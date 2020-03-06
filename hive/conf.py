@@ -32,7 +32,7 @@ class Conf():
 
         # common
         add('--database-url', env_var='DATABASE_URL', required=False, help='database connection url', default='')
-        add('--steemd-url', env_var='STEEMD_URL', required=False, help='steemd/jussi endpoint', default='https://api.steemit.com')
+        add('--steemd-url', env_var='STEEMD_URL', required=False, help='steemd/jussi endpoint', default='{"default" : "https://api.steemit.com"}')
         add('--muted-accounts-url', env_var='MUTED_ACCOUNTS_URL', required=False, help='url to flat list of muted accounts', default='')
 
         # server
@@ -85,8 +85,9 @@ class Conf():
     def steem(self):
         """Get a SteemClient instance, lazily initialized"""
         if not self._steem:
+            from json import loads
             self._steem = SteemClient(
-                url=self.get('steemd_url'),
+                url=loads(self.get('steemd_url')),
                 max_batch=self.get('max_batch'),
                 max_workers=self.get('max_workers'))
         return self._steem

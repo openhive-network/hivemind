@@ -63,7 +63,7 @@ Hivemind is deployed as a Docker container.
 Here is an example command that will initialize the DB schema and start the syncing process:
 
 ```
-docker run -d --name hivemind --env DATABASE_URL=postgresql://user:pass@hostname:5432/databasename --env STEEMD_URL=https://yoursteemnode --env SYNC_SERVICE=1 -p 8080:8080 steemit/hivemind:latest
+docker run -d --name hivemind --env DATABASE_URL=postgresql://user:pass@hostname:5432/databasename --env STEEMD_URL='{"default":"https://yoursteemnode"}' --env SYNC_SERVICE=1 -p 8080:8080 steemit/hivemind:latest
 ```
 
 Be sure to set `DATABASE_URL` to point to your postgres database and `STEEMD_URL` to point to your steemd node to sync from.
@@ -84,7 +84,7 @@ docker logs -f hivemind
 | `LOG_LEVEL`              | `--log-level`        | INFO    |
 | `HTTP_SERVER_PORT`       | `--http-server-port` | 8080    |
 | `DATABASE_URL`           | `--database-url`     | postgresql://user:pass@localhost:5432/hive |
-| `STEEMD_URL`             | `--steemd-url`       | https://api.steemit.com |
+| `STEEMD_URL`             | `--steemd-url`       | '{"default":"https://yoursteemnode"}' |
 | `MAX_BATCH`              | `--max-batch`        | 50      |
 | `MAX_WORKERS`            | `--max-workers`      | 4       |
 | `TRAIL_BLOCKS`           | `--trail-blocks`     | 2       |

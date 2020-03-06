@@ -10,15 +10,19 @@ from hive.steem.block.stream import BlockStream
 
 class SteemClient:
     """Handles upstream calls to jussi/steemd, with batching and retrying."""
-
-    def __init__(self, url='https://api.steemit.com', max_batch=50, max_workers=1):
-        assert url, 'steem-API endpoint undefined'
+    # dangerous default value of url but it should be fine since we are not writting to it
+    def __init__(self, url={"default" : 'https://api.steemit.com'}, max_batch=50, max_workers=1):
+        assert url, 'steem-API endpoints undefined'
+        assert "default" in url, "Url should have default endpoint defined"
         assert max_batch > 0 and max_batch <= 5000
         assert max_workers > 0 and max_workers <= 64
 
         self._max_batch = max_batch
         self._max_workers = max_workers
-        self._client = HttpClient(nodes=[url])
+        self._client = dict()
+        for endpoint, endpoint_url in url.items():
+            print("Endpoint {} will be routed to node {}".format(endpoint, endpoint_url))
+            self._client[endpoint] = HttpClient(nodes=[endpoint_url])
 
     def get_accounts(self, accounts):
         """Fetch multiple accounts by name."""
@@ -135,7 +139,11 @@ class SteemClient:
     def __exec(self, method, params=None):
         """Perform a single steemd call."""
         start = perf()
-        result = self._client.exec(method, params)
+        result = None
+        if method in self._client:
+            result = self._client[method].exec(method, params)
+        else:
+            result = self._client["default"].exec(method, params)
         items = len(params[0]) if method == 'get_accounts' else 1
         Stats.log_steem(method, perf() - start, items)
         return result
@@ -145,12 +153,20 @@ class SteemClient:
         start = perf()
 
         result = []
-        for part in self._client.exec_multi(
-                method,
-                params,
-                max_workers=self._max_workers,
-                batch_size=self._max_batch):
-            result.extend(part)
+        if method in self._client:
+            for part in self._client[method].exec_multi(
+                    method,
+                    params,
+                    max_workers=self._max_workers,
+                    batch_size=self._max_batch):
+                result.extend(part)
+        else:
+            for part in self._client["default"].exec_multi(
+                    method,
+                    params,
+                    max_workers=self._max_workers,
+                    batch_size=self._max_batch):
+                result.extend(part)
 
         Stats.log_steem(method, perf() - start, len(params))
         return result
