@@ -41,10 +41,10 @@ def test_vests_amount():
     assert vests_amount('4.549292 VESTS') == Decimal('4.549292')
 
 def test_steem_amount():
-    assert steem_amount('1.234567 STEEM') == Decimal('1.234567')
+    assert steem_amount('1.234567 HIVE') == Decimal('1.234567')
 
 def test_sbd_amount():
-    assert sbd_amount('1.001 SBD') == Decimal('1.001')
+    assert sbd_amount('1.001 HBD') == Decimal('1.001')
 
 def test_parse_amount():
     nai = [1231121, 6, '@@000000037']

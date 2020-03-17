@@ -143,7 +143,7 @@ def _condenser_post_object(row, truncate_body=0):
     post['total_payout_value'] = _amount(row['payout'] if paid else 0)
     post['curator_payout_value'] = _amount(0)
     post['pending_payout_value'] = _amount(0 if paid else row['payout'])
-    post['promoted'] = "%.3f SBD" % row['promoted']
+    post['promoted'] = _amount(row['promoted'])
 
     post['replies'] = []
     post['body_length'] = len(row['body'])
@@ -181,10 +181,10 @@ def _condenser_post_object(row, truncate_body=0):
 
     return post
 
-def _amount(amount, asset='SBD'):
+def _amount(amount, asset='HBD'):
     """Return a steem-style amount string given a (numeric, asset-str)."""
-    assert asset == 'SBD', 'unhandled asset %s' % asset
-    return "%.3f SBD" % amount
+    assert asset == 'HBD', 'unhandled asset %s' % asset
+    return "%.3f HBD" % amount
 
 def _hydrate_active_votes(vote_csv):
     """Convert minimal CSV representation into steemd-style object."""
