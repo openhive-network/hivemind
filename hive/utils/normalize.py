@@ -32,6 +32,10 @@ def parse_amount(value, expected_unit=None):
 
     if isinstance(value, str):
         raw_amount, unit = value.split(' ')
+        if unit == 'SBD':
+            unit = 'HBD'
+        elif unit == 'STEEM':
+            unit = 'HIVE'
         dec_amount = decimal.Decimal(raw_amount)
 
     elif isinstance(value, list):
