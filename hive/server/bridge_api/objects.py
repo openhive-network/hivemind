@@ -242,10 +242,10 @@ def _condenser_post_object(row, truncate_body=0):
 
     return post
 
-def _amount(amount, asset='SBD'):
+def _amount(amount, asset='HBD'):
     """Return a steem-style amount string given a (numeric, asset-str)."""
-    assert asset == 'SBD', 'unhandled asset %s' % asset
-    return "%.3f SBD" % amount
+    assert asset == 'HBD', 'unhandled asset %s' % asset
+    return "%.3f HBD" % amount
 
 def _hydrate_active_votes(vote_csv):
     """Convert minimal CSV representation into steemd-style object."""

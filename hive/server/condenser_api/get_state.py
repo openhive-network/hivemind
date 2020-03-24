@@ -282,7 +282,7 @@ async def _load_discussion(db, author, permlink):
 async def _get_feed_price(db):
     """Get a steemd-style ratio object representing feed price."""
     price = await db.query_one("SELECT usd_per_steem FROM hive_state")
-    return {"base": "%.3f SBD" % price, "quote": "1.000 STEEM"}
+    return {"base": "%.3f HBD" % price, "quote": "1.000 HIVE"}
 
 @cached(ttl=1800, timeout=1200)
 async def _get_props_lite(db):

@@ -52,8 +52,8 @@ class Payments:
             return # only care about payments to null
 
         amount, token = parse_amount(op['amount'])
-        if token != 'SBD':
-            return # only care about SBD payments
+        if token != 'HBD':
+            return # only care about HBD payments
 
         url = op['memo']
         if not cls._validate_url(url):

@@ -112,7 +112,7 @@ class SteemClient:
         # TODO: add latest feed price: get_feed_history.price_history[0]
         feed = self.__exec('get_feed_history')['current_median_history']
         units = dict([parse_amount(feed[k])[::-1] for k in ['base', 'quote']])
-        price = units['SBD'] / units['STEEM']
+        price = units['HBD'] / units['HIVE']
         return "%.6f" % price
 
     def _get_steem_price(self):

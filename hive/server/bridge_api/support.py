@@ -64,7 +64,10 @@ async def normalize_post(context, post):
     post['gray'] = core['is_muted']
     post['hide'] = not core['is_valid']
 
-    promoted = sbd_amount(post['promoted']) if post['promoted'] != '0.000 STEEM' else None
+    # TODO: there is a bug in steemd.. promoted value returned as 0.000 LIQUID
+    #       until it's promoted.. then returned as X.XXX STABLE. So here we
+    #       ignore the non-promoted case because sbd_amount  asserts proper input units.
+    promoted = sbd_amount(post['promoted']) if post['promoted'] != '0.000 HIVE' else None
 
     # convert to internal object
     row = None
