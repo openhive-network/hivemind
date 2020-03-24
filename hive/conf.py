@@ -33,7 +33,7 @@ class Conf():
         # common
         add('--database-url', env_var='DATABASE_URL', required=False, help='database connection url', default='')
         add('--steemd-url', env_var='STEEMD_URL', required=False, help='steemd/jussi endpoint', default='{"default" : "https://api.steemit.com"}')
-        add('--muted-accounts-url', env_var='MUTED_ACCOUNTS_URL', required=False, help='url to flat list of muted accounts', default='')
+        add('--muted-accounts-url', env_var='MUTED_ACCOUNTS_URL', required=False, help='url to flat list of muted accounts', default='https://raw.githubusercontent.com/hivevectordefense/irredeemables/master/full.txt')
 
         # server
         add('--http-server-port', type=int, env_var='HTTP_SERVER_PORT', default=8080)
