@@ -129,7 +129,7 @@ async def get_content_replies(context, author: str, permlink: str):
              )
              ORDER BY post_id"""
 
-    result=await db.query_all(sql, author=author, permlink = permlink, limit=1000)
+    result=await db.query_all(sql, author=author, permlink = permlink, limit=5000)
 
     posts = await resultset_to_posts(db=db, resultset=result, truncate_body=0)
     return posts
