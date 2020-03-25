@@ -2,13 +2,14 @@
 
 import logging
 from time import perf_counter as perf
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 import ujson as json
 
 log = logging.getLogger(__name__)
 
 def _read_url(url):
-    return urlopen(url).read()
+    req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    return urlopen(req).read()
 
 class Mutes:
     """Singleton tracking muted accounts."""
