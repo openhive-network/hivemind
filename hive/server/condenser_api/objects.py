@@ -88,6 +88,20 @@ async def load_posts(db, ids, truncate_body=0):
 
     return [posts_by_id[_id] for _id in ids]
 
+async def resultset_to_posts(db, resultset, truncate_body=0):
+    author_reps = await _query_author_rep_map(db, resultset)
+    muted_accounts = Mutes.all()
+
+    posts = []
+    for row in resultset:
+        row = dict(row)
+        row['author_rep'] = author_reps[row['author']]
+        post = _condenser_post_object(row, truncate_body=truncate_body)
+        post['active_votes'] = _mute_votes(post['active_votes'], muted_accounts)
+        posts.append(post)
+
+    return posts
+
 async def _query_author_rep_map(db, posts):
     """Given a list of posts, returns an author->reputation map."""
     if not posts:

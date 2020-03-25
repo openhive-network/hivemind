@@ -3,7 +3,7 @@
 from functools import wraps
 
 import hive.server.condenser_api.cursor as cursor
-from hive.server.condenser_api.objects import load_posts, load_posts_reblogs
+from hive.server.condenser_api.objects import load_posts, load_posts_reblogs, resultset_to_posts
 from hive.server.common.helpers import (
     ApiError,
     return_error_info,
@@ -115,13 +115,24 @@ async def get_content_replies(context, author: str, permlink: str):
     db = context['db']
     valid_account(author)
     valid_permlink(permlink)
-    parent_id = await cursor.get_post_id(db, author, permlink)
-    if parent_id:
-        child_ids = await cursor.get_child_ids(db, parent_id)
-        if child_ids:
-            return await load_posts(db, child_ids)
-    return []
 
+    sql = """SELECT post_id, author, permlink, title, body, category, depth,
+             promoted, payout, payout_at, is_paidout, children, votes,
+             created_at, updated_at, rshares, raw_json, json
+             FROM hive_posts_cache WHERE post_id IN (
+             SELECT hp2.id FROM hive_posts hp2
+             WHERE hp2.is_deleted = '0' AND
+             hp2.parent_id = (SELECT id FROM hive_posts
+             WHERE author = :author
+             AND permlink = :permlink AND is_deleted = '0')
+             LIMIT :limit
+             )
+             ORDER BY post_id"""
+
+    result=await db.query_all(sql, author=author, permlink = permlink, limit=5000)
+
+    posts = await resultset_to_posts(db=db, resultset=result, truncate_body=0)
+    return posts
 
 # Discussion Queries
 
