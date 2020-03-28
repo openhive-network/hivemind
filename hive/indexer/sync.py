@@ -48,7 +48,9 @@ class Sync:
         Accounts.fetch_ranks()
 
         # load irredeemables
-        mutes = Mutes(self._conf.get('muted_accounts_url'))
+        mutes = Mutes(
+            self._conf.get('muted_accounts_url'),
+            self._conf.get('blacklist_api_url'))
         Mutes.set_shared_instance(mutes)
 
         # community stats

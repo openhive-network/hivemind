@@ -32,16 +32,17 @@ class Mutes:
         """Set the global/shared instance."""
         cls._instance = instance
 
-    def __init__(self, url):
+    def __init__(self, url, blacklist_api_url):
         """Initialize a muted account list by loading from URL"""
         self.url = url
+        self.blacklist_api_url = blacklist_api_url
         if url:
             self.load()
 
     def load(self):
         """Reload all accounts from irredeemables endpoint and global lists."""
         self.accounts = set(_read_url(self.url).decode('utf8').split())
-        jsn = _read_url('https://blacklist.usehive.com/blacklists')
+        jsn = _read_url(self.blacklist_api_url + "/blacklists")
         self.blist = set(json.loads(jsn))
         self.blist_map = dict()
         log.warning("%d muted, %d blacklisted", len(self.accounts), len(self.blist))
@@ -65,7 +66,7 @@ class Mutes:
         if name not in inst.blist_map:
             out = []
             if name in inst.blist:
-                url = 'https://blacklist.usehive.com/user/' + name
+                url = "%s/user/%s" % (inst.blacklist_api_url, name)
                 lists = json.loads(_read_url(url))
                 out.extend(lists['blacklisted'])
 
