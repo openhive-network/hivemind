@@ -11,7 +11,7 @@ from hive.steem.block.stream import BlockStream
 class SteemClient:
     """Handles upstream calls to jussi/steemd, with batching and retrying."""
     # dangerous default value of url but it should be fine since we are not writting to it
-    def __init__(self, url={"default" : 'https://api.steemit.com'}, max_batch=50, max_workers=1):
+    def __init__(self, url={"default" : 'https://api.hive.blog'}, max_batch=50, max_workers=1):
         assert url, 'steem-API endpoints undefined'
         assert "default" in url, "Url should have default endpoint defined"
         assert max_batch > 0 and max_batch <= 5000

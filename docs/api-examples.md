@@ -60,9 +60,9 @@ http -j post http://localhost:8080 jsonrpc=2.0 id=1 method=hive.search params:='
 # steemd.legacy (deprecated)
 
 ```
-http -j post https://api.steemit.com jsonrpc=2.0 id=1 method=call params:='["follow_api","get_follow_count",["test-safari"]]'
-http -j post https://api.steemit.com jsonrpc=2.0 id=1 method=call params:='["follow_api","get_followers",["test-safari","", "blog", 5]]'
-http -j post https://api.steemit.com jsonrpc=2.0 id=1 method=call params:='["follow_api","get_following",["test-safari","", "ignore", 2]]'
+http -j post https://api.hive.blog jsonrpc=2.0 id=1 method=call params:='["follow_api","get_follow_count",["test-safari"]]'
+http -j post https://api.hive.blog jsonrpc=2.0 id=1 method=call params:='["follow_api","get_followers",["test-safari","", "blog", 5]]'
+http -j post https://api.hive.blog jsonrpc=2.0 id=1 method=call params:='["follow_api","get_following",["test-safari","", "ignore", 2]]'
 
-http -j post https://api.steemit.com jsonrpc=2.0 id=1 method=call params:='["database_api","get_content",["test-safari", "34gfex-december-spam"]]'
+http -j post https://api.hive.blog jsonrpc=2.0 id=1 method=call params:='["database_api","get_content",["test-safari", "34gfex-december-spam"]]'
 ```
