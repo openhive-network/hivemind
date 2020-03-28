@@ -8,7 +8,7 @@ from hive.steem.client import SteemClient
 
 @pytest.fixture
 def client():
-    return SteemClient(url='https://api.steemit.com')
+    return SteemClient(url='https://api.hive.blog')
 
 def test_instance(client):
     assert isinstance(client, SteemClient)
