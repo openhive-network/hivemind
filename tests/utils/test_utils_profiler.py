@@ -1,5 +1,5 @@
 #pylint: disable=missing-docstring,expression-not-assigned
-from hive.utils.profiler import Profiler
+from hivemind.utils.profiler import Profiler
 
 def test_profiler():
     p = Profiler('.tmp.test-prof')

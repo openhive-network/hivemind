@@ -4,7 +4,7 @@ import pytest
 from datetime import datetime
 from decimal import Decimal
 
-from hive.utils.normalize import (
+from hivemind.utils.normalize import (
     block_num,
     block_date,
     vests_amount,

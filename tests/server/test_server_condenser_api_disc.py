@@ -1,7 +1,7 @@
 #pylint: disable=missing-docstring,invalid-name
 import pytest
 
-from hive.server.condenser_api.methods import (
+from hivemind.server.condenser_api.methods import (
     get_followers,
     get_following,
     get_follow_count,

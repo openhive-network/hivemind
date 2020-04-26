@@ -1,8 +1,8 @@
 #pylint: disable=missing-docstring
 import pytest
-from hive.server.condenser_api.get_state import get_state
-from hive.server.condenser_api.tags import get_trending_tags
-from hive.server.condenser_api.call import call
+from hivemind.server.condenser_api.get_state import get_state
+from hivemind.server.condenser_api.tags import get_trending_tags
+from hivemind.server.condenser_api.call import call
 
 @pytest.mark.asyncio
 async def test_get_state():

@@ -1,7 +1,7 @@
 #pylint: disable=missing-docstring,line-too-long
 from decimal import Decimal
 
-from hive.utils.post import (
+from hivemind.utils.post import (
     mentions,
     post_basic,
     post_legacy,

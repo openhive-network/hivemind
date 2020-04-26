@@ -3,8 +3,8 @@
 import datetime
 import pytest
 
-from hive.utils.normalize import parse_time
-from hive.steem.client import SteemClient
+from hivemind.utils.normalize import parse_time
+from hivemind.steem.client import SteemClient
 
 @pytest.fixture
 def client():

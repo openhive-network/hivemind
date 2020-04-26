@@ -1,5 +1,5 @@
 #pylint: disable=missing-docstring
-from hive.utils.system import (
+from hivemind.utils.system import (
     colorize,
     peak_usage_mb,
 )

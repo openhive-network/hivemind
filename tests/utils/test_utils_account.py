@@ -1,7 +1,7 @@
 #pylint: disable=missing-docstring,line-too-long
 import json
 
-from hive.utils.account import safe_profile_metadata
+from hivemind.utils.account import safe_profile_metadata
 
 def test_valid_account():
     raw_profile = dict(
