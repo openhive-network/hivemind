@@ -45,8 +45,11 @@ async def load_posts_keyed(db, ids, truncate_body=0):
     # fetch posts and associated author reps
     sql = """SELECT post_id, community_id, author, permlink, title, body, category, depth,
                     promoted, payout, payout_at, is_paidout, children, votes,
-                    created_at, updated_at, rshares, raw_json, json,
-                    is_hidden, is_grayed, total_votes, flag_weight
+                    created_at, updated_at, rshares, json,
+                    is_hidden, is_grayed, total_votes, flag_weight,
+                    legacy_id, parent_author, parent_permlink, curator_payout_value, 
+                    root_author, root_permlink, max_accepted_payout, percent_steem_dollars, 
+                    allow_replies, allow_votes, allow_curation_rewards, url, root_title 
                FROM hive_posts_cache WHERE post_id IN :ids"""
     result = await db.query_all(sql, ids=tuple(ids))
     author_map = await _query_author_map(db, result)
@@ -216,29 +219,37 @@ def _condenser_post_object(row, truncate_body=0):
         'total_votes': row['total_votes'],
         'flag_weight': row['flag_weight']} # TODO: down_weight
 
-    # import fields from legacy object
-    assert row['raw_json']
-    assert len(row['raw_json']) > 32
-    raw_json = json.loads(row['raw_json'])
 
-    # TODO: move to core, or payout_details
-    post['beneficiaries'] = raw_json['beneficiaries']
-    post['max_accepted_payout'] = raw_json['max_accepted_payout']
-    post['percent_steem_dollars'] = raw_json['percent_steem_dollars'] # TODO: systag?
+    #post['author_reputation'] = rep_to_raw(row['author_rep'])
+
+    post['legacy_id'] = row['legacy_id']
+
+    post['root_author'] = row['root_author']
+    post['root_permlink'] = row['root_permlink']
+
+    post['allow_replies'] = row['allow_replies']
+    post['allow_votes'] = row['allow_votes']
+    post['allow_curation_rewards'] = row['allow_curation_rewards']
+
+    post['url'] = row['url']
+    post['root_title'] = row['root_title']
+    post['beneficiaries'] = json.loads(row['beneficiaries'])
+    post['max_accepted_payout'] = row['max_accepted_payout']
+    post['percent_steem_dollars'] = row['percent_steem_dollars']
+
     if paid:
-        curator_payout = sbd_amount(raw_json['curator_payout_value'])
-        post['author_payout_value'] = _amount(row['payout'] - curator_payout)
+        curator_payout = sbd_amount(row['curator_payout_value'])
         post['curator_payout_value'] = _amount(curator_payout)
+        post['total_payout_value'] = _amount(row['payout'] - curator_payout)
+
+    # not used by condenser, but may be useful
+    # post['net_votes'] = post['total_votes'] - row['up_votes']
 
     # TODO: re-evaluate
     if row['depth'] > 0:
-        post['parent_author'] = raw_json['parent_author']
-        post['parent_permlink'] = raw_json['parent_permlink']
-        post['title'] = 'RE: ' + raw_json['root_title'] # PostSummary & comment context
-    #else:
-    #    post['parent_author'] = ''
-    #    post['parent_permlink'] = ''
-    post['url'] = raw_json['url']
+        post['parent_author'] = row['parent_author']
+        post['parent_permlink'] = row['parent_permlink']
+        post['title'] = 'RE: ' + row['root_title'] # PostSummary & comment context
 
     return post
 
