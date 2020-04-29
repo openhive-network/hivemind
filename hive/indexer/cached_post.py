@@ -487,6 +487,7 @@ class CachedPost:
         # always write, unless simple vote update
         if level in ['insert', 'payout', 'update']:
             basic = post_basic(post)
+            legacy_data = post_legacy(post)
             values.extend([
                 ('community_id',  post['community_id']), # immutable*
                 ('created_at',    post['created']),    # immutable*
@@ -501,7 +502,21 @@ class CachedPost:
                 ('is_full_power', basic['is_full_power']),
                 ('is_paidout',    basic['is_paidout']),
                 ('json',          json.dumps(basic['json_metadata'])),
-                ('raw_json',      json.dumps(post_legacy(post))),
+                #('raw_json',      json.dumps(legacy_data)),
+                ('legacy_id',               legacy_data['id']),
+                ('parent_author',           legacy_data['parent_author']),
+                ('parent_permlink',         legacy_data['parent_permlink']),
+                ('curator_payout_value',    legacy_data['curator_payout_value']),
+                ('root_author',             legacy_data['root_author']),
+                ('root_permlink',           legacy_data['root_permlink']),
+                ('max_accepted_payout',     legacy_data['max_accepted_payout']),
+                ('percent_steem_dollars',   legacy_data['percent_steem_dollars']),
+                ('allow_replies',           legacy_data['allow_replies']),
+                ('allow_votes',             legacy_data['allow_votes']),
+                ('allow_curation_rewards',  legacy_data['allow_curation_rewards']),
+                ('beneficiaries',           json.dumps(legacy_data['beneficiaries'])),
+                ('url',                     legacy_data['url']),
+                ('root_title',              legacy_data['root_title']),
             ])
 
         # if there's a pending promoted value to write, pull it out
