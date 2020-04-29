@@ -20,7 +20,6 @@ async def list_comments(context, start: list, limit: int, order: str):
     comments = []
     if order == 'by_cashout_time':
         assert len(start) == 3, "Expecting three arguments"
-
         author = start[1]
         permlink = start[2]
         post_id = 0
@@ -40,7 +39,6 @@ async def list_comments(context, start: list, limit: int, order: str):
             comments.append(condenser_post_object(dict(row)))
     elif order == 'by_permlink':
         assert len(start) == 2, "Expecting two arguments"
-
         sql = """SELECT post_id, community_id, author, permlink, title, body, category, depth,
                     promoted, payout, payout_at, is_paidout, children, votes,
                     created_at, updated_at, rshares, json,
