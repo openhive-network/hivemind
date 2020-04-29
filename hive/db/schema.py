@@ -40,7 +40,7 @@ def build_metadata():
         sa.Column('display_name', sa.String(20)),
         sa.Column('about', sa.String(160)),
         sa.Column('location', sa.String(30)),
-        sa.Column('website', sa.String(100)),
+        sa.Column('website', sa.String(1024)),
         sa.Column('profile_image', sa.String(1024), nullable=False, server_default=''),
         sa.Column('cover_image', sa.String(1024), nullable=False, server_default=''),
 
@@ -197,7 +197,22 @@ def build_metadata():
         sa.Column('body', TEXT),
         sa.Column('votes', TEXT),
         sa.Column('json', sa.Text),
-        sa.Column('raw_json', sa.Text),
+        #sa.Column('raw_json', sa.Text),
+
+        sa.Column('legacy_id', sa.Integer, nullable=False, server_default='-1'),
+        sa.Column('parent_author', sa.String(16), nullable=False, server_default=''),
+        sa.Column('parent_permlink',  sa.String(255), nullable=False, server_default=''),
+        sa.Column('curator_payout_value', sa.String(16), nullable=False, server_default=''),
+        sa.Column('root_author',  sa.String(16), nullable=False, server_default=''),
+        sa.Column('root_permlink',  sa.String(255), nullable=False, server_default=''),
+        sa.Column('max_accepted_payout',  sa.String(16), nullable=False, server_default=''),
+        sa.Column('percent_steem_dollars', sa.Integer, nullable=False, server_default='-1'),
+        sa.Column('allow_replies', BOOLEAN, nullable=False, server_default='1'),
+        sa.Column('allow_votes', BOOLEAN, nullable=False, server_default='1'),
+        sa.Column('allow_curation_rewards', BOOLEAN, nullable=False, server_default='1'),
+        sa.Column('beneficiaries',  sa.JSON, nullable=False, server_default=''),
+        sa.Column('url', sa.Text, nullable=False, server_default=''),
+        sa.Column('root_title', sa.String(255), nullable=False, server_default=''),
 
         # index: misc
         sa.Index('hive_posts_cache_ix3',  'payout_at', 'post_id',           postgresql_where=sql_text("is_paidout = '0'")),         # core: payout sweep

@@ -1,5 +1,5 @@
 """Steemd/condenser_api compatibility layer API methods."""
-
+from json import loads
 from functools import wraps
 
 import hive.server.condenser_api.cursor as cursor
@@ -118,7 +118,10 @@ async def get_content_replies(context, author: str, permlink: str):
 
     sql = """SELECT post_id, author, permlink, title, body, category, depth,
              promoted, payout, payout_at, is_paidout, children, votes,
-             created_at, updated_at, rshares, raw_json, json
+             created_at, updated_at, rshares, json,
+             legacy_id, parent_author, parent_permlink, curator_payout_value, 
+             root_author, root_permlink, max_accepted_payout, percent_steem_dollars, 
+             allow_replies, allow_votes, allow_curation_rewards, url, root_title 
              FROM hive_posts_cache WHERE post_id IN (
              SELECT hp2.id FROM hive_posts hp2
              WHERE hp2.is_deleted = '0' AND
@@ -404,3 +407,12 @@ async def _get_blog(db, account: str, start_index: int, limit: int = None):
         idx -= 1
 
     return out
+
+@return_error_info
+async def get_accounts(context, accounts: list):
+    """Returns accounts data for accounts given in list"""
+    print("Hivemind native get_accounts")
+    assert accounts, "Empty parameters are not supported"
+    assert len(accounts) < 1000, "Query exceeds limit"
+
+    return await cursor.get_accounts(context['db'], accounts)

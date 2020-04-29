@@ -26,6 +26,8 @@ from hive.server.hive_api import community as hive_api_community
 from hive.server.hive_api import notify as hive_api_notify
 from hive.server.hive_api import stats as hive_api_stats
 
+from hive.server.database_api import methods as database_api
+
 from hive.server.db import Db
 
 # pylint: disable=too-many-lines
@@ -73,6 +75,7 @@ def build_methods():
         condenser_api.get_blog_entries,
         condenser_api.get_account_reputations,
         condenser_api.get_reblogged_by,
+        condenser_api.get_accounts
     )})
 
     # dummy methods -- serve informational error
@@ -134,6 +137,11 @@ def build_methods():
         hive_api_community.list_subscribers,
         hive_api_community.list_all_subscriptions,
     )})
+
+    # database_api methods
+    methods.add(**{
+        'database_api.list_comments' : database_api.list_comments
+    })
 
     return methods
 
