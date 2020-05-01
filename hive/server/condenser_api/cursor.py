@@ -166,28 +166,30 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
             where.append("post_id IN (%s)" % sql)
 
     start_id = None
-    if start_permlink:
-        start_id = await _get_post_id(db, start_author, start_permlink)
-        if not start_id:
-            return []
-
-        sql = "%s <= (SELECT %s FROM %s WHERE post_id = :start_id)"
+    if start_permlink and start_author:
+        sql = "%s <= (SELECT %s FROM %s WHERE post_id = (SELECT post_id FROM hive_posts_cache WHERE author = :start_author AND permlink= :start_permlink))"
         where.append(sql % (field, field, table))
 
-    sql = ("SELECT post_id FROM %s WHERE %s ORDER BY %s DESC LIMIT :limit"
-           % (table, ' AND '.join(where), field))
+    columns = ['hive_posts_cache.post_id', 'hive_posts_cache.author', 'hive_posts_cache.permlink',
+               'hive_posts_cache.title', 'hive_posts_cache.body', 'hive_posts_cache.category',
+               'hive_posts_cache.depth', 'hive_posts_cache.promoted',
+               'hive_posts_cache.payout', 'hive_posts_cache.payout_at', 'hive_posts_cache.is_paidout',
+               'hive_posts_cache.children', 'hive_posts_cache.votes', 'hive_posts_cache.created_at',
+               'hive_posts_cache.updated_at', 'hive_posts_cache.rshares', 'hive_posts_cache.raw_json',
+               'hive_posts_cache.json']
+    sql = ("SELECT %s FROM %s WHERE %s ORDER BY %s DESC LIMIT :limit"
+           % (', '.join(columns), table, ' AND '.join(where), field))
 
-    return await db.query_col(sql, tag=tag, start_id=start_id, limit=limit)
+    #return await db.query_col(sql, tag=tag, start_id=start_id, limit=limit)
+    return [sql, tag, start_id, limit]
 
 
 async def pids_by_blog(db, account: str, start_author: str = '',
                        start_permlink: str = '', limit: int = 20):
     """Get a list of post_ids for an author's blog."""
-    account_id = await _get_account_id(db, account)
-
     seek = ''
     start_id = None
-    if start_permlink:
+    if start_permlink and start_author:
         start_id = await _get_post_id(db, start_author, start_permlink)
         if not start_id:
             return []
@@ -207,6 +209,12 @@ async def pids_by_blog(db, account: str, start_author: str = '',
       ORDER BY created_at DESC
          LIMIT :limit
     """ % seek
+
+    print()
+    print("-----debug-----")
+    print("pids_by_blog sql: ", sql)
+    print("-----end debug-----")
+    print()
 
     return await db.query_col(sql, account_id=account_id, start_id=start_id, limit=limit)
 
