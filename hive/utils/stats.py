@@ -6,7 +6,10 @@ import logging
 from time import perf_counter as perf
 from hive.utils.system import colorize, peak_usage_mb
 
+file_handler = logging.FileHandler('database_timer.log')
+file_handler.setLevel(logging.INFO)
 log = logging.getLogger(__name__)
+log.addHandler(file_handler)
 
 def _normalize_sql(sql, maxlen=180):
     """Collapse whitespace and middle-truncate if needed."""
@@ -116,6 +119,7 @@ class DbStats(StatsAbstract):
 
     def check_timing(self, call, ms, batch_size):
         """Warn if any query is slower than defined threshold."""
+        log.warning("[SQL][%dms] %s", ms, call)
         if ms > self.SLOW_QUERY_MS:
             out = "[SQL][%dms] %s" % (ms, call[:250])
             log.warning(colorize(out))
