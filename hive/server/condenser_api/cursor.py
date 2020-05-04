@@ -210,12 +210,6 @@ async def pids_by_blog(db, account: str, start_author: str = '',
          LIMIT :limit
     """ % seek
 
-    print()
-    print("-----debug-----")
-    print("pids_by_blog sql: ", sql)
-    print("-----end debug-----")
-    print()
-
     return await db.query_col(sql, account_id=account_id, start_id=start_id, limit=limit)
 
 
