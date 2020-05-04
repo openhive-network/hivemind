@@ -41,7 +41,7 @@ def safe_profile_metadata(account):
         website = None
     if website and not _valid_url_proto(website):
         website = 'http://' + website
-    if len(website) > 100
+    if website and len(website) > 100:
         website = None
 
     if profile_image and not _valid_url_proto(profile_image):
