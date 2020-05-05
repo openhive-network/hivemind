@@ -58,6 +58,7 @@ class Accounts:
     @classmethod
     def get_id(cls, name):
         """Get account id by name. Throw if not found."""
+        assert isinstance(name, str), "account name should be string"
         assert name in cls._ids, "account does not exist or was not registered"
         return cls._ids[name]
 
