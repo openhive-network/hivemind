@@ -10,7 +10,6 @@ from aiopg.sa import create_engine
 from hive.utils.stats import Stats
 
 logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
-logging.FileHandler('hive_database_timer.log')
 log = logging.getLogger(__name__)
 
 def sqltimer(function):
