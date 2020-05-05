@@ -4,6 +4,7 @@ from functools import wraps
 
 import hive.server.condenser_api.cursor as cursor
 from hive.server.condenser_api.objects import load_posts, load_posts_reblogs, resultset_to_posts
+from hive.server.condenser_api.objects import _mute_votes, _condenser_post_object
 from hive.server.common.helpers import (
     ApiError,
     return_error_info,
@@ -13,6 +14,7 @@ from hive.server.common.helpers import (
     valid_offset,
     valid_limit,
     valid_follow_type)
+from hive.server.common.mutes import Mutes
 
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
 
@@ -101,12 +103,34 @@ async def get_content(context, author: str, permlink: str):
     db = context['db']
     valid_account(author)
     valid_permlink(permlink)
-    post_id = await cursor.get_post_id(db, author, permlink)
-    if not post_id:
-        return {'id': 0, 'author': '', 'permlink': ''}
-    posts = await load_posts(db, [post_id])
-    assert posts, 'post was not found in cache'
-    return posts[0]
+
+    sql = """
+            ---get_content
+            SELECT hive_posts_cache.post_id, hive_posts_cache.author, hive_posts_cache.permlink, 
+            hive_posts_cache.title, hive_posts_cache.body, hive_posts_cache.category, hive_posts_cache.depth,
+            hive_posts_cache.promoted, hive_posts_cache.payout, hive_posts_cache.payout_at,
+            hive_posts_cache.is_paidout, hive_posts_cache.children, hive_posts_cache.votes,
+            hive_posts_cache.created_at, hive_posts_cache.updated_at, hive_posts_cache.rshares,
+            hive_posts_cache.raw_json, hive_posts_cache.json, hive_accounts.reputation AS author_rep
+            FROM hive_posts_cache JOIN hive_accounts ON (hive_posts_cache.author = hive_accounts.name)
+                                  JOIN hive_posts ON (hive_posts_cache.post_id = hive_posts.id)
+            WHERE hive_posts_cache.author = :author AND hive_posts_cache.permlink = :permlink AND NOT hive_posts.is_deleted
+          """
+
+    result = await db.query_all(sql, author=author, permlink=permlink)
+    result = dict(result[0])
+    post = _condenser_post_object(result, 0)
+    post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
+
+    assert post, 'post was not found in cache'
+    return post
+
+    #post_id = await cursor.get_post_id(db, author, permlink)
+    #if not post_id:
+    #    return {'id': 0, 'author': '', 'permlink': ''}
+    #posts = await load_posts(db, [post_id])
+    #assert posts, 'post was not found in cache'
+    #return posts[0]
 
 
 @return_error_info
@@ -116,7 +140,9 @@ async def get_content_replies(context, author: str, permlink: str):
     valid_account(author)
     valid_permlink(permlink)
 
-    sql = """SELECT post_id, author, permlink, title, body, category, depth,
+    sql = """
+             --get_content_replies
+             SELECT post_id, author, permlink, title, body, category, depth,
              promoted, payout, payout_at, is_paidout, children, votes,
              created_at, updated_at, rshares, raw_json, json
              FROM hive_posts_cache WHERE post_id IN (
@@ -156,6 +182,37 @@ def nested_query_compat(function):
         return function(*args, **kwargs)
     return wrapper
 
+@return_error_info
+@nested_query_compat
+async def get_discussions_by(discussion_type, context, start_author: str = '',
+                             start_permlink: str = '', limit: int = 20,
+                             tag: str = None, truncate_body: int = 0,
+                             filter_tags: list = None):
+    """ Common implementation for get_discussions_by calls  """
+    assert not filter_tags, 'filter tags not supported'
+    assert discussion_type in ['trending', 'hot', 'created', 'promoted',
+                               'payout', 'payout_comments'], 'invalid discussion type'
+
+    db = context['db']
+    query_information = await cursor.pids_by_query(
+        db,
+        discussion_type,
+        valid_account(start_author, allow_empty=True),
+        valid_permlink(start_permlink, allow_empty=True),
+        valid_limit(limit, 100),
+        valid_tag(tag, allow_empty=True))
+    
+    assert len(query_information) == 4, 'generated query is malformed, aborting'
+    sql = query_information[0]
+    sql = "---get_discussions_by_" + discussion_type + "\r\n" + sql
+    sql_tag = query_information[1]
+    sql_start_id = query_information[2]
+    sql_limit = query_information[3]
+
+    result = await db.query_all(sql, tag=sql_tag, start_id=sql_start_id, limit=sql_limit, start_author=start_author, start_permlink=start_permlink)
+    posts = await resultset_to_posts(db=db, resultset=result, truncate_body=0)
+    return posts
+
 
 @return_error_info
 @nested_query_compat
@@ -164,14 +221,9 @@ async def get_discussions_by_trending(context, start_author: str = '', start_per
                                       truncate_body: int = 0, filter_tags: list = None):
     """Query posts, sorted by trending score."""
     assert not filter_tags, 'filter_tags not supported'
-    ids = await cursor.pids_by_query(
-        context['db'],
-        'trending',
-        valid_account(start_author, allow_empty=True),
-        valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100),
-        valid_tag(tag, allow_empty=True))
-    return await load_posts(context['db'], ids, truncate_body=truncate_body)
+    results = await get_discussions_by('trending', context, start_author, start_permlink, 
+                                       limit, tag, truncate_body, filter_tags)
+    return results
 
 
 @return_error_info
@@ -181,14 +233,9 @@ async def get_discussions_by_hot(context, start_author: str = '', start_permlink
                                  truncate_body: int = 0, filter_tags: list = None):
     """Query posts, sorted by hot score."""
     assert not filter_tags, 'filter_tags not supported'
-    ids = await cursor.pids_by_query(
-        context['db'],
-        'hot',
-        valid_account(start_author, allow_empty=True),
-        valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100),
-        valid_tag(tag, allow_empty=True))
-    return await load_posts(context['db'], ids, truncate_body=truncate_body)
+    results = await get_discussions_by('hot', context, start_author, start_permlink,
+                                       limit, tag, truncate_body, filter_tags)
+    return results
 
 
 @return_error_info
@@ -198,14 +245,9 @@ async def get_discussions_by_promoted(context, start_author: str = '', start_per
                                       truncate_body: int = 0, filter_tags: list = None):
     """Query posts, sorted by promoted amount."""
     assert not filter_tags, 'filter_tags not supported'
-    ids = await cursor.pids_by_query(
-        context['db'],
-        'promoted',
-        valid_account(start_author, allow_empty=True),
-        valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100),
-        valid_tag(tag, allow_empty=True))
-    return await load_posts(context['db'], ids, truncate_body=truncate_body)
+    results = await get_discussions_by('promoted', context, start_author, start_permlink,
+                                       limit, tag, truncate_body, filter_tags)
+    return results
 
 
 @return_error_info
@@ -215,14 +257,9 @@ async def get_discussions_by_created(context, start_author: str = '', start_perm
                                      truncate_body: int = 0, filter_tags: list = None):
     """Query posts, sorted by creation date."""
     assert not filter_tags, 'filter_tags not supported'
-    ids = await cursor.pids_by_query(
-        context['db'],
-        'created',
-        valid_account(start_author, allow_empty=True),
-        valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100),
-        valid_tag(tag, allow_empty=True))
-    return await load_posts(context['db'], ids, truncate_body=truncate_body)
+    results = await get_discussions_by('created', context, start_author, start_permlink,
+                                       limit, tag, truncate_body, filter_tags)
+    return results
 
 
 @return_error_info
@@ -233,14 +270,46 @@ async def get_discussions_by_blog(context, tag: str = None, start_author: str = 
     """Retrieve account's blog posts, including reblogs."""
     assert tag, '`tag` cannot be blank'
     assert not filter_tags, 'filter_tags not supported'
-    ids = await cursor.pids_by_blog(
-        context['db'],
-        valid_account(tag),
-        valid_account(start_author, allow_empty=True),
-        valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100))
-    return await load_posts(context['db'], ids, truncate_body=truncate_body)
+    valid_account(tag)
+    valid_account(start_author, allow_empty=True)
+    valid_permlink(start_permlink, allow_empty=True)
+    valid_limit(limit, 100)
 
+    sql = """
+            ---get_discussions_by_blog
+            SELECT hive_posts_cache.post_id, hive_posts_cache.author, hive_posts_cache.permlink, 
+            hive_posts_cache.title, hive_posts_cache.body, hive_posts_cache.category, hive_posts_cache.depth,
+            hive_posts_cache.promoted, hive_posts_cache.payout, hive_posts_cache.payout_at,
+            hive_posts_cache.is_paidout, hive_posts_cache.children, hive_posts_cache.votes,
+            hive_posts_cache.created_at, hive_posts_cache.updated_at, hive_posts_cache.rshares,
+            hive_posts_cache.raw_json, hive_posts_cache.json, hive_accounts.reputation AS author_rep
+            FROM hive_posts_cache JOIN hive_accounts ON (hive_posts_cache.author = hive_accounts.name)
+                                  JOIN hive_posts ON (hive_posts_cache.post_id = hive_posts.id)
+            WHERE NOT hive_posts.is_deleted AND hive_posts_cache.post_id IN
+                (SELECT post_id FROM hive_feed_cache JOIN hive_accounts ON (hive_feed_cache.account_id = hive_accounts.id) WHERE hive_accounts.name = :author)
+          """
+    if start_author and start_permlink != '':
+        sql += """
+         AND hive_posts_cache.created_at <= (SELECT created_at from hive_posts_cache where author = :start_author AND permlink = :start_permlink)
+        """
+
+    sql += """
+        ORDER BY hive_posts_cache.created_at DESC
+        LIMIT :limit
+    """
+
+    db = context['db']
+    result = await db.query_all(sql, author=tag, start_author=start_author, start_permlink=start_permlink, limit=limit)
+    posts_by_id = []
+
+    for row in result:
+        row = dict(row)
+        post = _condenser_post_object(row, truncate_body=truncate_body)
+        post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
+        #posts_by_id[row['post_id']] = post
+        posts_by_id.append(post);
+
+    return posts_by_id
 
 @return_error_info
 @nested_query_compat
@@ -258,6 +327,18 @@ async def get_discussions_by_feed(context, tag: str = None, start_author: str = 
         valid_limit(limit, 100))
     return await load_posts_reblogs(context['db'], res, truncate_body=truncate_body)
 
+    #valid_account(start_author, allow_empty=True)
+    #valid_account(tag)
+    #valid_permlink(start_permlink, allow_empty=True)
+    #valid_limit(limit, 100)
+
+    #sql = """
+    #    
+    #"""
+
+    #if start_permlink and start_author:
+
+
 
 @return_error_info
 @nested_query_compat
@@ -267,12 +348,45 @@ async def get_discussions_by_comments(context, start_author: str = None, start_p
     """Get comments by made by author."""
     assert start_author, '`start_author` cannot be blank'
     assert not filter_tags, 'filter_tags not supported'
-    ids = await cursor.pids_by_account_comments(
-        context['db'],
-        valid_account(start_author),
-        valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100))
-    return await load_posts(context['db'], ids, truncate_body=truncate_body)
+    valid_account(start_author)
+    valid_permlink(start_permlink, allow_empty=True)
+    valid_limit(limit, 100)
+
+    sql = """
+        ---get_discussions_by_comments
+        SELECT hive_posts_cache.post_id, hive_posts_cache.author, hive_posts_cache.permlink, 
+            hive_posts_cache.title, hive_posts_cache.body, hive_posts_cache.category, hive_posts_cache.depth,
+            hive_posts_cache.promoted, hive_posts_cache.payout, hive_posts_cache.payout_at,
+            hive_posts_cache.is_paidout, hive_posts_cache.children, hive_posts_cache.votes,
+            hive_posts_cache.created_at, hive_posts_cache.updated_at, hive_posts_cache.rshares,
+            hive_posts_cache.raw_json, hive_posts_cache.json, hive_accounts.reputation AS author_rep
+            FROM hive_posts_cache JOIN hive_accounts ON (hive_posts_cache.author = hive_accounts.name)
+                                  JOIN hive_posts ON (hive_posts_cache.post_id = hive_posts.id)
+            WHERE hive_posts_cache.author = :start_author AND hive_posts_cache.depth > 0
+            AND NOT hive_posts.is_deleted
+    """
+
+    if start_permlink:
+        sql += """
+            AND hive_posts_cache.post_id <= (SELECT hive_posts_cache.post_id FROM 
+            hive_posts_cache WHERE permlink = :start_permlink AND author=:start_author)
+        """
+
+    sql += """
+        ORDER BY hive_posts_cache.post_id DESC, depth LIMIT :limit
+    """
+
+    posts = []
+    db = context['db']
+    result = await db.query_all(sql, start_author=start_author, start_permlink=start_permlink, limit=limit)
+
+    for row in result:
+        row = dict(row)
+        post = _condenser_post_object(row, truncate_body=truncate_body)
+        post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
+        posts.append(post)
+
+    return posts
 
 
 @return_error_info
@@ -281,6 +395,22 @@ async def get_replies_by_last_update(context, start_author: str = None, start_pe
                                      limit: int = 20, truncate_body: int = 0):
     """Get all replies made to any of author's posts."""
     assert start_author, '`start_author` cannot be blank'
+    #valid_account(start_author)
+    #valid_permlink(start_permlink, allow_empty=True)
+    #valid_limit(limit, 100)
+
+    #sql = """
+    #    SELECT hive_posts_cache.post_id, hive_posts_cache.author, hive_posts_cache.permlink, 
+    #        hive_posts_cache.title, hive_posts_cache.body, hive_posts_cache.category, hive_posts_cache.depth,
+    #        hive_posts_cache.promoted, hive_posts_cache.payout, hive_posts_cache.payout_at,
+    #        hive_posts_cache.is_paidout, hive_posts_cache.children, hive_posts_cache.votes,
+    #        hive_posts_cache.created_at, hive_posts_cache.updated_at, hive_posts_cache.rshares,
+    #        hive_posts_cache.raw_json, hive_posts_cache.json, hive_accounts.reputation AS author_rep
+    #        FROM hive_posts_cache JOIN hive_accounts ON (hive_posts_cache.author = hive_accounts.name)
+    #                              JOIN hive_posts ON (hive_posts_cache.post_id = hive_posts.id)
+    #
+    #"""
+
     ids = await cursor.pids_by_replies_to_account(
         context['db'],
         valid_account(start_author),
@@ -315,14 +445,9 @@ async def get_post_discussions_by_payout(context, start_author: str = '', start_
                                          limit: int = 20, tag: str = None,
                                          truncate_body: int = 0):
     """Query top-level posts, sorted by payout."""
-    ids = await cursor.pids_by_query(
-        context['db'],
-        'payout',
-        valid_account(start_author, allow_empty=True),
-        valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100),
-        valid_tag(tag, allow_empty=True))
-    return await load_posts(context['db'], ids, truncate_body=truncate_body)
+    results = await get_discussions_by('payout', context, start_author, start_permlink,
+                                       limit, tag, truncate_body)
+    return results
 
 
 @return_error_info
@@ -332,14 +457,9 @@ async def get_comment_discussions_by_payout(context, start_author: str = '', sta
                                             truncate_body: int = 0):
     """Query comments, sorted by payout."""
     # pylint: disable=invalid-name
-    ids = await cursor.pids_by_query(
-        context['db'],
-        'payout_comments',
-        valid_account(start_author, allow_empty=True),
-        valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100),
-        valid_tag(tag, allow_empty=True))
-    return await load_posts(context['db'], ids, truncate_body=truncate_body)
+    results = await get_discussions_by('payout_comments', context, start_author, start_permlink,
+                                       limit, tag, truncate_body)
+    return results
 
 
 @return_error_info
