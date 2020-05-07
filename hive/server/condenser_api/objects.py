@@ -185,7 +185,7 @@ def _condenser_post_object(row, truncate_body=0):
 
     post['url'] = row['url']
     post['root_title'] = row['root_title']
-    post['beneficiaries'] = json.loads(row['beneficiaries'])
+    post['beneficiaries'] = row['beneficiaries']
     post['max_accepted_payout'] = row['max_accepted_payout']
     post['percent_steem_dollars'] = row['percent_steem_dollars']
 
