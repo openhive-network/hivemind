@@ -96,6 +96,10 @@ DO $$
       CREATE INDEX IF NOT EXISTS author_permlink_post_id_idx ON hive_posts_cache (author ASC, permlink ASC, post_id ASC);
       RAISE NOTICE 'Creating post_id_author_permlink_idx';
       CREATE INDEX IF NOT EXISTS post_id_author_permlink_idx ON hive_posts_cache (post_id ASC, author ASC, permlink ASC);
+      RAISE NOTICE 'Creating parent_updated_id_idx';
+      CREATE INDEX IF NOT EXISTS parent_updated_id_idx ON hive_posts_cache (parent_author ASC, updated_at ASC, post_id ASC);
+      RAISE NOTICE 'Creating author_updated_id_idx';
+      CREATE INDEX IF NOT EXISTS author_updated_id_idx ON hive_posts_cache (author ASC, updated_at ASC, post_id ASC);
 
       -- Creating functions
       -- for list_comments by_root
