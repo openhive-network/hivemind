@@ -88,6 +88,7 @@ DO $$
       -- Creating indexes
       RAISE NOTICE 'Creating author_permlink_idx';
       CREATE INDEX IF NOT EXISTS author_permlink_idx ON hive_posts_cache (author ASC, permlink ASC);
+      CREATE INDEX IF NOT EXISTS permlink_author_idx ON hive_posts_cache (permlink ASC, author ASC);
       RAISE NOTICE 'Creating root_author_permlink_idx';
       CREATE INDEX IF NOT EXISTS root_author_permlink_idx ON hive_posts_cache (root_author ASC, root_permlink ASC);
       RAISE NOTICE 'Creating parent_permlink_idx';
@@ -109,7 +110,7 @@ DO $$
         child_row hive_posts_cache;
         query_count INT := 0;
       BEGIN
-        FOR root_row IN SELECT * FROM hive_posts_cache WHERE author >= root_a AND permlink >= root_p ORDER BY post_id ASC, author ASC, permlink ASC
+        FOR root_row IN SELECT * FROM hive_posts_cache WHERE author = root_a AND permlink = root_p ORDER BY post_id ASC, author ASC, permlink ASC
         LOOP
           EXIT WHEN query_count >= query_limit;
           FOR child_row IN SELECT * FROM hive_posts_cache WHERE author >= child_a AND permlink >= child_p AND root_author = root_row.root_author AND root_permlink = root_row.root_permlink ORDER BY post_id ASC, author ASC, permlink ASC

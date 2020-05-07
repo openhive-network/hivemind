@@ -4,7 +4,7 @@ from hive.server.common.objects import condenser_post_object
 
 async def get_post_id_by_author_and_permlink(db, author: str, permlink: str, limit: int):
     """Return post ids for given author and permlink"""
-    sql = """SELECT post_id FROM hive_posts_cache WHERE author >= :author AND permlink >= :permlink ORDER BY author ASC, permlink ASC, post_id ASC LIMIT :limit"""
+    sql = """SELECT post_id FROM hive_posts_cache WHERE author = :author AND permlink = :permlink ORDER BY author ASC, permlink ASC, post_id ASC LIMIT :limit"""
     result = await db.query_row(sql, author=author, permlink=permlink, limit=limit)
     return result.post_id
 
@@ -33,7 +33,7 @@ async def list_comments(context, start: list, limit: int, order: str):
                     is_hidden, is_grayed, total_votes, flag_weight,
                     legacy_id, parent_author, parent_permlink, curator_payout_value, 
                     root_author, root_permlink, max_accepted_payout, percent_steem_dollars, 
-                    allow_replies, allow_votes, allow_curation_rewards, url, root_title 
+                    allow_replies, allow_votes, allow_curation_rewards, beneficiaries, url, root_title 
                FROM hive_posts_cache WHERE payout_at >= :start AND post_id >= :post_id ORDER BY payout_at ASC, post_id ASC LIMIT :limit"""
         result = await db.query_all(sql, start=start[0], limit=limit, post_id=post_id)
         for row in result:
@@ -47,8 +47,8 @@ async def list_comments(context, start: list, limit: int, order: str):
                     is_hidden, is_grayed, total_votes, flag_weight,
                     legacy_id, parent_author, parent_permlink, curator_payout_value, 
                     root_author, root_permlink, max_accepted_payout, percent_steem_dollars, 
-                    allow_replies, allow_votes, allow_curation_rewards, url, root_title 
-               FROM hive_posts_cache WHERE author >= :author AND permlink >= :permlink ORDER BY author ASC, permlink ASC, post_id ASC LIMIT :limit"""
+                    allow_replies, allow_votes, allow_curation_rewards, beneficiaries, url, root_title 
+               FROM hive_posts_cache WHERE author >= :author AND permlink >= :permlink ORDER BY author ASC, permlink ASC LIMIT :limit"""
         result = await db.query_all(sql, author=start[0], permlink=start[1], limit=limit)
         for row in result:
             comments.append(condenser_post_object(dict(row)))
@@ -61,7 +61,7 @@ async def list_comments(context, start: list, limit: int, order: str):
                     is_hidden, is_grayed, total_votes, flag_weight,
                     legacy_id, parent_author, parent_permlink, curator_payout_value, 
                     root_author, root_permlink, max_accepted_payout, percent_steem_dollars, 
-                    allow_replies, allow_votes, allow_curation_rewards, url, root_title 
+                    allow_replies, allow_votes, allow_curation_rewards, beneficiaries, url, root_title 
                FROM get_rows_by_root(:root_author, :root_permlink, :child_author, :child_permlink) ORDER BY post_id ASC LIMIT :limit"""
         result = await db.query_all(sql, root_author=start[0], root_permlink=start[1], child_author=start[2], child_permlink=start[3], limit=limit)
         for row in result:
@@ -75,7 +75,7 @@ async def list_comments(context, start: list, limit: int, order: str):
                     is_hidden, is_grayed, total_votes, flag_weight,
                     legacy_id, parent_author, parent_permlink, curator_payout_value, 
                     root_author, root_permlink, max_accepted_payout, percent_steem_dollars, 
-                    allow_replies, allow_votes, allow_curation_rewards, url, root_title 
+                    allow_replies, allow_votes, allow_curation_rewards, beneficiaries, url, root_title 
                FROM get_rows_by_parent(:parent_author, :parent_permlink, :child_author, :child_permlink) LIMIT :limit"""
         result = await db.query_all(sql, parent_author=start[0], parent_permlink=start[1], child_author=start[2], child_permlink=start[3], limit=limit)
         for row in result:
@@ -96,7 +96,7 @@ async def list_comments(context, start: list, limit: int, order: str):
                     is_hidden, is_grayed, total_votes, flag_weight,
                     legacy_id, parent_author, parent_permlink, curator_payout_value, 
                     root_author, root_permlink, max_accepted_payout, percent_steem_dollars, 
-                    allow_replies, allow_votes, allow_curation_rewards, url, root_title 
+                    allow_replies, allow_votes, allow_curation_rewards, beneficiaries, url, root_title 
                FROM hive_posts_cache WHERE parent_author >= :parent_author AND updated_at >= :updated_at AND post_id >= :post_id ORDER BY parent_author ASC, updated_at ASC, post_id ASC LIMIT :limit"""
         result = await db.query_all(sql, parent_author=start[0], updated_at=start[1], post_id=post_id, limit=limit)
         for row in result:
@@ -118,7 +118,7 @@ async def list_comments(context, start: list, limit: int, order: str):
                     is_hidden, is_grayed, total_votes, flag_weight,
                     legacy_id, parent_author, parent_permlink, curator_payout_value, 
                     root_author, root_permlink, max_accepted_payout, percent_steem_dollars, 
-                    allow_replies, allow_votes, allow_curation_rewards, url, root_title 
+                    allow_replies, allow_votes, allow_curation_rewards, beneficiaries, url, root_title 
                FROM hive_posts_cache WHERE author >= :author AND updated_at >= :updated_at AND post_id >= :post_id ORDER BY parent_author ASC, updated_at ASC, post_id ASC LIMIT :limit"""
         result = await db.query_all(sql, author=start[0], updated_at=start[1], post_id=post_id, limit=limit)
         for row in result:
