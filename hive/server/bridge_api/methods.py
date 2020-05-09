@@ -206,31 +206,57 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
     elif tag[:5] == 'hive-':
         if start_author and start_permlink:
             if sort == 'trending':
-                sql = sql % """ AND hive_posts_cache.community_id = (SELECT community_id FROM communities WHERE name = :community_name )
+                sql = sql % """ AND hive_posts_cache.community_id = (SELECT hive_communities.id FROM hive_communities WHERE name = :community_name )
                                 AND hive_posts_cache.sc_trend <= (SELECT sc_trend FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) 
                                 AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) """
             elif sort == 'hot':
-                sql = sql % """ AND hive_posts_cache.community_id = (SELECT community_id FROM communities WHERE name = :community_name )
+                sql = sql % """ AND hive_posts_cache.community_id = (SELECT hive_communities.id FROM hive_communities WHERE name = :community_name )
                                 AND hive_posts_cache.sc_hot <= (SELECT sc_hot FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
                                 AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) """
             elif sort == 'created':
-                sql = sql % """ AND hive_posts_cache.community_id = (SELECT community_id FROM communities WHERE name = :community_name )
+                sql = sql % """ AND hive_posts_cache.community_id = (SELECT hive_communities.id FROM hive_communities WHERE name = :community_name )
                                 AND hive_posts_cache.post_id < (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) """
             elif sort == 'promoted':
-                sql = sql % """ AND hive_posts_cache.community_id = (SELECT community_id FROM communities WHERE name = :community_name )
+                sql = sql % """ AND hive_posts_cache.community_id = (SELECT hive_communities.id FROM hive_communities WHERE name = :community_name )
                                 AND hive_posts_cache.promoted <= (SELECT promoted FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
                                 AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) """
             else:
-                sql = sql % """ AND hive_posts_cache.community_id = (SELECT community_id FROM communities WHERE name = :community_name )
+                sql = sql % """ AND hive_posts_cache.community_id = (SELECT hive_communities.id FROM hive_communities WHERE name = :community_name )
                                 AND hive_posts_cache.payout <= (SELECT payout FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
                                 AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) """
         else:
             sql = sql % """ AND hive_communities.name = :community_name """
     else:
-        if sort in ['payout', 'payout_comments']:
-            sql = sql % """ AND hive_posts_cache.category = :tag"""
+        if start_author and start_permlink:
+            if sort == 'trending':
+                sql = sql % """ AND hive_posts_cache.category = :tag
+                                AND hive_posts_cache.sc_trend <= (SELECT sc_trend FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
+                                AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
+                            """
+            elif sort == 'hot':
+                sql = sql % """ AND hive_posts_cache.category = :tag 
+                                AND hive_posts_cache.sc_hot <= (SELECT sc_hot FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
+                                AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
+                            """
+            elif sort == 'created':
+                sql = sql % """ AND hive_posts_cache.category = :tag
+                                AND hive_posts_cache.post_id < (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
+                            """
+            elif sort == 'promoted':
+                sql = sql % """ AND hive_posts_cache.category = :tag
+                                AND hive_posts_cache.promoted <= (SELECT promoted FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
+                                AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
+                            """
+            else:
+                sql = sql % """ AND hive_posts_cache.category = :tag
+                                AND hive_posts_cache.payout <= (SELECT payout FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
+                                AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
+                            """
         else:
-            sql = sql % """ AND hive_posts_cache.post_id IN (SELECT post_id FROM hive_post_tags WHERE tag = :tag)"""
+            if sort in ['payout', 'payout_comments']:
+                sql = sql % """ AND hive_posts_cache.category = :tag"""
+            else:
+                sql = sql % """ AND hive_posts_cache.post_id IN (SELECT post_id FROM hive_post_tags WHERE tag = :tag)"""
 
     sql_result = await db.query_all(sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag)
     posts = []
