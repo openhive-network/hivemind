@@ -117,7 +117,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
            hive_posts_cache.total_votes AS total_votes, hive_posts_cache.flag_weight AS flag_weight,
            hive_posts_cache.sc_trend AS sc_trend, hive_accounts.id AS acct_author_id,
            hive_roles.title as role_title, hive_communities.title AS community_title, hive_roles.role_id AS role_id,
-           hive_posts.is_pinned AS is_pinned,
+           hive_posts.is_pinned AS is_pinned
            FROM hive_posts_cache JOIN hive_posts ON (hive_posts_cache.post_id = hive_posts.id)
                                  JOIN hive_accounts ON (hive_posts_cache.author = hive_accounts.name)
                                  LEFT OUTER JOIN hive_communities ON (hive_posts_cache.community_id = hive_communities.id)
