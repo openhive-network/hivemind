@@ -239,26 +239,26 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
     else:
         if start_author and start_permlink:
             if sort == 'trending':
-                sql = sql % """ AND hive_posts_cache.category = :tag
+                sql = sql % """ AND hive_posts_cache.post_id IN (SELECT post_id FROM hive_post_tags WHERE tag = :tag) 
                                 AND hive_posts_cache.sc_trend <= (SELECT sc_trend FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
                                 AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
                             """
             elif sort == 'hot':
-                sql = sql % """ AND hive_posts_cache.category = :tag 
+                sql = sql % """ AND hive_posts_cache.post_id IN (SELECT post_id FROM hive_post_tags WHERE tag = :tag)
                                 AND hive_posts_cache.sc_hot <= (SELECT sc_hot FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
                                 AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
                             """
             elif sort == 'created':
-                sql = sql % """ AND hive_posts_cache.category = :tag
+                sql = sql % """ AND hive_posts_cache.post_id IN (SELECT post_id FROM hive_post_tags WHERE tag = :tag)
                                 AND hive_posts_cache.post_id < (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
                             """
             elif sort == 'promoted':
-                sql = sql % """ AND hive_posts_cache.category = :tag
+                sql = sql % """ AND hive_posts_cache.post_id IN (SELECT post_id FROM hive_post_tags WHERE tag = :tag)
                                 AND hive_posts_cache.promoted <= (SELECT promoted FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
                                 AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
                             """
             else:
-                sql = sql % """ AND hive_posts_cache.category = :tag
+                sql = sql % """ AND hive_posts_cache.post_id IN (SELECT post_id FROm hive_post_tags WHERE tag = :tag)
                                 AND hive_posts_cache.payout <= (SELECT payout FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
                                 AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
                             """
