@@ -124,28 +124,29 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
                                  LEFT OUTER JOIN hive_roles ON (hive_accounts.id = hive_roles.account_id AND hive_posts_cache.community_id = hive_roles.community_id) """
 
     ranked_by_trending_sql = select_fragment + """ WHERE NOT hive_posts_cache.is_paidout AND hive_posts_cache.depth = 0 AND NOT hive_posts.is_deleted
-                                                   %s ORDER BY is_pinned desc, sc_trend desc, post_id LIMIT :limit """
+                                                   %s ORDER BY sc_trend desc, post_id LIMIT :limit """
 
     ranked_by_hot_sql = select_fragment + """ WHERE NOT hive_posts_cache.is_paidout AND hive_posts_cache.depth = 0 AND NOT hive_posts.is_deleted
-                                          %s ORDER BY is_pinned desc, sc_hot desc, post_id LIMIT :limit """
+                                          %s ORDER BY sc_hot desc, post_id LIMIT :limit """
 
     ranked_by_created_sql = select_fragment + """ WHERE hive_posts_cache.depth = 0 AND NOT hive_posts.is_deleted
-                                                  %s ORDER BY is_pinned desc, hive_posts_cache.created_at DESC, post_id LIMIT :limit """
+                                                  %s ORDER BY hive_posts_cache.created_at DESC, post_id LIMIT :limit """
 
     ranked_by_promoted_sql = select_fragment + """ WHERE hive_posts_cache.depth > 0 AND hive_posts_cache.promoted > 0 AND NOT hive_posts.is_deleted
-                                                   AND NOT hive_posts_cache.is_paidout %s ORDER BY is_pinned desc, hive_posts_cache.promoted DESC, post_id LIMIT :limit """
+                                                   AND NOT hive_posts_cache.is_paidout %s ORDER BY hive_posts_cache.promoted DESC, post_id LIMIT :limit """
 
     ranked_by_payout_sql = select_fragment + """ WHERE NOT hive_posts_cache.is_paidout AND NOT hive_posts.is_deleted %s 
                                                  AND payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
-                                                 ORDER BY is_pinned desc, hive_posts_cache.payout DESC, post_id LIMIT :limit """
+                                                 ORDER BY hive_posts_cache.payout DESC, post_id LIMIT :limit """
 
     ranked_by_payout_comments_sql = select_fragment + """ WHERE NOT hive_posts_cache.is_paidout AND NOT hive_posts.is_deleted AND hive_posts_cache.depth > 0
-                                                          %s ORDER BY is_pinned desc, hive_posts_cache.payout DESC, post_id LIMIT :limit """
+                                                          %s ORDER BY hive_posts_cache.payout DESC, post_id LIMIT :limit """
 
     ranked_by_muted_sql = select_fragment + """ WHERE NOT hive_posts_cache.is_paidout AND NOT hive_posts.is_deleted AND hive_posts_cache.is_grayed
-                                                AND hive_posts_cache.payout > 0 %s ORDER BY is_pinned desc, hive_posts_cache.payout DESC, post_id LIMIT :limit """
+                                                AND hive_posts_cache.payout > 0 %s ORDER BY hive_posts_cache.payout DESC, post_id LIMIT :limit """
 
     sql = '';
+    pinned_sql = '';
 
     if sort == 'trending':
         sql = ranked_by_trending_sql
@@ -232,6 +233,9 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
                                 AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) """
         else:
             sql = sql % """ AND hive_communities.name = :community_name """
+            if sort == 'trending' or sort == 'created':
+                pinned_sql = select_fragment + """ WHERE is_pinned AND hive_communities.name = :community_name ORDER BY hive_posts_cache.created_at DESC """
+
     else:
         if start_author and start_permlink:
             if sort == 'trending':
@@ -267,8 +271,30 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
     if not observer:
         observer = '';
 
-    sql_result = await db.query_all(sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag, observer=observer)
     posts = []
+
+    if pinned_sql:
+        pinned_result = await db.query_all(pinned_sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag, observer=observer)
+        for row in pinned_result:
+            post = _condenser_post_object(row)
+            post['blacklists'] = Mutes.lists(row['author'], row['author_rep'])
+            if 'community_title' in row and row['community_title']:
+                post['community'] = row['category']
+                post['community_title'] = row['community_title']
+                if row['role_id']:
+                    post['author_role'] = ROLES[row['role_id']]
+                    post['author_title'] = row['role_title']
+                else:
+                    post['author_role'] = 'guest'
+                    post['author_title'] = ''
+            else:
+                post['stats']['gray'] = row['is_grayed']
+            post['stats']['hide'] = 'irredeemables' in post['blacklists']
+            post['stats']['is_pinned'] = True
+            limit = limit - 1
+            posts.append(post)
+
+    sql_result = await db.query_all(sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag, observer=observer)
     for row in sql_result:
         post = _condenser_post_object(row)
         post['blacklists'] = Mutes.lists(row['author'], row['author_rep'])
@@ -284,8 +310,6 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
         else:
             post['stats']['gray'] = row['is_grayed']
         post['stats']['hide'] = 'irredeemables' in post['blacklists']
-        if 'is_pinned' in row and row['is_pinned']:
-            post['stats']['is_pinned'] = True
         posts.append(post)
     return posts
 
