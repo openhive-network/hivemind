@@ -183,26 +183,28 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
     elif tag == 'my':
         if start_author and start_permlink:
             if sort == 'trending':
-                sql = sql % """ AND hive_posts_cache.community_id IN (SELECT community_id FROM hive_roles WHERE account_id = hive_accounts.id ) 
+                sql = sql % """ AND hive_posts_cache.community_id IN (SELECT community_id FROM hive_subscriptions WHERE account_id = 
+                                    (SELECT id FROM hive_accounts WHERE name = :observer) ) 
                                 AND hive_posts_cache.sc_trend <= (SELECT sc_trend FROM hive_posts_cache WHERE permlink = :permlink AND author = :author )
                                 AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) """
             elif sort == 'hot':
-                sql = sql % """ AND hive_posts_cache.community_id IN (SELECT community_id FROM hive_roles WHERE account_id = hive_accounts.id) 
+                sql = sql % """ AND hive_posts_cache.community_id IN (SELECT community_id FROM hive_subscriptions WHERE account_id = hive_accounts.id) 
                                 AND hive_posts_cache.sc_hot <= (SELECT sc_hot FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) 
                                 AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) """
             elif sort == 'created':
-                sql = sql % """ AND hive_posts_cache.community_id IN (SELECT community_id FROM hive_roles WHERE account_id = hive_accounts.id ) 
+                sql = sql % """ AND hive_posts_cache.community_id IN (SELECT community_id FROM hive_subscriptions WHERE account_id = hive_accounts.id ) 
                                 AND hive_posts_cache.post_id < (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author ) """
             elif sort == 'promoted':
-                sql = sql % """ AND hive_posts_cache.community_id IN (SELECT community_id FROM hive_roles WHERE account_id = hive_accounts.id ) 
+                sql = sql % """ AND hive_posts_cache.community_id IN (SELECT community_id FROM hive_subscriptions WHERE account_id = hive_accounts.id ) 
                                 AND hive_posts_cache.promoted <= (SELECT promoted FROM hive_posts_cache WHERE permlink = :permlink AND author = :author ) 
                                 AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) """
             else:
-                sql = sql % """ AND hive_posts_cache.community_id IN (SELECT community_id FROM hive_roles WHERE account_id = hive_accounts.id ) 
+                sql = sql % """ AND hive_posts_cache.community_id IN (SELECT community_id FROM hive_subscriptions WHERE account_id = hive_accounts.id ) 
                                 AND hive_posts_cache.payout <= (SELECT payout FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
                                 AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author ) """
         else:
-            sql = sql % """ AND hive_posts_cache.community_id IN (SELECT community_id FROM hive_roles WHERE account_id = hive_accounts.id ) """
+            sql = sql % """ AND hive_posts_cache.community_id IN (SELECT community_id FROM hive_subscriptions WHERE account_id = 
+                                (SELECT id FROm hive_accounts WHERE name = :observer) ) """
     elif tag[:5] == 'hive-':
         if start_author and start_permlink:
             if sort == 'trending':
@@ -258,7 +260,10 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
             else:
                 sql = sql % """ AND hive_posts_cache.post_id IN (SELECT post_id FROM hive_post_tags WHERE tag = :tag)"""
 
-    sql_result = await db.query_all(sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag)
+    if not observer:
+        observer = '';
+
+    sql_result = await db.query_all(sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag, observer=observer)
     posts = []
     for row in sql_result:
         post = _condenser_post_object(row)
