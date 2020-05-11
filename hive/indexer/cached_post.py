@@ -503,6 +503,7 @@ class CachedPost:
                 ('is_paidout',    basic['is_paidout']),
                 ('json',          json.dumps(basic['json_metadata'])),
                 #('raw_json',      json.dumps(legacy_data)),
+                # TODO: check if writting fields below on every update is necessary!
                 ('legacy_id',               legacy_data['id']),
                 ('parent_author',           legacy_data['parent_author']),
                 ('parent_permlink',         legacy_data['parent_permlink']),
@@ -517,6 +518,7 @@ class CachedPost:
                 ('beneficiaries',           json.dumps(legacy_data['beneficiaries'])),
                 ('url',                     legacy_data['url']),
                 ('root_title',              legacy_data['root_title']),
+                ('author_permlink',         post['author'] + post['permlink']),
             ])
 
         # if there's a pending promoted value to write, pull it out

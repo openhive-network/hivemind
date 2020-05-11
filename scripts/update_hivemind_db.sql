@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS hive_db_version (
 
 -- Upgrade to version 1.0
 -- in this version we will move data from raw_json into separate columns
+-- also it will add needed indexes and procedures
 DO $$
   DECLARE
     -- We will perform our operations in baches to conserve memory and CPU
@@ -42,7 +43,8 @@ DO $$
         ADD COLUMN allow_curation_rewards BOOLEAN NOT NULL DEFAULT TRUE,
         ADD COLUMN beneficiaries JSON NOT NULL DEFAULT '[]',
         ADD COLUMN url TEXT NOT NULL DEFAULT '',
-        ADD COLUMN root_title VARCHAR(255) NOT NULL DEFAULT '';
+        ADD COLUMN root_title VARCHAR(255) NOT NULL DEFAULT '',
+        ADD COLUMN author_permlink VARCHAR(271) COLLATE "C" NOT NULL DEFAULT '';
       RAISE NOTICE 'Done...';
       
       -- Helper type for use with json_populate_record
@@ -69,18 +71,27 @@ DO $$
       
       WHILE current_id < last_id LOOP
         RAISE NOTICE 'Processing batch: % <= post_id < % (of %)', current_id, current_id + batch_size, last_id;
-        FOR row IN SELECT post_id, raw_json FROM hive_posts_cache WHERE post_id >= current_id AND post_id < current_id + batch_size LOOP
-          UPDATE hive_posts_cache SET (
-            legacy_id, parent_author, parent_permlink, curator_payout_value, 
-            root_author, root_permlink, max_accepted_payout, percent_steem_dollars, 
-            allow_replies, allow_votes, allow_curation_rewards, url, root_title
-          ) = (
-            SELECT id, parent_author, parent_permlink, curator_payout_value, 
-              root_author, root_permlink, max_accepted_payout, percent_steem_dollars, 
-              allow_replies, allow_votes, allow_curation_rewards, url, root_title 
-            FROM json_populate_record(null::legacy_comment_type, row.raw_json::json)
-          )
-          WHERE post_id = row.post_id;
+        FOR row IN SELECT post_id, raw_json, author, permlink FROM hive_posts_cache WHERE post_id >= current_id AND post_id < current_id + batch_size LOOP
+          UPDATE hive_posts_cache SET 
+            legacy_id = jpr.id, 
+            parent_author = jpr.parent_author, 
+            parent_permlink = jpr.parent_permlink, 
+            curator_payout_value = jpr.curator_payout_value, 
+            root_author = jpr.root_author, 
+            root_permlink = jpr.root_permlink, 
+            max_accepted_payout = jpr.max_accepted_payout, 
+            percent_steem_dollars = jpr.percent_steem_dollars, 
+            allow_replies = jpr.allow_replies, 
+            allow_votes = jpr.allow_votes, 
+            allow_curation_rewards = jpr.allow_curation_rewards, 
+            beneficiaries = jpr.beneficiaries,
+            url = jpr.url, 
+            root_title = jpr.root_title,
+            author_permlink = (row.author || row.permlink)
+          FROM 
+            json_populate_record(null::legacy_comment_type, row.raw_json::json) AS jpr
+          WHERE 
+            post_id = row.post_id;
           current_id := row.post_id;
         END LOOP;
       END LOOP;
@@ -88,7 +99,6 @@ DO $$
       -- Creating indexes
       RAISE NOTICE 'Creating author_permlink_idx';
       CREATE INDEX IF NOT EXISTS author_permlink_idx ON hive_posts_cache (author ASC, permlink ASC);
-      CREATE INDEX IF NOT EXISTS permlink_author_idx ON hive_posts_cache (permlink ASC, author ASC);
       RAISE NOTICE 'Creating root_author_permlink_idx';
       CREATE INDEX IF NOT EXISTS root_author_permlink_idx ON hive_posts_cache (root_author ASC, root_permlink ASC);
       RAISE NOTICE 'Creating parent_permlink_idx';
@@ -101,6 +111,9 @@ DO $$
       CREATE INDEX IF NOT EXISTS parent_updated_id_idx ON hive_posts_cache (parent_author ASC, updated_at ASC, post_id ASC);
       RAISE NOTICE 'Creating author_updated_id_idx';
       CREATE INDEX IF NOT EXISTS author_updated_id_idx ON hive_posts_cache (author ASC, updated_at ASC, post_id ASC);
+      -- idx for by_permlink list_comments
+      RAISE NOTICE 'Creating author_permlink_col_idx';
+      CREATE INDEX IF NOT EXISTS author_permlink_col_idx ON hive_comments_cache (author_permlink ASC);
 
       -- Creating functions
       -- for list_comments by_root
