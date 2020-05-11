@@ -214,6 +214,8 @@ def build_metadata():
         sa.Column('url', sa.Text, nullable=False, server_default=''),
         sa.Column('root_title', sa.String(255), nullable=False, server_default=''),
 
+        sa.Column('author_permlink', sa.String(255 + 16, collation='C'), nullable=False, server_default=''),
+
         # index: misc
         sa.Index('hive_posts_cache_ix3',  'payout_at', 'post_id',           postgresql_where=sql_text("is_paidout = '0'")),         # core: payout sweep
         sa.Index('hive_posts_cache_ix8',  'category', 'payout', 'depth',    postgresql_where=sql_text("is_paidout = '0'")),         # API: tag stats
