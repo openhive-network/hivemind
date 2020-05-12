@@ -209,7 +209,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
                                 AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author ) """
         else:
             sql = sql % """ AND hive_posts_cache.community_id IN (SELECT community_id FROM hive_subscriptions WHERE account_id = 
-                                (SELECT id FROm hive_accounts WHERE name = :observer) ) """
+                                (SELECT id FROM hive_accounts WHERE name = :observer) ) """
     elif tag[:5] == 'hive-':
         if start_author and start_permlink:
             if sort == 'trending':
@@ -277,41 +277,35 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
         pinned_result = await db.query_all(pinned_sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag, observer=observer)
         for row in pinned_result:
             post = _condenser_post_object(row)
-            post['blacklists'] = Mutes.lists(row['author'], row['author_rep'])
-            if 'community_title' in row and row['community_title']:
-                post['community'] = row['category']
-                post['community_title'] = row['community_title']
-                if row['role_id']:
-                    post['author_role'] = ROLES[row['role_id']]
-                    post['author_title'] = row['role_title']
-                else:
-                    post['author_role'] = 'guest'
-                    post['author_title'] = ''
-            else:
-                post['stats']['gray'] = row['is_grayed']
-            post['stats']['hide'] = 'irredeemables' in post['blacklists']
-            post['stats']['is_pinned'] = True
+            post = append_statistics_to_post(post, row, True)
             limit = limit - 1
             posts.append(post)
 
     sql_result = await db.query_all(sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag, observer=observer)
     for row in sql_result:
         post = _condenser_post_object(row)
-        post['blacklists'] = Mutes.lists(row['author'], row['author_rep'])
-        if 'community_title' in row and row['community_title']:
-            post['community'] = row['category']
-            post['community_title'] = row['community_title']
-            if row['role_id']:
-                post['author_role'] = ROLES[row['role_id']]
-                post['author_title'] = row['role_title']
-            else:
-                post['author_role'] = 'guest'
-                post['author_title'] = ''
-        else:
-            post['stats']['gray'] = row['is_grayed']
-        post['stats']['hide'] = 'irredeemables' in post['blacklists']
+        post = append_statistics_to_post(post, row, False)
         posts.append(post)
     return posts
+    
+def append_statistics_to_post(post, row, is_pinned):
+    post['blacklists'] = Mutes.lists(row['author'], row['author_rep'])
+    if 'community_title' in row and row['community_title']:
+        post['community'] = row['category']
+        post['community_title'] = row['community_title']
+        if row['role_id']:
+            post['author_role'] = ROLES[row['role_id']]
+            post['author_title'] = row['role_title']
+        else:
+            post['author_role'] = 'guest'
+            post['author_title'] = ''
+    else:
+        post['stats']['gray'] = row['is_grayed']
+    post['stats']['hide'] = 'irredeemables' in post['blacklists']
+    
+    if is_pinned:
+        post['stats']['is_pinned'] = True
+    return post
 
 @return_error_info
 async def get_account_posts(context, sort, account, start_author='', start_permlink='',
