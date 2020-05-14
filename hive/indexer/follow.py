@@ -72,6 +72,8 @@ class Follow:
             return None
 
         what = first(op['what']) or ''
+        if not isinstance(what, str):
+            return None
         defs = {'': 0, 'blog': 1, 'ignore': 2}
         if what not in defs:
             return None
