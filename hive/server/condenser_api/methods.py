@@ -16,6 +16,20 @@ from hive.server.common.helpers import (
 
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
 
+SELECT_FRAGMENT = """
+    SELECT hive_posts_cache.post_id, hive_posts_cache.author, hive_posts_cache.permlink,
+           hive_posts_cache.title, hive_posts_cache.body, hive_posts_cache.category, hive_posts_cache.depth,
+           hive_posts_cache.promoted, hive_posts_cache.payout, hive_posts_cache.payout_at,
+           hive_posts_cache.is_paidout, hive_posts_cache.children, hive_posts_cache.votes,
+           hive_posts_cache.created_at, hive_posts_cache.updated_at, hive_posts_cache.rshares,
+           hive_posts_cache.raw_json, hive_posts_cache.json, hive_accounts.reputation AS author_rep,
+           hive_posts_cache.is_hidden AS is_hidden, hive_posts_cache.is_grayed AS is_grayed,
+           hive_posts_cache.total_votes AS total_votes, hive_posts_cache.flag_weight AS flag_weight,
+           hive_posts_cache.sc_trend AS sc_trend, hive_accounts.id AS acct_author_id,
+           hive_posts.is_pinned AS is_pinned
+           FROM hive_posts_cache JOIN hive_posts ON (hive_posts_cache.post_id = hive_posts.id)
+                                 JOIN hive_accounts ON (hive_posts_cache.author = hive_accounts.name)"""
+
 
 # Dummy
 
@@ -101,13 +115,17 @@ async def get_content(context, author: str, permlink: str):
     db = context['db']
     valid_account(author)
     valid_permlink(permlink)
-    post_id = await cursor.get_post_id(db, author, permlink)
-    if not post_id:
-        return {'id': 0, 'author': '', 'permlink': ''}
-    posts = await load_posts(db, [post_id])
-    assert posts, 'post was not found in cache'
-    return posts[0]
 
+    sql = """ ---get_content """ + SELECT_FRAGMENT + """
+              WHERE hive_posts_cache.author = :author AND hive_posts_cache.permlink = :permlink AND NOT hive_posts.is_deleted
+          """
+    result = await db.query_all(sql, author=author, permlink=permlink)
+    result = dict(result[0])
+    post = _condenser_post_object(result, 0)
+    post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
+
+    assert post, 'post was not found in cache'
+    return post
 
 @return_error_info
 async def get_content_replies(context, author: str, permlink: str):
@@ -233,13 +251,35 @@ async def get_discussions_by_blog(context, tag: str = None, start_author: str = 
     """Retrieve account's blog posts, including reblogs."""
     assert tag, '`tag` cannot be blank'
     assert not filter_tags, 'filter_tags not supported'
-    ids = await cursor.pids_by_blog(
-        context['db'],
-        valid_account(tag),
-        valid_account(start_author, allow_empty=True),
-        valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100))
-    return await load_posts(context['db'], ids, truncate_body=truncate_body)
+    valid_account(tag)
+    valid_account(start_author, allow_empty=True)
+    valid_permlink(start_permlink, allow_empty=True)
+    valid_limit(limit, 100)
+
+    sql = """ ---get_discussions_by_blog """ + SELECT_FRAGMENT + """
+            WHERE NOT hive_posts.is_deleted AND hive_posts_cache.post_id IN
+                (SELECT post_id FROM hive_feed_cache JOIN hive_accounts ON (hive_feed_cache.account_id = hive_accounts.id) WHERE hive_accounts.name = :author)
+          """
+    if start_author and start_permlink != '':
+        sql += """
+         AND hive_posts_cache.created_at <= (SELECT created_at from hive_posts_cache where author = :start_author AND permlink = :start_permlink)
+        """
+
+    sql += """
+        ORDER BY hive_posts_cache.created_at DESC
+        LIMIT :limit
+    """
+
+    db = context['db']
+    result = await db.query_all(sql, author=tag, start_author=start_author, start_permlink=start_permlink, limit=limit)
+    posts_by_id = []
+
+    for row in result:
+        row = dict(row)
+        post = _condenser_post_object(row, truncate_body=truncate_body)
+        post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
+        #posts_by_id[row['post_id']] = post
+        posts_by_id.append(post)
 
 
 @return_error_info
@@ -267,12 +307,36 @@ async def get_discussions_by_comments(context, start_author: str = None, start_p
     """Get comments by made by author."""
     assert start_author, '`start_author` cannot be blank'
     assert not filter_tags, 'filter_tags not supported'
-    ids = await cursor.pids_by_account_comments(
-        context['db'],
-        valid_account(start_author),
-        valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100))
-    return await load_posts(context['db'], ids, truncate_body=truncate_body)
+    valid_account(start_author)
+    valid_permlink(start_permlink, allow_empty=True)
+    valid_limit(limit, 100)
+
+    sql = """ ---get_discussions_by_comments """ + SELECT_FRAGMENT + """
+            WHERE hive_posts_cache.author = :start_author AND hive_posts_cache.depth > 0
+            AND NOT hive_posts.is_deleted
+    """
+
+    if start_permlink:
+        sql += """
+            AND hive_posts_cache.post_id <= (SELECT hive_posts_cache.post_id FROM 
+            hive_posts_cache WHERE permlink = :start_permlink AND author=:start_author)
+        """
+
+    sql += """
+        ORDER BY hive_posts_cache.post_id DESC, depth LIMIT :limit
+    """
+
+    posts = []
+    db = context['db']
+    result = await db.query_all(sql, start_author=start_author, start_permlink=start_permlink, limit=limit)
+
+    for row in result:
+        row = dict(row)
+        post = _condenser_post_object(row, truncate_body=truncate_body)
+        post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
+        posts.append(post)
+
+    return posts
 
 
 @return_error_info
