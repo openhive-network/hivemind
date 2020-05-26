@@ -22,6 +22,7 @@ async def get_discussion(context, author, permlink):
     permlink = valid_permlink(permlink)
 
     sql = """
+        ---get_discussion
         WITH RECURSIVE child_posts AS (
             SELECT id, parent_id FROM hive_posts WHERE author = :author AND permlink = :permlink
             UNION
