@@ -14,6 +14,8 @@ log = logging.getLogger(__name__)
 @return_error_info
 async def get_discussion(context, author, permlink):
     """Modified `get_state` thread implementation."""
+    # New index was created: hive_posts_parent_id_btree (CREATE INDEX "hive_posts_parent_id_btree" ON hive_posts btree(parent_id)
+    # We thougth this would be covered by "hive_posts_ix4" btree (parent_id, id) WHERE is_deleted = false but it was not
     db = context['db']
 
     author = valid_account(author)

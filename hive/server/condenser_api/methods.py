@@ -116,7 +116,7 @@ async def get_content(context, author: str, permlink: str):
     valid_account(author)
     valid_permlink(permlink)
 
-    sql = """ ---get_content """ + SELECT_FRAGMENT + """
+    sql = """ ---get_content\n""" + SELECT_FRAGMENT + """
               WHERE hive_posts_cache.author = :author AND hive_posts_cache.permlink = :permlink AND NOT hive_posts.is_deleted
           """
     result = await db.query_all(sql, author=author, permlink=permlink)

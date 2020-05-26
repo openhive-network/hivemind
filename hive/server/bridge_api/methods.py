@@ -85,7 +85,7 @@ async def get_post(context, author, permlink, observer=None):
     valid_account(author)
     valid_permlink(permlink)
 
-    sql = SELECT_FRAGMENT + """ WHERE hive_posts_cache.author = :author AND hive_posts_cache.permlink = :permlink AND NOT hive_posts.is_deleted """
+    sql = "---bridge_api.get_post\n" + SELECT_FRAGMENT + """ WHERE hive_posts_cache.author = :author AND hive_posts_cache.permlink = :permlink AND NOT hive_posts.is_deleted """
 
     result = await db.query_all(sql, author=author, permlink=permlink)
     assert len(result) == 1, 'invalid author/permlink or post not found in cache'
@@ -133,6 +133,8 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
     elif sort == 'muted':
         sql = SELECT_FRAGMENT + """ WHERE NOT hive_posts_cache.is_paidout AND NOT hive_posts.is_deleted AND hive_posts_cache.is_grayed
                                     AND hive_posts_cache.payout > 0 %s ORDER BY hive_posts_cache.payout DESC, post_id LIMIT :limit """
+
+    sql = "---bridge_api.get_ranked_posts\n" + sql
 
     if start_author and start_permlink:
         if sort == 'trending':
@@ -233,7 +235,7 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
     # pylint: disable=unused-variable
     observer_id = await get_account_id(db, observer) if observer else None # TODO
      
-    sql = SELECT_FRAGMENT + """ %s """      
+    sql = "---bridge_api.get_account_posts\n" + SELECT_FRAGMENT + """ %s """      
     if start_author and start_permlink:
         sql = sql % """ WHERE hive_posts_cache.post_id < (SELECT post_id FROM hive_posts_cache WHERE author = :author AND permlink = :permlink) %s"""
     else:
