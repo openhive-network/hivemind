@@ -44,6 +44,8 @@ async def get_discussion(context, author, permlink):
     """
 
     rows = await db.query_all(sql, author=author, permlink=permlink)
+    if not rows or len(rows) == 0:
+        return {}
     root_id = rows[0]['id']
     all_posts = {}
     root_post = _condenser_post_object(rows[0])
