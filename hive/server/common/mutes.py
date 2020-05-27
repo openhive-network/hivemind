@@ -44,7 +44,6 @@ class Mutes:
         self.accounts = set(_read_url(self.url).decode('utf8').split())
         jsn = _read_url(self.blacklist_api_url + "/blacklists")
         self.blist = set(json.loads(jsn))
-        self.blist_map = dict()
         log.warning("%d muted, %d blacklisted", len(self.accounts), len(self.blist))
         self.fetched = perf()
 
@@ -63,22 +62,27 @@ class Mutes:
         if perf() - inst.fetched > 3600:
             inst.load()
 
-        if name not in inst.blist_map:
-            out = []
-            if name in inst.blist:
-                url = "%s/user/%s" % (inst.blacklist_api_url, name)
-                lists = json.loads(_read_url(url))
-                out.extend(lists['blacklisted'])
+        if name not in inst.blist and name not in inst.accounts:
+            if name in inst.blist_map: #this user was blacklisted, but has been removed from the blacklists since the last check
+                inst.blist_map.pop(name)    #so just pop them from the cache
+            return []
+        else:   # user is on at least 1 list
+            blacklists_for_user = []
+            if name not in inst.blist_map:  #user has been added to a blacklist since the last check so figure out what lists they belong to
+                if name in inst.blist: #blacklisted accounts
+                    url = "%s/user/%s" % (inst.blacklist_api_url, name)
+                    lists = json.loads(_read_url(url))
+                    blacklists_for_user.extend(lists['blacklisted'])
 
-            if name in inst.accounts:
-                if 'irredeemables' not in out:
-                    out.append('irredeemables')
+                if name in inst.accounts:   #muted accounts
+                    if 'irredeemables' not in blacklists_for_user:
+                        blacklists_for_user.append('irredeemables')
 
-            if int(rep) < 1:
-                out.append('reputation-0')
-            elif int(rep) == 1:
-                out.append('reputation-1')
+                if int(rep) < 1:
+                    blacklists_for_user.append('reputation-0')  #bad reputation
+                if int(rep) == 1:
+                    blacklists_for_user.append('reputation-1') #bad reputation
 
-            inst.blist_map[name] = out
+                inst.blist_map[name] = blacklists_for_user
 
-        return inst.blist_map[name]
+            return inst.blist_map[name]
