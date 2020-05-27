@@ -78,11 +78,10 @@ class Mutes:
                     if 'irredeemables' not in blacklists_for_user:
                         blacklists_for_user.append('irredeemables')
 
-                if int(rep) < 1:
-                    blacklists_for_user.append('reputation-0')  #bad reputation
-                if int(rep) == 1:
-                    blacklists_for_user.append('reputation-1') #bad reputation
+            if int(rep) < 1:
+                blacklists_for_user.append('reputation-0')  #bad reputation
+            if int(rep) == 1:
+                blacklists_for_user.append('reputation-1') #bad reputation
 
-                inst.blist_map[name] = blacklists_for_user
-
+            inst.blist_map[name] = blacklists_for_user
             return inst.blist_map[name]
