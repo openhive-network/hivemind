@@ -235,11 +235,7 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
     # pylint: disable=unused-variable
     observer_id = await get_account_id(db, observer) if observer else None # TODO
      
-    sql = "---bridge_api.get_account_posts\n" + SELECT_FRAGMENT + """ %s """      
-    if start_author and start_permlink:
-        sql = sql % """ WHERE hive_posts_cache.post_id < (SELECT post_id FROM hive_posts_cache WHERE author = :author AND permlink = :permlink) %s"""
-    else:
-        sql = sql % """ %s """
+    sql = "---bridge_api.get_account_posts\n " + SELECT_FRAGMENT + """ %s """      
         
     if sort == 'blog':
         ids = await cursor.pids_by_blog(db, account, *start, limit)
@@ -249,11 +245,11 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
                 post['reblogged_by'] = [account]
         return posts
     elif sort == 'posts':
-        sql = sql % """ WHERE hive_posts_cache.author = :account AND NOT hive_posts.is_deleted AND hive_posts_cache.depth = 0 ORDER BY hive_posts_cache.post_id DESC LIMIT :limit"""
+        sql = sql % """ WHERE hive_posts_cache.author = :account AND NOT hive_posts.is_deleted AND hive_posts_cache.depth = 0 %s ORDER BY hive_posts_cache.post_id DESC LIMIT :limit"""
     elif sort == 'comments':
-        sql = sql % """ WHERE hive_posts_cache.author = :account AND NOT hive_posts.is_deleted AND hive_posts_cache.depth > 0 ORDER BY hive_posts_cache.post_ID DESC, depth LIMIT :limit"""
+        sql = sql % """ WHERE hive_posts_cache.author = :account AND NOT hive_posts.is_deleted AND hive_posts_cache.depth > 0 %s ORDER BY hive_posts_cache.post_id DESC, depth LIMIT :limit"""
     elif sort == 'payout':
-        sql = sql % """ WHERE hive_posts_cache.author = :account AND NOT hive_posts.is_deleted AND NOT hive_posts_cache.is_paidout ORDER BY payout DESC, post_id LIMIT :limit"""
+        sql = sql % """ WHERE hive_posts_cache.author = :account AND NOT hive_posts.is_deleted AND NOT hive_posts_cache.is_paidout %s ORDER BY payout DESC, post_id LIMIT :limit"""
     elif sort == 'feed':
         res = await cursor.pids_by_feed_with_reblog(db, account, *start, limit)
         return await load_posts_reblogs(context['db'], res)
@@ -261,8 +257,14 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
         start = start if start_permlink else (account, None)
         ids = await cursor.pids_by_replies(db, *start, limit)
         return await load_posts(context['db'], ids)
+
+    if start_author and start_permlink:
+        sql = sql % """ AND hive_posts_cache.post_id < (SELECT post_id FROM hive_posts_cache WHERE author = :author AND permlink = :permlink) """
+    else:
+        sql = sql % """ """
         
     posts = []
+    print('sql is: ', sql)
     sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit)
     for row in sql_result:
         post = _condenser_post_object(row)
