@@ -174,6 +174,77 @@ def nested_query_compat(function):
         return function(*args, **kwargs)
     return wrapper
 
+@return_error_info
+@nested_query_compat
+async def get_discussions_by(discussion_type, context, start_author: str = '',
+                             start_permlink: str = '', limit: int = 20,
+                             tag: str = None, truncate_body: int = 0,
+                             filter_tags: list = None):
+    """ Common implementation for get_discussions_by calls  """
+    assert not filter_tags, 'filter tags not supported'
+    assert discussion_type in ['trending', 'hot', 'created', 'promoted',
+                               'payout', 'payout_comments'], 'invalid discussion type'
+    valid_account(start_author, allow_empty=True)
+    valid_permlink(start_permlink, allow_empty=True)
+    valid_limit(limit, 100)
+    valid_tag(tag, allow_empty=True)
+    db = context['db']
+
+    sql = "---get_discussions_by_" + discussion_type + "\r\n" + SELECT_FRAGMENT
+    
+    if tag and tag != 'all':
+        sql = sql + """ JOIN hive_post_tags on (hive_posts_cache.post_id = hive_post_tags.tag) """
+    
+    sql = sql + """ WHERE NOT hive_posts.is_deleted """
+    
+    if discussion_type == 'trending':
+        sql = sql + """ AND NOT hive_posts_cache.is_paidout %s ORDER BY sc_trend DESC LIMIT :limit """
+    elif discussion_type == 'hot':
+        sql = sql + """ AND NOT hive_posts_cache.is_paidout %s ORDER BY sc_hot DESC LIMIT :limit """
+    elif discussion_type == 'created':
+        sql = sql + """ AND hive_posts.depth = 0 %s ORDER BY hive_posts_cache.created_at DESC LIMIT :limit """
+    elif discussion_type == 'promoted':
+        sql = sql + """ AND NOT hive_posts_cache.is_paidout AND hive_posts.promoted > 0
+                        %s ORDER BY hive_posts_cache.promoted DESC LIMIT :limit """
+    elif discussion_type == 'payout':
+        sql = sql + """ AND NOT hive_posts_cache.is_paidout AND hive_posts_cache.depth = 0
+                        %s ORDER BY hive_posts_cache.payout DESC LIMIT :limit """
+    elif discussion_type == 'payout_comments':
+        sql = sql + """ AND NOT hive_posts_cache.is_paidout AND hive_posts_cache.depth > 0
+                        %s ORDER BY hive_posts_cache.payout DESC LIMIT :limit """
+    
+    if tag and tag != 'all':
+        if tag[:5] == 'hive-':
+            sql = sql % """ AND hive_posts_category = :tag %s """
+        else:
+            sql = sql % """ AND hive_post_tags.tag = :tag %s """
+
+    if start_author and start_permlink:
+        if discussion_type == 'trending':
+            sql = sql % """ AND hive_posts_cache.sc_trend <= (SELECT sc_trend FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
+                            AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) """
+        elif discussion_type == 'hot':
+            sql = sql % """ AND hive_posts_cache.sc_hot <= (SELECT sc_hot FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
+                            AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) """
+        elif discussion_type == 'created':
+            sql = sql % """ AND hive_posts_cache.post_id < (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) """
+        elif discussion_type == 'promoted':
+            sql = sql % """ AND hive_posts_cache.promoted <= (SELECT promoted FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
+                            AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) """
+        else:
+            sql = sql % """ AND hive_posts_cache.payout <= (SELECT payout FROM hive_posts_cache where permlink = :permlink AND author = :author)
+                            AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) """
+    else:
+        sql = sql % """ """
+
+    result = await db.query_all(sql, tag=tag, limit=limit, author=start_author, permlink=start_permlink)
+    posts = []
+    for row in result:
+        post = _condenser_post_object(row, truncate_body)
+        post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
+        posts.append(post)
+    #posts = await resultset_to_posts(db=db, resultset=result, truncate_body=truncate_body)
+    return posts
 
 @return_error_info
 @nested_query_compat
