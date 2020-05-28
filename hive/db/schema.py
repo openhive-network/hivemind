@@ -88,7 +88,7 @@ def build_metadata():
         sa.ForeignKeyConstraint(['parent_id'], ['hive_posts.id'], name='hive_posts_fk3'),
         sa.UniqueConstraint('author', 'permlink', name='hive_posts_ux1'),
         sa.Index('hive_posts_ix3', 'author', 'depth', 'id', postgresql_where=sql_text("is_deleted = '0'")), # API: author blog/comments
-        sa.Index('hive_posts_ix4', 'parent_id', 'id'), #postgresql_where=sql_text("is_deleted = '0'")), # API: fetching children #[JES] We decided we want the full index since posts can be deleted/undeleted
+        sa.Index('hive_posts_ix4', 'parent_id DESC NULLS LAST', 'id'), #postgresql_where=sql_text("is_deleted = '0'")), # API: fetching children #[JES] We decided we want the full index since posts can be deleted/undeleted
         sa.Index('hive_posts_ix5', 'id', postgresql_where=sql_text("is_pinned = '1' AND is_deleted = '0'")), # API: pinned post status
         sa.Index('hive_posts_ix6', 'community_id', 'id', postgresql_where=sql_text("community_id IS NOT NULL AND is_pinned = '1' AND is_deleted = '0'")), # API: community pinned
     )
@@ -225,6 +225,7 @@ def build_metadata():
         sa.Index('hive_posts_cache_ix32', 'community_id', 'created_at', 'post_id',  postgresql_where=sql_text("community_id IS NOT NULL AND is_grayed = '0' AND depth = 0")),        # API: community created
         sa.Index('hive_posts_cache_ix33', 'community_id', 'payout',     'post_id',  postgresql_where=sql_text("community_id IS NOT NULL AND is_grayed = '0' AND is_paidout = '0'")), # API: community payout
         sa.Index('hive_posts_cache_ix34', 'community_id', 'payout',     'post_id',  postgresql_where=sql_text("community_id IS NOT NULL AND is_grayed = '1' AND is_paidout = '0'")), # API: community muted
+        sa.Index('hive_posts_cache_ix35', 'author', 'depth'),
     )
 
     sa.Table(
