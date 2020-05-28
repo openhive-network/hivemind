@@ -197,7 +197,7 @@ async def get_discussions_by(discussion_type, context, start_author: str = '',
     sql = "---get_discussions_by_" + discussion_type + "\r\n" + SELECT_FRAGMENT
     
     if tag and tag != 'all':
-        sql = sql + """ JOIN hive_post_tags on (hive_posts_cache.post_id = hive_post_tags.tag) """
+        sql = sql + """ JOIN hive_post_tags on (hive_posts_cache.post_id = hive_post_tags.post_id) """
     
     sql = sql + """ WHERE NOT hive_posts.is_deleted """
     
