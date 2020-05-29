@@ -212,9 +212,9 @@ async def get_discussions_by(discussion_type, context, start_author: str = '',
     
     if tag and tag != 'all':
         if tag[:5] == 'hive-':
-            sql = sql % """ AND hive_posts_cache.category = :tag %s """
+            sql = sql % """ %s AND hive_posts_cache.category = :tag """
         else:
-            sql = sql % """ AND hive_post_tags.tag = :tag %s """
+            sql = sql % """ %s AND hive_posts_cache.post_id IN (SELECT post_id FROM hive_post_tags WHERE tag = :tag) """
 
     if start_author and start_permlink:
         if discussion_type == 'trending':
