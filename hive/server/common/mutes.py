@@ -10,10 +10,10 @@ log = logging.getLogger(__name__)
 
 GET_BLACKLISTED_ACCOUNTS = """
 with blacklisted_users as (select following, 'my_blacklist' as source from hive_follows where follower = 
-    (select id from hive_accounts where name = 'jes2850' ) and blacklisted
+    (select id from hive_accounts where name = :observer ) and blacklisted
 union all
 select following, 'my_followed_blacklists' as source from hive_follows where follower in (select following from hive_follows where follower = 
-    (select id from hive_accounts where name = 'jes2850') and follow_blacklists))
+    (select id from hive_accounts where name = :observer ) and follow_blacklists))
 
 select hive_accounts.name, blacklisted_users.source from hive_accounts join blacklisted_users on (hive_accounts.id = blacklisted_users.following)
 """
