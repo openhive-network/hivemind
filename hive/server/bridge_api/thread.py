@@ -12,7 +12,7 @@ from hive.server.common.helpers import (
 log = logging.getLogger(__name__)
 
 @return_error_info
-async def get_discussion(context, author, permlink):
+async def get_discussion(context, author, permlink, observer=None):
     """Modified `get_state` thread implementation."""
     # New index was created: hive_posts_parent_id_btree (CREATE INDEX "hive_posts_parent_id_btree" ON hive_posts btree(parent_id)
     # We thougth this would be covered by "hive_posts_ix4" btree (parent_id, id) WHERE is_deleted = false but it was not
@@ -49,7 +49,7 @@ async def get_discussion(context, author, permlink):
     root_id = rows[0]['id']
     all_posts = {}
     root_post = _condenser_post_object(rows[0])
-    root_post = append_statistics_to_post(root_post, rows[0], False)
+    root_post = append_statistics_to_post(root_post, rows[0], False, observer, context)
     root_post['replies'] = []
     all_posts[root_id] = root_post
 

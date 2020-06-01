@@ -184,7 +184,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
         pinned_result = await db.query_all(pinned_sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag, observer=observer)
         for row in pinned_result:
             post = _condenser_post_object(row)
-            post = append_statistics_to_post(post, row, True)
+            post = append_statistics_to_post(post, row, True, context, observer)
             limit = limit - 1
             posts.append(post)
             pinned_post_ids.append(post['post_id'])
@@ -192,14 +192,14 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
     sql_result = await db.query_all(sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag, observer=observer)
     for row in sql_result:
         post = _condenser_post_object(row)
-        post = append_statistics_to_post(post, row, False)
+        post = append_statistics_to_post(post, row, False, context, observer)
         if post['post_id'] in pinned_post_ids:
             continue
         posts.append(post)
     return posts
 
-def append_statistics_to_post(post, row, is_pinned):
-    post['blacklists'] = Mutes.lists(row['author'], row['author_rep'])
+def append_statistics_to_post(post, row, is_pinned, observer=None, context=None):
+    post['blacklists'] = Mutes.lists(row['author'], row['author_rep'], observer, context)
     if 'community_title' in row and row['community_title']:
         post['community'] = row['category']
         post['community_title'] = row['community_title']
@@ -268,6 +268,6 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
     sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit)
     for row in sql_result:
         post = _condenser_post_object(row)
-        post = append_statistics_to_post(post, row, False)
+        post = append_statistics_to_post(post, row, False, context, observer)
         posts.append(post)
     return posts

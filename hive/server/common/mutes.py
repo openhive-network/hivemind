@@ -4,8 +4,19 @@ import logging
 from time import perf_counter as perf
 from urllib.request import urlopen, Request
 import ujson as json
+from hive.server.common.helpers import valid_account
 
 log = logging.getLogger(__name__)
+
+GET_BLACKLISTED_ACCOUNTS = """
+with blacklisted_users as (select following, 'my_blacklist' as source from hive_follows where follower = 
+    (select id from hive_accounts where name = 'jes2850' ) and blacklisted
+union all
+select following, 'my_followed_blacklists' as source from hive_follows where follower in (select following from hive_follows where follower = 
+    (select id from hive_accounts where name = 'jes2850') and follow_blacklists))
+
+select hive_accounts.name, blacklisted_users.source from hive_accounts join blacklisted_users on (hive_accounts.id = blacklisted_users.following)
+"""
 
 def _read_url(url):
     req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -49,16 +60,49 @@ class Mutes:
         self.fetched = perf()
 
     @classmethod
-    def all(cls):
+    def all(cls, observer=None, context=None):
         """Return the set of all muted accounts from singleton instance."""
-        return cls.instance().accounts
+        if not observer:
+            return cls.instance().accounts
+
+        if not context:
+            return cls.instance().accounts
+
+        valid_account(observer)
+
+        db = context['db']
+        sql = GET_BLACKLISTED_ACCOUNTS
+        sql_result = await db.query_all(sql, observer=observer)
+
+        names = set()
+        for row in sql_result:
+            names.add(row['name'])
+        return names
 
     @classmethod
-    def lists(cls, name, rep):
+    def lists(cls, name, rep, observer=None, context=None):
         """Return blacklists the account belongs to."""
         return[]
         assert name
         inst = cls.instance()
+
+        if observer and context:
+            blacklists_for_user = []
+            valid_account(observer)
+            db = context['db']
+
+            sql = GET_BLACKLISTED_ACCOUNTS
+            sql_result = await db.query_all(sql, observer=observer)
+            for row in sql_result:
+                blacklists_for_user.append(row['source'])
+
+            if int(rep) < 1:
+                blacklists_for_user.append('reputation-0')
+            if int(rep) == 1:
+
+                blacklists_for_user.append('reputation-1')
+
+            return blacklists_for_user
 
         # update hourly
         if perf() - inst.fetched > 3600:
