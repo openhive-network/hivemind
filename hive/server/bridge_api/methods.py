@@ -90,7 +90,7 @@ async def get_post(context, author, permlink, observer=None):
     result = await db.query_all(sql, author=author, permlink=permlink)
     assert len(result) == 1, 'invalid author/permlink or post not found in cache'
     post = _condenser_post_object(result[0])
-    post['blacklists'] = Mutes.lists(post['author'], result[0]['author_rep'])
+    post['blacklists'] = Mutes.lists(post['author'], result[0]['author_rep'], observer, context)
     return post
 
 @return_error_info
