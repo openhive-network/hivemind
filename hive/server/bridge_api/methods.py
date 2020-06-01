@@ -268,6 +268,6 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
     sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit)
     for row in sql_result:
         post = _condenser_post_object(row)
-        post = append_statistics_to_post(post, row, False, observer, context)
+        post = await append_statistics_to_post(post, row, False, observer, context)
         posts.append(post)
     return posts
