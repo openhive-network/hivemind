@@ -192,7 +192,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
     sql_result = await db.query_all(sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag, observer=observer)
     for row in sql_result:
         post = _condenser_post_object(row)
-        post = append_statistics_to_post(post, row, False, observer, context)
+        post = await append_statistics_to_post(post, row, False, observer, context)
         if post['post_id'] in pinned_post_ids:
             continue
         posts.append(post)
