@@ -92,7 +92,7 @@ class Mutes:
             db = context['db']
 
             sql = GET_BLACKLISTED_ACCOUNTS
-            sql_result = await db.query_all(sql, observer=observer)
+            sql_result = await db.query_all(sql, observer=name)
             for row in sql_result:
                 blacklists_for_user.append(row['source'])
 
