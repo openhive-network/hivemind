@@ -198,8 +198,8 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
         posts.append(post)
     return posts
 
-def append_statistics_to_post(post, row, is_pinned, observer=None, context=None):
-    post['blacklists'] = Mutes.lists(row['author'], row['author_rep'], observer, context)
+async def append_statistics_to_post(post, row, is_pinned, observer=None, context=None):
+    post['blacklists'] = await Mutes.lists(row['author'], row['author_rep'], observer, context)
     if 'community_title' in row and row['community_title']:
         post['community'] = row['category']
         post['community_title'] = row['community_title']
