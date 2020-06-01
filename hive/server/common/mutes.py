@@ -60,7 +60,7 @@ class Mutes:
         self.fetched = perf()
 
     @classmethod
-    def all(cls, observer=None, context=None):
+    async def all(cls, observer=None, context=None):
         """Return the set of all muted accounts from singleton instance."""
         if not observer:
             return cls.instance().accounts
@@ -72,7 +72,7 @@ class Mutes:
 
         db = context['db']
         sql = GET_BLACKLISTED_ACCOUNTS
-        sql_result = db.query_all(sql, observer=observer)
+        sql_result = await db.query_all(sql, observer=observer)
 
         names = set()
         for row in sql_result:
@@ -80,7 +80,7 @@ class Mutes:
         return names
 
     @classmethod
-    def lists(cls, name, rep, observer=None, context=None):
+    async def lists(cls, name, rep, observer=None, context=None):
         """Return blacklists the account belongs to."""
         return[]
         assert name
@@ -92,7 +92,7 @@ class Mutes:
             db = context['db']
 
             sql = GET_BLACKLISTED_ACCOUNTS
-            sql_result = db.query_all(sql, observer=observer)
+            sql_result = await db.query_all(sql, observer=observer)
             for row in sql_result:
                 blacklists_for_user.append(row['source'])
 
