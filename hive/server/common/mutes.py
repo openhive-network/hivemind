@@ -85,6 +85,23 @@ class Mutes:
         return names
 
     @classmethod
+    async def get_blacklists_for_observer(cls, observer=None, context=None):
+        """ fetch the list of users that the observer has blacklisted """
+        if not observer or not context:
+            return {}
+
+        blacklisted_users = {}
+
+        db = context['db']
+        sql = GET_BLACKLISTED_ACCOUNTS_SQL
+        sql_result = await db.query_all(sql, observer=observer)
+        for row in sql_result:
+            if row['name'] not in blacklisted_users:
+                blacklisted_users[row['name']] = []
+            blacklisted_users[row['name']].extend(row['source'])
+        return blacklisted_users
+
+    @classmethod
     async def lists(cls, name, rep, observer=None, context=None):
         """Return blacklists the account belongs to."""
         return[]
