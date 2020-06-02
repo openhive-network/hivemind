@@ -8,14 +8,19 @@ from hive.server.common.helpers import valid_account
 
 log = logging.getLogger(__name__)
 
-GET_BLACKLISTED_ACCOUNTS = """
-with blacklisted_users as (select following, 'my_blacklist' as source from hive_follows where follower = 
-    (select id from hive_accounts where name = :observer ) and blacklisted
-union all
-select following, 'my_followed_blacklists' as source from hive_follows where follower in (select following from hive_follows where follower = 
-    (select id from hive_accounts where name = :observer ) and follow_blacklists))
-
-select hive_accounts.name, blacklisted_users.source from hive_accounts join blacklisted_users on (hive_accounts.id = blacklisted_users.following)
+GET_BLACKLISTED_ACCOUNTS_SQL = """
+WITH blacklisted_users AS (
+    SELECT following, 'my_blacklist' AS source FROM hive_follows WHERE follower =
+        (SELECT id FROM hive_accounts WHERE name = :observer )
+    AND blacklisted
+    UNION
+    SELECT following, 'my_followed_blacklists' AS source FROM hive_follows WHERE follower IN
+    (SELECT following FROM hive_follows WHERE follower =
+        (SELECT id FROM hive_accounts WHERE name = :observer )
+    AND follow_blacklists) AND blacklisted
+)
+SELECT hive_accounts.name, blacklisted_users.source FROM
+hive_accounts JOIN blacklisted_users ON (hive_accounts.id = blacklisted_users.following)
 """
 
 def _read_url(url):
@@ -71,7 +76,7 @@ class Mutes:
         valid_account(observer)
 
         db = context['db']
-        sql = GET_BLACKLISTED_ACCOUNTS
+        sql = GET_BLACKLISTED_ACCOUNTS_SQL
         sql_result = await db.query_all(sql, observer=observer)
 
         names = set()
@@ -91,7 +96,7 @@ class Mutes:
             valid_account(observer)
             db = context['db']
 
-            sql = GET_BLACKLISTED_ACCOUNTS
+            sql = GET_BLACKLISTED_ACCOUNTS_SQL
             sql_result = await db.query_all(sql, observer=observer)
             for row in sql_result:
                 if row['name'] == name:
