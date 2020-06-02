@@ -46,7 +46,7 @@ async def get_discussion(context, author, permlink, observer=None):
 
     blacklists_for_user = None
     if observer:
-        blacklists_for_user = Mutes.get_blacklists_for_observer(observer, context)
+        blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
 
     rows = await db.query_all(sql, author=author, permlink=permlink)
     if not rows or len(rows) == 0:

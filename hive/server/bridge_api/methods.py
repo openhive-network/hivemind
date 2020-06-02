@@ -182,7 +182,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
 
     blacklists_for_user = None
     if observer and context:
-        blacklists_for_user = Mutes.get_blacklists_for_observer(observer, context)
+        blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
 
     if pinned_sql:
         pinned_result = await db.query_all(pinned_sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag, observer=observer)
