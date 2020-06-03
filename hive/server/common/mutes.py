@@ -65,7 +65,7 @@ class Mutes:
         self.fetched = perf()
 
     @classmethod
-    async def all(cls):
+    def all(cls):
         """Return the set of all muted accounts from singleton instance."""
         return cls.instance().accounts
 
@@ -87,7 +87,7 @@ class Mutes:
         return blacklisted_users
 
     @classmethod
-    async def lists(cls, name, rep):
+    def lists(cls, name, rep):
         """Return blacklists the account belongs to."""
         return[]
         assert name
