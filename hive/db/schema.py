@@ -10,7 +10,8 @@ from sqlalchemy.types import BOOLEAN
 
 #pylint: disable=line-too-long, too-many-lines, bad-whitespace
 
-DB_VERSION = 17
+# [DK] we changed and removed some tables so i upgraded DB_VERSION to 18
+DB_VERSION = 18
 
 def build_metadata():
     """Build schema def with SqlAlchemy"""
@@ -72,9 +73,9 @@ def build_metadata():
         'hive_posts', metadata,
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('parent_id', sa.Integer),
-        sa.Column('author', VARCHAR(16), nullable=False),
-        sa.Column('permlink', VARCHAR(255), nullable=False),
-        sa.Column('category', VARCHAR(255), nullable=False, server_default=''),
+        sa.Column('author_id', sa.Integer, nullable=False),
+        sa.Column('permlink_id', sa.Integer, nullable=False),
+        sa.Column('category_id', sa.Integer, nullable=False),
         sa.Column('community_id', sa.Integer, nullable=True),
         sa.Column('created_at', sa.DateTime, nullable=False),
         sa.Column('depth', SMALLINT, nullable=False),
@@ -84,13 +85,79 @@ def build_metadata():
         sa.Column('is_valid', BOOLEAN, nullable=False, server_default='1'),
         sa.Column('promoted', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
 
-        sa.ForeignKeyConstraint(['author'], ['hive_accounts.name'], name='hive_posts_fk1'),
+        sa.Column('children', SMALLINT, nullable=False, server_default='0'),
+
+        # basic/extended-stats
+        sa.Column('author_rep', sa.Float(precision=6), nullable=False, server_default='0'),
+        sa.Column('flag_weight', sa.Float(precision=6), nullable=False, server_default='0'),
+        sa.Column('total_votes', sa.Integer, nullable=False, server_default='0'),
+        sa.Column('up_votes', sa.Integer, nullable=False, server_default='0'),
+
+        # core stats/indexes
+        sa.Column('payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
+        sa.Column('payout_at', sa.DateTime, nullable=False, server_default='1990-01-01'),
+        sa.Column('updated_at', sa.DateTime, nullable=False, server_default='1990-01-01'),
+        sa.Column('is_paidout', BOOLEAN, nullable=False, server_default='0'),
+
+        # ui flags/filters
+        sa.Column('is_nsfw', BOOLEAN, nullable=False, server_default='0'),
+        sa.Column('is_declined', BOOLEAN, nullable=False, server_default='0'),
+        sa.Column('is_full_power', BOOLEAN, nullable=False, server_default='0'),
+        sa.Column('is_hidden', BOOLEAN, nullable=False, server_default='0'),
+        sa.Column('is_grayed', BOOLEAN, nullable=False, server_default='0'),
+
+        # important indexes
+        sa.Column('rshares', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('sc_trend', sa.Float(precision=6), nullable=False, server_default='0'),
+        sa.Column('sc_hot', sa.Float(precision=6), nullable=False, server_default='0'),
+
+        sa.Column('parent_author_id', sa.Integer, nullable=False),
+        sa.Column('parent_permlink_id', sa.Integer, nullable=False),
+        sa.Column('curator_payout_value', sa.String(16), nullable=False, server_default=''),
+        sa.Column('root_author_id', sa.Integer, nullable=False),
+        sa.Column('root_permlink_id', sa.Integer, nullable=False),
+        sa.Column('max_accepted_payout',  sa.String(16), nullable=False, server_default=''),
+        sa.Column('percent_steem_dollars', sa.Integer, nullable=False, server_default='-1'),
+        sa.Column('allow_replies', BOOLEAN, nullable=False, server_default='1'),
+        sa.Column('allow_votes', BOOLEAN, nullable=False, server_default='1'),
+        sa.Column('allow_curation_rewards', BOOLEAN, nullable=False, server_default='1'),
+        sa.Column('beneficiaries', sa.JSON, nullable=False, server_default='[]'),
+        sa.Column('url', sa.Text, nullable=False, server_default=''),
+        sa.Column('root_title', sa.String(255), nullable=False, server_default=''),
+
+        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_posts_fk1'),
         sa.ForeignKeyConstraint(['parent_id'], ['hive_posts.id'], name='hive_posts_fk3'),
         sa.UniqueConstraint('author', 'permlink', name='hive_posts_ux1'),
         sa.Index('hive_posts_ix3', 'author', 'depth', 'id', postgresql_where=sql_text("is_deleted = '0'")), # API: author blog/comments
         sa.Index('hive_posts_ix4', 'parent_id DESC NULLS LAST', 'id'), #postgresql_where=sql_text("is_deleted = '0'")), # API: fetching children #[JES] We decided we want the full index since posts can be deleted/undeleted
         sa.Index('hive_posts_ix5', 'id', postgresql_where=sql_text("is_pinned = '1' AND is_deleted = '0'")), # API: pinned post status
         sa.Index('hive_posts_ix6', 'community_id', 'id', postgresql_where=sql_text("community_id IS NOT NULL AND is_pinned = '1' AND is_deleted = '0'")), # API: community pinned
+        sa.UniqueConstraint('author_id', 'permlink_id', name='hive_posts_ux1'),
+    )
+
+    sa.Table(
+        'hive_post_data', metadata,
+        sa.column('id', sa.Integer, nullable=False),
+        sa.column('title', VARCHAR(255), nullable=False),
+        sa.column('preview', VARCHAR(1024), nullable=False),
+        sa.column('img_url', VARCHAR(1024), nullable=False),
+        sa.Column('body', TEXT),
+        sa.Column('votes', TEXT),
+        sa.Column('json', sa.JSON)
+    )
+
+    sa.Table(
+        'hive_permlink_data', metadata,
+        sa.column('id', sa.Integer, primary_key=True),
+        sa.column('permlink', sa.String(255), nullable=False),
+        sa.UniqueConstraint('permlink', name='hive_permlink_data_permlink')
+    )
+
+    sa.Table(
+        'hive_category_data', metadata,
+        sa.column('id', sa.Integer, primary_key=True),
+        sa.column('category', sa.String(255), nullable=False),
+        sa.UniqueConstraint('category', name='hive_category_data_category')
     )
 
     sa.Table(
@@ -148,101 +215,6 @@ def build_metadata():
         sa.Column('created_at', sa.DateTime, nullable=False),
         sa.UniqueConstraint('post_id', 'account_id', name='hive_feed_cache_ux1'), # core
         sa.Index('hive_feed_cache_ix1', 'account_id', 'post_id', 'created_at'), # API (and rebuild?)
-    )
-
-    sa.Table(
-        'hive_posts_cache', metadata,
-        sa.Column('post_id', sa.Integer, primary_key=True, autoincrement=False),
-        sa.Column('author', VARCHAR(16), nullable=False),
-        sa.Column('permlink', VARCHAR(255), nullable=False),
-        sa.Column('category', VARCHAR(255), nullable=False, server_default=''),
-
-        # important/index
-        sa.Column('community_id', sa.Integer, nullable=True),
-        sa.Column('depth', SMALLINT, nullable=False, server_default='0'),
-        sa.Column('children', SMALLINT, nullable=False, server_default='0'),
-
-        # basic/extended-stats
-        sa.Column('author_rep', sa.Float(precision=6), nullable=False, server_default='0'),
-        sa.Column('flag_weight', sa.Float(precision=6), nullable=False, server_default='0'),
-        sa.Column('total_votes', sa.Integer, nullable=False, server_default='0'),
-        sa.Column('up_votes', sa.Integer, nullable=False, server_default='0'),
-
-        # basic ui fields
-        sa.Column('title', sa.String(255), nullable=False, server_default=''),
-        sa.Column('preview', sa.String(1024), nullable=False, server_default=''),
-        sa.Column('img_url', sa.String(1024), nullable=False, server_default=''),
-
-        # core stats/indexes
-        sa.Column('payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
-        sa.Column('promoted', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
-        sa.Column('created_at', sa.DateTime, nullable=False, server_default='1990-01-01'),
-        sa.Column('payout_at', sa.DateTime, nullable=False, server_default='1990-01-01'),
-        sa.Column('updated_at', sa.DateTime, nullable=False, server_default='1990-01-01'),
-        sa.Column('is_paidout', BOOLEAN, nullable=False, server_default='0'),
-
-        # ui flags/filters
-        sa.Column('is_nsfw', BOOLEAN, nullable=False, server_default='0'),
-        sa.Column('is_declined', BOOLEAN, nullable=False, server_default='0'),
-        sa.Column('is_full_power', BOOLEAN, nullable=False, server_default='0'),
-        sa.Column('is_hidden', BOOLEAN, nullable=False, server_default='0'),
-        sa.Column('is_grayed', BOOLEAN, nullable=False, server_default='0'),
-
-        # important indexes
-        sa.Column('rshares', sa.BigInteger, nullable=False, server_default='0'),
-        sa.Column('sc_trend', sa.Float(precision=6), nullable=False, server_default='0'),
-        sa.Column('sc_hot', sa.Float(precision=6), nullable=False, server_default='0'),
-
-        # bulk data
-        sa.Column('body', TEXT),
-        sa.Column('votes', TEXT),
-        sa.Column('json', sa.Text),
-        #sa.Column('raw_json', sa.Text),
-
-        sa.Column('legacy_id', sa.Integer, nullable=False, server_default='-1'),
-        sa.Column('parent_author', sa.String(16), nullable=False, server_default=''),
-        sa.Column('parent_permlink',  sa.String(255), nullable=False, server_default=''),
-        sa.Column('curator_payout_value', sa.String(16), nullable=False, server_default=''),
-        sa.Column('root_author',  sa.String(16), nullable=False, server_default=''),
-        sa.Column('root_permlink',  sa.String(255), nullable=False, server_default=''),
-        sa.Column('max_accepted_payout',  sa.String(16), nullable=False, server_default=''),
-        sa.Column('percent_steem_dollars', sa.Integer, nullable=False, server_default='-1'),
-        sa.Column('allow_replies', BOOLEAN, nullable=False, server_default='1'),
-        sa.Column('allow_votes', BOOLEAN, nullable=False, server_default='1'),
-        sa.Column('allow_curation_rewards', BOOLEAN, nullable=False, server_default='1'),
-        sa.Column('beneficiaries',  sa.JSON, nullable=False, server_default=''),
-        sa.Column('url', sa.Text, nullable=False, server_default=''),
-        sa.Column('root_title', sa.String(255), nullable=False, server_default=''),
-
-        sa.Column('author_permlink', sa.String(255 + 16, collation='C'), nullable=False, server_default=''),
-
-        # index: misc
-        sa.Index('hive_posts_cache_ix3',  'payout_at', 'post_id',           postgresql_where=sql_text("is_paidout = '0'")),         # core: payout sweep
-        sa.Index('hive_posts_cache_ix8',  'category', 'payout', 'depth',    postgresql_where=sql_text("is_paidout = '0'")),         # API: tag stats
-
-        # index: ranked posts
-        sa.Index('hive_posts_cache_ix2',  'promoted',             postgresql_where=sql_text("is_paidout = '0' AND promoted > 0")),  # API: promoted
-
-        sa.Index('hive_posts_cache_ix6a', 'sc_trend', 'post_id',  postgresql_where=sql_text("is_paidout = '0'")),                   # API: trending             todo: depth=0
-        sa.Index('hive_posts_cache_ix7a', 'sc_hot',   'post_id',  postgresql_where=sql_text("is_paidout = '0'")),                   # API: hot                  todo: depth=0
-        sa.Index('hive_posts_cache_ix6b', 'post_id',  'sc_trend', postgresql_where=sql_text("is_paidout = '0'")),                   # API: trending, filtered   todo: depth=0
-        sa.Index('hive_posts_cache_ix7b', 'post_id',  'sc_hot',   postgresql_where=sql_text("is_paidout = '0'")),                   # API: hot, filtered        todo: depth=0
-
-        sa.Index('hive_posts_cache_ix9a',             'depth', 'payout', 'post_id', postgresql_where=sql_text("is_paidout = '0'")), # API: payout               todo: rem depth
-        sa.Index('hive_posts_cache_ix9b', 'category', 'depth', 'payout', 'post_id', postgresql_where=sql_text("is_paidout = '0'")), # API: payout, filtered     todo: rem depth
-
-        sa.Index('hive_posts_cache_ix10', 'post_id', 'payout',                      postgresql_where=sql_text("is_grayed = '1' AND payout > 0")), # API: muted, by filter/date/payout
-
-        # index: stats
-        sa.Index('hive_posts_cache_ix20', 'community_id', 'author', 'payout', 'post_id', postgresql_where=sql_text("is_paidout = '0'")), # API: pending distribution; author payout
-
-        # index: community ranked posts
-        sa.Index('hive_posts_cache_ix30', 'community_id', 'sc_trend',   'post_id',  postgresql_where=sql_text("community_id IS NOT NULL AND is_grayed = '0' AND depth = 0")),        # API: community trend
-        sa.Index('hive_posts_cache_ix31', 'community_id', 'sc_hot',     'post_id',  postgresql_where=sql_text("community_id IS NOT NULL AND is_grayed = '0' AND depth = 0")),        # API: community hot
-        sa.Index('hive_posts_cache_ix32', 'community_id', 'created_at', 'post_id',  postgresql_where=sql_text("community_id IS NOT NULL AND is_grayed = '0' AND depth = 0")),        # API: community created
-        sa.Index('hive_posts_cache_ix33', 'community_id', 'payout',     'post_id',  postgresql_where=sql_text("community_id IS NOT NULL AND is_grayed = '0' AND is_paidout = '0'")), # API: community payout
-        sa.Index('hive_posts_cache_ix34', 'community_id', 'payout',     'post_id',  postgresql_where=sql_text("community_id IS NOT NULL AND is_grayed = '1' AND is_paidout = '0'")), # API: community muted
-        sa.Index('hive_posts_cache_ix35', 'author', 'depth'),
     )
 
     sa.Table(
@@ -370,7 +342,6 @@ def reset_autovac(db):
 
     autovac_config = { #    vacuum  analyze
         'hive_accounts':    (50000, 100000),
-        'hive_posts_cache': (25000, 25000),
         'hive_posts':       (2500, 10000),
         'hive_post_tags':   (5000, 10000),
         'hive_follows':     (5000, 5000),

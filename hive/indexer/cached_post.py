@@ -504,7 +504,6 @@ class CachedPost:
                 ('json',          json.dumps(basic['json_metadata'])),
                 #('raw_json',      json.dumps(legacy_data)),
                 # TODO: check if writting fields below on every update is necessary!
-                ('legacy_id',               legacy_data['id']),
                 ('parent_author',           legacy_data['parent_author']),
                 ('parent_permlink',         legacy_data['parent_permlink']),
                 ('curator_payout_value',    legacy_data['curator_payout_value']),

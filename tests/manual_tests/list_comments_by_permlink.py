@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from .test_base import run_test
+from test_base import run_test
 
 if __name__ == '__main__':
     reference_hive_node_url = 'https://api.hive.blog'
