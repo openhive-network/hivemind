@@ -111,7 +111,7 @@ async def get_account_reputations(context, account_lower_bound: str = None, limi
 # Content Primitives
 
 @return_error_info
-async def get_content(context, author: str, permlink: str):
+async def get_content(context, author: str, permlink: str, observer=None):
     """Get a single post object."""
     db = context['db']
     valid_account(author)
@@ -123,7 +123,11 @@ async def get_content(context, author: str, permlink: str):
     result = await db.query_all(sql, author=author, permlink=permlink)
     result = dict(result[0])
     post = _condenser_post_object(result, 0)
-    post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
+    if not observer:
+        post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
+    else:
+        blacklists_for_user = Mutes.get_blacklists_for_observer(observer, context)
+        post['active_votes'] = _mute_votes(post['active_votes'], blacklists_for_user.keys())
 
     assert post, 'post was not found in cache'
     return post

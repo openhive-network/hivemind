@@ -65,24 +65,9 @@ class Mutes:
         self.fetched = perf()
 
     @classmethod
-    async def all(cls, observer=None, context=None):
+    async def all(cls):
         """Return the set of all muted accounts from singleton instance."""
-        if not observer:
-            return cls.instance().accounts
-
-        if not context:
-            return cls.instance().accounts
-
-        valid_account(observer)
-
-        db = context['db']
-        sql = GET_BLACKLISTED_ACCOUNTS_SQL
-        sql_result = await db.query_all(sql, observer=observer)
-
-        names = set()
-        for row in sql_result:
-            names.add(row['name'])
-        return names
+        return cls.instance().accounts
 
     @classmethod
     async def get_blacklists_for_observer(cls, observer=None, context=None):
@@ -102,30 +87,11 @@ class Mutes:
         return blacklisted_users
 
     @classmethod
-    async def lists(cls, name, rep, observer=None, context=None):
+    async def lists(cls, name, rep):
         """Return blacklists the account belongs to."""
         return[]
         assert name
         inst = cls.instance()
-
-        if observer and context:
-            blacklists_for_user = []
-            valid_account(observer)
-            db = context['db']
-
-            sql = GET_BLACKLISTED_ACCOUNTS_SQL
-            sql_result = await db.query_all(sql, observer=observer)
-            for row in sql_result:
-                if row['name'] == name:
-                    blacklists_for_user.append(row['source'])
-
-            if int(rep) < 1:
-                blacklists_for_user.append('reputation-0')
-            if int(rep) == 1:
-
-                blacklists_for_user.append('reputation-1')
-
-            return blacklists_for_user
 
         # update hourly
         if perf() - inst.fetched > 3600:
