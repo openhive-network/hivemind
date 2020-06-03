@@ -126,7 +126,7 @@ async def get_content(context, author: str, permlink: str, observer=None):
     if not observer:
         post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
     else:
-        blacklists_for_user = Mutes.get_blacklists_for_observer(observer, context)
+        blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
         post['active_votes'] = _mute_votes(post['active_votes'], blacklists_for_user.keys())
 
     assert post, 'post was not found in cache'
