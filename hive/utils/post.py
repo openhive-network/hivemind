@@ -60,7 +60,6 @@ def post_to_internal(post, post_id, level='insert', promoted=None):
             ('is_paidout',    basic['is_paidout']),
             ('json',          json.dumps(basic['json_metadata'])),
             #('raw_json',      json.dumps(legacy_data)),
-            ('legacy_id',               legacy_data['id']),
             ('parent_author',           legacy_data['parent_author']),
             ('parent_permlink',         legacy_data['parent_permlink']),
             ('curator_payout_value',    legacy_data['curator_payout_value']),

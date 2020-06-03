@@ -11,7 +11,7 @@ async def get_top_trending_tags_summary(context):
     #return [tag['name'] for tag in await get_trending_tags('', 50)]
     sql = """
         SELECT category
-          FROM hive_posts_cache
+          FROM hive_posts
          WHERE is_paidout = '0'
       GROUP BY category
       ORDER BY SUM(payout) DESC
@@ -31,7 +31,7 @@ async def get_trending_tags(context, start_tag: str = '', limit: int = 250):
         seek = """
           HAVING SUM(payout) <= (
             SELECT SUM(payout)
-              FROM hive_posts_cache
+              FROM hive_posts
              WHERE is_paidout = '0'
                AND category = :start_tag)
         """
@@ -43,7 +43,7 @@ async def get_trending_tags(context, start_tag: str = '', limit: int = 250):
              COUNT(*) AS total_posts,
              SUM(CASE WHEN depth = 0 THEN 1 ELSE 0 END) AS top_posts,
              SUM(payout) AS total_payouts
-        FROM hive_posts_cache
+        FROM hive_posts
        WHERE is_paidout = '0'
     GROUP BY category %s
     ORDER BY SUM(payout) DESC

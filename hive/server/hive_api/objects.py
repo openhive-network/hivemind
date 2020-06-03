@@ -68,10 +68,22 @@ async def comments_by_id(db, ids, observer=None):
     """Given an array of post ids, returns comment objects keyed by id."""
     assert ids, 'no ids passed to comments_by_id'
 
-    sql = """SELECT post_id, author, permlink, body, depth,
-                    payout, payout_at, is_paidout, created_at, updated_at,
-                    rshares, is_hidden, is_grayed, votes
-               FROM hive_posts_cache WHERE post_id IN :ids""" #votes
+    sql = """SELECT hp.id,
+                    (SELECT name FROM hive_accounts ha WHERE ha.id = hp.author_id) as author,
+                    (SELECT permlink FROM hive_permlink_data hpd WHERE hpd.id = hp.permlink_id) as permlink,
+                    (SELECT body FROM hive_post_data hpa WHERE hpa.id = hp.id) as body,
+                    hp.depth,
+                    hp.payout,
+                    hp.payout_at,
+                    hp.is_paidout,
+                    hp.created_at,
+                    hp.updated_at,
+                    hp.rshares,
+                    hp.is_hidden,
+                    hp.is_grayed,
+                    hp.votes
+               FROM hive_posts hp
+               WHERE hp.id IN :ids""" #votes
     result = await db.query_all(sql, ids=tuple(ids))
 
     authors = set()
@@ -79,7 +91,7 @@ async def comments_by_id(db, ids, observer=None):
     for row in result:
         top_votes, observer_vote = _top_votes(row, 5, observer)
         post = {
-            'id': row['post_id'],
+            'id': row['id'],
             'author': row['author'],
             'url': row['author'] + '/' + row['permlink'],
             'depth': row['depth'],
@@ -108,10 +120,23 @@ async def posts_by_id(db, ids, observer=None, lite=True):
     """Given a list of post ids, returns lite post objects in the same order."""
 
     # pylint: disable=too-many-locals
-    sql = """SELECT post_id, author, permlink, title, img_url, payout, promoted,
-                    created_at, payout_at, is_nsfw, rshares, votes,
-                    is_muted, is_invalid, %s
-               FROM hive_posts_cache WHERE post_id IN :ids"""
+    sql = """SELECT hp.id,
+                    author,
+                    permlink,
+                    title,
+                    img_url,
+                    hp.payout,
+                    hp.promoted,
+                    hp.created_at,
+                    hp.payout_at,
+                    hp.is_nsfw,
+                    hp.rshares,
+                    hp.votes,
+                    hp.is_muted,
+                    hp.is_invalid,
+                    %s
+               FROM hive_posts hp 
+               WHERE post_id IN :ids"""
     fields = ['preview'] if lite else ['body', 'updated_at', 'json']
     sql = sql % (', '.join(fields))
 

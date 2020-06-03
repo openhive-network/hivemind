@@ -43,14 +43,53 @@ async def load_posts_keyed(db, ids, truncate_body=0):
     assert ids, 'no ids passed to load_posts_keyed'
 
     # fetch posts and associated author reps
-    sql = """SELECT post_id, community_id, author, permlink, title, body, category, depth,
-                    promoted, payout, payout_at, is_paidout, children, votes,
-                    created_at, updated_at, rshares, json,
-                    is_hidden, is_grayed, total_votes, flag_weight,
-                    legacy_id, parent_author, parent_permlink, curator_payout_value, 
-                    root_author, root_permlink, max_accepted_payout, percent_steem_dollars, 
-                    allow_replies, allow_votes, allow_curation_rewards, url, root_title 
-               FROM hive_posts_cache WHERE post_id IN :ids"""
+    sql = """
+        SELECT hp.id, 
+            community_id, 
+            ha_a.name as author,
+            hpd_p.permlink as permlink,
+            hpd.title as title, 
+            hpd.body as body, 
+            hcd.category as category, 
+            depth,
+            promoted, 
+            payout, 
+            payout_at, 
+            is_paidout, 
+            children, 
+            hpd.votes as votes,
+            hp.created_at, 
+            updated_at, 
+            rshares, 
+            hpd.json as json,
+            is_hidden, 
+            is_grayed, 
+            total_votes, 
+            flag_weight,
+            ha_pa.name as parent_author,
+            hpd_pp.permlink as parent_permlink,
+            curator_payout_value, 
+            ha_ra.name as root_author,
+            hpd_rp.permlink as root_permlink,
+            max_accepted_payout, 
+            percent_steem_dollars, 
+            allow_replies, 
+            allow_votes, 
+            allow_curation_rewards, 
+            beneficiaries, 
+            url, 
+            root_title
+        FROM hive_posts hp
+        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
+        LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+        LEFT JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
+        LEFT JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
+        LEFT JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
+        LEFT JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
+        WHERE id IN :ids
+    """
     result = await db.query_all(sql, ids=tuple(ids))
     author_map = await _query_author_map(db, result)
 
@@ -178,7 +217,7 @@ def _condenser_profile_object(row):
                        }}}
 
 def _condenser_post_object(row, truncate_body=0):
-    """Given a hive_posts_cache row, create a legacy-style post object."""
+    """Given a hive_posts row, create a legacy-style post object."""
     paid = row['is_paidout']
 
     # condenser#3424 mitigation
@@ -186,7 +225,7 @@ def _condenser_post_object(row, truncate_body=0):
         row['category'] = 'undefined'
 
     post = {}
-    post['post_id'] = row['post_id']
+    post['post_id'] = row['id']
     post['author'] = row['author']
     post['permlink'] = row['permlink']
     post['category'] = row['category']
@@ -221,8 +260,6 @@ def _condenser_post_object(row, truncate_body=0):
 
 
     #post['author_reputation'] = rep_to_raw(row['author_rep'])
-
-    post['legacy_id'] = row['legacy_id']
 
     post['root_author'] = row['root_author']
     post['root_permlink'] = row['root_permlink']
