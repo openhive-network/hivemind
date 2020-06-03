@@ -124,3 +124,6 @@ tests/failed_blocks/
 /tests/envdir-to-envfile.sh
 /deploy/
 /scripts/hive.sqlite
+
+# vscode
+.vscode/*
