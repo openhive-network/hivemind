@@ -210,7 +210,9 @@ async def append_statistics_to_post(post, row, is_pinned, observer=None, context
     else:
         post['blacklists'] = []
         if row['author'] in blacklists_for_user:
-            post['blacklists'].append(blacklists_for_user[row['author']])
+            blacklists = blacklists_for_user[row['author']]
+            for blacklist in blacklists:
+                post['blacklists'].append(blacklist)
         reputation = int(row['author_rep'])
         if reputation < 1:
             post['blacklists'].append('reputation-0')
