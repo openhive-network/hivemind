@@ -213,9 +213,9 @@ async def append_statistics_to_post(post, row, is_pinned, observer=None, context
             post['blacklists'].append(blacklists_for_user[row['author']])
         reputation = int(row['author_rep'])
         if reputation < 1:
-            post['blacklists'].extend('reputation-0')
+            post['blacklists'].append('reputation-0')
         elif reputation  == 1:
-            post['blacklists'].extend('reputation-1')
+            post['blacklists'].append('reputation-1')
 
     if 'community_title' in row and row['community_title']:
         post['community'] = row['category']
