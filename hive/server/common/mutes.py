@@ -98,7 +98,7 @@ class Mutes:
         for row in sql_result:
             if row['name'] not in blacklisted_users:
                 blacklisted_users[row['name']] = []
-            blacklisted_users[row['name']].extend(row['source'])
+            blacklisted_users[row['name']].append(row['source'])
         return blacklisted_users
 
     @classmethod
