@@ -209,7 +209,8 @@ async def append_statistics_to_post(post, row, is_pinned, observer=None, context
         post['blacklists'] = await Mutes.lists(row['author'], row['author_rep'], observer, context)
     else:
         post['blacklists'] = []
-        post['blacklists'].extend(blacklists_for_user[row['author']])
+        if row['author'] in blacklists_for_user:
+            post['blacklists'].extend(blacklists_for_user[row['author']])
         reputation = int(row['author_rep'])
         if reputation < 1:
             post['blacklists'].extend('reputation-0')
