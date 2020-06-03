@@ -40,8 +40,13 @@ class Posts:
             cls._ids[url] = _id
         else:
             cls._miss += 1
-            sql = """SELECT id FROM hive_posts WHERE
-                     author = :a AND permlink = :p"""
+            sql = """
+                SELECT id 
+                FROM hive_posts hp 
+                LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
+                LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
+                WHERE ha_a.name = :a AND hpd_p.permlink = :p
+            """
             _id = DB.query_one(sql, a=author, p=permlink)
             if _id:
                 cls._set_id(url, _id)
@@ -112,10 +117,11 @@ class Posts:
     @classmethod
     def insert(cls, op, date):
         """Inserts new post records."""
-        sql = """INSERT INTO hive_posts (is_valid, is_muted, parent_id, author,
-                             permlink, category, community_id, depth, created_at)
-                      VALUES (:is_valid, :is_muted, :parent_id, :author,
-                             :permlink, :category, :community_id, :depth, :date)"""
+        # TODO check if category and permlink exists
+        sql = """INSERT INTO hive_posts (is_valid, is_muted, parent_id, author_id,
+                             permlink_id, category_id, community_id, depth, created_at)
+                      VALUES (:is_valid, :is_muted, :parent_id, (SELECT id FROM hive_accounts WHERE name = :author),
+                             (SELECT id FROM hive_permlink_data WHERE permlink = :permlink), (SELECT :category), :community_id, :depth, :date)"""
         sql += ";SELECT currval(pg_get_serial_sequence('hive_posts','id'))"
         post = cls._build_post(op, date)
         result = DB.query(sql, **post)

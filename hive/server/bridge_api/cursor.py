@@ -104,7 +104,7 @@ async def pids_by_community(db, ids, sort, seek_id, limit):
 
     # setup
     field, pending, toponly, gray, promoted = definitions[sort]
-    table = 'hive_posts_cache'
+    table = 'hive_posts'
     where = ["community_id IN :ids"] if ids else ["community_id IS NOT NULL AND community_id != 1337319"]
 
     # select
@@ -117,8 +117,8 @@ async def pids_by_community(db, ids, sort, seek_id, limit):
 
     # seek
     if seek_id:
-        sval = "(SELECT %s FROM %s WHERE post_id = :seek_id)" % (field, table)
-        sql = """((%s < %s) OR (%s = %s AND post_id > :seek_id))"""
+        sval = "(SELECT %s FROM %s WHERE id = :seek_id)" % (field, table)
+        sql = """((%s < %s) OR (%s = %s AND id > :seek_id))"""
         where.append(sql % (field, sval, field, sval))
 
         # simpler `%s <= %s` eval has edge case: many posts with payout 0
@@ -129,8 +129,8 @@ async def pids_by_community(db, ids, sort, seek_id, limit):
         #where.append(sql % (field, sval, field, sval))
 
     # build
-    sql = ("""SELECT post_id FROM %s WHERE %s
-              ORDER BY %s DESC, post_id LIMIT :limit
+    sql = ("""SELECT id FROM %s WHERE %s
+              ORDER BY %s DESC, id LIMIT :limit
               """ % (table, ' AND '.join(where), field))
 
     # execute
@@ -157,7 +157,7 @@ async def pids_by_category(db, tag, sort, last_id, limit):
         'muted':           ('payout',   True,   False,  False,  False),
     }[sort]
 
-    table = 'hive_posts_cache'
+    table = 'hive_post'
     field = params[0]
     where = []
 
@@ -172,17 +172,17 @@ async def pids_by_category(db, tag, sort, last_id, limit):
     # filter by category or tag
     if tag:
         if sort in ['payout', 'payout_comments']:
-            where.append('category = :tag')
+            where.append('category_id = (SELECT id FROM hive_category_data WHERE category = :tag)')
         else:
             sql = "SELECT post_id FROM hive_post_tags WHERE tag = :tag"
-            where.append("post_id IN (%s)" % sql)
+            where.append("id IN (%s)" % sql)
 
     if last_id:
-        sval = "(SELECT %s FROM %s WHERE post_id = :last_id)" % (field, table)
-        sql = """((%s < %s) OR (%s = %s AND post_id > :last_id))"""
+        sval = "(SELECT %s FROM %s WHERE id = :last_id)" % (field, table)
+        sql = """((%s < %s) OR (%s = %s AND id > :last_id))"""
         where.append(sql % (field, sval, field, sval))
 
-    sql = ("""SELECT post_id FROM %s WHERE %s
+    sql = ("""SELECT id FROM %s WHERE %s
               ORDER BY %s DESC, post_id LIMIT :limit
               """ % (table, ' AND '.join(where), field))
 
@@ -390,14 +390,14 @@ async def pids_by_payout(db, account: str, start_author: str = '',
     start_id = None
     if start_permlink:
         start_id = await _get_post_id(db, start_author, start_permlink)
-        last = "(SELECT payout FROM hive_posts_cache WHERE post_id = :start_id)"
-        seek = ("""AND (payout < %s OR (payout = %s AND post_id > :start_id))"""
+        last = "(SELECT payout FROM hive_posts WHERE id = :start_id)"
+        seek = ("""AND (payout < %s OR (payout = %s AND id > :start_id))"""
                 % (last, last))
 
     sql = """
-        SELECT post_id
-          FROM hive_posts_cache
-         WHERE author = :account
+        SELECT id
+          FROM hive_posts
+         WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :account)
            AND is_paidout = '0' %s
       ORDER BY payout DESC, post_id
          LIMIT :limit

@@ -235,10 +235,11 @@ class Community:
                              SELECT community_id,
                                     COUNT(*) posts,
                                     ROUND(SUM(payout)) payouts,
-                                    COUNT(DISTINCT author) authors
-                               FROM hive_posts_cache
+                                    COUNT(DISTINCT author_id) authors
+                               FROM hive_posts
                               WHERE community_id IS NOT NULL
                                 AND is_paidout = '0'
+                                AND is_deleted = '0'
                            GROUP BY community_id
                         ) p
                      ON community_id = id

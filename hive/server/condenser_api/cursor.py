@@ -141,7 +141,7 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
         'payout_comments': ('payout',   True,   False,  True,   False),
     }[sort]
 
-    table = 'hive_posts_cache'
+    table = 'hive_posts'
     field = params[0]
     where = []
 
@@ -157,29 +157,67 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
         #    cid = get_community_id(tag)
         #    where.append('community_id = :cid')
         if sort in ['payout', 'payout_comments']:
-            where.append('category = :tag')
+            where.append('category_id = (SELECT id FROM hive_category_data WHERE category = :tag)')
         else:
             if tag[:5] == 'hive-':
-                where.append('category = :tag')
+                where.append('category_id = (SELECT id FROM hive_category_data WHERE category = :tag)')
                 if sort in ('trending', 'hot'):
                     where.append('depth = 0')
             sql = "SELECT post_id FROM hive_post_tags WHERE tag = :tag"
-            where.append("post_id IN (%s)" % sql)
+            where.append("id IN (%s)" % sql)
 
     start_id = None
     if start_permlink and start_author:
-        sql = "%s <= (SELECT %s FROM %s WHERE post_id = (SELECT post_id FROM hive_posts_cache WHERE author = :start_author AND permlink= :start_permlink))"
+        sql = "%s <= (SELECT %s FROM %s WHERE id = (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :start_author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :start_permlink)))"
         where.append(sql % (field, field, table))
 
-    columns = ['hive_posts_cache.post_id', 'hive_posts_cache.author', 'hive_posts_cache.permlink',
-               'hive_posts_cache.title', 'hive_posts_cache.body', 'hive_posts_cache.category',
-               'hive_posts_cache.depth', 'hive_posts_cache.promoted',
-               'hive_posts_cache.payout', 'hive_posts_cache.payout_at', 'hive_posts_cache.is_paidout',
-               'hive_posts_cache.children', 'hive_posts_cache.votes', 'hive_posts_cache.created_at',
-               'hive_posts_cache.updated_at', 'hive_posts_cache.rshares', 'hive_posts_cache.raw_json',
-               'hive_posts_cache.json']
-    sql = ("SELECT %s FROM %s WHERE %s ORDER BY %s DESC LIMIT :limit"
-           % (', '.join(columns), table, ' AND '.join(where), field))
+    sql = """
+        SELECT hp.id, 
+            community_id, 
+            ha_a.name as author,
+            hpd_p.permlink as permlink,
+            hpd.title as title, 
+            hpd.body as body, 
+            hcd.category as category, 
+            depth,
+            promoted, 
+            payout, 
+            payout_at, 
+            is_paidout, 
+            children, 
+            hpd.votes as votes,
+            hp.created_at, 
+            updated_at, 
+            rshares, 
+            hpd.json as json,
+            is_hidden, 
+            is_grayed, 
+            total_votes, 
+            flag_weight,
+            ha_pa.name as parent_author,
+            hpd_pp.permlink as parent_permlink,
+            curator_payout_value, 
+            ha_ra.name as root_author,
+            hpd_rp.permlink as root_permlink,
+            max_accepted_payout, 
+            percent_steem_dollars, 
+            allow_replies, 
+            allow_votes, 
+            allow_curation_rewards, 
+            beneficiaries, 
+            url, 
+            root_title
+        FROM hive_posts hp
+        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
+        LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+        LEFT JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
+        LEFT JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
+        LEFT JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
+        LEFT JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
+        WHERE %s ORDER BY %s DESC LIMIT :limit
+    """ % (' AND '.join(where), field)
 
     #return await db.query_col(sql, tag=tag, start_id=start_id, limit=limit)
     return [sql, tag, start_id, limit]

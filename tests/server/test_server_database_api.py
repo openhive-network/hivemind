@@ -12,7 +12,7 @@ def test_list_comments_by_cashout_time(client):
   assert reference_data
   assert test_data
   assert len(reference_data) == len(test_data)
-  to_compare = keys = ['author','permlink']
+  to_compare = ['author','permlink']
   for idx in range(len(reference_data)):
     for key in to_compare:
       assert reference_data[idx][key] == test_data[idx][key]
@@ -24,7 +24,7 @@ def test_list_comments_by_permlink(client):
   assert reference_data
   assert test_data
   assert len(reference_data) == len(test_data)
-  to_compare = keys = ['author','permlink']
+  to_compare = ['author','permlink']
   for idx in range(len(reference_data)):
     for key in to_compare:
       assert reference_data[idx][key] == test_data[idx][key]
@@ -35,7 +35,7 @@ def test_list_comments_by_root(client):
   assert reference_data
   assert test_data
   assert len(reference_data) == len(test_data)
-  to_compare = keys = ['author','permlink','root_author','root_permlink']
+  to_compare = ['author','permlink','root_author','root_permlink']
   for idx in range(len(reference_data)):
     for key in to_compare:
       assert reference_data[idx][key] == test_data[idx][key]
@@ -46,7 +46,7 @@ def test_list_comments_by_parent(client):
   assert reference_data
   assert test_data
   assert len(reference_data) == len(test_data)
-  to_compare = keys = ['author','permlink','parent_author','parent_permlink']
+  to_compare = ['author','permlink','parent_author','parent_permlink']
   for idx in range(len(reference_data)):
     for key in to_compare:
       assert reference_data[idx][key] == test_data[idx][key]

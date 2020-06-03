@@ -28,7 +28,7 @@ async def query_author_map(db, posts):
     return {r['name']: r for r in await db.query_all(sql, names=names)}
 
 def condenser_post_object(row, truncate_body=0):
-    """Given a hive_posts_cache row, create a legacy-style post object."""
+    """Given a hive_posts row, create a legacy-style post object."""
     paid = row['is_paidout']
 
     # condenser#3424 mitigation
@@ -36,7 +36,7 @@ def condenser_post_object(row, truncate_body=0):
         row['category'] = 'undefined'
 
     post = {}
-    post['post_id'] = row['post_id']
+    post['post_id'] = row['id']
     post['author'] = row['author']
     post['permlink'] = row['permlink']
     post['category'] = row['category']
@@ -62,8 +62,6 @@ def condenser_post_object(row, truncate_body=0):
     post['body_length'] = len(row['body'])
     post['active_votes'] = _hydrate_active_votes(row['votes'])
     #post['author_reputation'] = rep_to_raw(row['author_rep'])
-
-    post['legacy_id'] = row['legacy_id']
 
     post['root_author'] = row['root_author']
     post['root_permlink'] = row['root_permlink']
