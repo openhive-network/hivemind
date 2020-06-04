@@ -41,14 +41,32 @@ class Follow:
         old_state = cls._get_follow_db_state(op['flr'], op['flg'])
         if new_state == (old_state or 0):
             return
+        sql = ''
 
         # insert or update state
         if old_state is None:
             sql = """INSERT INTO hive_follows (follower, following,
-                     created_at, state) VALUES (:flr, :flg, :at, :state)"""
+                     created_at, state, blacklisted, follow_blacklists) VALUES (:flr, :flg, :at, :state, %s, %s)"""
+            if new_state == 3:
+                sql = sql % """ true, false """
+            elif new_state == 4:
+                sql = sql % """ false, true """
         else:
-            sql = """UPDATE hive_follows SET state = :state
-                      WHERE follower = :flr AND following = :flg"""
+            if new_state < 3:
+                sql = """UPDATE hive_follows SET state = :state
+                         WHERE follower = :flr AND following = :flg"""
+            elif new_state == 3:
+                sql = """UPDATE hive_follows SET blacklisted = true
+                          WHERE follower = :flr AND following = :flg"""
+            elif new_state == 4:
+                sql = """UPDATE hive_follows SET follow_blacklists = true
+                         WHERE follower = :flr AND following = :flg"""
+            elif new_state == 5:
+                sql = """UPDATE hive_follows SET blacklisted = false
+                         WHERE follower = :flr AND following = :flg"""
+            elif new_state == 6:
+                sql = """UPDATE hive_follows SET follow_blacklists = false
+                         WHERE follower = :flr AND following = :flg"""
         DB.query(sql, **op)
 
         # track count deltas
@@ -74,7 +92,7 @@ class Follow:
         what = first(op['what']) or ''
         if not isinstance(what, str):
             return None
-        defs = {'': 0, 'blog': 1, 'ignore': 2}
+        defs = {'': 0, 'blog': 1, 'ignore': 2, 'blacklist': 3, 'follow_blacklists': 4, 'unblacklist': 5, 'unfollow_blacklists': 6}
         if what not in defs:
             return None
 
