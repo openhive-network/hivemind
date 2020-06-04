@@ -51,6 +51,8 @@ class Follow:
                 sql = sql % """ true, false """
             elif new_state == 4:
                 sql = sql % """ false, true """
+            else:
+                sql = sql % """false, false"""
         else:
             if new_state < 3:
                 sql = """UPDATE hive_follows SET state = :state
