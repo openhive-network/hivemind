@@ -292,3 +292,39 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
         post = await append_statistics_to_post(post, row, False, observer, context, blacklists_for_user)
         posts.append(post)
     return posts
+
+@return_error_info
+async def get_relationship_between_accounts(context, account1, account2, observer=None):
+    valid_account(account1)
+    valid_account(account2)
+
+    db = context['db']
+
+    sql = """
+        SELECT state, blacklisted, follows_blacklists FROM hive_follows WHERE
+        follower = (SELECT id FROM hive_accounts WHERE name = :account1) AND 
+        following = (SELECT id FROM hive_accounts WHERE name = :account2)
+    """
+
+    sql_result = db.query_all(sql, account1=account1, account2=account2)
+
+    result = {
+        'follows': False,
+        'ignores': False,
+        'blacklisted': False,
+        'follows_blacklists': False
+    }
+
+    for row in sql_result:
+        state = row['state']
+        if state == 1:
+            result['follows'] = True
+        elif state == 2:
+            result['ignores'] = True
+        
+        if row['blacklisted']:
+            result['blacklisted'] = True
+        if row['follows_blacklists']:
+            result['follows_blacklists'] = True
+
+    return result
