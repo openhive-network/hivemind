@@ -21,8 +21,8 @@ ROLES = {-2: 'muted', 0: 'guest', 2: 'member', 4: 'mod', 6: 'admin', 8: 'owner'}
 async def _get_post_id(db, author, permlink):
     """Get post_id from hive db."""
     sql = """SELECT id FROM hive_posts
-              WHERE author = :a
-                AND permlink = :p
+              WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :a)
+                AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :p)
                 AND is_deleted = '0'"""
     post_id = await db.query_one(sql, a=author, p=permlink)
     assert post_id, 'invalid author/permlink'

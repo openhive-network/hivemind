@@ -170,8 +170,14 @@ async def load_posts(db, ids, truncate_body=0):
         log.info("get_posts do not exist in cache: %s", repr(missed))
         for _id in missed:
             ids.remove(_id)
-            sql = ("SELECT id, author, permlink, depth, created_at, is_deleted "
-                   "FROM hive_posts WHERE id = :id")
+            sql = """
+                SELECT 
+                    hp.id, ha_a.name as author, hpd_p.permlink as permlink, depth, created_at, is_deleted
+                FROM 
+                    hive_posts hp
+                LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+                LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+                WHERE id = :id"""
             post = await db.query_row(sql, id=_id)
             if not post['is_deleted']:
                 # TODO: This should never happen. See #173 for analysis

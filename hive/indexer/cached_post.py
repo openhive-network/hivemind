@@ -278,9 +278,15 @@ class CachedPost:
     def _select_missing_tuples(cls, last_cached_id, limit=1000000):
         """Fetch posts inserted into main posts table but not cache."""
         from hive.indexer.posts import Posts
-        sql = """SELECT id, author, permlink, promoted FROM hive_posts
-                  WHERE is_deleted = '0' AND id > :id
-               ORDER BY id LIMIT :limit"""
+        sql = """
+            SELECT 
+                hp.id, ha_a.name as author, hpd_p.permlink as permlink, promoted 
+            FROM hive_posts hp
+            LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+            LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+            WHERE 
+                hp.is_deleted = '0' AND hp.id > :id
+            ORDER BY hp.id LIMIT :limit"""
         results = DB.query_all(sql, id=last_cached_id, limit=limit)
         return Posts.save_ids_from_tuples(results)
 
@@ -422,8 +428,12 @@ class CachedPost:
             return {}
 
         # build a map of id->fields for each of those posts
-        sql = """SELECT id, category, community_id, is_muted, is_valid
-                   FROM hive_posts WHERE id IN :ids"""
+        sql = """
+            SELECT 
+                hp.id, hcd.category as category, community_id, is_muted, is_valid
+            FROM hive_posts hp
+            LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+            WHERE id IN :ids"""
         core = {r[0]: {'category': r[1],
                        'community_id': r[2],
                        'is_muted': r[3],
