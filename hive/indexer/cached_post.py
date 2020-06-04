@@ -27,7 +27,7 @@ def _keyify(items):
     return dict(map(lambda x: ("val_%d" % x[0], x[1]), enumerate(items)))
 
 class CachedPost:
-    """Maintain update queue and writing to `hive_posts_cache`."""
+    """Maintain update queue and writing to `hive_posts`."""
 
     # cursor signifying upper bound of cached post span
     _last_id = -1
@@ -116,6 +116,7 @@ class CachedPost:
          - author/permlink is unique and always references the same post
          - you can always get_content on any author/permlink you see in an op
         """
+        raise NotImplementedError("Cannot delete from CachedPost!!!")
         DB.query("DELETE FROM hive_posts_cache WHERE post_id = :id", id=post_id)
         DB.query("DELETE FROM hive_post_tags   WHERE post_id = :id", id=post_id)
 
@@ -230,7 +231,7 @@ class CachedPost:
 
     @classmethod
     def _select_paidout_tuples(cls, date):
-        """Query hive_posts_cache for payout sweep.
+        """Query hive_posts for payout sweep.
 
         Select all posts which should have been paid out before `date`
         yet do not have the `is_paidout` flag set. We perform this
@@ -241,14 +242,20 @@ class CachedPost:
         """
         from hive.indexer.posts import Posts
 
-        sql = """SELECT post_id FROM hive_posts_cache
+        sql = """SELECT id FROM hive_posts
                   WHERE is_paidout = '0' AND payout_at <= :date"""
         ids = DB.query_col(sql, date=date)
         if not ids:
             return []
 
-        sql = """SELECT id, author, permlink
-                 FROM hive_posts WHERE id IN :ids"""
+        sql = """
+            SELECT 
+                hp.id, ha_a.name as author, hpd_p.permlink as permlink, 
+            FROM 
+                hive_posts hp
+            LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+            LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+            WHERE hp.id IN :ids"""
         results = DB.query_all(sql, ids=tuple(ids))
         return Posts.save_ids_from_tuples(results)
 
@@ -394,7 +401,7 @@ class CachedPost:
         """Retrieve the latest post_id that was cached."""
         if cls._last_id == -1:
             # after initial query, we maintain last_id w/ _bump_last_id()
-            sql = "SELECT COALESCE(MAX(post_id), 0) FROM hive_posts_cache"
+            sql = "SELECT id FROM hive_posts ORDER BY id DESC LIMIT 1"
             cls._last_id = DB.query_one(sql)
         return cls._last_id
 
@@ -687,8 +694,10 @@ class CachedPost:
 
     @classmethod
     def _insert(cls, values):
+        raise NotImplementedError("Cannot insert from CachedPost")
         return DB.build_insert('hive_posts_cache', values, pk='post_id')
 
     @classmethod
     def _update(cls, values):
+        raise NotImplementedError("Cannot update from CachedPost")
         return DB.build_update('hive_posts_cache', values, pk='post_id')

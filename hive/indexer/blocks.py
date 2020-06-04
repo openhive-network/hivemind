@@ -63,8 +63,8 @@ class Blocks:
         num = cls._push(block)
         date = block['timestamp']
 
+        # [DK] we will make two scans, first scan will register all accounts
         account_names = set()
-        json_ops = []
         for tx_idx, tx in enumerate(block['transactions']):
             for operation in tx['operations']:
                 op_type = operation['type']
@@ -81,9 +81,17 @@ class Blocks:
                     account_names.add(op['new_account_name'])
                 elif op_type == 'create_claimed_account_operation':
                     account_names.add(op['new_account_name'])
+        Accounts.register(account_names, date)     # register any new names
+
+        # second scan will process all other ops
+        json_ops = []
+        for tx_idx, tx in enumerate(block['transactions']):
+            for operation in tx['operations']:
+                op_type = operation['type']
+                op = operation['value']
 
                 # account metadata updates
-                elif op_type == 'account_update_operation':
+                if op_type == 'account_update_operation':
                     if not is_initial_sync:
                         Accounts.dirty(op['account']) # full
                 elif op_type == 'account_update2_operation':
@@ -110,7 +118,6 @@ class Blocks:
                 elif op_type == 'custom_json_operation':
                     json_ops.append(op)
 
-        Accounts.register(account_names, date)     # register any new names
         CustomOp.process_ops(json_ops, num, date)  # follow/reblog/community ops
 
         return num

@@ -44,11 +44,7 @@ class SteemClient:
 
     def get_content_batch(self, tuples):
         """Fetch multiple comment objects."""
-        posts = self.__exec_batch('get_content', tuples)
-        # TODO: how are we ensuring sequential results? need to set and sort id.
-        for post in posts: # sanity-checking jussi responses
-            assert 'author' in post, "invalid post: %s" % post
-        return posts
+        raise NotImplementedError("get_content is not implemented in hived")
 
     def get_block(self, num, strict=True):
         """Fetches a single block.
