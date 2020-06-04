@@ -15,6 +15,7 @@ def _last_cached_post_id(db):
 
 def audit_cache_missing(db, steem):
     """Scan all posts to check for missing cache entries."""
+    raise NotImplementedError("Post cache is disabled in this version")
     last_id = _last_cached_post_id(db)
     step = 1000000
     steps = int(last_id / step) + 1

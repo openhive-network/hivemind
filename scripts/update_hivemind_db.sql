@@ -292,6 +292,7 @@ ALTER TABLE hive_reblogs ADD CONSTRAINT hive_reblogs_fk2 FOREIGN KEY (post_id) R
 
 ALTER TABLE hive_posts ADD CONSTRAINT hive_posts_fk1 FOREIGN KEY (author_id) REFERENCES hive_accounts(id);
 ALTER TABLE hive_posts ADD CONSTRAINT hive_posts_fk3 FOREIGN KEY (parent_id) REFERENCES hive_posts(id);
+ALTER TABLE hive_posts ADD CONSTRAINT hive_posts_fk4 FOREIGN KEY (permlink_id) REFERENCES hive_permlink_data(id);
 ALTER TABLE hive_posts ADD CONSTRAINT hive_posts_ux1 UNIQUE (author_id, permlink_id);
 
 -- Make indexes in hive_posts
