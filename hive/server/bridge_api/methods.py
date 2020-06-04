@@ -301,7 +301,7 @@ async def get_relationship_between_accounts(context, account1, account2, observe
     db = context['db']
 
     sql = """
-        SELECT state, blacklisted, follows_blacklists FROM hive_follows WHERE
+        SELECT state, blacklisted, follow_blacklists FROM hive_follows WHERE
         follower = (SELECT id FROM hive_accounts WHERE name = :account1) AND 
         following = (SELECT id FROM hive_accounts WHERE name = :account2)
     """
@@ -311,7 +311,7 @@ async def get_relationship_between_accounts(context, account1, account2, observe
     result = {
         'follows': False,
         'ignores': False,
-        'blacklisted': False,
+        'is_blacklisted': False,
         'follows_blacklists': False
     }
 
@@ -323,8 +323,8 @@ async def get_relationship_between_accounts(context, account1, account2, observe
             result['ignores'] = True
         
         if row['blacklisted']:
-            result['blacklisted'] = True
-        if row['follows_blacklists']:
+            result['is_blacklisted'] = True
+        if row['follow_blacklists']:
             result['follows_blacklists'] = True
 
     return result
