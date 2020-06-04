@@ -306,7 +306,7 @@ async def get_relationship_between_accounts(context, account1, account2, observe
         following = (SELECT id FROM hive_accounts WHERE name = :account2)
     """
 
-    sql_result = db.query_all(sql, account1=account1, account2=account2)
+    sql_result = await db.query_all(sql, account1=account1, account2=account2)
 
     result = {
         'follows': False,
