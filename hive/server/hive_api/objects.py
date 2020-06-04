@@ -120,24 +120,29 @@ async def posts_by_id(db, ids, observer=None, lite=True):
     """Given a list of post ids, returns lite post objects in the same order."""
 
     # pylint: disable=too-many-locals
-    sql = """SELECT hp.id,
-                    author,
-                    permlink,
-                    title,
-                    img_url,
-                    hp.payout,
-                    hp.promoted,
-                    hp.created_at,
-                    hp.payout_at,
-                    hp.is_nsfw,
-                    hp.rshares,
-                    hp.votes,
-                    hp.is_muted,
-                    hp.is_invalid,
-                    %s
-               FROM hive_posts hp 
-               WHERE post_id IN :ids"""
-    fields = ['preview'] if lite else ['body', 'updated_at', 'json']
+    sql = """
+        SELECT 
+            hp.id,
+            ha_a.name as author,
+            hpd_p.permlink as permlink,
+            hpd.title as title, 
+            hpd.img_url,
+            hp.payout,
+            hp.promoted,
+            hp.created_at,
+            hp.payout_at,
+            hp.is_nsfw,
+            hp.rshares,
+            hp.votes,
+            hp.is_muted,
+            hp.is_invalid,
+            %s
+        FROM hive_posts hp 
+        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
+        WHERE id IN :ids"""
+    fields = ['hpd.preview'] if lite else ['hpd.body', 'updated_at', 'hpd.json']
     sql = sql % (', '.join(fields))
 
     reblogged_ids = await _reblogged_ids(db, observer, ids) if observer else []
@@ -150,7 +155,7 @@ async def posts_by_id(db, ids, observer=None, lite=True):
     for row in await db.query_all(sql, ids=tuple(ids)):
         assert not row['is_muted']
         assert not row['is_invalid']
-        pid = row['post_id']
+        pid = row['id']
         top_votes, observer_vote = _top_votes(row, 5, observer)
 
         obj = {
@@ -183,7 +188,7 @@ async def posts_by_id(db, ids, observer=None, lite=True):
             }
 
         authors.add(obj['author'])
-        by_id[row['post_id']] = obj
+        by_id[row['id']] = obj
 
     # in rare cases of cache inconsistency, recover and warn
     missed = set(ids) - by_id.keys()
@@ -197,8 +202,12 @@ async def posts_by_id(db, ids, observer=None, lite=True):
             'accounts': await accounts_by_name(db, authors, observer, lite=True)}
 
 async def _append_flags(db, posts):
-    sql = """SELECT id, parent_id, community_id, category, is_muted, is_valid
-               FROM hive_posts WHERE id IN :ids"""
+    sql = """
+        SELECT 
+            id, parent_id, community_id,  hcd.category as category, is_muted, is_valid
+        FROM hive_posts hp
+        LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+        WHERE id IN :ids"""
     for row in await db.query_all(sql, ids=tuple(posts.keys())):
         post = posts[row['id']]
         post['parent_id'] = row['parent_id']

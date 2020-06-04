@@ -90,7 +90,9 @@ async def post_notifications(context, author, permlink, min_score=25, last_id=No
 def _notifs_sql(where):
     sql = """SELECT hn.id, hn.type_id, hn.score, hn.created_at,
                     src.name src, dst.name dst,
-                    hp.author, hp.permlink, hc.name community,
+                    (SELECT name FROM hive_accounts WHERE id = hp.author_id), 
+                    (SELECT permlink FROM hive_permlink_data WHERE id = hp.permlink_id), 
+                    hc.name community,
                     hc.title community_title, payload
                FROM hive_notifs hn
           LEFT JOIN hive_accounts src ON hn.src_id = src.id

@@ -23,7 +23,14 @@ async def url_to_id(db, url):
 
 async def get_post_id(db, author, permlink):
     """Get post_id based on author/permlink."""
-    sql = "SELECT id FROM hive_posts WHERE author = :a AND permlink = :p"
+    sql = """
+        SELECT 
+            hp.id, ha_a.name as author, hpd_p.permlink as permlink, 
+        FROM 
+            hive_posts hp
+        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        WHERE ha_a.name = :a AND hpd_p.permlik = :p"""
     _id = await db.query_one(sql, a=author, p=permlink)
     assert _id, 'post id not found'
     return _id
