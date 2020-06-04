@@ -42,7 +42,7 @@ class PayoutStats:
                    SUM(payout) payout,
                    COUNT(*) posts,
                    NULL authors
-              FROM hive_posts_cache
+              FROM hive_posts
              WHERE is_paidout = '0'
           GROUP BY community_id, author
 
@@ -52,8 +52,8 @@ class PayoutStats:
                    NULL author,
                    SUM(payout) payout,
                    COUNT(*) posts,
-                   COUNT(DISTINCT(author)) authors
-              FROM hive_posts_cache
+                   COUNT(DISTINCT(author_id)) authors
+              FROM hive_posts
              WHERE is_paidout = '0'
           GROUP BY community_id
         """
