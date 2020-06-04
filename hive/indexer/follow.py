@@ -46,7 +46,7 @@ class Follow:
         # insert or update state
         if old_state is None:
             sql = """INSERT INTO hive_follows (follower, following,
-                     created_at, state, blacklisted, follow_blacklists) VALUES (:flr, :flg, :at, :state, %s, %s)"""
+                     created_at, state, blacklisted, follow_blacklists) VALUES (:flr, :flg, :at, :state, %s)"""
             if new_state == 3:
                 sql = sql % """ true, false """
             elif new_state == 4:
