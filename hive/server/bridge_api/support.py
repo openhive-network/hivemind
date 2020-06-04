@@ -19,12 +19,19 @@ ROLES = {-2: 'muted', 0: 'guest', 2: 'member', 4: 'admin', 6: 'mod', 8: 'admin'}
 async def get_post_header(context, author, permlink):
     """Fetch basic post data"""
     db = context['db']
+    sql = """
+        SELECT 
+            hp.id, ha_a.name as author, hpd_p.permlink as permlink,  hcd.category as category, depth
+        FROM 
+            hive_posts hp
+        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+        WHERE ha_a.author = :author
+            AND hpd_p.permlink = :permlink
+            AND is_deleted = '0'
+    """
 
-    sql = """SELECT id, parent_id, author, permlink, category, depth
-               FROM hive_posts
-              WHERE author = :author
-                AND permlink = :permlink
-                AND is_deleted = '0'"""
     row = await db.query_row(sql, author=author, permlink=permlink)
 
     if not row:
@@ -43,9 +50,15 @@ async def normalize_post(context, post):
     db = context['db']
 
     # load core md
-    sql = """SELECT id, category, community_id, is_muted, is_valid
-               FROM hive_posts
-              WHERE author = :author AND permlink = :permlink"""
+    sql = """
+        SELECT 
+            hp.id, hcd.category as category, community_id, is_muted, is_valid
+        FROM hive_posts hp
+        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+        WHERE ha_a.author = :author AND hpd_p.permlink = :permlink
+    """
     core = await db.query_row(sql, author=post['author'], permlink=post['permlink'])
     if not core:
         core = dict(id=None,

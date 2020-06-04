@@ -54,7 +54,7 @@ class FeedCache:
             INSERT INTO hive_feed_cache (account_id, post_id, created_at)
                  SELECT hive_accounts.id, hive_posts.id, hive_posts.created_at
                    FROM hive_posts
-                   JOIN hive_accounts ON hive_posts.author = hive_accounts.name
+                   JOIN hive_accounts ON hive_posts.author_id = hive_accounts.id
                   WHERE depth = 0 AND is_deleted = '0'
             ON CONFLICT DO NOTHING
         """)

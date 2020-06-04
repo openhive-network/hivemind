@@ -25,7 +25,13 @@ async def get_child_ids(db, post_id):
 
 async def _get_post_id(db, author, permlink):
     """Get post_id from hive db."""
-    sql = "SELECT id FROM hive_posts WHERE author = :a AND permlink = :p"
+    sql = """
+        SELECT 
+            hp.id
+        FROM hive_posts hp
+        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        WHERE ha_a.author = :author AND hpd_p.permlink = :permlink"""
     return await db.query_one(sql, a=author, p=permlink)
 
 async def _get_account_id(db, name):
@@ -302,7 +308,7 @@ async def pids_by_blog_without_reblog(db, account: str, start_permlink: str = ''
     sql = """
         SELECT id
           FROM hive_posts
-         WHERE author = :account %s
+         WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :account) %s
            AND is_deleted = '0'
            AND depth = 0
       ORDER BY id DESC
@@ -361,7 +367,7 @@ async def pids_by_account_comments(db, account: str, start_permlink: str = '', l
     # `depth` in ORDER BY is a no-op, but forces an ix3 index scan (see #189)
     sql = """
         SELECT id FROM hive_posts
-         WHERE author = :account %s
+         WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :account) %s
            AND depth > 0
            AND is_deleted = '0'
       ORDER BY id DESC, depth
@@ -383,13 +389,13 @@ async def pids_by_replies_to_account(db, start_author: str, start_permlink: str 
     start_id = None
     if start_permlink:
         sql = """
-          SELECT parent.author,
+          SELECT (SELECT name FROM hive_accounts WHERE id = parent.author_id),
                  child.id
             FROM hive_posts child
             JOIN hive_posts parent
               ON child.parent_id = parent.id
-           WHERE child.author = :author
-             AND child.permlink = :permlink
+           WHERE child.author_id = (SELECT id FROM hive_accounts WHERE name = :author)
+             AND child.permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)
         """
 
         row = await db.query_row(sql, author=start_author, permlink=start_permlink)
@@ -405,7 +411,7 @@ async def pids_by_replies_to_account(db, start_author: str, start_permlink: str 
     sql = """
        SELECT id FROM hive_posts
         WHERE parent_id IN (SELECT id FROM hive_posts
-                             WHERE author = :parent
+                             WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :parent)
                                AND is_deleted = '0'
                           ORDER BY id DESC
                              LIMIT 10000) %s
