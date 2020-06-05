@@ -54,7 +54,7 @@ async def get_discussion(context, author, permlink, observer=None):
     root_id = rows[0]['id']
     all_posts = {}
     root_post = _condenser_post_object(rows[0])
-    root_post = await append_statistics_to_post(root_post, rows[0], False, observer, context, blacklists_for_user)
+    root_post = await append_statistics_to_post(root_post, rows[0], False, blacklists_for_user)
     root_post['replies'] = []
     all_posts[root_id] = root_post
 
@@ -64,7 +64,7 @@ async def get_discussion(context, author, permlink, observer=None):
     for index in range(1, len(rows)):
         id_to_parent_id_map[rows[index]['id']] = rows[index]['parent_id']
         post = _condenser_post_object(rows[index])
-        post = await append_statistics_to_post(post, rows[index], False, observer, context, blacklists_for_user)
+        post = await append_statistics_to_post(post, rows[index], False, blacklists_for_user)
         post['replies'] = []
         all_posts[post['post_id']] = post
 
