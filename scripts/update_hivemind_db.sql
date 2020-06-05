@@ -306,6 +306,7 @@ CREATE INDEX IF NOT EXISTS hive_posts_community_id_idx ON hive_posts (community_
 
 CREATE INDEX IF NOT EXISTS hive_posts_category_id_idx ON hive_posts (category_id);
 CREATE INDEX IF NOT EXISTS hive_posts_payout_at_idx ON hive_posts (payout_at);
+CREATE INDEX IF NOT EXISTS hive_posts_payout_at_idx2 ON hive_posts (payout_at) WHERE is_paidout = '0';
 
 CREATE INDEX IF NOT EXISTS hive_posts_payout_idx ON hive_posts (payout);
 
@@ -315,3 +316,4 @@ CREATE INDEX IF NOT EXISTS hive_posts_sc_trend_idx ON hive_posts (sc_trend);
 CREATE INDEX IF NOT EXISTS hive_posts_sc_hot_idx ON hive_posts (sc_hot);
 
 CREATE INDEX IF NOT EXISTS hive_posts_created_at_idx ON hive_posts (created_at);
+
