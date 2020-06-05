@@ -206,7 +206,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
 async def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=None):
     """ apply information such as blacklists and community names/roles to a given post """
     if not blacklists_for_user:
-        post['blacklists'] = await Mutes.lists(row['author'], row['author_rep'])
+        post['blacklists'] = Mutes.lists(row['author'], row['author_rep'])
     else:
         post['blacklists'] = []
         if row['author'] in blacklists_for_user:
