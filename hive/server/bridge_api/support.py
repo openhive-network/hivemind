@@ -21,7 +21,7 @@ async def get_post_header(context, author, permlink):
     db = context['db']
     sql = """
         SELECT 
-            hp.id, ha_a.name as author, hpd_p.permlink as permlink,  hcd.category as category, depth
+            hp.id, ha_a.name as author, hpd_p.permlink as permlink, hcd.category as category, depth
         FROM 
             hive_posts hp
         LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id

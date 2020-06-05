@@ -250,7 +250,7 @@ class CachedPost:
 
         sql = """
             SELECT 
-                hp.id, ha_a.name as author, hpd_p.permlink as permlink, 
+                hp.id, ha_a.name as author, hpd_p.permlink as permlink
             FROM 
                 hive_posts hp
             LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id

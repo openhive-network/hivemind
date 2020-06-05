@@ -41,7 +41,7 @@ class Posts:
         else:
             cls._miss += 1
             sql = """
-                SELECT id 
+                SELECT hp.id 
                 FROM hive_posts hp 
                 LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
                 LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
@@ -125,48 +125,38 @@ class Posts:
         # * insert post basic data
         # * obtain id
         # * insert post content data
+        print(op)
 
         # add permlinks to permlink table
-        for permlink in [op['permlink'], op['parent_permlink'], op['root_permlink']]:
-            sql = """
-                INSERT INTO hive_permlink_data (permlink) 
-                VALUES (:permlink) 
-                ON CONFLICT (permlink) DO NOTHING"""
-            DB.query(permlink=permlink)
+        for permlink in ['permlink', 'parent_permlink', 'root_permlink']:
+            if permlink in op:
+                sql = """
+                    INSERT INTO hive_permlink_data (permlink) 
+                    VALUES (:permlink) 
+                    ON CONFLICT (permlink) DO NOTHING"""
+                DB.query(sql, permlink=op[permlink])
 
         # add category to category table
-        sql = """
-            INSERT INTO hive_category_data (category) 
-            VALUES (:category) 
-            ON CONFLICT (category) DO NOTHING"""
-        DB.query(category=op['category'])
+        if 'category' in op:
+            sql = """
+                INSERT INTO hive_category_data (category) 
+                VALUES (:category) 
+                ON CONFLICT (category) DO NOTHING"""
+            DB.query(sql, category=op['category'])
 
         sql = """
             INSERT INTO hive_posts (parent_id, author_id, permlink_id,
-                category_id, community_id, created_at, depth, is_deleted, is_pinned,
-                is_muted, is_valid, promoted, children, author_rep, flag_weight,
-                total_votes, up_votes, payout, payout_at, updated_at, is_paidout,
-                is_nsfw, is_declined, is_full_power, is_hidden, is_grayed, rshares,
-                sc_trend, sc_hot, parent_author_id, parent_permlink_id,
-                curator_payout_value, root_author_id, root_permlink_id,
-                max_accepted_payout, percent_steem_dollars, allow_replies, allow_votes,
-                allow_curation_rewards, beneficiaries, url, root_title)
+                category_id, community_id, created_at, depth, is_muted, 
+                is_valid, parent_author_id, parent_permlink_id)
             VALUES (:parent_id, 
                 (SELECT id FROM hive_accounts WHERE name = :author),
                 (SELECT id FROM hive_permlink_data WHERE permlink = :permlink),
-                (SELECT id FROM hive_category_data WHERE category = :category)
-                :community_id, :created_at, :depth, :is_deleted, :is_pinned,
-                :is_muted, :is_valid, :promoted, :children, :author_rep, :flag_weight,
-                :total_votes, :up_votes, :payout, :payout_at, :updated_at, :is_paidout,
-                :is_nsfw, :is_declined, :is_full_power, :is_hidden, :is_grayed, :rshares,
-                :sc_trend, :sc_hot, 
+                (SELECT id FROM hive_category_data WHERE category = :category),
+                :community_id, :date, :depth,
+                :is_muted, :is_valid, 
                 (SELECT id FROM hive_accounts WHERE name = :parent_author),
-                (SELECT id FROM hive_permlink_data WHERE permlink = :parent_permlink),
-                :curator_payout_value, 
-                (SELECT id FROM hive_accounts WHERE name = :root_author),
-                (SELECT id FROM hive_permlink_data WHERE permlink = :root_permlink),
-                :max_accepted_payout, :percent_steem_dollars, :allow_replies, :allow_votes,
-                :allow_curation_rewards, :beneficiaries, :url, :root_title)"""
+                (SELECT id FROM hive_permlink_data WHERE permlink = :parent_permlink)
+            )"""
         sql += ";SELECT currval(pg_get_serial_sequence('hive_posts','id'))"
         post = cls._build_post(op, date)
         result = DB.query(sql, **post)
@@ -178,9 +168,11 @@ class Posts:
             INSERT INTO hive_post_data (id, title, preview, img_url, body, 
                 votes, json) 
             VALUES (:id, :title, :preview, :img_url, :body, :votes, :json)"""
-        DB.query(sql, id=post['id'], title=op['title'], preview=op['preview'],
-                 img_url=op['img_url'], body=op['body'], votes=op['votes'],
-                 json=op['json_metadata'])
+        DB.query(sql, id=post['id'], title=op['title'],
+                 preview=op['preview'] if 'preview' in op else "",
+                 img_url=op['img_url'] if 'img_url' in op else "",
+                 body=op['body'], votes=op['votes'] if 'votes' in op else "",
+                 json=op['json_metadata'] if op['json_metadata'] else '{}')
 
         if not DbState.is_initial_sync():
             if post['error']:
@@ -196,9 +188,17 @@ class Posts:
     @classmethod
     def undelete(cls, op, date, pid):
         """Re-allocates an existing record flagged as deleted."""
+        # add category to category table
+        if 'category' in op:
+            sql = """
+                INSERT INTO hive_category_data (category) 
+                VALUES (:category) 
+                ON CONFLICT (category) DO NOTHING"""
+            DB.query(sql, category=op['category'])
+
         sql = """UPDATE hive_posts SET is_valid = :is_valid,
                    is_muted = :is_muted, is_deleted = '0', is_pinned = '0',
-                   parent_id = :parent_id, category = :category,
+                   parent_id = :parent_id, category_id = (SELECT id FROM hive_category_data WHERE category = :category),
                    community_id = :community_id, depth = :depth
                  WHERE id = :id"""
         post = cls._build_post(op, date, pid)
@@ -243,57 +243,56 @@ class Posts:
         # pylint: disable=unused-argument
         #if not DbState.is_initial_sync():
         #    CachedPost.update(op['author'], op['permlink'], pid)
+        # add category to category table
+        if 'category' in op:
+            sql = """
+                INSERT INTO hive_category_data (category) 
+                VALUES (:category) 
+                ON CONFLICT (category) DO NOTHING"""
+            DB.query(sql, category=op['category'])
+
         sql = """
             UPDATE hive_posts 
-            SET 
-                parent_id = :parent_id, 
-                community_id = :community_id, 
-                created_at = :created_at,  
-                is_deleted = :is_deleted, 
-                is_pinned = :is_pinned,
-                is_muted = :is_muted, 
-                is_valid = :is_valid, 
-                promoted = :promoted, 
-                children = :children, 
-                author_rep = :author_rep, 
-                flag_weight = :flag_weight,
-                total_votes = :total_votes, 
-                up_votes = :up_votes, 
-                payout = :payout, 
-                payout_at = :payout_at, 
-                updated_at = :updated_at, 
-                is_paidout = :is_paidout,
-                is_nsfw = :is_nsfw, 
-                is_declined = :is_declined, 
-                is_full_power = :is_full_power, 
-                is_hidden = :is_hidden, 
-                is_grayed = :is_grayed, 
-                rshares = :rshares,
-                sc_trend = :sc_trend, 
-                sc_hot = :sc_hot, 
-                parent_author_id = (SELECT id FROM hive_accounts WHERE name = :parent_author), 
-                parent_permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :parent_permlink),
-                curator_payout_value = :curator_payout_value, 
-                root_author_id = (SELECT id FROM hive_accounts WHERE name = :root_author),
-                root_permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :root_permlink),
-                max_accepted_payout = :max_accepted_payout, 
-                percent_steem_dollars = :percent_steem_dollars, 
-                allow_replies = :allow_replies, 
-                allow_votes = :allow_votes,
-                allow_curation_rewards = :allow_curation_rewards, 
-                beneficiaries = :beneficiaries, 
-                url = :url, 
-                root_title = :root_title
+            SET
+                parent_id = :parent_id,
+                author_id = (SELECT id FROM hive_accounts WHERE name = :author),
+                permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink),
+                category_id = (SELECT id FROM hive_category_data WHERE category = :category),
+                community_id = :community_id,
+                updated_at = :date,
+                depth = :depth,
+                is_muted = :is_muted,
+                is_valid = :is_valid,
+                parent_author_id = (SELECT id FROM hive_accounts WHERE name = :parent_author),
+                parent_permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :parent_permlink)
             WHERE id = :id"""
-        post = cls._build_post(op, date, pid)
+        post = cls._build_post(op, date)
         DB.query(sql, **post)
+
+        sql = """
+            UPDATE 
+                hive_post_data 
+            SET 
+                title = :title, 
+                preview = :preview, 
+                img_url = :img_url, 
+                body = :body, 
+                votes = :votes, 
+                json = :json
+            WHERE id = :id"""
+
+        DB.query(sql, id=pid, title=op['title'],
+                 preview=op['preview'] if 'preview' in op else "",
+                 img_url=op['img_url'] if 'img_url' in op else "",
+                 body=op['body'], votes=op['votes'] if 'votes' in op else "",
+                 json=op['json_metadata'] if op['json_metadata'] else '{}')
 
     @classmethod
     def _get_parent_by_child_id(cls, child_id):
         """Get parent's `id`, `author`, `permlink` by child id."""
         sql = """
             SELECT 
-                hp.id, ha_a.name as author, hpd_p.permlink as permlink, 
+                hp.id, ha_a.name as author, hpd_p.permlink as permlink
             FROM 
                 hive_posts hp
             LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
@@ -357,21 +356,11 @@ class Posts:
             #is_valid = False # TODO: reserved for future blacklist status?
             is_muted = True
 
-        return dict(parent_id=parent_id,
-                    author=op['author'], permlink=op['permlink'], id=pid,
-                    category=category, community_id=community_id, created_at=op['created_at'],
-                    depth=depth, is_deleted=op['is_deleted'], is_pinned=op['is_pinned'],
-                    is_muted=op['is_muted'], is_valid=is_valid, promoted=op['promoted'],
-                    children=op['children'], author_rep=op['author_rep'], flag_weight=op['flag_weight'],
-                    total_votes=op['total_votes'], up_votes=op['up_votes'], payout=op['payout'],
-                    payout_at=op['payout_at'], updated_at=op['updated_at'], is_paidout=op['is_paidout'],
-                    is_nsfw=op['is_nsfw'], is_declined=op['is_declined'], is_full_power=op['is_full_power'],
-                    is_hidden=op['is_hidden'], is_grayed=op['is_grayed'], rshares=op['rshares'],
-                    sc_trend=op['sc_trend'], sc_hot=op['sc_hot'], parent_author=op['parent_author'],
-                    parent_permlink=op['parent_permlink'],
-                    curator_payout_value=op['curator_payout_value'], root_author=op['root_author'],
-                    root_permlink=op['root_permlink'],
-                    max_accepted_payout=op['max_accepted_payout'], percent_steem_dollars=op['percent_steem_dollars'],
-                    allow_replies=op['allow_replies'], allow_votes=op['allow_votes'],
-                    allow_curation_rewards=op['allow_curation_rewards'], beneficiaries=op['beneficiaries'], url=op['url'],
-                    root_title=op['root_title'], date=date, error=error)
+        ret = dict(parent_id=parent_id, id=pid, community_id=community_id,
+                   category=category, is_muted=is_muted, is_valid=is_valid,
+                   depth=depth, date=date, error=error,
+                   author=op['author'], permlink=op['permlink'],
+                   parent_author=op['parent_author'],
+                   parent_permlink=op['parent_permlink'])
+
+        return ret
