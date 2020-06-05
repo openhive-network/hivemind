@@ -14,8 +14,14 @@ def last_month():
 
 async def get_post_id(db, author, permlink):
     """Given an author/permlink, retrieve the id from db."""
-    sql = ("SELECT id FROM hive_posts WHERE author = :a "
-           "AND permlink = :p AND is_deleted = '0' LIMIT 1")
+    sql = """
+        SELECT 
+            hp.id
+        FROM hive_posts hp
+        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        WHERE ha_a.author = :author AND hpd_p.permlink = :permlink 
+            AND is_deleted = '0' LIMIT 1"""
     return await db.query_one(sql, a=author, p=permlink)
 
 async def get_child_ids(db, post_id):

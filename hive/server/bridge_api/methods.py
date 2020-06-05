@@ -16,22 +16,43 @@ from hive.server.common.mutes import Mutes
 
 ROLES = {-2: 'muted', 0: 'guest', 2: 'member', 4: 'mod', 6: 'admin', 8: 'owner'}
 
-SELECT_FRAGMENT = """
-    SELECT hive_posts_cache.post_id, hive_posts_cache.author, hive_posts_cache.permlink,
-           hive_posts_cache.title, hive_posts_cache.body, hive_posts_cache.category, hive_posts_cache.depth,
-           hive_posts_cache.promoted, hive_posts_cache.payout, hive_posts_cache.payout_at,
-           hive_posts_cache.is_paidout, hive_posts_cache.children, hive_posts_cache.votes,
-           hive_posts_cache.created_at, hive_posts_cache.updated_at, hive_posts_cache.rshares,
-           hive_posts_cache.raw_json, hive_posts_cache.json, hive_accounts.reputation AS author_rep,
-           hive_posts_cache.is_hidden AS is_hidden, hive_posts_cache.is_grayed AS is_grayed,
-           hive_posts_cache.total_votes AS total_votes, hive_posts_cache.flag_weight AS flag_weight,
-           hive_posts_cache.sc_trend AS sc_trend, hive_accounts.id AS acct_author_id,
-           hive_roles.title as role_title, hive_communities.title AS community_title, hive_roles.role_id AS role_id,
+SQL_TEMPLATE = """
+        SELECT hp.id, 
+            community_id, 
+            ha_a.name as author,
+            hpd_p.permlink as permlink,
+            hpd.title as title, 
+            hpd.body as body, 
+            hcd.category as category, 
+            depth,
+            promoted, 
+            payout, 
+            payout_at, 
+            is_paidout, 
+            children, 
+            hpd.votes as votes,
+            hp.created_at, 
+            updated_at, 
+            rshares, 
+            hpd.json as json,
+            is_hidden, 
+            is_grayed, 
+            total_votes, 
+            flag_weight,
+            sc_trend, 
+            ha_a.id AS acct_author_id,
+            hive_roles.title as role_title, 
+            hive_communities.title AS community_title, 
+            hive_roles.role_id AS role_id
            hive_posts.is_pinned AS is_pinned
-           FROM hive_posts_cache JOIN hive_posts ON (hive_posts_cache.post_id = hive_posts.id)
-                                 JOIN hive_accounts ON (hive_posts_cache.author = hive_accounts.name)
-                                 LEFT OUTER JOIN hive_communities ON (hive_posts_cache.community_id = hive_communities.id)
-                                 LEFT OUTER JOIN hive_roles ON (hive_accounts.id = hive_roles.account_id AND hive_posts_cache.community_id = hive_roles.community_id) """
+        FROM hive_posts hp
+        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
+        LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+        LEFT OUTER JOIN hive_communities ON (hp.community_id = hive_communities.id)
+        LEFT OUTER JOIN hive_roles ON (ha_a.id = hive_roles.account_id AND hp.community_id = hive_roles.community_id)
+    """
 
 #pylint: disable=too-many-arguments, no-else-return
 
@@ -85,7 +106,7 @@ async def get_post(context, author, permlink, observer=None):
     valid_account(author)
     valid_permlink(permlink)
 
-    sql = "---bridge_api.get_post\n" + SELECT_FRAGMENT + """ WHERE hive_posts_cache.author = :author AND hive_posts_cache.permlink = :permlink AND NOT hive_posts.is_deleted """
+    sql = "---bridge_api.get_post\n" + SQL_TEMPLATE + """ WHERE ha_a.name = :author AND hpd_p.permlink = :permlink AND NOT hive_posts.is_deleted """
 
     result = await db.query_all(sql, author=author, permlink=permlink)
     assert len(result) == 1, 'invalid author/permlink or post not found in cache'
@@ -112,67 +133,67 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
     pinned_sql = ''
 
     if sort == 'trending':
-        sql = SELECT_FRAGMENT + """ WHERE NOT hive_posts_cache.is_paidout AND hive_posts_cache.depth = 0 AND NOT hive_posts.is_deleted
-                                    %s ORDER BY sc_trend desc, post_id LIMIT :limit """
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND hp.depth = 0 AND NOT hive_posts.is_deleted
+                                    %s ORDER BY sc_trend desc, hp.id LIMIT :limit """
     elif sort == 'hot':
-        sql = SELECT_FRAGMENT + """ WHERE NOT hive_posts_cache.is_paidout AND hive_posts_cache.depth = 0 AND NOT hive_posts.is_deleted
-                                    %s ORDER BY sc_hot desc, post_id LIMIT :limit """
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND hp.depth = 0 AND NOT hive_posts.is_deleted
+                                    %s ORDER BY sc_hot desc, hp.id LIMIT :limit """
     elif sort == 'created':
-        sql = SELECT_FRAGMENT + """ WHERE hive_posts_cache.depth = 0 AND NOT hive_posts.is_deleted AND NOT hive_posts_cache.is_grayed
-                                    %s ORDER BY hive_posts_cache.created_at DESC, post_id LIMIT :limit """
+        sql = SQL_TEMPLATE + """ WHERE hp.depth = 0 AND NOT hive_posts.is_deleted AND NOT hp.is_grayed
+                                    %s ORDER BY hp.created_at DESC, hp.id LIMIT :limit """
     elif sort == 'promoted':
-        sql = SELECT_FRAGMENT + """ WHERE hive_posts_cache.depth > 0 AND hive_posts_cache.promoted > 0 AND NOT hive_posts.is_deleted
-                                    AND NOT hive_posts_cache.is_paidout %s ORDER BY hive_posts_cache.promoted DESC, post_id LIMIT :limit """
+        sql = SQL_TEMPLATE + """ WHERE hp.depth > 0 AND hp.promoted > 0 AND NOT hive_posts.is_deleted
+                                    AND NOT hp.is_paidout %s ORDER BY hp.promoted DESC, hp.id LIMIT :limit """
     elif sort == 'payout':
-        sql = SELECT_FRAGMENT + """ WHERE NOT hive_posts_cache.is_paidout AND NOT hive_posts.is_deleted %s
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hive_posts.is_deleted %s
                                     AND payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
-                                    ORDER BY hive_posts_cache.payout DESC, post_id LIMIT :limit """
+                                    ORDER BY hp.payout DESC, hp.id LIMIT :limit """
     elif sort == 'payout_comments':
-        sql = SELECT_FRAGMENT + """ WHERE NOT hive_posts_cache.is_paidout AND NOT hive_posts.is_deleted AND hive_posts_cache.depth > 0
-                                    %s ORDER BY hive_posts_cache.payout DESC, post_id LIMIT :limit """
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hive_posts.is_deleted AND hp.depth > 0
+                                    %s ORDER BY hp.payout DESC, hp.id LIMIT :limit """
     elif sort == 'muted':
-        sql = SELECT_FRAGMENT + """ WHERE NOT hive_posts_cache.is_paidout AND NOT hive_posts.is_deleted AND hive_posts_cache.is_grayed
-                                    AND hive_posts_cache.payout > 0 %s ORDER BY hive_posts_cache.payout DESC, post_id LIMIT :limit """
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hive_posts.is_deleted AND hp.is_grayed
+                                    AND hp.payout > 0 %s ORDER BY hp.payout DESC, hp.id LIMIT :limit """
 
     sql = "---bridge_api.get_ranked_posts\n" + sql
 
     if start_author and start_permlink:
         if sort == 'trending':
-            sql = sql % """ AND hive_posts_cache.sc_trend <= (SELECT sc_trend FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) 
-                            AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author=:author) %s """
+            sql = sql % """ AND hp.sc_trend <= (SELECT sc_trend FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) 
+                            AND hp.post_id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
         elif sort == 'hot':
-            sql = sql % """ AND hive_posts_cache.sc_hot <= (SELECT sc_hot FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
-                            AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) %s """
+            sql = sql % """ AND hp.sc_hot <= (SELECT sc_hot FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink))
+                            AND hp.post_id != (SELECT post_id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
         elif sort == 'created':
-            sql = sql % """ AND hive_posts_cache.post_id < (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) %s """
+            sql = sql % """ AND hp.post_id < (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
         elif sort == 'promoted':
-            sql = sql % """ AND hive_posts_cache.promoted <= (SELECT promoted FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
-                                AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) %s """
+            sql = sql % """ AND hp.promoted <= (SELECT promoted FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink))
+                                AND hp.post_id != (SELECT post_id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
         else:
-            sql = sql % """ AND hive_posts_cache.payout <= (SELECT payout FROM hive_posts_cache WHERE permlink = :permlink AND author = :author)
-                                AND hive_posts_cache.post_id != (SELECT post_id FROM hive_posts_cache WHERE permlink = :permlink AND author = :author) %s """
+            sql = sql % """ AND hp.payout <= (SELECT payout FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink))
+                                AND hp.post_id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
     else:
         sql = sql % """ %s """
 
     if not tag or tag == 'all':
         sql = sql % """ """
     elif tag == 'my':
-        sql = sql % """ AND hive_posts_cache.community_id IN (SELECT community_id FROM hive_subscriptions WHERE account_id =
+        sql = sql % """ AND hp.community_id IN (SELECT community_id FROM hive_subscriptions WHERE account_id =
                         (SELECT id FROM hive_accounts WHERE name = :observer) ) """
     elif tag[:5] == 'hive-':
         if start_author and start_permlink:
-            sql = sql % """  AND hive_posts_cache.community_id = (SELECT hive_communities.id FROM hive_communities WHERE name = :community_name ) """
+            sql = sql % """  AND hp.community_id = (SELECT hive_communities.id FROM hive_communities WHERE name = :community_name ) """
         else:
             sql = sql % """ AND hive_communities.name = :community_name """
 
         if sort == 'trending' or sort == 'created':
-                pinned_sql = SELECT_FRAGMENT + """ WHERE is_pinned AND hive_communities.name = :community_name ORDER BY hive_posts_cache.created_at DESC """
+                pinned_sql = SQL_TEMPLATE + """ WHERE is_pinned AND hive_communities.name = :community_name ORDER BY hp.created_at DESC """
 
     else:
         if sort in ['payout', 'payout_comments']:
-            sql = sql % """ AND hive_posts_cache.category = :tag """
+            sql = sql % """ AND hp.category = :tag """
         else:
-            sql = sql % """ AND hive_posts_cache.post_id IN (SELECT post_id FROM hive_post_tags WHERE tag = :tag)"""
+            sql = sql % """ AND hp.post_id IN (SELECT post_id FROM hive_post_tags WHERE tag = :tag)"""
 
     if not observer:
         observer = ''
@@ -235,7 +256,7 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
     # pylint: disable=unused-variable
     observer_id = await get_account_id(db, observer) if observer else None # TODO
      
-    sql = "---bridge_api.get_account_posts\n " + SELECT_FRAGMENT + """ %s """      
+    sql = "---bridge_api.get_account_posts\n " + SQL_TEMPLATE + """ %s """      
         
     if sort == 'blog':
         ids = await cursor.pids_by_blog(db, account, *start, limit)
@@ -245,11 +266,11 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
                 post['reblogged_by'] = [account]
         return posts
     elif sort == 'posts':
-        sql = sql % """ WHERE hive_posts_cache.author = :account AND NOT hive_posts.is_deleted AND hive_posts_cache.depth = 0 %s ORDER BY hive_posts_cache.post_id DESC LIMIT :limit"""
+        sql = sql % """ WHERE ha_a.name = :account AND NOT hp.is_deleted AND hp.depth = 0 %s ORDER BY hp.id DESC LIMIT :limit"""
     elif sort == 'comments':
-        sql = sql % """ WHERE hive_posts_cache.author = :account AND NOT hive_posts.is_deleted AND hive_posts_cache.depth > 0 %s ORDER BY hive_posts_cache.post_id DESC, depth LIMIT :limit"""
+        sql = sql % """ WHERE ha_a.name = :account AND NOT hp.is_deleted AND hp.depth > 0 %s ORDER BY hp.id DESC, depth LIMIT :limit"""
     elif sort == 'payout':
-        sql = sql % """ WHERE hive_posts_cache.author = :account AND NOT hive_posts.is_deleted AND NOT hive_posts_cache.is_paidout %s ORDER BY payout DESC, post_id LIMIT :limit"""
+        sql = sql % """ WHERE ha_a.name = :account AND NOT hp.is_deleted AND NOT hp.is_paidout %s ORDER BY payout DESC, hp.id LIMIT :limit"""
     elif sort == 'feed':
         res = await cursor.pids_by_feed_with_reblog(db, account, *start, limit)
         return await load_posts_reblogs(context['db'], res)
@@ -259,7 +280,7 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
         return await load_posts(context['db'], ids)
 
     if start_author and start_permlink:
-        sql = sql % """ AND hive_posts_cache.post_id < (SELECT post_id FROM hive_posts_cache WHERE author = :author AND permlink = :permlink) """
+        sql = sql % """ AND hp.id < (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) """
     else:
         sql = sql % """ """
         

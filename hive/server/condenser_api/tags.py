@@ -10,7 +10,7 @@ async def get_top_trending_tags_summary(context):
     # Same results, more overhead:
     #return [tag['name'] for tag in await get_trending_tags('', 50)]
     sql = """
-        SELECT category
+        SELECT (SELECT category FROM hive_category_data WHERE id = category_id) as category
           FROM hive_posts
          WHERE is_paidout = '0'
       GROUP BY category
@@ -33,13 +33,13 @@ async def get_trending_tags(context, start_tag: str = '', limit: int = 250):
             SELECT SUM(payout)
               FROM hive_posts
              WHERE is_paidout = '0'
-               AND category = :start_tag)
+               AND category_id = (SELECT id FROM hive_category_data WHERE category = :start_tag))
         """
     else:
         seek = ''
 
     sql = """
-      SELECT category,
+      SELECT (SELECT category FROM hive_category_data WHERE id = category_id) as category,
              COUNT(*) AS total_posts,
              SUM(CASE WHEN depth = 0 THEN 1 ELSE 0 END) AS top_posts,
              SUM(payout) AS total_payouts
