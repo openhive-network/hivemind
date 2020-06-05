@@ -127,8 +127,8 @@ def build_metadata():
 
         sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_posts_fk1'),
         sa.ForeignKeyConstraint(['parent_id'], ['hive_posts.id'], name='hive_posts_fk3'),
-        sa.UniqueConstraint('author', 'permlink', name='hive_posts_ux1'),
-        sa.Index('hive_posts_ix3', 'author', 'depth', 'id', postgresql_where=sql_text("is_deleted = '0'")), # API: author blog/comments
+        sa.UniqueConstraint('author_id', 'permlink_id', name='hive_posts_ux1'),
+        sa.Index('hive_posts_ix3', 'author_id', 'depth', 'id', postgresql_where=sql_text("is_deleted = '0'")), # API: author blog/comments
         sa.Index('hive_posts_ix4', 'parent_id DESC NULLS LAST', 'id'), #postgresql_where=sql_text("is_deleted = '0'")), # API: fetching children #[JES] We decided we want the full index since posts can be deleted/undeleted
         sa.Index('hive_posts_ix5', 'id', postgresql_where=sql_text("is_pinned = '1' AND is_deleted = '0'")), # API: pinned post status
         sa.Index('hive_posts_ix6', 'community_id', 'id', postgresql_where=sql_text("community_id IS NOT NULL AND is_pinned = '1' AND is_deleted = '0'")), # API: community pinned
