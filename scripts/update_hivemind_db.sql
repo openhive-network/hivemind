@@ -44,9 +44,6 @@ INSERT INTO hive_permlink_data (permlink) VALUES ('');
 -- RAISE NOTICE 'run on permlink field of hive_posts_cache';
 INSERT INTO hive_permlink_data (permlink) SELECT permlink FROM hive_posts ON CONFLICT (permlink) DO NOTHING;
 -- we should also scan parent_permlink and root_permlink but we will do that on raw_json scan
--- Create indexes
-CREATE INDEX IF NOT EXISTS hive_permlink_data_permlink_idx ON hive_permlink_data (permlink ASC);
-CREATE INDEX IF NOT EXISTS hive_permlink_data_permlink_c_idx ON hive_permlink_data (permlink COLLATE "C" ASC);
 
 -- Table to hold category data, category is unique
 -- RAISE NOTICE 'Table to hold category data, category is unique';
@@ -68,10 +65,10 @@ CREATE INDEX IF NOT EXISTS hive_category_data_category_c_idx ON hive_category_da
 -- Table to hold post data
 -- RAISE NOTICE 'Table to hold post data';
 CREATE TABLE IF NOT EXISTS hive_posts_new (
-  id INT DEFAULT '-1',
+  id INT NOT NULL,
   parent_id INT DEFAULT '-1',
-  author_id INT DEFAULT '-1',
-  permlink_id INT DEFAULT '-1',
+  author_id INT NOT NULL,
+  permlink_id INT NOT NULL,
   category_id INT DEFAULT '1',
   community_id INT,
   created_at DATE DEFAULT '1990-01-01T00:00:00',
@@ -124,6 +121,9 @@ CREATE TABLE IF NOT EXISTS hive_posts_new (
   url TEXT DEFAULT '',
   root_title VARCHAR(255) DEFAULT ''
 );
+
+CREATE INDEX IF NOT EXISTS hive_posts_author_id_idx ON hive_posts_new (author_id);
+CREATE INDEX IF NOT EXISTS hive_posts_permlink_id_idx ON hive_posts_new (permlink_id);
 
 -- Table to hold bulk post data
 -- RAISE NOTICE 'Table to hold bulk post data';
@@ -297,8 +297,6 @@ ALTER TABLE hive_posts ADD CONSTRAINT hive_posts_ux1 UNIQUE (author_id, permlink
 
 -- Make indexes in hive_posts
 -- RAISE NOTICE 'Creating indexes';
-CREATE INDEX IF NOT EXISTS hive_posts_author_id_idx ON hive_posts (author_id);
-CREATE INDEX IF NOT EXISTS hive_posts_permlink_id_idx ON hive_posts (permlink_id);
 
 CREATE INDEX IF NOT EXISTS hive_posts_depth_idx ON hive_posts (depth);
 CREATE INDEX IF NOT EXISTS hive_posts_parent_id_idx ON hive_posts (parent_id);
@@ -316,4 +314,25 @@ CREATE INDEX IF NOT EXISTS hive_posts_sc_trend_idx ON hive_posts (sc_trend);
 CREATE INDEX IF NOT EXISTS hive_posts_sc_hot_idx ON hive_posts (sc_hot);
 
 CREATE INDEX IF NOT EXISTS hive_posts_created_at_idx ON hive_posts (created_at);
+
+-- Create a materialized view and associated index to significantly speedup query for hive_posts
+drop materialized view if exists hive_posts_a_p;
+
+create materialized view hive_posts_a_p
+as
+select hp.id as id,
+       ha_a.name as author,
+       hpd_p.permlink as permlink
+FROM hive_posts hp
+inner JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+inner JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+with data
+;
+
+drop index if exists hive_posts_a_p_idx;
+
+create unique index hive_posts_a_p_idx
+on hive_posts_a_p
+(author collate "C", permlink collate "C")
+;
 
