@@ -63,7 +63,7 @@ async def get_post_id_by_author_and_permlink(db, author: str, permlink: str, lim
     """
     result = await db.query_row(sql, author=author, permlink=permlink, limit=limit)
     if result is not None:
-        return int(result.get('post_id', 0))
+        return int(result.get('id', 0))
     return 0
 
 @return_error_info

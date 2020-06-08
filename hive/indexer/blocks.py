@@ -109,8 +109,7 @@ class Blocks:
                     if not is_initial_sync:
                         Accounts.dirty(op['author']) # lite - rep
                         Accounts.dirty(op['voter']) # lite - stats
-                        CachedPost.vote(op['author'], op['permlink'],
-                                        None, op['voter'])
+                        Posts.vote_op(op)
 
                 # misc ops
                 elif op_type == 'transfer_operation':

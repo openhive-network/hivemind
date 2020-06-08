@@ -115,6 +115,12 @@ class Posts:
             cls.undelete(op, block_date, pid)
 
     @classmethod
+    def vote_op(cls, op):
+        """ Vote operation processing """
+        pid = cls.get_id(op['author'], op['permlink'])
+        assert pid, "Post does not exists in the database"
+
+    @classmethod
     def insert(cls, op, date):
         """Inserts new post records."""
 

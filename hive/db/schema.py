@@ -129,18 +129,28 @@ def build_metadata():
         sa.ForeignKeyConstraint(['parent_id'], ['hive_posts.id'], name='hive_posts_fk3'),
         sa.UniqueConstraint('author_id', 'permlink_id', name='hive_posts_ux1'),
         sa.Index('hive_posts_ix3', 'author_id', 'depth', 'id', postgresql_where=sql_text("is_deleted = '0'")), # API: author blog/comments
-        sa.Index('hive_posts_ix4', 'parent_id DESC NULLS LAST', 'id'), #postgresql_where=sql_text("is_deleted = '0'")), # API: fetching children #[JES] We decided we want the full index since posts can be deleted/undeleted
         sa.Index('hive_posts_ix5', 'id', postgresql_where=sql_text("is_pinned = '1' AND is_deleted = '0'")), # API: pinned post status
-        sa.Index('hive_posts_ix6', 'community_id', 'id', postgresql_where=sql_text("community_id IS NOT NULL AND is_pinned = '1' AND is_deleted = '0'")), # API: community pinned
-        sa.UniqueConstraint('author_id', 'permlink_id', name='hive_posts_ux1'),
+        sa.Index('hive_posts_depth_idx', 'depth'),
+        sa.Index('hive_posts_parent_id_idx', 'parent_id'),
+        sa.Index('hive_posts_community_id_idx', 'community_id'),
+
+        sa.Index('hive_posts_category_id_idx', 'category_id'),
+        sa.Index('hive_posts_payout_at_idx', 'payout_at'),
+        sa.Index('hive_posts_payout_at_idx2', 'payout_at', postgresql_where=sql_text("is_paidout = '0'")),
+        sa.Index('hive_posts_payout_idx', 'payout'),
+        sa.Index('hive_posts_promoted_idx', 'promoted'),
+        sa.Index('hive_posts_sc_trend_idx', 'sc_trend'),
+        sa.Index('hive_posts_sc_hot_idx', 'sc_hot'),
+        sa.Index('hive_posts_created_at_idx', 'created_at'),
+        sa.UniqueConstraint('author_id', 'permlink_id', name='hive_posts_ux1')
     )
 
     sa.Table(
         'hive_post_data', metadata,
-        sa.column('id', sa.Integer, nullable=False),
-        sa.column('title', VARCHAR(255), nullable=False),
-        sa.column('preview', VARCHAR(1024), nullable=False),
-        sa.column('img_url', VARCHAR(1024), nullable=False),
+        sa.Column('id', sa.Integer, nullable=False),
+        sa.Column('title', VARCHAR(255), nullable=False),
+        sa.Column('preview', VARCHAR(1024), nullable=False),
+        sa.Column('img_url', VARCHAR(1024), nullable=False),
         sa.Column('body', TEXT),
         sa.Column('votes', TEXT),
         sa.Column('json', sa.JSON)
@@ -148,15 +158,15 @@ def build_metadata():
 
     sa.Table(
         'hive_permlink_data', metadata,
-        sa.column('id', sa.Integer, primary_key=True),
-        sa.column('permlink', sa.String(255), nullable=False),
+        sa.Column('id', sa.Integer, primary_key=True),
+        sa.Column('permlink', sa.String(255), nullable=False),
         sa.UniqueConstraint('permlink', name='hive_permlink_data_permlink')
     )
 
     sa.Table(
         'hive_category_data', metadata,
-        sa.column('id', sa.Integer, primary_key=True),
-        sa.column('category', sa.String(255), nullable=False),
+        sa.Column('id', sa.Integer, primary_key=True),
+        sa.Column('category', sa.String(255), nullable=False),
         sa.UniqueConstraint('category', name='hive_category_data_category')
     )
 
