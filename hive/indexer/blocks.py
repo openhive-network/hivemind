@@ -31,20 +31,20 @@ class Blocks:
         return str(DB.query_one(sql) or '')
 
     @classmethod
-    def process(cls, block):
+    def process(cls, block, hived):
         """Process a single block. Always wrap in a transaction!"""
         #assert is_trx_active(), "Block.process must be in a trx"
-        return cls._process(block, is_initial_sync=False)
+        return cls._process(block, hived, is_initial_sync=False)
 
     @classmethod
-    def process_multi(cls, blocks, is_initial_sync=False):
+    def process_multi(cls, blocks, hived, is_initial_sync=False):
         """Batch-process blocks; wrapped in a transaction."""
         DB.query("START TRANSACTION")
 
         last_num = 0
         try:
             for block in blocks:
-                last_num = cls._process(block, is_initial_sync)
+                last_num = cls._process(block, hived, is_initial_sync)
         except Exception as e:
             log.error("exception encountered block %d", last_num + 1)
             raise e
@@ -57,7 +57,7 @@ class Blocks:
         DB.query("COMMIT")
 
     @classmethod
-    def _process(cls, block, is_initial_sync=False):
+    def _process(cls, block, hived, is_initial_sync=False):
         """Process a single block. Assumes a trx is open."""
         #pylint: disable=too-many-branches
         num = cls._push(block)
@@ -100,7 +100,7 @@ class Blocks:
 
                 # post ops
                 elif op_type == 'comment_operation':
-                    Posts.comment_op(op, date)
+                    Posts.comment_op(hived, op, date)
                     if not is_initial_sync:
                         Accounts.dirty(op['author']) # lite - stats
                 elif op_type == 'delete_comment_operation':

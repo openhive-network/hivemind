@@ -84,13 +84,15 @@ class SteemClient:
     def gdgp_extended(self):
         """Get dynamic global props without the cruft plus useful bits."""
         dgpo = self._gdgp()
+        print(dgpo)
 
         # remove unused/deprecated keys
         unused = ['total_pow', 'num_pow_witnesses', 'confidential_supply',
                   'confidential_sbd_supply', 'total_reward_fund_steem',
                   'total_reward_shares2']
         for key in unused:
-            del dgpo[key]
+            if key in dgpo:
+                del dgpo[key]
 
         return {
             'dgpo': dgpo,
@@ -100,7 +102,8 @@ class SteemClient:
 
     @staticmethod
     def _get_steem_per_mvest(dgpo):
-        steem = steem_amount(dgpo['total_vesting_fund_steem'])
+        print("DGPO: ", dgpo)
+        steem = steem_amount(dgpo['total_vesting_fund_hive'])
         mvests = vests_amount(dgpo['total_vesting_shares']) / Decimal(1e6)
         return "%.6f" % (steem / mvests)
 
@@ -108,15 +111,20 @@ class SteemClient:
         # TODO: add latest feed price: get_feed_history.price_history[0]
         feed = self.__exec('get_feed_history')['current_median_history']
         units = dict([parse_amount(feed[k])[::-1] for k in ['base', 'quote']])
-        price = units['HBD'] / units['HIVE']
+        if 'TBD' in units and 'TESTS' in units:
+            price = units['TBD'] / units['TESTS']
+        else:
+            price = units['HBD'] / units['HIVE']
         return "%.6f" % price
 
     def _get_steem_price(self):
         orders = self.__exec('get_order_book', [1])
-        ask = Decimal(orders['asks'][0]['real_price'])
-        bid = Decimal(orders['bids'][0]['real_price'])
-        price = (ask + bid) / 2
-        return "%.6f" % price
+        if orders['asks'] and orders[bids]:
+            ask = Decimal(orders['asks'][0]['real_price'])
+            bid = Decimal(orders['bids'][0]['real_price'])
+            price = (ask + bid) / 2
+            return "%.6f" % price
+        return "0"
 
     def get_blocks_range(self, lbound, ubound):
         """Retrieves blocks in the range of [lbound, ubound)."""
@@ -131,6 +139,22 @@ class SteemClient:
             blocks[num] = block
 
         return [blocks[x] for x in block_nums]
+
+    def get_comment_pending_payouts(self, comments):
+        """ Get comment pending payout data """
+        ret = self.__exec('get_comment_pending_payouts', {'comments':comments})
+        print(ret)
+        return ret['cashout_infos']
+
+    def get_votes(self, author, permlink):
+        """ Get list of votes """
+        call = self.__exec("list_votes", {'start':[author, permlink, ""],
+                                                      'limit':1000, 'order':'by_comment_voter'})
+        ret = []
+        for vote in call['votes']:
+            if vote['author'] == author and vote['permlink'] == permlink:
+                ret.append(vote)
+        return ret
 
     def __exec(self, method, params=None):
         """Perform a single steemd call."""

@@ -255,7 +255,7 @@ def _condenser_post_object(row, truncate_body=0):
     post['promoted'] = _amount(row['promoted'])
 
     post['replies'] = []
-    post['active_votes'] = _hydrate_active_votes(row['votes'])
+    post['active_votes'] = json.loads(row['votes'])
     post['author_reputation'] = row['author_rep']
 
     post['stats'] = {

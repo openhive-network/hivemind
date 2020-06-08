@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS hive_posts_new (
   permlink_id INT NOT NULL,
   category_id INT DEFAULT '1',
   community_id INT,
-  created_at DATE DEFAULT '1990-01-01T00:00:00',
+  created_at DATE DEFAULT '1970-01-01T00:00:00',
   depth SMALLINT DEFAULT '-1',
   is_deleted BOOLEAN DEFAULT '0',
   is_pinned BOOLEAN DEFAULT '0',
@@ -90,8 +90,8 @@ CREATE TABLE IF NOT EXISTS hive_posts_new (
   
   -- core stats/indexes
   payout NUMERIC(10, 3) DEFAULT '0.0',
-  payout_at DATE DEFAULT '1990-01-01T00:00:00',
-  updated_at DATE DEFAULT '1990-01-01T00:00:00',
+  payout_at DATE DEFAULT '1970-01-01T00:00:00',
+  updated_at DATE DEFAULT '1970-01-01T00:00:00',
   is_paidout BOOLEAN DEFAULT '0',
 
   -- ui flags/filters
@@ -105,6 +105,20 @@ CREATE TABLE IF NOT EXISTS hive_posts_new (
   rshares BIGINT DEFAULT '-1',
   sc_trend NUMERIC(6) DEFAULT '0.0',
   sc_hot NUMERIC(6) DEFAULT '0.0',
+
+  total_payout_value VARCHAR(16) DEFAULT '',
+  author_rewards INT DEFAULT '0',
+  children_abs_rshares INT DEFAULT '0',
+  net_rshares INT DEFAULT '0',
+  abs_rshares INT DEFAULT '0',
+  vote_rshares INT DEFAULT '0',
+  net_votes INT DEFAULT '0',
+  active DATE DEFAULT '1970-01-01T00:00:00',
+  last_payout DATE DEFAULT '1970-01-01T00:00:00',
+  cashout_time DATE DEFAULT '1970-01-01T00:00:00',
+  max_cashout_time DATE DEFAULT '1970-01-01T00:00:00',
+  percent_hbd INT DEFAULT '0',
+  reward_weight INT DEFAULT '0',
 
   -- columns from raw_json
   parent_author_id INT DEFAULT '-1',

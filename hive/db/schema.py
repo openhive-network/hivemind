@@ -111,6 +111,20 @@ def build_metadata():
         sa.Column('sc_trend', sa.Float(precision=6), nullable=False, server_default='0'),
         sa.Column('sc_hot', sa.Float(precision=6), nullable=False, server_default='0'),
 
+        sa.Column('total_payout_value', sa.String(16), nullable=False, server_default=''),
+        sa.Column('author_rewards', sa.Integer, nullable=False, server_default='0'),
+        sa.Column('children_abs_rshares', sa.Integer, nullable=False, server_default='0'),
+        sa.Column('net_rshares', sa.Integer, nullable=False, server_default='0'),
+        sa.Column('abs_rshares', sa.Integer, nullable=False, server_default='0'),
+        sa.Column('vote_rshares', sa.Integer, nullable=False, server_default='0'),
+        sa.Column('net_votes', sa.Integer, nullable=False, server_default='0'),
+        sa.Column('active', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
+        sa.Column('last_payout', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
+        sa.Column('cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
+        sa.Column('max_cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
+        sa.Column('percent_hbd', sa.Integer, nullable=False, server_default='0'),
+        sa.Column('reward_weight', sa.Integer, nullable=False, server_default='0'),
+
         sa.Column('parent_author_id', sa.Integer, nullable=False),
         sa.Column('parent_permlink_id', sa.Integer, nullable=False),
         sa.Column('curator_payout_value', sa.String(16), nullable=False, server_default=''),
@@ -231,9 +245,9 @@ def build_metadata():
         'hive_state', metadata,
         sa.Column('block_num', sa.Integer, primary_key=True, autoincrement=False),
         sa.Column('db_version', sa.Integer, nullable=False),
-        sa.Column('steem_per_mvest', sa.types.DECIMAL(8, 3), nullable=False),
-        sa.Column('usd_per_steem', sa.types.DECIMAL(8, 3), nullable=False),
-        sa.Column('sbd_per_steem', sa.types.DECIMAL(8, 3), nullable=False),
+        sa.Column('steem_per_mvest', sa.types.DECIMAL(14, 6), nullable=False),
+        sa.Column('usd_per_steem', sa.types.DECIMAL(14, 6), nullable=False),
+        sa.Column('sbd_per_steem', sa.types.DECIMAL(14, 6), nullable=False),
         sa.Column('dgpo', sa.Text, nullable=False),
     )
 
@@ -337,7 +351,10 @@ def setup(db):
         "INSERT INTO hive_accounts (name, created_at) VALUES ('miners',    '2016-03-24 16:05:00')",
         "INSERT INTO hive_accounts (name, created_at) VALUES ('null',      '2016-03-24 16:05:00')",
         "INSERT INTO hive_accounts (name, created_at) VALUES ('temp',      '2016-03-24 16:05:00')",
-        "INSERT INTO hive_accounts (name, created_at) VALUES ('initminer', '2016-03-24 16:05:00')"]
+        "INSERT INTO hive_accounts (name, created_at) VALUES ('initminer', '2016-03-24 16:05:00')",
+        "INSERT INTO hive_accounts (name, created_at) VALUES ('', '1990-01-01T00:00:00') ON CONFLICT (name) DO NOTHING",
+        "INSERT INTO hive_permlink_data (permlink) VALUES ('') ON CONFLICT (permlink) DO NOTHING",
+        "INSERT INTO hive_category_data (category) VALUES ('') ON CONFLICT (category) DO NOTHING"]
     for sql in sqls:
         db.query(sql)
 

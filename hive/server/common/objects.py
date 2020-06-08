@@ -60,7 +60,7 @@ def condenser_post_object(row, truncate_body=0):
 
     post['replies'] = []
     post['body_length'] = len(row['body'])
-    post['active_votes'] = _hydrate_active_votes(row['votes'])
+    post['active_votes'] = json.loads(row['votes'])
     #post['author_reputation'] = rep_to_raw(row['author_rep'])
 
     post['root_author'] = row['root_author']

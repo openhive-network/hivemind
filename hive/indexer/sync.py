@@ -159,7 +159,7 @@ class Sync:
             timer.batch_lap()
 
             # process blocks
-            Blocks.process_multi(blocks, is_initial_sync)
+            Blocks.process_multi(blocks, steemd, is_initial_sync)
             timer.batch_finish(len(blocks))
 
             _prefix = ("[SYNC] Got block %d @ %s" % (
@@ -192,7 +192,7 @@ class Sync:
             start_time = perf()
 
             self._db.query("START TRANSACTION")
-            num = Blocks.process(block)
+            num = Blocks.process(block, steemd)
             follows = Follow.flush(trx=False)
             accts = Accounts.flush(steemd, trx=False, spread=8)
             CachedPost.dirty_paidouts(block['timestamp'])
@@ -221,6 +221,10 @@ class Sync:
     def _update_chain_state(self):
         """Update basic state props (head block, feed price) in db."""
         state = self._steem.gdgp_extended()
+        print("======================")
+        print(state['steem_per_mvest'])
+        print(state['usd_per_steem'])
+        print(state['sbd_per_steem'])
         self._db.query("""UPDATE hive_state SET block_num = :block_num,
                        steem_per_mvest = :spm, usd_per_steem = :ups,
                        sbd_per_steem = :sps, dgpo = :dgpo""",

@@ -84,11 +84,12 @@ class HttpClient(object):
     METHOD_API = dict(
         lookup_accounts='condenser_api',
         get_block='block_api',
-        get_content='condenser_api',
         get_accounts='condenser_api',
         get_order_book='condenser_api',
         get_feed_history='condenser_api',
         get_dynamic_global_properties='database_api',
+        list_votes='database_api',
+        get_comment_pending_payouts='database_api',
     )
 
     def __init__(self, nodes, **kwargs):
