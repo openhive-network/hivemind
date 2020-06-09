@@ -69,7 +69,7 @@ async def get_post_id_by_author_and_permlink(db, author: str, permlink: str, lim
 @return_error_info
 async def list_comments(context, start: list, limit: int, order: str):
     """Returns all comments, starting with the specified options."""
-    print("Hivemind native list_comments")
+
     supported_order_list = ['by_cashout_time', 'by_permlink', 'by_root', 'by_parent', 'by_update', 'by_author_last_update']
     assert order in supported_order_list, "Unsupported order, valid orders: {}".format(", ".join(supported_order_list))
     limit = valid_limit(limit, 1000)

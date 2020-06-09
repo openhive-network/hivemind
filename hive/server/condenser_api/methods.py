@@ -554,7 +554,6 @@ async def _get_blog(db, account: str, start_index: int, limit: int = None):
 @return_error_info
 async def get_accounts(context, accounts: list):
     """Returns accounts data for accounts given in list"""
-    print("Hivemind native get_accounts")
     assert accounts, "Empty parameters are not supported"
     assert len(accounts) < 1000, "Query exceeds limit"
 

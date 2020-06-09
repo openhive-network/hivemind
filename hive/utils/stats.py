@@ -90,7 +90,8 @@ class SteemStats(StatsAbstract):
         'get_feed_history': 20,
         'lookup_accounts': 1000,
         'list_votes':1000,
-        'get_comment_pending_payouts':1000
+        'get_comment_pending_payouts':1000,
+        'get_ops_in_block':500
     }
 
     def __init__(self):

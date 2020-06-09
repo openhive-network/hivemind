@@ -221,10 +221,6 @@ class Sync:
     def _update_chain_state(self):
         """Update basic state props (head block, feed price) in db."""
         state = self._steem.gdgp_extended()
-        print("======================")
-        print(state['steem_per_mvest'])
-        print(state['usd_per_steem'])
-        print(state['sbd_per_steem'])
         self._db.query("""UPDATE hive_state SET block_num = :block_num,
                        steem_per_mvest = :spm, usd_per_steem = :ups,
                        sbd_per_steem = :sps, dgpo = :dgpo""",

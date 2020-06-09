@@ -90,6 +90,7 @@ class HttpClient(object):
         get_dynamic_global_properties='database_api',
         list_votes='database_api',
         get_comment_pending_payouts='database_api',
+        get_ops_in_block='account_history_api'
     )
 
     def __init__(self, nodes, **kwargs):

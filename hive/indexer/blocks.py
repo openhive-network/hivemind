@@ -109,7 +109,7 @@ class Blocks:
                     if not is_initial_sync:
                         Accounts.dirty(op['author']) # lite - rep
                         Accounts.dirty(op['voter']) # lite - stats
-                        Posts.vote_op(op)
+                        Posts.vote_op(hived, op)
 
                 # misc ops
                 elif op_type == 'transfer_operation':
@@ -117,6 +117,29 @@ class Blocks:
                 elif op_type == 'custom_json_operation':
                     json_ops.append(op)
 
+        comment_payout_ops = {}
+        for vop in hived.get_virtual_operations(num):
+            key = None
+            val = None
+            if vop['op']['type'] == 'curation_reward_operation':
+                key = "{}/{}".format(vop['op']['value']['comment_author'], vop['op']['value']['comment_permlink'])
+                val = {'reward' : vop['op']['value']['reward']}
+
+            if vop['op']['type'] == 'author_reward_operation':
+                key = "{}/{}".format(vop['op']['value']['author'], vop['op']['value']['permlink'])
+                val = {'hbd_payout':vop['op']['value']['hbd_payout'], 'hive_payout':vop['op']['value']['hive_payout'], 'vesting_payout':vop['op']['value']['vesting_payout']}
+
+            if vop['op']['type'] == 'comment_reward_operation':
+                key = "{}/{}".format(vop['op']['value']['author'], vop['op']['value']['permlink'])
+                val = {'payout':vop['op']['value']['payout']}
+
+            if key is not None and val is not None:
+                if key in comment_payout_ops:
+                    comment_payout_ops[key].append({vop['op']['type']:val})
+                else:
+                    comment_payout_ops[key] = [{vop['op']['type']:val}]
+        if comment_payout_ops:
+            Posts.comment_payout_op(comment_payout_ops, date)
         CustomOp.process_ops(json_ops, num, date)  # follow/reblog/community ops
 
         return num

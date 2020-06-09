@@ -13,7 +13,7 @@ from hive.indexer.cached_post import CachedPost
 from hive.indexer.feed_cache import FeedCache
 from hive.indexer.community import Community, START_DATE
 from hive.indexer.notify import Notify
-from hive.utils.normalize import legacy_amount
+from hive.utils.normalize import legacy_amount, parse_amount
 
 log = logging.getLogger(__name__)
 DB = Db.instance()
@@ -136,15 +136,57 @@ class Posts:
             cls.undelete(op, block_date, pid)
 
     @classmethod
-    def vote_op(cls, op):
+    def vote_op(cls, hived, op):
         """ Vote operation processing """
         pid = cls.get_id(op['author'], op['permlink'])
         assert pid, "Post does not exists in the database"
+        votes = hived.get_votes(op['author'], op['permlink'])
+        sql = """
+            UPDATE 
+                hive_post_data 
+            SET 
+                votes = :votes
+            WHERE id = :id"""
+
+        DB.query(sql, id=pid, votes=dumps(votes))
+
+    @classmethod
+    def comment_payout_op(cls, ops, date):
+        """ Process comment payment operations """
+        for k, v in ops.items():
+            author, permlink = k.split("/")
+            pid = cls.get_id(author, permlink)
+            curator_rewards_sum = 0
+            author_rewards = ''
+            comment_author_reward = None
+            print(v)
+            for operation in v:
+                for op, value in operation.items():
+                    if op == 'curation_reward_operation':
+                        curator_rewards_sum = curator_rewards_sum + int(value['reward']['amount'])
+                    if op == 'author_reward_operation':
+                        author_rewards = "{}, {}, {}".format(legacy_amount(value['hbd_payout']), legacy_amount(value['hive_payout']), legacy_amount(value['vesting_payout']))
+                    if op == 'comment_reward_operation':
+                        comment_author_reward = value['payout']
+                curator_rewards = {'amount' : str(curator_rewards_sum), 'precision': 6, 'nai': '@@000000037'}
+            print("COMMENT OP REWARDS ==> {}/{} > AUTHOR > {} > CURATORS > {} > TOTAL > {}".format(author, permlink, author_rewards, legacy_amount(curator_rewards), legacy_amount(comment_author_reward)))
+            raise RuntimeError("Comment payout op")
+            sql = """UPDATE
+                        hive_posts
+                    SET
+                        total_payout_value = :total_payout_value,
+                        curator_payout_value = :curator_payout_value,
+                        max_accepted_payout = :max_accepted_payout,
+                        author_rewards = :author_rewards,
+                        last_payout = :last_payout,
+                        cashout_time = :cashout_time,
+                        is_paidout = true
+                    WHERE id = :id
+            """
 
     @classmethod
     def insert(cls, hived, op, date):
         """Inserts new post records."""
-        print(op)
 
         # inserting new post
         # * Check for permlink, parent_permlink, root_permlink
@@ -153,7 +195,6 @@ class Posts:
         # * insert post basic data
         # * obtain id
         # * insert post content data
-        print(op)
 
         # add permlinks to permlink table
         for permlink in ['permlink', 'parent_permlink', 'root_permlink']:
@@ -189,8 +230,6 @@ class Posts:
                 (SELECT id FROM hive_permlink_data WHERE permlink = :root_permlink)
             )"""
         sql += ";SELECT currval(pg_get_serial_sequence('hive_posts','id'))"
-
-        print(post)
 
         result = DB.query(sql, **post)
         post['id'] = int(list(result)[0][0])

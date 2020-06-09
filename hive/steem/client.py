@@ -1,4 +1,5 @@
 """Tight and reliable steem API client for hive indexer."""
+import logging
 
 from time import perf_counter as perf
 from decimal import Decimal
@@ -7,6 +8,8 @@ from hive.utils.stats import Stats
 from hive.utils.normalize import parse_amount, steem_amount, vests_amount
 from hive.steem.http_client import HttpClient
 from hive.steem.block.stream import BlockStream
+
+logger = logging.getLogger(__name__)
 
 class SteemClient:
     """Handles upstream calls to jussi/steemd, with batching and retrying."""
@@ -21,10 +24,11 @@ class SteemClient:
         self._max_workers = max_workers
         self._client = dict()
         for endpoint, endpoint_url in url.items():
-            print("Endpoint {} will be routed to node {}".format(endpoint, endpoint_url))
+            logger.info("Endpoint %s will be routed to node %s" % (endpoint, endpoint_url))
             self._client[endpoint] = HttpClient(nodes=[endpoint_url])
 
-    def get_accounts(self, accounts):
+    def get_accounts(self, acc):
+        accounts = [v for v in acc if v != '']
         """Fetch multiple accounts by name."""
         assert accounts, "no accounts passed to get_accounts"
         assert len(accounts) <= 1000, "max 1000 accounts"
@@ -84,7 +88,6 @@ class SteemClient:
     def gdgp_extended(self):
         """Get dynamic global props without the cruft plus useful bits."""
         dgpo = self._gdgp()
-        print(dgpo)
 
         # remove unused/deprecated keys
         unused = ['total_pow', 'num_pow_witnesses', 'confidential_supply',
@@ -102,7 +105,6 @@ class SteemClient:
 
     @staticmethod
     def _get_steem_per_mvest(dgpo):
-        print("DGPO: ", dgpo)
         steem = steem_amount(dgpo['total_vesting_fund_hive'])
         mvests = vests_amount(dgpo['total_vesting_shares']) / Decimal(1e6)
         return "%.6f" % (steem / mvests)
@@ -119,7 +121,7 @@ class SteemClient:
 
     def _get_steem_price(self):
         orders = self.__exec('get_order_book', [1])
-        if orders['asks'] and orders[bids]:
+        if orders['asks'] and orders['bids']:
             ask = Decimal(orders['asks'][0]['real_price'])
             bid = Decimal(orders['bids'][0]['real_price'])
             price = (ask + bid) / 2
@@ -140,10 +142,14 @@ class SteemClient:
 
         return [blocks[x] for x in block_nums]
 
+    def get_virtual_operations(self, block):
+        """ Get virtual ops from block """
+        ret = self.__exec('get_ops_in_block', {"block_num":block, "only_virtual":True})
+        return ret['ops'] if 'ops' in ret else [] 
+
     def get_comment_pending_payouts(self, comments):
         """ Get comment pending payout data """
         ret = self.__exec('get_comment_pending_payouts', {'comments':comments})
-        print(ret)
         return ret['cashout_infos']
 
     def get_votes(self, author, permlink):
