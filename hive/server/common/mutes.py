@@ -13,14 +13,14 @@ WITH blacklisted_users AS (
     SELECT following, 'my_blacklist' AS source FROM hive_follows WHERE follower =
         (SELECT id FROM hive_accounts WHERE name = :observer )
     AND blacklisted
-    UNION
+    UNION ALL
     SELECT following, 'my_followed_blacklists' AS source FROM hive_follows WHERE follower IN
     (SELECT following FROM hive_follows WHERE follower =
         (SELECT id FROM hive_accounts WHERE name = :observer )
     AND follow_blacklists) AND blacklisted
 )
 SELECT hive_accounts.name, blacklisted_users.source FROM
-hive_accounts JOIN blacklisted_users ON (hive_accounts.id = blacklisted_users.following)
+blacklisted_users JOIN hive_accounts ON (hive_accounts.id = blacklisted_users.following)
 """
 
 def _read_url(url):
