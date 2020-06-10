@@ -89,9 +89,10 @@ class SteemStats(StatsAbstract):
         'get_order_book': 20,
         'get_feed_history': 20,
         'lookup_accounts': 1000,
-        'list_votes':1000,
+        'find_votes':1000,
         'get_comment_pending_payouts':1000,
-        'get_ops_in_block':500
+        'get_ops_in_block':500,
+        'get_current_price_feed':50
     }
 
     def __init__(self):

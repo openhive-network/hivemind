@@ -189,3 +189,4 @@ def asset_to_hbd_hive(price, asset):
     elif asset['nai'] == price['quote']['nai']:
         result = int(asset['amount']) * int(price['base']['amount']) / int(price['quote']['amount'])
         return {'amount' : result, 'nai' : price['base']['nai'], 'precision' : price['base']['precision']}
+    raise ValueError("Asset not supported")

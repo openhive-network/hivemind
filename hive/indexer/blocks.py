@@ -6,7 +6,6 @@ from hive.db.adapter import Db
 
 from hive.indexer.accounts import Accounts
 from hive.indexer.posts import Posts
-from hive.indexer.cached_post import CachedPost
 from hive.indexer.custom_op import CustomOp
 from hive.indexer.payments import Payments
 from hive.indexer.follow import Follow
@@ -116,7 +115,10 @@ class Blocks:
                     Payments.op_transfer(op, tx_idx, num, date)
                 elif op_type == 'custom_json_operation':
                     json_ops.append(op)
+        # follow/reblog/community ops
+        CustomOp.process_ops(json_ops, num, date)
 
+        # virtual ops
         comment_payout_ops = {}
         for vop in hived.get_virtual_operations(num):
             key = None
@@ -139,8 +141,8 @@ class Blocks:
                 else:
                     comment_payout_ops[key] = [{vop['op']['type']:val}]
         if comment_payout_ops:
-            Posts.comment_payout_op(comment_payout_ops, date)
-        CustomOp.process_ops(json_ops, num, date)  # follow/reblog/community ops
+            price = hived.get_price()
+            Posts.comment_payout_op(comment_payout_ops, date, price)
 
         return num
 
@@ -244,7 +246,7 @@ class Blocks:
             # remove all recent records -- core
             DB.query("DELETE FROM hive_feed_cache  WHERE created_at >= :date", date=date)
             DB.query("DELETE FROM hive_reblogs     WHERE created_at >= :date", date=date)
-            DB.query("DELETE FROM hive_follows     WHERE created_at >= :date", date=date) #*
+            DB.query("DELETE FROM hive_follows     WHERE created_at >= :date", date=date)
 
             # remove posts: core, tags, cache entries
             if post_ids:

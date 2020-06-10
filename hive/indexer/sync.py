@@ -66,7 +66,7 @@ class Sync:
             Blocks.verify_head(self._steem)
 
             # perform cleanup if process did not exit cleanly
-            CachedPost.recover_missing_posts(self._steem)
+            # CachedPost.recover_missing_posts(self._steem)
 
         #audit_cache_missing(self._db, self._steem)
         #audit_cache_deleted(self._db)
@@ -85,8 +85,8 @@ class Sync:
             self.from_steemd()
 
             # take care of payout backlog
-            CachedPost.dirty_paidouts(Blocks.head_date())
-            #CachedPost.flush(self._steem, trx=True)
+            # CachedPost.dirty_paidouts(Blocks.head_date())
+            # CachedPost.flush(self._steem, trx=True)
 
             try:
                 # listen for new blocks
@@ -104,7 +104,7 @@ class Sync:
         self.from_steemd(is_initial_sync=True)
 
         log.info("[INIT] *** Initial cache build ***")
-        CachedPost.recover_missing_posts(self._steem)
+        # CachedPost.recover_missing_posts(self._steem)
         FeedCache.rebuild()
         Follow.force_recount()
 
@@ -195,8 +195,8 @@ class Sync:
             num = Blocks.process(block, steemd)
             follows = Follow.flush(trx=False)
             accts = Accounts.flush(steemd, trx=False, spread=8)
-            CachedPost.dirty_paidouts(block['timestamp'])
-            #cnt = CachedPost.flush(steemd, trx=False)
+            # CachedPost.dirty_paidouts(block['timestamp'])
+            # cnt = CachedPost.flush(steemd, trx=False)
             self._db.query("COMMIT")
 
             ms = (perf() - start_time) * 1000

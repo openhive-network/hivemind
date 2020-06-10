@@ -9,11 +9,10 @@ from hive.db.adapter import Db
 from hive.db.db_state import DbState
 
 from hive.indexer.accounts import Accounts
-from hive.indexer.cached_post import CachedPost
 from hive.indexer.feed_cache import FeedCache
 from hive.indexer.community import Community, START_DATE
 from hive.indexer.notify import Notify
-from hive.utils.normalize import legacy_amount, parse_amount
+from hive.utils.normalize import legacy_amount, asset_to_hbd_hive
 
 log = logging.getLogger(__name__)
 DB = Db.instance()
@@ -151,38 +150,39 @@ class Posts:
         DB.query(sql, id=pid, votes=dumps(votes))
 
     @classmethod
-    def comment_payout_op(cls, ops, date):
+    def comment_payout_op(cls, ops, date, price):
         """ Process comment payment operations """
         for k, v in ops.items():
             author, permlink = k.split("/")
             pid = cls.get_id(author, permlink)
             curator_rewards_sum = 0
-            author_rewards = ''
+            author_rewards_sum = 0
             comment_author_reward = None
-            print(v)
             for operation in v:
                 for op, value in operation.items():
                     if op == 'curation_reward_operation':
                         curator_rewards_sum = curator_rewards_sum + int(value['reward']['amount'])
                     if op == 'author_reward_operation':
-                        author_rewards = "{}, {}, {}".format(legacy_amount(value['hbd_payout']), legacy_amount(value['hive_payout']), legacy_amount(value['vesting_payout']))
+                        hive_to_hbd = asset_to_hbd_hive(price, value['hive_payout'])
+                        author_rewards_sum = int(hive_to_hbd['amount']) + int(value['hbd_payout']['amount'])
                     if op == 'comment_reward_operation':
                         comment_author_reward = value['payout']
-                curator_rewards = {'amount' : str(curator_rewards_sum), 'precision': 6, 'nai': '@@000000037'}
-            print("COMMENT OP REWARDS ==> {}/{} > AUTHOR > {} > CURATORS > {} > TOTAL > {}".format(author, permlink, author_rewards, legacy_amount(curator_rewards), legacy_amount(comment_author_reward)))
-            raise RuntimeError("Comment payout op")
+            curator_rewards = {'amount' : str(curator_rewards_sum), 'precision': 6, 'nai': '@@000000037'}
             sql = """UPDATE
                         hive_posts
                     SET
                         total_payout_value = :total_payout_value,
                         curator_payout_value = :curator_payout_value,
-                        max_accepted_payout = :max_accepted_payout,
                         author_rewards = :author_rewards,
                         last_payout = :last_payout,
                         cashout_time = :cashout_time,
                         is_paidout = true
                     WHERE id = :id
             """
+            DB.query(sql, total_payout_value=legacy_amount(comment_author_reward),
+                     curator_payout_value=legacy_amount(curator_rewards),
+                     author_rewards=author_rewards_sum, last_payout=date,
+                     cashout_time=date, id=pid)
 
     @classmethod
     def insert(cls, hived, op, date):
@@ -245,7 +245,7 @@ class Posts:
                         max_accepted_payout = :max_accepted_payout,
                         author_rewards = :author_rewards,
                         children_abs_rshares = :children_abs_rshares,
-                        net_rshares = :net_rshares,
+                        rshares = :net_rshares,
                         abs_rshares = :abs_rshares,
                         vote_rshares = :vote_rshares,
                         net_votes = :net_votes,
@@ -298,11 +298,20 @@ class Posts:
                 author_id = Accounts.get_id(post['author'])
                 Notify('error', dst_id=author_id, when=date,
                        post_id=post['id'], payload=post['error']).write()
-            # TODO: [DK] Remove CachedPost
-            # CachedPost.insert(op['author'], op['permlink'], post['id'])
             if op['parent_author']: # update parent's child count
-                CachedPost.recount(op['parent_author'], op['parent_permlink'], post['parent_id'])
+                cls.update_child_count(post['parent_id'])
             cls._insert_feed_cache(post)
+
+    @classmethod
+    def update_child_count(cls, parent_id, op='+'):
+        """ Increase/decrease child count by 1 """
+        sql = """
+            UPDATE 
+                hive_posts 
+            SET 
+                children = (SELECT children FROM hive_posts WHERE id = :id) :op 1
+            WHERE id = :id"""
+        DB.query(sql, id=parent_id, op=op)
 
     @classmethod
     def undelete(cls, op, date, pid):
@@ -328,9 +337,6 @@ class Posts:
                 author_id = Accounts.get_id(post['author'])
                 Notify('error', dst_id=author_id, when=date,
                        post_id=post['id'], payload=post['error']).write()
-
-            # TODO: [DK] Remove CachedPost
-            #CachedPost.undelete(pid, post['author'], post['permlink'], post['category'])
             cls._insert_feed_cache(post)
 
     @classmethod
@@ -340,8 +346,6 @@ class Posts:
         DB.query("UPDATE hive_posts SET is_deleted = '1' WHERE id = :id", id=pid)
 
         if not DbState.is_initial_sync():
-            # TODO: [DK] Remove CachedPost
-            #CachedPost.delete(pid, op['author'], op['permlink'])
             if depth == 0:
                 # TODO: delete from hive_reblogs -- otherwise feed cache gets 
                 # populated with deleted posts somwrimas
@@ -349,8 +353,7 @@ class Posts:
             else:
                 # force parent child recount when child is deleted
                 prnt = cls._get_parent_by_child_id(pid)
-                CachedPost.recount(prnt['author'], prnt['permlink'], prnt['id'])
-
+                cls.update_child_count(prnt['id'], '-')
 
     @classmethod
     def update(cls, hived, op, date, pid):
@@ -360,8 +363,7 @@ class Posts:
         a signal to update cache record.
         """
         # pylint: disable=unused-argument
-        #if not DbState.is_initial_sync():
-        #    CachedPost.update(op['author'], op['permlink'], pid)
+
         # add category to category table
         if 'category' in op:
             sql = """
@@ -399,7 +401,7 @@ class Posts:
                         max_accepted_payout = :max_accepted_payout,
                         author_rewards = :author_rewards,
                         children_abs_rshares = :children_abs_rshares,
-                        net_rshares = :net_rshares,
+                        rshares = :net_rshares,
                         abs_rshares = :abs_rshares,
                         vote_rshares = :vote_rshares,
                         net_votes = :net_votes,
@@ -435,7 +437,6 @@ class Posts:
                     id=pid
             )
 
-        votes = hived.get_votes(op['author'], op['permlink'])
         sql = """
             UPDATE 
                 hive_post_data 
@@ -444,14 +445,13 @@ class Posts:
                 preview = :preview, 
                 img_url = :img_url, 
                 body = :body, 
-                votes = :votes, 
                 json = :json
             WHERE id = :id"""
 
         DB.query(sql, id=pid, title=op['title'],
                  preview=op['preview'] if 'preview' in op else "",
                  img_url=op['img_url'] if 'img_url' in op else "",
-                 body=op['body'], votes=dumps(votes),
+                 body=op['body'],
                  json=op['json_metadata'] if op['json_metadata'] else '{}')
 
     @classmethod
@@ -518,7 +518,17 @@ class Posts:
             if not is_valid: error = 'replying to invalid post'
             elif is_muted: error = 'replying to muted post'
             #find root comment
-
+            root_id = cls.find_root(op['author'], op['permlink'])
+            sql = """
+                SELECT 
+                    ha_a.name as author, hpd_p.permlink as permlink
+                FROM 
+                    hive_posts hp
+                LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+                LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+                WHERE 
+                    hp.id = :id"""
+            root_author, root_permlink = DB.query_row(sql, id=root_id)
 
         # check post validity in specified context
         error = None

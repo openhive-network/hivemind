@@ -31,7 +31,7 @@ def post_to_internal(post, post_id, level='insert', promoted=None):
     #post['gray'] = core['is_muted']
     #post['hide'] = not core['is_valid']
 
-    values = [('post_id', post_id)]
+    values = [('id', post_id)]
 
     # immutable; write only once (*edge case: undeleted posts)
     if level == 'insert':

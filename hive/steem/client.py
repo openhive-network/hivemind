@@ -154,13 +154,13 @@ class SteemClient:
 
     def get_votes(self, author, permlink):
         """ Get list of votes """
-        call = self.__exec("list_votes", {'start':[author, permlink, ""],
-                                                      'limit':1000, 'order':'by_comment_voter'})
-        ret = []
-        for vote in call['votes']:
-            if vote['author'] == author and vote['permlink'] == permlink:
-                ret.append(vote)
-        return ret
+        call = self.__exec("find_votes", {'author':author, 'permlink':permlink})
+        return call['votes']
+
+    def get_price(self):
+        """ Get current price feed """
+        call = self.__exec("get_current_price_feed")
+        return call
 
     def __exec(self, method, params=None):
         """Perform a single steemd call."""
