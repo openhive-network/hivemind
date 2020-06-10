@@ -66,13 +66,13 @@ CREATE INDEX IF NOT EXISTS hive_category_data_category_c_idx ON hive_category_da
 -- RAISE NOTICE 'Table to hold post data';
 CREATE TABLE IF NOT EXISTS hive_posts_new (
   id INT NOT NULL,
-  parent_id INT DEFAULT '-1',
+  parent_id INT,
   author_id INT NOT NULL,
   permlink_id INT NOT NULL,
-  category_id INT DEFAULT '1',
+  category_id INT NOT NULL,
   community_id INT,
-  created_at DATE DEFAULT '1970-01-01T00:00:00',
-  depth SMALLINT DEFAULT '-1',
+  created_at DATE NOT NULL,
+  depth SMALLINT DEFAULT '0',
   is_deleted BOOLEAN DEFAULT '0',
   is_pinned BOOLEAN DEFAULT '0',
   is_muted BOOLEAN DEFAULT '0',
@@ -80,13 +80,13 @@ CREATE TABLE IF NOT EXISTS hive_posts_new (
   promoted NUMERIC(10, 3) DEFAULT '0.0',
   
   -- important/index
-  children SMALLINT DEFAULT '-1',
+  children SMALLINT DEFAULT '0',
 
   -- basic/extended-stats
   author_rep NUMERIC(6) DEFAULT '0.0',
   flag_weight NUMERIC(6) DEFAULT '0.0',
-  total_votes INT DEFAULT '-1',
-  up_votes INT DEFAULT '-1',
+  total_votes INT DEFAULT '0',
+  up_votes INT DEFAULT '0',
   
   -- core stats/indexes
   payout NUMERIC(10, 3) DEFAULT '0.0',
@@ -329,23 +329,23 @@ CREATE INDEX IF NOT EXISTS hive_posts_sc_hot_idx ON hive_posts (sc_hot);
 CREATE INDEX IF NOT EXISTS hive_posts_created_at_idx ON hive_posts (created_at);
 
 -- Create a materialized view and associated index to significantly speedup query for hive_posts
-drop materialized view if exists hive_posts_a_p;
+DROP MATERIALIZED VIEW IF EXISTS hive_posts_a_p;
 
-create materialized view hive_posts_a_p
-as
-select hp.id as id,
-       ha_a.name as author,
-       hpd_p.permlink as permlink
+CREATE MATERIALIZED VIEW hive_posts_a_p
+AS
+SELECT hp.id AS id,
+       ha_a.name AS author,
+       hpd_p.permlink AS permlink
 FROM hive_posts hp
-inner JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-inner JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-with data
+INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+WITH DATA
 ;
 
-drop index if exists hive_posts_a_p_idx;
+DROP INDEX IF EXISTS hive_posts_a_p_idx;
 
-create unique index hive_posts_a_p_idx
-on hive_posts_a_p
+CREATE unique index hive_posts_a_p_idx
+ON hive_posts_a_p
 (author collate "C", permlink collate "C")
 ;
 
