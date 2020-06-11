@@ -5,6 +5,7 @@ from time import perf_counter as perf
 from urllib.request import urlopen, Request
 import ujson as json
 from hive.server.common.helpers import valid_account
+from hive.db.adapter import Db
 
 log = logging.getLogger(__name__)
 
@@ -13,14 +14,13 @@ WITH blacklisted_users AS (
     SELECT following, 'my_blacklist' AS source FROM hive_follows WHERE follower =
         (SELECT id FROM hive_accounts WHERE name = :observer )
     AND blacklisted
-    UNION ALL
+    UNION
     SELECT following, 'my_followed_blacklists' AS source FROM hive_follows WHERE follower IN
     (SELECT following FROM hive_follows WHERE follower =
         (SELECT id FROM hive_accounts WHERE name = :observer )
     AND follow_blacklists) AND blacklisted
 )
-SELECT hive_accounts.name, blacklisted_users.source FROM
-blacklisted_users JOIN hive_accounts ON (hive_accounts.id = blacklisted_users.following)
+SELECT following, source FROM blacklisted_users
 """
 
 def _read_url(url):
@@ -36,6 +36,7 @@ class Mutes:
     blist = set() # list/any-blacklist
     blist_map = dict() # cached account-list map
     fetched = None
+    all_accounts = dict()
 
     @classmethod
     def instance(cls):
@@ -62,6 +63,13 @@ class Mutes:
         jsn = _read_url(self.blacklist_api_url + "/blacklists")
         self.blist = set(json.loads(jsn))
         log.warning("%d muted, %d blacklisted", len(self.accounts), len(self.blist))
+
+        self.all_accounts.clear()
+        sql = "select id, name from hive_accounts"
+        db = Db.instance()
+        sql_result = db.query_all(sql)
+        for row in sql_result:
+            self.all_accounts[row['id']] = row['name']
         self.fetched = perf()
 
     @classmethod
@@ -75,15 +83,19 @@ class Mutes:
         if not observer or not context:
             return {}
 
+        if perf() - cls.instance().fetched > 3600:
+            cls.instance().load()
+
         blacklisted_users = {}
 
         db = context['db']
         sql = GET_BLACKLISTED_ACCOUNTS_SQL
         sql_result = await db.query_all(sql, observer=observer)
         for row in sql_result:
-            if row['name'] not in blacklisted_users:
-                blacklisted_users[row['name']] = []
-            blacklisted_users[row['name']].append(row['source'])
+            account_name = cls.all_accounts[row['following']]
+            if account_name not in blacklisted_users:
+                blacklisted_users[account_name] = []
+            blacklisted_users[account_name].append(row['source'])
         return blacklisted_users
 
     @classmethod
