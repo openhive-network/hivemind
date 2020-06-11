@@ -35,18 +35,20 @@ class Posts:
     @classmethod
     def find_root(cls, author, permlink):
         """ Find root for post """
-        sql = """WITH parent AS
+        print("A: ", author, "P: ", permlink)
+
+        sql = """WITH RECURSIVE parent AS
         (
-            SELECT id, parent_id, 1 AS [level] from hive_posts WHERE id = (SELECT hp.id 
+            SELECT id, parent_id, 1 AS level from hive_posts WHERE id = (SELECT hp.id 
                 FROM hive_posts hp 
                 LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
                 LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
                 WHERE ha_a.name = :a AND hpd_p.permlink = :p)
             UNION ALL 
-            SELECT t.id, t.parent_id, [level] + 1 FROM parent
+            SELECT t.id, t.parent_id, level + 1 FROM parent
             INNER JOIN hive_posts t ON t.id =  parent.parent_id
         )
-        SELECT TOP 1 id FROM parent ORDER BY [level] DESC"""
+        SELECT id FROM parent ORDER BY level DESC LIMIT 1"""
         _id = DB.query_one(sql, a=author, p=permlink)
         return _id
 
@@ -187,6 +189,7 @@ class Posts:
     @classmethod
     def insert(cls, hived, op, date):
         """Inserts new post records."""
+        print("New Post")
 
         # inserting new post
         # * Check for permlink, parent_permlink, root_permlink
@@ -316,6 +319,7 @@ class Posts:
     @classmethod
     def undelete(cls, op, date, pid):
         """Re-allocates an existing record flagged as deleted."""
+        print("Undelete")
         # add category to category table
         if 'category' in op:
             sql = """
@@ -342,6 +346,8 @@ class Posts:
     @classmethod
     def delete(cls, op):
         """Marks a post record as being deleted."""
+        print("Delete post")
+
         pid, depth = cls.get_id_and_depth(op['author'], op['permlink'])
         DB.query("UPDATE hive_posts SET is_deleted = '1' WHERE id = :id", id=pid)
 
@@ -362,6 +368,7 @@ class Posts:
         Here we could also build content diffs, but for now just used
         a signal to update cache record.
         """
+        print("Update post")
         # pylint: disable=unused-argument
 
         # add category to category table
@@ -518,7 +525,7 @@ class Posts:
             if not is_valid: error = 'replying to invalid post'
             elif is_muted: error = 'replying to muted post'
             #find root comment
-            root_id = cls.find_root(op['author'], op['permlink'])
+            root_id = cls.find_root(op['parent_author'], op['parent_permlink'])
             sql = """
                 SELECT 
                     ha_a.name as author, hpd_p.permlink as permlink
