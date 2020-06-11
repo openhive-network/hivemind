@@ -28,8 +28,7 @@ SELECT_FRAGMENT = """
            hive_posts_cache.sc_trend AS sc_trend, hive_accounts.id AS acct_author_id,
            hive_posts.is_pinned AS is_pinned
            FROM hive_posts_cache JOIN hive_posts ON (hive_posts_cache.post_id = hive_posts.id)
-                                 JOIN hive_accounts ON (hive_posts_cache.author = hive_accounts.name)
-                                 JOIN hive_post_tags ON (hive_posts_cache.post_id = hive_post_tags.post_id)"""
+                                 JOIN hive_accounts ON (hive_posts_cache.author = hive_accounts.name)"""
 
 
 # Dummy
