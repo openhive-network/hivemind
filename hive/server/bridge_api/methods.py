@@ -85,13 +85,16 @@ async def get_post(context, author, permlink, observer=None):
     valid_account(author)
     valid_permlink(permlink)
 
+    blacklists_for_user = None
+    if observer and context:
+        blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
+
     sql = "---bridge_api.get_post\n" + SELECT_FRAGMENT + """ WHERE hive_posts_cache.author = :author AND hive_posts_cache.permlink = :permlink AND NOT hive_posts.is_deleted """
 
     result = await db.query_all(sql, author=author, permlink=permlink)
     assert len(result) == 1, 'invalid author/permlink or post not found in cache'
     post = _condenser_post_object(result[0])
-    blacklists_for_user = Mutes.get_blacklists_for_observer(observer, context)
-    post['blacklists'] = await append_statistics_to_post(post, result[0], False, blacklists_for_user)
+    post = await append_statistics_to_post(post, result[0], False, blacklists_for_user)
     return post
 
 @return_error_info
@@ -285,7 +288,7 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
     posts = []
     blacklists_for_user = None
     if observer:
-        blacklists_for_user = Mutes.get_blacklists_for_observer(observer, context)
+        blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
     sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit)
     for row in sql_result:
         post = _condenser_post_object(row)
@@ -328,3 +331,4 @@ async def get_relationship_between_accounts(context, account1, account2, observe
             result['follows_blacklists'] = True
 
     return result
+
