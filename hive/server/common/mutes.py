@@ -14,7 +14,7 @@ WITH blacklisted_users AS (
     SELECT following, 'my_blacklist' AS source FROM hive_follows WHERE follower =
         (SELECT id FROM hive_accounts WHERE name = :observer )
     AND blacklisted
-    UNION
+    UNION ALL
     SELECT following, 'my_followed_blacklists' AS source FROM hive_follows WHERE follower IN
     (SELECT following FROM hive_follows WHERE follower =
         (SELECT id FROM hive_accounts WHERE name = :observer )
