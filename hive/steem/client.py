@@ -154,8 +154,11 @@ class SteemClient:
 
     def get_votes(self, author, permlink):
         """ Get list of votes """
-        call = self.__exec("find_votes", {'author':author, 'permlink':permlink})
-        return call['votes']
+        try:
+            call = self.__exec("find_votes", {'author':author, 'permlink':permlink})
+            return call['votes']
+        except Exception as ex:
+            return []
 
     def get_price(self):
         """ Get current price feed """
