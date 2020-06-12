@@ -148,7 +148,8 @@ class HttpClient(object):
         body_data = json.dumps(body, ensure_ascii=False).encode('utf8')
 
         tries = 0
-        while tries < 100:
+        # changed number of tries to 25
+        while tries < 25:
             tries += 1
             secs = -1
             info = None
