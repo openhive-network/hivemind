@@ -113,7 +113,7 @@ def build_metadata():
 
         sa.Column('total_payout_value', sa.String(19), nullable=False, server_default=''),
         sa.Column('author_rewards', sa.Integer, nullable=False, server_default='0'),
-        sa.Column('children_abs_rshares', sa.Integer, nullable=False, server_default='0'),
+        sa.Column('children_abs_rshares', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('abs_rshares', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('vote_rshares', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('net_votes', sa.Integer, nullable=False, server_default='0'),

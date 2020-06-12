@@ -317,7 +317,7 @@ class Posts:
         else:
             sql += """children = (SELECT children FROM hive_posts WHERE id = :id) - 1"""
         sql += """ WHERE id = :id"""
-        DB.query(sql, id=parent_id, op=op)
+        DB.query(sql, id=parent_id)
 
     @classmethod
     def undelete(cls, op, date, pid):

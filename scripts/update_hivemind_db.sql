@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS hive_posts_new (
 
   total_payout_value VARCHAR(19) DEFAULT '',
   author_rewards INT DEFAULT '0',
-  children_abs_rshares INT DEFAULT '0',
+  children_abs_rshares BIGINT DEFAULT '0',
   abs_rshares BIGINT DEFAULT '0',
   vote_rshares BIGINT DEFAULT '0',
   net_votes INT DEFAULT '0',
