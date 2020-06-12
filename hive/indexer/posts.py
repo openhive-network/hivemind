@@ -325,7 +325,7 @@ class Posts:
         """ Increase/decrease child count by 1 """
         sql = """SELECT children FROM hive_posts WHERE id = :id"""
         query = DB.query_row(sql, id=parent_id)
-        children = int(query.get("children", 0))
+        children = int(query.children)
 
         if children == 32767:
             children = 0
