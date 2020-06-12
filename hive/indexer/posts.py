@@ -324,7 +324,7 @@ class Posts:
     def update_child_count(cls, parent_id, op='+'):
         """ Increase/decrease child count by 1 """
         sql = """SELECT children FROM hive_posts WHERE id = :id"""
-        children = int(DB.query(sql, id=parent_id))
+        children = int(DB.query_row(sql, id=parent_id))
         if children == 32767:
             children = 0
 
