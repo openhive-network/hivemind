@@ -347,14 +347,11 @@ class Posts:
         """Re-allocates an existing record flagged as deleted."""
         print("Undelete")
         # add category to category table
-        if 'category' in op:
-            sql = """
-                INSERT INTO hive_category_data (category) 
-                VALUES (:category) 
-                ON CONFLICT (category) DO NOTHING"""
-            DB.query(sql, category=op['category'])
 
-        sql = """UPDATE hive_posts SET is_valid = :is_valid,
+        sql = """INSERT INTO hive_category_data (category) 
+                    VALUES (:category) 
+                 ON CONFLICT (category) DO NOTHING;
+                 UPDATE hive_posts SET is_valid = :is_valid,
                    is_muted = :is_muted, is_deleted = '0', is_pinned = '0',
                    parent_id = :parent_id, category_id = (SELECT id FROM hive_category_data WHERE category = :category),
                    community_id = :community_id, depth = :depth
