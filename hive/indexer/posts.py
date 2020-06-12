@@ -141,7 +141,14 @@ class Posts:
         """ Vote operation processing """
         pid = cls.get_id(op['author'], op['permlink'])
         assert pid, "Post does not exists in the database"
-        votes = hived.get_votes(op['author'], op['permlink'])
+        votes = []
+        # think that the comment was deleted in the future
+        # and since we are syncing blocks from the past and asking for current version of votes with find_votes
+        # we are getting error that comment does not exists
+        try:
+            votes = hived.get_votes(op['author'], op['permlink'])
+        except Exception:
+            pass
         sql = """
             UPDATE 
                 hive_post_data 
@@ -286,7 +293,14 @@ class Posts:
             )
 
         # add content data to hive_post_data
-        votes = hived.get_votes(op['author'], op['permlink'])
+        votes = []
+        # think that the comment was deleted in the future
+        # and since we are syncing blocks from the past and asking for current version of votes with find_votes
+        # we are getting error that comment does not exists
+        try:
+            votes = hived.get_votes(op['author'], op['permlink'])
+        except Exception:
+            pass
         sql = """
             INSERT INTO hive_post_data (id, title, preview, img_url, body, 
                 votes, json) 
