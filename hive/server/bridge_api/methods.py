@@ -21,20 +21,20 @@ SQL_TEMPLATE = """
             community_id, 
             ha_a.name as author,
             hpd_p.permlink as permlink,
-            hpd.title as title, 
-            hpd.body as body, 
-            hcd.category as category, 
+            (SELECT title FROM hive_post_data WHERE hive_post_data.id = hp.id) as title, 
+            (SELECT body FROM hive_post_data WHERE hive_post_data.id = hp.id) as body, 
+            (SELECT category FROM hive_category_data WHERE hive_category_data.id = hp.category_id) as category,
             depth,
             promoted, 
             payout, 
             payout_at, 
             is_paidout, 
             children, 
-            hpd.votes as votes,
+            (SELECT votes FROM hive_post_data WHERE hive_post_data.id = hp.id) as votes,
             hp.created_at, 
             updated_at, 
             rshares, 
-            hpd.json as json,
+            (SELECT json FROM hive_post_data WHERE hive_post_data.id = hp.id) as json,
             is_hidden, 
             is_grayed, 
             total_votes, 
@@ -48,8 +48,6 @@ SQL_TEMPLATE = """
         FROM hive_posts hp
         LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
         LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
-        LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
         LEFT OUTER JOIN hive_communities ON (hp.community_id = hive_communities.id)
         LEFT OUTER JOIN hive_roles ON (ha_a.id = hive_roles.account_id AND hp.community_id = hive_roles.community_id)
     """

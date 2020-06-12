@@ -7,20 +7,20 @@ SQL_TEMPLATE = """
         community_id, 
         ha_a.name as author,
         hpd_p.permlink as permlink,
-        hpd.title as title, 
-        hpd.body as body, 
-        hcd.category as category, 
+        (SELECT title FROM hive_post_data WHERE hive_post_data.id = hp.id) as title, 
+        (SELECT body FROM hive_post_data WHERE hive_post_data.id = hp.id) as body, 
+        (SELECT category FROM hive_category_data WHERE hive_category_data.id = hp.category_id) as category,
         depth,
         promoted, 
         payout, 
         payout_at, 
         is_paidout, 
         children, 
-        hpd.votes as votes,
+        (SELECT votes FROM hive_post_data WHERE hive_post_data.id = hp.id) as votes,
         hp.created_at, 
         updated_at, 
         rshares, 
-        hpd.json as json,
+        (SELECT json FROM hive_post_data WHERE hive_post_data.id = hp.id) as json,
         is_hidden, 
         is_grayed, 
         total_votes, 
@@ -41,8 +41,6 @@ SQL_TEMPLATE = """
     FROM hive_posts hp
     LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
     LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-    LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
-    LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
     LEFT JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
     LEFT JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
     LEFT JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
@@ -94,7 +92,8 @@ async def list_comments(context, start: list, limit: int, order: str):
         assert len(start) == 2, "Expecting two arguments"
 
         sql = str(SQL_TEMPLATE)
-        sql += 'ha_a.name >= :author COLLATE "C" AND hpd_p.permlink >= :permlink COLLATE "C" ORDER BY ha_a.name COLLATE "C" ASC LIMIT :limit'
+        sql += """ hp.id IN (SELECT hp1.id FROM hive_posts_a_p hp1 WHERE hp1.author >= :author COLLATE "C" 
+          AND hp1.permlink >= :permlink COLLATE "C" ORDER BY hp1.author COLLATE "C" ASC LIMIT :limit)"""
 
         result = await db.query_all(sql, author=start[0], permlink=start[1], limit=limit)
         for row in result:
