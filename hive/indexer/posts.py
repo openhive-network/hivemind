@@ -311,9 +311,12 @@ class Posts:
         sql = """
             UPDATE 
                 hive_posts 
-            SET 
-                children = (SELECT children FROM hive_posts WHERE id = :id) :op 1
-            WHERE id = :id"""
+            SET """
+        if op == '+':
+            sql += """children = (SELECT children FROM hive_posts WHERE id = :id) + 1"""
+        else:
+            sql += """children = (SELECT children FROM hive_posts WHERE id = :id) - 1"""
+        sql += """ WHERE id = :id"""
         DB.query(sql, id=parent_id, op=op)
 
     @classmethod
