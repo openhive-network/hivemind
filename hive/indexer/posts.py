@@ -240,6 +240,7 @@ class Posts:
 
         comment_pending_payouts = hived.get_comment_pending_payouts([[op['author'], op['permlink']]])
         if comment_pending_payouts and 'cashout_info' in comment_pending_payouts[0]:
+            comment_pending_payouts = comment_pending_payouts[0]
             sql = """UPDATE
                         hive_posts
                     SET
@@ -403,6 +404,7 @@ class Posts:
 
         comment_pending_payouts = hived.get_comment_pending_payouts([[op['author'], op['permlink']]])
         if comment_pending_payouts and 'cashout_info' in comment_pending_payouts[0]:
+            comment_pending_payouts = comment_pending_payouts[0]
             sql = """UPDATE
                         hive_posts
                     SET
