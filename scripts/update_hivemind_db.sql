@@ -146,7 +146,6 @@ CREATE TABLE IF NOT EXISTS hive_post_data (
   preview VARCHAR(1024) NOT NULL,
   img_url VARCHAR(1024) NOT NULL,
   body TEXT,
-  votes TEXT,
   json JSON
 );
 CREATE INDEX IF NOT EXISTS hive_post_data_id_idx ON hive_post_data (id);
@@ -215,7 +214,26 @@ UPDATE hive_posts_new hpn SET (
 
 -- Populate table hive_post_data with bulk data from hive_posts_cache
 -- RAISE NOTICE 'Populate table hive_post_data with bulk data from hive_posts_cache';
-INSERT INTO hive_post_data (id, title, preview, img_url, body, votes, json) SELECT post_id, title, preview, img_url, body, votes, json::json FROM hive_posts_cache;
+INSERT INTO hive_post_data (id, title, preview, img_url, body, votes, json) SELECT post_id, title, preview, img_url, body, json::json FROM hive_posts_cache;
+
+-- Populate hive_votes table
+-- RAISE NOTICE 'Populate table hive_votes with bulk data from hive_posts_cache';
+INSERT INTO 
+    hive_votes (voter_id, author_id, permlink_id, rshares, vote_percent)
+SELECT 
+    (SELECT id from hive_accounts WHERE name = vote_data.regexp_split_to_array[1]) AS voter_id,
+    (SELECT author_id FROM hive_posts WHERE id = vote_data.id) AS author_id,
+    (SELECT permlink_id FROM hive_posts WHERE id = vote_data.id) AS permlink_id,  
+    (vote_data.regexp_split_to_array[2])::bigint AS rshares,
+    (vote_data.regexp_split_to_array[3])::int AS vote_percent
+FROM 
+    (SELECT 
+        votes.id, regexp_split_to_array(votes.regexp_split_to_table::text, E',') 
+     FROM 
+        (SELECT id, regexp_split_to_table(votes::text, E'\n') 
+         FROM hive_posts_cache) 
+    AS votes) 
+AS vote_data;
 
 -- Helper type for use with json_populate_record
 -- RAISE NOTICE 'Creating legacy_comment_data table';

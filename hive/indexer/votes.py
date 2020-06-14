@@ -84,4 +84,3 @@ class Votes:
         rshares = 0
         DB.query(sql, weight=weight, rshares=rshares, vote_percent=vote_percent, last_update=date,
                  id=vote_id)
-
