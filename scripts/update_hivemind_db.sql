@@ -151,6 +151,22 @@ CREATE TABLE IF NOT EXISTS hive_post_data (
 );
 CREATE INDEX IF NOT EXISTS hive_post_data_id_idx ON hive_post_data (id);
 
+CREATE TABLE IF NOT EXISTS hive_votes (
+  id BIGSERIAL PRIMARY KEY NOT NULL,
+  voter_id INT NOT NULL REFERENCES hive_accounts (id) ON DELETE RESTRICT,
+  author_id INT NOT NULL REFERENCES hive_accounts (id) ON DELETE RESTRICT,
+  permlink_id INT NOT NULL REFERENCES hive_permlink_data (id) ON DELETE RESTRICT,
+  weight BIGINT DEFAULT '0',
+  rshares BIGINT DEFAULT '0',
+  vote_percent INT DEFAULT '0',
+  last_update DATE DEFAULT '1970-01-01T00:00:00',
+  num_changes INT DEFAULT '0'
+);
+
+CREATE INDEX IF NOT EXISTS hive_votes_voter_id_idx ON hive_votes (voter_id);
+CREATE INDEX IF NOT EXISTS hive_votes_author_id_idx ON hive_votes (author_id);
+CREATE INDEX IF NOT EXISTS hive_votes_permlink_id_idx ON hive_votes (permlink_id);
+
 -- Copy data from hive_posts table to new table
 -- RAISE NOTICE 'Copy data from hive_posts table to new table';
 INSERT INTO hive_posts_new (

@@ -137,28 +137,6 @@ class Posts:
             cls.undelete(op, block_date, pid)
 
     @classmethod
-    def vote_op(cls, hived, op):
-        """ Vote operation processing """
-        pid = cls.get_id(op['author'], op['permlink'])
-        assert pid, "Post does not exists in the database"
-        votes = []
-        # think that the comment was deleted in the future
-        # and since we are syncing blocks from the past and asking for current version of votes with find_votes
-        # we are getting error that comment does not exists
-        try:
-            votes = hived.get_votes(op['author'], op['permlink'])
-        except Exception:
-            pass
-        sql = """
-            UPDATE 
-                hive_post_data 
-            SET 
-                votes = :votes
-            WHERE id = :id"""
-
-        DB.query(sql, id=pid, votes=dumps(votes))
-
-    @classmethod
     def comment_payout_op(cls, ops, date, price):
         """ Process comment payment operations """
         for k, v in ops.items():
@@ -325,7 +303,10 @@ class Posts:
         """ Increase/decrease child count by 1 """
         sql = """SELECT children FROM hive_posts WHERE id = :id"""
         query = DB.query_row(sql, id=parent_id)
-        children = int(query.children)
+
+        children = 0
+        if query is not None:
+            children = query.children
 
         if children == 32767:
             children = 0

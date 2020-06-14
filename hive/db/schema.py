@@ -184,6 +184,27 @@ def build_metadata():
     )
 
     sa.Table(
+        'hive_votes', metadata,
+        sa.Column('id', sa.BigInteger, primary_key=True),
+        sa.Column('voter_id', sa.Integer, nullable=False),
+        sa.Column('author_id', sa.Integer, nullable=False),
+        sa.Column('permlink_id', sa.Integer, nullable=False),
+        sa.Column('weight', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('rshares', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('vote_percent', sa.Integer, server_default='0'),
+        sa.Column('last_update', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
+        sa.Column('num_changes', sa.Integer, server_default='0'), 
+
+        sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),
+        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id']),
+        sa.ForeignKeyConstraint(['permlink_id'], ['hive_permlink_data.id']),
+
+        sa.Index('hive_votes_voter_id_idx', 'voter_id'),
+        sa.Index('hive_votes_author_id_idx', 'author_id'),
+        sa.Index('hive_votes_permlink_id_idx', 'permlink_id')
+    )
+
+    sa.Table(
         'hive_post_tags', metadata,
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('tag', sa.String(32), nullable=False),

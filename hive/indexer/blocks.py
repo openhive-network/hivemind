@@ -9,6 +9,7 @@ from hive.indexer.posts import Posts
 from hive.indexer.custom_op import CustomOp
 from hive.indexer.payments import Payments
 from hive.indexer.follow import Follow
+from hive.indexer.votes import Votes
 
 log = logging.getLogger(__name__)
 
@@ -105,11 +106,11 @@ class Blocks:
                 elif op_type == 'delete_comment_operation':
                     Posts.delete_op(op)
                 elif op_type == 'vote_operation':
+                    Votes.vote_op(op, date)
                     if not is_initial_sync:
                         Accounts.dirty(op['author']) # lite - rep
                         Accounts.dirty(op['voter']) # lite - stats
-                        Posts.vote_op(hived, op)
-
+                        
                 # misc ops
                 elif op_type == 'transfer_operation':
                     Payments.op_transfer(op, tx_idx, num, date)
