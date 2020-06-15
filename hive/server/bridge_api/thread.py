@@ -25,9 +25,10 @@ async def get_discussion(context, author, permlink, observer=None):
     sql = """
         ---get_discussion
         WITH RECURSIVE child_posts AS (
-            SELECT id, parent_id FROM hive_posts WHERE author = :author AND permlink = :permlink
-            UNION
+            SELECT id, parent_id FROM hive_posts WHERE author = :author AND permlink = :permlink AND NOT is_deleted AND NOT is_muted
+            UNION ALL
             SELECT children.id, children.parent_id FROM hive_posts children JOIN child_posts ON (children.parent_id = child_posts.id)
+            WHERE NOT children.is_deleted AND NOT children.is_muted
         )
         SELECT child_posts.id, child_posts.parent_id, hive_posts_cache.post_id, hive_posts_cache.author, hive_posts_cache.permlink,
            hive_posts_cache.title, hive_posts_cache.body, hive_posts_cache.category, hive_posts_cache.depth,
@@ -39,9 +40,7 @@ async def get_discussion(context, author, permlink, observer=None):
            hive_posts_cache.total_votes AS total_votes, hive_posts_cache.flag_weight AS flag_weight,
            hive_posts_cache.sc_trend AS sc_trend, hive_accounts.id AS acct_author_id
            FROM child_posts JOIN hive_posts_cache ON (child_posts.id = hive_posts_cache.post_id)
-                            JOIN hive_posts ON (hive_posts_cache.post_id = hive_posts.id)
                             JOIN hive_accounts ON (hive_posts_cache.author = hive_accounts.name)
-                            WHERE NOT hive_posts.is_deleted AND NOT hive_posts.is_muted
     """
 
     blacklists_for_user = None
