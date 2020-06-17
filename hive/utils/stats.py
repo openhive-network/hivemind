@@ -89,7 +89,6 @@ class SteemStats(StatsAbstract):
         'get_order_book': 20,
         'get_feed_history': 20,
         'lookup_accounts': 1000,
-        'find_votes':1000,
         'get_comment_pending_payouts':1000,
         'get_ops_in_block':500,
         'get_current_price_feed':50
@@ -114,16 +113,18 @@ class SteemStats(StatsAbstract):
 class DbStats(StatsAbstract):
     """Tracks database query timings."""
     SLOW_QUERY_MS = 250
+    LOGGING_TRESHOLD = 50
 
     def __init__(self):
         super().__init__('db')
 
     def check_timing(self, call, ms, batch_size):
         """Warn if any query is slower than defined threshold."""
-        log.warning("[SQL][%dms] %s", ms, call)
-        if ms > self.SLOW_QUERY_MS:
-            out = "[SQL][%dms] %s" % (ms, call[:250])
-            log.warning(colorize(out))
+        if ms > self.LOGGING_TRESHOLD:
+            log.warning("[SQL][%dms] %s", ms, call)
+            if ms > self.SLOW_QUERY_MS:
+                out = "[SQL][%dms] %s" % (ms, call[:250])
+                log.warning(colorize(out))
 
 
 class Stats:

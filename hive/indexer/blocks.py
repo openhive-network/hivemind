@@ -85,6 +85,7 @@ class Blocks:
 
         # second scan will process all other ops
         json_ops = []
+        update_comment_pending_payouts = []
         for tx_idx, tx in enumerate(block['transactions']):
             for operation in tx['operations']:
                 op_type = operation['type']
@@ -100,50 +101,60 @@ class Blocks:
 
                 # post ops
                 elif op_type == 'comment_operation':
-                    Posts.comment_op(hived, op, date)
+                    Posts.comment_op(op, date)
                     if not is_initial_sync:
                         Accounts.dirty(op['author']) # lite - stats
                 elif op_type == 'delete_comment_operation':
                     Posts.delete_op(op)
                 elif op_type == 'vote_operation':
-                    Votes.vote_op(op, date)
                     if not is_initial_sync:
                         Accounts.dirty(op['author']) # lite - rep
                         Accounts.dirty(op['voter']) # lite - stats
-                        
+                        update_comment_pending_payouts.append([op['author'], op['permlink']])
+
                 # misc ops
                 elif op_type == 'transfer_operation':
                     Payments.op_transfer(op, tx_idx, num, date)
                 elif op_type == 'custom_json_operation':
                     json_ops.append(op)
+
         # follow/reblog/community ops
-        CustomOp.process_ops(json_ops, num, date)
+        if json_ops:
+            CustomOp.process_ops(json_ops, num, date)
+
+        if update_comment_pending_payouts:
+            Posts.update_comment_pending_payouts(hived, update_comment_pending_payouts)
 
         # virtual ops
         comment_payout_ops = {}
         for vop in hived.get_virtual_operations(num):
             key = None
             val = None
-            if vop['op']['type'] == 'curation_reward_operation':
-                key = "{}/{}".format(vop['op']['value']['comment_author'], vop['op']['value']['comment_permlink'])
-                val = {'reward' : vop['op']['value']['reward']}
 
-            if vop['op']['type'] == 'author_reward_operation':
-                key = "{}/{}".format(vop['op']['value']['author'], vop['op']['value']['permlink'])
-                val = {'hbd_payout':vop['op']['value']['hbd_payout'], 'hive_payout':vop['op']['value']['hive_payout'], 'vesting_payout':vop['op']['value']['vesting_payout']}
+            op_type = vop['op']['type']
+            op_value = vop['op']['value']
+            if op_type == 'curation_reward_operation':
+                key = "{}/{}".format(op_value['comment_author'], op_value['comment_permlink'])
+                val = {'reward' : op_value['reward']}
 
-            if vop['op']['type'] == 'comment_reward_operation':
-                key = "{}/{}".format(vop['op']['value']['author'], vop['op']['value']['permlink'])
-                val = {'payout':vop['op']['value']['payout']}
+            if op_type == 'author_reward_operation':
+                key = "{}/{}".format(op_value['author'], op_value['permlink'])
+                val = {'hbd_payout':op_value['hbd_payout'], 'hive_payout':op_value['hive_payout'], 'vesting_payout':op_value['vesting_payout']}
+
+            if op_type == 'comment_reward_operation':
+                key = "{}/{}".format(op_value['author'], op_value['permlink'])
+                val = {'payout':op_value['payout'], 'author_rewards':op_value['author_rewards']}
+
+            if op_type == 'effective_comment_vote_operation':
+                Votes.vote_op(vop, date)
 
             if key is not None and val is not None:
                 if key in comment_payout_ops:
-                    comment_payout_ops[key].append({vop['op']['type']:val})
+                    comment_payout_ops[key].append({op_type:val})
                 else:
-                    comment_payout_ops[key] = [{vop['op']['type']:val}]
+                    comment_payout_ops[key] = [{op_type:val}]
         if comment_payout_ops:
-            price = hived.get_price()
-            Posts.comment_payout_op(comment_payout_ops, date, price)
+            Posts.comment_payout_op(comment_payout_ops, date)
 
         return num
 

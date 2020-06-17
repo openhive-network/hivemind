@@ -112,7 +112,12 @@ def build_metadata():
         sa.Column('sc_hot', sa.Float(precision=6), nullable=False, server_default='0'),
 
         sa.Column('total_payout_value', sa.String(19), nullable=False, server_default=''),
-        sa.Column('author_rewards', sa.Integer, nullable=False, server_default='0'),
+        sa.Column('author_rewards', sa.BigInteger, nullable=False, server_default='0'),
+
+        sa.Column('author_rewards_hive', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('author_rewards_hbd', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('author_rewards_vests', sa.BigInteger, nullable=False, server_default='0'),
+
         sa.Column('children_abs_rshares', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('abs_rshares', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('vote_rshares', sa.BigInteger, nullable=False, server_default='0'),

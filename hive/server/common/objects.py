@@ -1,24 +1,10 @@
 from hive.server.common.helpers import json_date
-from hive.utils.normalize import sbd_amount, rep_to_raw
-import ujson as json
+from hive.utils.normalize import sbd_amount
 
 def _amount(amount, asset='HBD'):
     """Return a steem-style amount string given a (numeric, asset-str)."""
     assert asset == 'HBD', 'unhandled asset %s' % asset
     return "%.3f HBD" % amount
-
-def _hydrate_active_votes(vote_csv):
-    """Convert minimal CSV representation into steemd-style object."""
-    if not vote_csv:
-        return []
-    votes = []
-    for line in vote_csv.split("\n"):
-        voter, rshares, percent, reputation = line.split(',')
-        votes.append(dict(voter=voter,
-                          rshares=rshares,
-                          percent=percent,
-                          reputation=rep_to_raw(reputation)))
-    return votes
 
 async def query_author_map(db, posts):
     """Given a list of posts, returns an author->reputation map."""
@@ -60,11 +46,6 @@ def condenser_post_object(row, truncate_body=0):
 
     post['replies'] = []
     post['body_length'] = len(row['body'])
-    try:
-        post['active_votes'] = json.loads(row['votes'])
-    except Exception:
-        post['active_votes'] = _hydrate_active_votes(row['votes'])
-    #post['author_reputation'] = rep_to_raw(row['author_rep'])
 
     post['root_author'] = row['root_author']
     post['root_permlink'] = row['root_permlink']
@@ -90,8 +71,5 @@ def condenser_post_object(row, truncate_body=0):
         curator_payout = sbd_amount(row['curator_payout_value'])
         post['curator_payout_value'] = _amount(curator_payout)
         post['total_payout_value'] = _amount(row['payout'] - curator_payout)
-
-    # not used by condenser, but may be useful
-    # post['net_votes'] = post['total_votes'] - row['up_votes']
 
     return post

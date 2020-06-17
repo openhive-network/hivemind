@@ -123,44 +123,58 @@ class Posts:
         cls.delete(op)
 
     @classmethod
-    def comment_op(cls, hived, op, block_date):
+    def comment_op(cls, op, block_date):
         """Register new/edited/undeleted posts; insert into feed cache."""
         pid = cls.get_id(op['author'], op['permlink'])
         if not pid:
             # post does not exist, go ahead and process it.
-            cls.insert(hived, op, block_date)
+            cls.insert(op, block_date)
         elif not cls.is_pid_deleted(pid):
             # post exists, not deleted, thus an edit. ignore.
-            cls.update(hived, op, block_date, pid)
+            cls.update(op, block_date, pid)
         else:
             # post exists but was deleted. time to reinstate.
             cls.undelete(op, block_date, pid)
 
     @classmethod
-    def comment_payout_op(cls, ops, date, price):
+    def comment_payout_op(cls, ops, date):
         """ Process comment payment operations """
         for k, v in ops.items():
             author, permlink = k.split("/")
             pid = cls.get_id(author, permlink)
+            # total payout to curators
             curator_rewards_sum = 0
-            author_rewards_sum = 0
+            # author payouts
+            author_rewards = 0
+            author_rewards_hive = 0
+            author_rewards_hbd = 0
+            author_rewards_vests = 0
+            # total payout for comment
             comment_author_reward = None
             for operation in v:
                 for op, value in operation.items():
                     if op == 'curation_reward_operation':
                         curator_rewards_sum = curator_rewards_sum + int(value['reward']['amount'])
+
                     if op == 'author_reward_operation':
-                        hive_to_hbd = asset_to_hbd_hive(price, value['hive_payout'])
-                        author_rewards_sum = int(hive_to_hbd['amount']) + int(value['hbd_payout']['amount'])
+                        author_rewards_hive = value['hive_payout']['amount']
+                        author_rewards_hbd = value['hbd_payout']['amount']
+                        author_rewards_vests = value['vesting_payout']['amount']
+
                     if op == 'comment_reward_operation':
                         comment_author_reward = value['payout']
+                        author_rewards = value['author_rewards']
             curator_rewards = {'amount' : str(curator_rewards_sum), 'precision': 6, 'nai': '@@000000037'}
+
             sql = """UPDATE
                         hive_posts
                     SET
                         total_payout_value = :total_payout_value,
                         curator_payout_value = :curator_payout_value,
                         author_rewards = :author_rewards,
+                        author_rewards_hive = :author_rewards_hive,
+                        author_rewards_hbd = :author_rewards_hbd,
+                        author_rewards_vests = :author_rewards_vests,
                         last_payout = :last_payout,
                         cashout_time = :cashout_time,
                         is_paidout = true
@@ -168,11 +182,16 @@ class Posts:
             """
             DB.query(sql, total_payout_value=legacy_amount(comment_author_reward),
                      curator_payout_value=legacy_amount(curator_rewards),
-                     author_rewards=author_rewards_sum, last_payout=date,
-                     cashout_time=date, id=pid)
+                     author_rewards=author_rewards,
+                     author_rewards_hive=author_rewards_hive,
+                     author_rewards_hbd=author_rewards_hbd,
+                     author_rewards_vests=author_rewards_vests,
+                     last_payout=date,
+                     cashout_time=date,
+                     id=pid)
 
     @classmethod
-    def insert(cls, hived, op, date):
+    def insert(cls, op, date):
         """Inserts new post records."""
         print("New Post")
 
@@ -223,71 +242,14 @@ class Posts:
         post['id'] = int(list(result)[0][0])
         cls._set_id(op['author']+'/'+op['permlink'], post['id'])
 
-        comment_pending_payouts = hived.get_comment_pending_payouts([[op['author'], op['permlink']]])
-        if comment_pending_payouts and 'cashout_info' in comment_pending_payouts[0]:
-            comment_pending_payouts = comment_pending_payouts[0]
-            sql = """UPDATE
-                        hive_posts
-                    SET
-                        total_payout_value = :total_payout_value,
-                        curator_payout_value = :curator_payout_value,
-                        max_accepted_payout = :max_accepted_payout,
-                        author_rewards = :author_rewards,
-                        children_abs_rshares = :children_abs_rshares,
-                        rshares = :net_rshares,
-                        abs_rshares = :abs_rshares,
-                        vote_rshares = :vote_rshares,
-                        net_votes = :net_votes,
-                        active = :active,
-                        last_payout = :last_payout,
-                        cashout_time = :cashout_time,
-                        max_cashout_time = :max_cashout_time,
-                        percent_hbd = :percent_hbd,
-                        reward_weight = :reward_weight,
-                        allow_replies = :allow_replies,
-                        allow_votes = :allow_votes,
-                        allow_curation_rewards = :allow_curation_rewards
-                    WHERE id = :id
-            """
-            DB.query(sql, total_payout_value=legacy_amount(comment_pending_payouts['cashout_info']['total_payout_value']),
-                    curator_payout_value=legacy_amount(comment_pending_payouts['cashout_info']['curator_payout_value']),
-                    max_accepted_payout=legacy_amount(comment_pending_payouts['cashout_info']['max_accepted_payout']),
-                    author_rewards=comment_pending_payouts['cashout_info']['author_rewards'],
-                    children_abs_rshares=comment_pending_payouts['cashout_info']['children_abs_rshares'],
-                    net_rshares=comment_pending_payouts['cashout_info']['net_rshares'],
-                    abs_rshares=comment_pending_payouts['cashout_info']['abs_rshares'],
-                    vote_rshares=comment_pending_payouts['cashout_info']['vote_rshares'],
-                    net_votes=comment_pending_payouts['cashout_info']['net_votes'],
-                    active=comment_pending_payouts['cashout_info']['active'],
-                    last_payout=comment_pending_payouts['cashout_info']['last_payout'],
-                    cashout_time=comment_pending_payouts['cashout_info']['cashout_time'],
-                    max_cashout_time=comment_pending_payouts['cashout_info']['max_cashout_time'],
-                    percent_hbd=comment_pending_payouts['cashout_info']['percent_hbd'],
-                    reward_weight=comment_pending_payouts['cashout_info']['reward_weight'],
-                    allow_replies=comment_pending_payouts['cashout_info']['allow_replies'],
-                    allow_votes=comment_pending_payouts['cashout_info']['allow_votes'],
-                    allow_curation_rewards=comment_pending_payouts['cashout_info']['allow_curation_rewards'],
-                    id=post['id']
-            )
-
         # add content data to hive_post_data
-        votes = []
-        # think that the comment was deleted in the future
-        # and since we are syncing blocks from the past and asking for current version of votes with find_votes
-        # we are getting error that comment does not exists
-        try:
-            votes = hived.get_votes(op['author'], op['permlink'])
-        except Exception:
-            pass
         sql = """
-            INSERT INTO hive_post_data (id, title, preview, img_url, body, 
-                votes, json) 
-            VALUES (:id, :title, :preview, :img_url, :body, :votes, :json)"""
+            INSERT INTO hive_post_data (id, title, preview, img_url, body, json) 
+            VALUES (:id, :title, :preview, :img_url, :body, :json)"""
         DB.query(sql, id=post['id'], title=op['title'],
                  preview=op['preview'] if 'preview' in op else "",
                  img_url=op['img_url'] if 'img_url' in op else "",
-                 body=op['body'], votes=dumps(votes),
-                 json=op['json_metadata'] if op['json_metadata'] else '{}')
+                 body=op['body'], json=op['json_metadata'] if op['json_metadata'] else '{}')
 
         if not DbState.is_initial_sync():
             if post['error']:
@@ -301,27 +263,29 @@ class Posts:
     @classmethod
     def update_child_count(cls, parent_id, op='+'):
         """ Increase/decrease child count by 1 """
-        sql = """SELECT children FROM hive_posts WHERE id = :id"""
-        query = DB.query_row(sql, id=parent_id)
-
-        children = 0
-        if query is not None:
-            children = query.children
-
-        if children == 32767:
-            children = 0
-
-        if op == '+':
-            children += 1
-        else:
-            children -= 1
-
         sql = """
             UPDATE 
                 hive_posts 
-            SET children = :children WHERE id = :id"""
+            SET 
+                children = (
+                    SELECT children,
+                        CASE 
+                            WHEN children=NULL THEN 0
+                            WHEN children=32762 THEN 0
+                            ELSE children
+                        END
+                    FROM 
+                        hive_posts
+                    WHERE id = :id
+                )::int
+        """
+        if op == '+':
+            sql += """ + 1"""
+        else:
+            sql += """ - 1"""
+        sql += """ WHERE id = :id"""
 
-        DB.query(sql, id=parent_id, children=children)
+        DB.query(sql, id=parent_id)
 
     @classmethod
     def undelete(cls, op, date, pid):
@@ -329,14 +293,26 @@ class Posts:
         print("Undelete")
         # add category to category table
 
-        sql = """INSERT INTO hive_category_data (category) 
-                    VALUES (:category) 
-                 ON CONFLICT (category) DO NOTHING;
-                 UPDATE hive_posts SET is_valid = :is_valid,
-                   is_muted = :is_muted, is_deleted = '0', is_pinned = '0',
-                   parent_id = :parent_id, category_id = (SELECT id FROM hive_category_data WHERE category = :category),
-                   community_id = :community_id, depth = :depth
-                 WHERE id = :id"""
+        sql = """
+            INSERT INTO 
+                hive_category_data (category) 
+            VALUES 
+                (:category) 
+            ON CONFLICT (category) DO NOTHING;
+            UPDATE 
+                hive_posts 
+            SET 
+                is_valid = :is_valid,
+                is_muted = :is_muted,
+                is_deleted = '0',
+                is_pinned = '0',
+                parent_id = :parent_id,
+                category_id = (SELECT id FROM hive_category_data WHERE category = :category),
+                community_id = :community_id,
+                depth = :depth
+            WHERE 
+                id = :id
+        """
         post = cls._build_post(op, date, pid)
         DB.query(sql, **post)
 
@@ -366,7 +342,7 @@ class Posts:
                 cls.update_child_count(prnt['id'], '-')
 
     @classmethod
-    def update(cls, hived, op, date, pid):
+    def update(cls, op, date, pid):
         """Handle post updates.
 
         Here we could also build content diffs, but for now just used
@@ -397,57 +373,11 @@ class Posts:
                 is_valid = :is_valid,
                 parent_author_id = (SELECT id FROM hive_accounts WHERE name = :parent_author),
                 parent_permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :parent_permlink)
-            WHERE id = :id"""
+            WHERE id = :id
+        """
         post = cls._build_post(op, date)
         post['id'] = pid
         DB.query(sql, **post)
-
-        comment_pending_payouts = hived.get_comment_pending_payouts([[op['author'], op['permlink']]])
-        if comment_pending_payouts and 'cashout_info' in comment_pending_payouts[0]:
-            comment_pending_payouts = comment_pending_payouts[0]
-            sql = """UPDATE
-                        hive_posts
-                    SET
-                        total_payout_value = :total_payout_value,
-                        curator_payout_value = :curator_payout_value,
-                        max_accepted_payout = :max_accepted_payout,
-                        author_rewards = :author_rewards,
-                        children_abs_rshares = :children_abs_rshares,
-                        rshares = :net_rshares,
-                        abs_rshares = :abs_rshares,
-                        vote_rshares = :vote_rshares,
-                        net_votes = :net_votes,
-                        active = :active,
-                        last_payout = :last_payout,
-                        cashout_time = :cashout_time,
-                        max_cashout_time = :max_cashout_time,
-                        percent_hbd = :percent_hbd,
-                        reward_weight = :reward_weight,
-                        allow_replies = :allow_replies,
-                        allow_votes = :allow_votes,
-                        allow_curation_rewards = :allow_curation_rewards
-                    WHERE id = :id
-            """
-            DB.query(sql, total_payout_value=legacy_amount(comment_pending_payouts['cashout_info']['total_payout_value']),
-                    curator_payout_value=legacy_amount(comment_pending_payouts['cashout_info']['curator_payout_value']),
-                    max_accepted_payout=legacy_amount(comment_pending_payouts['cashout_info']['max_accepted_payout']),
-                    author_rewards=comment_pending_payouts['cashout_info']['author_rewards'],
-                    children_abs_rshares=comment_pending_payouts['cashout_info']['children_abs_rshares'],
-                    net_rshares=comment_pending_payouts['cashout_info']['net_rshares'],
-                    abs_rshares=comment_pending_payouts['cashout_info']['abs_rshares'],
-                    vote_rshares=comment_pending_payouts['cashout_info']['vote_rshares'],
-                    net_votes=comment_pending_payouts['cashout_info']['net_votes'],
-                    active=comment_pending_payouts['cashout_info']['active'],
-                    last_payout=comment_pending_payouts['cashout_info']['last_payout'],
-                    cashout_time=comment_pending_payouts['cashout_info']['cashout_time'],
-                    max_cashout_time=comment_pending_payouts['cashout_info']['max_cashout_time'],
-                    percent_hbd=comment_pending_payouts['cashout_info']['percent_hbd'],
-                    reward_weight=comment_pending_payouts['cashout_info']['reward_weight'],
-                    allow_replies=comment_pending_payouts['cashout_info']['allow_replies'],
-                    allow_votes=comment_pending_payouts['cashout_info']['allow_votes'],
-                    allow_curation_rewards=comment_pending_payouts['cashout_info']['allow_curation_rewards'],
-                    id=pid
-            )
 
         sql = """
             UPDATE 
@@ -458,20 +388,73 @@ class Posts:
                 img_url = :img_url, 
                 body = :body, 
                 json = :json
-            WHERE id = :id"""
+            WHERE id = :id
+        """
 
         DB.query(sql, id=pid, title=op['title'],
                  preview=op['preview'] if 'preview' in op else "",
                  img_url=op['img_url'] if 'img_url' in op else "",
-                 body=op['body'],
-                 json=op['json_metadata'] if op['json_metadata'] else '{}')
+                 body=op['body'], json=op['json_metadata'] if op['json_metadata'] else '{}')
+
+    @classmethod
+    def update_comment_pending_payouts(cls, hived, posts):
+        comment_pending_payouts = hived.get_comment_pending_payouts(posts)
+        for comment_pending_payout in comment_pending_payouts:
+            if 'cashout_info' in comment_pending_payout:
+                cpp = comment_pending_payout['cashout_info']
+                pid = cls.get_id(cpp['author'], cpp['permlink'])
+                sql = """UPDATE
+                            hive_posts
+                        SET
+                            total_payout_value = :total_payout_value,
+                            curator_payout_value = :curator_payout_value,
+                            max_accepted_payout = :max_accepted_payout,
+                            author_rewards = :author_rewards,
+                            children_abs_rshares = :children_abs_rshares,
+                            rshares = :net_rshares,
+                            abs_rshares = :abs_rshares,
+                            vote_rshares = :vote_rshares,
+                            net_votes = :net_votes,
+                            active = :active,
+                            last_payout = :last_payout,
+                            cashout_time = :cashout_time,
+                            max_cashout_time = :max_cashout_time,
+                            percent_hbd = :percent_hbd,
+                            reward_weight = :reward_weight,
+                            allow_replies = :allow_replies,
+                            allow_votes = :allow_votes,
+                            allow_curation_rewards = :allow_curation_rewards
+                        WHERE id = :id
+                """
+
+                DB.query(sql, total_payout_value=legacy_amount(cpp['total_payout_value']),
+                         curator_payout_value=legacy_amount(cpp['curator_payout_value']),
+                         max_accepted_payout=legacy_amount(cpp['max_accepted_payout']),
+                         author_rewards=cpp['author_rewards'],
+                         children_abs_rshares=cpp['children_abs_rshares'],
+                         net_rshares=cpp['net_rshares'],
+                         abs_rshares=cpp['abs_rshares'],
+                         vote_rshares=cpp['vote_rshares'],
+                         net_votes=cpp['net_votes'],
+                         active=cpp['active'],
+                         last_payout=cpp['last_payout'],
+                         cashout_time=cpp['cashout_time'],
+                         max_cashout_time=cpp['max_cashout_time'],
+                         percent_hbd=cpp['percent_hbd'],
+                         reward_weight=cpp['reward_weight'],
+                         allow_replies=cpp['allow_replies'],
+                         allow_votes=cpp['allow_votes'],
+                         allow_curation_rewards=cpp['allow_curation_rewards'],
+                         id=pid)
 
     @classmethod
     def _get_parent_by_child_id(cls, child_id):
         """Get parent's `id`, `author`, `permlink` by child id."""
         sql = """
             SELECT 
-                hp.id, ha_a.name as author, hpd_p.permlink as permlink
+                hp.id,
+                ha_a.name as author,
+                hpd_p.permlink as permlink
             FROM 
                 hive_posts hp
             LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id

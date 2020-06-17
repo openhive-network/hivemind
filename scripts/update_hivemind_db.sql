@@ -107,7 +107,12 @@ CREATE TABLE IF NOT EXISTS hive_posts_new (
   sc_hot NUMERIC(6) DEFAULT '0.0',
 
   total_payout_value VARCHAR(19) DEFAULT '',
-  author_rewards INT DEFAULT '0',
+  author_rewards BIGINT DEFAULT '0',
+
+  author_rewards_hive BIGINT DEFAULT '0',
+  author_rewards_hbd BIGINT DEFAULT '0',
+  author_rewards_vests BIGINT DEFAULT '0',
+
   children_abs_rshares BIGINT DEFAULT '0',
   abs_rshares BIGINT DEFAULT '0',
   vote_rshares BIGINT DEFAULT '0',
@@ -231,9 +236,10 @@ FROM
         votes.id, regexp_split_to_array(votes.regexp_split_to_table::text, E',') 
      FROM 
         (SELECT id, regexp_split_to_table(votes::text, E'\n') 
-         FROM hive_posts_cache) 
+         FROM hive_posts_cache WHERE votes IS NOT NULL AND votes != '') 
     AS votes) 
 AS vote_data;
+
 
 -- Helper type for use with json_populate_record
 -- RAISE NOTICE 'Creating legacy_comment_data table';

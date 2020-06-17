@@ -6,6 +6,7 @@ import ujson as json
 from hive.utils.normalize import sbd_amount, rep_to_raw
 from hive.server.common.mutes import Mutes
 from hive.server.common.helpers import json_date
+from hive.server.database_api.methods import find_votes
 
 log = logging.getLogger(__name__)
 
@@ -96,7 +97,7 @@ async def load_posts_keyed(db, ids, truncate_body=0):
         row = dict(row)
         row['author_rep'] = author_reps[row['author']]
         post = _condenser_post_object(row, truncate_body=truncate_body)
-        post['active_votes'] = _mute_votes(post['active_votes'], muted_accounts)
+        post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']})
         posts_by_id[row['id']] = post
 
     return posts_by_id
@@ -146,7 +147,7 @@ async def resultset_to_posts(db, resultset, truncate_body=0):
         row = dict(row)
         row['author_rep'] = author_reps[row['author']]
         post = _condenser_post_object(row, truncate_body=truncate_body)
-        post['active_votes'] = _mute_votes(post['active_votes'], muted_accounts)
+        post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']})
         posts.append(post)
 
     return posts
@@ -210,10 +211,6 @@ def _condenser_post_object(row, truncate_body=0):
 
     post['replies'] = []
     post['body_length'] = len(row['body'])
-    try:
-        post['active_votes'] = json.loads(row['votes'])
-    except Exception:
-        post['active_votes'] = _hydrate_active_votes(row['votes'])
     post['author_reputation'] = rep_to_raw(row['author_rep'])
 
     post['root_author'] = row['root_author']
@@ -250,16 +247,3 @@ def _amount(amount, asset='HBD'):
     """Return a steem-style amount string given a (numeric, asset-str)."""
     assert asset == 'HBD', 'unhandled asset %s' % asset
     return "%.3f HBD" % amount
-
-def _hydrate_active_votes(vote_csv):
-    """Convert minimal CSV representation into steemd-style object."""
-    if not vote_csv:
-        return []
-    votes = []
-    for line in vote_csv.split("\n"):
-        voter, rshares, percent, reputation = line.split(',')
-        votes.append(dict(voter=voter,
-                          rshares=rshares,
-                          percent=percent,
-                          reputation=rep_to_raw(reputation)))
-    return votes

@@ -1,5 +1,5 @@
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
-from hive.server.common.helpers import return_error_info, valid_limit
+from hive.server.common.helpers import return_error_info, valid_limit, valid_account, valid_permlink
 from hive.server.common.objects import condenser_post_object
 
 SQL_TEMPLATE = """
@@ -87,7 +87,9 @@ async def list_comments(context, start: list, limit: int, order: str):
 
         result = await db.query_all(sql, start=start[0], limit=limit, post_id=post_id)
         for row in result:
-            comments.append(condenser_post_object(dict(row)))
+            cpo = condenser_post_object(dict(row))
+            cpo['active_votes'] = find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
+            comments.append(cpo)
     elif order == 'by_permlink':
         assert len(start) == 2, "Expecting two arguments"
 
@@ -97,7 +99,9 @@ async def list_comments(context, start: list, limit: int, order: str):
 
         result = await db.query_all(sql, author=start[0], permlink=start[1], limit=limit)
         for row in result:
-            comments.append(condenser_post_object(dict(row)))
+            cpo = condenser_post_object(dict(row))
+            cpo['active_votes'] = find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
+            comments.append(cpo)
     elif order == 'by_root':
         assert len(start) == 4, "Expecting 4 arguments"
         raise NotImplementedError('by_root')
@@ -107,7 +111,9 @@ async def list_comments(context, start: list, limit: int, order: str):
 
         result = await db.query_all(sql, root_author=start[0], root_permlink=start[1], child_author=start[2], child_permlink=start[3], limit=limit)
         for row in result:
-            comments.append(condenser_post_object(dict(row)))
+            cpo = condenser_post_object(dict(row))
+            cpo['active_votes'] = find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
+            comments.append(cpo)
     elif order == 'by_parent':
         assert len(start) == 4, "Expecting 4 arguments"
         raise NotImplementedError('by_parent')
@@ -117,7 +123,9 @@ async def list_comments(context, start: list, limit: int, order: str):
 
         result = await db.query_all(sql, parent_author=start[0], parent_permlink=start[1], child_author=start[2], child_permlink=start[3], limit=limit)
         for row in result:
-            comments.append(condenser_post_object(dict(row)))
+            cpo = condenser_post_object(dict(row))
+            cpo['active_votes'] = find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
+            comments.append(cpo)
     elif order == 'by_update':
         assert len(start) == 4, "Expecting 4 arguments"
 
@@ -133,7 +141,9 @@ async def list_comments(context, start: list, limit: int, order: str):
 
         result = await db.query_all(sql, parent_author=start[0], updated_at=start[1], post_id=post_id, limit=limit)
         for row in result:
-            comments.append(condenser_post_object(dict(row)))
+            cpo = condenser_post_object(dict(row))
+            cpo['active_votes'] = find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
+            comments.append(cpo)
 
     elif order == 'by_author_last_update':
         assert len(start) == 4, "Expecting 4 arguments"
@@ -150,7 +160,9 @@ async def list_comments(context, start: list, limit: int, order: str):
 
         result = await db.query_all(sql, author=start[0], updated_at=start[1], post_id=post_id, limit=limit)
         for row in result:
-            comments.append(condenser_post_object(dict(row)))
+            cpo = condenser_post_object(dict(row))
+            cpo['active_votes'] = find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
+            comments.append(cpo)
 
     return comments
 
@@ -174,6 +186,48 @@ async def find_comments(context, start: list, limit: int, order: str):
 
     result = await db.query_all(sql)
     for row in result:
-        comments.append(condenser_post_object(dict(row)))
+        cpo = condenser_post_object(dict(row))
+        cpo['active_votes'] = find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
+        comments.append(cpo)
 
     return comments
+
+@return_error_info
+async def find_votes(context, params: dict):
+    """ Returns all votes for the given post """
+    valid_account(params['author'])
+    valid_permlink(params['permlink'])
+    db = context['db']
+    sql = """
+        SELECT
+            ha_v.name as voter,
+            ha_a.name as author,
+            hpd.permlink as permlink,
+            weight,
+            rshares,
+            vote_percent,
+            last_update,
+            num_changes
+        FROM
+            hive_votes
+        INNER JOIN hive_accounts ha_v ON (ha_v.id = hv.voter_id)
+        INNER JOIN hive_accounts ha_a ON (ha_a.id = hv.author_id)
+        INNER JOIN hive_permlink_data hpd ON (hpd.id = hv.permlink_id)
+        WHERE
+            ha_a.name = :author AND hpd.permlink = :permlink
+    """
+    ret = []
+    rows = db.query_all(sql, author=params['author'], permlink=params['permlink'])
+    for row in rows:
+        ret.append(dict(voter=row.voter, author=row.author, permlink=row.permlink,
+                        weight=row.weight, rshares=row.rshares, vote_percent=row.vote_percent,
+                        last_update=row.last_update, num_changes=row.num_changes))
+    return ret
+
+@return_error_info
+async def list_votes(context, start: list, limit: int, order: str):
+    """ Returns all votes, starting with the specified voter and/or author and permlink. """
+    supported_order_list = ["by_comment_voter", "by_voter_comment", "by_comment_voter", "by_voter_comment"]
+    assert order in supported_order_list, "Order {} is not supported".format(order)
+    limit = valid_limit(limit, 1000)
+    assert len(start) == 3, "Expecting 3 elements in start array"

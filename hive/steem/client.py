@@ -152,14 +152,6 @@ class SteemClient:
         ret = self.__exec('get_comment_pending_payouts', {'comments':comments})
         return ret['cashout_infos']
 
-    def get_votes(self, author, permlink):
-        """ Get list of votes """
-        try:
-            call = self.__exec("find_votes", {'author':author, 'permlink':permlink})
-            return call['votes']
-        except Exception as ex:
-            return []
-
     def get_price(self):
         """ Get current price feed """
         call = self.__exec("get_current_price_feed")
