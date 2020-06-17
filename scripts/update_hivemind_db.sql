@@ -170,6 +170,8 @@ CREATE TABLE IF NOT EXISTS hive_votes (
 CREATE INDEX IF NOT EXISTS hive_votes_voter_id_idx ON hive_votes (voter_id);
 CREATE INDEX IF NOT EXISTS hive_votes_author_id_idx ON hive_votes (author_id);
 CREATE INDEX IF NOT EXISTS hive_votes_permlink_id_idx ON hive_votes (permlink_id);
+CREATE INDEX IF NOT EXISTS hive_votes_upvote_idx ON hive_votes (vote_percent) WHERE vote_percent > 0;
+CREATE INDEX IF NOT EXISTS hive_votes_downvote_idx ON hive_votes (vote_percent) WHERE vote_percent < 0;
 
 -- Copy data from hive_posts table to new table
 -- RAISE NOTICE 'Copy data from hive_posts table to new table';

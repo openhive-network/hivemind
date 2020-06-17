@@ -205,7 +205,9 @@ def build_metadata():
 
         sa.Index('hive_votes_voter_id_idx', 'voter_id'),
         sa.Index('hive_votes_author_id_idx', 'author_id'),
-        sa.Index('hive_votes_permlink_id_idx', 'permlink_id')
+        sa.Index('hive_votes_permlink_id_idx', 'permlink_id'),
+        sa.Index('hive_votes_upvote_idx', 'vote_percent', postgresql_where=sql_text("vote_percent > 0")),
+        sa.Index('hive_votes_downvote_idx', 'vote_percent', postgresql_where=sql_text("vote_percent < 0"))
     )
 
     sa.Table(

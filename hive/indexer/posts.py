@@ -35,8 +35,6 @@ class Posts:
     @classmethod
     def find_root(cls, author, permlink):
         """ Find root for post """
-        print("A: ", author, "P: ", permlink)
-
         sql = """WITH RECURSIVE parent AS
         (
             SELECT id, parent_id, 1 AS level from hive_posts WHERE id = (SELECT hp.id 
@@ -193,8 +191,6 @@ class Posts:
     @classmethod
     def insert(cls, op, date):
         """Inserts new post records."""
-        print("New Post")
-
         # inserting new post
         # * Check for permlink, parent_permlink, root_permlink
         # * Check for authro, parent_author, root_author
@@ -290,7 +286,6 @@ class Posts:
     @classmethod
     def undelete(cls, op, date, pid):
         """Re-allocates an existing record flagged as deleted."""
-        print("Undelete")
         # add category to category table
 
         sql = """
@@ -326,7 +321,6 @@ class Posts:
     @classmethod
     def delete(cls, op):
         """Marks a post record as being deleted."""
-        print("Delete post")
 
         pid, depth = cls.get_id_and_depth(op['author'], op['permlink'])
         DB.query("UPDATE hive_posts SET is_deleted = '1' WHERE id = :id", id=pid)
@@ -348,16 +342,24 @@ class Posts:
         Here we could also build content diffs, but for now just used
         a signal to update cache record.
         """
-        print("Update post")
         # pylint: disable=unused-argument
+        post = cls._build_post(op, date)
+
+        # add permlinks to permlink table
+        for permlink in ['permlink', 'parent_permlink', 'root_permlink']:
+            if permlink in op:
+                sql = """
+                    INSERT INTO hive_permlink_data (permlink) 
+                    VALUES (:permlink) 
+                    ON CONFLICT (permlink) DO NOTHING"""
+                DB.query(sql, permlink=op[permlink])
 
         # add category to category table
-        if 'category' in op:
-            sql = """
-                INSERT INTO hive_category_data (category) 
-                VALUES (:category) 
-                ON CONFLICT (category) DO NOTHING"""
-            DB.query(sql, category=op['category'])
+        sql = """
+            INSERT INTO hive_category_data (category) 
+            VALUES (:category) 
+            ON CONFLICT (category) DO NOTHING"""
+        DB.query(sql, category=post['category'])
 
         sql = """
             UPDATE hive_posts 
@@ -375,7 +377,7 @@ class Posts:
                 parent_permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :parent_permlink)
             WHERE id = :id
         """
-        post = cls._build_post(op, date)
+
         post['id'] = pid
         DB.query(sql, **post)
 
