@@ -111,7 +111,7 @@ def build_metadata():
         sa.Column('sc_trend', sa.Float(precision=6), nullable=False, server_default='0'),
         sa.Column('sc_hot', sa.Float(precision=6), nullable=False, server_default='0'),
 
-        sa.Column('total_payout_value', sa.String(19), nullable=False, server_default=''),
+        sa.Column('total_payout_value', sa.String(30), nullable=False, server_default=''),
         sa.Column('author_rewards', sa.BigInteger, nullable=False, server_default='0'),
 
         sa.Column('author_rewards_hive', sa.BigInteger, nullable=False, server_default='0'),
@@ -131,10 +131,10 @@ def build_metadata():
 
         sa.Column('parent_author_id', sa.Integer, nullable=False),
         sa.Column('parent_permlink_id', sa.Integer, nullable=False),
-        sa.Column('curator_payout_value', sa.String(19), nullable=False, server_default=''),
+        sa.Column('curator_payout_value', sa.String(30), nullable=False, server_default=''),
         sa.Column('root_author_id', sa.Integer, nullable=False),
         sa.Column('root_permlink_id', sa.Integer, nullable=False),
-        sa.Column('max_accepted_payout',  sa.String(19), nullable=False, server_default=''),
+        sa.Column('max_accepted_payout',  sa.String(30), nullable=False, server_default=''),
         sa.Column('percent_steem_dollars', sa.Integer, nullable=False, server_default='-1'),
         sa.Column('allow_replies', BOOLEAN, nullable=False, server_default='1'),
         sa.Column('allow_votes', BOOLEAN, nullable=False, server_default='1'),
