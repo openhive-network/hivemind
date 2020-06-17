@@ -170,7 +170,7 @@ def build_metadata():
         sa.Column('preview', VARCHAR(1024), nullable=False),
         sa.Column('img_url', VARCHAR(1024), nullable=False),
         sa.Column('body', TEXT),
-        sa.Column('json', sa.JSON)
+        sa.Column('json', TEXT)
     )
 
     sa.Table(

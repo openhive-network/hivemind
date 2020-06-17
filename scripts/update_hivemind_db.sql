@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS hive_post_data (
   preview VARCHAR(1024) NOT NULL,
   img_url VARCHAR(1024) NOT NULL,
   body TEXT,
-  json JSON
+  json TEXT
 );
 CREATE INDEX IF NOT EXISTS hive_post_data_id_idx ON hive_post_data (id);
 
@@ -221,7 +221,7 @@ UPDATE hive_posts_new hpn SET (
 
 -- Populate table hive_post_data with bulk data from hive_posts_cache
 -- RAISE NOTICE 'Populate table hive_post_data with bulk data from hive_posts_cache';
-INSERT INTO hive_post_data (id, title, preview, img_url, body, votes, json) SELECT post_id, title, preview, img_url, body, json::json FROM hive_posts_cache;
+INSERT INTO hive_post_data (id, title, preview, img_url, body, votes, json) SELECT post_id, title, preview, img_url, body, json FROM hive_posts_cache;
 
 -- Populate hive_votes table
 -- RAISE NOTICE 'Populate table hive_votes with bulk data from hive_posts_cache';

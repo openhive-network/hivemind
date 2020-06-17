@@ -239,7 +239,7 @@ def _condenser_post_object(row, truncate_body=0):
 
     post['title'] = row['title']
     post['body'] = row['body'][0:truncate_body] if truncate_body else row['body']
-    post['json_metadata'] = json.loads(row['json'])
+    post['json_metadata'] = row['json']
 
     post['created'] = json_date(row['created_at'])
     post['updated'] = json_date(row['updated_at'])
