@@ -264,7 +264,7 @@ class Posts:
                 hive_posts 
             SET 
                 children = (
-                    SELECT children,
+                    SELECT 
                         CASE 
                             WHEN children=NULL THEN 0
                             WHEN children=32762 THEN 0
