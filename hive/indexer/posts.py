@@ -337,11 +337,7 @@ class Posts:
 
     @classmethod
     def update(cls, op, date, pid):
-        """Handle post updates.
-
-        Here we could also build content diffs, but for now just used
-        a signal to update cache record.
-        """
+        """Handle post updates."""
         # pylint: disable=unused-argument
         post = cls._build_post(op, date)
 

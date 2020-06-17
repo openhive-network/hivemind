@@ -74,7 +74,7 @@ def build_metadata():
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('parent_id', sa.Integer),
         sa.Column('author_id', sa.Integer, nullable=False),
-        sa.Column('permlink_id', sa.Integer, nullable=False),
+        sa.Column('permlink_id', sa.BigInteger, nullable=False),
         sa.Column('category_id', sa.Integer, nullable=False),
         sa.Column('community_id', sa.Integer, nullable=True),
         sa.Column('created_at', sa.DateTime, nullable=False),
@@ -130,10 +130,10 @@ def build_metadata():
         sa.Column('reward_weight', sa.Integer, nullable=False, server_default='0'),
 
         sa.Column('parent_author_id', sa.Integer, nullable=False),
-        sa.Column('parent_permlink_id', sa.Integer, nullable=False),
+        sa.Column('parent_permlink_id', sa.BigInteger, nullable=False),
         sa.Column('curator_payout_value', sa.String(30), nullable=False, server_default=''),
         sa.Column('root_author_id', sa.Integer, nullable=False),
-        sa.Column('root_permlink_id', sa.Integer, nullable=False),
+        sa.Column('root_permlink_id', sa.BigInteger, nullable=False),
         sa.Column('max_accepted_payout',  sa.String(30), nullable=False, server_default=''),
         sa.Column('percent_steem_dollars', sa.Integer, nullable=False, server_default='-1'),
         sa.Column('allow_replies', BOOLEAN, nullable=False, server_default='1'),
@@ -165,7 +165,7 @@ def build_metadata():
 
     sa.Table(
         'hive_post_data', metadata,
-        sa.Column('id', sa.Integer, nullable=False),
+        sa.Column('id', sa.Integer, primary_key=True, autoincrement=False),
         sa.Column('title', VARCHAR(255), nullable=False),
         sa.Column('preview', VARCHAR(1024), nullable=False),
         sa.Column('img_url', VARCHAR(1024), nullable=False),
@@ -175,7 +175,7 @@ def build_metadata():
 
     sa.Table(
         'hive_permlink_data', metadata,
-        sa.Column('id', sa.Integer, primary_key=True),
+        sa.Column('id', sa.BigInteger, primary_key=True),
         sa.Column('permlink', sa.String(255), nullable=False),
         sa.UniqueConstraint('permlink', name='hive_permlink_data_permlink')
     )

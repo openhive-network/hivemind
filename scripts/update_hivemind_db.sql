@@ -33,7 +33,7 @@ INSERT INTO hive_accounts (name, created_at) VALUES ('', '1990-01-01T00:00:00');
 -- Table to hold permlink dictionary, permlink is unique
 -- RAISE NOTICE 'Table to hold permlink dictionary, permlink is unique';
 CREATE TABLE IF NOT EXISTS hive_permlink_data (
-    id SERIAL PRIMARY KEY NOT NULL,
+    id BIGSERIAL PRIMARY KEY NOT NULL,
     permlink VARCHAR(255) NOT NULL CONSTRAINT hive_permlink_data_permlink UNIQUE
 );
 -- Populate hive_permlink_data
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS hive_posts_new (
   id INT NOT NULL,
   parent_id INT,
   author_id INT NOT NULL,
-  permlink_id INT NOT NULL,
+  permlink_id BIGINT NOT NULL,
   category_id INT NOT NULL,
   community_id INT,
   created_at DATE NOT NULL,
@@ -126,10 +126,10 @@ CREATE TABLE IF NOT EXISTS hive_posts_new (
 
   -- columns from raw_json
   parent_author_id INT DEFAULT '-1',
-  parent_permlink_id INT DEFAULT '-1',
+  parent_permlink_id BIGINT DEFAULT '-1',
   curator_payout_value VARCHAR(30) DEFAULT '',
   root_author_id INT DEFAULT '-1',
-  root_permlink_id INT DEFAULT '-1',
+  root_permlink_id BIGINT DEFAULT '-1',
   max_accepted_payout VARCHAR(30) DEFAULT '',
   percent_steem_dollars INT DEFAULT '-1',
   allow_replies BOOLEAN DEFAULT '1',
@@ -146,14 +146,13 @@ CREATE INDEX IF NOT EXISTS hive_posts_permlink_id_idx ON hive_posts_new (permlin
 -- Table to hold bulk post data
 -- RAISE NOTICE 'Table to hold bulk post data';
 CREATE TABLE IF NOT EXISTS hive_post_data (
-  id INT NOT NULL,
+  id INT PRIMARY KEY NOT NULL,
   title VARCHAR(255) NOT NULL,
   preview VARCHAR(1024) NOT NULL,
   img_url VARCHAR(1024) NOT NULL,
   body TEXT,
   json TEXT
 );
-CREATE INDEX IF NOT EXISTS hive_post_data_id_idx ON hive_post_data (id);
 
 CREATE TABLE IF NOT EXISTS hive_votes (
   id BIGSERIAL PRIMARY KEY NOT NULL,
