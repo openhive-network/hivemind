@@ -145,17 +145,25 @@ class SteemClient:
     def get_virtual_operations(self, block):
         """ Get virtual ops from block """
         ret = self.__exec('get_ops_in_block', {"block_num":block, "only_virtual":True})
-        return ret['ops'] if 'ops' in ret else [] 
+        return ret['ops'] if 'ops' in ret else []
+
+    def enum_virtual_ops(self, begin_block, end_block):
+        """ Get virtual ops for range of blocks """
+        result = self.__exec('enum_virtual_ops', {"block_range_begin":begin_block, "block_range_end":end_block})
+        ops = result['ops'] if 'ops' in result else []
+        ret = {}
+        for op in ops:
+            block = op['block']
+            if block in ret:
+                ret[block]['ops'].append(op['op'])
+            else:
+                ret[block] = {'timestamp':op['timestamp'], 'ops':[op['op']]}
+        return ret
 
     def get_comment_pending_payouts(self, comments):
         """ Get comment pending payout data """
         ret = self.__exec('get_comment_pending_payouts', {'comments':comments})
         return ret['cashout_infos']
-
-    def get_price(self):
-        """ Get current price feed """
-        call = self.__exec("get_current_price_feed")
-        return call
 
     def __exec(self, method, params=None):
         """Perform a single steemd call."""

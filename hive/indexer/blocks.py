@@ -17,6 +17,7 @@ DB = Db.instance()
 
 class Blocks:
     """Processes blocks, dispatches work, manages `hive_blocks` table."""
+    blocks_to_flush = []
 
     @classmethod
     def head_num(cls):
@@ -31,20 +32,20 @@ class Blocks:
         return str(DB.query_one(sql) or '')
 
     @classmethod
-    def process(cls, block, hived):
+    def process(cls, block, vops_in_block, hived):
         """Process a single block. Always wrap in a transaction!"""
         #assert is_trx_active(), "Block.process must be in a trx"
-        return cls._process(block, hived, is_initial_sync=False)
+        return cls._process(block, vops_in_block, hived, is_initial_sync=False)
 
     @classmethod
-    def process_multi(cls, blocks, hived, is_initial_sync=False):
+    def process_multi(cls, blocks, vops, hived, is_initial_sync=False):
         """Batch-process blocks; wrapped in a transaction."""
         DB.query("START TRANSACTION")
 
         last_num = 0
         try:
             for block in blocks:
-                last_num = cls._process(block, hived, is_initial_sync)
+                last_num = cls._process(block, vops, hived, is_initial_sync)
         except Exception as e:
             log.error("exception encountered block %d", last_num + 1)
             raise e
@@ -52,12 +53,13 @@ class Blocks:
         # Follows flushing needs to be atomic because recounts are
         # expensive. So is tracking follows at all; hence we track
         # deltas in memory and update follow/er counts in bulk.
+        cls._flush_blocks()
         Follow.flush(trx=False)
 
         DB.query("COMMIT")
 
     @classmethod
-    def _process(cls, block, hived, is_initial_sync=False):
+    def _process(cls, block, virtual_operations, hived, is_initial_sync=False):
         """Process a single block. Assumes a trx is open."""
         #pylint: disable=too-many-branches
         num = cls._push(block)
@@ -127,12 +129,19 @@ class Blocks:
 
         # virtual ops
         comment_payout_ops = {}
-        for vop in hived.get_virtual_operations(num):
+        vops = []
+        if not is_initial_sync:
+            ret = hived.get_virtual_operations(num)
+            for vop in ret:
+                vops.append(vop['op'])
+        else:
+            vops = virtual_operations[num]['ops'] if num in virtual_operations else []
+        for vop in vops:
             key = None
             val = None
 
-            op_type = vop['op']['type']
-            op_value = vop['op']['value']
+            op_type = vop['type']
+            op_value = vop['value']
             if op_type == 'curation_reward_operation':
                 key = "{}/{}".format(op_value['comment_author'], op_value['comment_permlink'])
                 val = {'reward' : op_value['reward']}
@@ -205,15 +214,27 @@ class Blocks:
         """Insert a row in `hive_blocks`."""
         num = int(block['block_id'][:8], base=16)
         txs = block['transactions']
-        DB.query("INSERT INTO hive_blocks (num, hash, prev, txs, ops, created_at) "
-                 "VALUES (:num, :hash, :prev, :txs, :ops, :date)", **{
-                     'num': num,
-                     'hash': block['block_id'],
-                     'prev': block['previous'],
-                     'txs': len(txs),
-                     'ops': sum([len(tx['operations']) for tx in txs]),
-                     'date': block['timestamp']})
+        cls.blocks_to_flush.append({
+            'num': num,
+            'hash': block['block_id'],
+            'prev': block['previous'],
+            'txs': len(txs),
+            'ops': sum([len(tx['operations']) for tx in txs]),
+            'date': block['timestamp']})
         return num
+
+    @classmethod
+    def _flush_blocks(cls):
+        query = """
+            INSERT INTO 
+                hive_blocks (num, hash, prev, txs, ops, created_at) 
+            VALUES 
+        """
+        values = []
+        for block in cls.blocks_to_flush:
+            values.append("({}, '{}', '{}', {}, {}, '{}')".format(block['num'], block['hash'], block['prev'], block['txs'], block['ops'], block['date']))
+        DB.query(query + ",".join(values))
+        cls.blocks_to_flush = []
 
     @classmethod
     def _pop(cls, blocks):

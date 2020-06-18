@@ -116,12 +116,14 @@ class Sync:
         exactly one block in JSON format.
         """
         # pylint: disable=no-self-use
+
         last_block = Blocks.head_num()
 
         tuplize = lambda path: [int(path.split('/')[-1].split('.')[0]), path]
         basedir = os.path.dirname(os.path.realpath(__file__ + "/../.."))
         files = glob.glob(basedir + "/checkpoints/*.json.lst")
         tuples = sorted(map(tuplize, files), key=lambda f: f[0])
+        vops = {}
 
         last_read = 0
         for (num, path) in tuples:
@@ -133,6 +135,7 @@ class Sync:
                     skip_lines = last_block - last_read
                     remaining = drop(skip_lines, f)
                     for lines in partition_all(chunk_size, remaining):
+                        raise RuntimeError("Sync from checkpoint disabled")
                         Blocks.process_multi(map(json.loads, lines), True)
                 last_block = num
             last_read = num
@@ -155,11 +158,12 @@ class Sync:
             # fetch blocks
             to = min(lbound + chunk_size, ubound)
             blocks = steemd.get_blocks_range(lbound, to)
+            vops = steemd.enum_virtual_ops(lbound, to)
             lbound = to
             timer.batch_lap()
 
             # process blocks
-            Blocks.process_multi(blocks, steemd, is_initial_sync)
+            Blocks.process_multi(blocks, vops, steemd, is_initial_sync)
             timer.batch_finish(len(blocks))
 
             _prefix = ("[SYNC] Got block %d @ %s" % (
@@ -192,7 +196,7 @@ class Sync:
             start_time = perf()
 
             self._db.query("START TRANSACTION")
-            num = Blocks.process(block, steemd)
+            num = Blocks.process(block, {}, steemd)
             follows = Follow.flush(trx=False)
             accts = Accounts.flush(steemd, trx=False, spread=8)
             # CachedPost.dirty_paidouts(block['timestamp'])

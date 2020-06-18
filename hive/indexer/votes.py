@@ -73,9 +73,9 @@ class Votes:
     @classmethod
     def vote_op(cls, vop, date):
         """ Process vote_operation """
-        voter = vop['op']['value']['voter']
-        author = vop['op']['value']['author']
-        permlink = vop['op']['value']['permlink']
+        voter = vop['value']['voter']
+        author = vop['value']['author']
+        permlink = vop['value']['permlink']
 
         vote_id = cls.get_id(voter, author, permlink)
         # no vote so create new
@@ -87,10 +87,10 @@ class Votes:
     @classmethod
     def _insert(cls, vop, date):
         """ Insert new vote """
-        voter = vop['op']['value']['voter']
-        author = vop['op']['value']['author']
-        permlink = vop['op']['value']['permlink']
-        vote_percent = vop['op']['value']['vote_percent']
+        voter = vop['value']['voter']
+        author = vop['value']['author']
+        permlink = vop['value']['permlink']
+        vote_percent = vop['value']['vote_percent']
         sql = """
             INSERT INTO 
                 hive_votes (voter_id, author_id, permlink_id, weight, rshares, vote_percent, last_update) 
@@ -103,15 +103,15 @@ class Votes:
                 :vote_percent,
                 :last_update
             )"""
-        weight = vop['op']['value']['weight']
-        rshares = vop['op']['value']['rshares']
+        weight = vop['value']['weight']
+        rshares = vop['value']['rshares']
         DB.query(sql, voter=voter, author=author, permlink=permlink, weight=weight, rshares=rshares,
                  vote_percent=vote_percent, last_update=date)
 
     @classmethod
     def _update(cls, vote_id, vop, date):
         """ Update existing vote """
-        vote_percent = vop['op']['value']['vote_percent']
+        vote_percent = vop['value']['vote_percent']
         sql = """
             UPDATE 
                 hive_votes 
@@ -123,7 +123,7 @@ class Votes:
                 num_changes = (SELECT num_changes FROM hive_votes WHERE id = :id)::int + 1
             WHERE id = :id
         """
-        weight = vop['op']['value']['weight']
-        rshares = vop['op']['value']['rshares']
+        weight = vop['value']['weight']
+        rshares = vop['value']['rshares']
         DB.query(sql, weight=weight, rshares=rshares, vote_percent=vote_percent, last_update=date,
                  id=vote_id)

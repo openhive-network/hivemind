@@ -91,7 +91,7 @@ class SteemStats(StatsAbstract):
         'lookup_accounts': 1000,
         'get_comment_pending_payouts':1000,
         'get_ops_in_block':500,
-        'get_current_price_feed':50
+        'enum_virtual_ops':1000
     }
 
     def __init__(self):
