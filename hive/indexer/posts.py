@@ -197,7 +197,7 @@ class Posts:
 
         sql = """
             SELECT id, author_id, permlink_id, parent_id, community_id, is_valid, is_muted, depth
-            FROM add_hive_post(:author, :permlink, :parent_author, :parent_permlink, :date, :community_support_start_date);
+            FROM add_hive_post((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_date)::timestamp);
             """
 
         row = DB.query_row(sql, author=op['author'], permlink=op['permlink'], parent_author=op['parent_author'],
@@ -342,7 +342,7 @@ class Posts:
                 updated_at = :date,
                 depth = :depth,
                 is_muted = :is_muted,
-                is_valid = :is_valid,
+                is_valid = :is_valid
             WHERE id = :id
         """
 

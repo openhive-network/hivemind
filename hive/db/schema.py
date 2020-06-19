@@ -436,6 +436,7 @@ if _parent_author != '' THEN
         CASE 
           WHEN root_id=-1 THEN php.id
           ELSE root_id
+        END
        FROM hive_posts
        WHERE hive_posts.id=php.id
       ) as root_id,
@@ -492,7 +493,7 @@ END IF;
 END
 $function$
     """
-    db.query_row(sql)
+    db.query_no_return(sql)
 
 def reset_autovac(db):
     """Initializes/resets per-table autovacuum/autoanalyze params.

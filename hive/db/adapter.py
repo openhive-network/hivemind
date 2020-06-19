@@ -78,6 +78,9 @@ class Db:
         assert self._is_write_query(sql), sql
         return self._query(sql, **kwargs)
 
+    def query_no_return(self, sql, **kwargs):
+        self._query(sql, **kwargs)
+
     def query_all(self, sql, **kwargs):
         """Perform a `SELECT n*m`"""
         res = self._query(sql, **kwargs)
