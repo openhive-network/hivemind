@@ -222,7 +222,7 @@ class Posts:
                 author_id = result['author_id']
                 Notify('error', dst_id=author_id, when=date,
                        post_id=result['id'], payload=error).write()
-            cls._insert_feed_cache(result)
+            cls._insert_feed_cache(result, date)
 
         if op['parent_author']:
             #update parent child count
@@ -287,7 +287,7 @@ class Posts:
                 author_id = Accounts.get_id(post['author'])
                 Notify('error', dst_id=author_id, when=date,
                        post_id=post['id'], payload=post['error']).write()
-            cls._insert_feed_cache(post)
+            cls._insert_feed_cache(post, date)
 
     @classmethod
     def delete(cls, op):
@@ -404,14 +404,13 @@ class Posts:
                          allow_replies=cpp['allow_replies'],
                          allow_votes=cpp['allow_votes'],
                          allow_curation_rewards=cpp['allow_curation_rewards'],
-                         author=cpp['author'], permlink=cpp['permlink'])
+                         author=comment_pending_payout['author'], permlink=comment_pending_payout['permlink'])
 
     @classmethod
-    def _insert_feed_cache(cls, result):
+    def _insert_feed_cache(cls, result, date):
         """Insert the new post into feed cache if it's not a comment."""
         if not result['depth']:
-            account_id = Accounts.get_id(result['author'])
-            cls._insert_feed_cache4(result['depth'], result['id'], account_id, result['date'])
+            cls._insert_feed_cache4(result['depth'], result['id'], result['author_id'], date)
 
     @classmethod
     def _insert_feed_cache4(cls, post_depth, post_id, author_id, post_date):
