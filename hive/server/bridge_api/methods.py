@@ -30,7 +30,7 @@ SQL_TEMPLATE = """
             payout_at, 
             is_paidout, 
             children, 
-            (SELECT votes FROM hive_post_data WHERE hive_post_data.id = hp.id) as votes,
+            (0) as votes,
             hp.created_at, 
             updated_at, 
             rshares, 
@@ -46,8 +46,8 @@ SQL_TEMPLATE = """
             hive_roles.role_id AS role_id
            hive_posts.is_pinned AS is_pinned
         FROM hive_posts hp
-        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
         LEFT OUTER JOIN hive_communities ON (hp.community_id = hive_communities.id)
         LEFT OUTER JOIN hive_roles ON (ha_a.id = hive_roles.account_id AND hp.community_id = hive_roles.community_id)
     """

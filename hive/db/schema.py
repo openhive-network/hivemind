@@ -73,6 +73,7 @@ def build_metadata():
         'hive_posts', metadata,
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('parent_id', sa.Integer),
+        sa.Column('root_id', sa.Integer, nullable=False, server_defaut='-1'), # -1 will mean no root, root_author_id = author_id and root_permlink_id = permlink_id
         sa.Column('author_id', sa.Integer, nullable=False),
         sa.Column('permlink_id', sa.BigInteger, nullable=False),
         sa.Column('category_id', sa.Integer, nullable=False),
@@ -190,6 +191,7 @@ def build_metadata():
     sa.Table(
         'hive_votes', metadata,
         sa.Column('id', sa.BigInteger, primary_key=True),
+        sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('voter_id', sa.Integer, nullable=False),
         sa.Column('author_id', sa.Integer, nullable=False),
         sa.Column('permlink_id', sa.Integer, nullable=False),
@@ -199,10 +201,12 @@ def build_metadata():
         sa.Column('last_update', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('num_changes', sa.Integer, server_default='0'), 
 
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id']),
         sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),
         sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id']),
         sa.ForeignKeyConstraint(['permlink_id'], ['hive_permlink_data.id']),
 
+        sa.Index('hive_votes_post_id_idx', 'post_id'),
         sa.Index('hive_votes_voter_id_idx', 'voter_id'),
         sa.Index('hive_votes_author_id_idx', 'author_id'),
         sa.Index('hive_votes_permlink_id_idx', 'permlink_id'),
@@ -385,8 +389,8 @@ def setup(db):
         "INSERT INTO hive_accounts (name, created_at) VALUES ('initminer', '2016-03-24 16:05:00')",
 
         """INSERT INTO public.hive_posts(
-          id, parent_id, author_id, permlink_id, category_id, community_id, parent_author_id, parent_permlink_id, root_author_id, root_permlink_id, created_at, depth)
-          VALUES (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, now(), 0);"""]
+          id, parent_id, root_id, author_id, permlink_id, category_id, community_id, parent_author_id, parent_permlink_id, root_author_id, root_permlink_id, created_at, depth)
+          VALUES (0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, now(), 0);"""]
     for sql in sqls:
         db.query(sql)
 
@@ -421,12 +425,21 @@ ON CONFLICT DO NOTHING
 ;
 if _parent_author != '' THEN
   RETURN QUERY INSERT INTO hive_posts 
-  (parent_id, parent_author_id, parent_permlink_id, depth, community_id,
+  (parent_id, root_id, parent_author_id, parent_permlink_id, depth, community_id,
    category_id,
    root_author_id, root_permlink_id,
    is_muted, is_valid,
    author_id, permlink_id, created_at)
-  SELECT php.id AS parent_id, php.author_id as parent_author_id,
+  SELECT 
+      php.id AS parent_id, 
+      (SELECT
+        CASE 
+          WHEN root_id=-1 THEN php.id
+          ELSE root_id
+       FROM hive_posts
+       WHERE hive_posts.id=php.id
+      ) as root_id,
+      php.author_id as parent_author_id,
       php.permlink_id as parent_permlink_id, php.depth + 1 as depth,
       (CASE
       WHEN _date > _community_support_start_date THEN
@@ -455,12 +468,12 @@ ELSE
   ;
 
   RETURN QUERY INSERT INTO hive_posts 
-  (parent_id, parent_author_id, parent_permlink_id, depth, community_id,
+  (parent_id, root_id, parent_author_id, parent_permlink_id, depth, community_id,
    category_id,
    root_author_id, root_permlink_id,
    is_muted, is_valid,
    author_id, permlink_id, created_at)
-  SELECT 0 AS parent_id, 0 as parent_author_id, 0 as parent_permlink_id, 0 as depth,
+  SELECT 0 AS parent_id, -1 AS root_id, 0 as parent_author_id, 0 as parent_permlink_id, 0 as depth,
       (CASE
         WHEN _date > _community_support_start_date THEN
           (select hc.id from hive_communities hc where hc.name = _parent_permlink)
@@ -479,7 +492,7 @@ END IF;
 END
 $function$
     """
-#    db.query(sql)
+    db.query_row(sql)
 
 def reset_autovac(db):
     """Initializes/resets per-table autovacuum/autoanalyze params.

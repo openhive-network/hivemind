@@ -78,14 +78,14 @@ async def load_posts_keyed(db, ids, truncate_body=0):
         url, 
         root_title,
     FROM hive_posts hp
-    LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-    LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+    INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+    INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
     LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
     LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
-    LEFT JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
-    LEFT JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
-    LEFT JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
-    LEFT JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
+    INNER JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
+    INNER JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
+    INNER JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
+    INNER JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
     WHERE post_id IN :ids"""
 
     result = await db.query_all(sql, ids=tuple(ids))
@@ -126,8 +126,8 @@ async def load_posts(db, ids, truncate_body=0):
                     hp.id, ha_a.name as author, hpd_p.permlink as permlink, depth, created_at, is_deleted
                 FROM 
                     hive_posts hp
-                LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-                LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+                INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+                INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
                 WHERE id = :id"""
             post = await db.query_row(sql, id=_id)
             if not post['is_deleted']:
@@ -237,9 +237,6 @@ def _condenser_post_object(row, truncate_body=0):
         curator_payout = sbd_amount(row['curator_payout_value'])
         post['curator_payout_value'] = _amount(curator_payout)
         post['total_payout_value'] = _amount(row['payout'] - curator_payout)
-
-    # not used by condenser, but may be useful
-    # post['net_votes'] = post['total_votes'] - row['up_votes']
 
     return post
 

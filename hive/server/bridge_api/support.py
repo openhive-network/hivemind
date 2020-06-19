@@ -24,8 +24,8 @@ async def get_post_header(context, author, permlink):
             hp.id, ha_a.name as author, hpd_p.permlink as permlink, hcd.category as category, depth
         FROM 
             hive_posts hp
-        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
         LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
         WHERE ha_a.author = :author
             AND hpd_p.permlink = :permlink
@@ -54,8 +54,8 @@ async def normalize_post(context, post):
         SELECT 
             hp.id, hcd.category as category, community_id, is_muted, is_valid
         FROM hive_posts hp
-        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
         LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
         WHERE ha_a.author = :author AND hpd_p.permlink = :permlink
     """

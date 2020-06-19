@@ -18,8 +18,8 @@ async def _get_post_id(db, author, permlink):
         SELECT 
             hp.id
         FROM hive_posts hp
-        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
         WHERE ha_a.author = :author AND hpd_p.permlink = :permlink"""
     post_id = await db.query_one(sql, a=author, p=permlink)
     assert post_id, 'invalid author/permlink'

@@ -33,9 +33,14 @@ class Votes:
                 count(hv.id) 
             FROM 
                 hive_votes hv 
-            INNER JOIN hive_accounts ha_a ON (ha_a.id = hv.author_id)
-            INNER JOIN hive_permlink_data hpd ON (hpd.id = hv.permlink_id)
-            WHERE ha_a.name = :author AND hpd.permlink = :permlink
+            WHERE 
+                hv.id = (SELECT 
+                    hp.id 
+                FROM
+                    hive_posts hp
+                INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
+                INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
+                WHERE ha_a.name = :author AND hpd_p.permlink = :permlink) 
         """
         ret = DB.query_row(sql, author=author, permlink=permlink)
         return 0 if ret is None else int(ret.count)
@@ -48,9 +53,15 @@ class Votes:
                 count(hv.id) 
             FROM 
                 hive_votes hv 
-            INNER JOIN hive_accounts ha_a ON (ha_a.id = hv.author_id)
-            INNER JOIN hive_permlink_data hpd ON (hpd.id = hv.permlink_id)
-            WHERE ha_a.name = :author AND hpd.permlink = :permlink AND vote_percent > 0
+            WHERE 
+                hv.id = (SELECT 
+                    hp.id 
+                FROM
+                    hive_posts hp
+                INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
+                INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
+                WHERE ha_a.name = :author AND hpd_p.permlink = :permlink) 
+            AND vote_percent > 0
         """
         ret = DB.query_row(sql, author=author, permlink=permlink)
         return 0 if ret is None else int(ret.count)
@@ -63,9 +74,15 @@ class Votes:
                 count(hv.id) 
             FROM 
                 hive_votes hv 
-            INNER JOIN hive_accounts ha_a ON (ha_a.id = hv.author_id)
-            INNER JOIN hive_permlink_data hpd ON (hpd.id = hv.permlink_id)
-            WHERE ha_a.name = :author AND hpd.permlink = :permlink AND vote_percent < 0
+            WHERE 
+                hv.id = (SELECT 
+                    hp.id 
+                FROM
+                    hive_posts hp
+                INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
+                INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
+                WHERE ha_a.name = :author AND hpd_p.permlink = :permlink) 
+            AND vote_percent < 0
         """
         ret = DB.query_row(sql, author=author, permlink=permlink)
         return 0 if ret is None else int(ret.count)
@@ -93,8 +110,16 @@ class Votes:
         vote_percent = vop['value']['vote_percent']
         sql = """
             INSERT INTO 
-                hive_votes (voter_id, author_id, permlink_id, weight, rshares, vote_percent, last_update) 
+                hive_votes (post_id, voter_id, author_id, permlink_id, weight, rshares, vote_percent, last_update) 
             VALUES (
+                (SELECT 
+                    hp.id 
+                FROM
+                    hive_posts hp
+                INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
+                INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
+                WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
+                ),
                 (SELECT id FROM hive_accounts WHERE name = :voter),
                 (SELECT id FROM hive_accounts WHERE name = :author),
                 (SELECT id FROM hive_permlink_data WHERE permlink = :permlink),

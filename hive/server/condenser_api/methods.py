@@ -32,7 +32,7 @@ SQL_TEMPLATE = """
         payout_at, 
         is_paidout, 
         children, 
-        (SELECT votes FROM hive_post_data WHERE hive_post_data.id = hp.id) as votes,
+        (0) as votes,
         hp.created_at, 
         updated_at, 
         rshares, 
@@ -56,12 +56,12 @@ SQL_TEMPLATE = """
         root_title,
         ha_a.reputation AS author_rep
     FROM hive_posts hp
-    LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-    LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-    LEFT JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
-    LEFT JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
-    LEFT JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
-    LEFT JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
+    INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+    INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+    INNER JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
+    INNER JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
+    INNER JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
+    INNER JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
     WHERE
 """
 

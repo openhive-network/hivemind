@@ -138,8 +138,8 @@ async def posts_by_id(db, ids, observer=None, lite=True):
             hp.is_invalid,
             %s
         FROM hive_posts hp 
-        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
         LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
         WHERE id IN :ids"""
     fields = ['hpd.preview'] if lite else ['hpd.body', 'updated_at', 'hpd.json']

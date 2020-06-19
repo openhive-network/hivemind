@@ -358,7 +358,7 @@ async def _top_community_posts(db, community, limit=50):
         hpd.votes as votes,
         payout
     FROM hive_posts hp
-    LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+    INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
     LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
     LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
     WHERE hcdcategory = :community AND is_paidout = '0'

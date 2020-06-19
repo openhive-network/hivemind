@@ -35,19 +35,14 @@ class Posts:
     @classmethod
     def find_root(cls, author, permlink):
         """ Find root for post """
-        sql = """WITH RECURSIVE parent AS
-        (
-            SELECT id, parent_id, 1 AS level from hive_posts WHERE id = (SELECT hp.id 
-                FROM hive_posts hp 
-                INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
-                INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
-                WHERE ha_a.name = :a AND hpd_p.permlink = :p)
-            UNION ALL 
-            SELECT t.id, t.parent_id, level + 1 FROM parent
-            INNER JOIN hive_posts t ON t.id =  parent.parent_id
-            WHERE parent.parent_id != 0
-        )
-        SELECT id FROM parent ORDER BY level DESC LIMIT 1"""
+        sql = """
+            SELECT 
+                root_id 
+            FROM hive_posts hp 
+            INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
+            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
+            WHERE ha_a.name = :a AND hpd_p.permlink = :p
+        """
         _id = DB.query_one(sql, a=author, p=permlink)
         return _id
 
@@ -226,12 +221,16 @@ class Posts:
 
         if not DbState.is_initial_sync():
             if error:
-                author_id = result.author_id
+                author_id = result['author_id']
                 Notify('error', dst_id=author_id, when=date,
                        post_id=result['id'], payload=error).write()
-            if op['parent_author']: # update parent's child count
-                cls.update_child_count(result['parent_id'])
-            cls._insert_feed_cache4(result['depth'], result['id'], result['author_id'], date)
+            cls._insert_feed_cache(result)
+
+        if op['parent_author']:
+            #update parent child count
+            prnt = cls._get_parent_by_child_id(result['id'])
+            if prnt is not None:
+                cls.update_child_count(prnt['id'])
 
     @classmethod
     def update_child_count(cls, parent_id, op='+'):
@@ -240,7 +239,7 @@ class Posts:
             UPDATE 
                 hive_posts 
             SET 
-                children = (
+                children = GREATEST(0, (
                     SELECT 
                         CASE 
                             WHEN children=NULL THEN 0
@@ -253,9 +252,9 @@ class Posts:
                 )::int
         """
         if op == '+':
-            sql += """ + 1"""
+            sql += """ + 1)"""
         else:
-            sql += """ - 1"""
+            sql += """ - 1)"""
         sql += """ WHERE id = :id"""
 
         DB.query(sql, id=parent_id)
@@ -307,10 +306,11 @@ class Posts:
                 # TODO: delete from hive_reblogs -- otherwise feed cache gets 
                 # populated with deleted posts somwrimas
                 FeedCache.delete(pid)
-            else:
-                # force parent child recount when child is deleted
-                prnt = cls._get_parent_by_child_id(pid)
-                cls.update_child_count(prnt['id'], '-')
+
+        # force parent child recount when child is deleted
+        prnt = cls._get_parent_by_child_id(pid)
+        if prnt is not None:
+            cls.update_child_count(prnt['id'], '-')
 
     @classmethod
     def update(cls, op, date, pid):
@@ -337,17 +337,12 @@ class Posts:
         sql = """
             UPDATE hive_posts 
             SET
-                parent_id = :parent_id,
-                author_id = (SELECT id FROM hive_accounts WHERE name = :author),
-                permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink),
                 category_id = (SELECT id FROM hive_category_data WHERE category = :category),
                 community_id = :community_id,
                 updated_at = :date,
                 depth = :depth,
                 is_muted = :is_muted,
                 is_valid = :is_valid,
-                parent_author_id = (SELECT id FROM hive_accounts WHERE name = :parent_author),
-                parent_permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :parent_permlink)
             WHERE id = :id
         """
 
@@ -437,21 +432,20 @@ class Posts:
             WHERE 
                 hp.id = (SELECT parent_id FROM hive_posts WHERE id = :child_id)"""
         result = DB.query_row(sql, child_id=child_id)
-        assert result, "parent of %d not found" % child_id
-        return result
+        return None if result is None else result
 
     @classmethod
-    def _insert_feed_cache(cls, post):
+    def _insert_feed_cache(cls, result):
         """Insert the new post into feed cache if it's not a comment."""
-        if not post['depth']:
-            account_id = Accounts.get_id(post['author'])
-            _insert_feed_cache4(cls, post['depth'], post['id'], account_id, post['date'])
+        if not result['depth']:
+            account_id = Accounts.get_id(result['author'])
+            cls._insert_feed_cache4(result['depth'], result['id'], account_id, result['date'])
 
     @classmethod
     def _insert_feed_cache4(cls, post_depth, post_id, author_id, post_date):
         """Insert the new post into feed cache if it's not a comment."""
         if not post_depth:
-            FeedCache.insert(post_id, account_id, post_date)
+            FeedCache.insert(post_id, author_id, post_date)
 
 
     @classmethod
@@ -480,6 +474,7 @@ class Posts:
         # if this is a top-level post:
         if not op['parent_author']:
             parent_id = None
+            root_id = -1
             depth = 0
             category = op['parent_permlink']
             community_id = None
@@ -498,23 +493,29 @@ class Posts:
                 FROM hive_posts hp 
                 INNER JOIN hive_category_data hcd ON hcd.id = hp.category_id
                 WHERE hp.id = :id"""
-            (parent_depth, category, community_id, is_valid,
-             is_muted) = DB.query_row(sql, id=parent_id)
+            (parent_depth, category, community_id, is_valid, is_muted) = DB.query_row(sql, id=parent_id)
             depth = parent_depth + 1
-            if not is_valid: error = 'replying to invalid post'
-            elif is_muted: error = 'replying to muted post'
+            if not is_valid:
+                error = 'replying to invalid post'
+            elif is_muted:
+                error = 'replying to muted post'
             #find root comment
             root_id = cls.find_root(op['parent_author'], op['parent_permlink'])
-            sql = """
-                SELECT 
-                    ha_a.name as author, hpd_p.permlink as permlink
-                FROM 
-                    hive_posts hp
-                INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-                INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-                WHERE 
-                    hp.id = :id"""
-            root_author, root_permlink = DB.query_row(sql, id=root_id)
+            if root_id > -1:
+                sql = """
+                    SELECT 
+                        ha_a.name as author, hpd_p.permlink as permlink
+                    FROM 
+                        hive_posts hp
+                    INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+                    INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+                    WHERE 
+                        hp.id = :id"""
+                root_author, root_permlink = DB.query_row(sql, id=root_id)
+            else:
+                root_id = parent_id
+                root_author = op['parent_author']
+                root_permlink = op['parent_permlink']
 
         # check post validity in specified context
         error = None
@@ -523,7 +524,7 @@ class Posts:
             #is_valid = False # TODO: reserved for future blacklist status?
             is_muted = True
 
-        ret = dict(parent_id=parent_id, id=pid, community_id=community_id,
+        ret = dict(parent_id=parent_id, root_id=root_id, id=pid, community_id=community_id,
                    category=category, is_muted=is_muted, is_valid=is_valid,
                    depth=depth, date=date, error=error,
                    author=op['author'], permlink=op['permlink'],

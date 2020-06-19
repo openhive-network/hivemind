@@ -16,7 +16,7 @@ SQL_TEMPLATE = """
         payout_at, 
         is_paidout, 
         children, 
-        (SELECT votes FROM hive_post_data WHERE hive_post_data.id = hp.id) as votes,
+        (0) as votes,
         hp.created_at, 
         updated_at, 
         rshares, 
@@ -39,12 +39,12 @@ SQL_TEMPLATE = """
         url, 
         root_title
     FROM hive_posts hp
-    LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-    LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-    LEFT JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
-    LEFT JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
-    LEFT JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
-    LEFT JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
+    INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+    INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+    INNER JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
+    INNER JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
+    INNER JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
+    INNER JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
     WHERE
 """
 
@@ -53,8 +53,8 @@ async def get_post_id_by_author_and_permlink(db, author: str, permlink: str, lim
     sql = """
         SELECT hp.id 
         FROM hive_posts hp
-        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
         WHERE ha_a.name >= :author AND hpd_p.permlink >= :permlink 
         ORDER BY ha_a.name ASC 
         LIMIT :limit

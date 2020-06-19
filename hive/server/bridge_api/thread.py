@@ -38,7 +38,7 @@ async def get_discussion(context, author, permlink):
            hive_posts.total_votes AS total_votes, hive_posts.flag_weight AS flag_weight,
            hive_posts.sc_trend AS sc_trend, hive_accounts.id AS acct_author_id
            FROM child_posts JOIN hive_accounts ON (hive_posts.author_id = hive_accounts.id)
-                            LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hive_posts.permlink_id
+                            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hive_posts.permlink_id
                             LEFT JOIN hive_post_data hpd ON hpd.id = hive_posts.id
                             LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
                             WHERE NOT hive_posts.is_deleted AND NOT hive_posts.is_muted
@@ -102,8 +102,8 @@ async def _get_post_id(db, author, permlink):
         SELECT 
             id 
         FROM hive_posts hp
-        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
         WHERE ha_a.author = :author 
             AND hpd_p.permlink = :permlink 
             AND is_deleted = '0' 

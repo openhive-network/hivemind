@@ -7,6 +7,7 @@ import ujson as json
 from funcy.seqs import first, distinct
 
 from hive.utils.normalize import sbd_amount, rep_log10, safe_img_url, parse_time, utc_timestamp
+from hive.indexer.votes import Votes
 
 def mentions(body):
     """Given a post body, return proper @-mentioned account names."""
@@ -99,7 +100,7 @@ def post_to_internal(post, post_id, level='insert', promoted=None):
         ('sc_trend',    payout['sc_trend']),
         ('sc_hot',      payout['sc_hot']),
         ('flag_weight', stats['flag_weight']),
-        ('total_votes', stats['total_votes']),
+        ('total_votes', Votes.get_vote_count(post['author'], post['permlink']),),
         ('up_votes',    stats['up_votes']),
         ('is_hidden',   stats['hide']),
         ('is_grayed',   stats['gray']),

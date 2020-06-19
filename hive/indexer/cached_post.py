@@ -253,8 +253,8 @@ class CachedPost:
                 hp.id, ha_a.name as author, hpd_p.permlink as permlink
             FROM 
                 hive_posts hp
-            LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-            LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+            INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
             WHERE hp.id IN :ids"""
         results = DB.query_all(sql, ids=tuple(ids))
         return Posts.save_ids_from_tuples(results)
@@ -282,8 +282,8 @@ class CachedPost:
             SELECT 
                 hp.id, ha_a.name as author, hpd_p.permlink as permlink, promoted 
             FROM hive_posts hp
-            LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-            LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+            INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
             WHERE 
                 hp.is_deleted = '0' AND hp.id > :id
             ORDER BY hp.id LIMIT :limit"""

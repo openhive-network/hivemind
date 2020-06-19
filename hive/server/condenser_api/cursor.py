@@ -18,8 +18,8 @@ async def get_post_id(db, author, permlink):
         SELECT 
             hp.id
         FROM hive_posts hp
-        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
         WHERE ha_a.author = :author AND hpd_p.permlink = :permlink 
             AND is_deleted = '0' LIMIT 1"""
     return await db.query_one(sql, a=author, p=permlink)
@@ -35,8 +35,8 @@ async def _get_post_id(db, author, permlink):
         SELECT 
             hp.id
         FROM hive_posts hp
-        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
         WHERE ha_a.author = :author AND hpd_p.permlink = :permlink"""
     return await db.query_one(sql, a=author, p=permlink)
 
@@ -220,14 +220,14 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
             url, 
             root_title
         FROM hive_posts hp
-        LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
         LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
         LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
-        LEFT JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
-        LEFT JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
-        LEFT JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
-        LEFT JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
+        INNER JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
+        INNER JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
+        INNER JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
+        INNER JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
         WHERE %s ORDER BY %s DESC LIMIT :limit
     """ % (' AND '.join(where), field)
 
