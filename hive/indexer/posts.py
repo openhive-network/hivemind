@@ -39,12 +39,13 @@ class Posts:
         (
             SELECT id, parent_id, 1 AS level from hive_posts WHERE id = (SELECT hp.id 
                 FROM hive_posts hp 
-                LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
-                LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
+                INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
+                INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
                 WHERE ha_a.name = :a AND hpd_p.permlink = :p)
             UNION ALL 
             SELECT t.id, t.parent_id, level + 1 FROM parent
             INNER JOIN hive_posts t ON t.id =  parent.parent_id
+            WHERE parent.parent_id != 0
         )
         SELECT id FROM parent ORDER BY level DESC LIMIT 1"""
         _id = DB.query_one(sql, a=author, p=permlink)
@@ -63,8 +64,8 @@ class Posts:
             sql = """
                 SELECT hp.id 
                 FROM hive_posts hp 
-                LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
-                LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
+                INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
+                INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
                 WHERE ha_a.name = :a AND hpd_p.permlink = :p
             """
             _id = DB.query_one(sql, a=author, p=permlink)
@@ -199,62 +200,38 @@ class Posts:
         # * obtain id
         # * insert post content data
 
-        # add permlinks to permlink table
-        for permlink in ['permlink', 'parent_permlink', 'root_permlink']:
-            if permlink in op:
-                sql = """
-                    INSERT INTO hive_permlink_data (permlink) 
-                    VALUES (:permlink) 
-                    ON CONFLICT (permlink) DO NOTHING"""
-                DB.query(sql, permlink=op[permlink])
-
-        post = cls._build_post(op, date)
-
-        # add category to category table
         sql = """
-            INSERT INTO hive_category_data (category) 
-            VALUES (:category) 
-            ON CONFLICT (category) DO NOTHING"""
-        DB.query(sql, category=post['category'])
+            SELECT id, author_id, permlink_id, parent_id, community_id, is_valid, is_muted, depth
+            FROM add_hive_post(:author, :permlink, :parent_author, :parent_permlink, :date, :community_support_start_date);
+            """
 
-        sql = """
-            INSERT INTO hive_posts (parent_id, author_id, permlink_id,
-                category_id, community_id, created_at, depth, is_muted, 
-                is_valid, parent_author_id, parent_permlink_id, root_author_id, root_permlink_id)
-            VALUES (:parent_id, 
-                (SELECT id FROM hive_accounts WHERE name = :author),
-                (SELECT id FROM hive_permlink_data WHERE permlink = :permlink),
-                (SELECT id FROM hive_category_data WHERE category = :category),
-                :community_id, :date, :depth,
-                :is_muted, :is_valid, 
-                (SELECT id FROM hive_accounts WHERE name = :parent_author),
-                (SELECT id FROM hive_permlink_data WHERE permlink = :parent_permlink),
-                (SELECT id FROM hive_accounts WHERE name = :root_author),
-                (SELECT id FROM hive_permlink_data WHERE permlink = :root_permlink)
-            )"""
-        sql += ";SELECT currval(pg_get_serial_sequence('hive_posts','id'))"
+        row = DB.query_row(sql, author=op['author'], permlink=op['permlink'], parent_author=op['parent_author'],
+                   parent_permlink=op['parent_permlink'], date=date, community_support_start_date=START_DATE)
 
-        result = DB.query(sql, **post)
-        post['id'] = int(list(result)[0][0])
-        cls._set_id(op['author']+'/'+op['permlink'], post['id'])
+        result = dict(row)
+
+        # TODO we need to enhance checking related community post validation and honor is_muted.
+        error = cls._verify_post_against_community(op, result['community_id'], result['is_valid'], result['is_muted'])
+
+        cls._set_id(op['author']+'/'+op['permlink'], result['id'])
 
         # add content data to hive_post_data
         sql = """
             INSERT INTO hive_post_data (id, title, preview, img_url, body, json) 
             VALUES (:id, :title, :preview, :img_url, :body, :json)"""
-        DB.query(sql, id=post['id'], title=op['title'],
+        DB.query(sql, id=result['id'], title=op['title'],
                  preview=op['preview'] if 'preview' in op else "",
                  img_url=op['img_url'] if 'img_url' in op else "",
                  body=op['body'], json=op['json_metadata'] if op['json_metadata'] else '{}')
 
         if not DbState.is_initial_sync():
-            if post['error']:
-                author_id = Accounts.get_id(post['author'])
+            if error:
+                author_id = result.author_id
                 Notify('error', dst_id=author_id, when=date,
-                       post_id=post['id'], payload=post['error']).write()
+                       post_id=result['id'], payload=error).write()
             if op['parent_author']: # update parent's child count
-                cls.update_child_count(post['parent_id'])
-            cls._insert_feed_cache(post)
+                cls.update_child_count(result['parent_id'])
+            cls._insert_feed_cache4(result['depth'], result['id'], result['author_id'], date)
 
     @classmethod
     def update_child_count(cls, parent_id, op='+'):
@@ -455,8 +432,8 @@ class Posts:
                 hpd_p.permlink as permlink
             FROM 
                 hive_posts hp
-            LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-            LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+            INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
             WHERE 
                 hp.id = (SELECT parent_id FROM hive_posts WHERE id = :child_id)"""
         result = DB.query_row(sql, child_id=child_id)
@@ -468,7 +445,23 @@ class Posts:
         """Insert the new post into feed cache if it's not a comment."""
         if not post['depth']:
             account_id = Accounts.get_id(post['author'])
-            FeedCache.insert(post['id'], account_id, post['date'])
+            _insert_feed_cache4(cls, post['depth'], post['id'], account_id, post['date'])
+
+    @classmethod
+    def _insert_feed_cache4(cls, post_depth, post_id, author_id, post_date):
+        """Insert the new post into feed cache if it's not a comment."""
+        if not post_depth:
+            FeedCache.insert(post_id, account_id, post_date)
+
+
+    @classmethod
+    def _verify_post_against_community(cls, op, community_id, is_valid, is_muted):
+        error = None
+        if community_id and is_valid and not Community.is_post_valid(community_id, op):
+            error = 'not authorized'
+            #is_valid = False # TODO: reserved for future blacklist status?
+            is_muted = True
+        return error
 
     @classmethod
     def _build_post(cls, op, date, pid=None):
@@ -503,7 +496,7 @@ class Posts:
             sql = """
                 SELECT depth, hcd.category as category, community_id, is_valid, is_muted
                 FROM hive_posts hp 
-                LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+                INNER JOIN hive_category_data hcd ON hcd.id = hp.category_id
                 WHERE hp.id = :id"""
             (parent_depth, category, community_id, is_valid,
              is_muted) = DB.query_row(sql, id=parent_id)
@@ -517,8 +510,8 @@ class Posts:
                     ha_a.name as author, hpd_p.permlink as permlink
                 FROM 
                     hive_posts hp
-                LEFT JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-                LEFT JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+                INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+                INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
                 WHERE 
                     hp.id = :id"""
             root_author, root_permlink = DB.query_row(sql, id=root_id)

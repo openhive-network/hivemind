@@ -374,18 +374,112 @@ def setup(db):
     sqls = [
         "INSERT INTO hive_state (block_num, db_version, steem_per_mvest, usd_per_steem, sbd_per_steem, dgpo) VALUES (0, %d, 0, 0, 0, '')" % DB_VERSION,
         "INSERT INTO hive_blocks (num, hash, created_at) VALUES (0, '0000000000000000000000000000000000000000', '2016-03-24 16:04:57')",
+
+        "INSERT INTO hive_permlink_data (id, permlink) VALUES (0, '')",
+        "INSERT INTO hive_category_data (id, category) VALUES (0, '')",
+        "INSERT INTO hive_accounts (id, name, created_at) VALUES (0, '', '1990-01-01T00:00:00')",
+
         "INSERT INTO hive_accounts (name, created_at) VALUES ('miners',    '2016-03-24 16:05:00')",
         "INSERT INTO hive_accounts (name, created_at) VALUES ('null',      '2016-03-24 16:05:00')",
         "INSERT INTO hive_accounts (name, created_at) VALUES ('temp',      '2016-03-24 16:05:00')",
         "INSERT INTO hive_accounts (name, created_at) VALUES ('initminer', '2016-03-24 16:05:00')",
-        "INSERT INTO hive_accounts (name, created_at) VALUES ('', '1990-01-01T00:00:00') ON CONFLICT (name) DO NOTHING",
-        "INSERT INTO hive_permlink_data (permlink) VALUES ('') ON CONFLICT (permlink) DO NOTHING",
-        "INSERT INTO hive_category_data (category) VALUES ('') ON CONFLICT (category) DO NOTHING"]
+
+        """INSERT INTO public.hive_posts(
+          id, parent_id, author_id, permlink_id, category_id, community_id, parent_author_id, parent_permlink_id, root_author_id, root_permlink_id, created_at, depth)
+          VALUES (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, now(), 0);"""]
     for sql in sqls:
         db.query(sql)
 
     sql = "CREATE INDEX hive_communities_ft1 ON hive_communities USING GIN (to_tsvector('english', title || ' ' || about))"
     db.query(sql)
+
+    sql = """
+DROP FUNCTION if exists add_hive_post(character varying,character varying,character varying,character varying,timestamp without time zone,timestamp without time zone)
+;
+CREATE OR REPLACE FUNCTION add_hive_post(
+  in _author hive_accounts.name%TYPE,
+  in _permlink hive_permlink_data.permlink%TYPE,
+  in _parent_author hive_accounts.name%TYPE,
+  in _parent_permlink hive_permlink_data.permlink%TYPE,
+  in _date hive_posts.created_at%TYPE,
+  in _community_support_start_date hive_posts.created_at%TYPE)
+RETURNS TABLE (id hive_posts.id%TYPE, author_id hive_posts.author_id%TYPE, permlink_id hive_posts.permlink_id%TYPE,
+               parent_id hive_posts.parent_id%TYPE, community_id hive_posts.community_id%TYPE,
+               is_valid hive_posts.is_valid%TYPE, is_muted hive_posts.is_muted%TYPE, depth hive_posts.depth%TYPE)
+LANGUAGE plpgsql
+AS
+$function$
+BEGIN
+
+INSERT INTO hive_permlink_data
+(permlink)
+values
+(
+_permlink
+)
+ON CONFLICT DO NOTHING
+;
+if _parent_author != '' THEN
+  RETURN QUERY INSERT INTO hive_posts 
+  (parent_id, parent_author_id, parent_permlink_id, depth, community_id,
+   category_id,
+   root_author_id, root_permlink_id,
+   is_muted, is_valid,
+   author_id, permlink_id, created_at)
+  SELECT php.id AS parent_id, php.author_id as parent_author_id,
+      php.permlink_id as parent_permlink_id, php.depth + 1 as depth,
+      (CASE
+      WHEN _date > _community_support_start_date THEN
+        COALESCE(php.community_id, (select hc.id from hive_communities hc where hc.name = _parent_permlink))
+      ELSE NULL
+    END)  as community_id,
+      COALESCE(php.category_id, (select hcg.id from hive_category_data hcg where hcg.category = _parent_permlink)) as category_id,
+      php.root_author_id as root_author_id, 
+      php.root_permlink_id as root_permlink_id, 
+      php.is_muted as is_muted, php.is_valid as is_valid,
+      ha.id as author_id, hpd.id as permlink_id, _date as created_at
+  FROM hive_accounts ha,
+       hive_permlink_data hpd,
+       hive_posts php
+  INNER JOIN hive_accounts pha ON pha.id = php.author_id
+  INNER JOIN hive_permlink_data phpd ON phpd.id = php.permlink_id
+  WHERE pha.name = _parent_author and phpd.permlink = _parent_permlink AND
+         ha.name = _author and hpd.permlink = _permlink 
+  RETURNING hive_posts.id, hive_posts.author_id, hive_posts.permlink_id, hive_posts.parent_id, hive_posts.community_id, hive_posts.is_valid, hive_posts.is_muted, hive_posts.depth
+;
+ELSE
+  INSERT INTO hive_category_data
+  (category) 
+  VALUES (_parent_permlink) 
+  ON CONFLICT (category) DO NOTHING
+  ;
+
+  RETURN QUERY INSERT INTO hive_posts 
+  (parent_id, parent_author_id, parent_permlink_id, depth, community_id,
+   category_id,
+   root_author_id, root_permlink_id,
+   is_muted, is_valid,
+   author_id, permlink_id, created_at)
+  SELECT 0 AS parent_id, 0 as parent_author_id, 0 as parent_permlink_id, 0 as depth,
+      (CASE
+        WHEN _date > _community_support_start_date THEN
+          (select hc.id from hive_communities hc where hc.name = _parent_permlink)
+        ELSE NULL
+      END)  as community_id,
+      (select hcg.id from hive_category_data hcg where hcg.category = _parent_permlink) as category_id,
+      ha.id as root_author_id, -- use author_id as root one if no parent
+      hpd.id as root_permlink_id, -- use perlink_id as root one if no parent
+      false as is_muted, true as is_valid,
+      ha.id as author_id, hpd.id as permlink_id, _date as created_at
+  FROM hive_accounts ha,
+       hive_permlink_data hpd
+  WHERE ha.name = _author and hpd.permlink = _permlink 
+  RETURNING hive_posts.id, hive_posts.author_id, hive_posts.permlink_id, hive_posts.parent_id, hive_posts.community_id, hive_posts.is_valid, hive_posts.is_muted, hive_posts.depth;
+END IF;
+END
+$function$
+    """
+#    db.query(sql)
 
 def reset_autovac(db):
     """Initializes/resets per-table autovacuum/autoanalyze params.
