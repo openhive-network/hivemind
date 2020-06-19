@@ -33,20 +33,6 @@ class Posts:
         return DB.query_one(sql) or 0
 
     @classmethod
-    def find_root(cls, author, permlink):
-        """ Find root for post """
-        sql = """
-            SELECT 
-                root_id 
-            FROM hive_posts hp 
-            INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
-            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
-            WHERE ha_a.name = :a AND hpd_p.permlink = :p
-        """
-        _id = DB.query_one(sql, a=author, p=permlink)
-        return _id
-
-    @classmethod
     def get_id(cls, author, permlink):
         """Look up id by author/permlink, making use of LRU cache."""
         url = author+'/'+permlink
@@ -96,11 +82,18 @@ class Posts:
     @classmethod
     def get_id_and_depth(cls, author, permlink):
         """Get the id and depth of @author/permlink post."""
-        _id = cls.get_id(author, permlink)
-        if not _id:
-            return (None, -1)
-        depth = DB.query_one("SELECT depth FROM hive_posts WHERE id = :id", id=_id)
-        return (_id, depth)
+        sql = """
+            SELECT
+                hp.id,
+                COALESCE(hp.depth, -1)
+            FROM
+                hive_posts hp
+            INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
+            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
+            WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
+        """
+        pid, depth = DB.query_row(sql, author=author, permlink=permlink)
+        return (pid, depth)
 
     @classmethod
     def is_pid_deleted(cls, pid):
@@ -135,7 +128,6 @@ class Posts:
         """ Process comment payment operations """
         for k, v in ops.items():
             author, permlink = k.split("/")
-            pid = cls.get_id(author, permlink)
             # total payout to curators
             curator_rewards_sum = 0
             # author payouts
@@ -172,7 +164,13 @@ class Posts:
                         last_payout = :last_payout,
                         cashout_time = :cashout_time,
                         is_paidout = true
-                    WHERE id = :id
+                    WHERE id = (
+                        SELECT hp.id 
+                        FROM hive_posts hp 
+                        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
+                        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
+                        WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
+                    )
             """
             DB.query(sql, total_payout_value=legacy_amount(comment_author_reward),
                      curator_payout_value=legacy_amount(curator_rewards),
@@ -182,7 +180,7 @@ class Posts:
                      author_rewards_vests=author_rewards_vests,
                      last_payout=date,
                      cashout_time=date,
-                     id=pid)
+                     author=author, permlink=permlink)
 
     @classmethod
     def insert(cls, op, date):
@@ -228,12 +226,10 @@ class Posts:
 
         if op['parent_author']:
             #update parent child count
-            prnt = cls._get_parent_by_child_id(result['id'])
-            if prnt is not None:
-                cls.update_child_count(prnt['id'])
+            cls.update_child_count(result['id'])
 
     @classmethod
-    def update_child_count(cls, parent_id, op='+'):
+    def update_child_count(cls, child_id, op='+'):
         """ Increase/decrease child count by 1 """
         sql = """
             UPDATE 
@@ -248,16 +244,16 @@ class Posts:
                         END
                     FROM 
                         hive_posts
-                    WHERE id = :id
+                    WHERE id = (SELECT parent_id FROM hive_posts WHERE id = :child_id)
                 )::int
         """
         if op == '+':
             sql += """ + 1)"""
         else:
             sql += """ - 1)"""
-        sql += """ WHERE id = :id"""
+        sql += """ WHERE id = (SELECT parent_id FROM hive_posts WHERE id = :child_id)"""
 
-        DB.query(sql, id=parent_id)
+        DB.query(sql, child_id=child_id)
 
     @classmethod
     def undelete(cls, op, date, pid):
@@ -277,7 +273,6 @@ class Posts:
                 is_muted = :is_muted,
                 is_deleted = '0',
                 is_pinned = '0',
-                parent_id = :parent_id,
                 category_id = (SELECT id FROM hive_category_data WHERE category = :category),
                 community_id = :community_id,
                 depth = :depth
@@ -308,24 +303,13 @@ class Posts:
                 FeedCache.delete(pid)
 
         # force parent child recount when child is deleted
-        prnt = cls._get_parent_by_child_id(pid)
-        if prnt is not None:
-            cls.update_child_count(prnt['id'], '-')
+        cls.update_child_count(pid, '-')
 
     @classmethod
     def update(cls, op, date, pid):
         """Handle post updates."""
         # pylint: disable=unused-argument
         post = cls._build_post(op, date)
-
-        # add permlinks to permlink table
-        for permlink in ['permlink', 'parent_permlink', 'root_permlink']:
-            if permlink in op:
-                sql = """
-                    INSERT INTO hive_permlink_data (permlink) 
-                    VALUES (:permlink) 
-                    ON CONFLICT (permlink) DO NOTHING"""
-                DB.query(sql, permlink=op[permlink])
 
         # add category to category table
         sql = """
@@ -372,7 +356,6 @@ class Posts:
         for comment_pending_payout in comment_pending_payouts:
             if 'cashout_info' in comment_pending_payout:
                 cpp = comment_pending_payout['cashout_info']
-                pid = cls.get_id(cpp['author'], cpp['permlink'])
                 sql = """UPDATE
                             hive_posts
                         SET
@@ -394,7 +377,13 @@ class Posts:
                             allow_replies = :allow_replies,
                             allow_votes = :allow_votes,
                             allow_curation_rewards = :allow_curation_rewards
-                        WHERE id = :id
+                        WHERE id = (
+                            SELECT hp.id 
+                            FROM hive_posts hp 
+                            INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
+                            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
+                            WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
+                        )
                 """
 
                 DB.query(sql, total_payout_value=legacy_amount(cpp['total_payout_value']),
@@ -415,24 +404,7 @@ class Posts:
                          allow_replies=cpp['allow_replies'],
                          allow_votes=cpp['allow_votes'],
                          allow_curation_rewards=cpp['allow_curation_rewards'],
-                         id=pid)
-
-    @classmethod
-    def _get_parent_by_child_id(cls, child_id):
-        """Get parent's `id`, `author`, `permlink` by child id."""
-        sql = """
-            SELECT 
-                hp.id,
-                ha_a.name as author,
-                hpd_p.permlink as permlink
-            FROM 
-                hive_posts hp
-            INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-            WHERE 
-                hp.id = (SELECT parent_id FROM hive_posts WHERE id = :child_id)"""
-        result = DB.query_row(sql, child_id=child_id)
-        return None if result is None else result
+                         author=cpp['author'], permlink=cpp['permlink'])
 
     @classmethod
     def _insert_feed_cache(cls, result):
@@ -446,7 +418,6 @@ class Posts:
         """Insert the new post into feed cache if it's not a comment."""
         if not post_depth:
             FeedCache.insert(post_id, author_id, post_date)
-
 
     @classmethod
     def _verify_post_against_community(cls, op, community_id, is_valid, is_muted):
@@ -473,8 +444,6 @@ class Posts:
 
         # if this is a top-level post:
         if not op['parent_author']:
-            parent_id = None
-            root_id = -1
             depth = 0
             category = op['parent_permlink']
             community_id = None
@@ -482,40 +451,28 @@ class Posts:
                 community_id = Community.validated_id(category)
             is_valid = True
             is_muted = False
-            root_author = op['author']
-            root_permlink = op['permlink']
 
         # this is a comment; inherit parent props.
         else:
-            parent_id = cls.get_id(op['parent_author'], op['parent_permlink'])
             sql = """
                 SELECT depth, hcd.category as category, community_id, is_valid, is_muted
                 FROM hive_posts hp 
                 INNER JOIN hive_category_data hcd ON hcd.id = hp.category_id
-                WHERE hp.id = :id"""
-            (parent_depth, category, community_id, is_valid, is_muted) = DB.query_row(sql, id=parent_id)
+                WHERE hp.id = (
+                    SELECT hp1.id 
+                    FROM hive_posts hp1 
+                    INNER JOIN hive_accounts ha_a ON ha_a.id = hp1.author_id 
+                    INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp1.permlink_id 
+                    WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
+                )
+            """
+            (parent_depth, category, community_id, is_valid, is_muted) = DB.query_row(sql, author=op['parent_author'], permlink=op['parent_permlink'])
             depth = parent_depth + 1
             if not is_valid:
                 error = 'replying to invalid post'
             elif is_muted:
                 error = 'replying to muted post'
             #find root comment
-            root_id = cls.find_root(op['parent_author'], op['parent_permlink'])
-            if root_id > -1:
-                sql = """
-                    SELECT 
-                        ha_a.name as author, hpd_p.permlink as permlink
-                    FROM 
-                        hive_posts hp
-                    INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-                    INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-                    WHERE 
-                        hp.id = :id"""
-                root_author, root_permlink = DB.query_row(sql, id=root_id)
-            else:
-                root_id = parent_id
-                root_author = op['parent_author']
-                root_permlink = op['parent_permlink']
 
         # check post validity in specified context
         error = None
@@ -524,13 +481,8 @@ class Posts:
             #is_valid = False # TODO: reserved for future blacklist status?
             is_muted = True
 
-        ret = dict(parent_id=parent_id, root_id=root_id, id=pid, community_id=community_id,
+        ret = dict(id=pid, community_id=community_id,
                    category=category, is_muted=is_muted, is_valid=is_valid,
-                   depth=depth, date=date, error=error,
-                   author=op['author'], permlink=op['permlink'],
-                   parent_author=op['parent_author'],
-                   parent_permlink=op['parent_permlink'],
-                   root_permlink=root_permlink,
-                   root_author=root_author)
+                   depth=depth, date=date, error=error)
 
         return ret
