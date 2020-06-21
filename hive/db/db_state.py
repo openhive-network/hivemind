@@ -90,7 +90,17 @@ class DbState:
             #'hive_posts_ix5', # (community_id>0, is_pinned=1)
             'hive_follows_ix5a', # (following, state, created_at, follower)
             'hive_follows_ix5b', # (follower, state, created_at, following)
-            'hive_reblogs_ix1', # (post_id, account, created_at)
+
+            'hive_posts_parent_id_idx',
+            'hive_posts_author_id',
+            'hive_posts_depth_idx',
+            'hive_posts_community_id_idx',
+            'hive_posts_category_id_idx',
+            'hive_posts_payout_at_idx',
+            'hive_posts_payout_idx',
+            'hive_posts_promoted_idx',
+            'hive_posts_sc_trend_idx',
+            'hive_posts_sc_hot_idx',
             #'hive_posts_cache_ix6a', # (sc_trend, post_id, paidout=0)
             #'hive_posts_cache_ix6b', # (post_id, sc_trend, paidout=0)
             #'hive_posts_cache_ix7a', # (sc_hot, post_id, paidout=0)
@@ -104,9 +114,8 @@ class DbState:
             #'hive_posts_cache_ix32', # API: community created
             #'hive_posts_cache_ix33', # API: community payout
             #'hive_posts_cache_ix34', # API: community muted
-            'hive_accounts_ix3', # (vote_weight, name VPO)
-            'hive_accounts_ix4', # (id, name)
-            'hive_accounts_ix5', # (cached_at, name)
+            'hive_accounts_ix1', # (cached_at, name)
+            'hive_accounts_ix5' # (cached_at, name)
         ]
 
         to_return = []

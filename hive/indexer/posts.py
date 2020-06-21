@@ -80,28 +80,6 @@ class Posts:
         return tuples
 
     @classmethod
-    def get_id_and_depth(cls, author, permlink):
-        """Get the id and depth of @author/permlink post."""
-        sql = """
-            SELECT
-                hp.id,
-                COALESCE(hp.depth, -1)
-            FROM
-                hive_posts hp
-            INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
-            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
-            WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
-        """
-        pid, depth = DB.query_row(sql, author=author, permlink=permlink)
-        return (pid, depth)
-
-    @classmethod
-    def is_pid_deleted(cls, pid):
-        """Check if the state of post is deleted."""
-        sql = "SELECT is_deleted FROM hive_posts WHERE id = :id"
-        return DB.query_one(sql, id=pid)
-
-    @classmethod
     def delete_op(cls, op):
         """Given a delete_comment op, mark the post as deleted.
 
@@ -112,16 +90,44 @@ class Posts:
     @classmethod
     def comment_op(cls, op, block_date):
         """Register new/edited/undeleted posts; insert into feed cache."""
-        pid = cls.get_id(op['author'], op['permlink'])
-        if not pid:
-            # post does not exist, go ahead and process it.
-            cls.insert(op, block_date)
-        elif not cls.is_pid_deleted(pid):
-            # post exists, not deleted, thus an edit. ignore.
-            cls.update(op, block_date, pid)
-        else:
-            # post exists but was deleted. time to reinstate.
-            cls.undelete(op, block_date, pid)
+
+        sql = """
+            SELECT id, author_id, permlink_id, parent_id, community_id, is_valid, is_muted, depth, is_edited
+            FROM process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_date)::timestamp);
+            """
+
+        row = DB.query_row(sql, author=op['author'], permlink=op['permlink'], parent_author=op['parent_author'],
+                   parent_permlink=op['parent_permlink'], date=block_date, community_support_start_date=START_DATE)
+
+        result = dict(row)
+
+        # TODO we need to enhance checking related community post validation and honor is_muted.
+        error = cls._verify_post_against_community(op, result['community_id'], result['is_valid'], result['is_muted'])
+
+        cls._set_id(op['author']+'/'+op['permlink'], result['id'])
+
+        # add content data to hive_post_data
+        sql = """
+            INSERT INTO hive_post_data (id, title, preview, img_url, body, json) 
+            VALUES (:id, :title, :preview, :img_url, :body, :json)
+            ON CONFLICT ON CONSTRAINT hive_post_data_pkey DO UPDATE SET
+                title = :title,
+                preview = :preview,
+                img_url = :img_url,
+                body = :body,
+                json = :json
+            """
+        DB.query(sql, id=result['id'], title=op['title'],
+                 preview=op['preview'] if 'preview' in op else "",
+                 img_url=op['img_url'] if 'img_url' in op else "",
+                 body=op['body'], json=op['json_metadata'] if op['json_metadata'] else '{}')
+
+        if not DbState.is_initial_sync():
+            if error:
+                author_id = result['author_id']
+                Notify('error', dst_id=author_id, when=date,
+                       post_id=result['id'], payload=error).write()
+            cls._insert_feed_cache(result)
 
     @classmethod
     def comment_payout_op(cls, ops, date):
@@ -183,52 +189,6 @@ class Posts:
                      author=author, permlink=permlink)
 
     @classmethod
-    def insert(cls, op, date):
-        """Inserts new post records."""
-        # inserting new post
-        # * Check for permlink, parent_permlink, root_permlink
-        # * Check for authro, parent_author, root_author
-        # * check for category data
-        # * insert post basic data
-        # * obtain id
-        # * insert post content data
-
-        sql = """
-            SELECT id, author_id, permlink_id, parent_id, community_id, is_valid, is_muted, depth
-            FROM add_hive_post((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_date)::timestamp);
-            """
-
-        row = DB.query_row(sql, author=op['author'], permlink=op['permlink'], parent_author=op['parent_author'],
-                   parent_permlink=op['parent_permlink'], date=date, community_support_start_date=START_DATE)
-
-        result = dict(row)
-
-        # TODO we need to enhance checking related community post validation and honor is_muted.
-        error = cls._verify_post_against_community(op, result['community_id'], result['is_valid'], result['is_muted'])
-
-        cls._set_id(op['author']+'/'+op['permlink'], result['id'])
-
-        # add content data to hive_post_data
-        sql = """
-            INSERT INTO hive_post_data (id, title, preview, img_url, body, json) 
-            VALUES (:id, :title, :preview, :img_url, :body, :json)"""
-        DB.query(sql, id=result['id'], title=op['title'],
-                 preview=op['preview'] if 'preview' in op else "",
-                 img_url=op['img_url'] if 'img_url' in op else "",
-                 body=op['body'], json=op['json_metadata'] if op['json_metadata'] else '{}')
-
-        if not DbState.is_initial_sync():
-            if error:
-                author_id = result['author_id']
-                Notify('error', dst_id=author_id, when=date,
-                       post_id=result['id'], payload=error).write()
-            cls._insert_feed_cache(result)
-
-        if op['parent_author']:
-            #update parent child count
-            cls.update_child_count(result['id'])
-
-    @classmethod
     def update_child_count(cls, child_id, op='+'):
         """ Increase/decrease child count by 1 """
         sql = """
@@ -238,7 +198,7 @@ class Posts:
                 children = GREATEST(0, (
                     SELECT 
                         CASE 
-                            WHEN children=NULL THEN 0
+                            WHEN children is NULL THEN 0
                             WHEN children=32762 THEN 0
                             ELSE children
                         END
@@ -255,48 +215,22 @@ class Posts:
 
         DB.query(sql, child_id=child_id)
 
-    @classmethod
-    def undelete(cls, op, date, pid):
-        """Re-allocates an existing record flagged as deleted."""
-        # add category to category table
-
-        sql = """
-            INSERT INTO 
-                hive_category_data (category) 
-            VALUES 
-                (:category) 
-            ON CONFLICT (category) DO NOTHING;
-            UPDATE 
-                hive_posts 
-            SET 
-                is_valid = :is_valid,
-                is_muted = :is_muted,
-                is_deleted = '0',
-                is_pinned = '0',
-                category_id = (SELECT id FROM hive_category_data WHERE category = :category),
-                community_id = :community_id,
-                depth = :depth
-            WHERE 
-                id = :id
-        """
-        post = cls._build_post(op, date, pid)
-        DB.query(sql, **post)
-
-        if not DbState.is_initial_sync():
-            if post['error']:
-                author_id = Accounts.get_id(post['author'])
-                Notify('error', dst_id=author_id, when=date,
-                       post_id=post['id'], payload=post['error']).write()
-            cls._insert_feed_cache(post)
 
     @classmethod
     def delete(cls, op):
         """Marks a post record as being deleted."""
 
-        pid, depth = cls.get_id_and_depth(op['author'], op['permlink'])
-        DB.query("UPDATE hive_posts SET is_deleted = '1' WHERE id = :id", id=pid)
+        sql = """
+              SELECT id, depth
+              FROM delete_hive_post((:author)::varchar, (:permlink)::varchar);
+              """
+        row = DB.query_row(sql, author=op['author'], permlink = op['permlink'])
+        result = dict(row)
+        pid = result['id']
 
         if not DbState.is_initial_sync():
+            depth = result['depth']
+
             if depth == 0:
                 # TODO: delete from hive_reblogs -- otherwise feed cache gets 
                 # populated with deleted posts somwrimas
@@ -304,51 +238,6 @@ class Posts:
 
         # force parent child recount when child is deleted
         cls.update_child_count(pid, '-')
-
-    @classmethod
-    def update(cls, op, date, pid):
-        """Handle post updates."""
-        # pylint: disable=unused-argument
-        post = cls._build_post(op, date)
-
-        # add category to category table
-        sql = """
-            INSERT INTO hive_category_data (category) 
-            VALUES (:category) 
-            ON CONFLICT (category) DO NOTHING"""
-        DB.query(sql, category=post['category'])
-
-        sql = """
-            UPDATE hive_posts 
-            SET
-                category_id = (SELECT id FROM hive_category_data WHERE category = :category),
-                community_id = :community_id,
-                updated_at = :date,
-                depth = :depth,
-                is_muted = :is_muted,
-                is_valid = :is_valid
-            WHERE id = :id
-        """
-
-        post['id'] = pid
-        DB.query(sql, **post)
-
-        sql = """
-            UPDATE 
-                hive_post_data 
-            SET 
-                title = :title, 
-                preview = :preview, 
-                img_url = :img_url, 
-                body = :body, 
-                json = :json
-            WHERE id = :id
-        """
-
-        DB.query(sql, id=pid, title=op['title'],
-                 preview=op['preview'] if 'preview' in op else "",
-                 img_url=op['img_url'] if 'img_url' in op else "",
-                 body=op['body'], json=op['json_metadata'] if op['json_metadata'] else '{}')
 
     @classmethod
     def update_comment_pending_payouts(cls, hived, posts):
@@ -428,61 +317,3 @@ class Posts:
             is_muted = True
         return error
 
-    @classmethod
-    def _build_post(cls, op, date, pid=None):
-        """Validate and normalize a post operation.
-
-        Post is muted if:
-         - parent was muted
-         - author unauthorized
-
-        Post is invalid if:
-         - parent is invalid
-         - author unauthorized
-        """
-        # TODO: non-nsfw post in nsfw community is `invalid`
-
-        # if this is a top-level post:
-        if not op['parent_author']:
-            depth = 0
-            category = op['parent_permlink']
-            community_id = None
-            if date > START_DATE:
-                community_id = Community.validated_id(category)
-            is_valid = True
-            is_muted = False
-
-        # this is a comment; inherit parent props.
-        else:
-            sql = """
-                SELECT depth, hcd.category as category, community_id, is_valid, is_muted
-                FROM hive_posts hp 
-                INNER JOIN hive_category_data hcd ON hcd.id = hp.category_id
-                WHERE hp.id = (
-                    SELECT hp1.id 
-                    FROM hive_posts hp1 
-                    INNER JOIN hive_accounts ha_a ON ha_a.id = hp1.author_id 
-                    INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp1.permlink_id 
-                    WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
-                )
-            """
-            (parent_depth, category, community_id, is_valid, is_muted) = DB.query_row(sql, author=op['parent_author'], permlink=op['parent_permlink'])
-            depth = parent_depth + 1
-            if not is_valid:
-                error = 'replying to invalid post'
-            elif is_muted:
-                error = 'replying to muted post'
-            #find root comment
-
-        # check post validity in specified context
-        error = None
-        if community_id and is_valid and not Community.is_post_valid(community_id, op):
-            error = 'not authorized'
-            #is_valid = False # TODO: reserved for future blacklist status?
-            is_muted = True
-
-        ret = dict(id=pid, community_id=community_id,
-                   category=category, is_muted=is_muted, is_valid=is_valid,
-                   depth=depth, date=date, error=error)
-
-        return ret

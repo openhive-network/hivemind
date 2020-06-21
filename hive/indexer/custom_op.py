@@ -119,29 +119,46 @@ class CustomOp:
         if not all(map(Accounts.exists, [author, blogger])):
             return
 
-        post_id, depth = Posts.get_id_and_depth(author, permlink)
-
-        if depth > 0:
-            return  # prevent comment reblogs
-
-        if not post_id:
-            log.debug("reblog: post not found: %s/%s", author, permlink)
-            return
-
-        author_id = Accounts.get_id(author)
-        blogger_id = Accounts.get_id(blogger)
-
         if 'delete' in op_json and op_json['delete'] == 'delete':
-            DB.query("DELETE FROM hive_reblogs WHERE account = :a AND "
-                     "post_id = :pid LIMIT 1", a=blogger, pid=post_id)
+            sql = """
+                  WITH processing_set AS (
+                    SELECT hp.id as post_id, ha.id as account_id
+                    FROM hive_posts hp
+                    INNER JOIN hive_accounts ha ON hp.author_id = ha.id
+                    INNER JOIN hive_permlink_data hpd ON hp.permlink_id = hpd.id
+                    WHERE ha.name = :a AND hpd.permlink = :permlink AND hp.depth <= 0
+                  )
+                  DELETE FROM hive_reblogs AS hr 
+                  WHERE hr.account = :a AND hr.post_id IN (SELECT ps.post_id FROM processing_set ps)
+                  RETURNING hr.post_id, (SELECT ps.account_id FROM processing_set ps) AS account_id
+                  """
+
+            row = DB.query_row(sql, a=blogger, permlink=permlink)
+            if row is None:
+                log.debug("reblog: post not found: %s/%s", author, permlink)
+                return
+
             if not DbState.is_initial_sync():
-                FeedCache.delete(post_id, blogger_id)
+                result = dict(row)
+                FeedCache.delete(result['post_id'], result['account_id'])
 
         else:
-            sql = ("INSERT INTO hive_reblogs (account, post_id, created_at) "
-                   "VALUES (:a, :pid, :date) ON CONFLICT (account, post_id) DO NOTHING")
-            DB.query(sql, a=blogger, pid=post_id, date=block_date)
+            sql = """
+                  INSERT INTO hive_reblogs (account, post_id, created_at)
+                  SELECT ha.name, hp.id, :date
+                  FROM hive_accounts ha
+                  INNER JOIN hive_posts hp ON hp.author_id = ha.id
+                  INNER JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
+                  WHERE ha.name = :a AND hpd.permlink = :p
+                  ON CONFLICT (account, post_id) DO NOTHING
+                  RETURNING post_id 
+                  """
+            row = DB.query_row(sql, a=blogger, p=permlink, date=block_date)
             if not DbState.is_initial_sync():
+                author_id = Accounts.get_id(author)
+                blogger_id = Accounts.get_id(blogger)
+                result = dict(row)
+                post_id = result['post_id']
                 FeedCache.insert(post_id, blogger_id, block_date)
                 Notify('reblog', src_id=blogger_id, dst_id=author_id,
                        post_id=post_id, when=block_date,
