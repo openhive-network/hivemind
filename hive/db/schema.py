@@ -161,11 +161,11 @@ def build_metadata():
     sa.Table(
         'hive_post_data', metadata,
         sa.Column('id', sa.Integer, primary_key=True, autoincrement=False),
-        sa.Column('title', VARCHAR(255), server_default=''),
-        sa.Column('preview', VARCHAR(1024), server_default=''),
-        sa.Column('img_url', VARCHAR(1024), server_default=''),
-        sa.Column('body', TEXT, server_default=''),
-        sa.Column('json', TEXT, server_default='')
+        sa.Column('title', VARCHAR(255), nullable=False, server_default=''),
+        sa.Column('preview', VARCHAR(1024), nullable=False, server_default=''),
+        sa.Column('img_url', VARCHAR(1024), nullable=False, server_default=''),
+        sa.Column('body', TEXT, nullable=False, server_default=''),
+        sa.Column('json', TEXT, nullable=False, server_default='')
     )
 
     sa.Table(

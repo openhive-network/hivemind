@@ -107,34 +107,18 @@ class Posts:
 
         cls._set_id(op['author']+'/'+op['permlink'], result['id'])
 
-# add content data to hive_post_data
-        if DbState.is_initial_sync():
-            post_data = dict(title=op['title'], preview=op['preview'] if 'preview' in op else "",
-                             img_url=op['img_url'] if 'img_url' in op else "", body=op['body'],
-                             json=op['json_metadata'] if op['json_metadata'] else '{}')
-            PostDataCache.add_data(result['id'], post_data)
-        else:
-            sql = """
-                INSERT INTO hive_post_data (id, title, preview, img_url, body, json) 
-                VALUES (:id, :title, :preview, :img_url, :body, :json)
-                ON CONFLICT ON CONSTRAINT hive_post_data_pkey DO UPDATE SET
-                    title = :title,
-                    preview = :preview,
-                    img_url = :img_url,
-                    body = :body,
-                    json = :json
-                """
-            DB.query(sql, id=result['id'], title=op['title'],
-                     preview=op['preview'] if 'preview' in op else "",
-                     img_url=op['img_url'] if 'img_url' in op else "",
-                     body=op['body'], json=op['json_metadata'] if op['json_metadata'] else '{}')
+        # add content data to hive_post_data
+        post_data = dict(title=op['title'], preview=op['preview'] if 'preview' in op else "",
+                         img_url=op['img_url'] if 'img_url' in op else "", body=op['body'],
+                         json=op['json_metadata'] if op['json_metadata'] else '{}')
+        PostDataCache.add_data(result['id'], post_data)
 
         if not DbState.is_initial_sync():
             if error:
                 author_id = result['author_id']
-                Notify('error', dst_id=author_id, when=date,
+                Notify('error', dst_id=author_id, when=block_date,
                        post_id=result['id'], payload=error).write()
-            cls._insert_feed_cache(result, date)
+            cls._insert_feed_cache(result, block_date)
 
     @classmethod
     def comment_payout_op(cls, ops, date):

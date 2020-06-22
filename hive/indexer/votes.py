@@ -9,21 +9,6 @@ DB = Db.instance()
 
 class Votes:
     """ Class for managing posts votes """
-    @classmethod
-    def get_id(cls, voter, author, permlink):
-        """ Check if vote exists, if yes return its id, else return None """
-        sql = """
-            SELECT 
-                hv.id 
-            FROM 
-                hive_votes hv
-            INNER JOIN hive_accounts ha_v ON (ha_v.id = hv.voter_id)
-            INNER JOIN hive_accounts ha_a ON (ha_a.id = hv.author_id)
-            INNER JOIN hive_permlink_data hpd ON (hpd.id = hv.permlink_id)
-            WHERE ha_v.name = :voter AND ha_a.name = :author AND hpd.permlink = :permlink
-        """
-        ret = DB.query_row(sql, voter=voter, author=author, permlink=permlink)
-        return None if ret is None else int(ret.id)
 
     @classmethod
     def get_vote_count(cls, author, permlink):
@@ -72,51 +57,28 @@ class Votes:
         voter = vop['value']['voter']
         author = vop['value']['author']
         permlink = vop['value']['permlink']
-
-        vote_id = cls.get_id(voter, author, permlink)
-        # no vote so create new
-        if vote_id is None:
-            cls._insert(vop, date)
-        else:
-            cls._update(vote_id, vop, date)
-
-    @classmethod
-    def _insert(cls, vop, date):
-        """ Insert new vote """
-        voter = vop['value']['voter']
-        author = vop['value']['author']
-        permlink = vop['value']['permlink']
         vote_percent = vop['value']['vote_percent']
+        weight = vop['value']['weight']
+        rshares = vop['value']['rshares']
+
         sql = """
             INSERT INTO hive_votes
                   (post_id, voter_id, author_id, permlink_id, weight, rshares, vote_percent, last_update) 
             SELECT hp.id, ha_v.id, ha_a.id, hpd_p.id, :weight, :rshares, :vote_percent, :last_update
             FROM hive_accounts ha_v,
                  hive_posts hp
-            INNER JOIN hive_accounts ha_a ON ha_a.name = hp.author 
-            INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = hp.permlink
+            INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
             WHERE ha_a.name = :author AND hpd_p.permlink = :permlink AND ha_v.name = :voter
-            """
-        weight = vop['value']['weight']
-        rshares = vop['value']['rshares']
+            ON CONFLICT ON CONSTRAINT hive_votes_ux1 DO
+                UPDATE
+                    SET
+                        weight = EXCLUDED.weight,
+                        rshares = EXCLUDED.rshares,
+                        vote_percent = EXCLUDED.vote_percent,
+                        last_update = EXCLUDED.last_update,
+                        num_changes = hive_votes.num_changes + 1
+                WHERE hive_votes.id = EXCLUDED.id
+        """
         DB.query(sql, voter=voter, author=author, permlink=permlink, weight=weight, rshares=rshares,
                  vote_percent=vote_percent, last_update=date)
-
-    @classmethod
-    def _update(cls, vote_id, vop, date):
-        """ Update existing vote """
-        vote_percent = vop['value']['vote_percent']
-        sql = """
-            UPDATE hive_votes as hv
-            SET
-                weight = :weight,
-                rshares = :rshares,
-                vote_percent = :vote_percent,
-                last_update = :last_update,
-                num_changes = hv.num_changes + 1
-            WHERE hv.id = :id
-        """
-        weight = vop['value']['weight']
-        rshares = vop['value']['rshares']
-        DB.query(sql, weight=weight, rshares=rshares, vote_percent=vote_percent, last_update=date,
-                 id=vote_id)

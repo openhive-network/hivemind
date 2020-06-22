@@ -36,7 +36,9 @@ class Blocks:
     def process(cls, block, vops_in_block, hived):
         """Process a single block. Always wrap in a transaction!"""
         #assert is_trx_active(), "Block.process must be in a trx"
-        return cls._process(block, vops_in_block, hived, is_initial_sync=False)
+        ret = cls._process(block, vops_in_block, hived, is_initial_sync=False)
+        PostDataCache.flush()
+        return ret
 
     @classmethod
     def process_multi(cls, blocks, vops, hived, is_initial_sync=False):
