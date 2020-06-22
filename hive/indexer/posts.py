@@ -12,6 +12,7 @@ from hive.indexer.accounts import Accounts
 from hive.indexer.feed_cache import FeedCache
 from hive.indexer.community import Community, START_DATE
 from hive.indexer.notify import Notify
+from hive.indexer.post_data_cache import PostDataCache
 from hive.utils.normalize import legacy_amount, asset_to_hbd_hive
 
 log = logging.getLogger(__name__)
@@ -198,24 +199,32 @@ class Posts:
             FROM add_hive_post((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_date)::timestamp);
             """
 
-        row = DB.query_row(sql, author=op['author'], permlink=op['permlink'], parent_author=op['parent_author'],
-                   parent_permlink=op['parent_permlink'], date=date, community_support_start_date=START_DATE)
+        row = DB.query_row(sql, author=op['author'], permlink=op['permlink'],
+                           parent_author=op['parent_author'], parent_permlink=op['parent_permlink'], 
+                           date=date, community_support_start_date=START_DATE)
 
         result = dict(row)
 
         # TODO we need to enhance checking related community post validation and honor is_muted.
-        error = cls._verify_post_against_community(op, result['community_id'], result['is_valid'], result['is_muted'])
+        error = cls._verify_post_against_community(op, result['community_id'], result['is_valid'],
+                                                   result['is_muted'])
 
         cls._set_id(op['author']+'/'+op['permlink'], result['id'])
 
         # add content data to hive_post_data
-        sql = """
-            INSERT INTO hive_post_data (id, title, preview, img_url, body, json) 
-            VALUES (:id, :title, :preview, :img_url, :body, :json)"""
-        DB.query(sql, id=result['id'], title=op['title'],
-                 preview=op['preview'] if 'preview' in op else "",
-                 img_url=op['img_url'] if 'img_url' in op else "",
-                 body=op['body'], json=op['json_metadata'] if op['json_metadata'] else '{}')
+        if DbState.is_initial_sync():
+            post_data = dict(title=op['title'], preview=op['preview'] if 'preview' in op else "",
+                             img_url=op['img_url'] if 'img_url' in op else "", body=op['body'],
+                             json=op['json_metadata'] if op['json_metadata'] else '{}')
+            PostDataCache.add_data(result['id'], post_data)
+        else:
+            sql = """
+                INSERT INTO hive_post_data (id, title, preview, img_url, body, json) 
+                VALUES (:id, :title, :preview, :img_url, :body, :json)"""
+            DB.query(sql, id=result['id'], title=op['title'],
+                     preview=op['preview'] if 'preview' in op else "",
+                     img_url=op['img_url'] if 'img_url' in op else "",
+                     body=op['body'], json=op['json_metadata'] if op['json_metadata'] else '{}')
 
         if not DbState.is_initial_sync():
             if error:
@@ -224,9 +233,10 @@ class Posts:
                        post_id=result['id'], payload=error).write()
             cls._insert_feed_cache(result, date)
 
-        if op['parent_author']:
+        # TODO: we will do that in batches at the end of sync
+        #if op['parent_author']:
             #update parent child count
-            cls.update_child_count(result['id'])
+            #cls.update_child_count(result['id'])
 
     @classmethod
     def update_child_count(cls, child_id, op='+'):
@@ -333,22 +343,29 @@ class Posts:
         post['id'] = pid
         DB.query(sql, **post)
 
-        sql = """
-            UPDATE 
-                hive_post_data 
-            SET 
-                title = :title, 
-                preview = :preview, 
-                img_url = :img_url, 
-                body = :body, 
-                json = :json
-            WHERE id = :id
-        """
+        # add content data to hive_post_data
+        if DbState.is_initial_sync():
+            post_data = dict(title=op['title'], preview=op['preview'] if 'preview' in op else "",
+                             img_url=op['img_url'] if 'img_url' in op else "", body=op['body'],
+                             json=op['json_metadata'] if op['json_metadata'] else '{}')
+            PostDataCache.add_data(pid, post_data)
+        else:
+            sql = """
+                UPDATE 
+                    hive_post_data 
+                SET 
+                    title = :title, 
+                    preview = :preview, 
+                    img_url = :img_url, 
+                    body = :body, 
+                    json = :json
+                WHERE id = :id
+            """
 
-        DB.query(sql, id=pid, title=op['title'],
-                 preview=op['preview'] if 'preview' in op else "",
-                 img_url=op['img_url'] if 'img_url' in op else "",
-                 body=op['body'], json=op['json_metadata'] if op['json_metadata'] else '{}')
+            DB.query(sql, id=pid, title=op['title'],
+                     preview=op['preview'] if 'preview' in op else "",
+                     img_url=op['img_url'] if 'img_url' in op else "",
+                     body=op['body'], json=op['json_metadata'] if op['json_metadata'] else '{}')
 
     @classmethod
     def update_comment_pending_payouts(cls, hived, posts):
