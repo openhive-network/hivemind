@@ -11,6 +11,7 @@ from hive.indexer.payments import Payments
 from hive.indexer.follow import Follow
 from hive.indexer.votes import Votes
 from hive.indexer.post_data_cache import PostDataCache
+from time import perf_counter
 
 log = logging.getLogger(__name__)
 
@@ -35,15 +36,19 @@ class Blocks:
     @classmethod
     def process(cls, block, vops_in_block, hived):
         """Process a single block. Always wrap in a transaction!"""
+        time_start = perf_counter()
         #assert is_trx_active(), "Block.process must be in a trx"
         ret = cls._process(block, vops_in_block, hived, is_initial_sync=False)
         PostDataCache.flush()
         Votes.flush()
+        time_end = perf_counter()
+        log.info("[PROCESS BLOCK] %fs", time_end - time_start)
         return ret
 
     @classmethod
     def process_multi(cls, blocks, vops, hived, is_initial_sync=False):
         """Batch-process blocks; wrapped in a transaction."""
+        time_start = perf_counter()
         DB.query("START TRANSACTION")
 
         last_num = 0
@@ -63,6 +68,8 @@ class Blocks:
         Follow.flush(trx=False)
 
         DB.query("COMMIT")
+        time_end = perf_counter()
+        log.info("[PROCESS MULTI] %i blocks in %fs", len(blocks), time_end - time_start)
 
     @classmethod
     def _process(cls, block, virtual_operations, hived, is_initial_sync=False):
@@ -137,9 +144,7 @@ class Blocks:
         comment_payout_ops = {}
         vops = []
         if not is_initial_sync:
-            ret = hived.get_virtual_operations(num)
-            for vop in ret:
-                vops.append(vop['op'])
+            vops = hived.get_virtual_operations(num)
         else:
             vops = virtual_operations[num]['ops'] if num in virtual_operations else []
         for vop in vops:

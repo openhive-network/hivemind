@@ -144,19 +144,26 @@ class SteemClient:
 
     def get_virtual_operations(self, block):
         """ Get virtual ops from block """
-        ret = self.__exec('get_ops_in_block', {"block_num":block, "only_virtual":True})
-        return ret['ops'] if 'ops' in ret else []
+        result = self.__exec('get_ops_in_block', {"block_num":block, "only_virtual":True})
+        tracked_ops = ['curation_reward_operation', 'author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation']
+        ret = []
+        result = result['ops'] if 'ops' in result else []
+        for vop in result:
+            if vop['op']['type'] in tracked_ops:
+                ret.append(vop['op'])
+        return ret
 
     def enum_virtual_ops(self, begin_block, end_block):
         """ Get virtual ops for range of blocks """
         result = self.__exec('enum_virtual_ops', {"block_range_begin":begin_block, "block_range_end":end_block})
         ops = result['ops'] if 'ops' in result else []
+        tracked_ops = ['curation_reward_operation', 'author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation']
         ret = {}
         for op in ops:
             block = op['block']
-            if block in ret:
+            if block in ret and op['op']['type'] in tracked_ops:
                 ret[block]['ops'].append(op['op'])
-            else:
+            if block not in ret and op['op']['type'] in tracked_ops:
                 ret[block] = {'timestamp':op['timestamp'], 'ops':[op['op']]}
         return ret
 
