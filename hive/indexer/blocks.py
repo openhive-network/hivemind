@@ -38,6 +38,7 @@ class Blocks:
         #assert is_trx_active(), "Block.process must be in a trx"
         ret = cls._process(block, vops_in_block, hived, is_initial_sync=False)
         PostDataCache.flush()
+        Votes.flush()
         return ret
 
     @classmethod
@@ -57,6 +58,7 @@ class Blocks:
         # expensive. So is tracking follows at all; hence we track
         # deltas in memory and update follow/er counts in bulk.
         PostDataCache.flush()
+        Votes.flush()
         cls._flush_blocks()
         Follow.flush(trx=False)
 

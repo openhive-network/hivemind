@@ -22,7 +22,7 @@ class FeedCache:
         assert not DbState.is_initial_sync(), 'writing to feed cache in sync'
         sql = """INSERT INTO hive_feed_cache (account_id, post_id, created_at)
                       VALUES (:account_id, :id, :created_at)
-                 ON CONFLICT (account_id, post_id) DO NOTHING"""
+                 ON CONFLICT ON CONSTRAINT hive_feed_cache_ux1 DO NOTHING"""
         DB.query(sql, account_id=account_id, id=post_id, created_at=created_at)
 
     @classmethod

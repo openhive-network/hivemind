@@ -266,6 +266,7 @@ def build_metadata():
         sa.Column('account_id', sa.Integer, nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
         sa.Index('hive_feed_cache_account_id', 'account_id'), # API (and rebuild?)
+        sa.UniqueConstraint('account_id', 'post_id', name='hive_feed_cache_ux1')
     )
 
     sa.Table(
