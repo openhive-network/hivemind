@@ -65,8 +65,16 @@ class StatsAbstract:
 
         log.info('%7s %9s %9s %9s', '-pct-', '-ttl-', '-avg-', '-cnt-')
         for call, ms, reqs in self.table(40):
+            try:
+              avg = ms/reqs
+              millisec = ms/self._ms
+            except ZeroDivisionError as ex:
+              avg = 0.0
+              millisec = 0.0
+            if reqs == 0:
+                reqs = 1
             log.info("% 6.1f%% % 7dms % 9.2f % 8dx -- %s",
-                     100 * ms/self._ms, ms, ms/reqs, reqs, call)
+                     100 * millisec, ms, avg, reqs, call)
         self.clear()
 
 
@@ -131,6 +139,9 @@ class Stats:
     """Container for steemd and db timing data."""
     PRINT_THRESH_MINS = 1
 
+    COLLECT_DB_STATS = 0
+    COLLECT_NODE_STATS = 0
+
     _db = DbStats()
     _steemd = SteemStats()
     _secs = 0.0
@@ -140,14 +151,16 @@ class Stats:
     @classmethod
     def log_db(cls, sql, secs):
         """Log a database query. Incoming SQL is normalized."""
-        cls._db.add(_normalize_sql(sql), secs * 1000)
-        cls.add_secs(secs)
+        if cls.COLLECT_DB_STATS:
+            cls._db.add(_normalize_sql(sql), secs * 1000)
+            cls.add_secs(secs)
 
     @classmethod
     def log_steem(cls, method, secs, batch_size=1):
         """Log a steemd call."""
-        cls._steemd.add(method, secs * 1000, batch_size)
-        cls.add_secs(secs)
+        if cls.COLLECT_NODE_STATS:
+            cls._steemd.add(method, secs * 1000, batch_size)
+            cls.add_secs(secs)
 
     @classmethod
     def log_idle(cls, secs):

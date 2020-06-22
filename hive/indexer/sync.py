@@ -5,6 +5,11 @@ import glob
 from time import perf_counter as perf
 import os
 import ujson as json
+import time
+
+import concurrent, threading, queue
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Future
 
 from funcy.seqs import drop
 from toolz import partition_all
@@ -24,6 +29,111 @@ from hive.server.common.mutes import Mutes
 #from hive.indexer.jobs import audit_cache_missing, audit_cache_deleted
 
 log = logging.getLogger(__name__)
+
+continue_processing = 1
+
+def _block_provider(node, queue, lbound, ubound, chunk_size):
+  try:
+    count = ubound - lbound
+    log.info("[SYNC] start block %d, +%d to sync", lbound, count)
+    timer = Timer(count, entity='block', laps=['rps', 'wps'])
+    num = 0
+    while continue_processing and lbound < ubound:
+        to = min(lbound + chunk_size, ubound)
+#        log.info("Querying a node for blocks from range: [%d, %d]", lbound, to)
+        timer.batch_start()
+        blocks = node.get_blocks_range(lbound, to)
+        lbound = to
+        timer.batch_lap()
+#        log.info("Enqueuing retrieved blocks from range: [%d, %d]. Blocks queue size: %d", lbound, to, queue.qsize())
+        queue.put(blocks)
+        num = num + 1
+    return num
+  except KeyboardInterrupt as ki:
+    log.info("Caught SIGINT")
+
+  except Exception as ex:
+    log.exception("Exception caught during fetching blocks")
+
+def _vops_provider(node, queue, lbound, ubound, chunk_size):
+  try:
+    count = ubound - lbound
+    log.info("[SYNC] start vops %d, +%d to sync", lbound, count)
+    timer = Timer(count, entity='vops-chunk', laps=['rps', 'wps'])
+    num = 0
+
+    while continue_processing and  lbound < ubound:
+        to = min(lbound + chunk_size, ubound)
+#        log.info("Querying a node for vops from block range: [%d, %d]", lbound, to)
+        timer.batch_start()
+        vops = node.enum_virtual_ops(lbound, to)
+        lbound = to
+        timer.batch_lap()
+#        log.info("Enqueuing retrieved vops for block range: [%d, %d]. Vops queue size: %d", lbound, to, queue.qsize())
+        queue.put(vops)
+        num = num + 1
+
+    return num
+  except KeyboardInterrupt as ki:
+    log.info("Caught SIGINT")
+
+  except Exception as ex:
+    log.exception("Exception caught during fetching vops...")
+
+def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size):
+  try:
+    count = ubound - lbound
+    num = 0
+    timer = Timer(count, entity='block', laps=['rps', 'wps'])
+
+    while continue_processing and lbound < ubound:
+#        log.info("Awaiting any block to process...")
+        blocks = blocksQueue.get()
+        blocksQueue.task_done()
+
+#        log.info("Awaiting any vops to process...")
+        vops = vopsQueue.get()
+
+        to = min(lbound + chunk_size, ubound)
+#        log.info("Processing retrieved blocks and vops from range: [%d, %d].", lbound, to)
+
+        timer.batch_start()
+        Blocks.process_multi(blocks, vops, node, is_initial_sync)
+        timer.batch_lap()
+        timer.batch_finish(len(blocks))
+        prefix = ("[SYNC] Got block %d @ %s" % (
+            to - 1, blocks[-1]['timestamp']))
+        log.info(timer.batch_status(prefix))
+
+        lbound = to
+
+        vopsQueue.task_done()
+        num = num + 1
+
+    return num
+  except KeyboardInterrupt as ki:
+    log.info("Caught SIGINT")
+  except Exception as ex:
+    log.exception("Exception caught during processing blocks...")
+
+def _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size):
+    blocksQueue = queue.Queue(maxsize=10)
+    vopsQueue = queue.Queue(maxsize=10)
+
+    with ThreadPoolExecutor(max_workers = 4) as pool:
+      try:
+        pool.submit(_block_provider, self._steem, blocksQueue, lbound, ubound, chunk_size)
+        pool.submit(_vops_provider, self._steem, vopsQueue, lbound, ubound, chunk_size)
+        blockConsumerFuture = pool.submit(_block_consumer, self._steem, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size)
+
+        blockConsumerFuture.result()
+  #      pool.shutdown()
+      except KeyboardInterrupt as ex:
+        continue_processing = 0
+        pool.shutdown(false)
+
+    blocksQueue.join()
+    vopsQueue.join()
 
 class Sync:
     """Manages the sync/index process.
@@ -148,6 +258,10 @@ class Sync:
         count = ubound - lbound
         if count < 1:
             return
+
+        if is_initial_sync:
+          _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size)
+          return
 
         log.info("[SYNC] start block %d, +%d to sync", lbound, count)
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
