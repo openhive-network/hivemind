@@ -161,11 +161,11 @@ def build_metadata():
     sa.Table(
         'hive_post_data', metadata,
         sa.Column('id', sa.Integer, primary_key=True, autoincrement=False),
-        sa.Column('title', VARCHAR(255), nullable=False),
-        sa.Column('preview', VARCHAR(1024), nullable=False),
-        sa.Column('img_url', VARCHAR(1024), nullable=False),
-        sa.Column('body', TEXT),
-        sa.Column('json', TEXT)
+        sa.Column('title', VARCHAR(255), server_default=''),
+        sa.Column('preview', VARCHAR(1024), server_default=''),
+        sa.Column('img_url', VARCHAR(1024), server_default=''),
+        sa.Column('body', TEXT, server_default=''),
+        sa.Column('json', TEXT, server_default='')
     )
 
     sa.Table(
@@ -193,7 +193,9 @@ def build_metadata():
         sa.Column('rshares', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('vote_percent', sa.Integer, server_default='0'),
         sa.Column('last_update', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
-        sa.Column('num_changes', sa.Integer, server_default='0'), 
+        sa.Column('num_changes', sa.Integer, server_default='0'),
+
+        sa.UniqueConstraint('voter_id', 'author_id', 'permlink_id', name='hive_votes_ux1'),
 
         sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id']),
         sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),

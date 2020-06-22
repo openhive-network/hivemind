@@ -12,6 +12,7 @@ from hive.indexer.accounts import Accounts
 from hive.indexer.feed_cache import FeedCache
 from hive.indexer.community import Community, START_DATE
 from hive.indexer.notify import Notify
+from hive.indexer.post_data_cache import PostDataCache
 from hive.utils.normalize import legacy_amount, asset_to_hbd_hive
 
 log = logging.getLogger(__name__)
@@ -106,21 +107,27 @@ class Posts:
 
         cls._set_id(op['author']+'/'+op['permlink'], result['id'])
 
-        # add content data to hive_post_data
-        sql = """
-            INSERT INTO hive_post_data (id, title, preview, img_url, body, json) 
-            VALUES (:id, :title, :preview, :img_url, :body, :json)
-            ON CONFLICT ON CONSTRAINT hive_post_data_pkey DO UPDATE SET
-                title = :title,
-                preview = :preview,
-                img_url = :img_url,
-                body = :body,
-                json = :json
-            """
-        DB.query(sql, id=result['id'], title=op['title'],
-                 preview=op['preview'] if 'preview' in op else "",
-                 img_url=op['img_url'] if 'img_url' in op else "",
-                 body=op['body'], json=op['json_metadata'] if op['json_metadata'] else '{}')
+# add content data to hive_post_data
+        if DbState.is_initial_sync():
+            post_data = dict(title=op['title'], preview=op['preview'] if 'preview' in op else "",
+                             img_url=op['img_url'] if 'img_url' in op else "", body=op['body'],
+                             json=op['json_metadata'] if op['json_metadata'] else '{}')
+            PostDataCache.add_data(result['id'], post_data)
+        else:
+            sql = """
+                INSERT INTO hive_post_data (id, title, preview, img_url, body, json) 
+                VALUES (:id, :title, :preview, :img_url, :body, :json)
+                ON CONFLICT ON CONSTRAINT hive_post_data_pkey DO UPDATE SET
+                    title = :title,
+                    preview = :preview,
+                    img_url = :img_url,
+                    body = :body,
+                    json = :json
+                """
+            DB.query(sql, id=result['id'], title=op['title'],
+                     preview=op['preview'] if 'preview' in op else "",
+                     img_url=op['img_url'] if 'img_url' in op else "",
+                     body=op['body'], json=op['json_metadata'] if op['json_metadata'] else '{}')
 
         if not DbState.is_initial_sync():
             if error:

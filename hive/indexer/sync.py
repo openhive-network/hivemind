@@ -16,7 +16,6 @@ from hive.steem.block.stream import MicroForkException
 
 from hive.indexer.blocks import Blocks
 from hive.indexer.accounts import Accounts
-from hive.indexer.cached_post import CachedPost
 from hive.indexer.feed_cache import FeedCache
 from hive.indexer.follow import Follow
 from hive.indexer.community import Community
@@ -199,8 +198,6 @@ class Sync:
             num = Blocks.process(block, {}, steemd)
             follows = Follow.flush(trx=False)
             accts = Accounts.flush(steemd, trx=False, spread=8)
-            # CachedPost.dirty_paidouts(block['timestamp'])
-            # cnt = CachedPost.flush(steemd, trx=False)
             self._db.query("COMMIT")
 
             ms = (perf() - start_time) * 1000

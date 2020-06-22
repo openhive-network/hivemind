@@ -10,6 +10,7 @@ from hive.indexer.custom_op import CustomOp
 from hive.indexer.payments import Payments
 from hive.indexer.follow import Follow
 from hive.indexer.votes import Votes
+from hive.indexer.post_data_cache import PostDataCache
 
 log = logging.getLogger(__name__)
 
@@ -53,6 +54,7 @@ class Blocks:
         # Follows flushing needs to be atomic because recounts are
         # expensive. So is tracking follows at all; hence we track
         # deltas in memory and update follow/er counts in bulk.
+        PostDataCache.flush()
         cls._flush_blocks()
         Follow.flush(trx=False)
 
