@@ -193,6 +193,8 @@ class Blocks:
                         Accounts.dirty(op['author']) # lite - stats
                 elif op_type == 'delete_comment_operation':
                     Posts.delete_op(op)
+                elif op_type == 'comment_options_operation':
+                    Posts.comment_options_op(op)
                 elif op_type == 'vote_operation':
                     if not is_initial_sync:
                         Accounts.dirty(op['author']) # lite - rep

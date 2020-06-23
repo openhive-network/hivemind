@@ -250,6 +250,34 @@ class Posts:
 
         DB.query(sql, child_id=child_id)
 
+    @classmethod
+    def comment_options_op(cls, op):
+        """ Process comment_options_operation """
+        max_accepted_payout = legacy_amount(op['max_accepted_payout']) if 'max_accepted_payout' in op else '1000000.000 HBD'
+        allow_votes = op['allow_votes'] if 'allow_votes' in op else True
+        allow_curation_rewards = op['allow_curation_rewards'] if 'allow_curation_rewards' in op else True
+        percent_hbd = op['percent_hbd'] if 'percent_hbd' in op else 10000
+        extensions = op['extensions'] if 'extensions' in op else []
+        beneficiaries = []
+        for extension in extensions:
+            if 'beneficiaries' in extensions:
+                beneficiaries = extension['beneficiaries']
+        sql = """
+            UPDATE
+                hive_posts hp
+            SET
+                max_accepted_payout = :max_accepted_payout,
+                percent_hbd = :percent_hbd,
+                allow_votes = :allow_votes,
+                allow_curation_rewards = :allow_curation_rewards
+                beneficiaries = :beneficiaries
+            WHERE
+            hp.author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND 
+            hp.permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)
+        """
+        DB.query(sql, author=op['author'], permlink=op['permlink'], max_accepted_payout=max_accepted_payout,
+                 percent_hbd=percent_hbd, allow_votes=allow_votes, allow_curation_rewards=allow_curation_rewards,
+                 beneficiaries=beneficiaries)
 
     @classmethod
     def delete(cls, op):

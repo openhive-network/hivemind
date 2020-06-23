@@ -65,7 +65,7 @@ def condenser_post_object(row, truncate_body=0):
     post['root_title'] = row['root_title']
     post['beneficiaries'] = row['beneficiaries']
     post['max_accepted_payout'] = row['max_accepted_payout']
-    post['percent_steem_dollars'] = row['percent_steem_dollars']
+    post['percent_hbd'] = row['percent_hbd']
 
     if paid:
         curator_payout = sbd_amount(row['curator_payout_value'])

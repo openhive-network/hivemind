@@ -67,7 +67,7 @@ def post_to_internal(post, post_id, level='insert', promoted=None):
             ('root_author',             legacy_data['root_author']),
             ('root_permlink',           legacy_data['root_permlink']),
             ('max_accepted_payout',     legacy_data['max_accepted_payout']),
-            ('percent_steem_dollars',   legacy_data['percent_steem_dollars']),
+            ('percent_hbd',   legacy_data['percent_hbd']),
             ('allow_replies',           legacy_data['allow_replies']),
             ('allow_votes',             legacy_data['allow_votes']),
             ('allow_curation_rewards',   legacy_data['allow_curation_rewards']),
@@ -163,7 +163,7 @@ def post_basic(post):
             is_payout_declined = True
 
     # payout entirely in SP
-    is_full_power = int(post['percent_steem_dollars']) == 0
+    is_full_power = int(post['percent_hbd']) == 0
 
     return {
         'json_metadata': md,
@@ -186,7 +186,7 @@ def post_legacy(post):
     """
     _legacy = ['id', 'url', 'root_comment', 'root_author', 'root_permlink',
                'root_title', 'parent_author', 'parent_permlink',
-               'max_accepted_payout', 'percent_steem_dollars',
+               'max_accepted_payout', 'percent_hbd',
                'curator_payout_value', 'allow_replies', 'allow_votes',
                'allow_curation_rewards', 'beneficiaries']
     return {k: v for k, v in post.items() if k in _legacy}

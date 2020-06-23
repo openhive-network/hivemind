@@ -47,7 +47,7 @@ SQL_TEMPLATE = """
         ha_ra.name as root_author,
         hpd_rp.permlink as root_permlink,
         max_accepted_payout, 
-        percent_steem_dollars, 
+        percent_hbd, 
         allow_replies, 
         allow_votes, 
         allow_curation_rewards, 

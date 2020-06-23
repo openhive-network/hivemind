@@ -70,7 +70,7 @@ async def load_posts_keyed(db, ids, truncate_body=0):
         ha_ra.name as root_author,
         hpd_rp.permlink as root_permlink,
         max_accepted_payout, 
-        percent_steem_dollars, 
+        percent_hbd, 
         allow_replies, 
         allow_votes, 
         allow_curation_rewards, 
@@ -231,7 +231,7 @@ def _condenser_post_object(row, truncate_body=0):
     post['root_title'] = row['root_title']
     post['beneficiaries'] = row['beneficiaries']
     post['max_accepted_payout'] = row['max_accepted_payout']
-    post['percent_steem_dollars'] = row['percent_steem_dollars']
+    post['percent_hbd'] = row['percent_hbd']
 
     if paid:
         curator_payout = sbd_amount(row['curator_payout_value'])

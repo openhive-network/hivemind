@@ -212,7 +212,7 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
             ha_ra.name as root_author,
             hpd_rp.permlink as root_permlink,
             max_accepted_payout, 
-            percent_steem_dollars, 
+            percent_hbd, 
             allow_replies, 
             allow_votes, 
             allow_curation_rewards, 

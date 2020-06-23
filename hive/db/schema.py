@@ -122,7 +122,7 @@ def build_metadata():
         sa.Column('last_payout', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('max_cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
-        sa.Column('percent_hbd', sa.Integer, nullable=False, server_default='0'),
+        sa.Column('percent_hbd', sa.Integer, nullable=False, server_default='10000'),
         sa.Column('reward_weight', sa.Integer, nullable=False, server_default='0'),
 
         sa.Column('parent_author_id', sa.Integer, nullable=False),
@@ -130,8 +130,7 @@ def build_metadata():
         sa.Column('curator_payout_value', sa.String(30), nullable=False, server_default=''),
         sa.Column('root_author_id', sa.Integer, nullable=False),
         sa.Column('root_permlink_id', sa.BigInteger, nullable=False),
-        sa.Column('max_accepted_payout',  sa.String(30), nullable=False, server_default=''),
-        sa.Column('percent_steem_dollars', sa.Integer, nullable=False, server_default='-1'),
+        sa.Column('max_accepted_payout',  sa.String(30), nullable=False, server_default='1000000.000 HBD'),
         sa.Column('allow_replies', BOOLEAN, nullable=False, server_default='1'),
         sa.Column('allow_votes', BOOLEAN, nullable=False, server_default='1'),
         sa.Column('allow_curation_rewards', BOOLEAN, nullable=False, server_default='1'),

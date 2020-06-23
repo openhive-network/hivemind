@@ -527,7 +527,7 @@ class CachedPost:
                 ('root_author',             legacy_data['root_author']),
                 ('root_permlink',           legacy_data['root_permlink']),
                 ('max_accepted_payout',     legacy_data['max_accepted_payout']),
-                ('percent_steem_dollars',   legacy_data['percent_steem_dollars']),
+                ('percent_hbd',   legacy_data['percent_hbd']),
                 ('allow_replies',           legacy_data['allow_replies']),
                 ('allow_votes',             legacy_data['allow_votes']),
                 ('allow_curation_rewards',  legacy_data['allow_curation_rewards']),

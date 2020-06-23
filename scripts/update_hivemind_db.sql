@@ -121,7 +121,6 @@ CREATE TABLE IF NOT EXISTS hive_posts_new (
   last_payout DATE DEFAULT '1970-01-01T00:00:00',
   cashout_time DATE DEFAULT '1970-01-01T00:00:00',
   max_cashout_time DATE DEFAULT '1970-01-01T00:00:00',
-  percent_hbd INT DEFAULT '0',
   reward_weight INT DEFAULT '0',
 
   -- columns from raw_json
@@ -130,8 +129,8 @@ CREATE TABLE IF NOT EXISTS hive_posts_new (
   curator_payout_value VARCHAR(30) DEFAULT '',
   root_author_id INT DEFAULT '-1',
   root_permlink_id BIGINT DEFAULT '-1',
-  max_accepted_payout VARCHAR(30) DEFAULT '',
-  percent_steem_dollars INT DEFAULT '-1',
+  max_accepted_payout VARCHAR(30) DEFAULT '1000000.000 HBD',
+  percent_hbd INT DEFAULT '10000',
   allow_replies BOOLEAN DEFAULT '1',
   allow_votes BOOLEAN DEFAULT '1',
   allow_curation_rewards BOOLEAN DEFAULT '1',
@@ -253,7 +252,7 @@ CREATE TABLE legacy_comment_data (
   root_author VARCHAR(16),
   root_permlink VARCHAR(255),
   max_accepted_payout VARCHAR(30),
-  percent_steem_dollars INT,
+  percent_hbd INT,
   allow_replies BOOLEAN,
   allow_votes BOOLEAN,
   allow_curation_rewards BOOLEAN,
@@ -271,7 +270,7 @@ CREATE TYPE legacy_comment_type AS (
   root_author VARCHAR(16),
   root_permlink VARCHAR(255),
   max_accepted_payout VARCHAR(16),
-  percent_steem_dollars INT,
+  percent_hbd INT,
   allow_replies BOOLEAN,
   allow_votes BOOLEAN,
   allow_curation_rewards BOOLEAN,
@@ -285,7 +284,7 @@ INSERT INTO legacy_comment_data (id, raw_json) SELECT post_id, raw_json FROM hiv
 
 update legacy_comment_data lcd set (parent_author, parent_permlink, 
   curator_payout_value, root_author, root_permlink, max_accepted_payout,
-  percent_steem_dollars, allow_replies, allow_votes, allow_curation_rewards,
+  percent_hbd, allow_replies, allow_votes, allow_curation_rewards,
   beneficiaries, url, root_title)
 =
 (SELECT parent_author, parent_permlink, 
@@ -308,7 +307,7 @@ UPDATE hive_posts_new hpn SET
   root_author_id = (SELECT id FROM hive_accounts WHERE name = lcd.root_author),
   root_permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = lcd.root_permlink),
   max_accepted_payout = lcd.max_accepted_payout,
-  percent_steem_dollars = lcd.percent_steem_dollars,
+  percent_hbd = lcd.percent_hbd,
   allow_replies = lcd.allow_replies,
   allow_votes = lcd.allow_votes,
   allow_curation_rewards = lcd.allow_curation_rewards,
@@ -316,7 +315,7 @@ UPDATE hive_posts_new hpn SET
   url = lcd.url,
   root_title = lcd.root_title
 FROM (SELECT id, parent_author, parent_permlink, curator_payout_value, root_author, root_permlink,
-  max_accepted_payout, percent_steem_dollars, allow_replies, allow_votes, allow_curation_rewards,
+  max_accepted_payout, percent_hbd, allow_replies, allow_votes, allow_curation_rewards,
   beneficiaries, url, root_title FROM legacy_comment_data) AS lcd
 WHERE lcd.id = hpn.id;
 
