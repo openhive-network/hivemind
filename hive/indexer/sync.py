@@ -32,6 +32,24 @@ log = logging.getLogger(__name__)
 
 continue_processing = 1
 
+def print_ops_stats(prefix, ops_stats):
+    log.info("############################################################################")
+    log.info(prefix)
+    sorted_stats = sorted(ops_stats.items(), key=lambda kv: kv[1], reverse=True)
+    for (k, v) in sorted_stats:
+        log.info("`{}': {}".format(k, v))
+
+    log.info("############################################################################")
+def prepare_vops(vops_by_block):
+    preparedVops = {}
+    for blockNum, blockDict in vops_by_block.items():
+
+        vopsList = blockDict['ops']
+        date = blockDict['timestamp']
+        preparedVops[blockNum] = Blocks.prepare_vops(vopsList, date)
+  
+    return preparedVops
+
 def _block_provider(node, queue, lbound, ubound, chunk_size):
   try:
     count = ubound - lbound
@@ -45,7 +63,9 @@ def _block_provider(node, queue, lbound, ubound, chunk_size):
         blocks = node.get_blocks_range(lbound, to)
         lbound = to
         timer.batch_lap()
-#        log.info("Enqueuing retrieved blocks from range: [%d, %d]. Blocks queue size: %d", lbound, to, queue.qsize())
+#        if(queue.full()):
+#            log.info("Block queue is full - Enqueuing retrieved block-data for block range: [%d, %d] will block... Block queue size: %d", lbound, to, queue.qsize())
+
         queue.put(blocks)
         num = num + 1
     return num
@@ -67,10 +87,12 @@ def _vops_provider(node, queue, lbound, ubound, chunk_size):
 #        log.info("Querying a node for vops from block range: [%d, %d]", lbound, to)
         timer.batch_start()
         vops = node.enum_virtual_ops(lbound, to)
+        preparedVops = prepare_vops(vops)
         lbound = to
         timer.batch_lap()
-#        log.info("Enqueuing retrieved vops for block range: [%d, %d]. Vops queue size: %d", lbound, to, queue.qsize())
-        queue.put(vops)
+#        if(queue.full()):
+#            log.info("Vops queue is full - Enqueuing retrieved vops for block range: [%d, %d] will block... Vops queue size: %d", lbound, to, queue.qsize())
+        queue.put(preparedVops)
         num = num + 1
 
     return num
@@ -86,30 +108,52 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
     num = 0
     timer = Timer(count, entity='block', laps=['rps', 'wps'])
 
-    while continue_processing and lbound < ubound:
-#        log.info("Awaiting any block to process...")
-        blocks = blocksQueue.get()
-        blocksQueue.task_done()
+    total_ops_stats = {}
 
-#        log.info("Awaiting any vops to process...")
-        vops = vopsQueue.get()
+    time_start = perf()
+
+    while continue_processing and lbound < ubound:
+        if(blocksQueue.empty()):
+            log.info("Awaiting any block to process...")
+
+        blocks = blocksQueue.get()
+
+        if(vopsQueue.empty()):
+            log.info("Awaiting any vops to process...")
+
+        preparedVops = vopsQueue.get()
 
         to = min(lbound + chunk_size, ubound)
 #        log.info("Processing retrieved blocks and vops from range: [%d, %d].", lbound, to)
 
+        blocksQueue.task_done()
+        vopsQueue.task_done()
+
         timer.batch_start()
-        Blocks.process_multi(blocks, vops, node, is_initial_sync)
+        
+        block_start = perf()
+        ops_stats = Blocks.process_multi(blocks, preparedVops, node, is_initial_sync)
+        block_end = perf()
+
         timer.batch_lap()
         timer.batch_finish(len(blocks))
+        time_current = perf()
+
         prefix = ("[SYNC] Got block %d @ %s" % (
             to - 1, blocks[-1]['timestamp']))
         log.info(timer.batch_status(prefix))
+        log.info("Time elapsed: %fs", time_current - time_start)
+
+        total_ops_stats = Blocks.merge_ops_stats(total_ops_stats, ops_stats)
+
+        if block_end - block_start > 1.0:
+            print_ops_stats("Operations present in the processed blocks:", ops_stats)
 
         lbound = to
 
-        vopsQueue.task_done()
         num = num + 1
 
+    print_ops_stats("All operations present in the processed blocks:", ops_stats)
     return num
   except KeyboardInterrupt as ki:
     log.info("Caught SIGINT")
@@ -130,7 +174,7 @@ def _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size):
   #      pool.shutdown()
       except KeyboardInterrupt as ex:
         continue_processing = 0
-        pool.shutdown(false)
+        pool.shutdown(False)
 
     blocksQueue.join()
     vopsQueue.join()
@@ -272,11 +316,12 @@ class Sync:
             to = min(lbound + chunk_size, ubound)
             blocks = steemd.get_blocks_range(lbound, to)
             vops = steemd.enum_virtual_ops(lbound, to)
+            preparedVops = prepare_vops(vops)
             lbound = to
             timer.batch_lap()
 
             # process blocks
-            Blocks.process_multi(blocks, vops, steemd, is_initial_sync)
+            Blocks.process_multi(blocks, preparedVops, steemd, is_initial_sync)
             timer.batch_finish(len(blocks))
 
             _prefix = ("[SYNC] Got block %d @ %s" % (

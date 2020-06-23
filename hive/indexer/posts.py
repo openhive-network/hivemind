@@ -122,6 +122,53 @@ class Posts:
 
     @classmethod
     def comment_payout_op(cls, ops, date):
+        ops_stats = {}
+        sql = """
+              UPDATE hive_posts AS ihp SET
+                  total_payout_value = data_source.total_payout_value,
+                  curator_payout_value = data_source.curator_payout_value,
+                  author_rewards = data_source.author_rewards,
+                  author_rewards_hive = data_source.author_rewards_hive,
+                  author_rewards_hbd = data_source.author_rewards_hbd,
+                  author_rewards_vests = data_source.author_rewards_vests,
+                  last_payout = data_source.last_payout,
+                  cashout_time = data_source.cashout_time,
+                  is_paidout = true
+
+              FROM 
+              (
+              SELECT  ha_a.id as author_id, hpd_p.id as permlink_id, 
+                      t.total_payout_value,
+                      t.curator_payout_value,
+                      t.author_rewards,
+                      t.author_rewards_hive,
+                      t.author_rewards_hbd,
+                      t.author_rewards_vests,
+                      t.last_payout,
+                      t.cashout_time
+              from
+              (
+              VALUES
+                --- put all constant values here
+                {}
+              ) AS T(author, permlink,
+                      total_payout_value,
+                      curator_payout_value,
+                      author_rewards,
+                      author_rewards_hive,
+                      author_rewards_hbd,
+                      author_rewards_vests,
+                      last_payout,
+                      cashout_time)
+              INNER JOIN hive_accounts ha_a ON ha_a.name = t.author
+              INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
+              ) as data_source(author_id, permlink_id, total_payout_value)
+              WHERE ihp.permlink_id = data_source.permlink_id and ihp.author_id = data_source.author_id
+              """
+
+        values = []
+        values_limit = 1000
+
         """ Process comment payment operations """
         for k, v in ops.items():
             author, permlink = k.split("/")
@@ -136,48 +183,45 @@ class Posts:
             comment_author_reward = None
             for operation in v:
                 for op, value in operation.items():
+                    if op in ops_stats:
+                        ops_stats[op] += 1
+                    else:
+                        ops_stats[op] = 1
+
                     if op == 'curation_reward_operation':
                         curator_rewards_sum = curator_rewards_sum + int(value['reward']['amount'])
-
-                    if op == 'author_reward_operation':
+                    elif op == 'author_reward_operation':
                         author_rewards_hive = value['hive_payout']['amount']
                         author_rewards_hbd = value['hbd_payout']['amount']
                         author_rewards_vests = value['vesting_payout']['amount']
-
-                    if op == 'comment_reward_operation':
+                    elif op == 'comment_reward_operation':
                         comment_author_reward = value['payout']
                         author_rewards = value['author_rewards']
             curator_rewards = {'amount' : str(curator_rewards_sum), 'precision': 6, 'nai': '@@000000037'}
 
-            sql = """UPDATE
-                        hive_posts
-                    SET
-                        total_payout_value = :total_payout_value,
-                        curator_payout_value = :curator_payout_value,
-                        author_rewards = :author_rewards,
-                        author_rewards_hive = :author_rewards_hive,
-                        author_rewards_hbd = :author_rewards_hbd,
-                        author_rewards_vests = :author_rewards_vests,
-                        last_payout = :last_payout,
-                        cashout_time = :cashout_time,
-                        is_paidout = true
-                    WHERE id = (
-                        SELECT hp.id 
-                        FROM hive_posts hp 
-                        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
-                        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
-                        WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
-                    )
-            """
-            DB.query(sql, total_payout_value=legacy_amount(comment_author_reward),
-                     curator_payout_value=legacy_amount(curator_rewards),
-                     author_rewards=author_rewards,
-                     author_rewards_hive=author_rewards_hive,
-                     author_rewards_hbd=author_rewards_hbd,
-                     author_rewards_vests=author_rewards_vests,
-                     last_payout=date,
-                     cashout_time=date,
-                     author=author, permlink=permlink)
+            values.append("('{}', '{}', '{}', '{}', {}, {}, {}, {}, '{}'::timestamp, '{}'::timestamp)".format(author, permlink,
+               legacy_amount(comment_author_reward), # total_payout_value
+               legacy_amount(curator_rewards), #curator_payout_value
+               author_rewards,
+               author_rewards_hive,
+               author_rewards_hbd,
+               author_rewards_vests,
+               date, #last_payout
+               date #cashout_time
+               ))
+
+            if len(values) >= values_limit:
+                values_str = ','.join(values)
+                actual_query = sql.format(values_str)
+                DB.query(actual_query)
+                values.clear()
+
+        if len(values) >= 0:
+            values_str = ','.join(values)
+            actual_query = sql.format(values_str)
+            DB.query(actual_query)
+            values.clear()
+        return ops_stats
 
     @classmethod
     def update_child_count(cls, child_id, op='+'):
@@ -216,6 +260,7 @@ class Posts:
               FROM delete_hive_post((:author)::varchar, (:permlink)::varchar);
               """
         row = DB.query_row(sql, author=op['author'], permlink = op['permlink'])
+
         result = dict(row)
         pid = result['id']
 

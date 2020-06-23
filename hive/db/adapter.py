@@ -157,11 +157,12 @@ class Db:
         return (sql, values)
 
     def _sql_text(self, sql):
-        if sql in self._prep_sql:
-            query = self._prep_sql[sql]
-        else:
-            query = sqlalchemy.text(sql).execution_options(autocommit=False)
-            self._prep_sql[sql] = query
+#        if sql in self._prep_sql:
+#            query = self._prep_sql[sql]
+#        else:
+#            query = sqlalchemy.text(sql).execution_options(autocommit=False)
+#            self._prep_sql[sql] = query
+        query = sqlalchemy.text(sql).execution_options(autocommit=False)
         return query
 
     def _query(self, sql, **kwargs):

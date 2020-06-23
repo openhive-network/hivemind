@@ -38,7 +38,7 @@ def _flip_dict(dict_to_flip):
 class Follow:
     """Handles processing of incoming follow ups and flushing to db."""
 
-    follow_items_to_flush = []
+    follow_items_to_flush = dict()
 
     @classmethod
     def follow_op(cls, account, op_json, date):
@@ -52,13 +52,20 @@ class Follow:
         old_state = None
         if DbState.is_initial_sync():
             # insert or update state
-            DB.query(FOLLOW_ITEM_INSERT_QUERY, **op)
 
-#            cls.follow_items_to_flush.append({
-#            'flr': op['flr'],
-#            'flg': op['flg'],
-#            'state': op['state'],
-#            'at': op['at']})
+            k = '{}/{}'.format(op['flr'], op['flg'])
+
+            if k in cls.follow_items_to_flush:
+                old_value = cls.follow_items_to_flush.get(k)
+                old_value['state'] = op['state'] 
+                cls.follow_items_to_flush[k] = old_value
+            else:
+                cls.follow_items_to_flush[k] = dict(
+                                                      flr = op['flr'],
+                                                      flg = op['flg'],
+                                                      state = op['state'],
+                                                      at = op['at'])
+
         else:
             old_state = cls._get_follow_db_state(op['flr'], op['flg'])
             # insert or update state
@@ -139,15 +146,17 @@ class Follow:
               VALUES """
 
         sql_postfix = """
-              ON CONFLICT (follower, following) DO UPDATE SET state = (CASE hf.state
-                                                                        WHEN 0 THEN 0 -- 0 blocks possibility to update state 
-                                                                        ELSE 1
-                                                                        END)
+              ON CONFLICT ON CONSTRAINT hive_follows_pk DO UPDATE SET 
+                state = (CASE hf.state
+                        WHEN 0 THEN 0 -- 0 blocks possibility to update state 
+                        ELSE EXCLUDED.state
+                    END)
+              WHERE hf.following = EXCLUDED.following AND hf.follower = EXCLUDED.follower
               """
         values = []
         limit = 1000
-        count = 0;
-        for follow_item in cls.follow_items_to_flush:
+        count = 0
+        for (k, follow_item) in cls.follow_items_to_flush.items():
           if count < limit:
             values.append("({}, {}, '{}', {})".format(follow_item['flr'], follow_item['flg'], follow_item['at'], follow_item['state']))
             count = count + 1
@@ -155,15 +164,16 @@ class Follow:
             query = sql_prefix + ",".join(values)
             query += sql_postfix
             DB.query(query)
-            values = []
-            count = 0
+            values.clear()
+            values.append("({}, {}, '{}', {})".format(follow_item['flr'], follow_item['flg'], follow_item['at'], follow_item['state']))
+            count = 1
 
         if len(values):
           query = sql_prefix + ",".join(values)
           query += sql_postfix
           DB.query(query)
 
-        cls.follow_items_to_flush = []
+        cls.follow_items_to_flush.clear()
 
     @classmethod
     def flush(cls, trx=True):

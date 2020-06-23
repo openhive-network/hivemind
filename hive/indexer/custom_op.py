@@ -39,10 +39,22 @@ class CustomOp:
 
     @classmethod
     def process_ops(cls, ops, block_num, block_date):
+        ops_stats = {}
+
         """Given a list of operation in block, filter and process them."""
         for op in ops:
             if op['id'] not in ['follow', 'community', 'notify']:
+                opName = str(op['id']) + '-ignored'
+                if(opName  in ops_stats):
+                    ops_stats[opName] += 1
+                else:
+                    ops_stats[opName] = 1
                 continue
+
+            if(op['id'] in ops_stats):
+                ops_stats[op['id']] += 1
+            else:
+                ops_stats[op['id']] = 1
 
             account = _get_auth(op)
             if not account:
@@ -58,6 +70,7 @@ class CustomOp:
                     process_json_community_op(account, op_json, block_date)
             elif op['id'] == 'notify':
                 cls._process_notify(account, op_json, block_date)
+        return ops_stats
 
     @classmethod
     def _process_notify(cls, account, op_json, block_date):
