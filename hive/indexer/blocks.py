@@ -22,15 +22,15 @@ class Blocks:
     blocks_to_flush = []
     ops_stats = {}
 
-    operations_in_tx = 0;
-    opened_tx = False;
+    operations_in_tx = 0
+    opened_tx = False
 
     OPERATIONS_IN_TX_TRESHOLD = 500000
 
     @staticmethod
     def merge_ops_stats(od1, od2):
         for (k, v) in od2.items():
-            if(k in od1):
+            if k in od1:
                od1[k] += v
             else:
                od1[k] = v
@@ -123,7 +123,7 @@ class Blocks:
     def _track_tx(cls, opCount = 1):
         if(cls.opened_tx == False):
             DB.query("START TRANSACTION")
-            cls.operations_in_tx = 0;
+            cls.operations_in_tx = 0
             cls.opened_tx = True
 
         cls.operations_in_tx += opCount
