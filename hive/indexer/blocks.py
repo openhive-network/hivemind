@@ -22,18 +22,14 @@ class Blocks:
     blocks_to_flush = []
     ops_stats = {}
 
-    operations_in_tx = 0
-    opened_tx = False
-
-    OPERATIONS_IN_TX_TRESHOLD = 500000
-
     @staticmethod
     def merge_ops_stats(od1, od2):
-        for (k, v) in od2.items():
-            if k in od1:
-               od1[k] += v
-            else:
-               od1[k] = v
+        if od2 is not None:
+            for k, v in od2.items():
+                if k in od1:
+                    od1[k] += v
+                else:
+                    od1[k] = v
 
         return od1
 
@@ -65,7 +61,7 @@ class Blocks:
     def process_multi(cls, blocks, vops, hived, is_initial_sync=False):
         """Batch-process blocks; wrapped in a transaction."""
         time_start = perf_counter()
-#        DB.query("START TRANSACTION")
+        DB.query("START TRANSACTION")
 
         last_num = 0
         try:
@@ -83,7 +79,7 @@ class Blocks:
         cls._flush_blocks()
         Follow.flush(trx=False)
 
-#        DB.query("COMMIT")
+        DB.query("COMMIT")
         time_end = perf_counter()
         log.info("[PROCESS MULTI] %i blocks in %fs", len(blocks), time_end - time_start)
 
@@ -119,19 +115,6 @@ class Blocks:
 
         return (vote_ops, comment_payout_ops)
 
-    @classmethod
-    def _track_tx(cls, opCount = 1):
-        if(cls.opened_tx == False):
-            DB.query("START TRANSACTION")
-            cls.operations_in_tx = 0
-            cls.opened_tx = True
-
-        cls.operations_in_tx += opCount
-
-        if(cls.operations_in_tx >= cls.OPERATIONS_IN_TX_TRESHOLD):
-            DB.query("COMMIT")
-            DB.query("START TRANSACTION")
-            cls.operations_in_tx = 0
 
     @classmethod
     def _process(cls, block, virtual_operations, hived, is_initial_sync=False):
@@ -159,7 +142,6 @@ class Blocks:
                 elif op_type == 'create_claimed_account_operation':
                     account_names.add(op['new_account_name'])
 
-        cls._track_tx()
         Accounts.register(account_names, date)     # register any new names
 
         # second scan will process all other ops
@@ -175,8 +157,6 @@ class Blocks:
                         cls.ops_stats[op_type] += 1
                     else:
                         cls.ops_stats[op_type] = 1
-
-                cls._track_tx()
 
                 # account metadata updates
                 if op_type == 'account_update_operation':
@@ -211,12 +191,10 @@ class Blocks:
         if json_ops:
             custom_ops_stats = CustomOp.process_ops(json_ops, num, date)
             cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, custom_ops_stats)
-            cls._track_tx(len(json_ops))
 
         if update_comment_pending_payouts:
             payout_ops_stat = Posts.update_comment_pending_payouts(hived, update_comment_pending_payouts)
             cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, payout_ops_stat)
-            cls._track_tx(len(update_comment_pending_payouts))
 
         # virtual ops
         comment_payout_ops = {}
@@ -228,7 +206,7 @@ class Blocks:
             (vote_ops, comment_payout_ops) = virtual_operations[num] if num in virtual_operations else empty_vops
         else:
             vops = hived.get_virtual_operations(num)
-            (vote_ops, comment_payout_ops) = prepare_vops(vops, date)
+            (vote_ops, comment_payout_ops) = Blocks.prepare_vops(vops, date)
 
         for v in vote_ops:
             Votes.vote_op(v, date)
@@ -238,12 +216,10 @@ class Blocks:
             else:
                 cls.ops_stats[op_type] = 1
 
-        cls._track_tx(len(vote_ops))
 
         if comment_payout_ops:
             comment_payout_stats = Posts.comment_payout_op(comment_payout_ops, date)
             cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, comment_payout_stats)
-            cls._track_tx(len(comment_payout_ops))
 
         return num
 

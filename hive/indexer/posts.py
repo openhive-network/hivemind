@@ -269,7 +269,7 @@ class Posts:
                 max_accepted_payout = :max_accepted_payout,
                 percent_hbd = :percent_hbd,
                 allow_votes = :allow_votes,
-                allow_curation_rewards = :allow_curation_rewards
+                allow_curation_rewards = :allow_curation_rewards,
                 beneficiaries = :beneficiaries
             WHERE
             hp.author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND 

@@ -26,6 +26,9 @@ from hive.server.hive_api import community as hive_api_community
 from hive.server.hive_api import notify as hive_api_notify
 from hive.server.hive_api import stats as hive_api_stats
 
+from hive.server.follow_api import methods as follow_api
+from hive.server.tags_api import methods as tags_api
+
 from hive.server.database_api import methods as database_api
 
 from hive.server.db import Db
@@ -93,6 +96,9 @@ def build_methods():
         'follow_api.get_blog': condenser_api.get_blog,
         'follow_api.get_blog_entries': condenser_api.get_blog_entries,
         'follow_api.get_reblogged_by': condenser_api.get_reblogged_by,
+        'follow_api.get_feed_entries': follow_api.get_feed_entries,
+        'follow_api.get_feed': follow_api.get_feed,
+        'follow_api.get_blog_authors': follow_api.get_blog_authors
     })
 
     # tags_api aliases
@@ -108,6 +114,12 @@ def build_methods():
         'tags_api.get_discussions_by_author_before_date': condenser_api.get_discussions_by_author_before_date,
         'tags_api.get_post_discussions_by_payout': condenser_api.get_post_discussions_by_payout,
         'tags_api.get_comment_discussions_by_payout': condenser_api.get_comment_discussions_by_payout,
+        'tags_api.get_active_votes' : tags_api.get_active_votes,
+        'tags_api.get_tags_used_by_author' : tags_api.get_tags_used_by_author,
+        'tags_api.get_discussions_by_active' : tags_api.get_discussions_by_active,
+        'tags_api.get_discussions_by_cashout' : tags_api.get_discussions_by_cashout,
+        'tags_api.get_discussions_by_votes' : tags_api.get_discussions_by_votes,
+        'tags_api.get_discussions_by_children' : tags_api.get_discussions_by_children
     })
 
     # legacy `call` style adapter

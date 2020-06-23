@@ -77,9 +77,8 @@ class Votes:
 
     @classmethod
     def flush(cls):
-        log.info("Inside Votes.flush")
-        cls.inside_flush = True
         """ Flush vote data from cache to database """
+        cls.inside_flush = True
         if cls._votes_data:
             sql = """
                     INSERT INTO hive_votes
@@ -128,7 +127,6 @@ class Votes:
                 actual_query = sql.format(values_str)
                 DB.query(actual_query)
                 values.clear()
-                
-        cls._votes_data.clear()
+
+            cls._votes_data.clear()
         cls.inside_flush = False
-        log.info("Exiting Votes.flush")
