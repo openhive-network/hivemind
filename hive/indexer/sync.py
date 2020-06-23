@@ -126,9 +126,6 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
         to = min(lbound + chunk_size, ubound)
 #        log.info("Processing retrieved blocks and vops from range: [%d, %d].", lbound, to)
 
-        blocksQueue.task_done()
-        vopsQueue.task_done()
-
         timer.batch_start()
         
         block_start = perf()
@@ -149,11 +146,14 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
         if block_end - block_start > 1.0:
             print_ops_stats("Operations present in the processed blocks:", ops_stats)
 
+        blocksQueue.task_done()
+        vopsQueue.task_done()
+
         lbound = to
 
         num = num + 1
 
-    print_ops_stats("All operations present in the processed blocks:", ops_stats)
+    print_ops_stats("All operations present in the processed blocks:", total_ops_stats)
     return num
   except KeyboardInterrupt as ki:
     log.info("Caught SIGINT")
@@ -173,6 +173,7 @@ def _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size):
         blockConsumerFuture.result()
   #      pool.shutdown()
       except KeyboardInterrupt as ex:
+        global continue_processing
         continue_processing = 0
         pool.shutdown(False)
 

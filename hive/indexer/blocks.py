@@ -91,6 +91,7 @@ class Blocks:
 
     @staticmethod
     def prepare_vops(vopsList, date):
+        vote_ops = []
         comment_payout_ops = {}
         for vop in vopsList:
             key = None
@@ -108,7 +109,7 @@ class Blocks:
                 key = "{}/{}".format(op_value['author'], op_value['permlink'])
                 val = {'payout':op_value['payout'], 'author_rewards':op_value['author_rewards']}
             elif op_type == 'effective_comment_vote_operation':
-                Votes.vote_op(vop, date)
+                vote_ops.append(vop)
 
             if key is not None and val is not None:
                 if key in comment_payout_ops:
@@ -116,7 +117,7 @@ class Blocks:
                 else:
                     comment_payout_ops[key] = [{op_type:val}]
 
-        return comment_payout_ops
+        return (vote_ops, comment_payout_ops)
 
     @classmethod
     def _track_tx(cls, opCount = 1):
@@ -217,12 +218,25 @@ class Blocks:
 
         # virtual ops
         comment_payout_ops = {}
+        vote_ops = []
+
+        empty_vops = (vote_ops, comment_payout_ops)
 
         if is_initial_sync:
-            comment_payout_ops = virtual_operations[num] if num in virtual_operations else {}
+            (vote_ops, comment_payout_ops) = virtual_operations[num] if num in virtual_operations else empty_vops
         else:
             vops = hived.get_virtual_operations(num)
-            comment_payout_ops = prepare_vops(vops, date)
+            (vote_ops, comment_payout_ops) = prepare_vops(vops, date)
+
+        for v in vote_ops:
+            Votes.vote_op(v, date)
+            op_type = v['type']
+            if op_type in cls.ops_stats:
+                cls.ops_stats[op_type] += 1
+            else:
+                cls.ops_stats[op_type] = 1
+
+        cls._track_tx(len(vote_ops))
 
         if comment_payout_ops:
             comment_payout_stats = Posts.comment_payout_op(comment_payout_ops, date)
@@ -230,8 +244,6 @@ class Blocks:
             cls._track_tx(len(comment_payout_ops))
 
         return num
-
-
 
     @classmethod
     def verify_head(cls, steem):

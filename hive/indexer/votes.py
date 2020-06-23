@@ -52,12 +52,18 @@ class Votes:
         ret = DB.query_row(sql, author=author, permlink=permlink)
         return 0 if ret is None else int(ret.count)
 
+    inside_flush = False
+
     @classmethod
     def vote_op(cls, vop, date):
         """ Process vote_operation """
         voter = vop['value']['voter']
         author = vop['value']['author']
         permlink = vop['value']['permlink']
+
+        if(cls.inside_flush):
+            log.info("Adding new vote-info into _votes_data dict")
+            raise "Fatal error"
 
         key = voter + "/" + author + "/" + permlink
 
@@ -71,6 +77,8 @@ class Votes:
 
     @classmethod
     def flush(cls):
+        log.info("Inside Votes.flush")
+        cls.inside_flush = True
         """ Flush vote data from cache to database """
         if cls._votes_data:
             sql = """
@@ -122,3 +130,5 @@ class Votes:
                 values.clear()
                 
         cls._votes_data.clear()
+        cls.inside_flush = False
+        log.info("Exiting Votes.flush")
