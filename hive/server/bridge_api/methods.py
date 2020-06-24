@@ -196,7 +196,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
                     post_id 
                 FROM 
                     hive_post_tags hpt
-                INNER JOIN hive_tag_data htd ON hpt.tag_id=htp.id
+                INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
                 WHERE htd.tag = :tag
                 )
             """

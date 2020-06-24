@@ -185,7 +185,7 @@ async def pids_by_category(db, tag, sort, last_id, limit):
                     post_id 
                 FROM 
                     hive_post_tags hpt
-                INNER JOIN hive_tag_data htd ON hpt.tag_id=htp.id
+                INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
                 WHERE htd.tag = :tag
             """
             where.append("id IN (%s)" % sql)

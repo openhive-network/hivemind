@@ -180,7 +180,7 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
                     post_id 
                 FROM 
                     hive_post_tags hpt
-                INNER JOIN hive_tag_data htd ON hpt.tag_id=htp.id
+                INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
                 WHERE htd.tag = :tag
             """
             where.append("id IN (%s)" % sql)
