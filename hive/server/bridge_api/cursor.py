@@ -180,7 +180,14 @@ async def pids_by_category(db, tag, sort, last_id, limit):
         if sort in ['payout', 'payout_comments']:
             where.append('category_id = (SELECT id FROM hive_category_data WHERE category = :tag)')
         else:
-            sql = "SELECT post_id FROM hive_post_tags WHERE tag_id = (SELECT id FROM hive_tag_data WHERE tag = :tag)"
+            sql = """
+                SELECT 
+                    post_id 
+                FROM 
+                    hive_post_tags hpt
+                INNER JOIN hive_tag_data htd ON hpt.tag_id=htp.id
+                WHERE htd.tag = :tag
+            """
             where.append("id IN (%s)" % sql)
 
     if last_id:

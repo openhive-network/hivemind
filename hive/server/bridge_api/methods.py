@@ -191,7 +191,15 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
         if sort in ['payout', 'payout_comments']:
             sql = sql % """ AND hp.category = :tag """
         else:
-            sql = sql % """ AND hp.post_id IN (SELECT post_id FROM hive_post_tags WHERE tag_id = (SELECT id FROM hive_tag_data WHERE tag = :tag))"""
+            sql = sql % """ AND hp.post_id IN 
+                (SELECT 
+                    post_id 
+                FROM 
+                    hive_post_tags hpt
+                INNER JOIN hive_tag_data htd ON hpt.tag_id=htp.id
+                WHERE htd.tag = :tag
+                )
+            """
 
     if not observer:
         observer = ''

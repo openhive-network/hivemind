@@ -175,7 +175,14 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
                 where.append('category_id = (SELECT id FROM hive_category_data WHERE category = :tag)')
                 if sort in ('trending', 'hot'):
                     where.append('depth = 0')
-            sql = "SELECT post_id FROM hive_post_tags WHERE tag_id = (SELECT id FROM hive_tag_data WHERE tag = :tag)"
+            sql = """
+                SELECT 
+                    post_id 
+                FROM 
+                    hive_post_tags hpt
+                INNER JOIN hive_tag_data htd ON hpt.tag_id=htp.id
+                WHERE htd.tag = :tag
+            """
             where.append("id IN (%s)" % sql)
 
     start_id = None

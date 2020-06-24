@@ -19,27 +19,53 @@ class Tags(object):
     def flush(cls):
         """ Flush tags to table """
         if cls._tags:
+            limit = 1000
+
             sql = """
                 INSERT INTO
                     hive_tag_data (tag)
-                VALUES 
+                VALUES {} 
+                ON CONFLICT DO NOTHING
             """
             values = []
             for tag in cls._tags:
                 values.append("('{}')".format(escape_characters(tag[1])))
-            sql += ",".join(values)
-            sql += " ON CONFLICT DO NOTHING"
-            DB.query(sql)
+                if len(values) >= limit:
+                    tag_query = str(sql)
+                    DB.query(tag_query.format(','.join(values)))
+                    values.clear()
+            if len(values) > 0:
+                tag_query = str(sql)
+                DB.query(tag_query.format(','.join(values)))
+                values.clear()
 
             sql = """
                 INSERT INTO
                     hive_post_tags (post_id, tag_id)
-                VALUES 
+                SELECT 
+                    data_source.post_id, data_source.tag_id
+                FROM
+                (
+                    SELECT 
+                        post_id, htd.id
+                    FROM
+                    (
+                        VALUES 
+                            {}
+                    ) AS T(post_id, tag)
+                    INNER JOIN hive_tag_data htd ON htd.tag = T.tag
+                ) AS data_source(post_id, tag_id)
+                ON CONFLICT DO NOTHING
             """
             values = []
             for tag in cls._tags:
-                values.append("({}, (SELECT id FROM hive_tag_data WHERE tag='{}'))".format(tag[0], escape_characters(tag[1])))
-            sql += ",".join(values)
-            sql += " ON CONFLICT DO NOTHING"
-            DB.query(sql)
+                values.append("({}, '{}')".format(tag[0], escape_characters(tag[1])))
+                if len(values) >= limit:
+                    tag_query = str(sql)
+                    DB.query(tag_query.format(','.join(values)))
+                    values.clear()
+            if len(values) > 0:
+                tag_query = str(sql)
+                DB.query(tag_query.format(','.join(values)))
+                values.clear()
             cls._tags.clear()
