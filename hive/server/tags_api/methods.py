@@ -3,13 +3,32 @@ from hive.server.common.helpers import (
     valid_account,
     valid_permlink)
 
+
 @return_error_info
 async def get_active_votes(context, author: str, permlink: str):
     """ Returns all votes for the given post. """
     valid_account(author)
     valid_permlink(permlink)
-    # TODO: body
-    raise NotImplementedError()
+    db = context['db']
+    sql = """
+        SELECT 
+            ha_v.name as voter
+            ha_a.name as author
+            hpd.permlink as permlink
+            weight
+            rshares
+            vote_percent
+            last_update
+            num_changes
+        FROM
+            hive_votes hv
+        INNER JOIN hive_accounts ha_v ON ha_v.id = hv.voter_id
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hv.author_id
+        INNER JOIN hive_permlink_data hpd ON hpd.id = hv.permlink_id
+        WHERE ha_a.name = :author AND hpd.permlink = :permlink
+    """
+    ret = await db.query_all(sql, author=author, permlink=permlink)
+    return ret
 
 @return_error_info
 async def get_tags_used_by_author(context, author: str):
