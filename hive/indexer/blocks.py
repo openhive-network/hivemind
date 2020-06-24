@@ -11,6 +11,7 @@ from hive.indexer.payments import Payments
 from hive.indexer.follow import Follow
 from hive.indexer.votes import Votes
 from hive.indexer.post_data_cache import PostDataCache
+from hive.indexer.tags import Tags
 from time import perf_counter
 
 log = logging.getLogger(__name__)
@@ -52,6 +53,7 @@ class Blocks:
         #assert is_trx_active(), "Block.process must be in a trx"
         ret = cls._process(block, vops_in_block, hived, is_initial_sync=False)
         PostDataCache.flush()
+        Tags.flush()
         Votes.flush()
         time_end = perf_counter()
         log.info("[PROCESS BLOCK] %fs", time_end - time_start)
@@ -75,6 +77,7 @@ class Blocks:
         # expensive. So is tracking follows at all; hence we track
         # deltas in memory and update follow/er counts in bulk.
         PostDataCache.flush()
+        Tags.flush()
         Votes.flush()
         cls._flush_blocks()
         Follow.flush(trx=False)

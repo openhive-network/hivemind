@@ -3,7 +3,7 @@
 import logging
 import collections
 
-from json import dumps
+from json import dumps, loads
 
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
@@ -13,6 +13,7 @@ from hive.indexer.feed_cache import FeedCache
 from hive.indexer.community import Community, START_DATE
 from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
+from hive.indexer.tags import Tags
 from hive.utils.normalize import legacy_amount, asset_to_hbd_hive
 
 log = logging.getLogger(__name__)
@@ -112,6 +113,26 @@ class Posts:
                          img_url=op['img_url'] if 'img_url' in op else "", body=op['body'],
                          json=op['json_metadata'] if op['json_metadata'] else '{}')
         PostDataCache.add_data(result['id'], post_data)
+
+        md = {}
+        # At least one case where jsonMetadata was double-encoded: condenser#895
+        # jsonMetadata = JSON.parse(jsonMetadata);
+        try:
+            md = loads(op['json_metadata'])
+            if not isinstance(md, dict):
+                md = {}
+        except Exception:
+            pass
+
+        tags = [op['parent_permlink']]
+        if md and 'tags' in md and isinstance(md['tags'], list):
+            tags = tags + md['tags']
+        tags = map(lambda tag: (str(tag) or '').strip('# ').lower()[:32], tags)
+        tags = filter(None, tags)
+        from funcy.seqs import distinct
+        tags = list(distinct(tags))[:5]
+        for tag in tags:
+            Tags.add_tag(result['id'], tag)
 
         if not DbState.is_initial_sync():
             if error:

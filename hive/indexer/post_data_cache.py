@@ -5,6 +5,7 @@ log = logging.getLogger(__name__)
 DB = Db.instance()
 
 def escape_characters(text):
+    """ Escape special charactes """
     ret = str(text)
     ret = ret.replace("\\", "\\\\")
     ret = ret.replace("'", "''")

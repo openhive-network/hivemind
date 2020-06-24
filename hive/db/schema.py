@@ -210,9 +210,18 @@ def build_metadata():
     )
 
     sa.Table(
+        'hive_tag_data', metadata,
+        sa.Column('id', sa.Integer, nullable=False, primary_key=True),
+        sa.Column('tag', VARCHAR(32), nullable=False, server_default=''),
+        sa.UniqueConstraint('tag', name='hive_tag_data_ux1')
+    )
+
+    sa.Table(
         'hive_post_tags', metadata,
-        sa.Column('post_id', sa.Integer, nullable=False, primary_key=True),
-        sa.Column('tag', sa.String(32), nullable=False),
+        sa.Column('post_id', sa.Integer, nullable=False),
+        sa.Column('tag_id', sa.Integer, nullable=False),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id']),
+        sa.ForeignKeyConstraint(['tag_id'], ['hive_tag_data.id']),
     )
 
     sa.Table(
