@@ -5,10 +5,12 @@ log = logging.getLogger(__name__)
 DB = Db.instance()
 
 def escape_characters(text):
-    characters = ["'", "_", "%"]
     ret = str(text)
-    for ch in characters:
-        ret = ret.replace(ch, "\\" + ch)
+    ret = ret.replace("\\", "\\\\")
+    ret = ret.replace("'", "''")
+    ret = ret.replace("%", '%%')
+    ret = ret.replace("_", "\\_")
+    ret = ret.replace(":", "\\:")
     return ret
 
 class PostDataCache(object):
