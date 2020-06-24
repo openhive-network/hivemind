@@ -155,16 +155,26 @@ class SteemClient:
 
     def enum_virtual_ops(self, begin_block, end_block):
         """ Get virtual ops for range of blocks """
-        result = self.__exec('enum_virtual_ops', {"block_range_begin":begin_block, "block_range_end":end_block})
-        ops = result['ops'] if 'ops' in result else []
-        tracked_ops = ['curation_reward_operation', 'author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation']
         ret = {}
-        for op in ops:
-            block = op['block']
-            if block in ret and op['op']['type'] in tracked_ops:
-                ret[block]['ops'].append(op['op'])
-            if block not in ret and op['op']['type'] in tracked_ops:
-                ret[block] = {'timestamp':op['timestamp'], 'ops':[op['op']]}
+        delta = 100
+
+        from_block = begin_block
+        to_block = (begin_block + delta) if begin_block + delta < end_block else end_block
+
+        while from_block < to_block:
+            print("From: ", from_block, " To: ", to_block)
+            result = self.__exec('enum_virtual_ops', {"block_range_begin":from_block, "block_range_end":to_block})
+            ops = result['ops'] if 'ops' in result else []
+            tracked_ops = ['curation_reward_operation', 'author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation']
+            
+            for op in ops:
+                block = op['block']
+                if block in ret and op['op']['type'] in tracked_ops:
+                    ret[block]['ops'].append(op['op'])
+                if block not in ret and op['op']['type'] in tracked_ops:
+                    ret[block] = {'timestamp':op['timestamp'], 'ops':[op['op']]}
+            from_block = to_block
+            to_block = (from_block + delta) if from_block + delta < end_block else end_block
         return ret
 
     def get_comment_pending_payouts(self, comments):
