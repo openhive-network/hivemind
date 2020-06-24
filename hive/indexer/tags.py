@@ -28,9 +28,10 @@ class Tags(object):
             for tag in cls._tags:
                 values.append("('{}')".format(escape_characters(tag[1])))
             sql += ",".join(values)
-            sql += " ON CONFLICT DO NOTHING;"
+            sql += " ON CONFLICT DO NOTHING"
+            DB.query(sql)
 
-            sql += """
+            sql = """
                 INSERT INTO
                     hive_post_tags (post_id, tag_id)
                 VALUES 
