@@ -162,7 +162,6 @@ class SteemClient:
         to_block = (begin_block + delta) if begin_block + delta < end_block else end_block
 
         while from_block < to_block:
-            print("From: ", from_block, " To: ", to_block)
             result = self.__exec('enum_virtual_ops', {"block_range_begin":from_block, "block_range_end":to_block})
             ops = result['ops'] if 'ops' in result else []
             tracked_ops = ['curation_reward_operation', 'author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation']
