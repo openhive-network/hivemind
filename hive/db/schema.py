@@ -160,7 +160,7 @@ def build_metadata():
     sa.Table(
         'hive_post_data', metadata,
         sa.Column('id', sa.Integer, primary_key=True, autoincrement=False),
-        sa.Column('title', TEXT, nullable=False, server_default=''),
+        sa.Column('title', VARCHAR(512), nullable=False, server_default=''),
         sa.Column('preview', VARCHAR(1024), nullable=False, server_default=''),
         sa.Column('img_url', VARCHAR(1024), nullable=False, server_default=''),
         sa.Column('body', TEXT, nullable=False, server_default=''),
