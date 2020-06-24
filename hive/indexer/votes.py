@@ -122,7 +122,7 @@ class Votes:
                     DB.query(actual_query)
                     values.clear()
 
-            if len(values) >= 0:
+            if len(values) > 0:
                 values_str = ','.join(values)
                 actual_query = sql.format(values_str)
                 DB.query(actual_query)

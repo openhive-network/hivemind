@@ -131,6 +131,7 @@ class Posts:
         tags = filter(None, tags)
         from funcy.seqs import distinct
         tags = list(distinct(tags))[:5]
+
         for tag in tags:
             Tags.add_tag(result['id'], tag)
 
