@@ -1,18 +1,9 @@
 import logging
+from hive.utils.normalize import escape_characters
 from hive.db.adapter import Db
 
 log = logging.getLogger(__name__)
 DB = Db.instance()
-
-def escape_characters(text):
-    """ Escape special charactes """
-    ret = str(text)
-    ret = ret.replace("\\", "\\\\")
-    ret = ret.replace("'", "''")
-    ret = ret.replace("%", '%%')
-    ret = ret.replace("_", "\\_")
-    ret = ret.replace(":", "\\:")
-    return ret
 
 class PostDataCache(object):
     """ Procides cache for DB operations on post data table in order to speed up initial sync """

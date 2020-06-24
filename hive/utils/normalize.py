@@ -13,6 +13,16 @@ NAI_MAP = {
     '@@000000037': 'VESTS',
 }
 
+def escape_characters(text):
+    """ Escape special charactes """
+    ret = str(text)
+    ret = ret.replace("\\", "\\\\")
+    ret = ret.replace("'", "''")
+    ret = ret.replace("%", '%%')
+    ret = ret.replace("_", "\\_")
+    ret = ret.replace(":", "\\:")
+    return ret
+
 def vests_amount(value):
     """Returns a decimal amount, asserting units are VESTS"""
     return parse_amount(value, 'VESTS')

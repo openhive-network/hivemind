@@ -4,6 +4,8 @@ from hive.db.adapter import Db
 log = logging.getLogger(__name__)
 DB = Db.instance()
 
+from hive.utils.normalize import escape_characters
+
 class Tags(object):
     """ Tags cache """
     _tags = []
@@ -24,7 +26,7 @@ class Tags(object):
             """
             values = []
             for tag in cls._tags:
-                values.append("('{}')".format(tag[1]))
+                values.append("('{}')".format(escape_characters(tag[1])))
             sql += ",".join(values)
             sql += " ON CONFLICT DO NOTHING;"
 
@@ -35,7 +37,7 @@ class Tags(object):
             """
             values = []
             for tag in cls._tags:
-                values.append("({}, (SELECT id FROM hive_tag_data WHERE tag='{}'))".format(tag[0], tag[1]))
+                values.append("({}, (SELECT id FROM hive_tag_data WHERE tag='{}'))".format(tag[0], escape_characters(tag[1])))
             sql += ",".join(values)
             sql += " ON CONFLICT DO NOTHING"
             DB.query(sql)
