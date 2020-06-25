@@ -105,6 +105,8 @@ class Blocks:
                 key = "{}/{}".format(op_value['author'], op_value['permlink'])
                 val = {'hbd_payout':op_value['hbd_payout'], 'hive_payout':op_value['hive_payout'], 'vesting_payout':op_value['vesting_payout']}
             elif op_type == 'comment_reward_operation':
+                if('payout' not in op_value or op_value['payout'] is None):
+                    logger.error("Broken op: `{}'".format(str(op)))
                 key = "{}/{}".format(op_value['author'], op_value['permlink'])
                 val = {'payout':op_value['payout'], 'author_rewards':op_value['author_rewards']}
             elif op_type == 'effective_comment_vote_operation':

@@ -156,24 +156,46 @@ class SteemClient:
     def enum_virtual_ops(self, begin_block, end_block):
         """ Get virtual ops for range of blocks """
         ret = {}
-        delta = 100
+        delta = 1000
 
         from_block = begin_block
         to_block = (begin_block + delta) if begin_block + delta < end_block else end_block
 
+        #According to definition of hive::plugins::acount_history::enum_vops_filter:
+
+        author_reward_operation                 = 0x000002
+        curation_reward_operation               = 0x000004
+        comment_reward_operation                = 0x000008
+        effective_comment_vote_operation        = 0x400000
+
+        tracked_ops_filter = curation_reward_operation | author_reward_operation | comment_reward_operation | effective_comment_vote_operation
+        tracked_ops = ['curation_reward_operation', 'author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation']
+
+        resume_on_operation = 0
+
         while from_block < to_block:
-            result = self.__exec('enum_virtual_ops', {"block_range_begin":from_block, "block_range_end":to_block})
+            result = self.__exec('enum_virtual_ops', {"block_range_begin":from_block, "block_range_end":to_block
+                , "operation_begin": resume_on_operation, "limit": 1000, "filter": tracked_ops_filter
+            })
             ops = result['ops'] if 'ops' in result else []
-            tracked_ops = ['curation_reward_operation', 'author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation']
-            
+            resume_on_operation = result['next_operation_begin'] if 'next_operation_begin' in result else 0
+
+            next_block = result['next_block_range_begin'] if 'next_block_range_begin' in result else from_block + delta
+
             for op in ops:
+                if(op['op']['type'] not in tracked_ops):
+                    logger.error("{} VOPS Filtering failed: `{}'".format(str(tracked_ops_filter), str(op)))
+
+                if(op['op']['type'] == 'comment_reward_operation' and 'payout' not in op['op']['value']):
+                    logger.error("Broken op: `{}'".format(str(op)))
+
                 block = op['block']
-                if block in ret and op['op']['type'] in tracked_ops:
+                if block in ret:
                     ret[block]['ops'].append(op['op'])
-                if block not in ret and op['op']['type'] in tracked_ops:
+                if block not in ret:
                     ret[block] = {'timestamp':op['timestamp'], 'ops':[op['op']]}
             from_block = to_block
-            to_block = (from_block + delta) if from_block + delta < end_block else end_block
+            to_block = next_block if next_block < end_block else end_block
         return ret
 
     def get_comment_pending_payouts(self, comments):
