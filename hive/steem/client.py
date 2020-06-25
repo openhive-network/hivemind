@@ -174,9 +174,11 @@ class SteemClient:
         resume_on_operation = 0
 
         while from_block < to_block:
-            result = self.__exec('enum_virtual_ops', {"block_range_begin":from_block, "block_range_end":to_block
-                , "operation_begin": resume_on_operation, "limit": 1000, "filter": tracked_ops_filter
-            })
+            result = self.__exec('enum_virtual_ops',
+                                 {"block_range_begin":from_block, "block_range_end":to_block,
+                                  "operation_begin": resume_on_operation,
+                                  "filter": tracked_ops_filter
+                                 })
             ops = result['ops'] if 'ops' in result else []
             resume_on_operation = result['next_operation_begin'] if 'next_operation_begin' in result else 0
 

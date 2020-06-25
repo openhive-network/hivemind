@@ -40,10 +40,11 @@ def print_ops_stats(prefix, ops_stats):
         log.info("`{}': {}".format(k, v))
 
     log.info("############################################################################")
+
 def prepare_vops(vops_by_block):
     preparedVops = {}
-    for blockNum, blockDict in vops_by_block.items():
 
+    for blockNum, blockDict in vops_by_block.items():
         vopsList = blockDict['ops']
         date = blockDict['timestamp']
         preparedVops[blockNum] = Blocks.prepare_vops(vopsList, date)
