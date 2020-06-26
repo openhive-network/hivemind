@@ -108,6 +108,7 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
             blocks = []
             if not blocksQueue.empty() or CONTINUE_PROCESSING:
                 blocks = blocksQueue.get()
+                blocksQueue.task_done()
 
             if vopsQueue.empty() and CONTINUE_PROCESSING:
                 log.info("Awaiting any vops to process...")
@@ -115,6 +116,7 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
             preparedVops = []
             if not vopsQueue.empty() or CONTINUE_PROCESSING:
                 preparedVops = vopsQueue.get()
+                vopsQueue.task_done()
 
             to = min(lbound + chunk_size, ubound)
 
@@ -138,9 +140,6 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
 
             if block_end - block_start > 1.0:
                 print_ops_stats("Operations present in the processed blocks:", ops_stats)
-
-            blocksQueue.task_done()
-            vopsQueue.task_done()
 
             lbound = to
 

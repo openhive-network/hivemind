@@ -156,10 +156,8 @@ class SteemClient:
     def enum_virtual_ops(self, begin_block, end_block):
         """ Get virtual ops for range of blocks """
         ret = {}
-        delta = 1000
 
         from_block = begin_block
-        to_block = (begin_block + delta) if begin_block + delta < end_block else end_block
 
         #According to definition of hive::plugins::acount_history::enum_vops_filter:
 
@@ -173,29 +171,20 @@ class SteemClient:
 
         resume_on_operation = 0
 
-        while from_block < to_block:
-            result = self.__exec('enum_virtual_ops', {"block_range_begin":from_block, "block_range_end":to_block
-                , "operation_begin": resume_on_operation, "limit": 1000, "filter": tracked_ops_filter
-            })
-            ops = result['ops'] if 'ops' in result else []
-            resume_on_operation = result['next_operation_begin'] if 'next_operation_begin' in result else 0
+        while from_block < end_block:
+            call_result = self.__exec('enum_virtual_ops', {"block_range_begin":from_block, "block_range_end":end_block
+                , "group_by_block": True, "operation_begin": resume_on_operation, "limit": 1000, "filter": tracked_ops_filter
+            }) 
 
-            next_block = result['next_block_range_begin'] if 'next_block_range_begin' in result else from_block + delta
+            ret = {opb["block"] : {"timestamp":opb["timestamp"], "ops":[op["op"] for op in opb["ops"]]} for opb in call_result["ops_by_block"]}
 
-            for op in ops:
-                if(op['op']['type'] not in tracked_ops):
-                    logger.error("{} VOPS Filtering failed: `{}'".format(str(tracked_ops_filter), str(op)))
+            resume_on_operation = call_result['next_operation_begin'] if 'next_operation_begin' in call_result else 0
 
-                if(op['op']['type'] == 'comment_reward_operation' and 'payout' not in op['op']['value']):
-                    logger.error("Broken op: `{}'".format(str(op)))
+            next_block = call_result['next_block_range_begin']
 
-                block = op['block']
-                if block in ret:
-                    ret[block]['ops'].append(op['op'])
-                if block not in ret:
-                    ret[block] = {'timestamp':op['timestamp'], 'ops':[op['op']]}
-            from_block = to_block
-            to_block = next_block if next_block < end_block else end_block
+            # Move to next block only if operations from current one have been processed completely.
+            from_block = next_block
+
         return ret
 
     def get_comment_pending_payouts(self, comments):

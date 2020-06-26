@@ -1,6 +1,7 @@
 """Blocks processor."""
 
 import logging
+import json
 
 from hive.db.adapter import Db
 
