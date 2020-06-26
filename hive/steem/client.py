@@ -156,24 +156,35 @@ class SteemClient:
     def enum_virtual_ops(self, begin_block, end_block):
         """ Get virtual ops for range of blocks """
         ret = {}
-        delta = 100
 
         from_block = begin_block
-        to_block = (begin_block + delta) if begin_block + delta < end_block else end_block
 
-        while from_block < to_block:
-            result = self.__exec('enum_virtual_ops', {"block_range_begin":from_block, "block_range_end":to_block})
-            ops = result['ops'] if 'ops' in result else []
-            tracked_ops = ['curation_reward_operation', 'author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation']
-            
-            for op in ops:
-                block = op['block']
-                if block in ret and op['op']['type'] in tracked_ops:
-                    ret[block]['ops'].append(op['op'])
-                if block not in ret and op['op']['type'] in tracked_ops:
-                    ret[block] = {'timestamp':op['timestamp'], 'ops':[op['op']]}
-            from_block = to_block
-            to_block = (from_block + delta) if from_block + delta < end_block else end_block
+        #According to definition of hive::plugins::acount_history::enum_vops_filter:
+
+        author_reward_operation                 = 0x000002
+        curation_reward_operation               = 0x000004
+        comment_reward_operation                = 0x000008
+        effective_comment_vote_operation        = 0x400000
+
+        tracked_ops_filter = curation_reward_operation | author_reward_operation | comment_reward_operation | effective_comment_vote_operation
+        tracked_ops = ['curation_reward_operation', 'author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation']
+
+        resume_on_operation = 0
+
+        while from_block < end_block:
+            call_result = self.__exec('enum_virtual_ops', {"block_range_begin":from_block, "block_range_end":end_block
+                , "group_by_block": True, "operation_begin": resume_on_operation, "limit": 1000, "filter": tracked_ops_filter
+            }) 
+
+            ret = {opb["block"] : {"timestamp":opb["timestamp"], "ops":[op["op"] for op in opb["ops"]]} for opb in call_result["ops_by_block"]}
+
+            resume_on_operation = call_result['next_operation_begin'] if 'next_operation_begin' in call_result else 0
+
+            next_block = call_result['next_block_range_begin']
+
+            # Move to next block only if operations from current one have been processed completely.
+            from_block = next_block
+
         return ret
 
     def get_comment_pending_payouts(self, comments):
