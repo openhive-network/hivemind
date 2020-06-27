@@ -147,7 +147,7 @@ class Community:
     def validated_name(cls, name):
         """Perform basic validation on community name, then search for id."""
         if (name[:5] == 'hive-'
-                and name[5] in ['1', '2', '3']
+                and len(name) > 5 and name[5] in ['1', '2', '3']
                 and re.match(r'^hive-[123]\d{4,6}$', name)):
             return name
         return None
