@@ -212,7 +212,7 @@ def build_metadata():
     sa.Table(
         'hive_tag_data', metadata,
         sa.Column('id', sa.Integer, nullable=False, primary_key=True),
-        sa.Column('tag', VARCHAR(32), nullable=False, server_default=''),
+        sa.Column('tag', VARCHAR(64), nullable=False, server_default=''),
         sa.UniqueConstraint('tag', name='hive_tag_data_ux1')
     )
 
