@@ -14,6 +14,7 @@ from hive.server.common.helpers import (
     valid_offset,
     valid_limit,
     valid_follow_type)
+from hive.server.common.mutes import Mutes
 
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
 
