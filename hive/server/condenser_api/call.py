@@ -94,7 +94,7 @@ async def call(context, api, method, params):
 
     # Content primitives
     elif method == 'get_content':
-        return await get_content(context, *_strict_list(params, 2))
+        return await get_content(context, *_strict_list(params, 3, 2))
     elif method == 'get_content_replies':
         return await get_content_replies(context, *_strict_list(params, 2))
 

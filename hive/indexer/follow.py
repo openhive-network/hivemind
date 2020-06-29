@@ -64,13 +64,44 @@ class Follow:
                                                       flr = op['flr'],
                                                       flg = op['flg'],
                                                       state = op['state'],
-                                                      at = op['at'])
+                                                      at = op['at'],
+                                                      blk=False,
+                                                      follow_blk=False)
 
         else:
             old_state = cls._get_follow_db_state(op['flr'], op['flg'])
+            if new_state == (old_state or 0):
+                return
+            sql = ''
+
             # insert or update state
-            DB.query(FOLLOW_ITEM_INSERT_QUERY, **op)
-            # track count deltas
+            if old_state is None:
+                sql = """INSERT INTO hive_follows (follower, following,
+                            created_at, state, blacklisted, follow_blacklists) VALUES (:flr, :flg, :at, :state, %s)"""
+                if new_state == 3:
+                    sql = sql % """ true, false """
+                elif new_state == 4:
+                    sql = sql % """ false, true """
+                else:
+                    sql = sql % """false, false"""
+            else:
+                if new_state < 3:
+                    sql = """UPDATE hive_follows SET state = :state
+                                WHERE follower = :flr AND following = :flg"""
+                elif new_state == 3:
+                    sql = """UPDATE hive_follows SET blacklisted = true
+                                WHERE follower = :flr AND following = :flg"""
+                elif new_state == 4:
+                    sql = """UPDATE hive_follows SET follow_blacklists = true
+                                WHERE follower = :flr AND following = :flg"""
+                elif new_state == 5:
+                    sql = """UPDATE hive_follows SET blacklisted = false
+                                WHERE follower = :flr AND following = :flg"""
+                elif new_state == 6:
+                    sql = """UPDATE hive_follows SET follow_blacklists = false
+                                WHERE follower = :flr AND following = :flg"""
+            DB.query(sql, **op)
+
             if new_state == 1:
                 Follow.follow(op['flr'], op['flg'])
                 if old_state is None:
@@ -92,7 +123,7 @@ class Follow:
         what = first(op['what']) or ''
         if not isinstance(what, str):
             return None
-        defs = {'': 0, 'blog': 1, 'ignore': 2}
+        defs = {'': 0, 'blog': 1, 'ignore': 2, 'blacklist': 3, 'follow_blacklist': 4, 'unblacklist': 5, 'unfollow_blacklist': 6}
         if what not in defs:
             return None
 
@@ -142,7 +173,7 @@ class Follow:
     @classmethod
     def _flush_follow_items(cls):
         sql_prefix = """
-              INSERT INTO hive_follows as hf (follower, following, created_at, state)
+              INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists)
               VALUES """
 
         sql_postfix = """
@@ -158,14 +189,14 @@ class Follow:
         count = 0
         for (k, follow_item) in cls.follow_items_to_flush.items():
           if count < limit:
-            values.append("({}, {}, '{}', {})".format(follow_item['flr'], follow_item['flg'], follow_item['at'], follow_item['state']))
+            values.append("({}, {}, '{}', {}, {}, {})".format(follow_item['flr'], follow_item['flg'], follow_item['at'], follow_item['state'], follow_item['blk'], follow_item['follow_blk']))
             count = count + 1
           else:
             query = sql_prefix + ",".join(values)
             query += sql_postfix
             DB.query(query)
             values.clear()
-            values.append("({}, {}, '{}', {})".format(follow_item['flr'], follow_item['flg'], follow_item['at'], follow_item['state']))
+            values.append("({}, {}, '{}', {}, {}, {})".format(follow_item['flr'], follow_item['flg'], follow_item['at'], follow_item['state'], follow_item['blk'], follow_item['follow_blk']))
             count = 1
 
         if len(values):

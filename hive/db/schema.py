@@ -231,6 +231,8 @@ def build_metadata():
         sa.Column('following', sa.Integer, nullable=False),
         sa.Column('state', SMALLINT, nullable=False, server_default='1'),
         sa.Column('created_at', sa.DateTime, nullable=False),
+        sa.Column('blacklisted', sa.Boolean, nullable=False, server_default='0'),
+        sa.Column('follow_blacklists', sa.Boolean, nullable=False, server_default='0'),
 
         sa.PrimaryKeyConstraint('following', 'follower', name='hive_follows_pk'), # core
         sa.Index('hive_follows_ix5a', 'following', 'state', 'created_at', 'follower'),

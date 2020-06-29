@@ -4,6 +4,7 @@ from functools import wraps
 
 import hive.server.condenser_api.cursor as cursor
 from hive.server.condenser_api.objects import load_posts, load_posts_reblogs, resultset_to_posts
+from hive.server.condenser_api.objects import _mute_votes, _condenser_post_object
 from hive.server.common.helpers import (
     ApiError,
     return_error_info,
@@ -13,12 +14,12 @@ from hive.server.common.helpers import (
     valid_offset,
     valid_limit,
     valid_follow_type)
+from hive.server.common.mutes import Mutes
 
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
 
 SQL_TEMPLATE = """
     SELECT hp.id, 
-        community_id, 
         ha_a.name as author,
         hpd_p.permlink as permlink,
         (SELECT title FROM hive_post_data WHERE hive_post_data.id = hp.id) as title, 
@@ -35,31 +36,18 @@ SQL_TEMPLATE = """
         updated_at, 
         rshares, 
         (SELECT json FROM hive_post_data WHERE hive_post_data.id = hp.id) as json,
+        ha_a.reputation AS author_rep,
         is_hidden, 
         is_grayed, 
         total_votes, 
         flag_weight,
-        ha_pa.name as parent_author,
-        hpd_pp.permlink as parent_permlink,
-        curator_payout_value, 
-        ha_ra.name as root_author,
-        hpd_rp.permlink as root_permlink,
-        max_accepted_payout, 
-        percent_hbd, 
-        allow_replies, 
-        allow_votes, 
-        allow_curation_rewards, 
-        beneficiaries, 
-        url, 
-        root_title,
-        ha_a.reputation AS author_rep
+        sc_trend,
+        author_id,
+        is_pinned
+        
     FROM hive_posts hp
     INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
     INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-    INNER JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
-    INNER JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
-    INNER JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
-    INNER JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
     WHERE
 """
 
@@ -140,7 +128,7 @@ async def get_account_reputations(context, account_lower_bound: str = None, limi
 # Content Primitives
 
 @return_error_info
-async def get_content(context, author: str, permlink: str):
+async def get_content(context, author: str, permlink: str, observer=None):
     """Get a single post object."""
     db = context['db']
     valid_account(author)
@@ -149,10 +137,16 @@ async def get_content(context, author: str, permlink: str):
     sql = str(SQL_TEMPLATE)
     sql += """ WHERE ha_a.name = :author AND hpd_p.permlink = :permlink AND NOT hp.is_deleted """
 
+    post = None
     result = await db.query_all(sql, author=author, permlink=permlink)
-    result = dict(result[0])
-    post = _condenser_post_object(result, 0)
-    post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
+    if result:
+        result = dict(result[0])
+        post = _condenser_post_object(result, 0)
+        if not observer:
+            post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
+        else:
+            blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
+            post['active_votes'] = _mute_votes(post['active_votes'], blacklists_for_user.keys())
 
     assert post, 'post was not found in cache'
     return post
