@@ -94,7 +94,7 @@ class Posts:
         """Register new/edited/undeleted posts; insert into feed cache."""
 
         sql = """
-            SELECT id, author_id, permlink_id, parent_id, community_id, is_valid, is_muted, depth, is_edited
+            SELECT id, author_id, permlink_id, post_category, parent_id, community_id, is_valid, is_muted, depth, is_edited
             FROM process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_date)::timestamp);
             """
 
@@ -124,7 +124,7 @@ class Posts:
         except Exception:
             pass
 
-        tags = [op['parent_permlink']]
+        tags = [result['post_category']]
         if md and 'tags' in md and isinstance(md['tags'], list):
             tags = tags + md['tags']
         tags = map(lambda tag: (str(tag) or '').strip('# ').lower()[:32], tags)
