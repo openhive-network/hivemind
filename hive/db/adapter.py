@@ -78,6 +78,9 @@ class Db:
         assert self._is_write_query(sql), sql
         return self._query(sql, **kwargs)
 
+    def query_no_return(self, sql, **kwargs):
+        self._query(sql, **kwargs)
+
     def query_all(self, sql, **kwargs):
         """Perform a `SELECT n*m`"""
         res = self._query(sql, **kwargs)
@@ -154,11 +157,12 @@ class Db:
         return (sql, values)
 
     def _sql_text(self, sql):
-        if sql in self._prep_sql:
-            query = self._prep_sql[sql]
-        else:
-            query = sqlalchemy.text(sql).execution_options(autocommit=False)
-            self._prep_sql[sql] = query
+#        if sql in self._prep_sql:
+#            query = self._prep_sql[sql]
+#        else:
+#            query = sqlalchemy.text(sql).execution_options(autocommit=False)
+#            self._prep_sql[sql] = query
+        query = sqlalchemy.text(sql).execution_options(autocommit=False)
         return query
 
     def _query(self, sql, **kwargs):

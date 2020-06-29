@@ -29,7 +29,7 @@ async def fetch_more_children(context, root_id, last_sibling_id, sort='top',
                                  valid_limit(limit, 50),
                                  observer)
 
-_SORTS = dict(hot='sc_hot', top='payout', new='post_id')
+_SORTS = dict(hot='sc_hot', top='payout', new='id')
 async def _fetch_children(db, root_id, start_id, sort, limit, observer=None):
     """Fetch truncated children from tree."""
     mutes = set()
@@ -41,10 +41,10 @@ async def _fetch_children(db, root_id, start_id, sort, limit, observer=None):
     # find most relevant ids in subset
     seek = ''
     if start_id:
-        seek = """AND %s < (SELECT %s FROM hive_posts_cache
-                             WHERE post_id = :start_id)""" % (field, field)
-    sql = """SELECT post_id FROM hive_posts_cache
-              WHERE post_id IN :ids %s ORDER BY %s DESC
+        seek = """AND %s < (SELECT %s FROM hive_posts
+                             WHERE id = :start_id)""" % (field, field)
+    sql = """SELECT id FROM hive_posts
+              WHERE id IN :ids %s ORDER BY %s DESC
               LIMIT :limit""" % (seek, field)
     relevant_ids = await db.query_col(sql, ids=tuple(parent.keys()),
                                       start_id=start_id, limit=limit)

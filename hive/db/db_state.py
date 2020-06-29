@@ -85,28 +85,37 @@ class DbState:
     @classmethod
     def _disableable_indexes(cls):
         to_locate = [
-            'hive_posts_ix3', # (author, depth, id)
-            'hive_posts_ix4', # (parent_id, id, is_deleted=0)
-            'hive_posts_ix5', # (community_id>0, is_pinned=1)
+            #'hive_posts_ix3', # (author, depth, id)
+            #'hive_posts_ix4', # (parent_id, id, is_deleted=0)
+            #'hive_posts_ix5', # (community_id>0, is_pinned=1)
             'hive_follows_ix5a', # (following, state, created_at, follower)
             'hive_follows_ix5b', # (follower, state, created_at, following)
-            'hive_reblogs_ix1', # (post_id, account, created_at)
-            'hive_posts_cache_ix6a', # (sc_trend, post_id, paidout=0)
-            'hive_posts_cache_ix6b', # (post_id, sc_trend, paidout=0)
-            'hive_posts_cache_ix7a', # (sc_hot, post_id, paidout=0)
-            'hive_posts_cache_ix7b', # (post_id, sc_hot, paidout=0)
-            'hive_posts_cache_ix8', # (category, payout, depth, paidout=0)
-            'hive_posts_cache_ix9a', # (depth, payout, post_id, paidout=0)
-            'hive_posts_cache_ix9b', # (category, depth, payout, post_id, paidout=0)
-            'hive_posts_cache_ix10', # (post_id, payout, gray=1, payout>0)
-            'hive_posts_cache_ix30', # API: community trend
-            'hive_posts_cache_ix31', # API: community hot
-            'hive_posts_cache_ix32', # API: community created
-            'hive_posts_cache_ix33', # API: community payout
-            'hive_posts_cache_ix34', # API: community muted
-            'hive_accounts_ix3', # (vote_weight, name VPO)
-            'hive_accounts_ix4', # (id, name)
-            'hive_accounts_ix5', # (cached_at, name)
+
+            'hive_posts_parent_id_idx',
+            'hive_posts_author_id',
+            'hive_posts_depth_idx',
+            'hive_posts_community_id_idx',
+            'hive_posts_category_id_idx',
+            'hive_posts_payout_at_idx',
+            'hive_posts_payout_idx',
+            'hive_posts_promoted_idx',
+            'hive_posts_sc_trend_idx',
+            'hive_posts_sc_hot_idx',
+            #'hive_posts_cache_ix6a', # (sc_trend, post_id, paidout=0)
+            #'hive_posts_cache_ix6b', # (post_id, sc_trend, paidout=0)
+            #'hive_posts_cache_ix7a', # (sc_hot, post_id, paidout=0)
+            #'hive_posts_cache_ix7b', # (post_id, sc_hot, paidout=0)
+            #'hive_posts_cache_ix8', # (category, payout, depth, paidout=0)
+            #'hive_posts_cache_ix9a', # (depth, payout, post_id, paidout=0)
+            #'hive_posts_cache_ix9b', # (category, depth, payout, post_id, paidout=0)
+            #'hive_posts_cache_ix10', # (post_id, payout, gray=1, payout>0)
+            #'hive_posts_cache_ix30', # API: community trend
+            #'hive_posts_cache_ix31', # API: community hot
+            #'hive_posts_cache_ix32', # API: community created
+            #'hive_posts_cache_ix33', # API: community payout
+            #'hive_posts_cache_ix34', # API: community muted
+            'hive_accounts_ix1', # (cached_at, name)
+            'hive_accounts_ix5' # (cached_at, name)
         ]
 
         to_return = []
@@ -231,11 +240,11 @@ class DbState:
 
         if cls._ver == 6:
             cls.db().query("DROP INDEX hive_posts_cache_ix6")
-            cls.db().query("CREATE INDEX hive_posts_cache_ix6a ON hive_posts_cache (sc_trend, post_id) WHERE is_paidout = '0'")
-            cls.db().query("CREATE INDEX hive_posts_cache_ix6b ON hive_posts_cache (post_id, sc_trend) WHERE is_paidout = '0'")
-            cls.db().query("DROP INDEX hive_posts_cache_ix7")
-            cls.db().query("CREATE INDEX hive_posts_cache_ix7a ON hive_posts_cache (sc_hot, post_id) WHERE is_paidout = '0'")
-            cls.db().query("CREATE INDEX hive_posts_cache_ix7b ON hive_posts_cache (post_id, sc_hot) WHERE is_paidout = '0'")
+            #cls.db().query("CREATE INDEX hive_posts_cache_ix6a ON hive_posts_cache (sc_trend, post_id) WHERE is_paidout = '0'")
+            #cls.db().query("CREATE INDEX hive_posts_cache_ix6b ON hive_posts_cache (post_id, sc_trend) WHERE is_paidout = '0'")
+            #cls.db().query("DROP INDEX hive_posts_cache_ix7")
+            #cls.db().query("CREATE INDEX hive_posts_cache_ix7a ON hive_posts_cache (sc_hot, post_id) WHERE is_paidout = '0'")
+            #cls.db().query("CREATE INDEX hive_posts_cache_ix7b ON hive_posts_cache (post_id, sc_hot) WHERE is_paidout = '0'")
             cls._set_ver(7)
 
         if cls._ver == 7:
@@ -257,9 +266,9 @@ class DbState:
             cls._set_ver(10)
 
         if cls._ver == 10:
-            cls.db().query("CREATE INDEX hive_posts_cache_ix8 ON hive_posts_cache (category, payout, depth) WHERE is_paidout = '0'")
-            cls.db().query("CREATE INDEX hive_posts_cache_ix9a ON hive_posts_cache (depth, payout, post_id) WHERE is_paidout = '0'")
-            cls.db().query("CREATE INDEX hive_posts_cache_ix9b ON hive_posts_cache (category, depth, payout, post_id) WHERE is_paidout = '0'")
+            #cls.db().query("CREATE INDEX hive_posts_cache_ix8 ON hive_posts_cache (category, payout, depth) WHERE is_paidout = '0'")
+            #cls.db().query("CREATE INDEX hive_posts_cache_ix9a ON hive_posts_cache (depth, payout, post_id) WHERE is_paidout = '0'")
+            #cls.db().query("CREATE INDEX hive_posts_cache_ix9b ON hive_posts_cache (category, depth, payout, post_id) WHERE is_paidout = '0'")
             cls._set_ver(11)
 
         if cls._ver == 11:
@@ -286,13 +295,13 @@ class DbState:
 
         if cls._ver == 13:
             sqls = ("CREATE INDEX hive_posts_ix5 ON hive_posts (id) WHERE is_pinned = '1' AND is_deleted = '0'",
-                    "CREATE INDEX hive_posts_ix6 ON hive_posts (community_id, id) WHERE community_id IS NOT NULL AND is_pinned = '1' AND is_deleted = '0'",
-                    "CREATE INDEX hive_posts_cache_ix10 ON hive_posts_cache (post_id, payout) WHERE is_grayed = '1' AND payout > 0",
-                    "CREATE INDEX hive_posts_cache_ix30 ON hive_posts_cache (community_id, sc_trend,   post_id) WHERE community_id IS NOT NULL AND is_grayed = '0' AND depth = 0",
-                    "CREATE INDEX hive_posts_cache_ix31 ON hive_posts_cache (community_id, sc_hot,     post_id) WHERE community_id IS NOT NULL AND is_grayed = '0' AND depth = 0",
-                    "CREATE INDEX hive_posts_cache_ix32 ON hive_posts_cache (community_id, created_at, post_id) WHERE community_id IS NOT NULL AND is_grayed = '0' AND depth = 0",
-                    "CREATE INDEX hive_posts_cache_ix33 ON hive_posts_cache (community_id, payout,     post_id) WHERE community_id IS NOT NULL AND is_grayed = '0' AND is_paidout = '0'",
-                    "CREATE INDEX hive_posts_cache_ix34 ON hive_posts_cache (community_id, payout,     post_id) WHERE community_id IS NOT NULL AND is_grayed = '1' AND is_paidout = '0'")
+                    "CREATE INDEX hive_posts_ix6 ON hive_posts (community_id, id) WHERE community_id IS NOT NULL AND is_pinned = '1' AND is_deleted = '0'",)
+                    #"CREATE INDEX hive_posts_cache_ix10 ON hive_posts_cache (post_id, payout) WHERE is_grayed = '1' AND payout > 0",
+                    #"CREATE INDEX hive_posts_cache_ix30 ON hive_posts_cache (community_id, sc_trend,   post_id) WHERE community_id IS NOT NULL AND is_grayed = '0' AND depth = 0",
+                    #"CREATE INDEX hive_posts_cache_ix31 ON hive_posts_cache (community_id, sc_hot,     post_id) WHERE community_id IS NOT NULL AND is_grayed = '0' AND depth = 0",
+                    #"CREATE INDEX hive_posts_cache_ix32 ON hive_posts_cache (community_id, created_at, post_id) WHERE community_id IS NOT NULL AND is_grayed = '0' AND depth = 0",
+                    #"CREATE INDEX hive_posts_cache_ix33 ON hive_posts_cache (community_id, payout,     post_id) WHERE community_id IS NOT NULL AND is_grayed = '0' AND is_paidout = '0'",
+                    #"CREATE INDEX hive_posts_cache_ix34 ON hive_posts_cache (community_id, payout,     post_id) WHERE community_id IS NOT NULL AND is_grayed = '1' AND is_paidout = '0'")
             for sql in sqls:
                 cls.db().query(sql)
             cls._set_ver(14)
@@ -302,7 +311,7 @@ class DbState:
             cls.db().query("ALTER TABLE hive_communities ADD COLUMN category    VARCHAR(32)   NOT NULL DEFAULT ''")
             cls.db().query("ALTER TABLE hive_communities ADD COLUMN avatar_url  VARCHAR(1024) NOT NULL DEFAULT ''")
             cls.db().query("ALTER TABLE hive_communities ADD COLUMN num_authors INTEGER       NOT NULL DEFAULT 0")
-            cls.db().query("CREATE INDEX hive_posts_cache_ix20 ON hive_posts_cache (community_id, author, payout, post_id) WHERE is_paidout = '0'")
+            #cls.db().query("CREATE INDEX hive_posts_cache_ix20 ON hive_posts_cache (community_id, author, payout, post_id) WHERE is_paidout = '0'")
             cls._set_ver(15)
 
         if cls._ver == 15:
@@ -314,6 +323,12 @@ class DbState:
         if cls._ver == 16:
             cls.db().query("CREATE INDEX hive_communities_ft1 ON hive_communities USING GIN (to_tsvector('english', title || ' ' || about))")
             cls._set_ver(17)
+
+        if cls._ver == 17:
+            cls.db().query("INSERT INTO hive_accounts (name, created_at) VALUES ('', '1990-01-01T00:00:00') ON CONFLICT (name) DO NOTHING")
+            cls.db().query("INSERT INTO hive_permlink_data (permlink) VALUES ('') ON CONFLICT (permlink) DO NOTHING")
+            cls.db().query("INSERT INTO hive_category_data (category) VALUES ('') ON CONFLICT (category) DO NOTHING")
+            cls._set_ver(18)
 
         reset_autovac(cls.db())
 

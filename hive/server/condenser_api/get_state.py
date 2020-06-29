@@ -291,8 +291,8 @@ async def _get_props_lite(db):
 
     # convert NAI amounts to legacy
     nais = ['virtual_supply', 'current_supply', 'current_sbd_supply',
-            'pending_rewarded_vesting_steem', 'pending_rewarded_vesting_shares',
-            'total_vesting_fund_steem', 'total_vesting_shares']
+            'pending_rewarded_vesting_hive', 'pending_rewarded_vesting_shares',
+            'total_vesting_fund_hive', 'total_vesting_shares']
     for k in nais:
         if k in raw:
             raw[k] = legacy_amount(raw[k])
@@ -303,6 +303,6 @@ async def _get_props_lite(db):
         sbd_interest_rate=raw['sbd_interest_rate'],
         head_block_number=raw['head_block_number'], #*
         total_vesting_shares=raw['total_vesting_shares'],
-        total_vesting_fund_steem=raw['total_vesting_fund_steem'],
+        total_vesting_fund_steem=raw['total_vesting_fund_hive'],
         last_irreversible_block_num=raw['last_irreversible_block_num'], #*
     )

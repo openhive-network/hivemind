@@ -235,10 +235,11 @@ class Community:
                              SELECT community_id,
                                     COUNT(*) posts,
                                     ROUND(SUM(payout)) payouts,
-                                    COUNT(DISTINCT author) authors
-                               FROM hive_posts_cache
+                                    COUNT(DISTINCT author_id) authors
+                               FROM hive_posts
                               WHERE community_id IS NOT NULL
                                 AND is_paidout = '0'
+                                AND is_deleted = '0'
                            GROUP BY community_id
                         ) p
                      ON community_id = id
@@ -400,15 +401,15 @@ class CommunityOp:
             DB.query("""UPDATE hive_posts SET is_muted = '1'
                          WHERE id = :post_id""", **params)
             self._notify('mute_post', payload=self.notes)
-            if not DbState.is_initial_sync():
-                CachedPost.update(self.account, self.permlink, self.post_id)
+            #if not DbState.is_initial_sync():
+            #    CachedPost.update(self.account, self.permlink, self.post_id)
 
         elif action == 'unmutePost':
             DB.query("""UPDATE hive_posts SET is_muted = '0'
                          WHERE id = :post_id""", **params)
             self._notify('unmute_post', payload=self.notes)
-            if not DbState.is_initial_sync():
-                CachedPost.update(self.account, self.permlink, self.post_id)
+            #if not DbState.is_initial_sync():
+            #    CachedPost.update(self.account, self.permlink, self.post_id)
 
         elif action == 'pinPost':
             DB.query("""UPDATE hive_posts SET is_pinned = '1'

@@ -65,8 +65,16 @@ class StatsAbstract:
 
         log.info('%7s %9s %9s %9s', '-pct-', '-ttl-', '-avg-', '-cnt-')
         for call, ms, reqs in self.table(40):
+            try:
+              avg = ms/reqs
+              millisec = ms/self._ms
+            except ZeroDivisionError as ex:
+              avg = 0.0
+              millisec = 0.0
+            if reqs == 0:
+                reqs = 1
             log.info("% 6.1f%% % 7dms % 9.2f % 8dx -- %s",
-                     100 * ms/self._ms, ms, ms/reqs, reqs, call)
+                     100 * millisec, ms, avg, reqs, call)
         self.clear()
 
 
@@ -89,6 +97,9 @@ class SteemStats(StatsAbstract):
         'get_order_book': 20,
         'get_feed_history': 20,
         'lookup_accounts': 1000,
+        'get_comment_pending_payouts':1000,
+        'get_ops_in_block':500,
+        'enum_virtual_ops':1000
     }
 
     def __init__(self):
@@ -110,20 +121,26 @@ class SteemStats(StatsAbstract):
 class DbStats(StatsAbstract):
     """Tracks database query timings."""
     SLOW_QUERY_MS = 250
+    LOGGING_TRESHOLD = 50
 
     def __init__(self):
         super().__init__('db')
 
     def check_timing(self, call, ms, batch_size):
         """Warn if any query is slower than defined threshold."""
-        if ms > self.SLOW_QUERY_MS:
-            out = "[SQL][%dms] %s" % (ms, call[:250])
-            log.warning(colorize(out))
 
+        if ms > self.LOGGING_TRESHOLD:
+            log.warning("[SQL][%dms] %s", ms, call)
+            if ms > self.SLOW_QUERY_MS:
+                out = "[SQL][%dms] %s" % (ms, call[:250])
+                log.warning(colorize(out))
 
 class Stats:
     """Container for steemd and db timing data."""
     PRINT_THRESH_MINS = 1
+
+    COLLECT_DB_STATS = 0
+    COLLECT_NODE_STATS = 0
 
     _db = DbStats()
     _steemd = SteemStats()
@@ -134,14 +151,16 @@ class Stats:
     @classmethod
     def log_db(cls, sql, secs):
         """Log a database query. Incoming SQL is normalized."""
-        cls._db.add(_normalize_sql(sql), secs * 1000)
-        cls.add_secs(secs)
+        if cls.COLLECT_DB_STATS:
+            cls._db.add(_normalize_sql(sql), secs * 1000)
+            cls.add_secs(secs)
 
     @classmethod
     def log_steem(cls, method, secs, batch_size=1):
         """Log a steemd call."""
-        cls._steemd.add(method, secs * 1000, batch_size)
-        cls.add_secs(secs)
+        if cls.COLLECT_NODE_STATS:
+            cls._steemd.add(method, secs * 1000, batch_size)
+            cls.add_secs(secs)
 
     @classmethod
     def log_idle(cls, secs):

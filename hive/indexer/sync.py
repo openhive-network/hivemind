@@ -5,6 +5,11 @@ import glob
 from time import perf_counter as perf
 import os
 import ujson as json
+import time
+
+import concurrent, threading, queue
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Future
 
 from funcy.seqs import drop
 from toolz import partition_all
@@ -16,7 +21,6 @@ from hive.steem.block.stream import MicroForkException
 
 from hive.indexer.blocks import Blocks
 from hive.indexer.accounts import Accounts
-from hive.indexer.cached_post import CachedPost
 from hive.indexer.feed_cache import FeedCache
 from hive.indexer.follow import Follow
 from hive.indexer.community import Community
@@ -25,6 +29,156 @@ from hive.server.common.mutes import Mutes
 #from hive.indexer.jobs import audit_cache_missing, audit_cache_deleted
 
 log = logging.getLogger(__name__)
+
+CONTINUE_PROCESSING = True
+
+def print_ops_stats(prefix, ops_stats):
+    log.info("############################################################################")
+    log.info(prefix)
+    sorted_stats = sorted(ops_stats.items(), key=lambda kv: kv[1], reverse=True)
+    for (k, v) in sorted_stats:
+        log.info("`{}': {}".format(k, v))
+
+    log.info("############################################################################")
+
+def prepare_vops(vops_by_block):
+    preparedVops = {}
+
+    for blockNum, blockDict in vops_by_block.items():
+        vopsList = blockDict['ops']
+        date = blockDict['timestamp']
+        preparedVops[blockNum] = Blocks.prepare_vops(vopsList, date)
+  
+    return preparedVops
+
+def _block_provider(node, queue, lbound, ubound, chunk_size):
+    try:
+        num = 0
+        count = ubound - lbound
+        log.info("[SYNC] start block %d, +%d to sync", lbound, count)
+        timer = Timer(count, entity='block', laps=['rps', 'wps'])
+        while CONTINUE_PROCESSING and lbound < ubound:
+            to = min(lbound + chunk_size, ubound)
+            timer.batch_start()
+            blocks = node.get_blocks_range(lbound, to)
+            lbound = to
+            timer.batch_lap()
+            queue.put(blocks)
+            num = num + 1
+        return num
+    except KeyboardInterrupt:
+        log.info("Caught SIGINT")
+
+    except Exception:
+        log.exception("Exception caught during fetching blocks")
+
+def _vops_provider(node, queue, lbound, ubound, chunk_size):
+    try:
+        num = 0
+        count = ubound - lbound
+        log.info("[SYNC] start vops %d, +%d to sync", lbound, count)
+        timer = Timer(count, entity='vops-chunk', laps=['rps', 'wps'])
+
+        while CONTINUE_PROCESSING and lbound < ubound:
+            to = min(lbound + chunk_size, ubound)
+            timer.batch_start()
+            vops = node.enum_virtual_ops(lbound, to)
+            preparedVops = prepare_vops(vops)
+            lbound = to
+            timer.batch_lap()
+            queue.put(preparedVops)
+            num = num + 1
+        return num
+    except KeyboardInterrupt:
+        log.info("Caught SIGINT")
+
+    except Exception:
+        log.exception("Exception caught during fetching vops...")
+
+def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size):
+    num = 0
+    try:
+        count = ubound - lbound
+        timer = Timer(count, entity='block', laps=['rps', 'wps'])
+        total_ops_stats = {}
+        time_start = perf()
+        while lbound < ubound:
+            if blocksQueue.empty() and CONTINUE_PROCESSING:
+                log.info("Awaiting any block to process...")
+            
+            blocks = []
+            if not blocksQueue.empty() or CONTINUE_PROCESSING:
+                blocks = blocksQueue.get()
+                blocksQueue.task_done()
+
+            if vopsQueue.empty() and CONTINUE_PROCESSING:
+                log.info("Awaiting any vops to process...")
+            
+            preparedVops = []
+            if not vopsQueue.empty() or CONTINUE_PROCESSING:
+                preparedVops = vopsQueue.get()
+                vopsQueue.task_done()
+
+            to = min(lbound + chunk_size, ubound)
+
+            timer.batch_start()
+            
+            block_start = perf()
+            ops_stats = dict(Blocks.process_multi(blocks, preparedVops, node, is_initial_sync))
+            Blocks.ops_stats.clear()
+            block_end = perf()
+
+            timer.batch_lap()
+            timer.batch_finish(len(blocks))
+            time_current = perf()
+
+            prefix = ("[SYNC] Got block %d @ %s" % (
+                to - 1, blocks[-1]['timestamp']))
+            log.info(timer.batch_status(prefix))
+            log.info("[SYNC] Time elapsed: %fs", time_current - time_start)
+
+            total_ops_stats = Blocks.merge_ops_stats(total_ops_stats, ops_stats)
+
+            if block_end - block_start > 1.0:
+                print_ops_stats("Operations present in the processed blocks:", ops_stats)
+
+            lbound = to
+
+            num = num + 1
+
+            if not CONTINUE_PROCESSING and blocksQueue.empty() and vopsQueue.empty():
+                break
+
+        print_ops_stats("All operations present in the processed blocks:", total_ops_stats)
+        return num
+    except KeyboardInterrupt:
+        log.info("Caught SIGINT")
+
+    except Exception:
+        log.exception("Exception caught during processing blocks...")
+
+def _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size):
+    blocksQueue = queue.Queue(maxsize=10)
+    vopsQueue = queue.Queue(maxsize=10)
+    global CONTINUE_PROCESSING
+
+    with ThreadPoolExecutor(max_workers = 4) as pool:
+        try:
+            pool.submit(_block_provider, self._steem, blocksQueue, lbound, ubound, chunk_size)
+            pool.submit(_vops_provider, self._steem, vopsQueue, lbound, ubound, chunk_size)
+            blockConsumerFuture = pool.submit(_block_consumer, self._steem, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size)
+
+            blockConsumerFuture.result()
+            if not CONTINUE_PROCESSING and blocksQueue.empty() and vopsQueue.empty():
+                pool.shutdown(False)
+        except KeyboardInterrupt:
+            log.info(""" **********************************************************
+                          CAUGHT SIGINT. PLEASE WAIT... PROCESSING DATA IN QUEUES...
+                          **********************************************************
+            """)
+            CONTINUE_PROCESSING = False
+    blocksQueue.join()
+    vopsQueue.join()
 
 class Sync:
     """Manages the sync/index process.
@@ -59,6 +213,8 @@ class Sync:
         if DbState.is_initial_sync():
             # resume initial sync
             self.initial()
+            if not CONTINUE_PROCESSING:
+                return
             DbState.finish_initial_sync()
 
         else:
@@ -66,7 +222,7 @@ class Sync:
             Blocks.verify_head(self._steem)
 
             # perform cleanup if process did not exit cleanly
-            CachedPost.recover_missing_posts(self._steem)
+            # CachedPost.recover_missing_posts(self._steem)
 
         #audit_cache_missing(self._db, self._steem)
         #audit_cache_deleted(self._db)
@@ -85,8 +241,8 @@ class Sync:
             self.from_steemd()
 
             # take care of payout backlog
-            CachedPost.dirty_paidouts(Blocks.head_date())
-            CachedPost.flush(self._steem, trx=True)
+            # CachedPost.dirty_paidouts(Blocks.head_date())
+            # CachedPost.flush(self._steem, trx=True)
 
             try:
                 # listen for new blocks
@@ -102,9 +258,11 @@ class Sync:
         log.info("[INIT] *** Initial fast sync ***")
         self.from_checkpoints()
         self.from_steemd(is_initial_sync=True)
+        if not CONTINUE_PROCESSING:
+            return
 
         log.info("[INIT] *** Initial cache build ***")
-        CachedPost.recover_missing_posts(self._steem)
+        # CachedPost.recover_missing_posts(self._steem)
         FeedCache.rebuild()
         Follow.force_recount()
 
@@ -116,12 +274,14 @@ class Sync:
         exactly one block in JSON format.
         """
         # pylint: disable=no-self-use
+
         last_block = Blocks.head_num()
 
         tuplize = lambda path: [int(path.split('/')[-1].split('.')[0]), path]
         basedir = os.path.dirname(os.path.realpath(__file__ + "/../.."))
         files = glob.glob(basedir + "/checkpoints/*.json.lst")
         tuples = sorted(map(tuplize, files), key=lambda f: f[0])
+        vops = {}
 
         last_read = 0
         for (num, path) in tuples:
@@ -133,6 +293,7 @@ class Sync:
                     skip_lines = last_block - last_read
                     remaining = drop(skip_lines, f)
                     for lines in partition_all(chunk_size, remaining):
+                        raise RuntimeError("Sync from checkpoint disabled")
                         Blocks.process_multi(map(json.loads, lines), True)
                 last_block = num
             last_read = num
@@ -147,6 +308,10 @@ class Sync:
         if count < 1:
             return
 
+        if is_initial_sync:
+          _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size)
+          return
+
         log.info("[SYNC] start block %d, +%d to sync", lbound, count)
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
         while lbound < ubound:
@@ -155,11 +320,13 @@ class Sync:
             # fetch blocks
             to = min(lbound + chunk_size, ubound)
             blocks = steemd.get_blocks_range(lbound, to)
+            vops = steemd.enum_virtual_ops(lbound, to)
+            preparedVops = prepare_vops(vops)
             lbound = to
             timer.batch_lap()
 
             # process blocks
-            Blocks.process_multi(blocks, is_initial_sync)
+            Blocks.process_multi(blocks, preparedVops, steemd, is_initial_sync)
             timer.batch_finish(len(blocks))
 
             _prefix = ("[SYNC] Got block %d @ %s" % (
@@ -174,7 +341,7 @@ class Sync:
             # edits and pre-payout votes. If the post has not been paid out yet,
             # then the worst case is it will be synced upon payout. If the post
             # is already paid out, worst case is to lose an edit.
-            CachedPost.flush(steemd, trx=True)
+            #CachedPost.flush(steemd, trx=True)
 
     def listen(self):
         """Live (block following) mode."""
@@ -192,19 +359,15 @@ class Sync:
             start_time = perf()
 
             self._db.query("START TRANSACTION")
-            num = Blocks.process(block)
+            num = Blocks.process(block, {}, steemd)
             follows = Follow.flush(trx=False)
             accts = Accounts.flush(steemd, trx=False, spread=8)
-            CachedPost.dirty_paidouts(block['timestamp'])
-            cnt = CachedPost.flush(steemd, trx=False)
             self._db.query("COMMIT")
 
             ms = (perf() - start_time) * 1000
-            log.info("[LIVE] Got block %d at %s --% 4d txs,% 3d posts,% 3d edits,"
-                     "% 3d payouts,% 3d votes,% 3d counts,% 3d accts,% 3d follows"
+            log.info("[LIVE] Got block %d at %s --% 4d txs,% 3d accts,% 3d follows"
                      " --% 5dms%s", num, block['timestamp'], len(block['transactions']),
-                     cnt['insert'], cnt['update'], cnt['payout'], cnt['upvote'],
-                     cnt['recount'], accts, follows, ms, ' SLOW' if ms > 1000 else '')
+                     accts, follows, ms, ' SLOW' if ms > 1000 else '')
 
             if num % 1200 == 0: #1hr
                 log.warning("head block %d @ %s", num, block['timestamp'])

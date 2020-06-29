@@ -10,11 +10,12 @@ def _last_post_id(db):
     return db.query_one(sql) or 0
 
 def _last_cached_post_id(db):
-    sql = "SELECT post_id FROM hive_posts_cache ORDER BY post_id DESC LIMIT 1"
+    sql = "SELECT id FROM hive_posts ORDER BY id DESC LIMIT 1"
     return db.query_one(sql) or 0
 
 def audit_cache_missing(db, steem):
     """Scan all posts to check for missing cache entries."""
+    raise NotImplementedError("Post cache is disabled in this version")
     last_id = _last_cached_post_id(db)
     step = 1000000
     steps = int(last_id / step) + 1
@@ -42,6 +43,7 @@ def audit_cache_missing(db, steem):
 
 def audit_cache_deleted(db):
     """Scan all posts to check for extraneous cache entries."""
+    raise NotImplementedError("Post cache is disabled in this version")
     last_id = _last_cached_post_id(db)
     step = 1000000
     steps = int(last_id / step) + 1
@@ -66,6 +68,7 @@ def audit_cache_deleted(db):
 
 def audit_cache_undelete(db, steem):
     """Scan all posts to check for posts erroneously deleted."""
+    raise NotImplementedError("Post cache is disabled in this version")
     last_id = _last_post_id(db)
     step = 1000000
     steps = int(last_id / step) + 1

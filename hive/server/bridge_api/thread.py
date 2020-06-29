@@ -2,7 +2,8 @@
 
 import logging
 
-from hive.server.bridge_api.objects import load_posts_keyed
+from hive.server.bridge_api.objects import load_posts_keyed, _condenser_post_object
+from hive.server.bridge_api.methods import append_statistics_to_post
 from hive.server.common.helpers import (
     return_error_info,
     valid_account,
@@ -13,20 +14,100 @@ log = logging.getLogger(__name__)
 @return_error_info
 async def get_discussion(context, author, permlink):
     """Modified `get_state` thread implementation."""
+    # New index was created: hive_posts_parent_id_btree (CREATE INDEX "hive_posts_parent_id_btree" ON hive_posts btree(parent_id)
+    # We thougth this would be covered by "hive_posts_ix4" btree (parent_id, id) WHERE is_deleted = false but it was not
     db = context['db']
 
     author = valid_account(author)
     permlink = valid_permlink(permlink)
-    root_id = await _get_post_id(db, author, permlink)
-    if not root_id:
-        return {}
 
-    return await _load_discussion(db, root_id)
+    sql = """
+        ---get_discussion
+        WITH RECURSIVE child_posts AS (
+            SELECT id, parent_id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)
+            UNION
+            SELECT children.id, children.parent_id FROM hive_posts children JOIN child_posts ON (children.parent_id = child_posts.id)
+        )
+        SELECT child_posts.id, child_posts.parent_id, hive_posts.id, hive_accounts.name as author, hpd_p.permlink as permlink,
+           hpd.title as title, hpd.body as body, hcd.category as category, hive_posts.depth,
+           hive_posts.promoted, hive_posts.payout, hive_posts.payout_at,
+           hive_posts.is_paidout, hive_posts.children, hive_posts.votes,
+           hive_posts.created_at, hive_posts.updated_at, hive_posts.rshares,
+           hive_posts.raw_json, hive_posts.json, hive_accounts.reputation AS author_rep,
+           hive_posts.is_hidden AS is_hidden, hive_posts.is_grayed AS is_grayed,
+           hive_posts.total_votes AS total_votes, hive_posts.flag_weight AS flag_weight,
+           hive_posts.sc_trend AS sc_trend, hive_accounts.id AS acct_author_id
+           FROM child_posts JOIN hive_accounts ON (hive_posts.author_id = hive_accounts.id)
+                            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hive_posts.permlink_id
+                            LEFT JOIN hive_post_data hpd ON hpd.id = hive_posts.id
+                            LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+                            WHERE NOT hive_posts.is_deleted AND NOT hive_posts.is_muted
+    """
+
+    rows = await db.query_all(sql, author=author, permlink=permlink)
+    if not rows or len(rows) == 0:
+        return {}
+    root_id = rows[0]['id']
+    all_posts = {}
+    root_post = _condenser_post_object(rows[0])
+    root_post = append_statistics_to_post(root_post, rows[0], False)
+    root_post['replies'] = []
+    all_posts[root_id] = root_post
+
+    id_to_parent_id_map = {}
+    id_to_parent_id_map[root_id] = None
+
+    for index in range(1, len(rows)):
+        id_to_parent_id_map[rows[index]['id']] = rows[index]['parent_id']
+        post = _condenser_post_object(rows[index])
+        post = append_statistics_to_post(post, rows[index], False)
+        post['replies'] = []
+        all_posts[post['post_id']] = post
+
+    discussion_map = {}
+    build_discussion_map(root_id, id_to_parent_id_map, discussion_map)
+
+    for key in discussion_map:
+        children = discussion_map[key]
+        if children and len(children) > 0:
+            post = all_posts[key]
+            for child_id in children:
+                post['replies'].append(_ref(all_posts[child_id]))
+
+    #result has to be in form of dictionary of dictionaries {post_ref: post}
+    results = {}
+    for key in all_posts:
+        post_ref = _ref(all_posts[key])
+        results[post_ref] = all_posts[key]
+    return results
+
+def build_discussion_map(parent_id, posts, results):
+    results[parent_id] = get_children(parent_id, posts)
+    if (results[parent_id] == []):
+        return
+    else:
+        for post_id in results[parent_id]:
+            build_discussion_map(post_id, posts, results)
+
+def get_children(parent_id, posts):
+    results = []
+    for key in posts:
+        if posts[key] == parent_id:
+            results.append(key)
+    return results;
 
 async def _get_post_id(db, author, permlink):
     """Given an author/permlink, retrieve the id from db."""
-    sql = ("SELECT id FROM hive_posts WHERE author = :a "
-           "AND permlink = :p AND is_deleted = '0' LIMIT 1")
+    sql = """
+        SELECT 
+            id 
+        FROM hive_posts hp
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        WHERE ha_a.author = :author 
+            AND hpd_p.permlink = :permlink 
+            AND is_deleted = '0' 
+        LIMIT 1"""
     return await db.query_one(sql, a=author, p=permlink)
 
 def _ref(post):

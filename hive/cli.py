@@ -22,7 +22,6 @@ def run():
     else:
         launch_mode(mode, conf)
 
-
 def launch_mode(mode, conf):
     """Launch a routine as indicated by `mode`."""
     if mode == 'server':

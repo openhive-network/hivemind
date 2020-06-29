@@ -1,7 +1,7 @@
 """Bridge API public endpoints for posts"""
 
 import hive.server.bridge_api.cursor as cursor
-from hive.server.bridge_api.objects import load_posts, load_posts_reblogs, load_profiles
+from hive.server.bridge_api.objects import load_posts, load_posts_reblogs, load_profiles, _condenser_post_object
 from hive.server.common.helpers import (
     return_error_info,
     valid_account,
@@ -11,14 +11,54 @@ from hive.server.common.helpers import (
 from hive.server.hive_api.common import get_account_id
 from hive.server.hive_api.objects import _follow_contexts
 from hive.server.hive_api.community import list_top_communities
+from hive.server.common.mutes import Mutes
+
+
+ROLES = {-2: 'muted', 0: 'guest', 2: 'member', 4: 'mod', 6: 'admin', 8: 'owner'}
+
+SQL_TEMPLATE = """
+        SELECT hp.id, 
+            community_id, 
+            ha_a.name as author,
+            hpd_p.permlink as permlink,
+            (SELECT title FROM hive_post_data WHERE hive_post_data.id = hp.id) as title, 
+            (SELECT body FROM hive_post_data WHERE hive_post_data.id = hp.id) as body, 
+            (SELECT category FROM hive_category_data WHERE hive_category_data.id = hp.category_id) as category,
+            depth,
+            promoted, 
+            payout, 
+            payout_at, 
+            is_paidout, 
+            children, 
+            (0) as votes,
+            hp.created_at, 
+            updated_at, 
+            rshares, 
+            (SELECT json FROM hive_post_data WHERE hive_post_data.id = hp.id) as json,
+            is_hidden, 
+            is_grayed, 
+            total_votes, 
+            flag_weight,
+            sc_trend, 
+            ha_a.id AS acct_author_id,
+            hive_roles.title as role_title, 
+            hive_communities.title AS community_title, 
+            hive_roles.role_id AS role_id
+           hive_posts.is_pinned AS is_pinned
+        FROM hive_posts hp
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        LEFT OUTER JOIN hive_communities ON (hp.community_id = hive_communities.id)
+        LEFT OUTER JOIN hive_roles ON (ha_a.id = hive_roles.account_id AND hp.community_id = hive_roles.community_id)
+    """
 
 #pylint: disable=too-many-arguments, no-else-return
 
 async def _get_post_id(db, author, permlink):
     """Get post_id from hive db."""
     sql = """SELECT id FROM hive_posts
-              WHERE author = :a
-                AND permlink = :p
+              WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :a)
+                AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :p)
                 AND is_deleted = '0'"""
     post_id = await db.query_one(sql, a=author, p=permlink)
     assert post_id, 'invalid author/permlink'
@@ -61,35 +101,148 @@ async def get_post(context, author, permlink, observer=None):
     # pylint: disable=unused-variable
     #TODO: `observer` logic for user-post state
     db = context['db']
-    observer_id = await get_account_id(db, observer) if observer else None
-    pid = await _get_post_id(db,
-                             valid_account(author),
-                             valid_permlink(permlink))
-    posts = await load_posts(db, [pid])
-    assert len(posts) == 1, 'cache post not found'
-    return posts[0]
+    valid_account(author)
+    valid_permlink(permlink)
 
+    sql = "---bridge_api.get_post\n" + SQL_TEMPLATE + """ WHERE ha_a.name = :author AND hpd_p.permlink = :permlink AND NOT hive_posts.is_deleted """
+
+    result = await db.query_all(sql, author=author, permlink=permlink)
+    assert len(result) == 1, 'invalid author/permlink or post not found in cache'
+    post = _condenser_post_object(result[0])
+    post['blacklists'] = Mutes.lists(post['author'], result[0]['author_rep'])
+    return post
 
 @return_error_info
 async def get_ranked_posts(context, sort, start_author='', start_permlink='',
                            limit=20, tag=None, observer=None):
     """Query posts, sorted by given method."""
 
-    db = context['db']
-    observer_id = await get_account_id(db, observer) if observer else None
-
     assert sort in ['trending', 'hot', 'created', 'promoted',
                     'payout', 'payout_comments', 'muted'], 'invalid sort'
-    ids = await cursor.pids_by_ranked(
-        context['db'],
-        sort,
-        valid_account(start_author, allow_empty=True),
-        valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100),
-        valid_tag(tag, allow_empty=True),
-        observer_id)
 
-    return await load_posts(context['db'], ids)
+    valid_account(start_author, allow_empty=True)
+    valid_permlink(start_permlink, allow_empty=True)
+    valid_limit(limit, 100)
+    valid_tag(tag, allow_empty=True)
+
+    db = context['db']
+
+    sql = ''
+    pinned_sql = ''
+
+    if sort == 'trending':
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND hp.depth = 0 AND NOT hive_posts.is_deleted
+                                    %s ORDER BY sc_trend desc, hp.id LIMIT :limit """
+    elif sort == 'hot':
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND hp.depth = 0 AND NOT hive_posts.is_deleted
+                                    %s ORDER BY sc_hot desc, hp.id LIMIT :limit """
+    elif sort == 'created':
+        sql = SQL_TEMPLATE + """ WHERE hp.depth = 0 AND NOT hive_posts.is_deleted AND NOT hp.is_grayed
+                                    %s ORDER BY hp.created_at DESC, hp.id LIMIT :limit """
+    elif sort == 'promoted':
+        sql = SQL_TEMPLATE + """ WHERE hp.depth > 0 AND hp.promoted > 0 AND NOT hive_posts.is_deleted
+                                    AND NOT hp.is_paidout %s ORDER BY hp.promoted DESC, hp.id LIMIT :limit """
+    elif sort == 'payout':
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hive_posts.is_deleted %s
+                                    AND payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
+                                    ORDER BY hp.payout DESC, hp.id LIMIT :limit """
+    elif sort == 'payout_comments':
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hive_posts.is_deleted AND hp.depth > 0
+                                    %s ORDER BY hp.payout DESC, hp.id LIMIT :limit """
+    elif sort == 'muted':
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hive_posts.is_deleted AND hp.is_grayed
+                                    AND hp.payout > 0 %s ORDER BY hp.payout DESC, hp.id LIMIT :limit """
+
+    sql = "---bridge_api.get_ranked_posts\n" + sql
+
+    if start_author and start_permlink:
+        if sort == 'trending':
+            sql = sql % """ AND hp.sc_trend <= (SELECT sc_trend FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) 
+                            AND hp.post_id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
+        elif sort == 'hot':
+            sql = sql % """ AND hp.sc_hot <= (SELECT sc_hot FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink))
+                            AND hp.post_id != (SELECT post_id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
+        elif sort == 'created':
+            sql = sql % """ AND hp.post_id < (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
+        elif sort == 'promoted':
+            sql = sql % """ AND hp.promoted <= (SELECT promoted FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink))
+                                AND hp.post_id != (SELECT post_id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
+        else:
+            sql = sql % """ AND hp.payout <= (SELECT payout FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink))
+                                AND hp.post_id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
+    else:
+        sql = sql % """ %s """
+
+    if not tag or tag == 'all':
+        sql = sql % """ """
+    elif tag == 'my':
+        sql = sql % """ AND hp.community_id IN (SELECT community_id FROM hive_subscriptions WHERE account_id =
+                        (SELECT id FROM hive_accounts WHERE name = :observer) ) """
+    elif tag[:5] == 'hive-':
+        if start_author and start_permlink:
+            sql = sql % """  AND hp.community_id = (SELECT hive_communities.id FROM hive_communities WHERE name = :community_name ) """
+        else:
+            sql = sql % """ AND hive_communities.name = :community_name """
+
+        if sort == 'trending' or sort == 'created':
+                pinned_sql = SQL_TEMPLATE + """ WHERE is_pinned AND hive_communities.name = :community_name ORDER BY hp.created_at DESC """
+
+    else:
+        if sort in ['payout', 'payout_comments']:
+            sql = sql % """ AND hp.category = :tag """
+        else:
+            sql = sql % """ AND hp.post_id IN 
+                (SELECT 
+                    post_id 
+                FROM 
+                    hive_post_tags hpt
+                INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
+                WHERE htd.tag = :tag
+                )
+            """
+
+    if not observer:
+        observer = ''
+
+    posts = []
+    pinned_post_ids = []
+
+    if pinned_sql:
+        pinned_result = await db.query_all(pinned_sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag, observer=observer)
+        for row in pinned_result:
+            post = _condenser_post_object(row)
+            post = append_statistics_to_post(post, row, True)
+            limit = limit - 1
+            posts.append(post)
+            pinned_post_ids.append(post['post_id'])
+
+    sql_result = await db.query_all(sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag, observer=observer)
+    for row in sql_result:
+        post = _condenser_post_object(row)
+        post = append_statistics_to_post(post, row, False)
+        if post['post_id'] in pinned_post_ids:
+            continue
+        posts.append(post)
+    return posts
+
+def append_statistics_to_post(post, row, is_pinned):
+    post['blacklists'] = Mutes.lists(row['author'], row['author_rep'])
+    if 'community_title' in row and row['community_title']:
+        post['community'] = row['category']
+        post['community_title'] = row['community_title']
+        if row['role_id']:
+            post['author_role'] = ROLES[row['role_id']]
+            post['author_title'] = row['role_title']
+        else:
+            post['author_role'] = 'guest'
+            post['author_title'] = ''
+    else:
+        post['stats']['gray'] = row['is_grayed']
+    post['stats']['hide'] = 'irredeemables' in post['blacklists']
+    
+    if is_pinned:
+        post['stats']['is_pinned'] = True
+    return post
 
 @return_error_info
 async def get_account_posts(context, sort, account, start_author='', start_permlink='',
@@ -108,7 +261,9 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
 
     # pylint: disable=unused-variable
     observer_id = await get_account_id(db, observer) if observer else None # TODO
-
+     
+    sql = "---bridge_api.get_account_posts\n " + SQL_TEMPLATE + """ %s """      
+        
     if sort == 'blog':
         ids = await cursor.pids_by_blog(db, account, *start, limit)
         posts = await load_posts(context['db'], ids)
@@ -116,24 +271,29 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
             if post['author'] != account:
                 post['reblogged_by'] = [account]
         return posts
+    elif sort == 'posts':
+        sql = sql % """ WHERE ha_a.name = :account AND NOT hp.is_deleted AND hp.depth = 0 %s ORDER BY hp.id DESC LIMIT :limit"""
+    elif sort == 'comments':
+        sql = sql % """ WHERE ha_a.name = :account AND NOT hp.is_deleted AND hp.depth > 0 %s ORDER BY hp.id DESC, depth LIMIT :limit"""
+    elif sort == 'payout':
+        sql = sql % """ WHERE ha_a.name = :account AND NOT hp.is_deleted AND NOT hp.is_paidout %s ORDER BY payout DESC, hp.id LIMIT :limit"""
     elif sort == 'feed':
         res = await cursor.pids_by_feed_with_reblog(db, account, *start, limit)
         return await load_posts_reblogs(context['db'], res)
-    elif sort == 'posts':
-        start = start if start_permlink else (account, None)
-        assert account == start[0], 'comments - account must match start author'
-        ids = await cursor.pids_by_posts(db, *start, limit)
-        return await load_posts(context['db'], ids)
-    elif sort == 'comments':
-        start = start if start_permlink else (account, None)
-        assert account == start[0], 'comments - account must match start author'
-        ids = await cursor.pids_by_comments(db, *start, limit)
-        return await load_posts(context['db'], ids)
     elif sort == 'replies':
         start = start if start_permlink else (account, None)
         ids = await cursor.pids_by_replies(db, *start, limit)
         return await load_posts(context['db'], ids)
-    elif sort == 'payout':
-        start = start if start_permlink else (account, None)
-        ids = await cursor.pids_by_payout(db, account, *start, limit)
-        return await load_posts(context['db'], ids)
+
+    if start_author and start_permlink:
+        sql = sql % """ AND hp.id < (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) """
+    else:
+        sql = sql % """ """
+        
+    posts = []
+    sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit)
+    for row in sql_result:
+        post = _condenser_post_object(row)
+        post = append_statistics_to_post(post, row, False)
+        posts.append(post)
+    return posts
