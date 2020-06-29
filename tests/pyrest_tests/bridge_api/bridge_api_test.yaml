@@ -1,0 +1,155 @@
+---
+  - config:
+    - testset: "Bridge API Tests"
+    - api: &api "bridge_api"
+    - variable_binds:
+      - api: *api
+    - generators:
+      - test_id: {type: 'number_sequence', start: 1}
+
+  - base_test: &base_test
+    - generator_binds:
+      - test_id: test_id
+    - group: *api
+    - url: "/rpc"
+    - method: "POST"
+    - body: {template: {file: "../templates/request_template.json"}}
+    - validators:
+      - extract_test: {jsonpath_mini: "error", test: "not_exists"}
+      - extract_test: {jsonpath_mini: "result", test: "exists"}
+      - compare: {jsonpath_mini: "id", comparator: "str_eq", expected: {template: $test_id}}
+      - json_file_validator: {jsonpath_mini: "result", comparator: "json_compare", expected: {template: '$api/$method'}}
+
+  - test:
+    - name: "normalize_post"
+    - variable_binds:
+      - method: "normalize_post"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_post_header"
+    - variable_binds:
+      - method: "get_post_header"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_discussion"
+    - variable_binds:
+      - method: "get_discussion"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_post"
+    - variable_binds:
+      - method: "get_post"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_account_posts"
+    - variable_binds:
+      - method: "get_account_posts"
+      - args: {}
+    - <<: *base_test
+
+
+  - test:
+    - name: "get_ranked_posts"
+    - variable_binds:
+      - method: "get_ranked_posts"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_profile"
+    - variable_binds:
+      - method: "get_profile"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_trending_topics"
+    - variable_binds:
+      - method: "get_trending_topics"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "post_notifications"
+    - variable_binds:
+      - method: "post_notifications"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "account_notifications"
+    - variable_binds:
+      - method: "account_notifications"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "unread_notifications"
+    - variable_binds:
+      - method: "unread_notifications"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_payout_stats"
+    - variable_binds:
+      - method: "get_payout_stats"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_community"
+    - variable_binds:
+      - method: "get_community"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_community_context"
+    - variable_binds:
+      - method: "get_community_context"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "list_communities"
+    - variable_binds:
+      - method: "list_communities"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "list_pop_communities"
+    - variable_binds:
+      - method: "list_pop_communities"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "list_community_roles"
+    - variable_binds:
+      - method: "list_community_roles"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "list_subscribers"
+    - variable_binds:
+      - method: "list_subscribers"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "list_all_subscriptions"
+    - variable_binds:
+      - method: "list_all_subscriptions"
+      - args: {}
+    - <<: *base_test

@@ -1,0 +1,189 @@
+---
+  - config:
+    - testset: "Condenser API Tests"
+    - api: &api "condenser_api"
+    - variable_binds:
+      - api: *api
+    - generators:
+      - test_id: {type: 'number_sequence', start: 1}
+  
+  - base_test: &base_test
+    - generator_binds:
+      - test_id: test_id
+    - group: *api
+    - url: "/rpc"
+    - method: "POST"
+    - body: {template: {file: "../templates/request_template.json"}}
+    - validators:
+      - extract_test: {jsonpath_mini: "error", test: "not_exists"}
+      - extract_test: {jsonpath_mini: "result", test: "exists"}
+      - compare: {jsonpath_mini: "id", comparator: "str_eq", expected: {template: $test_id}}
+      - json_file_validator: {jsonpath_mini: "result", comparator: "json_compare", expected: {template: '$api/$method'}}
+
+  - test:
+    - name: "get_followers"
+    - variable_binds:
+      - method: "get_followers"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_following"
+    - variable_binds:
+      - method: "get_following"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_follow_count"
+    - variable_binds:
+      - method: "get_follow_count"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_content"
+    - variable_binds:
+      - method: "get_content"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_content_replies"
+    - variable_binds:
+      - method: "get_content_replies"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_state"
+    - variable_binds:
+      - method: "get_state"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_trending_tags"
+    - variable_binds:
+      - method: "get_trending_tags"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_discussions_by_trending"
+    - variable_binds:
+      - method: "get_discussions_by_trending"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_discussions_by_hot"
+    - variable_binds:
+      - method: "get_discussions_by_hot"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_discussions_by_promoted"
+    - variable_binds:
+      - method: "get_discussions_by_promoted"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_discussions_by_created"
+    - variable_binds:
+      - method: "get_discussions_by_created"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_discussions_by_blog"
+    - variable_binds:
+      - method: "get_discussions_by_blog"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_discussions_by_feed"
+    - variable_binds:
+      - method: "get_discussions_by_feed"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_discussions_by_comments"
+    - variable_binds:
+      - method: "get_discussions_by_comments"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_replies_by_last_update"
+    - variable_binds:
+      - method: "get_replies_by_last_update"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_discussions_by_author_before_date"
+    - variable_binds:
+      - method: "get_discussions_by_author_before_date"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_post_discussions_by_payout"
+    - variable_binds:
+      - method: "get_post_discussions_by_payout"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_comment_discussions_by_payout"
+    - variable_binds:
+      - method: "get_comment_discussions_by_payout"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_blog"
+    - variable_binds:
+      - method: "get_blog"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_blog_entries"
+    - variable_binds:
+      - method: "get_blog_entries"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_account_reputations"
+    - variable_binds:
+      - method: "get_account_reputations"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_reblogged_by"
+    - variable_binds:
+      - method: "get_reblogged_by"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_accounts"
+    - variable_binds:
+      - method: "get_accounts"
+      - args: {}
+    - <<: *base_test
+
+  - test:
+    - name: "get_account_votes"
+    - variable_binds:
+      - method: "get_account_votes"
+      - args: {}
+    - <<: *base_test
