@@ -45,7 +45,6 @@ async def get_discussion(context, author, permlink, observer=None):
                             INNER JOIN hive_post_data hpd ON hpd.id = hive_posts.id
                             INNER JOIN hive_category_data hcd ON hcd.id = hp.category_id
                             WHERE NOT hive_posts.is_deleted AND NOT hive_posts.is_muted
-        LIMIT 2000
     """
 
     blacklists_for_user = None

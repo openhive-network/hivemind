@@ -19,15 +19,6 @@ WITH blacklisted_users AS (
     (SELECT following FROM hive_follows WHERE follower =
         (SELECT id FROM hive_accounts WHERE name = :observer )
     AND follow_blacklists) AND blacklisted
-    UNION ALL
-    SELECT following, 'my_muted' AS source FROM hive_follows WHERE follower =
-        (SELECT id FROM hive_accounts WHERE name = :observer)
-    AND state = 2
-    UNION ALL
-    SELECT following, 'my_followed_mutes' AS source FROm hive_follows WHERE follower IN
-    (SELECT following FROM hive_follows WHERE follower = 
-        (SELECT id FROM hive_accounts WHERE name = :observer)
-    AND follow_muted) AND state = 2
 )
 SELECT following, source FROM blacklisted_users
 """
@@ -105,7 +96,6 @@ class Mutes:
             if account_name not in blacklisted_users:
                 blacklisted_users[account_name] = []
             blacklisted_users[account_name].append(row['source'])
-        print('blacklist for user', blacklisted_users)
         return blacklisted_users
 
     @classmethod

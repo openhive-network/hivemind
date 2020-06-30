@@ -82,7 +82,6 @@ async def call(context, api, method, params):
      "params":["database_api","get_state",["trending"]]}
     ```"""
     # pylint: disable=too-many-return-statements, too-many-branches, no-else-return
-    print("api is: ", api)
     assert api == 'condenser_api', "`call` requires condenser_api"
 
     # Follows
