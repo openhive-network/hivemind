@@ -103,7 +103,7 @@ async def get_post(context, author, permlink, observer=None):
     valid_account(author)
     valid_permlink(permlink)
 
-        blacklists_for_user = None
+    blacklists_for_user = None
     if observer and context:
         blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
 
