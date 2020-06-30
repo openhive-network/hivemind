@@ -153,6 +153,73 @@ class SteemClient:
                 ret.append(vop['op'])
         return ret
 
+    def enum_block_operations(self, begin_block, end_block):
+        ret = {}
+
+        from_block = begin_block
+
+        #According to definition of hive::plugins::acount_history::enum_vops_filter:
+
+        author_reward_operation                 = 0x000002
+        curation_reward_operation               = 0x000004
+        comment_reward_operation                = 0x000008
+        effective_comment_vote_operation        = 0x400000
+
+        tracked_ops_filter = curation_reward_operation | author_reward_operation | comment_reward_operation | effective_comment_vote_operation
+        tracked_ops = ['curation_reward_operation', 'author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation']
+
+        resume_on_operation = 0
+
+        while from_block < end_block:
+            call_result = self.__exec('enum_block_operations', {"block_range_begin":from_block, "block_range_end":end_block
+                ,"last_returned_operation_id": resume_on_operation, "limit": 1000, "vops_filter": tracked_ops_filter
+            }) 
+
+            prev_resume_on_operation = resume_on_operation
+            resume_on_operation = call_result['next_operation_begin'] if 'next_operation_begin' in call_result else 0
+
+            next_block = call_result['next_block_range_begin']
+
+            #if prev_resume_on_operation != 0:
+            #    logger.info("Splitted processing of block: %s. Previous resume from operation: %s", str(from_block), str(prev_resume_on_operation));
+
+            #if resume_on_operation != 0:
+            #    logger.info("Splitted processing of block: %s. Resume from operation: %s", str(from_block), str(resume_on_operation));
+
+            if len(ret) == 0:
+                ret = call_result
+            else:
+                info_list = call_result["ops_by_block"]
+                lhs_info_list = ret["ops_by_block"]
+
+                first_block_info = info_list[0]
+                lhs_last_block_info = lhs_info_list[-1]
+
+                fbn = first_block_info["block"]["block"]
+                lbn = lhs_last_block_info["block"]["block"]
+
+                if fbn != lbn:
+                    lhs_info_list.extend(info_list)
+                else:
+                    # Last block data could splitted across separate calls due to operation limit. So we need to merge last and first block data
+
+                    next_ops = first_block_info["ops"]
+                    lhs_last_block_info["ops"].extend(next_ops)
+
+                    next_vops = first_block_info["vops"]
+                    lhs_last_block_info["vops"].extend(next_vops)
+
+                    info_list.pop(0)
+                    lhs_info_list.extend(info_list)
+
+            next_block = call_result['next_block_range_begin']
+
+            # Move to next block only if operations from current one have been processed completely.
+            from_block = next_block
+
+        return ret
+        
+
     def enum_virtual_ops(self, begin_block, end_block):
         """ Get virtual ops for range of blocks """
         ret = {}

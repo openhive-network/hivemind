@@ -48,11 +48,11 @@ class Blocks:
         return str(DB.query_one(sql) or '')
 
     @classmethod
-    def process(cls, block, vops_in_block, hived):
+    def process(cls, block, hived):
         """Process a single block. Always wrap in a transaction!"""
         time_start = perf_counter()
         #assert is_trx_active(), "Block.process must be in a trx"
-        ret = cls._process(block, vops_in_block, hived, is_initial_sync=False)
+        ret = cls._process(block, hived, is_initial_sync=False)
         PostDataCache.flush()
         Tags.flush()
         Votes.flush()
@@ -61,15 +61,18 @@ class Blocks:
         return ret
 
     @classmethod
-    def process_multi(cls, blocks, vops, hived, is_initial_sync=False):
+    def process_multi(cls, blocks, hived, is_initial_sync=False):
         """Batch-process blocks; wrapped in a transaction."""
         time_start = perf_counter()
         DB.query("START TRANSACTION")
 
+        block_info_list = blocks["ops_by_block"]
+
         last_num = 0
         try:
-            for block in blocks:
-                last_num = cls._process(block, vops, hived, is_initial_sync)
+            for block_info in block_info_list:
+                _block_info_dict = dict(block_info)
+                last_num = cls._process(_block_info_dict, hived, is_initial_sync)
         except Exception as e:
             log.error("exception encountered block %d", last_num + 1)
             raise e
@@ -85,7 +88,7 @@ class Blocks:
 
         DB.query("COMMIT")
         time_end = perf_counter()
-        log.info("[PROCESS MULTI] %i blocks in %fs", len(blocks), time_end - time_start)
+        log.info("[PROCESS MULTI] %i blocks in %fs", len(block_info_list), time_end - time_start)
 
         return cls.ops_stats
 
@@ -93,7 +96,8 @@ class Blocks:
     def prepare_vops(vopsList, date):
         vote_ops = []
         comment_payout_ops = {}
-        for vop in vopsList:
+        for vop_info in vopsList:
+            vop = vop_info["op"]
             key = None
             val = None
 
@@ -123,75 +127,81 @@ class Blocks:
 
 
     @classmethod
-    def _process(cls, block, virtual_operations, hived, is_initial_sync=False):
+    def _process(cls, block_info, hived, is_initial_sync=False):
         """Process a single block. Assumes a trx is open."""
         #pylint: disable=too-many-branches
+        block = block_info["block"]
         num = cls._push(block)
         date = block['timestamp']
 
         # [DK] we will make two scans, first scan will register all accounts
         account_names = set()
-        for tx_idx, tx in enumerate(block['transactions']):
-            for operation in tx['operations']:
-                op_type = operation['type']
-                op = operation['value']
+        for op_info in block_info['ops']:
+            #op_info = dict(_op_info)
 
-                # account ops
-                if op_type == 'pow_operation':
-                    account_names.add(op['worker_account'])
-                elif op_type == 'pow2_operation':
-                    account_names.add(op['work']['value']['input']['worker_account'])
-                elif op_type == 'account_create_operation':
-                    account_names.add(op['new_account_name'])
-                elif op_type == 'account_create_with_delegation_operation':
-                    account_names.add(op['new_account_name'])
-                elif op_type == 'create_claimed_account_operation':
-                    account_names.add(op['new_account_name'])
+            operation = op_info["op"]
+            op_type = operation['type']
+            op = operation['value']
+
+            # account ops
+            if op_type == 'pow_operation':
+                account_names.add(op['worker_account'])
+            elif op_type == 'pow2_operation':
+                account_names.add(op['work']['value']['input']['worker_account'])
+            elif op_type == 'account_create_operation':
+                account_names.add(op['new_account_name'])
+            elif op_type == 'account_create_with_delegation_operation':
+                account_names.add(op['new_account_name'])
+            elif op_type == 'create_claimed_account_operation':
+                account_names.add(op['new_account_name'])
 
         Accounts.register(account_names, date)     # register any new names
 
         # second scan will process all other ops
         json_ops = []
         update_comment_pending_payouts = []
-        for tx_idx, tx in enumerate(block['transactions']):
-            for operation in tx['operations']:
-                op_type = operation['type']
-                op = operation['value']
+        for op_info in block_info['ops']:
+            tx_idx = op_info["op_in_trx"]
+            operation = op_info["op"]
+            op_type = operation['type']
+            op = operation['value']
 
-                if(op_type != 'custom_json_operation'):
-                    if op_type in cls.ops_stats:
-                        cls.ops_stats[op_type] += 1
-                    else:
-                        cls.ops_stats[op_type] = 1
+            if(op_type != 'custom_json_operation'):
+                if op_type in cls.ops_stats:
+                    cls.ops_stats[op_type] += 1
+                else:
+                    cls.ops_stats[op_type] = 1
 
-                # account metadata updates
-                if op_type == 'account_update_operation':
-                    if not is_initial_sync:
-                        Accounts.dirty(op['account']) # full
-                elif op_type == 'account_update2_operation':
-                    if not is_initial_sync:
-                        Accounts.dirty(op['account']) # full
+#            continue
 
-                # post ops
-                elif op_type == 'comment_operation':
-                    Posts.comment_op(op, date)
-                    if not is_initial_sync:
-                        Accounts.dirty(op['author']) # lite - stats
-                elif op_type == 'delete_comment_operation':
-                    Posts.delete_op(op)
-                elif op_type == 'comment_options_operation':
-                    Posts.comment_options_op(op)
-                elif op_type == 'vote_operation':
-                    if not is_initial_sync:
-                        Accounts.dirty(op['author']) # lite - rep
-                        Accounts.dirty(op['voter']) # lite - stats
-                        update_comment_pending_payouts.append([op['author'], op['permlink']])
+            # account metadata updates
+            if op_type == 'account_update_operation':
+                if not is_initial_sync:
+                    Accounts.dirty(op['account']) # full
+            elif op_type == 'account_update2_operation':
+                if not is_initial_sync:
+                    Accounts.dirty(op['account']) # full
 
-                # misc ops
-                elif op_type == 'transfer_operation':
-                    Payments.op_transfer(op, tx_idx, num, date)
-                elif op_type == 'custom_json_operation':
-                    json_ops.append(op)
+            # post ops
+            elif op_type == 'comment_operation':
+                Posts.comment_op(op, date)
+                if not is_initial_sync:
+                    Accounts.dirty(op['author']) # lite - stats
+            elif op_type == 'delete_comment_operation':
+                Posts.delete_op(op)
+            elif op_type == 'comment_options_operation':
+                Posts.comment_options_op(op)
+            elif op_type == 'vote_operation':
+                if not is_initial_sync:
+                    Accounts.dirty(op['author']) # lite - rep
+                    Accounts.dirty(op['voter']) # lite - stats
+                    update_comment_pending_payouts.append([op['author'], op['permlink']])
+
+            # misc ops
+            elif op_type == 'transfer_operation':
+                Payments.op_transfer(op, tx_idx, num, date)
+            elif op_type == 'custom_json_operation':
+                json_ops.append(op)
 
         # follow/reblog/community ops
         if json_ops:
@@ -208,11 +218,8 @@ class Blocks:
 
         empty_vops = (vote_ops, comment_payout_ops)
 
-        if is_initial_sync:
-            (vote_ops, comment_payout_ops) = virtual_operations[num] if num in virtual_operations else empty_vops
-        else:
-            vops = hived.get_virtual_operations(num)
-            (vote_ops, comment_payout_ops) = Blocks.prepare_vops(vops, date)
+        vops = block_info["vops"]
+        (vote_ops, comment_payout_ops) = Blocks.prepare_vops(vops, date)
 
         for v in vote_ops:
             Votes.vote_op(v, date)
@@ -221,7 +228,6 @@ class Blocks:
                 cls.ops_stats[op_type] += 1
             else:
                 cls.ops_stats[op_type] = 1
-
 
         if comment_payout_ops:
             comment_payout_stats = Posts.comment_payout_op(comment_payout_ops, date)
@@ -275,13 +281,12 @@ class Blocks:
     def _push(cls, block):
         """Insert a row in `hive_blocks`."""
         num = int(block['block_id'][:8], base=16)
-        txs = block['transactions']
         cls.blocks_to_flush.append({
             'num': num,
             'hash': block['block_id'],
             'prev': block['previous'],
-            'txs': len(txs),
-            'ops': sum([len(tx['operations']) for tx in txs]),
+            'txs': 0, # FIXME missing number of transactions but this value is unused
+            'ops': block["ops"] + block["vops"],
             'date': block['timestamp']})
         return num
 
