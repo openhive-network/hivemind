@@ -340,7 +340,8 @@ async def get_relationship_between_accounts(context, account1, account2, observe
         'follows': False,
         'ignores': False,
         'is_blacklisted': False,
-        'follows_blacklists': False
+        'follows_blacklists': False,
+        'follows_muted': False
     }
 
     for row in sql_result:
@@ -354,6 +355,36 @@ async def get_relationship_between_accounts(context, account1, account2, observe
             result['is_blacklisted'] = True
         if row['follow_blacklists']:
             result['follows_blacklists'] = True
+        if row['follow_muted']:
+            result['follows_muted'] = True
 
     return result
+
+@return_error_info
+async def get_follow_list(context, observer, follow_type = 'blacklisted', starting_account = '', limit = 20):
+    db = context['db']
+    valid_account(observer)
+    valid_account(starting_account, allow_empty=True)
+    valid_limit(limit, 100)
+
+    valid_types = ['blacklisted', 'follow_blacklist', 'muted', 'follow_muted']
+    assert follow_type in valid_types, 'invalid follow_type'
+
+    results = []
+    blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
+    for account in blacklists_for_user.keys():
+        sources = blacklists_for_user[account]
+        if follow_type == 'blacklisted':
+            if 'my_blacklist' in sources:
+                results.append(account)
+        elif follow_type == 'follow_blacklist':
+            if 'my_followed_blacklists' in sources:
+                results.append(account)
+        elif follow_type == 'muted':
+            if 'my_muted' in sources:
+                results.append(account)
+        elif follow_type == 'follow_muted':
+            if 'my_followed_mutes' in sources:
+                results.append(account)
+    return results
 
