@@ -7,6 +7,7 @@ import ujson as json
 from funcy.seqs import first, distinct
 
 from hive.utils.normalize import sbd_amount, rep_log10, safe_img_url, parse_time, utc_timestamp
+from hive.indexer.votes import Votes
 
 def mentions(body):
     """Given a post body, return proper @-mentioned account names."""
@@ -31,7 +32,7 @@ def post_to_internal(post, post_id, level='insert', promoted=None):
     #post['gray'] = core['is_muted']
     #post['hide'] = not core['is_valid']
 
-    values = [('post_id', post_id)]
+    values = [('id', post_id)]
 
     # immutable; write only once (*edge case: undeleted posts)
     if level == 'insert':
@@ -44,6 +45,7 @@ def post_to_internal(post, post_id, level='insert', promoted=None):
     # always write, unless simple vote update
     if level in ['insert', 'payout', 'update']:
         basic = post_basic(post)
+        legacy_data = post_legacy(post)
         values.extend([
             ('community_id',  post['community_id']), # immutable*
             ('created_at',    post['created']),    # immutable*
@@ -58,7 +60,20 @@ def post_to_internal(post, post_id, level='insert', promoted=None):
             ('is_full_power', basic['is_full_power']),
             ('is_paidout',    basic['is_paidout']),
             ('json',          json.dumps(basic['json_metadata'])),
-            ('raw_json',      json.dumps(post_legacy(post))),
+            #('raw_json',      json.dumps(legacy_data)),
+            ('parent_author',           legacy_data['parent_author']),
+            ('parent_permlink',         legacy_data['parent_permlink']),
+            ('curator_payout_value',    legacy_data['curator_payout_value']),
+            ('root_author',             legacy_data['root_author']),
+            ('root_permlink',           legacy_data['root_permlink']),
+            ('max_accepted_payout',     legacy_data['max_accepted_payout']),
+            ('percent_hbd',   legacy_data['percent_hbd']),
+            ('allow_replies',           legacy_data['allow_replies']),
+            ('allow_votes',             legacy_data['allow_votes']),
+            ('allow_curation_rewards',   legacy_data['allow_curation_rewards']),
+            ('beneficiaries',           legacy_data['beneficiaries']),
+            ('url',                     legacy_data['url']),
+            ('root_title',              legacy_data['root_title']),
         ])
 
     # if there's a pending promoted value to write, pull it out
@@ -85,7 +100,7 @@ def post_to_internal(post, post_id, level='insert', promoted=None):
         ('sc_trend',    payout['sc_trend']),
         ('sc_hot',      payout['sc_hot']),
         ('flag_weight', stats['flag_weight']),
-        ('total_votes', stats['total_votes']),
+        ('total_votes', Votes.get_vote_count(post['author'], post['permlink']),),
         ('up_votes',    stats['up_votes']),
         ('is_hidden',   stats['hide']),
         ('is_grayed',   stats['gray']),
@@ -148,7 +163,7 @@ def post_basic(post):
             is_payout_declined = True
 
     # payout entirely in SP
-    is_full_power = int(post['percent_steem_dollars']) == 0
+    is_full_power = int(post['percent_hbd']) == 0
 
     return {
         'json_metadata': md,
@@ -171,7 +186,7 @@ def post_legacy(post):
     """
     _legacy = ['id', 'url', 'root_comment', 'root_author', 'root_permlink',
                'root_title', 'parent_author', 'parent_permlink',
-               'max_accepted_payout', 'percent_steem_dollars',
+               'max_accepted_payout', 'percent_hbd',
                'curator_payout_value', 'allow_replies', 'allow_votes',
                'allow_curation_rewards', 'beneficiaries']
     return {k: v for k, v in post.items() if k in _legacy}

@@ -14,7 +14,13 @@ def last_month():
 
 async def _get_post_id(db, author, permlink):
     """Get post_id from hive db. (does NOT filter on is_deleted)"""
-    sql = "SELECT id FROM hive_posts WHERE author = :a AND permlink = :p"
+    sql = """
+        SELECT 
+            hp.id
+        FROM hive_posts hp
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        WHERE ha_a.author = :author AND hpd_p.permlink = :permlink"""
     post_id = await db.query_one(sql, a=author, p=permlink)
     assert post_id, 'invalid author/permlink'
     return post_id
@@ -104,7 +110,7 @@ async def pids_by_community(db, ids, sort, seek_id, limit):
 
     # setup
     field, pending, toponly, gray, promoted = definitions[sort]
-    table = 'hive_posts_cache'
+    table = 'hive_posts'
     where = ["community_id IN :ids"] if ids else ["community_id IS NOT NULL AND community_id != 1337319"]
 
     # select
@@ -117,8 +123,8 @@ async def pids_by_community(db, ids, sort, seek_id, limit):
 
     # seek
     if seek_id:
-        sval = "(SELECT %s FROM %s WHERE post_id = :seek_id)" % (field, table)
-        sql = """((%s < %s) OR (%s = %s AND post_id > :seek_id))"""
+        sval = "(SELECT %s FROM %s WHERE id = :seek_id)" % (field, table)
+        sql = """((%s < %s) OR (%s = %s AND id > :seek_id))"""
         where.append(sql % (field, sval, field, sval))
 
         # simpler `%s <= %s` eval has edge case: many posts with payout 0
@@ -129,8 +135,8 @@ async def pids_by_community(db, ids, sort, seek_id, limit):
         #where.append(sql % (field, sval, field, sval))
 
     # build
-    sql = ("""SELECT post_id FROM %s WHERE %s
-              ORDER BY %s DESC, post_id LIMIT :limit
+    sql = ("""SELECT id FROM %s WHERE %s
+              ORDER BY %s DESC, id LIMIT :limit
               """ % (table, ' AND '.join(where), field))
 
     # execute
@@ -157,7 +163,7 @@ async def pids_by_category(db, tag, sort, last_id, limit):
         'muted':           ('payout',   True,   False,  False,  False),
     }[sort]
 
-    table = 'hive_posts_cache'
+    table = 'hive_post'
     field = params[0]
     where = []
 
@@ -172,17 +178,24 @@ async def pids_by_category(db, tag, sort, last_id, limit):
     # filter by category or tag
     if tag:
         if sort in ['payout', 'payout_comments']:
-            where.append('category = :tag')
+            where.append('category_id = (SELECT id FROM hive_category_data WHERE category = :tag)')
         else:
-            sql = "SELECT post_id FROM hive_post_tags WHERE tag = :tag"
-            where.append("post_id IN (%s)" % sql)
+            sql = """
+                SELECT 
+                    post_id 
+                FROM 
+                    hive_post_tags hpt
+                INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
+                WHERE htd.tag = :tag
+            """
+            where.append("id IN (%s)" % sql)
 
     if last_id:
-        sval = "(SELECT %s FROM %s WHERE post_id = :last_id)" % (field, table)
-        sql = """((%s < %s) OR (%s = %s AND post_id > :last_id))"""
+        sval = "(SELECT %s FROM %s WHERE id = :last_id)" % (field, table)
+        sql = """((%s < %s) OR (%s = %s AND id > :last_id))"""
         where.append(sql % (field, sval, field, sval))
 
-    sql = ("""SELECT post_id FROM %s WHERE %s
+    sql = ("""SELECT id FROM %s WHERE %s
               ORDER BY %s DESC, post_id LIMIT :limit
               """ % (table, ' AND '.join(where), field))
 
@@ -223,7 +236,7 @@ async def pids_by_blog(db, account: str, start_author: str = '',
     # ignore community posts which were not reblogged
     skip = """
         SELECT id FROM hive_posts
-         WHERE author = :account
+         WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :account)
            AND is_deleted = '0'
            AND depth = 0
            AND community_id IS NOT NULL
@@ -305,7 +318,7 @@ async def pids_by_posts(db, account: str, start_permlink: str = '', limit: int =
     # `depth` in ORDER BY is a no-op, but forces an ix3 index scan (see #189)
     sql = """
         SELECT id FROM hive_posts
-         WHERE author = :account %s
+         WHERE author = (SELECT id FROM hive_accounts WHERE name = :account) %s
            AND is_deleted = '0'
            AND depth = '0'
       ORDER BY id DESC
@@ -328,7 +341,7 @@ async def pids_by_comments(db, account: str, start_permlink: str = '', limit: in
     # `depth` in ORDER BY is a no-op, but forces an ix3 index scan (see #189)
     sql = """
         SELECT id FROM hive_posts
-         WHERE author = :account %s
+         WHERE author = (SELECT id FROM hive_accounts WHERE name = :account) %s
            AND is_deleted = '0'
            AND depth > 0
       ORDER BY id DESC, depth
@@ -350,13 +363,13 @@ async def pids_by_replies(db, start_author: str, start_permlink: str = '',
     start_id = None
     if start_permlink:
         sql = """
-          SELECT parent.author,
+          SELECT (SELECT name FROM hive_accounts WHERE id = parent.author_id),
                  child.id
             FROM hive_posts child
             JOIN hive_posts parent
               ON child.parent_id = parent.id
-           WHERE child.author = :author
-             AND child.permlink = :permlink
+           WHERE child.author_id = (SELECT id FROM hive_accounts WHERE name = :author)
+             AND child.permlink = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)
         """
 
         row = await db.query_row(sql, author=start_author, permlink=start_permlink)
@@ -372,7 +385,7 @@ async def pids_by_replies(db, start_author: str, start_permlink: str = '',
     sql = """
        SELECT id FROM hive_posts
         WHERE parent_id IN (SELECT id FROM hive_posts
-                             WHERE author = :parent
+                             WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :parent)
                                AND is_deleted = '0'
                           ORDER BY id DESC
                              LIMIT 10000) %s
@@ -390,14 +403,14 @@ async def pids_by_payout(db, account: str, start_author: str = '',
     start_id = None
     if start_permlink:
         start_id = await _get_post_id(db, start_author, start_permlink)
-        last = "(SELECT payout FROM hive_posts_cache WHERE post_id = :start_id)"
-        seek = ("""AND (payout < %s OR (payout = %s AND post_id > :start_id))"""
+        last = "(SELECT payout FROM hive_posts WHERE id = :start_id)"
+        seek = ("""AND (payout < %s OR (payout = %s AND id > :start_id))"""
                 % (last, last))
 
     sql = """
-        SELECT post_id
-          FROM hive_posts_cache
-         WHERE author = :account
+        SELECT id
+          FROM hive_posts
+         WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :account)
            AND is_paidout = '0' %s
       ORDER BY payout DESC, post_id
          LIMIT :limit

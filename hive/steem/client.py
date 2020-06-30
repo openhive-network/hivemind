@@ -1,4 +1,5 @@
 """Tight and reliable steem API client for hive indexer."""
+import logging
 
 from time import perf_counter as perf
 from decimal import Decimal
@@ -7,6 +8,8 @@ from hive.utils.stats import Stats
 from hive.utils.normalize import parse_amount, steem_amount, vests_amount
 from hive.steem.http_client import HttpClient
 from hive.steem.block.stream import BlockStream
+
+logger = logging.getLogger(__name__)
 
 class SteemClient:
     """Handles upstream calls to jussi/steemd, with batching and retrying."""
@@ -21,10 +24,11 @@ class SteemClient:
         self._max_workers = max_workers
         self._client = dict()
         for endpoint, endpoint_url in url.items():
-            print("Endpoint {} will be routed to node {}".format(endpoint, endpoint_url))
+            logger.info("Endpoint %s will be routed to node %s" % (endpoint, endpoint_url))
             self._client[endpoint] = HttpClient(nodes=[endpoint_url])
 
-    def get_accounts(self, accounts):
+    def get_accounts(self, acc):
+        accounts = [v for v in acc if v != '']
         """Fetch multiple accounts by name."""
         assert accounts, "no accounts passed to get_accounts"
         assert len(accounts) <= 1000, "max 1000 accounts"
@@ -44,11 +48,7 @@ class SteemClient:
 
     def get_content_batch(self, tuples):
         """Fetch multiple comment objects."""
-        posts = self.__exec_batch('get_content', tuples)
-        # TODO: how are we ensuring sequential results? need to set and sort id.
-        for post in posts: # sanity-checking jussi responses
-            assert 'author' in post, "invalid post: %s" % post
-        return posts
+        raise NotImplementedError("get_content is not implemented in hived")
 
     def get_block(self, num, strict=True):
         """Fetches a single block.
@@ -94,7 +94,8 @@ class SteemClient:
                   'confidential_sbd_supply', 'total_reward_fund_steem',
                   'total_reward_shares2']
         for key in unused:
-            del dgpo[key]
+            if key in dgpo:
+                del dgpo[key]
 
         return {
             'dgpo': dgpo,
@@ -104,7 +105,7 @@ class SteemClient:
 
     @staticmethod
     def _get_steem_per_mvest(dgpo):
-        steem = steem_amount(dgpo['total_vesting_fund_steem'])
+        steem = steem_amount(dgpo['total_vesting_fund_hive'])
         mvests = vests_amount(dgpo['total_vesting_shares']) / Decimal(1e6)
         return "%.6f" % (steem / mvests)
 
@@ -112,15 +113,20 @@ class SteemClient:
         # TODO: add latest feed price: get_feed_history.price_history[0]
         feed = self.__exec('get_feed_history')['current_median_history']
         units = dict([parse_amount(feed[k])[::-1] for k in ['base', 'quote']])
-        price = units['HBD'] / units['HIVE']
+        if 'TBD' in units and 'TESTS' in units:
+            price = units['TBD'] / units['TESTS']
+        else:
+            price = units['HBD'] / units['HIVE']
         return "%.6f" % price
 
     def _get_steem_price(self):
         orders = self.__exec('get_order_book', [1])
-        ask = Decimal(orders['asks'][0]['real_price'])
-        bid = Decimal(orders['bids'][0]['real_price'])
-        price = (ask + bid) / 2
-        return "%.6f" % price
+        if orders['asks'] and orders['bids']:
+            ask = Decimal(orders['asks'][0]['real_price'])
+            bid = Decimal(orders['bids'][0]['real_price'])
+            price = (ask + bid) / 2
+            return "%.6f" % price
+        return "0"
 
     def get_blocks_range(self, lbound, ubound):
         """Retrieves blocks in the range of [lbound, ubound)."""
@@ -135,6 +141,56 @@ class SteemClient:
             blocks[num] = block
 
         return [blocks[x] for x in block_nums]
+
+    def get_virtual_operations(self, block):
+        """ Get virtual ops from block """
+        result = self.__exec('get_ops_in_block', {"block_num":block, "only_virtual":True})
+        tracked_ops = ['curation_reward_operation', 'author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation']
+        ret = []
+        result = result['ops'] if 'ops' in result else []
+        for vop in result:
+            if vop['op']['type'] in tracked_ops:
+                ret.append(vop['op'])
+        return ret
+
+    def enum_virtual_ops(self, begin_block, end_block):
+        """ Get virtual ops for range of blocks """
+        ret = {}
+
+        from_block = begin_block
+
+        #According to definition of hive::plugins::acount_history::enum_vops_filter:
+
+        author_reward_operation                 = 0x000002
+        curation_reward_operation               = 0x000004
+        comment_reward_operation                = 0x000008
+        effective_comment_vote_operation        = 0x400000
+
+        tracked_ops_filter = curation_reward_operation | author_reward_operation | comment_reward_operation | effective_comment_vote_operation
+        tracked_ops = ['curation_reward_operation', 'author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation']
+
+        resume_on_operation = 0
+
+        while from_block < end_block:
+            call_result = self.__exec('enum_virtual_ops', {"block_range_begin":from_block, "block_range_end":end_block
+                , "group_by_block": True, "operation_begin": resume_on_operation, "limit": 1000, "filter": tracked_ops_filter
+            }) 
+
+            ret = {opb["block"] : {"timestamp":opb["timestamp"], "ops":[op["op"] for op in opb["ops"]]} for opb in call_result["ops_by_block"]}
+
+            resume_on_operation = call_result['next_operation_begin'] if 'next_operation_begin' in call_result else 0
+
+            next_block = call_result['next_block_range_begin']
+
+            # Move to next block only if operations from current one have been processed completely.
+            from_block = next_block
+
+        return ret
+
+    def get_comment_pending_payouts(self, comments):
+        """ Get comment pending payout data """
+        ret = self.__exec('get_comment_pending_payouts', {'comments':comments})
+        return ret['cashout_infos']
 
     def __exec(self, method, params=None):
         """Perform a single steemd call."""

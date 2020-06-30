@@ -13,6 +13,16 @@ NAI_MAP = {
     '@@000000037': 'VESTS',
 }
 
+def escape_characters(text):
+    """ Escape special charactes """
+    ret = str(text)
+    ret = ret.replace("\\", "\\\\")
+    ret = ret.replace("'", "''")
+    ret = ret.replace("%", '%%')
+    ret = ret.replace("_", "\\_")
+    ret = ret.replace(":", "\\:")
+    return ret
+
 def vests_amount(value):
     """Returns a decimal amount, asserting units are VESTS"""
     return parse_amount(value, 'VESTS')
@@ -180,3 +190,13 @@ def int_log_level(str_log_level):
     if not isinstance(log_level, int):
         raise ValueError('Invalid log level: %s' % str_log_level)
     return log_level
+
+def asset_to_hbd_hive(price, asset):
+    """ Converts hive to hbd and hbd to hive based on price """
+    if asset['nai'] == price['base']['nai']:
+        result = int(asset['amount']) * int(price['quote']['amount']) / int(price['base']['amount'])
+        return {'amount' : result, 'nai' : price['quote']['nai'], 'precision' : price['quote']['precision']}
+    elif asset['nai'] == price['quote']['nai']:
+        result = int(asset['amount']) * int(price['base']['amount']) / int(price['quote']['amount'])
+        return {'amount' : result, 'nai' : price['base']['nai'], 'precision' : price['base']['precision']}
+    raise ValueError("Asset not supported")

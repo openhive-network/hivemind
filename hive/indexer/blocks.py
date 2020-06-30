@@ -1,15 +1,19 @@
 """Blocks processor."""
 
 import logging
+import json
 
 from hive.db.adapter import Db
 
 from hive.indexer.accounts import Accounts
 from hive.indexer.posts import Posts
-from hive.indexer.cached_post import CachedPost
 from hive.indexer.custom_op import CustomOp
 from hive.indexer.payments import Payments
 from hive.indexer.follow import Follow
+from hive.indexer.votes import Votes
+from hive.indexer.post_data_cache import PostDataCache
+from hive.indexer.tags import Tags
+from time import perf_counter
 
 log = logging.getLogger(__name__)
 
@@ -17,6 +21,19 @@ DB = Db.instance()
 
 class Blocks:
     """Processes blocks, dispatches work, manages `hive_blocks` table."""
+    blocks_to_flush = []
+    ops_stats = {}
+
+    @staticmethod
+    def merge_ops_stats(od1, od2):
+        if od2 is not None:
+            for k, v in od2.items():
+                if k in od1:
+                    od1[k] += v
+                else:
+                    od1[k] = v
+
+        return od1
 
     @classmethod
     def head_num(cls):
@@ -31,20 +48,28 @@ class Blocks:
         return str(DB.query_one(sql) or '')
 
     @classmethod
-    def process(cls, block):
+    def process(cls, block, vops_in_block, hived):
         """Process a single block. Always wrap in a transaction!"""
+        time_start = perf_counter()
         #assert is_trx_active(), "Block.process must be in a trx"
-        return cls._process(block, is_initial_sync=False)
+        ret = cls._process(block, vops_in_block, hived, is_initial_sync=False)
+        PostDataCache.flush()
+        Tags.flush()
+        Votes.flush()
+        time_end = perf_counter()
+        log.info("[PROCESS BLOCK] %fs", time_end - time_start)
+        return ret
 
     @classmethod
-    def process_multi(cls, blocks, is_initial_sync=False):
+    def process_multi(cls, blocks, vops, hived, is_initial_sync=False):
         """Batch-process blocks; wrapped in a transaction."""
+        time_start = perf_counter()
         DB.query("START TRANSACTION")
 
         last_num = 0
         try:
             for block in blocks:
-                last_num = cls._process(block, is_initial_sync)
+                last_num = cls._process(block, vops, hived, is_initial_sync)
         except Exception as e:
             log.error("exception encountered block %d", last_num + 1)
             raise e
@@ -52,19 +77,60 @@ class Blocks:
         # Follows flushing needs to be atomic because recounts are
         # expensive. So is tracking follows at all; hence we track
         # deltas in memory and update follow/er counts in bulk.
+        PostDataCache.flush()
+        Tags.flush()
+        Votes.flush()
+        cls._flush_blocks()
         Follow.flush(trx=False)
 
         DB.query("COMMIT")
+        time_end = perf_counter()
+        log.info("[PROCESS MULTI] %i blocks in %fs", len(blocks), time_end - time_start)
+
+        return cls.ops_stats
+
+    @staticmethod
+    def prepare_vops(vopsList, date):
+        vote_ops = []
+        comment_payout_ops = {}
+        for vop in vopsList:
+            key = None
+            val = None
+
+            op_type = vop['type']
+            op_value = vop['value']
+            if op_type == 'curation_reward_operation':
+                key = "{}/{}".format(op_value['comment_author'], op_value['comment_permlink'])
+                val = {'reward' : op_value['reward']}
+            elif op_type == 'author_reward_operation':
+                key = "{}/{}".format(op_value['author'], op_value['permlink'])
+                val = {'hbd_payout':op_value['hbd_payout'], 'hive_payout':op_value['hive_payout'], 'vesting_payout':op_value['vesting_payout']}
+            elif op_type == 'comment_reward_operation':
+                if('payout' not in op_value or op_value['payout'] is None):
+                    log.error("Broken op: `{}'".format(str(vop)))
+                key = "{}/{}".format(op_value['author'], op_value['permlink'])
+                val = {'payout':op_value['payout'], 'author_rewards':op_value['author_rewards']}
+            elif op_type == 'effective_comment_vote_operation':
+                vote_ops.append(vop)
+
+            if key is not None and val is not None:
+                if key in comment_payout_ops:
+                    comment_payout_ops[key].append({op_type:val})
+                else:
+                    comment_payout_ops[key] = [{op_type:val}]
+
+        return (vote_ops, comment_payout_ops)
+
 
     @classmethod
-    def _process(cls, block, is_initial_sync=False):
+    def _process(cls, block, virtual_operations, hived, is_initial_sync=False):
         """Process a single block. Assumes a trx is open."""
         #pylint: disable=too-many-branches
         num = cls._push(block)
         date = block['timestamp']
 
+        # [DK] we will make two scans, first scan will register all accounts
         account_names = set()
-        json_ops = []
         for tx_idx, tx in enumerate(block['transactions']):
             for operation in tx['operations']:
                 op_type = operation['type']
@@ -82,8 +148,24 @@ class Blocks:
                 elif op_type == 'create_claimed_account_operation':
                     account_names.add(op['new_account_name'])
 
+        Accounts.register(account_names, date)     # register any new names
+
+        # second scan will process all other ops
+        json_ops = []
+        update_comment_pending_payouts = []
+        for tx_idx, tx in enumerate(block['transactions']):
+            for operation in tx['operations']:
+                op_type = operation['type']
+                op = operation['value']
+
+                if(op_type != 'custom_json_operation'):
+                    if op_type in cls.ops_stats:
+                        cls.ops_stats[op_type] += 1
+                    else:
+                        cls.ops_stats[op_type] = 1
+
                 # account metadata updates
-                elif op_type == 'account_update_operation':
+                if op_type == 'account_update_operation':
                     if not is_initial_sync:
                         Accounts.dirty(op['account']) # full
                 elif op_type == 'account_update2_operation':
@@ -97,12 +179,13 @@ class Blocks:
                         Accounts.dirty(op['author']) # lite - stats
                 elif op_type == 'delete_comment_operation':
                     Posts.delete_op(op)
+                elif op_type == 'comment_options_operation':
+                    Posts.comment_options_op(op)
                 elif op_type == 'vote_operation':
                     if not is_initial_sync:
                         Accounts.dirty(op['author']) # lite - rep
                         Accounts.dirty(op['voter']) # lite - stats
-                        CachedPost.vote(op['author'], op['permlink'],
-                                        None, op['voter'])
+                        update_comment_pending_payouts.append([op['author'], op['permlink']])
 
                 # misc ops
                 elif op_type == 'transfer_operation':
@@ -110,8 +193,39 @@ class Blocks:
                 elif op_type == 'custom_json_operation':
                     json_ops.append(op)
 
-        Accounts.register(account_names, date)     # register any new names
-        CustomOp.process_ops(json_ops, num, date)  # follow/reblog/community ops
+        # follow/reblog/community ops
+        if json_ops:
+            custom_ops_stats = CustomOp.process_ops(json_ops, num, date)
+            cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, custom_ops_stats)
+
+        if update_comment_pending_payouts:
+            payout_ops_stat = Posts.update_comment_pending_payouts(hived, update_comment_pending_payouts)
+            cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, payout_ops_stat)
+
+        # virtual ops
+        comment_payout_ops = {}
+        vote_ops = []
+
+        empty_vops = (vote_ops, comment_payout_ops)
+
+        if is_initial_sync:
+            (vote_ops, comment_payout_ops) = virtual_operations[num] if num in virtual_operations else empty_vops
+        else:
+            vops = hived.get_virtual_operations(num)
+            (vote_ops, comment_payout_ops) = Blocks.prepare_vops(vops, date)
+
+        for v in vote_ops:
+            Votes.vote_op(v, date)
+            op_type = v['type']
+            if op_type in cls.ops_stats:
+                cls.ops_stats[op_type] += 1
+            else:
+                cls.ops_stats[op_type] = 1
+
+
+        if comment_payout_ops:
+            comment_payout_stats = Posts.comment_payout_op(comment_payout_ops, date)
+            cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, comment_payout_stats)
 
         return num
 
@@ -162,15 +276,27 @@ class Blocks:
         """Insert a row in `hive_blocks`."""
         num = int(block['block_id'][:8], base=16)
         txs = block['transactions']
-        DB.query("INSERT INTO hive_blocks (num, hash, prev, txs, ops, created_at) "
-                 "VALUES (:num, :hash, :prev, :txs, :ops, :date)", **{
-                     'num': num,
-                     'hash': block['block_id'],
-                     'prev': block['previous'],
-                     'txs': len(txs),
-                     'ops': sum([len(tx['operations']) for tx in txs]),
-                     'date': block['timestamp']})
+        cls.blocks_to_flush.append({
+            'num': num,
+            'hash': block['block_id'],
+            'prev': block['previous'],
+            'txs': len(txs),
+            'ops': sum([len(tx['operations']) for tx in txs]),
+            'date': block['timestamp']})
         return num
+
+    @classmethod
+    def _flush_blocks(cls):
+        query = """
+            INSERT INTO 
+                hive_blocks (num, hash, prev, txs, ops, created_at) 
+            VALUES 
+        """
+        values = []
+        for block in cls.blocks_to_flush:
+            values.append("({}, '{}', '{}', {}, {}, '{}')".format(block['num'], block['hash'], block['prev'], block['txs'], block['ops'], block['date']))
+        DB.query(query + ",".join(values))
+        cls.blocks_to_flush = []
 
     @classmethod
     def _pop(cls, blocks):
@@ -215,13 +341,13 @@ class Blocks:
             # remove all recent records -- core
             DB.query("DELETE FROM hive_feed_cache  WHERE created_at >= :date", date=date)
             DB.query("DELETE FROM hive_reblogs     WHERE created_at >= :date", date=date)
-            DB.query("DELETE FROM hive_follows     WHERE created_at >= :date", date=date) #*
+            DB.query("DELETE FROM hive_follows     WHERE created_at >= :date", date=date)
 
             # remove posts: core, tags, cache entries
             if post_ids:
-                DB.query("DELETE FROM hive_posts_cache WHERE post_id IN :ids", ids=post_ids)
                 DB.query("DELETE FROM hive_post_tags   WHERE post_id IN :ids", ids=post_ids)
                 DB.query("DELETE FROM hive_posts       WHERE id      IN :ids", ids=post_ids)
+                DB.query("DELETE FROM hive_posts_data  WHERE id      IN :ids", ids=post_ids)
 
             DB.query("DELETE FROM hive_payments    WHERE block_num = :num", num=num)
             DB.query("DELETE FROM hive_blocks      WHERE num = :num", num=num)

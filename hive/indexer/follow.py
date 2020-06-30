@@ -16,6 +16,45 @@ DB = Db.instance()
 FOLLOWERS = 'followers'
 FOLLOWING = 'following'
 
+FOLLOW_ITEM_INSERT_QUERY = """
+    INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists)
+    VALUES 
+        (
+            :flr, 
+            :flg, 
+            :at, 
+            :state, 
+            (CASE :state
+                WHEN 3 THEN TRUE
+                WHEN 4 THEN FALSE
+                ELSE FALSE
+            END
+            ), 
+            (CASE :state
+                WHEN 3 THEN FALSE
+                WHEN 4 THEN TRUE
+                ELSE TRUE
+            END
+            )
+        )
+    ON CONFLICT (follower, following) DO UPDATE 
+        SET 
+            state = (CASE EXCLUDED.state 
+                        WHEN 0 THEN 0 -- 0 blocks possibility to update state 
+                        ELSE EXCLUDED.state
+                     END),
+            blacklisted = (CASE EXCLUDED.state 
+                              WHEN 3 THEN TRUE
+                              WHEN 5 THEN FALSE
+                              ELSE EXCLUDED.blacklisted
+                          END),
+            follow_blacklists = (CASE EXCLUDED.state 
+                                    WHEN 4 THEN TRUE
+                                    WHEN 6 THEN FALSE
+                                    ELSE EXCLUDED.follow_blacklists
+                                END)
+    """
+
 def _flip_dict(dict_to_flip):
     """Swap keys/values. Returned dict values are array of keys."""
     flipped = {}
@@ -29,6 +68,8 @@ def _flip_dict(dict_to_flip):
 class Follow:
     """Handles processing of incoming follow ups and flushing to db."""
 
+    follow_items_to_flush = dict()
+
     @classmethod
     def follow_op(cls, account, op_json, date):
         """Process an incoming follow op."""
@@ -38,41 +79,27 @@ class Follow:
 
         # perform delta check
         new_state = op['state']
-        old_state = cls._get_follow_db_state(op['flr'], op['flg'])
-        if new_state == (old_state or 0):
-            return
-        sql = ''
+        old_state = None
+        if DbState.is_initial_sync():
+            # insert or update state
 
-        # insert or update state
-        if old_state is None:
-            sql = """INSERT INTO hive_follows (follower, following,
-                     created_at, state, blacklisted, follow_blacklists) VALUES (:flr, :flg, :at, :state, %s)"""
-            if new_state == 3:
-                sql = sql % """ true, false """
-            elif new_state == 4:
-                sql = sql % """ false, true """
+            k = '{}/{}'.format(op['flr'], op['flg'])
+
+            if k in cls.follow_items_to_flush:
+                old_value = cls.follow_items_to_flush.get(k)
+                old_value['state'] = op['state'] 
+                cls.follow_items_to_flush[k] = old_value
             else:
-                sql = sql % """false, false"""
-        else:
-            if new_state < 3:
-                sql = """UPDATE hive_follows SET state = :state
-                         WHERE follower = :flr AND following = :flg"""
-            elif new_state == 3:
-                sql = """UPDATE hive_follows SET blacklisted = true
-                          WHERE follower = :flr AND following = :flg"""
-            elif new_state == 4:
-                sql = """UPDATE hive_follows SET follow_blacklists = true
-                         WHERE follower = :flr AND following = :flg"""
-            elif new_state == 5:
-                sql = """UPDATE hive_follows SET blacklisted = false
-                         WHERE follower = :flr AND following = :flg"""
-            elif new_state == 6:
-                sql = """UPDATE hive_follows SET follow_blacklists = false
-                         WHERE follower = :flr AND following = :flg"""
-        DB.query(sql, **op)
+                cls.follow_items_to_flush[k] = dict(
+                                                      flr=op['flr'],
+                                                      flg=op['flg'],
+                                                      state=op['state'],
+                                                      at=op['at'])
 
-        # track count deltas
-        if not DbState.is_initial_sync():
+        else:
+            old_state = cls._get_follow_db_state(op['flr'], op['flg'])
+            # insert or update state
+            DB.query(FOLLOW_ITEM_INSERT_QUERY, **op)
             if new_state == 1:
                 Follow.follow(op['flr'], op['flg'])
                 if old_state is None:
@@ -142,8 +169,63 @@ class Follow:
         cls._delta[role][account] += direction
 
     @classmethod
+    def _flush_follow_items(cls):
+        sql_prefix = """
+              INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists)
+              VALUES """
+
+        sql_postfix = """
+              ON CONFLICT ON CONSTRAINT hive_follows_pk DO UPDATE 
+                SET 
+                    state = (CASE EXCLUDED.state 
+                                WHEN 0 THEN 0 -- 0 blocks possibility to update state 
+                                ELSE EXCLUDED.state
+                            END),
+                    blacklisted = (CASE EXCLUDED.state 
+                                    WHEN 3 THEN TRUE
+                                    WHEN 5 THEN FALSE
+                                    ELSE EXCLUDED.blacklisted
+                                END),
+                    follow_blacklists = (CASE EXCLUDED.state 
+                                            WHEN 4 THEN TRUE
+                                            WHEN 6 THEN FALSE
+                                            ELSE EXCLUDED.follow_blacklists
+                                        END)
+              WHERE hf.following = EXCLUDED.following AND hf.follower = EXCLUDED.follower
+              """
+        values = []
+        limit = 1000
+        count = 0
+        for _, follow_item in cls.follow_items_to_flush.items():
+            if count < limit:
+                values.append("({}, {}, '{}', {}, {}, {})".format(follow_item['flr'], follow_item['flg'],
+                                                                  follow_item['at'], follow_item['state'],
+                                                                  follow_item['state'] == 3,
+                                                                  follow_item['state'] == 4))
+                count = count + 1
+            else:
+                query = sql_prefix + ",".join(values)
+                query += sql_postfix
+                DB.query(query)
+                values.clear()
+                values.append("({}, {}, '{}', {}, {}, {})".format(follow_item['flr'], follow_item['flg'],
+                                                                  follow_item['at'], follow_item['state'],
+                                                                  follow_item['state'] == 3,
+                                                                  follow_item['state'] == 4))
+                count = 1
+
+        if len(values) > 0:
+            query = sql_prefix + ",".join(values)
+            query += sql_postfix
+            DB.query(query)
+
+        cls.follow_items_to_flush.clear()
+
+    @classmethod
     def flush(cls, trx=True):
         """Flushes pending follow count deltas."""
+
+        cls._flush_follow_items()
 
         updated = 0
         sqls = []

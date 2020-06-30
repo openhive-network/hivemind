@@ -6,6 +6,7 @@ import ujson as json
 from hive.utils.normalize import sbd_amount, rep_to_raw
 from hive.server.common.mutes import Mutes
 from hive.server.common.helpers import json_date
+from hive.server.database_api.methods import find_votes
 
 log = logging.getLogger(__name__)
 
@@ -40,10 +41,53 @@ async def load_posts_keyed(db, ids, truncate_body=0):
     assert ids, 'no ids passed to load_posts_keyed'
 
     # fetch posts and associated author reps
-    sql = """SELECT post_id, author, permlink, title, body, category, depth,
-                    promoted, payout, payout_at, is_paidout, children, votes,
-                    created_at, updated_at, rshares, raw_json, json
-               FROM hive_posts_cache WHERE post_id IN :ids"""
+    sql = """
+    SELECT hp.id, 
+        community_id, 
+        ha_a.name as author,
+        hpd_p.permlink as permlink,
+        hpd.title as title, 
+        hpd.body as body, 
+        hcd.category as category, 
+        depth,
+        promoted, 
+        payout, 
+        payout_at, 
+        is_paidout, 
+        children, 
+        hpd.votes as votes,
+        hp.created_at, 
+        updated_at, 
+        rshares, 
+        hpd.json as json,
+        is_hidden, 
+        is_grayed, 
+        total_votes, 
+        flag_weight,
+        ha_pa.name as parent_author,
+        hpd_pp.permlink as parent_permlink,
+        curator_payout_value, 
+        ha_ra.name as root_author,
+        hpd_rp.permlink as root_permlink,
+        max_accepted_payout, 
+        percent_hbd, 
+        allow_replies, 
+        allow_votes, 
+        allow_curation_rewards, 
+        beneficiaries, 
+        url, 
+        root_title,
+    FROM hive_posts hp
+    INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+    INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+    LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
+    LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+    INNER JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
+    INNER JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
+    INNER JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
+    INNER JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
+    WHERE post_id IN :ids"""
+
     result = await db.query_all(sql, ids=tuple(ids))
     author_reps = await _query_author_rep_map(db, result)
 
@@ -53,8 +97,8 @@ async def load_posts_keyed(db, ids, truncate_body=0):
         row = dict(row)
         row['author_rep'] = author_reps[row['author']]
         post = _condenser_post_object(row, truncate_body=truncate_body)
-        post['active_votes'] = _mute_votes(post['active_votes'], muted_accounts)
-        posts_by_id[row['post_id']] = post
+        post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']})
+        posts_by_id[row['id']] = post
 
     return posts_by_id
 
@@ -77,8 +121,14 @@ async def load_posts(db, ids, truncate_body=0):
         log.info("get_posts do not exist in cache: %s", repr(missed))
         for _id in missed:
             ids.remove(_id)
-            sql = ("SELECT id, author, permlink, depth, created_at, is_deleted "
-                   "FROM hive_posts WHERE id = :id")
+            sql = """
+                SELECT 
+                    hp.id, ha_a.name as author, hpd_p.permlink as permlink, depth, created_at, is_deleted
+                FROM 
+                    hive_posts hp
+                INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+                INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+                WHERE id = :id"""
             post = await db.query_row(sql, id=_id)
             if not post['is_deleted']:
                 # TODO: This should never happen. See #173 for analysis
@@ -97,7 +147,7 @@ async def resultset_to_posts(db, resultset, truncate_body=0):
         row = dict(row)
         row['author_rep'] = author_reps[row['author']]
         post = _condenser_post_object(row, truncate_body=truncate_body)
-        post['active_votes'] = _mute_votes(post['active_votes'], muted_accounts)
+        post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']})
         posts.append(post)
 
     return posts
@@ -129,7 +179,7 @@ def _condenser_account_object(row):
                        }})}
 
 def _condenser_post_object(row, truncate_body=0):
-    """Given a hive_posts_cache row, create a legacy-style post object."""
+    """Given a hive_posts row, create a legacy-style post object."""
     paid = row['is_paidout']
 
     # condenser#3424 mitigation
@@ -137,7 +187,7 @@ def _condenser_post_object(row, truncate_body=0):
         row['category'] = 'undefined'
 
     post = {}
-    post['post_id'] = row['post_id']
+    post['post_id'] = row['id']
     post['author'] = row['author']
     post['permlink'] = row['permlink']
     post['category'] = row['category']
@@ -161,37 +211,32 @@ def _condenser_post_object(row, truncate_body=0):
 
     post['replies'] = []
     post['body_length'] = len(row['body'])
-    post['active_votes'] = _hydrate_active_votes(row['votes'])
     post['author_reputation'] = rep_to_raw(row['author_rep'])
 
-    # import fields from legacy object
-    assert row['raw_json']
-    assert len(row['raw_json']) > 32
-    raw_json = json.loads(row['raw_json'])
+    post['root_author'] = row['root_author']
+    post['root_permlink'] = row['root_permlink']
+
+    post['allow_replies'] = row['allow_replies']
+    post['allow_votes'] = row['allow_votes']
+    post['allow_curation_rewards'] = row['allow_curation_rewards']
 
     if row['depth'] > 0:
-        post['parent_author'] = raw_json['parent_author']
-        post['parent_permlink'] = raw_json['parent_permlink']
+        post['parent_author'] = row['parent_author']
+        post['parent_permlink'] = row['parent_permlink']
     else:
         post['parent_author'] = ''
         post['parent_permlink'] = row['category']
 
-    post['url'] = raw_json['url']
-    post['root_title'] = raw_json['root_title']
-    post['beneficiaries'] = raw_json['beneficiaries']
-    post['max_accepted_payout'] = raw_json['max_accepted_payout']
-    post['percent_steem_dollars'] = raw_json['percent_steem_dollars']
+    post['url'] = row['url']
+    post['root_title'] = row['root_title']
+    post['beneficiaries'] = row['beneficiaries']
+    post['max_accepted_payout'] = row['max_accepted_payout']
+    post['percent_hbd'] = row['percent_hbd']
 
     if paid:
-        curator_payout = sbd_amount(raw_json['curator_payout_value'])
+        curator_payout = sbd_amount(row['curator_payout_value'])
         post['curator_payout_value'] = _amount(curator_payout)
         post['total_payout_value'] = _amount(row['payout'] - curator_payout)
-
-    # not used by condenser, but may be useful
-    #post['net_votes'] = post['total_votes'] - row['up_votes']
-    #post['allow_replies'] = raw_json['allow_replies']
-    #post['allow_votes'] = raw_json['allow_votes']
-    #post['allow_curation_rewards'] = raw_json['allow_curation_rewards']
 
     return post
 
@@ -199,16 +244,3 @@ def _amount(amount, asset='HBD'):
     """Return a steem-style amount string given a (numeric, asset-str)."""
     assert asset == 'HBD', 'unhandled asset %s' % asset
     return "%.3f HBD" % amount
-
-def _hydrate_active_votes(vote_csv):
-    """Convert minimal CSV representation into steemd-style object."""
-    if not vote_csv:
-        return []
-    votes = []
-    for line in vote_csv.split("\n"):
-        voter, rshares, percent, reputation = line.split(',')
-        votes.append(dict(voter=voter,
-                          rshares=rshares,
-                          percent=percent,
-                          reputation=rep_to_raw(reputation)))
-    return votes

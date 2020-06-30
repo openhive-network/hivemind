@@ -27,7 +27,7 @@ def _keyify(items):
     return dict(map(lambda x: ("val_%d" % x[0], x[1]), enumerate(items)))
 
 class CachedPost:
-    """Maintain update queue and writing to `hive_posts_cache`."""
+    """Maintain update queue and writing to `hive_posts`."""
 
     # cursor signifying upper bound of cached post span
     _last_id = -1
@@ -116,6 +116,7 @@ class CachedPost:
          - author/permlink is unique and always references the same post
          - you can always get_content on any author/permlink you see in an op
         """
+        raise NotImplementedError("Cannot delete from CachedPost!!!")
         DB.query("DELETE FROM hive_posts_cache WHERE post_id = :id", id=post_id)
         DB.query("DELETE FROM hive_post_tags   WHERE post_id = :id", id=post_id)
 
@@ -230,7 +231,7 @@ class CachedPost:
 
     @classmethod
     def _select_paidout_tuples(cls, date):
-        """Query hive_posts_cache for payout sweep.
+        """Query hive_posts for payout sweep.
 
         Select all posts which should have been paid out before `date`
         yet do not have the `is_paidout` flag set. We perform this
@@ -241,14 +242,20 @@ class CachedPost:
         """
         from hive.indexer.posts import Posts
 
-        sql = """SELECT post_id FROM hive_posts_cache
+        sql = """SELECT id FROM hive_posts
                   WHERE is_paidout = '0' AND payout_at <= :date"""
         ids = DB.query_col(sql, date=date)
         if not ids:
             return []
 
-        sql = """SELECT id, author, permlink
-                 FROM hive_posts WHERE id IN :ids"""
+        sql = """
+            SELECT 
+                hp.id, ha_a.name as author, hpd_p.permlink as permlink
+            FROM 
+                hive_posts hp
+            INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+            WHERE hp.id IN :ids"""
         results = DB.query_all(sql, ids=tuple(ids))
         return Posts.save_ids_from_tuples(results)
 
@@ -271,9 +278,15 @@ class CachedPost:
     def _select_missing_tuples(cls, last_cached_id, limit=1000000):
         """Fetch posts inserted into main posts table but not cache."""
         from hive.indexer.posts import Posts
-        sql = """SELECT id, author, permlink, promoted FROM hive_posts
-                  WHERE is_deleted = '0' AND id > :id
-               ORDER BY id LIMIT :limit"""
+        sql = """
+            SELECT 
+                hp.id, ha_a.name as author, hpd_p.permlink as permlink, promoted 
+            FROM hive_posts hp
+            INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+            WHERE 
+                hp.is_deleted = '0' AND hp.id > :id
+            ORDER BY hp.id LIMIT :limit"""
         results = DB.query_all(sql, id=last_cached_id, limit=limit)
         return Posts.save_ids_from_tuples(results)
 
@@ -394,7 +407,7 @@ class CachedPost:
         """Retrieve the latest post_id that was cached."""
         if cls._last_id == -1:
             # after initial query, we maintain last_id w/ _bump_last_id()
-            sql = "SELECT COALESCE(MAX(post_id), 0) FROM hive_posts_cache"
+            sql = "SELECT id FROM hive_posts ORDER BY id DESC LIMIT 1"
             cls._last_id = DB.query_one(sql)
         return cls._last_id
 
@@ -415,8 +428,12 @@ class CachedPost:
             return {}
 
         # build a map of id->fields for each of those posts
-        sql = """SELECT id, category, community_id, is_muted, is_valid
-                   FROM hive_posts WHERE id IN :ids"""
+        sql = """
+            SELECT 
+                hp.id, hcd.category as category, community_id, is_muted, is_valid
+            FROM hive_posts hp
+            LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+            WHERE id IN :ids"""
         core = {r[0]: {'category': r[1],
                        'community_id': r[2],
                        'is_muted': r[3],
@@ -487,6 +504,7 @@ class CachedPost:
         # always write, unless simple vote update
         if level in ['insert', 'payout', 'update']:
             basic = post_basic(post)
+            legacy_data = post_legacy(post)
             values.extend([
                 ('community_id',  post['community_id']), # immutable*
                 ('created_at',    post['created']),    # immutable*
@@ -501,7 +519,22 @@ class CachedPost:
                 ('is_full_power', basic['is_full_power']),
                 ('is_paidout',    basic['is_paidout']),
                 ('json',          json.dumps(basic['json_metadata'])),
-                ('raw_json',      json.dumps(post_legacy(post))),
+                #('raw_json',      json.dumps(legacy_data)),
+                # TODO: check if writting fields below on every update is necessary!
+                ('parent_author',           legacy_data['parent_author']),
+                ('parent_permlink',         legacy_data['parent_permlink']),
+                ('curator_payout_value',    legacy_data['curator_payout_value']),
+                ('root_author',             legacy_data['root_author']),
+                ('root_permlink',           legacy_data['root_permlink']),
+                ('max_accepted_payout',     legacy_data['max_accepted_payout']),
+                ('percent_hbd',   legacy_data['percent_hbd']),
+                ('allow_replies',           legacy_data['allow_replies']),
+                ('allow_votes',             legacy_data['allow_votes']),
+                ('allow_curation_rewards',  legacy_data['allow_curation_rewards']),
+                ('beneficiaries',           json.dumps(legacy_data['beneficiaries'])),
+                ('url',                     legacy_data['url']),
+                ('root_title',              legacy_data['root_title']),
+                ('author_permlink',         post['author'] + post['permlink']),
             ])
 
         # if there's a pending promoted value to write, pull it out
@@ -671,8 +704,10 @@ class CachedPost:
 
     @classmethod
     def _insert(cls, values):
+        raise NotImplementedError("Cannot insert from CachedPost")
         return DB.build_insert('hive_posts_cache', values, pk='post_id')
 
     @classmethod
     def _update(cls, values):
+        raise NotImplementedError("Cannot update from CachedPost")
         return DB.build_update('hive_posts_cache', values, pk='post_id')

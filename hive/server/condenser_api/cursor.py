@@ -4,6 +4,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 from hive.utils.normalize import rep_to_raw
+from json import loads
 
 # pylint: disable=too-many-lines
 
@@ -13,8 +14,14 @@ def last_month():
 
 async def get_post_id(db, author, permlink):
     """Given an author/permlink, retrieve the id from db."""
-    sql = ("SELECT id FROM hive_posts WHERE author = :a "
-           "AND permlink = :p AND is_deleted = '0' LIMIT 1")
+    sql = """
+        SELECT 
+            hp.id
+        FROM hive_posts hp
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        WHERE ha_a.author = :author AND hpd_p.permlink = :permlink 
+            AND is_deleted = '0' LIMIT 1"""
     return await db.query_one(sql, a=author, p=permlink)
 
 async def get_child_ids(db, post_id):
@@ -24,7 +31,13 @@ async def get_child_ids(db, post_id):
 
 async def _get_post_id(db, author, permlink):
     """Get post_id from hive db."""
-    sql = "SELECT id FROM hive_posts WHERE author = :a AND permlink = :p"
+    sql = """
+        SELECT 
+            hp.id
+        FROM hive_posts hp
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        WHERE ha_a.author = :author AND hpd_p.permlink = :permlink"""
     return await db.query_one(sql, a=author, p=permlink)
 
 async def _get_account_id(db, name):
@@ -115,7 +128,7 @@ async def get_account_reputations(db, account_lower_bound, limit):
         seek = "WHERE name >= :start"
 
     sql = """SELECT name, reputation
-               FROM hive_accounts %s
+              FROM hive_accounts %s
            ORDER BY name
               LIMIT :limit""" % seek
     rows = await db.query_all(sql, start=account_lower_bound, limit=limit)
@@ -140,7 +153,7 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
         'payout_comments': ('payout',   True,   False,  True,   False),
     }[sort]
 
-    table = 'hive_posts_cache'
+    table = 'hive_posts'
     field = params[0]
     where = []
 
@@ -156,26 +169,74 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
         #    cid = get_community_id(tag)
         #    where.append('community_id = :cid')
         if sort in ['payout', 'payout_comments']:
-            where.append('category = :tag')
+            where.append('category_id = (SELECT id FROM hive_category_data WHERE category = :tag)')
         else:
             if tag[:5] == 'hive-':
-                where.append('category = :tag')
+                where.append('category_id = (SELECT id FROM hive_category_data WHERE category = :tag)')
                 if sort in ('trending', 'hot'):
                     where.append('depth = 0')
-            sql = "SELECT post_id FROM hive_post_tags WHERE tag = :tag"
-            where.append("post_id IN (%s)" % sql)
+            sql = """
+                SELECT 
+                    post_id 
+                FROM 
+                    hive_post_tags hpt
+                INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
+                WHERE htd.tag = :tag
+            """
+            where.append("id IN (%s)" % sql)
 
     start_id = None
-    if start_permlink:
-        start_id = await _get_post_id(db, start_author, start_permlink)
-        if not start_id:
-            return []
-
-        sql = "%s <= (SELECT %s FROM %s WHERE post_id = :start_id)"
+    if start_permlink and start_author:
+        sql = "%s <= (SELECT %s FROM %s WHERE id = (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :start_author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :start_permlink)))"
         where.append(sql % (field, field, table))
 
-    sql = ("SELECT post_id FROM %s WHERE %s ORDER BY %s DESC LIMIT :limit"
-           % (table, ' AND '.join(where), field))
+    sql = """
+        SELECT hp.id, 
+            community_id, 
+            ha_a.name as author,
+            hpd_p.permlink as permlink,
+            hpd.title as title, 
+            hpd.body as body, 
+            hcd.category as category, 
+            depth,
+            promoted, 
+            payout, 
+            payout_at, 
+            is_paidout, 
+            children, 
+            hpd.votes as votes,
+            hp.created_at, 
+            updated_at, 
+            rshares, 
+            hpd.json as json,
+            is_hidden, 
+            is_grayed, 
+            total_votes, 
+            flag_weight,
+            ha_pa.name as parent_author,
+            hpd_pp.permlink as parent_permlink,
+            curator_payout_value, 
+            ha_ra.name as root_author,
+            hpd_rp.permlink as root_permlink,
+            max_accepted_payout, 
+            percent_hbd, 
+            allow_replies, 
+            allow_votes, 
+            allow_curation_rewards, 
+            beneficiaries, 
+            url, 
+            root_title
+        FROM hive_posts hp
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
+        LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+        INNER JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
+        INNER JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
+        INNER JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
+        INNER JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
+        WHERE %s ORDER BY %s DESC LIMIT :limit
+    """ % (' AND '.join(where), field)
 
     return await db.query_col(sql, tag=tag, start_id=start_id, limit=limit)
 
@@ -261,7 +322,7 @@ async def pids_by_blog_without_reblog(db, account: str, start_permlink: str = ''
     sql = """
         SELECT id
           FROM hive_posts
-         WHERE author = :account %s
+         WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :account) %s
            AND is_deleted = '0'
            AND depth = 0
       ORDER BY id DESC
@@ -320,7 +381,7 @@ async def pids_by_account_comments(db, account: str, start_permlink: str = '', l
     # `depth` in ORDER BY is a no-op, but forces an ix3 index scan (see #189)
     sql = """
         SELECT id FROM hive_posts
-         WHERE author = :account %s
+         WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :account) %s
            AND depth > 0
            AND is_deleted = '0'
       ORDER BY id DESC, depth
@@ -342,13 +403,13 @@ async def pids_by_replies_to_account(db, start_author: str, start_permlink: str 
     start_id = None
     if start_permlink:
         sql = """
-          SELECT parent.author,
+          SELECT (SELECT name FROM hive_accounts WHERE id = parent.author_id),
                  child.id
             FROM hive_posts child
             JOIN hive_posts parent
               ON child.parent_id = parent.id
-           WHERE child.author = :author
-             AND child.permlink = :permlink
+           WHERE child.author_id = (SELECT id FROM hive_accounts WHERE name = :author)
+             AND child.permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)
         """
 
         row = await db.query_row(sql, author=start_author, permlink=start_permlink)
@@ -364,7 +425,7 @@ async def pids_by_replies_to_account(db, start_author: str, start_permlink: str 
     sql = """
        SELECT id FROM hive_posts
         WHERE parent_id IN (SELECT id FROM hive_posts
-                             WHERE author = :parent
+                             WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :parent)
                                AND is_deleted = '0'
                           ORDER BY id DESC
                              LIMIT 10000) %s
@@ -374,3 +435,39 @@ async def pids_by_replies_to_account(db, start_author: str, start_permlink: str 
     """ % seek
 
     return await db.query_col(sql, parent=parent_account, start_id=start_id, limit=limit)
+
+async def get_accounts(db, accounts: list):
+    """Returns accounts data for accounts given in list"""
+    ret = []
+
+    names = ["'{}'".format(a) for a in accounts]
+    sql = """SELECT created_at, reputation, display_name, about,
+        location, website, profile_image, cover_image, followers, following,
+        proxy, post_count, proxy_weight, vote_weight, rank,
+        lastread_at, active_at, cached_at, raw_json
+        FROM hive_accounts WHERE name IN ({})""".format(",".join(names))
+
+    result = await db.query_all(sql)
+    for row in result:
+        account_data = dict(loads(row.raw_json))
+        account_data['created_at'] = row.created_at.isoformat()
+        account_data['reputation'] = row.reputation
+        account_data['display_name'] = row.display_name
+        account_data['about'] = row.about
+        account_data['location'] = row.location
+        account_data['website'] = row.website
+        account_data['profile_image'] = row.profile_image
+        account_data['cover_image'] = row.cover_image
+        account_data['followers'] = row.followers
+        account_data['following'] = row.following
+        account_data['proxy'] = row.proxy
+        account_data['post_count'] = row.post_count
+        account_data['proxy_weight'] = row.proxy_weight
+        account_data['vote_weight'] = row.vote_weight
+        account_data['rank'] = row.rank
+        account_data['lastread_at'] = row.lastread_at.isoformat()
+        account_data['active_at'] = row.active_at.isoformat()
+        account_data['cached_at'] = row.cached_at.isoformat()
+        ret.append(account_data)
+
+    return ret

@@ -10,7 +10,8 @@ from sqlalchemy.types import BOOLEAN
 
 #pylint: disable=line-too-long, too-many-lines, bad-whitespace
 
-DB_VERSION = 17
+# [DK] we changed and removed some tables so i upgraded DB_VERSION to 18
+DB_VERSION = 18
 
 def build_metadata():
     """Build schema def with SqlAlchemy"""
@@ -40,7 +41,7 @@ def build_metadata():
         sa.Column('display_name', sa.String(20)),
         sa.Column('about', sa.String(160)),
         sa.Column('location', sa.String(30)),
-        sa.Column('website', sa.String(100)),
+        sa.Column('website', sa.String(1024)),
         sa.Column('profile_image', sa.String(1024), nullable=False, server_default=''),
         sa.Column('cover_image', sa.String(1024), nullable=False, server_default=''),
 
@@ -59,22 +60,18 @@ def build_metadata():
         sa.Column('cached_at', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('raw_json', sa.Text),
 
-
         sa.UniqueConstraint('name', name='hive_accounts_ux1'),
-        sa.Index('hive_accounts_ix1', 'vote_weight', 'id'), # core: quick ranks
-        sa.Index('hive_accounts_ix2', 'name', 'id'), # core: quick id map
-        sa.Index('hive_accounts_ix3', 'vote_weight', 'name', postgresql_ops=dict(name='varchar_pattern_ops')), # API: lookup
-        sa.Index('hive_accounts_ix4', 'id', 'name'), # API: quick filter/sort
-        sa.Index('hive_accounts_ix5', 'cached_at', 'name'), # core/listen sweep
+        sa.Index('hive_accounts_ix1', 'vote_weight'), # core: quick ranks
+        sa.Index('hive_accounts_ix5', 'cached_at'), # core/listen sweep
     )
 
     sa.Table(
         'hive_posts', metadata,
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('parent_id', sa.Integer),
-        sa.Column('author', VARCHAR(16), nullable=False),
-        sa.Column('permlink', VARCHAR(255), nullable=False),
-        sa.Column('category', VARCHAR(255), nullable=False, server_default=''),
+        sa.Column('author_id', sa.Integer, nullable=False),
+        sa.Column('permlink_id', sa.BigInteger, nullable=False),
+        sa.Column('category_id', sa.Integer, nullable=False),
         sa.Column('community_id', sa.Integer, nullable=True),
         sa.Column('created_at', sa.DateTime, nullable=False),
         sa.Column('depth', SMALLINT, nullable=False),
@@ -84,82 +81,6 @@ def build_metadata():
         sa.Column('is_valid', BOOLEAN, nullable=False, server_default='1'),
         sa.Column('promoted', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
 
-        sa.ForeignKeyConstraint(['author'], ['hive_accounts.name'], name='hive_posts_fk1'),
-        sa.ForeignKeyConstraint(['parent_id'], ['hive_posts.id'], name='hive_posts_fk3'),
-        sa.UniqueConstraint('author', 'permlink', name='hive_posts_ux1'),
-        sa.Index('hive_posts_ix3', 'author', 'depth', 'id', postgresql_where=sql_text("is_deleted = '0'")), # API: author blog/comments
-        sa.Index('hive_posts_ix4', 'parent_id DESC NULLS LAST', 'id'), #postgresql_where=sql_text("is_deleted = '0'")), # API: fetching children #[JES] We decided we want the full index since posts can be deleted/undeleted
-        sa.Index('hive_posts_ix5', 'id', postgresql_where=sql_text("is_pinned = '1' AND is_deleted = '0'")), # API: pinned post status
-        sa.Index('hive_posts_ix6', 'community_id', 'id', postgresql_where=sql_text("community_id IS NOT NULL AND is_pinned = '1' AND is_deleted = '0'")), # API: community pinned
-    )
-
-    sa.Table(
-        'hive_post_tags', metadata,
-        sa.Column('post_id', sa.Integer, nullable=False),
-        sa.Column('tag', sa.String(32), nullable=False),
-        sa.UniqueConstraint('tag', 'post_id', name='hive_post_tags_ux1'), # core
-        sa.Index('hive_post_tags_ix1', 'post_id'), # core
-    )
-
-    sa.Table(
-        'hive_follows', metadata,
-        sa.Column('follower', sa.Integer, nullable=False),
-        sa.Column('following', sa.Integer, nullable=False),
-        sa.Column('state', SMALLINT, nullable=False, server_default='1'),
-        sa.Column('created_at', sa.DateTime, nullable=False),
-
-        sa.UniqueConstraint('following', 'follower', name='hive_follows_ux3'), # core
-        sa.Index('hive_follows_ix5a', 'following', 'state', 'created_at', 'follower'),
-        sa.Index('hive_follows_ix5b', 'follower', 'state', 'created_at', 'following'),
-    )
-
-    sa.Table(
-        'hive_reblogs', metadata,
-        sa.Column('account', VARCHAR(16), nullable=False),
-        sa.Column('post_id', sa.Integer, nullable=False),
-        sa.Column('created_at', sa.DateTime, nullable=False),
-
-        sa.ForeignKeyConstraint(['account'], ['hive_accounts.name'], name='hive_reblogs_fk1'),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_reblogs_fk2'),
-        sa.UniqueConstraint('account', 'post_id', name='hive_reblogs_ux1'), # core
-        sa.Index('hive_reblogs_ix1', 'post_id', 'account', 'created_at'), # API -- not yet used
-    )
-
-    sa.Table(
-        'hive_payments', metadata,
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Column('tx_idx', SMALLINT, nullable=False),
-        sa.Column('post_id', sa.Integer, nullable=False),
-        sa.Column('from_account', sa.Integer, nullable=False),
-        sa.Column('to_account', sa.Integer, nullable=False),
-        sa.Column('amount', sa.types.DECIMAL(10, 3), nullable=False),
-        sa.Column('token', VARCHAR(5), nullable=False),
-
-        sa.ForeignKeyConstraint(['from_account'], ['hive_accounts.id'], name='hive_payments_fk1'),
-        sa.ForeignKeyConstraint(['to_account'], ['hive_accounts.id'], name='hive_payments_fk2'),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_payments_fk3'),
-    )
-
-    sa.Table(
-        'hive_feed_cache', metadata,
-        sa.Column('post_id', sa.Integer, nullable=False),
-        sa.Column('account_id', sa.Integer, nullable=False),
-        sa.Column('created_at', sa.DateTime, nullable=False),
-        sa.UniqueConstraint('post_id', 'account_id', name='hive_feed_cache_ux1'), # core
-        sa.Index('hive_feed_cache_ix1', 'account_id', 'post_id', 'created_at'), # API (and rebuild?)
-    )
-
-    sa.Table(
-        'hive_posts_cache', metadata,
-        sa.Column('post_id', sa.Integer, primary_key=True, autoincrement=False),
-        sa.Column('author', VARCHAR(16), nullable=False),
-        sa.Column('permlink', VARCHAR(255), nullable=False),
-        sa.Column('category', VARCHAR(255), nullable=False, server_default=''),
-
-        # important/index
-        sa.Column('community_id', sa.Integer, nullable=True),
-        sa.Column('depth', SMALLINT, nullable=False, server_default='0'),
         sa.Column('children', SMALLINT, nullable=False, server_default='0'),
 
         # basic/extended-stats
@@ -168,15 +89,8 @@ def build_metadata():
         sa.Column('total_votes', sa.Integer, nullable=False, server_default='0'),
         sa.Column('up_votes', sa.Integer, nullable=False, server_default='0'),
 
-        # basic ui fields
-        sa.Column('title', sa.String(255), nullable=False, server_default=''),
-        sa.Column('preview', sa.String(1024), nullable=False, server_default=''),
-        sa.Column('img_url', sa.String(1024), nullable=False, server_default=''),
-
         # core stats/indexes
         sa.Column('payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
-        sa.Column('promoted', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
-        sa.Column('created_at', sa.DateTime, nullable=False, server_default='1990-01-01'),
         sa.Column('payout_at', sa.DateTime, nullable=False, server_default='1990-01-01'),
         sa.Column('updated_at', sa.DateTime, nullable=False, server_default='1990-01-01'),
         sa.Column('is_paidout', BOOLEAN, nullable=False, server_default='0'),
@@ -193,48 +107,186 @@ def build_metadata():
         sa.Column('sc_trend', sa.Float(precision=6), nullable=False, server_default='0'),
         sa.Column('sc_hot', sa.Float(precision=6), nullable=False, server_default='0'),
 
-        # bulk data
-        sa.Column('body', TEXT),
-        sa.Column('votes', TEXT),
-        sa.Column('json', sa.Text),
-        sa.Column('raw_json', sa.Text),
+        sa.Column('total_payout_value', sa.String(30), nullable=False, server_default=''),
+        sa.Column('author_rewards', sa.BigInteger, nullable=False, server_default='0'),
 
-        # index: misc
-        sa.Index('hive_posts_cache_ix3',  'payout_at', 'post_id',           postgresql_where=sql_text("is_paidout = '0'")),         # core: payout sweep
-        sa.Index('hive_posts_cache_ix8',  'category', 'payout', 'depth',    postgresql_where=sql_text("is_paidout = '0'")),         # API: tag stats
+        sa.Column('author_rewards_hive', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('author_rewards_hbd', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('author_rewards_vests', sa.BigInteger, nullable=False, server_default='0'),
 
-        # index: ranked posts
-        sa.Index('hive_posts_cache_ix2',  'promoted',             postgresql_where=sql_text("is_paidout = '0' AND promoted > 0")),  # API: promoted
+        sa.Column('children_abs_rshares', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('abs_rshares', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('vote_rshares', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('net_votes', sa.Integer, nullable=False, server_default='0'),
+        sa.Column('active', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
+        sa.Column('last_payout', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
+        sa.Column('cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
+        sa.Column('max_cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
+        sa.Column('percent_hbd', sa.Integer, nullable=False, server_default='10000'),
+        sa.Column('reward_weight', sa.Integer, nullable=False, server_default='0'),
 
-        sa.Index('hive_posts_cache_ix6a', 'sc_trend', 'post_id',  postgresql_where=sql_text("is_paidout = '0'")),                   # API: trending             todo: depth=0
-        sa.Index('hive_posts_cache_ix7a', 'sc_hot',   'post_id',  postgresql_where=sql_text("is_paidout = '0'")),                   # API: hot                  todo: depth=0
-        sa.Index('hive_posts_cache_ix6b', 'post_id',  'sc_trend', postgresql_where=sql_text("is_paidout = '0'")),                   # API: trending, filtered   todo: depth=0
-        sa.Index('hive_posts_cache_ix7b', 'post_id',  'sc_hot',   postgresql_where=sql_text("is_paidout = '0'")),                   # API: hot, filtered        todo: depth=0
+        sa.Column('parent_author_id', sa.Integer, nullable=False),
+        sa.Column('parent_permlink_id', sa.BigInteger, nullable=False),
+        sa.Column('curator_payout_value', sa.String(30), nullable=False, server_default=''),
+        sa.Column('root_author_id', sa.Integer, nullable=False),
+        sa.Column('root_permlink_id', sa.BigInteger, nullable=False),
+        sa.Column('max_accepted_payout',  sa.String(30), nullable=False, server_default='1000000.000 HBD'),
+        sa.Column('allow_replies', BOOLEAN, nullable=False, server_default='1'),
+        sa.Column('allow_votes', BOOLEAN, nullable=False, server_default='1'),
+        sa.Column('allow_curation_rewards', BOOLEAN, nullable=False, server_default='1'),
+        sa.Column('beneficiaries', sa.JSON, nullable=False, server_default='[]'),
+        sa.Column('url', sa.Text, nullable=False, server_default=''),
+        sa.Column('root_title', sa.String(255), nullable=False, server_default=''),
 
-        sa.Index('hive_posts_cache_ix9a',             'depth', 'payout', 'post_id', postgresql_where=sql_text("is_paidout = '0'")), # API: payout               todo: rem depth
-        sa.Index('hive_posts_cache_ix9b', 'category', 'depth', 'payout', 'post_id', postgresql_where=sql_text("is_paidout = '0'")), # API: payout, filtered     todo: rem depth
+        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_posts_fk1'),
+        sa.ForeignKeyConstraint(['parent_id'], ['hive_posts.id'], name='hive_posts_fk3'),
+        sa.UniqueConstraint('author_id', 'permlink_id', name='hive_posts_ux1'),
+        sa.Index('hive_posts_permlink_id', 'permlink_id'),
 
-        sa.Index('hive_posts_cache_ix10', 'post_id', 'payout',                      postgresql_where=sql_text("is_grayed = '1' AND payout > 0")), # API: muted, by filter/date/payout
+        sa.Index('hive_posts_depth_idx', 'depth'),
+        sa.Index('hive_posts_parent_id_idx', 'parent_id'),
+        sa.Index('hive_posts_community_id_idx', 'community_id'),
+        sa.Index('hive_posts_author_id', 'author_id'),
 
-        # index: stats
-        sa.Index('hive_posts_cache_ix20', 'community_id', 'author', 'payout', 'post_id', postgresql_where=sql_text("is_paidout = '0'")), # API: pending distribution; author payout
+        sa.Index('hive_posts_category_id_idx', 'category_id'),
+        sa.Index('hive_posts_payout_at_idx', 'payout_at'),
+        sa.Index('hive_posts_payout_idx', 'payout'),
+        sa.Index('hive_posts_promoted_idx', 'promoted'),
+        sa.Index('hive_posts_sc_trend_idx', 'sc_trend'),
+        sa.Index('hive_posts_sc_hot_idx', 'sc_hot'),
+        sa.Index('hive_posts_created_at_idx', 'created_at'),
+    )
 
-        # index: community ranked posts
-        sa.Index('hive_posts_cache_ix30', 'community_id', 'sc_trend',   'post_id',  postgresql_where=sql_text("community_id IS NOT NULL AND is_grayed = '0' AND depth = 0")),        # API: community trend
-        sa.Index('hive_posts_cache_ix31', 'community_id', 'sc_hot',     'post_id',  postgresql_where=sql_text("community_id IS NOT NULL AND is_grayed = '0' AND depth = 0")),        # API: community hot
-        sa.Index('hive_posts_cache_ix32', 'community_id', 'created_at', 'post_id',  postgresql_where=sql_text("community_id IS NOT NULL AND is_grayed = '0' AND depth = 0")),        # API: community created
-        sa.Index('hive_posts_cache_ix33', 'community_id', 'payout',     'post_id',  postgresql_where=sql_text("community_id IS NOT NULL AND is_grayed = '0' AND is_paidout = '0'")), # API: community payout
-        sa.Index('hive_posts_cache_ix34', 'community_id', 'payout',     'post_id',  postgresql_where=sql_text("community_id IS NOT NULL AND is_grayed = '1' AND is_paidout = '0'")), # API: community muted
-        sa.Index('hive_posts_cache_ix35', 'author', 'depth'),
+    sa.Table(
+        'hive_post_data', metadata,
+        sa.Column('id', sa.Integer, primary_key=True, autoincrement=False),
+        sa.Column('title', VARCHAR(512), nullable=False, server_default=''),
+        sa.Column('preview', VARCHAR(1024), nullable=False, server_default=''),
+        sa.Column('img_url', VARCHAR(1024), nullable=False, server_default=''),
+        sa.Column('body', TEXT, nullable=False, server_default=''),
+        sa.Column('json', TEXT, nullable=False, server_default='')
+    )
+
+    sa.Table(
+        'hive_permlink_data', metadata,
+        sa.Column('id', sa.BigInteger, primary_key=True),
+        sa.Column('permlink', sa.String(255), nullable=False),
+        sa.UniqueConstraint('permlink', name='hive_permlink_data_permlink')
+    )
+
+    sa.Table(
+        'hive_category_data', metadata,
+        sa.Column('id', sa.Integer, primary_key=True),
+        sa.Column('category', sa.String(255), nullable=False),
+        sa.UniqueConstraint('category', name='hive_category_data_category')
+    )
+
+    sa.Table(
+        'hive_votes', metadata,
+        sa.Column('id', sa.BigInteger, primary_key=True),
+        sa.Column('post_id', sa.Integer, nullable=False),
+        sa.Column('voter_id', sa.Integer, nullable=False),
+        sa.Column('author_id', sa.Integer, nullable=False),
+        sa.Column('permlink_id', sa.Integer, nullable=False),
+        sa.Column('weight', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('rshares', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('vote_percent', sa.Integer, server_default='0'),
+        sa.Column('last_update', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
+        sa.Column('num_changes', sa.Integer, server_default='0'),
+
+        sa.UniqueConstraint('voter_id', 'author_id', 'permlink_id', name='hive_votes_ux1'),
+
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id']),
+        sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),
+        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id']),
+        sa.ForeignKeyConstraint(['permlink_id'], ['hive_permlink_data.id']),
+
+        sa.Index('hive_votes_post_id_idx', 'post_id'),
+        sa.Index('hive_votes_voter_id_idx', 'voter_id'),
+        sa.Index('hive_votes_author_id_idx', 'author_id'),
+        sa.Index('hive_votes_permlink_id_idx', 'permlink_id'),
+        sa.Index('hive_votes_upvote_idx', 'vote_percent', postgresql_where=sql_text("vote_percent > 0")),
+        sa.Index('hive_votes_downvote_idx', 'vote_percent', postgresql_where=sql_text("vote_percent < 0"))
+    )
+
+    sa.Table(
+        'hive_tag_data', metadata,
+        sa.Column('id', sa.Integer, nullable=False, primary_key=True),
+        sa.Column('tag', VARCHAR(64), nullable=False, server_default=''),
+        sa.UniqueConstraint('tag', name='hive_tag_data_ux1')
+    )
+
+    sa.Table(
+        'hive_post_tags', metadata,
+        sa.Column('post_id', sa.Integer, nullable=False),
+        sa.Column('tag_id', sa.Integer, nullable=False),
+        sa.PrimaryKeyConstraint('post_id', 'tag_id', name='hive_post_tags_pk1'),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id']),
+        sa.ForeignKeyConstraint(['tag_id'], ['hive_tag_data.id']),
+    )
+
+    sa.Table(
+        'hive_follows', metadata,
+        sa.Column('follower', sa.Integer, nullable=False),
+        sa.Column('following', sa.Integer, nullable=False),
+        sa.Column('state', SMALLINT, nullable=False, server_default='1'),
+        sa.Column('created_at', sa.DateTime, nullable=False),
+        sa.Column('blacklisted', sa.Boolean, nullable=False, server_default='0'),
+        sa.Column('follow_blacklists', sa.Boolean, nullable=False, server_default='0'),
+
+        sa.PrimaryKeyConstraint('following', 'follower', name='hive_follows_pk'), # core
+        sa.Index('hive_follows_ix5a', 'following', 'state', 'created_at', 'follower'),
+        sa.Index('hive_follows_ix5b', 'follower', 'state', 'created_at', 'following'),
+    )
+
+    sa.Table(
+        'hive_reblogs', metadata,
+        sa.Column('account', VARCHAR(16), nullable=False),
+        sa.Column('post_id', sa.Integer, nullable=False),
+        sa.Column('created_at', sa.DateTime, nullable=False),
+
+        sa.ForeignKeyConstraint(['account'], ['hive_accounts.name'], name='hive_reblogs_fk1'),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_reblogs_fk2'),
+        sa.PrimaryKeyConstraint('account', 'post_id', name='hive_reblogs_pk'), # core
+        sa.Index('hive_reblogs_account', 'account'),
+        sa.Index('hive_reblogs_post_id', 'post_id'),
+    )
+
+    sa.Table(
+        'hive_payments', metadata,
+        sa.Column('id', sa.Integer, primary_key=True),
+        sa.Column('block_num', sa.Integer, nullable=False),
+        sa.Column('tx_idx', SMALLINT, nullable=False),
+        sa.Column('post_id', sa.Integer, nullable=False),
+        sa.Column('from_account', sa.Integer, nullable=False),
+        sa.Column('to_account', sa.Integer, nullable=False),
+        sa.Column('amount', sa.types.DECIMAL(10, 3), nullable=False),
+        sa.Column('token', VARCHAR(5), nullable=False),
+
+        sa.ForeignKeyConstraint(['from_account'], ['hive_accounts.id'], name='hive_payments_fk1'),
+        sa.ForeignKeyConstraint(['to_account'], ['hive_accounts.id'], name='hive_payments_fk2'),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_payments_fk3'),
+        sa.Index('hive_payments_from', 'from_account'),
+        sa.Index('hive_payments_to', 'to_account'),
+        sa.Index('hive_payments_post_id', 'post_id'),
+    )
+
+    sa.Table(
+        'hive_feed_cache', metadata,
+        sa.Column('post_id', sa.Integer, nullable=False, primary_key=True),
+        sa.Column('account_id', sa.Integer, nullable=False),
+        sa.Column('created_at', sa.DateTime, nullable=False),
+        sa.Index('hive_feed_cache_account_id', 'account_id'), # API (and rebuild?)
+        sa.UniqueConstraint('account_id', 'post_id', name='hive_feed_cache_ux1')
     )
 
     sa.Table(
         'hive_state', metadata,
         sa.Column('block_num', sa.Integer, primary_key=True, autoincrement=False),
         sa.Column('db_version', sa.Integer, nullable=False),
-        sa.Column('steem_per_mvest', sa.types.DECIMAL(8, 3), nullable=False),
-        sa.Column('usd_per_steem', sa.types.DECIMAL(8, 3), nullable=False),
-        sa.Column('sbd_per_steem', sa.types.DECIMAL(8, 3), nullable=False),
+        sa.Column('steem_per_mvest', sa.types.DECIMAL(14, 6), nullable=False),
+        sa.Column('usd_per_steem', sa.types.DECIMAL(14, 6), nullable=False),
+        sa.Column('sbd_per_steem', sa.types.DECIMAL(14, 6), nullable=False),
         sa.Column('dgpo', sa.Text, nullable=False),
     )
 
@@ -335,15 +387,200 @@ def setup(db):
     sqls = [
         "INSERT INTO hive_state (block_num, db_version, steem_per_mvest, usd_per_steem, sbd_per_steem, dgpo) VALUES (0, %d, 0, 0, 0, '')" % DB_VERSION,
         "INSERT INTO hive_blocks (num, hash, created_at) VALUES (0, '0000000000000000000000000000000000000000', '2016-03-24 16:04:57')",
+
+        "INSERT INTO hive_permlink_data (id, permlink) VALUES (0, '')",
+        "INSERT INTO hive_category_data (id, category) VALUES (0, '')",
+        "INSERT INTO hive_accounts (id, name, created_at) VALUES (0, '', '1990-01-01T00:00:00')",
+
         "INSERT INTO hive_accounts (name, created_at) VALUES ('miners',    '2016-03-24 16:05:00')",
         "INSERT INTO hive_accounts (name, created_at) VALUES ('null',      '2016-03-24 16:05:00')",
         "INSERT INTO hive_accounts (name, created_at) VALUES ('temp',      '2016-03-24 16:05:00')",
-        "INSERT INTO hive_accounts (name, created_at) VALUES ('initminer', '2016-03-24 16:05:00')"]
+        "INSERT INTO hive_accounts (name, created_at) VALUES ('initminer', '2016-03-24 16:05:00')",
+
+        """
+        INSERT INTO 
+            public.hive_posts(id, parent_id, author_id, permlink_id, category_id,
+                community_id, parent_author_id, parent_permlink_id, root_author_id, 
+                root_permlink_id, created_at, depth
+            )
+        VALUES 
+            (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, now(), 0);
+        """]
     for sql in sqls:
         db.query(sql)
 
     sql = "CREATE INDEX hive_communities_ft1 ON hive_communities USING GIN (to_tsvector('english', title || ' ' || about))"
     db.query(sql)
+
+    sql = """
+          DROP FUNCTION if exists process_hive_post_operation(character varying,character varying,character varying,character varying,timestamp without time zone,timestamp without time zone)
+          ;
+          CREATE OR REPLACE FUNCTION process_hive_post_operation(
+            in _author hive_accounts.name%TYPE,
+            in _permlink hive_permlink_data.permlink%TYPE,
+            in _parent_author hive_accounts.name%TYPE,
+            in _parent_permlink hive_permlink_data.permlink%TYPE,
+            in _date hive_posts.created_at%TYPE,
+            in _community_support_start_date hive_posts.created_at%TYPE)
+          RETURNS TABLE (id hive_posts.id%TYPE, author_id hive_posts.author_id%TYPE, permlink_id hive_posts.permlink_id%TYPE,
+                         post_category hive_category_data.category%TYPE, parent_id hive_posts.parent_id%TYPE, community_id hive_posts.community_id%TYPE,
+                         is_valid hive_posts.is_valid%TYPE, is_muted hive_posts.is_muted%TYPE, depth hive_posts.depth%TYPE,
+                         is_edited boolean)
+          LANGUAGE plpgsql
+          AS
+          $function$
+          BEGIN
+
+          INSERT INTO hive_permlink_data
+          (permlink)
+          values
+          (
+          _permlink
+          )
+          ON CONFLICT DO NOTHING
+          ;
+          if _parent_author != '' THEN
+            RETURN QUERY INSERT INTO hive_posts as hp
+            (parent_id, parent_author_id, parent_permlink_id, depth, community_id,
+             category_id,
+             root_author_id, root_permlink_id,
+             is_muted, is_valid,
+             author_id, permlink_id, created_at)
+            SELECT php.id AS parent_id, php.author_id as parent_author_id,
+                php.permlink_id as parent_permlink_id, php.depth + 1 as depth,
+                (CASE
+                WHEN _date > _community_support_start_date THEN
+                  COALESCE(php.community_id, (select hc.id from hive_communities hc where hc.name = _parent_permlink))
+                ELSE NULL
+              END)  as community_id,
+                COALESCE(php.category_id, (select hcg.id from hive_category_data hcg where hcg.category = _parent_permlink)) as category_id,
+                php.root_author_id as root_author_id, 
+                php.root_permlink_id as root_permlink_id, 
+                php.is_muted as is_muted, php.is_valid as is_valid,
+                ha.id as author_id, hpd.id as permlink_id, _date as created_at
+            FROM hive_accounts ha,
+                 hive_permlink_data hpd,
+                 hive_posts php
+            INNER JOIN hive_accounts pha ON pha.id = php.author_id
+            INNER JOIN hive_permlink_data phpd ON phpd.id = php.permlink_id
+            WHERE pha.name = _parent_author and phpd.permlink = _parent_permlink AND
+                   ha.name = _author and hpd.permlink = _permlink 
+
+            ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
+              --- During post update it is disallowed to change: parent-post, category, community-id
+              --- then also depth, is_valid and is_muted is impossible to change
+             --- post edit part 
+             updated_at = _date,
+
+              --- post undelete part (if was deleted)
+              is_deleted = (CASE hp.is_deleted
+                              WHEN true THEN false
+                              ELSE false
+                            END
+                           ),
+              is_pinned = (CASE hp.is_deleted
+                              WHEN true THEN false
+                              ELSE hp.is_pinned --- no change
+                            END
+                           )
+
+            RETURNING hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, (hp.updated_at > hp.created_at) as is_edited
+          ;
+          ELSE
+            INSERT INTO hive_category_data
+            (category) 
+            VALUES (_parent_permlink) 
+            ON CONFLICT (category) DO NOTHING
+            ;
+
+            RETURN QUERY INSERT INTO hive_posts as hp
+            (parent_id, parent_author_id, parent_permlink_id, depth, community_id,
+             category_id,
+             root_author_id, root_permlink_id,
+             is_muted, is_valid,
+             author_id, permlink_id, created_at)
+            SELECT 0 AS parent_id, 0 as parent_author_id, 0 as parent_permlink_id, 0 as depth,
+                (CASE
+                  WHEN _date > _community_support_start_date THEN
+                    (select hc.id from hive_communities hc where hc.name = _parent_permlink)
+                  ELSE NULL
+                END)  as community_id,
+                (select hcg.id from hive_category_data hcg where hcg.category = _parent_permlink) as category_id,
+                ha.id as root_author_id, -- use author_id as root one if no parent
+                hpd.id as root_permlink_id, -- use perlink_id as root one if no parent
+                false as is_muted, true as is_valid,
+                ha.id as author_id, hpd.id as permlink_id, _date as created_at
+            FROM hive_accounts ha,
+                 hive_permlink_data hpd
+            WHERE ha.name = _author and hpd.permlink = _permlink 
+
+            ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
+              --- During post update it is disallowed to change: parent-post, category, community-id
+              --- then also depth, is_valid and is_muted is impossible to change
+              --- post edit part 
+              updated_at = _date,
+
+              --- post undelete part (if was deleted)
+              is_deleted = (CASE hp.is_deleted
+                              WHEN true THEN false
+                              ELSE false
+                            END
+                           ),
+              is_pinned = (CASE hp.is_deleted
+                              WHEN true THEN false
+                              ELSE hp.is_pinned --- no change
+                            END
+                           )
+
+            RETURNING hp.id, hp.author_id, hp.permlink_id, _parent_permlink as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, (hp.updated_at > hp.created_at) as is_edited
+            ;
+          END IF;
+          END
+          $function$
+    """
+    db.query_no_return(sql)
+
+    sql = """
+          DROP FUNCTION if exists delete_hive_post(character varying,character varying,character varying)
+          ;
+          CREATE OR REPLACE FUNCTION delete_hive_post(
+            in _author hive_accounts.name%TYPE,
+            in _permlink hive_permlink_data.permlink%TYPE)
+          RETURNS TABLE (id hive_posts.id%TYPE, depth hive_posts.depth%TYPE)
+          LANGUAGE plpgsql
+          AS
+          $function$
+          BEGIN
+            RETURN QUERY UPDATE hive_posts AS hp
+              SET is_deleted = false
+            FROM hive_posts hp1
+            INNER JOIN hive_accounts ha ON hp1.author_id = ha.id
+            INNER JOIN hive_permlink_data hpd ON hp1.permlink_id = hpd.id
+            WHERE hp.id = hp1.id AND ha.name = _author AND hpd.permlink = _permlink
+            RETURNING hp.id, hp.depth;
+          END
+          $function$
+          """
+    db.query_no_return(sql)
+
+    sql = """
+        DROP MATERIALIZED VIEW IF EXISTS hive_posts_a_p
+        ;
+        CREATE MATERIALIZED VIEW hive_posts_a_p
+        AS
+        SELECT hp.id AS id,
+            ha_a.name AS author,
+            hpd_p.permlink AS permlink
+        FROM hive_posts hp
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        WITH DATA
+        ;
+        DROP INDEX IF EXISTS hive_posts_a_p_idx
+        ;
+        CREATE unique index hive_posts_a_p_idx ON hive_posts_a_p (author collate "C", permlink collate "C")
+    """
+    db.query_no_return(sql)
 
 def reset_autovac(db):
     """Initializes/resets per-table autovacuum/autoanalyze params.
@@ -353,7 +590,6 @@ def reset_autovac(db):
 
     autovac_config = { #    vacuum  analyze
         'hive_accounts':    (50000, 100000),
-        'hive_posts_cache': (25000, 25000),
         'hive_posts':       (2500, 10000),
         'hive_post_tags':   (5000, 10000),
         'hive_follows':     (5000, 5000),
