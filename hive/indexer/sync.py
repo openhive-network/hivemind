@@ -60,10 +60,10 @@ def _block_provider(node, queue, lbound, ubound, chunk_size):
         while CONTINUE_PROCESSING and lbound < ubound:
             to = min(lbound + chunk_size, ubound)
             timer.batch_start()
-            blocks = node.get_blocks_range(lbound, to)
+            block_infos = node.enum_block_operations(lbound, to)
             lbound = to
             timer.batch_lap()
-            queue.put(blocks)
+            queue.put(block_infos)
             num = num + 1
         return num
     except KeyboardInterrupt:
@@ -95,7 +95,7 @@ def _vops_provider(node, queue, lbound, ubound, chunk_size):
     except Exception:
         log.exception("Exception caught during fetching vops...")
 
-def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size):
+def _block_consumer(node, blocksQueue, is_initial_sync, lbound, ubound, chunk_size):
     num = 0
     try:
         count = ubound - lbound
@@ -111,29 +111,25 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
                 blocks = blocksQueue.get()
                 blocksQueue.task_done()
 
-            if vopsQueue.empty() and CONTINUE_PROCESSING:
-                log.info("Awaiting any vops to process...")
-            
-            preparedVops = []
-            if not vopsQueue.empty() or CONTINUE_PROCESSING:
-                preparedVops = vopsQueue.get()
-                vopsQueue.task_done()
-
             to = min(lbound + chunk_size, ubound)
 
             timer.batch_start()
             
             block_start = perf()
-            ops_stats = dict(Blocks.process_multi(blocks, preparedVops, node, is_initial_sync))
+            ops_stats = dict(Blocks.process_multi(blocks, node, is_initial_sync))
             Blocks.ops_stats.clear()
             block_end = perf()
 
             timer.batch_lap()
-            timer.batch_finish(len(blocks))
+            block_list = blocks["ops_by_block"]
+            timer.batch_finish(len(block_list))
             time_current = perf()
 
+            last_block_info = block_list[-1];
+            last_block = last_block_info["block"]
+
             prefix = ("[SYNC] Got block %d @ %s" % (
-                to - 1, blocks[-1]['timestamp']))
+                to - 1, last_block['timestamp']))
             log.info(timer.batch_status(prefix))
             log.info("[SYNC] Time elapsed: %fs", time_current - time_start)
 
@@ -146,7 +142,7 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
 
             num = num + 1
 
-            if not CONTINUE_PROCESSING and blocksQueue.empty() and vopsQueue.empty():
+            if not CONTINUE_PROCESSING and blocksQueue.empty():
                 break
 
         print_ops_stats("All operations present in the processed blocks:", total_ops_stats)
@@ -159,17 +155,15 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
 
 def _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size):
     blocksQueue = queue.Queue(maxsize=10)
-    vopsQueue = queue.Queue(maxsize=10)
     global CONTINUE_PROCESSING
 
     with ThreadPoolExecutor(max_workers = 4) as pool:
         try:
             pool.submit(_block_provider, self._steem, blocksQueue, lbound, ubound, chunk_size)
-            pool.submit(_vops_provider, self._steem, vopsQueue, lbound, ubound, chunk_size)
-            blockConsumerFuture = pool.submit(_block_consumer, self._steem, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size)
+            blockConsumerFuture = pool.submit(_block_consumer, self._steem, blocksQueue, is_initial_sync, lbound, ubound, chunk_size)
 
             blockConsumerFuture.result()
-            if not CONTINUE_PROCESSING and blocksQueue.empty() and vopsQueue.empty():
+            if not CONTINUE_PROCESSING and blocksQueue.empty():
                 pool.shutdown(False)
         except KeyboardInterrupt:
             log.info(""" **********************************************************
@@ -178,7 +172,6 @@ def _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size):
             """)
             CONTINUE_PROCESSING = False
     blocksQueue.join()
-    vopsQueue.join()
 
 class Sync:
     """Manages the sync/index process.
@@ -319,18 +312,20 @@ class Sync:
 
             # fetch blocks
             to = min(lbound + chunk_size, ubound)
-            blocks = steemd.get_blocks_range(lbound, to)
-            vops = steemd.enum_virtual_ops(lbound, to)
-            preparedVops = prepare_vops(vops)
+            blocks = steemd.enum_block_operations(lbound, to)
             lbound = to
             timer.batch_lap()
 
             # process blocks
-            Blocks.process_multi(blocks, preparedVops, steemd, is_initial_sync)
-            timer.batch_finish(len(blocks))
+            Blocks.process_multi(blocks, steemd, is_initial_sync)
 
+            block_info_list = blocks["ops_by_block"]
+            last_block_info = block_info_list[-1];
+            last_block = last_block_info["block"]
+
+            timer.batch_finish(len(block_info_list))
             _prefix = ("[SYNC] Got block %d @ %s" % (
-                to - 1, blocks[-1]['timestamp']))
+                to - 1, last_block['timestamp']))
             log.info(timer.batch_status(_prefix))
 
         if not is_initial_sync:
@@ -359,7 +354,7 @@ class Sync:
             start_time = perf()
 
             self._db.query("START TRANSACTION")
-            num = Blocks.process(block, {}, steemd)
+            num = Blocks.process(block, steemd)
             follows = Follow.flush(trx=False)
             accts = Accounts.flush(steemd, trx=False, spread=8)
             self._db.query("COMMIT")
