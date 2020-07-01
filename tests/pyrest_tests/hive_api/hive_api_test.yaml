@@ -11,14 +11,16 @@
     - generator_binds:
       - test_id: test_id
     - group: *api
-    - url: "/rpc"
+    - url: "/"
     - method: "POST"
     - body: {template: {file: "../templates/request_template.json"}}
     - validators:
       - extract_test: {jsonpath_mini: "error", test: "not_exists"}
       - extract_test: {jsonpath_mini: "result", test: "exists"}
+      - extract_test: {jsonpath_mini: "result.db_head_block", test: "exists"}
+      - extract_test: {jsonpath_mini: "result.db_head_time", test: "exists"}
+      - extract_test: {jsonpath_mini: "result.db_head_age", test: "exists"}
       - compare: {jsonpath_mini: "id", comparator: "str_eq", expected: {template: $test_id}}
-      - json_file_validator: {jsonpath_mini: "result", comparator: "json_compare", expected: {template: '$api/$method'}}
   
   - test:
     - name: "db_head_state"

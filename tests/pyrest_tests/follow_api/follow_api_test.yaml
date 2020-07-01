@@ -11,7 +11,7 @@
     - generator_binds:
       - test_id: test_id
     - group: *api
-    - url: "/rpc"
+    - url: "/"
     - method: "POST"
     - body: {template: {file: "../templates/request_template.json"}}
     - validators:

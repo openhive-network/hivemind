@@ -1,189 +1,191 @@
 ---
   - config:
-    - testset: "Condenser API Tests"
-    - api: &api "condenser_api"
+    - testset: "Hive API Benchmark Tests"
+    - api: &api "hive"
     - variable_binds:
       - api: *api
     - generators:
       - test_id: {type: 'number_sequence', start: 1}
-  
-  - base_test: &base_test
+
+  - base_benchmark: &base_benchmark
+    - url: "/"
+    - group: *api
+    - method: "POST"
     - generator_binds:
       - test_id: test_id
-    - group: *api
-    - url: "/"
-    - method: "POST"
-    - body: {template: {file: "../templates/request_template.json"}}
-    - validators:
-      - extract_test: {jsonpath_mini: "error", test: "not_exists"}
-      - extract_test: {jsonpath_mini: "result", test: "exists"}
-      - compare: {jsonpath_mini: "id", comparator: "str_eq", expected: {template: $test_id}}
-      - json_file_validator: {jsonpath_mini: "result", comparator: "json_compare", expected: {template: '$api/$method'}}
+    - body: {template: {file: "./templates/request_template.json"}}
+    - warmup_runs: 0
+    - benchmark_runs: '1000'
+    - output_format: csv
+    - metrics:
+      - total_time
+      - total_time: mean
+      - total_time: median
 
-  - test:
+  - benchmark:
     - name: "get_followers"
     - variable_binds:
       - method: "get_followers"
       - args: {"account":"steemit","start":null,"type":"blog","limit":10}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_following"
     - variable_binds:
       - method: "get_following"
       - args: {"account":"steemit","start":null,"type":"blog","limit":10}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_follow_count"
     - variable_binds:
       - method: "get_follow_count"
       - args: {"account":"steemit"}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_content"
     - variable_binds:
       - method: "get_content"
       - args: {"author":"steemit", "permlink":"firstpost"}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_content_replies"
     - variable_binds:
       - method: "get_content_replies"
       - args: {"author":"steemit", "permlink":"firstpost"}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_state"
     - variable_binds:
       - method: "get_state"
       - args: {}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_trending_tags"
     - variable_binds:
       - method: "get_trending_tags"
       - args: {"start_tag":"steem","limit":10}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_discussions_by_trending"
     - variable_binds:
       - method: "get_discussions_by_trending"
       - args: {"tag":"steem","limit":1}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_discussions_by_hot"
     - variable_binds:
       - method: "get_discussions_by_hot"
       - args: {"tag":"steem","limit":1}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_discussions_by_promoted"
     - variable_binds:
       - method: "get_discussions_by_promoted"
       - args: {"tag":"steem","limit":1}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_discussions_by_created"
     - variable_binds:
       - method: "get_discussions_by_created"
       - args: {"tag":"steem","limit":1}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_discussions_by_blog"
     - variable_binds:
       - method: "get_discussions_by_blog"
       - args: {"tag":"steemit","limit":1}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_discussions_by_feed"
     - variable_binds:
       - method: "get_discussions_by_feed"
       - args: {"tag":"steem","limit":1}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_discussions_by_comments"
     - variable_binds:
       - method: "get_discussions_by_comments"
       - args: {"start_author":"steemit","start_permlink":"firstpost","limit":1}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_replies_by_last_update"
     - variable_binds:
       - method: "get_replies_by_last_update"
       - args: {"start_parent_author":"steemit","start_permlink":"firstpost","limit":1}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_discussions_by_author_before_date"
     - variable_binds:
       - method: "get_discussions_by_author_before_date"
       - args: {"author":"steemit","start_permlink":"firstpost","before_date":"2016-04-19T22:49:43","limit":1}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_post_discussions_by_payout"
     - variable_binds:
       - method: "get_post_discussions_by_payout"
       - args: {"tag":"steem","limit":1}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_comment_discussions_by_payout"
     - variable_binds:
       - method: "get_comment_discussions_by_payout"
       - args: {"tag":"steem","limit":1}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_blog"
     - variable_binds:
       - method: "get_blog"
       - args: {"account":"steemit","start_entry_id":0,"limit":1}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_blog_entries"
     - variable_binds:
       - method: "get_blog_entries"
       - args: {"account":"steemit","start_entry_id":0,"limit":1}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_account_reputations"
     - variable_binds:
       - method: "get_account_reputations"
       - args: {"account_lower_bound": "steem"}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_reblogged_by"
     - variable_binds:
       - method: "get_reblogged_by"
       - args: {"author":"steemit","permlink":"firstpost"}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_accounts"
     - variable_binds:
       - method: "get_accounts"
       - args: {["steemit"]}
-    - <<: *base_test
+    - <<: *base_benchmark
 
-  - test:
+  - benchmark:
     - name: "get_account_votes"
     - variable_binds:
       - method: "get_account_votes"
       - args: {["steemit"]}
-    - <<: *base_test
+    - <<: *base_benchmark

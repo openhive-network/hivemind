@@ -4,6 +4,6 @@
 - test:
   - name: "Test ip address"
   - group: "basic_smoketest"
-  - url: "/rpc"
+  - url: "/"
   - method: "POST"
   - body: '{}'
