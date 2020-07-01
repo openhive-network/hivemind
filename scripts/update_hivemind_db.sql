@@ -351,7 +351,7 @@ ON CONFLICT ON CONSTRAINT hive_post_tags_pk1 DO NOTHING;
 
 -- RAISE NOTICE 'Drop old hive_post_tags' and rename new table to old name;
 DROP TABLE IF EXISTS hive_post_tags;
-ALTER TABLE hive_post_tags_new RENAME hive_post_tags;
+ALTER TABLE hive_post_tags_new RENAME TO hive_post_tags;
 
 -- Drop and rename tables after data migration
 -- RAISE NOTICE 'Droping tables';
