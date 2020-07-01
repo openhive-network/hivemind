@@ -319,6 +319,40 @@ FROM (SELECT id, parent_author, parent_permlink, curator_payout_value, root_auth
   beneficiaries, url, root_title FROM legacy_comment_data) AS lcd
 WHERE lcd.id = hpn.id;
 
+-- RAISE NOTICE 'Create new table structure for tags';
+CREATE TABLE hive_tag_data (
+  id SERIAL PRIMARY KEY NOT NULL,
+  tag VARCHAR(64) NOT NULL CONSTRAINT hive_tag_data_ux1 UNIQUE
+);
+
+CREATE TABLE hive_post_tags_new(
+  post_id INT REFERENCES hive_posts (id) ON DELETE RESTRICT,
+  tag_id INT REFERENCES hive_tag_data (id) ON DELETE RESTRICT,
+  CONSTRAINT hive_post_tags_pk1 PRIMARY KEY (post_id, tag_id)
+);
+
+-- RAISE NOTICE 'Copy tags data to new table';
+INSERT INTO 
+  hive_tag_data (tag) 
+  SELECT 
+    tag 
+  FROM 
+    hive_post_tags 
+ON CONFLICT (tag) DO NOTHING;
+
+INSERT INTO 
+  hive_post_tags_new (post_id, tag_id) 
+  SELECT 
+    hpt.post_id, htd.id 
+  FROM
+    hive_post_tags hpt
+  INNER JOIN hive_tag_data htd ON htd.tag = hpt.tag
+ON CONFLICT ON CONSTRAINT hive_post_tags_pk1 DO NOTHING;
+
+-- RAISE NOTICE 'Drop old hive_post_tags' and rename new table to old name;
+DROP TABLE IF EXISTS hive_post_tags;
+ALTER TABLE hive_post_tags_new RENAME hive_post_tags;
+
 -- Drop and rename tables after data migration
 -- RAISE NOTICE 'Droping tables';
 DROP TYPE IF EXISTS legacy_comment_type;
