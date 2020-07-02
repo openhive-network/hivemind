@@ -30,8 +30,8 @@ def dict_str_eq(x, y):
     return x == y
 
 COMPARATORS = {'dict_str_eq': dict_str_eq}
-PATTERN_FILE_EXT = ".json.pat"
-OUTPUT_FILE_EXT = ".json.out"
+PATTERN_FILE_EXT = ".pat.json"
+OUTPUT_FILE_EXT = ".out.json"
 
 def dump_output(output_file_name, output):
     """ Dump JSON output to the file. """
