@@ -24,124 +24,124 @@
     - name: "get_discussion"
     - variable_binds:
       - method: "get_discussion"
-      - args: {}
+      - args: {"author":"steemit", "permlink":"firstpost"}
     - <<: *base_test
 
   - test:
     - name: "get_content_replies"
     - variable_binds:
       - method: "get_content_replies"
-      - args: {}
+      - args: {"author":"steemit", "permlink":"firstpost"}
     - <<: *base_test
 
   - test:
     - name: "get_discussions_by_trending"
     - variable_binds:
       - method: "get_discussions_by_trending"
-      - args: {}
+      - args: {"tag":"steem","limit":1}
     - <<: *base_test
 
   - test:
     - name: "get_discussions_by_hot"
     - variable_binds:
       - method: "get_discussions_by_hot"
-      - args: {}
+      - args: {"tag":"steem","limit":1}
     - <<: *base_test
 
   - test:
     - name: "get_discussions_by_promoted"
     - variable_binds:
       - method: "get_discussions_by_promoted"
-      - args: {}
+      - args: {"tag":"steem","limit":1}
     - <<: *base_test
 
   - test:
     - name: "get_discussions_by_created"
     - variable_binds:
       - method: "get_discussions_by_created"
-      - args: {}
+      - args: {"tag":"steem","limit":1}
     - <<: *base_test
 
   - test:
     - name: "get_discussions_by_blog"
     - variable_binds:
       - method: "get_discussions_by_blog"
-      - args: {}
+      - args: {"tag":"steemit","limit":1}
     - <<: *base_test
 
   - test:
     - name: "get_discussions_by_comments"
     - variable_binds:
       - method: "get_discussions_by_comments"
-      - args: {}
+      - args: {"start_author":"steemit","start_permlink":"firstpost","limit":1}
     - <<: *base_test
 
   - test:
     - name: "get_discussions_by_author_before_date"
     - variable_binds:
       - method: "get_discussions_by_author_before_date"
-      - args: {}
+      - args: {"author":"steemit","start_permlink":"firstpost","before_date":"2016-04-19T22:49:43","limit":1}
     - <<: *base_test
 
   - test:
     - name: "get_post_discussions_by_payout"
     - variable_binds:
       - method: "get_post_discussions_by_payout"
-      - args: {}
+      - args: {"tag":"steem","limit":1}
     - <<: *base_test
 
   - test:
     - name: "get_comment_discussions_by_payout"
     - variable_binds:
       - method: "get_comment_discussions_by_payout"
-      - args: {}
+      - args: {"tag":"steem","limit":1}
     - <<: *base_test
 
   - test:
     - name: "get_active_votes"
     - variable_binds:
       - method: "get_active_votes"
-      - args: {}
+      - args: {"author":"steemit", "permlink":"firstpost"}
     - <<: *base_test
 
   - test:
     - name: "get_tags_used_by_author"
     - variable_binds:
       - method: "get_tags_used_by_author"
-      - args: {}
+      - args: {"author":"steemit"}
     - <<: *base_test
 
   - test:
     - name: "get_discussions_by_active"
     - variable_binds:
       - method: "get_discussions_by_active"
-      - args: {}
+      - args: {"tag":"steem","limit":1}
     - <<: *base_test
 
   - test:
     - name: "get_discussions_by_cashout"
     - variable_binds:
       - method: "get_discussions_by_cashout"
-      - args: {}
+      - args: {"tag":"steem","limit":1}
     - <<: *base_test
 
   - test:
     - name: "get_discussions_by_votes"
     - variable_binds:
       - method: "get_discussions_by_votes"
-      - args: {}
+      - args: {"tag":"steem","limit":1}
     - <<: *base_test
 
   - test:
     - name: "get_discussions_by_children"
     - variable_binds:
       - method: "get_discussions_by_children"
-      - args: {}
+      - args: {"tag":"steem","limit":1}
     - <<: *base_test
 
   - test:
     - name: "get_account_votes"
     - variable_binds:
       - method: "get_account_votes"
-      - args: {}
+      - args: {"account":"steemit"}
     - <<: *base_test

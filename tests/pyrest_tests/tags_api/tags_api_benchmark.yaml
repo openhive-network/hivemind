@@ -21,3 +21,129 @@
       - total_time
       - total_time: mean
       - total_time: median
+
+  - benchmark:
+    - name: "get_discussion"
+    - variable_binds:
+      - method: "get_discussion"
+      - args: {"author":"steemit", "permlink":"firstpost"}
+    - <<: *base_benchmark
+
+  - benchmark:
+    - name: "get_content_replies"
+    - variable_binds:
+      - method: "get_content_replies"
+      - args: {"author":"steemit", "permlink":"firstpost"}
+    - <<: *base_benchmark
+
+  - benchmark:
+    - name: "get_discussions_by_trending"
+    - variable_binds:
+      - method: "get_discussions_by_trending"
+      - args: {"tag":"steem","limit":1}
+    - <<: *base_benchmark
+
+  - benchmark:
+    - name: "get_discussions_by_hot"
+    - variable_binds:
+      - method: "get_discussions_by_hot"
+      - args: {"tag":"steem","limit":1}
+    - <<: *base_benchmark
+
+  - benchmark:
+    - name: "get_discussions_by_promoted"
+    - variable_binds:
+      - method: "get_discussions_by_promoted"
+      - args: {"tag":"steem","limit":1}
+    - <<: *base_benchmark
+
+  - benchmark:
+    - name: "get_discussions_by_created"
+    - variable_binds:
+      - method: "get_discussions_by_created"
+      - args: {"tag":"steem","limit":1}
+    - <<: *base_benchmark
+
+  - benchmark:
+    - name: "get_discussions_by_blog"
+    - variable_binds:
+      - method: "get_discussions_by_blog"
+      - args: {"tag":"steemit","limit":1}
+    - <<: *base_benchmark
+
+  - benchmark:
+    - name: "get_discussions_by_comments"
+    - variable_binds:
+      - method: "get_discussions_by_comments"
+      - args: {"start_author":"steemit","start_permlink":"firstpost","limit":1}
+    - <<: *base_benchmark
+
+  - benchmark:
+    - name: "get_discussions_by_author_before_date"
+    - variable_binds:
+      - method: "get_discussions_by_author_before_date"
+      - args: {"author":"steemit","start_permlink":"firstpost","before_date":"2016-04-19T22:49:43","limit":1}
+    - <<: *base_benchmark
+
+  - benchmark:
+    - name: "get_post_discussions_by_payout"
+    - variable_binds:
+      - method: "get_post_discussions_by_payout"
+      - args: {"tag":"steem","limit":1}
+    - <<: *base_benchmark
+
+  - benchmark:
+    - name: "get_comment_discussions_by_payout"
+    - variable_binds:
+      - method: "get_comment_discussions_by_payout"
+      - args: {"tag":"steem","limit":1}
+    - <<: *base_benchmark
+
+  - benchmark:
+    - name: "get_active_votes"
+    - variable_binds:
+      - method: "get_active_votes"
+      - args: {"author":"steemit", "permlink":"firstpost"}
+    - <<: *base_benchmark
+
+  - benchmark:
+    - name: "get_tags_used_by_author"
+    - variable_binds:
+      - method: "get_tags_used_by_author"
+      - args: {"author":"steemit"}
+    - <<: *base_benchmark
+
+  - benchmark:
+    - name: "get_discussions_by_active"
+    - variable_binds:
+      - method: "get_discussions_by_active"
+      - args: {"tag":"steem","limit":1}
+    - <<: *base_benchmark
+
+  - benchmark:
+    - name: "get_discussions_by_cashout"
+    - variable_binds:
+      - method: "get_discussions_by_cashout"
+      - args: {"tag":"steem","limit":1}
+    - <<: *base_benchmark
+
+  - benchmark:
+    - name: "get_discussions_by_votes"
+    - variable_binds:
+      - method: "get_discussions_by_votes"
+      - args: {"tag":"steem","limit":1}
+    - <<: *base_benchmark
+
+  - benchmark:
+    - name: "get_discussions_by_children"
+    - variable_binds:
+      - method: "get_discussions_by_children"
+      - args: {"tag":"steem","limit":1}
+    - <<: *base_benchmark
+
+  - benchmark:
+    - name: "get_account_votes"
+    - variable_binds:
+      - method: "get_account_votes"
+      - args: {"account":"steemit"}
+    - <<: *base_benchmark
