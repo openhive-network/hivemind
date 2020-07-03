@@ -170,9 +170,10 @@ class CustomOp:
             if not DbState.is_initial_sync():
                 author_id = Accounts.get_id(author)
                 blogger_id = Accounts.get_id(blogger)
-                result = dict(row)
-                post_id = result['post_id']
-                FeedCache.insert(post_id, blogger_id, block_date)
-                Notify('reblog', src_id=blogger_id, dst_id=author_id,
-                       post_id=post_id, when=block_date,
-                       score=Accounts.default_score(blogger)).write()
+                if row is not None:
+                    result = dict(row)
+                    post_id = result['post_id']
+                    FeedCache.insert(post_id, blogger_id, block_date)
+                    Notify('reblog', src_id=blogger_id, dst_id=author_id,
+                        post_id=post_id, when=block_date,
+                        score=Accounts.default_score(blogger)).write()

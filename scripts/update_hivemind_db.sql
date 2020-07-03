@@ -386,6 +386,10 @@ ALTER TABLE hive_posts ADD CONSTRAINT hive_posts_ux1 UNIQUE (author_id, permlink
 
 ALTER TABLE hive_post_tags ADD CONSTRAINT hive_post_tags_new_post_id_fkey FOREIGN KEY (post_id) REFERENCES hive_posts(id);
 
+ALTER TABLE hive_follows
+  ADD COLUMN blacklisted BOOLEAN NOT NULL DEFAULT FALSE,
+  ADD COLUMN follow_blacklists BOOLEAN NOT NULL DEFAULT FALSE;
+
 -- Make indexes in hive_posts
 -- RAISE NOTICE 'Creating indexes';
 
