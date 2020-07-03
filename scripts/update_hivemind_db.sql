@@ -28,7 +28,7 @@ INSERT INTO hive_db_version (version, notes) VALUES ('1.0', 'https://gitlab.sync
 
 -- add special author value, empty author to accounts table
 -- RAISE NOTICE 'add special author value, empty author to accounts table';
-INSERT INTO hive_accounts (name, created_at) VALUES ('', '1990-01-01T00:00:00');
+INSERT INTO hive_accounts (name, created_at) VALUES (0, '', '1990-01-01T00:00:00');
 
 -- Table to hold permlink dictionary, permlink is unique
 -- RAISE NOTICE 'Table to hold permlink dictionary, permlink is unique';
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS hive_permlink_data (
 -- Populate hive_permlink_data
 -- insert special permlink, empty permlink
 -- RAISE NOTICE 'insert special permlink, empty permlink';
-INSERT INTO hive_permlink_data (permlink) VALUES ('');
+INSERT INTO hive_permlink_data (permlink) VALUES (0, '');
 -- run on permlink field of hive_posts_cache
 -- RAISE NOTICE 'run on permlink field of hive_posts_cache';
 INSERT INTO hive_permlink_data (permlink) SELECT permlink FROM hive_posts ON CONFLICT (permlink) DO NOTHING;
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS hive_category_data (
 -- Populate hive_category_data
 -- insert special category, empty category
 -- RAISE NOTICE 'insert special category, empty category';
-INSERT INTO hive_category_data (category) VALUES ('');
+INSERT INTO hive_category_data (category) VALUES (0, '');
 -- run on category field of hive_posts_cache
 -- RAISE NOTICE 'run on category field of hive_posts_cache';
 INSERT INTO hive_category_data (category) SELECT category FROM hive_posts ON CONFLICT (category) DO NOTHING;
@@ -405,6 +405,159 @@ CREATE INDEX IF NOT EXISTS hive_posts_sc_trend_idx ON hive_posts (sc_trend);
 CREATE INDEX IF NOT EXISTS hive_posts_sc_hot_idx ON hive_posts (sc_hot);
 
 CREATE INDEX IF NOT EXISTS hive_posts_created_at_idx ON hive_posts (created_at);
+
+INSERT INTO 
+    public.hive_posts(id, parent_id, author_id, permlink_id, category_id,
+        community_id, parent_author_id, parent_permlink_id, root_author_id, 
+        root_permlink_id, created_at, depth
+    )
+VALUES 
+    (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, now(), 0);
+
+CREATE INDEX hive_communities_ft1 ON hive_communities USING GIN (to_tsvector('english', title || ' ' || about));
+
+DROP FUNCTION if exists process_hive_post_operation(character varying,character varying,character varying,character varying,timestamp without time zone,timestamp without time zone);
+CREATE OR REPLACE FUNCTION process_hive_post_operation(
+  in _author hive_accounts.name%TYPE,
+  in _permlink hive_permlink_data.permlink%TYPE,
+  in _parent_author hive_accounts.name%TYPE,
+  in _parent_permlink hive_permlink_data.permlink%TYPE,
+  in _date hive_posts.created_at%TYPE,
+  in _community_support_start_date hive_posts.created_at%TYPE)
+RETURNS TABLE (id hive_posts.id%TYPE, author_id hive_posts.author_id%TYPE, permlink_id hive_posts.permlink_id%TYPE,
+                post_category hive_category_data.category%TYPE, parent_id hive_posts.parent_id%TYPE, community_id hive_posts.community_id%TYPE,
+                is_valid hive_posts.is_valid%TYPE, is_muted hive_posts.is_muted%TYPE, depth hive_posts.depth%TYPE,
+                is_edited boolean)
+LANGUAGE plpgsql
+AS
+$function$
+BEGIN
+
+INSERT INTO hive_permlink_data
+(permlink)
+values
+(
+_permlink
+)
+ON CONFLICT DO NOTHING
+;
+if _parent_author != '' THEN
+  RETURN QUERY INSERT INTO hive_posts as hp
+  (parent_id, parent_author_id, parent_permlink_id, depth, community_id,
+    category_id,
+    root_author_id, root_permlink_id,
+    is_muted, is_valid,
+    author_id, permlink_id, created_at)
+  SELECT php.id AS parent_id, php.author_id as parent_author_id,
+      php.permlink_id as parent_permlink_id, php.depth + 1 as depth,
+      (CASE
+      WHEN _date > _community_support_start_date THEN
+        COALESCE(php.community_id, (select hc.id from hive_communities hc where hc.name = _parent_permlink))
+      ELSE NULL
+    END)  as community_id,
+      COALESCE(php.category_id, (select hcg.id from hive_category_data hcg where hcg.category = _parent_permlink)) as category_id,
+      php.root_author_id as root_author_id, 
+      php.root_permlink_id as root_permlink_id, 
+      php.is_muted as is_muted, php.is_valid as is_valid,
+      ha.id as author_id, hpd.id as permlink_id, _date as created_at
+  FROM hive_accounts ha,
+        hive_permlink_data hpd,
+        hive_posts php
+  INNER JOIN hive_accounts pha ON pha.id = php.author_id
+  INNER JOIN hive_permlink_data phpd ON phpd.id = php.permlink_id
+  WHERE pha.name = _parent_author and phpd.permlink = _parent_permlink AND
+          ha.name = _author and hpd.permlink = _permlink 
+
+  ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
+    --- During post update it is disallowed to change: parent-post, category, community-id
+    --- then also depth, is_valid and is_muted is impossible to change
+    --- post edit part 
+    updated_at = _date,
+
+    --- post undelete part (if was deleted)
+    is_deleted = (CASE hp.is_deleted
+                    WHEN true THEN false
+                    ELSE false
+                  END
+                  ),
+    is_pinned = (CASE hp.is_deleted
+                    WHEN true THEN false
+                    ELSE hp.is_pinned --- no change
+                  END
+                  )
+
+  RETURNING hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, (hp.updated_at > hp.created_at) as is_edited
+;
+ELSE
+  INSERT INTO hive_category_data
+  (category) 
+  VALUES (_parent_permlink) 
+  ON CONFLICT (category) DO NOTHING
+  ;
+
+  RETURN QUERY INSERT INTO hive_posts as hp
+  (parent_id, parent_author_id, parent_permlink_id, depth, community_id,
+    category_id,
+    root_author_id, root_permlink_id,
+    is_muted, is_valid,
+    author_id, permlink_id, created_at)
+  SELECT 0 AS parent_id, 0 as parent_author_id, 0 as parent_permlink_id, 0 as depth,
+      (CASE
+        WHEN _date > _community_support_start_date THEN
+          (select hc.id from hive_communities hc where hc.name = _parent_permlink)
+        ELSE NULL
+      END)  as community_id,
+      (select hcg.id from hive_category_data hcg where hcg.category = _parent_permlink) as category_id,
+      ha.id as root_author_id, -- use author_id as root one if no parent
+      hpd.id as root_permlink_id, -- use perlink_id as root one if no parent
+      false as is_muted, true as is_valid,
+      ha.id as author_id, hpd.id as permlink_id, _date as created_at
+  FROM hive_accounts ha,
+        hive_permlink_data hpd
+  WHERE ha.name = _author and hpd.permlink = _permlink 
+
+  ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
+    --- During post update it is disallowed to change: parent-post, category, community-id
+    --- then also depth, is_valid and is_muted is impossible to change
+    --- post edit part 
+    updated_at = _date,
+
+    --- post undelete part (if was deleted)
+    is_deleted = (CASE hp.is_deleted
+                    WHEN true THEN false
+                    ELSE false
+                  END
+                  ),
+    is_pinned = (CASE hp.is_deleted
+                    WHEN true THEN false
+                    ELSE hp.is_pinned --- no change
+                  END
+                  )
+
+  RETURNING hp.id, hp.author_id, hp.permlink_id, _parent_permlink as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, (hp.updated_at > hp.created_at) as is_edited
+  ;
+END IF;
+END
+$function$;
+
+DROP FUNCTION if exists delete_hive_post(character varying,character varying,character varying);
+CREATE OR REPLACE FUNCTION delete_hive_post(
+  in _author hive_accounts.name%TYPE,
+  in _permlink hive_permlink_data.permlink%TYPE)
+RETURNS TABLE (id hive_posts.id%TYPE, depth hive_posts.depth%TYPE)
+LANGUAGE plpgsql
+AS
+$function$
+BEGIN
+  RETURN QUERY UPDATE hive_posts AS hp
+    SET is_deleted = false
+  FROM hive_posts hp1
+  INNER JOIN hive_accounts ha ON hp1.author_id = ha.id
+  INNER JOIN hive_permlink_data hpd ON hp1.permlink_id = hpd.id
+  WHERE hp.id = hp1.id AND ha.name = _author AND hpd.permlink = _permlink
+  RETURNING hp.id, hp.depth;
+END
+$function$;
 
 -- Create a materialized view and associated index to significantly speedup query for hive_posts
 DROP MATERIALIZED VIEW IF EXISTS hive_posts_a_p;
