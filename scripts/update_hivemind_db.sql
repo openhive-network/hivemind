@@ -361,6 +361,8 @@ DROP TABLE IF EXISTS hive_posts_cache;
 -- before deleting hive_posts we need to remove constraints
 ALTER TABLE hive_payments DROP CONSTRAINT hive_payments_fk3;
 ALTER TABLE hive_reblogs DROP CONSTRAINT hive_reblogs_fk2;
+ALTER TABLE hive_post_tags DROP CONSTRAINT hive_post_tags_new_post_id_fkey;
+-- drop old table
 DROP TABLE IF EXISTS hive_posts;
 -- now rename table 
 -- RAISE NOTICE 'Renaming hive_posts_new to hive_posts';
@@ -381,6 +383,8 @@ ALTER TABLE hive_posts ADD CONSTRAINT hive_posts_fk1 FOREIGN KEY (author_id) REF
 ALTER TABLE hive_posts ADD CONSTRAINT hive_posts_fk3 FOREIGN KEY (parent_id) REFERENCES hive_posts(id);
 ALTER TABLE hive_posts ADD CONSTRAINT hive_posts_fk4 FOREIGN KEY (permlink_id) REFERENCES hive_permlink_data(id);
 ALTER TABLE hive_posts ADD CONSTRAINT hive_posts_ux1 UNIQUE (author_id, permlink_id);
+
+ALTER TABLE hive_post_tags ADD CONSTRAINT hive_post_tags_new_post_id_fkey FOREIGN KEY (post_id) REFERENCES hive_posts(id);
 
 -- Make indexes in hive_posts
 -- RAISE NOTICE 'Creating indexes';
