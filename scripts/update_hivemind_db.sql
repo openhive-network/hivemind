@@ -155,6 +155,7 @@ CREATE TABLE IF NOT EXISTS hive_post_data (
 
 CREATE TABLE IF NOT EXISTS hive_votes (
   id BIGSERIAL PRIMARY KEY NOT NULL,
+  post_id INT NOT NULL REFERENCES hive_posts (id) ON DELETE RESTRICT,
   voter_id INT NOT NULL REFERENCES hive_accounts (id) ON DELETE RESTRICT,
   author_id INT NOT NULL REFERENCES hive_accounts (id) ON DELETE RESTRICT,
   permlink_id INT NOT NULL REFERENCES hive_permlink_data (id) ON DELETE RESTRICT,
@@ -219,13 +220,14 @@ UPDATE hive_posts_new hpn SET (
 
 -- Populate table hive_post_data with bulk data from hive_posts_cache
 -- RAISE NOTICE 'Populate table hive_post_data with bulk data from hive_posts_cache';
-INSERT INTO hive_post_data (id, title, preview, img_url, body, votes, json) SELECT post_id, title, preview, img_url, body, json FROM hive_posts_cache;
+INSERT INTO hive_post_data (id, title, preview, img_url, body, json) SELECT post_id, title, preview, img_url, body, json FROM hive_posts_cache;
 
 -- Populate hive_votes table
 -- RAISE NOTICE 'Populate table hive_votes with bulk data from hive_posts_cache';
 INSERT INTO 
-    hive_votes (voter_id, author_id, permlink_id, rshares, vote_percent)
+    hive_votes (post_id, voter_id, author_id, permlink_id, rshares, vote_percent)
 SELECT 
+    (vote_data.id),
     (SELECT id from hive_accounts WHERE name = vote_data.regexp_split_to_array[1]) AS voter_id,
     (SELECT author_id FROM hive_posts WHERE id = vote_data.id) AS author_id,
     (SELECT permlink_id FROM hive_posts WHERE id = vote_data.id) AS permlink_id,  
