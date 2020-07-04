@@ -28,7 +28,8 @@ INSERT INTO hive_db_version (version, notes) VALUES ('1.0', 'https://gitlab.sync
 
 -- add special author value, empty author to accounts table
 -- RAISE NOTICE 'add special author value, empty author to accounts table';
-INSERT INTO hive_accounts (name, created_at) VALUES (0, '', '1990-01-01T00:00:00');
+INSERT INTO hive_accounts (id, name, created_at) VALUES (0, '', '1990-01-01T00:00:00');
+CREATE INDEX IF NOT EXISTS hive_accounts_name_idx ON hive_accounts (name);
 
 -- Table to hold permlink dictionary, permlink is unique
 -- RAISE NOTICE 'Table to hold permlink dictionary, permlink is unique';
@@ -39,7 +40,7 @@ CREATE TABLE IF NOT EXISTS hive_permlink_data (
 -- Populate hive_permlink_data
 -- insert special permlink, empty permlink
 -- RAISE NOTICE 'insert special permlink, empty permlink';
-INSERT INTO hive_permlink_data (permlink) VALUES (0, '');
+INSERT INTO hive_permlink_data (id, permlink) VALUES (0, '');
 -- run on permlink field of hive_posts_cache
 -- RAISE NOTICE 'run on permlink field of hive_posts_cache';
 INSERT INTO hive_permlink_data (permlink) SELECT permlink FROM hive_posts ON CONFLICT (permlink) DO NOTHING;
@@ -54,7 +55,7 @@ CREATE TABLE IF NOT EXISTS hive_category_data (
 -- Populate hive_category_data
 -- insert special category, empty category
 -- RAISE NOTICE 'insert special category, empty category';
-INSERT INTO hive_category_data (category) VALUES (0, '');
+INSERT INTO hive_category_data (id, category) VALUES (0, '');
 -- run on category field of hive_posts_cache
 -- RAISE NOTICE 'run on category field of hive_posts_cache';
 INSERT INTO hive_category_data (category) SELECT category FROM hive_posts ON CONFLICT (category) DO NOTHING;
@@ -139,6 +140,7 @@ CREATE TABLE IF NOT EXISTS hive_posts_new (
   root_title VARCHAR(255) DEFAULT ''
 );
 
+CREATE INDEX IF NOT EXISTS hive_posts_id_idx ON hive_posts_new (id);
 CREATE INDEX IF NOT EXISTS hive_posts_author_id_idx ON hive_posts_new (author_id);
 CREATE INDEX IF NOT EXISTS hive_posts_permlink_id_idx ON hive_posts_new (permlink_id);
 
@@ -227,7 +229,7 @@ INSERT INTO hive_post_data (id, title, preview, img_url, body, json) SELECT post
 INSERT INTO 
     hive_votes (post_id, voter_id, author_id, permlink_id, rshares, vote_percent)
 SELECT 
-    (vote_data.id),
+    (vote_data.id) AS post_id,
     (SELECT id from hive_accounts WHERE name = vote_data.regexp_split_to_array[1]) AS voter_id,
     (SELECT author_id FROM hive_posts WHERE id = vote_data.id) AS author_id,
     (SELECT permlink_id FROM hive_posts WHERE id = vote_data.id) AS permlink_id,  
@@ -237,8 +239,8 @@ FROM
     (SELECT 
         votes.id, regexp_split_to_array(votes.regexp_split_to_table::text, E',') 
      FROM 
-        (SELECT id, regexp_split_to_table(votes::text, E'\n') 
-         FROM hive_posts_cache WHERE votes IS NOT NULL AND votes != '') 
+        (SELECT hpc.id, regexp_split_to_table(hpc.votes::text, E'\n') 
+         FROM hive_posts_cache hpc WHERE hpc.votes IS NOT NULL AND hpc.votes != '') 
     AS votes) 
 AS vote_data;
 
@@ -368,6 +370,7 @@ ALTER TABLE hive_post_tags DROP CONSTRAINT hive_post_tags_new_post_id_fkey;
 DROP TABLE IF EXISTS hive_posts;
 -- now rename table 
 -- RAISE NOTICE 'Renaming hive_posts_new to hive_posts';
+DROP INDEX IF EXISTS hive_posts_id_idx;
 ALTER TABLE hive_posts_new RENAME TO hive_posts;
 -- in order to make id column a primary key we will need a sequence
 CREATE SEQUENCE hive_posts_serial OWNED BY hive_posts.id;
