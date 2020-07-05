@@ -274,7 +274,7 @@ CREATE TYPE legacy_comment_type AS (
   root_author VARCHAR(16),
   root_permlink VARCHAR(255),
   max_accepted_payout VARCHAR(16),
-  percent_hbd INT,
+  percent_steem_dollars INT,
   allow_replies BOOLEAN,
   allow_votes BOOLEAN,
   allow_curation_rewards BOOLEAN,
