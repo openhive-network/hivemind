@@ -163,8 +163,8 @@ class CustomOp:
                   INNER JOIN hive_posts hp ON hp.author_id = ha.id
                   INNER JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
                   WHERE ha.name = :a AND hpd.permlink = :p
-                  ON CONFLICT (account, post_id) DO NOTHING
-                  RETURNING post_id 
+                  ON CONFLICT (account, hp.id) DO NOTHING
+                  RETURNING hp.id 
                   """
             row = DB.query_row(sql, a=blogger, p=permlink, date=block_date)
             if not DbState.is_initial_sync():

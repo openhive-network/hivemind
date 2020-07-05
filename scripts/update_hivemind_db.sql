@@ -424,7 +424,7 @@ INSERT INTO
 VALUES 
     (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, now(), 0);
 
-CREATE INDEX  IF NOT EXISTS hive_communities_ft1 ON hive_communities USING GIN (to_tsvector('english', title || ' ' || about));
+CREATE INDEX IF NOT EXISTS hive_communities_ft1 ON hive_communities USING GIN (to_tsvector('english', title || ' ' || about));
 
 DROP FUNCTION if exists process_hive_post_operation(character varying,character varying,character varying,character varying,timestamp without time zone,timestamp without time zone);
 CREATE OR REPLACE FUNCTION process_hive_post_operation(
