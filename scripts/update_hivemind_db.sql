@@ -29,7 +29,6 @@ INSERT INTO hive_db_version (version, notes) VALUES ('1.0', 'https://gitlab.sync
 -- add special author value, empty author to accounts table
 -- RAISE NOTICE 'add special author value, empty author to accounts table';
 INSERT INTO hive_accounts (id, name, created_at) VALUES (0, '', '1990-01-01T00:00:00');
-CREATE INDEX IF NOT EXISTS hive_accounts_name_idx ON hive_accounts (name);
 
 -- Table to hold permlink dictionary, permlink is unique
 -- RAISE NOTICE 'Table to hold permlink dictionary, permlink is unique';
@@ -366,6 +365,7 @@ DROP TABLE IF EXISTS hive_posts_cache;
 ALTER TABLE hive_payments DROP CONSTRAINT hive_payments_fk3;
 ALTER TABLE hive_reblogs DROP CONSTRAINT hive_reblogs_fk2;
 ALTER TABLE hive_post_tags DROP CONSTRAINT hive_post_tags_new_post_id_fkey;
+ALTER TABLE hive_votes DROP CONSTRAINT hive_votes_post_id_fkey;
 -- drop old table
 DROP TABLE IF EXISTS hive_posts;
 -- now rename table 
@@ -389,7 +389,8 @@ ALTER TABLE hive_posts ADD CONSTRAINT hive_posts_fk3 FOREIGN KEY (parent_id) REF
 ALTER TABLE hive_posts ADD CONSTRAINT hive_posts_fk4 FOREIGN KEY (permlink_id) REFERENCES hive_permlink_data(id);
 ALTER TABLE hive_posts ADD CONSTRAINT hive_posts_ux1 UNIQUE (author_id, permlink_id);
 
-ALTER TABLE hive_post_tags ADD CONSTRAINT hive_post_tags_new_post_id_fkey FOREIGN KEY (post_id) REFERENCES hive_posts(id);
+ALTER TABLE hive_post_tags ADD CONSTRAINT hive_post_tags_post_id_fkey FOREIGN KEY (post_id) REFERENCES hive_posts(id);
+ALTER TABLE hive_votes ADD CONSTRAINT hive_votes_post_id_fkey FOREIGN KEY (post_id) REFERENCES hive_posts(id);
 
 ALTER TABLE hive_follows
   ADD COLUMN blacklisted BOOLEAN NOT NULL DEFAULT FALSE,
