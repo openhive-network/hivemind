@@ -158,13 +158,13 @@ class CustomOp:
         else:
             sql = """
                   INSERT INTO hive_reblogs (account, post_id, created_at)
-                  SELECT ha.name, hp.id, :date
+                  SELECT ha.name, hp.id as post_id, :date
                   FROM hive_accounts ha
                   INNER JOIN hive_posts hp ON hp.author_id = ha.id
                   INNER JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
                   WHERE ha.name = :a AND hpd.permlink = :p
-                  ON CONFLICT (account, hp.id) DO NOTHING
-                  RETURNING hp.id 
+                  ON CONFLICT (account, post_id) DO NOTHING
+                  RETURNING post_id
                   """
             row = DB.query_row(sql, a=blogger, p=permlink, date=block_date)
             if not DbState.is_initial_sync():
