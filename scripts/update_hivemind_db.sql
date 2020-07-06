@@ -599,10 +599,6 @@ DROP INDEX IF EXISTS hive_accounts_ix5;
 CREATE INDEX IF NOT EXISTS hive_accounts_ix5 ON hive_accounts (cached_at);
 DROP INDEX IF EXISTS hive_accounts_name_idx;
 
--- DROP INDEX IF EXISTS hive_posts_payout_at_idx2;
--- DROP INDEX IF EXISTS hive_category_data_category_c_idx;
--- DROP INDEX IF EXISTS hive_category_data_category_idx;
-
 CREATE INDEX IF NOT EXISTS hive_votes_post_id_idx ON hive_votes (post_id);
 
 -- convert unique index to primary key
