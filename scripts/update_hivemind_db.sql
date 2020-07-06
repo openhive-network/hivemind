@@ -623,6 +623,9 @@ ALTER TABLE hive_feed_cache ADD CONSTRAINT hive_feed_cache_pk PRIMARY KEY (post_
 DROP INDEX IF EXISTS hive_feed_cache_ix1;
 CREATE INDEX IF NOT EXISTS hive_feed_cache_account_id ON hive_feed_cache (account_id);
 
+-- delete content of hive_feed_cache to force initial sync
+DELETE FROM hive_feed_cache WHERE post_id >= 1;
+
 -- force vacuum after changes
 -- will take a while
 VACUUM FULL;
