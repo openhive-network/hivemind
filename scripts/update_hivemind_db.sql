@@ -622,3 +622,8 @@ ALTER TABLE hive_feed_cache DROP CONSTRAINT hive_feed_cache_ux1;
 ALTER TABLE hive_feed_cache ADD CONSTRAINT hive_feed_cache_pk PRIMARY KEY (post_id, account_id);
 DROP INDEX IF EXISTS hive_feed_cache_ix1;
 CREATE INDEX IF NOT EXISTS hive_feed_cache_account_id ON hive_feed_cache (account_id);
+
+-- force vacuum after changes
+-- will take a while
+VACUUM FULL;
+
