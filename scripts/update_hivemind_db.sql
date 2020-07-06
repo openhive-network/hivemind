@@ -60,7 +60,6 @@ INSERT INTO hive_category_data (id, category) VALUES (0, '');
 INSERT INTO hive_category_data (category) SELECT category FROM hive_posts ON CONFLICT (category) DO NOTHING;
 -- Create indexes
 CREATE INDEX IF NOT EXISTS hive_category_data_category_idx ON hive_category_data (category ASC);
-CREATE INDEX IF NOT EXISTS hive_category_data_category_c_idx ON hive_category_data (category COLLATE "C" ASC);
 
 -- Table to hold post data
 -- RAISE NOTICE 'Table to hold post data';
@@ -167,6 +166,7 @@ CREATE TABLE IF NOT EXISTS hive_votes (
   num_changes INT DEFAULT '0'
 );
 
+ALTER TABLE hive_votes ADD CONSTRAINT hive_votes_ux1 UNIQUE (voter_id, author_id, permlink_id);
 CREATE INDEX IF NOT EXISTS hive_votes_voter_id_idx ON hive_votes (voter_id);
 CREATE INDEX IF NOT EXISTS hive_votes_author_id_idx ON hive_votes (author_id);
 CREATE INDEX IF NOT EXISTS hive_votes_permlink_id_idx ON hive_votes (permlink_id);
@@ -405,7 +405,6 @@ CREATE INDEX IF NOT EXISTS hive_posts_community_id_idx ON hive_posts (community_
 
 CREATE INDEX IF NOT EXISTS hive_posts_category_id_idx ON hive_posts (category_id);
 CREATE INDEX IF NOT EXISTS hive_posts_payout_at_idx ON hive_posts (payout_at);
-CREATE INDEX IF NOT EXISTS hive_posts_payout_at_idx2 ON hive_posts (payout_at) WHERE is_paidout = '0';
 
 CREATE INDEX IF NOT EXISTS hive_posts_payout_idx ON hive_posts (payout);
 
@@ -590,3 +589,40 @@ ON hive_posts_a_p
 (author collate "C", permlink collate "C")
 ;
 
+-- drop old not needed indexes and introduce new
+DROP INDEX IF EXISTS hive_accounts_ix1;
+CREATE INDEX IF NOT EXISTS hive_accounts_ix1 ON hive_accounts (vote_weight);
+DROP INDEX IF EXISTS hive_accounts_ix2;
+DROP INDEX IF EXISTS hive_accounts_ix3;
+DROP INDEX IF EXISTS hive_accounts_ix4;
+DROP INDEX IF EXISTS hive_accounts_ix5;
+CREATE INDEX IF NOT EXISTS hive_accounts_ix5 ON hive_accounts (cached_at);
+DROP INDEX IF EXISTS hive_accounts_name_idx;
+
+-- DROP INDEX IF EXISTS hive_posts_payout_at_idx2;
+-- DROP INDEX IF EXISTS hive_category_data_category_c_idx;
+-- DROP INDEX IF EXISTS hive_category_data_category_idx;
+
+CREATE INDEX IF NOT EXISTS hive_votes_post_id_idx ON hive_votes (post_id);
+
+-- convert unique index to primary key
+ALTER TABLE hive_follows DROP CONSTRAINT hive_follows_ux3;
+ALTER TABLE hive_follows ADD CONSTRAINT hive_follows_pk PRIMARY KEY (following, follower);
+
+-- convert unique index to primary key
+ALTER TABLE hive_reblogs DROP CONSTRAINT hive_reblogs_ux1;
+ALTER TABLE hive_reblogs ADD CONSTRAINT hive_reblogs_pk PRIMARY KEY (account, post_id);
+
+DROP INDEX IF EXISTS hive_reblogs_ix1;
+CREATE INDEX IF NOT EXISTS hive_reblogs_account_idx ON hive_reblogs (account);
+CREATE INDEX IF NOT EXISTS hive_reblogs_post_id_idx ON hive_reblogs (post_id);
+
+CREATE INDEX IF NOT EXISTS hive_payments_from_idx ON hive_payments (from_account);
+CREATE INDEX IF NOT EXISTS hive_payments_post_id_idx ON hive_payments (post_id);
+CREATE INDEX IF NOT EXISTS hive_payments_to_idx ON hive_payments (to_account);
+
+-- convert unique index to primary key
+ALTER TABLE hive_feed_cache DROP CONSTRAINT hive_feed_cache_ux1;
+ALTER TABLE hive_feed_cache ADD CONSTRAINT hive_feed_cache_pk PRIMARY KEY (post_id, account_id);
+DROP INDEX IF EXISTS hive_feed_cache_ix1;
+CREATE INDEX IF NOT EXISTS hive_feed_cache_account_id ON hive_feed_cache (account_id);

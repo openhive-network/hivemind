@@ -140,6 +140,7 @@ def build_metadata():
 
         sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_posts_fk1'),
         sa.ForeignKeyConstraint(['parent_id'], ['hive_posts.id'], name='hive_posts_fk3'),
+        sa.ForeignKeyConstraint(['permlink_id'], ['hive_permlink_data.id'], name='hive_posts_fk4'),
         sa.UniqueConstraint('author_id', 'permlink_id', name='hive_posts_ux1'),
         sa.Index('hive_posts_permlink_id', 'permlink_id'),
 
@@ -273,11 +274,11 @@ def build_metadata():
 
     sa.Table(
         'hive_feed_cache', metadata,
-        sa.Column('post_id', sa.Integer, nullable=False, primary_key=True),
+        sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('account_id', sa.Integer, nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
-        sa.Index('hive_feed_cache_account_id', 'account_id'), # API (and rebuild?)
-        sa.UniqueConstraint('account_id', 'post_id', name='hive_feed_cache_ux1')
+        sa.PrimaryKeyConstraint('post_id', 'account_id', name='hive_feed_cache_pk'),
+        sa.Index('hive_feed_cache_account_id', 'account_id') # API (and rebuild?)
     )
 
     sa.Table(
