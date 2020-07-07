@@ -117,7 +117,7 @@
     - name: "get_community_context"
     - variable_binds:
       - method: "get_community_context"
-      - args: {"community":"hive-123456", "account":"steemit"}
+      - args: {"name":"hive-123456", "account":"steemit"}
     - <<: *base_benchmark
 
   - benchmark:
