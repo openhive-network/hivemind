@@ -83,7 +83,7 @@ class Mutes:
         if not observer or not context:
             return {}
 
-        if int(perf() - cls.instance().fetched) > 3600:
+        if cls.instance().fetched and (perf() - cls.instance().fetched) > 3600:
             cls.instance().load()
 
         blacklisted_users = {}
