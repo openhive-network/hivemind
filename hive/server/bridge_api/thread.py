@@ -8,11 +8,12 @@ from hive.server.common.helpers import (
     return_error_info,
     valid_account,
     valid_permlink)
+from hive.server.common.mutes import Mutes
 
 log = logging.getLogger(__name__)
 
 @return_error_info
-async def get_discussion(context, author, permlink):
+async def get_discussion(context, author, permlink, observer=None):
     """Modified `get_state` thread implementation."""
     # New index was created: hive_posts_parent_id_btree (CREATE INDEX "hive_posts_parent_id_btree" ON hive_posts btree(parent_id)
     # We thougth this would be covered by "hive_posts_ix4" btree (parent_id, id) WHERE is_deleted = false but it was not
@@ -22,11 +23,13 @@ async def get_discussion(context, author, permlink):
     permlink = valid_permlink(permlink)
 
     sql = """
-        ---get_discussion
-        WITH RECURSIVE child_posts AS (
-            SELECT id, parent_id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)
-            UNION
-            SELECT children.id, children.parent_id FROM hive_posts children JOIN child_posts ON (children.parent_id = child_posts.id)
+        WITH RECURSIVE child_posts (id, parent_id) AS (
+            SELECT id, parent_id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) 
+                AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)
+                AND NOT hp.is_deleted AND NOT hp.is_muted
+            UNION ALL
+            SELECT children.id, children.parent_id FROM hive_posts children INNER JOIN child_posts ON (children.parent_id = child_posts.id) 
+            WHERE NOT children.is_deleted AND NOT children.is_muted
         )
         SELECT child_posts.id, child_posts.parent_id, hive_posts.id, hive_accounts.name as author, hpd_p.permlink as permlink,
            hpd.title as title, hpd.body as body, hcd.category as category, hive_posts.depth,
@@ -39,10 +42,15 @@ async def get_discussion(context, author, permlink):
            hive_posts.sc_trend AS sc_trend, hive_accounts.id AS acct_author_id
            FROM child_posts JOIN hive_accounts ON (hive_posts.author_id = hive_accounts.id)
                             INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hive_posts.permlink_id
-                            LEFT JOIN hive_post_data hpd ON hpd.id = hive_posts.id
-                            LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+                            INNER JOIN hive_post_data hpd ON hpd.id = hive_posts.id
+                            INNER JOIN hive_category_data hcd ON hcd.id = hp.category_id
                             WHERE NOT hive_posts.is_deleted AND NOT hive_posts.is_muted
+        LIMIT 2000
     """
+
+    blacklists_for_user = None
+    if observer:
+        blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
 
     rows = await db.query_all(sql, author=author, permlink=permlink)
     if not rows or len(rows) == 0:
@@ -50,7 +58,7 @@ async def get_discussion(context, author, permlink):
     root_id = rows[0]['id']
     all_posts = {}
     root_post = _condenser_post_object(rows[0])
-    root_post = append_statistics_to_post(root_post, rows[0], False)
+    root_post = await append_statistics_to_post(root_post, rows[0], False, blacklists_for_user)
     root_post['replies'] = []
     all_posts[root_id] = root_post
 
@@ -60,7 +68,7 @@ async def get_discussion(context, author, permlink):
     for index in range(1, len(rows)):
         id_to_parent_id_map[rows[index]['id']] = rows[index]['parent_id']
         post = _condenser_post_object(rows[index])
-        post = append_statistics_to_post(post, rows[index], False)
+        post = await append_statistics_to_post(post, rows[index], False, blacklists_for_user)
         post['replies'] = []
         all_posts[post['post_id']] = post
 

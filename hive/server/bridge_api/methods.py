@@ -18,11 +18,21 @@ ROLES = {-2: 'muted', 0: 'guest', 2: 'member', 4: 'mod', 6: 'admin', 8: 'owner'}
 
 SQL_TEMPLATE = """
         SELECT hp.id, 
-            community_id, 
             ha_a.name as author,
+            ha_r.name as root_author,
+            hp.author_rep as author_rep,
+            hp.allow_replies AS allow_replies,
+            hp.allow_votes AS allow_votes,
+            hp.allow_curation_rewards AS allow_curation_rewards,
+            hp.root_title AS root_title,
+            hp.beneficiaries AS beneficiaries,
+            hp.max_accepted_payout AS max_accepted_payout,
+            hp.percent_hbd AS percent_hbd,
+            hp.url AS url,
             hpd_p.permlink as permlink,
-            (SELECT title FROM hive_post_data WHERE hive_post_data.id = hp.id) as title, 
-            (SELECT body FROM hive_post_data WHERE hive_post_data.id = hp.id) as body, 
+            hpd_r.permlink as root_permlink,
+            hpd.title as title,
+            hpd.body as body,
             (SELECT category FROM hive_category_data WHERE hive_category_data.id = hp.category_id) as category,
             depth,
             promoted, 
@@ -34,7 +44,7 @@ SQL_TEMPLATE = """
             hp.created_at, 
             updated_at, 
             rshares, 
-            (SELECT json FROM hive_post_data WHERE hive_post_data.id = hp.id) as json,
+            hpd.json as json,
             is_hidden, 
             is_grayed, 
             total_votes, 
@@ -43,11 +53,16 @@ SQL_TEMPLATE = """
             ha_a.id AS acct_author_id,
             hive_roles.title as role_title, 
             hive_communities.title AS community_title, 
-            hive_roles.role_id AS role_id
-           hive_posts.is_pinned AS is_pinned
+            hive_roles.role_id AS role_id,
+            hp.is_pinned AS is_pinned
         FROM hive_posts hp
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_accounts ha_r ON ha_r.id = hp.root_author_id
         INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        INNER JOIN hive_permlink_data hpd_r ON hpd_r.id = hp.root_permlink_id
+        INNER JOIN hive_post_data hpd ON hpd.id = hp.id
+        INNER JOIN hive_post_tags hpt ON hpt.post_id = hp.id
+        INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
         LEFT OUTER JOIN hive_communities ON (hp.community_id = hive_communities.id)
         LEFT OUTER JOIN hive_roles ON (ha_a.id = hive_roles.account_id AND hp.community_id = hive_roles.community_id)
     """
@@ -104,12 +119,16 @@ async def get_post(context, author, permlink, observer=None):
     valid_account(author)
     valid_permlink(permlink)
 
+    blacklists_for_user = None
+    if observer and context:
+        blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
+
     sql = "---bridge_api.get_post\n" + SQL_TEMPLATE + """ WHERE ha_a.name = :author AND hpd_p.permlink = :permlink AND NOT hive_posts.is_deleted """
 
     result = await db.query_all(sql, author=author, permlink=permlink)
     assert len(result) == 1, 'invalid author/permlink or post not found in cache'
     post = _condenser_post_object(result[0])
-    post['blacklists'] = Mutes.lists(post['author'], result[0]['author_rep'])
+    post = await append_statistics_to_post(post, result[0], False, blacklists_for_user)
     return post
 
 @return_error_info
@@ -131,26 +150,26 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
     pinned_sql = ''
 
     if sort == 'trending':
-        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND hp.depth = 0 AND NOT hive_posts.is_deleted
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND hp.depth = 0 AND NOT hp.is_deleted
                                     %s ORDER BY sc_trend desc, hp.id LIMIT :limit """
     elif sort == 'hot':
-        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND hp.depth = 0 AND NOT hive_posts.is_deleted
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND hp.depth = 0 AND NOT hp.is_deleted
                                     %s ORDER BY sc_hot desc, hp.id LIMIT :limit """
     elif sort == 'created':
-        sql = SQL_TEMPLATE + """ WHERE hp.depth = 0 AND NOT hive_posts.is_deleted AND NOT hp.is_grayed
+        sql = SQL_TEMPLATE + """ WHERE hp.depth = 0 AND NOT hp.is_deleted AND NOT hp.is_grayed
                                     %s ORDER BY hp.created_at DESC, hp.id LIMIT :limit """
     elif sort == 'promoted':
-        sql = SQL_TEMPLATE + """ WHERE hp.depth > 0 AND hp.promoted > 0 AND NOT hive_posts.is_deleted
+        sql = SQL_TEMPLATE + """ WHERE hp.depth > 0 AND hp.promoted > 0 AND NOT hp.is_deleted
                                     AND NOT hp.is_paidout %s ORDER BY hp.promoted DESC, hp.id LIMIT :limit """
     elif sort == 'payout':
-        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hive_posts.is_deleted %s
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hp.is_deleted %s
                                     AND payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
                                     ORDER BY hp.payout DESC, hp.id LIMIT :limit """
     elif sort == 'payout_comments':
-        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hive_posts.is_deleted AND hp.depth > 0
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hp.is_deleted AND hp.depth > 0
                                     %s ORDER BY hp.payout DESC, hp.id LIMIT :limit """
     elif sort == 'muted':
-        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hive_posts.is_deleted AND hp.is_grayed
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hp.is_deleted AND hp.is_grayed
                                     AND hp.payout > 0 %s ORDER BY hp.payout DESC, hp.id LIMIT :limit """
 
     sql = "---bridge_api.get_ranked_posts\n" + sql
@@ -158,18 +177,18 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
     if start_author and start_permlink:
         if sort == 'trending':
             sql = sql % """ AND hp.sc_trend <= (SELECT sc_trend FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) 
-                            AND hp.post_id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
+                            AND hp.id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
         elif sort == 'hot':
             sql = sql % """ AND hp.sc_hot <= (SELECT sc_hot FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink))
-                            AND hp.post_id != (SELECT post_id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
+                            AND hp.id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
         elif sort == 'created':
-            sql = sql % """ AND hp.post_id < (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
+            sql = sql % """ AND hp.id < (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
         elif sort == 'promoted':
             sql = sql % """ AND hp.promoted <= (SELECT promoted FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink))
-                                AND hp.post_id != (SELECT post_id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
+                                AND hp.id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
         else:
             sql = sql % """ AND hp.payout <= (SELECT payout FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink))
-                                AND hp.post_id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
+                                AND hp.id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
     else:
         sql = sql % """ %s """
 
@@ -191,15 +210,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
         if sort in ['payout', 'payout_comments']:
             sql = sql % """ AND hp.category = :tag """
         else:
-            sql = sql % """ AND hp.post_id IN 
-                (SELECT 
-                    post_id 
-                FROM 
-                    hive_post_tags hpt
-                INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
-                WHERE htd.tag = :tag
-                )
-            """
+            sql = sql % """ AND htd.tag = :tag """
 
     if not observer:
         observer = ''
@@ -207,11 +218,15 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
     posts = []
     pinned_post_ids = []
 
+    blacklists_for_user = None
+    if observer and context:
+        blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
+
     if pinned_sql:
         pinned_result = await db.query_all(pinned_sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag, observer=observer)
         for row in pinned_result:
             post = _condenser_post_object(row)
-            post = append_statistics_to_post(post, row, True)
+            post = await append_statistics_to_post(post, row, True, blacklists_for_user)
             limit = limit - 1
             posts.append(post)
             pinned_post_ids.append(post['post_id'])
@@ -219,14 +234,28 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
     sql_result = await db.query_all(sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag, observer=observer)
     for row in sql_result:
         post = _condenser_post_object(row)
-        post = append_statistics_to_post(post, row, False)
+        post = await append_statistics_to_post(post, row, False, blacklists_for_user)
         if post['post_id'] in pinned_post_ids:
             continue
         posts.append(post)
     return posts
 
-def append_statistics_to_post(post, row, is_pinned):
-    post['blacklists'] = Mutes.lists(row['author'], row['author_rep'])
+async def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=None):
+    """ apply information such as blacklists and community names/roles to a given post """
+    if not blacklists_for_user:
+        post['blacklists'] = Mutes.lists(row['author'], row['author_rep'])
+    else:
+        post['blacklists'] = []
+        if row['author'] in blacklists_for_user:
+            blacklists = blacklists_for_user[row['author']]
+            for blacklist in blacklists:
+                post['blacklists'].append(blacklist)
+        reputation = int(row['author_rep'])
+        if reputation < 1:
+            post['blacklists'].append('reputation-0')
+        elif reputation  == 1:
+            post['blacklists'].append('reputation-1')
+
     if 'community_title' in row and row['community_title']:
         post['community'] = row['category']
         post['community_title'] = row['community_title']
@@ -239,7 +268,6 @@ def append_statistics_to_post(post, row, is_pinned):
     else:
         post['stats']['gray'] = row['is_grayed']
     post['stats']['hide'] = 'irredeemables' in post['blacklists']
-    
     if is_pinned:
         post['stats']['is_pinned'] = True
     return post
@@ -291,9 +319,49 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
         sql = sql % """ """
         
     posts = []
+    blacklists_for_user = None
+    if observer:
+        blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
     sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit)
     for row in sql_result:
         post = _condenser_post_object(row)
-        post = append_statistics_to_post(post, row, False)
+        post = await append_statistics_to_post(post, row, False, blacklists_for_user)
         posts.append(post)
     return posts
+
+@return_error_info
+async def get_relationship_between_accounts(context, account1, account2, observer=None):
+    valid_account(account1)
+    valid_account(account2)
+
+    db = context['db']
+
+    sql = """
+        SELECT state, blacklisted, follow_blacklists FROM hive_follows WHERE
+        follower = (SELECT id FROM hive_accounts WHERE name = :account1) AND 
+        following = (SELECT id FROM hive_accounts WHERE name = :account2)
+    """
+
+    sql_result = await db.query_all(sql, account1=account1, account2=account2)
+
+    result = {
+        'follows': False,
+        'ignores': False,
+        'is_blacklisted': False,
+        'follows_blacklists': False
+    }
+
+    for row in sql_result:
+        state = row['state']
+        if state == 1:
+            result['follows'] = True
+        elif state == 2:
+            result['ignores'] = True
+        
+        if row['blacklisted']:
+            result['is_blacklisted'] = True
+        if row['follow_blacklists']:
+            result['follows_blacklists'] = True
+
+    return result
+

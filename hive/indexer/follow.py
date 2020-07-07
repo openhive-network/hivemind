@@ -17,12 +17,42 @@ FOLLOWERS = 'followers'
 FOLLOWING = 'following'
 
 FOLLOW_ITEM_INSERT_QUERY = """
-    INSERT INTO hive_follows as hf (follower, following, created_at, state)
-    VALUES( :flr, :flg, :at, :state )
-    ON CONFLICT (follower, following) DO UPDATE SET state = (CASE hf.state
-                                                                when 0 then 0 -- 0 blocks possibility to update state 
-                                                              ELSE 1
-                                                          END)
+    INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists)
+    VALUES 
+        (
+            :flr, 
+            :flg, 
+            :at, 
+            :state, 
+            (CASE :state
+                WHEN 3 THEN TRUE
+                WHEN 4 THEN FALSE
+                ELSE FALSE
+            END
+            ), 
+            (CASE :state
+                WHEN 3 THEN FALSE
+                WHEN 4 THEN TRUE
+                ELSE TRUE
+            END
+            )
+        )
+    ON CONFLICT (follower, following) DO UPDATE 
+        SET 
+            state = (CASE EXCLUDED.state 
+                        WHEN 0 THEN 0 -- 0 blocks possibility to update state 
+                        ELSE EXCLUDED.state
+                     END),
+            blacklisted = (CASE EXCLUDED.state 
+                              WHEN 3 THEN TRUE
+                              WHEN 5 THEN FALSE
+                              ELSE EXCLUDED.blacklisted
+                          END),
+            follow_blacklists = (CASE EXCLUDED.state 
+                                    WHEN 4 THEN TRUE
+                                    WHEN 6 THEN FALSE
+                                    ELSE EXCLUDED.follow_blacklists
+                                END)
     """
 
 def _flip_dict(dict_to_flip):
@@ -61,16 +91,15 @@ class Follow:
                 cls.follow_items_to_flush[k] = old_value
             else:
                 cls.follow_items_to_flush[k] = dict(
-                                                      flr = op['flr'],
-                                                      flg = op['flg'],
-                                                      state = op['state'],
-                                                      at = op['at'])
+                                                      flr=op['flr'],
+                                                      flg=op['flg'],
+                                                      state=op['state'],
+                                                      at=op['at'])
 
         else:
             old_state = cls._get_follow_db_state(op['flr'], op['flg'])
             # insert or update state
             DB.query(FOLLOW_ITEM_INSERT_QUERY, **op)
-            # track count deltas
             if new_state == 1:
                 Follow.follow(op['flr'], op['flg'])
                 if old_state is None:
@@ -92,7 +121,7 @@ class Follow:
         what = first(op['what']) or ''
         if not isinstance(what, str):
             return None
-        defs = {'': 0, 'blog': 1, 'ignore': 2}
+        defs = {'': 0, 'blog': 1, 'ignore': 2, 'blacklist': 3, 'follow_blacklist': 4, 'unblacklist': 5, 'unfollow_blacklist': 6}
         if what not in defs:
             return None
 
@@ -142,36 +171,53 @@ class Follow:
     @classmethod
     def _flush_follow_items(cls):
         sql_prefix = """
-              INSERT INTO hive_follows as hf (follower, following, created_at, state)
+              INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists)
               VALUES """
 
         sql_postfix = """
-              ON CONFLICT ON CONSTRAINT hive_follows_pk DO UPDATE SET 
-                state = (CASE hf.state
-                        WHEN 0 THEN 0 -- 0 blocks possibility to update state 
-                        ELSE EXCLUDED.state
-                    END)
+              ON CONFLICT ON CONSTRAINT hive_follows_pk DO UPDATE 
+                SET 
+                    state = (CASE EXCLUDED.state 
+                                WHEN 0 THEN 0 -- 0 blocks possibility to update state 
+                                ELSE EXCLUDED.state
+                            END),
+                    blacklisted = (CASE EXCLUDED.state 
+                                    WHEN 3 THEN TRUE
+                                    WHEN 5 THEN FALSE
+                                    ELSE EXCLUDED.blacklisted
+                                END),
+                    follow_blacklists = (CASE EXCLUDED.state 
+                                            WHEN 4 THEN TRUE
+                                            WHEN 6 THEN FALSE
+                                            ELSE EXCLUDED.follow_blacklists
+                                        END)
               WHERE hf.following = EXCLUDED.following AND hf.follower = EXCLUDED.follower
               """
         values = []
         limit = 1000
         count = 0
-        for (k, follow_item) in cls.follow_items_to_flush.items():
-          if count < limit:
-            values.append("({}, {}, '{}', {})".format(follow_item['flr'], follow_item['flg'], follow_item['at'], follow_item['state']))
-            count = count + 1
-          else:
+        for _, follow_item in cls.follow_items_to_flush.items():
+            if count < limit:
+                values.append("({}, {}, '{}', {}, {}, {})".format(follow_item['flr'], follow_item['flg'],
+                                                                  follow_item['at'], follow_item['state'],
+                                                                  follow_item['state'] == 3,
+                                                                  follow_item['state'] == 4))
+                count = count + 1
+            else:
+                query = sql_prefix + ",".join(values)
+                query += sql_postfix
+                DB.query(query)
+                values.clear()
+                values.append("({}, {}, '{}', {}, {}, {})".format(follow_item['flr'], follow_item['flg'],
+                                                                  follow_item['at'], follow_item['state'],
+                                                                  follow_item['state'] == 3,
+                                                                  follow_item['state'] == 4))
+                count = 1
+
+        if len(values) > 0:
             query = sql_prefix + ",".join(values)
             query += sql_postfix
             DB.query(query)
-            values.clear()
-            values.append("({}, {}, '{}', {})".format(follow_item['flr'], follow_item['flg'], follow_item['at'], follow_item['state']))
-            count = 1
-
-        if len(values):
-          query = sql_prefix + ",".join(values)
-          query += sql_postfix
-          DB.query(query)
 
         cls.follow_items_to_flush.clear()
 

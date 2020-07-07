@@ -223,6 +223,8 @@ def build_metadata():
         sa.PrimaryKeyConstraint('post_id', 'tag_id', name='hive_post_tags_pk1'),
         sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id']),
         sa.ForeignKeyConstraint(['tag_id'], ['hive_tag_data.id']),
+        sa.Index('hive_post_tags_post_id_idx', 'post_id'),
+        sa.Index('hive_post_tags_tag_id_idx', 'tag_id')
     )
 
     sa.Table(
@@ -231,6 +233,8 @@ def build_metadata():
         sa.Column('following', sa.Integer, nullable=False),
         sa.Column('state', SMALLINT, nullable=False, server_default='1'),
         sa.Column('created_at', sa.DateTime, nullable=False),
+        sa.Column('blacklisted', sa.Boolean, nullable=False, server_default='0'),
+        sa.Column('follow_blacklists', sa.Boolean, nullable=False, server_default='0'),
 
         sa.PrimaryKeyConstraint('following', 'follower', name='hive_follows_pk'), # core
         sa.Index('hive_follows_ix5a', 'following', 'state', 'created_at', 'follower'),
