@@ -24,12 +24,12 @@
   - name: "list_comments"
   - variable_binds:
     - method: "list_comments"
-    - args: {"start":["steemit","firstpost","",""], "limit":10, "order":"by_permlink"}
+    - args: '{"start":["steemit","firstpost","",""], "limit":10, "order":"by_permlink"}'
   - <<: *base_test
 
 - test:
   - name: "find_comments"
   - variable_binds:
     - method: "find_comments"
-    - args: {"start":[["steemit","firstpost"],["steemit","firstpost"]], "limit":10, "order":"by_account"}
+    - args: '{"start":[["steemit","firstpost"]], "limit":10, "order":"by_author"}'
   - <<: *base_test
