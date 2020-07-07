@@ -1,0 +1,30 @@
+---
+  - config:
+    - testset: "Hive API Tests"
+    - api: &api "hive"
+    - variable_binds:
+      - api: *api
+    - generators:
+      - test_id: {type: 'number_sequence', start: 1}
+  
+  - base_test: &base_test
+    - generator_binds:
+      - test_id: test_id
+    - group: *api
+    - url: "/"
+    - method: "POST"
+    - body: {template: {file: "../templates/request_template.json"}}
+    - validators:
+      - extract_test: {jsonpath_mini: "error", test: "not_exists"}
+      - extract_test: {jsonpath_mini: "result", test: "exists"}
+      - extract_test: {jsonpath_mini: "result.db_head_block", test: "exists"}
+      - extract_test: {jsonpath_mini: "result.db_head_time", test: "exists"}
+      - extract_test: {jsonpath_mini: "result.db_head_age", test: "exists"}
+      - compare: {jsonpath_mini: "id", comparator: "str_eq", expected: {template: $test_id}}
+  
+  - test:
+    - name: "db_head_state"
+    - variable_binds:
+      - method: "db_head_state"
+      - args: {}
+    - <<: *base_test
