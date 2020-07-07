@@ -21,6 +21,14 @@ SQL_TEMPLATE = """
             ha_a.name as author,
             ha_r.name as root_author,
             hp.author_rep as author_rep,
+            hp.allow_replies AS allow_replies,
+            hp.allow_votes AS allow_votes,
+            hp.allow_curation_rewards AS allow_curation_rewards,
+            hp.root_title AS root_title,
+            hp.beneficiaries AS beneficiaries,
+            hp.max_accepted_payout AS max_accepted_payout,
+            hp.percent_hbd AS percent_hbd,
+            hp.url AS url,
             hpd_p.permlink as permlink,
             hpd_r.permlink as root_permlink,
             hpd.title as title,
@@ -53,6 +61,8 @@ SQL_TEMPLATE = """
         INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
         INNER JOIN hive_permlink_data hpd_r ON hpd_r.id = hp.root_permlink_id
         INNER JOIN hive_post_data hpd ON hpd.id = hp.id
+        INNER JOIN hive_post_tags hpt ON hpt.post_id = hp.id
+        INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
         LEFT OUTER JOIN hive_communities ON (hp.community_id = hive_communities.id)
         LEFT OUTER JOIN hive_roles ON (ha_a.id = hive_roles.account_id AND hp.community_id = hive_roles.community_id)
     """
@@ -200,15 +210,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
         if sort in ['payout', 'payout_comments']:
             sql = sql % """ AND hp.category = :tag """
         else:
-            sql = sql % """ AND hp.id IN 
-                (SELECT 
-                    post_id 
-                FROM 
-                    hive_post_tags hpt
-                INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
-                WHERE htd.tag = :tag
-                )
-            """
+            sql = sql % """ AND htd.tag = :tag """
 
     if not observer:
         observer = ''
