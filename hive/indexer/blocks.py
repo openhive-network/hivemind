@@ -56,6 +56,7 @@ class Blocks:
         PostDataCache.flush()
         Tags.flush()
         Votes.flush()
+        cls._flush_blocks()
         time_end = perf_counter()
         log.info("[PROCESS BLOCK] %fs", time_end - time_start)
         return ret
