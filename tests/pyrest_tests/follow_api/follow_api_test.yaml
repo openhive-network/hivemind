@@ -24,68 +24,71 @@
     - name: "get_followers"
     - variable_binds:
       - method: "get_followers"
-      - args: {"account":"steemit","start":null,"type":"blog","limit":10}
+      - args: '{"account":"steemit","start":null,"type":"blog","limit":10}'
     - <<: *base_test
 
   - test:
     - name: "get_following"
     - variable_binds:
       - method: "get_following"
-      - args: {"account":"steemit","start":null,"type":"blog","limit":10}
+      - args: '{"account":"steemit","start":null,"type":"blog","limit":10}'
     - <<: *base_test
 
   - test:
     - name: "get_follow_count"
     - variable_binds:
       - method: "get_follow_count"
-      - args: {"account":"steemit"}
+      - args: '{"account":"steemit"}'
     - <<: *base_test
 
   - test:
     - name: "get_account_reputations"
     - variable_binds:
       - method: "get_account_reputations"
-      - args: {"account_lower_bound": "steem"}
+      - args: '{"account_lower_bound": "steem", "limit":1}'
     - <<: *base_test
 
   - test:
     - name: "get_blog"
     - variable_binds:
       - method: "get_blog"
-      - args: {"account":"steemit","start_entry_id":0,"limit":1}
+      - args: '{"account":"steemit","start_entry_id":0,"limit":1}'
     - <<: *base_test
 
   - test:
     - name: "get_blog_entries"
     - variable_binds:
       - method: "get_blog_entries"
-      - args: {"account":"steemit","start_entry_id":0,"limit":1}
+      - args: '{"account":"steemit","start_entry_id":0,"limit":1}'
     - <<: *base_test
 
   - test:
     - name: "get_reblogged_by"
     - variable_binds:
       - method: "get_reblogged_by"
-      - args: {"author":"steemit","permlink":"firstpost"}
+      - args: '{"author":"steemit","permlink":"firstpost"}'
     - <<: *base_test
 
-  - test:
-    - name: "get_feed_entries"
-    - variable_binds:
-      - method: "get_feed_entries"
-      - args: {"account":"steemit","start_entry_id":0,"limit":1}
-    - <<: *base_test
+# API not found
+#  - test:
+#    - name: "get_feed_entries"
+#    - variable_binds:
+#      - method: "get_feed_entries"
+#      - args: '{"account":"steemit","start_entry_id":0,"limit":1}'
+#    - <<: *base_test
 
-  - test:
-    - name: "get_feed"
-    - variable_binds:
-      - method: "get_feed"
-      - args: {"account":"steemit","start_entry_id":0,"limit":1}
-    - <<: *base_test
+# API not found
+#  - test:
+#    - name: "get_feed"
+#    - variable_binds:
+#      - method: "get_feed"
+#      - args: '{"account":"steemit","start_entry_id":0,"limit":1}'
+#    - <<: *base_test
 
-  - test:
-    - name: "get_blog_authors"
-    - variable_binds:
-      - method: "get_blog_authors"
-      - args: {"blog_account":"steemit"}
-    - <<: *base_test
+# API not found
+#  - test:
+#    - name: "get_blog_authors"
+#    - variable_binds:
+#      - method: "get_blog_authors"
+#      - args: '{"blog_account":"steemit"}'
+#    - <<: *base_test
