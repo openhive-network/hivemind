@@ -1,9 +1,0 @@
-- config:
-  - testset: "Basic hivemind API Smoke Test"
-
-- test:
-  - name: "Test ip address"
-  - group: "basic_smoketest"
-  - url: "/"
-  - method: "POST"
-  - body: '{}'
