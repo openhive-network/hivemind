@@ -68,7 +68,7 @@ def build_metadata():
         sa.Index('hive_accounts_ix5', 'cached_at', 'name'), # core/listen sweep
     )
 
-    sa.Table(
+    hive_posts = sa.Table(
         'hive_posts', metadata,
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('parent_id', sa.Integer),
@@ -88,10 +88,12 @@ def build_metadata():
         sa.ForeignKeyConstraint(['parent_id'], ['hive_posts.id'], name='hive_posts_fk3'),
         sa.UniqueConstraint('author', 'permlink', name='hive_posts_ux1'),
         sa.Index('hive_posts_ix3', 'author', 'depth', 'id', postgresql_where=sql_text("is_deleted = '0'")), # API: author blog/comments
-        sa.Index('hive_posts_ix4', 'parent_id DESC NULLS LAST', 'id'), #postgresql_where=sql_text("is_deleted = '0'")), # API: fetching children #[JES] We decided we want the full index since posts can be deleted/undeleted
         sa.Index('hive_posts_ix5', 'id', postgresql_where=sql_text("is_pinned = '1' AND is_deleted = '0'")), # API: pinned post status
         sa.Index('hive_posts_ix6', 'community_id', 'id', postgresql_where=sql_text("community_id IS NOT NULL AND is_pinned = '1' AND is_deleted = '0'")), # API: community pinned
     )
+
+    sa.Index('hive_posts_ix4', hive_posts.c.parent_id.desc().nullslast(), hive_posts.c.id)
+    sa.Index('hive_posts_id_parent_id_created_at', hive_posts.c.id, hive_posts.c.parent_id.desc().nullslast(), hive_posts.c.created_at)
 
     sa.Table(
         'hive_post_tags', metadata,
@@ -107,10 +109,14 @@ def build_metadata():
         sa.Column('following', sa.Integer, nullable=False),
         sa.Column('state', SMALLINT, nullable=False, server_default='1'),
         sa.Column('created_at', sa.DateTime, nullable=False),
+        sa.Column('blacklisted', BOOLEAN, nullable=False, server_default='0'),
+        sa.Column('follow_blacklists', BOOLEAN, nullable=False, server_default='0'),
+        sa.Column('follow_muted', BOOLEAN, nullable=False, server_default='0'),
 
         sa.UniqueConstraint('following', 'follower', name='hive_follows_ux3'), # core
         sa.Index('hive_follows_ix5a', 'following', 'state', 'created_at', 'follower'),
         sa.Index('hive_follows_ix5b', 'follower', 'state', 'created_at', 'following'),
+        sa.Index('hive_follows_all_columns', 'follower', 'following', 'state', 'created_at', 'blacklisted', 'follow_blacklists', 'follow_muted')
     )
 
     sa.Table(
@@ -270,7 +276,8 @@ def build_metadata_community(metadata=None):
         sa.Column('settings',    TEXT,            nullable=False, server_default='{}'),
 
         sa.UniqueConstraint('name', name='hive_communities_ux1'),
-        sa.Index('hive_communities_ix1', 'rank', 'id')
+        sa.Index('hive_communities_ix1', 'rank', 'id'),
+        sa.Index('hive_communities_id_name', 'id', 'name')
     )
 
     sa.Table(
