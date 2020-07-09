@@ -223,6 +223,8 @@ def build_metadata():
         sa.PrimaryKeyConstraint('post_id', 'tag_id', name='hive_post_tags_pk1'),
         sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id']),
         sa.ForeignKeyConstraint(['tag_id'], ['hive_tag_data.id']),
+        sa.Index('hive_post_tags_post_id_idx', 'post_id'),
+        sa.Index('hive_post_tags_tag_id_idx', 'tag_id')
     )
 
     sa.Table(

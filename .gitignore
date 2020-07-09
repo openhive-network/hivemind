@@ -127,3 +127,6 @@ tests/failed_blocks/
 
 # vscode
 .vscode/*
+
+# pyrest tests
+*.out.json

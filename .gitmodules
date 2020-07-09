@@ -1,0 +1,3 @@
+[submodule "tests/tests_api"]
+	path = tests/tests_api
+	url = git@gitlab.syncad.com:hive/tests_api.git

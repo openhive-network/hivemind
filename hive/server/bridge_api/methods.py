@@ -19,9 +19,20 @@ ROLES = {-2: 'muted', 0: 'guest', 2: 'member', 4: 'mod', 6: 'admin', 8: 'owner'}
 SQL_TEMPLATE = """
         SELECT hp.id, 
             ha_a.name as author,
+            ha_r.name as root_author,
+            hp.author_rep as author_rep,
+            hp.allow_replies AS allow_replies,
+            hp.allow_votes AS allow_votes,
+            hp.allow_curation_rewards AS allow_curation_rewards,
+            hp.root_title AS root_title,
+            hp.beneficiaries AS beneficiaries,
+            hp.max_accepted_payout AS max_accepted_payout,
+            hp.percent_hbd AS percent_hbd,
+            hp.url AS url,
             hpd_p.permlink as permlink,
-            (SELECT title FROM hive_post_data WHERE hive_post_data.id = hp.id) as title, 
-            (SELECT body FROM hive_post_data WHERE hive_post_data.id = hp.id) as body, 
+            hpd_r.permlink as root_permlink,
+            hpd.title as title,
+            hpd.body as body,
             (SELECT category FROM hive_category_data WHERE hive_category_data.id = hp.category_id) as category,
             depth,
             promoted, 
@@ -33,7 +44,7 @@ SQL_TEMPLATE = """
             hp.created_at, 
             updated_at, 
             rshares, 
-            (SELECT json FROM hive_post_data WHERE hive_post_data.id = hp.id) as json,
+            hpd.json as json,
             is_hidden, 
             is_grayed, 
             total_votes, 
@@ -42,11 +53,16 @@ SQL_TEMPLATE = """
             ha_a.id AS acct_author_id,
             hive_roles.title as role_title, 
             hive_communities.title AS community_title, 
-            hive_roles.role_id AS role_id
-           hive_posts.is_pinned AS is_pinned
+            hive_roles.role_id AS role_id,
+            hp.is_pinned AS is_pinned
         FROM hive_posts hp
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_accounts ha_r ON ha_r.id = hp.root_author_id
         INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        INNER JOIN hive_permlink_data hpd_r ON hpd_r.id = hp.root_permlink_id
+        INNER JOIN hive_post_data hpd ON hpd.id = hp.id
+        INNER JOIN hive_post_tags hpt ON hpt.post_id = hp.id
+        INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
         LEFT OUTER JOIN hive_communities ON (hp.community_id = hive_communities.id)
         LEFT OUTER JOIN hive_roles ON (ha_a.id = hive_roles.account_id AND hp.community_id = hive_roles.community_id)
     """
@@ -134,26 +150,26 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
     pinned_sql = ''
 
     if sort == 'trending':
-        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND hp.depth = 0 AND NOT hive_posts.is_deleted
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND hp.depth = 0 AND NOT hp.is_deleted
                                     %s ORDER BY sc_trend desc, hp.id LIMIT :limit """
     elif sort == 'hot':
-        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND hp.depth = 0 AND NOT hive_posts.is_deleted
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND hp.depth = 0 AND NOT hp.is_deleted
                                     %s ORDER BY sc_hot desc, hp.id LIMIT :limit """
     elif sort == 'created':
-        sql = SQL_TEMPLATE + """ WHERE hp.depth = 0 AND NOT hive_posts.is_deleted AND NOT hp.is_grayed
+        sql = SQL_TEMPLATE + """ WHERE hp.depth = 0 AND NOT hp.is_deleted AND NOT hp.is_grayed
                                     %s ORDER BY hp.created_at DESC, hp.id LIMIT :limit """
     elif sort == 'promoted':
-        sql = SQL_TEMPLATE + """ WHERE hp.depth > 0 AND hp.promoted > 0 AND NOT hive_posts.is_deleted
+        sql = SQL_TEMPLATE + """ WHERE hp.depth > 0 AND hp.promoted > 0 AND NOT hp.is_deleted
                                     AND NOT hp.is_paidout %s ORDER BY hp.promoted DESC, hp.id LIMIT :limit """
     elif sort == 'payout':
-        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hive_posts.is_deleted %s
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hp.is_deleted %s
                                     AND payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
                                     ORDER BY hp.payout DESC, hp.id LIMIT :limit """
     elif sort == 'payout_comments':
-        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hive_posts.is_deleted AND hp.depth > 0
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hp.is_deleted AND hp.depth > 0
                                     %s ORDER BY hp.payout DESC, hp.id LIMIT :limit """
     elif sort == 'muted':
-        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hive_posts.is_deleted AND hp.is_grayed
+        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hp.is_deleted AND hp.is_grayed
                                     AND hp.payout > 0 %s ORDER BY hp.payout DESC, hp.id LIMIT :limit """
 
     sql = "---bridge_api.get_ranked_posts\n" + sql
@@ -194,15 +210,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
         if sort in ['payout', 'payout_comments']:
             sql = sql % """ AND hp.category = :tag """
         else:
-            sql = sql % """ AND hp.post IN 
-                (SELECT 
-                    post_id 
-                FROM 
-                    hive_post_tags hpt
-                INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
-                WHERE htd.tag = :tag
-                )
-            """
+            sql = sql % """ AND htd.tag = :tag """
 
     if not observer:
         observer = ''
