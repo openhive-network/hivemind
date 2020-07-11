@@ -46,7 +46,7 @@ async def load_posts_keyed(db, ids, truncate_body=0):
     # fetch posts and associated author reps
     sql = """
         SELECT hp.id, 
-            community_id, 
+            hp.community_id, 
             ha_a.name as author,
             hpd_p.permlink as permlink,
             hpd.title as title, 
@@ -58,7 +58,7 @@ async def load_posts_keyed(db, ids, truncate_body=0):
             payout_at, 
             is_paidout, 
             children, 
-            hpd.votes as votes,
+            0 as votes,
             hp.created_at, 
             updated_at, 
             rshares, 
@@ -83,8 +83,8 @@ async def load_posts_keyed(db, ids, truncate_body=0):
         FROM hive_posts hp
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
         INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
-        LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+        INNER JOIN hive_post_data hpd ON hpd.id = hp.id
+        INNER JOIN hive_category_data hcd ON hcd.id = hp.category_id
         INNER JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
         INNER JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
         INNER JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
@@ -254,16 +254,16 @@ def _condenser_post_object(row, truncate_body=0):
     post['pending_payout_value'] = _amount(0 if paid else row['payout'])
     post['author_payout_value'] = _amount(row['payout'] if paid else 0)
     post['curator_payout_value'] = _amount(0)
-    post['promoted'] = _amount(row['promoted'])
+    post['promoted'] = float(row['promoted'])
 
     post['replies'] = []
-    post['author_reputation'] = row['author_rep']
+    post['author_reputation'] = float(row['author_rep'])
 
     post['stats'] = {
         'hide': row['is_hidden'],
         'gray': row['is_grayed'],
         'total_votes': Votes.get_vote_count(row['author'], row['permlink']),
-        'flag_weight': row['flag_weight']} # TODO: down_weight
+        'flag_weight': float(row['flag_weight'])} # TODO: down_weight
 
 
     #post['author_reputation'] = rep_to_raw(row['author_rep'])

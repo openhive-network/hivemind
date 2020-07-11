@@ -43,7 +43,7 @@ async def load_posts_keyed(db, ids, truncate_body=0):
     # fetch posts and associated author reps
     sql = """
     SELECT hp.id, 
-        community_id, 
+        hp.community_id, 
         ha_a.name as author,
         hpd_p.permlink as permlink,
         hpd.title as title, 
@@ -55,7 +55,8 @@ async def load_posts_keyed(db, ids, truncate_body=0):
         payout_at, 
         is_paidout, 
         children, 
-        hpd.votes as votes,
+        0 as votes,
+        0 as active_votes,
         hp.created_at, 
         updated_at, 
         rshares, 
@@ -76,7 +77,7 @@ async def load_posts_keyed(db, ids, truncate_body=0):
         allow_curation_rewards, 
         beneficiaries, 
         url, 
-        root_title,
+        root_title
     FROM hive_posts hp
     INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
     INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
@@ -86,7 +87,7 @@ async def load_posts_keyed(db, ids, truncate_body=0):
     INNER JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
     INNER JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
     INNER JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
-    WHERE post_id IN :ids"""
+    WHERE hp.id IN :ids"""
 
     result = await db.query_all(sql, ids=tuple(ids))
     author_reps = await _query_author_rep_map(db, result)

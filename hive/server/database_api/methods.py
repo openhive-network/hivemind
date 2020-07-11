@@ -4,7 +4,7 @@ from hive.server.common.objects import condenser_post_object
 
 SQL_TEMPLATE = """
     SELECT hp.id, 
-        community_id, 
+        hp.community_id, 
         ha_a.name as author,
         hpd_p.permlink as permlink,
         (SELECT title FROM hive_post_data WHERE hive_post_data.id = hp.id) as title, 
@@ -187,7 +187,7 @@ async def find_comments(context, start: list, limit: int, order: str):
     result = await db.query_all(sql)
     for row in result:
         cpo = condenser_post_object(dict(row))
-        cpo['active_votes'] = find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
+        cpo['active_votes'] = await find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
         comments.append(cpo)
 
     return comments
@@ -209,7 +209,7 @@ async def find_votes(context, params: dict):
             last_update,
             num_changes
         FROM
-            hive_votes
+            hive_votes hv
         INNER JOIN hive_accounts ha_v ON (ha_v.id = hv.voter_id)
         INNER JOIN hive_accounts ha_a ON (ha_a.id = hv.author_id)
         INNER JOIN hive_permlink_data hpd ON (hpd.id = hv.permlink_id)
@@ -217,7 +217,7 @@ async def find_votes(context, params: dict):
             ha_a.name = :author AND hpd.permlink = :permlink
     """
     ret = []
-    rows = db.query_all(sql, author=params['author'], permlink=params['permlink'])
+    rows = await db.query_all(sql, author=params['author'], permlink=params['permlink'])
     for row in rows:
         ret.append(dict(voter=row.voter, author=row.author, permlink=row.permlink,
                         weight=row.weight, rshares=row.rshares, vote_percent=row.vote_percent,

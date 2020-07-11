@@ -30,7 +30,7 @@ async def get_post_id(db, author, permlink):
             hive_posts hp
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
         INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        WHERE ha_a.name = :a AND hpd_p.permlik = :p"""
+        WHERE ha_a.name = :a AND hpd_p.permlink = :p"""
     _id = await db.query_one(sql, a=author, p=permlink)
     assert _id, 'post id not found'
     return _id

@@ -20,9 +20,9 @@ async def get_post_id(db, author, permlink):
         FROM hive_posts hp
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
         INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        WHERE ha_a.author = :author AND hpd_p.permlink = :permlink 
+        WHERE ha_a.name = :author AND hpd_p.permlink = :permlink 
             AND is_deleted = '0' LIMIT 1"""
-    return await db.query_one(sql, a=author, p=permlink)
+    return await db.query_one(sql, author=author, permlink=permlink)
 
 async def get_child_ids(db, post_id):
     """Given a parent post id, retrieve all child ids."""
@@ -37,8 +37,8 @@ async def _get_post_id(db, author, permlink):
         FROM hive_posts hp
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
         INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        WHERE ha_a.author = :author AND hpd_p.permlink = :permlink"""
-    return await db.query_one(sql, a=author, p=permlink)
+        WHERE ha_a.name = :author AND hpd_p.permlink = :permlink"""
+    return await db.query_one(sql, author=author, permlink=permlink)
 
 async def _get_account_id(db, name):
     """Get account id from hive db."""
@@ -117,7 +117,8 @@ async def get_reblogged_by(db, author: str, permlink: str):
                JOIN hive_feed_cache ON id = account_id
               WHERE post_id = :post_id"""
     names = await db.query_col(sql, post_id=post_id)
-    names.remove(author)
+    if author in names:
+        names.remove(author)
     return names
 
 
@@ -147,7 +148,7 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
     params = {             # field      pending posts   comment promoted    todo        community
         'trending':        ('sc_trend', True,   False,  False,  False),   # posts=True  pending=False
         'hot':             ('sc_hot',   True,   False,  False,  False),   # posts=True  pending=False
-        'created':         ('post_id',  False,  True,   False,  False),
+        'created':         ('id',  False,  True,   False,  False),
         'promoted':        ('promoted', True,   False,  False,  True),    # posts=True
         'payout':          ('payout',   True,   True,   False,  False),
         'payout_comments': ('payout',   True,   False,  True,   False),
@@ -183,7 +184,7 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
                 INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
                 WHERE htd.tag = :tag
             """
-            where.append("id IN (%s)" % sql)
+            where.append("hp.id IN (%s)" % sql)
 
     start_id = None
     if start_permlink and start_author:
@@ -192,7 +193,7 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
 
     sql = """
         SELECT hp.id, 
-            community_id, 
+            hp.community_id, 
             ha_a.name as author,
             hpd_p.permlink as permlink,
             hpd.title as title, 
@@ -204,7 +205,7 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
             payout_at, 
             is_paidout, 
             children, 
-            hpd.votes as votes,
+            0 as votes,
             hp.created_at, 
             updated_at, 
             rshares, 
