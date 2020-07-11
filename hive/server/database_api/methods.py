@@ -88,7 +88,7 @@ async def list_comments(context, start: list, limit: int, order: str):
         result = await db.query_all(sql, start=start[0], limit=limit, post_id=post_id)
         for row in result:
             cpo = condenser_post_object(dict(row))
-            cpo['active_votes'] = find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
+            cpo['active_votes'] = await find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
             comments.append(cpo)
     elif order == 'by_permlink':
         assert len(start) == 2, "Expecting two arguments"
@@ -100,7 +100,7 @@ async def list_comments(context, start: list, limit: int, order: str):
         result = await db.query_all(sql, author=start[0], permlink=start[1], limit=limit)
         for row in result:
             cpo = condenser_post_object(dict(row))
-            cpo['active_votes'] = find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
+            cpo['active_votes'] = await find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
             comments.append(cpo)
     elif order == 'by_root':
         assert len(start) == 4, "Expecting 4 arguments"
@@ -112,7 +112,7 @@ async def list_comments(context, start: list, limit: int, order: str):
         result = await db.query_all(sql, root_author=start[0], root_permlink=start[1], child_author=start[2], child_permlink=start[3], limit=limit)
         for row in result:
             cpo = condenser_post_object(dict(row))
-            cpo['active_votes'] = find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
+            cpo['active_votes'] = await find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
             comments.append(cpo)
     elif order == 'by_parent':
         assert len(start) == 4, "Expecting 4 arguments"
@@ -124,7 +124,7 @@ async def list_comments(context, start: list, limit: int, order: str):
         result = await db.query_all(sql, parent_author=start[0], parent_permlink=start[1], child_author=start[2], child_permlink=start[3], limit=limit)
         for row in result:
             cpo = condenser_post_object(dict(row))
-            cpo['active_votes'] = find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
+            cpo['active_votes'] = await find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
             comments.append(cpo)
     elif order == 'by_update':
         assert len(start) == 4, "Expecting 4 arguments"
@@ -142,7 +142,7 @@ async def list_comments(context, start: list, limit: int, order: str):
         result = await db.query_all(sql, parent_author=start[0], updated_at=start[1], post_id=post_id, limit=limit)
         for row in result:
             cpo = condenser_post_object(dict(row))
-            cpo['active_votes'] = find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
+            cpo['active_votes'] = await find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
             comments.append(cpo)
 
     elif order == 'by_author_last_update':
@@ -161,7 +161,7 @@ async def list_comments(context, start: list, limit: int, order: str):
         result = await db.query_all(sql, author=start[0], updated_at=start[1], post_id=post_id, limit=limit)
         for row in result:
             cpo = condenser_post_object(dict(row))
-            cpo['active_votes'] = find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
+            cpo['active_votes'] = await find_votes(context, {'author':cpo['author'], 'permlink':cpo['permlink']})
             comments.append(cpo)
 
     return comments
@@ -221,7 +221,7 @@ async def find_votes(context, params: dict):
     for row in rows:
         ret.append(dict(voter=row.voter, author=row.author, permlink=row.permlink,
                         weight=row.weight, rshares=row.rshares, vote_percent=row.vote_percent,
-                        last_update=row.last_update, num_changes=row.num_changes))
+                        last_update=str(row.last_update), num_changes=row.num_changes))
     return ret
 
 @return_error_info

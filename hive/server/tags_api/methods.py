@@ -27,7 +27,12 @@ async def get_active_votes(context, author: str, permlink: str):
         INNER JOIN hive_permlink_data hpd ON hpd.id = hv.permlink_id
         WHERE ha_a.name = :author AND hpd.permlink = :permlink
     """
-    ret = await db.query_all(sql, author=author, permlink=permlink)
+    ret = []
+    rows = await db.query_all(sql, author=author, permlink=permlink)
+    for row in rows:
+        ret.append(dict(voter=row.voter, author=row.author, permlink=row.permlink,
+                        weight=row.weight, rshares=row.rshares, vote_percent=row.vote_percent,
+                        last_update=str(row.last_update), num_changes=row.num_changes))
     return ret
 
 @return_error_info
