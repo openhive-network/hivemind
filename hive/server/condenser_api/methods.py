@@ -15,39 +15,57 @@ from hive.server.common.helpers import (
     valid_limit,
     valid_follow_type)
 from hive.server.common.mutes import Mutes
+from hive.server.database_api.methods import find_votes
 
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
 
 SQL_TEMPLATE = """
     SELECT hp.id, 
+        hp.community_id, 
         ha_a.name as author,
         hpd_p.permlink as permlink,
-        (SELECT title FROM hive_post_data WHERE hive_post_data.id = hp.id) as title, 
-        (SELECT body FROM hive_post_data WHERE hive_post_data.id = hp.id) as body, 
-        (SELECT category FROM hive_category_data WHERE hive_category_data.id = hp.category_id) as category,
+        hpd.title as title, 
+        hpd.body as body, 
+        hcd.category as category, 
         depth,
         promoted, 
         payout, 
         payout_at, 
         is_paidout, 
         children, 
-        (0) as votes,
+        0 as votes,
+        0 as active_votes,
         hp.created_at, 
         updated_at, 
         rshares, 
-        (SELECT json FROM hive_post_data WHERE hive_post_data.id = hp.id) as json,
+        hpd.json as json,
         ha_a.reputation AS author_rep,
         is_hidden, 
         is_grayed, 
         total_votes, 
         flag_weight,
-        sc_trend,
-        author_id,
-        is_pinned
-        
+        ha_pa.name as parent_author,
+        hpd_pp.permlink as parent_permlink,
+        curator_payout_value, 
+        ha_ra.name as root_author,
+        hpd_rp.permlink as root_permlink,
+        max_accepted_payout, 
+        percent_hbd, 
+        allow_replies, 
+        allow_votes, 
+        allow_curation_rewards, 
+        beneficiaries, 
+        url, 
+        root_title
     FROM hive_posts hp
     INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
     INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+    LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
+    LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+    INNER JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
+    INNER JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
+    INNER JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
+    INNER JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
     WHERE
 """
 
@@ -135,13 +153,14 @@ async def get_content(context, author: str, permlink: str, observer=None):
     valid_permlink(permlink)
     #force copy
     sql = str(SQL_TEMPLATE)
-    sql += """ WHERE ha_a.name = :author AND hpd_p.permlink = :permlink AND NOT hp.is_deleted """
+    sql += """ ha_a.name = :author AND hpd_p.permlink = :permlink AND NOT hp.is_deleted """
 
     post = None
     result = await db.query_all(sql, author=author, permlink=permlink)
     if result:
         result = dict(result[0])
         post = _condenser_post_object(result, 0)
+        post['active_votes'] = await find_votes(context, {'author':author, 'permlink':permlink})
         if not observer:
             post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
         else:
@@ -161,7 +180,6 @@ async def get_content_replies(context, author: str, permlink: str):
     #force copy
     sql = str(SQL_TEMPLATE)
     sql += """
-        WHERE 
             hp.is_deleted = '0' AND 
             hp.parent_id = (
                 SELECT id 
@@ -170,9 +188,8 @@ async def get_content_replies(context, author: str, permlink: str):
                     author_id = (SELECT id FROM hive_accounts WHERE name =:author)
                     AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)
                     AND is_deleted = '0'
-            )
-        LIMIT :limit
-        ORDER BY id
+            ) 
+        ORDER BY hp.id LIMIT :limit
     """
 
     result = await db.query_all(sql, author=author, permlink=permlink, limit=5000)
@@ -220,7 +237,7 @@ async def get_discussions_by(discussion_type, context, start_author: str = '',
 
     sql = "---get_discussions_by_" + discussion_type + "\r\n" + str(SQL_TEMPLATE)
     
-    sql = sql + """ WHERE NOT hp.is_deleted """
+    sql = sql + """ NOT hp.is_deleted """
     
     if discussion_type == 'trending':
         sql = sql + """ AND NOT hp.is_paidout %s ORDER BY sc_trend DESC LIMIT :limit """
@@ -273,6 +290,7 @@ async def get_discussions_by(discussion_type, context, start_author: str = '',
     posts = []
     for row in result:
         post = _condenser_post_object(row, truncate_body)
+        post['active_votes'] = await find_votes(context, {'author':post['author'], 'permlink':post['permlink']})
         post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
         posts.append(post)
     #posts = await resultset_to_posts(db=db, resultset=result, truncate_body=truncate_body)
@@ -362,7 +380,7 @@ async def get_discussions_by_blog(context, tag: str = None, start_author: str = 
     #force copy
     sql = str(SQL_TEMPLATE)
     sql += """
-            WHERE NOT hp.is_deleted AND hp.id IN
+            NOT hp.is_deleted AND hp.id IN
                 (SELECT post_id FROM hive_feed_cache JOIN hive_accounts ON (hive_feed_cache.account_id = hive_accounts.id) WHERE hive_accounts.name = :author)
           """
     if start_author and start_permlink != '':
@@ -382,6 +400,7 @@ async def get_discussions_by_blog(context, tag: str = None, start_author: str = 
     for row in result:
         row = dict(row)
         post = _condenser_post_object(row, truncate_body=truncate_body)
+        post['active_votes'] = await find_votes(context, {'author':post['author'], 'permlink':post['permlink']})
         post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
         #posts_by_id[row['post_id']] = post
         posts_by_id.append(post)
@@ -418,7 +437,7 @@ async def get_discussions_by_comments(context, start_author: str = None, start_p
     #force copy
     sql = str(SQL_TEMPLATE)
     sql += """
-            WHERE ha_a.author = :start_author AND hp.depth > 0
+            ha_a.name = :start_author AND hp.depth > 0
             AND NOT hp.is_deleted
     """
 
@@ -438,6 +457,7 @@ async def get_discussions_by_comments(context, start_author: str = None, start_p
     for row in result:
         row = dict(row)
         post = _condenser_post_object(row, truncate_body=truncate_body)
+        post['active_votes'] = await find_votes(context, {'author':post['author'], 'permlink':post['permlink']})
         post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
         posts.append(post)
 

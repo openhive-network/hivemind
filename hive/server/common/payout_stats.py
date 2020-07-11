@@ -38,11 +38,12 @@ class PayoutStats:
 
         sql = """
             SELECT community_id,
-                   author,
+                   ha.name as author,
                    SUM(payout) payout,
                    COUNT(*) posts,
                    NULL authors
               FROM hive_posts
+              INNER JOIN hive_accounts ha ON ha.id = hive_posts.author_id
              WHERE is_paidout = '0'
           GROUP BY community_id, author
 

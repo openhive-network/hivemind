@@ -112,7 +112,7 @@ async def _get_post_id(db, author, permlink):
         FROM hive_posts hp
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
         INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        WHERE ha_a.author = :author 
+        WHERE ha_a.name = :author 
             AND hpd_p.permlink = :permlink 
             AND is_deleted = '0' 
         LIMIT 1"""

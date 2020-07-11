@@ -355,7 +355,7 @@ async def _top_community_posts(db, community, limit=50):
     # TODO: muted equivalent
     sql = """
     SELECT ha_a.name as author,
-        hpd.votes as votes,
+        0 as votes,
         payout
     FROM hive_posts hp
     INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id

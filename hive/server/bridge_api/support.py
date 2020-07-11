@@ -27,7 +27,7 @@ async def get_post_header(context, author, permlink):
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
         INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
         LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
-        WHERE ha_a.author = :author
+        WHERE ha_a.name = :author
             AND hpd_p.permlink = :permlink
             AND is_deleted = '0'
     """
@@ -57,7 +57,7 @@ async def normalize_post(context, post):
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
         INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
         LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
-        WHERE ha_a.author = :author AND hpd_p.permlink = :permlink
+        WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
     """
     core = await db.query_row(sql, author=post['author'], permlink=post['permlink'])
     if not core:

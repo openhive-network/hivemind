@@ -54,7 +54,8 @@ SQL_TEMPLATE = """
             hive_roles.title as role_title, 
             hive_communities.title AS community_title, 
             hive_roles.role_id AS role_id,
-            hp.is_pinned AS is_pinned
+            hp.is_pinned AS is_pinned,
+            curator_payout_value
         FROM hive_posts hp
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
         INNER JOIN hive_accounts ha_r ON ha_r.id = hp.root_author_id
@@ -65,6 +66,7 @@ SQL_TEMPLATE = """
         INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
         LEFT OUTER JOIN hive_communities ON (hp.community_id = hive_communities.id)
         LEFT OUTER JOIN hive_roles ON (ha_a.id = hive_roles.account_id AND hp.community_id = hive_roles.community_id)
+        WHERE
     """
 
 #pylint: disable=too-many-arguments, no-else-return
@@ -123,7 +125,7 @@ async def get_post(context, author, permlink, observer=None):
     if observer and context:
         blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
 
-    sql = "---bridge_api.get_post\n" + SQL_TEMPLATE + """ WHERE ha_a.name = :author AND hpd_p.permlink = :permlink AND NOT hive_posts.is_deleted """
+    sql = "---bridge_api.get_post\n" + SQL_TEMPLATE + """ ha_a.name = :author AND hpd_p.permlink = :permlink AND NOT hp.is_deleted """
 
     result = await db.query_all(sql, author=author, permlink=permlink)
     assert len(result) == 1, 'invalid author/permlink or post not found in cache'
@@ -150,26 +152,26 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
     pinned_sql = ''
 
     if sort == 'trending':
-        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND hp.depth = 0 AND NOT hp.is_deleted
+        sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND hp.depth = 0 AND NOT hp.is_deleted
                                     %s ORDER BY sc_trend desc, hp.id LIMIT :limit """
     elif sort == 'hot':
-        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND hp.depth = 0 AND NOT hp.is_deleted
+        sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND hp.depth = 0 AND NOT hp.is_deleted
                                     %s ORDER BY sc_hot desc, hp.id LIMIT :limit """
     elif sort == 'created':
-        sql = SQL_TEMPLATE + """ WHERE hp.depth = 0 AND NOT hp.is_deleted AND NOT hp.is_grayed
+        sql = SQL_TEMPLATE + """ hp.depth = 0 AND NOT hp.is_deleted AND NOT hp.is_grayed
                                     %s ORDER BY hp.created_at DESC, hp.id LIMIT :limit """
     elif sort == 'promoted':
-        sql = SQL_TEMPLATE + """ WHERE hp.depth > 0 AND hp.promoted > 0 AND NOT hp.is_deleted
+        sql = SQL_TEMPLATE + """ hp.depth > 0 AND hp.promoted > 0 AND NOT hp.is_deleted
                                     AND NOT hp.is_paidout %s ORDER BY hp.promoted DESC, hp.id LIMIT :limit """
     elif sort == 'payout':
-        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hp.is_deleted %s
+        sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND NOT hp.is_deleted %s
                                     AND payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
                                     ORDER BY hp.payout DESC, hp.id LIMIT :limit """
     elif sort == 'payout_comments':
-        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hp.is_deleted AND hp.depth > 0
+        sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND NOT hp.is_deleted AND hp.depth > 0
                                     %s ORDER BY hp.payout DESC, hp.id LIMIT :limit """
     elif sort == 'muted':
-        sql = SQL_TEMPLATE + """ WHERE NOT hp.is_paidout AND NOT hp.is_deleted AND hp.is_grayed
+        sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND NOT hp.is_deleted AND hp.is_grayed
                                     AND hp.payout > 0 %s ORDER BY hp.payout DESC, hp.id LIMIT :limit """
 
     sql = "---bridge_api.get_ranked_posts\n" + sql
@@ -204,7 +206,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
             sql = sql % """ AND hive_communities.name = :community_name """
 
         if sort == 'trending' or sort == 'created':
-                pinned_sql = SQL_TEMPLATE + """ WHERE is_pinned AND hive_communities.name = :community_name ORDER BY hp.created_at DESC """
+                pinned_sql = SQL_TEMPLATE + """ is_pinned AND hive_communities.name = :community_name ORDER BY hp.created_at DESC """
 
     else:
         if sort in ['payout', 'payout_comments']:
@@ -300,11 +302,11 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
                 post['reblogged_by'] = [account]
         return posts
     elif sort == 'posts':
-        sql = sql % """ WHERE ha_a.name = :account AND NOT hp.is_deleted AND hp.depth = 0 %s ORDER BY hp.id DESC LIMIT :limit"""
+        sql = sql % """ ha_a.name = :account AND NOT hp.is_deleted AND hp.depth = 0 %s ORDER BY hp.id DESC LIMIT :limit"""
     elif sort == 'comments':
-        sql = sql % """ WHERE ha_a.name = :account AND NOT hp.is_deleted AND hp.depth > 0 %s ORDER BY hp.id DESC, depth LIMIT :limit"""
+        sql = sql % """ ha_a.name = :account AND NOT hp.is_deleted AND hp.depth > 0 %s ORDER BY hp.id DESC, depth LIMIT :limit"""
     elif sort == 'payout':
-        sql = sql % """ WHERE ha_a.name = :account AND NOT hp.is_deleted AND NOT hp.is_paidout %s ORDER BY payout DESC, hp.id LIMIT :limit"""
+        sql = sql % """ ha_a.name = :account AND NOT hp.is_deleted AND NOT hp.is_paidout %s ORDER BY payout DESC, hp.id LIMIT :limit"""
     elif sort == 'feed':
         res = await cursor.pids_by_feed_with_reblog(db, account, *start, limit)
         return await load_posts_reblogs(context['db'], res)
