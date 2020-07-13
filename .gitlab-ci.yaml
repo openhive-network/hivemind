@@ -37,6 +37,7 @@ hivemind_deploy:
     - hivemind_build
   script:
     - ls -l dist/*
+    - mkdir -p `python3 -m site --user-site`
     - python3 setup.py install --user --force
     - ./local-site/bin/hive --version
     - "echo Attempting to recreate database $HIVEMIND_DB_NAME"
