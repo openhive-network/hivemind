@@ -1,3 +1,10 @@
+# https://hub.docker.com/r/library/python/tags/
+image: "python:3.7"
+
+before-script:
+- python3 --version
+- pip3 install --upgrade pip setuptools
+
 stages:
 - build
 - test
@@ -14,7 +21,18 @@ hivemind_build:
 
   script:
     - python3 setup.py build
+    - echo "Install prefix: $CI_PROJECT_DIR/hivemind-install"
     - python3 setup.py install --prefix "$CI_PROJECT_DIR/hivemind-install"
 
   tags:
      - hivemind
+
+hivemind_deploy:
+- stage deploy
+variables:
+  HIVEMIND_DB_NAME="hive_" + ${CI_JOB_ID}
+  HIVEMIND_SOURCE_HIVED_URL=http://localhost:8090
+script:
+  - echo "Attempting to recreate database ${HIVEMIND_DB_NAME}"
+  - echo "Attempting to starting hive sync using hived node: ${HIVEMIND_SOURCE_HIVED_URL}"
+
