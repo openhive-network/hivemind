@@ -71,6 +71,11 @@ ADD_API_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tes
 ADD_API_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tests_api hivemind tags_api get_tags_used_by_author flaws)
 ADD_API_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tests_api hivemind tags_api get_trending_tags blocktrades 1)
 
+ADD_API_PYREST_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tests_api hivemind 5000000 bridge_api )
+ADD_API_PYREST_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tests_api hivemind 5000000 condenser_api )
+ADD_API_PYREST_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tests_api hivemind 5000000 database_api )
+ADD_API_PYREST_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tests_api hivemind 5000000 follow_api )
+ADD_API_PYREST_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tests_api hivemind 5000000 hive_api )
 
 
 
