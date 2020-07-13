@@ -1,0 +1,20 @@
+stages:
+- build
+- test
+- deploy
+
+variables:
+  GIT_DEPTH: 1
+  LC_ALL: "C"
+  GIT_STRATEGY: clone
+  GIT_SUBMODULE_STRATEGY: recursiv
+
+hivemind_build:
+  stage: build
+
+  script:
+    - python3 setup.py build
+    - python3 setup.py install --prefix "$CI_PROJECT_DIR/hivemind-install"
+
+  tags:
+     - hivemind
