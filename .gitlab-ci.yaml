@@ -21,8 +21,8 @@ variables:
 hivemind_build:
   stage: build
   script:
-    - "python3 setup.py build"
-    - ls -l dist/
+    - "python3 setup.py bdist_egg"
+    - ls -l dist/*
 #    - "python3 setup.py install --prefix $CI_PROJECT_DIR/hivemind-install"
   artifacts:
     paths:
