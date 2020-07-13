@@ -15,7 +15,6 @@ variables:
   LC_ALL: "C"
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: recursive
-  HIVEMIND_DB_NAME: $HIVEMIND_DB_NAME
   HIVEMIND_SOURCE_HIVED_URL: $HIVEMIND_SOURCE_HIVED_URL
   PYTHONUSERBASE: ./local-site
 
@@ -38,6 +37,8 @@ hivemind_deploy:
       artifacts: true
   variables:
     GIT_STRATEGY: none
+    HIVEMIND_DB_NAME: "hive_$CI_JOB_ID"
+
   script:
     - ls -l dist/*
     - mkdir -p `python3 -m site --user-site`
