@@ -33,8 +33,11 @@ hivemind_build:
 
 hivemind_deploy:
   stage: deploy
-  dependencies:
-    - hivemind_build
+  needs:
+    - job: hivemind_build
+      artifacts: true
+  variables:
+    GIT_STRATEGY: none
   script:
     - ls -l dist/*
     - mkdir -p `python3 -m site --user-site`
