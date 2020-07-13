@@ -17,11 +17,12 @@ variables:
   GIT_SUBMODULE_STRATEGY: recursive
   HIVEMIND_DB_NAME: $HIVEMIND_DB_NAME
   HIVEMIND_SOURCE_HIVED_URL: $HIVEMIND_SOURCE_HIVED_URL
+  PYTHONUSERBASE: ./local-site
 
 hivemind_build:
   stage: build
   script:
-    - "python3 setup.py bdist_egg"
+    - "python3 setup.py build"
     - ls -l dist/*
   artifacts:
     paths:
@@ -37,7 +38,7 @@ hivemind_deploy:
   script:
     - ls -l dist/*
     - python3 setup.py install --user --force
-    - hive --version
+    - ./local-site/bin/hive --version
     - "echo Attempting to recreate database $HIVEMIND_DB_NAME"
     - "echo Attempting to starting hive sync using hived node: $HIVEMIND_SOURCE_HIVED_URL"
   tags:
