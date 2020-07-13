@@ -24,7 +24,7 @@ hivemind_build:
     - "python3 setup.py build"
     - ls -l dist/
 #    - "python3 setup.py install --prefix $CI_PROJECT_DIR/hivemind-install"
-  artifact:
+  artifacts:
     paths:
       - dist/
     expire_in: 1 week
@@ -33,7 +33,8 @@ hivemind_build:
 
 hivemind_deploy:
   stage: deploy
-  depends: build
+  dependencies:
+    - hivemind_build
   script:
     - ls -l dist/*
     - "echo Attempting to recreate database $HIVEMIND_DB_NAME"
