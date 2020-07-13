@@ -22,7 +22,7 @@ variables:
 hivemind_build:
   stage: build
   script:
-    - "python3 setup.py build"
+    - "python3 setup.py bdist_egg"
     - ls -l dist/*
   artifacts:
     paths:
