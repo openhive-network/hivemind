@@ -16,47 +16,48 @@ from hive.server.common.helpers import (
     valid_follow_type)
 from hive.server.common.mutes import Mutes
 from hive.server.database_api.methods import find_votes
+from hive.utils.normalize import rep_to_raw, number_to_json_value, time_string_with_t
 
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
 
 SQL_TEMPLATE = """
-    SELECT 
-        hp.id, 
-        hp.community_id, 
+    SELECT
+        hp.id,
+        hp.community_id,
         hp.author,
         hp.permlink,
         hp.author_rep,
-        hp.title, 
-        hp.body, 
-        hp.category, 
+        hp.title,
+        hp.body,
+        hp.category,
         hp.depth,
-        hp.promoted, 
-        hp.payout, 
-        hp.payout_at, 
-        hp.is_paidout, 
-        hp.children, 
+        hp.promoted,
+        hp.payout,
+        hp.payout_at,
+        hp.is_paidout,
+        hp.children,
         hp.votes,
         hp.active_votes,
-        hp.created_at, 
-        hp.updated_at, 
-        hp.rshares, 
+        hp.created_at,
+        hp.updated_at,
+        hp.rshares,
         hp.json as json,
-        hp.is_hidden, 
-        hp.is_grayed, 
-        hp.total_votes, 
+        hp.is_hidden,
+        hp.is_grayed,
+        hp.total_votes,
         hp.flag_weight,
         hp.parent_author,
         hp.parent_permlink,
-        hp.curator_payout_value, 
+        hp.curator_payout_value,
         hp.root_author,
         hp.root_permlink,
-        hp.max_accepted_payout, 
-        hp.percent_hbd, 
-        hp.allow_replies, 
-        hp.allow_votes, 
-        hp.allow_curation_rewards, 
-        hp.beneficiaries, 
-        hp.url, 
+        hp.max_accepted_payout,
+        hp.percent_hbd,
+        hp.allow_replies,
+        hp.allow_votes,
+        hp.allow_curation_rewards,
+        hp.beneficiaries,
+        hp.url,
         hp.root_title
     FROM vw_hive_posts hp
     WHERE
@@ -221,9 +222,9 @@ async def get_discussions_by(discussion_type, context, start_author: str = '',
     db = context['db']
 
     sql = "---get_discussions_by_" + discussion_type + "\r\n" + str(SQL_TEMPLATE)
-    
+
     sql = sql + """ NOT hp.is_deleted """
-    
+
     if discussion_type == 'trending':
         sql = sql + """ AND NOT hp.is_paidout %s ORDER BY sc_trend DESC LIMIT :limit """
     elif discussion_type == 'hot':
@@ -239,15 +240,15 @@ async def get_discussions_by(discussion_type, context, start_author: str = '',
     elif discussion_type == 'payout_comments':
         sql = sql + """ AND NOT hp.is_paidout AND hp.depth > 0
                         %s ORDER BY hp.payout DESC LIMIT :limit """
-    
+
     if tag and tag != 'all':
         if tag[:5] == 'hive-':
             sql = sql % """ %s AND hp.category = :tag """
         else:
-            sql = sql % """ %s AND hp.post_id IN 
-                (SELECT 
-                    post_id 
-                FROM 
+            sql = sql % """ %s AND hp.post_id IN
+                (SELECT
+                    post_id
+                FROM
                     hive_post_tags hpt
                 INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
                 WHERE htd.tag = :tag
@@ -586,3 +587,31 @@ async def get_accounts(context, accounts: list):
     assert len(accounts) < 1000, "Query exceeds limit"
 
     return await cursor.get_accounts(context['db'], accounts)
+
+@return_error_info
+async def get_active_votes(context, author: str, permlink: str):
+    """ Returns all votes for the given post. """
+    valid_account(author)
+    valid_permlink(permlink)
+    db = context['db']
+    sql = """
+        SELECT
+            percent,
+            reputation,
+            rshares,
+            time,
+            voter,
+            weight
+        FROM
+            wv_hive_votes_accounts_permlinks
+        WHERE author = :author AND permlink = :permlink
+        ORDER BY id
+    """
+    ret = []
+    rows = await db.query_all(sql, author=author, permlink=permlink)
+    for row in rows:
+        ret.append(dict(percent=row.percent, reputation=rep_to_raw(row.reputation),
+                        rshares=number_to_json_value(row.rshares), time=time_string_with_t(row.time), voter=row.voter,
+                        weight=number_to_json_value(row.weight),
+                        ))
+    return ret

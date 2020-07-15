@@ -222,3 +222,20 @@ def asset_to_hbd_hive(price, asset):
         result = int(asset['amount']) * int(price['base']['amount']) / int(price['quote']['amount'])
         return {'amount' : result, 'nai' : price['base']['nai'], 'precision' : price['base']['precision']}
     raise ValueError("Asset not supported")
+
+def number_to_json_value(number):
+    """ hived serialize some numbers greater than 0xFFFFFFFF as strings
+
+    Check 'json::stringify_large_ints_and_doubles' in hive C++ code
+    """
+    if number > 0xFFFFFFFF:
+        return str(number)
+    return number
+
+def time_string_with_t(time_iso8601):
+    """ Ensures that time in format ISO8601 use 'T' as a data time separator
+
+    Hived serialzie time wit 'T' as a separator. ISO allows for space as a separator
+    and SQL queries may return it.
+    """
+    return str(time_iso8601).replace(" ", "T")
