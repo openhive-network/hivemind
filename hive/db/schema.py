@@ -188,7 +188,7 @@ def build_metadata():
         sa.Column('voter_id', sa.Integer, nullable=False),
         sa.Column('author_id', sa.Integer, nullable=False),
         sa.Column('permlink_id', sa.Integer, nullable=False),
-        sa.Column('weight', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('weight', sa.Numeric, nullable=False, server_default='0'),
         sa.Column('rshares', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('vote_percent', sa.Integer, server_default='0'),
         sa.Column('last_update', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
@@ -400,12 +400,12 @@ def setup(db):
         "INSERT INTO hive_accounts (name, created_at) VALUES ('initminer', '2016-03-24 16:05:00')",
 
         """
-        INSERT INTO 
+        INSERT INTO
             public.hive_posts(id, parent_id, author_id, permlink_id, category_id,
-                community_id, parent_author_id, parent_permlink_id, root_author_id, 
+                community_id, parent_author_id, parent_permlink_id, root_author_id,
                 root_permlink_id, created_at, depth
             )
-        VALUES 
+        VALUES
             (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, now(), 0);
         """]
     for sql in sqls:
@@ -456,8 +456,8 @@ def setup(db):
                 ELSE NULL
               END)  as community_id,
                 COALESCE(php.category_id, (select hcg.id from hive_category_data hcg where hcg.category = _parent_permlink)) as category_id,
-                php.root_author_id as root_author_id, 
-                php.root_permlink_id as root_permlink_id, 
+                php.root_author_id as root_author_id,
+                php.root_permlink_id as root_permlink_id,
                 php.is_muted as is_muted, php.is_valid as is_valid,
                 ha.id as author_id, hpd.id as permlink_id, _date as created_at
             FROM hive_accounts ha,
@@ -466,12 +466,12 @@ def setup(db):
             INNER JOIN hive_accounts pha ON pha.id = php.author_id
             INNER JOIN hive_permlink_data phpd ON phpd.id = php.permlink_id
             WHERE pha.name = _parent_author and phpd.permlink = _parent_permlink AND
-                   ha.name = _author and hpd.permlink = _permlink 
+                   ha.name = _author and hpd.permlink = _permlink
 
             ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
               --- During post update it is disallowed to change: parent-post, category, community-id
               --- then also depth, is_valid and is_muted is impossible to change
-             --- post edit part 
+             --- post edit part
              updated_at = _date,
 
               --- post undelete part (if was deleted)
@@ -490,8 +490,8 @@ def setup(db):
           ;
           ELSE
             INSERT INTO hive_category_data
-            (category) 
-            VALUES (_parent_permlink) 
+            (category)
+            VALUES (_parent_permlink)
             ON CONFLICT (category) DO NOTHING
             ;
 
@@ -514,12 +514,12 @@ def setup(db):
                 ha.id as author_id, hpd.id as permlink_id, _date as created_at
             FROM hive_accounts ha,
                  hive_permlink_data hpd
-            WHERE ha.name = _author and hpd.permlink = _permlink 
+            WHERE ha.name = _author and hpd.permlink = _permlink
 
             ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
               --- During post update it is disallowed to change: parent-post, category, community-id
               --- then also depth, is_valid and is_muted is impossible to change
-              --- post edit part 
+              --- post edit part
               updated_at = _date,
 
               --- post undelete part (if was deleted)
