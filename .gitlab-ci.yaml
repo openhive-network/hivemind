@@ -1,3 +1,6 @@
+# https://hub.docker.com/r/library/python/tags/
+image: "python:3.7"
+
 stages:
 - build
 - test
@@ -7,14 +10,75 @@ variables:
   GIT_DEPTH: 1
   LC_ALL: "C"
   GIT_STRATEGY: clone
-  GIT_SUBMODULE_STRATEGY: recursiv
+  GIT_SUBMODULE_STRATEGY: recursive
+  HIVEMIND_SOURCE_HIVED_URL: $HIVEMIND_SOURCE_HIVED_URL
+  PYTHONUSERBASE: ./local-site
+
+before_script:
+  - echo "CI_NODE_TOTAL is $CI_NODE_TOTAL"
+  - echo "CI_NODE_INDEX is $CI_NODE_INDEX"
+  - echo "CI_CONCURRENT_ID is $CI_CONCURRENT_ID"
+  - echo "CI_COMMIT_REF_SLUG is $CI_COMMIT_REF_SLUG"
+  - python3 --version
+  - python3 -m site --user-site
+  - pip3 install --user --upgrade pip setuptools
 
 hivemind_build:
   stage: build
+  script:
+    - git fetch --tags
+    - git tag -f ci_implicit_tag
+    - echo $PYTHONUSERBASE
+    - "python3 setup.py bdist_egg"
+    - ls -l dist/*
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
+  tags:
+     - hivemind
+
+hivemind_deploy:
+  stage: deploy
+  environment: hive-4.pl.syncad.com
+  needs:
+    - job: hivemind_build
+      artifacts: true
+  variables:
+    GIT_STRATEGY: none
+    HIVEMIND_DB_NAME: "hive_$CI_JOB_ID"
+    HIVEMIND_HTTP_PORT: $HIVEMIND_HTTP_PORT
+
+    # Configured at gitlab repository settings side
+    POSTGRES_USER: $HIVEMIND_POSTGRES_USER
+    POSTGRES_PASSWORD: $HIVEMIND_POSTGRES_PASSWORD
+    POSTGRES_HOST_AUTH_METHOD: trust
+    # official way to provide password to psql: http://www.postgresql.org/docs/9.3/static/libpq-envars.html
+    PGPASSWORD: $HIVEMIND_POSTGRES_PASSWORD
+    DB_URL: "$HIVEMIND_POSTGRESQL_CONNECTION_STRING/hive_$CI_JOB_ID"
+    PYTHONUSERBASE: ./local-site
 
   script:
-    - python3 setup.py build
-    - python3 setup.py install --prefix "$CI_PROJECT_DIR/hivemind-install"
+    - ls -l dist/*
+    - rm -rf ./local-site
+    - mkdir -p `python3 -m site --user-site`
+    - python3 setup.py install --user --force
+    - ./local-site/bin/hive -h
+    - "echo Attempting to recreate database $HIVEMIND_DB_NAME"
+    - psql -U $POSTGRES_USER -h localhost -d postgres -c "DROP DATABASE IF EXISTS $HIVEMIND_DB_NAME;"
+    - psql -U $POSTGRES_USER -h localhost -d postgres -c "CREATE DATABASE $HIVEMIND_DB_NAME;"
+    - "echo Attempting to starting hive sync using hived node: $HIVEMIND_SOURCE_HIVED_URL . Max sync block is: $HIVEMIND_MAX_BLOCK"
+    - echo Attempting to access database $DB_URL
+    - ./local-site/bin/hive sync --test-max-block=$HIVEMIND_MAX_BLOCK --exit-after-sync --test-profile=False --steemd-url "$HIVEMIND_SOURCE_HIVED_URL" --database-url $DB_URL 2>&1 | tee -i hivemind-sync.log
+    - echo Attempting to start hive server listening on $HIVEMIND_HTTP_PORT port...
+    - screen -L -Logfile hive_server.log -dmS hive_server_$CI_JOB_ID ./local-site/bin/hive server --pid-file hive_server.pid --http-server-port $HIVEMIND_HTTP_PORT --steemd-url "$HIVEMIND_SOURCE_HIVED_URL" --database-url $DB_URL
+    - for i in `seq 1 10`; do if [ -f hive_server.pid ]; then break; else sleep 1; fi;  done
+    - cat hive_server.pid
+  artifacts:
+    paths:
+      - hivemind-sync.log
+      - hive_server.pid
+    expire_in: 1 week
 
   tags:
      - hivemind

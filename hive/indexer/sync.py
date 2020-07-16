@@ -189,6 +189,9 @@ class Sync:
     def __init__(self, conf):
         self._conf = conf
         self._db = conf.db()
+
+        log.info("Using hived url: `%s'", self._conf.get('steemd_url'))
+
         self._steem = conf.steem()
 
     def run(self):
@@ -216,6 +219,10 @@ class Sync:
             if not CONTINUE_PROCESSING:
                 return
             DbState.finish_initial_sync()
+
+            if self._conf.get("exit_after_sync"):
+                log.info("Exiting after sync on user request...")
+                return
 
         else:
             # recover from fork

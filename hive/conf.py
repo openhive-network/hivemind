@@ -48,7 +48,10 @@ class Conf():
         add('--log-level', env_var='LOG_LEVEL', default='INFO')
         add('--test-disable-sync', type=strtobool, env_var='TEST_DISABLE_SYNC', help='(debug) skip sync and sweep; jump to block streaming', default=False)
         add('--test-max-block', type=int, env_var='TEST_MAX_BLOCK', help='(debug) only sync to given block, for running sync test', default=None)
+        add('--exit-after-sync', help='exit when sync is completed', action='store_true')
         add('--test-profile', type=strtobool, env_var='TEST_PROFILE', help='(debug) profile execution', default=False)
+
+        add('--pid-file', type=str, env_var='PID_FILE', help='Allows to dump current process pid into specified file', default=None)
 
         # needed for e.g. tests - other args may be present
         args = (parser.parse_args() if strict
@@ -118,3 +121,7 @@ class Conf():
     def log_level(self):
         """Get `logger`s internal int level from config string."""
         return int_log_level(self.get('log_level'))
+
+    def pid_file(self):
+        """Get optional pid_file name to put current process pid in"""
+        return self._args.get("pid_file", None)
