@@ -20,11 +20,11 @@ tests_require = [
 # yapf: disable
 setup(
     name='hivemind',
-    version='0.0.1',
+    version_format='0.0.1+{gitsha}',
     description='Developer-friendly microservice powering social networks on the Steem blockchain.',
     long_description=open('README.md').read(),
     packages=find_packages(exclude=['scripts']),
-    setup_requires=['pytest-runner'],
+    setup_requires=['pytest-runner', 'setuptools-git-version'],
     tests_require=tests_require,
     install_requires=[
         #'aiopg==0.16.0',

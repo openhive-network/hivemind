@@ -2,6 +2,7 @@
 
 """CLI service router"""
 
+import os
 import logging
 from hive.conf import Conf
 from hive.db.adapter import Db
@@ -14,6 +15,17 @@ def run():
     conf = Conf.init_argparse()
     Db.set_shared_instance(conf.db())
     mode = conf.mode()
+
+    pid_file_name = conf.pid_file()
+    if pid_file_name is not None:
+        fh = open(pid_file_name, 'w')
+        if fh is None:
+          print("Cannot write into specified pid_file: %s", pidpid_file_name)
+        else:
+          pid = os.getpid()
+          fh.write(str(pid))
+          fh.close()
+
 
     if conf.get('test_profile'):
         from hive.utils.profiler import Profiler
