@@ -585,7 +585,7 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-        DROP VIEW public.vw_hive_posts;
+        DROP VIEW IF EXISTS public.vw_hive_posts;
 
         CREATE OR REPLACE VIEW public.vw_hive_posts
           AS
