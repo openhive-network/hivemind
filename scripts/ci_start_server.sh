@@ -9,7 +9,10 @@ HIVEMIND_HTTP_PORT=$4
 
 PYTHONUSERBASE=./local-site
 
-DB_NAME=${HIVEMIND_DB_NAME/-/_}
+DB_NAME=${HIVEMIND_DB_NAME//-/_}
+DB_NAME=${DB_NAME//\[/_}
+DB_NAME=${DB_NAME//]/_}
+
 DB_URL=$HIVEMIND_POSTGRESQL_CONNECTION_STRING/$DB_NAME
 
 echo Attempting to start hive server listening on $HIVEMIND_HTTP_PORT port...
