@@ -29,7 +29,7 @@ class Tags(object):
             """
             values = []
             for tag in cls._tags:
-                values.append("('{}')".format(escape_characters(tag[1])))
+                values.append("({})".format(escape_characters(tag[1])))
                 if len(values) >= limit:
                     tag_query = str(sql)
                     DB.query(tag_query.format(','.join(values)))
@@ -59,7 +59,7 @@ class Tags(object):
             """
             values = []
             for tag in cls._tags:
-                values.append("({}, '{}')".format(tag[0], escape_characters(tag[1])))
+                values.append("({}, {})".format(tag[0], escape_characters(tag[1])))
                 if len(values) >= limit:
                     tag_query = str(sql)
                     DB.query(tag_query.format(','.join(values)))

@@ -30,11 +30,11 @@ class PostDataCache(object):
             """
             values = []
             for k, data in cls._data.items():
-                title = "''" if not data['title'] else "'{}'".format(escape_characters(data['title']))
-                preview = "''" if not data['preview'] else "'{}'".format(escape_characters(data['preview']))
-                img_url = "''" if not data['img_url'] else "'{}'".format(escape_characters(data['img_url']))
-                body = "''" if not data['body'] else "'{}'".format(escape_characters(data['body']))
-                json = "'{}'" if not data['json'] else "'{}'".format(escape_characters(data['json']))
+                title = "''" if not data['title'] else "{}".format(escape_characters(data['title']))
+                preview = "''" if not data['preview'] else "{}".format(escape_characters(data['preview']))
+                img_url = "''" if not data['img_url'] else "{}".format(escape_characters(data['img_url']))
+                body = "''" if not data['body'] else "{}".format(escape_characters(data['body']))
+                json = "'{}'" if not data['json'] else "{}".format(escape_characters(data['json']))
                 values.append("({},{},{},{},{},{})".format(k, title, preview, img_url, body, json))
             sql += ','.join(values)
             sql += """

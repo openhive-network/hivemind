@@ -584,6 +584,68 @@ def setup(db):
     """
     db.query_no_return(sql)
 
+    sql = """
+        DROP VIEW public.vw_hive_posts;
+
+        CREATE OR REPLACE VIEW public.vw_hive_posts
+          AS
+          SELECT hp.id,
+            hp.community_id,
+            ha_a.name AS author,
+            hpd_p.permlink,
+            hpd.title,
+            hpd.body,
+            hcd.category,
+            hp.depth,
+            hp.promoted,
+            hp.payout,
+            hp.payout_at,
+            hp.is_paidout,
+            hp.children,
+            0 AS votes,
+            0 AS active_votes,
+            hp.created_at,
+            hp.updated_at,
+            hp.rshares,
+            hpd.json,
+            hp.is_hidden,
+            hp.is_grayed,
+            hp.total_votes,
+            hp.flag_weight,
+            ha_pa.name AS parent_author,
+            hpd_pp.permlink AS parent_permlink,
+            hp.curator_payout_value,
+            ha_ra.name AS root_author,
+            hpd_rp.permlink AS root_permlink,
+            rcd.category as root_category,
+            hp.max_accepted_payout,
+            hp.percent_hbd,
+            hp.allow_replies,
+            hp.allow_votes,
+            hp.allow_curation_rewards,
+            hp.beneficiaries,
+            concat('/', rcd.category, '/@', ha_ra.name, '/', hpd_rp.permlink,
+              case (rp.id)
+                  when hp.id then ''
+                    else concat('#@', ha_a.name, '/', hpd_p.permlink)
+              end ) as url,
+            rpd.title AS root_title
+            FROM hive_posts hp
+            JOIN hive_posts rp ON rp.author_id = hp.root_author_id AND rp.permlink_id = hp.root_permlink_id
+            JOIN hive_post_data rpd ON rp.id = rpd.id
+            JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+            JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+            JOIN hive_post_data hpd ON hpd.id = hp.id
+            LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+            LEFT JOIN hive_category_data rcd ON rcd.id = rp.category_id
+            JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
+            JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
+            JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
+            JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id;
+            ;
+          """
+    db.query_no_return(sql)
+
 def reset_autovac(db):
     """Initializes/resets per-table autovacuum/autoanalyze params.
 

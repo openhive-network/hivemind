@@ -76,7 +76,7 @@ ADD_API_PYREST_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_D
 ADD_API_PYREST_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tests_api hivemind 5000000 database_api )
 ADD_API_PYREST_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tests_api hivemind 5000000 follow_api )
 ADD_API_PYREST_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tests_api hivemind 5000000 hive_api )
-
+ADD_API_PYREST_TEST(${CMAKE_BINARY_DIR}/tests/tests_api ${CMAKE_CURRENT_SOURCE_DIR}/tests_api hivemind 5000000 tags_api )
 
 
 
