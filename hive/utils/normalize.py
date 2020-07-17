@@ -3,6 +3,8 @@
 import logging
 import math
 import decimal
+import time
+
 from datetime import datetime
 from pytz import utc
 import ujson as json
@@ -13,14 +15,33 @@ NAI_MAP = {
     '@@000000037': 'VESTS',
 }
 
+dct={'0':'a','1':'b','2':'c','3':'d','4':'e',
+     '5':'f','6':'g','7':'h','8':'i','9':'j'}
+
+# convert special chars into their octal formats recognized by sql
+special_chars={
+  "\\":"\\134",
+  "'":"\\047",
+  "%":"\\045",
+  "_":"\\137",
+  ":":"\\072"
+}
+
 def escape_characters(text):
     """ Escape special charactes """
-    ret = str(text)
-    ret = ret.replace("\\", "\\\\")
-    ret = ret.replace("'", "''")
-    ret = ret.replace("%", '%%')
-    ret = ret.replace("_", "\\_")
-    ret = ret.replace(":", "\\:")
+    if len(text.strip()) == 0:
+        return "'" + text + "'"
+
+    ret = "E'"
+
+    for ch in text:
+        try:
+            dw=special_chars[ch]
+            ret=ret+dw
+        except KeyError as k:
+            ret=ret+ch
+
+    ret = ret + "'"
     return ret
 
 def vests_amount(value):
