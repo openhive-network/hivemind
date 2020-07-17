@@ -20,4 +20,5 @@ if [ -f hive_server.pid ]; then kill -SIGINT `cat hive_server.pid`; fi;
 rm -f hive_server.pid
 screen -L -Logfile hive_server.log -dmS hive_server_$CI_JOB_ID ./local-site/bin/hive server --pid-file hive_server.pid --http-server-port $HIVEMIND_HTTP_PORT --steemd-url "$HIVEMIND_SOURCE_HIVED_URL" --database-url $DB_URL
 for i in `seq 1 10`; do if [ -f hive_server.pid ]; then break; else sleep 1; fi;  done
-cat hive_server.pid
+if [ -f hive_server.pid ]; then echo "Hive server started successfully..."; else "Hive server start failure..." ; fi;
+

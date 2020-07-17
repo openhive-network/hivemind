@@ -55,17 +55,10 @@ hivemind_sync:
       artifacts: true
   variables:
     GIT_STRATEGY: none
-    HIVEMIND_MAX_BLOCK: 50000
 
   script:
     - scripts/ci_sync.sh "$HIVEMIND_DB_NAME" "$HIVEMIND_POSTGRESQL_CONNECTION_STRING" "$HIVEMIND_SOURCE_HIVED_URL" $HIVEMIND_MAX_BLOCK
-    - echo Attempting to start hive server listening on $HIVEMIND_HTTP_PORT port...
-    - if [ -f hive_server.pid ]; then kill -SIGINT `cat hive_server.pid`; fi;
-    - rm -f hive_server.pid
-    - screen -L -Logfile hive_server.log -dmS hive_server_$CI_JOB_ID ./local-site/bin/hive server --pid-file hive_server.pid --http-server-port $HIVEMIND_HTTP_PORT --steemd-url "$HIVEMIND_SOURCE_HIVED_URL" --database-url $DB_URL
-    - for i in `seq 1 10`; do if [ -f hive_server.pid ]; then break; else sleep 1; fi;  done
-    - cat hive_server.pid
-    
+    - scripts/ci_start_server.sh "$HIVEMIND_DB_NAME" "$HIVEMIND_POSTGRESQL_CONNECTION_STRING" "$HIVEMIND_SOURCE_HIVED_URL" $HIVEMIND_HTTP_PORT
   artifacts:
     paths:
       - hivemind-sync.log
@@ -85,12 +78,8 @@ hivemind_start_server:
     GIT_STRATEGY: none
 
   script:
-    - echo Attempting to start hive server listening on $HIVEMIND_HTTP_PORT port...
-    - if [ -f hive_server.pid ]; then kill -SIGINT `cat hive_server.pid`; fi;
-    - rm -f hive_server.pid
-    - screen -L -Logfile hive_server.log -dmS hive_server_$CI_JOB_ID ./local-site/bin/hive server --pid-file hive_server.pid --http-server-port $HIVEMIND_HTTP_PORT --steemd-url "$HIVEMIND_SOURCE_HIVED_URL" --database-url $DB_URL
-    - for i in `seq 1 10`; do if [ -f hive_server.pid ]; then break; else sleep 1; fi;  done
-    - cat hive_server.pid
+    - scripts/ci_start_server.sh "$HIVEMIND_DB_NAME" "$HIVEMIND_POSTGRESQL_CONNECTION_STRING" "$HIVEMIND_SOURCE_HIVED_URL" $HIVEMIND_HTTP_PORT
+
   artifacts:
     paths:
       - hive_server.log
