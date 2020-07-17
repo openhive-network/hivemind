@@ -55,14 +55,13 @@ hivemind_sync:
       artifacts: true
   variables:
     GIT_STRATEGY: none
-
     HIVEMIND_MAX_BLOCK: 50000
 
   script:
-    - DB_NAME=${HIVEMIND_DB_NAME/-/_}
-    - DB_URL="$HIVEMIND_POSTGRESQL_CONNECTION_STRING/$HIVEMIND_DB_NAME"
-    - echo "Corrected db name: $DB_NAME"
-    - echo "Corrected db url: $DB_URL"    
+    - "DB_NAME=${HIVEMIND_DB_NAME/-/_}"
+    - "DB_URL=$HIVEMIND_POSTGRESQL_CONNECTION_STRING/$HIVEMIND_DB_NAME"
+    - "echo Corrected db name $DB_NAME"
+    - "echo Corrected db url $DB_URL"
     - ls -l dist/*
     - rm -rf ./local-site
     - mkdir -p `python3 -m site --user-site`
