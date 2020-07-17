@@ -4,6 +4,7 @@
 
 import time
 import logging
+import sqlalchemy
 
 from hive.db.schema import (setup, reset_autovac, build_metadata,
                             build_metadata_community, teardown, DB_VERSION)
@@ -37,17 +38,15 @@ class DbState:
         if not cls._is_schema_loaded():
             log.info("[INIT] Create db schema...")
             setup(cls.db())
-            cls._before_initial_sync()
+
+        cls._before_initial_sync()
 
         # perform db migrations
         cls._check_migrations()
 
         # check if initial sync complete
-        cls._is_initial_sync = cls._is_feed_cache_empty()
-        if cls._is_initial_sync:
-            log.info("[INIT] Continue with initial sync...")
-        else:
-            log.info("[INIT] Hive initialized.")
+        cls._is_initial_sync = True
+        log.info("[INIT] Continue with initial sync...")
 
     @classmethod
     def teardown(cls):
@@ -143,7 +142,11 @@ class DbState:
 
         for index in cls._disableable_indexes():
             log.info("Drop index %s.%s", index.table, index.name)
-            index.drop(engine)
+
+            try:
+                index.drop(engine)
+            except sqlalchemy.exc.ProgrammingError as ex:
+                log.warning("Ignoring ex: {}".format(ex))
 
         # TODO: #111
         #for key in cls._all_foreign_keys():
@@ -163,7 +166,12 @@ class DbState:
         log.info("[INIT] Begin post-initial sync hooks")
 
         for index in cls._disableable_indexes():
-            log.info("Create index %s.%s", index.table, index.name)
+            log.info("Recreate index %s.%s", index.table, index.name)
+            try:
+                index.drop(engine)
+            except sqlalchemy.exc.ProgrammingError as ex:
+                log.warning("Ignoring ex: {}".format(ex))
+
             index.create(engine)
 
         # TODO: #111
@@ -248,8 +256,8 @@ class DbState:
             cls._set_ver(7)
 
         if cls._ver == 7:
-            cls.db().query("CREATE INDEX hive_accounts_ix4 ON hive_accounts (id, name)")
-            cls.db().query("CREATE INDEX hive_accounts_ix5 ON hive_accounts (cached_at, name)")
+            cls.db().query("DROP INDEX IF EXISTS hive_accounts_ix4; CREATE INDEX hive_accounts_ix4 ON hive_accounts (id, name)")
+            cls.db().query("DROP INDEX IF EXISTS hive_accounts_ix5; CREATE INDEX hive_accounts_ix5 ON hive_accounts (cached_at, name)")
             cls._set_ver(8)
 
         if cls._ver == 8:
