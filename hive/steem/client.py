@@ -174,11 +174,20 @@ class SteemClient:
         while from_block < end_block:
             call_result = self.__exec('enum_virtual_ops', {"block_range_begin":from_block, "block_range_end":end_block
                 , "group_by_block": True, "operation_begin": resume_on_operation, "limit": 1000, "filter": tracked_ops_filter
-            }) 
+            })
 
-            ret = {opb["block"] : {"timestamp":opb["timestamp"], "ops":[op["op"] for op in opb["ops"]]} for opb in call_result["ops_by_block"]}
+            one_block_ops = {opb["block"] : {"timestamp":opb["timestamp"], "ops":[op["op"] for op in opb["ops"]]} for opb in call_result["ops_by_block"]}
+
+            if one_block_ops:
+                first_block = list(one_block_ops.keys())[0];
+                # if we continue collecting ops from previous iteration
+                if first_block in ret:
+                    ret.update( { first_block : { "timestamp":ret[ first_block ]["timestamp"], "ops":ret[ first_block ]["ops"] + one_block_ops[ first_block ]["ops"]} } )
+                    one_block_ops.pop( first_block, None )
+            ret.update( one_block_ops )
 
             resume_on_operation = call_result['next_operation_begin'] if 'next_operation_begin' in call_result else 0
+
 
             next_block = call_result['next_block_range_begin']
 
