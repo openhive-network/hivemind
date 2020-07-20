@@ -12,6 +12,15 @@ variables:
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: recursive
   HIVEMIND_SOURCE_HIVED_URL: $HIVEMIND_SOURCE_HIVED_URL
+  HIVEMIND_DB_NAME: "hive_$CI_COMMIT_REF_SLUG"
+  HIVEMIND_HTTP_PORT: $HIVEMIND_HTTP_PORT
+  # Configured at gitlab repository settings side
+  POSTGRES_USER: $HIVEMIND_POSTGRES_USER
+  POSTGRES_PASSWORD: $HIVEMIND_POSTGRES_PASSWORD
+  POSTGRES_HOST_AUTH_METHOD: trust
+  # official way to provide password to psql: http://www.postgresql.org/docs/9.3/static/libpq-envars.html
+  PGPASSWORD: $HIVEMIND_POSTGRES_PASSWORD
+
   PYTHONUSERBASE: ./local-site
 
 before_script:
@@ -38,7 +47,7 @@ hivemind_build:
   tags:
      - hivemind
 
-hivemind_deploy:
+hivemind_sync:
   stage: deploy
   environment: hive-4.pl.syncad.com
   needs:
@@ -46,39 +55,38 @@ hivemind_deploy:
       artifacts: true
   variables:
     GIT_STRATEGY: none
-    HIVEMIND_DB_NAME: "hive_$CI_JOB_ID"
-    HIVEMIND_HTTP_PORT: $HIVEMIND_HTTP_PORT
-
-    # Configured at gitlab repository settings side
-    POSTGRES_USER: $HIVEMIND_POSTGRES_USER
-    POSTGRES_PASSWORD: $HIVEMIND_POSTGRES_PASSWORD
-    POSTGRES_HOST_AUTH_METHOD: trust
-    # official way to provide password to psql: http://www.postgresql.org/docs/9.3/static/libpq-envars.html
-    PGPASSWORD: $HIVEMIND_POSTGRES_PASSWORD
-    DB_URL: "$HIVEMIND_POSTGRESQL_CONNECTION_STRING/hive_$CI_JOB_ID"
-    PYTHONUSERBASE: ./local-site
 
   script:
-    - ls -l dist/*
-    - rm -rf ./local-site
-    - mkdir -p `python3 -m site --user-site`
-    - python3 setup.py install --user --force
-    - ./local-site/bin/hive -h
-    - "echo Attempting to recreate database $HIVEMIND_DB_NAME"
-    - psql -U $POSTGRES_USER -h localhost -d postgres -c "DROP DATABASE IF EXISTS $HIVEMIND_DB_NAME;"
-    - psql -U $POSTGRES_USER -h localhost -d postgres -c "CREATE DATABASE $HIVEMIND_DB_NAME;"
-    - "echo Attempting to starting hive sync using hived node: $HIVEMIND_SOURCE_HIVED_URL . Max sync block is: $HIVEMIND_MAX_BLOCK"
-    - echo Attempting to access database $DB_URL
-    - ./local-site/bin/hive sync --test-max-block=$HIVEMIND_MAX_BLOCK --exit-after-sync --test-profile=False --steemd-url "$HIVEMIND_SOURCE_HIVED_URL" --database-url $DB_URL 2>&1 | tee -i hivemind-sync.log
-    - echo Attempting to start hive server listening on $HIVEMIND_HTTP_PORT port...
-    - screen -L -Logfile hive_server.log -dmS hive_server_$CI_JOB_ID ./local-site/bin/hive server --pid-file hive_server.pid --http-server-port $HIVEMIND_HTTP_PORT --steemd-url "$HIVEMIND_SOURCE_HIVED_URL" --database-url $DB_URL
-    - for i in `seq 1 10`; do if [ -f hive_server.pid ]; then break; else sleep 1; fi;  done
-    - cat hive_server.pid
+    - scripts/ci_sync.sh "$HIVEMIND_DB_NAME" "$HIVEMIND_POSTGRESQL_CONNECTION_STRING" "$HIVEMIND_SOURCE_HIVED_URL" $HIVEMIND_MAX_BLOCK
+    - scripts/ci_start_server.sh "$HIVEMIND_DB_NAME" "$HIVEMIND_POSTGRESQL_CONNECTION_STRING" "$HIVEMIND_SOURCE_HIVED_URL" $HIVEMIND_HTTP_PORT
   artifacts:
     paths:
       - hivemind-sync.log
       - hive_server.pid
     expire_in: 1 week
+
+  tags:
+     - hivemind
+
+hivemind_start_server:
+  stage: deploy
+  environment: hive-4.pl.syncad.com
+  needs:
+    - job: hivemind_build
+      artifacts: true
+  variables:
+    GIT_STRATEGY: none
+
+  script:
+    - scripts/ci_start_server.sh "$HIVEMIND_DB_NAME" "$HIVEMIND_POSTGRESQL_CONNECTION_STRING" "$HIVEMIND_SOURCE_HIVED_URL" $HIVEMIND_HTTP_PORT
+
+  artifacts:
+    paths:
+      - hive_server.log
+      - hive_server.pid
+    expire_in: 1 week
+
+  when: manual
 
   tags:
      - hivemind
