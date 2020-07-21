@@ -631,6 +631,8 @@ def setup(db):
                     else concat('#@', ha_a.name, '/', hpd_p.permlink)
               end ) as url,
             rpd.title AS root_title,
+            hp.sc_trend,
+            hp.sc_hot,
             hp.is_deleted
             FROM hive_posts hp
             JOIN hive_posts rp ON rp.author_id = hp.root_author_id AND rp.permlink_id = hp.root_permlink_id

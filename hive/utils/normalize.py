@@ -80,7 +80,8 @@ def parse_amount(value, expected_unit=None):
         raise Exception("invalid input amount %s" % repr(value))
 
     if expected_unit:
-        assert unit == expected_unit, "Unexpected unit: %s" % unit
+# FIXME to be uncommented when payout collection will be corrected
+#        assert unit == expected_unit, "Unexpected unit: %s" % unit
         return dec_amount
 
     return (dec_amount, unit)

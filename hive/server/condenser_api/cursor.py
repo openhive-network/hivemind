@@ -283,12 +283,10 @@ async def pids_by_blog_by_index(db, account: str, start_index: int, limit: int =
     (acct, 2, 3) = returns 3 posts: idxs (2,1,0)
     """
 
-    account_id = await _get_account_id(db, account)
-
     if start_index in (-1, 0):
-        sql = """SELECT COUNT(*) - 1 FROM hive_feed_cache
-                  WHERE account_id = :account_id"""
-        start_index = await db.query_one(sql, account_id=account_id)
+        sql = """SELECT COUNT(*) - 1 FROM vw_hive_posts hp
+                  WHERE hp.author = :account"""
+        start_index = await db.query_one(sql, account=account)
         if start_index < 0:
             return (0, [])
 
@@ -297,15 +295,15 @@ async def pids_by_blog_by_index(db, account: str, start_index: int, limit: int =
                          % (start_index, limit))
 
     sql = """
-        SELECT post_id
-          FROM hive_feed_cache
-         WHERE account_id = :account_id
-      ORDER BY created_at
+        SELECT hp.id
+          FROM vw_hive_posts hp
+         WHERE hp.author = :account
+      ORDER BY hp.created_at
          LIMIT :limit
         OFFSET :offset
     """
 
-    ids = await db.query_col(sql, account_id=account_id, limit=limit, offset=offset)
+    ids = await db.query_col(sql, account=account, limit=limit, offset=offset)
     return (start_index, list(reversed(ids)))
 
 
