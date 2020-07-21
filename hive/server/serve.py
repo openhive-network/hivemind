@@ -11,6 +11,8 @@ from aiohttp import web
 from jsonrpcserver.methods import Methods
 from jsonrpcserver import async_dispatch as dispatch
 
+import simplejson
+
 from hive.server.condenser_api import methods as condenser_api
 from hive.server.condenser_api.tags import get_trending_tags as condenser_api_get_trending_tags
 from hive.server.condenser_api.get_state import get_state as condenser_api_get_state
@@ -34,6 +36,12 @@ from hive.server.database_api import methods as database_api
 from hive.server.db import Db
 
 # pylint: disable=too-many-lines
+
+def decimal_serialize(obj):
+    return simplejson.dumps(obj=obj, use_decimal=True)
+
+def decimal_deserialize(s):
+    return simplejson.loads(s=s, use_decimal=True)
 
 async def db_head_state(context):
     """Status/health check."""
@@ -268,10 +276,10 @@ def run_server(conf):
         """Handles all hive jsonrpc API requests."""
         request = await request.text()
         # debug=True refs https://github.com/bcb/jsonrpcserver/issues/71
-        response = await dispatch(request, methods=methods, debug=True, context=app)
+        response = await dispatch(request, methods=methods, debug=True, context=app, serialize=decimal_serialize, deserialize=decimal_deserialize)
         if response.wanted:
             headers = {'Access-Control-Allow-Origin': '*'}
-            return web.json_response(response.deserialized(), status=200, headers=headers)
+            return web.json_response(response.deserialized(), status=200, headers=headers, dumps=decimal_serialize)
         return web.Response()
 
     if conf.get('sync_to_s3'):
