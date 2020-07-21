@@ -23,6 +23,14 @@ class Blocks:
     """Processes blocks, dispatches work, manages `hive_blocks` table."""
     blocks_to_flush = []
     ops_stats = {}
+    _head_block_date = None
+
+    def __init__(cls):
+        head_date = cls.head_date()
+        if(head_date == ''):
+            cls._head_block_date = None
+        else:
+            cls._head_block_date = head_date
 
     @staticmethod
     def merge_ops_stats(od1, od2):
@@ -127,7 +135,12 @@ class Blocks:
         """Process a single block. Assumes a trx is open."""
         #pylint: disable=too-many-branches
         num = cls._push(block)
-        date = block['timestamp']
+        block_date = block['timestamp']
+
+        # head block date shall point to last imported block (not yet current one) to conform hived behavior.
+        # that's why operations processed by node are included in the block being currently produced, so its processing time is equal to last produced block.
+        if(cls._head_block_date is None):
+            cls._head_block_date = block_date
 
         # [DK] we will make two scans, first scan will register all accounts
         account_names = set()
@@ -148,7 +161,7 @@ class Blocks:
                 elif op_type == 'create_claimed_account_operation':
                     account_names.add(op['new_account_name'])
 
-        Accounts.register(account_names, date)     # register any new names
+        Accounts.register(account_names, cls._head_block_date)     # register any new names
 
         # second scan will process all other ops
         json_ops = []
@@ -174,7 +187,7 @@ class Blocks:
 
                 # post ops
                 elif op_type == 'comment_operation':
-                    Posts.comment_op(op, date)
+                    Posts.comment_op(op, cls._head_block_date)
                     if not is_initial_sync:
                         Accounts.dirty(op['author']) # lite - stats
                 elif op_type == 'delete_comment_operation':
@@ -189,13 +202,13 @@ class Blocks:
 
                 # misc ops
                 elif op_type == 'transfer_operation':
-                    Payments.op_transfer(op, tx_idx, num, date)
+                    Payments.op_transfer(op, tx_idx, num, cls._head_block_date)
                 elif op_type == 'custom_json_operation':
                     json_ops.append(op)
 
         # follow/reblog/community ops
         if json_ops:
-            custom_ops_stats = CustomOp.process_ops(json_ops, num, date)
+            custom_ops_stats = CustomOp.process_ops(json_ops, num, cls._head_block_date)
             cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, custom_ops_stats)
 
         if update_comment_pending_payouts:
@@ -212,10 +225,10 @@ class Blocks:
             (vote_ops, comment_payout_ops) = virtual_operations[num] if num in virtual_operations else empty_vops
         else:
             vops = hived.get_virtual_operations(num)
-            (vote_ops, comment_payout_ops) = Blocks.prepare_vops(vops, date)
+            (vote_ops, comment_payout_ops) = Blocks.prepare_vops(vops, cls._head_block_date)
 
         for v in vote_ops:
-            Votes.vote_op(v, date)
+            Votes.vote_op(v, cls._head_block_date)
             op_type = v['type']
             if op_type in cls.ops_stats:
                 cls.ops_stats[op_type] += 1
@@ -224,8 +237,10 @@ class Blocks:
 
 
         if comment_payout_ops:
-            comment_payout_stats = Posts.comment_payout_op(comment_payout_ops, date)
+            comment_payout_stats = Posts.comment_payout_op(comment_payout_ops, cls._head_block_date)
             cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, comment_payout_stats)
+
+        cls._head_block_date = block_date
 
         return num
 
