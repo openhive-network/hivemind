@@ -650,6 +650,44 @@ def setup(db):
           """
     db.query_no_return(sql)
 
+    sql = """
+          DROP FUNCTION if exists update_hive_posts_children_count()
+          ;
+          CREATE OR REPLACE FUNCTION update_hive_posts_children_count()
+          RETURNS VOID
+          LANGUAGE plpgsql
+          AS
+          $function$
+          BEGIN
+
+          update hive_posts uhp
+          set children = data_source.childrencount
+          from
+          (
+          WITH RECURSIVE ChildrenCTE AS (
+            SELECT  ID as RootId, ID
+            FROM    hive_posts hp
+            where hp.parent_id != 0
+            UNION ALL
+            SELECT  cte.RootID, d.ID
+            FROM    ChildrenCTE cte
+                    INNER JOIN hive_posts d ON d.parent_id = cte.ID
+          )
+          SELECT  d.ID, d.parent_id, cnt.ChildrenCount
+          FROM    hive_posts d 
+                  INNER JOIN (
+                    SELECT  RootID as ID, COUNT(*) - 1 as ChildrenCount
+                    FROM    ChildrenCTE
+                    GROUP BY RootID
+                  ) cnt ON cnt.ID = d.ID
+          ) as data_source
+          where uhp.id = data_source.id
+          ;
+          END
+          $function$
+          """
+    db.query_no_return(sql)
+
 def reset_autovac(db):
     """Initializes/resets per-table autovacuum/autoanalyze params.
 
