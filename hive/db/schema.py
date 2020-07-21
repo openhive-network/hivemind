@@ -608,6 +608,7 @@ def setup(db):
             hp.updated_at,
             hp.rshares,
             hpd.json,
+            ha_a.reputation AS author_rep,
             hp.is_hidden,
             hp.is_grayed,
             hp.total_votes,
@@ -629,7 +630,8 @@ def setup(db):
                   when hp.id then ''
                     else concat('#@', ha_a.name, '/', hpd_p.permlink)
               end ) as url,
-            rpd.title AS root_title
+            rpd.title AS root_title,
+            hp.is_deleted
             FROM hive_posts hp
             JOIN hive_posts rp ON rp.author_id = hp.root_author_id AND rp.permlink_id = hp.root_permlink_id
             JOIN hive_post_data rpd ON rp.id = rpd.id

@@ -20,52 +20,45 @@ from hive.server.database_api.methods import find_votes
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
 
 SQL_TEMPLATE = """
-    SELECT hp.id, 
+    SELECT 
+        hp.id, 
         hp.community_id, 
-        ha_a.name as author,
-        hpd_p.permlink as permlink,
-        hpd.title as title, 
-        hpd.body as body, 
-        hcd.category as category, 
-        depth,
-        promoted, 
-        payout, 
-        payout_at, 
-        is_paidout, 
-        children, 
-        0 as votes,
-        0 as active_votes,
+        hp.author,
+        hp.permlink,
+        hp.author_rep,
+        hp.title, 
+        hp.body, 
+        hp.category, 
+        hp.depth,
+        hp.promoted, 
+        hp.payout, 
+        hp.payout_at, 
+        hp.is_paidout, 
+        hp.children, 
+        hp.votes,
+        hp.active_votes,
         hp.created_at, 
-        updated_at, 
-        rshares, 
-        hpd.json as json,
-        ha_a.reputation AS author_rep,
-        is_hidden, 
-        is_grayed, 
-        total_votes, 
-        flag_weight,
-        ha_pa.name as parent_author,
-        hpd_pp.permlink as parent_permlink,
-        curator_payout_value, 
-        ha_ra.name as root_author,
-        hpd_rp.permlink as root_permlink,
-        max_accepted_payout, 
-        percent_hbd, 
-        allow_replies, 
-        allow_votes, 
-        allow_curation_rewards, 
-        beneficiaries, 
-        url, 
-        root_title
-    FROM hive_posts hp
-    INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-    INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-    LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
-    LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
-    INNER JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
-    INNER JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
-    INNER JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
-    INNER JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
+        hp.updated_at, 
+        hp.rshares, 
+        hp.json as json,
+        hp.is_hidden, 
+        hp.is_grayed, 
+        hp.total_votes, 
+        hp.flag_weight,
+        hp.parent_author,
+        hp.parent_permlink,
+        hp.curator_payout_value, 
+        hp.root_author,
+        hp.root_permlink,
+        hp.max_accepted_payout, 
+        hp.percent_hbd, 
+        hp.allow_replies, 
+        hp.allow_votes, 
+        hp.allow_curation_rewards, 
+        hp.beneficiaries, 
+        hp.url, 
+        hp.root_title
+    FROM vw_hive_posts hp
     WHERE
 """
 
@@ -153,7 +146,7 @@ async def get_content(context, author: str, permlink: str, observer=None):
     valid_permlink(permlink)
     #force copy
     sql = str(SQL_TEMPLATE)
-    sql += """ ha_a.name = :author AND hpd_p.permlink = :permlink AND NOT hp.is_deleted """
+    sql += """ hp.author = :author AND hp.permlink = :permlink AND NOT hp.is_deleted """
 
     post = None
     result = await db.query_all(sql, author=author, permlink=permlink)
@@ -180,15 +173,7 @@ async def get_content_replies(context, author: str, permlink: str):
     #force copy
     sql = str(SQL_TEMPLATE)
     sql += """
-            hp.is_deleted = '0' AND 
-            hp.parent_id = (
-                SELECT id 
-                FROM hive_posts
-                WHERE 
-                    author_id = (SELECT id FROM hive_accounts WHERE name =:author)
-                    AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)
-                    AND is_deleted = '0'
-            ) 
+            hp.is_deleted = '0' AND hp.parent_author = :author AND hp.parent_permlink = :permlink
         ORDER BY hp.id LIMIT :limit
     """
 
@@ -437,7 +422,7 @@ async def get_discussions_by_comments(context, start_author: str = None, start_p
     #force copy
     sql = str(SQL_TEMPLATE)
     sql += """
-            ha_a.name = :start_author AND hp.depth > 0
+            hp.author = :start_author AND hp.depth > 0
             AND NOT hp.is_deleted
     """
 
