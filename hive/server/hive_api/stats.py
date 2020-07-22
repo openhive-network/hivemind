@@ -46,4 +46,4 @@ async def get_payout_stats(context, limit=250):
               WHERE community_id IS NULL AND author IS NULL"""
     blog_ttl = await db.query_one(sql)
 
-    return dict(items=items, total=float(total), blogs=float(blog_ttl))
+    return dict(items=items, total=float(total if total is not None else 0.), blogs=float(blog_ttl if blog_ttl is not None else 0.))
