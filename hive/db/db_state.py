@@ -174,6 +174,12 @@ class DbState:
 
             index.create(engine)
 
+        # Update count of all child posts (what was hold during initial sync)
+        sql = """
+              select update_hive_posts_children_count()
+              """
+        row = DbState.db().query_row(sql)
+
         # TODO: #111
         #for key in cls._all_foreign_keys():
         #    log.info("Create fk %s", key.name)

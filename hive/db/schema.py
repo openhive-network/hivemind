@@ -608,6 +608,7 @@ def setup(db):
             hp.updated_at,
             hp.rshares,
             hpd.json,
+            ha_a.reputation AS author_rep,
             hp.is_hidden,
             hp.is_grayed,
             hp.total_votes,
@@ -629,7 +630,10 @@ def setup(db):
                   when hp.id then ''
                     else concat('#@', ha_a.name, '/', hpd_p.permlink)
               end ) as url,
-            rpd.title AS root_title
+            rpd.title AS root_title,
+            hp.sc_trend,
+            hp.sc_hot,
+            hp.is_deleted
             FROM hive_posts hp
             JOIN hive_posts rp ON rp.author_id = hp.root_author_id AND rp.permlink_id = hp.root_permlink_id
             JOIN hive_post_data rpd ON rp.id = rpd.id
@@ -643,6 +647,44 @@ def setup(db):
             JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
             JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id;
             ;
+          """
+    db.query_no_return(sql)
+
+    sql = """
+          DROP FUNCTION if exists update_hive_posts_children_count()
+          ;
+          CREATE OR REPLACE FUNCTION update_hive_posts_children_count()
+          RETURNS VOID
+          LANGUAGE plpgsql
+          AS
+          $function$
+          BEGIN
+
+          update hive_posts uhp
+          set children = data_source.childrencount
+          from
+          (
+          WITH RECURSIVE ChildrenCTE AS (
+            SELECT  ID as RootId, ID
+            FROM    hive_posts hp
+            where hp.parent_id != 0
+            UNION ALL
+            SELECT  cte.RootID, d.ID
+            FROM    ChildrenCTE cte
+                    INNER JOIN hive_posts d ON d.parent_id = cte.ID
+          )
+          SELECT  d.ID, d.parent_id, cnt.ChildrenCount
+          FROM    hive_posts d 
+                  INNER JOIN (
+                    SELECT  RootID as ID, COUNT(*) - 1 as ChildrenCount
+                    FROM    ChildrenCTE
+                    GROUP BY RootID
+                  ) cnt ON cnt.ID = d.ID
+          ) as data_source
+          where uhp.id = data_source.id
+          ;
+          END
+          $function$
           """
     db.query_no_return(sql)
 
