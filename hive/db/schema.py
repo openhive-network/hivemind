@@ -674,7 +674,7 @@ def setup(db):
                     INNER JOIN hive_posts d ON d.parent_id = cte.ID
           )
           SELECT  d.ID, d.parent_id, cnt.ChildrenCount
-          FROM    hive_posts d 
+          FROM    hive_posts d
                   INNER JOIN (
                     SELECT  RootID as ID, COUNT(*) - 1 as ChildrenCount
                     FROM    ChildrenCTE
@@ -686,6 +686,30 @@ def setup(db):
           END
           $function$
           """
+    db.query_no_return(sql)
+
+    sql = """
+        DROP VIEW IF EXISTS wv_hive_votes_accounts_permlinks
+        ;
+        CREATE VIEW wv_hive_votes_accounts_permlinks
+        AS
+        SELECT
+            ha_v.id as id,
+            ha_a.name as author,
+            hpd.permlink as permlink,
+            vote_percent as percent,
+            ha_a.reputation as reputation,
+            rshares,
+            last_update as time,
+            ha_v.name as voter,
+            weight
+        FROM
+            hive_votes hv
+        INNER JOIN hive_accounts ha_v ON ha_v.id = hv.voter_id
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hv.author_id
+        INNER JOIN hive_permlink_data hpd ON hpd.id = hv.permlink_id
+        ;
+    """
     db.query_no_return(sql)
 
 def reset_autovac(db):
