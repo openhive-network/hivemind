@@ -114,11 +114,17 @@ class Blocks:
                 key = "{}/{}".format(op_value['author'], op_value['permlink'])
                 val = {'hbd_payout':op_value['hbd_payout'], 'hive_payout':op_value['hive_payout'], 'vesting_payout':op_value['vesting_payout']}
             elif op_type == 'comment_reward_operation':
-                if('payout' not in op_value or op_value['payout'] is None):
-                    log.error("Broken op: `{}'".format(str(vop)))
                 key = "{}/{}".format(op_value['author'], op_value['permlink'])
-                val = {'payout':op_value['payout'], 'author_rewards':op_value['author_rewards']}
+                val = {'payout':op_value['payout'], 'author_rewards':op_value['author_rewards'], 'total_payout_value':op_value['total_payout_value'], 'curator_payout_value':op_value['curator_payout_value'], 'beneficiary_payout_value':op_value['beneficiary_payout_value'] }
+
             elif op_type == 'effective_comment_vote_operation':
+                key = "{}/{}".format(op_value['author'], op_value['permlink'])
+                val = {'pending_payout':op_value['pending_payout']}
+                vote_ops.append(vop)
+            elif op_type == 'comment_payout_update_operation':
+                key = "{}/{}".format(op_value['author'], op_value['permlink'])
+                #Later these values are not used
+                val = {'val':'key'}
                 vote_ops.append(vop)
 
             if key is not None and val is not None:
@@ -165,7 +171,6 @@ class Blocks:
 
         # second scan will process all other ops
         json_ops = []
-        update_comment_pending_payouts = []
         for tx_idx, tx in enumerate(block['transactions']):
             for operation in tx['operations']:
                 op_type = operation['type']
@@ -198,7 +203,6 @@ class Blocks:
                     if not is_initial_sync:
                         Accounts.dirty(op['author']) # lite - rep
                         Accounts.dirty(op['voter']) # lite - stats
-                        update_comment_pending_payouts.append([op['author'], op['permlink']])
 
                 # misc ops
                 elif op_type == 'transfer_operation':
@@ -210,10 +214,6 @@ class Blocks:
         if json_ops:
             custom_ops_stats = CustomOp.process_ops(json_ops, num, cls._head_block_date)
             cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, custom_ops_stats)
-
-        if update_comment_pending_payouts:
-            payout_ops_stat = Posts.update_comment_pending_payouts(hived, update_comment_pending_payouts)
-            cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, payout_ops_stat)
 
         # virtual ops
         comment_payout_ops = {}
