@@ -91,6 +91,7 @@ def build_metadata():
 
         # core stats/indexes
         sa.Column('payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
+        sa.Column('pending_payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
         sa.Column('payout_at', sa.DateTime, nullable=False, server_default='1990-01-01'),
         sa.Column('updated_at', sa.DateTime, nullable=False, server_default='1990-01-01'),
         sa.Column('is_paidout', BOOLEAN, nullable=False, server_default='0'),

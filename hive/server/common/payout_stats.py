@@ -39,7 +39,7 @@ class PayoutStats:
         sql = """
             SELECT community_id,
                    ha.name as author,
-                   SUM(payout) payout,
+                   SUM( payout + pending_payout ) payout,
                    COUNT(*) posts,
                    NULL authors
               FROM hive_posts
@@ -51,7 +51,7 @@ class PayoutStats:
 
             SELECT community_id,
                    NULL author,
-                   SUM(payout) payout,
+                   SUM( payout + pending_payout ) payout,
                    COUNT(*) posts,
                    COUNT(DISTINCT(author_id)) authors
               FROM hive_posts
