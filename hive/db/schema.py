@@ -447,7 +447,7 @@ def setup(db):
              category_id,
              root_author_id, root_permlink_id,
              is_muted, is_valid,
-             author_id, permlink_id, created_at)
+             author_id, permlink_id, created_at, updated_at)
             SELECT php.id AS parent_id, php.author_id as parent_author_id,
                 php.permlink_id as parent_permlink_id, php.depth + 1 as depth,
                 (CASE
@@ -459,7 +459,8 @@ def setup(db):
                 php.root_author_id as root_author_id,
                 php.root_permlink_id as root_permlink_id,
                 php.is_muted as is_muted, php.is_valid as is_valid,
-                ha.id as author_id, hpd.id as permlink_id, _date as created_at
+                ha.id as author_id, hpd.id as permlink_id, _date as created_at,
+                _date as updated_at
             FROM hive_accounts ha,
                  hive_permlink_data hpd,
                  hive_posts php
@@ -500,7 +501,7 @@ def setup(db):
              category_id,
              root_author_id, root_permlink_id,
              is_muted, is_valid,
-             author_id, permlink_id, created_at)
+             author_id, permlink_id, created_at, updated_at)
             SELECT 0 AS parent_id, 0 as parent_author_id, 0 as parent_permlink_id, 0 as depth,
                 (CASE
                   WHEN _date > _community_support_start_date THEN
@@ -511,7 +512,8 @@ def setup(db):
                 ha.id as root_author_id, -- use author_id as root one if no parent
                 hpd.id as root_permlink_id, -- use perlink_id as root one if no parent
                 false as is_muted, true as is_valid,
-                ha.id as author_id, hpd.id as permlink_id, _date as created_at
+                ha.id as author_id, hpd.id as permlink_id, _date as created_at,
+                _date as updated_at
             FROM hive_accounts ha,
                  hive_permlink_data hpd
             WHERE ha.name = _author and hpd.permlink = _permlink
