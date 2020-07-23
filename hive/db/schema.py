@@ -653,40 +653,40 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-          DROP FUNCTION if exists update_hive_posts_children_count()
-          ;
-          CREATE OR REPLACE FUNCTION update_hive_posts_children_count()
-          RETURNS VOID
-          LANGUAGE plpgsql
-          AS
-          $function$
+          DROP FUNCTION IF EXISTS public.update_hive_posts_children_count();
+
+          CREATE OR REPLACE FUNCTION public.update_hive_posts_children_count()
+              RETURNS void
+              LANGUAGE 'plpgsql'
+
+              COST 100
+              STABLE 
+          AS $BODY$
           BEGIN
 
           update hive_posts uhp
-          set children = data_source.childrencount
+          set children = data_source.children_count
           from
           (
-          WITH RECURSIVE ChildrenCTE AS (
-            SELECT  ID as RootId, ID
-            FROM    hive_posts hp
-            where hp.parent_id != 0
-            UNION ALL
-            SELECT  cte.RootID, d.ID
-            FROM    ChildrenCTE cte
-                    INNER JOIN hive_posts d ON d.parent_id = cte.ID
-          )
-          SELECT  d.ID, d.parent_id, cnt.ChildrenCount
-          FROM    hive_posts d
-                  INNER JOIN (
-                    SELECT  RootID as ID, COUNT(*) - 1 as ChildrenCount
-                    FROM    ChildrenCTE
-                    GROUP BY RootID
-                  ) cnt ON cnt.ID = d.ID
-          ) as data_source
-          where uhp.id = data_source.id
+            WITH recursive tblChild AS
+            (
+              SELECT s.queried_parent, s.id
+	            from
+	            (SELECT h1.Parent_Id as queried_parent, h1.id
+                    FROM hive_posts h1 WHERE h1.depth > 0
+	                order by h1.depth desc
+	            ) s
+              UNION ALL
+              SELECT tblChild.queried_parent, p.id FROM hive_posts p JOIN tblChild  ON p.Parent_Id = tblChild.Id
+            )
+            SELECT queried_parent, cast(count(1) as smallint) as children_count
+            FROM tblChild
+            group by queried_parent
+          ) data_source
+          where uhp.id = data_source.queried_parent
           ;
           END
-          $function$
+          $BODY$;
           """
     db.query_no_return(sql)
 
