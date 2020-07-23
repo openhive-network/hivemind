@@ -658,9 +658,7 @@ def setup(db):
           CREATE OR REPLACE FUNCTION public.update_hive_posts_children_count()
               RETURNS void
               LANGUAGE 'plpgsql'
-
-              COST 100
-              STABLE 
+              VOLATILE
           AS $BODY$
           BEGIN
 

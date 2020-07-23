@@ -3,6 +3,8 @@
 #pylint: disable=too-many-lines
 
 import time
+from time import perf_counter
+
 import logging
 import sqlalchemy
 
@@ -174,11 +176,16 @@ class DbState:
 
             index.create(engine)
 
+        time_start = perf_counter()
+
         # Update count of all child posts (what was hold during initial sync)
         sql = """
               select update_hive_posts_children_count()
               """
         row = DbState.db().query_row(sql)
+
+        time_end = perf_counter()
+        log.info("[INIT] update_hive_posts_children_count executed in %fs", time_end - time_start)
 
         # TODO: #111
         #for key in cls._all_foreign_keys():
