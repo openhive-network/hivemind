@@ -16,7 +16,7 @@ from hive.indexer.community import Community, START_DATE
 from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.tags import Tags
-from hive.utils.normalize import legacy_amount, asset_to_hbd_hive
+from hive.utils.normalize import sbd_amount, legacy_amount, asset_to_hbd_hive
 
 log = logging.getLogger(__name__)
 DB = Db.instance()
@@ -150,18 +150,20 @@ class Posts:
         ops_stats = {}
         sql = """
               UPDATE hive_posts AS ihp SET
-                  total_payout_value    = COALESCE( data_source.total_payout_value,                   ihp.total_payout_value ),
-                  curator_payout_value  = COALESCE( data_source.curator_payout_value,                 ihp.curator_payout_value ),
-                  author_rewards        = COALESCE( CAST( data_source.author_rewards as INT8 ),       ihp.author_rewards ),
-                  author_rewards_hive   = COALESCE( CAST( data_source.author_rewards_hive as INT8 ),  ihp.author_rewards_hive ),
-                  author_rewards_hbd    = COALESCE( CAST( data_source.author_rewards_hbd as INT8 ),   ihp.author_rewards_hbd ),
-                  author_rewards_vests  = COALESCE( CAST( data_source.author_rewards_vests as INT8 ), ihp.author_rewards_vests ),
-                  payout                = COALESCE( CAST( data_source.payout as DECIMAL ),            ihp.payout ),
-                  pending_payout        = COALESCE( CAST( data_source.pending_payout as DECIMAL ),    ihp.pending_payout ),
-                  last_payout           = data_source.last_payout,
-                  cashout_time          = data_source.cashout_time,
-                  is_paidout            = data_source.is_paidout
-              FROM 
+                  total_payout_value    = COALESCE( data_source.total_payout_value,                     ihp.total_payout_value ),
+                  curator_payout_value  = COALESCE( data_source.curator_payout_value,                   ihp.curator_payout_value ),
+                  author_rewards        = COALESCE( CAST( data_source.author_rewards as INT8 ),         ihp.author_rewards ),
+                  author_rewards_hive   = COALESCE( CAST( data_source.author_rewards_hive as INT8 ),    ihp.author_rewards_hive ),
+                  author_rewards_hbd    = COALESCE( CAST( data_source.author_rewards_hbd as INT8 ),     ihp.author_rewards_hbd ),
+                  author_rewards_vests  = COALESCE( CAST( data_source.author_rewards_vests as INT8 ),   ihp.author_rewards_vests ),
+                  payout                = COALESCE( CAST( data_source.payout as DECIMAL ),              ihp.payout ),
+                  pending_payout        = COALESCE( CAST( data_source.pending_payout as DECIMAL ),      ihp.pending_payout ),
+                  payout_at             = COALESCE( CAST( data_source.payout_at as TIMESTAMP ),         ihp.payout_at ),
+                  updated_at            = data_source.updated_at,
+                  last_payout           = COALESCE( CAST( data_source.last_payout as TIMESTAMP ),       ihp.last_payout ),
+                  cashout_time          = COALESCE( CAST( data_source.cashout_time as TIMESTAMP ),      ihp.cashout_time ),
+                  is_paidout            = COALESCE( CAST( data_source.is_paidout as BOOLEAN ),          ihp.is_paidout )
+              FROM
               (
               SELECT  ha_a.id as author_id, hpd_p.id as permlink_id, 
                       t.total_payout_value,
@@ -172,6 +174,8 @@ class Posts:
                       t.author_rewards_vests,
                       t.payout,
                       t.pending_payout,
+                      t.payout_at,
+                      t.updated_at,
                       t.last_payout,
                       t.cashout_time,
                       t.is_paidout
@@ -189,6 +193,8 @@ class Posts:
                       author_rewards_vests,
                       payout,
                       pending_payout,
+                      payout_at,
+                      updated_at,
                       last_payout,
                       cashout_time,
                       is_paidout)
@@ -205,25 +211,29 @@ class Posts:
         for k, v in ops.items():
             author, permlink = k.split("/")
             # total payout to curators
-            curator_rewards_sum = None
+            curator_rewards_sum       = None
 
             # author payouts
-            author_rewards = None
-            author_rewards_hive = None
-            author_rewards_hbd = None
-            author_rewards_vests = None
+            author_rewards            = None
+            author_rewards_hive       = None
+            author_rewards_hbd        = None
+            author_rewards_vests      = None
 
             # total payout for comment
-            comment_author_reward = None
-            curator_rewards = None
-            total_payout_value = None;
-            curator_payout_value = None;
-            beneficiary_payout_value = None;
+            comment_author_reward     = None
+            curator_rewards           = None
+            total_payout_value        = None;
+            curator_payout_value      = None;
+            beneficiary_payout_value  = None;
 
-            payout = None
-            pending_payout = None
+            payout                    = None
+            pending_payout            = None
 
-            is_paidout = (date[0:4] == '1969')
+            payout_at                 = None
+            last_payout               = None
+            cashout_time              = None
+
+            is_paidout                = None
 
             for operation in v:
                 for op, value in operation.items():
@@ -245,9 +255,10 @@ class Posts:
                         total_payout_value        = value['total_payout_value']
                         curator_payout_value      = value['curator_payout_value']
                         beneficiary_payout_value  = value['beneficiary_payout_value']
-
                     elif op == 'effective_comment_vote_operation':
                         pending_payout = sbd_amount( value['pending_payout'] )
+                    elif op == 'comment_payout_update_operation':
+                        is_paidout = bool( value['is_paidout'] )
 
             if curator_rewards_sum is not None:
               curator_rewards = {'amount' : str(curator_rewards_sum), 'precision': 6, 'nai': '@@000000037'}
@@ -256,7 +267,15 @@ class Posts:
               payout = sum([ sbd_amount(total_payout_value), sbd_amount(curator_payout_value) ])
               pending_payout = 0
 
-            values.append("('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, '{}'::timestamp, '{}'::timestamp, {})".format(
+            #Calculations of all dates
+            if ( total_payout_value is not None ):
+              payout_at = date
+              last_payout = date
+
+            if ( is_paidout is not None ):
+              cashout_time = date
+
+            values.append("('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, '{}'::timestamp, {}, {}, {})".format(
               author,
               permlink,
               "NULL" if ( total_payout_value is None ) else ( "'{}'".format( legacy_amount(total_payout_value) ) ),
@@ -267,9 +286,13 @@ class Posts:
               "NULL" if ( author_rewards_vests is None ) else author_rewards_vests,
               "NULL" if ( payout is None ) else payout,
               "NULL" if ( pending_payout is None ) else pending_payout,
-              date, #last_payout
-              date, #cashout_time
-              is_paidout))
+
+              "NULL" if ( payout_at is None ) else ( "'{}'::timestamp".format( payout_at ) ),
+              date,#updated_at
+              "NULL" if ( last_payout is None ) else ( "'{}'::timestamp".format( last_payout ) ),
+              "NULL" if ( cashout_time is None ) else ( "'{}'::timestamp".format( cashout_time ) ),
+
+              "NULL" if ( is_paidout is None ) else is_paidout ))
 
             if len(values) >= values_limit:
                 values_str = ','.join(values)

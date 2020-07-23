@@ -123,9 +123,7 @@ class Blocks:
                 vote_ops.append(vop)
             elif op_type == 'comment_payout_update_operation':
                 key = "{}/{}".format(op_value['author'], op_value['permlink'])
-                #Later these values are not used
-                val = {'val':'key'}
-                vote_ops.append(vop)
+                val = {'is_paidout':op_value['is_paidout']}
 
             if key is not None and val is not None:
                 if key in comment_payout_ops:
