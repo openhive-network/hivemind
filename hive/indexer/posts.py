@@ -252,8 +252,8 @@ class Posts:
                         total_payout_value        = value['total_payout_value']
                         curator_payout_value      = value['curator_payout_value']
                         beneficiary_payout_value  = value['beneficiary_payout_value']
-                    elif op == 'effective_comment_vote_operation':
-                        pending_payout = sbd_amount( value['pending_payout'] )
+                    #elif op == 'effective_comment_vote_operation':
+                    #    pending_payout = sbd_amount( value['pending_payout'] )
                     elif op == 'comment_payout_update_operation':
                         is_paidout = bool( value['is_paidout'] )
 

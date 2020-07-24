@@ -118,8 +118,8 @@ class Blocks:
                 val = {'payout':op_value['payout'], 'author_rewards':op_value['author_rewards'], 'total_payout_value':op_value['total_payout_value'], 'curator_payout_value':op_value['curator_payout_value'], 'beneficiary_payout_value':op_value['beneficiary_payout_value'] }
 
             elif op_type == 'effective_comment_vote_operation':
-                key = "{}/{}".format(op_value['author'], op_value['permlink'])
-                val = {'pending_payout':op_value['pending_payout']}
+                #key = "{}/{}".format(op_value['author'], op_value['permlink'])
+                #val = {'pending_payout':op_value['pending_payout']}
                 vote_ops.append(vop)
             elif op_type == 'comment_payout_update_operation':
                 key = "{}/{}".format(op_value['author'], op_value['permlink'])
