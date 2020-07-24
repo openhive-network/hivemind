@@ -15,6 +15,12 @@ DB_NAME=${DB_NAME//]/_}
 
 DB_URL=$HIVEMIND_POSTGRESQL_CONNECTION_STRING/$DB_NAME
 
+ls -l dist/*
+rm -rf ./local-site
+mkdir -p `python3 -m site --user-site`
+python3 setup.py install --user --force
+./local-site/bin/hive -h 
+
 echo Attempting to start hive server listening on $HIVEMIND_HTTP_PORT port...
 if [ -f hive_server.pid ]; then kill -SIGINT `cat hive_server.pid`; fi;
 rm -f hive_server.pid

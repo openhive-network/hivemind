@@ -4,13 +4,17 @@ image: "python:3.7"
 stages:
 - build
 - test
+- data-supply
 - deploy
+- e2e-test
 
 variables:
   GIT_DEPTH: 1
   LC_ALL: "C"
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: recursive
+  GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/project-name
+
   HIVEMIND_SOURCE_HIVED_URL: $HIVEMIND_SOURCE_HIVED_URL
   HIVEMIND_DB_NAME: "hive_$CI_COMMIT_REF_SLUG"
   HIVEMIND_HTTP_PORT: $HIVEMIND_HTTP_PORT
@@ -21,20 +25,16 @@ variables:
   # official way to provide password to psql: http://www.postgresql.org/docs/9.3/static/libpq-envars.html
   PGPASSWORD: $HIVEMIND_POSTGRES_PASSWORD
 
-  PYTHONUSERBASE: ./local-site
-
 before_script:
   - echo "CI_NODE_TOTAL is $CI_NODE_TOTAL"
   - echo "CI_NODE_INDEX is $CI_NODE_INDEX"
   - echo "CI_CONCURRENT_ID is $CI_CONCURRENT_ID"
   - echo "CI_COMMIT_REF_SLUG is $CI_COMMIT_REF_SLUG"
-  - python3 --version
-  - python3 -m site --user-site
-  - pip3 install --user --upgrade pip setuptools
 
 hivemind_build:
   stage: build
   script:
+    - pip3 install --user --upgrade pip setuptools
     - git fetch --tags
     - git tag -f ci_implicit_tag
     - echo $PYTHONUSERBASE
@@ -48,34 +48,55 @@ hivemind_build:
      - hivemind
 
 hivemind_sync:
-  stage: deploy
-  environment: hive-4.pl.syncad.com
+  stage: data-supply
+  environment:
+      name: "hive sync built from branch $CI_COMMIT_REF_NAME targeting database $HIVEMIND_DB_NAME"
+
   needs:
     - job: hivemind_build
       artifacts: true
   variables:
     GIT_STRATEGY: none
+    PYTHONUSERBASE: ./local-site
 
   script:
+    - pip3 install --user --upgrade pip setuptools
     - scripts/ci_sync.sh "$HIVEMIND_DB_NAME" "$HIVEMIND_POSTGRESQL_CONNECTION_STRING" "$HIVEMIND_SOURCE_HIVED_URL" $HIVEMIND_MAX_BLOCK
-    - scripts/ci_start_server.sh "$HIVEMIND_DB_NAME" "$HIVEMIND_POSTGRESQL_CONNECTION_STRING" "$HIVEMIND_SOURCE_HIVED_URL" $HIVEMIND_HTTP_PORT
+
   artifacts:
     paths:
       - hivemind-sync.log
-      - hive_server.pid
-    expire_in: 1 week
 
+    expire_in: 1 week
+  when: manual
   tags:
      - hivemind
 
+hivemind_stop_server:
+  stage: deploy
+  environment:
+    name: "hive serve built from branch $CI_COMMIT_REF_NAME exposed on port $HIVEMIND_HTTP_PORT"
+    action: stop
+
+  variables:
+    GIT_STRATEGY: none
+  when: manual
+  script:
+    - scripts/ci_stop_server.sh hive_server.pid
+
 hivemind_start_server:
   stage: deploy
-  environment: hive-4.pl.syncad.com
+  environment:
+    name: "hive serve built from branch $CI_COMMIT_REF_NAME exposed on port $HIVEMIND_HTTP_PORT"
+    url: "http://hive-4.pl.syncad.com:$HIVEMIND_HTTP_PORT"
+    on_stop: hivemind_stop_server
+
   needs:
-    - job: hivemind_build
+    - job: hivemind_sync
       artifacts: true
   variables:
     GIT_STRATEGY: none
+    PYTHONUSERBASE: ./local-site
 
   script:
     - scripts/ci_start_server.sh "$HIVEMIND_DB_NAME" "$HIVEMIND_POSTGRESQL_CONNECTION_STRING" "$HIVEMIND_SOURCE_HIVED_URL" $HIVEMIND_HTTP_PORT
@@ -85,6 +106,27 @@ hivemind_start_server:
       - hive_server.log
       - hive_server.pid
     expire_in: 1 week
+
+  when: manual
+
+  tags:
+     - hivemind
+
+hivemind_start_api_smoketest:
+  stage: e2e-test
+  environment: hive-4.pl.syncad.com
+  needs:
+    - job: hivemind_start_server
+      artifacts: true
+
+  variables:
+    GIT_STRATEGY: none
+
+  script:
+    - python3 -m site --user-site
+    - pip3 install --user --upgrade pip setuptools
+    - pip3 install --user pyresttest
+    - scripts/ci_start_api_smoketest.sh "http://localhost/$HIVEMIND_HTTP_PORT"
 
   when: manual
 

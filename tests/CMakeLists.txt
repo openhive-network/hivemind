@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.10)
+
 INCLUDE(tests_api/ApiTests.cmake)
 
 ENABLE_TESTING()
