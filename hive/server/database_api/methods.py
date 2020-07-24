@@ -1,42 +1,45 @@
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
+from enum import Enum
+
 from hive.server.common.helpers import return_error_info, valid_limit, valid_account, valid_permlink
 from hive.server.common.objects import condenser_post_object
+from hive.utils.normalize import rep_to_raw, number_to_json_value, time_string_with_t
 
 SQL_TEMPLATE = """
-    SELECT hp.id, 
-        hp.community_id, 
+    SELECT hp.id,
+        hp.community_id,
         ha_a.name as author,
         hpd_p.permlink as permlink,
-        (SELECT title FROM hive_post_data WHERE hive_post_data.id = hp.id) as title, 
-        (SELECT body FROM hive_post_data WHERE hive_post_data.id = hp.id) as body, 
+        (SELECT title FROM hive_post_data WHERE hive_post_data.id = hp.id) as title,
+        (SELECT body FROM hive_post_data WHERE hive_post_data.id = hp.id) as body,
         (SELECT category FROM hive_category_data WHERE hive_category_data.id = hp.category_id) as category,
         depth,
-        promoted, 
-        payout, 
-        payout_at, 
-        is_paidout, 
-        children, 
+        promoted,
+        payout,
+        payout_at,
+        is_paidout,
+        children,
         (0) as votes,
-        hp.created_at, 
-        updated_at, 
-        rshares, 
+        hp.created_at,
+        updated_at,
+        rshares,
         (SELECT json FROM hive_post_data WHERE hive_post_data.id = hp.id) as json,
-        is_hidden, 
-        is_grayed, 
-        total_votes, 
+        is_hidden,
+        is_grayed,
+        total_votes,
         flag_weight,
         ha_pa.name as parent_author,
         hpd_pp.permlink as parent_permlink,
-        curator_payout_value, 
+        curator_payout_value,
         ha_ra.name as root_author,
         hpd_rp.permlink as root_permlink,
-        max_accepted_payout, 
-        percent_hbd, 
-        allow_replies, 
-        allow_votes, 
-        allow_curation_rewards, 
-        beneficiaries, 
-        url, 
+        max_accepted_payout,
+        percent_hbd,
+        allow_replies,
+        allow_votes,
+        allow_curation_rewards,
+        beneficiaries,
+        url,
         root_title
     FROM hive_posts hp
     INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
@@ -51,12 +54,12 @@ SQL_TEMPLATE = """
 async def get_post_id_by_author_and_permlink(db, author: str, permlink: str, limit: int):
     """Return post ids for given author and permlink"""
     sql = """
-        SELECT hp.id 
+        SELECT hp.id
         FROM hive_posts hp
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
         INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        WHERE ha_a.name >= :author AND hpd_p.permlink >= :permlink 
-        ORDER BY ha_a.name ASC 
+        WHERE ha_a.name >= :author AND hpd_p.permlink >= :permlink
+        ORDER BY ha_a.name ASC
         LIMIT :limit
     """
     result = await db.query_row(sql, author=author, permlink=permlink, limit=limit)
@@ -94,7 +97,7 @@ async def list_comments(context, start: list, limit: int, order: str):
         assert len(start) == 2, "Expecting two arguments"
 
         sql = str(SQL_TEMPLATE)
-        sql += """ hp.id IN (SELECT hp1.id FROM hive_posts_a_p hp1 WHERE hp1.author >= :author COLLATE "C" 
+        sql += """ hp.id IN (SELECT hp1.id FROM hive_posts_a_p hp1 WHERE hp1.author >= :author COLLATE "C"
           AND hp1.permlink >= :permlink COLLATE "C" ORDER BY hp1.author COLLATE "C" ASC LIMIT :limit)"""
 
         result = await db.query_all(sql, author=start[0], permlink=start[1], limit=limit)
@@ -192,36 +195,51 @@ async def find_comments(context, start: list, limit: int, order: str):
 
     return comments
 
+class VotesPresentation(Enum):
+    ActiveVotes = 1
+    DatabaseApi = 2
+    CondenserApi = 3
+
 @return_error_info
-async def find_votes(context, params: dict):
+async def find_votes(context, params: dict, votes_presentation = VotesPresentation.DatabaseApi):
     """ Returns all votes for the given post """
     valid_account(params['author'])
     valid_permlink(params['permlink'])
     db = context['db']
     sql = """
         SELECT
-            ha_v.name as voter,
-            ha_a.name as author,
-            hpd.permlink as permlink,
+            voter,
+            author,
+            permlink,
             weight,
             rshares,
-            vote_percent,
-            last_update,
-            num_changes
+            percent,
+            time,
+            num_changes,
+            reputation
         FROM
-            hive_votes hv
-        INNER JOIN hive_accounts ha_v ON (ha_v.id = hv.voter_id)
-        INNER JOIN hive_accounts ha_a ON (ha_a.id = hv.author_id)
-        INNER JOIN hive_permlink_data hpd ON (hpd.id = hv.permlink_id)
+            wv_hive_votes_accounts_permlinks
         WHERE
-            ha_a.name = :author AND hpd.permlink = :permlink
+            author = :author AND permlink = :permlink
+        ORDER BY id
     """
+
     ret = []
     rows = await db.query_all(sql, author=params['author'], permlink=params['permlink'])
+
     for row in rows:
-        ret.append(dict(voter=row.voter, author=row.author, permlink=row.permlink,
-                        weight=row.weight, rshares=row.rshares, vote_percent=row.vote_percent,
-                        last_update=str(row.last_update), num_changes=row.num_changes))
+        if ( votes_presentation == VotesPresentation.DatabaseApi ):
+            ret.append(dict(voter=row.voter, author=row.author, permlink=row.permlink,
+                        weight=row.weight, rshares=row.rshares, vote_percent=row.percent,
+                        last_update=str(row.time), num_changes=row.num_changes))
+        elif ( votes_presentation == VotesPresentation.CondenserApi ):
+            ret.append(dict(percent=str(row.percent), reputation=rep_to_raw(row.reputation), rshares=str(row.rshares), voter=row.voter))
+        else:
+            ret.append(dict(percent=row.percent, reputation=rep_to_raw(row.reputation),
+                            rshares=number_to_json_value(row.rshares), time=time_string_with_t(row.time), voter=row.voter,
+                            weight=number_to_json_value(row.weight),
+                            ))
+
     return ret
 
 @return_error_info

@@ -2,11 +2,13 @@
 
 import logging
 import ujson as json
+
 from hive.server.common.mutes import Mutes
 from hive.server.common.helpers import json_date
 from hive.server.database_api.methods import find_votes
 from hive.utils.normalize import sbd_amount
 from hive.indexer.votes import Votes
+
 
 log = logging.getLogger(__name__)
 
@@ -45,40 +47,40 @@ async def load_posts_keyed(db, ids, truncate_body=0):
 
     # fetch posts and associated author reps
     sql = """
-        SELECT hp.id, 
-            hp.community_id, 
+        SELECT hp.id,
+            hp.community_id,
             ha_a.name as author,
             hpd_p.permlink as permlink,
-            hpd.title as title, 
-            hpd.body as body, 
-            hcd.category as category, 
+            hpd.title as title,
+            hpd.body as body,
+            hcd.category as category,
             depth,
-            promoted, 
-            payout, 
-            payout_at, 
-            is_paidout, 
-            children, 
+            promoted,
+            payout,
+            payout_at,
+            is_paidout,
+            children,
             0 as votes,
-            hp.created_at, 
-            updated_at, 
-            rshares, 
+            hp.created_at,
+            updated_at,
+            rshares,
             hpd.json as json,
-            is_hidden, 
-            is_grayed, 
-            total_votes, 
+            is_hidden,
+            is_grayed,
+            total_votes,
             flag_weight,
             ha_pa.name as parent_author,
             hpd_pp.permlink as parent_permlink,
-            curator_payout_value, 
+            curator_payout_value,
             ha_ra.name as root_author,
             hpd_rp.permlink as root_permlink,
-            max_accepted_payout, 
-            percent_hbd, 
-            allow_replies, 
-            allow_votes, 
-            allow_curation_rewards, 
-            beneficiaries, 
-            url, 
+            max_accepted_payout,
+            percent_hbd,
+            allow_replies,
+            allow_votes,
+            allow_curation_rewards,
+            beneficiaries,
+            url,
             root_title
         FROM hive_posts hp
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
@@ -173,9 +175,9 @@ async def load_posts(db, ids, truncate_body=0):
         for _id in missed:
             ids.remove(_id)
             sql = """
-                SELECT 
+                SELECT
                     hp.id, ha_a.name as author, hpd_p.permlink as permlink, depth, created_at, is_deleted
-                FROM 
+                FROM
                     hive_posts hp
                 INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
                 INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id

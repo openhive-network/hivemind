@@ -15,12 +15,12 @@ def last_month():
 async def get_post_id(db, author, permlink):
     """Given an author/permlink, retrieve the id from db."""
     sql = """
-        SELECT 
+        SELECT
             hp.id
         FROM hive_posts hp
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
         INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        WHERE ha_a.name = :author AND hpd_p.permlink = :permlink 
+        WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
             AND is_deleted = '0' LIMIT 1"""
     return await db.query_one(sql, author=author, permlink=permlink)
 
@@ -32,7 +32,7 @@ async def get_child_ids(db, post_id):
 async def _get_post_id(db, author, permlink):
     """Get post_id from hive db."""
     sql = """
-        SELECT 
+        SELECT
             hp.id
         FROM hive_posts hp
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
@@ -177,9 +177,9 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
                 if sort in ('trending', 'hot'):
                     where.append('depth = 0')
             sql = """
-                SELECT 
-                    post_id 
-                FROM 
+                SELECT
+                    post_id
+                FROM
                     hive_post_tags hpt
                 INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
                 WHERE htd.tag = :tag
@@ -192,40 +192,40 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
         where.append(sql % (field, field, table))
 
     sql = """
-        SELECT hp.id, 
-            hp.community_id, 
+        SELECT hp.id,
+            hp.community_id,
             ha_a.name as author,
             hpd_p.permlink as permlink,
-            hpd.title as title, 
-            hpd.body as body, 
-            hcd.category as category, 
+            hpd.title as title,
+            hpd.body as body,
+            hcd.category as category,
             depth,
-            promoted, 
-            payout, 
-            payout_at, 
-            is_paidout, 
-            children, 
+            promoted,
+            payout,
+            payout_at,
+            is_paidout,
+            children,
             0 as votes,
-            hp.created_at, 
-            updated_at, 
-            rshares, 
+            hp.created_at,
+            updated_at,
+            rshares,
             hpd.json as json,
-            is_hidden, 
-            is_grayed, 
-            total_votes, 
+            is_hidden,
+            is_grayed,
+            total_votes,
             flag_weight,
             ha_pa.name as parent_author,
             hpd_pp.permlink as parent_permlink,
-            curator_payout_value, 
+            curator_payout_value,
             ha_ra.name as root_author,
             hpd_rp.permlink as root_permlink,
-            max_accepted_payout, 
-            percent_hbd, 
-            allow_replies, 
-            allow_votes, 
-            allow_curation_rewards, 
-            beneficiaries, 
-            url, 
+            max_accepted_payout,
+            percent_hbd,
+            allow_replies,
+            allow_votes,
+            allow_curation_rewards,
+            beneficiaries,
+            url,
             root_title
         FROM hive_posts hp
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id

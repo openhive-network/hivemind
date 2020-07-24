@@ -15,7 +15,7 @@ from hive.server.common.helpers import (
     valid_limit,
     valid_follow_type)
 from hive.server.common.mutes import Mutes
-from hive.server.database_api.methods import find_votes
+from hive.server.database_api.methods import find_votes, VotesPresentation
 from hive.utils.normalize import rep_to_raw, number_to_json_value, time_string_with_t
 
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
@@ -154,7 +154,7 @@ async def get_content(context, author: str, permlink: str, observer=None):
     if result:
         result = dict(result[0])
         post = _condenser_post_object(result, 0)
-        post['active_votes'] = await find_votes(context, {'author':author, 'permlink':permlink})
+        post['active_votes'] = await find_votes(context, {'author':author, 'permlink':permlink}, VotesPresentation.CondenserApi)
         if not observer:
             post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
         else:
@@ -443,7 +443,7 @@ async def get_discussions_by_comments(context, start_author: str = None, start_p
     for row in result:
         row = dict(row)
         post = _condenser_post_object(row, truncate_body=truncate_body)
-        post['active_votes'] = await find_votes(context, {'author':post['author'], 'permlink':post['permlink']})
+        post['active_votes'] = await find_votes(context, {'author':post['author'], 'permlink':post['permlink']}, VotesPresentation.CondenserApi)
         post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
         posts.append(post)
 
@@ -572,6 +572,7 @@ async def _get_blog(db, account: str, start_index: int, limit: int = None):
     for post in await load_posts(db, ids):
         reblog = post['author'] != account
         reblog_on = post['created'] if reblog else "1970-01-01T00:00:00"
+
         out.append({"blog": account,
                     "entry_id": idx,
                     "comment": post,
@@ -594,24 +595,5 @@ async def get_active_votes(context, author: str, permlink: str):
     valid_account(author)
     valid_permlink(permlink)
     db = context['db']
-    sql = """
-        SELECT
-            percent,
-            reputation,
-            rshares,
-            time,
-            voter,
-            weight
-        FROM
-            wv_hive_votes_accounts_permlinks
-        WHERE author = :author AND permlink = :permlink
-        ORDER BY id
-    """
-    ret = []
-    rows = await db.query_all(sql, author=author, permlink=permlink)
-    for row in rows:
-        ret.append(dict(percent=row.percent, reputation=rep_to_raw(row.reputation),
-                        rshares=number_to_json_value(row.rshares), time=time_string_with_t(row.time), voter=row.voter,
-                        weight=number_to_json_value(row.weight),
-                        ))
-    return ret
+
+    return await find_votes( {'db':db}, {'author':author, 'permlink':permlink}, VotesPresentation.ActiveVotes  )
