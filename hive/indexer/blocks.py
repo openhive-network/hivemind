@@ -107,29 +107,36 @@ class Blocks:
 
             op_type = vop['type']
             op_value = vop['value']
+
             if op_type == 'curation_reward_operation':
                 key = "{}/{}".format(op_value['comment_author'], op_value['comment_permlink'])
-                val = {'reward' : op_value['reward']}
+                val = {'reward' : op_value['reward'], 'author':op_value['comment_author'], 'permlink': op_value['comment_permlink'] }
             elif op_type == 'author_reward_operation':
                 key = "{}/{}".format(op_value['author'], op_value['permlink'])
-                val = {'hbd_payout':op_value['hbd_payout'], 'hive_payout':op_value['hive_payout'], 'vesting_payout':op_value['vesting_payout']}
+                val = {'hbd_payout':op_value['hbd_payout'], 'hive_payout':op_value['hive_payout'], 'vesting_payout':op_value['vesting_payout'], 'author':op_value['author'], 'permlink': op_value['permlink'] }
             elif op_type == 'comment_reward_operation':
                 key = "{}/{}".format(op_value['author'], op_value['permlink'])
-                val = {'payout':op_value['payout'], 'author_rewards':op_value['author_rewards'], 'total_payout_value':op_value['total_payout_value'], 'curator_payout_value':op_value['curator_payout_value'], 'beneficiary_payout_value':op_value['beneficiary_payout_value'] }
+                val = {'payout':op_value['payout'], 'author_rewards':op_value['author_rewards'], 'total_payout_value':op_value['total_payout_value'], 'curator_payout_value':op_value['curator_payout_value'], 'beneficiary_payout_value':op_value['beneficiary_payout_value'], 'author':op_value['author'], 'permlink': op_value['permlink'] }
 
             elif op_type == 'effective_comment_vote_operation':
                 key = "{}/{}".format(op_value['author'], op_value['permlink'])
-                val = {'pending_payout':op_value['pending_payout']}
+                val = {'pending_payout':op_value['pending_payout'], 'author':op_value['author'], 'permlink': op_value['permlink'] }
                 vote_ops.append(vop)
             elif op_type == 'comment_payout_update_operation':
                 key = "{}/{}".format(op_value['author'], op_value['permlink'])
-                val = {'is_paidout': True} # comment_payout_update_operation implicates is_paidout (is generated only when post is paidout)
+                val = {'is_paidout': True, 'author':op_value['author'], 'permlink': op_value['permlink'] } # comment_payout_update_operation implicates is_paidout (is generated only when post is paidout)
 
             if key is not None and val is not None:
                 if key in comment_payout_ops:
-                    comment_payout_ops[key].append({op_type:val})
+                    if op_type == 'curation_reward_operation':
+                        comment_payout_ops[ op_type ].append( { key:val } )
+                    else:
+                        if key in comment_payout_ops[ op_type ]: 
+                            comment_payout_ops[ op_type ][ key ] = val
+                        else:
+                            comment_payout_ops[ op_type ].append( { key:val } )
                 else:
-                    comment_payout_ops[key] = [{op_type:val}]
+                    comment_payout_ops[ op_type ] = [ { key:val } ]
 
         return (vote_ops, comment_payout_ops)
 
