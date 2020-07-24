@@ -127,14 +127,11 @@ class Blocks:
                 val = {'is_paidout': True, 'author':op_value['author'], 'permlink': op_value['permlink'] } # comment_payout_update_operation implicates is_paidout (is generated only when post is paidout)
 
             if key is not None and val is not None:
-                if key in comment_payout_ops:
-                    if op_type == 'curation_reward_operation':
-                        comment_payout_ops[ op_type ].append( { key:val } )
+                if op_type in comment_payout_ops:
+                    if ( key in comment_payout_ops[ op_type ] ) and ( op_type != 'curation_reward_operation' ):
+                        comment_payout_ops[ op_type ][ key ] = val
                     else:
-                        if key in comment_payout_ops[ op_type ]: 
-                            comment_payout_ops[ op_type ][ key ] = val
-                        else:
-                            comment_payout_ops[ op_type ].append( { key:val } )
+                        comment_payout_ops[ op_type ].append( { key:val } )
                 else:
                     comment_payout_ops[ op_type ] = [ { key:val } ]
 
