@@ -207,11 +207,12 @@ class Posts:
         values = []
         values_limit = 1000
 
+        ops_stats = { 'curation_reward_operation' : 0, 'author_reward_operation' : 0, 'comment_reward_operation' : 0, 'effective_comment_vote_operation' : 0, 'comment_payout_update_operation' : 0 }
+
         """ Process comment payment operations """
         for k, v in ops.items():
-            author, permlink = k.split("/")
-            # total payout to curators
-            curator_rewards_sum       = None
+            author                    = None
+            permlink                  = None
 
             # author payouts
             author_rewards            = None
@@ -235,33 +236,51 @@ class Posts:
 
             is_paidout                = None
 
-            for operation in v:
-                for op, value in operation.items():
-                    if op in ops_stats:
-                        ops_stats[op] += 1
-                    else:
-                        ops_stats[op] = 1
+            if v[ 'curation_reward_operation' ] is not None:
+              value = v[ 'curation_reward_operation' ]
+              ops_stats[ 'curation_reward_operation' ] += 1
+              curator_rewards           = value['reward']
+              if author is None:
+                author                    = value['comment_author']
+                permlink                  = value['comment_permlink']
 
-                    if op == 'curation_reward_operation':
-                        curator_rewards_sum = 0
-                        curator_rewards_sum = curator_rewards_sum + int(value['reward']['amount'])
-                    elif op == 'author_reward_operation':
-                        author_rewards_hive = value['hive_payout']['amount']
-                        author_rewards_hbd = value['hbd_payout']['amount']
-                        author_rewards_vests = value['vesting_payout']['amount']
-                    elif op == 'comment_reward_operation':
-                        comment_author_reward     = value['payout']
-                        author_rewards            = value['author_rewards']
-                        total_payout_value        = value['total_payout_value']
-                        curator_payout_value      = value['curator_payout_value']
-                        beneficiary_payout_value  = value['beneficiary_payout_value']
-                    elif op == 'effective_comment_vote_operation':
-                        pending_payout = sbd_amount( value['pending_payout'] )
-                    elif op == 'comment_payout_update_operation':
-                        is_paidout = bool( value['is_paidout'] )
+            if v[ 'author_reward_operation' ] is not None:
+              value = v[ 'author_reward_operation' ]
+              ops_stats[ 'author_reward_operation' ] += 1
+              author_rewards_hive       = value['hive_payout']['amount']
+              author_rewards_hbd        = value['hbd_payout']['amount']
+              author_rewards_vests      = value['vesting_payout']['amount']
+              if author is None:
+                author                    = value['author']
+                permlink                  = value['permlink']
 
-            if curator_rewards_sum is not None:
-              curator_rewards = {'amount' : str(curator_rewards_sum), 'precision': 6, 'nai': '@@000000037'}
+            if v[ 'comment_reward_operation' ] is not None:
+              value = v[ 'comment_reward_operation' ]
+              ops_stats[ 'comment_reward_operation' ] += 1
+              comment_author_reward     = value['payout']
+              author_rewards            = value['author_rewards']
+              total_payout_value        = value['total_payout_value']
+              curator_payout_value      = value['curator_payout_value']
+              beneficiary_payout_value  = value['beneficiary_payout_value']
+              if author is None:
+                author                    = value['author']
+                permlink                  = value['permlink']
+
+            if v[ 'effective_comment_vote_operation' ] is not None:
+              value = v[ 'effective_comment_vote_operation' ]
+              ops_stats[ 'effective_comment_vote_operation' ] += 1
+              pending_payout            = sbd_amount( value['pending_payout'] )
+              if author is None:
+                author                    = value['author']
+                permlink                  = value['permlink']
+
+            if v[ 'comment_payout_update_operation' ] is not None:
+              value = v[ 'comment_payout_update_operation' ]
+              ops_stats[ 'comment_payout_update_operation' ] += 1
+              is_paidout                = True
+              if author is None:
+                author                    = value['author']
+                permlink                  = value['permlink']
 
             if ( total_payout_value is not None and curator_payout_value is not None ):
               payout = sum([ sbd_amount(total_payout_value), sbd_amount(curator_payout_value) ])
