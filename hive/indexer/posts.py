@@ -287,7 +287,7 @@ class Posts:
             if v[ 'comment_payout_update_operation' ] is not None:
               value = v[ 'comment_payout_update_operation' ]
               ops_stats[ 'comment_payout_update_operation' ] += 1
-              is_paidout                = bool( value['is_paidout'] )
+              is_paidout                = True
               if author is None:
                 author                    = value['author']
                 permlink                  = value['permlink']
@@ -302,6 +302,7 @@ class Posts:
               last_payout = date
 
             if ( is_paidout is not None ):
+              payout_at = date
               cashout_time = date
 
             values.append("('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, '{}'::timestamp, {}, {}, {})".format(
