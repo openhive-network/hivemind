@@ -557,7 +557,7 @@ def setup(db):
           $function$
           BEGIN
             RETURN QUERY UPDATE hive_posts AS hp
-              SET is_deleted = false
+              SET is_deleted = true
             FROM hive_posts hp1
             INNER JOIN hive_accounts ha ON hp1.author_id = ha.id
             INNER JOIN hive_permlink_data hpd ON hp1.permlink_id = hpd.id
