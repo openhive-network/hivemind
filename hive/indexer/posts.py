@@ -218,7 +218,8 @@ class Posts:
         values_limit = 1000
 
         """ Process comment payment operations """
-        for op, v in ops.items():
+        for k, v in ops.items():
+            author, permlink = k.split("/")
             # total payout to curators
             curator_rewards_sum       = None
 
@@ -244,19 +245,15 @@ class Posts:
 
             is_paidout                = None
 
-            for data in v:
-                for key, value in data.items():
+            for operation in v:
+                for op, value in operation.items():
                     if op in ops_stats:
                         ops_stats[op] += 1
                     else:
                         ops_stats[op] = 1
 
-                    author = value["author"]
-                    permlink = value["permlink"]
-
                     if op == 'curation_reward_operation':
-                        if curator_rewards_sum is None:
-                            curator_rewards_sum = 0
+                        curator_rewards_sum = 0
                         curator_rewards_sum = curator_rewards_sum + int(value['reward']['amount'])
                     elif op == 'author_reward_operation':
                         author_rewards_hive = value['hive_payout']['amount']
