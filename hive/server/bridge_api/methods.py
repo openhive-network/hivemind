@@ -17,55 +17,46 @@ from hive.server.common.mutes import Mutes
 ROLES = {-2: 'muted', 0: 'guest', 2: 'member', 4: 'mod', 6: 'admin', 8: 'owner'}
 
 SQL_TEMPLATE = """
-        SELECT hp.id, 
-            ha_a.name as author,
-            ha_r.name as root_author,
-            hp.author_rep as author_rep,
-            hp.allow_replies AS allow_replies,
-            hp.allow_votes AS allow_votes,
-            hp.allow_curation_rewards AS allow_curation_rewards,
-            hp.root_title AS root_title,
-            hp.beneficiaries AS beneficiaries,
-            hp.max_accepted_payout AS max_accepted_payout,
-            hp.percent_hbd AS percent_hbd,
-            hp.url AS url,
-            hpd_p.permlink as permlink,
-            hpd_r.permlink as root_permlink,
-            hpd.title as title,
-            hpd.body as body,
-            (SELECT category FROM hive_category_data WHERE hive_category_data.id = hp.category_id) as category,
-            depth,
-            promoted, 
-            payout, 
-            payout_at, 
-            is_paidout, 
-            children, 
-            (0) as votes,
+        SELECT
+            hp.id, 
+            hp.author,
+            hp.root_author,
+            hp.author_rep,
+            hp.allow_replies,
+            hp.allow_votes,
+            hp.allow_curation_rewards,
+            hp.root_title,
+            hp.beneficiaries,
+            hp.max_accepted_payout,
+            hp.percent_hbd,
+            hp.url,
+            hp.permlink,
+            hp.root_permlink,
+            hp.title,
+            hp.body,
+            hp.category,
+            hp.depth,
+            hp.promoted, 
+            hp.payout, 
+            hp.payout_at, 
+            hp.is_paidout, 
+            hp.children, 
+            hp.votes,
             hp.created_at, 
-            updated_at, 
-            rshares, 
-            hpd.json as json,
-            is_hidden, 
-            is_grayed, 
-            total_votes, 
-            flag_weight,
-            sc_trend, 
-            ha_a.id AS acct_author_id,
-            hive_roles.title as role_title, 
-            hive_communities.title AS community_title, 
-            hive_roles.role_id AS role_id,
-            hp.is_pinned AS is_pinned,
-            curator_payout_value
-        FROM hive_posts hp
-        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        INNER JOIN hive_accounts ha_r ON ha_r.id = hp.root_author_id
-        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        INNER JOIN hive_permlink_data hpd_r ON hpd_r.id = hp.root_permlink_id
-        INNER JOIN hive_post_data hpd ON hpd.id = hp.id
-        INNER JOIN hive_post_tags hpt ON hpt.post_id = hp.id
-        INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
-        LEFT OUTER JOIN hive_communities ON (hp.community_id = hive_communities.id)
-        LEFT OUTER JOIN hive_roles ON (ha_a.id = hive_roles.account_id AND hp.community_id = hive_roles.community_id)
+            hp.updated_at, 
+            hp.rshares, 
+            hp.json,
+            hp.is_hidden, 
+            hp.is_grayed, 
+            hp.total_votes, 
+            hp.flag_weight,
+            hp.sc_trend, 
+            hp.role_title, 
+            hp.community_title, 
+            hr.role_id,
+            hp.is_pinned,
+            hp.curator_payout_value
+        FROM vw_hive_posts hp
         WHERE
     """
 
@@ -125,7 +116,7 @@ async def get_post(context, author, permlink, observer=None):
     if observer and context:
         blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
 
-    sql = "---bridge_api.get_post\n" + SQL_TEMPLATE + """ ha_a.name = :author AND hpd_p.permlink = :permlink AND NOT hp.is_deleted """
+    sql = "---bridge_api.get_post\n" + SQL_TEMPLATE + """ hp.author = :author AND hp.permlink = :permlink AND NOT hp.is_deleted """
 
     result = await db.query_all(sql, author=author, permlink=permlink)
     assert len(result) == 1, 'invalid author/permlink or post not found in cache'
@@ -153,10 +144,10 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
 
     if sort == 'trending':
         sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND hp.depth = 0 AND NOT hp.is_deleted
-                                    %s ORDER BY sc_trend desc, hp.id LIMIT :limit """
+                                    %s ORDER BY hp.sc_trend DESC, hp.id LIMIT :limit """
     elif sort == 'hot':
         sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND hp.depth = 0 AND NOT hp.is_deleted
-                                    %s ORDER BY sc_hot desc, hp.id LIMIT :limit """
+                                    %s ORDER BY hp.sc_hot DESC, hp.id LIMIT :limit """
     elif sort == 'created':
         sql = SQL_TEMPLATE + """ hp.depth = 0 AND NOT hp.is_deleted AND NOT hp.is_grayed
                                     %s ORDER BY hp.created_at DESC, hp.id LIMIT :limit """
@@ -165,7 +156,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
                                     AND NOT hp.is_paidout %s ORDER BY hp.promoted DESC, hp.id LIMIT :limit """
     elif sort == 'payout':
         sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND NOT hp.is_deleted %s
-                                    AND payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
+                                    AND hp.payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
                                     ORDER BY hp.payout DESC, hp.id LIMIT :limit """
     elif sort == 'payout_comments':
         sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND NOT hp.is_deleted AND hp.depth > 0
@@ -201,18 +192,18 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
                         (SELECT id FROM hive_accounts WHERE name = :observer) ) """
     elif tag[:5] == 'hive-':
         if start_author and start_permlink:
-            sql = sql % """  AND hp.community_id = (SELECT hive_communities.id FROM hive_communities WHERE name = :community_name ) """
+            sql = sql % """ AND hp.community_id = (SELECT hive_communities.id FROM hive_communities WHERE name = :community_name ) """
         else:
-            sql = sql % """ AND hive_communities.name = :community_name """
+            sql = sql % """ AND hp.community_name = :community_name """
 
         if sort == 'trending' or sort == 'created':
-                pinned_sql = SQL_TEMPLATE + """ is_pinned AND hive_communities.name = :community_name ORDER BY hp.created_at DESC """
+            pinned_sql = SQL_TEMPLATE + """ hp.is_pinned AND hp.community_name = :community_name ORDER BY hp.created_at DESC """
 
     else:
         if sort in ['payout', 'payout_comments']:
             sql = sql % """ AND hp.category = :tag """
         else:
-            sql = sql % """ AND htd.tag = :tag """
+            sql = sql % """ AND hp.tag = :tag """
 
     if not observer:
         observer = ''
@@ -292,7 +283,7 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
     # pylint: disable=unused-variable
     observer_id = await get_account_id(db, observer) if observer else None # TODO
      
-    sql = "---bridge_api.get_account_posts\n " + SQL_TEMPLATE + """ %s """      
+    sql = "---bridge_api.get_account_posts\n " + SQL_TEMPLATE + """ %s """
         
     if sort == 'blog':
         ids = await cursor.pids_by_blog(db, account, *start, limit)
@@ -302,11 +293,11 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
                 post['reblogged_by'] = [account]
         return posts
     elif sort == 'posts':
-        sql = sql % """ ha_a.name = :account AND NOT hp.is_deleted AND hp.depth = 0 %s ORDER BY hp.id DESC LIMIT :limit"""
+        sql = sql % """ hp.author = :account AND NOT hp.is_deleted AND hp.depth = 0 %s ORDER BY hp.id DESC LIMIT :limit"""
     elif sort == 'comments':
-        sql = sql % """ ha_a.name = :account AND NOT hp.is_deleted AND hp.depth > 0 %s ORDER BY hp.id DESC, depth LIMIT :limit"""
+        sql = sql % """ hp.author = :account AND NOT hp.is_deleted AND hp.depth > 0 %s ORDER BY hp.id DESC, hp.depth LIMIT :limit"""
     elif sort == 'payout':
-        sql = sql % """ ha_a.name = :account AND NOT hp.is_deleted AND NOT hp.is_paidout %s ORDER BY payout DESC, hp.id LIMIT :limit"""
+        sql = sql % """ hp.author = :account AND NOT hp.is_deleted AND NOT hp.is_paidout %s ORDER BY hp.payout DESC, hp.id LIMIT :limit"""
     elif sort == 'feed':
         res = await cursor.pids_by_feed_with_reblog(db, account, *start, limit)
         return await load_posts_reblogs(context['db'], res)
