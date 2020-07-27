@@ -641,7 +641,6 @@ def setup(db):
             hr.role_id AS role_is,
             hc.title AS community_title,
             hc.name AS community_name,
-            htd.tag AS tag
             FROM hive_posts hp
             JOIN hive_posts rp ON rp.author_id = hp.root_author_id AND rp.permlink_id = hp.root_permlink_id
             JOIN hive_post_data rpd ON rp.id = rpd.id
@@ -654,8 +653,6 @@ def setup(db):
             JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
             JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
             JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
-            JOIN hive_post_tags hpt ON hpt.post_id = hp.id
-            JOIN hive_tag_data htd ON hpt.tag_id=htd.id
             LEFT OUTER JOIN hive_communities hc ON (hp.community_id = hc.id)
             LEFT OUTER JOIN hive_roles hr ON (hp.author_id = hr.account_id AND hp.community_id = hr.community_id)
             ;
