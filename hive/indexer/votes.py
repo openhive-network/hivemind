@@ -57,9 +57,9 @@ class Votes:
     @classmethod
     def vote_op(cls, vop, date):
         """ Process vote_operation """
-        voter = vop['value']['voter']
-        author = vop['value']['author']
-        permlink = vop['value']['permlink']
+        voter = vop['voter']
+        author = vop['author']
+        permlink = vop['permlink']
 
         if(cls.inside_flush):
             log.info("Adding new vote-info into _votes_data dict")
@@ -70,9 +70,9 @@ class Votes:
         cls._votes_data[key] = dict(voter=voter,
                                     author=author,
                                     permlink=permlink,
-                                    vote_percent=vop['value']['vote_percent'],
-                                    weight=vop['value']['weight'],
-                                    rshares=vop['value']['rshares'],
+                                    vote_percent=vop['vote_percent'],
+                                    weight=vop['weight'],
+                                    rshares=vop['rshares'],
                                     last_update=date)
 
     @classmethod

@@ -274,7 +274,7 @@ class Posts:
             if v[ 'comment_payout_update_operation' ] is not None:
               value = v[ 'comment_payout_update_operation' ]
               ops_stats[ 'comment_payout_update_operation' ] += 1
-              is_paidout                = True
+              is_paidout                = bool( value['is_paidout'] )
               if author is None:
                 author                    = value['author']
                 permlink                  = value['permlink']
