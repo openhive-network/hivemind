@@ -64,24 +64,10 @@ class Votes:
         cls._votes_data[key] = dict(voter=voter,
                                     author=author,
                                     permlink=permlink,
-                                    vote_percent=0,
-                                    weight=0,
-                                    rshares=0,
-                                    last_update="1969-12-31T23:59:59")
-
-    @classmethod
-    def effective_comment_vote_op(cls, key, vop, date):
-        """ Process effective_comment_vote_operation """
-
-        if(cls.inside_flush):
-            log.info("Updating data in '_votes_data' using effective comment")
-            raise "Fatal error"
-
-        if key in cls._votes_data:
-            cls._votes_data[key]["vote_percent"]  = vop["vote_percent"]
-            cls._votes_data[key]["weight"]        = vop["weight"]
-            cls._votes_data[key]["rshares"]       = vop["rshares"]
-            cls._votes_data[key]["last_update"]   = date
+                                    vote_percent=vop['vote_percent'],
+                                    weight=vop['weight'],
+                                    rshares=vop['rshares'],
+                                    last_update=date)
 
     @classmethod
     def flush(cls):
