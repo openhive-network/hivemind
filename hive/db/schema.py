@@ -640,7 +640,7 @@ def setup(db):
             hr.title AS role_title, 
             hr.role_id AS role_is,
             hc.title AS community_title,
-            hc.name AS community_name,
+            hc.name AS community_name
             FROM hive_posts hp
             JOIN hive_posts rp ON rp.author_id = hp.root_author_id AND rp.permlink_id = hp.root_permlink_id
             JOIN hive_post_data rpd ON rp.id = rpd.id
