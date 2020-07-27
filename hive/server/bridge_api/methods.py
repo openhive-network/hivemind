@@ -56,7 +56,7 @@ SQL_TEMPLATE = """
             hr.role_id,
             hp.is_pinned,
             hp.curator_payout_value
-        FROM vw_hive_posts hp
+        FROM hive_posts_view hp
         WHERE
     """
 

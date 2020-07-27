@@ -284,7 +284,7 @@ async def pids_by_blog_by_index(db, account: str, start_index: int, limit: int =
     """
 
     if start_index in (-1, 0):
-        sql = """SELECT COUNT(*) - 1 FROM vw_hive_posts hp
+        sql = """SELECT COUNT(*) - 1 FROM hive_posts_view hp
                   WHERE hp.author = :account"""
         start_index = await db.query_one(sql, account=account)
         if start_index < 0:
@@ -296,7 +296,7 @@ async def pids_by_blog_by_index(db, account: str, start_index: int, limit: int =
 
     sql = """
         SELECT hp.id
-          FROM vw_hive_posts hp
+          FROM hive_posts_view hp
          WHERE hp.author = :account
       ORDER BY hp.created_at
          LIMIT :limit

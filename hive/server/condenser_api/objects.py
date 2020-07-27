@@ -78,7 +78,7 @@ async def load_posts_keyed(db, ids, truncate_body=0):
         hp.beneficiaries, 
         hp.url, 
         hp.root_title
-    FROM vw_hive_posts hp
+    FROM hive_posts_view hp
     WHERE hp.id IN :ids"""
 
     result = await db.query_all(sql, ids=tuple(ids))
