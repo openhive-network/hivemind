@@ -20,6 +20,10 @@ dct={'0':'a','1':'b','2':'c','3':'d','4':'e',
 
 # convert special chars into their octal formats recognized by sql
 special_chars={
+  "\r":"\\015",
+  "\n":"\\012",
+  "\v":"\\013",
+  "\f": "\\014",
   "\\":"\\134",
   "'":"\\047",
   "%":"\\045",
@@ -35,11 +39,21 @@ def escape_characters(text):
     ret = "E'"
 
     for ch in text:
-        try:
-            dw=special_chars[ch]
-            ret=ret+dw
-        except KeyError as k:
-            ret=ret+ch
+        if ch.isprintable() or ch in special_chars:
+            try:
+                dw=special_chars[ch]
+                ret=ret+dw
+            except KeyError as k:
+                ret=ret+ch
+        else:
+            ordinal = ord(ch)
+            if ordinal == 0 or ordinal >= 0x80:
+                escaped_value = 'u' + hex(ordinal)[2:]
+#                logging.info("Encoded unicode escape: {}".format(escaped_value))
+            else:
+                escaped_value = ch.encode('unicode-escape').decode('utf-8')
+
+            ret = ret + escaped_value
 
     ret = ret + "'"
     return ret
