@@ -162,7 +162,7 @@ class Blocks:
                 if key not in comment_payout_ops:
                   comment_payout_ops[key] = { 'curation_reward_operation':None, 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':is_payout_true }
 
-                comment_payout_ops[key][op_type] = op_value
+                comment_payout_ops[key][op_type] = is_payout_true
 
         return (vote_ops, comment_payout_ops)
 
