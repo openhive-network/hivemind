@@ -101,35 +101,62 @@ class Blocks:
     def prepare_vops(vopsList, date):
         vote_ops = []
         comment_payout_ops = {}
+
         for vop in vopsList:
             key = None
             val = None
 
             op_type = vop['type']
             op_value = vop['value']
+  
             if op_type == 'curation_reward_operation':
                 key = "{}/{}".format(op_value['comment_author'], op_value['comment_permlink'])
-                val = {'reward' : op_value['reward']}
+
+                if key not in comment_payout_ops:
+                  comment_payout_ops[key] = { 'curation_reward_operation':None, 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
+
+                if comment_payout_ops[key][op_type] is None:
+                  comment_payout_ops[key][op_type] = op_value
+                else:
+                  comment_payout_ops[key][op_type]['reward']['amount'] = int( comment_payout_ops[key][op_type]['reward']['amount'] ) + int( op_value['reward']['amount'] )
+
             elif op_type == 'author_reward_operation':
                 key = "{}/{}".format(op_value['author'], op_value['permlink'])
-                val = {'hbd_payout':op_value['hbd_payout'], 'hive_payout':op_value['hive_payout'], 'vesting_payout':op_value['vesting_payout']}
+
+                if key not in comment_payout_ops:
+                  comment_payout_ops[key] = { 'curation_reward_operation':None, 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
+
+                comment_payout_ops[key][op_type] = op_value
+
             elif op_type == 'comment_reward_operation':
                 key = "{}/{}".format(op_value['author'], op_value['permlink'])
-                val = {'payout':op_value['payout'], 'author_rewards':op_value['author_rewards'], 'total_payout_value':op_value['total_payout_value'], 'curator_payout_value':op_value['curator_payout_value'], 'beneficiary_payout_value':op_value['beneficiary_payout_value'] }
+
+                if key not in comment_payout_ops:
+                  comment_payout_ops[key] = { 'curation_reward_operation':None, 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
+
+                comment_payout_ops[key]['effective_comment_vote_operation'] = None
+
+                comment_payout_ops[key][op_type] = op_value
 
             elif op_type == 'effective_comment_vote_operation':
-                key = "{}/{}".format(op_value['author'], op_value['permlink'])
-                val = {'pending_payout':op_value['pending_payout']}
-                vote_ops.append(vop)
-            elif op_type == 'comment_payout_update_operation':
-                key = "{}/{}".format(op_value['author'], op_value['permlink'])
-                val = {'is_paidout': True} # comment_payout_update_operation implicates is_paidout (is generated only when post is paidout)
 
-            if key is not None and val is not None:
-                if key in comment_payout_ops:
-                    comment_payout_ops[key].append({op_type:val})
-                else:
-                    comment_payout_ops[key] = [{op_type:val}]
+                key = "{}/{}".format(op_value['author'], op_value['permlink'])
+
+                if key not in comment_payout_ops:
+                  comment_payout_ops[key] = { 'curation_reward_operation':None, 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
+
+                comment_payout_ops[key][op_type] = op_value
+
+                vote_ops.append(vop)
+
+            elif op_type == 'comment_payout_update_operation':
+
+                key = "{}/{}".format(op_value['author'], op_value['permlink'])
+
+                if key not in comment_payout_ops:
+                  comment_payout_ops[key] = { 'curation_reward_operation':None, 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
+
+                comment_payout_ops[key][op_type] = op_value
 
         return (vote_ops, comment_payout_ops)
 
