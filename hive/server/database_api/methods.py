@@ -6,48 +6,43 @@ from hive.server.common.objects import condenser_post_object
 from hive.utils.normalize import rep_to_raw, number_to_json_value, time_string_with_t
 
 SQL_TEMPLATE = """
-    SELECT hp.id,
+    SELECT
+        hp.id,
         hp.community_id,
-        ha_a.name as author,
-        hpd_p.permlink as permlink,
-        (SELECT title FROM hive_post_data WHERE hive_post_data.id = hp.id) as title,
-        (SELECT body FROM hive_post_data WHERE hive_post_data.id = hp.id) as body,
-        (SELECT category FROM hive_category_data WHERE hive_category_data.id = hp.category_id) as category,
-        depth,
-        promoted,
-        payout,
-        payout_at,
-        is_paidout,
-        children,
-        (0) as votes,
+        hp.author,
+        hp.permlink,
+        hp.title,
+        hp.body,
+        hp.category,
+        hp.depth,
+        hp.promoted,
+        hp.payout,
+        hp.payout_at,
+        hp.is_paidout,
+        hp.children,
+        hp.votes,
         hp.created_at,
-        updated_at,
-        rshares,
-        (SELECT json FROM hive_post_data WHERE hive_post_data.id = hp.id) as json,
-        is_hidden,
-        is_grayed,
-        total_votes,
-        flag_weight,
-        ha_pa.name as parent_author,
-        hpd_pp.permlink as parent_permlink,
-        curator_payout_value,
-        ha_ra.name as root_author,
-        hpd_rp.permlink as root_permlink,
-        max_accepted_payout,
-        percent_hbd,
-        allow_replies,
-        allow_votes,
-        allow_curation_rewards,
-        beneficiaries,
-        url,
-        root_title
-    FROM hive_posts hp
-    INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-    INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-    INNER JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
-    INNER JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
-    INNER JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
-    INNER JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
+        hp.updated_at,
+        hp.rshares,
+        hp.json,
+        hp.is_hidden,
+        hp.is_grayed,
+        hp.total_votes,
+        hp.flag_weight,
+        hp.parent_author,
+        hp.parent_permlink,
+        hp.curator_payout_value,
+        hp.root_author,
+        hp.root_permlink,
+        hp.max_accepted_payout,
+        hp.percent_hbd,
+        hp.allow_replies,
+        hp.allow_votes,
+        hp.allow_curation_rewards,
+        hp.beneficiaries,
+        hp.url,
+        hp.root_title
+    FROM hive_posts_view hp
     WHERE
 """
 
@@ -140,7 +135,7 @@ async def list_comments(context, start: list, limit: int, order: str):
             post_id = await get_post_id_by_author_and_permlink(db, child_author, child_permlink, 1)
 
         sql = str(SQL_TEMPLATE)
-        sql += "ha_pa.name >= :parent_author AND hp.updated_at >= :updated_at AND hp.id >= :post_id ORDER BY ha_pa.name ASC, updated_at ASC, hp.id ASC LIMIT :limit"
+        sql += "hp.parent_author >= :parent_author AND hp.updated_at >= :updated_at AND hp.id >= :post_id ORDER BY hp.parent_author ASC, hp.updated_at ASC, hp.id ASC LIMIT :limit"
 
         result = await db.query_all(sql, parent_author=start[0], updated_at=start[1], post_id=post_id, limit=limit)
         for row in result:
@@ -159,7 +154,7 @@ async def list_comments(context, start: list, limit: int, order: str):
             post_id = await get_post_id_by_author_and_permlink(db, author, permlink, 1)
 
         sql = str(SQL_TEMPLATE)
-        sql += "ha_a.name >= :author AND hp.updated_at >= :updated_at AND hp.id >= :post_id ORDER BY ha_a.name ASC, hp.updated_at ASC, hp.id ASC LIMIT :limit"
+        sql += "hp.author >= :author AND hp.updated_at >= :updated_at AND hp.id >= :post_id ORDER BY hp.author ASC, hp.updated_at ASC, hp.id ASC LIMIT :limit"
 
         result = await db.query_all(sql, author=start[0], updated_at=start[1], post_id=post_id, limit=limit)
         for row in result:
@@ -184,7 +179,7 @@ async def find_comments(context, start: list, limit: int, order: str):
     for arg in start:
         if idx > 0:
             sql += " OR "
-        sql += "(ha_a.name = '{}' AND hpd_p.permlink = '{}')".format(arg[0], arg[1])
+        sql += "(hp.author = '{}' AND hp.permlink = '{}')".format(arg[0], arg[1])
         idx += 1
 
     result = await db.query_all(sql)

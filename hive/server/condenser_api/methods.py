@@ -41,7 +41,7 @@ SQL_TEMPLATE = """
         hp.created_at,
         hp.updated_at,
         hp.rshares,
-        hp.json as json,
+        hp.json,
         hp.is_hidden,
         hp.is_grayed,
         hp.total_votes,
@@ -59,7 +59,7 @@ SQL_TEMPLATE = """
         hp.beneficiaries,
         hp.url,
         hp.root_title
-    FROM vw_hive_posts hp
+    FROM hive_posts_view hp
     WHERE
 """
 
@@ -226,9 +226,9 @@ async def get_discussions_by(discussion_type, context, start_author: str = '',
     sql = sql + """ NOT hp.is_deleted """
 
     if discussion_type == 'trending':
-        sql = sql + """ AND NOT hp.is_paidout %s ORDER BY sc_trend DESC LIMIT :limit """
+        sql = sql + """ AND NOT hp.is_paidout %s ORDER BY hp.sc_trend DESC LIMIT :limit """
     elif discussion_type == 'hot':
-        sql = sql + """ AND NOT hp.is_paidout %s ORDER BY sc_hot DESC LIMIT :limit """
+        sql = sql + """ AND NOT hp.is_paidout %s ORDER BY hp.sc_hot DESC LIMIT :limit """
     elif discussion_type == 'created':
         sql = sql + """ AND hp.depth = 0 %s ORDER BY hp.created_at DESC LIMIT :limit """
     elif discussion_type == 'promoted':
@@ -245,14 +245,12 @@ async def get_discussions_by(discussion_type, context, start_author: str = '',
         if tag[:5] == 'hive-':
             sql = sql % """ %s AND hp.category = :tag """
         else:
-            sql = sql % """ %s AND hp.post_id IN
-                (SELECT
-                    post_id
-                FROM
-                    hive_post_tags hpt
-                INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
-                WHERE htd.tag = :tag
-            ) """
+            sql = sql % """ %s AND EXISTS
+                (SELECT NULL
+                    FROM hive_post_tags hpt
+                    INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
+                    WHERE hp.id = hpt.post_id AND htd.tag = :tag
+                ) """
 
     if start_author and start_permlink:
         if discussion_type == 'trending':
@@ -433,7 +431,7 @@ async def get_discussions_by_comments(context, start_author: str = None, start_p
         """
 
     sql += """
-        ORDER BY hp.id DESC, depth LIMIT :limit
+        ORDER BY hp.id DESC, hp.depth LIMIT :limit
     """
 
     posts = []
