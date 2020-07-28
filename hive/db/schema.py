@@ -676,11 +676,11 @@ def setup(db):
             WITH recursive tblChild AS
             (
               SELECT s.queried_parent, s.id
-	            from
-	            (SELECT h1.Parent_Id as queried_parent, h1.id
+              from
+              (SELECT h1.Parent_Id as queried_parent, h1.id
                     FROM hive_posts h1 WHERE h1.depth > 0
-	                order by h1.depth desc
-	            ) s
+                  order by h1.depth desc
+              ) s
               UNION ALL
               SELECT tblChild.queried_parent, p.id FROM hive_posts p JOIN tblChild  ON p.Parent_Id = tblChild.Id
             )
