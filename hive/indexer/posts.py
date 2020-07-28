@@ -287,13 +287,14 @@ class Posts:
               pending_payout = 0
 
             #Calculations of all dates
-            if ( total_payout_value is not None ):
-              payout_at = date
-              last_payout = date
-
             if ( is_paidout is not None ):
               payout_at = date
-              cashout_time = date
+              last_payout = date
+              cashout_time = "1969-12-31T23:59:59"
+            else:
+              if ( total_payout_value is not None ):
+                payout_at = date  #Here should be `cashout_time`
+                last_payout = date
 
             values.append("('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, '{}'::timestamp, {}, {}, {})".format(
               author,
