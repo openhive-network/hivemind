@@ -147,19 +147,19 @@ class Posts:
         ops_stats = {}
         sql = """
               UPDATE hive_posts AS ihp SET
-                  total_payout_value    = COALESCE( data_source.total_payout_value,                     ihp.total_payout_value ),
-                  curator_payout_value  = COALESCE( data_source.curator_payout_value,                   ihp.curator_payout_value ),
-                  author_rewards        = COALESCE( CAST( data_source.author_rewards as INT8 ),         ihp.author_rewards ),
-                  author_rewards_hive   = COALESCE( CAST( data_source.author_rewards_hive as INT8 ),    ihp.author_rewards_hive ),
-                  author_rewards_hbd    = COALESCE( CAST( data_source.author_rewards_hbd as INT8 ),     ihp.author_rewards_hbd ),
-                  author_rewards_vests  = COALESCE( CAST( data_source.author_rewards_vests as INT8 ),   ihp.author_rewards_vests ),
-                  payout                = COALESCE( CAST( data_source.payout as DECIMAL ),              ihp.payout ),
-                  pending_payout        = COALESCE( CAST( data_source.pending_payout as DECIMAL ),      ihp.pending_payout ),
-                  payout_at             = COALESCE( CAST( data_source.payout_at as TIMESTAMP ),         ihp.payout_at ),
+                  total_payout_value    = ihp.total_payout_value,
+                  curator_payout_value  = ihp.curator_payout_value,
+                  author_rewards        = ihp.author_rewards,
+                  author_rewards_hive   = ihp.author_rewards_hive,
+                  author_rewards_hbd    = ihp.author_rewards_hbd,
+                  author_rewards_vests  = ihp.author_rewards_vests,
+                  payout                = ihp.payout,
+                  pending_payout        = ihp.pending_payout,
+                  payout_at             = ihp.payout_at,
                   updated_at            = data_source.updated_at,
-                  last_payout           = COALESCE( CAST( data_source.last_payout as TIMESTAMP ),       ihp.last_payout ),
-                  cashout_time          = COALESCE( CAST( data_source.cashout_time as TIMESTAMP ),      ihp.cashout_time ),
-                  is_paidout            = COALESCE( CAST( data_source.is_paidout as BOOLEAN ),          ihp.is_paidout )
+                  last_payout           = ihp.last_payout,
+                  cashout_time          = ihp.cashout_time,
+                  is_paidout            = ihp.is_paidout
               FROM
               (
               SELECT  ha_a.id as author_id, hpd_p.id as permlink_id, 
