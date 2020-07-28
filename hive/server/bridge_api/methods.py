@@ -75,7 +75,7 @@ async def _get_post_id(db, author, permlink):
     """Get post_id from hive db."""
     sql = """SELECT id FROM hive_posts
               WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :a)
-                AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :p)
+                AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :p)
                 AND is_deleted = '0'"""
     post_id = await db.query_one(sql, a=author, p=permlink)
     assert post_id, 'invalid author/permlink'
@@ -178,19 +178,19 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
 
     if start_author and start_permlink:
         if sort == 'trending':
-            sql = sql % """ AND hp.sc_trend <= (SELECT sc_trend FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) 
-                            AND hp.id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
+            sql = sql % """ AND hp.sc_trend <= (SELECT sc_trend FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)) 
+                            AND hp.id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)) %s """
         elif sort == 'hot':
-            sql = sql % """ AND hp.sc_hot <= (SELECT sc_hot FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink))
-                            AND hp.id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
+            sql = sql % """ AND hp.sc_hot <= (SELECT sc_hot FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink))
+                            AND hp.id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)) %s """
         elif sort == 'created':
-            sql = sql % """ AND hp.id < (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
+            sql = sql % """ AND hp.id < (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)) %s """
         elif sort == 'promoted':
-            sql = sql % """ AND hp.promoted <= (SELECT promoted FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink))
-                                AND hp.id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
+            sql = sql % """ AND hp.promoted <= (SELECT promoted FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink))
+                                AND hp.id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)) %s """
         else:
-            sql = sql % """ AND hp.payout <= (SELECT payout FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink))
-                                AND hp.id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) %s """
+            sql = sql % """ AND hp.payout <= (SELECT payout FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink))
+                                AND hp.id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)) %s """
     else:
         sql = sql % """ %s """
 
@@ -316,7 +316,7 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
         return await load_posts(context['db'], ids)
 
     if start_author and start_permlink:
-        sql = sql % """ AND hp.id < (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)) """
+        sql = sql % """ AND hp.id < (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)) """
     else:
         sql = sql % """ """
         
