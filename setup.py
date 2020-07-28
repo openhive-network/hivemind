@@ -46,6 +46,7 @@ setup(
         'aiocache',
         'configargparse',
         'pdoc',
+        'diff-match-patch'
     ],
     extras_require={'test': tests_require},
     entry_points={

@@ -84,6 +84,9 @@ hivemind_stop_server:
   script:
     - scripts/ci_stop_server.sh hive_server.pid
 
+  tags:
+     - hivemind
+
 hivemind_start_server:
   stage: deploy
   environment:
@@ -126,7 +129,7 @@ hivemind_start_api_smoketest:
     - python3 -m site --user-site
     - pip3 install --user --upgrade pip setuptools
     - pip3 install --user pyresttest
-    - scripts/ci_start_api_smoketest.sh "http://localhost/$HIVEMIND_HTTP_PORT"
+    - scripts/ci_start_api_smoketest.sh "http://localhost:$HIVEMIND_HTTP_PORT"
 
   when: manual
 
