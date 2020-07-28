@@ -702,7 +702,8 @@ def setup(db):
             rshares,
             last_update as time,
             ha_v.name as voter,
-            weight
+            weight,
+            num_changes
         FROM
             hive_votes hv
         INNER JOIN hive_accounts ha_v ON ha_v.id = hv.voter_id

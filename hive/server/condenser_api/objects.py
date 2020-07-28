@@ -6,7 +6,7 @@ import ujson as json
 from hive.utils.normalize import sbd_amount, rep_to_raw
 from hive.server.common.mutes import Mutes
 from hive.server.common.helpers import json_date
-from hive.server.database_api.methods import find_votes
+from hive.server.database_api.methods import find_votes, VotesPresentation
 
 log = logging.getLogger(__name__)
 
@@ -42,41 +42,41 @@ async def load_posts_keyed(db, ids, truncate_body=0):
 
     # fetch posts and associated author reps
     sql = """
-    SELECT hp.id, 
-        hp.community_id, 
+    SELECT hp.id,
+        hp.community_id,
         hp.author,
         hp.permlink,
-        hp.title, 
-        hp.body, 
-        hp.category, 
+        hp.title,
+        hp.body,
+        hp.category,
         hp.depth,
-        hp.promoted, 
-        hp.payout, 
-        hp.payout_at, 
-        hp.is_paidout, 
-        hp.children, 
+        hp.promoted,
+        hp.payout,
+        hp.payout_at,
+        hp.is_paidout,
+        hp.children,
         hp.votes,
         hp.active_votes,
-        hp.created_at, 
-        hp.updated_at, 
-        hp.rshares, 
+        hp.created_at,
+        hp.updated_at,
+        hp.rshares,
         hp.json as json,
-        hp.is_hidden, 
-        hp.is_grayed, 
-        hp.total_votes, 
+        hp.is_hidden,
+        hp.is_grayed,
+        hp.total_votes,
         hp.flag_weight,
         hp.parent_author,
         hp.parent_permlink,
-        hp.curator_payout_value, 
+        hp.curator_payout_value,
         hp.root_author,
         hp.root_permlink,
-        hp.max_accepted_payout, 
-        hp.percent_hbd, 
-        hp.allow_replies, 
-        hp.allow_votes, 
-        hp.allow_curation_rewards, 
-        hp.beneficiaries, 
-        hp.url, 
+        hp.max_accepted_payout,
+        hp.percent_hbd,
+        hp.allow_replies,
+        hp.allow_votes,
+        hp.allow_curation_rewards,
+        hp.beneficiaries,
+        hp.url,
         hp.root_title
     FROM vw_hive_posts hp
     WHERE hp.id IN :ids"""
@@ -90,7 +90,8 @@ async def load_posts_keyed(db, ids, truncate_body=0):
         row = dict(row)
         row['author_rep'] = author_reps[row['author']]
         post = _condenser_post_object(row, truncate_body=truncate_body)
-        post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']})
+
+        post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']}, VotesPresentation.CondenserApi)
         posts_by_id[row['id']] = post
 
     return posts_by_id
@@ -115,9 +116,9 @@ async def load_posts(db, ids, truncate_body=0):
         for _id in missed:
             ids.remove(_id)
             sql = """
-                SELECT 
+                SELECT
                     hp.id, ha_a.name as author, hpd_p.permlink as permlink, depth, created_at, is_deleted
-                FROM 
+                FROM
                     hive_posts hp
                 INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
                 INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
