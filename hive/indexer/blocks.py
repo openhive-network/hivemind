@@ -229,6 +229,7 @@ class Blocks:
                     if not is_initial_sync:
                         Accounts.dirty(op['author']) # lite - rep
                         Accounts.dirty(op['voter']) # lite - stats
+                    Votes.vote_op(op)
 
                 # misc ops
                 elif op_type == 'transfer_operation':
@@ -254,7 +255,7 @@ class Blocks:
             (vote_ops, comment_payout_ops) = Blocks.prepare_vops(vops, cls._head_block_date)
 
         for k, v in vote_ops.items():
-            Votes.vote_op(v, cls._head_block_date)
+            Votes.effective_comment_vote_op(v, cls._head_block_date)
             op_type = 'effective_comment_vote_operation'
             if op_type in cls.ops_stats:
                 cls.ops_stats[op_type] += 1
