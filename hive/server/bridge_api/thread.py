@@ -25,7 +25,7 @@ async def get_discussion(context, author, permlink, observer=None):
     sql = """
         WITH RECURSIVE child_posts (id, parent_id) AS (
             SELECT id, parent_id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) 
-                AND permlink_id = (SELECT id FROM hive_permlik_data WHERE permlink = :permlink)
+                AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)
                 AND NOT hp.is_deleted AND NOT hp.is_muted
             UNION ALL
             SELECT children.id, children.parent_id FROM hive_posts children INNER JOIN child_posts ON (children.parent_id = child_posts.id) 
