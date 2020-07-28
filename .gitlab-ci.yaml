@@ -84,6 +84,9 @@ hivemind_stop_server:
   script:
     - scripts/ci_stop_server.sh hive_server.pid
 
+  tags:
+     - hivemind
+
 hivemind_start_server:
   stage: deploy
   environment:
