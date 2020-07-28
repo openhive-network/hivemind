@@ -5,6 +5,8 @@ import collections
 
 from json import dumps, loads
 
+from diff_match_patch import diff_match_patch
+
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 
@@ -94,7 +96,7 @@ class Posts:
         """Register new/edited/undeleted posts; insert into feed cache."""
 
         sql = """
-            SELECT id, author_id, permlink_id, post_category, parent_id, community_id, is_valid, is_muted, depth, is_edited
+            SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, community_id, is_valid, is_muted, depth, is_edited
             FROM process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_date)::timestamp);
             """
 
@@ -108,11 +110,22 @@ class Posts:
 
         cls._set_id(op['author']+'/'+op['permlink'], result['id'])
 
-        # add content data to hive_post_data
-        post_data = dict(title=op['title'], preview=op['preview'] if 'preview' in op else "",
-                         img_url=op['img_url'] if 'img_url' in op else "", body=op['body'],
-                         json=op['json_metadata'] if op['json_metadata'] else '{}')
-        PostDataCache.add_data(result['id'], post_data)
+        if result['is_new_post']:
+            # add content data to hive_post_data
+            post_data = dict(title=op['title'], preview=op['preview'] if 'preview' in op else "",
+                             img_url=op['img_url'] if 'img_url' in op else "", body=op['body'],
+                             json=op['json_metadata'] if op['json_metadata'] else '{}')
+        else:
+            # edit case. Now we need to (potentially) apply patch to the post body.
+            new_body = cls._merge_post_body(id=result['id'], new_body_def=op['body'])
+            post_data = dict(title=op['title'], preview=op['preview'] if 'preview' in op else "",
+                             img_url=op['img_url'] if 'img_url' in op else "", body=new_body,
+                             json=op['json_metadata'] if op['json_metadata'] else '{}')
+
+#        log.info("Adding author: {}  permlink: {}".format(op['author'], op['permlink']))
+
+        printQuery = False # op['author'] == 'xeroc' and op['permlink'] == 're-piston-20160818t080811'
+        PostDataCache.add_data(result['id'], post_data, printQuery)
 
         md = {}
         # At least one case where jsonMetadata was double-encoded: condenser#895
@@ -402,3 +415,30 @@ class Posts:
             is_muted = True
         return error
 
+    @classmethod
+    def _merge_post_body(cls, id, new_body_def):
+        new_body = ''
+        old_body = ''
+
+        try:
+            dmp = diff_match_patch()
+            patch = dmp.patch_fromText(new_body_def)
+            if patch is not None and len(patch):
+                old_body = PostDataCache.get_post_body(id)
+                new_body, _ = dmp.patch_apply(patch, old_body)
+                #new_utf8_body = new_body.decode('utf-8')
+                #new_body = new_utf8_body
+            else:
+                new_body = new_body_def
+        except ValueError as e:
+#            log.info("Merging a body post id: {} caused an ValueError exception {}".format(id, e))
+#            log.info("New body definition: {}".format(new_body_def))
+#            log.info("Old body definition: {}".format(old_body))
+            new_body = new_body_def
+        except Exception as ex:
+            log.info("Merging a body post id: {} caused an unknown exception {}".format(id, ex))
+            log.info("New body definition: {}".format(new_body_def))
+            log.info("Old body definition: {}".format(old_body))
+            new_body = new_body_def
+        
+        return new_body
