@@ -696,9 +696,9 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-        DROP VIEW IF EXISTS wv_hive_votes_accounts_permlinks
+        DROP VIEW IF EXISTS hive_votes_accounts_permlinks_view
         ;
-        CREATE VIEW wv_hive_votes_accounts_permlinks
+        CREATE VIEW hive_votes_accounts_permlinks_view
         AS
         SELECT
             ha_v.id as id,

@@ -213,7 +213,7 @@ async def find_votes(context, params: dict, votes_presentation = VotesPresentati
             num_changes,
             reputation
         FROM
-            wv_hive_votes_accounts_permlinks
+            hive_votes_accounts_permlinks_view
         WHERE
             author = :author AND permlink = :permlink
         ORDER BY id
