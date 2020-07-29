@@ -638,7 +638,7 @@ def setup(db):
             hp.is_deleted,
             hp.is_pinned,
             hr.title AS role_title, 
-            hr.role_id AS role_is,
+            hr.role_id AS role_id,
             hc.title AS community_title,
             hc.name AS community_name
             FROM hive_posts hp

@@ -53,7 +53,7 @@ SQL_TEMPLATE = """
             hp.sc_trend, 
             hp.role_title, 
             hp.community_title, 
-            hr.role_id,
+            hp.role_id,
             hp.is_pinned,
             hp.curator_payout_value
         FROM hive_posts_view hp

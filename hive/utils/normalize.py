@@ -244,9 +244,6 @@ def number_to_json_value(number):
     """
     if number > 0xFFFFFFFF:
         return str(number)
-    from decimal import Decimal
-    if isinstance(number, Decimal):
-        return str(number)
     return number
 
 def time_string_with_t(time_iso8601):
