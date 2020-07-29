@@ -24,27 +24,30 @@ async def get_discussion(context, author, permlink, observer=None):
 
     sql = """
         WITH RECURSIVE child_posts (id, parent_id) AS (
-            SELECT id, parent_id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) 
-                AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)
-                AND NOT hp.is_deleted AND NOT hp.is_muted
+            SELECT id, parent_id FROM hive_posts_view hpv WHERE hpv.author = :author
+                AND hpv.permlink = :permlink AND NOT hpv.is_deleted AND NOT hpv.is_muted
             UNION ALL
             SELECT children.id, children.parent_id FROM hive_posts children INNER JOIN child_posts ON (children.parent_id = child_posts.id) 
             WHERE NOT children.is_deleted AND NOT children.is_muted
         )
-        SELECT child_posts.id, child_posts.parent_id, hive_posts.id, hive_accounts.name as author, hpd_p.permlink as permlink,
-           hpd.title as title, hpd.body as body, hcd.category as category, hive_posts.depth,
-           hive_posts.promoted, hive_posts.payout, hive_posts.payout_at,
-           hive_posts.is_paidout, hive_posts.children, hive_posts.votes,
-           hive_posts.created_at, hive_posts.updated_at, hive_posts.rshares,
-           hive_posts.raw_json, hive_posts.json, hive_accounts.reputation AS author_rep,
-           hive_posts.is_hidden AS is_hidden, hive_posts.is_grayed AS is_grayed,
-           hive_posts.total_votes AS total_votes, hive_posts.flag_weight AS flag_weight,
-           hive_posts.sc_trend AS sc_trend, hive_accounts.id AS acct_author_id
-           FROM child_posts JOIN hive_accounts ON (hive_posts.author_id = hive_accounts.id)
-                            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hive_posts.permlink_id
-                            INNER JOIN hive_post_data hpd ON hpd.id = hive_posts.id
-                            INNER JOIN hive_category_data hcd ON hcd.id = hp.category_id
-                            WHERE NOT hive_posts.is_deleted AND NOT hive_posts.is_muted
+        SELECT child_posts.id, child_posts.parent_id, hpv.id as post_id, hpv.author, hpv.permlink,
+           hpv.title, hpv.body, hpv.category, hpv.depth,
+           hpv.promoted, hpv.payout, hpv.payout_at,
+           hpv.is_paidout, hpv.children, hpv.votes,
+           hpv.created_at, hpv.updated_at, hpv.rshares,
+           hpv.json, hive_accounts.reputation AS author_rep,
+           hpv.is_hidden, hpv.is_grayed,
+           hpv.total_votes, hpv.flag_weight,
+           hpv.sc_trend, hive_accounts.id AS acct_author_id,
+           hpv.root_author, hpv.root_permlink, hpv.parent_author, hpv.parent_permlink,
+           hpv.allow_replies, hpv.allow_votes,
+           hpv.allow_curation_rewards, hpv.url, hpv.root_title, hpv.beneficiaries,
+           hpv.max_accepted_payout, hpv.percent_hbd, hpv.curator_payout_value
+           FROM 
+              child_posts 
+           INNER JOIN hive_posts_view hpv ON (hpv.id = child_posts.id)
+           INNER JOIN hive_accounts ON (hive_accounts.name = hpv.author)
+           WHERE NOT hpv.is_deleted AND NOT hpv.is_muted
         LIMIT 2000
     """
 
@@ -91,18 +94,18 @@ async def get_discussion(context, author, permlink, observer=None):
 
 def build_discussion_map(parent_id, posts, results):
     results[parent_id] = get_children(parent_id, posts)
-    if (results[parent_id] == []):
+    if results[parent_id] == []:
         return
-    else:
-        for post_id in results[parent_id]:
-            build_discussion_map(post_id, posts, results)
+
+    for post_id in results[parent_id]:
+        build_discussion_map(post_id, posts, results)
 
 def get_children(parent_id, posts):
     results = []
     for key in posts:
         if posts[key] == parent_id:
             results.append(key)
-    return results;
+    return results
 
 async def _get_post_id(db, author, permlink):
     """Given an author/permlink, retrieve the id from db."""
