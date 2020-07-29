@@ -109,22 +109,11 @@ class Blocks:
             op_type = vop['type']
             op_value = vop['value']
   
-            if op_type == 'curation_reward_operation':
-                key = "{}/{}".format(op_value['comment_author'], op_value['comment_permlink'])
-
-                if key not in comment_payout_ops:
-                  comment_payout_ops[key] = { 'curation_reward_operation':None, 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
-
-                if comment_payout_ops[key][op_type] is None:
-                  comment_payout_ops[key][op_type] = op_value
-                else:
-                  comment_payout_ops[key][op_type]['reward']['amount'] = int( comment_payout_ops[key][op_type]['reward']['amount'] ) + int( op_value['reward']['amount'] )
-
-            elif op_type == 'author_reward_operation':
+            if op_type == 'author_reward_operation':
                 key = "{}/{}".format(op_value['author'], op_value['permlink'])
 
                 if key not in comment_payout_ops:
-                  comment_payout_ops[key] = { 'curation_reward_operation':None, 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
+                  comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
 
                 comment_payout_ops[key][op_type] = op_value
 
@@ -132,7 +121,7 @@ class Blocks:
                 key = "{}/{}".format(op_value['author'], op_value['permlink'])
 
                 if key not in comment_payout_ops:
-                  comment_payout_ops[key] = { 'curation_reward_operation':None, 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
+                  comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
 
                 comment_payout_ops[key]['effective_comment_vote_operation'] = None
 
@@ -144,7 +133,7 @@ class Blocks:
                 key_vote = "{}/{}/{}".format(op_value['voter'], op_value['author'], op_value['permlink'])
 
                 if key not in comment_payout_ops:
-                  comment_payout_ops[key] = { 'curation_reward_operation':None, 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
+                  comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
 
                 comment_payout_ops[key][op_type] = op_value
 
@@ -155,7 +144,7 @@ class Blocks:
                 key = "{}/{}".format(op_value['author'], op_value['permlink'])
 
                 if key not in comment_payout_ops:
-                  comment_payout_ops[key] = { 'curation_reward_operation':None, 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
+                  comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
 
                 comment_payout_ops[key][op_type] = op_value
 

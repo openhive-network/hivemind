@@ -145,7 +145,7 @@ class SteemClient:
     def get_virtual_operations(self, block):
         """ Get virtual ops from block """
         result = self.__exec('get_ops_in_block', {"block_num":block, "only_virtual":True})
-        tracked_ops = ['curation_reward_operation', 'author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation', 'comment_payout_update_operation']
+        tracked_ops = ['author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation', 'comment_payout_update_operation']
         ret = []
         result = result['ops'] if 'ops' in result else []
         for vop in result:
@@ -162,13 +162,12 @@ class SteemClient:
         #According to definition of hive::plugins::acount_history::enum_vops_filter:
 
         author_reward_operation                 = 0x000002
-        curation_reward_operation               = 0x000004
         comment_reward_operation                = 0x000008
         effective_comment_vote_operation        = 0x400000
         comment_payout_update_operation         = 0x000800
 
-        tracked_ops_filter = curation_reward_operation | author_reward_operation | comment_reward_operation | effective_comment_vote_operation | comment_payout_update_operation
-        tracked_ops = ['curation_reward_operation', 'author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation', 'comment_payout_update_operation']
+        tracked_ops_filter = author_reward_operation | comment_reward_operation | effective_comment_vote_operation | comment_payout_update_operation
+        tracked_ops = ['author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation', 'comment_payout_update_operation']
 
         resume_on_operation = 0
 
