@@ -207,7 +207,7 @@ class Posts:
         values = []
         values_limit = 1000
 
-        ops_stats = { 'curation_reward_operation' : 0, 'author_reward_operation' : 0, 'comment_reward_operation' : 0, 'effective_comment_vote_operation' : 0, 'comment_payout_update_operation' : 0 }
+        ops_stats = { 'author_reward_operation' : 0, 'comment_reward_operation' : 0, 'effective_comment_vote_operation' : 0, 'comment_payout_update_operation' : 0 }
 
         """ Process comment payment operations """
         for k, v in ops.items():
@@ -222,7 +222,7 @@ class Posts:
 
             # total payout for comment
             comment_author_reward     = None
-            curator_rewards           = None
+            curators_vesting_payout   = None
             total_payout_value        = None;
             curator_payout_value      = None;
             beneficiary_payout_value  = None;
@@ -236,20 +236,13 @@ class Posts:
 
             is_paidout                = None
 
-            if v[ 'curation_reward_operation' ] is not None:
-              value = v[ 'curation_reward_operation' ]
-              ops_stats[ 'curation_reward_operation' ] += 1
-              curator_rewards           = value['reward']
-              if author is None:
-                author                    = value['comment_author']
-                permlink                  = value['comment_permlink']
-
             if v[ 'author_reward_operation' ] is not None:
               value = v[ 'author_reward_operation' ]
               ops_stats[ 'author_reward_operation' ] += 1
               author_rewards_hive       = value['hive_payout']['amount']
               author_rewards_hbd        = value['hbd_payout']['amount']
               author_rewards_vests      = value['vesting_payout']['amount']
+              curators_vesting_payout   = value['curators_vesting_payout']['amount']
               if author is None:
                 author                    = value['author']
                 permlink                  = value['permlink']
@@ -300,7 +293,7 @@ class Posts:
               author,
               permlink,
               "NULL" if ( total_payout_value is None ) else ( "'{}'".format( legacy_amount(total_payout_value) ) ),
-              "NULL" if ( curator_rewards is None ) else ( "'{}'".format( legacy_amount(curator_rewards) ) ), #curator_payout_value
+              "NULL" if ( curators_vesting_payout is None ) else ( "'{}'".format( legacy_amount(curators_vesting_payout) ) ), #curator_payout_value
               "NULL" if ( author_rewards is None ) else author_rewards,
               "NULL" if ( author_rewards_hive is None ) else author_rewards_hive,
               "NULL" if ( author_rewards_hbd is None ) else author_rewards_hbd,

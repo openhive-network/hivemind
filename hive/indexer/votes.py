@@ -98,17 +98,17 @@ class Votes:
                     select data_source.post_id, data_source.voter_id, data_source.author_id, data_source.permlink_id, data_source.weight
                     from
                     (
-                    SELECT hp.id as post_id, ha_v.id as voter_id, ha_a.id as author_id, hpd_p.id as permlink_id, t.weight
-                    from
-                    (
-                    VALUES
-                    --   voter, author, permlink, weight
-                      {}
-                    ) AS T(voter, author, permlink, weight)
-                    INNER JOIN hive_accounts ha_v ON ha_v.name = t.voter
-                    INNER JOIN hive_accounts ha_a ON ha_a.name = t.author
-                    INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
-                    INNER JOIN hive_posts hp ON hp.author_id = ha_a.id AND hp.permlink_id = hpd_p.id  
+                      SELECT hp.id as post_id, ha_v.id as voter_id, ha_a.id as author_id, hpd_p.id as permlink_id, t.weight
+                      from
+                      (
+                        VALUES
+                        -- voter, author, permlink, weight
+                        {}
+                      ) AS T(voter, author, permlink, weight)
+                      INNER JOIN hive_accounts ha_v ON ha_v.name = T.voter
+                      INNER JOIN hive_accounts ha_a ON ha_a.name = T.author
+                      INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = T.permlink
+                      INNER JOIN hive_posts hp ON hp.author_id = ha_a.id AND hp.permlink_id = hpd_p.id  
                     ) as data_source(post_id, voter_id, author_id, permlink_id, weight)
                     ON CONFLICT ON CONSTRAINT hive_votes_ux1 DO
                       UPDATE
