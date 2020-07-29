@@ -116,7 +116,12 @@ class Votes:
                       INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = T.permlink
                       INNER JOIN hive_posts hp ON hp.author_id = ha_a.id AND hp.permlink_id = hpd_p.id  
                     ) as data_source(post_id, voter_id, author_id, permlink_id, weight)
-                  """
+                    ON CONFLICT ON CONSTRAINT hive_votes_ux1 DO
+                      UPDATE
+                        SET
+                          weight = EXCLUDED.weight
+                      WHERE hive_votes.id = EXCLUDED.id
+                      """
 
             values = []
             values_limit = 1000
