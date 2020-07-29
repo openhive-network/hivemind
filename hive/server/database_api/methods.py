@@ -234,7 +234,6 @@ async def find_votes(context, params: dict, votes_presentation = VotesPresentati
                             rshares=number_to_json_value(row.rshares), time=time_string_with_t(row.time), voter=row.voter,
                             weight=number_to_json_value(row.weight),
                             ))
-
     return ret
 
 @return_error_info

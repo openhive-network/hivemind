@@ -299,8 +299,8 @@ async def _get_props_lite(db):
 
     return dict(
         time=raw['time'], #*
-        sbd_print_rate=raw['sbd_print_rate'],
-        sbd_interest_rate=raw['sbd_interest_rate'],
+        sbd_print_rate=raw['hbd_print_rate'], # TODO: rename this key to hbd_ after 0.24
+        sbd_interest_rate=raw['hbd_interest_rate'], # TODO: rename this key to hbd_ after 0.24
         head_block_number=raw['head_block_number'], #*
         total_vesting_shares=raw['total_vesting_shares'],
         total_vesting_fund_steem=raw['total_vesting_fund_hive'],
