@@ -608,7 +608,7 @@ def setup(db):
             0 AS active_votes,
             hp.created_at,
             hp.updated_at,
-            hp.rshares,
+            (SELECT SUM( v.rshares ) FROM hive_votes v WHERE v.post_id = hp.id GROUP BY v.post_id) AS rshares,
             hpd.json,
             ha_a.reputation AS author_rep,
             hp.is_hidden,

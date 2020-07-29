@@ -141,7 +141,7 @@ async def resultset_to_posts(db, resultset, truncate_body=0):
         row = dict(row)
         row['author_rep'] = author_reps[row['author']]
         post = _condenser_post_object(row, truncate_body=truncate_body)
-        post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']})
+        post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']}, VotesPresentation.CondenserApi)
         posts.append(post)
 
     return posts
