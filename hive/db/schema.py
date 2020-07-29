@@ -556,7 +556,7 @@ def setup(db):
           $function$
           BEGIN
             RETURN QUERY UPDATE hive_posts AS hp
-              SET is_deleted = false
+              SET is_deleted = true
             FROM hive_posts hp1
             INNER JOIN hive_accounts ha ON hp1.author_id = ha.id
             INNER JOIN hive_permlink_data hpd ON hp1.permlink_id = hpd.id
@@ -669,26 +669,29 @@ def setup(db):
           AS $BODY$
           BEGIN
 
-          update hive_posts uhp
-          set children = data_source.children_count
-          from
+          UPDATE hive_posts uhp
+          SET children = data_source.children_count
+          FROM
           (
             WITH recursive tblChild AS
             (
               SELECT s.queried_parent, s.id
-              from
-              (SELECT h1.Parent_Id as queried_parent, h1.id
-                    FROM hive_posts h1 WHERE h1.depth > 0
-                  order by h1.depth desc
+              FROM
+              (SELECT h1.Parent_Id AS queried_parent, h1.id
+               FROM hive_posts h1
+               WHERE h1.depth > 0 AND NOT h1.is_deleted
+               ORDER BY h1.depth DESC
               ) s
               UNION ALL
-              SELECT tblChild.queried_parent, p.id FROM hive_posts p JOIN tblChild  ON p.Parent_Id = tblChild.Id
+              SELECT tblChild.queried_parent, p.id FROM hive_posts p
+              JOIN tblChild  ON p.Parent_Id = tblChild.Id
+              WHERE NOT p.is_deleted
             )
-            SELECT queried_parent, cast(count(1) as smallint) as children_count
+            SELECT queried_parent, cast(count(1) AS smallint) AS children_count
             FROM tblChild
-            group by queried_parent
+            GROUP BY queried_parent
           ) data_source
-          where uhp.id = data_source.queried_parent
+          WHERE uhp.id = data_source.queried_parent
           ;
           END
           $BODY$;
