@@ -595,6 +595,7 @@ def setup(db):
             hp.community_id,
             hp.parent_id,
             ha_a.name AS author,
+            hp.author_id,
             hpd_p.permlink,
             hpd.title,
             hpd.body,

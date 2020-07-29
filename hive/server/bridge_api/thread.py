@@ -35,10 +35,10 @@ async def get_discussion(context, author, permlink, observer=None):
            hpv.promoted, hpv.payout, hpv.payout_at,
            hpv.is_paidout, hpv.children, hpv.votes,
            hpv.created_at, hpv.updated_at, hpv.rshares,
-           hpv.json, hive_accounts.reputation AS author_rep,
+           hpv.json, hpv.author_rep,
            hpv.is_hidden, hpv.is_grayed,
            hpv.total_votes, hpv.flag_weight,
-           hpv.sc_trend, hive_accounts.id AS acct_author_id,
+           hpv.sc_trend, hpv.author_id AS acct_author_id,
            hpv.root_author, hpv.root_permlink, hpv.parent_author, hpv.parent_permlink,
            hpv.allow_replies, hpv.allow_votes,
            hpv.allow_curation_rewards, hpv.url, hpv.root_title, hpv.beneficiaries,
@@ -46,7 +46,6 @@ async def get_discussion(context, author, permlink, observer=None):
            FROM 
               child_posts 
            INNER JOIN hive_posts_view hpv ON (hpv.id = child_posts.id)
-           INNER JOIN hive_accounts ON (hive_accounts.name = hpv.author)
            WHERE NOT hpv.is_deleted AND NOT hpv.is_muted
         LIMIT 2000
     """
