@@ -81,19 +81,34 @@ class Blocks:
         except Exception as e:
             log.error("exception encountered block %d", last_num + 1)
             raise e
+        step_time = perf_counter()
+        log.info("[PROCESS MULTI] Process loop in %fs", step_time - time_start)
 
         # Follows flushing needs to be atomic because recounts are
         # expensive. So is tracking follows at all; hence we track
         # deltas in memory and update follow/er counts in bulk.
+
         PostDataCache.flush()
+        log.info("[PROCESS MULTI] Post data cache flush in %fs", perf_counter() - step_time)
+        
+        step_time = perf_counter()
         Tags.flush()
+        log.info("[PROCESS MULTI] Tags flush in %fs", perf_counter() - step_time)
+        
+        step_time = perf_counter()
         Votes.flush()
+        log.info("[PROCESS MULTI] Votes flush in %fs", perf_counter() - step_time)
+        
+        step_time = perf_counter()
         cls._flush_blocks()
+        log.info("[PROCESS MULTI] Blocks flush in %fs", perf_counter() - step_time)
+        
+        step_time = perf_counter()
         Follow.flush(trx=False)
+        log.info("[PROCESS MULTI] Follow flush in %fs", perf_counter() - step_time)
 
         DB.query("COMMIT")
-        time_end = perf_counter()
-        log.info("[PROCESS MULTI] %i blocks in %fs", len(blocks), time_end - time_start)
+        log.info("[PROCESS MULTI] %i blocks in %fs", len(blocks), perf_counter() - time_start)
 
         return cls.ops_stats
 
@@ -232,6 +247,7 @@ class Blocks:
             cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, custom_ops_stats)
 
         # virtual ops
+        step_time = perf_counter()
         comment_payout_ops = {}
         vote_ops = {}
 
@@ -245,9 +261,19 @@ class Blocks:
 
         for k, v in vote_ops.items():
             Votes.effective_comment_vote_op(v, cls._head_block_date)
+            op_type = 'effective_comment_vote_operation'
+        if "vops_total_time" in cls.ops_stats:
+            cls.ops_stats["vops_total_time"] += perf_counter() - step_time
+        else:
+            cls.ops_stats["vops_total_time"] = perf_counter() - step_time
 
+        step_time = perf_counter()
         if comment_payout_ops:
             comment_payout_stats = Posts.comment_payout_op(comment_payout_ops, cls._head_block_date)
+            if "comment_payout_total_time" in cls.ops_stats:
+                cls.ops_stats["comment_payout_total_time"] += perf_counter() - step_time
+            else:
+                cls.ops_stats["comment_payout_total_time"] = perf_counter() - step_time
             cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, comment_payout_stats)
 
         cls._head_block_date = block_date

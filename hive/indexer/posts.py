@@ -17,6 +17,7 @@ from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.tags import Tags
 from hive.utils.normalize import sbd_amount, legacy_amount, asset_to_hbd_hive
+from time import perf_counter
 
 log = logging.getLogger(__name__)
 DB = Db.instance()
@@ -217,7 +218,7 @@ class Posts:
         values = []
         values_limit = 1000
 
-        ops_stats = { 'author_reward_operation' : 0, 'comment_reward_operation' : 0, 'effective_comment_vote_operation' : 0, 'comment_payout_update_operation' : 0 }
+        ops_stats = { 'comment_payout_op_total_query_time' : 0.0, 'author_reward_operation' : 0, 'comment_reward_operation' : 0, 'effective_comment_vote_operation' : 0, 'comment_payout_update_operation' : 0 }
 
         """ Process comment payment operations """
         for k, v in ops.items():
@@ -233,9 +234,9 @@ class Posts:
             # total payout for comment
             comment_author_reward     = None
             curators_vesting_payout   = None
-            total_payout_value        = None;
-            curator_payout_value      = None;
-            beneficiary_payout_value  = None;
+            total_payout_value        = None
+            curator_payout_value      = None
+            beneficiary_payout_value  = None
 
             payout                    = None
             pending_payout            = None
@@ -246,9 +247,9 @@ class Posts:
 
             is_paidout                = None
 
-            if v[ 'author_reward_operation' ] is not None:
-              value = v[ 'author_reward_operation' ]
-              ops_stats[ 'author_reward_operation' ] += 1
+            value = v.get('author_reward_operation', None)
+            if value is not None:
+              ops_stats['author_reward_operation'] += 1
               author_rewards_hive       = value['hive_payout']['amount']
               author_rewards_hbd        = value['hbd_payout']['amount']
               author_rewards_vests      = value['vesting_payout']['amount']
@@ -257,9 +258,9 @@ class Posts:
                 author                    = value['author']
                 permlink                  = value['permlink']
 
-            if v[ 'comment_reward_operation' ] is not None:
-              value = v[ 'comment_reward_operation' ]
-              ops_stats[ 'comment_reward_operation' ] += 1
+            value = v.get('comment_reward_operation', None)
+            if value is not None:
+              ops_stats['comment_reward_operation'] += 1
               comment_author_reward     = value['payout']
               author_rewards            = value['author_rewards']
               total_payout_value        = value['total_payout_value']
@@ -269,17 +270,17 @@ class Posts:
                 author                    = value['author']
                 permlink                  = value['permlink']
 
-            if v[ 'effective_comment_vote_operation' ] is not None:
-              value = v[ 'effective_comment_vote_operation' ]
-              ops_stats[ 'effective_comment_vote_operation' ] += 1
+            value = v.get('effective_comment_vote_operation', None)
+            if value is not None:
+              ops_stats['effective_comment_vote_operation'] += 1
               pending_payout            = sbd_amount( value['pending_payout'] )
               if author is None:
                 author                    = value['author']
                 permlink                  = value['permlink']
 
-            if v[ 'comment_payout_update_operation' ] is not None:
-              value = v[ 'comment_payout_update_operation' ]
-              ops_stats[ 'comment_payout_update_operation' ] += 1
+            value = v.get('comment_payout_update_operation', None)
+            if value is not None:
+              ops_stats['comment_payout_update_operation'] += 1
               is_paidout                = True
               if author is None:
                 author                    = value['author']
@@ -290,12 +291,12 @@ class Posts:
               pending_payout = 0
 
             #Calculations of all dates
-            if ( is_paidout is not None ):
+            if is_paidout is not None:
               payout_at = date
               last_payout = date
               cashout_time = "1969-12-31T23:59:59"
             else:
-              if ( total_payout_value is not None ):
+              if total_payout_value is not None:
                 payout_at = date  #Here should be `cashout_time`
                 last_payout = date
 
@@ -322,15 +323,20 @@ class Posts:
                 values_str = ','.join(values)
                 actual_query = sql.format(values_str)
 
+                start_time = perf_counter()
                 DB.query(actual_query)
+                ops_stats["comment_payout_op_total_query_time"] += perf_counter() - start_time
                 values.clear()
 
         if len(values) > 0:
             values_str = ','.join(values)
             actual_query = sql.format(values_str)
 
+            start_time = perf_counter()
             DB.query(actual_query)
+            ops_stats["comment_payout_op_total_query_time"] += perf_counter() - start_time
             values.clear()
+
         return ops_stats
 
     @classmethod
