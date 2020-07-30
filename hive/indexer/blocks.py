@@ -245,12 +245,6 @@ class Blocks:
 
         for k, v in vote_ops.items():
             Votes.effective_comment_vote_op(v, cls._head_block_date)
-            op_type = 'effective_comment_vote_operation'
-            if op_type in cls.ops_stats:
-                cls.ops_stats[op_type] += 1
-            else:
-                cls.ops_stats[op_type] = 1
-
 
         if comment_payout_ops:
             comment_payout_stats = Posts.comment_payout_op(comment_payout_ops, cls._head_block_date)
