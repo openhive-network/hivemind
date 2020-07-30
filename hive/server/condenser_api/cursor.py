@@ -149,7 +149,7 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
         'trending':        ('sc_trend', True,   False,  False,  False),   # posts=True  pending=False
         'hot':             ('sc_hot',   True,   False,  False,  False),   # posts=True  pending=False
         'created':         ('id',  False,  True,   False,  False),
-        'promoted':        ('promoted', True,   False,  False,  True),    # posts=True
+        'promoted':        ('promoted', False,   False,  False,  True),    # posts=True
         'payout':          ('payout',   True,   True,   False,  False),
         'payout_comments': ('payout',   True,   False,  True,   False),
     }[sort]
@@ -236,7 +236,7 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
         INNER JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
         INNER JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
         INNER JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
-        WHERE %s ORDER BY %s DESC LIMIT :limit
+        WHERE %s ORDER BY %s DESC, hp.id DESC LIMIT :limit
     """ % (' AND '.join(where), field)
 
     return await db.query_col(sql, tag=tag, start_id=start_id, limit=limit)
