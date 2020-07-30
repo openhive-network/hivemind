@@ -120,7 +120,7 @@ class Votes:
                       UPDATE
                         SET
                           weight = EXCLUDED.weight
-                      WHERE hive_votes.id = EXCLUDED.id
+                      WHERE hive_votes.voter_id = EXCLUDED.voter_id and hive_votes.author_id = EXCLUDED.author_id and hive_votes.permlink_id = EXCLUDED.permlink_id;
                       """
 
             values = []
