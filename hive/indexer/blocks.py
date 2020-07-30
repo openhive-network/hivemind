@@ -91,6 +91,10 @@ class Blocks:
         cls._flush_blocks()
         Follow.flush(trx=False)
 
+        step_time = perf_counter()
+        Posts.flush()
+        log.info("[PROCESS MULTI] Comment payment flush in %fs", perf_counter() - step_time)
+
         DB.query("COMMIT")
         time_end = perf_counter()
         log.info("[PROCESS MULTI] %i blocks in %fs", len(blocks), time_end - time_start)
