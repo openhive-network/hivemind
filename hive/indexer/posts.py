@@ -74,16 +74,6 @@ class Posts:
         cls._ids[url] = pid
 
     @classmethod
-    def save_ids_from_tuples(cls, tuples):
-        """Skim & cache `author/permlink -> id` from external queries."""
-        for tup in tuples:
-            pid, author, permlink = (tup[0], tup[1], tup[2])
-            url = author+'/'+permlink
-            if not url in cls._ids:
-                cls._set_id(url, pid)
-        return tuples
-
-    @classmethod
     def delete_op(cls, op):
         """Given a delete_comment op, mark the post as deleted.
 

@@ -26,8 +26,6 @@ from hive.indexer.follow import Follow
 from hive.indexer.community import Community
 from hive.server.common.mutes import Mutes
 
-#from hive.indexer.jobs import audit_cache_missing, audit_cache_deleted
-
 log = logging.getLogger(__name__)
 
 CONTINUE_PROCESSING = True
@@ -228,12 +226,6 @@ class Sync:
             # recover from fork
             Blocks.verify_head(self._steem)
 
-            # perform cleanup if process did not exit cleanly
-            # CachedPost.recover_missing_posts(self._steem)
-
-        #audit_cache_missing(self._db, self._steem)
-        #audit_cache_deleted(self._db)
-
         self._update_chain_state()
 
         if self._conf.get('test_max_block'):
@@ -246,10 +238,6 @@ class Sync:
         while True:
             # sync up to irreversible block
             self.from_steemd()
-
-            # take care of payout backlog
-            # CachedPost.dirty_paidouts(Blocks.head_date())
-            # CachedPost.flush(self._steem, trx=True)
 
             try:
                 # listen for new blocks
@@ -269,7 +257,6 @@ class Sync:
             return
 
         log.info("[INIT] *** Initial cache build ***")
-        # CachedPost.recover_missing_posts(self._steem)
         FeedCache.rebuild()
         Follow.force_recount()
 
@@ -343,12 +330,6 @@ class Sync:
         if not is_initial_sync:
             # This flush is low importance; accounts are swept regularly.
             Accounts.flush(steemd, trx=True)
-
-            # If this flush fails, all that could potentially be lost here is
-            # edits and pre-payout votes. If the post has not been paid out yet,
-            # then the worst case is it will be synced upon payout. If the post
-            # is already paid out, worst case is to lose an edit.
-            #CachedPost.flush(steemd, trx=True)
 
     def listen(self):
         """Live (block following) mode."""

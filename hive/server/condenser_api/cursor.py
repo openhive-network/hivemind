@@ -146,12 +146,12 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
                     'payout', 'payout_comments']
 
     params = {             # field      pending posts   comment promoted    todo        community
-        'trending':        ('sc_trend', True,   False,  False,  False),   # posts=True  pending=False
-        'hot':             ('sc_hot',   True,   False,  False,  False),   # posts=True  pending=False
-        'created':         ('id',  False,  True,   False,  False),
-        'promoted':        ('promoted', False,   False,  False,  True),    # posts=True
-        'payout':          ('payout',   True,   True,   False,  False),
-        'payout_comments': ('payout',   True,   False,  True,   False),
+        'trending':        ('hp.sc_trend', True,   False,  False,  False),   # posts=True  pending=False
+        'hot':             ('hp.sc_hot',   True,   False,  False,  False),   # posts=True  pending=False
+        'created':         ('hp.id',  False,  True,   False,  False),
+        'promoted':        ('hp.promoted', False,   False,  False,  True),    # posts=True
+        'payout':          ('hp.payout',   True,   True,   False,  False),
+        'payout_comments': ('hp.payout',   True,   False,  True,   False),
     }[sort]
 
     table = 'hive_posts'
@@ -159,10 +159,10 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
     where = []
 
     # primary filters
-    if params[1]: where.append("is_paidout = '0'")
-    if params[2]: where.append('depth = 0')
-    if params[3]: where.append('depth > 0')
-    if params[4]: where.append('promoted > 0')
+    if params[1]: where.append("hp.is_paidout = '0'")
+    if params[2]: where.append('hp.depth = 0')
+    if params[3]: where.append('hp.depth > 0')
+    if params[4]: where.append('hp.promoted > 0')
 
     # filter by community, category, or tag
     if tag:
@@ -170,21 +170,21 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
         #    cid = get_community_id(tag)
         #    where.append('community_id = :cid')
         if sort in ['payout', 'payout_comments']:
-            where.append('category_id = (SELECT id FROM hive_category_data WHERE category = :tag)')
+            where.append('hp.category = :tag')
         else:
             if tag[:5] == 'hive-':
-                where.append('category_id = (SELECT id FROM hive_category_data WHERE category = :tag)')
+                where.append('hp.category = :tag')
                 if sort in ('trending', 'hot'):
-                    where.append('depth = 0')
+                    where.append('hp.depth = 0')
             sql = """
-                SELECT
-                    post_id
-                FROM
-                    hive_post_tags hpt
-                INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
-                WHERE htd.tag = :tag
+                EXISTS
+                (SELECT NULL
+                  FROM hive_post_tags hpt
+                  INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
+                  WHERE hp.id = hpt.post_id AND htd.tag = :tag
+                )
             """
-            where.append("hp.id IN (%s)" % sql)
+            where.append(sql)
 
     start_id = None
     if start_permlink and start_author:
@@ -192,53 +192,48 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
         where.append(sql % (field, field, table))
 
     sql = """
-        SELECT hp.id,
+        SELECT
+            hp.id,
             hp.community_id,
-            ha_a.name as author,
-            hpd_p.permlink as permlink,
-            hpd.title as title,
-            hpd.body as body,
-            hcd.category as category,
-            depth,
-            promoted,
-            payout,
-            payout_at,
-            is_paidout,
-            children,
-            0 as votes,
+            hp.author,
+            hp.permlink,
+            hp.title,
+            hp.body,
+            hp.category,
+            hp.depth,
+            hp.promoted,
+            hp.payout,
+            hp.payout_at,
+            hp.is_paidout,
+            hp.children,
+            hp.votes,
             hp.created_at,
-            updated_at,
-            rshares,
-            hpd.json as json,
-            is_hidden,
-            is_grayed,
-            total_votes,
-            flag_weight,
-            ha_pa.name as parent_author,
-            hpd_pp.permlink as parent_permlink,
-            curator_payout_value,
-            ha_ra.name as root_author,
-            hpd_rp.permlink as root_permlink,
-            max_accepted_payout,
-            percent_hbd,
-            allow_replies,
-            allow_votes,
-            allow_curation_rewards,
-            beneficiaries,
-            url,
-            root_title
-        FROM hive_posts hp
-        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
-        LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
-        INNER JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
-        INNER JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
-        INNER JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
-        INNER JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
+            hp.updated_at,
+            hp.rshares,
+            hp.json,
+            hp.is_hidden,
+            hp.is_grayed,
+            hp.total_votes,
+            hp.flag_weight,
+            hp.parent_author,
+            hp.parent_permlink,
+            hp.curator_payout_value,
+            hp.root_author,
+            hp.root_permlink,
+            hp.max_accepted_payout,
+            hp.percent_hbd,
+            hp.allow_replies,
+            hp.allow_votes,
+            hp.allow_curation_rewards,
+            hp.beneficiaries,
+            hp.url,
+            hp.root_title
+        FROM hive_posts_view hp
         WHERE %s ORDER BY %s DESC, hp.id DESC LIMIT :limit
     """ % (' AND '.join(where), field)
 
+    # ABW: why did we select all the above when all we care about is ids?
+    #      more importantly why select ids first and query for rest later when we can do it in one go?
     return await db.query_col(sql, tag=tag, start_id=start_id, limit=limit)
 
 

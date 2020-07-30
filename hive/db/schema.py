@@ -103,7 +103,6 @@ def build_metadata():
         sa.Column('is_grayed', BOOLEAN, nullable=False, server_default='0'),
 
         # important indexes
-        sa.Column('rshares', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('sc_trend', sa.Float(precision=6), nullable=False, server_default='0'),
         sa.Column('sc_hot', sa.Float(precision=6), nullable=False, server_default='0'),
 
@@ -599,6 +598,8 @@ def setup(db):
             hpd_p.permlink,
             hpd.title,
             hpd.body,
+            hpd.img_url,
+            hpd.preview,
             hcd.category,
             hp.depth,
             hp.promoted,
@@ -610,7 +611,14 @@ def setup(db):
             0 AS active_votes,
             hp.created_at,
             hp.updated_at,
-            (SELECT SUM( v.rshares ) FROM hive_votes v WHERE v.post_id = hp.id GROUP BY v.post_id) AS rshares,
+            COALESCE(
+              (
+                SELECT SUM( v.rshares )
+                FROM hive_votes v
+                WHERE v.post_id = hp.id
+                GROUP BY v.post_id
+              ), 0
+            ) AS rshares,
             hpd.json,
             ha_a.reputation AS author_rep,
             hp.is_hidden,
@@ -640,6 +648,8 @@ def setup(db):
             hp.is_deleted,
             hp.is_pinned,
             hp.is_muted,
+            hp.is_nsfw,
+            hp.is_valid,
             hr.title AS role_title, 
             hr.role_id AS role_id,
             hc.title AS community_title,
