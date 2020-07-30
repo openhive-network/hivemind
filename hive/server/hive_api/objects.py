@@ -68,22 +68,24 @@ async def comments_by_id(db, ids, observer=None):
     """Given an array of post ids, returns comment objects keyed by id."""
     assert ids, 'no ids passed to comments_by_id'
 
-    sql = """SELECT hp.id,
-                    (SELECT name FROM hive_accounts ha WHERE ha.id = hp.author_id) as author,
-                    (SELECT permlink FROM hive_permlink_data hpd WHERE hpd.id = hp.permlink_id) as permlink,
-                    (SELECT body FROM hive_post_data hpa WHERE hpa.id = hp.id) as body,
-                    hp.depth,
-                    hp.payout,
-                    hp.payout_at,
-                    hp.is_paidout,
-                    hp.created_at,
-                    hp.updated_at,
-                    hp.rshares,
-                    hp.is_hidden,
-                    hp.is_grayed,
-                    hp.votes
-               FROM hive_posts hp
-               WHERE hp.id IN :ids""" #votes
+    sql = """
+      SELECT
+        hp.id,
+        hp.author,
+        hp.permlink,
+        hp.body,
+        hp.depth,
+        hp.payout,
+        hp.payout_at,
+        hp.is_paidout,
+        hp.created_at,
+        hp.updated_at,
+        hp.rshares,
+        hp.is_hidden,
+        hp.is_grayed,
+        hp.votes
+      FROM hive_posts_view hp
+      WHERE hp.id IN :ids""" #votes
     result = await db.query_all(sql, ids=tuple(ids))
 
     authors = set()
@@ -122,27 +124,24 @@ async def posts_by_id(db, ids, observer=None, lite=True):
     # pylint: disable=too-many-locals
     sql = """
         SELECT 
-            hp.id,
-            ha_a.name as author,
-            hpd_p.permlink as permlink,
-            hpd.title as title, 
-            hpd.img_url,
-            hp.payout,
-            hp.promoted,
-            hp.created_at,
-            hp.payout_at,
-            hp.is_nsfw,
-            hp.rshares,
-            hp.votes,
-            hp.is_muted,
-            hp.is_invalid,
-            %s
-        FROM hive_posts hp 
-        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
+          hp.id,
+          hp.author,
+          hp.permlink,
+          hp.title, 
+          hp.img_url,
+          hp.payout,
+          hp.promoted,
+          hp.created_at,
+          hp.payout_at,
+          hp.is_nsfw,
+          hp.rshares,
+          hp.votes,
+          hp.is_muted,
+          hp.is_valid,
+          %s
+        FROM hive_posts_view hp 
         WHERE id IN :ids"""
-    fields = ['hpd.preview'] if lite else ['hpd.body', 'updated_at', 'hpd.json']
+    fields = ['hp.preview'] if lite else ['hp.body', 'hp.updated_at', 'hp.json']
     sql = sql % (', '.join(fields))
 
     reblogged_ids = await _reblogged_ids(db, observer, ids) if observer else []
@@ -154,7 +153,7 @@ async def posts_by_id(db, ids, observer=None, lite=True):
     by_id = {}
     for row in await db.query_all(sql, ids=tuple(ids)):
         assert not row['is_muted']
-        assert not row['is_invalid']
+        assert row['is_valid']
         pid = row['id']
         top_votes, observer_vote = _top_votes(row, 5, observer)
 

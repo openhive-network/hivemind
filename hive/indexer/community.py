@@ -340,7 +340,6 @@ class CommunityOp:
     def process(self):
         """Applies a validated operation."""
         assert self.valid, 'cannot apply invalid op'
-        from hive.indexer.cached_post import CachedPost
 
         action = self.action
         params = dict(
@@ -401,15 +400,11 @@ class CommunityOp:
             DB.query("""UPDATE hive_posts SET is_muted = '1'
                          WHERE id = :post_id""", **params)
             self._notify('mute_post', payload=self.notes)
-            #if not DbState.is_initial_sync():
-            #    CachedPost.update(self.account, self.permlink, self.post_id)
 
         elif action == 'unmutePost':
             DB.query("""UPDATE hive_posts SET is_muted = '0'
                          WHERE id = :post_id""", **params)
             self._notify('unmute_post', payload=self.notes)
-            #if not DbState.is_initial_sync():
-            #    CachedPost.update(self.account, self.permlink, self.post_id)
 
         elif action == 'pinPost':
             DB.query("""UPDATE hive_posts SET is_pinned = '1'

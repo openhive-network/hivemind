@@ -24,29 +24,61 @@ async def get_discussion(context, author, permlink, observer=None):
 
     sql = """
         WITH RECURSIVE child_posts (id, parent_id) AS (
-            SELECT id, parent_id FROM hive_posts_view hpv WHERE hpv.author = :author
-                AND hpv.permlink = :permlink AND NOT hpv.is_deleted AND NOT hpv.is_muted
-            UNION ALL
-            SELECT children.id, children.parent_id FROM hive_posts children INNER JOIN child_posts ON (children.parent_id = child_posts.id) 
-            WHERE NOT children.is_deleted AND NOT children.is_muted
+          SELECT
+            id, parent_id
+          FROM hive_posts_view hpv WHERE hpv.author = :author
+            AND hpv.permlink = :permlink
+            AND NOT hpv.is_deleted AND NOT hpv.is_muted
+          UNION ALL
+          SELECT
+            children.id, children.parent_id
+          FROM hive_posts children
+          INNER JOIN child_posts ON (children.parent_id = child_posts.id) 
+          WHERE NOT children.is_deleted AND NOT children.is_muted
         )
-        SELECT child_posts.id, child_posts.parent_id, hpv.id as post_id, hpv.author, hpv.permlink,
-           hpv.title, hpv.body, hpv.category, hpv.depth,
-           hpv.promoted, hpv.payout, hpv.payout_at,
-           hpv.is_paidout, hpv.children, hpv.votes,
-           hpv.created_at, hpv.updated_at, hpv.rshares,
-           hpv.json, hpv.author_rep,
-           hpv.is_hidden, hpv.is_grayed,
-           hpv.total_votes, hpv.flag_weight,
-           hpv.sc_trend, hpv.author_id AS acct_author_id,
-           hpv.root_author, hpv.root_permlink, hpv.parent_author, hpv.parent_permlink,
-           hpv.allow_replies, hpv.allow_votes,
-           hpv.allow_curation_rewards, hpv.url, hpv.root_title, hpv.beneficiaries,
-           hpv.max_accepted_payout, hpv.percent_hbd, hpv.curator_payout_value
-           FROM 
-              child_posts 
-           INNER JOIN hive_posts_view hpv ON (hpv.id = child_posts.id)
-           WHERE NOT hpv.is_deleted AND NOT hpv.is_muted
+        SELECT
+          child_posts.id,
+          child_posts.parent_id,
+          hpv.id as post_id,
+          hpv.author,
+          hpv.permlink,
+          hpv.title,
+          hpv.body,
+          hpv.category,
+          hpv.depth,
+          hpv.promoted,
+          hpv.payout,
+          hpv.payout_at,
+          hpv.is_paidout,
+          hpv.children,
+          hpv.votes,
+          hpv.created_at,
+          hpv.updated_at,
+          hpv.rshares,
+          hpv.json,
+          hpv.author_rep,
+          hpv.is_hidden,
+          hpv.is_grayed,
+          hpv.total_votes,
+          hpv.flag_weight,
+          hpv.sc_trend,
+          hpv.author_id AS acct_author_id,
+          hpv.root_author,
+          hpv.root_permlink,
+          hpv.parent_author,
+          hpv.parent_permlink,
+          hpv.allow_replies,
+          hpv.allow_votes,
+          hpv.allow_curation_rewards,
+          hpv.url,
+          hpv.root_title,
+          hpv.beneficiaries,
+          hpv.max_accepted_payout,
+          hpv.percent_hbd,
+          hpv.curator_payout_value
+        FROM child_posts 
+        INNER JOIN hive_posts_view hpv ON (hpv.id = child_posts.id)
+        WHERE NOT hpv.is_deleted AND NOT hpv.is_muted
         LIMIT 2000
     """
 

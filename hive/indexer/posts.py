@@ -74,16 +74,6 @@ class Posts:
         cls._ids[url] = pid
 
     @classmethod
-    def save_ids_from_tuples(cls, tuples):
-        """Skim & cache `author/permlink -> id` from external queries."""
-        for tup in tuples:
-            pid, author, permlink = (tup[0], tup[1], tup[2])
-            url = author+'/'+permlink
-            if not url in cls._ids:
-                cls._set_id(url, pid)
-        return tuples
-
-    @classmethod
     def delete_op(cls, op):
         """Given a delete_comment op, mark the post as deleted.
 
@@ -352,7 +342,6 @@ class Posts:
                             max_accepted_payout = :max_accepted_payout,
                             author_rewards = :author_rewards,
                             children_abs_rshares = :children_abs_rshares,
-                            rshares = :net_rshares,
                             abs_rshares = :abs_rshares,
                             vote_rshares = :vote_rshares,
                             net_votes = :net_votes,
@@ -379,7 +368,6 @@ class Posts:
                          max_accepted_payout=legacy_amount(cpp['max_accepted_payout']),
                          author_rewards=cpp['author_rewards'],
                          children_abs_rshares=cpp['children_abs_rshares'],
-                         net_rshares=cpp['net_rshares'],
                          abs_rshares=cpp['abs_rshares'],
                          vote_rshares=cpp['vote_rshares'],
                          net_votes=cpp['net_votes'],
