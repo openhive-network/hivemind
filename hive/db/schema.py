@@ -593,7 +593,9 @@ def setup(db):
           AS
           SELECT hp.id,
             hp.community_id,
+            hp.parent_id,
             ha_a.name AS author,
+            hp.author_id,
             hpd_p.permlink,
             hpd.title,
             hpd.body,
@@ -637,6 +639,7 @@ def setup(db):
             hp.sc_hot,
             hp.is_deleted,
             hp.is_pinned,
+            hp.is_muted,
             hr.title AS role_title, 
             hr.role_id AS role_id,
             hc.title AS community_title,
