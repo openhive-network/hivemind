@@ -31,6 +31,8 @@ class Posts:
     _hits = 0
     _miss = 0
 
+    _comment_payout_ops = []
+
     @classmethod
     def last_id(cls):
         """Get the last indexed post id."""
@@ -157,8 +159,7 @@ class Posts:
             cls._insert_feed_cache(result, block_date)
 
     @classmethod
-    def comment_payout_op(cls, ops, date):
-        ops_stats = {}
+    def flush(cls):
         sql = """
               UPDATE hive_posts AS ihp SET
                   total_payout_value    = COALESCE( data_source.total_payout_value,                     ihp.total_payout_value ),
@@ -213,12 +214,26 @@ class Posts:
               INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
               ) as data_source(author_id, permlink_id, total_payout_value)
               WHERE ihp.permlink_id = data_source.permlink_id and ihp.author_id = data_source.author_id
-              """
+        """
 
-        values = []
+        def chunks(lst, n):
+            """Yield successive n-sized chunks from lst."""
+            for i in range(0, len(lst), n):
+                yield lst[i:i + n]
+
+        for chunk in chunks(cls._comment_payout_ops, 1000):
+            values_str = ','.join(chunk)
+            actual_query = sql.format(values_str)
+
+            DB.query(actual_query)
+
+        cls._comment_payout_ops.clear()
+
+    @classmethod
+    def comment_payout_op(cls, ops, date):
         values_limit = 1000
 
-        ops_stats = { 'comment_payout_op_total_query_time' : 0.0, 'author_reward_operation' : 0, 'comment_reward_operation' : 0, 'effective_comment_vote_operation' : 0, 'comment_payout_update_operation' : 0 }
+        ops_stats = { 'author_reward_operation' : 0, 'comment_reward_operation' : 0, 'effective_comment_vote_operation' : 0, 'comment_payout_update_operation' : 0 }
 
         """ Process comment payment operations """
         for k, v in ops.items():
@@ -300,7 +315,7 @@ class Posts:
                 payout_at = date  #Here should be `cashout_time`
                 last_payout = date
 
-            values.append("('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, '{}'::timestamp, {}, {}, {})".format(
+            cls._comment_payout_ops.append("('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, '{}'::timestamp, {}, {}, {})".format(
               author,
               permlink,
               "NULL" if ( total_payout_value is None ) else ( "'{}'".format( legacy_amount(total_payout_value) ) ),
@@ -318,24 +333,6 @@ class Posts:
               "NULL" if ( cashout_time is None ) else ( "'{}'::timestamp".format( cashout_time ) ),
 
               "NULL" if ( is_paidout is None ) else is_paidout ))
-
-            if len(values) >= values_limit:
-                values_str = ','.join(values)
-                actual_query = sql.format(values_str)
-
-                start_time = perf_counter()
-                DB.query(actual_query)
-                ops_stats["comment_payout_op_total_query_time"] += perf_counter() - start_time
-                values.clear()
-
-        if len(values) > 0:
-            values_str = ','.join(values)
-            actual_query = sql.format(values_str)
-
-            start_time = perf_counter()
-            DB.query(actual_query)
-            ops_stats["comment_payout_op_total_query_time"] += perf_counter() - start_time
-            values.clear()
 
         return ops_stats
 
