@@ -102,7 +102,6 @@ CREATE TABLE IF NOT EXISTS hive_posts_new (
   is_grayed BOOLEAN DEFAULT '0',
 
   -- important indexes
-  rshares BIGINT DEFAULT '-1',
   sc_trend NUMERIC(6) DEFAULT '0.0',
   sc_hot NUMERIC(6) DEFAULT '0.0',
 
@@ -210,12 +209,12 @@ FROM
 UPDATE hive_posts_new hpn SET (                             
   children, author_rep, flag_weight, total_votes, up_votes, payout,
   payout_at, updated_at, is_paidout, is_nsfw, is_declined, is_full_power,
-  is_hidden, is_grayed, rshares, sc_trend, sc_hot)
+  is_hidden, is_grayed, sc_trend, sc_hot)
 =
   (SELECT
     children, author_rep, flag_weight, total_votes, up_votes, payout,
     payout_at, updated_at, is_paidout, is_nsfw, is_declined, is_full_power,
-    is_hidden, is_grayed, rshares, sc_trend, sc_hot FROM hive_posts_cache hpc WHERE hpn.id = hpc.post_id);
+    is_hidden, is_grayed, sc_trend, sc_hot FROM hive_posts_cache hpc WHERE hpn.id = hpc.post_id);
 
 -- Populate table hive_post_data with bulk data from hive_posts_cache
 -- RAISE NOTICE 'Populate table hive_post_data with bulk data from hive_posts_cache';
