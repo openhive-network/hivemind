@@ -10,7 +10,6 @@ DB = Db.instance()
 class Votes:
     """ Class for managing posts votes """
     _votes_data = {}
-    _effective_votes_data = {}
 
     @classmethod
     def get_vote_count(cls, author, permlink):
@@ -84,18 +83,19 @@ class Votes:
         permlink = vop['permlink']
 
         if(cls.inside_flush):
-            log.info("Adding new effective comment vote into '_effective_votes_data' dict")
+            log.info("Updating data in '_votes_data' using effective comment")
             raise "Fatal error"
 
         key = voter + "/" + author + "/" + permlink
+        assert key in cls._votes_data
 
-        cls._effective_votes_data[key] = dict(vote_percent=vop['vote_percent'],
-                                              weight=vop['weight'],
-                                              rshares=vop['rshares'],
-                                              last_update=date)
+        cls._votes_data[key]["vote_percent"]  = vop["vote_percent"]
+        cls._votes_data[key]["weight"]        = vop["weight"]
+        cls._votes_data[key]["rshares"]       = vop["rshares"]
+        cls._votes_data[key]["last_update"]   = vop["last_update"]
 
     @classmethod
-    def flush_votes(cls):
+    def flush(cls):
         """ Flush vote data from cache to database """
         cls.inside_flush = True
         if cls._votes_data:
@@ -149,21 +149,3 @@ class Votes:
 
             cls._votes_data.clear()
         cls.inside_flush = False
-
-    @classmethod
-    def process_effective_votes(cls):
-        """ Flush vote data from cache to database """
-        for key, vd in cls._effective_votes_data.items():
-          assert key in cls._votes_data
-
-          cls._votes_data[key]["vote_percent"]  = cls._effective_votes_data[key]["vote_percent"]
-          cls._votes_data[key]["weight"]        = cls._effective_votes_data[key]["weight"]
-          cls._votes_data[key]["rshares"]       = cls._effective_votes_data[key]["rshares"]
-          cls._votes_data[key]["last_update"]   = cls._effective_votes_data[key]["last_update"]
-
-        cls._effective_votes_data.clear()
-
-    @classmethod
-    def flush(cls):
-      cls.process_effective_votes()
-      cls.flush_votes()
