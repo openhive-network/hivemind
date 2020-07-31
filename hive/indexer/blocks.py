@@ -101,9 +101,10 @@ class Blocks:
         return cls.ops_stats
 
     @staticmethod
-    def prepare_vops(vopsList, date):
+    def prepare_vops( comment_payout_ops, vopsList, date):
         vote_ops = {}
-        comment_payout_ops = {}
+
+        ops_stats = { 'author_reward_operation' : 0, 'comment_reward_operation' : 0, 'effective_comment_vote_operation' : 0, 'comment_payout_update_operation' : 0 }
 
         for vop in vopsList:
             key = None
@@ -111,47 +112,46 @@ class Blocks:
 
             op_type = vop['type']
             op_value = vop['value']
+            key = "{}/{}".format(op_value['author'], op_value['permlink'])
   
             if op_type == 'author_reward_operation':
-                key = "{}/{}".format(op_value['author'], op_value['permlink'])
+                ops_stats[ 'author_reward_operation' ] += 1
 
                 if key not in comment_payout_ops:
-                  comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
+                  comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None, 'date' : date }
 
                 comment_payout_ops[key][op_type] = op_value
 
             elif op_type == 'comment_reward_operation':
-                key = "{}/{}".format(op_value['author'], op_value['permlink'])
+                ops_stats[ 'comment_reward_operation' ] += 1
 
                 if key not in comment_payout_ops:
-                  comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
+                  comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None, 'date' : date }
 
                 comment_payout_ops[key]['effective_comment_vote_operation'] = None
 
                 comment_payout_ops[key][op_type] = op_value
 
             elif op_type == 'effective_comment_vote_operation':
-
-                key = "{}/{}".format(op_value['author'], op_value['permlink'])
+                ops_stats[ 'effective_comment_vote_operation' ] += 1
                 key_vote = "{}/{}/{}".format(op_value['voter'], op_value['author'], op_value['permlink'])
 
                 if key not in comment_payout_ops:
-                  comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
+                  comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None, 'date' : date }
 
                 comment_payout_ops[key][op_type] = op_value
 
                 vote_ops[ key_vote ] = op_value
 
             elif op_type == 'comment_payout_update_operation':
-
-                key = "{}/{}".format(op_value['author'], op_value['permlink'])
+                ops_stats[ 'comment_payout_update_operation' ] += 1
 
                 if key not in comment_payout_ops:
-                  comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
+                  comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None, 'date' : date }
 
                 comment_payout_ops[key][op_type] = op_value
 
-        return (vote_ops, comment_payout_ops)
+        return (vote_ops, ops_stats)
 
 
     @classmethod
@@ -235,23 +235,20 @@ class Blocks:
             cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, custom_ops_stats)
 
         # virtual ops
-        comment_payout_ops = {}
+        comment_payout_stats = {}
         vote_ops = {}
 
-        empty_vops = (vote_ops, comment_payout_ops)
+        empty_vops = (vote_ops, comment_payout_stats)
 
         if is_initial_sync:
-            (vote_ops, comment_payout_ops) = virtual_operations[num] if num in virtual_operations else empty_vops
+            (vote_ops, comment_payout_stats) = virtual_operations[num] if num in virtual_operations else empty_vops
         else:
             vops = hived.get_virtual_operations(num)
-            (vote_ops, comment_payout_ops) = Blocks.prepare_vops(vops, cls._head_block_date)
+            (vote_ops, comment_payout_stats) = Blocks.prepare_vops(Posts.comment_payout_ops, vops, cls._head_block_date)
+            cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, comment_payout_stats)
 
         for k, v in vote_ops.items():
             Votes.effective_comment_vote_op(v, cls._head_block_date)
-
-        if comment_payout_ops:
-            comment_payout_stats = Posts.comment_payout_op(comment_payout_ops, cls._head_block_date)
-            cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, comment_payout_stats)
 
         cls._head_block_date = block_date
 
