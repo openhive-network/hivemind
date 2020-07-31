@@ -64,6 +64,8 @@ class Blocks:
         PostDataCache.flush()
         Tags.flush()
         Votes.flush()
+        cls._flush_blocks()
+        Posts.flush()
         time_end = perf_counter()
         log.info("[PROCESS BLOCK] %fs", time_end - time_start)
         return ret
@@ -90,6 +92,7 @@ class Blocks:
         Votes.flush()
         cls._flush_blocks()
         Follow.flush(trx=False)
+        Posts.flush()
 
         DB.query("COMMIT")
         time_end = perf_counter()
