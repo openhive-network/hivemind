@@ -76,23 +76,18 @@ class Votes:
                                     last_update="1969-12-31T23:59:59")
 
     @classmethod
-    def effective_comment_vote_op(cls, vop, date):
+    def effective_comment_vote_op(cls, key, vop, date):
         """ Process effective_comment_vote_operation """
-        voter = vop['voter']
-        author = vop['author']
-        permlink = vop['permlink']
 
         if(cls.inside_flush):
             log.info("Updating data in '_votes_data' using effective comment")
             raise "Fatal error"
 
-        key = voter + "/" + author + "/" + permlink
-        assert key in cls._votes_data
-
-        cls._votes_data[key]["vote_percent"]  = vop["vote_percent"]
-        cls._votes_data[key]["weight"]        = vop["weight"]
-        cls._votes_data[key]["rshares"]       = vop["rshares"]
-        cls._votes_data[key]["last_update"]   = vop["last_update"]
+        if key in cls._votes_data:
+            cls._votes_data[key]["vote_percent"]  = vop["vote_percent"]
+            cls._votes_data[key]["weight"]        = vop["weight"]
+            cls._votes_data[key]["rshares"]       = vop["rshares"]
+            cls._votes_data[key]["last_update"]   = vop["last_update"]
 
     @classmethod
     def flush(cls):

@@ -230,7 +230,7 @@ class Blocks:
             (vote_ops, comment_payout_ops) = Blocks.prepare_vops(vops, cls._head_block_date)
 
         for k, v in vote_ops.items():
-            Votes.effective_comment_vote_op(v, cls._head_block_date)
+            Votes.effective_comment_vote_op(k, v, cls._head_block_date)
 
         if comment_payout_ops:
             comment_payout_stats = Posts.comment_payout_op(comment_payout_ops, cls._head_block_date)
