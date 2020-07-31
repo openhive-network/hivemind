@@ -15,11 +15,9 @@ class Votes:
     def get_vote_count(cls, author, permlink):
         """ Get vote count for given post """
         sql = """
-            SELECT count(hv.id) 
-            FROM hive_votes hv 
-            INNER JOIN hive_accounts ha_a ON ha_a.id = hv.author_id 
-            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hv.permlink_id 
-            WHERE ha_a.name = :author AND hpd_p.permlink = :permlink 
+            SELECT count(1)
+            FROM hive_votes_accounts_permlinks_view hv
+            WHERE hv.author = :author AND hv.permlink = :permlink
         """
         ret = DB.query_row(sql, author=author, permlink=permlink)
         return 0 if ret is None else int(ret.count)
@@ -28,12 +26,10 @@ class Votes:
     def get_upvote_count(cls, author, permlink):
         """ Get vote count for given post """
         sql = """
-            SELECT count(hv.id) 
-            FROM hive_votes hv 
-            INNER JOIN hive_accounts ha_a ON ha_a.id = hv.author_id 
-            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hv.permlink_id 
-            WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
-                  vote_percent > 0 
+            SELECT count(1)
+            FROM hive_votes_accounts_permlinks_view hv
+            WHERE hv.author = :author AND hv.permlink = :permlink
+                  AND hv.percent > 0
         """
         ret = DB.query_row(sql, author=author, permlink=permlink)
         return 0 if ret is None else int(ret.count)
@@ -42,12 +38,10 @@ class Votes:
     def get_downvote_count(cls, author, permlink):
         """ Get vote count for given post """
         sql = """
-            SELECT count(hv.id) 
-            FROM hive_votes hv 
-            INNER JOIN hive_accounts ha_a ON ha_a.id = hv.author_id 
-            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hv.permlink_id 
-            WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
-                  vote_percent < 0 
+            SELECT count(1)
+            FROM hive_votes_accounts_permlinks_view hv
+            WHERE hv.author = :author AND hv.permlink = :permlink
+                  AND hv.percent < 0
         """
         ret = DB.query_row(sql, author=author, permlink=permlink)
         return 0 if ret is None else int(ret.count)
@@ -96,7 +90,7 @@ class Votes:
                     INNER JOIN hive_accounts ha_v ON ha_v.name = t.voter
                     INNER JOIN hive_accounts ha_a ON ha_a.name = t.author
                     INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
-                    INNER JOIN hive_posts hp ON hp.author_id = ha_a.id AND hp.permlink_id = hpd_p.id  
+                    INNER JOIN hive_posts hp ON hp.author_id = ha_a.id AND hp.permlink_id = hpd_p.id
                     ) as data_source(post_id, voter_id, author_id, permlink_id, weight, rshares, vote_percent, last_update)
                     ON CONFLICT ON CONSTRAINT hive_votes_ux1 DO
                       UPDATE
@@ -106,7 +100,7 @@ class Votes:
                           vote_percent = EXCLUDED.vote_percent,
                           last_update = EXCLUDED.last_update,
                           num_changes = hive_votes.num_changes + 1
-                      WHERE hive_votes.id = EXCLUDED.id
+                      WHERE hive_votes.voter_id = EXCLUDED.voter_id and hive_votes.author_id = EXCLUDED.author_id and hive_votes.permlink_id = EXCLUDED.permlink_id;
                       """
 
             values = []

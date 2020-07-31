@@ -717,7 +717,7 @@ def setup(db):
         CREATE VIEW hive_votes_accounts_permlinks_view
         AS
         SELECT
-            ha_v.id as id,
+            ha_v.id as voter_id,
             ha_a.name as author,
             hpd.permlink as permlink,
             vote_percent as percent,

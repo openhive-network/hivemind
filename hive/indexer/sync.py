@@ -217,11 +217,6 @@ class Sync:
             if not CONTINUE_PROCESSING:
                 return
             DbState.finish_initial_sync()
-
-            if self._conf.get("exit_after_sync"):
-                log.info("Exiting after sync on user request...")
-                return
-
         else:
             # recover from fork
             Blocks.verify_head(self._steem)
@@ -231,6 +226,9 @@ class Sync:
         if self._conf.get('test_max_block'):
             # debug mode: partial sync
             return self.from_steemd()
+        if self._conf.get("exit_after_sync"):
+            log.info("Exiting after sync on user request...")
+            return
         if self._conf.get('test_disable_sync'):
             # debug mode: no sync, just stream
             return self.listen()
