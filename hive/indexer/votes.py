@@ -83,8 +83,6 @@ class Votes:
         key = voter + "/" + author + "/" + permlink
         assert key in cls._votes_data
 
-        log.info( "xx {}".format(vop) )
-
         cls._votes_data[key]["vote_percent"]  = vop["vote_percent"]
         cls._votes_data[key]["weight"]        = vop["weight"]
         cls._votes_data[key]["rshares"]       = vop["rshares"]
