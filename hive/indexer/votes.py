@@ -10,6 +10,7 @@ DB = Db.instance()
 class Votes:
     """ Class for managing posts votes """
     _votes_data = {}
+    _effective_votes_data = {}
 
     @classmethod
     def get_vote_count(cls, author, permlink):
@@ -55,14 +56,14 @@ class Votes:
     inside_flush = False
 
     @classmethod
-    def vote_op(cls, vop, date):
+    def vote_op(cls, vop):
         """ Process vote_operation """
-        voter = vop['value']['voter']
-        author = vop['value']['author']
-        permlink = vop['value']['permlink']
+        voter = vop['voter']
+        author = vop['author']
+        permlink = vop['permlink']
 
         if(cls.inside_flush):
-            log.info("Adding new vote-info into _votes_data dict")
+            log.info("Adding new vote-info into '_votes_data' dict")
             raise "Fatal error"
 
         key = voter + "/" + author + "/" + permlink
@@ -70,13 +71,31 @@ class Votes:
         cls._votes_data[key] = dict(voter=voter,
                                     author=author,
                                     permlink=permlink,
-                                    vote_percent=vop['value']['vote_percent'],
-                                    weight=vop['value']['weight'],
-                                    rshares=vop['value']['rshares'],
-                                    last_update=date)
+                                    vote_percent=0,
+                                    weight=0,
+                                    rshares=0,
+                                    last_update="1969-12-31T23:59:59")
 
     @classmethod
-    def flush(cls):
+    def effective_comment_vote_op(cls, vop, date):
+        """ Process effective_comment_vote_operation """
+        voter = vop['voter']
+        author = vop['author']
+        permlink = vop['permlink']
+
+        if(cls.inside_flush):
+            log.info("Adding new effective comment vote into '_effective_votes_data' dict")
+            raise "Fatal error"
+
+        key = voter + "/" + author + "/" + permlink
+
+        cls._effective_votes_data[key] = dict(vote_percent=vop['vote_percent'],
+                                              weight=vop['weight'],
+                                              rshares=vop['rshares'],
+                                              last_update=date)
+
+    @classmethod
+    def flush_votes(cls):
         """ Flush vote data from cache to database """
         cls.inside_flush = True
         if cls._votes_data:
@@ -106,7 +125,7 @@ class Votes:
                           vote_percent = EXCLUDED.vote_percent,
                           last_update = EXCLUDED.last_update,
                           num_changes = hive_votes.num_changes + 1
-                      WHERE hive_votes.id = EXCLUDED.id
+                      WHERE hive_votes.voter_id = EXCLUDED.voter_id and hive_votes.author_id = EXCLUDED.author_id and hive_votes.permlink_id = EXCLUDED.permlink_id;
                       """
 
             values = []
@@ -130,3 +149,21 @@ class Votes:
 
             cls._votes_data.clear()
         cls.inside_flush = False
+
+    @classmethod
+    def process_effective_votes(cls):
+        """ Flush vote data from cache to database """
+        for key, vd in cls._effective_votes_data.items():
+          assert key in cls._votes_data
+
+          cls._votes_data[key]["vote_percent"]  = cls._effective_votes_data[key]["vote_percent"]
+          cls._votes_data[key]["weight"]        = cls._effective_votes_data[key]["weight"]
+          cls._votes_data[key]["rshares"]       = cls._effective_votes_data[key]["rshares"]
+          cls._votes_data[key]["last_update"]   = cls._effective_votes_data[key]["last_update"]
+
+        cls._effective_votes_data.clear()
+
+    @classmethod
+    def flush(cls):
+      cls.process_effective_votes()
+      cls.flush_votes()
