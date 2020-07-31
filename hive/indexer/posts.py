@@ -304,10 +304,6 @@ class Posts:
                 payout_at = date  #Here should be `cashout_time`
                 last_payout = date
 
-            with open("charlieshrem.log", "a+") as myfile:
-                if author == "charlieshrem":
-                    myfile.write( "payout:{} permlink:{} date:{}".format( payout, permlink, date ) )
-
             cls._comment_payout_ops.append("('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, '{}'::timestamp, {}, {}, {})".format(
               author,
               permlink,
@@ -326,6 +322,11 @@ class Posts:
               "NULL" if ( cashout_time is None ) else ( "'{}'::timestamp".format( cashout_time ) ),
 
               "NULL" if ( is_paidout is None ) else is_paidout ))
+
+            with open("charlieshrem.log", "a+") as myfile:
+                if author == "charlieshrem" and payout is not None:
+                    myfile.write( "payout:{} permlink:{} date:{} \n".format( payout, permlink, date ) )
+                    myfile.write( "{} \n \n".format( cls._comment_payout_ops[ len( cls._comment_payout_ops ) - 1 ] ) )
 
         return ops_stats
 
