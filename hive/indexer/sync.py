@@ -33,9 +33,9 @@ CONTINUE_PROCESSING = True
 def print_ops_stats(prefix, ops_stats):
     log.info("############################################################################")
     log.info(prefix)
-    sorted_stats = sorted(ops_stats.items(), key=lambda kv: kv[1], reverse=True)
-    for (k, v) in sorted_stats:
-        log.info("`{}': {}".format(k, v))
+    # sorted_stats = sorted(ops_stats.items(), key=lambda kv: kv[1]["count"], reverse=True)
+    for k, v in ops_stats.items():
+        log.info("`{}': {}".format(k, "count: {}, average time: {:.5f} ms".format(v['count'], v['avg_time'] * 10**3)) + ( f", note: {v['note']}" if "note" in v.keys() else "" ) )
 
     log.info("############################################################################")
 

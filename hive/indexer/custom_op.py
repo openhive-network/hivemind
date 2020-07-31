@@ -39,22 +39,20 @@ class CustomOp:
 
     @classmethod
     def process_ops(cls, ops, block_num, block_date):
+        from time import time
         ops_stats = {}
 
         """Given a list of operation in block, filter and process them."""
         for op in ops:
+            start_op_processing = time()
+
             if op['id'] not in ['follow', 'community', 'notify']:
                 opName = str(op['id']) + '-ignored'
                 if(opName  in ops_stats):
-                    ops_stats[opName] += 1
+                    ops_stats[opName]["count"] += 1
                 else:
-                    ops_stats[opName] = 1
+                    ops_stats[opName] = { "count": 1, "avg_time": None }
                 continue
-
-            if(op['id'] in ops_stats):
-                ops_stats[op['id']] += 1
-            else:
-                ops_stats[op['id']] = 1
 
             account = _get_auth(op)
             if not account:
@@ -70,6 +68,15 @@ class CustomOp:
                     process_json_community_op(account, op_json, block_date)
             elif op['id'] == 'notify':
                 cls._process_notify(account, op_json, block_date)
+
+            stop = time() - start_op_processing
+            op_type = op['id']
+            if(op_type in ops_stats):
+                ops_stats[op_type]["count"] += 1
+                ops_stats[op_type]["avg_time"] = ( ops_stats[op_type]["avg_time"] + stop ) / 2.0
+            else:
+                ops_stats[op_type] = { "count": 1, "avg_time": stop }
+
         return ops_stats
 
     @classmethod

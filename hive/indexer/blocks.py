@@ -13,7 +13,7 @@ from hive.indexer.follow import Follow
 from hive.indexer.votes import Votes
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.tags import Tags
-from time import perf_counter
+from time import perf_counter, time
 
 log = logging.getLogger(__name__)
 
@@ -36,8 +36,9 @@ class Blocks:
     def merge_ops_stats(od1, od2):
         if od2 is not None:
             for k, v in od2.items():
-                if k in od1:
-                    od1[k] += v
+                if k in od1.keys():
+                    od1[k]["count"] = v["count"] + od1[k]["count"]
+                    od1[k]["avg_time"] = (od1[k]["avg_time"] + v["avg_time"]) / 2.0
                 else:
                     od1[k] = v
 
@@ -171,11 +172,7 @@ class Blocks:
                 op_type = operation['type']
                 op = operation['value']
 
-                if(op_type != 'custom_json_operation'):
-                    if op_type in cls.ops_stats:
-                        cls.ops_stats[op_type] += 1
-                    else:
-                        cls.ops_stats[op_type] = 1
+                start_op_processing = time()
 
                 # account metadata updates
                 if op_type == 'account_update_operation':
@@ -206,6 +203,15 @@ class Blocks:
                 elif op_type == 'custom_json_operation':
                     json_ops.append(op)
 
+                # counting and measurments
+                stop = time() - start_op_processing
+                if(op_type != 'custom_json_operation'):
+                    if op_type in cls.ops_stats:
+                        cls.ops_stats[op_type]["count"] += 1
+                        cls.ops_stats[op_type]["avg_time"] = ( cls.ops_stats[op_type]["avg_time"] + stop ) / 2.0
+                    else:
+                        cls.ops_stats[op_type] = { "count": 1, "avg_time": stop }
+
         # follow/reblog/community ops
         if json_ops:
             custom_ops_stats = CustomOp.process_ops(json_ops, num, cls._head_block_date)
@@ -228,13 +234,15 @@ class Blocks:
             (vote_ops, comment_payout_ops) = Blocks.prepare_vops(vops, cls._head_block_date)
 
         for v in vote_ops:
+            start_op_processing = time()
             Votes.vote_op(v, cls._head_block_date)
+            stop = time() - start_op_processing
             op_type = v['type']
             if op_type in cls.ops_stats:
-                cls.ops_stats[op_type] += 1
+                cls.ops_stats[op_type]["count"] += 1
+                cls.ops_stats[op_type]["avg_time"] = ( cls.ops_stats[op_type]["avg_time"] + stop ) / 2.0
             else:
-                cls.ops_stats[op_type] = 1
-
+                cls.ops_stats[op_type] = { "count": 1, "avg_time": stop }
 
         if comment_payout_ops:
             comment_payout_stats = Posts.comment_payout_op(comment_payout_ops, cls._head_block_date)

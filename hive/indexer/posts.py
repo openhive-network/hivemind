@@ -194,8 +194,11 @@ class Posts:
         values = []
         values_limit = 1000
 
+        from time import time
+
         """ Process comment payment operations """
         for k, v in ops.items():
+            start_measurment = time()
             author, permlink = k.split("/")
             # total payout to curators
             curator_rewards_sum = 0
@@ -208,11 +211,6 @@ class Posts:
             comment_author_reward = None
             for operation in v:
                 for op, value in operation.items():
-                    if op in ops_stats:
-                        ops_stats[op] += 1
-                    else:
-                        ops_stats[op] = 1
-
                     if op == 'curation_reward_operation':
                         curator_rewards_sum = curator_rewards_sum + int(value['reward']['amount'])
                     elif op == 'author_reward_operation':
@@ -240,6 +238,15 @@ class Posts:
                 actual_query = sql.format(values_str)
                 DB.query(actual_query)
                 values.clear()
+
+            stop = time() - start_measurment
+            for operation in v:
+                for op, value in operation.items():
+                    if op in ops_stats:
+                        ops_stats[op]["count"] += 1
+                        ops_stats[op]["avg_time"] = ( ops_stats[op]["avg_time"] + stop ) / 2.0
+                    else:
+                        ops_stats[op] = { "count": 1, "avg_time": stop }
 
         if len(values) > 0:
             values_str = ','.join(values)
