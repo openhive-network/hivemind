@@ -319,6 +319,7 @@ class Posts:
               "NULL" if ( cashout_time is None ) else ( "'{}'::timestamp".format( cashout_time ) ),
 
               "NULL" if ( is_paidout is None ) else is_paidout ))
+        cls.comment_payout_ops.clear()
 
     @classmethod
     def update_child_count(cls, child_id, op='+'):
