@@ -30,6 +30,7 @@ class Posts:
     _hits = 0
     _miss = 0
 
+    comment_payout_ops = {}
     _comment_payout_ops = []
 
     @classmethod
@@ -148,7 +149,7 @@ class Posts:
             cls._insert_feed_cache(result, block_date)
 
     @classmethod
-    def flush(cls):
+    def flush_into_db(cls):
         sql = """
               UPDATE hive_posts AS ihp SET
                   total_payout_value    = COALESCE( data_source.total_payout_value,                     ihp.total_payout_value ),
@@ -219,13 +220,11 @@ class Posts:
         cls._comment_payout_ops.clear()
 
     @classmethod
-    def comment_payout_op(cls, ops, date):
+    def comment_payout_op(cls):
         values_limit = 1000
 
-        ops_stats = { 'author_reward_operation' : 0, 'comment_reward_operation' : 0, 'effective_comment_vote_operation' : 0, 'comment_payout_update_operation' : 0 }
-
         """ Process comment payment operations """
-        for k, v in ops.items():
+        for k, v in cls.comment_payout_ops.items():
             author                    = None
             permlink                  = None
 
@@ -251,9 +250,10 @@ class Posts:
 
             is_paidout                = None
 
+            date =  v[ 'date' ]
+
             if v[ 'author_reward_operation' ] is not None:
               value = v[ 'author_reward_operation' ]
-              ops_stats[ 'author_reward_operation' ] += 1
               author_rewards_hive       = value['hive_payout']['amount']
               author_rewards_hbd        = value['hbd_payout']['amount']
               author_rewards_vests      = value['vesting_payout']['amount']
@@ -264,7 +264,6 @@ class Posts:
 
             if v[ 'comment_reward_operation' ] is not None:
               value = v[ 'comment_reward_operation' ]
-              ops_stats[ 'comment_reward_operation' ] += 1
               comment_author_reward     = value['payout']
               author_rewards            = value['author_rewards']
               total_payout_value        = value['total_payout_value']
@@ -280,7 +279,6 @@ class Posts:
 
             if v[ 'effective_comment_vote_operation' ] is not None:
               value = v[ 'effective_comment_vote_operation' ]
-              ops_stats[ 'effective_comment_vote_operation' ] += 1
               pending_payout            = sbd_amount( value['pending_payout'] )
               if author is None:
                 author                    = value['author']
@@ -288,7 +286,6 @@ class Posts:
 
             if v[ 'comment_payout_update_operation' ] is not None:
               value = v[ 'comment_payout_update_operation' ]
-              ops_stats[ 'comment_payout_update_operation' ] += 1
               is_paidout                = True
               if author is None:
                 author                    = value['author']
@@ -322,8 +319,6 @@ class Posts:
               "NULL" if ( cashout_time is None ) else ( "'{}'::timestamp".format( cashout_time ) ),
 
               "NULL" if ( is_paidout is None ) else is_paidout ))
-
-        return ops_stats
 
     @classmethod
     def update_child_count(cls, child_id, op='+'):
@@ -453,3 +448,8 @@ class Posts:
             new_body = new_body_def
         
         return new_body
+
+    @classmethod
+    def flush(cls):
+        cls.comment_payout_op()
+        cls.flush_into_db()
