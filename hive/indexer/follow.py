@@ -18,18 +18,18 @@ FOLLOWING = 'following'
 
 FOLLOW_ITEM_INSERT_QUERY = """
     INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists)
-    VALUES 
+    VALUES
         (
-            :flr, 
-            :flg, 
-            :at, 
-            :state, 
+            :flr,
+            :flg,
+            :at,
+            :state,
             (CASE :state
                 WHEN 3 THEN TRUE
                 WHEN 4 THEN FALSE
                 ELSE FALSE
             END
-            ), 
+            ),
             (CASE :state
                 WHEN 3 THEN FALSE
                 WHEN 4 THEN TRUE
@@ -37,18 +37,18 @@ FOLLOW_ITEM_INSERT_QUERY = """
             END
             )
         )
-    ON CONFLICT (follower, following) DO UPDATE 
-        SET 
-            state = (CASE EXCLUDED.state 
-                        WHEN 0 THEN 0 -- 0 blocks possibility to update state 
+    ON CONFLICT (follower, following) DO UPDATE
+        SET
+            state = (CASE EXCLUDED.state
+                        WHEN 0 THEN 0 -- 0 blocks possibility to update state
                         ELSE EXCLUDED.state
                      END),
-            blacklisted = (CASE EXCLUDED.state 
+            blacklisted = (CASE EXCLUDED.state
                               WHEN 3 THEN TRUE
                               WHEN 5 THEN FALSE
                               ELSE EXCLUDED.blacklisted
                           END),
-            follow_blacklists = (CASE EXCLUDED.state 
+            follow_blacklists = (CASE EXCLUDED.state
                                     WHEN 4 THEN TRUE
                                     WHEN 6 THEN FALSE
                                     ELSE EXCLUDED.follow_blacklists
@@ -87,7 +87,7 @@ class Follow:
 
             if k in cls.follow_items_to_flush:
                 old_value = cls.follow_items_to_flush.get(k)
-                old_value['state'] = op['state'] 
+                old_value['state'] = op['state']
                 cls.follow_items_to_flush[k] = old_value
             else:
                 cls.follow_items_to_flush[k] = dict(
@@ -175,18 +175,18 @@ class Follow:
               VALUES """
 
         sql_postfix = """
-              ON CONFLICT ON CONSTRAINT hive_follows_pk DO UPDATE 
-                SET 
-                    state = (CASE EXCLUDED.state 
-                                WHEN 0 THEN 0 -- 0 blocks possibility to update state 
+              ON CONFLICT ON CONSTRAINT hive_follows_pk DO UPDATE
+                SET
+                    state = (CASE EXCLUDED.state
+                                WHEN 0 THEN 0 -- 0 blocks possibility to update state
                                 ELSE EXCLUDED.state
                             END),
-                    blacklisted = (CASE EXCLUDED.state 
+                    blacklisted = (CASE EXCLUDED.state
                                     WHEN 3 THEN TRUE
                                     WHEN 5 THEN FALSE
                                     ELSE EXCLUDED.blacklisted
                                 END),
-                    follow_blacklists = (CASE EXCLUDED.state 
+                    follow_blacklists = (CASE EXCLUDED.state
                                             WHEN 4 THEN TRUE
                                             WHEN 6 THEN FALSE
                                             ELSE EXCLUDED.follow_blacklists

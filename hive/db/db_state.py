@@ -12,6 +12,8 @@ from hive.db.schema import (setup, reset_autovac, build_metadata,
                             build_metadata_community, teardown, DB_VERSION)
 from hive.db.adapter import Db
 
+from hive.utils.trends import update_all_hot_and_tranding
+
 log = logging.getLogger(__name__)
 
 class DbState:
@@ -186,6 +188,13 @@ class DbState:
 
         time_end = perf_counter()
         log.info("[INIT] update_hive_posts_children_count executed in %fs", time_end - time_start)
+
+        time_start = perf_counter()
+
+        update_all_hot_and_tranding()
+
+        time_end = perf_counter()
+        log.info("[INIT] update_hot_and_tranding executed in %fs", time_end - time_start)
 
         # TODO: #111
         #for key in cls._all_foreign_keys():

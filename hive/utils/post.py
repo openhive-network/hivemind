@@ -8,6 +8,13 @@ from funcy.seqs import first, distinct
 
 from hive.utils.normalize import sbd_amount, rep_log10, safe_img_url, parse_time, utc_timestamp
 from hive.indexer.votes import Votes
+from hive.utils.trends import score
+
+from hive.db.adapter import Db
+
+DB = Db.instance()
+
+
 
 def mentions(body):
     """Given a post body, return proper @-mentioned account names."""
@@ -210,8 +217,8 @@ def post_payout(post):
 
     # trending scores
     _timestamp = utc_timestamp(parse_time(post['created']))
-    sc_trend = _score(rshares, _timestamp, 240000)
-    sc_hot = _score(rshares, _timestamp, 10000)
+    sc_trend = score(rshares, _timestamp, 240000)
+    sc_hot = score(rshares, _timestamp, 10000)
 
     return {
         'payout': payout,
@@ -225,16 +232,6 @@ def _vote_csv_row(vote):
     """Convert a vote object into minimal CSV line."""
     rep = rep_log10(vote['reputation'])
     return "%s,%s,%s,%s" % (vote['voter'], vote['rshares'], vote['percent'], rep)
-
-def _score(rshares, created_timestamp, timescale=480000):
-    """Calculate trending/hot score.
-
-    Source: calculate_score - https://github.com/steemit/steem/blob/8cd5f688d75092298bcffaa48a543ed9b01447a6/libraries/plugins/tags/tags_plugin.cpp#L239
-    """
-    mod_score = rshares / 10000000.0
-    order = math.log10(max((abs(mod_score), 1)))
-    sign = 1 if mod_score > 0 else -1
-    return sign * order + created_timestamp / timescale
 
 def post_stats(post):
     """Get post statistics and derived properties.

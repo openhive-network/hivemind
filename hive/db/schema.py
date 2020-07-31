@@ -640,7 +640,7 @@ def setup(db):
             hp.is_deleted,
             hp.is_pinned,
             hp.is_muted,
-            hr.title AS role_title, 
+            hr.title AS role_title,
             hr.role_id AS role_id,
             hc.title AS community_title,
             hc.name AS community_name
@@ -716,7 +716,9 @@ def setup(db):
             last_update as time,
             ha_v.name as voter,
             weight,
-            num_changes
+            num_changes,
+            hpd.id as permlink_id,
+            post_id
         FROM
             hive_votes hv
         INNER JOIN hive_accounts ha_v ON ha_v.id = hv.voter_id
@@ -724,6 +726,182 @@ def setup(db):
         INNER JOIN hive_permlink_data hpd ON hpd.id = hv.permlink_id
         ;
     """
+    db.query_no_return(sql)
+
+   # hot and tranding functions
+    sql = """
+        DROP TYPE IF EXISTS hot_and_trend CASCADE
+        ;
+        CREATE TYPE hot_and_trend AS (hot double precision, trend double precision)
+        """
+    db.query_no_return(sql)
+
+    sql = """
+       DROP FUNCTION IF EXISTS date_diff CASCADE
+       ;
+       CREATE OR REPLACE FUNCTION date_diff (units VARCHAR(30), start_t TIMESTAMP, end_t TIMESTAMP)
+         RETURNS INT AS $$
+       DECLARE
+         diff_interval INTERVAL;
+         diff INT = 0;
+         years_diff INT = 0;
+       BEGIN
+         IF units IN ('yy', 'yyyy', 'year', 'mm', 'm', 'month') THEN
+           years_diff = DATE_PART('year', end_t) - DATE_PART('year', start_t);
+           IF units IN ('yy', 'yyyy', 'year') THEN
+             -- SQL Server does not count full years passed (only difference between year parts)
+             RETURN years_diff;
+           ELSE
+             -- If end month is less than start month it will subtracted
+             RETURN years_diff * 12 + (DATE_PART('month', end_t) - DATE_PART('month', start_t));
+           END IF;
+         END IF;
+         -- Minus operator returns interval 'DDD days HH:MI:SS'
+         diff_interval = end_t - start_t;
+         diff = diff + DATE_PART('day', diff_interval);
+         IF units IN ('wk', 'ww', 'week') THEN
+           diff = diff/7;
+           RETURN diff;
+         END IF;
+         IF units IN ('dd', 'd', 'day') THEN
+           RETURN diff;
+         END IF;
+         diff = diff * 24 + DATE_PART('hour', diff_interval);
+         IF units IN ('hh', 'hour') THEN
+            RETURN diff;
+         END IF;
+         diff = diff * 60 + DATE_PART('minute', diff_interval);
+         IF units IN ('mi', 'n', 'minute') THEN
+            RETURN diff;
+         END IF;
+         diff = diff * 60 + DATE_PART('second', diff_interval);
+         RETURN diff;
+       END;
+       $$ LANGUAGE plpgsql IMMUTABLE
+    """
+    db.query_no_return(sql)
+
+    sql = """
+        DROP FUNCTION IF EXISTS calculate_hot_and_tranding CASCADE
+        ;
+        CREATE OR REPLACE FUNCTION calculate_hot_and_tranding( IN _rshares NUMERIC, IN _post_created_at TIMESTAMP )
+    	RETURNS hot_and_trend
+    	LANGUAGE plpgsql IMMUTABLE
+    	AS
+     	$$
+     	DECLARE
+     		sec_from_epoch INT = 0;
+     		time_factor_for_trend double precision;
+     		time_factor_for_hot double precision;
+     		mod_score double precision;
+     		sign double precision;
+     		hot double precision;
+     		trend double precision;
+     		result hot_and_trend;
+     	BEGIN
+     		sec_from_epoch  = date_diff( 'second', CAST('19700101' AS TIMESTAMP), _post_created_at );
+     		time_factor_for_trend = sec_from_epoch/240000.0;
+     		time_factor_for_hot = sec_from_epoch/10000.0;
+     		mod_score := _rshares / 10000000.0;
+     		IF ( mod_score > 0 )
+     		THEN
+     			sign := 1;
+     		ELSE
+     			sign := -1;
+     		END IF;
+     		mod_score = log( greatest( abs(mod_score), 1 ) );
+     		trend = sign * mod_score + time_factor_for_trend;
+     		hot = sign * mod_score + time_factor_for_hot;
+     		SELECT INTO result hot, trend;
+    		return result;
+     	END;
+     	$$
+    """
+    db.query_no_return(sql)
+
+    sql = """
+            DROP FUNCTION IF EXISTS set_hot_and_trend CASCADE
+            ;
+            CREATE OR REPLACE FUNCTION update_hot_and_trend( IN _post_id BIGINT )
+                  	RETURNS void
+                  	LANGUAGE plpgsql
+         	AS
+         	$$
+         	DECLARE
+         		sum_of_rshares NUMERIC;
+         		created_time TIMESTAMP;
+         		trending hot_and_trend;
+         	BEGIN
+         		SELECT  COALESCE(SUM(rshares),0) INTO sum_of_rshares FROM hive_votes_accounts_permlinks_view WHERE post_id=_post_id;
+         		SELECT created_at INTO created_time FROM hive_posts WHERE id = _post_id;
+         		trending = calculate_hot_and_tranding(sum_of_rshares, created_time);
+         		UPDATE hive_posts SET sc_trend=trending.trend, sc_hot=trending.hot WHERE id=_post_id;
+         	END;
+         	$$
+    """
+    db.query_no_return(sql)
+
+    sql = """
+        DROP FUNCTION IF EXISTS update_post_hot_and_trend
+        ;
+        CREATE OR REPLACE FUNCTION update_post_hot_and_trend( IN _author VARCHAR, IN _permlink VARCHAR )
+      	RETURNS void
+      	LANGUAGE plpgsql
+    	AS
+    	$$
+    	DECLARE
+    		post_id_value BIGINT;
+    	BEGIN
+    		SELECT id INTO post_id_value FROM hive_posts_view WHERE author=_author AND permlink=_permlink;
+    		PERFORM update_hot_and_trend(post_id_value);
+    	END;
+    	$$
+        """
+    db.query_no_return(sql)
+
+    sql = """
+        DROP FUNCTION IF EXISTS update_all_posts_hot_and_trend
+        ;
+        CREATE OR REPLACE FUNCTION update_all_posts_hot_and_trend()
+            	RETURNS void
+            	LANGUAGE plpgsql
+       	AS
+       	$$
+       	DECLARE
+       		post RECORD;
+       	BEGIN
+			FOR post IN
+        			SELECT id FROM hive_posts WHERE id > 0
+    			LOOP
+        			PERFORM update_hot_and_trend(post.id);
+    			END LOOP;
+       	END;
+       	$$
+        """
+    db.query_no_return(sql)
+
+    sql = """
+        DROP TYPE IF EXISTS author_permlink_type
+        ;
+        CREATE TYPE author_permlink_type as (author VARCHAR, permlink VARCHAR)
+        ;
+        DROP FUNCTION IF EXISTS update_posts_hot_and_trend( arr author_permlink_type[] )
+        ;
+        CREATE OR REPLACE FUNCTION update_posts_hot_and_trend( arr author_permlink_type[] )
+	       RETURNS void
+        LANGUAGE plpgsql
+        AS
+        $$
+        DECLARE
+	       post author_permlink_type;
+        BEGIN
+            FOREACH post IN ARRAY $1
+                LOOP
+		             PERFORM update_post_hot_and_trend(post.author, post.permlink);
+                END LOOP;
+        END;
+        $$
+        """
     db.query_no_return(sql)
 
 def reset_autovac(db):

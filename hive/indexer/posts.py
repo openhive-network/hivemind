@@ -17,6 +17,7 @@ from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.tags import Tags
 from hive.utils.normalize import legacy_amount, asset_to_hbd_hive
+from hive.utils.trends import update_hot_and_tranding
 
 log = logging.getLogger(__name__)
 DB = Db.instance()
@@ -47,10 +48,10 @@ class Posts:
         else:
             cls._miss += 1
             sql = """
-                SELECT hp.id 
-                FROM hive_posts hp 
-                INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
-                INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
+                SELECT hp.id
+                FROM hive_posts hp
+                INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+                INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
                 WHERE ha_a.name = :a AND hpd_p.permlink = :p
             """
             _id = DB.query_one(sql, a=author, p=permlink)
@@ -115,6 +116,9 @@ class Posts:
             post_data = dict(title=op['title'], preview=op['preview'] if 'preview' in op else "",
                              img_url=op['img_url'] if 'img_url' in op else "", body=op['body'],
                              json=op['json_metadata'] if op['json_metadata'] else '{}')
+
+            if not DbState.is_initial_sync():
+                update_hot_and_tranding(op['author'], op['permlink'])
         else:
             # edit case. Now we need to (potentially) apply patch to the post body.
             new_body = cls._merge_post_body(id=result['id'], new_body_def=op['body'])
@@ -170,9 +174,9 @@ class Posts:
                   cashout_time = data_source.cashout_time,
                   is_paidout = true
 
-              FROM 
+              FROM
               (
-              SELECT  ha_a.id as author_id, hpd_p.id as permlink_id, 
+              SELECT  ha_a.id as author_id, hpd_p.id as permlink_id,
                       t.total_payout_value,
                       t.curator_payout_value,
                       t.author_rewards,
@@ -262,17 +266,17 @@ class Posts:
     def update_child_count(cls, child_id, op='+'):
         """ Increase/decrease child count by 1 """
         sql = """
-            UPDATE 
-                hive_posts 
-            SET 
+            UPDATE
+                hive_posts
+            SET
                 children = GREATEST(0, (
-                    SELECT 
-                        CASE 
+                    SELECT
+                        CASE
                             WHEN children is NULL THEN 0
                             WHEN children=32762 THEN 0
                             ELSE children
                         END
-                    FROM 
+                    FROM
                         hive_posts
                     WHERE id = (SELECT parent_id FROM hive_posts WHERE id = :child_id)
                 )::int
@@ -307,7 +311,7 @@ class Posts:
                 allow_curation_rewards = :allow_curation_rewards,
                 beneficiaries = :beneficiaries
             WHERE
-            hp.author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND 
+            hp.author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND
             hp.permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)
         """
         DB.query(sql, author=op['author'], permlink=op['permlink'], max_accepted_payout=max_accepted_payout,
@@ -331,7 +335,7 @@ class Posts:
             depth = result['depth']
 
             if depth == 0:
-                # TODO: delete from hive_reblogs -- otherwise feed cache gets 
+                # TODO: delete from hive_reblogs -- otherwise feed cache gets
                 # populated with deleted posts somwrimas
                 FeedCache.delete(pid)
 
@@ -366,10 +370,10 @@ class Posts:
                             allow_votes = :allow_votes,
                             allow_curation_rewards = :allow_curation_rewards
                         WHERE id = (
-                            SELECT hp.id 
-                            FROM hive_posts hp 
-                            INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
-                            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
+                            SELECT hp.id
+                            FROM hive_posts hp
+                            INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+                            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
                             WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
                         )
                 """
@@ -440,5 +444,5 @@ class Posts:
             log.info("New body definition: {}".format(new_body_def))
             log.info("Old body definition: {}".format(old_body))
             new_body = new_body_def
-        
+
         return new_body
