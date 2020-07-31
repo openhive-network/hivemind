@@ -170,7 +170,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
             sql = sql % """ AND hive_communities.name = :community_name """
 
         if sort == 'trending' or sort == 'created':
-                pinned_sql = SELECT_FRAGMENT + """ WHERE is_pinned AND hive_communities.name = :community_name ORDER BY hive_posts_cache.created_at DESC """
+            pinned_sql = SELECT_FRAGMENT + """ WHERE is_pinned AND hive_communities.name = :community_name ORDER BY hive_posts_cache.created_at DESC """
 
     else:
         if sort in ['payout', 'payout_comments']:
@@ -297,7 +297,7 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
     return posts
 
 @return_error_info
-async def get_relationship_between_accounts(context, account1, account2, observer=None):
+async def get_relationship_between_accounts(context, account1, account2):
     valid_account(account1)
     valid_account(account2)
 
@@ -331,4 +331,65 @@ async def get_relationship_between_accounts(context, account1, account2, observe
             result['follows_blacklists'] = True
 
     return result
+
+@return_error_info
+async def does_user_follow_any_lists(context, observer):
+    follows_blacklists = await get_follow_list(context, observer, 'follow_blacklist')
+    follows_muted = await get_follow_list(context, observer, 'follow_muted')
+
+    if len(follows_blacklists) == 0 and len(follows_muted) == 0:
+        return False
+    else:
+        return True
+
+@return_error_info
+async def get_follow_list(context, observer, follow_type='blacklisted'):
+    db = context['db']
+    valid_account(observer)
+
+    valid_types = ['blacklisted', 'follow_blacklist', 'muted', 'follow_muted']
+    assert follow_type in valid_types, 'invalid follow_type'
+
+    results = []
+
+    if follow_type == 'follow_blacklist':
+        sql = """select hive_accounts.name, hive_accounts.blacklist_description, hive_accounts.mute_list_description
+                 from hive_accounts join hive_follows on (hive_accounts.id = hive_follows.following) where
+                 hive_follows.follower = (select id from hive_accounts where name = :observer) and follow_blacklists"""
+        sql_result = await db.query_all(sql, observer=observer)
+        for row in sql_result:
+            row_result = {'name': row['name'], 'blacklist_description': row['blacklist_description'], 'mute_list_description': row['mute_list_description']}
+            results.append(row_result)
+        return results
+
+    elif follow_type == 'follow_muted':
+        sql = """select hive_accounts.name, hive_accounts.blacklist_description, hive_accounts.mute_list_description
+                 from hive_accounts join hive_follows on (hive_accounts.id = hive_follows.following) where
+                 hive_follows.follower = (select id from hive_accounts where name = :observer) and follow_muted"""
+        sql_result = await db.query_all(sql, observer=observer)
+        for row in sql_result:
+            row_result = {'name': row['name'], 'blacklist_description': row['blacklist_description'], 'mute_list_description': row['mute_list_description']}
+            results.append(row_result)
+        return results
+
+    blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
+    for account in blacklists_for_user.keys():
+        sources = blacklists_for_user[account]
+        if follow_type == 'blacklisted':
+            if 'my_blacklist' in sources:
+                row_result = {'name': account, 'blacklist_description':'', 'mute_list_description':''}
+                results.append(row_result)
+        elif follow_type == 'follow_blacklist':
+            if 'my_followed_blacklists' in sources:
+                row_result = {'name': account, 'blacklist_description':'', 'mute_list_description':''}
+                results.append(row_result)
+        elif follow_type == 'muted':
+            if 'my_muted' in sources:
+                row_result = {'name': account, 'blacklist_description':'', 'mute_list_description':''}
+                results.append(row_result)
+        elif follow_type == 'follow_muted':
+            if 'my_followed_mutes' in sources:
+                row_result = {'name': account, 'blacklist_description':'', 'mute_list_description':''}
+                results.append(row_result)
+    return results
 

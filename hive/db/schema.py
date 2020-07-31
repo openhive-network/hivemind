@@ -58,6 +58,8 @@ def build_metadata():
         sa.Column('active_at', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('cached_at', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('raw_json', sa.Text),
+        sa.Column('blacklist_description', sa.String(256)),
+        sa.Column('mute_list_description', sa.String(256)),
 
 
         sa.UniqueConstraint('name', name='hive_accounts_ux1'),

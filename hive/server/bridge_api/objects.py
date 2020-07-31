@@ -15,7 +15,8 @@ async def load_profiles(db, names):
     """`get_accounts`-style lookup for `get_state` compat layer."""
     sql = """SELECT id, name, display_name, about, reputation, vote_weight,
                     created_at, post_count, profile_image, location, website,
-                    cover_image, rank, following, followers, active_at
+                    cover_image, rank, following, followers, active_at,
+                    blacklist_description, mute_list_description
                FROM hive_accounts WHERE name IN :names"""
     rows = await db.query_all(sql, names=tuple(names))
     return [_condenser_profile_object(row) for row in rows]
@@ -172,6 +173,8 @@ def _condenser_profile_object(row):
                         'location': row['location'],
                         'cover_image': row['cover_image'],
                         'profile_image': row['profile_image'],
+                        'blacklist_description': row['blacklist_description'],
+                        'mute_list_description': row['mute_list_description']
                        }}}
 
 def _condenser_post_object(row, truncate_body=0):

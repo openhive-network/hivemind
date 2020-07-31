@@ -4,7 +4,6 @@ import logging
 from time import perf_counter as perf
 from urllib.request import urlopen, Request
 import ujson as json
-from hive.server.common.helpers import valid_account
 from hive.db.adapter import Db
 
 log = logging.getLogger(__name__)
@@ -19,6 +18,15 @@ WITH blacklisted_users AS (
     (SELECT following FROM hive_follows WHERE follower =
         (SELECT id FROM hive_accounts WHERE name = :observer )
     AND follow_blacklists) AND blacklisted
+    UNION ALL
+    SELECT following, 'my_muted' AS source FROM hive_follows WHERE follower =
+        (SELECT id FROM hive_accounts WHERE name = :observer )
+    AND state = 2
+    UNION ALL
+    SELECT following, 'my_followed_mutes' AS source FROM hive_follows WHERE follower IN
+    (SELECT following FROM hive_follows WHERE follower =
+        (SELECT id FROM hive_accounts WHERE name = :observer )
+    AND follow_muted) AND state = 2
 )
 SELECT following, source FROM blacklisted_users
 """
@@ -78,7 +86,7 @@ class Mutes:
 
     @classmethod
     async def get_blacklists_for_observer(cls, observer=None, context=None):
-        """ fetch the list of users that the observer has blacklisted """
+        """fetch the list of users that the observer has blacklisted"""
         if not observer or not context:
             return {}
 

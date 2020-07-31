@@ -214,6 +214,8 @@ class Accounts:
             'website':       profile['website'],
             'profile_image': profile['profile_image'],
             'cover_image':   profile['cover_image'],
+            'blacklist_description': profile['blacklist_description'],
+            'mute_list_description': profile['mute_list_description'],
 
             'raw_json': json.dumps(account)}
 

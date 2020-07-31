@@ -26,14 +26,20 @@ def safe_profile_metadata(account):
     website = str(prof['website']) if 'website' in prof else None
     profile_image = str(prof['profile_image']) if 'profile_image' in prof else None
     cover_image = str(prof['cover_image']) if 'cover_image' in prof else None
+    blacklist_description = str(prof['blacklist_description']) if 'blacklist_description' in prof else None
+    mute_list_description = str(prof['mute_list_description']) if 'mute_list_description' in prof else None
 
     name = _char_police(name)
     about = _char_police(about)
     location = _char_police(location)
+    blacklist_description = _char_police(blacklist_description)
+    mute_list_description = _char_police(mute_list_description)
 
     name = trunc(name, 20)
     about = trunc(about, 160)
     location = trunc(location, 30)
+    blacklist_description = trunc(blacklist_description, 256)
+    mute_list_description = trunc(mute_list_description, 256)
 
     if name and name[0:1] == '@':
         name = None
@@ -58,6 +64,8 @@ def safe_profile_metadata(account):
         website=website or '',
         profile_image=profile_image or '',
         cover_image=cover_image or '',
+        blacklist_description=blacklist_description or '',
+        mute_list_description=mute_list_description or '',
     )
 
 def _valid_url_proto(url):
