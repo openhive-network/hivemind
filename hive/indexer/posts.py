@@ -304,6 +304,10 @@ class Posts:
                 payout_at = date  #Here should be `cashout_time`
                 last_payout = date
 
+            with open("charlieshrem.log", "a+") as myfile:
+                if author == "charlieshrem":
+                    myfile.write( "payout:{} permlink:{} date:{}".format( payout, permlink, date ) )
+
             cls._comment_payout_ops.append("('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, '{}'::timestamp, {}, {}, {})".format(
               author,
               permlink,
