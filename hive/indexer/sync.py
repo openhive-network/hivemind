@@ -19,7 +19,6 @@ from hive.db.db_state import DbState
 from hive.utils.timer import Timer
 from hive.steem.block.stream import MicroForkException
 
-from hive.indexer.posts import Posts
 from hive.indexer.blocks import Blocks
 from hive.indexer.accounts import Accounts
 from hive.indexer.feed_cache import FeedCache
@@ -46,7 +45,7 @@ def prepare_vops(vops_by_block):
     for blockNum, blockDict in vops_by_block.items():
         vopsList = blockDict['ops']
         date = blockDict['timestamp']
-        preparedVops[blockNum] = Blocks.prepare_vops(Posts.comment_payout_ops, vopsList, date)
+        preparedVops[blockNum] = Blocks.prepare_vops(vopsList, date)
   
     return preparedVops
 
