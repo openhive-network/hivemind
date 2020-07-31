@@ -55,14 +55,14 @@ class Votes:
     inside_flush = False
 
     @classmethod
-    def vote_op(cls, vop, date):
+    def vote_op(cls, vop):
         """ Process vote_operation """
-        voter = vop['value']['voter']
-        author = vop['value']['author']
-        permlink = vop['value']['permlink']
+        voter = vop['voter']
+        author = vop['author']
+        permlink = vop['permlink']
 
         if(cls.inside_flush):
-            log.info("Adding new vote-info into _votes_data dict")
+            log.info("Adding new vote-info into '_votes_data' dict")
             raise "Fatal error"
 
         key = voter + "/" + author + "/" + permlink
@@ -70,10 +70,29 @@ class Votes:
         cls._votes_data[key] = dict(voter=voter,
                                     author=author,
                                     permlink=permlink,
-                                    vote_percent=vop['value']['vote_percent'],
-                                    weight=vop['value']['weight'],
-                                    rshares=vop['value']['rshares'],
-                                    last_update=date)
+                                    vote_percent=0,
+                                    weight=0,
+                                    rshares=0,
+                                    last_update="1969-12-31T23:59:59")
+
+    @classmethod
+    def effective_comment_vote_op(cls, vop, date):
+        """ Process effective_comment_vote_operation """
+        voter = vop['voter']
+        author = vop['author']
+        permlink = vop['permlink']
+
+        if(cls.inside_flush):
+            log.info("Updating data in '_votes_data' using effective comment")
+            raise "Fatal error"
+
+        key = voter + "/" + author + "/" + permlink
+        assert key in cls._votes_data
+
+        cls._votes_data[key]["vote_percent"]  = vop["vote_percent"]
+        cls._votes_data[key]["weight"]        = vop["weight"]
+        cls._votes_data[key]["rshares"]       = vop["rshares"]
+        cls._votes_data[key]["last_update"]   = vop["last_update"]
 
     @classmethod
     def flush(cls):
@@ -106,7 +125,7 @@ class Votes:
                           vote_percent = EXCLUDED.vote_percent,
                           last_update = EXCLUDED.last_update,
                           num_changes = hive_votes.num_changes + 1
-                      WHERE hive_votes.id = EXCLUDED.id
+                      WHERE hive_votes.voter_id = EXCLUDED.voter_id and hive_votes.author_id = EXCLUDED.author_id and hive_votes.permlink_id = EXCLUDED.permlink_id;
                       """
 
             values = []
