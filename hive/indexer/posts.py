@@ -270,6 +270,10 @@ class Posts:
               total_payout_value        = value['total_payout_value']
               curator_payout_value      = value['curator_payout_value']
               beneficiary_payout_value  = value['beneficiary_payout_value']
+
+              payout = sum([ sbd_amount(total_payout_value), sbd_amount(curator_payout_value) ])
+              pending_payout = 0
+
               if author is None:
                 author                    = value['author']
                 permlink                  = value['permlink']
@@ -289,10 +293,6 @@ class Posts:
               if author is None:
                 author                    = value['author']
                 permlink                  = value['permlink']
-
-            if ( total_payout_value is not None and curator_payout_value is not None ):
-              payout = sum([ sbd_amount(total_payout_value), sbd_amount(curator_payout_value) ])
-              pending_payout = 0
 
             #Calculations of all dates
             if ( is_paidout is not None ):
