@@ -104,33 +104,32 @@ class Community:
     _names = {}
 
     @classmethod
-    def register(cls, names, block_date):
+    def register(cls, name, block_date):
         """Block processing: hooks into new account registration.
 
         `Accounts` calls this method with any newly registered names.
         This method checks for any valid community names and inserts them.
         """
 
-        for name in names:
-            #if not re.match(r'^hive-[123]\d{4,6}$', name):
-            if not re.match(r'^hive-[1]\d{4,6}$', name):
-                continue
-            type_id = int(name[5])
-            _id = Accounts.get_id(name)
+        #if not re.match(r'^hive-[123]\d{4,6}$', name):
+        if not re.match(r'^hive-[1]\d{4,6}$', name):
+            return
+        type_id = int(name[5])
+        _id = Accounts.get_id(name)
 
-            # insert community
-            sql = """INSERT INTO hive_communities (id, name, type_id, created_at)
-                          VALUES (:id, :name, :type_id, :date)"""
-            DB.query(sql, id=_id, name=name, type_id=type_id, date=block_date)
+        # insert community
+        sql = """INSERT INTO hive_communities (id, name, type_id, created_at)
+                        VALUES (:id, :name, :type_id, :date)"""
+        DB.query(sql, id=_id, name=name, type_id=type_id, date=block_date)
 
-            # insert owner
-            sql = """INSERT INTO hive_roles (community_id, account_id, role_id, created_at)
-                         VALUES (:community_id, :account_id, :role_id, :date)"""
-            DB.query(sql, community_id=_id, account_id=_id,
-                     role_id=Role.owner.value, date=block_date)
+        # insert owner
+        sql = """INSERT INTO hive_roles (community_id, account_id, role_id, created_at)
+                        VALUES (:community_id, :account_id, :role_id, :date)"""
+        DB.query(sql, community_id=_id, account_id=_id,
+                    role_id=Role.owner.value, date=block_date)
 
-            Notify('new_community', src_id=None, dst_id=_id,
-                   when=block_date, community_id=_id).write()
+        Notify('new_community', src_id=None, dst_id=_id,
+                when=block_date, community_id=_id).write()
 
     @classmethod
     def validated_id(cls, name):

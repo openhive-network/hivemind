@@ -70,7 +70,7 @@ class Accounts:
         return False
 
     @classmethod
-    def register(cls, names, block_date):
+    def register(cls, name, block_date):
         """Block processing: register "candidate" names.
 
         There are four ops which can result in account creation:
@@ -79,24 +79,23 @@ class Accounts:
         the account they name does not already exist!
         """
 
-        # filter out names which already registered
-        new_names = list(filter(lambda n: not cls.exists(n), set(names)))
-        if not new_names:
+        if name is None:
             return
 
-        for name in new_names:
-            DB.query("INSERT INTO hive_accounts (name, created_at) "
-                     "VALUES (:name, :date)", name=name, date=block_date)
+        # filter out names which already registered
+        if cls.exists(name):
+            return
+
+        DB.query("INSERT INTO hive_accounts (name, created_at) VALUES (:name, :date)", name=name, date=block_date)
 
         # pull newly-inserted ids and merge into our map
-        sql = "SELECT name, id FROM hive_accounts WHERE name IN :names"
-        for name, _id in DB.query_all(sql, names=tuple(new_names)):
-            cls._ids[name] = _id
+        sql = "SELECT id FROM hive_accounts WHERE name = :name"
+        cls._ids[name] = DB.query_one(sql, name=name)
 
         # post-insert: pass to communities to check for new registrations
         from hive.indexer.community import Community, START_DATE
         if block_date > START_DATE:
-            Community.register(new_names, block_date)
+            Community.register(name, block_date)
 
     # account cache methods
     # ---------------------
