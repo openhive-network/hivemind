@@ -87,7 +87,7 @@ class Votes:
             cls._votes_data[key]["vote_percent"]  = vop["vote_percent"]
             cls._votes_data[key]["weight"]        = vop["weight"]
             cls._votes_data[key]["rshares"]       = vop["rshares"]
-            cls._votes_data[key]["last_update"]   = vop["last_update"]
+            cls._votes_data[key]["last_update"]   = date
 
     @classmethod
     def flush(cls):
