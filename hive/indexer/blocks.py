@@ -99,7 +99,7 @@ class Blocks:
 
     @staticmethod
     def prepare_vops(vopsList, date):
-        vote_ops = []
+        vote_ops = {}
         comment_payout_ops = {}
         for vop in vopsList:
             key = None
@@ -119,7 +119,8 @@ class Blocks:
                 key = "{}/{}".format(op_value['author'], op_value['permlink'])
                 val = {'payout':op_value['payout'], 'author_rewards':op_value['author_rewards']}
             elif op_type == 'effective_comment_vote_operation':
-                vote_ops.append(vop)
+                key_vote = "{}/{}/{}".format(op_value['voter'], op_value['author'], op_value['permlink'])
+                vote_ops[ key_vote ] = op_value
 
             if key is not None and val is not None:
                 if key in comment_payout_ops:
@@ -199,6 +200,7 @@ class Blocks:
                         Accounts.dirty(op['author']) # lite - rep
                         Accounts.dirty(op['voter']) # lite - stats
                         update_comment_pending_payouts.append([op['author'], op['permlink']])
+                        Votes.vote_op(op)
 
                 # misc ops
                 elif op_type == 'transfer_operation':
@@ -217,7 +219,7 @@ class Blocks:
 
         # virtual ops
         comment_payout_ops = {}
-        vote_ops = []
+        vote_ops = {}
 
         empty_vops = (vote_ops, comment_payout_ops)
 
@@ -227,14 +229,8 @@ class Blocks:
             vops = hived.get_virtual_operations(num)
             (vote_ops, comment_payout_ops) = Blocks.prepare_vops(vops, cls._head_block_date)
 
-        for v in vote_ops:
-            Votes.vote_op(v, cls._head_block_date)
-            op_type = v['type']
-            if op_type in cls.ops_stats:
-                cls.ops_stats[op_type] += 1
-            else:
-                cls.ops_stats[op_type] = 1
-
+        for k, v in vote_ops.items():
+            Votes.effective_comment_vote_op(k, v, cls._head_block_date)
 
         if comment_payout_ops:
             comment_payout_stats = Posts.comment_payout_op(comment_payout_ops, cls._head_block_date)
