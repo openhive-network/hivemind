@@ -143,8 +143,6 @@ class Blocks:
 
                 comment_payout_ops[key][op_type] = op_value
 
-                vote_ops[ key_vote ] = op_value
-
             elif op_type == 'comment_payout_update_operation':
                 ops_stats[ 'comment_payout_update_operation' ] += 1
 
