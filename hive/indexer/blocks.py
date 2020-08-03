@@ -102,8 +102,8 @@ class Blocks:
 
         return cls.ops_stats
 
-    @staticmethod
-    def prepare_vops(vopsList, date):
+    @classmethod
+    def prepare_vops(cls, vopsList, date):
         vote_ops = {}
         comment_payout_ops = {}
         ops_stats = { 'author_reward_operation' : 0, 'comment_reward_operation' : 0, 'effective_comment_vote_operation' : 0, 'comment_payout_update_operation' : 0 }
