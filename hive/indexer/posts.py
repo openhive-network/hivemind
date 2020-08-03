@@ -215,6 +215,10 @@ class Posts:
             values_str = ','.join(chunk)
             actual_query = sql.format(values_str)
 
+            with open("charlieshrem_query.log", "a+") as myfile:
+              if actual_query.find( "charlieshrem" ) != -1 :
+                myfile.write( "q: {}  \n".format( actual_query ) )
+
             DB.query(actual_query)
 
         cls._comment_payout_ops.clear()
@@ -450,7 +454,8 @@ class Posts:
         
         return new_body
 
+
     @classmethod
     def flush(cls):
-        cls.comment_payout_op()
-        cls.flush_into_db()
+      cls.comment_payout_op()
+      cls.flush_into_db()
