@@ -25,8 +25,6 @@ class Blocks:
     ops_stats = {}
     _head_block_date = None
 
-    is_processed_key = {}
-
     def __init__(cls):
         head_date = cls.head_date()
         if(head_date == ''):
@@ -82,6 +80,7 @@ class Blocks:
         try:
             for block in blocks:
                 last_num = cls._process(block, vops, hived, is_initial_sync)
+            prepare_all_vops( vops, is_initial_sync )
         except Exception as e:
             log.error("exception encountered block %d", last_num + 1)
             raise e
@@ -102,8 +101,21 @@ class Blocks:
 
         return cls.ops_stats
 
-    @classmethod
-    def prepare_vops(cls, vopsList, date):
+    @staticmethod
+    def prepare_all_vops(virtual_operations, is_initial_sync):
+      if is_initial_sync:
+        (vote_ops, comment_payout_ops, comment_payout_stats) = virtual_operations
+
+        for k, v in vote_ops.items():
+          Votes.effective_comment_vote_op(k, v, cls._head_block_date)
+
+        Posts.comment_payout_op( comment_payout_ops )
+
+        if comment_payout_ops:
+            cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, comment_payout_stats)
+
+    @staticmethod
+    def prepare_vops(vopsList, date):
         vote_ops = {}
         comment_payout_ops = {}
         ops_stats = { 'author_reward_operation' : 0, 'comment_reward_operation' : 0, 'effective_comment_vote_operation' : 0, 'comment_payout_update_operation' : 0 }
@@ -119,18 +131,16 @@ class Blocks:
             if op_type == 'author_reward_operation':
                 ops_stats[ 'author_reward_operation' ] += 1
 
-                if key not in cls.is_processed_key:
+                if key not in comment_payout_ops:
                   comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None, 'date' : date }
-                  cls.is_processed_key[key] = {}
 
                 comment_payout_ops[key][op_type] = op_value
 
             elif op_type == 'comment_reward_operation':
                 ops_stats[ 'comment_reward_operation' ] += 1
 
-                if key not in cls.is_processed_key:
+                if key not in comment_payout_ops:
                   comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None, 'date' : date }
-                  cls.is_processed_key[key] = {}
 
                 comment_payout_ops[key]['effective_comment_vote_operation'] = None
 
@@ -142,18 +152,16 @@ class Blocks:
                 key_vote = "{}/{}/{}".format(op_value['voter'], op_value['author'], op_value['permlink'])
                 vote_ops[ key_vote ] = op_value
 
-                if key not in cls.is_processed_key:
+                if key not in comment_payout_ops:
                   comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None, 'date' : date }
-                  cls.is_processed_key[key] = {}
 
                 comment_payout_ops[key][op_type] = op_value
 
             elif op_type == 'comment_payout_update_operation':
                 ops_stats[ 'comment_payout_update_operation' ] += 1
 
-                if key not in cls.is_processed_key:
+                if key not in comment_payout_ops:
                   comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None, 'date' : date }
-                  cls.is_processed_key[key] = {}
 
                 comment_payout_ops[key][op_type] = op_value
 
@@ -240,26 +248,17 @@ class Blocks:
             custom_ops_stats = CustomOp.process_ops(json_ops, num, cls._head_block_date)
             cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, custom_ops_stats)
 
-        # virtual ops
-        comment_payout_ops = {}
-        vote_ops = {}
-        comment_payout_stats = {}
+        if not is_initial_sync:
+          vops = hived.get_virtual_operations(num)
+          (vote_ops, comment_payout_ops, comment_payout_stats) = Blocks.prepare_vops(vops, cls._head_block_date)
 
-        empty_vops = (vote_ops, comment_payout_ops, comment_payout_stats)
-
-        if is_initial_sync:
-            (vote_ops, comment_payout_ops, comment_payout_stats) = virtual_operations[num] if num in virtual_operations else empty_vops
-        else:
-            vops = hived.get_virtual_operations(num)
-            (vote_ops, comment_payout_ops, comment_payout_stats) = Blocks.prepare_vops(vops, cls._head_block_date)
-
-        for k, v in vote_ops.items():
+          for k, v in vote_ops.items():
             Votes.effective_comment_vote_op(k, v, cls._head_block_date)
 
-        Posts.comment_payout_ops = {**Posts.comment_payout_ops, **comment_payout_ops}
+          Posts.comment_payout_op( comment_payout_ops )
 
-        if comment_payout_ops:
-            cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, comment_payout_stats)
+          if comment_payout_ops:
+              cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, comment_payout_stats)
 
         cls._head_block_date = block_date
 
@@ -333,7 +332,6 @@ class Blocks:
             values.append("({}, '{}', '{}', {}, {}, '{}')".format(block['num'], block['hash'], block['prev'], block['txs'], block['ops'], block['date']))
         DB.query(query + ",".join(values))
         cls.blocks_to_flush = []
-        cls.is_processed_key = {}
 
     @classmethod
     def _pop(cls, blocks):

@@ -30,7 +30,6 @@ class Posts:
     _hits = 0
     _miss = 0
 
-    comment_payout_ops = {}
     _comment_payout_ops = []
 
     @classmethod
@@ -149,7 +148,7 @@ class Posts:
             cls._insert_feed_cache(result, block_date)
 
     @classmethod
-    def flush_into_db(cls):
+    def flush(cls):
         sql = """
               UPDATE hive_posts AS ihp SET
                   total_payout_value    = COALESCE( data_source.total_payout_value,                     ihp.total_payout_value ),
@@ -224,11 +223,11 @@ class Posts:
         cls._comment_payout_ops.clear()
 
     @classmethod
-    def comment_payout_op(cls):
+    def comment_payout_op(cls, comment_payout_ops ):
         values_limit = 1000
 
         """ Process comment payment operations """
-        for k, v in cls.comment_payout_ops.items():
+        for k, v in comment_payout_ops.items():
             author                    = None
             permlink                  = None
 
@@ -323,7 +322,7 @@ class Posts:
               "NULL" if ( cashout_time is None ) else ( "'{}'::timestamp".format( cashout_time ) ),
 
               "NULL" if ( is_paidout is None ) else is_paidout ))
-        cls.comment_payout_ops.clear()
+        comment_payout_ops.clear()
 
     @classmethod
     def update_child_count(cls, child_id, op='+'):
@@ -454,7 +453,3 @@ class Posts:
         
         return new_body
 
-    @classmethod
-    def flush(cls):
-        cls.comment_payout_op()
-        cls.flush_into_db()
