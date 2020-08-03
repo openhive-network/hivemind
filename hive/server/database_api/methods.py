@@ -216,7 +216,7 @@ async def find_votes(context, params: dict, votes_presentation = VotesPresentati
             hive_votes_accounts_permlinks_view
         WHERE
             author = :author AND permlink = :permlink
-        ORDER BY id
+        ORDER BY voter_id
     """
 
     ret = []
