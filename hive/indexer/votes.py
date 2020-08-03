@@ -83,7 +83,7 @@ class Votes:
             log.info("Updating data in '_votes_data' using effective comment")
             raise "Fatal error"
 
-        assert key in cls._votes_dat
+        assert key in cls._votes_data
 
         cls._votes_data[key]["vote_percent"]  = vop["vote_percent"]
         cls._votes_data[key]["weight"]        = vop["weight"]
