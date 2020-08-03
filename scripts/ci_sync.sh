@@ -29,6 +29,10 @@ kill -SIGINT `pgrep -f "$HIVE_NAME sync"` || true;
 sleep 5
 kill -9 `pgrep -f "$HIVE_NAME sync"` || true;
 
+kill -SIGINT `pgrep -f "$HIVE_NAME server"` || true;
+sleep 5
+kill -9 `pgrep -f "$HIVE_NAME server"` || true;
+
 ls -l dist/*
 rm -rf ./local-site
 mkdir -p `python3 -m site --user-site`
