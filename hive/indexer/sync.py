@@ -25,7 +25,6 @@ from hive.indexer.feed_cache import FeedCache
 from hive.indexer.follow import Follow
 from hive.indexer.community import Community
 from hive.server.common.mutes import Mutes
-from hive.indexer.posts import Posts
 
 log = logging.getLogger(__name__)
 
@@ -46,7 +45,7 @@ def prepare_vops(vops_by_block):
     for blockNum, blockDict in vops_by_block.items():
         vopsList = blockDict['ops']
         date = blockDict['timestamp']
-        preparedVops[blockNum] = Blocks.prepare_vops(Posts.comment_payout_ops, vopsList, date)
+        preparedVops[blockNum] = Blocks.prepare_vops(vopsList, date)
   
     return preparedVops
 
