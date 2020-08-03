@@ -169,7 +169,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
         else:
             sql = sql % """ AND hive_communities.name = :community_name """
 
-        if sort == 'trending' or sort == 'created':
+        if (sort == 'trending' or sort == 'created') and not start_author and not permlink:
                 pinned_sql = SELECT_FRAGMENT + """ WHERE is_pinned AND hive_communities.name = :community_name ORDER BY hive_posts_cache.created_at DESC """
 
     else:
