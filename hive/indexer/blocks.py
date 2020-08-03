@@ -119,18 +119,18 @@ class Blocks:
             if op_type == 'author_reward_operation':
                 ops_stats[ 'author_reward_operation' ] += 1
 
-                if key not in is_processed_key:
+                if key not in cls.is_processed_key:
                   comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None, 'date' : date }
-                  is_processed_key[key] = {}
+                  cls.is_processed_key[key] = {}
 
                 comment_payout_ops[key][op_type] = op_value
 
             elif op_type == 'comment_reward_operation':
                 ops_stats[ 'comment_reward_operation' ] += 1
 
-                if key not in is_processed_key:
+                if key not in cls.is_processed_key:
                   comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None, 'date' : date }
-                  is_processed_key[key] = {}
+                  cls.is_processed_key[key] = {}
 
                 comment_payout_ops[key]['effective_comment_vote_operation'] = None
 
@@ -142,18 +142,18 @@ class Blocks:
                 key_vote = "{}/{}/{}".format(op_value['voter'], op_value['author'], op_value['permlink'])
                 vote_ops[ key_vote ] = op_value
 
-                if key not in is_processed_key:
+                if key not in cls.is_processed_key:
                   comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None, 'date' : date }
-                  is_processed_key[key] = {}
+                  cls.is_processed_key[key] = {}
 
                 comment_payout_ops[key][op_type] = op_value
 
             elif op_type == 'comment_payout_update_operation':
                 ops_stats[ 'comment_payout_update_operation' ] += 1
 
-                if key not in is_processed_key:
+                if key not in cls.is_processed_key:
                   comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None, 'date' : date }
-                  is_processed_key[key] = {}
+                  cls.is_processed_key[key] = {}
 
                 comment_payout_ops[key][op_type] = op_value
 
