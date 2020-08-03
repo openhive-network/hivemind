@@ -215,6 +215,10 @@ class Posts:
             values_str = ','.join(chunk)
             actual_query = sql.format(values_str)
 
+            with open("charlieshrem_query.log", "a+") as myfile:
+              if actual_query.find( "charlieshrem" ) != -1 :
+                myfile.write( "q: {}  \n".format( actual_query ) )
+
             DB.query(actual_query)
 
         cls._comment_payout_ops.clear()
@@ -400,60 +404,6 @@ class Posts:
 
         # force parent child recount when child is deleted
         cls.update_child_count(pid, '-')
-
-    @classmethod
-    def update_comment_pending_payouts(cls, hived, posts):
-        comment_pending_payouts = hived.get_comment_pending_payouts(posts)
-        for comment_pending_payout in comment_pending_payouts:
-            if 'cashout_info' in comment_pending_payout:
-                cpp = comment_pending_payout['cashout_info']
-                sql = """UPDATE
-                            hive_posts
-                        SET
-                            total_payout_value = :total_payout_value,
-                            curator_payout_value = :curator_payout_value,
-                            max_accepted_payout = :max_accepted_payout,
-                            author_rewards = :author_rewards,
-                            children_abs_rshares = :children_abs_rshares,
-                            abs_rshares = :abs_rshares,
-                            vote_rshares = :vote_rshares,
-                            net_votes = :net_votes,
-                            active = :active,
-                            last_payout = :last_payout,
-                            cashout_time = :cashout_time,
-                            max_cashout_time = :max_cashout_time,
-                            percent_hbd = :percent_hbd,
-                            reward_weight = :reward_weight,
-                            allow_replies = :allow_replies,
-                            allow_votes = :allow_votes,
-                            allow_curation_rewards = :allow_curation_rewards
-                        WHERE id = (
-                            SELECT hp.id 
-                            FROM hive_posts hp 
-                            INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
-                            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
-                            WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
-                        )
-                """
-
-                DB.query(sql, total_payout_value=legacy_amount(cpp['total_payout_value']),
-                         curator_payout_value=legacy_amount(cpp['curator_payout_value']),
-                         max_accepted_payout=legacy_amount(cpp['max_accepted_payout']),
-                         author_rewards=cpp['author_rewards'],
-                         children_abs_rshares=cpp['children_abs_rshares'],
-                         abs_rshares=cpp['abs_rshares'],
-                         vote_rshares=cpp['vote_rshares'],
-                         net_votes=cpp['net_votes'],
-                         active=cpp['active'],
-                         last_payout=cpp['last_payout'],
-                         cashout_time=cpp['cashout_time'],
-                         max_cashout_time=cpp['max_cashout_time'],
-                         percent_hbd=cpp['percent_hbd'],
-                         reward_weight=cpp['reward_weight'],
-                         allow_replies=cpp['allow_replies'],
-                         allow_votes=cpp['allow_votes'],
-                         allow_curation_rewards=cpp['allow_curation_rewards'],
-                         author=comment_pending_payout['author'], permlink=comment_pending_payout['permlink'])
 
     @classmethod
     def _insert_feed_cache(cls, result, date):
