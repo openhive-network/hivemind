@@ -70,11 +70,8 @@ class Votes:
                                     last_update="1969-12-31T23:59:59")
 
     @classmethod
-    def effective_comment_vote_op(cls, vop, date):
+    def effective_comment_vote_op(cls, key, vop, date):
         """ Process effective_comment_vote_operation """
-        voter = vop['voter']
-        author = vop['author']
-        permlink = vop['permlink']
 
         if(cls.inside_flush):
             log.info("Updating data in '_votes_data' using effective comment")
@@ -108,7 +105,7 @@ class Votes:
                     INNER JOIN hive_accounts ha_v ON ha_v.name = t.voter
                     INNER JOIN hive_accounts ha_a ON ha_a.name = t.author
                     INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
-                    INNER JOIN hive_posts hp ON hp.author_id = ha_a.id AND hp.permlink_id = hpd_p.id  
+                    INNER JOIN hive_posts hp ON hp.author_id = ha_a.id AND hp.permlink_id = hpd_p.id
                     ) as data_source(post_id, voter_id, author_id, permlink_id, weight, rshares, vote_percent, last_update)
                     ON CONFLICT ON CONSTRAINT hive_votes_ux1 DO
                       UPDATE
