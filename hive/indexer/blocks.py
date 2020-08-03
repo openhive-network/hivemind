@@ -80,7 +80,6 @@ class Blocks:
         try:
             for block in blocks:
                 last_num = cls._process(block, vops, hived, is_initial_sync)
-            cls.prepare_all_vops( vops, is_initial_sync )
         except Exception as e:
             log.error("exception encountered block %d", last_num + 1)
             raise e
@@ -102,22 +101,8 @@ class Blocks:
         return cls.ops_stats
 
     @staticmethod
-    def prepare_all_vops(virtual_operations, is_initial_sync):
-      if is_initial_sync:
-        (vote_ops, comment_payout_ops, comment_payout_stats) = virtual_operations
-
-        for k, v in vote_ops.items():
-          Votes.effective_comment_vote_op(k, v, cls._head_block_date)
-
-        Posts.comment_payout_op( comment_payout_ops )
-
-        if comment_payout_ops:
-            cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, comment_payout_stats)
-
-    @staticmethod
-    def prepare_vops(vopsList, date):
+    def prepare_vops(comment_payout_ops, vopsList, date):
         vote_ops = {}
-        comment_payout_ops = {}
         ops_stats = { 'author_reward_operation' : 0, 'comment_reward_operation' : 0, 'effective_comment_vote_operation' : 0, 'comment_payout_update_operation' : 0 }
 
         for vop in vopsList:
@@ -165,7 +150,7 @@ class Blocks:
 
                 comment_payout_ops[key][op_type] = op_value
 
-        return (vote_ops, comment_payout_ops, ops_stats)
+        return (vote_ops, ops_stats)
 
 
     @classmethod
@@ -248,17 +233,22 @@ class Blocks:
             custom_ops_stats = CustomOp.process_ops(json_ops, num, cls._head_block_date)
             cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, custom_ops_stats)
 
-        if not is_initial_sync:
-          vops = hived.get_virtual_operations(num)
-          (vote_ops, comment_payout_ops, comment_payout_stats) = Blocks.prepare_vops(vops, cls._head_block_date)
+        vote_ops = None
+        comment_payout_stats = None
 
+        if is_initial_sync:
+            if num in virtual_operations:
+              (vote_ops, comment_payout_stats) = Blocks.prepare_vops(Posts.comment_payout_ops, virtual_operations[num], cls._head_block_date)
+        else:
+            vops = hived.get_virtual_operations(num)
+            (vote_ops, comment_payout_stats) = Blocks.prepare_vops(Posts.comment_payout_ops, vops, cls._head_block_date)
+
+        if vote_ops is not None:
           for k, v in vote_ops.items():
-            Votes.effective_comment_vote_op(k, v, cls._head_block_date)
+              Votes.effective_comment_vote_op(k, v, cls._head_block_date)
 
-          Posts.comment_payout_op( comment_payout_ops )
-
-          if comment_payout_ops:
-              cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, comment_payout_stats)
+        if Posts.comment_payout_ops:
+            cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, comment_payout_stats)
 
         cls._head_block_date = block_date
 
