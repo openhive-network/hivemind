@@ -80,7 +80,7 @@ class Blocks:
         try:
             for block in blocks:
                 last_num = cls._process(block, vops, hived, is_initial_sync)
-            prepare_all_vops( vops, is_initial_sync )
+            cls.prepare_all_vops( vops, is_initial_sync )
         except Exception as e:
             log.error("exception encountered block %d", last_num + 1)
             raise e
