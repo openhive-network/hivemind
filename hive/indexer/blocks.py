@@ -248,7 +248,7 @@ class Blocks:
             vops = hived.get_virtual_operations(num)
             (vote_ops, comment_payout_ops, comment_payout_stats) = Blocks.prepare_vops(vops, cls._head_block_date)
 
-        cls.comment_payout_ops = {**Posts.comment_payout_ops, **comment_payout_ops}
+        Posts.comment_payout_ops = {**Posts.comment_payout_ops, **comment_payout_ops}
 
         for k, v in vote_ops.items():
             Votes.effective_comment_vote_op(v, cls._head_block_date)
