@@ -214,11 +214,6 @@ class Posts:
         for chunk in chunks(cls._comment_payout_ops, 1000):
             values_str = ','.join(chunk)
             actual_query = sql.format(values_str)
-
-            with open("charlieshrem_query.log", "a+") as myfile:
-              if actual_query.find( "charlieshrem" ) != -1 :
-                myfile.write( "q: {}  \n".format( actual_query ) )
-
             DB.query(actual_query)
 
         cls._comment_payout_ops.clear()
