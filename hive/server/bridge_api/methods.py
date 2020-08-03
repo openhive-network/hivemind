@@ -196,7 +196,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
         else:
             sql = sql % """ AND hp.community_name = :community_name """
 
-        if sort == 'trending' or sort == 'created':
+        if sort == ('trending' or sort == 'created') and not start_author and not permlink:
             pinned_sql = SQL_TEMPLATE + """ hp.is_pinned AND hp.community_name = :community_name ORDER BY hp.created_at DESC """
 
     else:
