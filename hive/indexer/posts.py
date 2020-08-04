@@ -304,7 +304,7 @@ class Posts:
               author,
               permlink,
               "NULL" if ( total_payout_value is None ) else ( "'{}'".format( legacy_amount(total_payout_value) ) ),
-              "NULL" if ( curators_vesting_payout is None ) else ( "'{}'".format( legacy_amount(curators_vesting_payout) ) ), #curator_payout_value
+              "NULL" if ( curator_payout_value is None ) else ( "'{}'".format( legacy_amount(curator_payout_value) ) ),
               "NULL" if ( author_rewards is None ) else author_rewards,
               "NULL" if ( author_rewards_hive is None ) else author_rewards_hive,
               "NULL" if ( author_rewards_hbd is None ) else author_rewards_hbd,
