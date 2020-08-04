@@ -234,11 +234,11 @@ class Posts:
             author_rewards_vests      = None
 
             # total payout for comment
-            comment_author_reward     = None
+            #comment_author_reward     = None
             curators_vesting_payout   = None
             total_payout_value        = None;
             curator_payout_value      = None;
-            beneficiary_payout_value  = None;
+            #beneficiary_payout_value  = None;
 
             payout                    = None
             pending_payout            = None
@@ -263,11 +263,11 @@ class Posts:
 
             if v[ 'comment_reward_operation' ] is not None:
               value = v[ 'comment_reward_operation' ]
-              comment_author_reward     = value['payout']
+              #comment_author_reward     = value['payout']
               author_rewards            = value['author_rewards']
               total_payout_value        = value['total_payout_value']
               curator_payout_value      = value['curator_payout_value']
-              beneficiary_payout_value  = value['beneficiary_payout_value']
+              #beneficiary_payout_value  = value['beneficiary_payout_value']
 
               payout = sum([ sbd_amount(total_payout_value), sbd_amount(curator_payout_value) ])
               pending_payout = 0
@@ -286,6 +286,16 @@ class Posts:
             if v[ 'comment_payout_update_operation' ] is not None:
               value = v[ 'comment_payout_update_operation' ]
               is_paidout                = True
+
+              #Payout didn't generate any payments
+              if v[ 'comment_reward_operation' ] is None:
+                author_rewards            = 0
+                total_payout_value        = "0.000 HBD"
+                curator_payout_value      = "0.000 HBD"
+
+                payout = 0
+                pending_payout = 0
+
               if author is None:
                 author                    = value['author']
                 permlink                  = value['permlink']
