@@ -161,7 +161,6 @@ class Posts:
                   payout                = COALESCE( CAST( data_source.payout as DECIMAL ),              ihp.payout ),
                   pending_payout        = COALESCE( CAST( data_source.pending_payout as DECIMAL ),      ihp.pending_payout ),
                   payout_at             = COALESCE( CAST( data_source.payout_at as TIMESTAMP ),         ihp.payout_at ),
-                  updated_at            = data_source.updated_at,
                   last_payout           = COALESCE( CAST( data_source.last_payout as TIMESTAMP ),       ihp.last_payout ),
                   cashout_time          = COALESCE( CAST( data_source.cashout_time as TIMESTAMP ),      ihp.cashout_time ),
                   is_paidout            = COALESCE( CAST( data_source.is_paidout as BOOLEAN ),          ihp.is_paidout )
@@ -177,7 +176,6 @@ class Posts:
                       t.payout,
                       t.pending_payout,
                       t.payout_at,
-                      t.updated_at,
                       t.last_payout,
                       t.cashout_time,
                       t.is_paidout
@@ -196,7 +194,6 @@ class Posts:
                       payout,
                       pending_payout,
                       payout_at,
-                      updated_at,
                       last_payout,
                       cashout_time,
                       is_paidout)
@@ -310,7 +307,7 @@ class Posts:
                 payout_at = date  #Here should be `cashout_time`
                 last_payout = date
 
-            cls._comment_payout_ops.append("('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, '{}'::timestamp, {}, {}, {})".format(
+            cls._comment_payout_ops.append("('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(
               author,
               permlink,
               "NULL" if ( total_payout_value is None ) else ( "'{}'".format( legacy_amount(total_payout_value) ) ),
@@ -323,7 +320,6 @@ class Posts:
               "NULL" if ( pending_payout is None ) else pending_payout,
 
               "NULL" if ( payout_at is None ) else ( "'{}'::timestamp".format( payout_at ) ),
-              date,#updated_at
               "NULL" if ( last_payout is None ) else ( "'{}'::timestamp".format( last_payout ) ),
               "NULL" if ( cashout_time is None ) else ( "'{}'::timestamp".format( cashout_time ) ),
 
