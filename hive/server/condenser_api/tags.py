@@ -29,10 +29,10 @@ async def get_trending_tags(context, start_tag: str = '', limit: int = 250):
 
     if start_tag:
         seek = """
-          HAVING SUM(payout) <= (
-            SELECT SUM(payout)
+          HAVING SUM(payout + pending_payout) <= (
+            SELECT SUM(payout + pending_payout)
               FROM hive_posts
-             WHERE is_paidout = '0'
+             WHERE is_paidout = '0' and is_deleted = false
                AND category_id = (SELECT id FROM hive_category_data WHERE category = :start_tag))
         """
     else:
@@ -42,11 +42,11 @@ async def get_trending_tags(context, start_tag: str = '', limit: int = 250):
       SELECT (SELECT category FROM hive_category_data WHERE id = category_id) as category,
              COUNT(*) AS total_posts,
              SUM(CASE WHEN depth = 0 THEN 1 ELSE 0 END) AS top_posts,
-             SUM(payout) AS total_payouts
+             SUM(payout + pending_payout) AS total_payouts
         FROM hive_posts
-       WHERE is_paidout = '0'
+       WHERE is_paidout = '0' and is_deleted = false
     GROUP BY category %s
-    ORDER BY SUM(payout) DESC
+    ORDER BY SUM(payout + pending_payout) DESC
        LIMIT :limit
     """ % seek
 

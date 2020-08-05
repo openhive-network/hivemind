@@ -39,23 +39,23 @@ class PayoutStats:
         sql = """
             SELECT community_id,
                    ha.name as author,
-                   SUM(payout) payout,
+                   SUM( payout + pending_payout ) payout,
                    COUNT(*) posts,
                    NULL authors
               FROM hive_posts
               INNER JOIN hive_accounts ha ON ha.id = hive_posts.author_id
-             WHERE is_paidout = '0'
+             WHERE is_paidout = '0' and is_deleted = false
           GROUP BY community_id, author
 
              UNION ALL
 
             SELECT community_id,
                    NULL author,
-                   SUM(payout) payout,
+                   SUM( payout + pending_payout ) payout,
                    COUNT(*) posts,
                    COUNT(DISTINCT(author_id)) authors
               FROM hive_posts
-             WHERE is_paidout = '0'
+             WHERE is_paidout = '0' and is_deleted = false
           GROUP BY community_id
         """
 
