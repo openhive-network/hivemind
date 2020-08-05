@@ -29,6 +29,12 @@ if [ -f hive_server.pid ]; then
   rm hive_server.pid;
 fi
 
+fuser $HIVEMIND_HTTP_PORT/tcp -k -INT || true
+sleep 5
+
+fuser $HIVEMIND_HTTP_PORT/tcp -k -KILL || true
+sleep 5
+
 ls -l dist/*
 rm -rf ./local-site
 mkdir -p `python3 -m site --user-site`

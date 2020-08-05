@@ -7,6 +7,7 @@ HIVEMIND_DB_NAME=$1
 HIVEMIND_POSTGRESQL_CONNECTION_STRING=$2
 HIVEMIND_SOURCE_HIVED_URL=$3
 HIVEMIND_MAX_BLOCK=$4
+HIVEMIND_HTTP_PORT=$5
 
 PYTHONUSERBASE=./local-site
 
@@ -32,6 +33,12 @@ kill -9 `pgrep -f "$HIVE_NAME sync"` || true;
 kill -SIGINT `pgrep -f "$HIVE_NAME server"` || true;
 sleep 5
 kill -9 `pgrep -f "$HIVE_NAME server"` || true;
+
+fuser $HIVEMIND_HTTP_PORT/tcp -k -INT || true
+sleep 5
+
+fuser $HIVEMIND_HTTP_PORT/tcp -k -KILL || true
+sleep 5
 
 ls -l dist/*
 rm -rf ./local-site
