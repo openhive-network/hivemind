@@ -65,8 +65,9 @@ class Conf():
         from sys import argv
         root.info("Used command line args: %s", " ".join(argv[1:]))
 
-        args_list = ["--" + k + " " + str(v) for k,v in vars(args).items()]
-        root.info("Full command line args: %s", " ".join(args_list))
+        # uncomment for full list of program args
+        #args_list = ["--" + k + " " + str(v) for k,v in vars(args).items()]
+        #root.info("Full command line args: %s", " ".join(args_list))
 
         if conf.mode() == 'server':
             #DbStats.SLOW_QUERY_MS = 750

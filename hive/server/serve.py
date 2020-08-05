@@ -223,7 +223,23 @@ def run_server(conf):
         app['db'].close()
         await app['db'].wait_closed()
 
+    async def show_info(app):
+        sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
+        database_head_block = await app['db'].query_one(sql)
+
+        import pkg_resources
+        hivemind_version, hivemind_git_rev = pkg_resources.get_distribution("hivemind").version.split("+")
+
+        log.info("hivemind_version : %s", hivemind_version)
+        log.info("hivemind_git_rev : %s", hivemind_git_rev)
+
+        from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
+        log.info("database_schema_version : %s", SCHEMA_DB_VERSION)
+        
+        log.info("database_head_block : %s", database_head_block)
+
     app.on_startup.append(init_db)
+    app.on_startup.append(show_info)
     app.on_cleanup.append(close_db)
 
     async def head_age(request):
