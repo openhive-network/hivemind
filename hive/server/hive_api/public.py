@@ -10,6 +10,7 @@ from hive.server.condenser_api.cursor import get_followers, get_following
 from hive.server.bridge_api.cursor import (
     pids_by_blog, pids_by_comments, pids_by_feed_with_reblog)
 
+from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
 
 log = logging.getLogger(__name__)
 
@@ -108,3 +109,21 @@ async def list_account_feed(context, account, limit=10, observer=None, last_post
         if rby: post['reblogged_by'] = list(rby)
 
     return posts
+
+async def get_info(context):
+    db = context['db']
+
+    sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
+    database_head_block = await db.query_one(sql)
+
+    import pkg_resources
+    hivemind_version, hivemind_git_rev = pkg_resources.get_distribution("hivemind").version.split("+")
+
+    ret = {
+        "hivemind_version" : hivemind_version,
+        "hivemind_git_rev" : hivemind_git_rev,
+        "database_schema_version" : SCHEMA_DB_VERSION,
+        "database_head_block" : database_head_block
+    }
+
+    return ret

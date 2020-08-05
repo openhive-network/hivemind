@@ -27,6 +27,7 @@ from hive.server.bridge_api.support import get_post_header as bridge_api_get_pos
 from hive.server.hive_api import community as hive_api_community
 from hive.server.hive_api import notify as hive_api_notify
 from hive.server.hive_api import stats as hive_api_stats
+from hive.server.hive_api.public import get_info as hive_api_get_info
 
 from hive.server.follow_api import methods as follow_api
 from hive.server.tags_api import methods as tags_api
@@ -61,6 +62,8 @@ def build_methods():
     methods.add(**{'hive.' + method.__name__: method for method in (
         db_head_state,
     )})
+
+    methods.add(**{'hive.get_info' : hive_api_get_info})
 
     methods.add(**{'condenser_api.' + method.__name__: method for method in (
         condenser_api.get_followers,
