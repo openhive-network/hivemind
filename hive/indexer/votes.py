@@ -106,11 +106,12 @@ class Votes:
                 ON CONFLICT ON CONSTRAINT hive_votes_ux1 DO
                 UPDATE
                   SET
-                    weight = (CASE (SELECT hp.is_paidout FROM hive_posts hp WHERE hp.id = EXCLUDED.id) WHEN true THEN hive_votes.weight ELSE EXCLUDED.weight END),
-                    rshares = (CASE (SELECT hp.is_paidout FROM hive_posts hp WHERE hp.id = EXCLUDED.id) WHEN true THEN hive_votes.rshares ELSE EXCLUDED.rshares END),
+                    weight = (CASE (SELECT hp.is_paidout FROM hive_posts hp WHERE hp.id = EXCLUDED.post_id) WHEN true THEN hive_votes.weight ELSE EXCLUDED.weight END),
+                    rshares = (CASE (SELECT hp.is_paidout FROM hive_posts hp WHERE hp.id = EXCLUDED.post_id) WHEN true THEN hive_votes.rshares ELSE EXCLUDED.rshares END),
                     vote_percent = EXCLUDED.vote_percent,
                     last_update = EXCLUDED.last_update,
                     num_changes = hive_votes.num_changes + 1
+                  WHERE hive_votes.voter_id = EXCLUDED.voter_id and hive_votes.author_id = EXCLUDED.author_id and hive_votes.permlink_id = EXCLUDED.permlink_id;
                 """
 
             values = []
