@@ -207,7 +207,7 @@ class Blocks:
                     if not is_initial_sync:
                         Accounts.dirty(op['author']) # lite - rep
                         Accounts.dirty(op['voter']) # lite - stats
-                    Votes.vote_op(op)
+                    Votes.vote_op(op, cls._head_block_date)
 
                 # misc ops
                 elif op_type == 'transfer_operation':
