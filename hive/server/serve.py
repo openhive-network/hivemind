@@ -230,8 +230,9 @@ def run_server(conf):
         import pkg_resources
         hivemind_version, hivemind_git_rev = pkg_resources.get_distribution("hivemind").version.split("+")
 
-        log.info("hivemind_version : %s", hivemind_version)
-        log.info("hivemind_git_rev : %s", hivemind_git_rev)
+        from hive.version import VERSION, GIT_REVISION
+        log.info("hivemind_version : %s", VERSION)
+        log.info("hivemind_git_rev : %s", GIT_REVISION)
 
         from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
         log.info("database_schema_version : %s", SCHEMA_DB_VERSION)

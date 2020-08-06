@@ -116,12 +116,11 @@ async def get_info(context):
     sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
     database_head_block = await db.query_one(sql)
 
-    import pkg_resources
-    hivemind_version, hivemind_git_rev = pkg_resources.get_distribution("hivemind").version.split("+")
+    from hive.version import VERSION, GIT_REVISION
 
     ret = {
-        "hivemind_version" : hivemind_version,
-        "hivemind_git_rev" : hivemind_git_rev,
+        "hivemind_version" : VERSION,
+        "hivemind_git_rev" : GIT_REVISION,
         "database_schema_version" : SCHEMA_DB_VERSION,
         "database_head_block" : database_head_block
     }
