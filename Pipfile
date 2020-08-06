@@ -16,6 +16,7 @@ aiohttp = "*"
 aiopg = "*"
 "psycopg2-binary" = "*"
 "diff-match-patch" = "*"
+"gitpython" = "*"
 
 [dev-packages]
 

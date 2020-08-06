@@ -61,8 +61,13 @@ class Conf():
         # configure logger and print config
         root = logging.getLogger()
         root.setLevel(conf.log_level())
-        root.info("loaded configuration:\n%s",
-                  _sanitized_conf(parser))
+
+        from sys import argv
+        root.info("Used command line args: %s", " ".join(argv[1:]))
+
+        # uncomment for full list of program args
+        #args_list = ["--" + k + " " + str(v) for k,v in vars(args).items()]
+        #root.info("Full command line args: %s", " ".join(args_list))
 
         if conf.mode() == 'server':
             #DbStats.SLOW_QUERY_MS = 750

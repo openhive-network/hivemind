@@ -130,3 +130,6 @@ tests/failed_blocks/
 
 # pyrest tests
 *.out.json
+
+# version.py
+version.py
