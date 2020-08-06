@@ -27,6 +27,7 @@ from hive.server.bridge_api.support import get_post_header as bridge_api_get_pos
 from hive.server.hive_api import community as hive_api_community
 from hive.server.hive_api import notify as hive_api_notify
 from hive.server.hive_api import stats as hive_api_stats
+from hive.server.hive_api.public import get_info as hive_api_get_info
 
 from hive.server.follow_api import methods as follow_api
 from hive.server.tags_api import methods as tags_api
@@ -61,6 +62,8 @@ def build_methods():
     methods.add(**{'hive.' + method.__name__: method for method in (
         db_head_state,
     )})
+
+    methods.add(**{'hive.get_info' : hive_api_get_info})
 
     methods.add(**{'condenser_api.' + method.__name__: method for method in (
         condenser_api.get_followers,
@@ -220,7 +223,24 @@ def run_server(conf):
         app['db'].close()
         await app['db'].wait_closed()
 
+    async def show_info(app):
+        sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
+        database_head_block = await app['db'].query_one(sql)
+
+        import pkg_resources
+        hivemind_version, hivemind_git_rev = pkg_resources.get_distribution("hivemind").version.split("+")
+
+        from hive.version import VERSION, GIT_REVISION
+        log.info("hivemind_version : %s", VERSION)
+        log.info("hivemind_git_rev : %s", GIT_REVISION)
+
+        from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
+        log.info("database_schema_version : %s", SCHEMA_DB_VERSION)
+        
+        log.info("database_head_block : %s", database_head_block)
+
     app.on_startup.append(init_db)
+    app.on_startup.append(show_info)
     app.on_cleanup.append(close_db)
 
     async def head_age(request):
