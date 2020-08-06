@@ -860,27 +860,6 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-        DROP FUNCTION IF EXISTS update_all_posts_hot_and_trend
-        ;
-        CREATE OR REPLACE FUNCTION update_all_posts_hot_and_trend()
-            	RETURNS void
-            	LANGUAGE plpgsql
-       	AS
-       	$$
-       	DECLARE
-       		post RECORD;
-       	BEGIN
-			FOR post IN
-        			SELECT id FROM hive_posts WHERE id > 0
-    			LOOP
-        			PERFORM update_hot_and_trend(post.id);
-    			END LOOP;
-       	END;
-       	$$
-        """
-    db.query_no_return(sql)
-
-    sql = """
         DROP TYPE IF EXISTS author_permlink_type
         ;
         CREATE TYPE author_permlink_type as (author VARCHAR, permlink VARCHAR)

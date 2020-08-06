@@ -8,7 +8,19 @@ DB = Db.instance()
 def update_all_hot_and_tranding():
     """Calculate and set hot and trending values of all posts"""
     sql = """
-        SELECT update_all_posts_hot_and_trend()
+        UPDATE hive_posts
+        SET (sc_hot,sc_trend)=
+            (
+                SELECT * FROM calculate_hot_and_tranding(
+                (
+                    SELECT COALESCE(SUM(rshares),0)
+                    FROM hive_votes
+	                WHERE post_id=hive_posts.id
+                 )
+                 , created_at
+             )
+	    )
+        WHERE id > 0
         """
     DB.query_no_return(sql)
 
