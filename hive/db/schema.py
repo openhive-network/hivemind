@@ -729,12 +729,6 @@ def setup(db):
     db.query_no_return(sql)
 
    # hot and tranding functions
-    sql = """
-        DROP TYPE IF EXISTS hot_and_trend CASCADE
-        ;
-        CREATE TYPE hot_and_trend AS (hot double precision, trend double precision)
-        """
-    db.query_no_return(sql)
 
     sql = """
        DROP FUNCTION IF EXISTS date_diff CASCADE
@@ -782,62 +776,69 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-        DROP FUNCTION IF EXISTS calculate_hot_and_tranding CASCADE
-        ;
-        CREATE OR REPLACE FUNCTION calculate_hot_and_tranding( IN _rshares NUMERIC, IN _post_created_at TIMESTAMP )
-    	RETURNS hot_and_trend
-    	LANGUAGE plpgsql IMMUTABLE
-    	AS
-     	$$
-     	DECLARE
-     		sec_from_epoch INT = 0;
-     		time_factor_for_trend double precision;
-     		time_factor_for_hot double precision;
-     		mod_score double precision;
-     		sign double precision;
-     		hot double precision;
-     		trend double precision;
-     		result hot_and_trend;
-     	BEGIN
-     		sec_from_epoch  = date_diff( 'second', CAST('19700101' AS TIMESTAMP), _post_created_at );
-     		time_factor_for_trend = sec_from_epoch/240000.0;
-     		time_factor_for_hot = sec_from_epoch/10000.0;
-     		mod_score := _rshares / 10000000.0;
-     		IF ( mod_score > 0 )
-     		THEN
-     			sign := 1;
-     		ELSE
-     			sign := -1;
-     		END IF;
-     		mod_score = log( greatest( abs(mod_score), 1 ) );
-     		trend = sign * mod_score + time_factor_for_trend;
-     		hot = sign * mod_score + time_factor_for_hot;
-     		SELECT INTO result hot, trend;
-    		return result;
-     	END;
-     	$$
-    """
+          DROP FUNCTION IF EXISTS public.calculate_hot_and_tranding(hive_votes.rshares%TYPE, _post_created_at hive_posts.created_at%TYPE, boolean);
+
+          CREATE OR REPLACE FUNCTION public.calculate_hot_and_tranding(
+            _rshares hive_votes.rshares%TYPE,
+            _post_created_at hive_posts.created_at%TYPE,
+            _calculate_hot boolean)
+              RETURNS real
+              LANGUAGE 'plpgsql'
+              IMMUTABLE 
+          AS $BODY$
+          DECLARE
+            sec_from_epoch INT = 0;
+            time_factor_for_trend double precision;
+            time_factor_for_hot double precision;
+            mod_score double precision;
+            sign double precision;
+            hot hive_posts.sc_hot%TYPE;
+            trend hive_posts.sc_trend%TYPE;
+          BEGIN
+            sec_from_epoch  = date_diff( 'second', CAST('19700101' AS TIMESTAMP), _post_created_at );
+            time_factor_for_trend = sec_from_epoch/240000.0;
+            time_factor_for_hot = sec_from_epoch/10000.0;
+            mod_score := _rshares / 10000000.0;
+            IF ( mod_score > 0 )
+            THEN
+              sign := 1;
+            ELSE
+              sign := -1;
+            END IF;
+            mod_score = log( greatest( abs(mod_score), 1 ) );
+            trend = sign * mod_score + time_factor_for_trend;
+            hot = sign * mod_score + time_factor_for_hot;
+          if _calculate_hot
+        Then
+          return  hot;
+        else
+          return trend;
+        end if;
+          END;
+          $BODY$;
+
+          """
     db.query_no_return(sql)
 
     sql = """
             DROP FUNCTION IF EXISTS set_hot_and_trend CASCADE
             ;
             CREATE OR REPLACE FUNCTION update_hot_and_trend( IN _post_id BIGINT )
-                  	RETURNS void
-                  	LANGUAGE plpgsql
-         	AS
-         	$$
-         	DECLARE
-         		sum_of_rshares NUMERIC;
-         		created_time TIMESTAMP;
-         		trending hot_and_trend;
-         	BEGIN
-         		SELECT  COALESCE(SUM(rshares),0) INTO sum_of_rshares FROM hive_votes_accounts_permlinks_view WHERE post_id=_post_id;
-         		SELECT created_at INTO created_time FROM hive_posts WHERE id = _post_id;
-         		trending = calculate_hot_and_tranding(sum_of_rshares, created_time);
-         		UPDATE hive_posts SET sc_trend=trending.trend, sc_hot=trending.hot WHERE id=_post_id;
-         	END;
-         	$$
+                    RETURNS void
+                    LANGUAGE plpgsql
+           AS
+           $$
+           DECLARE
+             sum_of_rshares NUMERIC;
+             created_time TIMESTAMP;
+             trending hot_and_trend;
+           BEGIN
+             SELECT  COALESCE(SUM(rshares),0) INTO sum_of_rshares FROM hive_votes_accounts_permlinks_view WHERE post_id=_post_id;
+             SELECT created_at INTO created_time FROM hive_posts WHERE id = _post_id;
+             trending = calculate_hot_and_tranding(sum_of_rshares, created_time);
+             UPDATE hive_posts SET sc_trend=trending.trend, sc_hot=trending.hot WHERE id=_post_id;
+           END;
+           $$
     """
     db.query_no_return(sql)
 
@@ -845,17 +846,17 @@ def setup(db):
         DROP FUNCTION IF EXISTS update_post_hot_and_trend
         ;
         CREATE OR REPLACE FUNCTION update_post_hot_and_trend( IN _author VARCHAR, IN _permlink VARCHAR )
-      	RETURNS void
-      	LANGUAGE plpgsql
-    	AS
-    	$$
-    	DECLARE
-    		post_id_value BIGINT;
-    	BEGIN
-    		SELECT id INTO post_id_value FROM hive_posts_view WHERE author=_author AND permlink=_permlink;
-    		PERFORM update_hot_and_trend(post_id_value);
-    	END;
-    	$$
+        RETURNS void
+        LANGUAGE plpgsql
+      AS
+      $$
+      DECLARE
+        post_id_value BIGINT;
+      BEGIN
+        SELECT id INTO post_id_value FROM hive_posts_view WHERE author=_author AND permlink=_permlink;
+        PERFORM update_hot_and_trend(post_id_value);
+      END;
+      $$
         """
     db.query_no_return(sql)
 
@@ -867,16 +868,16 @@ def setup(db):
         DROP FUNCTION IF EXISTS update_posts_hot_and_trend( arr author_permlink_type[] )
         ;
         CREATE OR REPLACE FUNCTION update_posts_hot_and_trend( arr author_permlink_type[] )
-	       RETURNS void
+         RETURNS void
         LANGUAGE plpgsql
         AS
         $$
         DECLARE
-	       post author_permlink_type;
+         post author_permlink_type;
         BEGIN
             FOREACH post IN ARRAY $1
                 LOOP
-		             PERFORM update_post_hot_and_trend(post.author, post.permlink);
+                 PERFORM update_post_hot_and_trend(post.author, post.permlink);
                 END LOOP;
         END;
         $$
