@@ -238,7 +238,7 @@ class Blocks:
 
         if vote_ops is not None:
           for k, v in vote_ops.items():
-              Votes.effective_comment_vote_op(k, v, cls._head_block_date)
+            Votes.effective_comment_vote_op(k, v)
 
         if Posts.comment_payout_ops:
             cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, comment_payout_stats)
