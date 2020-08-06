@@ -80,6 +80,7 @@ async def get_discussion(context, author, permlink, observer=None):
         FROM child_posts 
         INNER JOIN hive_posts_view hpv ON (hpv.id = child_posts.id)
         WHERE NOT hpv.is_deleted AND NOT hpv.is_muted
+        order by child_posts.parent_id, post_id
         LIMIT 2000
     """
 
