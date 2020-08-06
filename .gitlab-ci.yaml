@@ -71,7 +71,7 @@ hivemind_sync:
     PYTHONUSERBASE: ./local-site
 
   script:
-    - pip3 install --user --upgrade pip setuptools
+    - pip3 install --user --upgrade pip setuptools gitpython
     - scripts/ci_sync.sh "$HIVEMIND_DB_NAME" "$HIVEMIND_POSTGRESQL_CONNECTION_STRING" "$HIVEMIND_SOURCE_HIVED_URL" $HIVEMIND_MAX_BLOCK $HIVEMIND_HTTP_PORT
 
   artifacts:
