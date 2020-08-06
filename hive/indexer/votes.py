@@ -62,16 +62,21 @@ class Votes:
 
         key = voter + "/" + author + "/" + permlink
 
-        cls._votes_data[key] = dict(voter=voter,
-                                    author=author,
-                                    permlink=permlink,
-                                    vote_percent=weight,
-                                    weight=0,
-                                    rshares=0,
-                                    last_update=date)
+        if key in cls._votes_data:
+            cls._votes_data[key]["vote_percent"]=weight
+            cls._votes_data[key]["last_update"]=date
+        else:
+            cls._votes_data[key] = dict(voter=voter,
+                                        author=author,
+                                        permlink=permlink,
+                                        vote_percent=weight,
+                                        weight=0,
+                                        rshares=0,
+                                        last_update=date,
+                                        is_effective=False)
 
     @classmethod
-    def effective_comment_vote_op(cls, key, vop, date):
+    def effective_comment_vote_op(cls, key, vop):
         """ Process effective_comment_vote_operation """
 
         if(cls.inside_flush):
@@ -80,9 +85,9 @@ class Votes:
 
         assert key in cls._votes_data
 
-        cls._votes_data[key]["weight"]        = vop["weight"]
-        cls._votes_data[key]["rshares"]       = vop["rshares"]
-        cls._votes_data[key]["last_update"]   = date
+        cls._votes_data[key]["weight"]       = vop["weight"]
+        cls._votes_data[key]["rshares"]      = vop["rshares"]
+        cls._votes_data[key]["is_effective"] = True
 
     @classmethod
     def flush(cls):
@@ -106,32 +111,49 @@ class Votes:
                 ON CONFLICT ON CONSTRAINT hive_votes_ux1 DO
                 UPDATE
                   SET
-                    weight = (CASE (SELECT hp.is_paidout FROM hive_posts hp WHERE hp.id = EXCLUDED.post_id) WHEN true THEN hive_votes.weight ELSE EXCLUDED.weight END),
-                    rshares = (CASE (SELECT hp.is_paidout FROM hive_posts hp WHERE hp.id = EXCLUDED.post_id) WHEN true THEN hive_votes.rshares ELSE EXCLUDED.rshares END),
+                    weight = {}.weight,
+                    rshares = {}.rshares,
                     vote_percent = EXCLUDED.vote_percent,
                     last_update = EXCLUDED.last_update,
                     num_changes = hive_votes.num_changes + 1
                   WHERE hive_votes.voter_id = EXCLUDED.voter_id and hive_votes.author_id = EXCLUDED.author_id and hive_votes.permlink_id = EXCLUDED.permlink_id;
                 """
+            # WHERE clause above seems superfluous (and works all the same without it, at least up to 5mln)
 
-            values = []
+            values_skip = []
+            values_override = []
             values_limit = 1000
 
             for _, vd in cls._votes_data.items():
+                values = None
+                on_conflict_data_source = None
+
+                if vd['is_effective']:
+                    values = values_override
+                    on_conflict_data_source = 'EXCLUDED'
+                else:
+                    values = values_skip
+                    on_conflict_data_source = 'hive_votes'
+
                 values.append("('{}', '{}', '{}', {}, {}, {}, '{}'::timestamp)".format(
                     vd['voter'], vd['author'], vd['permlink'], vd['weight'], vd['rshares'], vd['vote_percent'], vd['last_update']))
 
                 if len(values) >= values_limit:
                     values_str = ','.join(values)
-                    actual_query = sql.format(values_str)
+                    actual_query = sql.format(values_str,on_conflict_data_source,on_conflict_data_source)
                     DB.query(actual_query)
                     values.clear()
 
-            if len(values) > 0:
-                values_str = ','.join(values)
-                actual_query = sql.format(values_str)
+            if len(values_skip) > 0:
+                values_str = ','.join(values_skip)
+                actual_query = sql.format(values_str,'hive_votes','hive_votes')
                 DB.query(actual_query)
-                values.clear()
+                values_skip.clear()
+            if len(values_override) > 0:
+                values_str = ','.join(values_override)
+                actual_query = sql.format(values_str,'EXCLUDED','EXCLUDED')
+                DB.query(actual_query)
+                values_override.clear()
 
             cls._votes_data.clear()
         cls.inside_flush = False
