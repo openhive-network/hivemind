@@ -23,14 +23,17 @@ class Blocks:
     """Processes blocks, dispatches work, manages `hive_blocks` table."""
     blocks_to_flush = []
     ops_stats = {}
-    _head_block_date = None
+    _head_block_date = None # timestamp of last fully processed block ("previous block")
+    _current_block_date = None # timestamp of block currently being processes ("current block")
 
     def __init__(cls):
         head_date = cls.head_date()
         if(head_date == ''):
             cls._head_block_date = None
+            cls._current_block_date = None
         else:
             cls._head_block_date = head_date
+            cls._current_block_date = head_date
 
     @staticmethod
     def merge_ops_stats(od1, od2):
@@ -157,12 +160,15 @@ class Blocks:
         """Process a single block. Assumes a trx is open."""
         #pylint: disable=too-many-branches
         num = cls._push(block)
-        block_date = block['timestamp']
+        cls._current_block_date = block['timestamp']
 
         # head block date shall point to last imported block (not yet current one) to conform hived behavior.
         # that's why operations processed by node are included in the block being currently produced, so its processing time is equal to last produced block.
+        # unfortunately it is not true to all operations, most likely in case of dates that used to come from
+        # FatNode where it supplemented it with its-current head block, since it was already past block processing,
+        # it saw later block (equal to _current_block_date here)
         if cls._head_block_date is None:
-            cls._head_block_date = block_date
+            cls._head_block_date = cls._current_block_date
 
         json_ops = []
         update_comment_pending_payouts = []
@@ -231,10 +237,10 @@ class Blocks:
 
         if is_initial_sync:
             if num in virtual_operations:
-              (vote_ops, comment_payout_stats) = Blocks.prepare_vops(Posts.comment_payout_ops, virtual_operations[num], cls._head_block_date)
+              (vote_ops, comment_payout_stats) = Blocks.prepare_vops(Posts.comment_payout_ops, virtual_operations[num], cls._current_block_date)
         else:
             vops = hived.get_virtual_operations(num)
-            (vote_ops, comment_payout_stats) = Blocks.prepare_vops(Posts.comment_payout_ops, vops, cls._head_block_date)
+            (vote_ops, comment_payout_stats) = Blocks.prepare_vops(Posts.comment_payout_ops, vops, cls._current_block_date)
 
         if vote_ops is not None:
           for k, v in vote_ops.items():
@@ -243,7 +249,7 @@ class Blocks:
         if Posts.comment_payout_ops:
             cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, comment_payout_stats)
 
-        cls._head_block_date = block_date
+        cls._head_block_date = cls._current_block_date
 
         return num
 
@@ -365,7 +371,7 @@ class Blocks:
             if post_ids:
                 DB.query("DELETE FROM hive_post_tags   WHERE post_id IN :ids", ids=post_ids)
                 DB.query("DELETE FROM hive_posts       WHERE id      IN :ids", ids=post_ids)
-                DB.query("DELETE FROM hive_posts_data  WHERE id      IN :ids", ids=post_ids)
+                DB.query("DELETE FROM hive_post_data   WHERE id      IN :ids", ids=post_ids)
 
             DB.query("DELETE FROM hive_payments    WHERE block_num = :num", num=num)
             DB.query("DELETE FROM hive_blocks      WHERE num = :num", num=num)

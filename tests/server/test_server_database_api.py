@@ -7,8 +7,8 @@ def client():
   return SteemClient(url='https://api.hive.blog')
 
 def test_list_comments_by_cashout_time(client):
-  reference_data = await client.list_comments({"start":["1990-01-01T00:00:00","steemit","firstpost"],"limit":10,"order":"by_cashout_time"})
-  test_data = await list_comments(["1990-01-01T00:00:00","steemit","firstpost"],10,"by_cashout_time")
+  reference_data = await client.list_comments({"start":["1970-01-01T00:00:00","steemit","firstpost"],"limit":10,"order":"by_cashout_time"})
+  test_data = await list_comments(["1970-01-01T00:00:00","steemit","firstpost"],10,"by_cashout_time")
   assert reference_data
   assert test_data
   assert len(reference_data) == len(test_data)
