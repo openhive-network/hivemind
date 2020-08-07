@@ -92,8 +92,8 @@ def build_metadata():
         # core stats/indexes
         sa.Column('payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
         sa.Column('pending_payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
-        sa.Column('payout_at', sa.DateTime, nullable=False, server_default='1990-01-01'),
-        sa.Column('updated_at', sa.DateTime, nullable=False, server_default='1990-01-01'),
+        sa.Column('payout_at', sa.DateTime, nullable=False, server_default='1970-01-01'),
+        sa.Column('updated_at', sa.DateTime, nullable=False, server_default='1970-01-01'),
         sa.Column('is_paidout', BOOLEAN, nullable=False, server_default='0'),
 
         # ui flags/filters
@@ -119,7 +119,6 @@ def build_metadata():
         sa.Column('vote_rshares', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('net_votes', sa.Integer, nullable=False, server_default='0'),
         sa.Column('active', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
-        sa.Column('last_payout', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('max_cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('percent_hbd', sa.Integer, nullable=False, server_default='10000'),
@@ -392,7 +391,7 @@ def setup(db):
 
         "INSERT INTO hive_permlink_data (id, permlink) VALUES (0, '')",
         "INSERT INTO hive_category_data (id, category) VALUES (0, '')",
-        "INSERT INTO hive_accounts (id, name, created_at) VALUES (0, '', '1990-01-01T00:00:00')",
+        "INSERT INTO hive_accounts (id, name, created_at) VALUES (0, '', '1970-01-01T00:00:00')",
 
         "INSERT INTO hive_accounts (name, created_at) VALUES ('miners',    '2016-03-24 16:05:00')",
         "INSERT INTO hive_accounts (name, created_at) VALUES ('null',      '2016-03-24 16:05:00')",

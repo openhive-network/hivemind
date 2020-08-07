@@ -346,7 +346,7 @@ class DbState:
             cls._set_ver(17)
 
         if cls._ver == 17:
-            cls.db().query("INSERT INTO hive_accounts (name, created_at) VALUES ('', '1990-01-01T00:00:00') ON CONFLICT (name) DO NOTHING")
+            cls.db().query("INSERT INTO hive_accounts (name, created_at) VALUES ('', '1970-01-01T00:00:00') ON CONFLICT (name) DO NOTHING")
             cls.db().query("INSERT INTO hive_permlink_data (permlink) VALUES ('') ON CONFLICT (permlink) DO NOTHING")
             cls.db().query("INSERT INTO hive_category_data (category) VALUES ('') ON CONFLICT (category) DO NOTHING")
             cls._set_ver(18)

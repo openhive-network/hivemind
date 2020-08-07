@@ -28,7 +28,7 @@ INSERT INTO hive_db_version (version, notes) VALUES ('1.0', 'https://gitlab.sync
 
 -- add special author value, empty author to accounts table
 -- RAISE NOTICE 'add special author value, empty author to accounts table';
-INSERT INTO hive_accounts (name, created_at) VALUES ('', '1990-01-01T00:00:00');
+INSERT INTO hive_accounts (name, created_at) VALUES ('', '1970-01-01T00:00:00');
 
 -- Table to hold permlink dictionary, permlink is unique
 -- RAISE NOTICE 'Table to hold permlink dictionary, permlink is unique';
@@ -117,7 +117,6 @@ CREATE TABLE IF NOT EXISTS hive_posts_new (
   vote_rshares BIGINT DEFAULT '0',
   net_votes INT DEFAULT '0',
   active TIMESTAMP DEFAULT '1970-01-01T00:00:00',
-  last_payout TIMESTAMP DEFAULT '1970-01-01T00:00:00',
   cashout_time TIMESTAMP DEFAULT '1970-01-01T00:00:00',
   max_cashout_time TIMESTAMP DEFAULT '1970-01-01T00:00:00',
   reward_weight INT DEFAULT '0',

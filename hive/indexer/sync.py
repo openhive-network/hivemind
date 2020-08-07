@@ -44,7 +44,6 @@ def prepare_vops(vops_by_block):
 
     for blockNum, blockDict in vops_by_block.items():
         vopsList = blockDict['ops']
-        date = blockDict['timestamp']
         preparedVops[blockNum] = vopsList
   
     return preparedVops
