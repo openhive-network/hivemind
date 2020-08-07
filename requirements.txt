@@ -40,3 +40,4 @@ ujson==2.0.3
 urllib3==1.25.9
 yarl==1.4.2
 diff-match-patch=20200713
+gitpython==3.1.7
