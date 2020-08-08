@@ -123,17 +123,20 @@ class Follow:
                     #reset blacklists for follower
                     sql = """UPDATE hive_follows set blacklisted = false where follower = :follower"""
                 elif state == 10:
-                    #reset all muted users to state 0 (not muted, not followed)
-                    sql = """UPDATE hive_follows set state = 0 where follower = :follower"""
+                    #reset following list for follower
+                    sql = """UPDATE hive_follows set state = 0 where follower = :follower AND state = 1"""
                 elif state == 11:
+                    #reset all muted list for follower
+                    sql = """UPDATE hive_follows set state = 0 where follower = :follower AND state = 2"""
+                elif state == 12:
                     #reset followed blacklists
                     sql = """UPDATE hive_follows set follow_blacklists = false where follower = :follower"""
                     sql2 = """UPDATE hive_follows SET follow_blacklists = true WHERE follower = :follower AND following = (SELECT id FROM hive_accounts WHERE name = 'null')"""
-                elif state == 12:
+                elif state == 13:
                     #reset followed mute lists
                     sql = """UPDATE hive_follows set follow_muted = false where follower = :follower"""
                     sql2 = """UPDATE hive_follows SET follow_muted = true WHERE follower = :follower AND following = (SELECT id FROM hive_accounts WHERE name = 'null')"""
-                elif state == 13:
+                elif state == 14:
                     #reset all lists
                     sql = """UPDATE hive_follows set blacklisted = false, follow_blacklists = false, follow_muted = false, state = 0 where follower = :follower"""
                     sql2 = """UPDATE hive_follows SET follow_blacklists = true, follow_muted = true WHERE follower = :follower AND following = (SELECT id FROM hive_accounts WHERE name = 'null')"""
@@ -170,8 +173,8 @@ class Follow:
         if not isinstance(what, str):
             return None
         defs = {'': 0, 'blog': 1, 'ignore': 2, 'blacklist': 3, 'follow_blacklist': 4, 'unblacklist': 5, 'unfollow_blacklist': 6,
-                'follow_muted': 7, 'unfollow_muted': 8, 'reset_blacklist': 9, 'reset_mute_list': 10, 'reset_follow_blacklist': 11,
-                'reset_follow_muted_list': 12, 'reset_all_lists': 13}
+                'follow_muted': 7, 'unfollow_muted': 8, 'reset_blacklist': 9, 'reset_following_list': 10, 'reset_muted_list': 11, 'reset_follow_blacklist': 12,
+                'reset_follow_muted_list': 13, 'reset_all_lists': 14}
         if what not in defs:
             return None
 
