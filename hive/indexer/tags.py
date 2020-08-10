@@ -68,4 +68,7 @@ class Tags(object):
                 tag_query = str(sql)
                 DB.query(tag_query.format(','.join(values)))
                 values.clear()
-            cls._tags.clear()
+            
+        n = len(cls._tags)
+        cls._tags.clear()
+        return n

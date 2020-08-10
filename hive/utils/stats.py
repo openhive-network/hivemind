@@ -3,10 +3,292 @@
 import atexit
 import logging
 
+from queue import Queue
 from time import perf_counter as perf
 from hive.utils.system import colorize, peak_usage_mb
+from psutil import pid_exists
+from os import getpid
 
 log = logging.getLogger(__name__)
+
+class BroadcastObject:
+    def __init__(self, category, value, unit):
+        self.category = category
+        self.value = value
+        self.unit = unit
+
+    def name(self):
+        return f"hivemind_{self.category}"
+
+    def debug(self):
+        log.debug(f"{self.name()}_{self.unit}: {self.value :.2f}")
+
+class PrometheusClient:
+
+    deamon = None
+    logs_to_broadcast = Queue()
+
+    @staticmethod
+    def work( port, pid ):
+        try:
+            import prometheus_client as prom
+            prom.start_http_server(port)
+
+            gauges = {}
+
+            while pid_exists(pid):
+                value : BroadcastObject = PrometheusClient.logs_to_broadcast.get()
+                value.debug()
+                value_name = value.name()
+
+                if value_name not in gauges.keys():
+                    gauge = prom.Gauge(value_name, '', unit=value.unit)
+                    gauge.set(value.value)
+                    gauges[value_name] = gauge
+                else:
+                    gauges[value_name].set(value.value)
+
+        except Exception as e:
+            log.error(f"Prometheus logging failed. Exception\n {e}")
+
+    def __init__(self, port):
+        if port is None:
+            return
+        else:
+            port = int(port)
+        if PrometheusClient.deamon is None:
+            try:
+                import prometheus_client
+            except ImportError:
+                log.warn("Failed to import prometheus client. Online stats disabled")
+                return
+            from threading import Thread
+            deamon = Thread(target=PrometheusClient.work, args=[ port, getpid() ], daemon=True)
+            deamon.start()
+
+    @staticmethod
+    def broadcast(obj):
+        if type(obj) == type(list()):
+            for v in obj:
+                PrometheusClient.broadcast(v)
+        elif type(obj) == type(BroadcastObject('', '', '')):
+            PrometheusClient.logs_to_broadcast.put(obj)
+        else:
+            raise Exception(f"Not expexcted type. Should be list or BroadcastObject, but: {type(obj)} given")
+
+class Stat:
+    def __init__(self, time):
+        self.time = time
+
+    def update(self, other):
+        assert type(self) == type(other)
+        attributes = self.__dict__
+        oatte = other.__dict__
+        for key, val in attributes.items():
+            setattr(self, key, oatte[key] + val)
+        return self
+
+    def __repr__(self):
+        return self.__dict__
+
+    def __lt__(self, other):
+        return self.time < other.time
+
+    def broadcast(self, name):
+        return BroadcastObject(name, self.time, 's')
+
+class StatusManager:
+
+    # Fully abstract class
+    def __init__(self):
+        assert False
+
+    @staticmethod
+    def start():
+        return perf()
+
+    @staticmethod
+    def stop( start : float ):
+        return perf() - start
+
+    @staticmethod
+    def merge_dicts(od1, od2, broadcast : bool = False):
+        if od2 is not None:
+            for k, v in od2.items():
+                if k in od1:
+                    od1[k].update(v)
+                    if broadcast:
+                        PrometheusClient.broadcast(v.broadcast(k))
+                else:
+                    od1[k] = v
+
+        return od1
+
+    @staticmethod
+    def log_dict(col : dict) -> float:
+        sorted_stats = sorted(col.items(), key=lambda kv: kv[1], reverse=True)
+        measured_time = 0.0
+        for (k, v) in sorted_stats:
+            log.info("`{}`: {}".format(k, v))
+            measured_time += v.time
+        return measured_time
+
+    @staticmethod
+    def print_row():
+        log.info("#" * 20)
+
+class OPStat(Stat):
+    def __init__(self, time, count):
+        super().__init__(time)
+        self.count = count
+
+    def __str__(self):
+        return f"Processed {self.count :.0f} times in {self.time :.5f} seconds"
+
+    def broadcast(self, name : str):
+        n = name.lower()
+        if not n.endswith('operation'):
+            n = f"{n}_operation"
+        return list([ super().broadcast(n), BroadcastObject(n, self.count, 'b') ])
+
+class OPStatusManager(StatusManager):
+    # Summary for whole sync
+    global_stats = {}
+
+    # Currently processed blocks stats, merged to global stats, after `next_block`
+    cpbs = {}
+
+    @staticmethod
+    def op_stats( name, time, processed = 1 ):
+        if name in OPStatusManager.cpbs.keys():
+            OPStatusManager.cpbs[name].time += time
+            OPStatusManager.cpbs[name].count += processed
+        else:
+            OPStatusManager.cpbs[name] = OPStat(time, processed)
+
+    @staticmethod
+    def next_blocks():
+        OPStatusManager.global_stats = StatusManager.merge_dicts(
+            OPStatusManager.global_stats, 
+            OPStatusManager.cpbs,
+            True
+        )
+        OPStatusManager.cpbs.clear()
+
+    @staticmethod
+    def log_global(label : str):
+        StatusManager.print_row()
+        log.info(label)
+        tm = StatusManager.log_dict(OPStatusManager.global_stats)
+        log.info(f"Total time for processing operations time: {tm :.4f}s.")
+        return tm
+
+
+    @staticmethod
+    def log_current(label : str):
+        StatusManager.print_row()
+        log.info(label)
+        tm = StatusManager.log_dict(OPStatusManager.cpbs)
+        log.info(f"Current time for processing operations time: {tm :.4f}s.")
+        return tm
+
+class FlushStat(Stat):
+    def __init__(self, time, pushed):
+        super().__init__(time)
+        self.pushed = pushed
+
+    def __str__(self):
+        return f"Pushed {self.pushed :.0f} records in {self.time :.4f} seconds"
+
+    def broadcast(self, name : str):
+        n = f"flushing_{name.lower()}"
+        return list([ super().broadcast(n), BroadcastObject(n, self.pushed, 'b') ])
+
+class FlushStatusManager(StatusManager):
+    # Summary for whole sync
+    global_stats = {}
+
+    # Currently processed blocks stats, merged to global stats, after `next_block`
+    current_flushes = {}
+
+    @staticmethod
+    def flush_stat(name, time, pushed):
+        if name in FlushStatusManager.current_flushes.keys():
+            FlushStatusManager.current_flushes[name].time += time
+            FlushStatusManager.current_flushes[name].pushed += pushed
+        else:
+            FlushStatusManager.current_flushes[name] = FlushStat(time, pushed)
+
+    @staticmethod
+    def next_blocks():
+        FlushStatusManager.global_stats = StatusManager.merge_dicts(
+            FlushStatusManager.global_stats, 
+            FlushStatusManager.current_flushes,
+            True
+        )
+        FlushStatusManager.current_flushes.clear()
+
+    @staticmethod
+    def log_global(label : str):
+        StatusManager.print_row()
+        log.info(label)
+        tm = StatusManager.log_dict(FlushStatusManager.global_stats)
+        log.info(f"Total flushing time: {tm :.4f}s.")
+        return tm
+
+    @staticmethod
+    def log_current(label : str):
+        StatusManager.print_row()
+        log.info(label)
+        tm = StatusManager.log_dict(FlushStatusManager.current_flushes)
+        log.info(f"Current flushing time: {tm :.4f}s.")
+        return tm
+
+class WaitStat(Stat):
+    def __init__(self, time):
+        super().__init__(time)
+
+    def __str__(self):
+        return f"Waited {self.time :.4f} seconds"
+
+class WaitingStatusManager(StatusManager):
+    # Summary for whole sync
+    global_stats = {}
+
+    # Currently processed blocks stats, merged to global stats, after `next_block`
+    current_waits = {}
+
+    @staticmethod
+    def wait_stat(name, time):
+        if name in WaitingStatusManager.current_waits.keys():
+            WaitingStatusManager.current_waits[name].time += time
+        else:
+            WaitingStatusManager.current_waits[name] = WaitStat(time)
+
+    @staticmethod
+    def next_blocks():
+        WaitingStatusManager.global_stats = StatusManager.merge_dicts(
+            WaitingStatusManager.global_stats, 
+            WaitingStatusManager.current_waits,
+            True
+        )
+        WaitingStatusManager.current_waits.clear()
+
+    @staticmethod
+    def log_global(label : str):
+        StatusManager.print_row()
+        log.info(label)
+        tm = StatusManager.log_dict(WaitingStatusManager.global_stats)
+        log.info(f"Total waiting time: {tm :.4f}s.")
+        return tm
+
+    @staticmethod
+    def log_current(label : str):
+        StatusManager.print_row()
+        log.info(label)
+        tm = StatusManager.log_dict(WaitingStatusManager.current_waits)
+        log.info(f"Current waiting time: {tm :.4f}s.")
+        return tm
 
 def _normalize_sql(sql, maxlen=180):
     """Collapse whitespace and middle-truncate if needed."""

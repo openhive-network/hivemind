@@ -123,6 +123,7 @@ class Votes:
     def flush(cls):
         """ Flush vote data from cache to database """
         cls.inside_flush = True
+        n = 0
         if cls._votes_data:
             sql = """
                 INSERT INTO hive_votes
@@ -186,5 +187,8 @@ class Votes:
                 DB.query(actual_query)
                 values_override.clear()
 
+            n = len(cls._votes_data)
             cls._votes_data.clear()
         cls.inside_flush = False
+        return n
+

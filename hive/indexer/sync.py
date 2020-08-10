@@ -26,18 +26,15 @@ from hive.indexer.follow import Follow
 from hive.indexer.community import Community
 from hive.server.common.mutes import Mutes
 
+from hive.utils.stats import OPStatusManager as OPSM
+from hive.utils.stats import FlushStatusManager as FSM
+from hive.utils.stats import WaitingStatusManager as WSM
+from hive.utils.stats import PrometheusClient as PC
+from hive.utils.stats import BroadcastObject
+
 log = logging.getLogger(__name__)
 
 CONTINUE_PROCESSING = True
-
-def print_ops_stats(prefix, ops_stats):
-    log.info("############################################################################")
-    log.info(prefix)
-    sorted_stats = sorted(ops_stats.items(), key=lambda kv: kv[1], reverse=True)
-    for (k, v) in sorted_stats:
-        log.info("`{}': {}".format(k, v))
-
-    log.info("############################################################################")
 
 def prepare_vops(vops_by_block):
     preparedVops = {}
@@ -45,7 +42,7 @@ def prepare_vops(vops_by_block):
     for blockNum, blockDict in vops_by_block.items():
         vopsList = blockDict['ops']
         preparedVops[blockNum] = vopsList
-  
+
     return preparedVops
 
 def _block_provider(node, queue, lbound, ubound, chunk_size):
@@ -93,13 +90,16 @@ def _vops_provider(node, queue, lbound, ubound, chunk_size):
         log.exception("Exception caught during fetching vops...")
 
 def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size):
+    is_debug = log.isEnabledFor(10)
+
     num = 0
+    time_start = OPSM.start()
     try:
         count = ubound - lbound
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
-        total_ops_stats = {}
-        time_start = perf()
         while lbound < ubound:
+
+            wait_time = WSM.start()
             if blocksQueue.empty() and CONTINUE_PROCESSING:
                 log.info("Awaiting any block to process...")
             
@@ -107,7 +107,9 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
             if not blocksQueue.empty() or CONTINUE_PROCESSING:
                 blocks = blocksQueue.get()
                 blocksQueue.task_done()
+            WSM.wait_stat('block_consumer_block', WSM.stop(wait_time))
 
+            wait_time = WSM.start()
             if vopsQueue.empty() and CONTINUE_PROCESSING:
                 log.info("Awaiting any vops to process...")
             
@@ -115,14 +117,14 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
             if not vopsQueue.empty() or CONTINUE_PROCESSING:
                 preparedVops = vopsQueue.get()
                 vopsQueue.task_done()
+            WSM.wait_stat('block_consumer_vop', WSM.stop(wait_time))
 
             to = min(lbound + chunk_size, ubound)
 
             timer.batch_start()
             
             block_start = perf()
-            ops_stats = dict(Blocks.process_multi(blocks, preparedVops, node, is_initial_sync))
-            Blocks.ops_stats.clear()
+            Blocks.process_multi(blocks, preparedVops, node, is_initial_sync)
             block_end = perf()
 
             timer.batch_lap()
@@ -134,25 +136,38 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
             log.info(timer.batch_status(prefix))
             log.info("[SYNC] Time elapsed: %fs", time_current - time_start)
 
-            total_ops_stats = Blocks.merge_ops_stats(total_ops_stats, ops_stats)
 
-            if block_end - block_start > 1.0:
-                print_ops_stats("Operations present in the processed blocks:", ops_stats)
+            if block_end - block_start > 1.0 or is_debug:
+                otm = OPSM.log_current("Operations present in the processed blocks")
+                ftm = FSM.log_current("Flushing times")
+                wtm = WSM.log_current("Waiting times")
+                log.info(f"Calculated time: {otm+ftm+wtm :.4f} s.")
+
+            OPSM.next_blocks()
+            FSM.next_blocks()
+            WSM.next_blocks()
 
             lbound = to
+            PC.broadcast(BroadcastObject('sync_current_block', lbound, 'blocks'))
 
             num = num + 1
 
             if not CONTINUE_PROCESSING and blocksQueue.empty() and vopsQueue.empty():
                 break
-
-        print_ops_stats("All operations present in the processed blocks:", total_ops_stats)
-        return num
     except KeyboardInterrupt:
         log.info("Caught SIGINT")
-
     except Exception:
         log.exception("Exception caught during processing blocks...")
+    finally:
+        stop = OPSM.stop(time_start)
+        log.info("=== TOTAL STATS ===")
+        wtm = WSM.log_global("Total waiting times")
+        ftm = FSM.log_global("Total flush times")
+        otm = OPSM.log_global("All operations present in the processed blocks")
+        ttm = ftm + otm + wtm
+        log.info(f"Elapsed time: {stop :.4f}s. Calculated elapsed time: {ttm :.4f}s. Difference: {stop - ttm :.4f}s")
+        log.info("=== TOTAL STATS ===")
+        return num
 
 def _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size):
     blocksQueue = queue.Queue(maxsize=10)
