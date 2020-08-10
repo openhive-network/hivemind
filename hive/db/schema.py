@@ -162,7 +162,109 @@ def build_metadata():
     )
 
     sa.Table(
+        'deleted_hive_posts', metadata,
+        sa.Column('id', sa.Integer, primary_key=True, autoincrement=False),
+        sa.Column('parent_id', sa.Integer),
+        sa.Column('author_id', sa.Integer, nullable=False),
+        sa.Column('permlink_id', sa.BigInteger, nullable=False),
+        sa.Column('category_id', sa.Integer, nullable=False),
+        sa.Column('community_id', sa.Integer, nullable=True),
+        sa.Column('created_at', sa.DateTime, nullable=False),
+        sa.Column('depth', SMALLINT, nullable=False),
+        sa.Column('is_deleted', BOOLEAN, nullable=False, server_default='0'),
+        sa.Column('is_pinned', BOOLEAN, nullable=False, server_default='0'),
+        sa.Column('is_muted', BOOLEAN, nullable=False, server_default='0'),
+        sa.Column('is_valid', BOOLEAN, nullable=False, server_default='1'),
+        sa.Column('promoted', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
+
+        sa.Column('children', SMALLINT, nullable=False, server_default='0'),
+
+        # basic/extended-stats
+        sa.Column('author_rep', sa.Float(precision=6), nullable=False, server_default='0'),
+        sa.Column('flag_weight', sa.Float(precision=6), nullable=False, server_default='0'),
+        sa.Column('total_votes', sa.Integer, nullable=False, server_default='0'),
+        sa.Column('up_votes', sa.Integer, nullable=False, server_default='0'),
+
+        # core stats/indexes
+        sa.Column('payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
+        sa.Column('pending_payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
+        sa.Column('payout_at', sa.DateTime, nullable=False, server_default='1990-01-01'),
+        sa.Column('updated_at', sa.DateTime, nullable=False, server_default='1990-01-01'),
+        sa.Column('is_paidout', BOOLEAN, nullable=False, server_default='0'),
+
+        # ui flags/filters
+        sa.Column('is_nsfw', BOOLEAN, nullable=False, server_default='0'),
+        sa.Column('is_declined', BOOLEAN, nullable=False, server_default='0'),
+        sa.Column('is_full_power', BOOLEAN, nullable=False, server_default='0'),
+        sa.Column('is_hidden', BOOLEAN, nullable=False, server_default='0'),
+        sa.Column('is_grayed', BOOLEAN, nullable=False, server_default='0'),
+
+        # important indexes
+        sa.Column('sc_trend', sa.Float(precision=6), nullable=False, server_default='0'),
+        sa.Column('sc_hot', sa.Float(precision=6), nullable=False, server_default='0'),
+
+        sa.Column('total_payout_value', sa.String(30), nullable=False, server_default=''),
+        sa.Column('author_rewards', sa.BigInteger, nullable=False, server_default='0'),
+
+        sa.Column('author_rewards_hive', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('author_rewards_hbd', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('author_rewards_vests', sa.BigInteger, nullable=False, server_default='0'),
+
+        sa.Column('children_abs_rshares', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('abs_rshares', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('vote_rshares', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('net_votes', sa.Integer, nullable=False, server_default='0'),
+        sa.Column('active', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
+        sa.Column('last_payout', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
+        sa.Column('cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
+        sa.Column('max_cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
+        sa.Column('percent_hbd', sa.Integer, nullable=False, server_default='10000'),
+        sa.Column('reward_weight', sa.Integer, nullable=False, server_default='0'),
+
+        sa.Column('parent_author_id', sa.Integer, nullable=False),
+        sa.Column('parent_permlink_id', sa.BigInteger, nullable=False),
+        sa.Column('curator_payout_value', sa.String(30), nullable=False, server_default=''),
+        sa.Column('root_author_id', sa.Integer, nullable=False),
+        sa.Column('root_permlink_id', sa.BigInteger, nullable=False),
+        sa.Column('max_accepted_payout',  sa.String(30), nullable=False, server_default='1000000.000 HBD'),
+        sa.Column('allow_replies', BOOLEAN, nullable=False, server_default='1'),
+        sa.Column('allow_votes', BOOLEAN, nullable=False, server_default='1'),
+        sa.Column('allow_curation_rewards', BOOLEAN, nullable=False, server_default='1'),
+        sa.Column('beneficiaries', sa.JSON, nullable=False, server_default='[]'),
+        sa.Column('url', sa.Text, nullable=False, server_default=''),
+        sa.Column('root_title', sa.String(255), nullable=False, server_default=''),
+
+        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='deleted_hive_posts_fk1'),
+        sa.ForeignKeyConstraint(['parent_id'], ['hive_posts.id'], name='deleted_hive_posts_fk3'),
+        sa.UniqueConstraint('author_id', 'permlink_id', name='deleted_hive_posts_ux1'),
+        sa.Index('deleted_hive_posts_permlink_id', 'permlink_id'),
+
+        sa.Index('deleted_hive_posts_depth_idx', 'depth'),
+        sa.Index('deleted_hive_posts_parent_id_idx', 'parent_id'),
+        sa.Index('deleted_hive_posts_community_id_idx', 'community_id'),
+        sa.Index('deleted_hive_posts_author_id', 'author_id'),
+
+        sa.Index('deleted_hive_posts_category_id_idx', 'category_id'),
+        sa.Index('deleted_hive_posts_payout_at_idx', 'payout_at'),
+        sa.Index('deleted_hive_posts_payout_idx', 'payout'),
+        sa.Index('deleted_hive_posts_promoted_idx', 'promoted'),
+        sa.Index('deleted_hive_posts_sc_trend_idx', 'sc_trend'),
+        sa.Index('deleted_hive_posts_sc_hot_idx', 'sc_hot'),
+        sa.Index('deleted_hive_posts_created_at_idx', 'created_at'),
+    )
+
+    sa.Table(
         'hive_post_data', metadata,
+        sa.Column('id', sa.Integer, primary_key=True, autoincrement=False),
+        sa.Column('title', VARCHAR(512), nullable=False, server_default=''),
+        sa.Column('preview', VARCHAR(1024), nullable=False, server_default=''),
+        sa.Column('img_url', VARCHAR(1024), nullable=False, server_default=''),
+        sa.Column('body', TEXT, nullable=False, server_default=''),
+        sa.Column('json', TEXT, nullable=False, server_default='')
+    )
+
+    sa.Table(
+        'deleted_hive_post_data', metadata,
         sa.Column('id', sa.Integer, primary_key=True, autoincrement=False),
         sa.Column('title', VARCHAR(512), nullable=False, server_default=''),
         sa.Column('preview', VARCHAR(1024), nullable=False, server_default=''),
@@ -200,7 +302,7 @@ def build_metadata():
 
         sa.UniqueConstraint('voter_id', 'author_id', 'permlink_id', name='hive_votes_ux1'),
 
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id']),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),
         sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id']),
         sa.ForeignKeyConstraint(['permlink_id'], ['hive_permlink_data.id']),
@@ -211,6 +313,34 @@ def build_metadata():
         sa.Index('hive_votes_permlink_id_idx', 'permlink_id'),
         sa.Index('hive_votes_upvote_idx', 'vote_percent', postgresql_where=sql_text("vote_percent > 0")),
         sa.Index('hive_votes_downvote_idx', 'vote_percent', postgresql_where=sql_text("vote_percent < 0"))
+    )
+
+    sa.Table(
+        'deleted_hive_votes', metadata,
+        sa.Column('id', sa.BigInteger, primary_key=True, autoincrement=False),
+        sa.Column('post_id', sa.Integer, nullable=False),
+        sa.Column('voter_id', sa.Integer, nullable=False),
+        sa.Column('author_id', sa.Integer, nullable=False),
+        sa.Column('permlink_id', sa.Integer, nullable=False),
+        sa.Column('weight', sa.Numeric, nullable=False, server_default='0'),
+        sa.Column('rshares', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('vote_percent', sa.Integer, server_default='0'),
+        sa.Column('last_update', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
+        sa.Column('num_changes', sa.Integer, server_default='0'),
+
+        sa.UniqueConstraint('voter_id', 'author_id', 'permlink_id', name='deleted_hive_votes_ux1'),
+
+        sa.ForeignKeyConstraint(['post_id'], ['deleted_hive_posts.id']),
+        sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),
+        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id']),
+        sa.ForeignKeyConstraint(['permlink_id'], ['hive_permlink_data.id']),
+
+        sa.Index('deleted_hive_votes_post_id_idx', 'post_id'),
+        sa.Index('deleted_hive_votes_voter_id_idx', 'voter_id'),
+        sa.Index('deleted_hive_votes_author_id_idx', 'author_id'),
+        sa.Index('deleted_hive_votes_permlink_id_idx', 'permlink_id'),
+        sa.Index('deleted_hive_votes_upvote_idx', 'vote_percent', postgresql_where=sql_text("vote_percent > 0")),
+        sa.Index('deleted_hive_votes_downvote_idx', 'vote_percent', postgresql_where=sql_text("vote_percent < 0"))
     )
 
     sa.Table(
@@ -225,10 +355,21 @@ def build_metadata():
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('tag_id', sa.Integer, nullable=False),
         sa.PrimaryKeyConstraint('post_id', 'tag_id', name='hive_post_tags_pk1'),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id']),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(['tag_id'], ['hive_tag_data.id']),
         sa.Index('hive_post_tags_post_id_idx', 'post_id'),
         sa.Index('hive_post_tags_tag_id_idx', 'tag_id')
+    )
+
+    sa.Table(
+        'deleted_hive_post_tags', metadata,
+        sa.Column('post_id', sa.Integer, nullable=False),
+        sa.Column('tag_id', sa.Integer, nullable=False),
+        sa.PrimaryKeyConstraint('post_id', 'tag_id', name='deleted_hive_post_tags_pk1'),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id']),
+        sa.ForeignKeyConstraint(['tag_id'], ['hive_tag_data.id']),
+        sa.Index('deleted_hive_post_tags_post_id_idx', 'post_id'),
+        sa.Index('deleted_hive_post_tags_tag_id_idx', 'tag_id')
     )
 
     sa.Table(
@@ -252,10 +393,23 @@ def build_metadata():
         sa.Column('created_at', sa.DateTime, nullable=False),
 
         sa.ForeignKeyConstraint(['account'], ['hive_accounts.name'], name='hive_reblogs_fk1'),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_reblogs_fk2'),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_reblogs_fk2', ondelete="CASCADE"),
         sa.PrimaryKeyConstraint('account', 'post_id', name='hive_reblogs_pk'), # core
         sa.Index('hive_reblogs_account', 'account'),
         sa.Index('hive_reblogs_post_id', 'post_id'),
+    )
+
+    sa.Table(
+        'deleted_hive_reblogs', metadata,
+        sa.Column('account', VARCHAR(16), nullable=False),
+        sa.Column('post_id', sa.Integer, nullable=False),
+        sa.Column('created_at', sa.DateTime, nullable=False),
+
+        sa.ForeignKeyConstraint(['account'], ['hive_accounts.name'], name='deleted_hive_reblogs_fk1'),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='deleted_hive_reblogs_fk2'),
+        sa.PrimaryKeyConstraint('account', 'post_id', name='deleted_hive_reblogs_pk'), # core
+        sa.Index('deleted_hive_reblogs_account', 'account'),
+        sa.Index('deleted_hive_reblogs_post_id', 'post_id'),
     )
 
     sa.Table(
@@ -271,10 +425,29 @@ def build_metadata():
 
         sa.ForeignKeyConstraint(['from_account'], ['hive_accounts.id'], name='hive_payments_fk1'),
         sa.ForeignKeyConstraint(['to_account'], ['hive_accounts.id'], name='hive_payments_fk2'),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_payments_fk3'),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_payments_fk3', ondelete="CASCADE"),
         sa.Index('hive_payments_from', 'from_account'),
         sa.Index('hive_payments_to', 'to_account'),
         sa.Index('hive_payments_post_id', 'post_id'),
+    )
+
+    sa.Table(
+        'deleted_hive_payments', metadata,
+        sa.Column('id', sa.Integer, primary_key=True),
+        sa.Column('block_num', sa.Integer, nullable=False),
+        sa.Column('tx_idx', SMALLINT, nullable=False),
+        sa.Column('post_id', sa.Integer, nullable=False),
+        sa.Column('from_account', sa.Integer, nullable=False),
+        sa.Column('to_account', sa.Integer, nullable=False),
+        sa.Column('amount', sa.types.DECIMAL(10, 3), nullable=False),
+        sa.Column('token', VARCHAR(5), nullable=False),
+
+        sa.ForeignKeyConstraint(['from_account'], ['hive_accounts.id'], name='deleted_hive_payments_fk1'),
+        sa.ForeignKeyConstraint(['to_account'], ['hive_accounts.id'], name='deleted_hive_payments_fk2'),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='deleted_hive_payments_fk3'),
+        sa.Index('deleted_hive_payments_from', 'from_account'),
+        sa.Index('deleted_hive_payments_to', 'to_account'),
+        sa.Index('deleted_hive_payments_post_id', 'post_id'),
     )
 
     sa.Table(
@@ -284,6 +457,15 @@ def build_metadata():
         sa.Column('created_at', sa.DateTime, nullable=False),
         sa.Index('hive_feed_cache_account_id', 'account_id'), # API (and rebuild?)
         sa.UniqueConstraint('account_id', 'post_id', name='hive_feed_cache_ux1')
+    )
+
+    sa.Table(
+        'deleted_hive_feed_cache', metadata,
+        sa.Column('post_id', sa.Integer, nullable=False, primary_key=True, autoincrement=False),
+        sa.Column('account_id', sa.Integer, nullable=False),
+        sa.Column('created_at', sa.DateTime, nullable=False),
+        sa.Index('deleted_hive_feed_cache_account_id', 'account_id'), # API (and rebuild?)
+        sa.UniqueConstraint('account_id', 'post_id', name='deleted_hive_feed_cache_ux1')
     )
 
     sa.Table(
@@ -374,6 +556,27 @@ def build_metadata_community(metadata=None):
         sa.Index('hive_notifs_ix6', 'dst_id', 'created_at', 'score', 'id', postgresql_where=sql_text("dst_id IS NOT NULL")), # unread
     )
 
+    sa.Table(
+        'deleted_hive_notifs', metadata,
+        sa.Column('id',           sa.Integer,  primary_key=True, autoincrement=False),
+        sa.Column('type_id',      SMALLINT,    nullable=False),
+        sa.Column('score',        SMALLINT,    nullable=False),
+        sa.Column('created_at',   sa.DateTime, nullable=False),
+        sa.Column('src_id',       sa.Integer,  nullable=True),
+        sa.Column('dst_id',       sa.Integer,  nullable=True),
+        sa.Column('post_id',      sa.Integer,  nullable=True),
+        sa.Column('community_id', sa.Integer,  nullable=True),
+        sa.Column('block_num',    sa.Integer,  nullable=True),
+        sa.Column('payload',      sa.Text,     nullable=True),
+
+        sa.Index('deleted_hive_notifs_ix1', 'dst_id',                  'id', postgresql_where=sql_text("dst_id IS NOT NULL")),
+        sa.Index('deleted_hive_notifs_ix2', 'community_id',            'id', postgresql_where=sql_text("community_id IS NOT NULL")),
+        sa.Index('deleted_hive_notifs_ix3', 'community_id', 'type_id', 'id', postgresql_where=sql_text("community_id IS NOT NULL")),
+        sa.Index('deleted_hive_notifs_ix4', 'community_id', 'post_id', 'type_id', 'id', postgresql_where=sql_text("community_id IS NOT NULL AND post_id IS NOT NULL")),
+        sa.Index('deleted_hive_notifs_ix5', 'post_id', 'type_id', 'dst_id', 'src_id', postgresql_where=sql_text("post_id IS NOT NULL AND type_id IN (16,17)")), # filter: dedupe
+        sa.Index('deleted_hive_notifs_ix6', 'dst_id', 'created_at', 'score', 'id', postgresql_where=sql_text("dst_id IS NOT NULL")), # unread
+    )
+
     return metadata
 
 
@@ -406,6 +609,15 @@ def setup(db):
         """
         INSERT INTO
             public.hive_posts(id, parent_id, author_id, permlink_id, category_id,
+                community_id, parent_author_id, parent_permlink_id, root_author_id,
+                root_permlink_id, created_at, depth
+            )
+        VALUES
+            (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, now(), 0);
+        """,
+        """
+        INSERT INTO
+            public.deleted_hive_posts(id, parent_id, author_id, permlink_id, category_id,
                 community_id, parent_author_id, parent_permlink_id, root_author_id,
                 root_permlink_id, created_at, depth
             )
@@ -567,6 +779,103 @@ def setup(db):
           END
           $function$
           """
+    db.query_no_return(sql)
+
+    sql = """
+          DROP FUNCTION if exists process_deleted_hive_post
+          ;
+          CREATE OR REPLACE PROCEDURE process_deleted_hive_post(
+            in _id deleted_hive_posts.id%TYPE)
+          LANGUAGE plpgsql
+          AS  
+          $$
+          BEGIN
+
+            INSERT INTO deleted_hive_posts
+              SELECT * 
+              FROM hive_posts
+              WHERE id = _id
+
+            INSERT INTO deleted_hive_votes
+              SELECT *
+              FROM hive_votes hv
+              INNER JOIN hive_posts hp ON hv.post_id = hp.id
+              WHERE hp.id = _id
+
+            INSERT INTO deleted_hive_feed_cache
+              SELECT *
+              FROM hive_feed_cache hfc
+              INNER JOIN hive_posts hp ON hfc.post_id = hp.id
+              WHERE hp.id = _id
+
+            INSERT INTO deleted_hive_notifs
+              SELECT *
+              FROM hive_notifs hn
+              INNER JOIN hive_posts hp ON hn.post_id = hp.id
+              WHERE hp.id = _id
+
+            INSERT INTO deleted_hive_payments
+              SELECT *
+              FROM hive_payments hp
+              INNER JOIN hive_posts hp ON hp.post_id = hp.id
+              WHERE hp.id = _id
+
+            INSERT INTO deleted_hive_post_data
+              SELECT *
+              FROM hive_post_data hpd
+              INNER JOIN hive_posts hp ON hpd.post_id = hp.id
+              WHERE hp.id = _id
+
+            INSERT INTO deleted_hive_post_tags
+              SELECT *
+              FROM hive_post_tags hpt
+              INNER JOIN hive_posts hp ON hpt.post_id = hp.id
+              WHERE hp.id = _id
+
+            INSERT INTO deleted_hive_reblogs
+              SELECT *
+              FROM hive_reblogs hr
+              INNER JOIN hive_posts hp ON hr.post_id = hp.id
+              WHERE hp.id = _id
+
+            DELETE FROM hive_feed_cache
+            WHERE post_id = _id
+
+            DELETE FROM hive_notifs
+            WHERE post_id = _id
+
+            DELETE FROM hive_post_data
+            WHERE post_id = _id
+
+            UPDATE hive_posts
+            SET parent_id = 0
+            WHERE parent_id = _id
+
+            DELETE
+              FROM hive_posts
+              WHERE id = _id
+          END
+          $$
+          """
+    db.query_no_return(sql)
+
+    sql = """
+        DROP MATERIALIZED VIEW IF EXISTS hive_posts_a_p
+        ;
+        CREATE MATERIALIZED VIEW hive_posts_a_p
+        AS
+        SELECT hp.id AS id,
+            ha_a.name AS author,
+            hpd_p.permlink AS permlink
+        FROM hive_posts hp
+        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        WITH DATA
+        ;
+        DROP INDEX IF EXISTS hive_posts_a_p_idx
+        ;
+        CREATE unique index hive_posts_a_p_idx ON hive_posts_a_p (author collate "C", permlink collate "C")
+    """
     db.query_no_return(sql)
 
     sql = """

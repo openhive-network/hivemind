@@ -118,7 +118,18 @@ class DbState:
             #'hive_posts_cache_ix33', # API: community payout
             #'hive_posts_cache_ix34', # API: community muted
             'hive_accounts_ix1', # (cached_at, name)
-            'hive_accounts_ix5' # (cached_at, name)
+            'hive_accounts_ix5', # (cached_at, name)
+
+            'deleted_hive_posts_parent_id_idx',
+            'deleted_hive_posts_author_id',
+            'deleted_hive_posts_depth_idx',
+            'deleted_hive_posts_community_id_idx',
+            'deleted_hive_posts_category_id_idx',
+            'deleted_hive_posts_payout_at_idx',
+            'deleted_hive_posts_payout_idx',
+            'deleted_hive_posts_promoted_idx',
+            'deleted_hive_posts_sc_trend_idx',
+            'deleted_hive_posts_sc_hot_idx'
         ]
 
         to_return = []
@@ -275,6 +286,9 @@ class DbState:
             #cls.db().query("DROP INDEX hive_posts_cache_ix7")
             #cls.db().query("CREATE INDEX hive_posts_cache_ix7a ON hive_posts_cache (sc_hot, post_id) WHERE is_paidout = '0'")
             #cls.db().query("CREATE INDEX hive_posts_cache_ix7b ON hive_posts_cache (post_id, sc_hot) WHERE is_paidout = '0'")
+
+            cls.db().query("DROP INDEX deleted_hive_posts_cache_ix6")
+
             cls._set_ver(7)
 
         if cls._ver == 7:
@@ -306,13 +320,18 @@ class DbState:
             cls.db().query("DROP INDEX hive_posts_ix2")
             cls.db().query("CREATE INDEX hive_posts_ix3 ON hive_posts (author, depth, id) WHERE is_deleted = '0'")
             cls.db().query("CREATE INDEX hive_posts_ix4 ON hive_posts (parent_id, id) WHERE is_deleted = '0'")
+
+            cls.db().query("DROP INDEX deleted_hive_posts_ix1")
+            cls.db().query("DROP INDEX deleted_hive_posts_ix2")
+            cls.db().query("CREATE INDEX deleted_hive_posts_ix3 ON deleted_hive_posts (author, depth, id) WHERE is_deleted = '0'")
+            cls.db().query("CREATE INDEX deleted_hive_posts_ix4 ON deleted_hive_posts (parent_id, id) WHERE is_deleted = '0'")
             cls._set_ver(12)
 
         if cls._ver == 12: # community schema
             assert False, 'not finalized'
             for table in ['hive_members', 'hive_flags', 'hive_modlog',
                           'hive_communities', 'hive_subscriptions',
-                          'hive_roles', 'hive_notifs']:
+                          'hive_roles', 'hive_notifs', 'deleted_hive_notifs']:
                 cls.db().query("DROP TABLE IF EXISTS %s" % table)
             build_metadata_community().create_all(cls.db().engine())
 
@@ -321,11 +340,19 @@ class DbState:
             cls.db().query("ALTER TABLE hive_posts DROP COLUMN community")
             cls.db().query("ALTER TABLE hive_posts ADD COLUMN community_id integer")
             cls.db().query("ALTER TABLE hive_posts_cache ADD COLUMN community_id integer")
+
+            cls.db().query("ALTER TABLE deleted_hive_posts DROP CONSTRAINT deleted_hive_posts_fk2")
+            cls.db().query("ALTER TABLE deleted_hive_posts DROP COLUMN community")
+            cls.db().query("ALTER TABLE deleted_hive_posts ADD COLUMN community_id integer")
+            cls.db().query("ALTER TABLE deleted_hive_posts_cache ADD COLUMN community_id integer")
+
             cls._set_ver(13)
 
         if cls._ver == 13:
             sqls = ("CREATE INDEX hive_posts_ix5 ON hive_posts (id) WHERE is_pinned = '1' AND is_deleted = '0'",
-                    "CREATE INDEX hive_posts_ix6 ON hive_posts (community_id, id) WHERE community_id IS NOT NULL AND is_pinned = '1' AND is_deleted = '0'",)
+                    "CREATE INDEX hive_posts_ix6 ON hive_posts (community_id, id) WHERE community_id IS NOT NULL AND is_pinned = '1' AND is_deleted = '0'",
+                    "CREATE INDEX deleted_hive_posts_ix5 ON deleted_hive_posts (id) WHERE is_pinned = '1' AND is_deleted = '0'",
+                    "CREATE INDEX deleted_hive_posts_ix6 ON deleted_hive_posts (community_id, id) WHERE community_id IS NOT NULL AND is_pinned = '1' AND is_deleted = '0'",)
                     #"CREATE INDEX hive_posts_cache_ix10 ON hive_posts_cache (post_id, payout) WHERE is_grayed = '1' AND payout > 0",
                     #"CREATE INDEX hive_posts_cache_ix30 ON hive_posts_cache (community_id, sc_trend,   post_id) WHERE community_id IS NOT NULL AND is_grayed = '0' AND depth = 0",
                     #"CREATE INDEX hive_posts_cache_ix31 ON hive_posts_cache (community_id, sc_hot,     post_id) WHERE community_id IS NOT NULL AND is_grayed = '0' AND depth = 0",
@@ -348,6 +375,7 @@ class DbState:
             cls.db().query("ALTER TABLE hive_accounts DROP COLUMN lr_notif_id")
             cls.db().query("ALTER TABLE hive_accounts ADD COLUMN lastread_at TIMESTAMP WITHOUT TIME ZONE DEFAULT '1970-01-01 00:00:00' NOT NULL")
             cls.db().query("CREATE INDEX hive_notifs_ix6 ON hive_notifs (dst_id, created_at, score, id) WHERE dst_id IS NOT NULL")
+            cls.db().query("CREATE INDEX deleted_hive_notifs_ix6 ON deleted_hive_notifs (dst_id, created_at, score, id) WHERE dst_id IS NOT NULL")
             cls._set_ver(16)
 
         if cls._ver == 16:

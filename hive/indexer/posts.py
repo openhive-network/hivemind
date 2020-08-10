@@ -396,6 +396,10 @@ class Posts:
         # force parent child recount when child is deleted
         cls.update_child_count(pid, '-')
 
+        # Move all data related to deleted post into corresponding 'deleted_*' tables
+        sql = "CALL process_deleted_hive_post( :id )"
+        DB.query(sql, id=pid)
+
     @classmethod
     def _insert_feed_cache(cls, result, date):
         """Insert the new post into feed cache if it's not a comment."""
