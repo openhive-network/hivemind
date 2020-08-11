@@ -143,6 +143,7 @@ class VotesPresentation(Enum):
     ActiveVotes = 1
     DatabaseApi = 2
     CondenserApi = 3
+    BridgeApi = 4
 
 @return_error_info
 async def find_votes(context, params: dict, votes_presentation = VotesPresentation.DatabaseApi):
@@ -180,6 +181,8 @@ async def find_votes(context, params: dict, votes_presentation = VotesPresentati
         elif votes_presentation == VotesPresentation.CondenserApi:
             ret.append(dict(percent=str(row.percent), reputation=rep_to_raw(row.reputation),
                             rshares=str(row.rshares), voter=row.voter))
+        elif votes_presentation == VotesPresentation.BridgeApi:
+            ret.append(dict(rshares=str(row.rshares), voter=row.voter))
         else:
             ret.append(dict(percent=row.percent, reputation=rep_to_raw(row.reputation),
                             rshares=number_to_json_value(row.rshares), time=time_string_with_t(row.time), 

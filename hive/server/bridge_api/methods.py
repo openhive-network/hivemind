@@ -1,7 +1,8 @@
 """Bridge API public endpoints for posts"""
 
 import hive.server.bridge_api.cursor as cursor
-from hive.server.bridge_api.objects import load_posts, load_posts_reblogs, load_profiles, _condenser_post_object
+from hive.server.bridge_api.objects import load_posts, load_posts_reblogs, load_profiles, _bridge_post_object
+from hive.server.database_api.methods import find_votes, VotesPresentation
 from hive.server.common.helpers import (
     return_error_info,
     valid_account,
@@ -20,18 +21,15 @@ SQL_TEMPLATE = """
         SELECT
             hp.id, 
             hp.author,
-            hp.root_author,
+            hp.parent_author,
             hp.author_rep,
-            hp.allow_replies,
-            hp.allow_votes,
-            hp.allow_curation_rewards,
             hp.root_title,
             hp.beneficiaries,
             hp.max_accepted_payout,
             hp.percent_hbd,
             hp.url,
             hp.permlink,
-            hp.root_permlink,
+            hp.parent_permlink,
             hp.title,
             hp.body,
             hp.category,
@@ -61,16 +59,6 @@ SQL_TEMPLATE = """
     """
 
 #pylint: disable=too-many-arguments, no-else-return
-
-async def _get_post_id(db, author, permlink):
-    """Get post_id from hive db."""
-    sql = """SELECT id FROM hive_posts
-              WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :a)
-                AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :p)
-                AND is_deleted = '0'"""
-    post_id = await db.query_one(sql, a=author, p=permlink)
-    assert post_id, 'invalid author/permlink'
-    return post_id
 
 @return_error_info
 async def get_profile(context, account, observer=None):
@@ -120,7 +108,8 @@ async def get_post(context, author, permlink, observer=None):
 
     result = await db.query_all(sql, author=author, permlink=permlink)
     assert len(result) == 1, 'invalid author/permlink or post not found in cache'
-    post = _condenser_post_object(result[0])
+    post = _bridge_post_object(result[0])
+    post['active_votes'] = await find_votes({'db':db}, {'author':author, 'permlink':permlink}, VotesPresentation.BridgeApi)
     post = await append_statistics_to_post(post, result[0], False, blacklists_for_user)
     return post
 
@@ -223,7 +212,8 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
     if pinned_sql:
         pinned_result = await db.query_all(pinned_sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag, observer=observer)
         for row in pinned_result:
-            post = _condenser_post_object(row)
+            post = _bridge_post_object(row)
+            post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']}, VotesPresentation.BridgeApi)
             post = await append_statistics_to_post(post, row, True, blacklists_for_user)
             limit = limit - 1
             posts.append(post)
@@ -231,7 +221,8 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
 
     sql_result = await db.query_all(sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag, observer=observer)
     for row in sql_result:
-        post = _condenser_post_object(row)
+        post = _bridge_post_object(row)
+        post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']}, VotesPresentation.BridgeApi)
         post = await append_statistics_to_post(post, row, False, blacklists_for_user)
         if post['post_id'] in pinned_post_ids:
             continue
@@ -322,7 +313,8 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
         blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
     sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit)
     for row in sql_result:
-        post = _condenser_post_object(row)
+        post = _bridge_post_object(row)
+        post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']}, VotesPresentation.BridgeApi)
         post = await append_statistics_to_post(post, row, False, blacklists_for_user)
         posts.append(post)
     return posts

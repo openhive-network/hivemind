@@ -2,8 +2,9 @@
 
 import logging
 
-from hive.server.bridge_api.objects import load_posts_keyed, _condenser_post_object
+from hive.server.bridge_api.objects import load_posts_keyed, _bridge_post_object
 from hive.server.bridge_api.methods import append_statistics_to_post
+from hive.server.database_api.methods import find_votes, VotesPresentation
 from hive.server.common.helpers import (
     return_error_info,
     valid_account,
@@ -91,7 +92,8 @@ async def get_discussion(context, author, permlink, observer=None):
         return {}
     root_id = rows[0]['id']
     all_posts = {}
-    root_post = _condenser_post_object(rows[0])
+    root_post = _bridge_post_object(rows[0])
+    root_post['active_votes'] = await find_votes({'db':db}, {'author':rows[0]['author'], 'permlink':rows[0]['permlink']}, VotesPresentation.BridgeApi)
     root_post = await append_statistics_to_post(root_post, rows[0], False, blacklists_for_user)
     root_post['replies'] = []
     all_posts[root_id] = root_post
@@ -101,7 +103,8 @@ async def get_discussion(context, author, permlink, observer=None):
 
     for index in range(1, len(rows)):
         id_to_parent_id_map[rows[index]['id']] = rows[index]['parent_id']
-        post = _condenser_post_object(rows[index])
+        post = _bridge_post_object(rows[index])
+        post['active_votes'] = await find_votes({'db':db}, {'author':rows[index]['author'], 'permlink':rows[index]['permlink']}, VotesPresentation.BridgeApi)
         post = await append_statistics_to_post(post, rows[index], False, blacklists_for_user)
         post['replies'] = []
         all_posts[post['post_id']] = post
@@ -137,20 +140,6 @@ def get_children(parent_id, posts):
         if posts[key] == parent_id:
             results.append(key)
     return results
-
-async def _get_post_id(db, author, permlink):
-    """Given an author/permlink, retrieve the id from db."""
-    sql = """
-        SELECT 
-            id 
-        FROM hive_posts hp
-        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        WHERE ha_a.name = :author 
-            AND hpd_p.permlink = :permlink 
-            AND is_deleted = '0' 
-        LIMIT 1"""
-    return await db.query_one(sql, a=author, p=permlink)
 
 def _ref(post):
     return post['author'] + '/' + post['permlink']
