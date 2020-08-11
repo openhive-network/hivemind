@@ -7,6 +7,7 @@ cd tests/tests_api/hivemind/tavern
 pip3 install --user jsondiff==1.2.0
 pip3 install --user tavern==1.2.2
 pip3 install --user pytest==6.0.1
+pip3 install --user deepdiff[murmur]
 
 export HIVEMIND_ADDRESS=$1
 export HIVEMIND_PORT=$2
