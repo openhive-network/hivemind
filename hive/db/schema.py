@@ -451,7 +451,7 @@ def setup(db):
              category_id,
              root_author_id, root_permlink_id,
              is_muted, is_valid,
-             author_id, permlink_id, created_at, updated_at, active, payout_at, cashout_time)
+             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,active, payout_at, cashout_time)
             SELECT php.id AS parent_id, php.author_id as parent_author_id,
                 php.permlink_id as parent_permlink_id, php.depth + 1 as depth,
                 (CASE
@@ -464,7 +464,8 @@ def setup(db):
                 php.root_permlink_id as root_permlink_id,
                 php.is_muted as is_muted, php.is_valid as is_valid,
                 ha.id as author_id, hpd.id as permlink_id, _date as created_at,
-                _date as updated_at,
+                _date as updated_at, calculate_time_part_of_hot(_date) as sc_hot,
+                 calculate_time_part_of_trending(_date) as sc_trend,
                 _date as active, (_date + INTERVAL '7 days') as payout_at, (_date + INTERVAL '7 days') as cashout_time
             FROM hive_accounts ha,
                  hive_permlink_data hpd,
@@ -503,7 +504,7 @@ def setup(db):
              category_id,
              root_author_id, root_permlink_id,
              is_muted, is_valid,
-             author_id, permlink_id, created_at, updated_at, active, payout_at, cashout_time)
+             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time)
             SELECT 0 AS parent_id, 0 as parent_author_id, 0 as parent_permlink_id, 0 as depth,
                 (CASE
                   WHEN _date > _community_support_start_date THEN
@@ -515,7 +516,8 @@ def setup(db):
                 hpd.id as root_permlink_id, -- use perlink_id as root one if no parent
                 false as is_muted, true as is_valid,
                 ha.id as author_id, hpd.id as permlink_id, _date as created_at,
-                _date as updated_at,
+                _date as updated_at, calculate_time_part_of_hot(_date) as sc_hot,
+                  calculate_time_part_of_trending(_date) as sc_trend,
                 _date as active, (_date + INTERVAL '7 days') as payout_at, (_date + INTERVAL '7 days') as cashout_time
             FROM hive_accounts ha,
                  hive_permlink_data hpd
@@ -634,7 +636,7 @@ def setup(db):
             hp.is_muted,
             hp.is_nsfw,
             hp.is_valid,
-            hr.title AS role_title, 
+            hr.title AS role_title,
             hr.role_id AS role_id,
             hc.title AS community_title,
             hc.name AS community_name,
@@ -714,7 +716,9 @@ def setup(db):
             last_update as time,
             ha_v.name as voter,
             weight,
-            num_changes
+            num_changes,
+            hpd.id as permlink_id,
+            post_id
         FROM
             hive_votes hv
         INNER JOIN hive_accounts ha_v ON ha_v.id = hv.voter_id
@@ -1016,6 +1020,134 @@ def setup(db):
     """
     db.query_no_return(sql)
 
+    # hot and tranding functions
+
+    sql = """
+       DROP FUNCTION IF EXISTS date_diff CASCADE
+       ;
+       CREATE OR REPLACE FUNCTION date_diff (units VARCHAR(30), start_t TIMESTAMP, end_t TIMESTAMP)
+         RETURNS INT AS $$
+       DECLARE
+         diff_interval INTERVAL;
+         diff INT = 0;
+         years_diff INT = 0;
+       BEGIN
+         IF units IN ('yy', 'yyyy', 'year', 'mm', 'm', 'month') THEN
+           years_diff = DATE_PART('year', end_t) - DATE_PART('year', start_t);
+           IF units IN ('yy', 'yyyy', 'year') THEN
+             -- SQL Server does not count full years passed (only difference between year parts)
+             RETURN years_diff;
+           ELSE
+             -- If end month is less than start month it will subtracted
+             RETURN years_diff * 12 + (DATE_PART('month', end_t) - DATE_PART('month', start_t));
+           END IF;
+         END IF;
+         -- Minus operator returns interval 'DDD days HH:MI:SS'
+         diff_interval = end_t - start_t;
+         diff = diff + DATE_PART('day', diff_interval);
+         IF units IN ('wk', 'ww', 'week') THEN
+           diff = diff/7;
+           RETURN diff;
+         END IF;
+         IF units IN ('dd', 'd', 'day') THEN
+           RETURN diff;
+         END IF;
+         diff = diff * 24 + DATE_PART('hour', diff_interval);
+         IF units IN ('hh', 'hour') THEN
+            RETURN diff;
+         END IF;
+         diff = diff * 60 + DATE_PART('minute', diff_interval);
+         IF units IN ('mi', 'n', 'minute') THEN
+            RETURN diff;
+         END IF;
+         diff = diff * 60 + DATE_PART('second', diff_interval);
+         RETURN diff;
+       END;
+       $$ LANGUAGE plpgsql IMMUTABLE
+    """
+    db.query_no_return(sql)
+
+    sql = """
+          DROP FUNCTION IF EXISTS public.calculate_time_part_of_trending(_post_created_at hive_posts.created_at%TYPE ) CASCADE
+          ;
+          CREATE OR REPLACE FUNCTION public.calculate_time_part_of_trending(
+            _post_created_at hive_posts.created_at%TYPE)
+              RETURNS double precision
+              LANGUAGE 'plpgsql'
+              IMMUTABLE
+          AS $BODY$
+          DECLARE
+            result double precision;
+            sec_from_epoch INT = 0;
+          BEGIN
+            sec_from_epoch  = date_diff( 'second', CAST('19700101' AS TIMESTAMP), _post_created_at );
+            result = sec_from_epoch/240000.0;
+            return result;
+          END;
+          $BODY$;
+    """
+    db.query_no_return(sql)
+
+    sql = """
+            DROP FUNCTION IF EXISTS public.calculate_time_part_of_hot(_post_created_at hive_posts.created_at%TYPE ) CASCADE
+            ;
+            CREATE OR REPLACE FUNCTION public.calculate_time_part_of_hot(
+              _post_created_at hive_posts.created_at%TYPE)
+                RETURNS double precision
+                LANGUAGE 'plpgsql'
+                IMMUTABLE
+            AS $BODY$
+            DECLARE
+              result double precision;
+              sec_from_epoch INT = 0;
+            BEGIN
+              sec_from_epoch  = date_diff( 'second', CAST('19700101' AS TIMESTAMP), _post_created_at );
+              result = sec_from_epoch/10000.0;
+              return result;
+            END;
+            $BODY$;
+    """
+    db.query_no_return(sql)
+
+    sql = """
+	DROP FUNCTION IF EXISTS public.calculate_rhsares_part_of_hot_and_trend(_rshares hive_votes.rshares%TYPE) CASCADE
+	;
+	CREATE OR REPLACE FUNCTION public.calculate_rhsares_part_of_hot_and_trend(_rshares hive_votes.rshares%TYPE)
+	RETURNS double precision
+	LANGUAGE 'plpgsql'
+	IMMUTABLE
+	AS $BODY$
+	DECLARE
+		mod_score double precision;
+	BEGIN
+		mod_score := _rshares / 10000000.0;
+		IF ( mod_score > 0 )
+		THEN
+			return log( greatest( abs(mod_score), 1 ) );
+		END IF;
+		return  -1.0 * log( greatest( abs(mod_score), 1 ) );
+	END;
+	$BODY$;
+    """
+    db.query_no_return(sql)
+
+    sql = """
+	DROP FUNCTION IF EXISTS public.calculate_hot(hive_votes.rshares%TYPE, hive_posts.created_at%TYPE)
+	;
+	CREATE OR REPLACE FUNCTION public.calculate_hot(
+	    _rshares hive_votes.rshares%TYPE,
+	    _post_created_at hive_posts.created_at%TYPE)
+	    RETURNS hive_posts.sc_hot%TYPE
+	      LANGUAGE 'plpgsql'
+	      IMMUTABLE
+	  AS $BODY$
+	BEGIN
+	    return calculate_rhsares_part_of_hot_and_trend(_rshares) + calculate_time_part_of_hot( _post_created_at );
+	END;
+	$BODY$;
+    """
+    db.query_no_return(sql)
+
     sql = """
           DO $$
           BEGIN
@@ -1024,6 +1156,23 @@ def setup(db):
           END
           $$;
           """
+    db.query_no_return(sql)
+
+    sql = """
+	DROP FUNCTION IF EXISTS public.calculate_tranding(hive_votes.rshares%TYPE, hive_posts.created_at%TYPE)
+	;
+	CREATE OR REPLACE FUNCTION public.calculate_tranding(
+	    _rshares hive_votes.rshares%TYPE,
+	    _post_created_at hive_posts.created_at%TYPE)
+	    RETURNS hive_posts.sc_trend%TYPE
+	      LANGUAGE 'plpgsql'
+	      IMMUTABLE
+	  AS $BODY$
+	BEGIN
+	    return calculate_rhsares_part_of_hot_and_trend(_rshares) + calculate_time_part_of_trending( _post_created_at );
+	END;
+	$BODY$;
+    """
     db.query_no_return(sql)
 
 def reset_autovac(db):
