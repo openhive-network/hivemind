@@ -7,6 +7,7 @@ def run_test(reference_node_url, test_node_url, payload, table_keys):
     resp = post(reference_node_url, dumps(payload))
 
     json = resp.json()
+    #print(json)
     table = prettytable.PrettyTable()
     table.field_names = table_keys
     for row in json['result']['comments']:
@@ -17,6 +18,7 @@ def run_test(reference_node_url, test_node_url, payload, table_keys):
     resp = post(test_node_url, dumps(payload))
 
     json = resp.json()
+    #print(json)
     table = prettytable.PrettyTable()
     table.field_names = table_keys
     for row in json['result']:

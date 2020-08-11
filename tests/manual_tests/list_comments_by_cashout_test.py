@@ -1,8 +1,8 @@
 #!/usr/bin/python3
-from .test_base import run_test
+from test_base import run_test
 
 if __name__ == '__main__':
-    reference_hive_node_url = 'https://api.hive.blog'
+    reference_hive_node_url = 'http://127.0.0.1:8090'
     test_hive_node_url = 'http://127.0.0.1:8080'
 
     payload = {

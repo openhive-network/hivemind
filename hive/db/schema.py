@@ -122,7 +122,7 @@ def build_metadata():
         sa.Column('cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('max_cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('percent_hbd', sa.Integer, nullable=False, server_default='10000'),
-        sa.Column('reward_weight', sa.Integer, nullable=False, server_default='0'),
+        sa.Column('reward_weight', sa.Integer, nullable=False, server_default='10000'), # Seems to be always 10000
 
         sa.Column('parent_author_id', sa.Integer, nullable=False),
         sa.Column('parent_permlink_id', sa.BigInteger, nullable=False),
@@ -154,6 +154,11 @@ def build_metadata():
         sa.Index('hive_posts_sc_trend_idx', 'sc_trend'),
         sa.Index('hive_posts_sc_hot_idx', 'sc_hot'),
         sa.Index('hive_posts_created_at_idx', 'created_at'),
+
+        sa.Index('hive_posts_root_author_id', 'root_author_id'),
+        sa.Index('hive_posts_root_permlink_id', 'root_permlink_id'),
+        sa.Index('hive_posts_parent_author_id', 'parent_author_id'),
+        sa.Index('hive_posts_parent_permlink_id', 'parent_permlink_id')
     )
 
     sa.Table(
@@ -446,7 +451,7 @@ def setup(db):
              category_id,
              root_author_id, root_permlink_id,
              is_muted, is_valid,
-             author_id, permlink_id, created_at, updated_at)
+             author_id, permlink_id, created_at, updated_at, active)
             SELECT php.id AS parent_id, php.author_id as parent_author_id,
                 php.permlink_id as parent_permlink_id, php.depth + 1 as depth,
                 (CASE
@@ -459,7 +464,8 @@ def setup(db):
                 php.root_permlink_id as root_permlink_id,
                 php.is_muted as is_muted, php.is_valid as is_valid,
                 ha.id as author_id, hpd.id as permlink_id, _date as created_at,
-                _date as updated_at
+                _date as updated_at,
+                _date as active
             FROM hive_accounts ha,
                  hive_permlink_data hpd,
                  hive_posts php
@@ -473,6 +479,7 @@ def setup(db):
               --- then also depth, is_valid and is_muted is impossible to change
              --- post edit part
              updated_at = _date,
+             active = _date,
 
               --- post undelete part (if was deleted)
               is_deleted = (CASE hp.is_deleted
@@ -500,7 +507,7 @@ def setup(db):
              category_id,
              root_author_id, root_permlink_id,
              is_muted, is_valid,
-             author_id, permlink_id, created_at, updated_at)
+             author_id, permlink_id, created_at, updated_at, active)
             SELECT 0 AS parent_id, 0 as parent_author_id, 0 as parent_permlink_id, 0 as depth,
                 (CASE
                   WHEN _date > _community_support_start_date THEN
@@ -512,7 +519,8 @@ def setup(db):
                 hpd.id as root_permlink_id, -- use perlink_id as root one if no parent
                 false as is_muted, true as is_valid,
                 ha.id as author_id, hpd.id as permlink_id, _date as created_at,
-                _date as updated_at
+                _date as updated_at,
+                _date as active
             FROM hive_accounts ha,
                  hive_permlink_data hpd
             WHERE ha.name = _author and hpd.permlink = _permlink
@@ -522,6 +530,7 @@ def setup(db):
               --- then also depth, is_valid and is_muted is impossible to change
               --- post edit part
               updated_at = _date,
+              active = _date,
 
               --- post undelete part (if was deleted)
               is_deleted = (CASE hp.is_deleted
@@ -567,25 +576,6 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-        DROP MATERIALIZED VIEW IF EXISTS hive_posts_a_p
-        ;
-        CREATE MATERIALIZED VIEW hive_posts_a_p
-        AS
-        SELECT hp.id AS id,
-            ha_a.name AS author,
-            hpd_p.permlink AS permlink
-        FROM hive_posts hp
-        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        WITH DATA
-        ;
-        DROP INDEX IF EXISTS hive_posts_a_p_idx
-        ;
-        CREATE unique index hive_posts_a_p_idx ON hive_posts_a_p (author collate "C", permlink collate "C")
-    """
-    db.query_no_return(sql)
-
-    sql = """
         DROP VIEW IF EXISTS public.hive_posts_view;
 
         CREATE OR REPLACE VIEW public.hive_posts_view
@@ -594,6 +584,8 @@ def setup(db):
             hp.community_id,
             hp.parent_id,
             ha_a.name AS author,
+            hp.active,
+            hp.author_rewards,
             hp.author_id,
             hpd_p.permlink,
             hpd.title,
@@ -653,7 +645,11 @@ def setup(db):
             hr.title AS role_title, 
             hr.role_id AS role_id,
             hc.title AS community_title,
-            hc.name AS community_name
+            hc.name AS community_name,
+            hp.abs_rshares,
+            hp.cashout_time,
+            hp.max_cashout_time,
+            hp.reward_weight
             FROM hive_posts hp
             JOIN hive_posts rp ON rp.author_id = hp.root_author_id AND rp.permlink_id = hp.root_permlink_id
             JOIN hive_post_data rpd ON rp.id = rpd.id
@@ -733,6 +729,298 @@ def setup(db):
         INNER JOIN hive_accounts ha_a ON ha_a.id = hv.author_id
         INNER JOIN hive_permlink_data hpd ON hpd.id = hv.permlink_id
         ;
+    """
+    db.query_no_return(sql)
+
+    sql = """
+      DROP TYPE IF EXISTS database_api_post CASCADE;
+      CREATE TYPE database_api_post AS (
+        id INT, 
+        community_id INT,
+        author VARCHAR(16),
+        permlink VARCHAR(255),
+        title VARCHAR(512),
+        body TEXT,
+        category VARCHAR(255),
+        depth SMALLINT,
+        promoted DECIMAL(10,3),
+        payout DECIMAL(10,3),
+        payout_at TIMESTAMP,
+        is_paidout BOOLEAN,
+        children SMALLINT,
+        votes INT,
+        created_at TIMESTAMP,
+        updated_at TIMESTAMP,
+        rshares NUMERIC,
+        json TEXT,
+        is_hidden BOOLEAN,
+        is_grayed BOOLEAN,
+        total_votes INT,
+        flag_weight REAL,
+        parent_author VARCHAR(16),
+        parent_permlink VARCHAR(255),
+        curator_payout_value VARCHAR(30),
+        root_author VARCHAR(16),
+        root_permlink VARCHAR(255),
+        max_accepted_payout VARCHAR(30),
+        percent_hbd INT,
+        allow_replies BOOLEAN,
+        allow_votes BOOLEAN,
+        allow_curation_rewards BOOLEAN,
+        beneficiaries JSON,
+        url TEXT,
+        root_title VARCHAR(512),
+        abs_rshares BIGINT,
+        active TIMESTAMP,
+        author_rewards BIGINT,
+        max_cashout_time TIMESTAMP,
+        reward_weight INT
+      )
+      ;
+
+      DROP FUNCTION IF EXISTS list_comments_by_cashout_time(timestamp, character varying, character varying, int)
+      ;
+      CREATE OR REPLACE FUNCTION list_comments_by_cashout_time(
+        in _cashout_time timestamp,
+        in _author hive_accounts.name%TYPE,
+        in _permlink hive_permlink_data.permlink%TYPE,
+        in _limit INT)
+        RETURNS SETOF database_api_post
+        AS
+        $function$
+        BEGIN
+          RETURN QUERY 
+          SELECT
+              hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
+              hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
+              hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.flag_weight, hp.parent_author,
+              hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
+              hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
+              hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
+          FROM
+              hive_posts_view hp
+          WHERE
+              NOT hp.is_muted AND
+              NOT hp.is_deleted AND
+              hp.cashout_time >= _cashout_time AND
+              hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _author AND hp1.permlink >= _permlink ORDER BY id LIMIT 1)
+          ORDER BY
+              hp.cashout_time ASC,
+              hp.id ASC
+          LIMIT
+              _limit
+          ;
+        END
+        $function$
+        LANGUAGE plpgsql
+      ;
+
+      DROP FUNCTION IF EXISTS list_comments_by_permlink(character varying, character varying, int)
+      ;
+      CREATE OR REPLACE FUNCTION list_comments_by_permlink(
+        in _author hive_accounts.name%TYPE,
+        in _permlink hive_permlink_data.permlink%TYPE,
+        in _limit INT)
+        RETURNS SETOF database_api_post
+        AS
+        $function$
+        BEGIN
+          RETURN QUERY 
+          SELECT
+              hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
+              hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
+              hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.flag_weight, hp.parent_author,
+              hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
+              hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
+              hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
+          FROM
+              hive_posts_view hp
+          WHERE
+              NOT hp.is_muted AND
+              NOT hp.is_deleted AND
+              hp.author >= _author COLLATE "C" AND
+              hp.permlink >= _permlink COLLATE "C"
+          ORDER BY
+              hp.author COLLATE "C" ASC,
+              hp.permlink COLLATE "C" ASC
+          LIMIT
+              _limit
+          ;
+        END
+        $function$
+        LANGUAGE plpgsql
+      ;
+
+      DROP FUNCTION IF EXISTS list_comments_by_root(character varying, character varying, character varying, character varying, int)
+      ;
+      CREATE OR REPLACE FUNCTION list_comments_by_root(
+        in _root_author hive_accounts.name%TYPE,
+        in _root_permlink hive_permlink_data.permlink%TYPE,
+        in _start_post_author hive_accounts.name%TYPE,
+        in _start_post_permlink hive_permlink_data.permlink%TYPE,
+        in _limit INT)
+        RETURNS SETOF database_api_post
+        AS
+        $function$
+        BEGIN
+          RETURN QUERY 
+          SELECT
+              hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
+              hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
+              hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.flag_weight, hp.parent_author,
+              hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
+              hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
+              hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
+          FROM
+              hive_posts_view hp
+          WHERE
+              NOT hp.is_muted AND
+              NOT hp.is_deleted AND
+              root_author >= _root_author AND
+              root_permlink >= _root_permlink AND
+              hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _start_post_author AND hp1.permlink >= _start_post_permlink ORDER BY id LIMIT 1)
+          ORDER BY 
+              root_author ASC, 
+              root_permlink ASC,
+              id ASC
+          LIMIT 
+              _limit
+          ;
+        END
+        $function$
+        LANGUAGE plpgsql
+      ;
+
+      DROP FUNCTION IF EXISTS list_comments_by_parent(character varying, character varying, character varying, character varying, int)
+      ;
+      CREATE OR REPLACE FUNCTION list_comments_by_parent(
+        in _parent_author hive_accounts.name%TYPE,
+        in _parent_permlink hive_permlink_data.permlink%TYPE,
+        in _start_post_author hive_accounts.name%TYPE,
+        in _start_post_permlink hive_permlink_data.permlink%TYPE,
+        in _limit INT)
+        RETURNS SETOF database_api_post
+        AS
+        $function$
+        BEGIN
+          RETURN QUERY 
+          SELECT
+              hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
+              hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
+              hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.flag_weight, hp.parent_author,
+              hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
+              hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
+              hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
+          FROM
+              hive_posts_view hp
+          WHERE
+              NOT hp.is_muted AND
+              NOT hp.is_deleted AND
+              parent_author >= _parent_author AND
+              parent_permlink >= _parent_permlink AND
+              hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _start_post_author AND hp1.permlink >= _start_post_permlink ORDER BY id LIMIT 1)
+          ORDER BY
+              parent_author ASC,
+              parent_permlink ASC,
+              id ASC
+          LIMIT
+              _limit
+          ;
+        END
+        $function$
+        LANGUAGE plpgsql
+      ;
+
+      DROP FUNCTION IF EXISTS list_comments_by_last_update(character varying, timestamp, character varying, character varying, int)
+      ;
+      CREATE OR REPLACE FUNCTION list_comments_by_last_update(
+        in _parent_author hive_accounts.name%TYPE,
+        in _updated_at hive_posts.updated_at%TYPE,
+        in _start_post_author hive_accounts.name%TYPE,
+        in _start_post_permlink hive_permlink_data.permlink%TYPE,
+        in _limit INT)
+        RETURNS SETOF database_api_post
+        AS
+        $function$
+        BEGIN
+          RETURN QUERY 
+          SELECT
+              hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
+              hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
+              hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.flag_weight, hp.parent_author,
+              hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
+              hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
+              hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
+          FROM
+              hive_posts_view hp
+          WHERE
+              NOT hp.is_muted AND
+              NOT hp.is_deleted AND
+              hp.parent_author >= _parent_author AND 
+              hp.updated_at >= _updated_at AND 
+              hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _start_post_author AND hp1.permlink >= _start_post_permlink ORDER BY id LIMIT 1)
+          ORDER BY 
+              hp.parent_author ASC, 
+              hp.updated_at ASC, 
+              hp.id ASC 
+          LIMIT 
+              _limit
+          ;
+        END
+        $function$
+        LANGUAGE plpgsql
+      ;
+      DROP FUNCTION IF EXISTS list_comments_by_author_last_update(character varying, timestamp, character varying, character varying, int)
+      ;
+      CREATE OR REPLACE FUNCTION list_comments_by_author_last_update(
+        in _author hive_accounts.name%TYPE,
+        in _updated_at hive_posts.updated_at%TYPE,
+        in _start_post_author hive_accounts.name%TYPE,
+        in _start_post_permlink hive_permlink_data.permlink%TYPE,
+        in _limit INT)
+        RETURNS SETOF database_api_post
+        AS
+        $function$
+        BEGIN
+          RETURN QUERY 
+          SELECT
+              hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
+              hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
+              hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.flag_weight, hp.parent_author,
+              hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
+              hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
+              hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
+          FROM
+              hive_posts_view hp
+          WHERE
+              NOT hp.is_muted AND
+              NOT hp.is_deleted AND
+              hp.author >= _author AND 
+              hp.updated_at >= _updated_at AND 
+              hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _start_post_author AND hp1.permlink >= _start_post_permlink ORDER BY id LIMIT 1)
+          ORDER BY 
+              hp.parent_author ASC, 
+              hp.updated_at ASC, 
+              hp.id ASC 
+          LIMIT 
+              _limit
+          ;
+        END
+        $function$
+        LANGUAGE plpgsql
+      ;
     """
     db.query_no_return(sql)
 

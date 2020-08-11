@@ -15,21 +15,56 @@ NAI_MAP = {
     '@@000000037': 'VESTS',
 }
 
-dct={'0':'a','1':'b','2':'c','3':'d','4':'e',
-     '5':'f','6':'g','7':'h','8':'i','9':'j'}
+NAI_PRECISION = {
+    '@@000000013': 3,
+    '@@000000021': 3,
+    '@@000000037': 6,
+}
+
+UNIT_NAI = {
+    'HBD' : '@@000000013',
+    'HIVE' : '@@000000021',
+    'VESTS' : '@@000000037'
+}
 
 # convert special chars into their octal formats recognized by sql
-special_chars={
-  "\r":"\\015",
-  "\n":"\\012",
-  "\v":"\\013",
-  "\f": "\\014",
-  "\\":"\\134",
-  "'":"\\047",
-  "%":"\\045",
-  "_":"\\137",
-  ":":"\\072"
+SPECIAL_CHARS = {
+    "\r" : "\\015",
+    "\n" : "\\012",
+    "\v" : "\\013",
+    "\f" : "\\014",
+    "\\" : "\\134",
+    "'" : "\\047",
+    "%" : "\\045",
+    "_" : "\\137",
+    ":" : "\\072"
 }
+
+def to_nai(value):
+    """ Convert various amount notation to nai notation """
+    ret = None
+    if isinstance(value, dict):
+        assert 'amount' in value, "amount not found in dict"
+        assert 'precision' in value, "precision not found in dict"
+        assert 'nai' in value, "nai not found in dict"
+        ret = value
+
+    elif isinstance(value, str):
+        raw_amount, unit = value.split(' ')
+        assert unit in UNIT_NAI, "Unknown unit {}".format(unit)
+        nai = UNIT_NAI[unit]
+        precision = NAI_PRECISION[nai]
+        satoshis = int(decimal.Decimal(raw_amount) * (10**precision))
+        ret = {'amount' : str(satoshis), 'nai' : nai, 'precision' : precision}
+
+    elif isinstance(value, list):
+        satoshis, precision, nai = value
+        assert nai in NAI_MAP, "Unknown NAI {}".format(nai)
+
+    else:
+        raise Exception("Invalid input amount %s" % repr(value))
+    return ret
+
 
 def escape_characters(text):
     """ Escape special charactes """
@@ -39,12 +74,12 @@ def escape_characters(text):
     ret = "E'"
 
     for ch in text:
-        if ch.isprintable() or ch in special_chars:
+        if ch.isprintable() or ch in SPECIAL_CHARS:
             try:
-                dw=special_chars[ch]
-                ret=ret+dw
-            except KeyError as k:
-                ret=ret+ch
+                dw = SPECIAL_CHARS[ch]
+                ret = ret + dw
+            except KeyError:
+                ret = ret + ch
         else:
             ordinal = ord(ch)
             if ordinal == 0 or ordinal >= 0x80:

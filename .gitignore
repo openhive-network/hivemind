@@ -132,4 +132,4 @@ tests/failed_blocks/
 *.out.json
 
 # version.py
-version.py
+hive/version.py
