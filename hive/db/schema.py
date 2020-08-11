@@ -235,7 +235,6 @@ def build_metadata():
         sa.Column('root_title', sa.String(255), nullable=False, server_default=''),
 
         sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='deleted_hive_posts_fk1'),
-        sa.ForeignKeyConstraint(['parent_id'], ['hive_posts.id'], name='deleted_hive_posts_fk3'),
         sa.UniqueConstraint('author_id', 'permlink_id', name='deleted_hive_posts_ux1'),
         sa.Index('deleted_hive_posts_permlink_id', 'permlink_id'),
 
@@ -366,7 +365,7 @@ def build_metadata():
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('tag_id', sa.Integer, nullable=False),
         sa.PrimaryKeyConstraint('post_id', 'tag_id', name='deleted_hive_post_tags_pk1'),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id']),
+        sa.ForeignKeyConstraint(['post_id'], ['deleted_hive_posts.id']),
         sa.ForeignKeyConstraint(['tag_id'], ['hive_tag_data.id']),
         sa.Index('deleted_hive_post_tags_post_id_idx', 'post_id'),
         sa.Index('deleted_hive_post_tags_tag_id_idx', 'tag_id')
@@ -406,7 +405,7 @@ def build_metadata():
         sa.Column('created_at', sa.DateTime, nullable=False),
 
         sa.ForeignKeyConstraint(['account'], ['hive_accounts.name'], name='deleted_hive_reblogs_fk1'),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='deleted_hive_reblogs_fk2'),
+        sa.ForeignKeyConstraint(['post_id'], ['deleted_hive_posts.id'], name='deleted_hive_reblogs_fk2'),
         sa.PrimaryKeyConstraint('account', 'post_id', name='deleted_hive_reblogs_pk'), # core
         sa.Index('deleted_hive_reblogs_account', 'account'),
         sa.Index('deleted_hive_reblogs_post_id', 'post_id'),
@@ -444,7 +443,7 @@ def build_metadata():
 
         sa.ForeignKeyConstraint(['from_account'], ['hive_accounts.id'], name='deleted_hive_payments_fk1'),
         sa.ForeignKeyConstraint(['to_account'], ['hive_accounts.id'], name='deleted_hive_payments_fk2'),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='deleted_hive_payments_fk3'),
+        sa.ForeignKeyConstraint(['post_id'], ['deleted_hive_posts.id'], name='deleted_hive_payments_fk3'),
         sa.Index('deleted_hive_payments_from', 'from_account'),
         sa.Index('deleted_hive_payments_to', 'to_account'),
         sa.Index('deleted_hive_payments_post_id', 'post_id'),
@@ -782,80 +781,239 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-          DROP FUNCTION if exists process_deleted_hive_post
-          ;
-          CREATE OR REPLACE PROCEDURE process_deleted_hive_post(
-            in _id deleted_hive_posts.id%TYPE)
-          LANGUAGE plpgsql
-          AS  
-          $$
-          BEGIN
+          DROP FUNCTION IF EXISTS process_deleted_hive_post();
 
+          CREATE OR REPLACE FUNCTION process_deleted_hive_post(
+            in _id deleted_hive_posts.id%TYPE)
+          RETURNS integer
+          LANGUAGE plpgsql
+          AS
+          $function$
+          DECLARE rows integer;
+          BEGIN
             INSERT INTO deleted_hive_posts
-              SELECT * 
-              FROM hive_posts
-              WHERE id = _id
+            (
+              id,
+              parent_id,
+              author_id,
+              permlink_id,
+              category_id,
+              community_id,
+              created_at,
+              depth,
+              is_deleted,
+              is_pinned,
+              is_muted,
+              is_valid,
+              promoted,
+              children,
+              author_rep,
+              flag_weight,
+              total_votes,
+              up_votes,
+              payout,
+              pending_payout,
+              payout_at,
+              updated_at,
+              is_paidout,
+              is_nsfw,
+              is_declined,
+              is_full_power,
+              is_hidden,
+              is_grayed,
+              sc_trend,
+              sc_hot,
+              total_payout_value,
+              author_rewards,
+              author_rewards_hive,
+              author_rewards_hbd,
+              author_rewards_vests,
+              children_abs_rshares,
+              abs_rshares,
+              vote_rshares,
+              net_votes,
+              active,
+              cashout_time,
+              max_cashout_time,
+              percent_hbd,
+              reward_weight,
+              parent_author_id,
+              parent_permlink_id,
+              curator_payout_value,
+              root_author_id,
+              root_permlink_id,
+              max_accepted_payout,
+              allow_replies,
+              allow_votes,
+              allow_curation_rewards,
+              beneficiaries,
+              url,
+              root_title
+            )
+            SELECT
+              id,
+              parent_id,
+              author_id,
+              permlink_id,
+              category_id,
+              community_id,
+              created_at,
+              depth,
+              is_deleted,
+              is_pinned,
+              is_muted,
+              is_valid,
+              promoted,
+              children,
+              author_rep,
+              flag_weight,
+              total_votes,
+              up_votes,
+              payout,
+              pending_payout,
+              payout_at,
+              updated_at,
+              is_paidout,
+              is_nsfw,
+              is_declined,
+              is_full_power,
+              is_hidden,
+              is_grayed,
+              sc_trend,
+              sc_hot,
+              total_payout_value,
+              author_rewards,
+              author_rewards_hive,
+              author_rewards_hbd,
+              author_rewards_vests,
+              children_abs_rshares,
+              abs_rshares,
+              vote_rshares,
+              net_votes,
+              active,
+              cashout_time,
+              max_cashout_time,
+              percent_hbd,
+              reward_weight,
+              parent_author_id,
+              parent_permlink_id,
+              curator_payout_value,
+              root_author_id,
+              root_permlink_id,
+              max_accepted_payout,
+              allow_replies,
+              allow_votes,
+              allow_curation_rewards,
+              beneficiaries,
+              url,
+              root_title
+            FROM hive_posts
+            WHERE id = _id ON CONFLICT DO NOTHING;
 
             INSERT INTO deleted_hive_votes
-              SELECT *
-              FROM hive_votes hv
-              INNER JOIN hive_posts hp ON hv.post_id = hp.id
-              WHERE hp.id = _id
+            SELECT
+              hv.id,
+              hv.post_id,
+              hv.voter_id,
+              hv.author_id,
+              hv.permlink_id,
+              hv.weight,
+              hv.rshares,
+              hv.vote_percent,
+              hv.last_update,
+              hv.num_changes
+            FROM hive_votes hv
+            INNER JOIN hive_posts hp ON hv.post_id = hp.id
+            WHERE hp.id = _id ON CONFLICT DO NOTHING;
 
             INSERT INTO deleted_hive_feed_cache
-              SELECT *
+              SELECT
+                hfc.post_id,
+                hfc.account_id,
+                hfc.created_at
               FROM hive_feed_cache hfc
               INNER JOIN hive_posts hp ON hfc.post_id = hp.id
-              WHERE hp.id = _id
+              WHERE hp.id = _id ON CONFLICT DO NOTHING;
 
             INSERT INTO deleted_hive_notifs
-              SELECT *
+              SELECT
+                hn.id,
+                hn.type_id,
+                hn.score,
+                hn.created_at,
+                hn.src_id,
+                hn.dst_id,
+                hn.post_id,
+                hn.community_id,
+                hn.block_num,
+                hn.payload
               FROM hive_notifs hn
               INNER JOIN hive_posts hp ON hn.post_id = hp.id
-              WHERE hp.id = _id
+              WHERE hp.id = _id ON CONFLICT DO NOTHING;
 
             INSERT INTO deleted_hive_payments
-              SELECT *
-              FROM hive_payments hp
-              INNER JOIN hive_posts hp ON hp.post_id = hp.id
-              WHERE hp.id = _id
+              SELECT
+                hps.id,
+                hps.block_num,
+                hps.tx_idx,
+                hps.post_id,
+                hps.from_account,
+                hps.to_account,
+                hps.amount,
+                hps.token
+              FROM hive_payments hps
+              INNER JOIN hive_posts hp ON hps.post_id = hp.id
+              WHERE hp.id = _id ON CONFLICT DO NOTHING;
 
             INSERT INTO deleted_hive_post_data
-              SELECT *
+              SELECT
+                hpd.id,
+                hpd.title,
+                hpd.preview,
+                hpd.img_url,
+                hpd.body,
+                hpd.json
               FROM hive_post_data hpd
-              INNER JOIN hive_posts hp ON hpd.post_id = hp.id
-              WHERE hp.id = _id
+              INNER JOIN hive_posts hp ON hpd.id = hp.id
+              WHERE hp.id = _id ON CONFLICT DO NOTHING;
 
             INSERT INTO deleted_hive_post_tags
-              SELECT *
+              SELECT
+                hpt.post_id,
+                hpt.tag_id
               FROM hive_post_tags hpt
               INNER JOIN hive_posts hp ON hpt.post_id = hp.id
-              WHERE hp.id = _id
+              WHERE hp.id = _id ON CONFLICT DO NOTHING;
 
             INSERT INTO deleted_hive_reblogs
-              SELECT *
+              SELECT
+                hr.account,
+                hr.post_id,
+                hr.created_at
               FROM hive_reblogs hr
               INNER JOIN hive_posts hp ON hr.post_id = hp.id
-              WHERE hp.id = _id
+              WHERE hp.id = _id ON CONFLICT DO NOTHING;
 
-            DELETE FROM hive_feed_cache
-            WHERE post_id = _id
+            DELETE FROM hive_feed_cache WHERE post_id = _id;
 
-            DELETE FROM hive_notifs
-            WHERE post_id = _id
+            DELETE FROM hive_notifs WHERE post_id = _id;
 
-            DELETE FROM hive_post_data
-            WHERE post_id = _id
+            DELETE FROM hive_post_data WHERE id = _id;
 
             UPDATE hive_posts
             SET parent_id = 0
-            WHERE parent_id = _id
+            WHERE parent_id = _id;
 
             DELETE
               FROM hive_posts
-              WHERE id = _id
+              WHERE id = _id;
+
+            GET DIAGNOSTICS rows = ROW_COUNT;
+
+            RETURN rows;
+
           END
-          $$
+          $function$
           """
     db.query_no_return(sql)
 

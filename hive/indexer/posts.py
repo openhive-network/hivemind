@@ -397,8 +397,8 @@ class Posts:
         cls.update_child_count(pid, '-')
 
         # Move all data related to deleted post into corresponding 'deleted_*' tables
-        sql = "CALL process_deleted_hive_post( :id )"
-        DB.query(sql, id=pid)
+        sql = "SELECT process_deleted_hive_post( :id )"
+        DB.query_row(sql, id=pid)
 
     @classmethod
     def _insert_feed_cache(cls, result, date):
