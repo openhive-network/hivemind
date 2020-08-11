@@ -46,6 +46,36 @@ class Votes:
         ret = DB.query_row(sql, author=author, permlink=permlink)
         return 0 if ret is None else int(ret.count)
 
+    @classmethod
+    def get_total_vote_weight(cls, author, permlink):
+        """ Get total vote weight for selected post """
+        sql = """
+            SELECT 
+                sum(weight)
+            FROM 
+                hive_votes_accounts_permlinks_view hv
+            WHERE 
+                hv.author = :author AND
+                hv.permlink = :permlink
+        """
+        ret = DB.query_row(sql, author=author, permlink=permlink)
+        return 0 if ret is None else int(0 if ret.sum is None else ret.sum)
+
+    @classmethod
+    def get_total_vote_rshares(cls, author, permlink):
+        """ Get total vote rshares for selected post """
+        sql = """
+            SELECT 
+                sum(rshares)
+            FROM 
+                hive_votes_accounts_permlinks_view hv
+            WHERE 
+                hv.author = :author AND
+                hv.permlink = :permlink
+        """
+        ret = DB.query_row(sql, author=author, permlink=permlink)
+        return 0 if ret is None else int(0 if ret.sum is None else ret.sum)
+
     inside_flush = False
 
     @classmethod
@@ -56,15 +86,15 @@ class Votes:
         permlink  = vote_operation['permlink']
         weight    = vote_operation['weight']
 
-        if(cls.inside_flush):
-            log.info("Adding new vote-info into '_votes_data' dict")
-            raise "Fatal error"
+        if cls.inside_flush:
+            log.exception("Adding new vote-info into '_votes_data' dict")
+            raise RuntimeError("Fatal error")
 
         key = voter + "/" + author + "/" + permlink
 
         if key in cls._votes_data:
-            cls._votes_data[key]["vote_percent"]=weight
-            cls._votes_data[key]["last_update"]=date
+            cls._votes_data[key]["vote_percent"] = weight
+            cls._votes_data[key]["last_update"] = date
         else:
             cls._votes_data[key] = dict(voter=voter,
                                         author=author,
@@ -79,9 +109,9 @@ class Votes:
     def effective_comment_vote_op(cls, key, vop):
         """ Process effective_comment_vote_operation """
 
-        if(cls.inside_flush):
-            log.info("Updating data in '_votes_data' using effective comment")
-            raise "Fatal error"
+        if cls.inside_flush:
+            log.exception("Updating data in '_votes_data' using effective comment")
+            raise RuntimeError("Fatal error")
 
         assert key in cls._votes_data
 
@@ -140,18 +170,18 @@ class Votes:
 
                 if len(values) >= values_limit:
                     values_str = ','.join(values)
-                    actual_query = sql.format(values_str,on_conflict_data_source,on_conflict_data_source)
+                    actual_query = sql.format(values_str, on_conflict_data_source, on_conflict_data_source)
                     DB.query(actual_query)
                     values.clear()
 
             if len(values_skip) > 0:
                 values_str = ','.join(values_skip)
-                actual_query = sql.format(values_str,'hive_votes','hive_votes')
+                actual_query = sql.format(values_str, 'hive_votes', 'hive_votes')
                 DB.query(actual_query)
                 values_skip.clear()
             if len(values_override) > 0:
                 values_str = ','.join(values_override)
-                actual_query = sql.format(values_str,'EXCLUDED','EXCLUDED')
+                actual_query = sql.format(values_str, 'EXCLUDED', 'EXCLUDED')
                 DB.query(actual_query)
                 values_override.clear()
 

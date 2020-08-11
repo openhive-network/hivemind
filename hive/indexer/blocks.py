@@ -171,7 +171,6 @@ class Blocks:
             cls._head_block_date = cls._current_block_date
 
         json_ops = []
-        update_comment_pending_payouts = []
         for tx_idx, tx in enumerate(block['transactions']):
             for operation in tx['operations']:
                 op_type = operation['type']
@@ -243,8 +242,8 @@ class Blocks:
             (vote_ops, comment_payout_stats) = Blocks.prepare_vops(Posts.comment_payout_ops, vops, cls._current_block_date)
 
         if vote_ops is not None:
-          for k, v in vote_ops.items():
-            Votes.effective_comment_vote_op(k, v)
+            for k, v in vote_ops.items():
+                Votes.effective_comment_vote_op(k, v)
 
         if Posts.comment_payout_ops:
             cls.ops_stats = Blocks.merge_ops_stats(cls.ops_stats, comment_payout_stats)
@@ -318,7 +317,9 @@ class Blocks:
         """
         values = []
         for block in cls.blocks_to_flush:
-            values.append("({}, '{}', '{}', {}, {}, '{}')".format(block['num'], block['hash'], block['prev'], block['txs'], block['ops'], block['date']))
+            values.append("({}, '{}', '{}', {}, {}, '{}')".format(block['num'], block['hash'],
+                                                                  block['prev'], block['txs'],
+                                                                  block['ops'], block['date']))
         DB.query(query + ",".join(values))
         cls.blocks_to_flush = []
 

@@ -1,31 +1,23 @@
+from hive.indexer.votes import Votes
 from hive.server.common.helpers import json_date
-from hive.utils.normalize import sbd_amount
+from hive.utils.normalize import sbd_amount, to_nai
 
 def _amount(amount, asset='HBD'):
     """Return a steem-style amount string given a (numeric, asset-str)."""
     assert asset == 'HBD', 'unhandled asset %s' % asset
     return "%.3f HBD" % amount
 
-async def query_author_map(db, posts):
-    """Given a list of posts, returns an author->reputation map."""
-    if not posts: return {}
-    names = tuple({post['author'] for post in posts})
-    sql = "SELECT id, name, reputation FROM hive_accounts WHERE name IN :names"
-    return {r['name']: r for r in await db.query_all(sql, names=names)}
-
-def condenser_post_object(row, truncate_body=0):
+def database_post_object(row, truncate_body=0):
     """Given a hive_posts row, create a legacy-style post object."""
     paid = row['is_paidout']
 
-    # condenser#3424 mitigation
-    if not row['category']:
-        row['category'] = 'undefined'
-
     post = {}
+    post['active'] = json_date(row['active'])
+    post['author_rewards'] = row['author_rewards']
     post['post_id'] = row['id']
     post['author'] = row['author']
     post['permlink'] = row['permlink']
-    post['category'] = row['category']
+    post['category'] = row['category'] if 'category' in row else 'undefined'
 
     post['title'] = row['title']
     post['body'] = row['body'][0:truncate_body] if truncate_body else row['body']
@@ -35,17 +27,16 @@ def condenser_post_object(row, truncate_body=0):
     post['last_update'] = json_date(row['updated_at'])
     post['depth'] = row['depth']
     post['children'] = row['children']
+    post['children_abs_rshares'] = 0 # TODO
     post['net_rshares'] = row['rshares']
 
     post['last_payout'] = json_date(row['payout_at'] if paid else None)
     post['cashout_time'] = json_date(None if paid else row['payout_at'])
-    post['total_payout_value'] = _amount(row['payout'] if paid else 0)
-    post['curator_payout_value'] = _amount(0)
-    post['pending_payout_value'] = _amount(0 if paid else row['payout'])
-    post['promoted'] = _amount(row['promoted'])
+    post['max_cashout_time'] = json_date(row['max_cashout_time'])
+    post['total_payout_value'] = to_nai(_amount(row['payout'] if paid else 0))
+    post['curator_payout_value'] = to_nai(_amount(0))
 
-    post['replies'] = []
-    post['body_length'] = len(row['body'])
+    post['reward_weight'] = row['reward_weight']
 
     post['root_author'] = row['root_author']
     post['root_permlink'] = row['root_permlink']
@@ -61,15 +52,18 @@ def condenser_post_object(row, truncate_body=0):
         post['parent_author'] = ''
         post['parent_permlink'] = row['category']
 
-    post['url'] = row['url']
-    post['root_title'] = row['root_title']
     post['beneficiaries'] = row['beneficiaries']
-    post['max_accepted_payout'] = row['max_accepted_payout']
+    post['max_accepted_payout'] = to_nai(row['max_accepted_payout'])
     post['percent_hbd'] = row['percent_hbd']
+    post['abs_rshares'] = row['abs_rshares']
+    post['net_votes'] = Votes.get_vote_count(row['author'], row['permlink'])
 
     if paid:
         curator_payout = sbd_amount(row['curator_payout_value'])
-        post['curator_payout_value'] = _amount(curator_payout)
-        post['total_payout_value'] = _amount(row['payout'] - curator_payout)
+        post['curator_payout_value'] = to_nai(_amount(curator_payout))
+        post['total_payout_value'] = to_nai(_amount(row['payout'] - curator_payout))
+
+    post['total_vote_weight'] = Votes.get_total_vote_weight(row['author'], row['permlink'])
+    post['vote_rshares'] = Votes.get_total_vote_rshares(row['author'], row['permlink']) 
 
     return post

@@ -166,7 +166,7 @@ def build_methods():
     # database_api methods
     methods.add(**{
         'database_api.list_comments' : database_api.list_comments,
-        'database_api.find_comments' : database_api.find_comments
+        'database_api.find_comments' : database_api.find_comments,
     })
 
     return methods
