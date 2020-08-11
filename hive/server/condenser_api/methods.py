@@ -389,6 +389,8 @@ async def get_discussions_by_blog(context, tag: str = None, start_author: str = 
         #posts_by_id[row['post_id']] = post
         posts_by_id.append(post)
 
+    return posts_by_id
+
 @return_error_info
 @nested_query_compat
 async def get_discussions_by_feed(context, tag: str = None, start_author: str = '',
