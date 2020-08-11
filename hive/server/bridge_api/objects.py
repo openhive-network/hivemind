@@ -5,7 +5,7 @@ import ujson as json
 
 from hive.server.common.mutes import Mutes
 from hive.server.common.helpers import json_date
-from hive.server.database_api.methods import find_votes
+from hive.server.database_api.methods import find_votes, VotesPresentation
 from hive.utils.normalize import sbd_amount
 from hive.indexer.votes import Votes
 
@@ -100,7 +100,7 @@ async def load_posts_keyed(db, ids, truncate_body=0):
         author_ids[author['id']] = author['name']
 
         row['author_rep'] = author['reputation']
-        post = _condenser_post_object(row, truncate_body=truncate_body)
+        post = _bridge_post_object(row, truncate_body=truncate_body)
         post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']})
 
         post['blacklists'] = Mutes.lists(post['author'], author['reputation'])
@@ -219,7 +219,7 @@ def _condenser_profile_object(row):
                         'profile_image': row['profile_image'],
                        }}}
 
-def _condenser_post_object(row, truncate_body=0):
+def _bridge_post_object(row, truncate_body=0):
     """Given a hive_posts row, create a legacy-style post object."""
     paid = row['is_paidout']
 
@@ -231,7 +231,7 @@ def _condenser_post_object(row, truncate_body=0):
 
     post['title'] = row['title']
     post['body'] = row['body'][0:truncate_body] if truncate_body else row['body']
-    post['json_metadata'] = row['json']
+    post['json_metadata'] = json.loads(row['json'])
 
     post['created'] = json_date(row['created_at'])
     post['updated'] = json_date(row['updated_at'])
@@ -245,37 +245,30 @@ def _condenser_post_object(row, truncate_body=0):
     post['pending_payout_value'] = _amount(0 if paid else row['payout'])
     post['author_payout_value'] = _amount(row['payout'] if paid else 0)
     post['curator_payout_value'] = _amount(0)
-    post['promoted'] = float(row['promoted'])
+    post['promoted'] = _amount(row['promoted'])
 
     post['replies'] = []
+# ABW: missing post['active_votes'] = _hydrate_active_votes(row['votes'])
     post['author_reputation'] = float(row['author_rep'])
 
     post['stats'] = {
         'hide': row['is_hidden'],
         'gray': row['is_grayed'],
-        'total_votes': Votes.get_vote_count(row['author'], row['permlink']),
+        'total_votes': Votes.get_vote_count(row['author'], row['permlink']), # ABW: incorrect calculation (possibly needs to exclude blacklisted votes)
         'flag_weight': float(row['flag_weight'])} # TODO: down_weight
 
 
     #post['author_reputation'] = rep_to_raw(row['author_rep'])
 
-    post['root_author'] = row['root_author']
-    post['root_permlink'] = row['root_permlink']
-
-    post['allow_replies'] = row['allow_replies']
-    post['allow_votes'] = row['allow_votes']
-    post['allow_curation_rewards'] = row['allow_curation_rewards']
-
     post['url'] = row['url']
-    post['root_title'] = row['root_title']
     post['beneficiaries'] = row['beneficiaries']
     post['max_accepted_payout'] = row['max_accepted_payout']
     post['percent_hbd'] = row['percent_hbd']
 
     if paid:
         curator_payout = sbd_amount(row['curator_payout_value'])
+        post['author_payout_value'] = _amount(row['payout'] - curator_payout)
         post['curator_payout_value'] = _amount(curator_payout)
-        post['total_payout_value'] = _amount(row['payout'] - curator_payout)
 
     # TODO: re-evaluate
     if row['depth'] > 0:

@@ -297,9 +297,6 @@ class Posts:
             if ( is_paidout is not None ):
               payout_at = date
               cashout_time = "1969-12-31T23:59:59"
-            else:
-              if ( total_payout_value is not None ):
-                payout_at = date  #Here should be `cashout_time`
 
             cls._comment_payout_ops.append("('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(
               author,

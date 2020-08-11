@@ -4,7 +4,7 @@ import logging
 #import ujson as json
 import traceback
 
-from hive.server.bridge_api.objects import _condenser_post_object
+from hive.server.bridge_api.objects import _bridge_post_object
 from hive.utils.post import post_to_internal
 from hive.utils.normalize import sbd_amount
 from hive.server.common.helpers import (
@@ -96,7 +96,7 @@ async def normalize_post(context, post):
     try:
         if 'promoted' not in row: row['promoted'] = 0
         row['author_rep'] = author['reputation']
-        ret = _condenser_post_object(row)
+        ret = _bridge_post_object(row)
     except Exception as e:
         log.error("post_to_internal: %s %s", repr(e), traceback.format_exc())
         raise e

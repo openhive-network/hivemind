@@ -451,7 +451,7 @@ def setup(db):
              category_id,
              root_author_id, root_permlink_id,
              is_muted, is_valid,
-             author_id, permlink_id, created_at, updated_at, active)
+             author_id, permlink_id, created_at, updated_at, active, payout_at, cashout_time)
             SELECT php.id AS parent_id, php.author_id as parent_author_id,
                 php.permlink_id as parent_permlink_id, php.depth + 1 as depth,
                 (CASE
@@ -465,7 +465,7 @@ def setup(db):
                 php.is_muted as is_muted, php.is_valid as is_valid,
                 ha.id as author_id, hpd.id as permlink_id, _date as created_at,
                 _date as updated_at,
-                _date as active
+                _date as active, (_date + INTERVAL '7 days') as payout_at, (_date + INTERVAL '7 days') as cashout_time
             FROM hive_accounts ha,
                  hive_permlink_data hpd,
                  hive_posts php
@@ -482,11 +482,7 @@ def setup(db):
              active = _date,
 
               --- post undelete part (if was deleted)
-              is_deleted = (CASE hp.is_deleted
-                              WHEN true THEN false
-                              ELSE false
-                            END
-                           ),
+              is_deleted = false,
               is_pinned = (CASE hp.is_deleted
                               WHEN true THEN false
                               ELSE hp.is_pinned --- no change
@@ -507,7 +503,7 @@ def setup(db):
              category_id,
              root_author_id, root_permlink_id,
              is_muted, is_valid,
-             author_id, permlink_id, created_at, updated_at, active)
+             author_id, permlink_id, created_at, updated_at, active, payout_at, cashout_time)
             SELECT 0 AS parent_id, 0 as parent_author_id, 0 as parent_permlink_id, 0 as depth,
                 (CASE
                   WHEN _date > _community_support_start_date THEN
@@ -520,7 +516,7 @@ def setup(db):
                 false as is_muted, true as is_valid,
                 ha.id as author_id, hpd.id as permlink_id, _date as created_at,
                 _date as updated_at,
-                _date as active
+                _date as active, (_date + INTERVAL '7 days') as payout_at, (_date + INTERVAL '7 days') as cashout_time
             FROM hive_accounts ha,
                  hive_permlink_data hpd
             WHERE ha.name = _author and hpd.permlink = _permlink
@@ -533,11 +529,7 @@ def setup(db):
               active = _date,
 
               --- post undelete part (if was deleted)
-              is_deleted = (CASE hp.is_deleted
-                              WHEN true THEN false
-                              ELSE false
-                            END
-                           ),
+              is_deleted = false,
               is_pinned = (CASE hp.is_deleted
                               WHEN true THEN false
                               ELSE hp.is_pinned --- no change
