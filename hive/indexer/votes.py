@@ -90,20 +90,24 @@ class Votes:
             log.exception("Adding new vote-info into '_votes_data' dict")
             raise RuntimeError("Fatal error")
 
+        basic_key = "{}/{}".format(author, permlink)
         key = voter + "/" + author + "/" + permlink
 
-        if key in cls._votes_data:
-            cls._votes_data[key]["vote_percent"] = weight
-            cls._votes_data[key]["last_update"] = date
+        if basic_key not in cls._votes_data:
+          cls._votes_data[basic_key] = {}
+
+        if key in cls._votes_data[basic_key]:
+            cls._votes_data[basic_key][key]["vote_percent"] = weight
+            cls._votes_data[basic_key][key]["last_update"] = date
         else:
-            cls._votes_data[key] = dict(voter=voter,
-                                        author=author,
-                                        permlink=permlink,
-                                        vote_percent=weight,
-                                        weight=0,
-                                        rshares=0,
-                                        last_update=date,
-                                        is_effective=False)
+            cls._votes_data[basic_key][key] = dict(voter=voter,
+                                                   author=author,
+                                                   permlink=permlink,
+                                                   vote_percent=weight,
+                                                   weight=0,
+                                                   rshares=0,
+                                                   last_update=date,
+                                                   is_effective=False)
 
     @classmethod
     def effective_comment_vote_op(cls, key, vop):
@@ -120,10 +124,23 @@ class Votes:
         cls._votes_data[key]["is_effective"] = True
 
     @classmethod
-    def flush(cls):
+    def write_data_into_db_before_post_deleting(cls, key):
+      _tmp_data = {}
+
+      #Extract data for given key
+      _tmp_data[key] = cls._votes_data[key]
+
+      #Remove from original dictionary
+      del cls._votes_data[key]
+
+      #Save into database
+      cls.flush_from_source(_tmp_data)
+
+    @classmethod
+    def flush_from_source(cls, source):
         """ Flush vote data from cache to database """
         cls.inside_flush = True
-        if cls._votes_data:
+        if source:
             sql = """
                 INSERT INTO hive_votes
                 (post_id, voter_id, author_id, permlink_id, weight, rshares, vote_percent, last_update) 
@@ -154,25 +171,26 @@ class Votes:
             values_override = []
             values_limit = 1000
 
-            for _, vd in cls._votes_data.items():
-                values = None
-                on_conflict_data_source = None
+            for key, value in source.items():
+              for _, vd in value.items():
+                  values = None
+                  on_conflict_data_source = None
 
-                if vd['is_effective']:
-                    values = values_override
-                    on_conflict_data_source = 'EXCLUDED'
-                else:
-                    values = values_skip
-                    on_conflict_data_source = 'hive_votes'
+                  if vd['is_effective']:
+                      values = values_override
+                      on_conflict_data_source = 'EXCLUDED'
+                  else:
+                      values = values_skip
+                      on_conflict_data_source = 'hive_votes'
 
-                values.append("('{}', '{}', '{}', {}, {}, {}, '{}'::timestamp)".format(
-                    vd['voter'], vd['author'], vd['permlink'], vd['weight'], vd['rshares'], vd['vote_percent'], vd['last_update']))
+                  values.append("('{}', '{}', '{}', {}, {}, {}, '{}'::timestamp)".format(
+                      vd['voter'], vd['author'], vd['permlink'], vd['weight'], vd['rshares'], vd['vote_percent'], vd['last_update']))
 
-                if len(values) >= values_limit:
-                    values_str = ','.join(values)
-                    actual_query = sql.format(values_str, on_conflict_data_source, on_conflict_data_source)
-                    DB.query(actual_query)
-                    values.clear()
+                  if len(values) >= values_limit:
+                      values_str = ','.join(values)
+                      actual_query = sql.format(values_str,on_conflict_data_source,on_conflict_data_source)
+                      DB.query(actual_query)
+                      values.clear()
 
             if len(values_skip) > 0:
                 values_str = ','.join(values_skip)
@@ -185,5 +203,9 @@ class Votes:
                 DB.query(actual_query)
                 values_override.clear()
 
-            cls._votes_data.clear()
+            source.clear()
         cls.inside_flush = False
+
+    @classmethod
+    def flush(cls):
+      cls.flush_from_source(cls._votes_data)

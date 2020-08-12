@@ -30,6 +30,7 @@ class Posts:
     _hits = 0
     _miss = 0
 
+    deleted_ops = {}
     comment_payout_ops = {}
     _comment_payout_ops = []
 
@@ -75,6 +76,15 @@ class Posts:
         if len(cls._ids) > cls.CACHE_SIZE:
             cls._ids.popitem(last=False)
         cls._ids[url] = pid
+
+    @classmethod
+    def flush_deleted_ops(cls):
+        """ Process delete_comment operations """
+
+        for k, v in cls.deleted_ops.items():
+          cls.delete_op(v)
+
+        cls.deleted_ops.clear();
 
     @classmethod
     def delete_op(cls, op):
@@ -149,7 +159,7 @@ class Posts:
             cls._insert_feed_cache(result, block_date)
 
     @classmethod
-    def flush_into_db(cls):
+    def flush_payouts(cls):
         sql = """
               UPDATE hive_posts AS ihp SET
                   total_payout_value    = COALESCE( data_source.total_payout_value,                     ihp.total_payout_value ),
@@ -373,20 +383,28 @@ class Posts:
                  beneficiaries=beneficiaries)
 
     @classmethod
+    def get_id_depth(cls, op):
+        sql = """
+            SELECT hp.id, hp.depth
+            FROM hive_posts hp 
+            INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
+            INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
+            WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
+        """
+
+        row = DB.query_row(sql, author=op['author'], permlink = op['permlink'])
+        result = dict(row)
+
+        return ( result['id'], result['depth'] )
+
+    @classmethod
     def delete(cls, op):
         """Marks a post record as being deleted."""
 
-        sql = """
-              SELECT id, depth
-              FROM delete_hive_post((:author)::varchar, (:permlink)::varchar);
-              """
-        row = DB.query_row(sql, author=op['author'], permlink = op['permlink'])
-
-        result = dict(row)
-        pid = result['id']
+        pid = op['id']
 
         if not DbState.is_initial_sync():
-            depth = result['depth']
+            depth = op['depth']
 
             if depth == 0:
                 # TODO: delete from hive_reblogs -- otherwise feed cache gets 
@@ -449,8 +467,13 @@ class Posts:
         
         return new_body
 
+    @classmethod
+    def write_data_into_db_before_post_deleting(cls, key):
+      delete_op( deleted_ops[key] )
+      del deleted_ops[key]
 
     @classmethod
     def flush(cls):
       cls.comment_payout_op()
-      cls.flush_into_db()
+      cls.flush_payouts()
+      cls.flush_deleted_ops()

@@ -8,17 +8,34 @@ from hive.utils.normalize import escape_characters
 
 class Tags(object):
     """ Tags cache """
-    _tags = []
+    _tags = {}
 
     @classmethod
     def add_tag(cls, tid, tag):
         """ Add tag to cache """
-        cls._tags.append((tid, tag))
+        if tid in cls._tags:
+          cls._tags[tid].append(tag)
+        else:
+          cls._tags[tid]=[]
+          cls._tags[tid].append(tag)
 
     @classmethod
-    def flush(cls):
+    def write_data_into_db_before_post_deleting(cls, pid):
+      _tmp_data = {}
+
+      #Extract data for given key
+      _tmp_data[pid] = cls._tags[pid]
+
+      #Remove from original dictionary
+      del cls._tags[pid]
+
+      #Save into database
+      cls.flush_from_source(_tmp_data)
+
+    @classmethod
+    def flush_from_source(cls, source):
         """ Flush tags to table """
-        if cls._tags:
+        if source:
             limit = 1000
 
             sql = """
@@ -28,8 +45,9 @@ class Tags(object):
                 ON CONFLICT DO NOTHING
             """
             values = []
-            for tag in cls._tags:
-                values.append("({})".format(escape_characters(tag[1])))
+            for id,value in source.items():
+              for tag in value:
+                values.append("({})".format(escape_characters(tag)))
                 if len(values) >= limit:
                     tag_query = str(sql)
                     DB.query(tag_query.format(','.join(values)))
@@ -58,8 +76,9 @@ class Tags(object):
                 ON CONFLICT DO NOTHING
             """
             values = []
-            for tag in cls._tags:
-                values.append("({}, {})".format(tag[0], escape_characters(tag[1])))
+            for id,value in source.items():
+              for tag in value:
+                values.append("({}, {})".format(id, escape_characters(tag)))
                 if len(values) >= limit:
                     tag_query = str(sql)
                     DB.query(tag_query.format(','.join(values)))
@@ -68,4 +87,8 @@ class Tags(object):
                 tag_query = str(sql)
                 DB.query(tag_query.format(','.join(values)))
                 values.clear()
-            cls._tags.clear()
+            source.clear()
+
+    @classmethod
+    def flush(cls):
+      cls.flush_from_source(cls._tags)

@@ -216,13 +216,27 @@ class Blocks:
 
                 # post ops
                 elif op_type == 'comment_operation':
+
+                    key = "{}/{}".format(op['author'], op['permlink'])
+                    allow_write_data = ( Posts.deleted_ops is not None ) and ( key in Posts.deleted_ops )
+
+                    if allow_write_data:
+                      _id = Posts.deleted_ops[key]['id']
+
+                      #Move all data dependent on old post and remove this post. Next create new post.
+                      PostDataCache.write_data_into_db_before_post_deleting(_id)
+                      Tags.write_data_into_db_before_post_deleting(_id)
+                      Votes.write_data_into_db_before_post_deleting(key)
+                      Posts.write_data_into_db_before_post_deleting(key)
+
                     Posts.comment_op(op, cls._head_block_date)
                     if not is_initial_sync:
                         Accounts.dirty(op['author']) # lite - stats
                 elif op_type == 'delete_comment_operation':
                     key = "{}/{}".format(op['author'], op['permlink'])
                     if ( deleted_ops is None ) or ( key not in deleted_ops ):
-                      Posts.delete_op(op)
+                      ( _id, _depth ) = Posts.get_id_depth(op)
+                      Posts.deleted_ops[ key ] = { "id":_id, "depth":_depth }
                 elif op_type == 'comment_options_operation':
                     Posts.comment_options_op(op)
                 elif op_type == 'vote_operation':
