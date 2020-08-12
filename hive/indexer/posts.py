@@ -469,8 +469,8 @@ class Posts:
 
     @classmethod
     def write_data_into_db_before_post_deleting(cls, key):
-      delete_op( deleted_ops[key] )
-      del deleted_ops[key]
+      cls.delete_op( cls.deleted_ops[key] )
+      del cls.deleted_ops[key]
 
     @classmethod
     def flush(cls):

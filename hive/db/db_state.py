@@ -341,7 +341,6 @@ class DbState:
             cls.db().query("ALTER TABLE hive_posts ADD COLUMN community_id integer")
             cls.db().query("ALTER TABLE hive_posts_cache ADD COLUMN community_id integer")
 
-            cls.db().query("ALTER TABLE deleted_hive_posts DROP CONSTRAINT deleted_hive_posts_fk2")
             cls.db().query("ALTER TABLE deleted_hive_posts DROP COLUMN community")
             cls.db().query("ALTER TABLE deleted_hive_posts ADD COLUMN community_id integer")
             cls.db().query("ALTER TABLE deleted_hive_posts_cache ADD COLUMN community_id integer")

@@ -34,16 +34,19 @@ class PostDataCache(object):
 
     @classmethod
     def write_data_into_db_before_post_deleting(cls, pid, print_query = False):
+      if pid not in cls._data:
+        return
+
       _tmp_data = {}
 
       #Extract data for given key
       _tmp_data[pid] = cls._data[pid]
 
-      #Remove from original dictionary
-      del cls._data[pid]
-
       #Save into database
       cls.flush_from_source(_tmp_data, print_query)
+
+      #Remove from original dictionary
+      del cls._data[pid]
 
     @classmethod
     def flush_from_source(cls, source, print_query = False):

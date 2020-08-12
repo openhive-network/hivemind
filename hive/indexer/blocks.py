@@ -138,7 +138,7 @@ class Blocks:
             elif op_type == 'effective_comment_vote_operation':
                 ops_stats[ 'effective_comment_vote_operation' ] += 1
                 key_vote = "{}/{}/{}".format(op_value['voter'], op_value['author'], op_value['permlink'])
-                vote_ops[ key_vote ] = op_value
+                vote_ops[ key_vote ] = { 'basic_key':key, 'op':op_value }
 
                 if key not in comment_payout_ops:
                   comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None, 'date' : date }

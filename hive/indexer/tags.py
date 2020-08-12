@@ -21,16 +21,19 @@ class Tags(object):
 
     @classmethod
     def write_data_into_db_before_post_deleting(cls, pid):
+      if pid not in cls._tags:
+        return
+
       _tmp_data = {}
 
       #Extract data for given key
       _tmp_data[pid] = cls._tags[pid]
 
-      #Remove from original dictionary
-      del cls._tags[pid]
-
       #Save into database
       cls.flush_from_source(_tmp_data)
+
+      #Remove from original dictionary
+      del cls._tags[pid]
 
     @classmethod
     def flush_from_source(cls, source):

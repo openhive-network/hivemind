@@ -117,24 +117,30 @@ class Votes:
             log.exception("Updating data in '_votes_data' using effective comment")
             raise RuntimeError("Fatal error")
 
-        assert key in cls._votes_data
+        basic_key = vop["basic_key"]
 
-        cls._votes_data[key]["weight"]       = vop["weight"]
-        cls._votes_data[key]["rshares"]      = vop["rshares"]
-        cls._votes_data[key]["is_effective"] = True
+        assert basic_key in cls._votes_data
+        assert key in cls._votes_data[basic_key]
+
+        cls._votes_data[basic_key][key]["weight"]       = vop["op"]["weight"]
+        cls._votes_data[basic_key][key]["rshares"]      = vop["op"]["rshares"]
+        cls._votes_data[basic_key][key]["is_effective"] = True
 
     @classmethod
     def write_data_into_db_before_post_deleting(cls, key):
+      if key not in cls._votes_data:
+        return
+
       _tmp_data = {}
 
       #Extract data for given key
       _tmp_data[key] = cls._votes_data[key]
 
-      #Remove from original dictionary
-      del cls._votes_data[key]
-
       #Save into database
       cls.flush_from_source(_tmp_data)
+
+      #Remove from original dictionary
+      del cls._votes_data[key]
 
     @classmethod
     def flush_from_source(cls, source):
