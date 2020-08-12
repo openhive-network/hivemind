@@ -81,7 +81,7 @@ def build_metadata():
         sa.Column('is_valid', BOOLEAN, nullable=False, server_default='1'),
         sa.Column('promoted', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
 
-        sa.Column('children', SMALLINT, nullable=False, server_default='0'),
+        sa.Column('children', sa.Integer, nullable=False, server_default='0'),
 
         # basic/extended-stats
         sa.Column('author_rep', sa.Float(precision=6), nullable=False, server_default='0'),
@@ -688,7 +688,7 @@ def setup(db):
               JOIN tblChild  ON p.Parent_Id = tblChild.Id
               WHERE NOT p.is_deleted
             )
-            SELECT queried_parent, cast(count(1) AS smallint) AS children_count
+            SELECT queried_parent, cast(count(1) AS int) AS children_count
             FROM tblChild
             GROUP BY queried_parent
           ) data_source
