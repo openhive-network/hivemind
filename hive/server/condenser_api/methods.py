@@ -384,10 +384,12 @@ async def get_discussions_by_blog(context, tag: str = None, start_author: str = 
     for row in result:
         row = dict(row)
         post = _condenser_post_object(row, truncate_body=truncate_body)
-        post['active_votes'] = await find_votes(context, {'author':post['author'], 'permlink':post['permlink']})
+        post['active_votes'] = await find_votes(context, {'author':post['author'], 'permlink':post['permlink']}, votes_presentation = VotesPresentation.CondenserApi)
         post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
         #posts_by_id[row['post_id']] = post
         posts_by_id.append(post)
+
+    return posts_by_id
 
 @return_error_info
 @nested_query_compat
