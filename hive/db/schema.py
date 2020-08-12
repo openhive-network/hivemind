@@ -1012,25 +1012,6 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-        DROP MATERIALIZED VIEW IF EXISTS hive_posts_a_p
-        ;
-        CREATE MATERIALIZED VIEW hive_posts_a_p
-        AS
-        SELECT hp.id AS id,
-            ha_a.name AS author,
-            hpd_p.permlink AS permlink
-        FROM hive_posts hp
-        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        WITH DATA
-        ;
-        DROP INDEX IF EXISTS hive_posts_a_p_idx
-        ;
-        CREATE unique index hive_posts_a_p_idx ON hive_posts_a_p (author collate "C", permlink collate "C")
-    """
-    db.query_no_return(sql)
-
-    sql = """
         DROP VIEW IF EXISTS public.hive_posts_view;
 
         CREATE OR REPLACE VIEW public.hive_posts_view
