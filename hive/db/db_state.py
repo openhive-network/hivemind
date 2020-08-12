@@ -89,7 +89,7 @@ class DbState:
     def _disableable_indexes(cls):
         to_locate = [
             #'hive_posts_ix3', # (author, depth, id)
-            #'hive_posts_ix4', # (parent_id, id, is_deleted=0)
+            #'hive_posts_ix4', # (parent_id, id)
             #'hive_posts_ix5', # (community_id>0, is_pinned=1)
             'hive_follows_ix5a', # (following, state, created_at, follower)
             'hive_follows_ix5b', # (follower, state, created_at, following)
@@ -318,13 +318,13 @@ class DbState:
         if cls._ver == 11:
             cls.db().query("DROP INDEX hive_posts_ix1")
             cls.db().query("DROP INDEX hive_posts_ix2")
-            cls.db().query("CREATE INDEX hive_posts_ix3 ON hive_posts (author, depth, id) WHERE is_deleted = '0'")
-            cls.db().query("CREATE INDEX hive_posts_ix4 ON hive_posts (parent_id, id) WHERE is_deleted = '0'")
+            cls.db().query("CREATE INDEX hive_posts_ix3 ON hive_posts (author, depth, id)")
+            cls.db().query("CREATE INDEX hive_posts_ix4 ON hive_posts (parent_id, id)")
 
             cls.db().query("DROP INDEX deleted_hive_posts_ix1")
             cls.db().query("DROP INDEX deleted_hive_posts_ix2")
-            cls.db().query("CREATE INDEX deleted_hive_posts_ix3 ON deleted_hive_posts (author, depth, id) WHERE is_deleted = '0'")
-            cls.db().query("CREATE INDEX deleted_hive_posts_ix4 ON deleted_hive_posts (parent_id, id) WHERE is_deleted = '0'")
+            cls.db().query("CREATE INDEX deleted_hive_posts_ix3 ON deleted_hive_posts (author, depth, id)")
+            cls.db().query("CREATE INDEX deleted_hive_posts_ix4 ON deleted_hive_posts (parent_id, id)")
             cls._set_ver(12)
 
         if cls._ver == 12: # community schema
@@ -348,10 +348,10 @@ class DbState:
             cls._set_ver(13)
 
         if cls._ver == 13:
-            sqls = ("CREATE INDEX hive_posts_ix5 ON hive_posts (id) WHERE is_pinned = '1' AND is_deleted = '0'",
-                    "CREATE INDEX hive_posts_ix6 ON hive_posts (community_id, id) WHERE community_id IS NOT NULL AND is_pinned = '1' AND is_deleted = '0'",
-                    "CREATE INDEX deleted_hive_posts_ix5 ON deleted_hive_posts (id) WHERE is_pinned = '1' AND is_deleted = '0'",
-                    "CREATE INDEX deleted_hive_posts_ix6 ON deleted_hive_posts (community_id, id) WHERE community_id IS NOT NULL AND is_pinned = '1' AND is_deleted = '0'",)
+            sqls = ("CREATE INDEX hive_posts_ix5 ON hive_posts (id) WHERE is_pinned = '1'",
+                    "CREATE INDEX hive_posts_ix6 ON hive_posts (community_id, id) WHERE community_id IS NOT NULL AND is_pinned = '1'",
+                    "CREATE INDEX deleted_hive_posts_ix5 ON deleted_hive_posts (id) WHERE is_pinned = '1'",
+                    "CREATE INDEX deleted_hive_posts_ix6 ON deleted_hive_posts (community_id, id) WHERE community_id IS NOT NULL AND is_pinned = '1'",)
                     #"CREATE INDEX hive_posts_cache_ix10 ON hive_posts_cache (post_id, payout) WHERE is_grayed = '1' AND payout > 0",
                     #"CREATE INDEX hive_posts_cache_ix30 ON hive_posts_cache (community_id, sc_trend,   post_id) WHERE community_id IS NOT NULL AND is_grayed = '0' AND depth = 0",
                     #"CREATE INDEX hive_posts_cache_ix31 ON hive_posts_cache (community_id, sc_hot,     post_id) WHERE community_id IS NOT NULL AND is_grayed = '0' AND depth = 0",

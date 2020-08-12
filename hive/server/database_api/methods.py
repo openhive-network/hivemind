@@ -117,7 +117,6 @@ async def find_comments(context, start: list, limit: int, order: str):
             hive_posts_view hp
         WHERE
             NOT hp.is_muted AND
-            NOT hp.is_deleted AND
     """
 
     idx = 0

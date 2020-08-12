@@ -29,13 +29,13 @@ async def get_discussion(context, author, permlink, observer=None):
             id, parent_id
           FROM hive_posts_view hpv WHERE hpv.author = :author
             AND hpv.permlink = :permlink
-            AND NOT hpv.is_deleted AND NOT hpv.is_muted
+            AND NOT hpv.is_muted
           UNION ALL
           SELECT
             children.id, children.parent_id
           FROM hive_posts children
           INNER JOIN child_posts ON (children.parent_id = child_posts.id) 
-          WHERE NOT children.is_deleted AND NOT children.is_muted
+          WHERE NOT children.is_muted
         )
         SELECT
           child_posts.id,
@@ -79,7 +79,7 @@ async def get_discussion(context, author, permlink, observer=None):
           hpv.curator_payout_value
         FROM child_posts 
         INNER JOIN hive_posts_view hpv ON (hpv.id = child_posts.id)
-        WHERE NOT hpv.is_deleted AND NOT hpv.is_muted
+        WHERE NOT hpv.is_muted
         LIMIT 2000
     """
 
@@ -150,7 +150,6 @@ async def _child_ids(db, parent_ids):
              SELECT parent_id, array_agg(id)
                FROM hive_posts
               WHERE parent_id IN :ids
-                AND is_deleted = '0'
            GROUP BY parent_id
     """
     rows = await db.query_all(sql, ids=tuple(parent_ids))

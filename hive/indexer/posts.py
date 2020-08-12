@@ -37,7 +37,7 @@ class Posts:
     @classmethod
     def last_id(cls):
         """Get the last indexed post id."""
-        sql = "SELECT MAX(id) FROM hive_posts WHERE is_deleted = '0'"
+        sql = "SELECT MAX(id) FROM hive_posts"
         return DB.query_one(sql) or 0
 
     @classmethod
