@@ -1016,6 +1016,16 @@ def setup(db):
     """
     db.query_no_return(sql)
 
+    sql = """
+          DO $$
+          BEGIN
+            EXECUTE 'ALTER DATABASE '||current_database()||' SET join_collapse_limit TO 16';
+            EXECUTE 'ALTER DATABASE '||current_database()||' SET from_collapse_limit TO 16';
+          END
+          $$;
+          """
+    db.query_no_return(sql)
+
 def reset_autovac(db):
     """Initializes/resets per-table autovacuum/autoanalyze params.
 
