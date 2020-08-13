@@ -64,10 +64,8 @@ setup(
     long_description=open('README.md').read(),
     packages=find_packages(exclude=['scripts']),
     setup_requires=[
-        'importlib_metadata',
         'pytest-runner',
-        'setuptools-git-version',
-        'tox'
+        'setuptools-git-version'
     ],
     install_requires=[
         'importlib_metadata',
@@ -87,6 +85,7 @@ setup(
         'configargparse',
         'pdoc',
         'diff-match-patch',
+        'tox'
     ],
     entry_points={
         'console_scripts': [
