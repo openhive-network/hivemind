@@ -54,7 +54,7 @@ class BuildWrapper(build_py):
 class InstallWrapper(install):
     def run(self):
         GitRevisionProvider.provide_git_revision()
-        install.run(self)
+        install.do_egg_install(self)
 
 # yapf: disable
 setup(
@@ -94,6 +94,7 @@ setup(
         ]
     },
     cmdclass={
-        'install': InstallWrapper,
-        'build_py':BuildWrapper}
+        'install' : InstallWrapper,
+        'build_py' : BuildWrapper
+    }
 )
