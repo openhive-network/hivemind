@@ -16,7 +16,6 @@ aiohttp = "*"
 aiopg = "*"
 psycopg2-binary = "*"
 diff-match-patch = "*"
-tox = "*"
 
 [dev-packages]
 
@@ -30,6 +29,7 @@ pytest-asyncio = "*"
 pytest-console-scripts = "*"
 yapf = "*"
 autopep8 = "*"
+tox = "*"
 
 [requires]
 python_version = "3.6"

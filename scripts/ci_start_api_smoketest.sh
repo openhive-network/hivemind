@@ -1,6 +1,7 @@
 #!/bin/bash 
 
 set -e
+pip3 install tox --user
 
 export HIVEMIND_ADDRESS=$1
 export HIVEMIND_PORT=$2

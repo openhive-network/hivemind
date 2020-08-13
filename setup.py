@@ -85,7 +85,6 @@ setup(
         'configargparse',
         'pdoc',
         'diff-match-patch',
-        'tox'
     ],
     entry_points={
         'console_scripts': [
