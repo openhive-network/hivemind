@@ -324,7 +324,6 @@ def build_metadata():
         sa.Column('last_update', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('num_changes', sa.Integer, server_default='0'),
 
-        sa.ForeignKeyConstraint(['post_id'], ['deleted_hive_posts.id']),
         sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),
         sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id']),
         sa.ForeignKeyConstraint(['permlink_id'], ['hive_permlink_data.id']),
@@ -359,7 +358,6 @@ def build_metadata():
         'deleted_hive_post_tags', metadata,
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('tag_id', sa.Integer, nullable=False),
-        sa.ForeignKeyConstraint(['post_id'], ['deleted_hive_posts.id']),
         sa.ForeignKeyConstraint(['tag_id'], ['hive_tag_data.id']),
         sa.Index('deleted_hive_post_tags_post_id_idx', 'post_id'),
         sa.Index('deleted_hive_post_tags_tag_id_idx', 'tag_id')

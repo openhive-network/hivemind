@@ -163,15 +163,6 @@ class Votes:
                 INNER JOIN hive_accounts ha_a ON ha_a.name = t.author
                 INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
                 INNER JOIN hive_posts hp ON hp.author_id = ha_a.id AND hp.permlink_id = hpd_p.id
-                ON CONFLICT ON CONSTRAINT hive_votes_ux1 DO
-                UPDATE
-                  SET
-                    weight = {}.weight,
-                    rshares = {}.rshares,
-                    vote_percent = EXCLUDED.vote_percent,
-                    last_update = EXCLUDED.last_update,
-                    num_changes = hive_votes.num_changes + 1
-                  WHERE hive_votes.voter_id = EXCLUDED.voter_id and hive_votes.author_id = EXCLUDED.author_id and hive_votes.permlink_id = EXCLUDED.permlink_id;
                 """
           else:
             sql = """

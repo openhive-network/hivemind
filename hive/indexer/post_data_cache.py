@@ -83,9 +83,9 @@ class PostDataCache(object):
                             img_url = EXCLUDED.img_url,
                             body = EXCLUDED.body,
                             json = EXCLUDED.json
-                        WHERE
-                            hive_post_data.id = EXCLUDED.id
+                        WHERE 
             """
+            sql += "{}.id = EXCLUDED.id".format( "deleted_hive_post_data" if deleted_mode else "hive_post_data" )
 
             if(print_query):
                 log.info("Executing query:\n{}".format(sql))
