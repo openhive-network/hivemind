@@ -541,7 +541,7 @@ def setup(db):
           $function$
           BEGIN
             RETURN QUERY UPDATE hive_posts AS hp
-              SET hp.counter_deleted =
+              SET counter_deleted =
               (
                 SELECT max( hp.counter_deleted ) + 1
                 FROM hive_posts hp
