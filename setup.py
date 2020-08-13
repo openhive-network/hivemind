@@ -63,14 +63,16 @@ setup(
     description='Developer-friendly microservice powering social networks on the Steem blockchain.',
     long_description=open('README.md').read(),
     packages=find_packages(exclude=['scripts']),
-    setup_requires=['pytest-runner', 'setuptools-git-version', 'tox'],
-    dependency_links=[
-      'https://github.com/bcb/jsonrpcserver/tarball/8f3437a19b6d1a8f600ee2c9b112116c85f17827#egg=jsonrpcserver-4.1.3+8f3437a'
+    setup_requires=[
+        'importlib_metadata',
+        'pytest-runner',
+        'setuptools-git-version',
+        'tox'
     ],
     install_requires=[
         'importlib_metadata',
-        'aiopg @ https://github.com/aio-libs/aiopg/tarball/862fff97e4ae465333451a4af2a838bfaa3dd0bc',
-        'jsonrpcserver @ https://github.com/bcb/jsonrpcserver/tarball/8f3437a19b6d1a8f600ee2c9b112116c85f17827#egg=jsonrpcserver',
+        'aiopg',
+        'jsonrpcserver',
         'simplejson',
         'aiohttp',
         'certifi',
