@@ -52,6 +52,7 @@ async def load_posts_keyed(db, ids, truncate_body=0):
         hp.depth,
         hp.promoted,
         hp.payout,
+        hp.pending_payout,
         hp.payout_at,
         hp.is_paidout,
         hp.children,
@@ -200,7 +201,7 @@ def _condenser_post_object(row, truncate_body=0):
     post['cashout_time'] = json_date(None if paid else row['payout_at'])
     post['total_payout_value'] = _amount(row['payout'] if paid else 0)
     post['curator_payout_value'] = _amount(0)
-    post['pending_payout_value'] = _amount(0 if paid else row['payout'])
+    post['pending_payout_value'] = _amount(row['pending_payout'])
     post['promoted'] = _amount(row['promoted'])
 
     post['replies'] = []
