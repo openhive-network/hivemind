@@ -473,7 +473,7 @@ def setup(db):
             INNER JOIN hive_accounts pha ON pha.id = php.author_id
             INNER JOIN hive_permlink_data phpd ON phpd.id = php.permlink_id
             WHERE pha.name = _parent_author and phpd.permlink = _parent_permlink AND
-                   ha.name = _author and hpd.permlink = _permlink
+                   ha.name = _author and hpd.permlink = _permlink and php.counter_deleted = 0
 
             ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
               --- During post update it is disallowed to change: parent-post, category, community-id
