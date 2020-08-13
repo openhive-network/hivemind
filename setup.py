@@ -68,7 +68,7 @@ setup(
       'https://github.com/bcb/jsonrpcserver/tarball/8f3437a19b6d1a8f600ee2c9b112116c85f17827#egg=jsonrpcserver-4.1.3+8f3437a'
     ],
     install_requires=[
-        #'aiopg==0.16.0',
+        'importlib_metadata',
         'aiopg @ https://github.com/aio-libs/aiopg/tarball/862fff97e4ae465333451a4af2a838bfaa3dd0bc',
         'jsonrpcserver @ https://github.com/bcb/jsonrpcserver/tarball/8f3437a19b6d1a8f600ee2c9b112116c85f17827#egg=jsonrpcserver',
         'simplejson',
@@ -84,7 +84,7 @@ setup(
         'aiocache',
         'configargparse',
         'pdoc',
-        'diff-match-patch'
+        'diff-match-patch',
     ],
     entry_points={
         'console_scripts': [
