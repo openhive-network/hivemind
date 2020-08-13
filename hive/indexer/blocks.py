@@ -107,7 +107,7 @@ class Blocks:
     def prepare_vops(comment_payout_ops, vopsList, date):
         vote_ops = {}
         ops_stats = { 'author_reward_operation' : 0, 'comment_reward_operation' : 0, 'effective_comment_vote_operation' : 0, 'comment_payout_update_operation' : 0, 'ineffective_delete_comment_operation' : 0 }
-        deleted_ops = {}
+        inefficient_deleted_ops = {}
 
         for vop in vopsList:
             key = None
@@ -154,9 +154,9 @@ class Blocks:
                 comment_payout_ops[key][op_type] = op_value
             elif op_type == 'ineffective_delete_comment_operation':
               ops_stats[ 'ineffective_delete_comment_operation' ] += 1
-              deleted_ops[key] = {}
+              inefficient_deleted_ops[key] = {}
 
-        return (vote_ops, ops_stats, deleted_ops)
+        return (vote_ops, ops_stats, inefficient_deleted_ops)
 
 
     @classmethod
@@ -174,16 +174,16 @@ class Blocks:
         if cls._head_block_date is None:
             cls._head_block_date = cls._current_block_date
 
-        vote_ops              = None
-        comment_payout_stats  = None
-        deleted_ops           = None
+        vote_ops                = None
+        comment_payout_stats    = None
+        inefficient_deleted_ops = None
 
         if is_initial_sync:
             if num in virtual_operations:
-              (vote_ops, comment_payout_stats, deleted_ops ) = Blocks.prepare_vops(Posts.comment_payout_ops, virtual_operations[num], cls._current_block_date)
+              (vote_ops, comment_payout_stats, inefficient_deleted_ops ) = Blocks.prepare_vops(Posts.comment_payout_ops, virtual_operations[num], cls._current_block_date)
         else:
             vops = hived.get_virtual_operations(num)
-            (vote_ops, comment_payout_stats, deleted_ops ) = Blocks.prepare_vops(Posts.comment_payout_ops, vops, cls._current_block_date)
+            (vote_ops, comment_payout_stats, inefficient_deleted_ops ) = Blocks.prepare_vops(Posts.comment_payout_ops, vops, cls._current_block_date)
 
         json_ops = []
         for tx_idx, tx in enumerate(block['transactions']):
@@ -234,7 +234,7 @@ class Blocks:
                         Accounts.dirty(op['author']) # lite - stats
                 elif op_type == 'delete_comment_operation':
                     key = "{}/{}".format(op['author'], op['permlink'])
-                    if ( deleted_ops is None ) or ( key not in deleted_ops ):
+                    if ( inefficient_deleted_ops is None ) or ( key not in inefficient_deleted_ops ):
                       ( _id, _depth ) = Posts.get_id_depth(op)
                       Posts.deleted_ops[ key ] = { "id":_id, "depth":_depth }
                 elif op_type == 'comment_options_operation':

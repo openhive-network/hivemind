@@ -78,25 +78,18 @@ class Posts:
         cls._ids[url] = pid
 
     @classmethod
-    def flush_deleted_ops(cls):
+    def move_into_deleted_tables(cls, source, all_operations):
         """ Process delete_comment operations """
 
         # Move all data related to deleted post into corresponding 'deleted_*' tables
-        sql="""SELECT process_deleted_hive_post('{{{}}}')""".format(",".join([str( v['id'] ) for k,v in cls.deleted_ops.items()]))
+        sql="SELECT process_deleted_hive_post( {}, ".format( all_operations )
+        sql += """'{{{}}}' )""".format(",".join([str( v['id'] ) for k,v in source.items()]))
         DB.query_row(sql)
 
-        for k, v in cls.deleted_ops.items():
-          cls.delete_op(v)
+        for k, v in source.items():
+          cls.delete(v)
 
-        cls.deleted_ops.clear();
-
-    @classmethod
-    def delete_op(cls, op):
-        """Given a delete_comment op, mark the post as deleted.
-
-        Also remove it from post-cache and feed-cache.
-        """
-        cls.delete(op)
+        source.clear();
 
     @classmethod
     def comment_op(cls, op, block_date):
@@ -467,11 +460,17 @@ class Posts:
 
     @classmethod
     def write_data_into_db_before_post_deleting(cls, key):
-      cls.delete_op( cls.deleted_ops[key] )
+      _tmp_data = {}
+
+      #Extract data for given key
+      _tmp_data[key] = cls.deleted_ops[key]
+
+      cls.move_into_deleted_tables( _tmp_data, False )
+
       del cls.deleted_ops[key]
 
     @classmethod
     def flush(cls):
       cls.comment_payout_op()
       cls.flush_payouts()
-      cls.flush_deleted_ops()
+      cls.move_into_deleted_tables( cls.deleted_ops, True )

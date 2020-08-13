@@ -43,20 +43,28 @@ class PostDataCache(object):
       _tmp_data[pid] = cls._data[pid]
 
       #Save into database
-      cls.flush_from_source(_tmp_data, print_query)
+      cls.flush_from_source(_tmp_data, True, print_query)
 
       #Remove from original dictionary
       del cls._data[pid]
 
     @classmethod
-    def flush_from_source(cls, source, print_query = False):
+    def flush_from_source(cls, source, deleted_mode, print_query = False):
         """ Flush data from cache to db """
         if source:
-            sql = """
+            sql = ""
+            if deleted_mode:
+              sql = """
+                INSERT INTO 
+                    deleted_hive_post_data (id, title, preview, img_url, body, json) 
+                VALUES 
+            """
+            else:
+              sql = """
                 INSERT INTO 
                     hive_post_data (id, title, preview, img_url, body, json) 
                 VALUES 
-            """
+              """
             values = []
             for k, data in source.items():
                 title = "''" if not data['title'] else "{}".format(escape_characters(data['title']))
@@ -87,4 +95,4 @@ class PostDataCache(object):
 
     @classmethod
     def flush(cls, print_query = False):
-      cls.flush_from_source(cls._data, print_query)
+      cls.flush_from_source(cls._data, False, print_query)

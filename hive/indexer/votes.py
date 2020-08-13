@@ -137,16 +137,43 @@ class Votes:
       _tmp_data[key] = cls._votes_data[key]
 
       #Save into database
-      cls.flush_from_source(_tmp_data)
+      cls.flush_from_source(_tmp_data, True)
 
       #Remove from original dictionary
       del cls._votes_data[key]
 
     @classmethod
-    def flush_from_source(cls, source):
+    def flush_from_source(cls, source, deleted_mode):
         """ Flush vote data from cache to database """
         cls.inside_flush = True
         if source:
+          sql = ""
+          if deleted_mode:
+            sql = """
+                INSERT INTO deleted_hive_votes
+                (post_id, voter_id, author_id, permlink_id, weight, rshares, vote_percent, last_update) 
+                SELECT hp.id as post_id, ha_v.id as voter_id, ha_a.id as author_id, hpd_p.id as permlink_id, t.weight, t.rshares, t.vote_percent, t.last_update
+                FROM
+                (
+                VALUES
+                  -- voter, author, permlink, weight, rshares, vote_percent, last_update
+                  {}
+                ) AS T(voter, author, permlink, weight, rshares, vote_percent, last_update)
+                INNER JOIN hive_accounts ha_v ON ha_v.name = t.voter
+                INNER JOIN hive_accounts ha_a ON ha_a.name = t.author
+                INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
+                INNER JOIN hive_posts hp ON hp.author_id = ha_a.id AND hp.permlink_id = hpd_p.id
+                ON CONFLICT ON CONSTRAINT hive_votes_ux1 DO
+                UPDATE
+                  SET
+                    weight = {}.weight,
+                    rshares = {}.rshares,
+                    vote_percent = EXCLUDED.vote_percent,
+                    last_update = EXCLUDED.last_update,
+                    num_changes = hive_votes.num_changes + 1
+                  WHERE hive_votes.voter_id = EXCLUDED.voter_id and hive_votes.author_id = EXCLUDED.author_id and hive_votes.permlink_id = EXCLUDED.permlink_id;
+                """
+          else:
             sql = """
                 INSERT INTO hive_votes
                 (post_id, voter_id, author_id, permlink_id, weight, rshares, vote_percent, last_update) 
@@ -214,4 +241,4 @@ class Votes:
 
     @classmethod
     def flush(cls):
-      cls.flush_from_source(cls._votes_data)
+      cls.flush_from_source(cls._votes_data, False)

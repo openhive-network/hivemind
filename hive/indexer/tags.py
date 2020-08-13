@@ -30,13 +30,13 @@ class Tags(object):
       _tmp_data[pid] = cls._tags[pid]
 
       #Save into database
-      cls.flush_from_source(_tmp_data)
+      cls.flush_from_source(_tmp_data, True)
 
       #Remove from original dictionary
       del cls._tags[pid]
 
     @classmethod
-    def flush_from_source(cls, source):
+    def flush_from_source(cls, source, deleted_mode):
         """ Flush tags to table """
         if source:
             limit = 1000
@@ -60,7 +60,27 @@ class Tags(object):
                 DB.query(tag_query.format(','.join(values)))
                 values.clear()
 
-            sql = """
+            if deleted_mode:
+              sql = """
+                  INSERT INTO
+                      deleted_hive_post_tags (post_id, tag_id)
+                  SELECT 
+                      data_source.post_id, data_source.tag_id
+                  FROM
+                  (
+                      SELECT 
+                          post_id, htd.id
+                      FROM
+                      (
+                          VALUES 
+                              {}
+                      ) AS T(post_id, tag)
+                      INNER JOIN hive_tag_data htd ON htd.tag = T.tag
+                  ) AS data_source(post_id, tag_id)
+                  ON CONFLICT DO NOTHING
+              """
+            else:
+              sql = """
                 INSERT INTO
                     hive_post_tags (post_id, tag_id)
                 SELECT 
@@ -94,4 +114,4 @@ class Tags(object):
 
     @classmethod
     def flush(cls):
-      cls.flush_from_source(cls._tags)
+      cls.flush_from_source(cls._tags, False)
