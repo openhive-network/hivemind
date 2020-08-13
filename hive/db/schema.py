@@ -1022,7 +1022,7 @@ def setup(db):
     # hot and tranding functions
 
     sql = """
-       DROP FUNCTION IF EXISTS date_diff CASCADE
+       DROP FUNCTION IF EXISTS date_diff() CASCADE
        ;
        CREATE OR REPLACE FUNCTION date_diff (units VARCHAR(30), start_t TIMESTAMP, end_t TIMESTAMP)
          RETURNS INT AS $$
