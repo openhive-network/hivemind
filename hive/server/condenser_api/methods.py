@@ -34,6 +34,7 @@ SQL_TEMPLATE = """
         hp.promoted,
         hp.payout,
         hp.payout_at,
+        hp.pending_payout,
         hp.is_paidout,
         hp.children,
         hp.votes,

@@ -590,6 +590,7 @@ def setup(db):
             hp.depth,
             hp.promoted,
             hp.payout,
+            hp.pending_payout,
             hp.payout_at,
             hp.is_paidout,
             hp.children,
@@ -731,7 +732,7 @@ def setup(db):
     sql = """
       DROP TYPE IF EXISTS database_api_post CASCADE;
       CREATE TYPE database_api_post AS (
-        id INT, 
+        id INT,
         community_id INT,
         author VARCHAR(16),
         permlink VARCHAR(255),
@@ -785,7 +786,7 @@ def setup(db):
         AS
         $function$
         BEGIN
-          RETURN QUERY 
+          RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
               hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
@@ -823,7 +824,7 @@ def setup(db):
         AS
         $function$
         BEGIN
-          RETURN QUERY 
+          RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
               hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
@@ -863,7 +864,7 @@ def setup(db):
         AS
         $function$
         BEGIN
-          RETURN QUERY 
+          RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
               hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
@@ -881,11 +882,11 @@ def setup(db):
               root_author >= _root_author AND
               root_permlink >= _root_permlink AND
               hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _start_post_author AND hp1.permlink >= _start_post_permlink ORDER BY id LIMIT 1)
-          ORDER BY 
-              root_author ASC, 
+          ORDER BY
+              root_author ASC,
               root_permlink ASC,
               id ASC
-          LIMIT 
+          LIMIT
               _limit
           ;
         END
@@ -905,7 +906,7 @@ def setup(db):
         AS
         $function$
         BEGIN
-          RETURN QUERY 
+          RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
               hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
@@ -947,7 +948,7 @@ def setup(db):
         AS
         $function$
         BEGIN
-          RETURN QUERY 
+          RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
               hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
@@ -962,14 +963,14 @@ def setup(db):
           WHERE
               NOT hp.is_muted AND
               NOT hp.is_deleted AND
-              hp.parent_author >= _parent_author AND 
-              hp.updated_at >= _updated_at AND 
+              hp.parent_author >= _parent_author AND
+              hp.updated_at >= _updated_at AND
               hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _start_post_author AND hp1.permlink >= _start_post_permlink ORDER BY id LIMIT 1)
-          ORDER BY 
-              hp.parent_author ASC, 
-              hp.updated_at ASC, 
-              hp.id ASC 
-          LIMIT 
+          ORDER BY
+              hp.parent_author ASC,
+              hp.updated_at ASC,
+              hp.id ASC
+          LIMIT
               _limit
           ;
         END
@@ -988,7 +989,7 @@ def setup(db):
         AS
         $function$
         BEGIN
-          RETURN QUERY 
+          RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
               hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
@@ -1003,14 +1004,14 @@ def setup(db):
           WHERE
               NOT hp.is_muted AND
               NOT hp.is_deleted AND
-              hp.author >= _author AND 
-              hp.updated_at >= _updated_at AND 
+              hp.author >= _author AND
+              hp.updated_at >= _updated_at AND
               hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _start_post_author AND hp1.permlink >= _start_post_permlink ORDER BY id LIMIT 1)
-          ORDER BY 
-              hp.parent_author ASC, 
-              hp.updated_at ASC, 
-              hp.id ASC 
-          LIMIT 
+          ORDER BY
+              hp.parent_author ASC,
+              hp.updated_at ASC,
+              hp.id ASC
+          LIMIT
               _limit
           ;
         END
