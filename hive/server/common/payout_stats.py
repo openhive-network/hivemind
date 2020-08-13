@@ -44,7 +44,7 @@ class PayoutStats:
                    NULL authors
               FROM hive_posts
               INNER JOIN hive_accounts ha ON ha.id = hive_posts.author_id
-             WHERE is_paidout = '0' and is_deleted = false
+             WHERE is_paidout = '0' and counter_deleted = 0
           GROUP BY community_id, author
 
              UNION ALL
@@ -55,7 +55,7 @@ class PayoutStats:
                    COUNT(*) posts,
                    COUNT(DISTINCT(author_id)) authors
               FROM hive_posts
-             WHERE is_paidout = '0' and is_deleted = false
+             WHERE is_paidout = '0' and counter_deleted = 0
           GROUP BY community_id
         """
 

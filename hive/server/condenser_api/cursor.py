@@ -21,12 +21,12 @@ async def get_post_id(db, author, permlink):
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
         INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
         WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
-            AND is_deleted = '0' LIMIT 1"""
+            AND counter_deleted = 0 LIMIT 1"""
     return await db.query_one(sql, author=author, permlink=permlink)
 
 async def get_child_ids(db, post_id):
     """Given a parent post id, retrieve all child ids."""
-    sql = "SELECT id FROM hive_posts WHERE parent_id = :id AND is_deleted = '0'"
+    sql = "SELECT id FROM hive_posts WHERE parent_id = :id AND counter_deleted = 0"
     return await db.query_col(sql, id=post_id)
 
 async def _get_post_id(db, author, permlink):
@@ -317,7 +317,7 @@ async def pids_by_blog_without_reblog(db, account: str, start_permlink: str = ''
         SELECT id
           FROM hive_posts
          WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :account) %s
-           AND is_deleted = '0'
+           AND counter_deleted = 0
            AND depth = 0
       ORDER BY id DESC
          LIMIT :limit
@@ -377,7 +377,7 @@ async def pids_by_account_comments(db, account: str, start_permlink: str = '', l
         SELECT id FROM hive_posts
          WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :account) %s
            AND depth > 0
-           AND is_deleted = '0'
+           AND counter_deleted = 0
       ORDER BY id DESC, depth
          LIMIT :limit
     """ % seek
@@ -420,10 +420,10 @@ async def pids_by_replies_to_account(db, start_author: str, start_permlink: str 
        SELECT id FROM hive_posts
         WHERE parent_id IN (SELECT id FROM hive_posts
                              WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :parent)
-                               AND is_deleted = '0'
+                               AND counter_deleted = 0
                           ORDER BY id DESC
                              LIMIT 10000) %s
-          AND is_deleted = '0'
+          AND counter_deleted = 0
      ORDER BY id DESC
         LIMIT :limit
     """ % seek

@@ -210,7 +210,7 @@ async def _pinned(db, community_id):
     """Get a list of pinned post `id`s in `community`."""
     sql = """SELECT id FROM hive_posts
               WHERE is_pinned = '1'
-                AND is_deleted = '0'
+                AND counter_deleted = 0
                 AND community_id = :community_id
             ORDER BY id DESC"""
     return await db.query_col(sql, community_id=community_id)
@@ -237,7 +237,7 @@ async def pids_by_blog(db, account: str, start_author: str = '',
     skip = """
         SELECT id FROM hive_posts
          WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :account)
-           AND is_deleted = '0'
+           AND counter_deleted = 0
            AND depth = 0
            AND community_id IS NOT NULL
            AND id NOT IN (SELECT post_id FROM hive_reblogs
@@ -257,7 +257,7 @@ async def pids_by_blog(db, account: str, start_author: str = '',
     #    SELECT id
     #      FROM (
     #             SELECT id, author account, created_at FROM hive_posts
-    #              WHERE depth = 0 AND is_deleted = '0' AND community_id IS NULL
+    #              WHERE depth = 0 AND counter_deleted = 0 AND community_id IS NULL
     #              UNION ALL
     #             SELECT post_id id, account, created_at FROM hive_reblogs
     #           ) blog
@@ -319,7 +319,7 @@ async def pids_by_posts(db, account: str, start_permlink: str = '', limit: int =
     sql = """
         SELECT id FROM hive_posts
          WHERE author = (SELECT id FROM hive_accounts WHERE name = :account) %s
-           AND is_deleted = '0'
+           AND counter_deleted = 0
            AND depth = '0'
       ORDER BY id DESC
          LIMIT :limit
@@ -342,7 +342,7 @@ async def pids_by_comments(db, account: str, start_permlink: str = '', limit: in
     sql = """
         SELECT id FROM hive_posts
          WHERE author = (SELECT id FROM hive_accounts WHERE name = :account) %s
-           AND is_deleted = '0'
+           AND counter_deleted = 0
            AND depth > 0
       ORDER BY id DESC, depth
          LIMIT :limit
@@ -386,10 +386,10 @@ async def pids_by_replies(db, start_author: str, start_permlink: str = '',
        SELECT id FROM hive_posts
         WHERE parent_id IN (SELECT id FROM hive_posts
                              WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :parent)
-                               AND is_deleted = '0'
+                               AND counter_deleted = 0
                           ORDER BY id DESC
                              LIMIT 10000) %s
-          AND is_deleted = '0'
+          AND counter_deleted = 0
      ORDER BY id DESC
         LIMIT :limit
     """ % seek
