@@ -181,6 +181,7 @@ def _condenser_post_object(row, truncate_body=0):
     if not row['category']:
         row['category'] = 'undefined'
 
+    full_payout = row['pending_payout'] + row['payout'];
     post = {}
     post['post_id'] = row['id']
     post['author'] = row['author']
@@ -201,7 +202,7 @@ def _condenser_post_object(row, truncate_body=0):
     post['cashout_time'] = json_date(None if paid else row['payout_at'])
     post['total_payout_value'] = _amount(row['payout'] if paid else 0)
     post['curator_payout_value'] = _amount(0)
-    post['pending_payout_value'] = _amount(row['pending_payout'])
+    post['pending_payout_value'] = _amount(0 if paid else full_payout)
     post['promoted'] = _amount(row['promoted'])
 
     post['replies'] = []
