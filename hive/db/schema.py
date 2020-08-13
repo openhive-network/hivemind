@@ -451,7 +451,7 @@ def setup(db):
              category_id,
              root_author_id, root_permlink_id,
              is_muted, is_valid,
-             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,active, payout_at, cashout_time)
+             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,active, payout_at, cashout_time, counter_deleted)
             SELECT php.id AS parent_id, php.author_id as parent_author_id,
                 php.permlink_id as parent_permlink_id, php.depth + 1 as depth,
                 (CASE
@@ -466,7 +466,7 @@ def setup(db):
                 ha.id as author_id, hpd.id as permlink_id, _date as created_at,
                 _date as updated_at, calculate_time_part_of_hot(_date) as sc_hot,
                  calculate_time_part_of_trending(_date) as sc_trend,
-                _date as active, (_date + INTERVAL '7 days') as payout_at, (_date + INTERVAL '7 days') as cashout_time
+                _date as active, (_date + INTERVAL '7 days') as payout_at, (_date + INTERVAL '7 days') as cashout_time, 0
             FROM hive_accounts ha,
                  hive_permlink_data hpd,
                  hive_posts php
@@ -480,16 +480,7 @@ def setup(db):
               --- then also depth, is_valid and is_muted is impossible to change
              --- post edit part
              updated_at = _date,
-             active = _date,
-
-              --- post undelete part (if was deleted)
-              counter_deleted = 0,
-              is_pinned = (CASE
-                              WHEN hp.counter_deleted>0 THEN false
-                              ELSE hp.is_pinned --- no change
-                            END
-                           )
-
+             active = _date
             RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, (hp.updated_at > hp.created_at) as is_edited
           ;
           ELSE
@@ -504,7 +495,7 @@ def setup(db):
              category_id,
              root_author_id, root_permlink_id,
              is_muted, is_valid,
-             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time)
+             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted)
             SELECT 0 AS parent_id, 0 as parent_author_id, 0 as parent_permlink_id, 0 as depth,
                 (CASE
                   WHEN _date > _community_support_start_date THEN
@@ -518,7 +509,7 @@ def setup(db):
                 ha.id as author_id, hpd.id as permlink_id, _date as created_at,
                 _date as updated_at, calculate_time_part_of_hot(_date) as sc_hot,
                   calculate_time_part_of_trending(_date) as sc_trend,
-                _date as active, (_date + INTERVAL '7 days') as payout_at, (_date + INTERVAL '7 days') as cashout_time
+                _date as active, (_date + INTERVAL '7 days') as payout_at, (_date + INTERVAL '7 days') as cashout_time, 0
             FROM hive_accounts ha,
                  hive_permlink_data hpd
             WHERE ha.name = _author and hpd.permlink = _permlink
@@ -528,15 +519,7 @@ def setup(db):
               --- then also depth, is_valid and is_muted is impossible to change
               --- post edit part
               updated_at = _date,
-              active = _date,
-
-              --- post undelete part (if was deleted)
-              hp.counter_deleted = 0,
-              is_pinned = (CASE
-                              WHEN hp.counter_deleted>0 THEN false
-                              ELSE hp.is_pinned --- no change
-                            END
-                           )
+              active = _date
 
             RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, _parent_permlink as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, (hp.updated_at > hp.created_at) as is_edited
             ;
