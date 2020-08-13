@@ -742,8 +742,7 @@ def setup(db):
     sql = """
           DROP FUNCTION IF EXISTS process_deleted_hive_post();
 
-          CREATE OR REPLACE FUNCTION process_deleted_hive_post(
-            in _id deleted_hive_posts.id%TYPE)
+          CREATE OR REPLACE FUNCTION process_deleted_hive_post( int[] )
           RETURNS integer
           LANGUAGE plpgsql
           AS
@@ -865,7 +864,7 @@ def setup(db):
               url,
               root_title
             FROM hive_posts
-            WHERE id = _id;
+            WHERE id = ANY( $1 );
 
             INSERT INTO deleted_hive_votes
             SELECT
@@ -881,7 +880,7 @@ def setup(db):
               hv.num_changes
             FROM hive_votes hv
             INNER JOIN hive_posts hp ON hv.post_id = hp.id
-            WHERE hp.id = _id;
+            WHERE hp.id = ANY( $1 );
 
             INSERT INTO deleted_hive_feed_cache
               SELECT
@@ -890,7 +889,7 @@ def setup(db):
                 hfc.created_at
               FROM hive_feed_cache hfc
               INNER JOIN hive_posts hp ON hfc.post_id = hp.id
-              WHERE hp.id = _id;
+              WHERE hp.id = ANY( $1 );
 
             INSERT INTO deleted_hive_notifs
               SELECT
@@ -906,7 +905,7 @@ def setup(db):
                 hn.payload
               FROM hive_notifs hn
               INNER JOIN hive_posts hp ON hn.post_id = hp.id
-              WHERE hp.id = _id;
+              WHERE hp.id = ANY( $1 );
 
             INSERT INTO deleted_hive_payments
               SELECT
@@ -920,7 +919,7 @@ def setup(db):
                 hps.token
               FROM hive_payments hps
               INNER JOIN hive_posts hp ON hps.post_id = hp.id
-              WHERE hp.id = _id;
+              WHERE hp.id = ANY( $1 );
 
             INSERT INTO deleted_hive_post_data
               SELECT
@@ -932,7 +931,7 @@ def setup(db):
                 hpd.json
               FROM hive_post_data hpd
               INNER JOIN hive_posts hp ON hpd.id = hp.id
-              WHERE hp.id = _id;
+              WHERE hp.id = ANY( $1 );
 
             INSERT INTO deleted_hive_post_tags
               SELECT
@@ -940,7 +939,7 @@ def setup(db):
                 hpt.tag_id
               FROM hive_post_tags hpt
               INNER JOIN hive_posts hp ON hpt.post_id = hp.id
-              WHERE hp.id = _id;
+              WHERE hp.id = ANY( $1 );
 
             INSERT INTO deleted_hive_reblogs
               SELECT
@@ -949,21 +948,21 @@ def setup(db):
                 hr.created_at
               FROM hive_reblogs hr
               INNER JOIN hive_posts hp ON hr.post_id = hp.id
-              WHERE hp.id = _id;
+              WHERE hp.id = ANY( $1 );
 
-            DELETE FROM hive_feed_cache WHERE post_id = _id;
+            DELETE FROM hive_feed_cache WHERE post_id = ANY( $1 );
 
-            DELETE FROM hive_notifs WHERE post_id = _id;
+            DELETE FROM hive_notifs WHERE post_id = ANY( $1 );
 
-            DELETE FROM hive_post_data WHERE id = _id;
+            DELETE FROM hive_post_data WHERE id = ANY( $1 );
 
             UPDATE hive_posts
             SET parent_id = 0
-            WHERE parent_id = _id;
+            WHERE parent_id = ANY( $1 );
 
             DELETE
               FROM hive_posts
-              WHERE id = _id;
+              WHERE id = ANY( $1 );
 
             GET DIAGNOSTICS rows = ROW_COUNT;
 

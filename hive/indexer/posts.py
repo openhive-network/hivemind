@@ -81,6 +81,10 @@ class Posts:
     def flush_deleted_ops(cls):
         """ Process delete_comment operations """
 
+        # Move all data related to deleted post into corresponding 'deleted_*' tables
+        sql="""SELECT process_deleted_hive_post('{{{}}}')""".format(",".join([str( v['id'] ) for k,v in cls.deleted_ops.items()]))
+        DB.query_row(sql)
+
         for k, v in cls.deleted_ops.items():
           cls.delete_op(v)
 
@@ -401,12 +405,6 @@ class Posts:
     def delete(cls, op):
         """Marks a post record as being deleted."""
 
-        pid = op['id']
-
-        # Move all data related to deleted post into corresponding 'deleted_*' tables
-        sql = "SELECT process_deleted_hive_post( :id )"
-        DB.query_row(sql, id=pid)
-
         if not DbState.is_initial_sync():
             depth = op['depth']
 
@@ -416,7 +414,7 @@ class Posts:
                 FeedCache.delete(pid)
 
         # force parent child recount when child is deleted
-        cls.update_child_count(pid, '-')
+        cls.update_child_count(op['id'], '-')
 
     @classmethod
     def _insert_feed_cache(cls, result, date):
