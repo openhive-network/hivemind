@@ -14,9 +14,14 @@ def run():
     """Run the service specified in the `--mode` argument."""
 
     conf = Conf.init_argparse()
-    Db.set_shared_instance(conf.db())
     mode = conf.mode()
     PrometheusClient( conf.get('prometheus_port') )
+
+    if mode == 'completion':
+        conf.generate_completion()
+        return
+
+    Db.set_shared_instance(conf.db())
 
     pid_file_name = conf.pid_file()
     if pid_file_name is not None:
