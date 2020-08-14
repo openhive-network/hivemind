@@ -4,8 +4,6 @@ import os
 
 from setuptools import find_packages
 from setuptools import setup
-from setuptools.command.install import install
-from setuptools.command.build_py import build_py as build_py
 
 assert sys.version_info[0] == 3 and sys.version_info[1] >= 6, "hive requires Python 3.6 or newer"
 
@@ -28,14 +26,18 @@ class GitRevisionProvider(object):
             version = check_output(command.split()).decode('utf-8').strip()
             parts = version.split('-')
             _, _, sha = parts[:3]
-            GitRevisionProvider._save_version_file(VERSION, sha.lstrip('g'))
+            git_revision = sha.lstrip('g')
+            GitRevisionProvider._save_version_file(VERSION, git_revision)
+            return git_revision
         else:
             from pkg_resources import get_distribution
             try:
                 version, git_revision = get_distribution("hivemind").version.split("+")
                 GitRevisionProvider._save_version_file(version, git_revision)
+                return git_revision
             except:
                 GitRevisionProvider._save_version_file(VERSION, "")
+        return ""
 
     @staticmethod
     def _save_version_file(hivemind_version, git_revision):
@@ -46,53 +48,40 @@ class GitRevisionProvider(object):
             version_file.write("VERSION = '{}'\n".format(hivemind_version))
             version_file.write("GIT_REVISION = '{}'".format(git_revision))
 
-class BuildWrapper(build_py):
-    def run(self):
-        GitRevisionProvider.provide_git_revision()
-        build_py.run(self)
+GIT_REVISION = GitRevisionProvider.provide_git_revision()
 
-class InstallWrapper(install):
-    def run(self):
-        GitRevisionProvider.provide_git_revision()
-        install.do_egg_install(self)
-
-# yapf: disable
-setup(
-    name='hivemind',
-    version_format=VERSION + "+{gitsha}",
-    description='Developer-friendly microservice powering social networks on the Steem blockchain.',
-    long_description=open('README.md').read(),
-    packages=find_packages(exclude=['scripts']),
-    setup_requires=[
-        'pytest-runner',
-        'setuptools-git-version'
-    ],
-    install_requires=[
-        'importlib_metadata',
-        'aiopg',
-        'jsonrpcserver',
-        'simplejson',
-        'aiohttp',
-        'certifi',
-        'sqlalchemy',
-        'funcy',
-        'toolz',
-        'maya',
-        'ujson',
-        'urllib3',
-        'psycopg2-binary',
-        'aiocache',
-        'configargparse',
-        'pdoc',
-        'diff-match-patch',
-    ],
-    entry_points={
-        'console_scripts': [
-            'hive=hive.cli:run',
-        ]
-    },
-    cmdclass={
-        'install' : InstallWrapper,
-        'build_py' : BuildWrapper
-    }
-)
+if __name__ == "__main__":
+    setup(
+        name='hivemind',
+        version=VERSION + "+" + GIT_REVISION,
+        description='Developer-friendly microservice powering social networks on the Steem blockchain.',
+        long_description=open('README.md').read(),
+        packages=find_packages(exclude=['scripts']),
+        setup_requires=[
+            'pytest-runner',
+        ],
+        install_requires=[
+            'importlib_metadata',
+            'aiopg',
+            'jsonrpcserver',
+            'simplejson',
+            'aiohttp',
+            'certifi',
+            'sqlalchemy',
+            'funcy',
+            'toolz',
+            'maya',
+            'ujson',
+            'urllib3',
+            'psycopg2-binary',
+            'aiocache',
+            'configargparse',
+            'pdoc',
+            'diff-match-patch',
+        ],
+        entry_points={
+            'console_scripts': [
+                'hive=hive.cli:run',
+            ]
+        }
+    )
