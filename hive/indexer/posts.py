@@ -50,10 +50,10 @@ class Posts:
         else:
             cls._miss += 1
             sql = """
-                SELECT hp.id 
-                FROM hive_posts hp 
-                INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id 
-                INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id 
+                SELECT hp.id
+                FROM hive_posts hp
+                INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+                INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
                 WHERE ha_a.name = :a AND hpd_p.permlink = :p
             """
             _id = DB.query_one(sql, a=author, p=permlink)
@@ -130,16 +130,17 @@ class Posts:
         except Exception:
             pass
 
-        tags = [result['post_category']]
-        if md and 'tags' in md and isinstance(md['tags'], list):
-            tags = tags + md['tags']
-        tags = map(lambda tag: (str(tag) or '').strip('# ').lower()[:32], tags)
-        tags = filter(None, tags)
-        from funcy.seqs import distinct
-        tags = list(distinct(tags))[:5]
+        if not result['depth']:
+            tags = [result['post_category']]
+            if md and 'tags' in md and isinstance(md['tags'], list):
+                tags = tags + md['tags']
+            tags = map(lambda tag: (str(tag) or '').strip('# ').lower()[:32], tags)
+            tags = filter(None, tags)
+            from funcy.seqs import distinct
+            tags = list(distinct(tags))[:5]
 
-        for tag in tags:
-            Tags.add_tag(result['id'], tag)
+            for tag in tags:
+                Tags.add_tag(result['id'], tag)
 
         if not DbState.is_initial_sync():
             if error:
@@ -165,7 +166,7 @@ class Posts:
                   is_paidout            = COALESCE( CAST( data_source.is_paidout as BOOLEAN ),          ihp.is_paidout )
               FROM
               (
-              SELECT  ha_a.id as author_id, hpd_p.id as permlink_id, 
+              SELECT  ha_a.id as author_id, hpd_p.id as permlink_id,
                       t.total_payout_value,
                       t.curator_payout_value,
                       t.author_rewards,
@@ -320,17 +321,17 @@ class Posts:
     def update_child_count(cls, child_id, op='+'):
         """ Increase/decrease child count by 1 """
         sql = """
-            UPDATE 
-                hive_posts 
-            SET 
+            UPDATE
+                hive_posts
+            SET
                 children = GREATEST(0, (
-                    SELECT 
-                        CASE 
+                    SELECT
+                        CASE
                             WHEN children is NULL THEN 0
                             WHEN children=32762 THEN 0
                             ELSE children
                         END
-                    FROM 
+                    FROM
                         hive_posts
                     WHERE id = (SELECT parent_id FROM hive_posts WHERE id = :child_id)
                 )::int
@@ -365,7 +366,7 @@ class Posts:
                 allow_curation_rewards = :allow_curation_rewards,
                 beneficiaries = :beneficiaries
             WHERE
-            hp.author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND 
+            hp.author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND
             hp.permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)
         """
         DB.query(sql, author=op['author'], permlink=op['permlink'], max_accepted_payout=max_accepted_payout,
@@ -389,7 +390,7 @@ class Posts:
             depth = result['depth']
 
             if depth == 0:
-                # TODO: delete from hive_reblogs -- otherwise feed cache gets 
+                # TODO: delete from hive_reblogs -- otherwise feed cache gets
                 # populated with deleted posts somwrimas
                 FeedCache.delete(pid)
 
@@ -442,7 +443,7 @@ class Posts:
             log.info("New body definition: {}".format(new_body_def))
             log.info("Old body definition: {}".format(old_body))
             new_body = new_body_def
-        
+
         return new_body
 
 
