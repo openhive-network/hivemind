@@ -90,16 +90,17 @@ def _vops_provider(node, queue, lbound, ubound, chunk_size):
         log.exception("Exception caught during fetching vops...")
 
 def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size):
+    from hive.utils.stats import minmax
     is_debug = log.isEnabledFor(10)
-
     num = 0
     time_start = OPSM.start()
+    rate = {}
     try:
         count = ubound - lbound
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
         while lbound < ubound:
 
-            wait_time = WSM.start()
+            wait_time_1 = WSM.start()
             if blocksQueue.empty() and CONTINUE_PROCESSING:
                 log.info("Awaiting any block to process...")
             
@@ -107,9 +108,9 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
             if not blocksQueue.empty() or CONTINUE_PROCESSING:
                 blocks = blocksQueue.get()
                 blocksQueue.task_done()
-            WSM.wait_stat('block_consumer_block', WSM.stop(wait_time))
+            WSM.wait_stat('block_consumer_block', WSM.stop(wait_time_1))
 
-            wait_time = WSM.start()
+            wait_time_2 = WSM.start()
             if vopsQueue.empty() and CONTINUE_PROCESSING:
                 log.info("Awaiting any vops to process...")
             
@@ -117,7 +118,7 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
             if not vopsQueue.empty() or CONTINUE_PROCESSING:
                 preparedVops = vopsQueue.get()
                 vopsQueue.task_done()
-            WSM.wait_stat('block_consumer_vop', WSM.stop(wait_time))
+            WSM.wait_stat('block_consumer_vop', WSM.stop(wait_time_2))
 
             to = min(lbound + chunk_size, ubound)
 
@@ -135,7 +136,7 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
                 to - 1, blocks[-1]['timestamp']))
             log.info(timer.batch_status(prefix))
             log.info("[SYNC] Time elapsed: %fs", time_current - time_start)
-
+            rate = minmax(rate, len(blocks), time_current - wait_time_1, lbound)
 
             if block_end - block_start > 1.0 or is_debug:
                 otm = OPSM.log_current("Operations present in the processed blocks")
@@ -166,6 +167,8 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
         otm = OPSM.log_global("All operations present in the processed blocks")
         ttm = ftm + otm + wtm
         log.info(f"Elapsed time: {stop :.4f}s. Calculated elapsed time: {ttm :.4f}s. Difference: {stop - ttm :.4f}s")
+        log.info(f"Highest block processing rate: {rate['max'] :.4f} bps. From: {rate['max_from']} To: {rate['max_to']}")
+        log.info(f"Lowest block processing rate: {rate['min'] :.4f} bps. From: {rate['min_from']} To: {rate['min_to']}")
         log.info("=== TOTAL STATS ===")
         return num
 

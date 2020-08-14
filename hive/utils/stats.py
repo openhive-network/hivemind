@@ -290,6 +290,35 @@ class WaitingStatusManager(StatusManager):
         log.info(f"Current waiting time: {tm :.4f}s.")
         return tm
 
+def minmax(collection : dict, blocks : int, time : float, _from : int):
+    value = blocks/time
+    _to = _from + blocks
+    PrometheusClient.broadcast(BroadcastObject('block_processing_rate', value, 'bps'))
+    if len(collection.keys())  == 0:
+
+        collection['min'] = value
+        collection['min_from'] = _from
+        collection['min_to'] = _to
+
+        collection['max'] = value
+        collection['max_from'] = _from
+        collection['max_to'] = _to
+
+    else:
+
+        mn = min(collection['min'], value)
+        if mn == value:
+            collection['min'] = value
+            collection['min_from'] = _from
+            collection['min_to'] = _to
+        mx = max(collection['max'], value)
+        if mx == value:
+            collection['max'] = value
+            collection['max_from'] = _from
+            collection['max_to'] = _to
+    
+    return collection
+
 def _normalize_sql(sql, maxlen=180):
     """Collapse whitespace and middle-truncate if needed."""
     out = ' '.join(sql.split())
