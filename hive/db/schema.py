@@ -744,7 +744,7 @@ def setup(db):
         payout DECIMAL(10,3),
         payout_at TIMESTAMP,
         is_paidout BOOLEAN,
-        children SMALLINT,
+        children INT,
         votes INT,
         created_at TIMESTAMP,
         updated_at TIMESTAMP,
@@ -801,6 +801,7 @@ def setup(db):
           WHERE
               NOT hp.is_muted AND
               NOT hp.is_deleted AND
+              -- ABW: wrong! fat node required _author+_permlink to exist (when given) and sorted by ( cashout_time, comment_id )
               hp.cashout_time >= _cashout_time AND
               hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _author AND hp1.permlink >= _permlink ORDER BY id LIMIT 1)
           ORDER BY
@@ -839,8 +840,8 @@ def setup(db):
           WHERE
               NOT hp.is_muted AND
               NOT hp.is_deleted AND
-              hp.author >= _author COLLATE "C" AND
-              hp.permlink >= _permlink COLLATE "C"
+              hp.author > _author COLLATE "C" OR
+              hp.author = _author AND hp.permlink >= _permlink COLLATE "C"
           ORDER BY
               hp.author COLLATE "C" ASC,
               hp.permlink COLLATE "C" ASC
@@ -879,6 +880,8 @@ def setup(db):
           WHERE
               NOT hp.is_muted AND
               NOT hp.is_deleted AND
+              -- ABW: wrong! fat node required both _root_author+_root_permlink and _start_post_author+start_post_permlink to exist (when given)
+              -- and sorted by ( root_id, comment_id )
               root_author >= _root_author AND
               root_permlink >= _root_permlink AND
               hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _start_post_author AND hp1.permlink >= _start_post_permlink ORDER BY id LIMIT 1)
@@ -921,9 +924,11 @@ def setup(db):
           WHERE
               NOT hp.is_muted AND
               NOT hp.is_deleted AND
-              parent_author >= _parent_author AND
-              parent_permlink >= _parent_permlink AND
-              hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _start_post_author AND hp1.permlink >= _start_post_permlink ORDER BY id LIMIT 1)
+              -- ABW: wrong! fat node required _start_post_author+_start_port_permlink to exist (when given) and sorted by ( parent_author, parent_permlink, comment_id )
+              parent_author > _parent_author COLLATE "C" OR
+              parent_author = _parent_author AND ( parent_permlink > _parent_permlink COLLATE "C" OR
+              parent_permlink = _parent_permlink AND
+              hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _start_post_author AND hp1.permlink >= _start_post_permlink ORDER BY id LIMIT 1) )
           ORDER BY
               parent_author ASC,
               parent_permlink ASC,
@@ -963,8 +968,9 @@ def setup(db):
           WHERE
               NOT hp.is_muted AND
               NOT hp.is_deleted AND
-              hp.parent_author >= _parent_author AND
-              hp.updated_at >= _updated_at AND
+              -- ABW: wrong! fat node required _start_post_author+_start_port_permlink to exist (when given) and sorted by ( _parent_author, updated_at, comment_id )
+              hp.parent_author > _parent_author COLLATE "C" OR
+              hp.parent_author = _parent_author AND hp.updated_at >= _updated_at AND 
               hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _start_post_author AND hp1.permlink >= _start_post_permlink ORDER BY id LIMIT 1)
           ORDER BY
               hp.parent_author ASC,
@@ -1004,9 +1010,11 @@ def setup(db):
           WHERE
               NOT hp.is_muted AND
               NOT hp.is_deleted AND
-              hp.author >= _author AND
-              hp.updated_at >= _updated_at AND
-              hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _start_post_author AND hp1.permlink >= _start_post_permlink ORDER BY id LIMIT 1)
+              -- ABW: wrong! fat node required _start_post_author+_start_post_permlink to exist (when given) and sorted just like
+              -- in case of by_last_update (but in fat node) but should by ( _author, updated_at, comment_id )
+              hp.author > _author COLLATE "C" OR
+              hp.author = _author AND hp.updated_at >= _updated_at AND 
+              hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author > _start_post_author COLLATE "C" OR hp1.author = _start_post_author AND hp1.permlink >= _start_post_permlink COLLATE "C" ORDER BY id LIMIT 1)
           ORDER BY
               hp.parent_author ASC,
               hp.updated_at ASC,

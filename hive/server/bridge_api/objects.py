@@ -58,6 +58,7 @@ async def load_posts_keyed(db, ids, truncate_body=0):
             hp.depth,
             hp.promoted,
             hp.payout,
+            hp.pending_payout,
             hp.payout_at,
             hp.is_paidout,
             hp.children,
@@ -241,20 +242,19 @@ def _bridge_post_object(row, truncate_body=0):
 
     post['is_paidout'] = row['is_paidout']
     post['payout_at'] = json_date(row['payout_at'])
-    post['payout'] = float(row['payout'])
-    post['pending_payout_value'] = _amount(0 if paid else row['payout'])
-    post['author_payout_value'] = _amount(row['payout'] if paid else 0)
-    post['curator_payout_value'] = _amount(0)
+    post['payout'] = float(row['payout'] + row['pending_payout'])
+    post['pending_payout_value'] = _amount(0 if paid else post['payout'])
+    post['author_payout_value'] = _amount(0) # supplemented below
+    post['curator_payout_value'] = _amount(0) # supplemented below
     post['promoted'] = _amount(row['promoted'])
 
     post['replies'] = []
-# ABW: missing post['active_votes'] = _hydrate_active_votes(row['votes'])
     post['author_reputation'] = float(row['author_rep'])
 
     post['stats'] = {
         'hide': row['is_hidden'],
         'gray': row['is_grayed'],
-        'total_votes': Votes.get_vote_count(row['author'], row['permlink']), # ABW: incorrect calculation (possibly needs to exclude blacklisted votes)
+        'total_votes': Votes.get_vote_count(row['author'], row['permlink']),
         'flag_weight': float(row['flag_weight'])} # TODO: down_weight
 
 

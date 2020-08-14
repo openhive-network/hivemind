@@ -9,12 +9,13 @@ def _amount(amount, asset='HBD'):
 
 def database_post_object(row, truncate_body=0):
     """Given a hive_posts row, create a legacy-style post object."""
+
     paid = row['is_paidout']
 
     post = {}
     post['active'] = json_date(row['active'])
     post['author_rewards'] = row['author_rewards']
-    post['post_id'] = row['id']
+    post['id'] = row['id']
     post['author'] = row['author']
     post['permlink'] = row['permlink']
     post['category'] = row['category'] if 'category' in row else 'undefined'
