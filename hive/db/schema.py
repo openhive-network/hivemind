@@ -543,16 +543,16 @@ def setup(db):
             RETURN QUERY UPDATE hive_posts AS hp
               SET counter_deleted =
               (
-                SELECT max( hp.counter_deleted ) + 1
-                FROM hive_posts hp
-                INNER JOIN hive_accounts ha ON hp.author_id = ha.id
-                INNER JOIN hive_permlink_data hpd ON hp.permlink_id = hpd.id
+                SELECT max( hps.counter_deleted ) + 1
+                FROM hive_posts hps
+                INNER JOIN hive_accounts ha ON hps.author_id = ha.id
+                INNER JOIN hive_permlink_data hpd ON hps.permlink_id = hpd.id
                 WHERE ha.name = _author AND hpd.permlink = _permlink
               )
             FROM hive_posts hp1
             INNER JOIN hive_accounts ha ON hp1.author_id = ha.id
             INNER JOIN hive_permlink_data hpd ON hp1.permlink_id = hpd.id
-            WHERE hp.id = hp1.id AND ha.name = _author AND hpd.permlink = _permlink
+            WHERE hp.id = hp1.id AND ha.name = _author AND hpd.permlink = _permlink AND hp1.counter_deleted = 0
             RETURNING hp.id, hp.depth;
           END
           $function$
