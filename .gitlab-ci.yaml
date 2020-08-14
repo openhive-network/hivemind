@@ -113,7 +113,6 @@ hivemind_start_server:
 
   artifacts:
     paths:
-      - hive_server.log
       - hive_server.pid
     expire_in: 1 week
 
@@ -150,6 +149,10 @@ hivemind_stop_server:
 
   tags:
      - hivemind
+
+  artifacts:
+    paths:
+      - hive_server.log
 
 .hivemind_start_api_smoketest: &common_api_smoketest_job
   stage: e2e-test

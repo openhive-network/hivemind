@@ -60,10 +60,12 @@ if __name__ == "__main__":
         setup_requires=[
             'pytest-runner',
         ],
+        dependency_links=[
+            'https://github.com/bcb/jsonrpcserver/tarball/8f3437a19b6d1a8f600ee2c9b112116c85f17827#egg=jsonrpcserver-4.1.3+8f3437a'
+        ],
         install_requires=[
-            'importlib_metadata',
-            'aiopg',
-            'jsonrpcserver',
+            'aiopg @ https://github.com/aio-libs/aiopg/tarball/862fff97e4ae465333451a4af2a838bfaa3dd0bc',
+            'jsonrpcserver @ https://github.com/bcb/jsonrpcserver/tarball/8f3437a19b6d1a8f600ee2c9b112116c85f17827#egg=jsonrpcserver',
             'simplejson',
             'aiohttp',
             'certifi',
@@ -77,8 +79,9 @@ if __name__ == "__main__":
             'aiocache',
             'configargparse',
             'pdoc',
-            'diff-match-patch',
+            'diff-match-patch'
         ],
+
         entry_points={
             'console_scripts': [
                 'hive=hive.cli:run',
