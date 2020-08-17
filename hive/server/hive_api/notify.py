@@ -1,10 +1,10 @@
 """Hive API: Notifications"""
 import logging
+import re
 
 from hive.server.common.helpers import return_error_info, json_date
 from hive.indexer.notify import NotifyType
 from hive.server.hive_api.common import get_account_id, valid_limit, get_post_id
-
 log = logging.getLogger(__name__)
 
 STRINGS = {
@@ -22,7 +22,7 @@ STRINGS = {
 
     # personal
     NotifyType.error:          'error: <payload>',
-    NotifyType.reblog:         '<src> resteemed your post',
+    NotifyType.reblog:         '<src> reblogged your post',
     NotifyType.follow:         '<src> followed you',
     NotifyType.reply:          '<src> replied to your post',
     NotifyType.reply_comment:  '<src> replied to your comment',
@@ -64,8 +64,10 @@ async def account_notifications(context, account, min_score=25, last_id=None, li
 
     if account[:5] == 'hive-': min_score = 0
 
+
+
     seek = ' AND hn.id < :last_id' if last_id else ''
-    col = 'hn.community_id' if account[:5] == 'hive-' else 'dst_id'
+    col = 'hn.community_id' if account[:5] == 'hive-' and re.match(r'^hive-[123]\d{4,6}$', account) else 'dst_id'
     sql = _notifs_sql(col + " = :dst_id" + seek)
 
     rows = await db.query_all(sql, min_score=min_score, dst_id=account_id,
