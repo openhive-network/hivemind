@@ -87,13 +87,12 @@ def build_metadata():
         # basic/extended-stats
         sa.Column('author_rep', sa.Float(precision=6), nullable=False, server_default='0'),
         sa.Column('flag_weight', sa.Float(precision=6), nullable=False, server_default='0'),
-        sa.Column('total_votes', sa.Integer, nullable=False, server_default='0'),
-        sa.Column('up_votes', sa.Integer, nullable=False, server_default='0'),
 
         # core stats/indexes
         sa.Column('payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
         sa.Column('pending_payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
         sa.Column('payout_at', sa.DateTime, nullable=False, server_default='1970-01-01'),
+        sa.Column('last_payout_at', sa.DateTime, nullable=False, server_default='1970-01-01'),
         sa.Column('updated_at', sa.DateTime, nullable=False, server_default='1970-01-01'),
         sa.Column('is_paidout', BOOLEAN, nullable=False, server_default='0'),
 
@@ -118,7 +117,6 @@ def build_metadata():
         sa.Column('children_abs_rshares', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('abs_rshares', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('vote_rshares', sa.BigInteger, nullable=False, server_default='0'),
-        sa.Column('net_votes', sa.Integer, nullable=False, server_default='0'),
         sa.Column('active', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('percent_hbd', sa.Integer, nullable=False, server_default='10000'),
@@ -189,6 +187,7 @@ def build_metadata():
         sa.Column('vote_percent', sa.Integer, server_default='0'),
         sa.Column('last_update', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('num_changes', sa.Integer, server_default='0'),
+        sa.Column('is_effective', BOOLEAN, nullable=False, server_default='0'),
 
         sa.UniqueConstraint('voter_id', 'author_id', 'permlink_id', name='hive_votes_ux1'),
 
@@ -439,7 +438,7 @@ def setup(db):
             RETURN QUERY INSERT INTO hive_posts as hp
             (parent_id, depth, community_id, category_id,
              root_id, is_muted, is_valid,
-             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,active, payout_at, cashout_time)
+             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time)
             SELECT php.id AS parent_id, php.depth + 1 AS depth,
                 (CASE
                    WHEN _date > _community_support_start_date THEN
@@ -578,6 +577,8 @@ def setup(db):
             hp.payout,
             hp.pending_payout,
             hp.payout_at,
+            hp.last_payout_at,
+            hp.cashout_time,
             hp.is_paidout,
             hp.children,
             0 AS votes,
@@ -596,7 +597,22 @@ def setup(db):
             ha_a.reputation AS author_rep,
             hp.is_hidden,
             hp.is_grayed,
-            hp.total_votes,
+            COALESCE(
+              (
+                SELECT COUNT( 1 )
+                FROM hive_votes v
+                WHERE v.post_id = hp.id AND v.is_effective
+                GROUP BY v.post_id
+              ), 0
+            ) AS total_votes,
+            COALESCE(
+              (
+                SELECT SUM( CASE v.rshares > 0 WHEN True THEN 1 ELSE -1 END )
+                FROM hive_votes v
+                WHERE v.post_id = hp.id AND NOT v.rshares = 0
+                GROUP BY v.post_id
+              ), 0
+            ) AS net_votes,
             hp.flag_weight,
             ha_pp.name AS parent_author,
             hpd_pp.permlink AS parent_permlink,
@@ -629,7 +645,6 @@ def setup(db):
             hc.title AS community_title,
             hc.name AS community_name,
             hp.abs_rshares,
-            hp.cashout_time,
             '1969-12-31T23:59:59'::timestamp AS max_cashout_time,
             hp.reward_weight
             FROM hive_posts hp
@@ -707,7 +722,8 @@ def setup(db):
             weight,
             num_changes,
             hpd.id as permlink_id,
-            post_id
+            post_id,
+            is_effective
         FROM
             hive_votes hv
         INNER JOIN hive_accounts ha_v ON ha_v.id = hv.voter_id
@@ -750,7 +766,8 @@ def setup(db):
         depth SMALLINT,
         promoted DECIMAL(10,3),
         payout DECIMAL(10,3),
-        payout_at TIMESTAMP,
+        last_payout_at TIMESTAMP,
+        cashout_time TIMESTAMP, 
         is_paidout BOOLEAN,
         children INT,
         votes INT,
@@ -760,7 +777,8 @@ def setup(db):
         json TEXT,
         is_hidden BOOLEAN,
         is_grayed BOOLEAN,
-        total_votes INT,
+        total_votes BIGINT,
+        net_votes BIGINT,
         flag_weight REAL,
         parent_author VARCHAR(16),
         parent_permlink VARCHAR(255),
@@ -800,9 +818,9 @@ def setup(db):
           RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
-              hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
+              hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.flag_weight, hp.parent_author,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.flag_weight, hp.parent_author,
               hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
@@ -838,9 +856,9 @@ def setup(db):
           RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
-              hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
+              hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.flag_weight, hp.parent_author,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.flag_weight, hp.parent_author,
               hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
@@ -883,9 +901,9 @@ def setup(db):
           RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
-              hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
+              hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.flag_weight, hp.parent_author,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.flag_weight, hp.parent_author,
               hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
@@ -927,9 +945,9 @@ def setup(db):
           RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
-              hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
+              hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.flag_weight, hp.parent_author,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.flag_weight, hp.parent_author,
               hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
@@ -972,9 +990,9 @@ def setup(db):
           RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
-              hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
+              hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.flag_weight, hp.parent_author,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.flag_weight, hp.parent_author,
               hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
@@ -1017,9 +1035,9 @@ def setup(db):
           RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
-              hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
+              hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.flag_weight, hp.parent_author,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.flag_weight, hp.parent_author,
               hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,

@@ -162,6 +162,7 @@ class Posts:
                   payout                = COALESCE( CAST( data_source.payout as DECIMAL ),              ihp.payout ),
                   pending_payout        = COALESCE( CAST( data_source.pending_payout as DECIMAL ),      ihp.pending_payout ),
                   payout_at             = COALESCE( CAST( data_source.payout_at as TIMESTAMP ),         ihp.payout_at ),
+                  last_payout_at        = COALESCE( CAST( data_source.last_payout_at as TIMESTAMP ),    ihp.last_payout_at ),
                   cashout_time          = COALESCE( CAST( data_source.cashout_time as TIMESTAMP ),      ihp.cashout_time ),
                   is_paidout            = COALESCE( CAST( data_source.is_paidout as BOOLEAN ),          ihp.is_paidout )
               FROM
@@ -176,6 +177,7 @@ class Posts:
                       t.payout,
                       t.pending_payout,
                       t.payout_at,
+                      t.last_payout_at,
                       t.cashout_time,
                       t.is_paidout
               from
@@ -193,6 +195,7 @@ class Posts:
                       payout,
                       pending_payout,
                       payout_at,
+                      last_payout_at,
                       cashout_time,
                       is_paidout)
               INNER JOIN hive_accounts ha_a ON ha_a.name = t.author
@@ -239,6 +242,7 @@ class Posts:
             pending_payout            = None
 
             payout_at                 = None
+            last_payout_at            = None
             cashout_time              = None
 
             is_paidout                = None
@@ -265,6 +269,7 @@ class Posts:
 
               payout = sum([ sbd_amount(total_payout_value), sbd_amount(curator_payout_value) ])
               pending_payout = 0
+              last_payout_at = date
 
               if author is None:
                 author                    = value['author']
@@ -297,9 +302,10 @@ class Posts:
             #Calculations of all dates
             if ( is_paidout is not None ):
               payout_at = date
+              last_payout_at = date
               cashout_time = "1969-12-31T23:59:59"
 
-            cls._comment_payout_ops.append("('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(
+            cls._comment_payout_ops.append("('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(
               author,
               permlink,
               "NULL" if ( total_payout_value is None ) else ( "'{}'".format( legacy_amount(total_payout_value) ) ),
@@ -312,6 +318,7 @@ class Posts:
               "NULL" if ( pending_payout is None ) else pending_payout,
 
               "NULL" if ( payout_at is None ) else ( "'{}'::timestamp".format( payout_at ) ),
+              "NULL" if ( last_payout_at is None ) else ( "'{}'::timestamp".format( last_payout_at ) ),
               "NULL" if ( cashout_time is None ) else ( "'{}'::timestamp".format( cashout_time ) ),
 
               "NULL" if ( is_paidout is None ) else is_paidout ))

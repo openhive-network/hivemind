@@ -29,10 +29,9 @@ def database_post_object(row, truncate_body=0):
     post['depth'] = row['depth']
     post['children'] = row['children']
     post['children_abs_rshares'] = 0 # TODO
-    post['net_rshares'] = row['rshares']
 
-    post['last_payout'] = json_date(row['payout_at'] if paid else None)
-    post['cashout_time'] = json_date(None if paid else row['payout_at'])
+    post['last_payout'] = json_date(row['last_payout_at'] if paid else None)
+    post['cashout_time'] = json_date(None if paid else row['cashout_time'])
     post['max_cashout_time'] = json_date(row['max_cashout_time'])
     post['total_payout_value'] = to_nai(_amount(row['payout'] if paid else 0))
     post['curator_payout_value'] = to_nai(_amount(0))
@@ -57,14 +56,18 @@ def database_post_object(row, truncate_body=0):
     post['max_accepted_payout'] = to_nai(row['max_accepted_payout'])
     post['percent_hbd'] = row['percent_hbd']
     post['abs_rshares'] = row['abs_rshares']
-    post['net_votes'] = Votes.get_vote_count(row['author'], row['permlink'])
+    post['net_votes'] = row['net_votes']
 
     if paid:
         curator_payout = sbd_amount(row['curator_payout_value'])
         post['curator_payout_value'] = to_nai(_amount(curator_payout))
         post['total_payout_value'] = to_nai(_amount(row['payout'] - curator_payout))
-
-    post['total_vote_weight'] = Votes.get_total_vote_weight(row['author'], row['permlink'])
-    post['vote_rshares'] = Votes.get_total_vote_rshares(row['author'], row['permlink']) 
+        post['total_vote_weight'] = 0
+        post['vote_rshares'] = 0
+        post['net_rshares'] = 0 if row['rshares'] > 0 else row['rshares']
+    else:
+        post['total_vote_weight'] = Votes.get_total_vote_weight(row['author'], row['permlink'])
+        post['vote_rshares'] = row['rshares']
+        post['net_rshares'] = row['rshares']
 
     return post
