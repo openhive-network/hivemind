@@ -61,7 +61,9 @@ setup(
         'aiocache',
         'configargparse',
         'pdoc',
-        'diff-match-patch'
+        'diff-match-patch',
+        'prometheus-client',
+        'psutil'
     ],
     extras_require={'test': tests_require},
     entry_points={

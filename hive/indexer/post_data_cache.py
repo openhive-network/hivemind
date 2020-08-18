@@ -67,4 +67,6 @@ class PostDataCache(object):
                 log.info("Executing query:\n{}".format(sql))
 
             DB.query(sql)
-            cls._data.clear()
+        n = len(cls._data.keys())
+        cls._data.clear()
+        return n

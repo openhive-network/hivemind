@@ -6,6 +6,7 @@ import os
 import logging
 from hive.conf import Conf
 from hive.db.adapter import Db
+from hive.utils.stats import PrometheusClient
 
 logging.basicConfig()
 
@@ -15,6 +16,7 @@ def run():
     conf = Conf.init_argparse()
     Db.set_shared_instance(conf.db())
     mode = conf.mode()
+    PrometheusClient( conf.get('prometheus_port') )
 
     pid_file_name = conf.pid_file()
     if pid_file_name is not None:

@@ -211,7 +211,9 @@ class Posts:
             actual_query = sql.format(values_str)
             DB.query(actual_query)
 
+        n = len(cls._comment_payout_ops)
         cls._comment_payout_ops.clear()
+        return n
 
     @classmethod
     def comment_payout_op(cls):
@@ -315,7 +317,10 @@ class Posts:
               "NULL" if ( cashout_time is None ) else ( "'{}'::timestamp".format( cashout_time ) ),
 
               "NULL" if ( is_paidout is None ) else is_paidout ))
+        
+        n = len(cls.comment_payout_ops)
         cls.comment_payout_ops.clear()
+        return n
 
     @classmethod
     def update_child_count(cls, child_id, op='+'):
@@ -449,5 +454,4 @@ class Posts:
 
     @classmethod
     def flush(cls):
-      cls.comment_payout_op()
-      cls.flush_into_db()
+      return cls.comment_payout_op() + cls.flush_into_db()

@@ -15,6 +15,8 @@ from hive.indexer.community import process_json_community_op, START_BLOCK
 from hive.utils.normalize import load_json_key
 from hive.utils.json import valid_op_json, valid_date, valid_command, valid_keys
 
+from hive.utils.stats import OPStatusManager as OPSM
+
 DB = Db.instance()
 
 log = logging.getLogger(__name__)
@@ -39,22 +41,10 @@ class CustomOp:
 
     @classmethod
     def process_ops(cls, ops, block_num, block_date):
-        ops_stats = {}
-
         """Given a list of operation in block, filter and process them."""
         for op in ops:
-            if op['id'] not in ['follow', 'community', 'notify']:
-                opName = str(op['id']) + '-ignored'
-                if(opName  in ops_stats):
-                    ops_stats[opName] += 1
-                else:
-                    ops_stats[opName] = 1
-                continue
-
-            if(op['id'] in ops_stats):
-                ops_stats[op['id']] += 1
-            else:
-                ops_stats[op['id']] = 1
+            start = OPSM.start()
+            opName = str(op['id']) + ( '-ignored' if op['id'] not in ['follow', 'community', 'notify'] else '' )
 
             account = _get_auth(op)
             if not account:
@@ -70,7 +60,8 @@ class CustomOp:
                     process_json_community_op(account, op_json, block_date)
             elif op['id'] == 'notify':
                 cls._process_notify(account, op_json, block_date)
-        return ops_stats
+            
+            OPSM.op_stats(opName, OPSM.stop(start))
 
     @classmethod
     def _process_notify(cls, account, op_json, block_date):
