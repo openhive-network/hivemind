@@ -79,7 +79,9 @@ if __name__ == "__main__":
             'aiocache',
             'configargparse',
             'pdoc',
-            'diff-match-patch'
+            'diff-match-patch',
+            'prometheus-client',
+            'psutil'
         ],
 
         entry_points={

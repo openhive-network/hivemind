@@ -35,8 +35,10 @@ class Conf():
         add('--steemd-url', env_var='STEEMD_URL', required=False, help='steemd/jussi endpoint', default='{"default" : "https://api.hive.blog"}')
         add('--muted-accounts-url', env_var='MUTED_ACCOUNTS_URL', required=False, help='url to flat list of muted accounts', default='https://raw.githubusercontent.com/hivevectordefense/irredeemables/master/full.txt')
         add('--blacklist-api-url', env_var='BLACKLIST_API_URL', required=False, help='url to acccess blacklist api', default='https://blacklist.usehive.com')
+
         # server
         add('--http-server-port', type=int, env_var='HTTP_SERVER_PORT', default=8080)
+        add('--prometheus-port', type=int, env_var='PROMETHEUS_PORT', required=False, help='if specified, runs prometheus deamon on specified port, which provide statistic and performance data')
 
         # sync
         add('--max-workers', type=int, env_var='MAX_WORKERS', help='max workers for batch requests', default=4)
@@ -112,6 +114,7 @@ class Conf():
     def get(self, param):
         """Reads a single property, e.g. `database_url`."""
         assert self._args, "run init_argparse()"
+        print(self._args)
         return self._args[param]
 
     def mode(self):

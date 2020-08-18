@@ -29,7 +29,7 @@ async def get_post_header(context, author, permlink):
         LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
         WHERE ha_a.name = :author
             AND hpd_p.permlink = :permlink
-            AND is_deleted = '0'
+            AND counter_deleted = 0
     """
 
     row = await db.query_row(sql, author=author, permlink=permlink)

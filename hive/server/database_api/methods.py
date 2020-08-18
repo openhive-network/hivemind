@@ -61,14 +61,14 @@ async def list_comments(context, start: list, limit: int, order: str):
         sql = "SELECT * FROM list_comments_by_author_last_update(:author, :updated_at, :start_post_author, :start_post_permlink, :limit)"
         result = await db.query_all(sql, author=author, updated_at=updated_at, start_post_author=start_post_author, start_post_permlink=start_post_permlink, limit=limit)
 
-    return [database_post_object(dict(row)) for row in result]
+    return { "comments": [database_post_object(dict(row)) for row in result] }
 
 @return_error_info
-async def find_comments(context, start: list, limit: int, order: str):
+async def find_comments(context, comments: list):
     """ Search for comments: limit and order is ignored in hive code """
-    comments = []
+    result = []
 
-    assert len(start) <= 1000, "Parameters count is greather than max allowed (1000)"
+    assert len(comments) <= 1000, "Parameters count is greather than max allowed (1000)"
     db = context['db']
 
     SQL_TEMPLATE = """
@@ -115,29 +115,26 @@ async def find_comments(context, start: list, limit: int, order: str):
             hp.reward_weight
         FROM
             hive_posts_view hp
+        JOIN (VALUES {}) AS t (author, permlink) ON hp.author = t.author AND hp.permlink = t.permlink
         WHERE
-            NOT hp.is_muted AND
-            NOT hp.is_deleted AND
+            NOT hp.is_muted AND hp.counter_deleted = 0
     """
 
     idx = 0
-    sql = ""
-    for arg in start:
+    values = ""
+    for arg in comments:
         if idx > 0:
-            sql += " UNION ALL "
-        sql += str(SQL_TEMPLATE)
-        sql += """
-            hp.author = '{}' AND 
-            hp.permlink = '{}'
-        """.format(arg[0], arg[1])
+            values += ","
+        values += "('{}','{}')".format(arg[0], arg[1])
         idx += 1
+    sql = SQL_TEMPLATE.format(values)
 
-    result = await db.query_all(sql)
-    for row in result:
+    rows = await db.query_all(sql)
+    for row in rows:
         cpo = database_post_object(dict(row))
-        comments.append(cpo)
+        result.append(cpo)
 
-    return comments
+    return { "comments": result }
 
 class VotesPresentation(Enum):
     ActiveVotes = 1
@@ -214,7 +211,7 @@ async def list_votes(context, start: list, limit: int, order: str):
             hive_votes_accounts_permlinks_view
     """
 
-    if order == "by_comment_voter":
+    if order == "by_comment_voter": # ABW: wrong! fat node sorted by ( comment_id, voter_id )
         sql += """
             WHERE
                 author >= :author AND 
@@ -228,7 +225,7 @@ async def list_votes(context, start: list, limit: int, order: str):
                 :limit
         """
         return await db.query_all(sql, author=start[0], permlink=start[1], voter=start[2], limit=limit)
-    if order == "by_voter_comment":
+    if order == "by_voter_comment": # ABW: wrong! fat node sorted by ( voter_id, comment_id )
         sql += """
             WHERE
                 voter >= :voter AND 

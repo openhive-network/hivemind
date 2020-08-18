@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 async def get_discussion(context, author, permlink, observer=None):
     """Modified `get_state` thread implementation."""
     # New index was created: hive_posts_parent_id_btree (CREATE INDEX "hive_posts_parent_id_btree" ON hive_posts btree(parent_id)
-    # We thougth this would be covered by "hive_posts_ix4" btree (parent_id, id) WHERE is_deleted = false but it was not
+    # We thougth this would be covered by "hive_posts_ix4" btree (parent_id, id) WHERE counter_deleted = 0 but it was not
     db = context['db']
 
     author = valid_account(author)
@@ -29,17 +29,17 @@ async def get_discussion(context, author, permlink, observer=None):
             id, parent_id
           FROM hive_posts_view hpv WHERE hpv.author = :author
             AND hpv.permlink = :permlink
-            AND NOT hpv.is_deleted AND NOT hpv.is_muted
+            AND hpv.counter_deleted = 0 AND NOT hpv.is_muted
           UNION ALL
           SELECT
             children.id, children.parent_id
           FROM hive_posts children
           INNER JOIN child_posts ON (children.parent_id = child_posts.id) 
-          WHERE NOT children.is_deleted AND NOT children.is_muted
+          WHERE children.counter_deleted = 0 AND NOT children.is_muted
         )
         SELECT
-          child_posts.id,
-          child_posts.parent_id,
+          cp.id,
+          cp.parent_id,
           hpv.id as post_id,
           hpv.author,
           hpv.permlink,
@@ -49,6 +49,7 @@ async def get_discussion(context, author, permlink, observer=None):
           hpv.depth,
           hpv.promoted,
           hpv.payout,
+          hpv.pending_payout,
           hpv.payout_at,
           hpv.is_paidout,
           hpv.children,
@@ -77,9 +78,10 @@ async def get_discussion(context, author, permlink, observer=None):
           hpv.max_accepted_payout,
           hpv.percent_hbd,
           hpv.curator_payout_value
-        FROM child_posts 
-        INNER JOIN hive_posts_view hpv ON (hpv.id = child_posts.id)
-        WHERE NOT hpv.is_deleted AND NOT hpv.is_muted
+        FROM child_posts cp
+        INNER JOIN hive_posts_view hpv ON (hpv.id = cp.id)
+        WHERE hpv.counter_deleted = 0 AND NOT hpv.is_muted
+        ORDER BY cp.id
         LIMIT 2000
     """
 
@@ -98,47 +100,30 @@ async def get_discussion(context, author, permlink, observer=None):
     root_post['replies'] = []
     all_posts[root_id] = root_post
 
-    id_to_parent_id_map = {}
-    id_to_parent_id_map[root_id] = None
+    parent_to_children_id_map = {}
 
     for index in range(1, len(rows)):
-        id_to_parent_id_map[rows[index]['id']] = rows[index]['parent_id']
+        parent_id = rows[index]['parent_id']
+        if parent_id not in parent_to_children_id_map:
+            parent_to_children_id_map[parent_id] = []
+        parent_to_children_id_map[parent_id].append(rows[index]['id'])
         post = _bridge_post_object(rows[index])
         post['active_votes'] = await find_votes({'db':db}, {'author':rows[index]['author'], 'permlink':rows[index]['permlink']}, VotesPresentation.BridgeApi)
         post = await append_statistics_to_post(post, rows[index], False, blacklists_for_user)
         post['replies'] = []
         all_posts[post['post_id']] = post
 
-    discussion_map = {}
-    build_discussion_map(root_id, id_to_parent_id_map, discussion_map)
-
-    for key in discussion_map:
-        children = discussion_map[key]
-        if children and len(children) > 0:
-            post = all_posts[key]
-            for child_id in children:
-                post['replies'].append(_ref(all_posts[child_id]))
+    for key in parent_to_children_id_map:
+        children = parent_to_children_id_map[key]
+        post = all_posts[key]
+        for child_id in children:
+            post['replies'].append(_ref(all_posts[child_id]))
 
     #result has to be in form of dictionary of dictionaries {post_ref: post}
     results = {}
     for key in all_posts:
         post_ref = _ref(all_posts[key])
         results[post_ref] = all_posts[key]
-    return results
-
-def build_discussion_map(parent_id, posts, results):
-    results[parent_id] = get_children(parent_id, posts)
-    if results[parent_id] == []:
-        return
-
-    for post_id in results[parent_id]:
-        build_discussion_map(post_id, posts, results)
-
-def get_children(parent_id, posts):
-    results = []
-    for key in posts:
-        if posts[key] == parent_id:
-            results.append(key)
     return results
 
 def _ref(post):
@@ -150,7 +135,7 @@ async def _child_ids(db, parent_ids):
              SELECT parent_id, array_agg(id)
                FROM hive_posts
               WHERE parent_id IN :ids
-                AND is_deleted = '0'
+                AND counter_deleted = 0
            GROUP BY parent_id
     """
     rows = await db.query_all(sql, ids=tuple(parent_ids))

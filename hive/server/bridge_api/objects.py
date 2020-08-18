@@ -58,6 +58,7 @@ async def load_posts_keyed(db, ids, truncate_body=0):
             hp.depth,
             hp.promoted,
             hp.payout,
+            hp.pending_payout,
             hp.payout_at,
             hp.is_paidout,
             hp.children,
@@ -146,7 +147,7 @@ async def load_posts_keyed(db, ids, truncate_body=0):
 
 
     sql = """SELECT id FROM hive_posts
-              WHERE id IN :ids AND is_pinned = '1' AND is_deleted = '0'"""
+              WHERE id IN :ids AND is_pinned = '1' AND counter_deleted = 0"""
     for pid in await db.query_col(sql, ids=tuple(ids)):
         if pid in posts_by_id:
             posts_by_id[pid]['stats']['is_pinned'] = True
@@ -169,16 +170,16 @@ async def load_posts(db, ids, truncate_body=0):
             ids.remove(_id)
             sql = """
                 SELECT
-                    hp.id, ha_a.name as author, hpd_p.permlink as permlink, depth, created_at, is_deleted
+                    hp.id, ha_a.name as author, hpd_p.permlink as permlink, depth, created_at, counter_deleted
                 FROM
                     hive_posts hp
                 INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
                 INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-                WHERE id = :id"""
+                WHERE id = :id and counter_deleted = 0 """
             post = await db.query_row(sql, id=_id)
-            if not post['is_deleted']:
+            if post is None:
                 # TODO: This should never happen. See #173 for analysis
-                log.error("missing post: %s", dict(post))
+                log.error("missing post: id %i", _id)
             else:
                 log.info("requested deleted post: %s", dict(post))
 
@@ -241,20 +242,19 @@ def _bridge_post_object(row, truncate_body=0):
 
     post['is_paidout'] = row['is_paidout']
     post['payout_at'] = json_date(row['payout_at'])
-    post['payout'] = float(row['payout'])
-    post['pending_payout_value'] = _amount(0 if paid else row['payout'])
-    post['author_payout_value'] = _amount(row['payout'] if paid else 0)
-    post['curator_payout_value'] = _amount(0)
+    post['payout'] = float(row['payout'] + row['pending_payout'])
+    post['pending_payout_value'] = _amount(0 if paid else post['payout'])
+    post['author_payout_value'] = _amount(0) # supplemented below
+    post['curator_payout_value'] = _amount(0) # supplemented below
     post['promoted'] = _amount(row['promoted'])
 
     post['replies'] = []
-# ABW: missing post['active_votes'] = _hydrate_active_votes(row['votes'])
     post['author_reputation'] = float(row['author_rep'])
 
     post['stats'] = {
         'hide': row['is_hidden'],
         'gray': row['is_grayed'],
-        'total_votes': Votes.get_vote_count(row['author'], row['permlink']), # ABW: incorrect calculation (possibly needs to exclude blacklisted votes)
+        'total_votes': Votes.get_vote_count(row['author'], row['permlink']),
         'flag_weight': float(row['flag_weight'])} # TODO: down_weight
 
 
