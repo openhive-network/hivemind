@@ -228,7 +228,7 @@ async def _child_ids(db, parent_ids):
              SELECT parent_id, array_agg(id)
                FROM hive_posts
               WHERE parent_id IN :ids
-                AND is_deleted = '0'
+                AND counter_deleted = 0
            GROUP BY parent_id
     """
     rows = await db.query_all(sql, ids=tuple(parent_ids))

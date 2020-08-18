@@ -55,7 +55,7 @@ class FeedCache:
                  SELECT hive_accounts.id, hive_posts.id, hive_posts.created_at
                    FROM hive_posts
                    JOIN hive_accounts ON hive_posts.author_id = hive_accounts.id
-                  WHERE depth = 0 AND is_deleted = '0'
+                  WHERE depth = 0 AND counter_deleted = 0
             ON CONFLICT DO NOTHING
         """)
         lap_1 = time.perf_counter()

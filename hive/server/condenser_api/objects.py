@@ -118,16 +118,16 @@ async def load_posts(db, ids, truncate_body=0):
             ids.remove(_id)
             sql = """
                 SELECT
-                    hp.id, ha_a.name as author, hpd_p.permlink as permlink, depth, created_at, is_deleted
+                    hp.id, ha_a.name as author, hpd_p.permlink as permlink, depth, created_at, counter_deleted
                 FROM
                     hive_posts hp
                 INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
                 INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-                WHERE id = :id"""
+                WHERE id = :id and counter_deleted = 0 """
             post = await db.query_row(sql, id=_id)
-            if not post['is_deleted']:
+            if post is None:
                 # TODO: This should never happen. See #173 for analysis
-                log.error("missing post -- %s", dict(post))
+                log.error("missing post: id %i", _id)
             else:
                 log.info("requested deleted post: %s", dict(post))
 

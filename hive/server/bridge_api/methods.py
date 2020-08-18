@@ -105,7 +105,7 @@ async def get_post(context, author, permlink, observer=None):
     if observer and context:
         blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
 
-    sql = "---bridge_api.get_post\n" + SQL_TEMPLATE + """ hp.author = :author AND hp.permlink = :permlink AND NOT hp.is_deleted """
+    sql = "---bridge_api.get_post\n" + SQL_TEMPLATE + """ hp.author = :author AND hp.permlink = :permlink AND hp.counter_deleted = 0 """
 
     result = await db.query_all(sql, author=author, permlink=permlink)
     assert len(result) == 1, 'invalid author/permlink or post not found in cache'
@@ -133,26 +133,26 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
     pinned_sql = ''
 
     if sort == 'trending':
-        sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND hp.depth = 0 AND NOT hp.is_deleted
+        sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND hp.depth = 0 AND hp.counter_deleted = 0
                                     %s ORDER BY hp.sc_trend DESC, hp.id LIMIT :limit """
     elif sort == 'hot':
-        sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND hp.depth = 0 AND NOT hp.is_deleted
+        sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND hp.depth = 0 AND hp.counter_deleted = 0
                                     %s ORDER BY hp.sc_hot DESC, hp.id LIMIT :limit """
     elif sort == 'created':
-        sql = SQL_TEMPLATE + """ hp.depth = 0 AND NOT hp.is_deleted AND NOT hp.is_grayed
+        sql = SQL_TEMPLATE + """ hp.depth = 0 AND hp.counter_deleted = 0 AND NOT hp.is_grayed
                                     %s ORDER BY hp.created_at DESC, hp.id LIMIT :limit """
     elif sort == 'promoted':
-        sql = SQL_TEMPLATE + """ hp.depth > 0 AND hp.promoted > 0 AND NOT hp.is_deleted
+        sql = SQL_TEMPLATE + """ hp.depth > 0 AND hp.promoted > 0 AND hp.counter_deleted = 0
                                     AND NOT hp.is_paidout %s ORDER BY hp.promoted DESC, hp.id LIMIT :limit """
     elif sort == 'payout':
-        sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND NOT hp.is_deleted %s
+        sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND hp.counter_deleted = 0 %s
                                     AND hp.payout_at BETWEEN now() + interval '12 hours' AND now() + interval '36 hours'
                                     ORDER BY hp.payout DESC, hp.id LIMIT :limit """
     elif sort == 'payout_comments':
-        sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND NOT hp.is_deleted AND hp.depth > 0
+        sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND hp.counter_deleted = 0 AND hp.depth > 0
                                     %s ORDER BY hp.payout DESC, hp.id LIMIT :limit """
     elif sort == 'muted':
-        sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND NOT hp.is_deleted AND hp.is_grayed
+        sql = SQL_TEMPLATE + """ NOT hp.is_paidout AND hp.counter_deleted = 0 AND hp.is_grayed
                                     AND hp.payout > 0 %s ORDER BY hp.payout DESC, hp.id LIMIT :limit """
 
     sql = "---bridge_api.get_ranked_posts\n" + sql
@@ -290,11 +290,11 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
                 post['reblogged_by'] = [account]
         return posts
     elif sort == 'posts':
-        sql = sql % """ hp.author = :account AND NOT hp.is_deleted AND hp.depth = 0 %s ORDER BY hp.id DESC LIMIT :limit"""
+        sql = sql % """ hp.author = :account AND hp.counter_deleted = 0 AND hp.depth = 0 %s ORDER BY hp.id DESC LIMIT :limit"""
     elif sort == 'comments':
-        sql = sql % """ hp.author = :account AND NOT hp.is_deleted AND hp.depth > 0 %s ORDER BY hp.id DESC, hp.depth LIMIT :limit"""
+        sql = sql % """ hp.author = :account AND hp.counter_deleted = 0 AND hp.depth > 0 %s ORDER BY hp.id DESC, hp.depth LIMIT :limit"""
     elif sort == 'payout':
-        sql = sql % """ hp.author = :account AND NOT hp.is_deleted AND NOT hp.is_paidout %s ORDER BY hp.payout DESC, hp.id LIMIT :limit"""
+        sql = sql % """ hp.author = :account AND hp.counter_deleted = 0 AND NOT hp.is_paidout %s ORDER BY hp.payout DESC, hp.id LIMIT :limit"""
     elif sort == 'feed':
         res = await cursor.pids_by_feed_with_reblog(db, account, *start, limit)
         return await load_posts_reblogs(context['db'], res)

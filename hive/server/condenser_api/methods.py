@@ -148,7 +148,7 @@ async def get_content(context, author: str, permlink: str, observer=None):
     valid_permlink(permlink)
     #force copy
     sql = str(SQL_TEMPLATE)
-    sql += """ hp.author = :author AND hp.permlink = :permlink AND NOT hp.is_deleted """
+    sql += """ hp.author = :author AND hp.permlink = :permlink AND hp.counter_deleted = 0 """
 
     post = None
     result = await db.query_all(sql, author=author, permlink=permlink)
@@ -175,7 +175,7 @@ async def get_content_replies(context, author: str, permlink: str):
     #force copy
     sql = str(SQL_TEMPLATE)
     sql += """
-            hp.is_deleted = '0' AND hp.parent_author = :author AND hp.parent_permlink = :permlink
+            hp.counter_deleted = 0 AND hp.parent_author = :author AND hp.parent_permlink = :permlink
         ORDER BY hp.id LIMIT :limit
     """
 
@@ -224,7 +224,7 @@ async def get_discussions_by(discussion_type, context, start_author: str = '',
 
     sql = "---get_discussions_by_" + discussion_type + "\r\n" + str(SQL_TEMPLATE)
 
-    sql = sql + """ NOT hp.is_deleted """
+    sql = sql + """ hp.counter_deleted = 0 """
 
     if discussion_type == 'trending':
         sql = sql + """ AND NOT hp.is_paidout %s ORDER BY hp.sc_trend DESC LIMIT :limit """
@@ -365,7 +365,7 @@ async def get_discussions_by_blog(context, tag: str = None, start_author: str = 
     #force copy
     sql = str(SQL_TEMPLATE)
     sql += """
-            NOT hp.is_deleted AND hp.id IN
+            hp.counter_deleted = 0 AND hp.id IN
                 (SELECT post_id FROM hive_feed_cache JOIN hive_accounts ON (hive_feed_cache.account_id = hive_accounts.id) WHERE hive_accounts.name = :author)
           """
     if start_author and start_permlink != '':
@@ -425,7 +425,7 @@ async def get_discussions_by_comments(context, start_author: str = None, start_p
     sql = str(SQL_TEMPLATE)
     sql += """
             hp.author = :start_author AND hp.depth > 0
-            AND NOT hp.is_deleted
+            AND hp.counter_deleted = 0
     """
 
     if start_permlink:

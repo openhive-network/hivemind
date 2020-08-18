@@ -238,7 +238,7 @@ class Community:
                                FROM hive_posts
                               WHERE community_id IS NOT NULL
                                 AND is_paidout = '0'
-                                AND is_deleted = '0'
+                                AND counter_deleted = 0
                            GROUP BY community_id
                         ) p
                      ON community_id = id

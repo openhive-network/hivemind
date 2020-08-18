@@ -75,7 +75,7 @@ def build_metadata():
         sa.Column('community_id', sa.Integer, nullable=True),
         sa.Column('created_at', sa.DateTime, nullable=False),
         sa.Column('depth', SMALLINT, nullable=False),
-        sa.Column('is_deleted', BOOLEAN, nullable=False, server_default='0'),
+        sa.Column('counter_deleted', sa.Integer, nullable=False, server_default='0'),
         sa.Column('is_pinned', BOOLEAN, nullable=False, server_default='0'),
         sa.Column('is_muted', BOOLEAN, nullable=False, server_default='0'),
         sa.Column('is_valid', BOOLEAN, nullable=False, server_default='1'),
@@ -139,7 +139,7 @@ def build_metadata():
 
         sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_posts_fk1'),
         sa.ForeignKeyConstraint(['parent_id'], ['hive_posts.id'], name='hive_posts_fk3'),
-        sa.UniqueConstraint('author_id', 'permlink_id', name='hive_posts_ux1'),
+        sa.UniqueConstraint('author_id', 'permlink_id', 'counter_deleted', name='hive_posts_ux1'),
         sa.Index('hive_posts_permlink_id', 'permlink_id'),
 
         sa.Index('hive_posts_depth_idx', 'depth'),
@@ -451,7 +451,7 @@ def setup(db):
              category_id,
              root_author_id, root_permlink_id,
              is_muted, is_valid,
-             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,active, payout_at, cashout_time)
+             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,active, payout_at, cashout_time, counter_deleted)
             SELECT php.id AS parent_id, php.author_id as parent_author_id,
                 php.permlink_id as parent_permlink_id, php.depth + 1 as depth,
                 (CASE
@@ -466,30 +466,21 @@ def setup(db):
                 ha.id as author_id, hpd.id as permlink_id, _date as created_at,
                 _date as updated_at, calculate_time_part_of_hot(_date) as sc_hot,
                  calculate_time_part_of_trending(_date) as sc_trend,
-                _date as active, (_date + INTERVAL '7 days') as payout_at, (_date + INTERVAL '7 days') as cashout_time
+                _date as active, (_date + INTERVAL '7 days') as payout_at, (_date + INTERVAL '7 days') as cashout_time, 0
             FROM hive_accounts ha,
                  hive_permlink_data hpd,
                  hive_posts php
             INNER JOIN hive_accounts pha ON pha.id = php.author_id
             INNER JOIN hive_permlink_data phpd ON phpd.id = php.permlink_id
             WHERE pha.name = _parent_author and phpd.permlink = _parent_permlink AND
-                   ha.name = _author and hpd.permlink = _permlink
+                   ha.name = _author and hpd.permlink = _permlink and php.counter_deleted = 0
 
             ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
               --- During post update it is disallowed to change: parent-post, category, community-id
               --- then also depth, is_valid and is_muted is impossible to change
              --- post edit part
              updated_at = _date,
-             active = _date,
-
-              --- post undelete part (if was deleted)
-              is_deleted = false,
-              is_pinned = (CASE hp.is_deleted
-                              WHEN true THEN false
-                              ELSE hp.is_pinned --- no change
-                            END
-                           )
-
+             active = _date
             RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, (hp.updated_at > hp.created_at) as is_edited
           ;
           ELSE
@@ -504,7 +495,7 @@ def setup(db):
              category_id,
              root_author_id, root_permlink_id,
              is_muted, is_valid,
-             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time)
+             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted)
             SELECT 0 AS parent_id, 0 as parent_author_id, 0 as parent_permlink_id, 0 as depth,
                 (CASE
                   WHEN _date > _community_support_start_date THEN
@@ -518,7 +509,7 @@ def setup(db):
                 ha.id as author_id, hpd.id as permlink_id, _date as created_at,
                 _date as updated_at, calculate_time_part_of_hot(_date) as sc_hot,
                   calculate_time_part_of_trending(_date) as sc_trend,
-                _date as active, (_date + INTERVAL '7 days') as payout_at, (_date + INTERVAL '7 days') as cashout_time
+                _date as active, (_date + INTERVAL '7 days') as payout_at, (_date + INTERVAL '7 days') as cashout_time, 0
             FROM hive_accounts ha,
                  hive_permlink_data hpd
             WHERE ha.name = _author and hpd.permlink = _permlink
@@ -528,15 +519,7 @@ def setup(db):
               --- then also depth, is_valid and is_muted is impossible to change
               --- post edit part
               updated_at = _date,
-              active = _date,
-
-              --- post undelete part (if was deleted)
-              is_deleted = false,
-              is_pinned = (CASE hp.is_deleted
-                              WHEN true THEN false
-                              ELSE hp.is_pinned --- no change
-                            END
-                           )
+              active = _date
 
             RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, _parent_permlink as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, (hp.updated_at > hp.created_at) as is_edited
             ;
@@ -558,11 +541,18 @@ def setup(db):
           $function$
           BEGIN
             RETURN QUERY UPDATE hive_posts AS hp
-              SET is_deleted = true
+              SET counter_deleted =
+              (
+                SELECT max( hps.counter_deleted ) + 1
+                FROM hive_posts hps
+                INNER JOIN hive_accounts ha ON hps.author_id = ha.id
+                INNER JOIN hive_permlink_data hpd ON hps.permlink_id = hpd.id
+                WHERE ha.name = _author AND hpd.permlink = _permlink
+              )
             FROM hive_posts hp1
             INNER JOIN hive_accounts ha ON hp1.author_id = ha.id
             INNER JOIN hive_permlink_data hpd ON hp1.permlink_id = hpd.id
-            WHERE hp.id = hp1.id AND ha.name = _author AND hpd.permlink = _permlink
+            WHERE hp.id = hp1.id AND ha.name = _author AND hpd.permlink = _permlink AND hp1.counter_deleted = 0
             RETURNING hp.id, hp.depth;
           END
           $function$
@@ -632,7 +622,7 @@ def setup(db):
             rpd.title AS root_title,
             hp.sc_trend,
             hp.sc_hot,
-            hp.is_deleted,
+            hp.counter_deleted,
             hp.is_pinned,
             hp.is_muted,
             hp.is_nsfw,
@@ -683,13 +673,13 @@ def setup(db):
               FROM
               (SELECT h1.Parent_Id AS queried_parent, h1.id
                FROM hive_posts h1
-               WHERE h1.depth > 0 AND NOT h1.is_deleted
+               WHERE h1.depth > 0 AND h1.counter_deleted = 0
                ORDER BY h1.depth DESC
               ) s
               UNION ALL
               SELECT tblChild.queried_parent, p.id FROM hive_posts p
               JOIN tblChild  ON p.Parent_Id = tblChild.Id
-              WHERE NOT p.is_deleted
+              WHERE p.counter_deleted = 0
             )
             SELECT queried_parent, cast(count(1) AS int) AS children_count
             FROM tblChild
@@ -800,7 +790,7 @@ def setup(db):
               hive_posts_view hp
           WHERE
               NOT hp.is_muted AND
-              NOT hp.is_deleted AND
+              hp.counter_deleted == 0 AND
               -- ABW: wrong! fat node required _author+_permlink to exist (when given) and sorted by ( cashout_time, comment_id )
               hp.cashout_time >= _cashout_time AND
               hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _author AND hp1.permlink >= _permlink ORDER BY id LIMIT 1)
@@ -839,7 +829,7 @@ def setup(db):
               hive_posts_view hp
           WHERE
               NOT hp.is_muted AND
-              NOT hp.is_deleted AND
+              hp.counter_deleted = 0 AND
               hp.author > _author COLLATE "C" OR
               hp.author = _author AND hp.permlink >= _permlink COLLATE "C"
           ORDER BY
@@ -879,7 +869,7 @@ def setup(db):
               hive_posts_view hp
           WHERE
               NOT hp.is_muted AND
-              NOT hp.is_deleted AND
+              hp.counter_deleted = 0 AND
               -- ABW: wrong! fat node required both _root_author+_root_permlink and _start_post_author+start_post_permlink to exist (when given)
               -- and sorted by ( root_id, comment_id )
               root_author >= _root_author AND
@@ -923,7 +913,7 @@ def setup(db):
               hive_posts_view hp
           WHERE
               NOT hp.is_muted AND
-              NOT hp.is_deleted AND
+              hp.counter_deleted = 0 AND
               -- ABW: wrong! fat node required _start_post_author+_start_port_permlink to exist (when given) and sorted by ( parent_author, parent_permlink, comment_id )
               parent_author > _parent_author COLLATE "C" OR
               parent_author = _parent_author AND ( parent_permlink > _parent_permlink COLLATE "C" OR
@@ -967,7 +957,7 @@ def setup(db):
               hive_posts_view hp
           WHERE
               NOT hp.is_muted AND
-              NOT hp.is_deleted AND
+              hp.counter_deleted = 0 AND
               -- ABW: wrong! fat node required _start_post_author+_start_port_permlink to exist (when given) and sorted by ( _parent_author, updated_at, comment_id )
               hp.parent_author > _parent_author COLLATE "C" OR
               hp.parent_author = _parent_author AND hp.updated_at >= _updated_at AND 
@@ -1009,7 +999,7 @@ def setup(db):
               hive_posts_view hp
           WHERE
               NOT hp.is_muted AND
-              NOT hp.is_deleted AND
+              hp.counter_deleted = 0 AND
               -- ABW: wrong! fat node required _start_post_author+_start_post_permlink to exist (when given) and sorted just like
               -- in case of by_last_update (but in fat node) but should by ( _author, updated_at, comment_id )
               hp.author > _author COLLATE "C" OR
@@ -1032,7 +1022,7 @@ def setup(db):
     # hot and tranding functions
 
     sql = """
-       DROP FUNCTION IF EXISTS date_diff CASCADE
+       DROP FUNCTION IF EXISTS date_diff() CASCADE
        ;
        CREATE OR REPLACE FUNCTION date_diff (units VARCHAR(30), start_t TIMESTAMP, end_t TIMESTAMP)
          RETURNS INT AS $$

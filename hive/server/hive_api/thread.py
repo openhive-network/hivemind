@@ -125,7 +125,7 @@ async def _child_ids(db, parent_ids, muted):
              SELECT parent_id, array_agg(id)
                FROM hive_posts
               WHERE parent_id IN :ids
-                AND is_deleted = '0'
+                AND counter_deleted = 0
                 AND is_muted = '0'
                 AND is_valid = '1' %s
            GROUP BY parent_id

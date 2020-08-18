@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 async def get_discussion(context, author, permlink, observer=None):
     """Modified `get_state` thread implementation."""
     # New index was created: hive_posts_parent_id_btree (CREATE INDEX "hive_posts_parent_id_btree" ON hive_posts btree(parent_id)
-    # We thougth this would be covered by "hive_posts_ix4" btree (parent_id, id) WHERE is_deleted = false but it was not
+    # We thougth this would be covered by "hive_posts_ix4" btree (parent_id, id) WHERE counter_deleted = 0 but it was not
     db = context['db']
 
     author = valid_account(author)
@@ -29,13 +29,13 @@ async def get_discussion(context, author, permlink, observer=None):
             id, parent_id
           FROM hive_posts_view hpv WHERE hpv.author = :author
             AND hpv.permlink = :permlink
-            AND NOT hpv.is_deleted AND NOT hpv.is_muted
+            AND hpv.counter_deleted = 0 AND NOT hpv.is_muted
           UNION ALL
           SELECT
             children.id, children.parent_id
           FROM hive_posts children
           INNER JOIN child_posts ON (children.parent_id = child_posts.id) 
-          WHERE NOT children.is_deleted AND NOT children.is_muted
+          WHERE children.counter_deleted = 0 AND NOT children.is_muted
         )
         SELECT
           cp.id,
@@ -80,7 +80,7 @@ async def get_discussion(context, author, permlink, observer=None):
           hpv.curator_payout_value
         FROM child_posts cp
         INNER JOIN hive_posts_view hpv ON (hpv.id = cp.id)
-        WHERE NOT hpv.is_deleted AND NOT hpv.is_muted
+        WHERE hpv.counter_deleted = 0 AND NOT hpv.is_muted
         ORDER BY cp.id
         LIMIT 2000
     """
@@ -135,7 +135,7 @@ async def _child_ids(db, parent_ids):
              SELECT parent_id, array_agg(id)
                FROM hive_posts
               WHERE parent_id IN :ids
-                AND is_deleted = '0'
+                AND counter_deleted = 0
            GROUP BY parent_id
     """
     rows = await db.query_all(sql, ids=tuple(parent_ids))
