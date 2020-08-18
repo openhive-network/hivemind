@@ -146,7 +146,6 @@ class Blocks:
 
                 comment_payout_ops[key][op_type] = op_value
             elif op_type == 'ineffective_delete_comment_operation':
-              ops_stats[ 'ineffective_delete_comment_operation' ] += 1
               inefficient_deleted_ops[key] = {}
 
             if op_type in registered_ops_stats:
