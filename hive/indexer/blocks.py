@@ -55,10 +55,10 @@ class Blocks:
         time_start = perf_counter()
         #assert is_trx_active(), "Block.process must be in a trx"
         ret = cls._process(block, vops_in_block, hived, is_initial_sync=False)
+        cls._flush_blocks()
         PostDataCache.flush()
         Tags.flush()
         Votes.flush()
-        cls._flush_blocks()
         Posts.flush()
         time_end = perf_counter()
         log.info("[PROCESS BLOCK] %fs", time_end - time_start)
@@ -89,10 +89,10 @@ class Blocks:
             return FSM.start()
 
         log.info("#############################################################################")
+        flush_time = register_time(flush_time, "Blocks", cls._flush_blocks())
         flush_time = register_time(flush_time, "PostDataCache", PostDataCache.flush())
         flush_time = register_time(flush_time, "Tags", Tags.flush())
         flush_time = register_time(flush_time, "Votes", Votes.flush())
-        flush_time = register_time(flush_time, "Blocks", cls._flush_blocks())
         folllow_items = len(Follow.follow_items_to_flush) + Follow.flush(trx=False)
         flush_time = register_time(flush_time, "Follow", folllow_items)
         flush_time = register_time(flush_time, "Posts", Posts.flush())
@@ -102,7 +102,7 @@ class Blocks:
         log.info(f"[PROCESS MULTI] {len(blocks)} blocks in {OPSM.stop(time_start) :.4f}s")
 
     @staticmethod
-    def prepare_vops(comment_payout_ops, vopsList, date):
+    def prepare_vops(comment_payout_ops, vopsList, date, block_num):
         vote_ops = {}
 
         inefficient_deleted_ops = {}
@@ -115,6 +115,7 @@ class Blocks:
 
             op_type = vop['type']
             op_value = vop['value']
+            op_value['block_num'] = block_num
             key = "{}/{}".format(op_value['author'], op_value['permlink'])
 
             if op_type == 'author_reward_operation':
@@ -175,10 +176,10 @@ class Blocks:
 
         if is_initial_sync:
             if num in virtual_operations:
-              (vote_ops, inefficient_deleted_ops ) = Blocks.prepare_vops(Posts.comment_payout_ops, virtual_operations[num], cls._current_block_date)
+              (vote_ops, inefficient_deleted_ops ) = Blocks.prepare_vops(Posts.comment_payout_ops, virtual_operations[num], cls._current_block_date, num)
         else:
             vops = hived.get_virtual_operations(num)
-            (vote_ops, inefficient_deleted_ops ) = Blocks.prepare_vops(Posts.comment_payout_ops, vops, cls._current_block_date)
+            (vote_ops, inefficient_deleted_ops ) = Blocks.prepare_vops(Posts.comment_payout_ops, vops, cls._current_block_date, num)
 
         json_ops = []
         for tx_idx, tx in enumerate(block['transactions']):
@@ -186,6 +187,9 @@ class Blocks:
                 start = OPSM.start()
                 op_type = operation['type']
                 op = operation['value']
+
+                assert 'block_num' not in op
+                op['block_num'] = num
 
                 account_name = None
                 # account ops
@@ -307,9 +311,9 @@ class Blocks:
     @classmethod
     def _flush_blocks(cls):
         query = """
-            INSERT INTO 
-                hive_blocks (num, hash, prev, txs, ops, created_at) 
-            VALUES 
+            INSERT INTO
+                hive_blocks (num, hash, prev, txs, ops, created_at)
+            VALUES
         """
         values = []
         for block in cls.blocks_to_flush:
