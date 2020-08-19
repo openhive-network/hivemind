@@ -2,7 +2,9 @@
 
 import logging
 
+from hive.db.db_state import DbState
 from hive.db.adapter import Db
+from hive.utils.trends import update_hot_and_tranding_for_block_range
 
 log = logging.getLogger(__name__)
 DB = Db.instance()
@@ -85,6 +87,7 @@ class Votes:
         author    = vote_operation['author']
         permlink  = vote_operation['permlink']
         weight    = vote_operation['weight']
+        block_num = vote_operation['block_num']
 
         if cls.inside_flush:
             log.exception("Adding new vote-info into '_votes_data' dict")
@@ -95,6 +98,7 @@ class Votes:
         if key in cls._votes_data:
             cls._votes_data[key]["vote_percent"] = weight
             cls._votes_data[key]["last_update"] = date
+            cls._votes_data[key]["block_num"] = block_num
         else:
             cls._votes_data[key] = dict(voter=voter,
                                         author=author,
@@ -103,7 +107,8 @@ class Votes:
                                         weight=0,
                                         rshares=0,
                                         last_update=date,
-                                        is_effective=False)
+                                        is_effective=False,
+                                        block_num=block_num)
 
     @classmethod
     def effective_comment_vote_op(cls, key, vop):
@@ -118,6 +123,7 @@ class Votes:
         cls._votes_data[key]["weight"]       = vop["weight"]
         cls._votes_data[key]["rshares"]      = vop["rshares"]
         cls._votes_data[key]["is_effective"] = True
+        cls._votes_data[key]["block_num"] = vop['block_num']
 
     @classmethod
     def flush(cls):
@@ -127,14 +133,14 @@ class Votes:
         if cls._votes_data:
             sql = """
                 INSERT INTO hive_votes
-                (post_id, voter_id, author_id, permlink_id, weight, rshares, vote_percent, last_update) 
-                SELECT hp.id as post_id, ha_v.id as voter_id, ha_a.id as author_id, hpd_p.id as permlink_id, t.weight, t.rshares, t.vote_percent, t.last_update
+                (post_id, voter_id, author_id, permlink_id, weight, rshares, vote_percent, last_update, block_num)
+                SELECT hp.id as post_id, ha_v.id as voter_id, ha_a.id as author_id, hpd_p.id as permlink_id, t.weight, t.rshares, t.vote_percent, t.last_update, t.block_num
                 FROM
                 (
                 VALUES
-                  -- voter, author, permlink, weight, rshares, vote_percent, last_update
+                  -- voter, author, permlink, weight, rshares, vote_percent, last_update, block_num
                   {}
-                ) AS T(voter, author, permlink, weight, rshares, vote_percent, last_update)
+                ) AS T(voter, author, permlink, weight, rshares, vote_percent, last_update, block_num)
                 INNER JOIN hive_accounts ha_v ON ha_v.name = t.voter
                 INNER JOIN hive_accounts ha_a ON ha_a.name = t.author
                 INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
@@ -155,10 +161,14 @@ class Votes:
             values_skip = []
             values_override = []
             values_limit = 1000
+            first_block = 0
+            last_block = 0
 
             for _, vd in cls._votes_data.items():
                 values = None
                 on_conflict_data_source = None
+                first_block = min( first_block, vd['block_num'] )
+                last_block = max( last_block, vd['block_num'] )
 
                 if vd['is_effective']:
                     values = values_override
@@ -167,8 +177,8 @@ class Votes:
                     values = values_skip
                     on_conflict_data_source = 'hive_votes'
 
-                values.append("('{}', '{}', '{}', {}, {}, {}, '{}'::timestamp)".format(
-                    vd['voter'], vd['author'], vd['permlink'], vd['weight'], vd['rshares'], vd['vote_percent'], vd['last_update']))
+                values.append("('{}', '{}', '{}', {}, {}, {}, '{}'::timestamp, {})".format(
+                    vd['voter'], vd['author'], vd['permlink'], vd['weight'], vd['rshares'], vd['vote_percent'], vd['last_update'], vd['block_num']))
 
                 if len(values) >= values_limit:
                     values_str = ','.join(values)
@@ -188,6 +198,8 @@ class Votes:
                 values_override.clear()
 
             n = len(cls._votes_data)
+            if not DbState.is_initial_sync():
+                update_hot_and_tranding_for_block_range( first_block, last_block )				
             cls._votes_data.clear()
         cls.inside_flush = False
         return n

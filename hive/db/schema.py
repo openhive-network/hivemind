@@ -197,6 +197,7 @@ def build_metadata():
         sa.Column('vote_percent', sa.Integer, server_default='0'),
         sa.Column('last_update', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('num_changes', sa.Integer, server_default='0'),
+        sa.Column('block_num', sa.Integer,  nullable=False ),
 
         sa.UniqueConstraint('voter_id', 'author_id', 'permlink_id', name='hive_votes_ux1'),
 
@@ -204,13 +205,15 @@ def build_metadata():
         sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),
         sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id']),
         sa.ForeignKeyConstraint(['permlink_id'], ['hive_permlink_data.id']),
+        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num']),
 
         sa.Index('hive_votes_post_id_idx', 'post_id'),
         sa.Index('hive_votes_voter_id_idx', 'voter_id'),
         sa.Index('hive_votes_author_id_idx', 'author_id'),
         sa.Index('hive_votes_permlink_id_idx', 'permlink_id'),
         sa.Index('hive_votes_upvote_idx', 'vote_percent', postgresql_where=sql_text("vote_percent > 0")),
-        sa.Index('hive_votes_downvote_idx', 'vote_percent', postgresql_where=sql_text("vote_percent < 0"))
+        sa.Index('hive_votes_downvote_idx', 'vote_percent', postgresql_where=sql_text("vote_percent < 0")),
+        sa.Index('hive_votes_block_num_idx', 'block_num')
     )
 
     sa.Table(
@@ -960,7 +963,7 @@ def setup(db):
               hp.counter_deleted = 0 AND
               -- ABW: wrong! fat node required _start_post_author+_start_port_permlink to exist (when given) and sorted by ( _parent_author, updated_at, comment_id )
               hp.parent_author > _parent_author COLLATE "C" OR
-              hp.parent_author = _parent_author AND hp.updated_at >= _updated_at AND 
+              hp.parent_author = _parent_author AND hp.updated_at >= _updated_at AND
               hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _start_post_author AND hp1.permlink >= _start_post_permlink ORDER BY id LIMIT 1)
           ORDER BY
               hp.parent_author ASC,
@@ -1003,7 +1006,7 @@ def setup(db):
               -- ABW: wrong! fat node required _start_post_author+_start_post_permlink to exist (when given) and sorted just like
               -- in case of by_last_update (but in fat node) but should by ( _author, updated_at, comment_id )
               hp.author > _author COLLATE "C" OR
-              hp.author = _author AND hp.updated_at >= _updated_at AND 
+              hp.author = _author AND hp.updated_at >= _updated_at AND
               hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author > _start_post_author COLLATE "C" OR hp1.author = _start_post_author AND hp1.permlink >= _start_post_permlink COLLATE "C" ORDER BY id LIMIT 1)
           ORDER BY
               hp.parent_author ASC,
