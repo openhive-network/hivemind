@@ -13,6 +13,7 @@ from hive.db.schema import (setup, reset_autovac, build_metadata,
 from hive.db.adapter import Db
 
 from hive.utils.trends import update_all_hot_and_tranding
+from hive.utils.post_active import update_all_posts_active
 
 log = logging.getLogger(__name__)
 
@@ -197,6 +198,12 @@ class DbState:
         time_end = perf_counter()
         log.info("[INIT] update_all_hot_and_tranding executed in %fs", time_end - time_start)
 
+        time_start = perf_counter()
+
+        update_all_posts_active()
+
+        time_end = perf_counter()
+        log.info("[INIT] update_all_posts_active executed in %fs", time_end - time_start)
         # TODO: #111
         #for key in cls._all_foreign_keys():
         #    log.info("Create fk %s", key.name)
