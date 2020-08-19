@@ -117,6 +117,7 @@ def build_metadata():
         sa.Column('children_abs_rshares', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('abs_rshares', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('vote_rshares', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('total_vote_weight', sa.Numeric, nullable=False, server_default='0'),
         sa.Column('active', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('percent_hbd', sa.Integer, nullable=False, server_default='10000'),
@@ -613,6 +614,7 @@ def setup(db):
                 GROUP BY v.post_id
               ), 0
             ) AS net_votes,
+            hp.total_vote_weight,
             hp.flag_weight,
             ha_pp.name AS parent_author,
             hpd_pp.permlink AS parent_permlink,
@@ -644,7 +646,14 @@ def setup(db):
             hr.role_id AS role_id,
             hc.title AS community_title,
             hc.name AS community_name,
-            hp.abs_rshares,
+            COALESCE(
+              (
+                SELECT SUM( CASE v.rshares >= 0 WHEN True THEN v.rshares ELSE -v.rshares END )
+                FROM hive_votes v
+                WHERE v.post_id = hp.id AND NOT v.rshares = 0
+                GROUP BY v.post_id
+              ), 0
+            ) AS abs_rshares,
             '1969-12-31T23:59:59'::timestamp AS max_cashout_time,
             hp.reward_weight
             FROM hive_posts hp
@@ -779,6 +788,7 @@ def setup(db):
         is_grayed BOOLEAN,
         total_votes BIGINT,
         net_votes BIGINT,
+        total_vote_weight NUMERIC,
         flag_weight REAL,
         parent_author VARCHAR(16),
         parent_permlink VARCHAR(255),
@@ -793,7 +803,7 @@ def setup(db):
         beneficiaries JSON,
         url TEXT,
         root_title VARCHAR(512),
-        abs_rshares BIGINT,
+        abs_rshares NUMERIC,
         active TIMESTAMP,
         author_rewards BIGINT,
         max_cashout_time TIMESTAMP,
@@ -820,8 +830,8 @@ def setup(db):
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
               hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.flag_weight, hp.parent_author,
-              hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
+              hp.parent_author, hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
               hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
@@ -858,8 +868,8 @@ def setup(db):
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
               hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.flag_weight, hp.parent_author,
-              hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
+              hp.parent_author, hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
               hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
@@ -903,8 +913,8 @@ def setup(db):
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
               hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.flag_weight, hp.parent_author,
-              hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
+              hp.parent_author, hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
               hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
@@ -947,8 +957,8 @@ def setup(db):
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
               hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.flag_weight, hp.parent_author,
-              hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
+              hp.parent_author, hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
               hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
@@ -992,8 +1002,8 @@ def setup(db):
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
               hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.flag_weight, hp.parent_author,
-              hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
+              hp.parent_author, hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
               hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
@@ -1037,8 +1047,8 @@ def setup(db):
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
               hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.flag_weight, hp.parent_author,
-              hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
+              hp.parent_author, hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
               hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight

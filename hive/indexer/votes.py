@@ -11,21 +11,6 @@ class Votes:
     """ Class for managing posts votes """
     _votes_data = {}
 
-    @classmethod
-    def get_total_vote_weight(cls, author, permlink):
-        """ Get total vote weight for selected post """
-        sql = """
-            SELECT 
-                sum(weight)
-            FROM 
-                hive_votes_accounts_permlinks_view hv
-            WHERE 
-                hv.author = :author AND
-                hv.permlink = :permlink
-        """
-        ret = DB.query_row(sql, author=author, permlink=permlink)
-        return 0 if ret is None else int(0 if ret.sum is None else ret.sum)
-
     inside_flush = False
 
     @classmethod

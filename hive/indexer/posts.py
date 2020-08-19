@@ -155,16 +155,17 @@ class Posts:
               UPDATE hive_posts AS ihp SET
                   total_payout_value    = COALESCE( data_source.total_payout_value,                     ihp.total_payout_value ),
                   curator_payout_value  = COALESCE( data_source.curator_payout_value,                   ihp.curator_payout_value ),
-                  author_rewards        = COALESCE( CAST( data_source.author_rewards as INT8 ),         ihp.author_rewards ),
-                  author_rewards_hive   = COALESCE( CAST( data_source.author_rewards_hive as INT8 ),    ihp.author_rewards_hive ),
-                  author_rewards_hbd    = COALESCE( CAST( data_source.author_rewards_hbd as INT8 ),     ihp.author_rewards_hbd ),
-                  author_rewards_vests  = COALESCE( CAST( data_source.author_rewards_vests as INT8 ),   ihp.author_rewards_vests ),
+                  author_rewards        = COALESCE( CAST( data_source.author_rewards as BIGINT ),       ihp.author_rewards ),
+                  author_rewards_hive   = COALESCE( CAST( data_source.author_rewards_hive as BIGINT ),  ihp.author_rewards_hive ),
+                  author_rewards_hbd    = COALESCE( CAST( data_source.author_rewards_hbd as BIGINT ),   ihp.author_rewards_hbd ),
+                  author_rewards_vests  = COALESCE( CAST( data_source.author_rewards_vests as BIGINT ), ihp.author_rewards_vests ),
                   payout                = COALESCE( CAST( data_source.payout as DECIMAL ),              ihp.payout ),
                   pending_payout        = COALESCE( CAST( data_source.pending_payout as DECIMAL ),      ihp.pending_payout ),
                   payout_at             = COALESCE( CAST( data_source.payout_at as TIMESTAMP ),         ihp.payout_at ),
                   last_payout_at        = COALESCE( CAST( data_source.last_payout_at as TIMESTAMP ),    ihp.last_payout_at ),
                   cashout_time          = COALESCE( CAST( data_source.cashout_time as TIMESTAMP ),      ihp.cashout_time ),
-                  is_paidout            = COALESCE( CAST( data_source.is_paidout as BOOLEAN ),          ihp.is_paidout )
+                  is_paidout            = COALESCE( CAST( data_source.is_paidout as BOOLEAN ),          ihp.is_paidout ),
+                  total_vote_weight     = COALESCE( CAST( data_source.total_vote_weight as NUMERIC ),   ihp.total_vote_weight )
               FROM
               (
               SELECT  ha_a.id as author_id, hpd_p.id as permlink_id,
@@ -179,7 +180,8 @@ class Posts:
                       t.payout_at,
                       t.last_payout_at,
                       t.cashout_time,
-                      t.is_paidout
+                      t.is_paidout,
+                      t.total_vote_weight
               from
               (
               VALUES
@@ -197,10 +199,11 @@ class Posts:
                       payout_at,
                       last_payout_at,
                       cashout_time,
-                      is_paidout)
+                      is_paidout,
+                      total_vote_weight)
               INNER JOIN hive_accounts ha_a ON ha_a.name = t.author
               INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
-              ) as data_source(author_id, permlink_id, total_payout_value)
+              ) as data_source
               WHERE ihp.permlink_id = data_source.permlink_id and ihp.author_id = data_source.author_id
         """
 
@@ -247,6 +250,8 @@ class Posts:
 
             is_paidout                = None
 
+            total_vote_weight         = None
+
             date =  v[ 'date' ]
 
             if v[ 'author_reward_operation' ] is not None:
@@ -277,7 +282,8 @@ class Posts:
 
             if v[ 'effective_comment_vote_operation' ] is not None:
               value = v[ 'effective_comment_vote_operation' ]
-              pending_payout            = sbd_amount( value['pending_payout'] )
+              pending_payout              = sbd_amount( value['pending_payout'] )
+              total_vote_weight           = value['total_vote_weight']
               if author is None:
                 author                    = value['author']
                 permlink                  = value['permlink']
@@ -305,7 +311,7 @@ class Posts:
               last_payout_at = date
               cashout_time = "1969-12-31T23:59:59"
 
-            cls._comment_payout_ops.append("('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(
+            cls._comment_payout_ops.append("('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(
               author,
               permlink,
               "NULL" if ( total_payout_value is None ) else ( "'{}'".format( legacy_amount(total_payout_value) ) ),
@@ -321,7 +327,10 @@ class Posts:
               "NULL" if ( last_payout_at is None ) else ( "'{}'::timestamp".format( last_payout_at ) ),
               "NULL" if ( cashout_time is None ) else ( "'{}'::timestamp".format( cashout_time ) ),
 
-              "NULL" if ( is_paidout is None ) else is_paidout ))
+              "NULL" if ( is_paidout is None ) else is_paidout,
+                                           
+              "NULL" if ( total_vote_weight is None ) else total_vote_weight ))
+
         cls.comment_payout_ops.clear()
 
     @classmethod

@@ -96,6 +96,7 @@ async def find_comments(context, comments: list):
             hp.is_grayed,
             hp.total_votes,
             hp.net_votes,
+            hp.total_vote_weight,
             hp.flag_weight,
             hp.parent_author,
             hp.parent_permlink,
