@@ -38,7 +38,6 @@ sleep 5
 ls -l dist/*
 rm -rf ./local-site
 mkdir -p `python3 -m site --user-site`
-pip3 install --user gitpython
 python3 setup.py install --user --force
 ln -sf ./local-site/bin/hive $HIVE_NAME
 ./$HIVE_NAME -h

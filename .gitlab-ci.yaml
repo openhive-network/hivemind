@@ -36,7 +36,7 @@ before_script:
 hivemind_build:
   stage: build
   script:
-    - pip3 install --user --upgrade pip setuptools gitpython
+    - pip3 install --user --upgrade pip setuptools
     - git fetch --tags
     - git tag -f ci_implicit_tag
     - echo $PYTHONUSERBASE
@@ -71,7 +71,7 @@ hivemind_sync:
     PYTHONUSERBASE: ./local-site
 
   script:
-    - pip3 install --user --upgrade pip setuptools gitpython
+    - pip3 install --user --upgrade pip setuptools
     - scripts/ci_sync.sh "$HIVEMIND_DB_NAME" "$HIVEMIND_POSTGRESQL_CONNECTION_STRING" "$HIVEMIND_SOURCE_HIVED_URL" $HIVEMIND_MAX_BLOCK $HIVEMIND_HTTP_PORT
 
   artifacts:
@@ -113,7 +113,6 @@ hivemind_start_server:
 
   artifacts:
     paths:
-      - hive_server.log
       - hive_server.pid
     expire_in: 1 week
 
@@ -150,6 +149,10 @@ hivemind_stop_server:
 
   tags:
      - hivemind
+
+  artifacts:
+    paths:
+      - hive_server.log
 
 .hivemind_start_api_smoketest: &common_api_smoketest_job
   stage: e2e-test
