@@ -104,6 +104,7 @@ class DbState:
             'hive_posts_promoted_idx',
             'hive_posts_sc_trend_idx',
             'hive_posts_sc_hot_idx',
+            'hive_posts_block_num_idx',
             #'hive_posts_cache_ix6a', # (sc_trend, post_id, paidout=0)
             #'hive_posts_cache_ix6b', # (post_id, sc_trend, paidout=0)
             #'hive_posts_cache_ix7a', # (sc_hot, post_id, paidout=0)
