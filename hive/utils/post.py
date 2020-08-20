@@ -100,7 +100,7 @@ def post_to_internal(post, post_id, level='insert', promoted=None):
         ('sc_trend',    payout['sc_trend']),
         ('sc_hot',      payout['sc_hot']),
         ('flag_weight', stats['flag_weight']),
-        ('total_votes', Votes.get_vote_count(post['author'], post['permlink']),),
+        ('total_votes', stats['total_votes']),
         ('up_votes',    stats['up_votes']),
         ('is_hidden',   stats['hide']),
         ('is_grayed',   stats['gray']),

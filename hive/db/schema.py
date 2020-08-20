@@ -33,7 +33,7 @@ def build_metadata():
     sa.Table(
         'hive_accounts', metadata,
         sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('name', VARCHAR(16), nullable=False),
+        sa.Column('name', VARCHAR(16, collation='C'), nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
         #sa.Column('block_num', sa.Integer, nullable=False),
         sa.Column('reputation', sa.Float(precision=6), nullable=False, server_default='25'),
@@ -68,7 +68,8 @@ def build_metadata():
     sa.Table(
         'hive_posts', metadata,
         sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('parent_id', sa.Integer),
+        sa.Column('root_id', sa.Integer), # Null means = id
+        sa.Column('parent_id', sa.Integer, nullable=False),
         sa.Column('author_id', sa.Integer, nullable=False),
         sa.Column('permlink_id', sa.BigInteger, nullable=False),
         sa.Column('category_id', sa.Integer, nullable=False),
@@ -86,13 +87,12 @@ def build_metadata():
         # basic/extended-stats
         sa.Column('author_rep', sa.Float(precision=6), nullable=False, server_default='0'),
         sa.Column('flag_weight', sa.Float(precision=6), nullable=False, server_default='0'),
-        sa.Column('total_votes', sa.Integer, nullable=False, server_default='0'),
-        sa.Column('up_votes', sa.Integer, nullable=False, server_default='0'),
 
         # core stats/indexes
         sa.Column('payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
         sa.Column('pending_payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
         sa.Column('payout_at', sa.DateTime, nullable=False, server_default='1970-01-01'),
+        sa.Column('last_payout_at', sa.DateTime, nullable=False, server_default='1970-01-01'),
         sa.Column('updated_at', sa.DateTime, nullable=False, server_default='1970-01-01'),
         sa.Column('is_paidout', BOOLEAN, nullable=False, server_default='0'),
 
@@ -117,20 +117,14 @@ def build_metadata():
         sa.Column('children_abs_rshares', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('abs_rshares', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('vote_rshares', sa.BigInteger, nullable=False, server_default='0'),
-        sa.Column('net_votes', sa.Integer, nullable=False, server_default='0'),
+        sa.Column('total_vote_weight', sa.Numeric, nullable=False, server_default='0'),
         sa.Column('active', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
-        sa.Column('max_cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('percent_hbd', sa.Integer, nullable=False, server_default='10000'),
         sa.Column('reward_weight', sa.Integer, nullable=False, server_default='10000'), # Seems to be always 10000
 
-        sa.Column('parent_author_id', sa.Integer, nullable=False),
-        sa.Column('parent_permlink_id', sa.BigInteger, nullable=False),
         sa.Column('curator_payout_value', sa.String(30), nullable=False, server_default=''),
-        sa.Column('root_author_id', sa.Integer, nullable=False),
-        sa.Column('root_permlink_id', sa.BigInteger, nullable=False),
         sa.Column('max_accepted_payout',  sa.String(30), nullable=False, server_default='1000000.000 HBD'),
-        sa.Column('allow_replies', BOOLEAN, nullable=False, server_default='1'),
         sa.Column('allow_votes', BOOLEAN, nullable=False, server_default='1'),
         sa.Column('allow_curation_rewards', BOOLEAN, nullable=False, server_default='1'),
         sa.Column('beneficiaries', sa.JSON, nullable=False, server_default='[]'),
@@ -138,11 +132,13 @@ def build_metadata():
         sa.Column('root_title', sa.String(255), nullable=False, server_default=''),
 
         sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_posts_fk1'),
+        sa.ForeignKeyConstraint(['root_id'], ['hive_posts.id'], name='hive_posts_fk2'),
         sa.ForeignKeyConstraint(['parent_id'], ['hive_posts.id'], name='hive_posts_fk3'),
         sa.UniqueConstraint('author_id', 'permlink_id', 'counter_deleted', name='hive_posts_ux1'),
         sa.Index('hive_posts_permlink_id', 'permlink_id'),
 
         sa.Index('hive_posts_depth_idx', 'depth'),
+        sa.Index('hive_posts_root_id_idx', sa.func.coalesce('root_id','id')),
         sa.Index('hive_posts_parent_id_idx', 'parent_id'),
         sa.Index('hive_posts_community_id_idx', 'community_id'),
         sa.Index('hive_posts_author_id', 'author_id'),
@@ -153,12 +149,7 @@ def build_metadata():
         sa.Index('hive_posts_promoted_idx', 'promoted'),
         sa.Index('hive_posts_sc_trend_idx', 'sc_trend'),
         sa.Index('hive_posts_sc_hot_idx', 'sc_hot'),
-        sa.Index('hive_posts_created_at_idx', 'created_at'),
-
-        sa.Index('hive_posts_root_author_id', 'root_author_id'),
-        sa.Index('hive_posts_root_permlink_id', 'root_permlink_id'),
-        sa.Index('hive_posts_parent_author_id', 'parent_author_id'),
-        sa.Index('hive_posts_parent_permlink_id', 'parent_permlink_id')
+        sa.Index('hive_posts_created_at_idx', 'created_at')
     )
 
     sa.Table(
@@ -174,14 +165,14 @@ def build_metadata():
     sa.Table(
         'hive_permlink_data', metadata,
         sa.Column('id', sa.BigInteger, primary_key=True),
-        sa.Column('permlink', sa.String(255), nullable=False),
+        sa.Column('permlink', sa.String(255, collation='C'), nullable=False),
         sa.UniqueConstraint('permlink', name='hive_permlink_data_permlink')
     )
 
     sa.Table(
         'hive_category_data', metadata,
         sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('category', sa.String(255), nullable=False),
+        sa.Column('category', sa.String(255, collation='C'), nullable=False),
         sa.UniqueConstraint('category', name='hive_category_data_category')
     )
 
@@ -198,6 +189,7 @@ def build_metadata():
         sa.Column('last_update', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('num_changes', sa.Integer, server_default='0'),
         sa.Column('block_num', sa.Integer,  nullable=False ),
+        sa.Column('is_effective', BOOLEAN, nullable=False, server_default='0'),
 
         sa.UniqueConstraint('voter_id', 'author_id', 'permlink_id', name='hive_votes_ux1'),
 
@@ -219,7 +211,7 @@ def build_metadata():
     sa.Table(
         'hive_tag_data', metadata,
         sa.Column('id', sa.Integer, nullable=False, primary_key=True),
-        sa.Column('tag', VARCHAR(64), nullable=False, server_default=''),
+        sa.Column('tag', VARCHAR(64, collation='C'), nullable=False, server_default=''),
         sa.UniqueConstraint('tag', name='hive_tag_data_ux1')
     )
 
@@ -313,7 +305,7 @@ def build_metadata_community(metadata=None):
         sa.Column('id',          sa.Integer,      primary_key=True, autoincrement=False),
         sa.Column('type_id',     SMALLINT,        nullable=False),
         sa.Column('lang',        CHAR(2),         nullable=False, server_default='en'),
-        sa.Column('name',        VARCHAR(16),     nullable=False),
+        sa.Column('name',        VARCHAR(16, collation='C'), nullable=False),
         sa.Column('title',       sa.String(32),   nullable=False, server_default=''),
         sa.Column('created_at',  sa.DateTime,     nullable=False),
         sa.Column('sum_pending', sa.Integer,      nullable=False, server_default='0'),
@@ -408,12 +400,11 @@ def setup(db):
 
         """
         INSERT INTO
-            public.hive_posts(id, parent_id, author_id, permlink_id, category_id,
-                community_id, parent_author_id, parent_permlink_id, root_author_id,
-                root_permlink_id, created_at, depth
+            public.hive_posts(id, root_id, parent_id, author_id, permlink_id, category_id,
+                community_id, created_at, depth
             )
         VALUES
-            (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, now(), 0);
+            (0, 0, 0, 0, 0, 0, 0, now(), 0);
         """]
     for sql in sqls:
         db.query(sql)
@@ -433,8 +424,7 @@ def setup(db):
             in _community_support_start_date hive_posts.created_at%TYPE)
           RETURNS TABLE (is_new_post boolean, id hive_posts.id%TYPE, author_id hive_posts.author_id%TYPE, permlink_id hive_posts.permlink_id%TYPE,
                          post_category hive_category_data.category%TYPE, parent_id hive_posts.parent_id%TYPE, community_id hive_posts.community_id%TYPE,
-                         is_valid hive_posts.is_valid%TYPE, is_muted hive_posts.is_muted%TYPE, depth hive_posts.depth%TYPE,
-                         is_edited boolean)
+                         is_valid hive_posts.is_valid%TYPE, is_muted hive_posts.is_muted%TYPE, depth hive_posts.depth%TYPE)
           LANGUAGE plpgsql
           AS
           $function$
@@ -450,33 +440,30 @@ def setup(db):
           ;
           if _parent_author != '' THEN
             RETURN QUERY INSERT INTO hive_posts as hp
-            (parent_id, parent_author_id, parent_permlink_id, depth, community_id,
-             category_id,
-             root_author_id, root_permlink_id,
-             is_muted, is_valid,
-             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,active, payout_at, cashout_time, counter_deleted)
-            SELECT php.id AS parent_id, php.author_id as parent_author_id,
-                php.permlink_id as parent_permlink_id, php.depth + 1 as depth,
+            (parent_id, depth, community_id, category_id,
+             root_id, is_muted, is_valid,
+             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted)
+            SELECT php.id AS parent_id, php.depth + 1 AS depth,
                 (CASE
-                WHEN _date > _community_support_start_date THEN
-                  COALESCE(php.community_id, (select hc.id from hive_communities hc where hc.name = _parent_permlink))
-                ELSE NULL
-              END)  as community_id,
-                COALESCE(php.category_id, (select hcg.id from hive_category_data hcg where hcg.category = _parent_permlink)) as category_id,
-                php.root_author_id as root_author_id,
-                php.root_permlink_id as root_permlink_id,
-                php.is_muted as is_muted, php.is_valid as is_valid,
-                ha.id as author_id, hpd.id as permlink_id, _date as created_at,
-                _date as updated_at, calculate_time_part_of_hot(_date) as sc_hot,
-                 calculate_time_part_of_trending(_date) as sc_trend,
-                _date as active, (_date + INTERVAL '7 days') as payout_at, (_date + INTERVAL '7 days') as cashout_time, 0
+                   WHEN _date > _community_support_start_date THEN
+                     COALESCE(php.community_id, (select hc.id from hive_communities hc where hc.name = _parent_permlink))
+                   ELSE NULL
+                END) AS community_id,
+                COALESCE(php.category_id, (select hcg.id from hive_category_data hcg where hcg.category = _parent_permlink)) AS category_id,
+                COALESCE(php.root_id, php.id) AS root_id,
+                php.is_muted AS is_muted, php.is_valid AS is_valid,
+                ha.id AS author_id, hpd.id AS permlink_id, _date AS created_at,
+                _date AS updated_at,
+                calculate_time_part_of_hot(_date) AS sc_hot,
+                calculate_time_part_of_trending(_date) AS sc_trend,
+                _date AS active, (_date + INTERVAL '7 days') AS payout_at, (_date + INTERVAL '7 days') AS cashout_time, 0
             FROM hive_accounts ha,
                  hive_permlink_data hpd,
                  hive_posts php
             INNER JOIN hive_accounts pha ON pha.id = php.author_id
             INNER JOIN hive_permlink_data phpd ON phpd.id = php.permlink_id
-            WHERE pha.name = _parent_author and phpd.permlink = _parent_permlink AND
-                   ha.name = _author and hpd.permlink = _permlink and php.counter_deleted = 0
+            WHERE pha.name = _parent_author AND phpd.permlink = _parent_permlink AND
+                   ha.name = _author AND hpd.permlink = _permlink AND php.counter_deleted = 0
 
             ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
               --- During post update it is disallowed to change: parent-post, category, community-id
@@ -484,7 +471,7 @@ def setup(db):
              --- post edit part
              updated_at = _date,
              active = _date
-            RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, (hp.updated_at > hp.created_at) as is_edited
+            RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth
           ;
           ELSE
             INSERT INTO hive_category_data
@@ -494,25 +481,23 @@ def setup(db):
             ;
 
             RETURN QUERY INSERT INTO hive_posts as hp
-            (parent_id, parent_author_id, parent_permlink_id, depth, community_id,
-             category_id,
-             root_author_id, root_permlink_id,
-             is_muted, is_valid,
+            (parent_id, depth, community_id, category_id,
+             root_id, is_muted, is_valid,
              author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted)
-            SELECT 0 AS parent_id, 0 as parent_author_id, 0 as parent_permlink_id, 0 as depth,
+            SELECT 0 AS parent_id, 0 AS depth,
                 (CASE
                   WHEN _date > _community_support_start_date THEN
-                    (select hc.id from hive_communities hc where hc.name = _parent_permlink)
+                    (select hc.id FROM hive_communities hc WHERE hc.name = _parent_permlink)
                   ELSE NULL
-                END)  as community_id,
-                (select hcg.id from hive_category_data hcg where hcg.category = _parent_permlink) as category_id,
-                ha.id as root_author_id, -- use author_id as root one if no parent
-                hpd.id as root_permlink_id, -- use perlink_id as root one if no parent
-                false as is_muted, true as is_valid,
-                ha.id as author_id, hpd.id as permlink_id, _date as created_at,
-                _date as updated_at, calculate_time_part_of_hot(_date) as sc_hot,
-                  calculate_time_part_of_trending(_date) as sc_trend,
-                _date as active, (_date + INTERVAL '7 days') as payout_at, (_date + INTERVAL '7 days') as cashout_time, 0
+                END) AS community_id,
+                (SELECT hcg.id FROM hive_category_data hcg WHERE hcg.category = _parent_permlink) AS category_id,
+                Null as root_id, -- will use id as root one if no parent
+                false AS is_muted, true AS is_valid,
+                ha.id AS author_id, hpd.id AS permlink_id, _date AS created_at,
+                _date AS updated_at,
+                calculate_time_part_of_hot(_date) AS sc_hot,
+                calculate_time_part_of_trending(_date) AS sc_trend,
+                _date AS active, (_date + INTERVAL '7 days') AS payout_at, (_date + INTERVAL '7 days') AS cashout_time, 0
             FROM hive_accounts ha,
                  hive_permlink_data hpd
             WHERE ha.name = _author and hpd.permlink = _permlink
@@ -524,7 +509,7 @@ def setup(db):
               updated_at = _date,
               active = _date
 
-            RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, _parent_permlink as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth, (hp.updated_at > hp.created_at) as is_edited
+            RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, _parent_permlink as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth
             ;
           END IF;
           END
@@ -569,6 +554,7 @@ def setup(db):
           AS
           SELECT hp.id,
             hp.community_id,
+            COALESCE( hp.root_id, hp.id ) AS root_id,
             hp.parent_id,
             ha_a.name AS author,
             hp.active,
@@ -585,6 +571,8 @@ def setup(db):
             hp.payout,
             hp.pending_payout,
             hp.payout_at,
+            hp.last_payout_at,
+            hp.cashout_time,
             hp.is_paidout,
             hp.children,
             0 AS votes,
@@ -603,25 +591,42 @@ def setup(db):
             ha_a.reputation AS author_rep,
             hp.is_hidden,
             hp.is_grayed,
-            hp.total_votes,
+            COALESCE(
+              (
+                SELECT COUNT( 1 )
+                FROM hive_votes v
+                WHERE v.post_id = hp.id AND v.is_effective
+                GROUP BY v.post_id
+              ), 0
+            ) AS total_votes,
+            COALESCE(
+              (
+                SELECT SUM( CASE v.rshares > 0 WHEN True THEN 1 ELSE -1 END )
+                FROM hive_votes v
+                WHERE v.post_id = hp.id AND NOT v.rshares = 0
+                GROUP BY v.post_id
+              ), 0
+            ) AS net_votes,
+            hp.total_vote_weight,
             hp.flag_weight,
-            ha_pa.name AS parent_author,
+            ha_pp.name AS parent_author,
             hpd_pp.permlink AS parent_permlink,
             hp.curator_payout_value,
-            ha_ra.name AS root_author,
+            ha_rp.name AS root_author,
             hpd_rp.permlink AS root_permlink,
             rcd.category as root_category,
             hp.max_accepted_payout,
             hp.percent_hbd,
-            hp.allow_replies,
+            True AS allow_replies,
             hp.allow_votes,
             hp.allow_curation_rewards,
             hp.beneficiaries,
-            concat('/', rcd.category, '/@', ha_ra.name, '/', hpd_rp.permlink,
-              case (rp.id)
-                  when hp.id then ''
-                    else concat('#@', ha_a.name, '/', hpd_p.permlink)
-              end ) as url,
+            CONCAT('/', rcd.category, '/@', ha_rp.name, '/', hpd_rp.permlink,
+              CASE (rp.id)
+                WHEN hp.id THEN ''
+                ELSE CONCAT('#@', ha_a.name, '/', hpd_p.permlink)
+              END
+            ) AS url,
             rpd.title AS root_title,
             hp.sc_trend,
             hp.sc_hot,
@@ -634,22 +639,29 @@ def setup(db):
             hr.role_id AS role_id,
             hc.title AS community_title,
             hc.name AS community_name,
-            hp.abs_rshares,
-            hp.cashout_time,
-            hp.max_cashout_time,
+            COALESCE(
+              (
+                SELECT SUM( CASE v.rshares >= 0 WHEN True THEN v.rshares ELSE -v.rshares END )
+                FROM hive_votes v
+                WHERE v.post_id = hp.id AND NOT v.rshares = 0
+                GROUP BY v.post_id
+              ), 0
+            ) AS abs_rshares,
+            '1969-12-31T23:59:59'::timestamp AS max_cashout_time,
             hp.reward_weight
             FROM hive_posts hp
-            JOIN hive_posts rp ON rp.author_id = hp.root_author_id AND rp.permlink_id = hp.root_permlink_id
-            JOIN hive_post_data rpd ON rp.id = rpd.id
+            JOIN hive_posts pp ON pp.id = hp.parent_id
+            JOIN hive_posts rp ON rp.id = COALESCE( hp.root_id, hp.id )
             JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
             JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
             JOIN hive_post_data hpd ON hpd.id = hp.id
+            JOIN hive_accounts ha_pp ON ha_pp.id = pp.author_id
+            JOIN hive_permlink_data hpd_pp ON hpd_pp.id = pp.permlink_id
+            JOIN hive_accounts ha_rp ON ha_rp.id = rp.author_id
+            JOIN hive_permlink_data hpd_rp ON hpd_rp.id = rp.permlink_id
+            JOIN hive_post_data rpd ON rpd.id = rp.id
             LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
             LEFT JOIN hive_category_data rcd ON rcd.id = rp.category_id
-            JOIN hive_accounts ha_pa ON ha_pa.id = hp.parent_author_id
-            JOIN hive_permlink_data hpd_pp ON hpd_pp.id = hp.parent_permlink_id
-            JOIN hive_accounts ha_ra ON ha_ra.id = hp.root_author_id
-            JOIN hive_permlink_data hpd_rp ON hpd_rp.id = hp.root_permlink_id
             LEFT OUTER JOIN hive_communities hc ON (hp.community_id = hc.id)
             LEFT OUTER JOIN hive_roles hr ON (hp.author_id = hr.account_id AND hp.community_id = hr.community_id)
             ;
@@ -712,13 +724,34 @@ def setup(db):
             weight,
             num_changes,
             hpd.id as permlink_id,
-            post_id
+            post_id,
+            is_effective
         FROM
             hive_votes hv
         INNER JOIN hive_accounts ha_v ON ha_v.id = hv.voter_id
         INNER JOIN hive_accounts ha_a ON ha_a.id = hv.author_id
         INNER JOIN hive_permlink_data hpd ON hpd.id = hv.permlink_id
         ;
+    """
+    db.query_no_return(sql)
+
+    sql = """
+      DROP FUNCTION IF EXISTS find_comment_id(character varying, character varying)
+      ;
+      CREATE OR REPLACE FUNCTION find_comment_id(
+        in _author hive_accounts.name%TYPE,
+        in _permlink hive_permlink_data.permlink%TYPE)
+      RETURNS INT AS
+      $function$
+      SELECT COALESCE( (SELECT hp.id
+      FROM hive_posts hp
+      JOIN hive_accounts ha ON ha.id = hp.author_id
+      JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
+      WHERE ha.name = _author AND hpd.permlink = _permlink
+      ), 0 );
+      $function$
+      LANGUAGE sql
+      ;
     """
     db.query_no_return(sql)
 
@@ -735,7 +768,8 @@ def setup(db):
         depth SMALLINT,
         promoted DECIMAL(10,3),
         payout DECIMAL(10,3),
-        payout_at TIMESTAMP,
+        last_payout_at TIMESTAMP,
+        cashout_time TIMESTAMP, 
         is_paidout BOOLEAN,
         children INT,
         votes INT,
@@ -745,7 +779,9 @@ def setup(db):
         json TEXT,
         is_hidden BOOLEAN,
         is_grayed BOOLEAN,
-        total_votes INT,
+        total_votes BIGINT,
+        net_votes BIGINT,
+        total_vote_weight NUMERIC,
         flag_weight REAL,
         parent_author VARCHAR(16),
         parent_permlink VARCHAR(255),
@@ -760,7 +796,7 @@ def setup(db):
         beneficiaries JSON,
         url TEXT,
         root_title VARCHAR(512),
-        abs_rshares BIGINT,
+        abs_rshares NUMERIC,
         active TIMESTAMP,
         author_rewards BIGINT,
         max_cashout_time TIMESTAMP,
@@ -778,14 +814,17 @@ def setup(db):
         RETURNS SETOF database_api_post
         AS
         $function$
+        DECLARE
+          __post_id INT;
         BEGIN
+          __post_id = find_comment_id(_author,_permlink);
           RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
-              hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
+              hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.flag_weight, hp.parent_author,
-              hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
+              hp.parent_author, hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
               hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
@@ -794,9 +833,8 @@ def setup(db):
           WHERE
               NOT hp.is_muted AND
               hp.counter_deleted == 0 AND
-              -- ABW: wrong! fat node required _author+_permlink to exist (when given) and sorted by ( cashout_time, comment_id )
-              hp.cashout_time >= _cashout_time AND
-              hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _author AND hp1.permlink >= _permlink ORDER BY id LIMIT 1)
+              hp.cashout_time > _cashout_time OR
+              hp.cashout_time = _cashout_time AND hp.id >= __post_id
           ORDER BY
               hp.cashout_time ASC,
               hp.id ASC
@@ -821,10 +859,10 @@ def setup(db):
           RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
-              hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
+              hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.flag_weight, hp.parent_author,
-              hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
+              hp.parent_author, hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
               hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
@@ -833,11 +871,11 @@ def setup(db):
           WHERE
               NOT hp.is_muted AND
               hp.counter_deleted = 0 AND
-              hp.author > _author COLLATE "C" OR
-              hp.author = _author AND hp.permlink >= _permlink COLLATE "C"
+              hp.author > _author OR
+              hp.author = _author AND hp.permlink >= _permlink
           ORDER BY
-              hp.author COLLATE "C" ASC,
-              hp.permlink COLLATE "C" ASC
+              hp.author ASC,
+              hp.permlink ASC
           LIMIT
               _limit
           ;
@@ -857,14 +895,19 @@ def setup(db):
         RETURNS SETOF database_api_post
         AS
         $function$
+        DECLARE
+          __root_id INT;
+          __post_id INT;
         BEGIN
+          __root_id = find_comment_id(_root_author,_root_permlink);
+          __post_id = find_comment_id(_start_post_author,_start_post_permlink);
           RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
-              hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
+              hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.flag_weight, hp.parent_author,
-              hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
+              hp.parent_author, hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
               hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
@@ -873,14 +916,11 @@ def setup(db):
           WHERE
               NOT hp.is_muted AND
               hp.counter_deleted = 0 AND
-              -- ABW: wrong! fat node required both _root_author+_root_permlink and _start_post_author+start_post_permlink to exist (when given)
-              -- and sorted by ( root_id, comment_id )
-              root_author >= _root_author AND
-              root_permlink >= _root_permlink AND
-              hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _start_post_author AND hp1.permlink >= _start_post_permlink ORDER BY id LIMIT 1)
+              hp.root_id > __root_id OR
+              hp.root_id = __root_id AND
+              hp.id >= __post_id
           ORDER BY
-              root_author ASC,
-              root_permlink ASC,
+              root_id ASC,
               id ASC
           LIMIT
               _limit
@@ -901,14 +941,17 @@ def setup(db):
         RETURNS SETOF database_api_post
         AS
         $function$
+        DECLARE
+          __post_id INT;
         BEGIN
+          __post_id = find_comment_id(_start_post_author,_start_post_permlink);
           RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
-              hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
+              hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.flag_weight, hp.parent_author,
-              hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
+              hp.parent_author, hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
               hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
@@ -917,11 +960,9 @@ def setup(db):
           WHERE
               NOT hp.is_muted AND
               hp.counter_deleted = 0 AND
-              -- ABW: wrong! fat node required _start_post_author+_start_port_permlink to exist (when given) and sorted by ( parent_author, parent_permlink, comment_id )
-              parent_author > _parent_author COLLATE "C" OR
-              parent_author = _parent_author AND ( parent_permlink > _parent_permlink COLLATE "C" OR
-              parent_permlink = _parent_permlink AND
-              hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _start_post_author AND hp1.permlink >= _start_post_permlink ORDER BY id LIMIT 1) )
+              parent_author > _parent_author OR
+              parent_author = _parent_author AND ( parent_permlink > _parent_permlink OR
+              parent_permlink = _parent_permlink AND hp.id >= __post_id )
           ORDER BY
               parent_author ASC,
               parent_permlink ASC,
@@ -945,14 +986,17 @@ def setup(db):
         RETURNS SETOF database_api_post
         AS
         $function$
+        DECLARE
+          __post_id INT;
         BEGIN
+          __post_id = find_comment_id(_start_post_author,_start_post_permlink);
           RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
-              hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
+              hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.flag_weight, hp.parent_author,
-              hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
+              hp.parent_author, hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
               hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
@@ -961,10 +1005,9 @@ def setup(db):
           WHERE
               NOT hp.is_muted AND
               hp.counter_deleted = 0 AND
-              -- ABW: wrong! fat node required _start_post_author+_start_port_permlink to exist (when given) and sorted by ( _parent_author, updated_at, comment_id )
-              hp.parent_author > _parent_author COLLATE "C" OR
-              hp.parent_author = _parent_author AND hp.updated_at >= _updated_at AND
-              hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author >= _start_post_author AND hp1.permlink >= _start_post_permlink ORDER BY id LIMIT 1)
+              hp.parent_author > _parent_author OR
+              hp.parent_author = _parent_author AND ( hp.updated_at > _updated_at OR
+              hp.updated_at = _updated_at AND hp.id >= __post_id )
           ORDER BY
               hp.parent_author ASC,
               hp.updated_at ASC,
@@ -976,6 +1019,7 @@ def setup(db):
         $function$
         LANGUAGE plpgsql
       ;
+
       DROP FUNCTION IF EXISTS list_comments_by_author_last_update(character varying, timestamp, character varying, character varying, int)
       ;
       CREATE OR REPLACE FUNCTION list_comments_by_author_last_update(
@@ -987,14 +1031,17 @@ def setup(db):
         RETURNS SETOF database_api_post
         AS
         $function$
+        DECLARE
+          __post_id INT;
         BEGIN
+          __post_id = find_comment_id(_start_post_author,_start_post_permlink);
           RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
-              hp.category, hp.depth, hp.promoted, hp.payout, hp.payout_at, hp.is_paidout,
+              hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.flag_weight, hp.parent_author,
-              hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
+              hp.parent_author, hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
               hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
@@ -1004,12 +1051,12 @@ def setup(db):
               NOT hp.is_muted AND
               hp.counter_deleted = 0 AND
               -- ABW: wrong! fat node required _start_post_author+_start_post_permlink to exist (when given) and sorted just like
-              -- in case of by_last_update (but in fat node) but should by ( _author, updated_at, comment_id )
-              hp.author > _author COLLATE "C" OR
-              hp.author = _author AND hp.updated_at >= _updated_at AND
-              hp.id >= (SELECT id FROM hive_posts_view hp1 WHERE hp1.author > _start_post_author COLLATE "C" OR hp1.author = _start_post_author AND hp1.permlink >= _start_post_permlink COLLATE "C" ORDER BY id LIMIT 1)
+              -- in case of by_last_update (bug in fat node) but should by ( _author, updated_at, comment_id )
+              hp.author > _author OR
+              hp.author = _author AND ( hp.updated_at > _updated_at OR
+              hp.updated_at = _updated_at AND hp.id >= __post_id )
           ORDER BY
-              hp.parent_author ASC,
+              hp.author ASC,
               hp.updated_at ASC,
               hp.id ASC
           LIMIT

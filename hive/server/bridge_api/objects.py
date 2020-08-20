@@ -254,7 +254,7 @@ def _bridge_post_object(row, truncate_body=0):
     post['stats'] = {
         'hide': row['is_hidden'],
         'gray': row['is_grayed'],
-        'total_votes': Votes.get_vote_count(row['author'], row['permlink']),
+        'total_votes': row['total_votes'],
         'flag_weight': float(row['flag_weight'])} # TODO: down_weight
 
 
