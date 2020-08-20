@@ -1159,41 +1159,41 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-	DROP FUNCTION IF EXISTS public.calculate_rhsares_part_of_hot_and_trend(_rshares hive_votes.rshares%TYPE) CASCADE
-	;
-	CREATE OR REPLACE FUNCTION public.calculate_rhsares_part_of_hot_and_trend(_rshares hive_votes.rshares%TYPE)
-	RETURNS double precision
-	LANGUAGE 'plpgsql'
-	IMMUTABLE
-	AS $BODY$
-	DECLARE
-		mod_score double precision;
-	BEGIN
-		mod_score := _rshares / 10000000.0;
-		IF ( mod_score > 0 )
-		THEN
-			return log( greatest( abs(mod_score), 1 ) );
-		END IF;
-		return  -1.0 * log( greatest( abs(mod_score), 1 ) );
-	END;
-	$BODY$;
+    DROP FUNCTION IF EXISTS public.calculate_rhsares_part_of_hot_and_trend(_rshares hive_votes.rshares%TYPE) CASCADE
+    ;
+    CREATE OR REPLACE FUNCTION public.calculate_rhsares_part_of_hot_and_trend(_rshares hive_votes.rshares%TYPE)
+    RETURNS double precision
+    LANGUAGE 'plpgsql'
+    IMMUTABLE
+    AS $BODY$
+    DECLARE
+        mod_score double precision;
+    BEGIN
+        mod_score := _rshares / 10000000.0;
+        IF ( mod_score > 0 )
+        THEN
+            return log( greatest( abs(mod_score), 1 ) );
+        END IF;
+        return  -1.0 * log( greatest( abs(mod_score), 1 ) );
+    END;
+    $BODY$;
     """
     db.query_no_return(sql)
 
     sql = """
-	DROP FUNCTION IF EXISTS public.calculate_hot(hive_votes.rshares%TYPE, hive_posts.created_at%TYPE)
-	;
-	CREATE OR REPLACE FUNCTION public.calculate_hot(
-	    _rshares hive_votes.rshares%TYPE,
-	    _post_created_at hive_posts.created_at%TYPE)
-	    RETURNS hive_posts.sc_hot%TYPE
-	      LANGUAGE 'plpgsql'
-	      IMMUTABLE
-	  AS $BODY$
-	BEGIN
-	    return calculate_rhsares_part_of_hot_and_trend(_rshares) + calculate_time_part_of_hot( _post_created_at );
-	END;
-	$BODY$;
+    DROP FUNCTION IF EXISTS public.calculate_hot(hive_votes.rshares%TYPE, hive_posts.created_at%TYPE)
+    ;
+    CREATE OR REPLACE FUNCTION public.calculate_hot(
+        _rshares hive_votes.rshares%TYPE,
+        _post_created_at hive_posts.created_at%TYPE)
+    RETURNS hive_posts.sc_hot%TYPE
+    LANGUAGE 'plpgsql'
+    IMMUTABLE
+    AS $BODY$
+    BEGIN
+        return calculate_rhsares_part_of_hot_and_trend(_rshares) + calculate_time_part_of_hot( _post_created_at );
+    END;
+    $BODY$;
     """
     db.query_no_return(sql)
 
@@ -1208,19 +1208,19 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-	DROP FUNCTION IF EXISTS public.calculate_tranding(hive_votes.rshares%TYPE, hive_posts.created_at%TYPE)
-	;
-	CREATE OR REPLACE FUNCTION public.calculate_tranding(
-	    _rshares hive_votes.rshares%TYPE,
-	    _post_created_at hive_posts.created_at%TYPE)
-	    RETURNS hive_posts.sc_trend%TYPE
-	      LANGUAGE 'plpgsql'
-	      IMMUTABLE
-	  AS $BODY$
-	BEGIN
-	    return calculate_rhsares_part_of_hot_and_trend(_rshares) + calculate_time_part_of_trending( _post_created_at );
-	END;
-	$BODY$;
+    DROP FUNCTION IF EXISTS public.calculate_tranding(hive_votes.rshares%TYPE, hive_posts.created_at%TYPE)
+    ;
+    CREATE OR REPLACE FUNCTION public.calculate_tranding(
+        _rshares hive_votes.rshares%TYPE,
+        _post_created_at hive_posts.created_at%TYPE)
+    RETURNS hive_posts.sc_trend%TYPE
+    LANGUAGE 'plpgsql'
+    IMMUTABLE
+    AS $BODY$
+    BEGIN
+        return calculate_rhsares_part_of_hot_and_trend(_rshares) + calculate_time_part_of_trending( _post_created_at );
+    END;
+    $BODY$;
     """
     db.query_no_return(sql)
 
