@@ -12,16 +12,28 @@ from os import getpid
 log = logging.getLogger(__name__)
 
 class BroadcastObject:
-    def __init__(self, category, value, unit):
+    def __init__(self, category : str, value, unit):
         self.category = category
         self.value = value
         self.unit = unit
 
     def name(self):
-        return f"hivemind_{self.category}"
+        ret = ""
+        for c in self.category:
+            if c.isalnum():
+                ret += c
+            else:
+                ret += "_"
+        return f"hivemind_{ret}"
 
     def debug(self):
         log.debug(f"{self.name()}_{self.unit}: {self.value :.2f}")
+
+    def __repr__(self):
+        return self.__str__()
+    
+    def __str__(self):
+        return str(self.__dict__)
 
 class PrometheusClient:
 
@@ -112,15 +124,19 @@ class StatusManager:
         return perf() - start
 
     @staticmethod
-    def merge_dicts(od1, od2, broadcast : bool = False):
+    def merge_dicts(od1, od2, broadcast : bool = False, total_broadcast : bool = True):
         if od2 is not None:
             for k, v in od2.items():
                 if k in od1:
                     od1[k].update(v)
-                    if broadcast:
-                        PrometheusClient.broadcast(v.broadcast(k))
                 else:
                     od1[k] = v
+                
+                if broadcast:
+                    PrometheusClient.broadcast(v.broadcast(k))
+
+                if total_broadcast:
+                    PrometheusClient.broadcast( od1[k].broadcast( f"{k}_total" ) )
 
         return od1
 
@@ -149,7 +165,7 @@ class OPStat(Stat):
         n = name.lower()
         if not n.endswith('operation'):
             n = f"{n}_operation"
-        return list([ super().broadcast(n), BroadcastObject(n, self.count, 'b') ])
+        return list([ super().broadcast(n), BroadcastObject(n + "_count", self.count, 'b') ])
 
 class OPStatusManager(StatusManager):
     # Summary for whole sync
@@ -202,7 +218,7 @@ class FlushStat(Stat):
 
     def broadcast(self, name : str):
         n = f"flushing_{name.lower()}"
-        return list([ super().broadcast(n), BroadcastObject(n, self.pushed, 'b') ])
+        return list([ super().broadcast(n), BroadcastObject(n + "_items", self.pushed, 'b') ])
 
 class FlushStatusManager(StatusManager):
     # Summary for whole sync
