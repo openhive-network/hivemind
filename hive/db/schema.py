@@ -832,7 +832,7 @@ def setup(db):
               hive_posts_view hp
           WHERE
               NOT hp.is_muted AND
-              hp.counter_deleted == 0 AND
+              hp.counter_deleted = 0 AND
               hp.cashout_time > _cashout_time OR
               hp.cashout_time = _cashout_time AND hp.id >= __post_id
           ORDER BY

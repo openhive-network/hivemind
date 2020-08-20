@@ -58,7 +58,7 @@ class Votes:
         cls._votes_data[key]["weight"]       = vop["weight"]
         cls._votes_data[key]["rshares"]      = vop["rshares"]
         cls._votes_data[key]["is_effective"] = True
-        cls._votes_data[key]["block_num"] = vop['block_num']
+        cls._votes_data[key]["block_num"]    = vop['block_num']
 
     @classmethod
     def flush(cls):

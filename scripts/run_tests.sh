@@ -55,7 +55,7 @@ fi
 check_address $1
 check_port $2
 
-cd ..
+#cd ..
 
 set -e
 
