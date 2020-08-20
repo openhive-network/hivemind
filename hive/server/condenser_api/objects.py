@@ -123,7 +123,7 @@ async def load_posts(db, ids, truncate_body=0):
                     hive_posts hp
                 INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
                 INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-                WHERE id = :id and counter_deleted = 0 """
+                WHERE id = :id AND counter_deleted = 0 """
             post = await db.query_row(sql, id=_id)
             if post is None:
                 # TODO: This should never happen. See #173 for analysis
