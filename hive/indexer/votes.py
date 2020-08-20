@@ -13,71 +13,6 @@ class Votes:
     """ Class for managing posts votes """
     _votes_data = {}
 
-    @classmethod
-    def get_vote_count(cls, author, permlink):
-        """ Get vote count for given post """
-        sql = """
-            SELECT count(1)
-            FROM hive_votes_accounts_permlinks_view hv
-            WHERE hv.author = :author AND hv.permlink = :permlink
-        """
-        ret = DB.query_row(sql, author=author, permlink=permlink)
-        return 0 if ret is None else int(ret.count)
-
-    @classmethod
-    def get_upvote_count(cls, author, permlink):
-        """ Get vote count for given post """
-        sql = """
-            SELECT count(1)
-            FROM hive_votes_accounts_permlinks_view hv
-            WHERE hv.author = :author AND hv.permlink = :permlink
-                  AND hv.percent > 0
-        """
-        ret = DB.query_row(sql, author=author, permlink=permlink)
-        return 0 if ret is None else int(ret.count)
-
-    @classmethod
-    def get_downvote_count(cls, author, permlink):
-        """ Get vote count for given post """
-        sql = """
-            SELECT count(1)
-            FROM hive_votes_accounts_permlinks_view hv
-            WHERE hv.author = :author AND hv.permlink = :permlink
-                  AND hv.percent < 0
-        """
-        ret = DB.query_row(sql, author=author, permlink=permlink)
-        return 0 if ret is None else int(ret.count)
-
-    @classmethod
-    def get_total_vote_weight(cls, author, permlink):
-        """ Get total vote weight for selected post """
-        sql = """
-            SELECT 
-                sum(weight)
-            FROM 
-                hive_votes_accounts_permlinks_view hv
-            WHERE 
-                hv.author = :author AND
-                hv.permlink = :permlink
-        """
-        ret = DB.query_row(sql, author=author, permlink=permlink)
-        return 0 if ret is None else int(0 if ret.sum is None else ret.sum)
-
-    @classmethod
-    def get_total_vote_rshares(cls, author, permlink):
-        """ Get total vote rshares for selected post """
-        sql = """
-            SELECT 
-                sum(rshares)
-            FROM 
-                hive_votes_accounts_permlinks_view hv
-            WHERE 
-                hv.author = :author AND
-                hv.permlink = :permlink
-        """
-        ret = DB.query_row(sql, author=author, permlink=permlink)
-        return 0 if ret is None else int(0 if ret.sum is None else ret.sum)
-
     inside_flush = False
 
     @classmethod
@@ -123,7 +58,7 @@ class Votes:
         cls._votes_data[key]["weight"]       = vop["weight"]
         cls._votes_data[key]["rshares"]      = vop["rshares"]
         cls._votes_data[key]["is_effective"] = True
-        cls._votes_data[key]["block_num"] = vop['block_num']
+        cls._votes_data[key]["block_num"]    = vop['block_num']
 
     @classmethod
     def flush(cls):
@@ -133,14 +68,16 @@ class Votes:
         if cls._votes_data:
             sql = """
                 INSERT INTO hive_votes
-                (post_id, voter_id, author_id, permlink_id, weight, rshares, vote_percent, last_update, block_num)
-                SELECT hp.id as post_id, ha_v.id as voter_id, ha_a.id as author_id, hpd_p.id as permlink_id, t.weight, t.rshares, t.vote_percent, t.last_update, t.block_num
+                (post_id, voter_id, author_id, permlink_id, weight, rshares, vote_percent, last_update, block_num, is_effective)
+
+                SELECT hp.id as post_id, ha_v.id as voter_id, ha_a.id as author_id, hpd_p.id as permlink_id,
+                t.weight, t.rshares, t.vote_percent, t.last_update, t.block_num, t.is_effective
                 FROM
                 (
                 VALUES
-                  -- voter, author, permlink, weight, rshares, vote_percent, last_update, block_num
+                  -- voter, author, permlink, weight, rshares, vote_percent, last_update, block_num, is_effective
                   {}
-                ) AS T(voter, author, permlink, weight, rshares, vote_percent, last_update, block_num)
+                ) AS T(voter, author, permlink, weight, rshares, vote_percent, last_update, block_num, is_effective)
                 INNER JOIN hive_accounts ha_v ON ha_v.name = t.voter
                 INNER JOIN hive_accounts ha_a ON ha_a.name = t.author
                 INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
@@ -149,8 +86,8 @@ class Votes:
                 ON CONFLICT ON CONSTRAINT hive_votes_ux1 DO
                 UPDATE
                   SET
-                    weight = {}.weight,
-                    rshares = {}.rshares,
+                    weight = CASE EXCLUDED.is_effective WHEN true THEN EXCLUDED.weight ELSE hive_votes.weight END,
+                    rshares = CASE EXCLUDED.is_effective WHEN true THEN EXCLUDED.rshares ELSE hive_votes.rshares END,
                     vote_percent = EXCLUDED.vote_percent,
                     last_update = EXCLUDED.last_update,
                     num_changes = hive_votes.num_changes + 1
@@ -158,48 +95,36 @@ class Votes:
                 """
             # WHERE clause above seems superfluous (and works all the same without it, at least up to 5mln)
 
-            values_skip = []
-            values_override = []
+            values = []
             values_limit = 1000
             first_block = 0
             last_block = 0
 
             for _, vd in cls._votes_data.items():
-                values = None
-                on_conflict_data_source = None
+
                 first_block = min( first_block, vd['block_num'] )
                 last_block = max( last_block, vd['block_num'] )
 
-                if vd['is_effective']:
-                    values = values_override
-                    on_conflict_data_source = 'EXCLUDED'
-                else:
-                    values = values_skip
-                    on_conflict_data_source = 'hive_votes'
+                values.append("('{}', '{}', '{}', {}, {}, {}, '{}'::timestamp, {}, {})".format(
+                    vd['voter'], vd['author'], vd['permlink'], vd['weight'], vd['rshares'],
+                    vd['vote_percent'], vd['last_update'], vd['block_num'], vd['is_effective']))
 
-                values.append("('{}', '{}', '{}', {}, {}, {}, '{}'::timestamp, {})".format(
-                    vd['voter'], vd['author'], vd['permlink'], vd['weight'], vd['rshares'], vd['vote_percent'], vd['last_update'], vd['block_num']))
 
                 if len(values) >= values_limit:
                     values_str = ','.join(values)
-                    actual_query = sql.format(values_str, on_conflict_data_source, on_conflict_data_source)
+                    actual_query = sql.format(values_str)
                     DB.query(actual_query)
                     values.clear()
 
-            if len(values_skip) > 0:
-                values_str = ','.join(values_skip)
-                actual_query = sql.format(values_str, 'hive_votes', 'hive_votes')
+            if len(values) > 0:
+                values_str = ','.join(values)
+                actual_query = sql.format(values_str)
                 DB.query(actual_query)
-                values_skip.clear()
-            if len(values_override) > 0:
-                values_str = ','.join(values_override)
-                actual_query = sql.format(values_str, 'EXCLUDED', 'EXCLUDED')
-                DB.query(actual_query)
-                values_override.clear()
+                values.clear()
 
             n = len(cls._votes_data)
             if not DbState.is_initial_sync():
-                update_hot_and_tranding_for_block_range( first_block, last_block )				
+                update_hot_and_tranding_for_block_range( first_block, last_block )
             cls._votes_data.clear()
         cls.inside_flush = False
         return n
