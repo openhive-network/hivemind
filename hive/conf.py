@@ -114,7 +114,6 @@ class Conf():
     def get(self, param):
         """Reads a single property, e.g. `database_url`."""
         assert self._args, "run init_argparse()"
-        print(self._args)
         return self._args[param]
 
     def mode(self):
