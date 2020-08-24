@@ -4,7 +4,6 @@ import logging
 
 from hive.db.db_state import DbState
 from hive.db.adapter import Db
-from hive.utils.trends import update_hot_and_tranding_for_block_range
 
 log = logging.getLogger(__name__)
 DB = Db.instance()
@@ -97,18 +96,11 @@ class Votes:
 
             values = []
             values_limit = 1000
-            first_block = 0
-            last_block = 0
 
             for _, vd in cls._votes_data.items():
-
-                first_block = min( first_block, vd['block_num'] )
-                last_block = max( last_block, vd['block_num'] )
-
                 values.append("('{}', '{}', '{}', {}, {}, {}, '{}'::timestamp, {}, {})".format(
                     vd['voter'], vd['author'], vd['permlink'], vd['weight'], vd['rshares'],
                     vd['vote_percent'], vd['last_update'], vd['block_num'], vd['is_effective']))
-
 
                 if len(values) >= values_limit:
                     values_str = ','.join(values)
@@ -123,9 +115,6 @@ class Votes:
                 values.clear()
 
             n = len(cls._votes_data)
-            if not DbState.is_initial_sync():
-                update_hot_and_tranding_for_block_range( first_block, last_block )
             cls._votes_data.clear()
         cls.inside_flush = False
         return n
-

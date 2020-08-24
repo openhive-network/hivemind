@@ -17,6 +17,7 @@ from time import perf_counter
 
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.stats import FlushStatusManager as FSM
+from hive.utils.trends import update_hot_and_tranding_for_block_range
 from hive.utils.post_active import update_active_starting_from_posts_on_block
 
 log = logging.getLogger(__name__)
@@ -62,7 +63,7 @@ class Blocks:
         Votes.flush()
         Posts.flush()
         block_num = int(block['block_id'][:8], base=16)
-        cls.on_live_blocks_processed( block_num, block_num, is_initial_sync )
+        cls.on_live_blocks_processed( block_num, block_num )
         time_end = perf_counter()
         log.info("[PROCESS BLOCK] %fs", time_end - time_start)
         return ret
@@ -103,8 +104,8 @@ class Blocks:
         flush_time = register_time(flush_time, "Follow", folllow_items)
         flush_time = register_time(flush_time, "Posts", Posts.flush())
 
-        if first_block > -1:
-            cls.on_live_blocks_processed( first_block, last_num, is_initial_sync )
+        if is_initial_sync and first_block > -1:
+            cls.on_live_blocks_processed( first_block, last_num )
 
         DB.query("COMMIT")
 
@@ -393,11 +394,10 @@ class Blocks:
         # TODO: manually re-process here the blocks which were just popped.
 
     @classmethod
-    def on_live_blocks_processed( cls, first_block, last_block, is_initial_sync ):
+    def on_live_blocks_processed( cls, first_block, last_block ):
         """Is invoked when processing of block range is done and received
            informations from hived are already stored in db
         """
-        if is_initial_sync:
-            return;
 
+        update_hot_and_tranding_for_block_range( first_block, last_block )
         update_active_starting_from_posts_on_block( first_block, last_block )

@@ -773,7 +773,7 @@ def setup(db):
         promoted DECIMAL(10,3),
         payout DECIMAL(10,3),
         last_payout_at TIMESTAMP,
-        cashout_time TIMESTAMP, 
+        cashout_time TIMESTAMP,
         is_paidout BOOLEAN,
         children INT,
         votes INT,

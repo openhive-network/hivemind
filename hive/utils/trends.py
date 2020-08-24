@@ -35,6 +35,8 @@ def update_hot_and_tranding_for_block_range( first_block = NO_CONSTRAINT, last_b
         sql = hot_and_trend_sql.format( "WHERE block_num >= {}".format( first_block ) )
     elif first_block == NO_CONSTRAINT:
         sql = hot_and_trend_sql.format( "WHERE block_num <= {}".format( last_block ) )
+    elif first_block == last_block:
+        sql = hot_and_trend_sql.format( "WHERE block_num = {}".format( last_block ) )
     else:
         sql = hot_and_trend_sql.format( "WHERE block_num >= {} AND block_num <= {}".format( first_block, last_block ) )
     DB.query_no_return(sql)
