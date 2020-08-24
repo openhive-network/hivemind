@@ -52,8 +52,8 @@ then
   exit 0
 fi
 
-check_address $1
-check_port $2
+#check_address $1
+#check_port $2
 
 #cd ..
 

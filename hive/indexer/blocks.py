@@ -120,32 +120,33 @@ class Blocks:
 
             if op_type == 'author_reward_operation':
                 if key not in comment_payout_ops:
-                    comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None, 'date' : date }
+                    comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
 
-                comment_payout_ops[key][op_type] = op_value
+                comment_payout_ops[key][op_type] = ( op_value, date )
 
             elif op_type == 'comment_reward_operation':
                 if key not in comment_payout_ops:
-                    comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None, 'date' : date }
+                    comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
 
                 comment_payout_ops[key]['effective_comment_vote_operation'] = None
 
-                comment_payout_ops[key][op_type] = op_value
+                comment_payout_ops[key][op_type] = ( op_value, date )
 
             elif op_type == 'effective_comment_vote_operation':
                 key_vote = "{}/{}/{}".format(op_value['voter'], op_value['author'], op_value['permlink'])
                 vote_ops[ key_vote ] = op_value
 
                 if key not in comment_payout_ops:
-                    comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None, 'date' : date }
+                    comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
 
-                comment_payout_ops[key][op_type] = op_value
+                comment_payout_ops[key][op_type] = ( op_value, date )
 
             elif op_type == 'comment_payout_update_operation':
                 if key not in comment_payout_ops:
-                    comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None, 'date' : date }
+                    comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
 
-                comment_payout_ops[key][op_type] = op_value
+                comment_payout_ops[key][op_type] = ( op_value, date )
+
             elif op_type == 'ineffective_delete_comment_operation':
                 ineffective_deleted_ops[key] = {}
 

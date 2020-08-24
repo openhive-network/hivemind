@@ -107,23 +107,21 @@ def build_metadata():
         sa.Column('sc_trend', sa.Float(precision=6), nullable=False, server_default='0'),
         sa.Column('sc_hot', sa.Float(precision=6), nullable=False, server_default='0'),
 
-        sa.Column('total_payout_value', sa.String(30), nullable=False, server_default=''),
+        sa.Column('total_payout_value', sa.String(30), nullable=False, server_default='0.000 HBD'),
         sa.Column('author_rewards', sa.BigInteger, nullable=False, server_default='0'),
 
         sa.Column('author_rewards_hive', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('author_rewards_hbd', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('author_rewards_vests', sa.BigInteger, nullable=False, server_default='0'),
 
-        sa.Column('children_abs_rshares', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('abs_rshares', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('vote_rshares', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('total_vote_weight', sa.Numeric, nullable=False, server_default='0'),
         sa.Column('active', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('percent_hbd', sa.Integer, nullable=False, server_default='10000'),
-        sa.Column('reward_weight', sa.Integer, nullable=False, server_default='10000'), # Seems to be always 10000
 
-        sa.Column('curator_payout_value', sa.String(30), nullable=False, server_default=''),
+        sa.Column('curator_payout_value', sa.String(30), nullable=False, server_default='0.000 HBD'),
         sa.Column('max_accepted_payout',  sa.String(30), nullable=False, server_default='1000000.000 HBD'),
         sa.Column('allow_votes', BOOLEAN, nullable=False, server_default='1'),
         sa.Column('allow_curation_rewards', BOOLEAN, nullable=False, server_default='1'),
@@ -610,7 +608,10 @@ def setup(db):
             hp.total_vote_weight,
             hp.flag_weight,
             ha_pp.name AS parent_author,
-            hpd_pp.permlink AS parent_permlink,
+            ( CASE hp.depth > 0
+              WHEN True THEN hpd_pp.permlink
+              ELSE hcd.category
+            END ) AS parent_permlink_or_category,
             hp.curator_payout_value,
             ha_rp.name AS root_author,
             hpd_rp.permlink AS root_permlink,
@@ -646,9 +647,7 @@ def setup(db):
                 WHERE v.post_id = hp.id AND NOT v.rshares = 0
                 GROUP BY v.post_id
               ), 0
-            ) AS abs_rshares,
-            '1969-12-31T23:59:59'::timestamp AS max_cashout_time,
-            hp.reward_weight
+            ) AS abs_rshares
             FROM hive_posts hp
             JOIN hive_posts pp ON pp.id = hp.parent_id
             JOIN hive_posts rp ON rp.id = COALESCE( hp.root_id, hp.id )
@@ -784,7 +783,7 @@ def setup(db):
         total_vote_weight NUMERIC,
         flag_weight REAL,
         parent_author VARCHAR(16),
-        parent_permlink VARCHAR(255),
+        parent_permlink_or_category VARCHAR(255),
         curator_payout_value VARCHAR(30),
         root_author VARCHAR(16),
         root_permlink VARCHAR(255),
@@ -798,9 +797,7 @@ def setup(db):
         root_title VARCHAR(512),
         abs_rshares NUMERIC,
         active TIMESTAMP,
-        author_rewards BIGINT,
-        max_cashout_time TIMESTAMP,
-        reward_weight INT
+        author_rewards BIGINT
       )
       ;
 
@@ -824,10 +821,10 @@ def setup(db):
               hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
               hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
-              hp.parent_author, hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.parent_author, hp.parent_permlink_or_category, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
-              hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
+              hp.active, hp.author_rewards
           FROM
               hive_posts_view hp
           WHERE
@@ -862,10 +859,10 @@ def setup(db):
               hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
               hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
-              hp.parent_author, hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.parent_author, hp.parent_permlink_or_category, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
-              hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
+              hp.active, hp.author_rewards
           FROM
               hive_posts_view hp
           WHERE
@@ -907,10 +904,10 @@ def setup(db):
               hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
               hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
-              hp.parent_author, hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.parent_author, hp.parent_permlink_or_category, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
-              hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
+              hp.active, hp.author_rewards
           FROM
               hive_posts_view hp
           WHERE
@@ -951,21 +948,21 @@ def setup(db):
               hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
               hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
-              hp.parent_author, hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.parent_author, hp.parent_permlink_or_category, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
-              hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
+              hp.active, hp.author_rewards
           FROM
               hive_posts_view hp
           WHERE
               NOT hp.is_muted AND
               hp.counter_deleted = 0 AND
               parent_author > _parent_author OR
-              parent_author = _parent_author AND ( parent_permlink > _parent_permlink OR
-              parent_permlink = _parent_permlink AND hp.id >= __post_id )
+              parent_author = _parent_author AND ( parent_permlink_or_category > _parent_permlink OR
+              parent_permlink_or_category = _parent_permlink AND hp.id >= __post_id )
           ORDER BY
               parent_author ASC,
-              parent_permlink ASC,
+              parent_permlink_or_category ASC,
               id ASC
           LIMIT
               _limit
@@ -996,21 +993,21 @@ def setup(db):
               hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
               hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
-              hp.parent_author, hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.parent_author, hp.parent_permlink_or_category, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
-              hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
+              hp.active, hp.author_rewards
           FROM
               hive_posts_view hp
           WHERE
               NOT hp.is_muted AND
               hp.counter_deleted = 0 AND
               hp.parent_author > _parent_author OR
-              hp.parent_author = _parent_author AND ( hp.updated_at > _updated_at OR
+              hp.parent_author = _parent_author AND ( hp.updated_at < _updated_at OR
               hp.updated_at = _updated_at AND hp.id >= __post_id )
           ORDER BY
               hp.parent_author ASC,
-              hp.updated_at ASC,
+              hp.updated_at DESC,
               hp.id ASC
           LIMIT
               _limit
@@ -1041,23 +1038,22 @@ def setup(db):
               hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
               hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
               hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
-              hp.parent_author, hp.parent_permlink, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+              hp.parent_author, hp.parent_permlink_or_category, hp.curator_payout_value, hp.root_author, hp.root_permlink,
               hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
               hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
-              hp.active, hp.author_rewards, hp.max_cashout_time, hp.reward_weight
+              hp.active, hp.author_rewards
           FROM
               hive_posts_view hp
           WHERE
               NOT hp.is_muted AND
               hp.counter_deleted = 0 AND
-              -- ABW: wrong! fat node required _start_post_author+_start_post_permlink to exist (when given) and sorted just like
-              -- in case of by_last_update (bug in fat node) but should by ( _author, updated_at, comment_id )
+              -- fat node used wrong index (by_last_update) so the results are vastly different
               hp.author > _author OR
-              hp.author = _author AND ( hp.updated_at > _updated_at OR
+              hp.author = _author AND ( hp.updated_at < _updated_at OR
               hp.updated_at = _updated_at AND hp.id >= __post_id )
           ORDER BY
               hp.author ASC,
-              hp.updated_at ASC,
+              hp.updated_at DESC,
               hp.id ASC
           LIMIT
               _limit

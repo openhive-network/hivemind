@@ -4,6 +4,7 @@
 import re
 import math
 import ujson as json
+import datetime
 from funcy.seqs import first, distinct
 
 from hive.utils.normalize import sbd_amount, rep_log10, safe_img_url, parse_time, utc_timestamp
@@ -150,7 +151,8 @@ def post_basic(post):
         body = body.replace('\x00', '[NUL]')
 
     # payout date is last_payout if paid, and cashout_time if pending.
-    is_paidout = (post['cashout_time'][0:4] == '1969')
+    cashout_year = post['cashout_time'][0:4]
+    is_paidout = (cashout_year == '1969' or cashout_year == datetime.MAXYEAR) # depending on source it could be one or the other
     payout_at = post['last_payout'] if is_paidout else post['cashout_time']
 
     # payout is declined if max_payout = 0, or if 100% is burned

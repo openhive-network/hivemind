@@ -67,7 +67,7 @@ async def load_posts_keyed(db, ids, truncate_body=0):
         hp.total_votes,
         hp.flag_weight,
         hp.parent_author,
-        hp.parent_permlink,
+        hp.parent_permlink_or_category,
         hp.curator_payout_value,
         hp.root_author,
         hp.root_permlink,
@@ -209,12 +209,8 @@ def _condenser_post_object(row, truncate_body=0):
     post['body_length'] = len(row['body'])
     post['author_reputation'] = rep_to_raw(row['author_rep'])
 
-    if row['depth'] > 0:
-        post['parent_author'] = row['parent_author']
-        post['parent_permlink'] = row['parent_permlink']
-    else:
-        post['parent_author'] = ''
-        post['parent_permlink'] = row['category']
+    post['parent_author'] = row['parent_author']
+    post['parent_permlink'] = row['parent_permlink_or_category']
 
     post['url'] = row['url']
     post['root_title'] = row['root_title']

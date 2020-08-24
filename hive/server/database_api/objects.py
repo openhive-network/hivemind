@@ -31,11 +31,13 @@ def database_post_object(row, truncate_body=0):
 
     post['last_payout'] = json_date(row['last_payout_at'])
     post['cashout_time'] = json_date(row['cashout_time'])
-    post['max_cashout_time'] = json_date(row['max_cashout_time'])
-    post['total_payout_value'] = to_nai(_amount(row['payout'] if paid else 0))
-    post['curator_payout_value'] = to_nai(_amount(0))
+    post['max_cashout_time'] = json_date(None) # ABW: only relevant up to HF17, timestamp::max for all posts later (and also all paid)
 
-    post['reward_weight'] = row['reward_weight']
+    curator_payout = sbd_amount(row['curator_payout_value'])
+    post['curator_payout_value'] = to_nai(_amount(curator_payout))
+    post['total_payout_value'] = to_nai(_amount(row['payout'] - curator_payout))
+
+    post['reward_weight'] = 10000 # ABW: only relevant between HF12 and HF17 and we don't have access to correct value
 
     post['root_author'] = row['root_author']
     post['root_permlink'] = row['root_permlink']
@@ -44,12 +46,8 @@ def database_post_object(row, truncate_body=0):
     post['allow_votes'] = row['allow_votes']
     post['allow_curation_rewards'] = row['allow_curation_rewards']
 
-    if row['depth'] > 0:
-        post['parent_author'] = row['parent_author']
-        post['parent_permlink'] = row['parent_permlink']
-    else:
-        post['parent_author'] = ''
-        post['parent_permlink'] = row['category']
+    post['parent_author'] = row['parent_author']
+    post['parent_permlink'] = row['parent_permlink_or_category']
 
     post['beneficiaries'] = row['beneficiaries']
     post['max_accepted_payout'] = to_nai(row['max_accepted_payout'])
@@ -57,12 +55,9 @@ def database_post_object(row, truncate_body=0):
     post['net_votes'] = row['net_votes']
 
     if paid:
-        curator_payout = sbd_amount(row['curator_payout_value'])
-        post['curator_payout_value'] = to_nai(_amount(curator_payout))
-        post['total_payout_value'] = to_nai(_amount(row['payout'] - curator_payout))
         post['total_vote_weight'] = 0
         post['vote_rshares'] = 0
-        post['net_rshares'] = 0 if row['rshares'] > 0 else row['rshares']
+        post['net_rshares'] = 0 # if row['rshares'] > 0 else row['rshares'] ABW: used to be like this but after HF19 cashouts disappear and all give 0
         post['abs_rshares'] = 0
         post['children_abs_rshares'] = 0
     else:
@@ -70,6 +65,6 @@ def database_post_object(row, truncate_body=0):
         post['vote_rshares'] = ( row['rshares'] + row['abs_rshares'] ) // 2 # effectively sum of all positive rshares
         post['net_rshares'] = row['rshares']
         post['abs_rshares'] = row['abs_rshares']
-        post['children_abs_rshares'] = 0 # TODO
+        post['children_abs_rshares'] = 0 # TODO - ABW: I'm not sure about that, it is costly and useless (used to be part of mechanism to determine cashout time)
 
     return post
