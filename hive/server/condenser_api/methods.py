@@ -48,7 +48,7 @@ SQL_TEMPLATE = """
         hp.total_votes,
         hp.flag_weight,
         hp.parent_author,
-        hp.parent_permlink,
+        hp.parent_permlink_or_category,
         hp.curator_payout_value,
         hp.root_author,
         hp.root_permlink,
@@ -175,7 +175,7 @@ async def get_content_replies(context, author: str, permlink: str):
     #force copy
     sql = str(SQL_TEMPLATE)
     sql += """
-            hp.counter_deleted = 0 AND hp.parent_author = :author AND hp.parent_permlink = :permlink
+            hp.counter_deleted = 0 AND hp.parent_author = :author AND hp.parent_permlink_or_category = :permlink
         ORDER BY hp.id LIMIT :limit
     """
 

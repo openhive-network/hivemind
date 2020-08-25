@@ -155,7 +155,7 @@ class Posts:
               UPDATE hive_posts AS ihp SET
                   total_payout_value    = COALESCE( data_source.total_payout_value,                     ihp.total_payout_value ),
                   curator_payout_value  = COALESCE( data_source.curator_payout_value,                   ihp.curator_payout_value ),
-                  author_rewards        = COALESCE( CAST( data_source.author_rewards as BIGINT ),       ihp.author_rewards ),
+                  author_rewards        = CAST( data_source.author_rewards as BIGINT ) + ihp.author_rewards,
                   author_rewards_hive   = COALESCE( CAST( data_source.author_rewards_hive as BIGINT ),  ihp.author_rewards_hive ),
                   author_rewards_hbd    = COALESCE( CAST( data_source.author_rewards_hbd as BIGINT ),   ihp.author_rewards_hbd ),
                   author_rewards_vests  = COALESCE( CAST( data_source.author_rewards_vests as BIGINT ), ihp.author_rewards_vests ),
@@ -231,14 +231,14 @@ class Posts:
             permlink                  = None
 
             # author payouts
-            author_rewards            = None
+            author_rewards            = 0
             author_rewards_hive       = None
             author_rewards_hbd        = None
             author_rewards_vests      = None
 
             # total payout for comment
             #comment_author_reward     = None
-            curators_vesting_payout   = None
+            #curators_vesting_payout   = None
             total_payout_value        = None;
             curator_payout_value      = None;
             #beneficiary_payout_value  = None;
@@ -254,71 +254,62 @@ class Posts:
 
             total_vote_weight         = None
 
-            date =  v[ 'date' ]
-
-            if v[ 'author_reward_operation' ] is not None:
-              value = v[ 'author_reward_operation' ]
-              author_rewards_hive       = value['hive_payout']['amount']
-              author_rewards_hbd        = value['hbd_payout']['amount']
-              author_rewards_vests      = value['vesting_payout']['amount']
-              curators_vesting_payout   = value['curators_vesting_payout']['amount']
+            # final payout indicator - by default all rewards are zero, but might be overwritten by other operations
+            if v[ 'comment_payout_update_operation' ] is not None:
+              value, date = v[ 'comment_payout_update_operation' ]
               if author is None:
-                author                    = value['author']
-                permlink                  = value['permlink']
+                author = value['author']
+                permlink = value['permlink']
+              is_paidout              = True
+              payout_at               = date
+              last_payout_at          = date
+              cashout_time            = "infinity"
 
+              pending_payout          = 0
+
+            # author rewards in current (final or nonfinal) payout (always comes with comment_reward_operation)
+            if v[ 'author_reward_operation' ] is not None:
+              value, date = v[ 'author_reward_operation' ]
+              if author is None:
+                author = value['author']
+                permlink = value['permlink']
+              author_rewards_hive     = value['hive_payout']['amount']
+              author_rewards_hbd      = value['hbd_payout']['amount']
+              author_rewards_vests    = value['vesting_payout']['amount']
+              #curators_vesting_payout = value['curators_vesting_payout']['amount']
+
+            # summary of comment rewards in current (final or nonfinal) payout (always comes with author_reward_operation)
             if v[ 'comment_reward_operation' ] is not None:
-              value = v[ 'comment_reward_operation' ]
-              #comment_author_reward     = value['payout']
-              author_rewards            = value['author_rewards']
-              total_payout_value        = value['total_payout_value']
-              curator_payout_value      = value['curator_payout_value']
-              #beneficiary_payout_value  = value['beneficiary_payout_value']
+              value, date = v[ 'comment_reward_operation' ]
+              if author is None:
+                author = value['author']
+                permlink = value['permlink']
+              #comment_author_reward   = value['payout']
+              author_rewards          = value['author_rewards']
+              total_payout_value      = value['total_payout_value']
+              curator_payout_value    = value['curator_payout_value']
+              #beneficiary_payout_value = value['beneficiary_payout_value']
 
               payout = sum([ sbd_amount(total_payout_value), sbd_amount(curator_payout_value) ])
               pending_payout = 0
               last_payout_at = date
 
-              if author is None:
-                author                    = value['author']
-                permlink                  = value['permlink']
-
+            # estimated pending_payout from vote (if exists with actual payout the value comes from vote cast after payout)
             if v[ 'effective_comment_vote_operation' ] is not None:
-              value = v[ 'effective_comment_vote_operation' ]
-              pending_payout              = sbd_amount( value['pending_payout'] )
-              total_vote_weight           = value['total_vote_weight']
+              value, date = v[ 'effective_comment_vote_operation' ]
               if author is None:
-                author                    = value['author']
-                permlink                  = value['permlink']
+                author = value['author']
+                permlink = value['permlink']
+              pending_payout          = sbd_amount( value['pending_payout'] )
+              total_vote_weight       = value['total_vote_weight']
 
-            if v[ 'comment_payout_update_operation' ] is not None:
-              value = v[ 'comment_payout_update_operation' ]
-              is_paidout                = True
-
-              #Payout didn't generate any payments
-              if v[ 'comment_reward_operation' ] is None:
-                author_rewards            = 0
-                total_payout_value        = "0.000 HBD"
-                curator_payout_value      = "0.000 HBD"
-
-                payout = 0
-                pending_payout = 0
-
-              if author is None:
-                author                    = value['author']
-                permlink                  = value['permlink']
-
-            #Calculations of all dates
-            if ( is_paidout is not None ):
-              payout_at = date
-              last_payout_at = date
-              cashout_time = "1969-12-31T23:59:59"
 
             cls._comment_payout_ops.append("('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(
               author,
               permlink,
               "NULL" if ( total_payout_value is None ) else ( "'{}'".format( legacy_amount(total_payout_value) ) ),
               "NULL" if ( curator_payout_value is None ) else ( "'{}'".format( legacy_amount(curator_payout_value) ) ),
-              "NULL" if ( author_rewards is None ) else author_rewards,
+              author_rewards,
               "NULL" if ( author_rewards_hive is None ) else author_rewards_hive,
               "NULL" if ( author_rewards_hbd is None ) else author_rewards_hbd,
               "NULL" if ( author_rewards_vests is None ) else author_rewards_vests,
