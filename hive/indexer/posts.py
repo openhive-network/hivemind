@@ -265,14 +265,6 @@ class Posts:
               last_payout_at          = date
               cashout_time            = "infinity"
 
-              author_rewards_hive     = 0
-              author_rewards_hbd      = 0
-              author_rewards_vests    = 0
-              
-              total_payout_value      = "0.000 HBD"
-              curator_payout_value    = "0.000 HBD"
-
-              payout                  = 0
               pending_payout          = 0
 
             # author rewards in current (final or nonfinal) payout (always comes with comment_reward_operation)
