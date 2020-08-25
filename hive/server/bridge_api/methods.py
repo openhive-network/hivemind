@@ -29,7 +29,7 @@ SQL_TEMPLATE = """
             hp.percent_hbd,
             hp.url,
             hp.permlink,
-            hp.parent_permlink,
+            hp.parent_permlink_or_category,
             hp.title,
             hp.body,
             hp.category,
