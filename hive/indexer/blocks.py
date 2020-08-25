@@ -17,6 +17,8 @@ from time import perf_counter
 
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.stats import FlushStatusManager as FSM
+from hive.utils.trends import update_hot_and_tranding_for_block_range
+from hive.utils.post_active import update_active_starting_from_posts_on_block
 
 log = logging.getLogger(__name__)
 
@@ -60,6 +62,8 @@ class Blocks:
         Tags.flush()
         Votes.flush()
         Posts.flush()
+        block_num = int(block['block_id'][:8], base=16)
+        cls.on_live_blocks_processed( block_num, block_num )
         time_end = perf_counter()
         log.info("[PROCESS BLOCK] %fs", time_end - time_start)
         return ret
@@ -71,8 +75,11 @@ class Blocks:
         DB.query("START TRANSACTION")
 
         last_num = 0
+        first_block = -1
         try:
             for block in blocks:
+                if first_block == -1:
+                    first_block = int(block['block_id'][:8], base=16)
                 last_num = cls._process(block, vops, hived, is_initial_sync)
         except Exception as e:
             log.error("exception encountered block %d", last_num + 1)
@@ -96,6 +103,9 @@ class Blocks:
         folllow_items = len(Follow.follow_items_to_flush) + Follow.flush(trx=False)
         flush_time = register_time(flush_time, "Follow", folllow_items)
         flush_time = register_time(flush_time, "Posts", Posts.flush())
+
+        if is_initial_sync and first_block > -1:
+            cls.on_live_blocks_processed( first_block, last_num )
 
         DB.query("COMMIT")
 
@@ -382,3 +392,12 @@ class Blocks:
         DB.query("COMMIT")
         log.warning("[FORK] recovery complete")
         # TODO: manually re-process here the blocks which were just popped.
+
+    @classmethod
+    def on_live_blocks_processed( cls, first_block, last_block ):
+        """Is invoked when processing of block range is done and received
+           informations from hived are already stored in db
+        """
+
+        update_hot_and_tranding_for_block_range( first_block, last_block )
+        update_active_starting_from_posts_on_block( first_block, last_block )

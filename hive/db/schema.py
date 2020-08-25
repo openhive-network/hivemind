@@ -130,6 +130,7 @@ def build_metadata():
         sa.Column('beneficiaries', sa.JSON, nullable=False, server_default='[]'),
         sa.Column('url', sa.Text, nullable=False, server_default=''),
         sa.Column('root_title', sa.String(255), nullable=False, server_default=''),
+        sa.Column('block_num', sa.Integer,  nullable=False ),
 
         sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_posts_fk1'),
         sa.ForeignKeyConstraint(['root_id'], ['hive_posts.id'], name='hive_posts_fk2'),
@@ -149,7 +150,8 @@ def build_metadata():
         sa.Index('hive_posts_promoted_idx', 'promoted'),
         sa.Index('hive_posts_sc_trend_idx', 'sc_trend'),
         sa.Index('hive_posts_sc_hot_idx', 'sc_hot'),
-        sa.Index('hive_posts_created_at_idx', 'created_at')
+        sa.Index('hive_posts_created_at_idx', 'created_at'),
+	sa.Index('hive_posts_block_num_idx', 'block_num')
     )
 
     sa.Table(
@@ -401,10 +403,10 @@ def setup(db):
         """
         INSERT INTO
             public.hive_posts(id, root_id, parent_id, author_id, permlink_id, category_id,
-                community_id, created_at, depth
+                community_id, created_at, depth, block_num
             )
         VALUES
-            (0, 0, 0, 0, 0, 0, 0, now(), 0);
+            (0, 0, 0, 0, 0, 0, 0, now(), 0, 0);
         """]
     for sql in sqls:
         db.query(sql)
@@ -421,7 +423,8 @@ def setup(db):
             in _parent_author hive_accounts.name%TYPE,
             in _parent_permlink hive_permlink_data.permlink%TYPE,
             in _date hive_posts.created_at%TYPE,
-            in _community_support_start_date hive_posts.created_at%TYPE)
+            in _community_support_start_date hive_posts.created_at%TYPE,
+            in _block_num hive_posts.block_num%TYPE)
           RETURNS TABLE (is_new_post boolean, id hive_posts.id%TYPE, author_id hive_posts.author_id%TYPE, permlink_id hive_posts.permlink_id%TYPE,
                          post_category hive_category_data.category%TYPE, parent_id hive_posts.parent_id%TYPE, community_id hive_posts.community_id%TYPE,
                          is_valid hive_posts.is_valid%TYPE, is_muted hive_posts.is_muted%TYPE, depth hive_posts.depth%TYPE)
@@ -442,7 +445,7 @@ def setup(db):
             RETURN QUERY INSERT INTO hive_posts as hp
             (parent_id, depth, community_id, category_id,
              root_id, is_muted, is_valid,
-             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted)
+             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted, block_num)
             SELECT php.id AS parent_id, php.depth + 1 AS depth,
                 (CASE
                    WHEN _date > _community_support_start_date THEN
@@ -456,7 +459,7 @@ def setup(db):
                 _date AS updated_at,
                 calculate_time_part_of_hot(_date) AS sc_hot,
                 calculate_time_part_of_trending(_date) AS sc_trend,
-                _date AS active, (_date + INTERVAL '7 days') AS payout_at, (_date + INTERVAL '7 days') AS cashout_time, 0
+                _date AS active, (_date + INTERVAL '7 days') AS payout_at, (_date + INTERVAL '7 days') AS cashout_time, 0, _block_num as block_num
             FROM hive_accounts ha,
                  hive_permlink_data hpd,
                  hive_posts php
@@ -483,7 +486,7 @@ def setup(db):
             RETURN QUERY INSERT INTO hive_posts as hp
             (parent_id, depth, community_id, category_id,
              root_id, is_muted, is_valid,
-             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted)
+             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted, block_num)
             SELECT 0 AS parent_id, 0 AS depth,
                 (CASE
                   WHEN _date > _community_support_start_date THEN
@@ -497,7 +500,7 @@ def setup(db):
                 _date AS updated_at,
                 calculate_time_part_of_hot(_date) AS sc_hot,
                 calculate_time_part_of_trending(_date) AS sc_trend,
-                _date AS active, (_date + INTERVAL '7 days') AS payout_at, (_date + INTERVAL '7 days') AS cashout_time, 0
+                _date AS active, (_date + INTERVAL '7 days') AS payout_at, (_date + INTERVAL '7 days') AS cashout_time, 0, _block_num as block_num
             FROM hive_accounts ha,
                  hive_permlink_data hpd
             WHERE ha.name = _author and hpd.permlink = _permlink
@@ -507,7 +510,8 @@ def setup(db):
               --- then also depth, is_valid and is_muted is impossible to change
               --- post edit part
               updated_at = _date,
-              active = _date
+              active = _date,
+              block_num = _block_num
 
             RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, _parent_permlink as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth
             ;
@@ -769,7 +773,7 @@ def setup(db):
         promoted DECIMAL(10,3),
         payout DECIMAL(10,3),
         last_payout_at TIMESTAMP,
-        cashout_time TIMESTAMP, 
+        cashout_time TIMESTAMP,
         is_paidout BOOLEAN,
         children INT,
         votes INT,
@@ -1222,6 +1226,24 @@ def setup(db):
     END;
     $BODY$;
     """
+    db.query_no_return(sql)
+
+    sql = """
+        DROP FUNCTION IF EXISTS public.max_time_stamp() CASCADE;
+        CREATE OR REPLACE FUNCTION public.max_time_stamp( _first TIMESTAMP, _second TIMESTAMP )
+        RETURNS TIMESTAMP
+        LANGUAGE 'plpgsql'
+        IMMUTABLE
+        AS $BODY$
+        BEGIN
+	        IF _first > _second THEN
+	             RETURN _first;
+            ELSE
+	             RETURN _second;
+            END IF;
+        END
+        $BODY$;
+        """
     db.query_no_return(sql)
 
 def reset_autovac(db):
