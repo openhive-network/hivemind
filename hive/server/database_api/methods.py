@@ -5,6 +5,8 @@ from hive.server.common.helpers import return_error_info, valid_limit, valid_acc
 from hive.server.database_api.objects import database_post_object
 from hive.utils.normalize import rep_to_raw, number_to_json_value, time_string_with_t
 
+import datetime
+
 @return_error_info
 async def list_comments(context, start: list, limit: int, order: str):
     """Returns all comments, starting with the specified options."""
@@ -18,6 +20,8 @@ async def list_comments(context, start: list, limit: int, order: str):
     if order == 'by_cashout_time':
         assert len(start) == 3, "Expecting three arguments"
         cashout_time = start[0]
+        if cashout_time[0:4] == '1969':
+            cashout_time = "infinity"
         author = start[1]
         permlink = start[2]
         sql = "SELECT * FROM list_comments_by_cashout_time(:cashout_time, :author, :permlink, :limit)"
@@ -99,7 +103,7 @@ async def find_comments(context, comments: list):
             hp.total_vote_weight,
             hp.flag_weight,
             hp.parent_author,
-            hp.parent_permlink,
+            hp.parent_permlink_or_category,
             hp.curator_payout_value,
             hp.root_author,
             hp.root_permlink,
@@ -113,9 +117,7 @@ async def find_comments(context, comments: list):
             hp.root_title,
             hp.abs_rshares,
             hp.active,
-            hp.author_rewards,
-            hp.max_cashout_time,
-            hp.reward_weight
+            hp.author_rewards
         FROM
             hive_posts_view hp
         JOIN (VALUES {}) AS t (author, permlink) ON hp.author = t.author AND hp.permlink = t.permlink

@@ -4,6 +4,7 @@ import re
 from functools import wraps
 import traceback
 import logging
+import datetime
 
 log = logging.getLogger(__name__)
 
@@ -50,7 +51,7 @@ def return_error_info(function):
 
 def json_date(date=None):
     """Given a db datetime, return a steemd/json-friendly version."""
-    if not date: return '1969-12-31T23:59:59'
+    if not date or date == datetime.datetime.max: return '1969-12-31T23:59:59'
     return 'T'.join(str(date).split(' '))
 
 def valid_account(name, allow_empty=False):

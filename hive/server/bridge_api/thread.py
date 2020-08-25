@@ -68,7 +68,7 @@ async def get_discussion(context, author, permlink, observer=None):
           hpv.root_author,
           hpv.root_permlink,
           hpv.parent_author,
-          hpv.parent_permlink,
+          hpv.parent_permlink_or_category,
           hpv.allow_replies,
           hpv.allow_votes,
           hpv.allow_curation_rewards,

@@ -216,7 +216,7 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
             hp.total_votes,
             hp.flag_weight,
             hp.parent_author,
-            hp.parent_permlink,
+            hp.parent_permlink_or_category,
             hp.curator_payout_value,
             hp.root_author,
             hp.root_permlink,
