@@ -55,6 +55,8 @@ class Conf():
 
         add('--pid-file', type=str, env_var='PID_FILE', help='Allows to dump current process pid into specified file', default=None)
 
+        add('--auto-http-server-port', nargs='+', type=int, help='Hivemind will listen on first available port from this range')
+
         # needed for e.g. tests - other args may be present
         args = (parser.parse_args() if strict
                 else parser.parse_known_args()[0])
@@ -63,6 +65,18 @@ class Conf():
         # configure logger and print config
         root = logging.getLogger()
         root.setLevel(conf.log_level())
+
+        try:
+            if 'auto_http_server_port' in vars(args) and vars(args)['auto_http_server_port'] is not None:
+                port_range = vars(args)['auto_http_server_port']
+                port_range_len = len(port_range)
+                if port_range_len == 0 or port_range_len > 2:
+                    raise ValueError("auto-http-server-port expect maximum two values, minimum one")
+                if port_range_len == 2 and port_range[0] > port_range[1]:
+                    raise ValueError("port min value is greater than port max value")
+        except Exception as ex:
+            root.error("Value error: {}".format(ex))
+            exit(1)
 
         from sys import argv
         root.info("Used command line args: %s", " ".join(argv[1:]))

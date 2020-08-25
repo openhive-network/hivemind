@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Hive JSON-RPC API server."""
+from hive.server.database_api.methods import find_votes, list_votes
 import os
 import sys
 import logging
@@ -167,6 +168,8 @@ def build_methods():
     methods.add(**{
         'database_api.list_comments' : database_api.list_comments,
         'database_api.find_comments' : database_api.find_comments,
+        'database_api.list_votes' : database_api.list_votes,
+        'database_api.find_votes' : database_api.find_votes
     })
 
     return methods
@@ -226,9 +229,6 @@ def run_server(conf):
     async def show_info(app):
         sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
         database_head_block = await app['db'].query_one(sql)
-
-        import pkg_resources
-        hivemind_version, hivemind_git_rev = pkg_resources.get_distribution("hivemind").version.split("+")
 
         from hive.version import VERSION, GIT_REVISION
         log.info("hivemind_version : %s", VERSION)
@@ -308,5 +308,36 @@ def run_server(conf):
     app.router.add_get('/.well-known/healthcheck.json', health)
     app.router.add_get('/health', health)
     app.router.add_post('/', jsonrpc_handler)
+    if 'auto_http_server_port' in app['config']['args'] and app['config']['args']['auto_http_server_port'] is not None:
+        log.debug("auto-http-server-port detected in program arguments, http_server_port will be overriden with port from given range")
+        port_range = app['config']['args']['auto_http_server_port']
+        port_range_len = len(port_range)
+        port_from = port_range[0]
+        port_to = port_range[1] if port_range_len == 2 else 65535
+        if port_to > 65535:
+            port_to = 65535
+        if port_from < 1024:
+            port_from = 1024
 
-    web.run_app(app, port=app['config']['args']['http_server_port'])
+        import socket
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        while port_from <= port_to:
+            try:
+                log.debug("Trying port: {}".format(port_from))
+                sock.bind(('', port_from))
+            except OSError as ex:
+                log.debug("Exception: {}".format(ex))
+                port_from += 1
+            except Exception as ex:
+                # log and rethrow exception
+                log.exception("Exception: {}".format(ex))
+                raise ex
+            else:
+                with open('hivemind.port', 'w') as port_file:
+                    port_file.write("{}\n".format(port_from))
+                web.run_app(app, sock=sock)
+                break
+        if port_from == port_to:
+            raise IOError('No free ports in given range')
+    else:
+        web.run_app(app, port=app['config']['args']['http_server_port'])

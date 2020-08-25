@@ -133,3 +133,6 @@ tests/failed_blocks/
 
 # version.py
 hive/version.py
+
+# hivemind.port
+hivemind.port
