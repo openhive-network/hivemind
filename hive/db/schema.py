@@ -384,6 +384,9 @@ def setup(db):
     # tune auto vacuum/analyze
     reset_autovac(db)
 
+    # sets FILLFACTOR:
+    set_fillfactor(db)
+
     # default rows
     sqls = [
         "INSERT INTO hive_state (block_num, db_version, steem_per_mvest, usd_per_steem, sbd_per_steem, dgpo) VALUES (0, %d, 0, 0, 0, '')" % DB_VERSION,
@@ -1265,3 +1268,17 @@ def reset_autovac(db):
                                      autovacuum_analyze_scale_factor = 0,
                                      autovacuum_analyze_threshold = %s)"""
         db.query(sql % (table, n_vacuum, n_analyze))
+
+
+def set_fillfactor(db):
+    """Initializes/resets FILLFACTOR for tables which are intesively updated"""
+
+    fillfactor_config = {
+        'hive_posts': 70,
+        'hive_post_data': 70,
+        'hive_votes': 70
+    }
+
+    for table, fillfactor in fillfactor_config.items():
+        sql = """ALTER TABLE {} SET (FILLFACTOR = {})"""
+        db.query(sql.format(table, fillfactor))
