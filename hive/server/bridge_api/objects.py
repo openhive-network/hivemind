@@ -102,12 +102,12 @@ async def load_posts_keyed(db, ids, truncate_body=0):
 
         row['author_rep'] = author['reputation']
         post = _bridge_post_object(row, truncate_body=truncate_body)
-        post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']})
+        post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']}, VotesPresentation.BridgeApi)
 
         post['blacklists'] = Mutes.lists(post['author'], author['reputation'])
 
-        posts_by_id[row['post_id']] = post
-        post_cids[row['post_id']] = row['community_id']
+        posts_by_id[row['id']] = post
+        post_cids[row['id']] = row['community_id']
 
         cid = row['community_id']
         if cid:
