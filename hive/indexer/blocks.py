@@ -104,7 +104,7 @@ class Blocks:
         flush_time = register_time(flush_time, "Follow", folllow_items)
         flush_time = register_time(flush_time, "Posts", Posts.flush())
 
-        if is_initial_sync and first_block > -1:
+        if (not is_initial_sync) and (first_block > -1):
             cls.on_live_blocks_processed( first_block, last_num )
 
         DB.query("COMMIT")
