@@ -72,7 +72,7 @@ async def load_posts_keyed(db, ids, truncate_body=0):
             hp.total_votes,
             hp.flag_weight,
             hp.parent_author,
-            hp.parent_permlink,
+            hp.parent_permlink_or_category,
             hp.curator_payout_value,
             hp.root_author,
             hp.root_permlink,
@@ -273,7 +273,7 @@ def _bridge_post_object(row, truncate_body=0):
     # TODO: re-evaluate
     if row['depth'] > 0:
         post['parent_author'] = row['parent_author']
-        post['parent_permlink'] = row['parent_permlink']
+        post['parent_permlink'] = row['parent_permlink_or_category']
         post['title'] = 'RE: ' + row['root_title'] # PostSummary & comment context
 
     return post
