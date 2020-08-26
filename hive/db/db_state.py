@@ -95,9 +95,12 @@ class DbState:
             'hive_follows_ix5a', # (following, state, created_at, follower)
             'hive_follows_ix5b', # (follower, state, created_at, following)
 
-            'hive_posts_parent_id_idx',
-            'hive_posts_author_id',
+#            'hive_posts_parent_id_idx',
+#            'hive_posts_author_id',
             'hive_posts_depth_idx',
+
+            'hive_posts_root_id_id_idx',
+
             'hive_posts_community_id_idx',
             'hive_posts_category_id_idx',
             'hive_posts_payout_at_idx',
@@ -190,6 +193,18 @@ class DbState:
 
         time_end = perf_counter()
         log.info("[INIT] update_hive_posts_children_count executed in %fs", time_end - time_start)
+
+        time_start = perf_counter()
+
+        # Update root_id all root posts
+        sql = """
+              select update_hive_posts_root_id(NULL, NULL)
+              """
+        row = DbState.db().query_row(sql)
+
+        time_end = perf_counter()
+        log.info("[INIT] update_hive_posts_root_id executed in %fs", time_end - time_start)
+
 
         time_start = perf_counter()
 
