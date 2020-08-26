@@ -402,3 +402,5 @@ class Blocks:
 
         update_hot_and_tranding_for_block_range( first_block, last_block )
         update_active_starting_from_posts_on_block( first_block, last_block )
+
+        DB.query("SELECT update_hive_posts_root_id({},{})".format(first_block, last_block))
