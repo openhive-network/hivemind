@@ -35,12 +35,12 @@ update_active_sql = """
     	WHERE hp2.depth > 0 AND pp.intrusive_active > hp2.active
     )
    UPDATE
-	   hive_posts
+       hive_posts
    SET
-	   active = new_active
+       active = new_active
    FROM
    (
-        SELECT hp.id as post_id, MAX(pp.intrusive_active) as new_active
+        SELECT hp.id as post_id, max_time_stamp( hp.active, MAX(pp.intrusive_active)) as new_active
         FROM parent_posts pp
         JOIN hive_posts hp ON pp.parent_id = hp.id GROUP BY hp.id
     ) as dataset
