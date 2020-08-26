@@ -1008,7 +1008,7 @@ def setup(db):
           WHERE NOT hp2.is_muted
                 AND hp2.counter_deleted = 0
                 AND hp2.root_id > __root_id
-                OR hp2.root_id = __root_id AND hp2.id >= __post_id
+                OR hp2.root_id = __root_id AND hp2.id >= __post_id AND hp2.id > 0
           ORDER BY
              hp2.root_id ASC
             ,hp2.id ASC
