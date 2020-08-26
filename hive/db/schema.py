@@ -68,7 +68,7 @@ def build_metadata():
     sa.Table(
         'hive_posts', metadata,
         sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('root_id', sa.Integer), # Null means = id
+        sa.Column('root_id', sa.Integer, nullable=False), # records having initially set 0 will be updated to their id
         sa.Column('parent_id', sa.Integer, nullable=False),
         sa.Column('author_id', sa.Integer, nullable=False),
         sa.Column('permlink_id', sa.BigInteger, nullable=False),
@@ -137,7 +137,9 @@ def build_metadata():
         sa.Index('hive_posts_permlink_id', 'permlink_id'),
 
         sa.Index('hive_posts_depth_idx', 'depth'),
-        sa.Index('hive_posts_root_id_idx', sa.func.coalesce('root_id','id')),
+
+        sa.Index('hive_posts_root_id_id_idx', 'root_id','id'),
+
         sa.Index('hive_posts_parent_id_idx', 'parent_id'),
         sa.Index('hive_posts_community_id_idx', 'community_id'),
         sa.Index('hive_posts_author_id', 'author_id'),
@@ -149,7 +151,7 @@ def build_metadata():
         sa.Index('hive_posts_sc_trend_idx', 'sc_trend'),
         sa.Index('hive_posts_sc_hot_idx', 'sc_hot'),
         sa.Index('hive_posts_created_at_idx', 'created_at'),
-	sa.Index('hive_posts_block_num_idx', 'block_num')
+        sa.Index('hive_posts_block_num_idx', 'block_num')
     )
 
     sa.Table(
@@ -454,7 +456,10 @@ def setup(db):
                    ELSE NULL
                 END) AS community_id,
                 COALESCE(php.category_id, (select hcg.id from hive_category_data hcg where hcg.category = _parent_permlink)) AS category_id,
-                COALESCE(php.root_id, php.id) AS root_id,
+                (CASE(php.root_id)
+                   WHEN 0 THEN php.id
+                   ELSE php.root_id
+                 END) AS root_id,
                 php.is_muted AS is_muted, php.is_valid AS is_valid,
                 ha.id AS author_id, hpd.id AS permlink_id, _date AS created_at,
                 _date AS updated_at,
@@ -495,7 +500,7 @@ def setup(db):
                   ELSE NULL
                 END) AS community_id,
                 (SELECT hcg.id FROM hive_category_data hcg WHERE hcg.category = _parent_permlink) AS category_id,
-                Null as root_id, -- will use id as root one if no parent
+                0 as root_id, -- will use id as root one if no parent
                 false AS is_muted, true AS is_valid,
                 ha.id AS author_id, hpd.id AS permlink_id, _date AS created_at,
                 _date AS updated_at,
@@ -559,7 +564,7 @@ def setup(db):
           AS
           SELECT hp.id,
             hp.community_id,
-            COALESCE( hp.root_id, hp.id ) AS root_id,
+            hp.root_id AS root_id,
             hp.parent_id,
             ha_a.name AS author,
             hp.active,
@@ -657,7 +662,7 @@ def setup(db):
             ) AS abs_rshares
             FROM hive_posts hp
             JOIN hive_posts pp ON pp.id = hp.parent_id
-            JOIN hive_posts rp ON rp.id = COALESCE( hp.root_id, hp.id )
+            JOIN hive_posts rp ON rp.id = hp.root_id
             JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
             JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
             JOIN hive_post_data hpd ON hpd.id = hp.id
@@ -671,6 +676,26 @@ def setup(db):
             LEFT OUTER JOIN hive_communities hc ON (hp.community_id = hc.id)
             LEFT OUTER JOIN hive_roles hr ON (hp.author_id = hr.account_id AND hp.community_id = hr.community_id)
             ;
+          """
+    db.query_no_return(sql)
+
+    sql = """
+          DROP FUNCTION IF EXISTS public.update_hive_posts_root_id(INTEGER, INTEGER);
+
+          CREATE OR REPLACE FUNCTION public.update_hive_posts_root_id(in _first_block_num INTEGER, _last_block_num INTEGER)
+              RETURNS void
+              LANGUAGE 'plpgsql'
+              VOLATILE
+          AS $BODY$
+          BEGIN
+
+          --- _first_block_num can be null togegher with _last_block_num
+          UPDATE hive_posts uhp
+          SET root_id = id
+          WHERE uhp.root_id = 0 AND (_first_block_num IS NULL OR (uhp.block_num >= _first_block_num AND uhp.block_num <= _last_block_num))
+          ;
+          END
+          $BODY$;
           """
     db.query_no_return(sql)
 
@@ -907,27 +932,27 @@ def setup(db):
           __post_id = find_comment_id(_start_post_author,_start_post_permlink);
           RETURN QUERY
           SELECT
-              hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
-              hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
-              hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
-              hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
-              hp.parent_author, hp.parent_permlink_or_category, hp.curator_payout_value, hp.root_author, hp.root_permlink,
-              hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
-              hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
-              hp.active, hp.author_rewards
-          FROM
-              hive_posts_view hp
-          WHERE
-              NOT hp.is_muted AND
-              hp.counter_deleted = 0 AND
-              hp.root_id > __root_id OR
-              hp.root_id = __root_id AND
-              hp.id >= __post_id
+            hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
+            hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
+            hp.children, hp.votes, hp.created_at, hp.updated_at, hp.rshares, hp.json,
+            hp.is_hidden, hp.is_grayed, hp.total_votes, hp.net_votes, hp.total_vote_weight, hp.flag_weight,
+            hp.parent_author, hp.parent_permlink_or_category, hp.curator_payout_value, hp.root_author, hp.root_permlink,
+            hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
+            hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
+            hp.active, hp.author_rewards
+          FROM hive_posts_view hp
+          INNER JOIN 
+          (
+          SELECT hp2.id, hp2.root_id FROM hive_posts hp2
+          WHERE NOT hp2.is_muted
+                AND hp2.counter_deleted = 0
+                AND hp2.root_id > __root_id
+                OR hp2.root_id = __root_id AND hp2.id >= __post_id
           ORDER BY
-              root_id ASC,
-              id ASC
-          LIMIT
-              _limit
+             hp2.root_id ASC
+            ,hp2.id ASC
+          LIMIT _limit
+          ) ds on hp.id = ds.id
           ;
         END
         $function$
@@ -1235,10 +1260,10 @@ def setup(db):
         IMMUTABLE
         AS $BODY$
         BEGIN
-	        IF _first > _second THEN
-	             RETURN _first;
+          IF _first > _second THEN
+               RETURN _first;
             ELSE
-	             RETURN _second;
+               RETURN _second;
             END IF;
         END
         $BODY$;
