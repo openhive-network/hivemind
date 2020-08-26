@@ -558,6 +558,67 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
+        DROP VIEW IF EXISTS public.hive_posts_base_view;
+
+        CREATE OR REPLACE VIEW public.hive_posts_base_view
+        AS
+        SELECT hp.id,
+          hp.community_id,
+          hp.root_id,
+          hp.parent_id,
+          hp.category_id,
+          hcd.category,
+          ha_a.name AS author,
+          hp.active,
+          hp.author_rewards,
+          hp.author_id,
+          hpd_p.permlink,
+          hp.depth,
+          hp.promoted,
+          hp.payout,
+          hp.pending_payout,
+          hp.payout_at,
+          hp.last_payout_at,
+          hp.cashout_time,
+          hp.is_paidout,
+          hp.children,
+          hp.created_at,
+          hp.updated_at,
+          ha_a.reputation AS author_rep,
+          hp.is_hidden,
+          hp.is_grayed,
+          hp.flag_weight,
+          ha_pp.name AS parent_author,
+              CASE hp.depth > 0
+                  WHEN true THEN hpd_pp.permlink
+                  ELSE hcd.category
+              END AS parent_permlink_or_category,
+          hp.curator_payout_value,
+          hp.max_accepted_payout,
+          hp.percent_hbd,
+          true AS allow_replies,
+          hp.allow_votes,
+          hp.allow_curation_rewards,
+          hp.beneficiaries,
+          hp.sc_trend,
+          hp.sc_hot,
+          hp.counter_deleted,
+          hp.is_pinned,
+          hp.is_muted,
+          hp.is_nsfw,
+          hp.is_valid
+          FROM hive_posts hp
+          INNER JOIN hive_posts pp ON pp.id = hp.parent_id
+          INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+          INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+          INNER JOIN hive_accounts ha_pp ON ha_pp.id = pp.author_id
+          INNER JOIN hive_permlink_data hpd_pp ON hpd_pp.id = pp.permlink_id
+          LEFT OUTER JOIN hive_category_data hcd ON hcd.id = hp.category_id
+          ;
+          """
+    db.query_no_return(sql)
+
+    sql = """
         DROP VIEW IF EXISTS public.hive_posts_view;
 
         CREATE OR REPLACE VIEW public.hive_posts_view
