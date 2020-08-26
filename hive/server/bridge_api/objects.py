@@ -66,11 +66,11 @@ async def load_posts_keyed(db, ids, truncate_body=0):
             hp.created_at,
             hp.updated_at,
             hp.rshares,
+            hp.abs_rshares,
             hp.json,
             hp.is_hidden,
             hp.is_grayed,
             hp.total_votes,
-            hp.flag_weight,
             hp.parent_author,
             hp.parent_permlink_or_category,
             hp.curator_payout_value,
@@ -251,11 +251,17 @@ def _bridge_post_object(row, truncate_body=0):
     post['replies'] = []
     post['author_reputation'] = float(row['author_rep'])
 
+    neg_rshares = ( row['rshares'] - row['abs_rshares'] ) // 2 # effectively sum of all negative rshares
+    # take negative rshares, divide by 2, truncate 10 digits (plus neg sign),
+    #   and count digits. creates a cheap log10, stake-based flag weight.
+    #   result: 1 = approx $400 of downvoting stake; 2 = $4,000; etc
+    flag_weight = max((len(str(int(neg_rshares / 2))) - 11, 0))
+
     post['stats'] = {
         'hide': row['is_hidden'],
         'gray': row['is_grayed'],
         'total_votes': row['total_votes'],
-        'flag_weight': float(row['flag_weight'])} # TODO: down_weight
+        'flag_weight': float(flag_weight)} # TODO: down_weight
 
 
     #post['author_reputation'] = rep_to_raw(row['author_rep'])

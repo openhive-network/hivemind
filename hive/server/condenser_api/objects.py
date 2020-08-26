@@ -65,7 +65,6 @@ async def load_posts_keyed(db, ids, truncate_body=0):
         hp.is_hidden,
         hp.is_grayed,
         hp.total_votes,
-        hp.flag_weight,
         hp.parent_author,
         hp.parent_permlink_or_category,
         hp.curator_payout_value,

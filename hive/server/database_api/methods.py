@@ -101,7 +101,6 @@ async def find_comments(context, comments: list):
             hp.total_votes,
             hp.net_votes,
             hp.total_vote_weight,
-            hp.flag_weight,
             hp.parent_author,
             hp.parent_permlink_or_category,
             hp.curator_payout_value,
