@@ -185,6 +185,12 @@ class DbState:
 
         time_start = perf_counter()
 
+        DbState.db().query_no_return( "VACUUM" )
+
+        time_end = perf_counter()
+        log.info("[INIT] VACUUM executed in %fs", time_end - time_start)
+
+        time_start = perf_counter()
         # Update count of all child posts (what was hold during initial sync)
         sql = """
               select update_hive_posts_children_count()
@@ -205,10 +211,15 @@ class DbState:
         time_end = perf_counter()
         log.info("[INIT] update_hive_posts_root_id executed in %fs", time_end - time_start)
 
+        time_start = perf_counter()
+
+        DbState.db().query_no_return( "VACUUM" )
+
+        time_end = perf_counter()
+        log.info("[INIT] VACUUM executed in %fs", time_end - time_start)
 
         time_start = perf_counter()
 
-        DbState.db().query_no_return( "VACUUM ANALYZE hive_posts" )
         update_all_hot_and_tranding()
 
         time_end = perf_counter()
