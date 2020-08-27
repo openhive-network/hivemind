@@ -205,6 +205,16 @@ class DbState:
         time_end = perf_counter()
         log.info("[INIT] update_hive_posts_root_id executed in %fs", time_end - time_start)
 
+        time_start = perf_counter()
+
+        # Update root_id all root posts
+        sql = """
+              select update_hive_posts_api_helper(NULL, NULL)
+              """
+        row = DbState.db().query_row(sql)
+
+        time_end = perf_counter()
+        log.info("[INIT] update_hive_posts_api_helper executed in %fs", time_end - time_start)
 
         time_start = perf_counter()
 
