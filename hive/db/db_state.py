@@ -208,6 +208,7 @@ class DbState:
 
         time_start = perf_counter()
 
+        DbState.db().query_no_return( "VACUUM ANALYZE hive_posts" )
         update_all_hot_and_tranding()
 
         time_end = perf_counter()

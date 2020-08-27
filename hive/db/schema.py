@@ -1002,7 +1002,7 @@ def setup(db):
             hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
             hp.active, hp.author_rewards
           FROM hive_posts_view hp
-          INNER JOIN 
+          INNER JOIN
           (
           SELECT hp2.id, hp2.root_id FROM hive_posts hp2
           WHERE NOT hp2.is_muted
