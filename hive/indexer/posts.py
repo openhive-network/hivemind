@@ -365,9 +365,9 @@ class Posts:
         percent_hbd = op['percent_hbd'] if 'percent_hbd' in op else 10000
         extensions = op['extensions'] if 'extensions' in op else []
         beneficiaries = []
-        for extension in extensions:
-            if 'beneficiaries' in extensions:
-                beneficiaries = extension['beneficiaries']
+        for ex in extensions:
+            if 'type' in ex and ex['type'] == 'comment_payout_beneficiaries' and 'beneficiaries' in ex['value']:
+                beneficiaries = ex['value']['beneficiaries']
         sql = """
             UPDATE
                 hive_posts hp

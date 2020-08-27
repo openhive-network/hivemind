@@ -145,24 +145,27 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
     assert sort in ['trending', 'hot', 'created', 'promoted',
                     'payout', 'payout_comments']
 
-    params = {             # field      pending posts   comment promoted    todo        community
-        'trending':        ('hp.sc_trend', True,   False,  False,  False),   # posts=True  pending=False
-        'hot':             ('hp.sc_hot',   True,   False,  False,  False),   # posts=True  pending=False
-        'created':         ('hp.id',  False,  True,   False,  False),
-        'promoted':        ('hp.promoted', False,   False,  False,  True),    # posts=True
-        'payout':          ('hp.payout',   True,   True,   False,  False),
-        'payout_comments': ('hp.payout',   True,   False,  True,   False),
+    params = {             # field         # raw field  pending posts  comment promoted  todo    community
+        'trending':        ('hp.sc_trend', 'sc_trend',  True,          False,            False,  False),   # posts=True  pending=False
+        'hot':             ('hp.sc_hot',   'sc_hot',    True,          False,            False,  False),   # posts=True  pending=False
+        'created':         ('hp.id',       'id',        False,         True,             False,  False),
+        'promoted':        ('hp.promoted', 'promoted',  False,         False,            False,  True),    # posts=True
+        'payout':          ('(hp.payout+hp.pending_payout)',
+                            '(payout+pending_payout)',  True,          True,             False,  False),
+        'payout_comments': ('(hp.payout+hp.pending_payout)',
+                            '(payout+pending_payout)',  True,          False,            True,   False),
     }[sort]
 
     table = 'hive_posts'
     field = params[0]
+    raw_field = params[1]
     where = []
 
     # primary filters
-    if params[1]: where.append("hp.is_paidout = '0'")
-    if params[2]: where.append('hp.depth = 0')
-    if params[3]: where.append('hp.depth > 0')
-    if params[4]: where.append('hp.promoted > 0')
+    if params[2]: where.append("hp.is_paidout = '0'")
+    if params[3]: where.append('hp.depth = 0')
+    if params[4]: where.append('hp.depth > 0')
+    if params[5]: where.append('hp.promoted > 0')
 
     # filter by community, category, or tag
     if tag:
@@ -189,7 +192,7 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
     start_id = None
     if start_permlink and start_author:
         sql = "%s <= (SELECT %s FROM %s WHERE id = (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :start_author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :start_permlink)))"
-        where.append(sql % (field, field, table))
+        where.append(sql % (field, raw_field, table))
 
     sql = """
         SELECT
@@ -202,7 +205,7 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
             hp.category,
             hp.depth,
             hp.promoted,
-            hp.payout,
+            ( hp.payout + hp.pending_payout ) AS payout,
             hp.payout_at,
             hp.is_paidout,
             hp.children,
@@ -214,7 +217,6 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
             hp.is_hidden,
             hp.is_grayed,
             hp.total_votes,
-            hp.flag_weight,
             hp.parent_author,
             hp.parent_permlink_or_category,
             hp.curator_payout_value,
@@ -284,6 +286,8 @@ async def pids_by_blog_by_index(db, account: str, start_index: int, limit: int =
         start_index = await db.query_one(sql, account=account)
         if start_index < 0:
             return (0, [])
+        if limit > start_index + 1:
+            limit = start_index + 1
 
     offset = start_index - limit + 1
     assert offset >= 0, ('start_index and limit combination is invalid (%d, %d)'
@@ -443,7 +447,9 @@ async def get_accounts(db, accounts: list):
 
     result = await db.query_all(sql)
     for row in result:
-        account_data = dict(loads(row.raw_json))
+        account_data = {}
+        if not row.raw_json is None and row.raw_json != '':
+            account_data = dict(loads(row.raw_json))
         account_data['created_at'] = row.created_at.isoformat()
         account_data['reputation'] = row.reputation
         account_data['display_name'] = row.display_name

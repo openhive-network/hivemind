@@ -82,30 +82,29 @@ def post_to_internal(post, post_id, level='insert', promoted=None):
         values.append(('promoted', promoted))
 
     # update unconditionally
-    payout = post_payout(post)
-    stats = post_stats(post)
+    payout_and_stats = post_payout_and_stats(post)
 
     # //--
     # if community - override fields.
     # TODO: make conditional (date-based?)
     assert 'community_id' in post, 'comm_id not loaded'
     if post['community_id']:
-        stats['hide'] = post['hide']
-        stats['gray'] = post['gray']
+        payout_and_stats['hide'] = post['hide']
+        payout_and_stats['gray'] = post['gray']
     # //--
 
     values.extend([
-        ('payout',      payout['payout']),
-        ('rshares',     payout['rshares']),
-        ('votes',       payout['csvotes']),
-        ('sc_trend',    payout['sc_trend']),
-        ('sc_hot',      payout['sc_hot']),
-        ('flag_weight', stats['flag_weight']),
-        ('total_votes', stats['total_votes']),
-        ('up_votes',    stats['up_votes']),
-        ('is_hidden',   stats['hide']),
-        ('is_grayed',   stats['gray']),
-        ('author_rep',  stats['author_rep']),
+        ('payout',      payout_and_stats['payout']),
+        ('rshares',     payout_and_stats['rshares']),
+        ('abs_rshares', payout_and_stats['abs_rshares']),
+        ('votes',       payout_and_stats['csvotes']),
+        ('sc_trend',    payout_and_stats['sc_trend']),
+        ('sc_hot',      payout_and_stats['sc_hot']),
+        ('total_votes', payout_and_stats['total_votes']),
+        ('up_votes',    payout_and_stats['up_votes']),
+        ('is_hidden',   payout_and_stats['hide']),
+        ('is_grayed',   payout_and_stats['gray']),
+        ('author_rep',  payout_and_stats['author_rep']),
         ('children',    min(post['children'], 32767)),
     ])
 
@@ -193,8 +192,33 @@ def post_legacy(post):
                'allow_curation_rewards', 'beneficiaries']
     return {k: v for k, v in post.items() if k in _legacy}
 
-def post_payout(post):
-    """Get current vote/payout data and recalculate trend/hot score."""
+def post_payout_and_stats(post):
+    """Get post statistics, derived properties, current vote/payout data and recalculate trend/hot score.
+
+    Source: contentStats - https://github.com/steemit/condenser/blob/master/src/app/utils/StateFunctions.js#L109
+    """
+
+    net_rshares = 0
+    abs_rshares = 0
+    total_votes = 0
+    up_votes = 0
+    for vote in post['active_votes']:
+        rshares = int(vote['rshares'])
+
+        if rshares == 0:
+            continue
+
+        total_votes += 1
+        net_rshares += rshares
+        if rshares > 0:
+            up_votes += 1
+            abs_rshares += rshares
+        if rshares < 0:
+            abs_rshares -= rshares
+
+    author_rep = rep_log10(post['author_reputation'])
+    has_pending_payout = sbd_amount(post['pending_payout_value']) >= 0.02
+
     # total payout (completed and/or pending)
     payout = sum([
         sbd_amount(post['total_payout_value']),
@@ -206,18 +230,24 @@ def post_payout(post):
     # is caught ASAP. if no active_votes then rshares MUST be 0. ref: steem#2568
     assert post['active_votes'] or int(post['net_rshares']) == 0
 
-    # get total rshares, and create comma-separated vote data blob
-    rshares = sum(int(v['rshares']) for v in post['active_votes'])
+    # create comma-separated vote data blob
     csvotes = "\n".join(map(_vote_csv_row, post['active_votes']))
 
     # trending scores
     _timestamp = utc_timestamp(parse_time(post['created']))
-    sc_trend = _score(rshares, _timestamp, 240000)
-    sc_hot = _score(rshares, _timestamp, 10000)
+    sc_trend = _score(net_rshares, _timestamp, 240000)
+    sc_hot = _score(net_rshares, _timestamp, 10000)
 
     return {
+        'hide': author_rep < 0 and not has_pending_payout,
+        'gray': author_rep < 1,
+        'author_rep': author_rep,
+        'flag_weight': flag_weight,
+        'total_votes': total_votes,
+        'up_votes': up_votes,
         'payout': payout,
-        'rshares': rshares,
+        'rshares': net_rshares,
+        'abs_rshares': abs_rshares,
         'csvotes': csvotes,
         'sc_trend': sc_trend,
         'sc_hot': sc_hot
@@ -237,38 +267,3 @@ def _score(rshares, created_timestamp, timescale=480000):
     order = math.log10(max((abs(mod_score), 1)))
     sign = 1 if mod_score > 0 else -1
     return sign * order + created_timestamp / timescale
-
-def post_stats(post):
-    """Get post statistics and derived properties.
-
-    Source: contentStats - https://github.com/steemit/condenser/blob/master/src/app/utils/StateFunctions.js#L109
-    """
-    neg_rshares = 0
-    total_votes = 0
-    up_votes = 0
-    for vote in post['active_votes']:
-        rshares = int(vote['rshares'])
-
-        if rshares == 0:
-            continue
-
-        total_votes += 1
-        if rshares > 0: up_votes += 1
-        if rshares < 0: neg_rshares += rshares
-
-    # take negative rshares, divide by 2, truncate 10 digits (plus neg sign),
-    #   and count digits. creates a cheap log10, stake-based flag weight.
-    #   result: 1 = approx $400 of downvoting stake; 2 = $4,000; etc
-    flag_weight = max((len(str(int(neg_rshares / 2))) - 11, 0))
-
-    author_rep = rep_log10(post['author_reputation'])
-    has_pending_payout = sbd_amount(post['pending_payout_value']) >= 0.02
-
-    return {
-        'hide': author_rep < 0 and not has_pending_payout,
-        'gray': author_rep < 1,
-        'author_rep': author_rep,
-        'flag_weight': flag_weight,
-        'total_votes': total_votes,
-        'up_votes': up_votes
-    }
