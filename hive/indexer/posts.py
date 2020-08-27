@@ -406,8 +406,8 @@ class Posts:
                 # populated with deleted posts somwrimas
                 FeedCache.delete(pid)
 
-        # force parent child recount when child is deleted
-        cls.update_child_count(pid, '-')
+            # force parent child recount when child is deleted
+            cls.update_child_count(pid, '-')
 
     @classmethod
     def _insert_feed_cache(cls, result, date):
