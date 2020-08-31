@@ -121,7 +121,7 @@ async def find_comments(context, comments: list):
             hive_posts_view hp
         JOIN (VALUES {}) AS t (author, permlink) ON hp.author = t.author AND hp.permlink = t.permlink
         WHERE
-            NOT hp.is_muted AND hp.counter_deleted = 0
+            NOT hp.is_muted
     """
 
     idx = 0

@@ -21,7 +21,7 @@ async def get_post_id(db, author, permlink):
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
         INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
         WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
-            AND counter_deleted = 0 LIMIT 1"""
+            AND counter_deleted = 0 LIMIT 1""" # ABW: replace with find_comment_id(:author,:permlink)?
     return await db.query_one(sql, author=author, permlink=permlink)
 
 async def get_child_ids(db, post_id):
@@ -37,7 +37,7 @@ async def _get_post_id(db, author, permlink):
         FROM hive_posts hp
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
         INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        WHERE ha_a.name = :author AND hpd_p.permlink = :permlink"""
+        WHERE ha_a.name = :author AND hpd_p.permlink = :permlink""" # ABW: what's the difference between that and get_post_id?
     return await db.query_one(sql, author=author, permlink=permlink)
 
 async def _get_account_id(db, name):
@@ -191,7 +191,7 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
 
     start_id = None
     if start_permlink and start_author:
-        sql = "%s <= (SELECT %s FROM %s WHERE id = (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :start_author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :start_permlink)))"
+        sql = "%s <= (SELECT %s FROM %s WHERE id = find_comment_id('{}', '{}'))".format(start_author, start_permlink)
         where.append(sql % (field, raw_field, table))
 
     sql = """

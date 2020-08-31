@@ -383,7 +383,7 @@ class Posts:
         """
         DB.query(sql, author=op['author'], permlink=op['permlink'], max_accepted_payout=max_accepted_payout,
                  percent_hbd=percent_hbd, allow_votes=allow_votes, allow_curation_rewards=allow_curation_rewards,
-                 beneficiaries=beneficiaries)
+                 beneficiaries=dumps(beneficiaries))
 
     @classmethod
     def delete(cls, op):
