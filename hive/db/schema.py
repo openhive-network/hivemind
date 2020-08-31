@@ -658,7 +658,6 @@ def setup(db):
           rpd.title AS root_title,
           hp.sc_trend,
           hp.sc_hot,
-          hp.counter_deleted,
           hp.is_pinned,
           hp.is_muted,
           hp.is_nsfw,
@@ -683,7 +682,7 @@ def setup(db):
             JOIN hive_category_data rcd ON rcd.id = rp.category_id
             LEFT JOIN hive_communities hc ON hp.community_id = hc.id
             LEFT JOIN hive_roles hr ON hp.author_id = hr.account_id AND hp.community_id = hr.community_id
-            ;
+          WHERE hp.counter_deleted = 0;
           """
     db.query_no_return(sql)
 
@@ -786,7 +785,7 @@ def setup(db):
       FROM hive_posts hp
       JOIN hive_accounts ha ON ha.id = hp.author_id
       JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
-      WHERE ha.name = _author AND hpd.permlink = _permlink
+      WHERE ha.name = _author AND hpd.permlink = _permlink AND hp.counter_deleted = 0
       ), 0 );
       $function$
       LANGUAGE sql
@@ -868,7 +867,6 @@ def setup(db):
               hive_posts_view hp
           WHERE
               NOT hp.is_muted AND
-              hp.counter_deleted = 0 AND
               hp.cashout_time > _cashout_time OR
               hp.cashout_time = _cashout_time AND hp.id >= __post_id
           ORDER BY
@@ -906,7 +904,6 @@ def setup(db):
               hive_posts_view hp
           WHERE
               NOT hp.is_muted AND
-              hp.counter_deleted = 0 AND
               hp.author > _author OR
               hp.author = _author AND hp.permlink >= _permlink
           ORDER BY
@@ -952,7 +949,6 @@ def setup(db):
           (
           SELECT hp2.id, hp2.root_id FROM hive_posts hp2
           WHERE NOT hp2.is_muted
-                AND hp2.counter_deleted = 0
                 AND hp2.root_id > __root_id
                 OR hp2.root_id = __root_id AND hp2.id >= __post_id AND hp2.id > 0
           ORDER BY
@@ -1008,8 +1004,7 @@ def setup(db):
               _limit
           ) ds ON ds.id = hp.id
         WHERE
-          NOT hp.is_muted AND
-          hp.counter_deleted = 0
+          NOT hp.is_muted
           ;
       $BODY$;
         ;
@@ -1043,7 +1038,6 @@ def setup(db):
               hive_posts_view hp
           WHERE
               NOT hp.is_muted AND
-              hp.counter_deleted = 0 AND
               hp.parent_author > _parent_author OR
               hp.parent_author = _parent_author AND ( hp.updated_at < _updated_at OR
               hp.updated_at = _updated_at AND hp.id >= __post_id )
@@ -1088,7 +1082,6 @@ def setup(db):
               hive_posts_view hp
           WHERE
               NOT hp.is_muted AND
-              hp.counter_deleted = 0 AND
               -- fat node used wrong index (by_last_update) so the results are vastly different
               hp.author > _author OR
               hp.author = _author AND ( hp.updated_at < _updated_at OR

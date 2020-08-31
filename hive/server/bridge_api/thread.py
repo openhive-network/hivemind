@@ -29,7 +29,7 @@ async def get_discussion(context, author, permlink, observer=None):
             id, parent_id
           FROM hive_posts_view hpv WHERE hpv.author = :author
             AND hpv.permlink = :permlink
-            AND hpv.counter_deleted = 0 AND NOT hpv.is_muted
+            AND NOT hpv.is_muted
           UNION ALL
           SELECT
             children.id, children.parent_id
@@ -80,7 +80,7 @@ async def get_discussion(context, author, permlink, observer=None):
           hpv.curator_payout_value
         FROM child_posts cp
         INNER JOIN hive_posts_view hpv ON (hpv.id = cp.id)
-        WHERE hpv.counter_deleted = 0 AND NOT hpv.is_muted
+        WHERE NOT hpv.is_muted
         ORDER BY cp.id
         LIMIT 2000
     """
