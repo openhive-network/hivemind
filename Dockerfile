@@ -39,7 +39,8 @@ RUN \
         runit \
         s3cmd \
         libpcre3 \
-        libpcre3-dev
+        libpcre3-dev \
+        git
 
 RUN \
     pip3 install --upgrade pip setuptools
