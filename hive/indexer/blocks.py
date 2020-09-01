@@ -219,8 +219,8 @@ class Blocks:
 
                 # account metadata updates
                 if op_type == 'account_update_operation':
-                    if not is_initial_sync:
-                        Accounts.dirty(op['account']) # full
+                    #if not is_initial_sync:
+                    Accounts.dirty(op['account']) # full
                 elif op_type == 'account_update2_operation':
                     if not is_initial_sync:
                         Accounts.dirty(op['account']) # full
