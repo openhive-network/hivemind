@@ -12,10 +12,12 @@ from hive.db.schema import (setup, reset_autovac, build_metadata,
                             build_metadata_community, teardown, DB_VERSION)
 from hive.db.adapter import Db
 
-from hive.utils.trends import update_all_hot_and_tranding
-from hive.utils.post_active import update_all_posts_active
+from hive.utils.trends import update_hot_and_tranding_for_block_range
+from hive.utils.post_active import update_active_starting_from_posts_on_block
 
 log = logging.getLogger(__name__)
+
+SYNCED_BLOCK_LIMIT = 12*1200
 
 class DbState:
     """Manages database state: sync status, migrations, etc."""
@@ -66,10 +68,10 @@ class DbState:
         return cls._db
 
     @classmethod
-    def finish_initial_sync(cls):
+    def finish_initial_sync(cls, current_imported_block, last_imported_block):
         """Set status to initial sync complete."""
         assert cls._is_initial_sync, "initial sync was not started."
-        cls._after_initial_sync()
+        cls._after_initial_sync(current_imported_block, last_imported_block)
         cls._is_initial_sync = False
         log.info("[INIT] Initial sync complete!")
 
@@ -165,30 +167,39 @@ class DbState:
         log.info("[INIT] Finish pre-initial sync hooks")
 
     @classmethod
-    def _after_initial_sync(cls):
+    def _after_initial_sync(cls, current_imported_block, last_imported_block):
         """Routine which runs *once* after initial sync.
 
         Re-creates non-core indexes for serving APIs after init sync,
         as well as all foreign keys."""
 
-        engine = cls.db().engine()
-        log.info("[INIT] Begin post-initial sync hooks")
+        assert current_imported_block >= last_imported_block
 
-        for index in cls._disableable_indexes():
-            log.info("Recreate index %s.%s", index.table, index.name)
-            try:
-                index.drop(engine)
-            except sqlalchemy.exc.ProgrammingError as ex:
-                log.warning("Ignoring ex: {}".format(ex))
+        synced_blocks = current_imported_block - last_imported_block
 
-            index.create(engine)
+        if synced_blocks >= SYNCED_BLOCK_LIMIT:
+            engine = cls.db().engine()
+            log.info("[INIT] Begin post-initial sync hooks")
+
+            for index in cls._disableable_indexes():
+                log.info("Recreate index %s.%s", index.table, index.name)
+                try:
+                    index.drop(engine)
+                except sqlalchemy.exc.ProgrammingError as ex:
+                    log.warning("Ignoring ex: {}".format(ex))
+
+                index.create(engine)
+
+            log.info("[INIT] Finish post-initial sync hooks")
+        else:
+            log.info("[INIT] Post-initial sync hooks skipped")
 
         time_start = perf_counter()
 
         # Update count of all child posts (what was hold during initial sync)
         sql = """
-              select update_hive_posts_children_count()
-              """
+              select update_hive_posts_children_count({}, {})
+              """.format(last_imported_block, current_imported_block)
         row = DbState.db().query_row(sql)
 
         time_end = perf_counter()
@@ -198,8 +209,8 @@ class DbState:
 
         # Update root_id all root posts
         sql = """
-              select update_hive_posts_root_id(NULL, NULL)
-              """
+              select update_hive_posts_root_id({}, {})
+              """.format(last_imported_block, current_imported_block)
         row = DbState.db().query_row(sql)
 
         time_end = perf_counter()
@@ -209,8 +220,8 @@ class DbState:
 
         # Update root_id all root posts
         sql = """
-              select update_hive_posts_api_helper(NULL, NULL)
-              """
+              select update_hive_posts_api_helper({}, {})
+              """.format(last_imported_block, current_imported_block)
         row = DbState.db().query_row(sql)
 
         time_end = perf_counter()
@@ -218,14 +229,14 @@ class DbState:
 
         time_start = perf_counter()
 
-        update_all_hot_and_tranding()
+        update_hot_and_tranding_for_block_range(last_imported_block, current_imported_block)
 
         time_end = perf_counter()
         log.info("[INIT] update_all_hot_and_tranding executed in %fs", time_end - time_start)
 
         time_start = perf_counter()
 
-        update_all_posts_active()
+        update_active_starting_from_posts_on_block(last_imported_block, current_imported_block)
 
         time_end = perf_counter()
         log.info("[INIT] update_all_posts_active executed in %fs", time_end - time_start)
@@ -233,8 +244,6 @@ class DbState:
         #for key in cls._all_foreign_keys():
         #    log.info("Create fk %s", key.name)
         #    key.create(engine)
-
-        log.info("[INIT] Finish post-initial sync hooks")
 
     @staticmethod
     def status():
