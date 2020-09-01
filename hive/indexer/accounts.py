@@ -141,13 +141,6 @@ class Accounts:
         return count
 
     @classmethod
-    def fetch_ranks(cls):
-        """Rebuild account ranks and store in memory for next update."""
-        sql = "SELECT id FROM hive_accounts ORDER BY vote_weight DESC"
-        for rank, _id in enumerate(DB.query_col(sql)):
-            cls._ranks[_id] = rank + 1
-
-    @classmethod
     def _cache_accounts(cls, accounts, steem, trx=True):
         """Fetch all `accounts` and write to db."""
         timer = Timer(len(accounts), 'account', ['rps', 'wps'])
@@ -170,9 +163,10 @@ class Accounts:
         """Prepare a SQL query from a steemd account."""
         vests = vests_amount(account['vesting_shares'])
 
-        vote_weight = (vests
-                       + vests_amount(account['received_vesting_shares'])
-                       - vests_amount(account['delegated_vesting_shares']))
+        #Not used. The member `vote_weight` from `hive_accounts` is removed.
+        # vote_weight = (vests
+        #                + vests_amount(account['received_vesting_shares'])
+        #                - vests_amount(account['delegated_vesting_shares']))
 
         proxy_weight = 0 if account['proxy'] else float(vests)
         for satoshis in account['proxied_vsf_votes']:
@@ -190,21 +184,12 @@ class Accounts:
         del account['json_metadata']
         del account['posting_json_metadata']
 
-        active_at = max(account['created'],
-                        account['last_account_update'],
-                        account['last_post'],
-                        account['last_root_post'],
-                        account['last_vote_time'])
-
         values = {
             'name':         account['name'],
             'created_at':   account['created'],
             'proxy':        account['proxy'],
-            'post_count':   account['post_count'],
             'reputation':   rep_log10(account['reputation']),
             'proxy_weight': proxy_weight,
-            'vote_weight':  vote_weight,
-            'active_at':    active_at,
             'cached_at':    cached_at,
 
             'display_name':  profile['name'],
