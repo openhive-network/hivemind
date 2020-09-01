@@ -10,7 +10,7 @@ async def accounts_by_name(db, names, observer=None, lite=True):
     """Find and return accounts by `name`."""
 
     sql = """SELECT id, name, display_name, about, created_at,
-                    vote_weight, rank, followers, following %s
+                    rank, followers, following %s
                FROM hive_accounts WHERE name IN :names"""
     fields = '' if lite else ', location, website, profile_image, cover_image'
     rows = await db.query_all(sql % fields, names=tuple(names))
@@ -21,7 +21,6 @@ async def accounts_by_name(db, names, observer=None, lite=True):
             'id': row['id'],
             'name': row['name'],
             'created': str(row['created_at']).split(' ')[0],
-            'sp': int(estimated_sp(row['vote_weight'])),
             'rank': row['rank'],
             'followers': row['followers'],
             'following': row['following'],

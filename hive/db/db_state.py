@@ -297,7 +297,6 @@ class DbState:
             cls._set_ver(3)
 
         if cls._ver == 3:
-            cls.db().query("CREATE INDEX hive_accounts_ix3 ON hive_accounts (vote_weight, name varchar_pattern_ops)")
             cls._set_ver(4)
 
         if cls._ver == 4:
