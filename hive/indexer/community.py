@@ -57,9 +57,9 @@ def assert_keys_match(keys, expected, allow_missing=True):
     extra = keys - expected
     assert not extra, 'extraneous keys: %s' % extra
 
-def process_json_community_op(actor, op_json, date):
+def process_json_community_op(actor, op_json, date, block_num):
     """Validates community op and apply state changes to db."""
-    CommunityOp.process_if_valid(actor, op_json, date)
+    CommunityOp.process_if_valid(actor, op_json, date, block_num)
 
 def read_key_bool(op, key):
     """Reads a key from dict, ensuring valid bool if present."""
@@ -104,7 +104,7 @@ class Community:
     _names = {}
 
     @classmethod
-    def register(cls, name, block_date):
+    def register(cls, name, block_date, block_num):
         """Block processing: hooks into new account registration.
 
         `Accounts` calls this method with any newly registered names.
@@ -119,17 +119,14 @@ class Community:
 
         # insert community
         sql = """INSERT INTO hive_communities (id, name, type_id, created_at)
-                        VALUES (:id, :name, :type_id, :date)"""
-        DB.query(sql, id=_id, name=name, type_id=type_id, date=block_date)
+                        VALUES (:id, :name, :type_id, :date, :block_num)"""
+        DB.query(sql, id=_id, name=name, type_id=type_id, date=block_date, block_num=block_num)
 
         # insert owner
         sql = """INSERT INTO hive_roles (community_id, account_id, role_id, created_at)
                         VALUES (:community_id, :account_id, :role_id, :date)"""
         DB.query(sql, community_id=_id, account_id=_id,
                     role_id=Role.owner.value, date=block_date)
-
-        Notify('new_community', src_id=None, dst_id=_id,
-                when=block_date, community_id=_id).write()
 
     @classmethod
     def validated_id(cls, name):
@@ -275,9 +272,10 @@ class CommunityOp:
         'unsubscribe':    ['community'],
     }
 
-    def __init__(self, actor, date):
+    def __init__(self, actor, date, block_num):
         """Inits a community op for validation and processing."""
         self.date = date
+        self.block_num = block_num
         self.valid = False
         self.action = None
         self.op = None
@@ -302,9 +300,9 @@ class CommunityOp:
         self.props = None
 
     @classmethod
-    def process_if_valid(cls, actor, op_json, date):
+    def process_if_valid(cls, actor, op_json, date, block_num):
         """Helper to instantiate, validate, process an op."""
-        op = CommunityOp(actor, date)
+        op = CommunityOp(actor, date, block_num)
         if op.validate(op_json):
             op.process()
             return True
@@ -353,6 +351,7 @@ class CommunityOp:
             role_id=self.role_id,
             notes=self.notes,
             title=self.title,
+            block_num=self.block_num
         )
 
         # Community-level commands
@@ -364,12 +363,11 @@ class CommunityOp:
 
         elif action == 'subscribe':
             DB.query("""INSERT INTO hive_subscriptions
-                               (account_id, community_id, created_at)
-                        VALUES (:actor_id, :community_id, :date)""", **params)
+                               (account_id, community_id, created_at, block_num)
+                        VALUES (:actor_id, :community_id, :date, :block_num)""", **params)
             DB.query("""UPDATE hive_communities
                            SET subscribers = subscribers + 1
                          WHERE id = :community_id""", **params)
-            self._notify('subscribe')
         elif action == 'unsubscribe':
             DB.query("""DELETE FROM hive_subscriptions
                          WHERE account_id = :actor_id
@@ -384,7 +382,7 @@ class CommunityOp:
                                (account_id, community_id, role_id, created_at)
                         VALUES (:account_id, :community_id, :role_id, :date)
                             ON CONFLICT (account_id, community_id)
-                            DO UPDATE SET role_id = :role_id""", **params)
+                            DO UPDATE SET role_id = :role_id """, **params)
             self._notify('set_role', payload=Role(self.role_id).name)
         elif action == 'setUserTitle':
             DB.query("""INSERT INTO hive_roles

@@ -70,7 +70,7 @@ class Accounts:
         return False
 
     @classmethod
-    def register(cls, name, block_date):
+    def register(cls, name, block_date, block_num):
         """Block processing: register "candidate" names.
 
         There are four ops which can result in account creation:
@@ -95,7 +95,7 @@ class Accounts:
         # post-insert: pass to communities to check for new registrations
         from hive.indexer.community import Community, START_DATE
         if block_date > START_DATE:
-            Community.register(name, block_date)
+            Community.register(name, block_date, block_num)
 
     # account cache methods
     # ---------------------

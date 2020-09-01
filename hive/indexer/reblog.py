@@ -20,7 +20,7 @@ DELETE_SQL = """
         INNER JOIN hive_permlink_data hpd ON hp.permlink_id = hpd.id
         WHERE ha.name = :a AND hpd.permlink = :permlink AND hp.depth <= 0
     )
-    DELETE FROM hive_reblogs AS hr 
+    DELETE FROM hive_reblogs AS hr
     WHERE hr.account = :a AND hr.post_id IN (SELECT ps.post_id FROM processing_set ps)
     RETURNING hr.post_id, (SELECT ps.account_id FROM processing_set ps) AS account_id
 """
@@ -36,8 +36,8 @@ SELECT_SQL = """
 INSERT_SQL = """
     INSERT INTO hive_reblogs (account, post_id, created_at, block_num)
 """ + SELECT_SQL + """
-    ON CONFLICT ON CONSTRAINT hive_reblogs_pk DO NOTHING
-    RETURNING post_id 
+    ON CONFLICT ON CONSTRAINT hive_reblogs_ux1 DO NOTHING
+    RETURNING post_id
 """
 
 class Reblog(DbAdapterHolder):
@@ -82,9 +82,6 @@ class Reblog(DbAdapterHolder):
                     result = dict(row)
                     post_id = result['post_id']
                     FeedCache.insert(post_id, blogger_id, block_date)
-                    Notify('reblog', src_id=blogger_id, dst_id=author_id,
-                           post_id=post_id, when=block_date,
-                           score=Accounts.default_score(blogger)).write()
                 else:
                     log.warning("Error in reblog: Insert operation returned `None` as `post_id`. Op details: {}".format(op_json))
     @classmethod
@@ -94,7 +91,7 @@ class Reblog(DbAdapterHolder):
             VALUES
         """
         sql_postfix = """
-            ON CONFLICT ON CONSTRAINT hive_reblogs_pk DO NOTHING
+            ON CONFLICT ON CONSTRAINT hive_reblogs_ux1 DO NOTHING
         """
 
         values = []

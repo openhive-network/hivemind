@@ -18,18 +18,18 @@ FOLLOWING = 'following'
 
 FOLLOW_ITEM_INSERT_QUERY = """
     INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists, block_num)
-    VALUES 
+    VALUES
         (
-            :flr, 
-            :flg, 
-            :at, 
-            :state, 
+            :flr,
+            :flg,
+            :at,
+            :state,
             (CASE :state
                 WHEN 3 THEN TRUE
                 WHEN 4 THEN FALSE
                 ELSE FALSE
             END
-            ), 
+            ),
             (CASE :state
                 WHEN 3 THEN FALSE
                 WHEN 4 THEN TRUE
@@ -38,18 +38,18 @@ FOLLOW_ITEM_INSERT_QUERY = """
             ),
             :block_num
         )
-    ON CONFLICT (follower, following) DO UPDATE 
-        SET 
-            state = (CASE EXCLUDED.state 
-                        WHEN 0 THEN 0 -- 0 blocks possibility to update state 
+    ON CONFLICT (follower, following) DO UPDATE
+        SET
+            state = (CASE EXCLUDED.state
+                        WHEN 0 THEN 0 -- 0 blocks possibility to update state
                         ELSE EXCLUDED.state
                      END),
-            blacklisted = (CASE EXCLUDED.state 
+            blacklisted = (CASE EXCLUDED.state
                               WHEN 3 THEN TRUE
                               WHEN 5 THEN FALSE
                               ELSE EXCLUDED.blacklisted
                           END),
-            follow_blacklists = (CASE EXCLUDED.state 
+            follow_blacklists = (CASE EXCLUDED.state
                                     WHEN 4 THEN TRUE
                                     WHEN 6 THEN FALSE
                                     ELSE EXCLUDED.follow_blacklists
@@ -89,7 +89,7 @@ class Follow(DbAdapterHolder):
 
             if k in cls.follow_items_to_flush:
                 old_value = cls.follow_items_to_flush.get(k)
-                old_value['state'] = op['state'] 
+                old_value['state'] = op['state']
                 cls.follow_items_to_flush[k] = old_value
             else:
                 cls.follow_items_to_flush[k] = dict(
@@ -105,10 +105,6 @@ class Follow(DbAdapterHolder):
             cls.db.query(FOLLOW_ITEM_INSERT_QUERY, **op)
             if new_state == 1:
                 Follow.follow(op['flr'], op['flg'])
-                if old_state is None:
-                    score = Accounts.default_score(op_json['follower'])
-                    Notify('follow', src_id=op['flr'], dst_id=op['flg'],
-                           when=op['at'], score=score).write()
             if old_state == 1:
                 Follow.unfollow(op['flr'], op['flg'])
 
@@ -178,18 +174,18 @@ class Follow(DbAdapterHolder):
               VALUES """
 
         sql_postfix = """
-              ON CONFLICT ON CONSTRAINT hive_follows_pk DO UPDATE 
-                SET 
-                    state = (CASE EXCLUDED.state 
-                                WHEN 0 THEN 0 -- 0 blocks possibility to update state 
+              ON CONFLICT ON CONSTRAINT hive_follows_ux1 DO UPDATE
+                SET
+                    state = (CASE EXCLUDED.state
+                                WHEN 0 THEN 0 -- 0 blocks possibility to update state
                                 ELSE EXCLUDED.state
                             END),
-                    blacklisted = (CASE EXCLUDED.state 
+                    blacklisted = (CASE EXCLUDED.state
                                     WHEN 3 THEN TRUE
                                     WHEN 5 THEN FALSE
                                     ELSE EXCLUDED.blacklisted
                                 END),
-                    follow_blacklists = (CASE EXCLUDED.state 
+                    follow_blacklists = (CASE EXCLUDED.state
                                             WHEN 4 THEN TRUE
                                             WHEN 6 THEN FALSE
                                             ELSE EXCLUDED.follow_blacklists
@@ -276,15 +272,15 @@ class Follow(DbAdapterHolder):
         log.info("[SYNC] query follower counts")
         sql = """
             CREATE TEMPORARY TABLE following_counts AS (
-                  SELECT id account_id, COUNT(state) num
-                    FROM hive_accounts
-               LEFT JOIN hive_follows hf ON id = hf.follower AND state = 1
-                GROUP BY id);
+                  SELECT ha.id account_id, COUNT(state) num
+                    FROM hive_accounts ha
+               LEFT JOIN hive_follows hf ON ha.id = hf.follower AND state = 1
+                GROUP BY ha.id);
             CREATE TEMPORARY TABLE follower_counts AS (
-                  SELECT id account_id, COUNT(state) num
-                    FROM hive_accounts
-               LEFT JOIN hive_follows hf ON id = hf.following AND state = 1
-                GROUP BY id);
+                  SELECT ha.id account_id, COUNT(state) num
+                    FROM hive_accounts ha
+               LEFT JOIN hive_follows hf ON ha.id = hf.following AND state = 1
+                GROUP BY ha.id);
         """
         cls.db.query(sql)
 

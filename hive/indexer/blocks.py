@@ -272,7 +272,7 @@ class Blocks:
                 elif op_type == 'create_claimed_account_operation':
                     account_name = op['new_account_name']
 
-                Accounts.register(account_name, cls._head_block_date)
+                Accounts.register(account_name, cls._head_block_date, num)
 
                 # account metadata updates
                 if op_type == 'account_update_operation':
