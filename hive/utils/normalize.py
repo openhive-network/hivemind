@@ -29,6 +29,7 @@ UNIT_NAI = {
 
 # convert special chars into their octal formats recognized by sql
 SPECIAL_CHARS = {
+    "\x00" : " ", # nul char cannot be stored in string column (ABW: if we ever find the need to store nul chars we'll need bytea, not text)
     "\r" : "\\015",
     "\n" : "\\012",
     "\v" : "\\013",
@@ -74,20 +75,21 @@ def escape_characters(text):
     ret = "E'"
 
     for ch in text:
-        if ch.isprintable() or ch in SPECIAL_CHARS:
-            try:
-                dw = SPECIAL_CHARS[ch]
-                ret = ret + dw
-            except KeyError:
-                ret = ret + ch
+        if ch in SPECIAL_CHARS:
+            dw = SPECIAL_CHARS[ch]
+            ret = ret + dw
+        elif ch.isprintable():
+            ret = ret + ch
         else:
+            # escaped_value = ch.encode('unicode-escape').decode('utf-8')
             ordinal = ord(ch)
-            if ordinal == 0 or ordinal >= 0x80:
-                escaped_value = 'u' + hex(ordinal)[2:]
-#                logging.info("Encoded unicode escape: {}".format(escaped_value))
-            else:
-                escaped_value = ch.encode('unicode-escape').decode('utf-8')
-
+            hexstr = hex(ordinal)[2:]
+            escaped_value = '\\u'
+            i = len(hexstr)
+            while i < 4:
+                escaped_value += '0'
+                i += 1
+            escaped_value += hexstr
             ret = ret + escaped_value
 
     ret = ret + "'"
