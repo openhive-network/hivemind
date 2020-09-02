@@ -71,7 +71,7 @@ def build_metadata():
         sa.Column('root_id', sa.Integer, nullable=False), # records having initially set 0 will be updated to their id
         sa.Column('parent_id', sa.Integer, nullable=False),
         sa.Column('author_id', sa.Integer, nullable=False),
-        sa.Column('permlink_id', sa.BigInteger, nullable=False),
+        sa.Column('permlink_id', sa.Integer, nullable=False),
         sa.Column('category_id', sa.Integer, nullable=False),
         sa.Column('community_id', sa.Integer, nullable=True),
         sa.Column('created_at', sa.DateTime, nullable=False),
@@ -84,8 +84,6 @@ def build_metadata():
 
         sa.Column('children', sa.Integer, nullable=False, server_default='0'),
 
-        # basic/extended-stats
-        sa.Column('author_rep', sa.Float(precision=6), nullable=False, server_default='0'),
 
         # core stats/indexes
         sa.Column('payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
@@ -125,15 +123,12 @@ def build_metadata():
         sa.Column('allow_votes', BOOLEAN, nullable=False, server_default='1'),
         sa.Column('allow_curation_rewards', BOOLEAN, nullable=False, server_default='1'),
         sa.Column('beneficiaries', sa.JSON, nullable=False, server_default='[]'),
-        sa.Column('url', sa.Text, nullable=False, server_default=''),
-        sa.Column('root_title', sa.String(255), nullable=False, server_default=''),
         sa.Column('block_num', sa.Integer,  nullable=False ),
 
         sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_posts_fk1'),
         sa.ForeignKeyConstraint(['root_id'], ['hive_posts.id'], name='hive_posts_fk2'),
         sa.ForeignKeyConstraint(['parent_id'], ['hive_posts.id'], name='hive_posts_fk3'),
         sa.UniqueConstraint('author_id', 'permlink_id', 'counter_deleted', name='hive_posts_ux1'),
-        sa.Index('hive_posts_permlink_id', 'permlink_id'),
 
         sa.Index('hive_posts_depth_idx', 'depth'),
 
@@ -141,7 +136,6 @@ def build_metadata():
 
         sa.Index('hive_posts_parent_id_idx', 'parent_id'),
         sa.Index('hive_posts_community_id_idx', 'community_id'),
-        sa.Index('hive_posts_author_id', 'author_id'),
 
         sa.Index('hive_posts_category_id_idx', 'category_id'),
         sa.Index('hive_posts_payout_at_idx', 'payout_at'),
@@ -165,7 +159,7 @@ def build_metadata():
 
     sa.Table(
         'hive_permlink_data', metadata,
-        sa.Column('id', sa.BigInteger, primary_key=True),
+        sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('permlink', sa.String(255, collation='C'), nullable=False),
         sa.UniqueConstraint('permlink', name='hive_permlink_data_permlink')
     )
@@ -179,7 +173,6 @@ def build_metadata():
 
     sa.Table(
         'hive_votes', metadata,
-        sa.Column('id', sa.BigInteger, primary_key=True),
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('voter_id', sa.Integer, nullable=False),
         sa.Column('author_id', sa.Integer, nullable=False),
@@ -192,7 +185,7 @@ def build_metadata():
         sa.Column('block_num', sa.Integer,  nullable=False ),
         sa.Column('is_effective', BOOLEAN, nullable=False, server_default='0'),
 
-        sa.UniqueConstraint('voter_id', 'author_id', 'permlink_id', name='hive_votes_ux1'),
+        sa.PrimaryKeyConstraint('author_id', 'permlink_id', 'voter_id', name='hive_votes_pk'),
 
         sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id']),
         sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),
@@ -202,10 +195,6 @@ def build_metadata():
 
         sa.Index('hive_votes_post_id_idx', 'post_id'),
         sa.Index('hive_votes_voter_id_idx', 'voter_id'),
-        sa.Index('hive_votes_author_id_idx', 'author_id'),
-        sa.Index('hive_votes_permlink_id_idx', 'permlink_id'),
-        sa.Index('hive_votes_upvote_idx', 'vote_percent', postgresql_where=sql_text("vote_percent > 0")),
-        sa.Index('hive_votes_downvote_idx', 'vote_percent', postgresql_where=sql_text("vote_percent < 0")),
         sa.Index('hive_votes_block_num_idx', 'block_num')
     )
 
