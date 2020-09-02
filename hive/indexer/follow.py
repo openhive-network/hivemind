@@ -17,7 +17,7 @@ FOLLOWERS = 'followers'
 FOLLOWING = 'following'
 
 FOLLOW_ITEM_INSERT_QUERY = """
-    INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists)
+    INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists, block_num)
     VALUES 
         (
             :flr, 
@@ -35,7 +35,8 @@ FOLLOW_ITEM_INSERT_QUERY = """
                 WHEN 4 THEN TRUE
                 ELSE TRUE
             END
-            )
+            ),
+            :block_num
         )
     ON CONFLICT (follower, following) DO UPDATE 
         SET 
@@ -71,11 +72,12 @@ class Follow:
     follow_items_to_flush = dict()
 
     @classmethod
-    def follow_op(cls, account, op_json, date):
+    def follow_op(cls, account, op_json, date, block_num):
         """Process an incoming follow op."""
         op = cls._validated_op(account, op_json, date)
         if not op:
             return
+        op['block_num'] = block_num
 
         # perform delta check
         new_state = op['state']
@@ -94,7 +96,8 @@ class Follow:
                                                       flr=op['flr'],
                                                       flg=op['flg'],
                                                       state=op['state'],
-                                                      at=op['at'])
+                                                      at=op['at'],
+                                                      block_num=op['block_num'])
 
         else:
             old_state = cls._get_follow_db_state(op['flr'], op['flg'])
@@ -171,7 +174,7 @@ class Follow:
     @classmethod
     def _flush_follow_items(cls):
         sql_prefix = """
-              INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists)
+              INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists, block_num)
               VALUES """
 
         sql_postfix = """
@@ -198,20 +201,22 @@ class Follow:
         count = 0
         for _, follow_item in cls.follow_items_to_flush.items():
             if count < limit:
-                values.append("({}, {}, '{}', {}, {}, {})".format(follow_item['flr'], follow_item['flg'],
+                values.append("({}, {}, '{}', {}, {}, {}, {})".format(follow_item['flr'], follow_item['flg'],
                                                                   follow_item['at'], follow_item['state'],
                                                                   follow_item['state'] == 3,
-                                                                  follow_item['state'] == 4))
+                                                                  follow_item['state'] == 4,
+                                                                  follow_item['block_num']))
                 count = count + 1
             else:
                 query = sql_prefix + ",".join(values)
                 query += sql_postfix
                 DB.query(query)
                 values.clear()
-                values.append("({}, {}, '{}', {}, {}, {})".format(follow_item['flr'], follow_item['flg'],
+                values.append("({}, {}, '{}', {}, {}, {}, {})".format(follow_item['flr'], follow_item['flg'],
                                                                   follow_item['at'], follow_item['state'],
                                                                   follow_item['state'] == 3,
-                                                                  follow_item['state'] == 4))
+                                                                  follow_item['state'] == 4,
+                                                                  follow_item['block_num']))
                 count = 1
 
         if len(values) > 0:

@@ -177,7 +177,11 @@ class Db:
         try:
             start = perf()
             query = self._sql_text(sql)
+            if 'log_query' in kwargs and kwargs['log_query']:
+                log.info("QUERY: {}".format(query))
             result = self._exec(query, **kwargs)
+            if 'log_result' in kwargs and kwargs['log_result']:
+                log.info("RESULT: {}".format(result))
             Stats.log_db(sql, perf() - start)
             return result
         except Exception as e:
