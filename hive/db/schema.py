@@ -65,6 +65,21 @@ def build_metadata():
         sa.Index('hive_accounts_ix5', 'cached_at'), # core/listen sweep
     )
 
+
+    sa.Table(
+        'hive_reputation_data', metadata,
+        sa.Column('author_id', sa.Integer, nullable=False),
+        sa.Column('voter_id', sa.Integer, nullable=False),
+        sa.Column('permlink', sa.String(255, collation='C'), nullable=False),
+        sa.Column('rshares', sa.BigInteger, nullable=False),
+        sa.Column('block_num', sa.Integer,  nullable=False),
+
+        sa.PrimaryKeyConstraint('author_id', 'permlink', 'voter_id', name='hive_reputation_data_pk'),
+        sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),
+        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id']),
+        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'])
+    )
+
     sa.Table(
         'hive_posts', metadata,
         sa.Column('id', sa.Integer, primary_key=True),
@@ -1292,6 +1307,78 @@ def setup(db):
           $BODY$
           """
     db.query_no_return(sql)
+
+    sql = """
+          DROP TYPE IF EXISTS vote_reputation_info CASCADE;
+
+          CREATE TYPE vote_reputation_info as (is_new_vote BOOLEAN, existing_rshares BIGINT, author_id INTEGER, voter_id INTEGER);
+
+          DROP FUNCTION IF EXISTS process_reputation_data(in _block_num hive_blocks.num%TYPE, in _author hive_accounts.name%TYPE,
+            in _permlink hive_permlink_data.permlink%TYPE, in _voter hive_accounts.name%TYPE, in _rshares hive_votes.rshares%TYPE)
+            ;
+
+          CREATE OR REPLACE FUNCTION process_reputation_data(in _block_num hive_blocks.num%TYPE,
+            in _author hive_accounts.name%TYPE, in _permlink hive_permlink_data.permlink%TYPE,
+            in _voter hive_accounts.name%TYPE, in _rshares hive_votes.rshares%TYPE)
+          RETURNS void
+          LANGUAGE 'plpgsql'
+          AS
+          $FUNCTION$
+          DECLARE
+            __insert_info vote_reputation_info;
+            __rep_delta INTEGER;
+            __old_rep_delta INTEGER;
+          BEGIN
+            SELECT _rshares >> 6 INTO __rep_delta;
+
+            INSERT INTO hive_reputation_data
+              (author_id, voter_id, permlink, block_num, rshares)
+            SELECT ha.id as author_id, hv.id as voter_id, _permlink, _block_num, _rshares
+            FROM hive_accounts ha
+            JOIN hive_accounts hv ON hv.name = _voter
+            JOIN hive_posts hp ON hp.author_id = ha.id
+            JOIN hive_permlink_data hpd ON hp.permlink_id = hpd.id
+            WHERE hpd.permlink = _permlink
+                  AND ha.name = _author
+
+                  AND NOT hp.is_paidout --- voting on paidout posts shall have no effect
+                  AND hv.reputation >= 0 --- voter's negative reputation eliminates vote from processing
+                  AND (_rshares >= 0 
+                       OR (hv.reputation >= ha.reputation - COALESCE((SELECT hrd.rshares -- if previous vote was a downvote we need to correct author reputation before current comparison to voter's reputation
+                                                                      FROM hive_reputation_data hrd
+                                                                      WHERE hrd.author_id = ha.id
+                                                                           AND hrd.voter_id=hv.id
+                                                                           AND hrd.permlink=_permlink
+                                                                           AND hrd.rshares < 0), 0))
+                      )
+
+            ON CONFLICT ON CONSTRAINT hive_reputation_data_pk DO
+            UPDATE SET
+              rshares = EXCLUDED.rshares
+            RETURNING (xmax = 0) AS is_new_vote, 
+                      (SELECT hrd.rshares
+                      FROM hive_reputation_data hrd
+                      WHERE hrd.author_id = author_id and hrd.voter_id=voter_id and hrd.permlink=_permlink) AS old_rshares, author_id, voter_id
+              INTO __insert_info
+            ;
+
+            IF __insert_info.is_new_vote THEN
+              UPDATE hive_accounts ha
+                SET reputation = ha.reputation + __rep_delta
+                WHERE ha.id = __insert_info.author_id
+              ;
+            ELSE
+              SELECT __insert_info.existing_rshares >> 6 INTO __old_rep_delta;
+              UPDATE hive_accounts ha
+                SET reputation = ha.reputation - __old_rep_delta + __rep_delta
+                WHERE ha.id = __insert_info.author_id
+              ;
+
+            END IF;
+          END
+          $FUNCTION$
+          ;
+          """
 
 def reset_autovac(db):
     """Initializes/resets per-table autovacuum/autoanalyze params.
