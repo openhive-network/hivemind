@@ -57,9 +57,6 @@ class CustomOp:
                 if block_num < 6000000 and not isinstance(op_json, list):
                     op_json = ['reblog', op_json]  # legacy compat
                 cls._process_legacy(account, op_json, block_date, block_num)
-                with open("reblog.log", "a") as reblog_file:
-                    reblog_file.write("{} -> {}".format(account, op_json))
-                    reblog_file.write("\n")
             elif op['id'] == 'community':
                 if block_num > START_BLOCK:
                     process_json_community_op(account, op_json, block_date)
