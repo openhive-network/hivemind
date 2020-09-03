@@ -461,7 +461,7 @@ class CommunityOp:
         _name = read_key_str(self.op, 'community', 16)
         assert _name, 'must name a community'
         _id = Community.validated_id(_name)
-        assert _id, 'community `%s` does not exist' % _name
+        assert _id, 'Community \'%s\' does not exist' % _name
 
         self.community = _name
         self.community_id = _id
