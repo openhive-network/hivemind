@@ -109,7 +109,7 @@ async def get_post(context, author, permlink, observer=None):
     result = await db.query_all(sql, author=author, permlink=permlink)
     assert len(result) == 1, 'invalid author/permlink or post not found in cache'
     post = _bridge_post_object(result[0])
-    post['active_votes'] = await find_votes({'db':db}, {'author':author, 'permlink':permlink}, VotesPresentation.BridgeApi)
+    post['active_votes'] = await find_votes({'db':db}, author, permlink, VotesPresentation.BridgeApi)
     post = await append_statistics_to_post(post, result[0], False, blacklists_for_user)
     return post
 
@@ -213,7 +213,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
         pinned_result = await db.query_all(pinned_sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag, observer=observer)
         for row in pinned_result:
             post = _bridge_post_object(row)
-            post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']}, VotesPresentation.BridgeApi)
+            post['active_votes'] = await find_votes({'db':db}, row['author'], row['permlink'], VotesPresentation.BridgeApi)
             post = await append_statistics_to_post(post, row, True, blacklists_for_user)
             limit = limit - 1
             posts.append(post)
@@ -222,7 +222,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
     sql_result = await db.query_all(sql, author=start_author, limit=limit, tag=tag, permlink=start_permlink, community_name=tag, observer=observer)
     for row in sql_result:
         post = _bridge_post_object(row)
-        post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']}, VotesPresentation.BridgeApi)
+        post['active_votes'] = await find_votes({'db':db}, row['author'], row['permlink'], VotesPresentation.BridgeApi)
         post = await append_statistics_to_post(post, row, False, blacklists_for_user)
         if post['post_id'] in pinned_post_ids:
             continue
@@ -314,7 +314,7 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
     sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit)
     for row in sql_result:
         post = _bridge_post_object(row)
-        post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']}, VotesPresentation.BridgeApi)
+        post['active_votes'] = await find_votes({'db':db}, row['author'], row['permlink'], VotesPresentation.BridgeApi)
         post = await append_statistics_to_post(post, row, False, blacklists_for_user)
         posts.append(post)
     return posts
