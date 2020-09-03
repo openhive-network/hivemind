@@ -441,9 +441,9 @@ async def get_accounts(db, accounts: list):
     names = ["'{}'".format(a) for a in accounts]
     sql = """SELECT created_at, reputation, display_name, about,
         location, website, profile_image, cover_image, followers, following,
-        proxy, post_count, proxy_weight, vote_weight, rank,
+        proxy, post_count, proxy_weight, rank,
         lastread_at, active_at, cached_at, raw_json
-        FROM hive_accounts WHERE name IN ({})""".format(",".join(names))
+        FROM hive_accounts_info WHERE name IN ({})""".format(",".join(names))
 
     result = await db.query_all(sql)
     for row in result:
@@ -463,7 +463,6 @@ async def get_accounts(db, accounts: list):
         account_data['proxy'] = row.proxy
         account_data['post_count'] = row.post_count
         account_data['proxy_weight'] = row.proxy_weight
-        account_data['vote_weight'] = row.vote_weight
         account_data['rank'] = row.rank
         account_data['lastread_at'] = row.lastread_at.isoformat()
         account_data['active_at'] = row.active_at.isoformat()
