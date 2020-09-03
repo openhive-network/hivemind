@@ -16,10 +16,8 @@ log = logging.getLogger(__name__)
 
 async def load_profiles(db, names):
     """`get_accounts`-style lookup for `get_state` compat layer."""
-    sql = """SELECT id, name, display_name, about, reputation, vote_weight,
-                    created_at, post_count, profile_image, location, website,
-                    cover_image, rank, following, followers, active_at
-               FROM hive_accounts WHERE name IN :names"""
+    sql = """SELECT * FROM hive_accounts_info_view
+              WHERE name IN :names"""
     rows = await db.query_all(sql, names=tuple(names))
     return [_condenser_profile_object(row) for row in rows]
 
@@ -197,6 +195,8 @@ def _condenser_profile_object(row):
 
     blacklists = Mutes.lists(row['name'], row['reputation'])
 
+    #Important. The member `sp` in `stats` is removed, because currently the hivemind doesn't hold any balances.
+    # The member `vote_weight` from `hive_accounts` is removed as well.
     return {
         'id': row['id'],
         'name': row['name'],
@@ -206,16 +206,15 @@ def _condenser_profile_object(row):
         'reputation': row['reputation'],
         'blacklists': blacklists,
         'stats': {
-            'sp': int(row['vote_weight'] * 0.0005037),
             'rank': row['rank'],
             'following': row['following'],
             'followers': row['followers'],
         },
         'metadata': {
-            'profile': {'name': row['display_name'],
-                        'about': row['about'],
-                        'website': row['website'],
-                        'location': row['location'],
+            'profile': {'name': row['display_name'] if row['display_name'] else "",
+                        'about': row['about'] if row['about'] else "",
+                        'website': row['website'] if row['website'] else "",
+                        'location': row['location'] if row['location'] else "",
                         'cover_image': row['cover_image'],
                         'profile_image': row['profile_image'],
                        }}}

@@ -460,7 +460,6 @@ async def get_accounts(db, accounts: list):
         account_data['proxy'] = row.proxy
         account_data['post_count'] = row.post_count
         account_data['proxy_weight'] = row.proxy_weight
-        account_data['vote_weight'] = row.vote_weight
         account_data['rank'] = row.rank
         account_data['lastread_at'] = row.lastread_at.isoformat()
 

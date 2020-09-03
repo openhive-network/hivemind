@@ -224,7 +224,6 @@ class Sync:
 
         # prefetch id->name and id->rank memory maps
         Accounts.load_ids()
-        Accounts.fetch_ranks()
 
         # load irredeemables
         mutes = Mutes(
@@ -388,7 +387,6 @@ class Sync:
             if num % 1200 == 0: #1hr
                 log.warning("head block %d @ %s", num, block['timestamp'])
                 log.info("[LIVE] hourly stats")
-                Accounts.fetch_ranks()
                 #Community.recalc_pending_payouts()
             if num % 200 == 0: #10min
                 Community.recalc_pending_payouts()

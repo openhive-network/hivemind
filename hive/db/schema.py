@@ -49,19 +49,15 @@ def build_metadata():
         sa.Column('following', sa.Integer, nullable=False, server_default='0'),
 
         sa.Column('proxy', VARCHAR(16), nullable=False, server_default=''),
-        sa.Column('post_count', sa.Integer, nullable=False, server_default='0'),
         sa.Column('proxy_weight', sa.Float(precision=6), nullable=False, server_default='0'),
-        sa.Column('vote_weight', sa.Float(precision=6), nullable=False, server_default='0'),
         sa.Column('kb_used', sa.Integer, nullable=False, server_default='0'), # deprecated
         sa.Column('rank', sa.Integer, nullable=False, server_default='0'),
 
         sa.Column('lastread_at', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
-        sa.Column('active_at', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('cached_at', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('raw_json', sa.Text),
 
         sa.UniqueConstraint('name', name='hive_accounts_ux1'),
-        sa.Index('hive_accounts_ix1', 'vote_weight'), # core: quick ranks
         sa.Index('hive_accounts_ix5', 'cached_at'), # core/listen sweep
     )
 
