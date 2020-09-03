@@ -576,10 +576,37 @@ def setup(db):
         SELECT
           id,
           name,
+          COALESCE(
+            (
+              select count(*) post_count
+              FROM hive_posts hp
+              WHERE ha.id=hp.author_id
+              GROUP BY hp.author_id
+            ),
+            0
+          ) post_count,
+          COALESCE(
+            (
+              select max(hp.created_at)
+              FROM hive_posts hp
+              WHERE ha.id=hp.author_id
+              GROUP BY hp.author_id
+            ),
+            '1970-01-01 00:00:00.0'
+          ) post_active_at,
+          COALESCE(
+            (
+              select max(hv.last_update)
+              from hive_votes hv
+              WHERE ha.id=hv.voter_id
+              GROUP BY hv.voter_id
+            ),
+            '1970-01-01 00:00:00.0'
+          ) AS vote_active_at,
+          created_at,
           display_name,
           about,
           reputation,
-          created_at,
           profile_image,
           location,
           website,
@@ -587,47 +614,13 @@ def setup(db):
           rank,
           following,
           followers,
-          (
-          CASE
-              WHEN COALESCE( post_info.post_active_at, '1970-01-01 00:00:00.0' ) > COALESCE( vote_info.vote_active_at, '1970-01-01 00:00:00.0' ) THEN
-                (
-                    CASE
-                      WHEN  COALESCE( post_info.post_active_at, '1970-01-01 00:00:00.0' ) > created_at THEN
-                        COALESCE( post_info.post_active_at, '1970-01-01 00:00:00.0' )
-                      ELSE
-                        created_at
-                    END
-              )
-            ELSE
-              (
-                    CASE
-                      WHEN  COALESCE( vote_info.vote_active_at, '1970-01-01 00:00:00.0' ) > created_at THEN
-                        COALESCE( vote_info.vote_active_at, '1970-01-01 00:00:00.0' )
-                      ELSE
-                        created_at
-                    END
-              )
-            END
-          ) active_at,
           proxy,
           proxy_weight,
           lastread_at,
           cached_at,
-          raw_json,
-          COALESCE( post_info.post_count, 0 ) post_count
-          from hive_accounts ha
-          LEFT JOIN
-          (
-            select count(*) post_count, max(created_at) post_active_at, author_id
-            from hive_posts
-            GROUP BY author_id
-          ) post_info ON ha.id=post_info.author_id
-          LEFT JOIN
-          (
-            select max(last_update) vote_active_at, voter_id
-            from hive_votes
-            GROUP BY voter_id
-          )vote_info ON ha.id=vote_info.voter_id
+          raw_json
+        FROM
+          hive_accounts ha
           """
     db.query_no_return(sql)
 
