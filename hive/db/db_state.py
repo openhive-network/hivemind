@@ -128,7 +128,6 @@ class DbState:
             #'hive_posts_cache_ix32', # API: community created
             #'hive_posts_cache_ix33', # API: community payout
             #'hive_posts_cache_ix34', # API: community muted
-            'hive_accounts_ix1', # (cached_at, name)
             'hive_accounts_ix5' # (cached_at, name)
         ]
 

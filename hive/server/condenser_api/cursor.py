@@ -443,7 +443,7 @@ async def get_accounts(db, accounts: list):
         location, website, profile_image, cover_image, followers, following,
         proxy, post_count, proxy_weight, rank,
         lastread_at, active_at, cached_at, raw_json
-        FROM hive_accounts_info WHERE name IN ({})""".format(",".join(names))
+        FROM hive_accounts_info_view WHERE name IN ({})""".format(",".join(names))
 
     result = await db.query_all(sql)
     for row in result:
