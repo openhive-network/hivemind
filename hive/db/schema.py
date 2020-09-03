@@ -787,7 +787,7 @@ def setup(db):
         WHERE ha.name = _author AND hpd.permlink = _permlink AND hp.counter_deleted = 0
         ), 0 );
         IF _check AND (_author <> '' OR _permlink <> '') AND post_id = 0 THEN
-          RAISE EXCEPTION 'Post/comment %/% does not exist', _author, _permlink;
+          RAISE EXCEPTION 'Post %/% does not exist', _author, _permlink;
         END IF;
         RETURN post_id;
       END

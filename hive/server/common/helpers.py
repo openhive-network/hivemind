@@ -5,6 +5,7 @@ from functools import wraps
 import traceback
 import logging
 import datetime
+from psycopg2.errors import RaiseException
 
 log = logging.getLogger(__name__)
 
@@ -20,6 +21,9 @@ def return_error_info(function):
         """Catch ApiError and AssersionError (always due to user error)."""
         try:
             return await function(*args, **kwargs)
+        except (RaiseException) as e:
+            log.error("PGSQL: %s\n%s", repr(e), traceback.format_exc())
+            raise AssertionError(e.diag.message_primary)
         except (ApiError, AssertionError, TypeError, Exception) as e:
             if isinstance(e, KeyError):
                 #TODO: KeyError overloaded for method not found. Any KeyErrors
