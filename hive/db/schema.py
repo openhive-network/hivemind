@@ -560,6 +560,74 @@ def setup(db):
           """
     db.query_no_return(sql)
 
+    # In original hivemind, a value of 'active_at' was calculated from
+    # max
+    #   {
+    #     created             ( account_create_operation ),
+    #     last_account_update ( account_update_operation/account_update2_operation ),
+    #     last_post           ( comment_operation - only creation )
+    #     last_root_post      ( comment_operation - only creation + only ROOT ),
+    #     last_vote_time      ( vote_operation )
+    #   }
+    # In order to simplify calculations, `last_account_update` is not taken into consideration, because this updating accounts is very rare
+    # and posting/voting after an account updating, fixes `active_at` value immediately.
+
+    sql = """
+        DROP VIEW IF EXISTS public.hive_accounts_info_view;
+
+        CREATE OR REPLACE VIEW public.hive_accounts_info_view
+        AS
+        SELECT
+          id,
+          name,
+          COALESCE(
+            (
+              select count(*) post_count
+              FROM hive_posts hp
+              WHERE ha.id=hp.author_id
+              GROUP BY hp.author_id
+            ),
+            0
+          ) post_count,
+          COALESCE(
+            (
+              select max(hp.created_at)
+              FROM hive_posts hp
+              WHERE ha.id=hp.author_id
+              GROUP BY hp.author_id
+            ),
+            '1970-01-01 00:00:00.0'
+          ) post_active_at,
+          COALESCE(
+            (
+              select max(hv.last_update)
+              from hive_votes hv
+              WHERE ha.id=hv.voter_id
+              GROUP BY hv.voter_id
+            ),
+            '1970-01-01 00:00:00.0'
+          ) AS vote_active_at,
+          created_at,
+          display_name,
+          about,
+          reputation,
+          profile_image,
+          location,
+          website,
+          cover_image,
+          rank,
+          following,
+          followers,
+          proxy,
+          proxy_weight,
+          lastread_at,
+          cached_at,
+          raw_json
+        FROM
+          hive_accounts ha
+          """
+    db.query_no_return(sql)
+
     sql = """
         DROP VIEW IF EXISTS public.hive_posts_view;
 
