@@ -168,10 +168,10 @@ class VotesPresentation(Enum):
     BridgeApi = 4
 
 @return_error_info
-async def find_votes(context, params: dict, votes_presentation = VotesPresentation.DatabaseApi):
+async def find_votes(context, author: str, permlink: str, votes_presentation = VotesPresentation.DatabaseApi):
     """ Returns all votes for the given post """
-    valid_account(params['author'])
-    valid_permlink(params['permlink'])
+    valid_account(author)
+    valid_permlink(permlink)
     db = context['db']
     sql = """
         SELECT
@@ -193,7 +193,7 @@ async def find_votes(context, params: dict, votes_presentation = VotesPresentati
     """
 
     ret = []
-    rows = await db.query_all(sql, author=params['author'], permlink=params['permlink'])
+    rows = await db.query_all(sql, author=author, permlink=permlink)
 
     for row in rows:
         if votes_presentation == VotesPresentation.DatabaseApi:

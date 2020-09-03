@@ -154,7 +154,7 @@ async def get_content(context, author: str, permlink: str, observer=None):
     if result:
         result = dict(result[0])
         post = _condenser_post_object(result, 0)
-        post['active_votes'] = await find_votes(context, {'author':author, 'permlink':permlink}, VotesPresentation.CondenserApi)
+        post['active_votes'] = await find_votes(context, author, permlink, VotesPresentation.CondenserApi)
         if not observer:
             post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
         else:
@@ -272,7 +272,7 @@ async def get_discussions_by(discussion_type, context, start_author: str = '',
     posts = []
     for row in result:
         post = _condenser_post_object(row, truncate_body)
-        post['active_votes'] = await find_votes(context, {'author':post['author'], 'permlink':post['permlink']})
+        post['active_votes'] = await find_votes(context, post['author'], post['permlink'])
         post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
         posts.append(post)
     #posts = await resultset_to_posts(db=db, resultset=result, truncate_body=truncate_body)
@@ -381,7 +381,7 @@ async def get_discussions_by_blog(context, tag: str = None, start_author: str = 
     for row in result:
         row = dict(row)
         post = _condenser_post_object(row, truncate_body=truncate_body)
-        post['active_votes'] = await find_votes(context, {'author':post['author'], 'permlink':post['permlink']}, votes_presentation = VotesPresentation.CondenserApi)
+        post['active_votes'] = await find_votes(context, post['author'], post['permlink'], votes_presentation = VotesPresentation.CondenserApi)
         post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
         #posts_by_id[row['post_id']] = post
         posts_by_id.append(post)
@@ -439,7 +439,7 @@ async def get_discussions_by_comments(context, start_author: str = None, start_p
     for row in result:
         row = dict(row)
         post = _condenser_post_object(row, truncate_body=truncate_body)
-        post['active_votes'] = await find_votes(context, {'author':post['author'], 'permlink':post['permlink']}, VotesPresentation.CondenserApi)
+        post['active_votes'] = await find_votes(context, post['author'], post['permlink'], VotesPresentation.CondenserApi)
         post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
         posts.append(post)
 
@@ -592,4 +592,4 @@ async def get_active_votes(context, author: str, permlink: str):
     valid_permlink(permlink)
     db = context['db']
 
-    return await find_votes( {'db':db}, {'author':author, 'permlink':permlink}, VotesPresentation.ActiveVotes  )
+    return await find_votes( {'db':db}, author, permlink, VotesPresentation.ActiveVotes  )
