@@ -1,5 +1,6 @@
 """Hive sync manager."""
 
+from hive.indexer.reblog import Reblog
 import logging
 import glob
 from time import perf_counter as perf
@@ -211,6 +212,12 @@ class Sync:
 
     def run(self):
         """Initialize state; setup/recovery checks; sync and runloop."""
+        from hive.version import VERSION, GIT_REVISION
+        log.info("hivemind_version : %s", VERSION)
+        log.info("hivemind_git_rev : %s", GIT_REVISION)
+
+        from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
+        log.info("database_schema_version : %s", SCHEMA_DB_VERSION)
 
         # ensure db schema up to date, check app status
         DbState.initialize()
@@ -227,6 +234,10 @@ class Sync:
 
         # community stats
         Community.recalc_pending_payouts()
+
+        sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
+        database_head_block = DbState.db().query_one(sql)
+        log.info("database_head_block : %s", database_head_block)
 
         if DbState.is_initial_sync():
             last_imported_block = Blocks.head_num()

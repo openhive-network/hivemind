@@ -1,5 +1,6 @@
 """Blocks processor."""
 
+from hive.indexer.reblog import Reblog
 import logging
 import json
 
@@ -62,6 +63,7 @@ class Blocks:
         Tags.flush()
         Votes.flush()
         Posts.flush()
+        Reblog.flush()
         block_num = int(block['block_id'][:8], base=16)
         cls.on_live_blocks_processed( block_num, block_num )
         time_end = perf_counter()
@@ -103,6 +105,7 @@ class Blocks:
         folllow_items = len(Follow.follow_items_to_flush) + Follow.flush(trx=False)
         flush_time = register_time(flush_time, "Follow", folllow_items)
         flush_time = register_time(flush_time, "Posts", Posts.flush())
+        flush_time = register_time(flush_time, "Reblog", Reblog.flush())
 
         if (not is_initial_sync) and (first_block > -1):
             cls.on_live_blocks_processed( first_block, last_num )

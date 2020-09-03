@@ -224,10 +224,13 @@ def build_metadata():
         sa.Column('created_at', sa.DateTime, nullable=False),
         sa.Column('blacklisted', sa.Boolean, nullable=False, server_default='0'),
         sa.Column('follow_blacklists', sa.Boolean, nullable=False, server_default='0'),
+        sa.Column('block_num', sa.Integer,  nullable=False ),
 
         sa.PrimaryKeyConstraint('following', 'follower', name='hive_follows_pk'), # core
+        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_follows_fk1'),
         sa.Index('hive_follows_ix5a', 'following', 'state', 'created_at', 'follower'),
         sa.Index('hive_follows_ix5b', 'follower', 'state', 'created_at', 'following'),
+        sa.Index('hive_follows_block_num_idx', 'block_num')
     )
 
     sa.Table(
@@ -235,12 +238,15 @@ def build_metadata():
         sa.Column('account', VARCHAR(16), nullable=False),
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
+        sa.Column('block_num', sa.Integer,  nullable=False ),
 
         sa.ForeignKeyConstraint(['account'], ['hive_accounts.name'], name='hive_reblogs_fk1'),
         sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_reblogs_fk2'),
+        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_reblogs_fk3'),
         sa.PrimaryKeyConstraint('account', 'post_id', name='hive_reblogs_pk'), # core
         sa.Index('hive_reblogs_account', 'account'),
         sa.Index('hive_reblogs_post_id', 'post_id'),
+        sa.Index('hive_reblogs_block_num_idx', 'block_num')
     )
 
     sa.Table(
