@@ -573,62 +573,61 @@ def setup(db):
 
         CREATE OR REPLACE VIEW public.hive_accounts_info_view
         AS
-        SELECT  id,
-                name,
-                display_name,
-                about,
-                reputation,
-                created_at,
-                profile_image,
-                location,
-                website,
-                cover_image,
-                rank,
-                following,
-                followers,
+        SELECT
+          id,
+          name,
+          display_name,
+          about,
+          reputation,
+          created_at,
+          profile_image,
+          location,
+          website,
+          cover_image,
+          rank,
+          following,
+          followers,
+          (
+          CASE
+              WHEN COALESCE( post_info.post_active_at, '1970-01-01 00:00:00.0' ) > COALESCE( vote_info.vote_active_at, '1970-01-01 00:00:00.0' ) THEN
                 (
-				CASE
-                   		WHEN post_info.post_active_at > vote_info.vote_active_at THEN
-                   			(
-	                   			CASE
-	                   				WHEN	post_info.post_active_at > created_at THEN
-	                     				post_info.post_active_at
-	                     			ELSE
-	                     				created_at
-	                     		END
-                     		)
-                     	ELSE
-                     		(
-	                   			CASE
-	                   				WHEN	vote_info.vote_active_at > created_at THEN
-	                     				vote_info.vote_active_at
-	                     			ELSE
-	                     				created_at
-	                     		END
-                     		)
-                	END
-                ) active_at,
-                proxy,
-                proxy_weight,
-                lastread_at,
-                cached_at,
-                raw_json,
-                post_info.post_count post_count
-        FROM hive_accounts ha
-        INNER JOIN
-        (
-          select COALESCE( count(*), 0 ) post_count, COALESCE( max(hp.created_at), '1970-01-01 00:00:00.0' ) post_active_at, ha.id id_internal
-          from hive_posts hp
-          RIGHT JOIN hive_accounts ha ON hp.author_id = ha.id
-          GROUP BY ha.id
-        ) post_info ON ha.id = post_info.id_internal
-        INNER JOIN
-        (
-          select COALESCE( max(hv.last_update), '1970-01-01 00:00:00.0' ) vote_active_at, ha.id id_internal
-          from hive_votes hv
-          RIGHT JOIN hive_accounts ha ON hv.voter_id = ha.id
-          GROUP BY ha.id
-        ) vote_info ON ha.id = vote_info.id_internal
+                    CASE
+                      WHEN  COALESCE( post_info.post_active_at, '1970-01-01 00:00:00.0' ) > created_at THEN
+                        COALESCE( post_info.post_active_at, '1970-01-01 00:00:00.0' )
+                      ELSE
+                        created_at
+                    END
+              )
+            ELSE
+              (
+                    CASE
+                      WHEN  COALESCE( vote_info.vote_active_at, '1970-01-01 00:00:00.0' ) > created_at THEN
+                        COALESCE( vote_info.vote_active_at, '1970-01-01 00:00:00.0' )
+                      ELSE
+                        created_at
+                    END
+              )
+            END
+          ) active_at,
+          proxy,
+          proxy_weight,
+          lastread_at,
+          cached_at,
+          raw_json,
+          COALESCE( post_info.post_count, 0 ) post_count
+          from hive_accounts ha
+          LEFT JOIN
+          (
+            select count(*) post_count, max(created_at) post_active_at, author_id
+            from hive_posts
+            GROUP BY author_id
+          ) post_info ON ha.id=post_info.author_id
+          LEFT JOIN
+          (
+            select max(last_update) vote_active_at, voter_id
+            from hive_votes
+            GROUP BY voter_id
+          )vote_info ON ha.id=vote_info.voter_id
           """
     db.query_no_return(sql)
 
