@@ -774,21 +774,31 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-      DROP FUNCTION IF EXISTS find_comment_id(character varying, character varying)
+      DROP FUNCTION IF EXISTS find_comment_id(character varying, character varying, boolean)
       ;
       CREATE OR REPLACE FUNCTION find_comment_id(
         in _author hive_accounts.name%TYPE,
-        in _permlink hive_permlink_data.permlink%TYPE)
-      RETURNS INT AS
+        in _permlink hive_permlink_data.permlink%TYPE,
+        in _check boolean)
+      RETURNS INT
+      LANGUAGE 'plpgsql'
+      AS
       $function$
-      SELECT COALESCE( (SELECT hp.id
-      FROM hive_posts hp
-      JOIN hive_accounts ha ON ha.id = hp.author_id
-      JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
-      WHERE ha.name = _author AND hpd.permlink = _permlink AND hp.counter_deleted = 0
-      ), 0 );
+      DECLARE 
+        post_id INT;
+      BEGIN
+        SELECT INTO post_id COALESCE( (SELECT hp.id
+        FROM hive_posts hp
+        JOIN hive_accounts ha ON ha.id = hp.author_id
+        JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
+        WHERE ha.name = _author AND hpd.permlink = _permlink AND hp.counter_deleted = 0
+        ), 0 );
+        IF _check AND (_author <> '' OR _permlink <> '') AND post_id = 0 THEN
+          RAISE EXCEPTION 'Post/comment %/% does not exist', _author, _permlink;
+        END IF;
+        RETURN post_id;
+      END
       $function$
-      LANGUAGE sql
       ;
     """
     db.query_no_return(sql)
@@ -852,7 +862,7 @@ def setup(db):
         DECLARE
           __post_id INT;
         BEGIN
-          __post_id = find_comment_id(_author,_permlink);
+          __post_id = find_comment_id(_author,_permlink, False);
           RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
@@ -932,8 +942,8 @@ def setup(db):
           __root_id INT;
           __post_id INT;
         BEGIN
-          __root_id = find_comment_id(_root_author,_root_permlink);
-          __post_id = find_comment_id(_start_post_author,_start_post_permlink);
+          __root_id = find_comment_id(_root_author, _root_permlink, True);
+          __post_id = find_comment_id(_start_post_author, _start_post_permlink, True);
           RETURN QUERY
           SELECT
             hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
@@ -972,11 +982,10 @@ def setup(db):
         in _limit INT)
         RETURNS SETOF database_api_post 
         LANGUAGE sql
-
         COST 100
         STABLE
         ROWS 1000
-      AS $BODY$
+      AS $function$
         SELECT
           hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
           hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
@@ -995,7 +1004,7 @@ def setup(db):
             WHERE
               h.parent_author > _parent_author OR
               h.parent_author = _parent_author AND ( h.parent_permlink_or_category > _parent_permlink OR
-              h.parent_permlink_or_category = _parent_permlink AND h.id >= find_comment_id(_start_post_author,_start_post_permlink) )
+              h.parent_permlink_or_category = _parent_permlink AND h.id >= find_comment_id(_start_post_author, _start_post_permlink, True) )
             ORDER BY
               h.parent_author ASC,
               h.parent_permlink_or_category ASC,
@@ -1006,8 +1015,8 @@ def setup(db):
         WHERE
           NOT hp.is_muted
           ;
-      $BODY$;
-        ;
+      $function$
+      ;
 
       DROP FUNCTION IF EXISTS list_comments_by_last_update(character varying, timestamp, character varying, character varying, int)
       ;
@@ -1023,7 +1032,7 @@ def setup(db):
         DECLARE
           __post_id INT;
         BEGIN
-          __post_id = find_comment_id(_start_post_author,_start_post_permlink);
+          __post_id = find_comment_id(_start_post_author, _start_post_permlink, True);
           RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
@@ -1067,7 +1076,7 @@ def setup(db):
         DECLARE
           __post_id INT;
         BEGIN
-          __post_id = find_comment_id(_start_post_author,_start_post_permlink);
+          __post_id = find_comment_id(_start_post_author, _start_post_permlink, True);
           RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,

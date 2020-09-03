@@ -1,7 +1,7 @@
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
 from enum import Enum
 
-from hive.server.common.helpers import return_error_info, valid_limit, valid_account, valid_permlink
+from hive.server.common.helpers import return_error_info, valid_limit, valid_account, valid_permlink, valid_date
 from hive.server.database_api.objects import database_post_object
 from hive.utils.normalize import rep_to_raw, number_to_json_value, time_string_with_t
 
@@ -20,48 +20,69 @@ async def list_comments(context, start: list, limit: int, order: str):
     if order == 'by_cashout_time':
         assert len(start) == 3, "Expecting three arguments"
         cashout_time = start[0]
+        valid_date(cashout_time)
         if cashout_time[0:4] == '1969':
             cashout_time = "infinity"
         author = start[1]
+        valid_account(author, allow_empty=True)
         permlink = start[2]
+        valid_permlink(permlink, allow_empty=True)
         sql = "SELECT * FROM list_comments_by_cashout_time(:cashout_time, :author, :permlink, :limit)"
         result = await db.query_all(sql, cashout_time=cashout_time, author=author, permlink=permlink, limit=limit)
     elif order == 'by_permlink':
         assert len(start) == 2, "Expecting two arguments"
         author = start[0]
+        valid_account(author, allow_empty=True)
         permlink = start[1]
+        valid_permlink(permlink, allow_empty=True)
         sql = "SELECT * FROM list_comments_by_permlink(:author, :permlink, :limit)"
         result = await db.query_all(sql, author=author, permlink=permlink, limit=limit)
     elif order == 'by_root':
         assert len(start) == 4, "Expecting 4 arguments"
         root_author = start[0]
+        valid_account(root_author, allow_empty=True)
         root_permlink = start[1]
+        valid_permlink(root_permlink, allow_empty=True)
         start_post_author = start[2]
+        valid_account(start_post_author, allow_empty=True)
         start_post_permlink = start[3]
+        valid_permlink(start_post_permlink, allow_empty=True)
         sql = "SELECT * FROM list_comments_by_root(:root_author, :root_permlink, :start_post_author, :start_post_permlink, :limit)"
         result = await db.query_all(sql, root_author=root_author, root_permlink=root_permlink, start_post_author=start_post_author, start_post_permlink=start_post_permlink, limit=limit)
     elif order == 'by_parent':
         assert len(start) == 4, "Expecting 4 arguments"
         parent_author = start[0]
+        valid_account(parent_author, allow_empty=True)
         parent_permlink = start[1]
+        valid_permlink(parent_permlink, allow_empty=True)
         start_post_author = start[2]
+        valid_account(start_post_author, allow_empty=True)
         start_post_permlink = start[3]
+        valid_permlink(start_post_permlink, allow_empty=True)
         sql = "SELECT * FROM list_comments_by_parent(:parent_author, :parent_permlink, :start_post_author, :start_post_permlink, :limit)"
         result = await db.query_all(sql, parent_author=parent_author, parent_permlink=parent_permlink, start_post_author=start_post_author, start_post_permlink=start_post_permlink, limit=limit)
     elif order == 'by_last_update':
         assert len(start) == 4, "Expecting 4 arguments"
         parent_author = start[0]
+        valid_account(parent_author, allow_empty=True)
         updated_at = start[1]
+        valid_date(updated_at)
         start_post_author = start[2]
+        valid_account(start_post_author, allow_empty=True)
         start_post_permlink = start[3]
+        valid_permlink(start_post_permlink, allow_empty=True)
         sql = "SELECT * FROM list_comments_by_last_update(:parent_author, :updated_at, :start_post_author, :start_post_permlink, :limit)"
         result = await db.query_all(sql, parent_author=parent_author, updated_at=updated_at, start_post_author=start_post_author, start_post_permlink=start_post_permlink, limit=limit)
     elif order == 'by_author_last_update':
         assert len(start) == 4, "Expecting 4 arguments"
         author = start[0]
+        valid_account(author, allow_empty=True)
         updated_at = start[1]
+        valid_date(updated_at)
         start_post_author = start[2]
+        valid_account(start_post_author, allow_empty=True)
         start_post_permlink = start[3]
+        valid_permlink(start_post_permlink, allow_empty=True)
         sql = "SELECT * FROM list_comments_by_author_last_update(:author, :updated_at, :start_post_author, :start_post_permlink, :limit)"
         result = await db.query_all(sql, author=author, updated_at=updated_at, start_post_author=start_post_author, start_post_permlink=start_post_permlink, limit=limit)
 

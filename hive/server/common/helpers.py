@@ -115,3 +115,23 @@ def valid_follow_type(follow_type: str):
     """Ensure follow type is valid steemd type."""
     assert follow_type in ['blog', 'ignore'], 'invalid follow_type `%s`' % follow_type
     return follow_type
+
+def valid_date(date, allow_empty=False):
+    """ Ensure that date is in correct format """
+    if not date:
+        assert allow_empty, 'Date is blank'
+    check_date = False
+    # check format "%Y-%m-%d %H:%M:%S"
+    try:
+        check_date = (date == datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S").strftime('%Y-%m-%d %H:%M%S'))
+    except ValueError:
+        check_date = False
+    # if check failed for format above try another format
+    # check format "%Y-%m-%dT%H:%M:%S"
+    if not check_date:
+        try:
+            check_date = (date == datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%S").strftime('%Y-%m-%dT%H:%M:%S'))
+        except ValueError:
+            pass
+
+    assert check_date, "Date should be in format Y-m-d H:M:S or Y-m-dTH:M:S"
