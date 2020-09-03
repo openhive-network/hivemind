@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 
 async def load_profiles(db, names):
     """`get_accounts`-style lookup for `get_state` compat layer."""
-    sql = """SELECT * FROM hive_accounts_info
+    sql = """SELECT * FROM hive_accounts_info_view
               WHERE name IN :names"""
     rows = await db.query_all(sql, names=tuple(names))
     return [_condenser_profile_object(row) for row in rows]
