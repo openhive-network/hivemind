@@ -66,7 +66,7 @@ async def get_profile(context, account, observer=None):
     """Load account/profile data."""
     db = context['db']
     ret = await load_profiles(db, [valid_account(account)])
-    assert ret, 'account \'{}\' does not exist'.format(account)
+    assert ret, 'Account \'{}\' does not exist'.format(account)
 
     observer_id = await get_account_id(db, observer) if observer else None
     if observer_id:

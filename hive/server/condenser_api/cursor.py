@@ -463,7 +463,7 @@ async def get_accounts(db, accounts: list):
         account_data['rank'] = row.rank
         account_data['lastread_at'] = row.lastread_at.isoformat()
 
-        account_data['active_at'] = max( row.created_at, row.post_active_at, row.vote_active_at ).isoformat()
+        account_data['active_at'] = row.active_at.isoformat()
 
         account_data['cached_at'] = row.cached_at.isoformat()
         ret.append(account_data)

@@ -201,7 +201,7 @@ def _condenser_profile_object(row):
         'id': row['id'],
         'name': row['name'],
         'created': json_date(row['created_at']),
-        'active': json_date(max( row['created_at'], row['post_active_at'], row['vote_active_at'] )),
+        'active': json_date(row['active_at']),
         'post_count': row['post_count'],
         'reputation': row['reputation'],
         'blacklists': blacklists,

@@ -576,34 +576,34 @@ def setup(db):
         SELECT
           id,
           name,
-          COALESCE(
-            (
-              select count(*) post_count
-              FROM hive_posts hp
-              WHERE ha.id=hp.author_id
-              GROUP BY hp.author_id
-            ),
-            0
+          (
+            select count(*) post_count
+            FROM hive_posts hp
+            WHERE ha.id=hp.author_id
           ) post_count,
-          COALESCE(
-            (
-              select max(hp.created_at)
-              FROM hive_posts hp
-              WHERE ha.id=hp.author_id
-              GROUP BY hp.author_id
-            ),
-            '1970-01-01 00:00:00.0'
-          ) post_active_at,
-          COALESCE(
-            (
-              select max(hv.last_update)
-              from hive_votes hv
-              WHERE ha.id=hv.voter_id
-              GROUP BY hv.voter_id
-            ),
-            '1970-01-01 00:00:00.0'
-          ) AS vote_active_at,
           created_at,
+          (
+          	SELECT GREATEST
+          	(
+          		created_at,
+		          COALESCE(
+		            (
+		              select max(hp.created_at)
+		              FROM hive_posts hp
+		              WHERE ha.id=hp.author_id
+		            ),
+		            '1970-01-01 00:00:00.0'
+		          ),
+		          COALESCE(
+		            (
+		              select max(hv.last_update)
+		              from hive_votes hv
+		              WHERE ha.id=hv.voter_id
+		            ),
+		            '1970-01-01 00:00:00.0'
+		          )
+          	)
+          ) active_at,
           display_name,
           about,
           reputation,
