@@ -90,7 +90,6 @@ def build_methods():
         condenser_api.get_blog_entries,
         condenser_api.get_account_reputations,
         condenser_api.get_reblogged_by,
-        condenser_api.get_accounts,
         condenser_api.get_active_votes
     )})
 

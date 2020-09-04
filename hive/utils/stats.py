@@ -419,7 +419,6 @@ class SteemStats(StatsAbstract):
         'get_dynamic_global_properties': 20,
         'get_block': 50,
         'get_blocks_batch': 5,
-        'get_accounts': 3,
         'get_content': 4,
         'get_order_book': 20,
         'get_feed_history': 20,

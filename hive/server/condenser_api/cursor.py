@@ -433,39 +433,3 @@ async def pids_by_replies_to_account(db, start_author: str, start_permlink: str 
     """ % seek
 
     return await db.query_col(sql, parent=parent_account, start_id=start_id, limit=limit)
-
-async def get_accounts(db, accounts: list):
-    """Returns accounts data for accounts given in list"""
-    ret = []
-
-    names = ["'{}'".format(a) for a in accounts]
-    sql = """SELECT *
-        FROM hive_accounts_info_view WHERE name IN ({})""".format(",".join(names))
-
-    result = await db.query_all(sql)
-    for row in result:
-        account_data = {}
-        if not row.raw_json is None and row.raw_json != '':
-            account_data = dict(loads(row.raw_json))
-        account_data['created_at'] = row.created_at.isoformat()
-        account_data['reputation'] = row.reputation
-        account_data['display_name'] = row.display_name
-        account_data['about'] = row.about
-        account_data['location'] = row.location
-        account_data['website'] = row.website
-        account_data['profile_image'] = row.profile_image
-        account_data['cover_image'] = row.cover_image
-        account_data['followers'] = row.followers
-        account_data['following'] = row.following
-        account_data['proxy'] = row.proxy
-        account_data['post_count'] = row.post_count
-        account_data['proxy_weight'] = row.proxy_weight
-        account_data['rank'] = row.rank
-        account_data['lastread_at'] = row.lastread_at.isoformat()
-
-        account_data['active_at'] = row.active_at.isoformat()
-
-        account_data['cached_at'] = row.cached_at.isoformat()
-        ret.append(account_data)
-
-    return ret
