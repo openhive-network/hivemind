@@ -17,13 +17,13 @@ class FeedCache:
     """
 
     @classmethod
-    def insert(cls, post_id, account_id, created_at):
+    def insert(cls, post_id, account_id, created_at, block_num):
         """Inserts a [re-]post by an account into feed."""
         assert not DbState.is_initial_sync(), 'writing to feed cache in sync'
-        sql = """INSERT INTO hive_feed_cache (account_id, post_id, created_at)
-                      VALUES (:account_id, :id, :created_at)
+        sql = """INSERT INTO hive_feed_cache (account_id, post_id, created_at, block_num)
+                      VALUES (:account_id, :id, :created_at, :block_num)
                  ON CONFLICT ON CONSTRAINT hive_feed_cache_ux1 DO NOTHING"""
-        DB.query(sql, account_id=account_id, id=post_id, created_at=created_at)
+        DB.query(sql, account_id=account_id, id=post_id, created_at=created_at, block_num=block_num)
 
     @classmethod
     def delete(cls, post_id, account_id=None):
@@ -50,18 +50,18 @@ class FeedCache:
             DB.query("TRUNCATE TABLE hive_feed_cache")
 
         lap_0 = time.perf_counter()
+        # why join with accounts and taking id if author_id exists?
         DB.query("""
-            INSERT INTO hive_feed_cache (account_id, post_id, created_at)
-                 SELECT hive_accounts.id, hive_posts.id, hive_posts.created_at
+            INSERT INTO hive_feed_cache (account_id, post_id, created_at, block_num)
+                 SELECT hive_posts.author_id, hive_posts.id, hive_posts.created_at, hive_posts.block_num
                    FROM hive_posts
-                   JOIN hive_accounts ON hive_posts.author_id = hive_accounts.id
                   WHERE depth = 0 AND counter_deleted = 0
             ON CONFLICT DO NOTHING
         """)
         lap_1 = time.perf_counter()
         DB.query("""
-            INSERT INTO hive_feed_cache (account_id, post_id, created_at)
-                 SELECT hive_accounts.id, post_id, hive_reblogs.created_at
+            INSERT INTO hive_feed_cache (account_id, post_id, created_at, block_num)
+                 SELECT hive_accounts.id, post_id, hive_reblogs.created_at, hive_reblogs.block_num
                    FROM hive_reblogs
                    JOIN hive_accounts ON hive_reblogs.account = hive_accounts.name
             ON CONFLICT DO NOTHING

@@ -83,7 +83,7 @@ class Reblog():
                     blogger_id = Accounts.get_id(blogger)
                     result = dict(row)
                     post_id = result['post_id']
-                    FeedCache.insert(post_id, blogger_id, block_date)
+                    FeedCache.insert(post_id, blogger_id, block_date, block_num)
                     Notify('reblog', src_id=blogger_id, dst_id=author_id,
                            post_id=post_id, when=block_date,
                            score=Accounts.default_score(blogger)).write()

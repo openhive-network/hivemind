@@ -147,7 +147,7 @@ class Posts:
                 author_id = result['author_id']
                 Notify('error', dst_id=author_id, when=block_date,
                        post_id=result['id'], payload=error).write()
-            cls._insert_feed_cache(result, block_date)
+            cls._insert_feed_cache(result, block_date, op['block_num'])
 
     @classmethod
     def flush_into_db(cls):
@@ -410,16 +410,16 @@ class Posts:
             cls.update_child_count(pid, '-')
 
     @classmethod
-    def _insert_feed_cache(cls, result, date):
+    def _insert_feed_cache(cls, result, date, block_num):
         """Insert the new post into feed cache if it's not a comment."""
         if not result['depth']:
-            cls._insert_feed_cache4(result['depth'], result['id'], result['author_id'], date)
+            cls._insert_feed_cache4(result['depth'], result['id'], result['author_id'], date, block_num)
 
     @classmethod
-    def _insert_feed_cache4(cls, post_depth, post_id, author_id, post_date):
+    def _insert_feed_cache4(cls, post_depth, post_id, author_id, post_date, block_num):
         """Insert the new post into feed cache if it's not a comment."""
         if not post_depth:
-            FeedCache.insert(post_id, author_id, post_date)
+            FeedCache.insert(post_id, author_id, post_date, block_num)
 
     @classmethod
     def _verify_post_against_community(cls, op, community_id, is_valid, is_muted):
