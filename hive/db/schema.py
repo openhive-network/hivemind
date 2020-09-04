@@ -49,19 +49,15 @@ def build_metadata():
         sa.Column('following', sa.Integer, nullable=False, server_default='0'),
 
         sa.Column('proxy', VARCHAR(16), nullable=False, server_default=''),
-        sa.Column('post_count', sa.Integer, nullable=False, server_default='0'),
         sa.Column('proxy_weight', sa.Float(precision=6), nullable=False, server_default='0'),
-        sa.Column('vote_weight', sa.Float(precision=6), nullable=False, server_default='0'),
         sa.Column('kb_used', sa.Integer, nullable=False, server_default='0'), # deprecated
         sa.Column('rank', sa.Integer, nullable=False, server_default='0'),
 
         sa.Column('lastread_at', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
-        sa.Column('active_at', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('cached_at', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('raw_json', sa.Text),
 
         sa.UniqueConstraint('name', name='hive_accounts_ux1'),
-        sa.Index('hive_accounts_ix1', 'vote_weight'), # core: quick ranks
         sa.Index('hive_accounts_ix5', 'cached_at'), # core/listen sweep
     )
 
@@ -557,6 +553,74 @@ def setup(db):
             RETURNING hp.id, hp.depth;
           END
           $function$
+          """
+    db.query_no_return(sql)
+
+    # In original hivemind, a value of 'active_at' was calculated from
+    # max
+    #   {
+    #     created             ( account_create_operation ),
+    #     last_account_update ( account_update_operation/account_update2_operation ),
+    #     last_post           ( comment_operation - only creation )
+    #     last_root_post      ( comment_operation - only creation + only ROOT ),
+    #     last_vote_time      ( vote_operation )
+    #   }
+    # In order to simplify calculations, `last_account_update` is not taken into consideration, because this updating accounts is very rare
+    # and posting/voting after an account updating, fixes `active_at` value immediately.
+
+    sql = """
+        DROP VIEW IF EXISTS public.hive_accounts_info_view;
+
+        CREATE OR REPLACE VIEW public.hive_accounts_info_view
+        AS
+        SELECT
+          id,
+          name,
+          (
+            select count(*) post_count
+            FROM hive_posts hp
+            WHERE ha.id=hp.author_id
+          ) post_count,
+          created_at,
+          (
+          	SELECT GREATEST
+          	(
+          		created_at,
+		          COALESCE(
+		            (
+		              select max(hp.created_at)
+		              FROM hive_posts hp
+		              WHERE ha.id=hp.author_id
+		            ),
+		            '1970-01-01 00:00:00.0'
+		          ),
+		          COALESCE(
+		            (
+		              select max(hv.last_update)
+		              from hive_votes hv
+		              WHERE ha.id=hv.voter_id
+		            ),
+		            '1970-01-01 00:00:00.0'
+		          )
+          	)
+          ) active_at,
+          display_name,
+          about,
+          reputation,
+          profile_image,
+          location,
+          website,
+          cover_image,
+          rank,
+          following,
+          followers,
+          proxy,
+          proxy_weight,
+          lastread_at,
+          cached_at,
+          raw_json
+        FROM
+          hive_accounts ha
           """
     db.query_no_return(sql)
 
