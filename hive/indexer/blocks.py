@@ -116,8 +116,6 @@ class Blocks:
 
     @staticmethod
     def prepare_vops(comment_payout_ops, vopsList, date, block_num):
-        vote_ops = {}
-
         ineffective_deleted_ops = {}
         registered_ops_stats = [ 'author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation', 'comment_payout_update_operation', 'ineffective_delete_comment_operation']
 
@@ -146,8 +144,7 @@ class Blocks:
                 comment_payout_ops[key][op_type] = ( op_value, date )
 
             elif op_type == 'effective_comment_vote_operation':
-                key_vote = "{}/{}/{}".format(op_value['voter'], op_value['author'], op_value['permlink'])
-                vote_ops[ key_vote ] = op_value
+                Votes.effective_comment_vote_op( op_value )
 
                 if key not in comment_payout_ops:
                     comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
@@ -166,7 +163,7 @@ class Blocks:
             if op_type in registered_ops_stats:
                 OPSM.op_stats(op_type, OPSM.stop(start))
 
-        return (vote_ops, ineffective_deleted_ops)
+        return ineffective_deleted_ops
 
 
     @classmethod
@@ -184,16 +181,15 @@ class Blocks:
         if cls._head_block_date is None:
             cls._head_block_date = cls._current_block_date
 
-        vote_ops                = None
         comment_payout_stats    = None
         ineffective_deleted_ops = None
 
         if is_initial_sync:
             if num in virtual_operations:
-                (vote_ops, ineffective_deleted_ops ) = Blocks.prepare_vops(Posts.comment_payout_ops, virtual_operations[num], cls._current_block_date, num)
+                ineffective_deleted_ops = Blocks.prepare_vops(Posts.comment_payout_ops, virtual_operations[num], cls._current_block_date, num)
         else:
             vops = hived.get_virtual_operations(num)
-            (vote_ops, ineffective_deleted_ops ) = Blocks.prepare_vops(Posts.comment_payout_ops, vops, cls._current_block_date, num)
+            ineffective_deleted_ops = Blocks.prepare_vops(Posts.comment_payout_ops, vops, cls._current_block_date, num)
 
         json_ops = []
         for tx_idx, tx in enumerate(block['transactions']):
@@ -257,10 +253,6 @@ class Blocks:
         # follow/reblog/community ops
         if json_ops:
             CustomOp.process_ops(json_ops, num, cls._head_block_date)
-
-        if vote_ops is not None:
-            for k, v in vote_ops.items():
-                Votes.effective_comment_vote_op(k, v)
 
         cls._head_block_date = cls._current_block_date
 
