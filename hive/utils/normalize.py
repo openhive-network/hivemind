@@ -78,19 +78,23 @@ def escape_characters(text):
         if ch in SPECIAL_CHARS:
             dw = SPECIAL_CHARS[ch]
             ret = ret + dw
-        elif ch.isprintable():
-            ret = ret + ch
         else:
-            # escaped_value = ch.encode('unicode-escape').decode('utf-8')
             ordinal = ord(ch)
-            hexstr = hex(ordinal)[2:]
-            escaped_value = '\\u'
-            i = len(hexstr)
-            while i < 4:
-                escaped_value += '0'
-                i += 1
-            escaped_value += hexstr
-            ret = ret + escaped_value
+            if ordinal <= 0x80 and ch.isprintable():
+                ret = ret + ch
+            else:
+                hexstr = hex(ordinal)[2:]
+                i = len(hexstr)
+                max = 4
+                escaped_value = '\\u'
+                if i > max:
+                    max = 8
+                    escaped_value = '\\U'
+                while i < max:
+                    escaped_value += '0'
+                    i += 1
+                escaped_value += hexstr
+                ret = ret + escaped_value
 
     ret = ret + "'"
     return ret
