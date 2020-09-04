@@ -68,16 +68,18 @@ def build_metadata():
 
     sa.Table(
         'hive_reputation_data', metadata,
+        sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('author_id', sa.Integer, nullable=False),
         sa.Column('voter_id', sa.Integer, nullable=False),
         sa.Column('permlink', sa.String(255, collation='C'), nullable=False),
         sa.Column('rshares', sa.BigInteger, nullable=False),
         sa.Column('block_num', sa.Integer,  nullable=False),
 
-        sa.PrimaryKeyConstraint('author_id', 'permlink', 'voter_id', name='hive_reputation_data_pk'),
-        sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),
-        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id']),
-        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'])
+#        sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),
+#        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id']),
+#        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num']),
+
+        sa.UniqueConstraint('author_id', 'permlink', 'voter_id', name='hive_reputation_data_uk')
     )
 
     sa.Table(
@@ -1326,14 +1328,16 @@ def setup(db):
           $FUNCTION$
           DECLARE
             __insert_info vote_reputation_info;
-            __rep_delta INTEGER;
-            __old_rep_delta INTEGER;
+            __rep_delta BIGINT;
+            __old_rep_delta BIGINT;
           BEGIN
             SELECT _rshares >> 6 INTO __rep_delta;
 
             INSERT INTO hive_reputation_data
               (author_id, voter_id, permlink, block_num, rshares)
-            SELECT ha.id as author_id, hv.id as voter_id, _permlink, _block_num, _rshares
+            --- Warning DISTINCT is needed here since we have to strict join to hv table and there is really made a CROSS JOIN
+            --- between ha and hv records (producing 2 duplicated records)
+            SELECT DISTINCT ha.id as author_id, hv.id as voter_id, _permlink, _block_num, _rshares
             FROM hive_accounts ha
             JOIN hive_accounts hv ON hv.name = _voter
             JOIN hive_posts hp ON hp.author_id = ha.id
@@ -1352,15 +1356,20 @@ def setup(db):
                                                                            AND hrd.rshares < 0), 0))
                       )
 
-            ON CONFLICT ON CONSTRAINT hive_reputation_data_pk DO
+            ON CONFLICT ON CONSTRAINT hive_reputation_data_uk DO
             UPDATE SET
               rshares = EXCLUDED.rshares
             RETURNING (xmax = 0) AS is_new_vote, 
                       (SELECT hrd.rshares
                       FROM hive_reputation_data hrd
-                      WHERE hrd.author_id = author_id and hrd.voter_id=voter_id and hrd.permlink=_permlink) AS old_rshares, author_id, voter_id
+                      --- Warning we want OLD row here, not both !!!
+                      WHERE hrd.id = hive_reputation_data.id AND hrd.author_id = author_id and hrd.voter_id=voter_id and hrd.permlink=_permlink) AS old_rshares, author_id, voter_id
               INTO __insert_info
             ;
+
+            IF __insert_info IS NULL THEN
+                RETURN;
+            END IF;
 
             IF __insert_info.is_new_vote THEN
               UPDATE hive_accounts ha
@@ -1379,6 +1388,8 @@ def setup(db):
           $FUNCTION$
           ;
           """
+
+    db.query_no_return(sql)
 
 def reset_autovac(db):
     """Initializes/resets per-table autovacuum/autoanalyze params.
@@ -1411,7 +1422,8 @@ def set_fillfactor(db):
     fillfactor_config = {
         'hive_posts': 70,
         'hive_post_data': 70,
-        'hive_votes': 70
+        'hive_votes': 70,
+        'hive_reputation_data': 50
     }
 
     for table, fillfactor in fillfactor_config.items():

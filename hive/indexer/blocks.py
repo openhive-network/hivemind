@@ -13,6 +13,8 @@ from hive.indexer.follow import Follow
 from hive.indexer.votes import Votes
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.tags import Tags
+from hive.indexer.reputations import Reputations
+
 from time import perf_counter
 
 from hive.utils.stats import OPStatusManager as OPSM
@@ -103,6 +105,7 @@ class Blocks:
         folllow_items = len(Follow.follow_items_to_flush) + Follow.flush(trx=False)
         flush_time = register_time(flush_time, "Follow", folllow_items)
         flush_time = register_time(flush_time, "Posts", Posts.flush())
+        flush_time = register_time(flush_time, "Reputations", Reputations.flush())
 
         if (not is_initial_sync) and (first_block > -1):
             cls.on_live_blocks_processed( first_block, last_num )
@@ -144,6 +147,9 @@ class Blocks:
 
             elif op_type == 'effective_comment_vote_operation':
                 key_vote = "{}/{}/{}".format(op_value['voter'], op_value['author'], op_value['permlink'])
+
+                Reputations.process_vote(block_num, op_value)
+
                 vote_ops[ key_vote ] = op_value
 
                 if key not in comment_payout_ops:
