@@ -25,7 +25,7 @@ class Reputations:
         i = 0
         items = 0
         for s in cls._queries:
-            query = query + cls._queries[i] + ";\n"
+            query = query + str(cls._queries[i]) + ";\n"
             i = i + 1
             items = items + 1
             if items >= CACHED_ITEMS_LIMIT:
