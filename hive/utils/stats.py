@@ -349,6 +349,60 @@ class WaitingStatusManager(StatusManager):
         log.info(f"Current waiting time: {tm :.4f}s.")
         return tm
 
+class PreProcessingStat(Stat):
+    def __init__(self, time, items):
+        super().__init__(time)
+        self.items = items
+
+    def __str__(self):
+        return f"Preprocessed {self.items} items in {self.time :.4f} seconds"
+
+class PreProcessingStatusManager(StatusManager):
+    # Summary for whole sync
+    global_stats = {}
+
+    # Currently processed blocks stats, merged to global stats, after `next_block`
+    current_stats = {}
+
+    @staticmethod
+    def preprocess_stat(name, time, items):
+        if name in PreProcessingStatusManager.current_stats.keys():
+            PreProcessingStatusManager.current_stats[name].time += time
+            PreProcessingStatusManager.current_stats[name].items += items
+        else:
+            PreProcessingStatusManager.current_stats[name] = PreProcessingStat(time, items)
+
+    @staticmethod
+    def next_blocks():
+        PreProcessingStatusManager.global_stats = StatusManager.merge_dicts(
+            PreProcessingStatusManager.global_stats, 
+            PreProcessingStatusManager.current_stats,
+            True
+        )
+        PreProcessingStatusManager.current_stats.clear()
+
+    @staticmethod
+    def log_global(label : str):
+        StatusManager.print_row()
+        log.info(label)
+        count = 0
+        for key, value in PreProcessingStatusManager.global_stats.items():
+            count += value.items
+        tm = StatusManager.log_dict(PreProcessingStatusManager.global_stats)
+        log.info(f"Total preprocessing time: {tm :.4f} seconds, of {count} elements")
+        return tm
+
+    @staticmethod
+    def log_current(label : str):
+        StatusManager.print_row()
+        log.info(label)
+        count = 0
+        for key, value in PreProcessingStatusManager.current_stats.items():
+            count += value.items
+        tm = StatusManager.log_dict(PreProcessingStatusManager.current_stats)
+        log.info(f"Current preprocessing time: {tm :.4f} seconds, of {count} elements")
+        return tm
+
 def minmax(collection : dict, blocks : int, time : float, _from : int):
     value = blocks/time
     _to = _from + blocks

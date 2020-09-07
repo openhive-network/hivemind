@@ -33,6 +33,7 @@ from hive.utils.stats import StatusManager as SM
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import WaitingStatusManager as WSM
+from hive.utils.stats import PreProcessingStatusManager as PPSM
 from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import BroadcastObject
 
@@ -147,11 +148,13 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
                 otm = OPSM.log_current("Operations present in the processed blocks")
                 ftm = FSM.log_current("Flushing times")
                 wtm = WSM.log_current("Waiting times")
-                log.info(f"Calculated time: {otm+ftm+wtm :.4f} s.")
+                pptm = PPSM.log_current("Preprocessing times")
+                log.info(f"Calculated time: {otm+ftm+wtm+pptm :.4f} s.")
 
             OPSM.next_blocks()
             FSM.next_blocks()
             WSM.next_blocks()
+            PPSM.next_blocks()
 
             lbound = to
             PC.broadcast(BroadcastObject('sync_current_block', lbound, 'blocks'))
@@ -171,7 +174,8 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
         wtm = WSM.log_global("Total waiting times")
         ftm = FSM.log_global("Total flush times")
         otm = OPSM.log_global("All operations present in the processed blocks")
-        ttm = ftm + otm + wtm
+        pptm = PPSM.log_global("Preprocessing time")
+        ttm = ftm + otm + wtm + pptm
         log.info(f"Elapsed time: {stop :.4f}s. Calculated elapsed time: {ttm :.4f}s. Difference: {stop - ttm :.4f}s")
         log.info(f"Highest block processing rate: {rate['max'] :.4f} bps. From: {rate['max_from']} To: {rate['max_to']}")
         log.info(f"Lowest block processing rate: {rate['min'] :.4f} bps. From: {rate['min_from']} To: {rate['min_to']}")

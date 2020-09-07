@@ -20,6 +20,7 @@ from time import perf_counter
 
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.stats import FlushStatusManager as FSM
+from hive.utils.stats import PreProcessingStatusManager as PPSM
 from hive.utils.trends import update_hot_and_tranding_for_block_range
 from hive.utils.post_active import update_active_starting_from_posts_on_block
 
@@ -173,11 +174,11 @@ class Blocks:
 
     @staticmethod
     def prepare_vops(comment_payout_ops, vopsList, date, block_num):
+        start = PPSM.start()
         ineffective_deleted_ops = {}
         registered_ops_stats = [ 'author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation', 'comment_payout_update_operation', 'ineffective_delete_comment_operation']
 
         for vop in vopsList:
-            start = OPSM.start()
             key = None
             val = None
 
@@ -218,9 +219,7 @@ class Blocks:
             elif op_type == 'ineffective_delete_comment_operation':
                 ineffective_deleted_ops[key] = {}
 
-            if op_type in registered_ops_stats:
-                OPSM.op_stats(op_type, OPSM.stop(start))
-
+        PPSM.preprocess_stat( "prepare_vops", PPSM.stop(start), len(vopsList) )
         return ineffective_deleted_ops
 
 
