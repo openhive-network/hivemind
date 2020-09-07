@@ -15,9 +15,16 @@ class PostDataCache(object):
         return pid in cls._data
 
     @classmethod
-    def add_data(cls, pid, post_data, print_query = False):
+    def add_data(cls, pid, post_data, is_new_post):
         """ Add data to cache """
-        cls._data[pid] = post_data
+        if not cls.is_cached(pid):
+            cls._data[pid] = post_data
+            cls._data[pid]['is_new_post'] = is_new_post
+        else:
+            assert not is_new_post
+            for k, data in post_data.items():
+                if data is not None:
+                    cls._data[pid][k] = data
 
     @classmethod
     def get_post_body(cls, pid):
@@ -36,37 +43,53 @@ class PostDataCache(object):
     def flush(cls, print_query = False):
         """ Flush data from cache to db """
         if cls._data:
-            sql = """
-                INSERT INTO 
-                    hive_post_data (id, title, preview, img_url, body, json) 
-                VALUES 
-            """
-            values = []
+            values_insert = []
+            values_update = []
             for k, data in cls._data.items():
-                title = "''" if not data['title'] else "{}".format(escape_characters(data['title']))
-                preview = "''" if not data['preview'] else "{}".format(escape_characters(data['preview']))
-                img_url = "''" if not data['img_url'] else "{}".format(escape_characters(data['img_url']))
-                body = "''" if not data['body'] else "{}".format(escape_characters(data['body']))
-                json = "'{}'" if not data['json'] else "{}".format(escape_characters(data['json']))
-                values.append("({},{},{},{},{},{})".format(k, title, preview, img_url, body, json))
-            sql += ','.join(values)
-            sql += """
-                ON CONFLICT (id)
-                    DO
-                        UPDATE SET 
-                            title = EXCLUDED.title,
-                            preview = EXCLUDED.preview,
-                            img_url = EXCLUDED.img_url,
-                            body = EXCLUDED.body,
-                            json = EXCLUDED.json
-                        WHERE
-                            hive_post_data.id = EXCLUDED.id
-            """
+                title = 'NULL' if data['title'] is None else "{}".format(escape_characters(data['title']))
+                body = 'NULL' if data['body'] is None else "{}".format(escape_characters(data['body']))
+                preview = 'NULL' if data['body'] is None else "{}".format(escape_characters(data['body'][0:1024]))
+                json = 'NULL' if data['json'] is None else "{}".format(escape_characters(data['json']))
+                img_url = 'NULL' if data['img_url'] is None else "{}".format(escape_characters(data['img_url']))
+                value = "({},{},{},{},{},{})".format(k, title, preview, img_url, body, json)
+                if data['is_new_post']:
+                    values_insert.append(value)
+                else:
+                    values_update.append(value)
 
-            if(print_query):
-                log.info("Executing query:\n{}".format(sql))
+            if values_insert:
+                sql = """
+                    INSERT INTO 
+                        hive_post_data (id, title, preview, img_url, body, json) 
+                    VALUES 
+                """
+                sql += ','.join(values_insert)
+                if print_query:
+                    log.info("Executing query:\n{}".format(sql))
+                DB.query(sql)
 
-            DB.query(sql)
+            if values_update:
+                sql = """
+                    UPDATE hive_post_data AS hpd SET 
+                        title = COALESCE( data_source.title, hpd.title ),
+                        preview = COALESCE( data_source.preview, hpd.preview ),
+                        img_url = COALESCE( data_source.img_url, hpd.img_url ),
+                        body = COALESCE( data_source.body, hpd.body ),
+                        json = COALESCE( data_source.json, hpd.json )
+                    FROM
+                    ( SELECT * FROM
+                    ( VALUES
+                """
+                sql += ','.join(values_update)
+                sql += """
+                    ) AS T(id, title, preview, img_url, body, json)
+                    ) AS data_source
+                    WHERE hpd.id = data_source.id
+                """
+                if print_query:
+                    log.info("Executing query:\n{}".format(sql))
+                DB.query(sql)
+
         n = len(cls._data.keys())
         cls._data.clear()
         return n

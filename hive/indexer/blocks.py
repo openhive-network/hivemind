@@ -2,7 +2,6 @@
 
 from hive.indexer.reblog import Reblog
 import logging
-import json
 
 from hive.db.adapter import Db
 

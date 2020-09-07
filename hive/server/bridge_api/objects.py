@@ -231,7 +231,10 @@ def _bridge_post_object(row, truncate_body=0):
 
     post['title'] = row['title']
     post['body'] = row['body'][0:truncate_body] if truncate_body else row['body']
-    post['json_metadata'] = json.loads(row['json'])
+    try:
+        post['json_metadata'] = json.loads(row['json'])
+    except Exception:
+        post['json_metadata'] = {}
 
     post['created'] = json_date(row['created_at'])
     post['updated'] = json_date(row['updated_at'])

@@ -3,7 +3,7 @@
 import logging
 import collections
 
-from json import dumps, loads
+from ujson import dumps, loads
 
 from diff_match_patch import diff_match_patch
 
@@ -16,7 +16,7 @@ from hive.indexer.community import Community, START_DATE
 from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.tags import Tags
-from hive.utils.normalize import sbd_amount, legacy_amount, asset_to_hbd_hive
+from hive.utils.normalize import sbd_amount, legacy_amount, asset_to_hbd_hive, safe_img_url
 
 log = logging.getLogger(__name__)
 DB = Db.instance()
@@ -103,23 +103,6 @@ class Posts:
 
         cls._set_id(op['author']+'/'+op['permlink'], result['id'])
 
-        if result['is_new_post']:
-            # add content data to hive_post_data
-            post_data = dict(title=op['title'], preview=op['preview'] if 'preview' in op else "",
-                             img_url=op['img_url'] if 'img_url' in op else "", body=op['body'],
-                             json=op['json_metadata'] if op['json_metadata'] else '{}')
-        else:
-            # edit case. Now we need to (potentially) apply patch to the post body.
-            new_body = cls._merge_post_body(id=result['id'], new_body_def=op['body'])
-            post_data = dict(title=op['title'], preview=op['preview'] if 'preview' in op else "",
-                             img_url=op['img_url'] if 'img_url' in op else "", body=new_body,
-                             json=op['json_metadata'] if op['json_metadata'] else '{}')
-
-#        log.info("Adding author: {}  permlink: {}".format(op['author'], op['permlink']))
-
-        printQuery = False # op['author'] == 'xeroc' and op['permlink'] == 're-piston-20160818t080811'
-        PostDataCache.add_data(result['id'], post_data, printQuery)
-
         md = {}
         # At least one case where jsonMetadata was double-encoded: condenser#895
         # jsonMetadata = JSON.parse(jsonMetadata);
@@ -129,6 +112,34 @@ class Posts:
                 md = {}
         except Exception:
             pass
+
+        img_url = None
+        if 'image' in md:
+            img_url = md['image']
+            if isinstance(img_url, list) and img_url:
+                img_url = img_url[0]
+        if img_url:
+            img_url = safe_img_url(img_url)
+
+        is_new_post = result['is_new_post']
+        if is_new_post:
+            # add content data to hive_post_data
+            post_data = dict(title=op['title'] if op['title'] else '',
+                             img_url=img_url if img_url else '',
+                             body=op['body'] if op['body'] else '',
+                             json=op['json_metadata'] if op['json_metadata'] else '')
+        else:
+            # edit case. Now we need to (potentially) apply patch to the post body.
+            # empty new body means no body edit, not clear (same with other data)
+            new_body = cls._merge_post_body(id=result['id'], new_body_def=op['body']) if op['body'] else None
+            new_title = op['title'] if op['title'] else None
+            new_json = op['json_metadata'] if op['json_metadata'] else None
+            # when 'new_json' is not empty, 'img_url' should be overwritten even if it is itself empty
+            new_img = img_url if img_url else '' if new_json else None
+            post_data = dict(title=new_title, img_url=new_img, body=new_body, json=new_json)
+
+#        log.info("Adding author: {}  permlink: {}".format(op['author'], op['permlink']))
+        PostDataCache.add_data(result['id'], post_data, is_new_post)
 
         if not result['depth']:
             tags = [result['post_category']]
