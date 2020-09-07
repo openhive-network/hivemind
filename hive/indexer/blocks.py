@@ -13,7 +13,7 @@ from hive.indexer.follow import Follow
 from hive.indexer.votes import Votes
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.tags import Tags
-from hive.indexer.reputations import Reputations
+
 
 from time import perf_counter
 
@@ -30,12 +30,11 @@ class Blocks:
     """Processes blocks, dispatches work, manages `hive_blocks` table."""
     blocks_to_flush = []
     _head_block_date = None
-    _reputations = Reputations(DB)
+    _reputations = None
     _current_block_date = None
 
     def __init__(cls):
         log.info("Creating a reputations processor")
-        log.info("Built reputations object: {}".format(cls._reputations))
         log.info("Built blocks object: {}".format(cls))
 
         head_date = cls.head_date()
@@ -45,6 +44,12 @@ class Blocks:
         else:
             cls._head_block_date = head_date
             cls._current_block_date = head_date
+
+    @classmethod 
+    def set_reputations_processor(cls, reputations_processor):
+        cls._reputations = reputations_processor
+        assert cls._reputations is not None, "Reputation object is None"
+        log.info("Built reputations object: {}".format(cls._reputations))
 
     @classmethod
     def head_num(cls):

@@ -1,5 +1,6 @@
 """Hive sync manager."""
 
+from hive.indexer.reputations import Reputations
 import logging
 import glob
 from time import perf_counter as perf
@@ -31,6 +32,7 @@ from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import WaitingStatusManager as WSM
 from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import BroadcastObject
+from hive.indexer.reputations import Reputations
 
 log = logging.getLogger(__name__)
 
@@ -216,7 +218,7 @@ class Sync:
 
         # ensure db schema up to date, check app status
         DbState.initialize()
-
+        Blocks.set_reputations_processor(Reputations(self._db))
         self._blocksProcessor = Blocks()
 
         # prefetch id->name and id->rank memory maps
@@ -370,7 +372,7 @@ class Sync:
             start_time = perf()
 
             self._db.query("START TRANSACTION")
-            num = blocksProcessor.process(block, {}, steemd)
+            num = self._blocksProcessor.process(block, {}, steemd)
             follows = Follow.flush(trx=False)
             accts = Accounts.flush(steemd, trx=False, spread=8)
             self._db.query("COMMIT")
