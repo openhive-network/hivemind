@@ -50,6 +50,10 @@ class Db:
         self._exec = self._conn.execute
         self._exec(sqlalchemy.text("COMMIT"))
 
+    def clone(self):
+        c = Db(self._url)
+        return c
+
     def engine(self):
         """Lazy-loaded SQLAlchemy engine."""
         if not self._engine:

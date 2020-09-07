@@ -7,12 +7,14 @@ from hive.db.db_state import DbState
 from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
-DB = Db.instance()
 
 CACHED_ITEMS_LIMIT = 200
 
 class Reputations:
-    _queries = []
+    def __init__(cls, sharedDb):
+        cls._queries = []
+        cls._db = sharedDb.clone()
+        log.info("Cloning a database adapter")
 
     @classmethod
     def process_vote(cls, block_num, effective_vote_op):
@@ -29,12 +31,12 @@ class Reputations:
             i = i + 1
             items = items + 1
             if items >= CACHED_ITEMS_LIMIT:
-                DB.query_no_return(query)
+                cls._db.query_no_return(query)
                 query = ""
                 items = 0
 
         if items >= CACHED_ITEMS_LIMIT:
-            DB.query_no_return(query)
+            cls._db.query_no_return(query)
             query = ""
             items = 0
 

@@ -29,10 +29,16 @@ DB = Db.instance()
 class Blocks:
     """Processes blocks, dispatches work, manages `hive_blocks` table."""
     blocks_to_flush = []
-    _head_block_date = None # timestamp of last fully processed block ("previous block")
-    _current_block_date = None # timestamp of block currently being processes ("current block")
 
     def __init__(cls):
+        cls._reputations = Reputations(DB)
+        cls._head_block_date = None # timestamp of last fully processed block ("previous block")
+        cls._current_block_date = None # timestamp of block currently being processes ("current block")
+
+        log.info("Creating a reputations processor")
+        log.info("Built reputations object: {}".format(cls._reputations))
+        log.info("Built blocks object: {}".format(cls))
+
         head_date = cls.head_date()
         if(head_date == ''):
             cls._head_block_date = None
@@ -64,6 +70,7 @@ class Blocks:
         Tags.flush()
         Votes.flush()
         Posts.flush()
+        cls._reputations.flush()
         block_num = int(block['block_id'][:8], base=16)
         cls.on_live_blocks_processed( block_num, block_num )
         time_end = perf_counter()
@@ -74,6 +81,9 @@ class Blocks:
     def process_multi(cls, blocks, vops, hived, is_initial_sync=False):
         """Batch-process blocks; wrapped in a transaction."""
         time_start = OPSM.start()
+
+        log.info("Blocks object: {}".format(cls))
+
         DB.query("START TRANSACTION")
 
         last_num = 0
@@ -105,7 +115,7 @@ class Blocks:
         folllow_items = len(Follow.follow_items_to_flush) + Follow.flush(trx=False)
         flush_time = register_time(flush_time, "Follow", folllow_items)
         flush_time = register_time(flush_time, "Posts", Posts.flush())
-        flush_time = register_time(flush_time, "Reputations", Reputations.flush())
+        flush_time = register_time(flush_time, "Reputations", cls._flush_reputations())
 
         if (not is_initial_sync) and (first_block > -1):
             cls.on_live_blocks_processed( first_block, last_num )
@@ -114,8 +124,8 @@ class Blocks:
 
         log.info(f"[PROCESS MULTI] {len(blocks)} blocks in {OPSM.stop(time_start) :.4f}s")
 
-    @staticmethod
-    def prepare_vops(comment_payout_ops, vopsList, date, block_num):
+    @classmethod
+    def prepare_vops(cls, comment_payout_ops, vopsList, date, block_num):
         vote_ops = {}
 
         ineffective_deleted_ops = {}
@@ -148,7 +158,7 @@ class Blocks:
             elif op_type == 'effective_comment_vote_operation':
                 key_vote = "{}/{}/{}".format(op_value['voter'], op_value['author'], op_value['permlink'])
 
-                Reputations.process_vote(block_num, op_value)
+                cls._reputations.process_vote(block_num, op_value)
 
                 vote_ops[ key_vote ] = op_value
 
@@ -193,10 +203,10 @@ class Blocks:
 
         if is_initial_sync:
             if num in virtual_operations:
-                (vote_ops, ineffective_deleted_ops ) = Blocks.prepare_vops(Posts.comment_payout_ops, virtual_operations[num], cls._current_block_date, num)
+                (vote_ops, ineffective_deleted_ops ) = cls.prepare_vops(Posts.comment_payout_ops, virtual_operations[num], cls._current_block_date, num)
         else:
             vops = hived.get_virtual_operations(num)
-            (vote_ops, ineffective_deleted_ops ) = Blocks.prepare_vops(Posts.comment_payout_ops, vops, cls._current_block_date, num)
+            (vote_ops, ineffective_deleted_ops ) = cls.prepare_vops(Posts.comment_payout_ops, vops, cls._current_block_date, num)
 
         json_ops = []
         for tx_idx, tx in enumerate(block['transactions']):
@@ -324,6 +334,10 @@ class Blocks:
             'ops': sum([len(tx['operations']) for tx in txs]),
             'date': block['timestamp']})
         return num
+
+    @classmethod
+    def _flush_reputations(cls):
+        cls._reputations.flush()
 
     @classmethod
     def _flush_blocks(cls):

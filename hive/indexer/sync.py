@@ -89,7 +89,7 @@ def _vops_provider(node, queue, lbound, ubound, chunk_size):
     except Exception:
         log.exception("Exception caught during fetching vops...")
 
-def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size):
+def _block_consumer(node, blocksProcessor, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size):
     from hive.utils.stats import minmax
     is_debug = log.isEnabledFor(10)
     num = 0
@@ -98,6 +98,7 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
     try:
         count = ubound - lbound
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
+
         while lbound < ubound:
 
             wait_time_1 = WSM.start()
@@ -125,7 +126,7 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
             timer.batch_start()
             
             block_start = perf()
-            Blocks.process_multi(blocks, preparedVops, node, is_initial_sync)
+            blocksProcessor.process_multi(blocks, preparedVops, node, is_initial_sync)
             block_end = perf()
 
             timer.batch_lap()
@@ -181,7 +182,7 @@ def _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size):
         try:
             pool.submit(_block_provider, self._steem, blocksQueue, lbound, ubound, chunk_size)
             pool.submit(_vops_provider, self._steem, vopsQueue, lbound, ubound, chunk_size)
-            blockConsumerFuture = pool.submit(_block_consumer, self._steem, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size)
+            blockConsumerFuture = pool.submit(_block_consumer, self._steem, self._blocksProcessor, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size)
 
             blockConsumerFuture.result()
             if not CONTINUE_PROCESSING and blocksQueue.empty() and vopsQueue.empty():
@@ -208,12 +209,15 @@ class Sync:
         log.info("Using hived url: `%s'", self._conf.get('steemd_url'))
 
         self._steem = conf.steem()
+        self._blocksProcessor = None
 
     def run(self):
         """Initialize state; setup/recovery checks; sync and runloop."""
 
         # ensure db schema up to date, check app status
         DbState.initialize()
+
+        self._blocksProcessor = Blocks()
 
         # prefetch id->name and id->rank memory maps
         Accounts.load_ids()
@@ -229,16 +233,16 @@ class Sync:
         Community.recalc_pending_payouts()
 
         if DbState.is_initial_sync():
-            last_imported_block = Blocks.head_num()
+            last_imported_block = self._blocksProcessor.head_num()
             # resume initial sync
             self.initial()
             if not CONTINUE_PROCESSING:
                 return
-            current_imported_block = Blocks.head_num()
+            current_imported_block = self._blocksProcessor.head_num()
             DbState.finish_initial_sync(current_imported_block, last_imported_block)
         else:
             # recover from fork
-            Blocks.verify_head(self._steem)
+            self._blocksProcessor.verify_head(self._steem)
 
         self._update_chain_state()
 
@@ -305,14 +309,15 @@ class Sync:
                     remaining = drop(skip_lines, f)
                     for lines in partition_all(chunk_size, remaining):
                         raise RuntimeError("Sync from checkpoint disabled")
-                        Blocks.process_multi(map(json.loads, lines), True)
+#                        Blocks.process_multi(map(json.loads, lines), True)
                 last_block = num
             last_read = num
 
     def from_steemd(self, is_initial_sync=False, chunk_size=1000):
         """Fast sync strategy: read/process blocks in batches."""
         steemd = self._steem
-        lbound = Blocks.head_num() + 1
+
+        lbound = self._blocksProcessor.head_num() + 1
         ubound = self._conf.get('test_max_block') or steemd.last_irreversible()
 
         count = ubound - lbound
@@ -337,7 +342,7 @@ class Sync:
             timer.batch_lap()
 
             # process blocks
-            Blocks.process_multi(blocks, preparedVops, steemd, is_initial_sync)
+            self._blocksProcessor.process_multi(blocks, preparedVops, steemd, is_initial_sync)
             timer.batch_finish(len(blocks))
 
             _prefix = ("[SYNC] Got block %d @ %s" % (
@@ -357,14 +362,15 @@ class Sync:
         # debug: no max gap if disable_sync in effect
         max_gap = None if self._conf.get('test_disable_sync') else 100
 
+        assert self._blocksProcessor 
         steemd = self._steem
-        hive_head = Blocks.head_num()
+        hive_head = self._blocksProcessor.head_num()
 
         for block in steemd.stream_blocks(hive_head + 1, trail_blocks, max_gap):
             start_time = perf()
 
             self._db.query("START TRANSACTION")
-            num = Blocks.process(block, {}, steemd)
+            num = blocksProcessor.process(block, {}, steemd)
             follows = Follow.flush(trx=False)
             accts = Accounts.flush(steemd, trx=False, spread=8)
             self._db.query("COMMIT")
