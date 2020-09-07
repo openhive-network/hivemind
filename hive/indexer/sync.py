@@ -218,7 +218,7 @@ class Sync:
 
         # ensure db schema up to date, check app status
         DbState.initialize()
-        Blocks.set_reputations_processor(Reputations(self._db))
+        Reputations.setup_db(self._db)
         self._blocksProcessor = Blocks()
 
         # prefetch id->name and id->rank memory maps

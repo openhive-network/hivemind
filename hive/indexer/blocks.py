@@ -1,5 +1,6 @@
 """Blocks processor."""
 
+from hive.indexer.reputations import Reputations
 import logging
 import json
 
@@ -13,7 +14,6 @@ from hive.indexer.follow import Follow
 from hive.indexer.votes import Votes
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.tags import Tags
-
 
 from time import perf_counter
 
@@ -30,7 +30,6 @@ class Blocks:
     """Processes blocks, dispatches work, manages `hive_blocks` table."""
     blocks_to_flush = []
     _head_block_date = None
-    _reputations = None
     _current_block_date = None
 
     def __init__(cls):
@@ -44,12 +43,6 @@ class Blocks:
         else:
             cls._head_block_date = head_date
             cls._current_block_date = head_date
-
-    @classmethod 
-    def set_reputations_processor(cls, reputations_processor):
-        cls._reputations = reputations_processor
-        assert cls._reputations is not None, "Reputation object is None"
-        log.info("Built reputations object: {}".format(cls._reputations))
 
     @classmethod
     def head_num(cls):
@@ -74,7 +67,7 @@ class Blocks:
         Tags.flush()
         Votes.flush()
         Posts.flush()
-        cls._reputations.flush()
+        Reputations.flush()
         block_num = int(block['block_id'][:8], base=16)
         cls.on_live_blocks_processed( block_num, block_num )
         time_end = perf_counter()
@@ -119,7 +112,7 @@ class Blocks:
         folllow_items = len(Follow.follow_items_to_flush) + Follow.flush(trx=False)
         flush_time = register_time(flush_time, "Follow", folllow_items)
         flush_time = register_time(flush_time, "Posts", Posts.flush())
-        flush_time = register_time(flush_time, "Reputations", cls._flush_reputations())
+        flush_time = register_time(flush_time, "Reputations", Reputations.flush())
 
         if (not is_initial_sync) and (first_block > -1):
             cls.on_live_blocks_processed( first_block, last_num )
@@ -162,7 +155,7 @@ class Blocks:
             elif op_type == 'effective_comment_vote_operation':
                 key_vote = "{}/{}/{}".format(op_value['voter'], op_value['author'], op_value['permlink'])
 
-                cls._reputations.process_vote(block_num, op_value)
+                Reputations.process_vote(block_num, op_value)
 
                 vote_ops[ key_vote ] = op_value
 
@@ -338,10 +331,6 @@ class Blocks:
             'ops': sum([len(tx['operations']) for tx in txs]),
             'date': block['timestamp']})
         return num
-
-    @classmethod
-    def _flush_reputations(cls):
-        return cls._reputations.flush()
 
     @classmethod
     def _flush_blocks(cls):
