@@ -27,12 +27,11 @@ class Votes:
             log.exception("Adding new vote-info into '_votes_data' dict")
             raise RuntimeError("Fatal error")
 
-        key = voter + "/" + author + "/" + permlink
+        key = "{}/{}/{}".format(voter, author, permlink)
 
         if key in cls._votes_data:
             cls._votes_data[key]["vote_percent"] = weight
             cls._votes_data[key]["last_update"] = date
-            cls._votes_data[key]["block_num"] = block_num
         else:
             cls._votes_data[key] = dict(voter=voter,
                                         author=author,
@@ -45,20 +44,26 @@ class Votes:
                                         block_num=block_num)
 
     @classmethod
-    def effective_comment_vote_op(cls, key, vop):
+    def effective_comment_vote_op(cls, vop):
         """ Process effective_comment_vote_operation """
 
-        if cls.inside_flush:
-            log.exception("Updating data in '_votes_data' using effective comment")
-            raise RuntimeError("Fatal error")
+        key = "{}/{}/{}".format(vop['voter'], vop['author'], vop['permlink'])
 
-        assert key in cls._votes_data
-
-        cls._votes_data[key]["weight"]       = vop["weight"]
-        cls._votes_data[key]["rshares"]      = vop["rshares"]
-        cls._votes_data[key]["is_effective"] = True
-        cls._votes_data[key]["block_num"]    = vop['block_num']
-
+        if key in cls._votes_data:
+          cls._votes_data[key]["weight"]       = vop["weight"]
+          cls._votes_data[key]["rshares"]      = vop["rshares"]
+          cls._votes_data[key]["is_effective"] = True
+          cls._votes_data[key]["block_num"]    = vop['block_num']
+        else:
+            cls._votes_data[key] = dict(voter=vop['voter'],
+                                        author=vop['author'],
+                                        permlink=vop['permlink'],
+                                        vote_percent=0,
+                                        weight=vop["weight"],
+                                        rshares=vop["rshares"],
+                                        last_update='1970-01-01 00:00:00',
+                                        is_effective=True,
+                                        block_num=vop['block_num'])
     @classmethod
     def flush(cls):
         """ Flush vote data from cache to database """
