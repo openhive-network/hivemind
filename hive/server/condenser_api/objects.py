@@ -14,10 +14,8 @@ log = logging.getLogger(__name__)
 
 async def load_accounts(db, names):
     """`get_accounts`-style lookup for `get_state` compat layer."""
-    sql = """SELECT id, name, display_name, about, reputation, vote_weight,
-                    created_at, post_count, profile_image, location, website,
-                    cover_image
-               FROM hive_accounts WHERE name IN :names"""
+    sql = """SELECT * FROM hive_accounts_info_view
+              WHERE name IN :names"""
     rows = await db.query_all(sql, names=tuple(names))
     return [_condenser_account_object(row) for row in rows]
 
@@ -156,12 +154,13 @@ async def _query_author_rep_map(db, posts):
 
 def _condenser_account_object(row):
     """Convert an internal account record into legacy-steemd style."""
+    #The member `vote_weight` from `hive_accounts` is removed, so currently the member `net_vesting_shares` is equals to zero.
     return {
         'name': row['name'],
         'created': str(row['created_at']),
         'post_count': row['post_count'],
         'reputation': rep_to_raw(row['reputation']),
-        'net_vesting_shares': row['vote_weight'],
+        'net_vesting_shares': 0,
         'transfer_history': [],
         'json_metadata': json.dumps({
             'profile': {'name': row['display_name'],
