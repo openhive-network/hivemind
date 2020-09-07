@@ -29,12 +29,11 @@ DB = Db.instance()
 class Blocks:
     """Processes blocks, dispatches work, manages `hive_blocks` table."""
     blocks_to_flush = []
+    _head_block_date = None
+    _reputations = Reputations(DB)
+    _current_block_date = None
 
     def __init__(cls):
-        cls._reputations = Reputations(DB)
-        cls._head_block_date = None # timestamp of last fully processed block ("previous block")
-        cls._current_block_date = None # timestamp of block currently being processes ("current block")
-
         log.info("Creating a reputations processor")
         log.info("Built reputations object: {}".format(cls._reputations))
         log.info("Built blocks object: {}".format(cls))
@@ -337,7 +336,7 @@ class Blocks:
 
     @classmethod
     def _flush_reputations(cls):
-        cls._reputations.flush()
+        return cls._reputations.flush()
 
     @classmethod
     def _flush_blocks(cls):
