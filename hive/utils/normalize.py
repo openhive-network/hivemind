@@ -285,7 +285,7 @@ def number_to_json_value(number):
     """
     if number > 0xFFFFFFFF:
         return str(number)
-    return number
+    return int(number)
 
 def time_string_with_t(time_iso8601):
     """ Ensures that time in format ISO8601 use 'T' as a data time separator

@@ -172,13 +172,13 @@ def result_presentation(rows, votes_presentation):
   for row in rows:
       if votes_presentation == VotesPresentation.DatabaseApi:
           ret.append(dict(voter=row.voter, author=row.author, permlink=row.permlink,
-                          weight=row.weight, rshares=row.rshares, vote_percent=row.percent,
+                          weight=number_to_json_value(row.weight), rshares=number_to_json_value(row.rshares), vote_percent=row.percent,
                           last_update=str(row.time), num_changes=row.num_changes))
       elif votes_presentation == VotesPresentation.CondenserApi:
           ret.append(dict(percent=str(row.percent), reputation=rep_to_raw(row.reputation),
-                          rshares=str(row.rshares), voter=row.voter))
+                          rshares=number_to_json_value(row.rshares), voter=row.voter))
       elif votes_presentation == VotesPresentation.BridgeApi:
-          ret.append(dict(rshares=str(row.rshares), voter=row.voter))
+          ret.append(dict(rshares=number_to_json_value(row.rshares), voter=row.voter))
       else:
           ret.append(dict(percent=row.percent, reputation=rep_to_raw(row.reputation),
                           rshares=number_to_json_value(row.rshares), time=time_string_with_t(row.time), 
