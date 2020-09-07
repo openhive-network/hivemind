@@ -167,11 +167,30 @@ class VotesPresentation(Enum):
     CondenserApi = 3
     BridgeApi = 4
 
+def result_presentation(rows, votes_presentation):
+  ret = []
+  for row in rows:
+      if votes_presentation == VotesPresentation.DatabaseApi:
+          ret.append(dict(voter=row.voter, author=row.author, permlink=row.permlink,
+                          weight=row.weight, rshares=row.rshares, vote_percent=row.percent,
+                          last_update=str(row.time), num_changes=row.num_changes))
+      elif votes_presentation == VotesPresentation.CondenserApi:
+          ret.append(dict(percent=str(row.percent), reputation=rep_to_raw(row.reputation),
+                          rshares=str(row.rshares), voter=row.voter))
+      elif votes_presentation == VotesPresentation.BridgeApi:
+          ret.append(dict(rshares=str(row.rshares), voter=row.voter))
+      else:
+          ret.append(dict(percent=row.percent, reputation=rep_to_raw(row.reputation),
+                          rshares=number_to_json_value(row.rshares), time=time_string_with_t(row.time), 
+                          voter=row.voter, weight=number_to_json_value(row.weight)
+                          ))
+  return ret
+
 @return_error_info
-async def find_votes(context, params: dict, votes_presentation = VotesPresentation.DatabaseApi):
+async def find_votes(context, author: str, permlink: str, votes_presentation = VotesPresentation.DatabaseApi):
     """ Returns all votes for the given post """
-    valid_account(params['author'])
-    valid_permlink(params['permlink'])
+    valid_account(author)
+    valid_permlink(permlink)
     db = context['db']
     sql = """
         SELECT
@@ -192,28 +211,11 @@ async def find_votes(context, params: dict, votes_presentation = VotesPresentati
             voter_id
     """
 
-    ret = []
-    rows = await db.query_all(sql, author=params['author'], permlink=params['permlink'])
-
-    for row in rows:
-        if votes_presentation == VotesPresentation.DatabaseApi:
-            ret.append(dict(voter=row.voter, author=row.author, permlink=row.permlink,
-                            weight=row.weight, rshares=row.rshares, vote_percent=row.percent,
-                            last_update=str(row.time), num_changes=row.num_changes))
-        elif votes_presentation == VotesPresentation.CondenserApi:
-            ret.append(dict(percent=str(row.percent), reputation=rep_to_raw(row.reputation),
-                            rshares=str(row.rshares), voter=row.voter))
-        elif votes_presentation == VotesPresentation.BridgeApi:
-            ret.append(dict(rshares=str(row.rshares), voter=row.voter))
-        else:
-            ret.append(dict(percent=row.percent, reputation=rep_to_raw(row.reputation),
-                            rshares=number_to_json_value(row.rshares), time=time_string_with_t(row.time), 
-                            voter=row.voter, weight=number_to_json_value(row.weight)
-                            ))
-    return ret
+    rows = await db.query_all(sql, author=author, permlink=permlink)
+    return result_presentation(rows, votes_presentation)
 
 @return_error_info
-async def list_votes(context, start: list, limit: int, order: str):
+async def list_votes(context, start: list, limit: int, order: str, votes_presentation = VotesPresentation.DatabaseApi):
     """ Returns all votes, starting with the specified voter and/or author and permlink. """
     supported_order_list = ["by_comment_voter", "by_voter_comment"]
     assert order in supported_order_list, "Order {} is not supported".format(order)
@@ -236,31 +238,32 @@ async def list_votes(context, start: list, limit: int, order: str):
             hive_votes_accounts_permlinks_view
     """
 
-    if order == "by_comment_voter": # ABW: wrong! fat node sorted by ( comment_id, voter_id )
+    if order == "by_comment_voter":
         sql += """
             WHERE
                 author >= :author AND 
                 permlink >= :permlink AND 
                 voter >= :voter
             ORDER BY
-                author ASC, 
-                permlink ASC, 
-                id ASC 
+                post_id ASC,
+                voter_id ASC
             LIMIT 
                 :limit
         """
-        return await db.query_all(sql, author=start[0], permlink=start[1], voter=start[2], limit=limit)
-    if order == "by_voter_comment": # ABW: wrong! fat node sorted by ( voter_id, comment_id )
+        rows = await db.query_all(sql, author=start[0], permlink=start[1], voter=start[2], limit=limit)
+
+    if order == "by_voter_comment":
         sql += """
             WHERE
                 voter >= :voter AND 
                 author >= :author AND 
                 permlink >= :permlink
             ORDER BY 
-                voter ASC,
-                id ASC
+                voter_id ASC,
+                post_id ASC
             LIMIT
                 :limit
         """
-        return await db.query_all(sql, author=start[1], permlink=start[2], voter=start[0], limit=limit)
-    return []
+        rows = await db.query_all(sql, author=start[1], permlink=start[2], voter=start[0], limit=limit)
+
+    return result_presentation(rows, votes_presentation)
