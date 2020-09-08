@@ -855,7 +855,7 @@ def setup(db):
             vote_percent as percent,
             ha_a.reputation as reputation,
             rshares,
-            last_update as time,
+            last_update,
             ha_v.name as voter,
             weight,
             num_changes,
@@ -872,7 +872,7 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-        DROP VIEW IF EXISTS list_votes( character varying, character varying, character varying, int, bool );
+        DROP FUNCTION IF EXISTS list_votes( character varying, character varying, character varying, int, bool );
 
         CREATE OR REPLACE FUNCTION public.list_votes
         (
@@ -923,7 +923,7 @@ def setup(db):
                       v.weight,
                       v.rshares,
                       v.percent,
-                      v.time,
+                      v.last_update,
                       v.num_changes,
                       v.reputation
                   FROM
@@ -947,7 +947,7 @@ def setup(db):
                       v.weight,
                       v.rshares,
                       v.percent,
-                      v.time,
+                      v.last_update,
                       v.num_changes,
                       v.reputation
                   FROM

@@ -168,7 +168,7 @@ class VotesPresentation(Enum):
     CondenserApi = 3
     BridgeApi = 4
 
-def result_presentation(rows, votes_presentation):
+def api_vote_info(rows, votes_presentation):
   ret = []
   for row in rows:
       if votes_presentation == VotesPresentation.DatabaseApi:
@@ -201,7 +201,7 @@ async def find_votes(context, author: str, permlink: str, votes_presentation = V
             weight,
             rshares,
             percent,
-            time,
+            last_update,
             num_changes,
             reputation
         FROM
@@ -213,7 +213,7 @@ async def find_votes(context, author: str, permlink: str, votes_presentation = V
     """
 
     rows = await db.query_all(sql, author=author, permlink=permlink)
-    return result_presentation(rows, votes_presentation)
+    return api_vote_info(rows, votes_presentation)
 
 @return_error_info
 async def list_votes(context, start: list, limit: int, order: str, votes_presentation = VotesPresentation.DatabaseApi):
@@ -233,4 +233,4 @@ async def list_votes(context, start: list, limit: int, order: str, votes_present
 
     rows = await db.query_all(sql)
 
-    return result_presentation(rows, votes_presentation)
+    return api_vote_info(rows, votes_presentation)
