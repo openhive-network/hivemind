@@ -16,12 +16,14 @@ from hive.indexer.community import Community, START_DATE
 from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.tags import Tags
+from hive.indexer.db_adapter_holder import DbAdapterHolder
+
 from hive.utils.normalize import sbd_amount, legacy_amount, asset_to_hbd_hive, safe_img_url
 
 log = logging.getLogger(__name__)
 DB = Db.instance()
 
-class Posts:
+class Posts(DbAdapterHolder):
     """Handles critical/core post ops and data."""
 
     # LRU cache for (author-permlink -> id) lookup (~400mb per 1M entries)
@@ -224,9 +226,13 @@ class Posts:
                 yield lst[i:i + n]
 
         for chunk in chunks(cls._comment_payout_ops, 1000):
+            cls.beginTx()
+
             values_str = ','.join(chunk)
             actual_query = sql.format(values_str)
-            DB.query(actual_query)
+            cls.db.query(actual_query)
+
+            cls.commitTx()
 
         n = len(cls._comment_payout_ops)
         cls._comment_payout_ops.clear()

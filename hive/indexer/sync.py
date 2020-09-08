@@ -1,6 +1,5 @@
 """Hive sync manager."""
 
-from hive.indexer.reblog import Reblog
 import logging
 import glob
 from time import perf_counter as perf
@@ -25,6 +24,9 @@ from hive.indexer.accounts import Accounts
 from hive.indexer.feed_cache import FeedCache
 from hive.indexer.follow import Follow
 from hive.indexer.community import Community
+from hive.indexer.reblog import Reblog
+from hive.indexer.reputations import Reputations
+
 from hive.server.common.mutes import Mutes
 
 from hive.utils.stats import OPStatusManager as OPSM
@@ -99,6 +101,7 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
     try:
         count = ubound - lbound
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
+
         while lbound < ubound:
 
             wait_time_1 = WSM.start()
@@ -221,6 +224,7 @@ class Sync:
 
         # ensure db schema up to date, check app status
         DbState.initialize()
+        Blocks.setup_db_access(self._db)
 
         # prefetch id->name and id->rank memory maps
         Accounts.load_ids()
@@ -315,13 +319,14 @@ class Sync:
                     remaining = drop(skip_lines, f)
                     for lines in partition_all(chunk_size, remaining):
                         raise RuntimeError("Sync from checkpoint disabled")
-                        Blocks.process_multi(map(json.loads, lines), True)
+#                        Blocks.process_multi(map(json.loads, lines), True)
                 last_block = num
             last_read = num
 
     def from_steemd(self, is_initial_sync=False, chunk_size=1000):
         """Fast sync strategy: read/process blocks in batches."""
         steemd = self._steem
+
         lbound = Blocks.head_num() + 1
         ubound = self._conf.get('test_max_block') or steemd.last_irreversible()
 
@@ -367,6 +372,7 @@ class Sync:
         # debug: no max gap if disable_sync in effect
         max_gap = None if self._conf.get('test_disable_sync') else 100
 
+        assert self._blocksProcessor 
         steemd = self._steem
         hive_head = Blocks.head_num()
 

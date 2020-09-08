@@ -1,12 +1,12 @@
 import logging
 from hive.db.adapter import Db
+from hive.indexer.db_adapter_holder import DbAdapterHolder
 
 log = logging.getLogger(__name__)
-DB = Db.instance()
 
 from hive.utils.normalize import escape_characters
 
-class Tags(object):
+class Tags(DbAdapterHolder):
     """ Tags cache """
     _tags = []
 
@@ -17,8 +17,9 @@ class Tags(object):
 
     @classmethod
     def flush(cls):
-        """ Flush tags to table """
+        """ Flush tags to table """        
         if cls._tags:
+            cls.beginTx()
             limit = 1000
 
             sql = """
@@ -32,11 +33,11 @@ class Tags(object):
                 values.append("({})".format(escape_characters(tag[1])))
                 if len(values) >= limit:
                     tag_query = str(sql)
-                    DB.query(tag_query.format(','.join(values)))
+                    cls.db.query(tag_query.format(','.join(values)))
                     values.clear()
             if len(values) > 0:
                 tag_query = str(sql)
-                DB.query(tag_query.format(','.join(values)))
+                cls.db.query(tag_query.format(','.join(values)))
                 values.clear()
 
             sql = """
@@ -62,13 +63,13 @@ class Tags(object):
                 values.append("({}, {})".format(tag[0], escape_characters(tag[1])))
                 if len(values) >= limit:
                     tag_query = str(sql)
-                    DB.query(tag_query.format(','.join(values)))
+                    cls.db.query(tag_query.format(','.join(values)))
                     values.clear()
             if len(values) > 0:
                 tag_query = str(sql)
-                DB.query(tag_query.format(','.join(values)))
+                cls.db.query(tag_query.format(','.join(values)))
                 values.clear()
-            
+            cls.commitTx()
         n = len(cls._tags)
         cls._tags.clear()
         return n

@@ -8,9 +8,7 @@ from hive.db.db_state import DbState
 from hive.indexer.accounts import Accounts
 from hive.indexer.feed_cache import FeedCache
 from hive.indexer.notify import Notify
-
-
-DB = Db.instance()
+from hive.indexer.db_adapter_holder import DbAdapterHolder
 
 log = logging.getLogger(__name__)
 
@@ -42,7 +40,7 @@ INSERT_SQL = """
     RETURNING post_id 
 """
 
-class Reblog():
+class Reblog(DbAdapterHolder):
     """ Class for reblog operations """
     reblog_items_to_flush = []
 
@@ -63,7 +61,7 @@ class Reblog():
             return
 
         if 'delete' in op_json and op_json['delete'] == 'delete':
-            row = DB.query_row(DELETE_SQL, a=blogger, permlink=permlink)
+            row = cls.db.query_row(DELETE_SQL, a=blogger, permlink=permlink)
             if row is None:
                 log.debug("reblog: post not found: %s/%s", author, permlink)
                 return
@@ -72,12 +70,12 @@ class Reblog():
                 FeedCache.delete(result['post_id'], result['account_id'])
         else:
             if DbState.is_initial_sync():
-                row = DB.query_row(SELECT_SQL, blogger=blogger, author=author, permlink=permlink, date=block_date, block_num=block_num)
+                row = cls.db.query_row(SELECT_SQL, blogger=blogger, author=author, permlink=permlink, date=block_date, block_num=block_num)
                 if row is not None:
                     result = dict(row)
                     cls.reblog_items_to_flush.append(result)
             else:
-                row = DB.query_row(INSERT_SQL, blogger=blogger, author=author, permlink=permlink, date=block_date, block_num=block_num)
+                row = cls.db.query_row(INSERT_SQL, blogger=blogger, author=author, permlink=permlink, date=block_date, block_num=block_num)
                 if row is not None:
                     author_id = Accounts.get_id(author)
                     blogger_id = Accounts.get_id(blogger)
@@ -111,7 +109,7 @@ class Reblog():
             else:
                 query = sql_prefix + ",".join(values)
                 query += sql_postfix
-                DB.query(query)
+                cls.db.query(query)
                 values.clear()
                 values.append("('{}', {}, '{}', {})".format(reblog_item["blogger"], reblog_item["post_id"], reblog_item["date"], reblog_item["block_num"]))
                 count = 1
@@ -119,6 +117,6 @@ class Reblog():
         if len(values) > 0:
             query = sql_prefix + ",".join(values)
             query += sql_postfix
-            DB.query(query)
+            cls.db.query(query)
         cls.reblog_items_to_flush.clear()
         return item_count

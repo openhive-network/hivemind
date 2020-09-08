@@ -9,9 +9,9 @@ from hive.db.db_state import DbState
 from hive.indexer.accounts import Accounts
 from hive.indexer.notify import Notify
 
-log = logging.getLogger(__name__)
+from hive.indexer.db_adapter_holder import DbAdapterHolder
 
-DB = Db.instance()
+log = logging.getLogger(__name__)
 
 FOLLOWERS = 'followers'
 FOLLOWING = 'following'
@@ -66,7 +66,7 @@ def _flip_dict(dict_to_flip):
             flipped[value] = [key]
     return flipped
 
-class Follow:
+class Follow(DbAdapterHolder):
     """Handles processing of incoming follow ups and flushing to db."""
 
     follow_items_to_flush = dict()
@@ -102,7 +102,7 @@ class Follow:
         else:
             old_state = cls._get_follow_db_state(op['flr'], op['flg'])
             # insert or update state
-            DB.query(FOLLOW_ITEM_INSERT_QUERY, **op)
+            cls.db.query(FOLLOW_ITEM_INSERT_QUERY, **op)
             if new_state == 1:
                 Follow.follow(op['flr'], op['flg'])
                 if old_state is None:
@@ -145,7 +145,7 @@ class Follow:
         sql = """SELECT state FROM hive_follows
                   WHERE follower = :follower
                     AND following = :following"""
-        return DB.query_one(sql, follower=follower, following=following)
+        return cls.db.query_one(sql, follower=follower, following=following)
 
 
     # -- stat tracking --
@@ -210,7 +210,7 @@ class Follow:
             else:
                 query = sql_prefix + ",".join(values)
                 query += sql_postfix
-                DB.query(query)
+                cls.db.query(query)
                 values.clear()
                 values.append("({}, {}, '{}', {}, {}, {}, {})".format(follow_item['flr'], follow_item['flg'],
                                                                   follow_item['at'], follow_item['state'],
@@ -222,7 +222,7 @@ class Follow:
         if len(values) > 0:
             query = sql_prefix + ",".join(values)
             query += sql_postfix
-            DB.query(query)
+            cls.db.query(query)
 
         cls.follow_items_to_flush.clear()
 
@@ -244,7 +244,7 @@ class Follow:
             return 0
 
         start = perf()
-        DB.batch_queries(sqls, trx=trx)
+        cls.db.batch_queries(sqls, trx=trx)
         if trx:
             log.info("[SYNC] flushed %d follow deltas in %ds",
                      updated, perf() - start)
@@ -268,7 +268,7 @@ class Follow:
                    following = (SELECT COUNT(*) FROM hive_follows WHERE state = 1 AND follower  = hive_accounts.id)
              WHERE id IN :ids
         """
-        DB.query(sql, ids=tuple(ids))
+        cls.db.query(sql, ids=tuple(ids))
 
     @classmethod
     def force_recount(cls):
@@ -286,7 +286,7 @@ class Follow:
                LEFT JOIN hive_follows hf ON id = hf.following AND state = 1
                 GROUP BY id);
         """
-        DB.query(sql)
+        cls.db.query(sql)
 
         log.info("[SYNC] update follower counts")
         sql = """
@@ -296,4 +296,4 @@ class Follow:
             UPDATE hive_accounts SET following = num FROM following_counts
              WHERE id = account_id AND following != num;
         """
-        DB.query(sql)
+        cls.db.query(sql)
