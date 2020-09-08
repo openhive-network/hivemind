@@ -872,14 +872,15 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-        DROP VIEW IF EXISTS list_votes_by_voter_comment;
+        DROP VIEW IF EXISTS list_votes( character varying, character varying, character varying, int, bool );
 
-        CREATE OR REPLACE FUNCTION public.list_votes_by_voter_comment
+        CREATE OR REPLACE FUNCTION public.list_votes
         (
           in _VOTER hive_accounts.name%TYPE,
           in _AUTHOR hive_accounts.name%TYPE,
           in _PERMLINK hive_permlink_data.permlink%TYPE,
-          in _LIMIT INT
+          in _LIMIT INT,
+          in _IS_VOTER_COMMENT_SORT BOOLEAN
         )
         RETURNS TABLE
         (
@@ -912,29 +913,55 @@ def setup(db):
 
         _PERMLINK_ID = find_comment_id( _AUTHOR, _PERMLINK, True);
 
-        RETURN QUERY
-        (
-                SELECT
-                    v.voter,
-                    v.author,
-                    v.permlink,
-                    v.weight,
-                    v.rshares,
-                    v.percent,
-                    v.time,
-                    v.num_changes,
-                    v.reputation
-                FROM
-                    hive_votes_accounts_permlinks_view v
-                    WHERE
-                        ( v.voter_id = _VOTER_ID and v.permlink_id >= _PERMLINK_ID )
-                        OR
-                        ( v.voter_id > _VOTER_ID )
-                    ORDER BY
-                      voter_id,
-                      permlink_id
-                LIMIT _LIMIT
-        );
+        IF _IS_VOTER_COMMENT_SORT = True THEN
+          RETURN QUERY
+          (
+                  SELECT
+                      v.voter,
+                      v.author,
+                      v.permlink,
+                      v.weight,
+                      v.rshares,
+                      v.percent,
+                      v.time,
+                      v.num_changes,
+                      v.reputation
+                  FROM
+                      hive_votes_accounts_permlinks_view v
+                      WHERE
+                          ( v.voter_id = _VOTER_ID and v.permlink_id >= _PERMLINK_ID )
+                          OR
+                          ( v.voter_id > _VOTER_ID )
+                      ORDER BY
+                        voter_id,
+                        permlink_id
+                  LIMIT _LIMIT
+          );
+        ELSE
+          RETURN QUERY
+          (
+                  SELECT
+                      v.voter,
+                      v.author,
+                      v.permlink,
+                      v.weight,
+                      v.rshares,
+                      v.percent,
+                      v.time,
+                      v.num_changes,
+                      v.reputation
+                  FROM
+                      hive_votes_accounts_permlinks_view v
+                      WHERE
+                          ( v.permlink_id = _PERMLINK_ID and v.voter_id >= _VOTER_ID )
+                          OR
+                          ( v.permlink_id > _PERMLINK_ID )
+                      ORDER BY
+                        permlink_id,
+                        voter_id
+                  LIMIT _LIMIT
+          );
+        END IF;
 
         END
         $BODY$;

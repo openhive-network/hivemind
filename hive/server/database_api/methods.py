@@ -224,24 +224,12 @@ async def list_votes(context, start: list, limit: int, order: str, votes_present
     assert len(start) == 3, "Expecting 3 elements in start array"
     db = context['db']
 
-    sql = ""
-
-    if order == "by_comment_voter":
-        sql += """
-            WHERE
-                author >= :author AND 
-                permlink >= :permlink AND 
-                voter >= :voter
-            ORDER BY
-                post_id ASC,
-                voter_id ASC
-            LIMIT 
-                :limit
-        """
-        rows = await db.query_all(sql, author=start[0], permlink=start[1], voter=start[2], limit=limit)
+    sql=""
 
     if order == "by_voter_comment":
-        sql = "select * from list_votes_by_voter_comment( '{}', '{}', '{}', {} )".format( start[0], start[1], start[2], limit )
+        sql = "select * from list_votes( '{}', '{}', '{}', {}, true )".format( start[0], start[1], start[2], limit )
+    else:
+        sql = "select * from list_votes( '{}', '{}', '{}', {}, false )".format( start[2], start[0], start[1], limit )
 
     rows = await db.query_all(sql)
 
