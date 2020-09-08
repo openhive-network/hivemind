@@ -46,8 +46,6 @@ class DbState:
             log.info("[INIT] Create db schema...")
             setup(cls.db())
 
-        cls._before_initial_sync()
-
         # perform db migrations
         cls._check_migrations()
 
@@ -131,11 +129,17 @@ class DbState:
         return to_return
 
     @classmethod
-    def _before_initial_sync(cls):
+    def before_initial_sync(cls, last_imported_block, hived_head_block):
         """Routine which runs *once* after db setup.
 
         Disables non-critical indexes for faster initial sync, as well
         as foreign key constraints."""
+
+        to_sync = hived_head_block - last_imported_block
+
+        if to_sync < SYNCED_BLOCK_LIMIT:
+            log.info("[INIT] Skipping pre-initial sync hooks")
+            return
 
         engine = cls.db().engine()
         log.info("[INIT] Begin pre-initial sync hooks")
@@ -155,6 +159,22 @@ class DbState:
         set_logged_table_attribute(cls.db(), False)
 
         log.info("[INIT] Finish pre-initial sync hooks")
+
+    @classmethod
+    def update_work_mem(cls, workmem_value):
+        row = cls.db().query_row("SHOW work_mem")
+        current_work_mem = row['work_mem']
+
+        sql = """
+              DO $$
+              BEGIN
+                EXECUTE 'ALTER DATABASE '||current_database()||' SET work_mem TO "{}"';
+              END
+              $$;
+              """
+        cls.db().query_no_return(sql.format(workmem_value))
+
+        return current_work_mem
 
     @classmethod
     def _after_initial_sync(cls, current_imported_block, last_imported_block):
@@ -183,6 +203,8 @@ class DbState:
             log.info("[INIT] Finish post-initial sync hooks")
         else:
             log.info("[INIT] Post-initial sync hooks skipped")
+
+        current_work_mem = cls.update_work_mem('2GB')
 
         time_start = perf_counter()
 
@@ -231,12 +253,14 @@ class DbState:
         time_end = perf_counter()
         log.info("[INIT] update_all_posts_active executed in %fs", time_end - time_start)
 
+        cls.update_work_mem(current_work_mem)
 
-        from hive.db.schema import create_fk, set_logged_table_attribute
-        set_logged_table_attribute(cls.db(), True)
+        if synced_blocks >= SYNCED_BLOCK_LIMIT:
+            from hive.db.schema import create_fk, set_logged_table_attribute
+            set_logged_table_attribute(cls.db(), True)
 
-        log.info("Recreating FKs")
-        create_fk(cls.db())
+            log.info("Recreating FKs")
+            create_fk(cls.db())
 
     @staticmethod
     def status():

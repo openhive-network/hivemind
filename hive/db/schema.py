@@ -402,7 +402,7 @@ def drop_fk(db):
     db.query_no_return("START TRANSACTION")
     for table in build_metadata().sorted_tables:
         for fk in table.foreign_keys:
-            sql = """ALTER TABLE {} DROP CONSTRAINT {}""".format(table.name, fk.name)
+            sql = """ALTER TABLE {} DROP CONSTRAINT IF EXISTS {}""".format(table.name, fk.name)
             db.query_no_return(sql)
     db.query_no_return("COMMIT")
 
