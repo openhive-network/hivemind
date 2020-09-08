@@ -4,11 +4,11 @@ import logging
 
 from hive.db.db_state import DbState
 from hive.db.adapter import Db
+from hive.indexer.db_adapter_holder import DbAdapterHolder
 
 log = logging.getLogger(__name__)
-DB = Db.instance()
 
-class Votes:
+class Votes(DbAdapterHolder):
     """ Class for managing posts votes """
     _votes_data = {}
 
@@ -67,9 +67,12 @@ class Votes:
     @classmethod
     def flush(cls):
         """ Flush vote data from cache to database """
+
         cls.inside_flush = True
         n = 0
         if cls._votes_data:
+            cls.beginTx()
+
             sql = """
                 INSERT INTO hive_votes
                 (post_id, voter_id, author_id, permlink_id, weight, rshares, vote_percent, last_update, block_num, is_effective)
@@ -110,16 +113,19 @@ class Votes:
                 if len(values) >= values_limit:
                     values_str = ','.join(values)
                     actual_query = sql.format(values_str)
-                    DB.query(actual_query)
+                    cls.db.query(actual_query)
                     values.clear()
 
             if len(values) > 0:
                 values_str = ','.join(values)
                 actual_query = sql.format(values_str)
-                DB.query(actual_query)
+                cls.db.query(actual_query)
                 values.clear()
 
             n = len(cls._votes_data)
             cls._votes_data.clear()
+            cls.commitTx()
+
         cls.inside_flush = False
+
         return n

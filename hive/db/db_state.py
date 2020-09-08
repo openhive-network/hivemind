@@ -8,7 +8,7 @@ from time import perf_counter
 import logging
 import sqlalchemy
 
-from hive.db.schema import (setup, reset_autovac, build_metadata,
+from hive.db.schema import (setup, reset_autovac, set_logged_table_attribute, build_metadata,
                             build_metadata_community, teardown, DB_VERSION)
 from hive.db.adapter import Db
 
@@ -91,15 +91,12 @@ class DbState:
     @classmethod
     def _disableable_indexes(cls):
         to_locate = [
-            #'hive_posts_ix3', # (author, depth, id)
-            #'hive_posts_ix4', # (parent_id, id, counter_deleted=0)
-            #'hive_posts_ix5', # (community_id>0, is_pinned=1)
             'hive_follows_ix5a', # (following, state, created_at, follower)
             'hive_follows_ix5b', # (follower, state, created_at, following)
 
-#            'hive_posts_parent_id_idx',
+            'hive_posts_parent_id_idx',
             'hive_posts_depth_idx',
-
+            'hive_posts_created_at_idx',
             'hive_posts_root_id_id_idx',
 
             'hive_posts_community_id_idx',
@@ -115,20 +112,9 @@ class DbState:
             'hive_votes_voter_id_idx',
             'hive_votes_block_num_idx',
 
-            #'hive_posts_cache_ix6a', # (sc_trend, post_id, paidout=0)
-            #'hive_posts_cache_ix6b', # (post_id, sc_trend, paidout=0)
-            #'hive_posts_cache_ix7a', # (sc_hot, post_id, paidout=0)
-            #'hive_posts_cache_ix7b', # (post_id, sc_hot, paidout=0)
-            #'hive_posts_cache_ix8', # (category, payout, depth, paidout=0)
-            #'hive_posts_cache_ix9a', # (depth, payout, post_id, paidout=0)
-            #'hive_posts_cache_ix9b', # (category, depth, payout, post_id, paidout=0)
-            #'hive_posts_cache_ix10', # (post_id, payout, gray=1, payout>0)
-            #'hive_posts_cache_ix30', # API: community trend
-            #'hive_posts_cache_ix31', # API: community hot
-            #'hive_posts_cache_ix32', # API: community created
-            #'hive_posts_cache_ix33', # API: community payout
-            #'hive_posts_cache_ix34', # API: community muted
-            'hive_accounts_ix5' # (cached_at, name)
+            'hive_accounts_ix5', # (cached_at, name)
+
+            'hive_post_tags_tag_id_idx'
         ]
 
         to_return = []
@@ -162,9 +148,11 @@ class DbState:
             except sqlalchemy.exc.ProgrammingError as ex:
                 log.warning("Ignoring ex: {}".format(ex))
 
-        from hive.db.schema import drop_fk, create_fk
+        from hive.db.schema import drop_fk, set_logged_table_attribute
         log.info("Dropping FKs")
         drop_fk(cls.db())
+
+        set_logged_table_attribute(cls.db(), False)
 
         log.info("[INIT] Finish pre-initial sync hooks")
 
@@ -243,8 +231,11 @@ class DbState:
         time_end = perf_counter()
         log.info("[INIT] update_all_posts_active executed in %fs", time_end - time_start)
 
+
+        from hive.db.schema import create_fk, set_logged_table_attribute
+        set_logged_table_attribute(cls.db(), True)
+
         log.info("Recreating FKs")
-        from hive.db.schema import create_fk
         create_fk(cls.db())
 
     @staticmethod

@@ -1,13 +1,16 @@
 import logging
+import logging
 from hive.utils.normalize import escape_characters
 from hive.db.adapter import Db
 
-log = logging.getLogger(__name__)
-DB = Db.instance()
+from hive.indexer.db_adapter_holder import DbAdapterHolder
 
-class PostDataCache(object):
+log = logging.getLogger(__name__)
+
+class PostDataCache(DbAdapterHolder):
     """ Procides cache for DB operations on post data table in order to speed up initial sync """
     _data = {}
+
 
     @classmethod
     def is_cached(cls, pid):
@@ -35,7 +38,7 @@ class PostDataCache(object):
             sql = """
                   SELECT hpd.body FROM hive_post_data hpd WHERE hpd.id = :post_id;
                   """
-            row = DB.query_row(sql, post_id = pid)
+            row = cls.db.query_row(sql, post_id = pid)
             post_data = dict(row)
         return post_data['body']
 
@@ -45,6 +48,13 @@ class PostDataCache(object):
         if cls._data:
             values_insert = []
             values_update = []
+            cls.beginTx()
+            sql = """
+                INSERT INTO 
+                    hive_post_data (id, title, preview, img_url, body, json) 
+                VALUES 
+            """
+            values = []
             for k, data in cls._data.items():
                 title = 'NULL' if data['title'] is None else "{}".format(escape_characters(data['title']))
                 body = 'NULL' if data['body'] is None else "{}".format(escape_characters(data['body']))
@@ -66,7 +76,7 @@ class PostDataCache(object):
                 sql += ','.join(values_insert)
                 if print_query:
                     log.info("Executing query:\n{}".format(sql))
-                DB.query(sql)
+                cls.db.query(sql)
 
             if values_update:
                 sql = """
@@ -88,7 +98,9 @@ class PostDataCache(object):
                 """
                 if print_query:
                     log.info("Executing query:\n{}".format(sql))
-                DB.query(sql)
+                cls.db.query(sql)
+
+            cls.commitTx()
 
         n = len(cls._data.keys())
         cls._data.clear()
