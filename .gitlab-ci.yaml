@@ -284,16 +284,6 @@ follow_api_smoketest:
     reports:
       junit: api_smoketest_follow_api.xml
 
-tags_api_smoketest_old:
-  <<: *common_api_smoketest_job
-
-  script:
-    - scripts/ci_start_api_smoketest.sh localhost "$HIVEMIND_HTTP_PORT" test_tags_api_patterns.tavern.yaml api_smoketest_tags_api_old.xml
-
-  artifacts:
-    reports:
-      junit: api_smoketest_tags_api_old.xml
-
 tags_api_smoketest:
   <<: *common_api_smoketest_job
 
@@ -303,4 +293,14 @@ tags_api_smoketest:
   artifacts:
     reports:
       junit: api_smoketest_tags_api.xml
+
+tags_api_smoketest_negative:
+  <<: *common_api_smoketest_job
+
+  script:
+    - scripts/ci_start_api_smoketest.sh localhost "$HIVEMIND_HTTP_PORT" tags_api_negative/ api_smoketest_tags_api_negative.xml
+
+  artifacts:
+    reports:
+      junit: api_smoketest_tags_api_negative.xml
 
