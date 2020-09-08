@@ -240,13 +240,12 @@ class DbState:
 
         update_active_starting_from_posts_on_block(last_imported_block, current_imported_block)
 
-        log.info("Recreating FKs")
-        from hive.db.schema import create_fk
-        create_fk(cls.db())
-
         time_end = perf_counter()
         log.info("[INIT] update_all_posts_active executed in %fs", time_end - time_start)
 
+        log.info("Recreating FKs")
+        from hive.db.schema import create_fk
+        create_fk(cls.db())
 
     @staticmethod
     def status():
