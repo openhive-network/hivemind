@@ -402,6 +402,7 @@ def setup(db):
         "INSERT INTO hive_accounts (name, created_at) VALUES ('temp',      '2016-03-24 16:05:00')",
         "INSERT INTO hive_accounts (name, created_at) VALUES ('initminer', '2016-03-24 16:05:00')",
 
+        "INSERT INTO hive_post_data (id) VALUES (0)",
         """
         INSERT INTO
             public.hive_posts(id, root_id, parent_id, author_id, permlink_id, category_id,
@@ -841,7 +842,7 @@ def setup(db):
       LANGUAGE 'plpgsql'
       AS
       $function$
-      DECLARE 
+      DECLARE
         post_id INT;
       BEGIN
         SELECT INTO post_id COALESCE( (SELECT hp.id
@@ -1012,7 +1013,7 @@ def setup(db):
             hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
             hp.active, hp.author_rewards
           FROM hive_posts_view hp
-          INNER JOIN 
+          INNER JOIN
           (
           SELECT hp2.id, hp2.root_id FROM hive_posts hp2
           WHERE NOT hp2.is_muted
@@ -1037,7 +1038,7 @@ def setup(db):
         in _start_post_author hive_accounts.name%TYPE,
         in _start_post_permlink hive_permlink_data.permlink%TYPE,
         in _limit INT)
-        RETURNS SETOF database_api_post 
+        RETURNS SETOF database_api_post
         LANGUAGE sql
         COST 100
         STABLE
