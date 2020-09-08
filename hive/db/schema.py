@@ -183,11 +183,11 @@ def build_metadata():
 
         sa.PrimaryKeyConstraint('author_id', 'permlink_id', 'voter_id', name='hive_votes_pk'),
 
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id']),
-        sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),
-        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id']),
-        sa.ForeignKeyConstraint(['permlink_id'], ['hive_permlink_data.id']),
-        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num']),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_votes_fk1'),
+        sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id'], name='hive_votes_fk2'),
+        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_votes_fk3'),
+        sa.ForeignKeyConstraint(['permlink_id'], ['hive_permlink_data.id'], name='hive_votes_fk4'),
+        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_votes_fk5'),
 
         sa.Index('hive_votes_post_id_idx', 'post_id'),
         sa.Index('hive_votes_voter_id_idx', 'voter_id'),
@@ -206,8 +206,8 @@ def build_metadata():
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('tag_id', sa.Integer, nullable=False),
         sa.PrimaryKeyConstraint('post_id', 'tag_id', name='hive_post_tags_pk1'),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id']),
-        sa.ForeignKeyConstraint(['tag_id'], ['hive_tag_data.id']),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_post_tags_fk1'),
+        sa.ForeignKeyConstraint(['tag_id'], ['hive_tag_data.id'], name='hive_post_tags_fk2'),
         sa.Index('hive_post_tags_post_id_idx', 'post_id'),
         sa.Index('hive_post_tags_tag_id_idx', 'tag_id')
     )
@@ -376,6 +376,24 @@ def build_metadata_community(metadata=None):
 def teardown(db):
     """Drop all tables"""
     build_metadata().drop_all(db.engine())
+
+def drop_fk(db):
+    db.query_no_return("START TRANSACTION")
+    for table in build_metadata().sorted_tables:
+        for fk in table.foreign_keys:
+            sql = """ALTER TABLE {} DROP CONSTRAINT {}""".format(table.name, fk.name)
+            db.query_no_return(sql)
+    db.query_no_return("COMMIT")
+
+def create_fk(db):
+    from sqlalchemy.schema import AddConstraint
+    from sqlalchemy import text
+    connection = db.engine().connect()
+    connection.execute(text("START TRANSACTION"))
+    for table in build_metadata().sorted_tables:
+        for fk in table.foreign_keys:
+            connection.execute(AddConstraint(fk.constraint))
+    connection.execute(text("COMMIT"))
 
 def setup(db):
     """Creates all tables and seed data"""
