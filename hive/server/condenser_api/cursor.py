@@ -21,7 +21,7 @@ async def get_post_id(db, author, permlink):
         INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
         INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
         WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
-            AND counter_deleted = 0 LIMIT 1""" # ABW: replace with find_comment_id(:author,:permlink)?
+            AND counter_deleted = 0 LIMIT 1""" # ABW: replace with find_comment_id(:author,:permlink,True)?
     return await db.query_one(sql, author=author, permlink=permlink)
 
 async def get_child_ids(db, post_id):
@@ -190,8 +190,8 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
             where.append(sql)
 
     start_id = None
-    if start_permlink and start_author:
-        sql = "%s <= (SELECT %s FROM %s WHERE id = find_comment_id('{}', '{}'))".format(start_author, start_permlink)
+    if start_permlink or start_author:
+        sql = "%s <= (SELECT %s FROM %s WHERE id = find_comment_id('{}', '{}', True))".format(start_author, start_permlink)
         where.append(sql % (field, raw_field, table))
 
     sql = """
