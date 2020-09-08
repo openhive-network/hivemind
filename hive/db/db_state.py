@@ -112,7 +112,10 @@ class DbState:
 
             'hive_accounts_ix5', # (cached_at, name)
 
-            'hive_post_tags_tag_id_idx'
+            'hive_post_tags_tag_id_idx',
+
+            'hive_votes_voter_id_permlink_id_idx',
+            'hive_votes_permlink_id_voter_id_idx'
         ]
 
         to_return = []

@@ -211,6 +211,8 @@ def build_metadata():
 
         sa.Index('hive_votes_post_id_idx', 'post_id'),
         sa.Index('hive_votes_voter_id_idx', 'voter_id'),
+        sa.Index('hive_votes_voter_id_permlink_id_idx', 'voter_id', 'permlink_id'),
+        sa.Index('hive_votes_permlink_id_voter_id_idx', 'permlink_id', 'voter_id'),
         sa.Index('hive_votes_block_num_idx', 'block_num')
     )
 
@@ -844,10 +846,10 @@ def setup(db):
     sql = """
         DROP VIEW IF EXISTS hive_votes_accounts_permlinks_view
         ;
-        CREATE VIEW hive_votes_accounts_permlinks_view
+        CREATE OR REPLACE VIEW hive_votes_accounts_permlinks_view
         AS
         SELECT
-            ha_v.id as voter_id,
+            hv.voter_id as voter_id,
             ha_a.name as author,
             hpd.permlink as permlink,
             vote_percent as percent,
@@ -857,7 +859,7 @@ def setup(db):
             ha_v.name as voter,
             weight,
             num_changes,
-            hpd.id as permlink_id,
+            hv.permlink_id as permlink_id,
             post_id,
             is_effective
         FROM
@@ -866,6 +868,76 @@ def setup(db):
         INNER JOIN hive_accounts ha_a ON ha_a.id = hv.author_id
         INNER JOIN hive_permlink_data hpd ON hpd.id = hv.permlink_id
         ;
+    """
+    db.query_no_return(sql)
+
+    sql = """
+        DROP VIEW IF EXISTS list_votes_by_voter_comment;
+
+        CREATE OR REPLACE FUNCTION public.list_votes_by_voter_comment
+        (
+          in _VOTER hive_accounts.name%TYPE,
+          in _AUTHOR hive_accounts.name%TYPE,
+          in _PERMLINK hive_permlink_data.permlink%TYPE,
+          in _LIMIT INT
+        )
+        RETURNS TABLE
+        (
+          voter hive_accounts.name%TYPE,
+          author hive_accounts.name%TYPE,
+          permlink hive_permlink_data.permlink%TYPE,
+          weight hive_votes.weight%TYPE,
+          rshares hive_votes.rshares%TYPE,
+          percent hive_votes.vote_percent%TYPE,
+          last_update hive_votes.last_update%TYPE,
+          num_changes hive_votes.num_changes%TYPE,
+          reputation hive_accounts.reputation%TYPE
+        )
+        LANGUAGE 'plpgsql'
+        VOLATILE
+        AS $BODY$
+        DECLARE _VOTER_ID INT;
+        DECLARE _PERMLINK_ID INT;
+        BEGIN
+
+        IF _VOTER = '' THEN
+          _VOTER_ID = 0;
+        ELSE
+          _VOTER_ID =
+                      (
+                        SELECT id FROM hive_accounts
+                        WHERE name=_VOTER
+                      );
+        END IF;
+
+        _PERMLINK_ID = find_comment_id( _AUTHOR, _PERMLINK, True);
+
+        RETURN QUERY
+        (
+                SELECT
+                    v.voter,
+                    v.author,
+                    v.permlink,
+                    v.weight,
+                    v.rshares,
+                    v.percent,
+                    v.time,
+                    v.num_changes,
+                    v.reputation
+                FROM
+                    hive_votes_accounts_permlinks_view v
+                    WHERE
+                        ( v.voter_id = _VOTER_ID and v.permlink_id >= _PERMLINK_ID )
+                        OR
+                        ( v.voter_id > _VOTER_ID )
+                    ORDER BY
+                      voter_id,
+                      permlink_id
+                LIMIT _LIMIT
+        );
+
+        END
+        $BODY$;
     """
     db.query_no_return(sql)
 
