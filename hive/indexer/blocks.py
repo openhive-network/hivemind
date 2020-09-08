@@ -63,12 +63,14 @@ class Blocks:
         Votes.flush()
         Posts.flush()
         Reblog.flush()
-        Follow.flush(trx=False)
+        follows = Follow.flush(trx=False)
+        accts = Accounts.flush(hived, trx=False, spread=8)
+        # Follow and Account flush moved from Sync.listen (sync.py line 378)
         block_num = int(block['block_id'][:8], base=16)
         cls.on_live_blocks_processed( block_num, block_num )
         time_end = perf_counter()
         log.info("[PROCESS BLOCK] %fs", time_end - time_start)
-        return ret
+        return ret, follows, accts
 
     @classmethod
     def process_multi(cls, blocks, vops, hived, is_initial_sync=False):
@@ -102,10 +104,12 @@ class Blocks:
         flush_time = register_time(flush_time, "PostDataCache", PostDataCache.flush())
         flush_time = register_time(flush_time, "Tags", Tags.flush())
         flush_time = register_time(flush_time, "Votes", Votes.flush())
-        folllow_items = len(Follow.follow_items_to_flush) + Follow.flush(trx=False)
-        flush_time = register_time(flush_time, "Follow", folllow_items)
+        follow_items = len(Follow.follow_items_to_flush) + Follow.flush(trx=False)
+        flush_time = register_time(flush_time, "Follow", follow_items)
         flush_time = register_time(flush_time, "Posts", Posts.flush())
         flush_time = register_time(flush_time, "Reblog", Reblog.flush())
+        accts = Accounts.flush(hived, trx=False, spread=8)
+        flush_time = register_time(flush_time, "Accounts", accts)
 
         if (not is_initial_sync) and (first_block > -1):
             cls.on_live_blocks_processed( first_block, last_num )

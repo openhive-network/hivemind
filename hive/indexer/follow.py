@@ -78,31 +78,21 @@ class Follow:
         if not op:
             return
         op['block_num'] = block_num
+        k = '{}/{}'.format(op['flr'], op['flg'])
 
-        # perform delta check
-        new_state = op['state']
-        old_state = None
-        if DbState.is_initial_sync():
-            # insert or update state
-
-            k = '{}/{}'.format(op['flr'], op['flg'])
-
-            if k in cls.follow_items_to_flush:
-                old_value = cls.follow_items_to_flush.get(k)
-                old_value['state'] = op['state'] 
-                cls.follow_items_to_flush[k] = old_value
-            else:
-                cls.follow_items_to_flush[k] = dict(
-                                                      flr=op['flr'],
-                                                      flg=op['flg'],
-                                                      state=op['state'],
-                                                      at=op['at'],
-                                                      block_num=op['block_num'])
-
+        if k in cls.follow_items_to_flush:
+            cls.follow_items_to_flush[k]['state'] = op['state']
         else:
+            cls.follow_items_to_flush[k] = dict(
+                flr=op['flr'],
+                flg=op['flg'],
+                state=op['state'],
+                at=op['at'],
+                block_num=op['block_num'])
+
+        if not DbState.is_initial_sync():
+            new_state = op['state']
             old_state = cls._get_follow_db_state(op['flr'], op['flg'])
-            # insert or update state
-            DB.query(FOLLOW_ITEM_INSERT_QUERY, **op)
             if new_state == 1:
                 Follow.follow(op['flr'], op['flg'])
                 if old_state is None:
