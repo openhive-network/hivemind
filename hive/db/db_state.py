@@ -162,10 +162,9 @@ class DbState:
             except sqlalchemy.exc.ProgrammingError as ex:
                 log.warning("Ignoring ex: {}".format(ex))
 
-        # TODO: #111
-        #for key in cls._all_foreign_keys():
-        #    log.info("Drop fk %s", key.name)
-        #    key.drop(engine)
+        from hive.db.schema import drop_fk, create_fk
+        log.info("Dropping FKs")
+        drop_fk(cls.db())
 
         log.info("[INIT] Finish pre-initial sync hooks")
 
@@ -241,12 +240,13 @@ class DbState:
 
         update_active_starting_from_posts_on_block(last_imported_block, current_imported_block)
 
+        log.info("Recreating FKs")
+        from hive.db.schema import create_fk
+        create_fk(cls.db())
+
         time_end = perf_counter()
         log.info("[INIT] update_all_posts_active executed in %fs", time_end - time_start)
-        # TODO: #111
-        #for key in cls._all_foreign_keys():
-        #    log.info("Create fk %s", key.name)
-        #    key.create(engine)
+
 
     @staticmethod
     def status():
