@@ -63,6 +63,7 @@ class Blocks:
         Votes.flush()
         Posts.flush()
         Reblog.flush()
+        Follow.flush(trx=False)
         block_num = int(block['block_id'][:8], base=16)
         cls.on_live_blocks_processed( block_num, block_num )
         time_end = perf_counter()
