@@ -3,7 +3,7 @@ from enum import Enum
 
 from hive.server.common.helpers import return_error_info, valid_limit, valid_account, valid_permlink, valid_date
 from hive.server.database_api.objects import database_post_object
-from hive.utils.normalize import rep_to_raw, number_to_json_value, time_string_with_t
+from hive.utils.normalize import rep_to_raw, time_string_with_t
 from hive.server.common.helpers import json_date
 
 import datetime
@@ -172,18 +172,18 @@ def api_vote_info(rows, votes_presentation):
   ret = []
   for row in rows:
       if votes_presentation == VotesPresentation.DatabaseApi:
-          ret.append(dict(voter=row.voter, author=row.author, permlink=row.permlink,
-                          weight=number_to_json_value(row.weight), rshares=number_to_json_value(row.rshares), vote_percent=row.percent,
-                          last_update=json_date(row.last_update), num_changes=row.num_changes))
+          ret.append(dict(voter = row.voter, author = row.author, permlink = row.permlink,
+                          weight = row.weight, rshares = row.rshares, vote_percent = row.percent,
+                          last_update = json_date(row.last_update), num_changes = row.num_changes))
       elif votes_presentation == VotesPresentation.CondenserApi:
-          ret.append(dict(percent=str(row.percent), reputation=rep_to_raw(row.reputation),
-                          rshares=number_to_json_value(row.rshares), voter=row.voter))
+          ret.append(dict(percent = str(row.percent), reputation = rep_to_raw(row.reputation),
+                          rshares = row.rshares, voter = row.voter))
       elif votes_presentation == VotesPresentation.BridgeApi:
-          ret.append(dict(rshares=number_to_json_value(row.rshares), voter=row.voter))
+          ret.append(dict(rshares = row.rshares, voter = row.voter))
       else:
-          ret.append(dict(percent=row.percent, reputation=rep_to_raw(row.reputation),
-                          rshares=number_to_json_value(row.rshares), time=time_string_with_t(row.time), 
-                          voter=row.voter, weight=number_to_json_value(row.weight)
+          ret.append(dict(percent = row.percent, reputation = rep_to_raw(row.reputation),
+                          rshares = row.rshares, time = json_date(row.last_update), 
+                          voter = row.voter, weight = row.weight
                           ))
   return ret
 

@@ -278,15 +278,6 @@ def asset_to_hbd_hive(price, asset):
         return {'amount' : result, 'nai' : price['base']['nai'], 'precision' : price['base']['precision']}
     raise ValueError("Asset not supported")
 
-def number_to_json_value(number):
-    """ hived serialize some numbers greater than 0xFFFFFFFF as strings
-
-    Check 'json::stringify_large_ints_and_doubles' in hive C++ code
-    """
-    if number > 0xFFFFFFFF:
-        return str(number)
-    return int(number)
-
 def time_string_with_t(time_iso8601):
     """ Ensures that time in format ISO8601 use 'T' as a data time separator
 
