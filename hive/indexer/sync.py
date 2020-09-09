@@ -238,12 +238,14 @@ class Sync:
         # community stats
         Community.recalc_pending_payouts()
 
-        sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
-        database_head_block = DbState.db().query_one(sql)
-        log.info("database_head_block : %s", database_head_block)
+        last_imported_block = Blocks.head_num()
+        hived_head_block = self._conf.get('test_max_block') or self._steem.last_irreversible()
+
+        log.info("database_head_block : %s", last_imported_block)
+        log.info("target_head_block : %s", hived_head_block)
 
         if DbState.is_initial_sync():
-            last_imported_block = Blocks.head_num()
+            DbState.before_initial_sync(last_imported_block, hived_head_block)
             # resume initial sync
             self.initial()
             if not CONTINUE_PROCESSING:
