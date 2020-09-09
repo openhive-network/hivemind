@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 
 set -e
 set -o pipefail
@@ -8,6 +8,7 @@ HIVEMIND_POSTGRESQL_CONNECTION_STRING=$2
 HIVEMIND_SOURCE_HIVED_URL=$3
 HIVEMIND_MAX_BLOCK=$4
 HIVEMIND_HTTP_PORT=$5
+HIVEMIND_ENABLE_DB_MONITORING=${6:-yes}
 
 PYTHONUSERBASE=./local-site
 
@@ -49,7 +50,11 @@ ln -sf ./local-site/bin/hive $HIVE_NAME
 
 echo Attempting to recreate database $DB_NAME
 psql -U $POSTGRES_USER -h localhost -d postgres -c "DROP DATABASE IF EXISTS $DB_NAME;"
-psql -U $POSTGRES_USER -h localhost -d postgres -c "CREATE DATABASE $DB_NAME;"
+if [ "$HIVEMIND_ENABLE_DB_MONITORING" = "yes" ]; then
+  psql -U $POSTGRES_USER -h localhost -d postgres -c "CREATE DATABASE $DB_NAME TEMPLATE template_hive_ci;"
+else
+  psql -U $POSTGRES_USER -h localhost -d postgres -c "CREATE DATABASE $DB_NAME"
+fi
 
 echo Attempting to starting hive sync using hived node: $HIVEMIND_SOURCE_HIVED_URL . Max sync block is: $HIVEMIND_MAX_BLOCK
 echo Attempting to access database $DB_URL

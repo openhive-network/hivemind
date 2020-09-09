@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+
+  pgwatch2:
+    # Docs: https://pgwatch2.readthedocs.io/en/latest/index.html
+    image: cybertec/pgwatch2-nonroot:1.8.0
+    ports:
+      - "30000:3000"  # Grafana dashboarding
+      - "8080:8080"   # Management Web UI (monitored hosts, metrics, metrics configurations)
+      - "8081:8081"   # Gatherer healthcheck / statistics on number of gathered metrics (JSON)
+      - "54320:5432"  # Postgres configuration (or metrics storage DB, when using the cybertec/pgwatch2-postgres image)
+      # - "8086:8086" # InfluxDB API (when using the InfluxDB version)
+      # - "8088:8088" # InfluxDB Backup port (when using the InfluxDB version)
+    restart: always
+    volumes:
+      - pgwatch2-postgresql:/var/lib/postgresql
+      - pgwatch2-grafana:/var/lib/grafana
+      - pgwatch2-influxdb:/var/lib/influxdb
+      - pgwatch2-pgwatch2:/pgwatch2/persistent-config
+
+volumes:
+  pgwatch2-postgresql:
+  pgwatch2-grafana:
+  pgwatch2-influxdb:
+  pgwatch2-pgwatch2:
