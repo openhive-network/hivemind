@@ -149,6 +149,7 @@ class Follow(DbAdapterHolder):
         values = []
         limit = 1000
         count = 0
+        cls.beginTx()
         for _, follow_item in cls.follow_items_to_flush.items():
             if count < limit:
                 values.append("({}, {}, '{}', {}, {}, {}, {})".format(follow_item['flr'], follow_item['flg'],
@@ -173,7 +174,7 @@ class Follow(DbAdapterHolder):
             query = sql_prefix + ",".join(values)
             query += sql_postfix
             cls.db.query(query)
-
+        cls.commitTx()
         cls.follow_items_to_flush.clear()
 
     @classmethod

@@ -59,20 +59,19 @@ class Reblog(DbAdapterHolder):
             if row is None:
                 log.debug("reblog: post not found: %s/%s", author, permlink)
                 return
-            if not DbState.is_initial_sync():
-                result = dict(row)
-                FeedCache.delete(result['post_id'], result['account_id'])
+            result = dict(row)
+            FeedCache.delete(result['post_id'], result['account_id'])
         else:
             row = cls.db.query_row(SELECT_SQL, blogger=blogger, author=author, permlink=permlink,
                                date=block_date, block_num=block_num)
             if row is not None:
                 result = dict(row)
                 cls.reblog_items_to_flush.append(result)
+                author_id = Accounts.get_id(author)
+                blogger_id = Accounts.get_id(blogger)
+                post_id = result['post_id']
+                FeedCache.insert(post_id, blogger_id, block_date, block_num)
                 if not DbState.is_initial_sync():
-                    author_id = Accounts.get_id(author)
-                    blogger_id = Accounts.get_id(blogger)
-                    post_id = result['post_id']
-                    FeedCache.insert(post_id, blogger_id, block_date)
                     Notify('reblog', src_id=blogger_id, dst_id=author_id,
                            post_id=post_id, when=block_date,
                            score=Accounts.default_score(blogger)).write()
@@ -92,7 +91,7 @@ class Reblog(DbAdapterHolder):
         limit = 1000
         count = 0
         item_count = len(cls.reblog_items_to_flush)
-
+        cls.beginTx()
         for reblog_item in cls.reblog_items_to_flush:
             if count < limit:
                 values.append("('{}', {}, '{}', {})".format(reblog_item["blogger"],
@@ -115,5 +114,6 @@ class Reblog(DbAdapterHolder):
             query = sql_prefix + ",".join(values)
             query += sql_postfix
             cls.db.query(query)
+        cls.commitTx()
         cls.reblog_items_to_flush.clear()
         return item_count

@@ -227,7 +227,7 @@ class Sync:
 
         # ensure db schema up to date, check app status
         DbState.initialize()
-        Blocks.setup_db_access(self._db)
+        Blocks.setup_own_db_access(self._db)
 
         # prefetch id->name and id->rank memory maps
         Accounts.load_ids()
@@ -258,7 +258,7 @@ class Sync:
         else:
             # recover from fork
             Blocks.verify_head(self._steem)
-
+        Blocks.setup_shared_db_access(self._db)
         self._update_chain_state()
 
         if self._conf.get('test_max_block'):
@@ -293,7 +293,6 @@ class Sync:
             return
 
         log.info("[INIT] *** Initial cache build ***")
-        FeedCache.rebuild()
         Follow.force_recount()
 
     def from_checkpoints(self, chunk_size=1000):
@@ -383,7 +382,9 @@ class Sync:
         for block in steemd.stream_blocks(hive_head + 1, trail_blocks, max_gap):
             start_time = perf()
 
+            self._db.query("START TRANSACTION")
             num, follows, accts = Blocks.process(block, {}, steemd)
+            self._db.query("COMMIT")
 
             ms = (perf() - start_time) * 1000
             log.info("[LIVE] Got block %d at %s --% 4d txs,% 3d accts,% 3d follows"
