@@ -57,7 +57,7 @@ class FeedCache(DbAdapterHolder):
     @classmethod
     def insert(cls, post_id, account_id, created_at, block_num):
         """Inserts a [re-]post by an account into feed."""
-        cls._feed_cache_items.append((post_id, account_id, created_at, block_num))
+        cls._feed_cache_items.append((account_id, post_id, created_at, block_num))
 
     @classmethod
     def delete(cls, post_id, account_id=None):

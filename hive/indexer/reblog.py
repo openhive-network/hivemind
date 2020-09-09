@@ -18,7 +18,7 @@ DELETE_SQL = """
         FROM hive_posts hp
         INNER JOIN hive_accounts ha ON hp.author_id = ha.id
         INNER JOIN hive_permlink_data hpd ON hp.permlink_id = hpd.id
-        WHERE ha.name = :a AND hpd.permlink = :permlink AND hp.depth <= 0
+        WHERE ha.name = :a AND hpd.permlink = :permlink AND hp.depth = 0 AND hp.counter_deleted = 0
     )
     DELETE FROM hive_reblogs AS hr 
     WHERE hr.account = :a AND hr.post_id IN (SELECT ps.post_id FROM processing_set ps)
@@ -30,7 +30,7 @@ SELECT_SQL = """
     FROM hive_posts hp
     INNER JOIN hive_accounts ha ON ha.id = hp.author_id
     INNER JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
-    WHERE ha.name = :author AND hpd.permlink = :permlink AND hp.depth <= 0
+    WHERE ha.name = :author AND hpd.permlink = :permlink AND hp.depth = 0 AND hp.counter_deleted = 0
 """
 
 class Reblog(DbAdapterHolder):
