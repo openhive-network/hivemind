@@ -141,7 +141,7 @@ class Posts(DbAdapterHolder):
             post_data = dict(title=new_title, img_url=new_img, body=new_body, json=new_json)
 
 #        log.info("Adding author: {}  permlink: {}".format(op['author'], op['permlink']))
-        PostDataCache.add_data(result['id'], post_data, is_new_post, p["block_num"])
+        PostDataCache.add_data(result['id'], post_data, is_new_post, op["block_num"])
 
         if not result['depth']:
             tags = [result['post_category']]
