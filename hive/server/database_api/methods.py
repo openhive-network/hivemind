@@ -188,7 +188,7 @@ def api_vote_info(rows, votes_presentation):
   return ret
 
 @return_error_info
-async def find_votes(context, author: str, permlink: str, votes_presentation = VotesPresentation.DatabaseApi):
+async def find_votes_impl(context, author: str, permlink: str, votes_presentation):
     """ Returns all votes for the given post """
     valid_account(author)
     valid_permlink(permlink)
@@ -205,7 +205,7 @@ async def find_votes(context, author: str, permlink: str, votes_presentation = V
             num_changes,
             reputation
         FROM
-            hive_votes_accounts_permlinks_view
+            hive_votes_view
         WHERE
             author = :author AND permlink = :permlink
         ORDER BY 
@@ -216,7 +216,7 @@ async def find_votes(context, author: str, permlink: str, votes_presentation = V
     return api_vote_info(rows, votes_presentation)
 
 @return_error_info
-async def list_votes(context, start: list, limit: int, order: str, votes_presentation = VotesPresentation.DatabaseApi):
+async def list_votes_impl(context, start: list, limit: int, order: str, votes_presentation):
     """ Returns all votes, starting with the specified voter and/or author and permlink. """
     supported_order_list = ["by_comment_voter", "by_voter_comment"]
     assert order in supported_order_list, "Order {} is not supported".format(order)
@@ -227,10 +227,18 @@ async def list_votes(context, start: list, limit: int, order: str, votes_present
     sql=""
 
     if order == "by_voter_comment":
-        sql = "select * from list_votes( '{}', '{}', '{}', {}, true )".format( start[0], start[1], start[2], limit )
+        sql = "select * from list_votes_by_voter_comment( '{}', '{}', '{}', {} )".format( start[0], start[1], start[2], limit )
     else:
-        sql = "select * from list_votes( '{}', '{}', '{}', {}, false )".format( start[2], start[0], start[1], limit )
+        sql = "select * from list_votes_by_comment_voter( '{}', '{}', '{}', {} )".format( start[2], start[0], start[1], limit )
 
     rows = await db.query_all(sql)
 
     return api_vote_info(rows, votes_presentation)
+
+@return_error_info
+async def find_votes(context, author: str, permlink: str):
+  return await find_votes_impl( context, author, permlink, VotesPresentation.DatabaseApi)
+
+@return_error_info
+async def list_votes(context, start: list, limit: int, order: str):
+  return await list_votes_impl( context, start, limit, order, VotesPresentation.DatabaseApi)

@@ -5,7 +5,7 @@ import ujson as json
 
 from hive.server.common.mutes import Mutes
 from hive.server.common.helpers import json_date
-from hive.server.database_api.methods import find_votes, VotesPresentation
+from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 from hive.utils.normalize import sbd_amount
 from hive.indexer.votes import Votes
 
@@ -100,7 +100,7 @@ async def load_posts_keyed(db, ids, truncate_body=0):
 
         row['author_rep'] = author['reputation']
         post = _bridge_post_object(row, truncate_body=truncate_body)
-        post['active_votes'] = await find_votes({'db':db}, row['author'], row['permlink'], VotesPresentation.BridgeApi)
+        post['active_votes'] = await find_votes_impl({'db':db}, row['author'], row['permlink'], VotesPresentation.BridgeApi)
 
         post['blacklists'] = Mutes.lists(post['author'], author['reputation'])
 

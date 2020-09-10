@@ -21,7 +21,7 @@ async def get_active_votes(context, author: str, permlink: str):
             hv.last_update,
             hv.num_changes
         FROM
-            hive_votes_accounts_permlinks_view hv
+            hive_votes_view hv
         WHERE hv.author = :author AND hv.permlink = :permlink
     """
     ret = []

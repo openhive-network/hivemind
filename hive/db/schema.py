@@ -211,8 +211,8 @@ def build_metadata():
 
         sa.Index('hive_votes_post_id_idx', 'post_id'),
         sa.Index('hive_votes_voter_id_idx', 'voter_id'),
-        sa.Index('hive_votes_voter_id_permlink_id_idx', 'voter_id', 'permlink_id'),
-        sa.Index('hive_votes_permlink_id_voter_id_idx', 'permlink_id', 'voter_id'),
+        sa.Index('hive_votes_voter_id_post_id_idx', 'voter_id', 'post_id'),
+        sa.Index('hive_votes_post_id_voter_id_idx', 'post_id', 'voter_id'),
         sa.Index('hive_votes_block_num_idx', 'block_num')
     )
 
@@ -844,9 +844,9 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-        DROP VIEW IF EXISTS hive_votes_accounts_permlinks_view
+        DROP VIEW IF EXISTS hive_votes_view
         ;
-        CREATE OR REPLACE VIEW hive_votes_accounts_permlinks_view
+        CREATE OR REPLACE VIEW hive_votes_view
         AS
         SELECT
             hv.voter_id as voter_id,
@@ -872,33 +872,35 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-        DROP FUNCTION IF EXISTS list_votes( character varying, character varying, character varying, int, bool );
+        DROP TYPE IF EXISTS database_api_vote CASCADE;
 
-        CREATE OR REPLACE FUNCTION public.list_votes
+        CREATE TYPE database_api_vote AS (
+          voter VARCHAR(16),
+          author VARCHAR(16),
+          permlink VARCHAR(255),
+          weight NUMERIC,
+          rshares BIGINT,
+          percent INT,
+          last_update TIMESTAMP,
+          num_changes INT,
+          reputation FLOAT4
+        );
+
+        DROP FUNCTION IF EXISTS list_votes_by_voter_comment( character varying, character varying, character varying, int );
+
+        CREATE OR REPLACE FUNCTION public.list_votes_by_voter_comment
         (
           in _VOTER hive_accounts.name%TYPE,
           in _AUTHOR hive_accounts.name%TYPE,
           in _PERMLINK hive_permlink_data.permlink%TYPE,
-          in _LIMIT INT,
-          in _IS_VOTER_COMMENT_SORT BOOLEAN
+          in _LIMIT INT
         )
-        RETURNS TABLE
-        (
-          voter hive_accounts.name%TYPE,
-          author hive_accounts.name%TYPE,
-          permlink hive_permlink_data.permlink%TYPE,
-          weight hive_votes.weight%TYPE,
-          rshares hive_votes.rshares%TYPE,
-          percent hive_votes.vote_percent%TYPE,
-          last_update hive_votes.last_update%TYPE,
-          num_changes hive_votes.num_changes%TYPE,
-          reputation hive_accounts.reputation%TYPE
-        )
+        RETURNS SETOF database_api_vote
         LANGUAGE 'plpgsql'
-        VOLATILE
-        AS $BODY$
+        AS
+        $function$
         DECLARE _VOTER_ID INT;
-        DECLARE _PERMLINK_ID INT;
+        DECLARE _POST_ID INT;
         BEGIN
 
         IF _VOTER = '' THEN
@@ -911,60 +913,90 @@ def setup(db):
                       );
         END IF;
 
-        _PERMLINK_ID = find_comment_id( _AUTHOR, _PERMLINK, True);
+        _POST_ID = find_comment_id( _AUTHOR, _PERMLINK, True);
 
-        IF _IS_VOTER_COMMENT_SORT = True THEN
-          RETURN QUERY
-          (
-                  SELECT
-                      v.voter,
-                      v.author,
-                      v.permlink,
-                      v.weight,
-                      v.rshares,
-                      v.percent,
-                      v.last_update,
-                      v.num_changes,
-                      v.reputation
-                  FROM
-                      hive_votes_accounts_permlinks_view v
-                      WHERE
-                          ( v.voter_id = _VOTER_ID and v.permlink_id >= _PERMLINK_ID )
-                          OR
-                          ( v.voter_id > _VOTER_ID )
-                      ORDER BY
-                        voter_id,
-                        permlink_id
-                  LIMIT _LIMIT
-          );
-        ELSE
-          RETURN QUERY
-          (
-                  SELECT
-                      v.voter,
-                      v.author,
-                      v.permlink,
-                      v.weight,
-                      v.rshares,
-                      v.percent,
-                      v.last_update,
-                      v.num_changes,
-                      v.reputation
-                  FROM
-                      hive_votes_accounts_permlinks_view v
-                      WHERE
-                          ( v.permlink_id = _PERMLINK_ID and v.voter_id >= _VOTER_ID )
-                          OR
-                          ( v.permlink_id > _PERMLINK_ID )
-                      ORDER BY
-                        permlink_id,
-                        voter_id
-                  LIMIT _LIMIT
-          );
-        END IF;
+        RETURN QUERY
+        (
+                SELECT
+                    v.voter,
+                    v.author,
+                    v.permlink,
+                    v.weight,
+                    v.rshares,
+                    v.percent,
+                    v.last_update,
+                    v.num_changes,
+                    v.reputation
+                FROM
+                    hive_votes_view v
+                    WHERE
+                        ( v.voter_id = _VOTER_ID and v.post_id >= _POST_ID )
+                        OR
+                        ( v.voter_id > _VOTER_ID )
+                    ORDER BY
+                      voter_id,
+                      post_id
+                LIMIT _LIMIT
+        );
 
         END
-        $BODY$;
+        $function$;
+
+        DROP FUNCTION IF EXISTS list_votes_by_comment_voter( character varying, character varying, character varying, int );
+
+        CREATE OR REPLACE FUNCTION public.list_votes_by_comment_voter
+        (
+          in _VOTER hive_accounts.name%TYPE,
+          in _AUTHOR hive_accounts.name%TYPE,
+          in _PERMLINK hive_permlink_data.permlink%TYPE,
+          in _LIMIT INT
+        )
+        RETURNS SETOF database_api_vote
+        LANGUAGE 'plpgsql'
+        AS
+        $function$
+        DECLARE _VOTER_ID INT;
+        DECLARE _POST_ID INT;
+        BEGIN
+
+        IF _VOTER = '' THEN
+          _VOTER_ID = 0;
+        ELSE
+          _VOTER_ID =
+                      (
+                        SELECT id FROM hive_accounts
+                        WHERE name=_VOTER
+                      );
+        END IF;
+
+        _POST_ID = find_comment_id( _AUTHOR, _PERMLINK, True);
+
+        RETURN QUERY
+        (
+                SELECT
+                    v.voter,
+                    v.author,
+                    v.permlink,
+                    v.weight,
+                    v.rshares,
+                    v.percent,
+                    v.last_update,
+                    v.num_changes,
+                    v.reputation
+                FROM
+                    hive_votes_view v
+                    WHERE
+                        ( v.post_id = _POST_ID and v.voter_id >= _VOTER_ID )
+                        OR
+                        ( v.post_id > _POST_ID )
+                    ORDER BY
+                      post_id,
+                      voter_id
+                LIMIT _LIMIT
+        );
+
+        END
+        $function$;
     """
     db.query_no_return(sql)
 
