@@ -886,6 +886,28 @@ def setup(db):
           reputation FLOAT4
         );
 
+        DROP FUNCTION IF EXISTS get_account(character varying, boolean);
+
+        CREATE OR REPLACE FUNCTION get_account(
+          in _account hive_accounts.name%TYPE,
+          in _check boolean)
+        RETURNS INT
+        LANGUAGE 'plpgsql'
+        AS
+        $function$
+        DECLARE 
+          account_id INT;
+        BEGIN
+          SELECT INTO account_id COALESCE( ( SELECT id FROM hive_accounts WHERE name=_account ), 0 );
+          IF _check AND account_id = 0 THEN
+            RAISE EXCEPTION 'Account % does not exist', _account;
+          END IF;
+
+          RETURN account_id;
+        END
+        $function$
+        ;
+
         DROP FUNCTION IF EXISTS list_votes_by_voter_comment( character varying, character varying, character varying, int );
 
         CREATE OR REPLACE FUNCTION public.list_votes_by_voter_comment
@@ -903,16 +925,7 @@ def setup(db):
         DECLARE _POST_ID INT;
         BEGIN
 
-        IF _VOTER = '' THEN
-          _VOTER_ID = 0;
-        ELSE
-          _VOTER_ID =
-                      (
-                        SELECT id FROM hive_accounts
-                        WHERE name=_VOTER
-                      );
-        END IF;
-
+        _VOTER_ID = get_account( _VOTER, true );
         _POST_ID = find_comment_id( _AUTHOR, _PERMLINK, True);
 
         RETURN QUERY
@@ -959,16 +972,7 @@ def setup(db):
         DECLARE _POST_ID INT;
         BEGIN
 
-        IF _VOTER = '' THEN
-          _VOTER_ID = 0;
-        ELSE
-          _VOTER_ID =
-                      (
-                        SELECT id FROM hive_accounts
-                        WHERE name=_VOTER
-                      );
-        END IF;
-
+        _VOTER_ID = get_account( _VOTER, true );
         _POST_ID = find_comment_id( _AUTHOR, _PERMLINK, True);
 
         RETURN QUERY
