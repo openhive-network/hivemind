@@ -1741,3 +1741,27 @@ def set_logged_table_attribute(db, logged):
         log.info("Setting {} attribute on a table: {}".format('LOGGED' if logged else 'UNLOGGED', table))
         sql = """ALTER TABLE {} SET {}"""
         db.query_no_return(sql.format(table, 'LOGGED' if logged else 'UNLOGGED'))
+
+def execute_sql_script(query_executor, path_to_script):
+    """ Load and execute sql script from file 
+        Params:
+          query_executor - callable to execute query with
+          path_to_script - path to script
+        Returns:
+          depending on query_executor
+          
+        Example:
+          print(execute_sql_script(db.query_row, "./test.sql"))
+          where test_sql: SELECT * FROM hive_state WHERE block_num = 0;
+          will return something like: (0, 18, Decimal('0.000000'), Decimal('0.000000'), Decimal('0.000000'), '')
+    """
+    try:
+        sql_script = None
+        with open(path_to_script, 'r') as sql_script_file:
+            sql_script = sql_script_file.read()
+        if sql_script is not None:
+            return query_executor(sql_script)
+    except Exception as ex:
+        log.exception("Error running sql script: {}".format(ex))
+        raise ex
+    return None
