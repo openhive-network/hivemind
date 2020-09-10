@@ -95,7 +95,7 @@ async def get_discussion(context, author, permlink, observer=None):
     root_id = rows[0]['id']
     all_posts = {}
     root_post = _bridge_post_object(rows[0])
-    root_post['active_votes'] = await find_votes_impl({'db':db}, rows[0]['author'], rows[0]['permlink'], VotesPresentation.BridgeApi)
+    root_post['active_votes'] = await find_votes_impl(db, rows[0]['author'], rows[0]['permlink'], VotesPresentation.BridgeApi)
     root_post = await append_statistics_to_post(root_post, rows[0], False, blacklists_for_user)
     root_post['replies'] = []
     all_posts[root_id] = root_post
@@ -108,7 +108,7 @@ async def get_discussion(context, author, permlink, observer=None):
             parent_to_children_id_map[parent_id] = []
         parent_to_children_id_map[parent_id].append(rows[index]['id'])
         post = _bridge_post_object(rows[index])
-        post['active_votes'] = await find_votes_impl({'db':db}, rows[index]['author'], rows[index]['permlink'], VotesPresentation.BridgeApi)
+        post['active_votes'] = await find_votes_impl(db, rows[index]['author'], rows[index]['permlink'], VotesPresentation.BridgeApi)
         post = await append_statistics_to_post(post, rows[index], False, blacklists_for_user)
         post['replies'] = []
         all_posts[post['post_id']] = post
