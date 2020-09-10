@@ -62,6 +62,7 @@ def build_metadata():
 
         sa.UniqueConstraint('name', name='hive_accounts_ux1'),
         sa.Index('hive_accounts_ix5', 'cached_at'), # core/listen sweep
+	sa.Index('hive_accounts_ix6', 'reputation')
     )
 
 
@@ -189,6 +190,7 @@ def build_metadata():
 
     sa.Table(
         'hive_votes', metadata,
+        sa.Column('id', sa.BigInteger, primary_key=True),
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('voter_id', sa.Integer, nullable=False),
         sa.Column('author_id', sa.Integer, nullable=False),
@@ -201,7 +203,7 @@ def build_metadata():
         sa.Column('block_num', sa.Integer,  nullable=False ),
         sa.Column('is_effective', BOOLEAN, nullable=False, server_default='0'),
 
-        sa.PrimaryKeyConstraint('author_id', 'permlink_id', 'voter_id', name='hive_votes_pk'),
+        sa.UniqueConstraint('voter_id', 'author_id', 'permlink_id', name='hive_votes_ux1'),
 
         sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_votes_fk1'),
         sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id'], name='hive_votes_fk2'),
@@ -237,6 +239,7 @@ def build_metadata():
 
     sa.Table(
         'hive_follows', metadata,
+        sa.Column('id', sa.Integer, primary_key=True ),
         sa.Column('follower', sa.Integer, nullable=False),
         sa.Column('following', sa.Integer, nullable=False),
         sa.Column('state', SMALLINT, nullable=False, server_default='1'),
@@ -245,7 +248,7 @@ def build_metadata():
         sa.Column('follow_blacklists', sa.Boolean, nullable=False, server_default='0'),
         sa.Column('block_num', sa.Integer,  nullable=False ),
 
-        sa.PrimaryKeyConstraint('following', 'follower', name='hive_follows_pk'), # core
+        sa.UniqueConstraint('following', 'follower', name='hive_follows_ux1'), # core
         sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_follows_fk1'),
         sa.Index('hive_follows_ix5a', 'following', 'state', 'created_at', 'follower'),
         sa.Index('hive_follows_ix5b', 'follower', 'state', 'created_at', 'following'),
@@ -254,6 +257,7 @@ def build_metadata():
 
     sa.Table(
         'hive_reblogs', metadata,
+        sa.Column('id', sa.Integer, primary_key=True ),
         sa.Column('account', VARCHAR(16), nullable=False),
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
@@ -262,7 +266,7 @@ def build_metadata():
         sa.ForeignKeyConstraint(['account'], ['hive_accounts.name'], name='hive_reblogs_fk1'),
         sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_reblogs_fk2'),
         sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_reblogs_fk3'),
-        sa.PrimaryKeyConstraint('account', 'post_id', name='hive_reblogs_pk'), # core
+        sa.UniqueConstraint('account', 'post_id', name='hive_reblogs_ux1'), # core
         sa.Index('hive_reblogs_account', 'account'),
         sa.Index('hive_reblogs_post_id', 'post_id'),
         sa.Index('hive_reblogs_block_num_idx', 'block_num')
@@ -345,9 +349,11 @@ def build_metadata_community(metadata=None):
         sa.Column('description', sa.String(5000), nullable=False, server_default=''),
         sa.Column('flag_text',   sa.String(5000), nullable=False, server_default=''),
         sa.Column('settings',    TEXT,            nullable=False, server_default='{}'),
+        sa.Column('block_num', sa.Integer,  nullable=False ),
 
         sa.UniqueConstraint('name', name='hive_communities_ux1'),
-        sa.Index('hive_communities_ix1', 'rank', 'id')
+        sa.Index('hive_communities_ix1', 'rank', 'id'),
+        sa.Index('hive_communities_block_num_idx', 'block_num')
     )
 
     sa.Table(
@@ -364,12 +370,15 @@ def build_metadata_community(metadata=None):
 
     sa.Table(
         'hive_subscriptions', metadata,
+        sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('account_id',   sa.Integer,  nullable=False),
         sa.Column('community_id', sa.Integer,  nullable=False),
         sa.Column('created_at',   sa.DateTime, nullable=False),
+        sa.Column('block_num', sa.Integer,  nullable=False ),
 
         sa.UniqueConstraint('account_id', 'community_id', name='hive_subscriptions_ux1'),
         sa.Index('hive_subscriptions_ix1', 'community_id', 'account_id', 'created_at'),
+        sa.Index('hive_subscriptions_block_num_idx', 'block_num')
     )
 
     sa.Table(
@@ -735,6 +744,7 @@ def setup(db):
           hp.is_grayed,
           hp.total_vote_weight,
           ha_pp.name AS parent_author,
+          ha_pp.id AS parent_author_id,
             ( CASE hp.depth > 0
               WHEN True THEN hpd_pp.permlink
               ELSE hcd.category
@@ -1338,6 +1348,43 @@ def setup(db):
         LANGUAGE plpgsql
       ;
     """
+
+    db.query_no_return(sql)
+
+    sql = """
+        DROP FUNCTION IF EXISTS score_for_account(in _account_id hive_accounts.id%TYPE)
+        ;
+        CREATE OR REPLACE FUNCTION score_for_account(in _account_id hive_accounts.id%TYPE)
+        RETURNS SMALLINT
+        AS
+        $function$
+        DECLARE
+          score SMALLINT;
+        BEGIN
+          SELECT INTO score
+             CASE
+                 WHEN rank.position < 200 THEN 70
+                 WHEN rank.position < 1000 THEN 60
+                 WHEN rank.position < 6500 THEN 50
+                 WHEN rank.position < 25000 THEN 40
+                 WHEN rank.position < 100000 THEN 30
+                 ELSE 20
+             END as score
+          FROM (
+             SELECT
+                 (
+                     SELECT COUNT(*)
+                     FROM hive_accounts ha_for_rank2
+                     WHERE ha_for_rank2.reputation > ha_for_rank.reputation
+                 ) as position
+             FROM hive_accounts ha_for_rank WHERE ha_for_rank.id = _account_id
+          ) as rank;
+          return score;
+        END
+        $function$
+        LANGUAGE plpgsql
+        ;
+    """
     db.query_no_return(sql)
 
     # hot and tranding functions
@@ -1602,6 +1649,40 @@ def setup(db):
           $BODY$;
     """
 
+    db.query_no_return(sql)
+    sql = """
+        DROP FUNCTION IF EXISTS public.calculate_notify_vote_score(_payout hive_posts.payout%TYPE, _abs_rshares hive_posts_view.abs_rshares%TYPE, _rshares hive_votes.rshares%TYPE) CASCADE
+        ;
+        CREATE OR REPLACE FUNCTION public.calculate_notify_vote_score(_payout hive_posts.payout%TYPE, _abs_rshares hive_posts_view.abs_rshares%TYPE, _rshares hive_votes.rshares%TYPE)
+        RETURNS INT
+        LANGUAGE 'sql'
+        IMMUTABLE
+        AS $BODY$
+            SELECT CASE
+                WHEN ((( _payout )/_abs_rshares) * 1000 * _rshares < 20 ) THEN -1
+                ELSE LEAST(100, (LENGTH(CAST( ( (( _payout )/_abs_rshares) * 1000 * _rshares ) as text)) - 1) * 25)
+            END;
+        $BODY$;
+    """
+
+    db.query_no_return(sql)
+
+    sql = """
+        DROP FUNCTION IF EXISTS notification_id(in _block_number INTEGER, in _notifyType INTEGER, in _id INTEGER)
+        ;
+        CREATE OR REPLACE FUNCTION notification_id(in _block_number INTEGER, in _notifyType INTEGER, in _id INTEGER)
+        RETURNS BIGINT
+        AS
+        $function$
+        BEGIN
+        RETURN CAST( _block_number as BIGINT ) << 32
+        	  | ( _notifyType << 16 )
+        	  | ( _id & CAST( x'00FF' as INTEGER) );
+        END
+        $function$
+        LANGUAGE plpgsql IMMUTABLE
+        ;
+    """
     db.query_no_return(sql)
 
 def reset_autovac(db):

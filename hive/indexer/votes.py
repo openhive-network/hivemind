@@ -90,7 +90,7 @@ class Votes(DbAdapterHolder):
                 INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
                 INNER JOIN hive_posts hp ON hp.author_id = ha_a.id AND hp.permlink_id = hpd_p.id
                 WHERE hp.counter_deleted = 0
-                ON CONFLICT ON CONSTRAINT hive_votes_pk DO
+                ON CONFLICT ON CONSTRAINT hive_votes_ux1 DO
                 UPDATE
                   SET
                     weight = CASE EXCLUDED.is_effective WHEN true THEN EXCLUDED.weight ELSE hive_votes.weight END,

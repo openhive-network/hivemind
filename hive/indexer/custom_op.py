@@ -59,7 +59,7 @@ class CustomOp:
                 cls._process_legacy(account, op_json, block_date, block_num)
             elif op['id'] == 'community':
                 if block_num > START_BLOCK:
-                    process_json_community_op(account, op_json, block_date)
+                    process_json_community_op(account, op_json, block_date, block_num)
             elif op['id'] == 'notify':
                 cls._process_notify(account, op_json, block_date)
             OPSM.op_stats(opName, OPSM.stop(start))
