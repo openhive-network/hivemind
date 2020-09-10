@@ -13,7 +13,7 @@ class Reputations(DbAdapterHolder):
     @classmethod
     def process_vote(self, block_num, effective_vote_op):
         return 
-        self._queries.append("\nSELECT process_reputation_data({}, '{}', '{}', '{}', {});".format(block_num, effective_vote_op['author'], effective_vote_op['permlink'],
+        self._queries.append("\nSELECT process_reputation_data(/* block number: */ {}, '{}', '{}', '{}', {});".format(block_num, effective_vote_op['author'], effective_vote_op['permlink'],
              effective_vote_op['voter'], effective_vote_op['rshares']))
 
     @classmethod

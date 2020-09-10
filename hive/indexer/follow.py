@@ -197,7 +197,7 @@ class Follow(DbAdapterHolder):
         count = 0
         for _, follow_item in cls.follow_items_to_flush.items():
             if count < limit:
-                values.append("({}, {}, '{}', {}, {}, {}, {})".format(follow_item['flr'], follow_item['flg'],
+                values.append("({}, {}, '{}', {}, {}, {}, /* block num: */ {} )".format(follow_item['flr'], follow_item['flg'],
                                                                   follow_item['at'], follow_item['state'],
                                                                   follow_item['state'] == 3,
                                                                   follow_item['state'] == 4,
@@ -208,7 +208,7 @@ class Follow(DbAdapterHolder):
                 query += sql_postfix
                 cls.db.query(query)
                 values.clear()
-                values.append("({}, {}, '{}', {}, {}, {}, {})".format(follow_item['flr'], follow_item['flg'],
+                values.append("({}, {}, '{}', {}, {}, {}, /* block num: */ {})".format(follow_item['flr'], follow_item['flg'],
                                                                   follow_item['at'], follow_item['state'],
                                                                   follow_item['state'] == 3,
                                                                   follow_item['state'] == 4,
@@ -225,7 +225,7 @@ class Follow(DbAdapterHolder):
     @classmethod
     def flush(cls, trx=True):
         """Flushes pending follow count deltas."""
-
+        
         cls._flush_follow_items()
 
         updated = 0

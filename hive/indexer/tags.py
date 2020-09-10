@@ -11,13 +11,13 @@ class Tags(DbAdapterHolder):
     _tags = []
 
     @classmethod
-    def add_tag(cls, tid, tag):
+    def add_tag(cls, tid, tag, bn):
         """ Add tag to cache """
-        cls._tags.append((tid, tag))
+        cls._tags.append((tid, tag, bn))
 
     @classmethod
     def flush(cls):
-        """ Flush tags to table """        
+        """ Flush tags to table """
         if cls._tags:
             cls.beginTx()
             limit = 1000
@@ -30,7 +30,7 @@ class Tags(DbAdapterHolder):
             """
             values = []
             for tag in cls._tags:
-                values.append("({})".format(escape_characters(tag[1])))
+                values.append(f"({escape_characters(tag[1])} /* block number: {tag[2]} */)")
                 if len(values) >= limit:
                     tag_query = str(sql)
                     cls.db.query(tag_query.format(','.join(values)))
@@ -60,7 +60,7 @@ class Tags(DbAdapterHolder):
             """
             values = []
             for tag in cls._tags:
-                values.append("({}, {})".format(tag[0], escape_characters(tag[1])))
+                values.append("({}, {} /* block number: {} */)".format(tag[0], escape_characters(tag[1]), tag[2]))
                 if len(values) >= limit:
                     tag_query = str(sql)
                     cls.db.query(tag_query.format(','.join(values)))

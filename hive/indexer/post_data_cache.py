@@ -18,11 +18,12 @@ class PostDataCache(DbAdapterHolder):
         return pid in cls._data
 
     @classmethod
-    def add_data(cls, pid, post_data, is_new_post):
+    def add_data(cls, pid, post_data, is_new_post, block_num):
         """ Add data to cache """
         if not cls.is_cached(pid):
             cls._data[pid] = post_data
             cls._data[pid]['is_new_post'] = is_new_post
+            cls._data[pid]['block_number'] = block_num
         else:
             assert not is_new_post
             for k, data in post_data.items():
@@ -61,7 +62,7 @@ class PostDataCache(DbAdapterHolder):
                 preview = 'NULL' if data['body'] is None else "{}".format(escape_characters(data['body'][0:1024]))
                 json = 'NULL' if data['json'] is None else "{}".format(escape_characters(data['json']))
                 img_url = 'NULL' if data['img_url'] is None else "{}".format(escape_characters(data['img_url']))
-                value = "({},{},{},{},{},{})".format(k, title, preview, img_url, body, json)
+                value = "({},{},{},{},{},{} /* block number: {} */ )".format(k, title, preview, img_url, body, json, data["block_number"])
                 if data['is_new_post']:
                     values_insert.append(value)
                 else:
@@ -70,7 +71,7 @@ class PostDataCache(DbAdapterHolder):
             if values_insert:
                 sql = """
                     INSERT INTO 
-                        hive_post_data (id, title, preview, img_url, body, json) 
+                        hive_post_data (id, title, preview, img_url, body, json)
                     VALUES 
                 """
                 sql += ','.join(values_insert)

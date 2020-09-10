@@ -29,12 +29,11 @@ log = logging.getLogger(__name__)
 
 DB = Db.instance()
 
-def time_collector(f):
+def time_collector(f, desc):
     startTime = FSM.start()
     result = f()
-    elapsedTime = FSM.stop(startTime)
-
-    return (result, elapsedTime)
+    FSM.flush_stat( desc, FSM.stop(startTime), result )
+    return result
 
 def follows_flush_helper():
     folllow_items = len(Follow.follow_items_to_flush) + Follow.flush(trx=False)
@@ -141,19 +140,17 @@ class Blocks:
 
         DB.query("COMMIT")
 
-        completedThreads = 0;
+        completedThreads = 0
 
         pool = ThreadPoolExecutor(max_workers = len(cls._concurrent_flush))
-        flush_futures = {pool.submit(time_collector, f): (description, c) for (description, f, c) in cls._concurrent_flush}
+        flush_futures = {pool.submit(time_collector, f, description): (c) for (description, f, c) in cls._concurrent_flush}
         for future in concurrent.futures.as_completed(flush_futures):
-            (description, c) = flush_futures[future]
-            completedThreads = completedThreads + 1
+            c = flush_futures[future]
+            completedThreads += 1
             try:
-                (n, elapsedTime) = future.result()
+                n = future.result()
                 assert n is not None
                 assert not c.tx_active()
-
-                FSM.flush_stat(description, elapsedTime, n)
 
 #                if n > 0:
 #                    log.info('%r flush generated %d records' % (description, n))

@@ -98,17 +98,17 @@ class Reblog(DbAdapterHolder):
         limit = 1000
         count = 0
         item_count = len(cls.reblog_items_to_flush)
-
+        
         for reblog_item in cls.reblog_items_to_flush:
             if count < limit:
-                values.append("('{}', {}, '{}', {})".format(reblog_item["blogger"], reblog_item["post_id"], reblog_item["date"], reblog_item["block_num"]))
+                values.append("('{}', {}, '{}', /* block number: */ {})".format(reblog_item["blogger"], reblog_item["post_id"], reblog_item["date"], reblog_item["block_num"]))
                 count = count + 1
             else:
                 query = sql_prefix + ",".join(values)
                 query += sql_postfix
                 cls.db.query(query)
                 values.clear()
-                values.append("('{}', {}, '{}', {})".format(reblog_item["blogger"], reblog_item["post_id"], reblog_item["date"], reblog_item["block_num"]))
+                values.append("('{}', {}, '{}', /* block number: */ {})".format(reblog_item["blogger"], reblog_item["post_id"], reblog_item["date"], reblog_item["block_num"]))
                 count = 1
 
         if len(values) > 0:
