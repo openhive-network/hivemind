@@ -18,10 +18,10 @@ async def get_active_votes(context, author: str, permlink: str):
             hv.weight,
             hv.rshares,
             hv.percent,
-            hv.time,
+            hv.last_update,
             hv.num_changes
         FROM
-            hive_votes_accounts_permlinks_view hv
+            hive_votes_view hv
         WHERE hv.author = :author AND hv.permlink = :permlink
     """
     ret = []
@@ -29,7 +29,7 @@ async def get_active_votes(context, author: str, permlink: str):
     for row in rows:
         ret.append(dict(voter=row.voter, author=row.author, permlink=row.permlink,
                         weight=row.weight, rshares=row.rshares, vote_percent=row.percent,
-                        last_update=str(row.time), num_changes=row.num_changes))
+                        last_update=str(row.last_update), num_changes=row.num_changes))
     return ret
 
 @return_error_info

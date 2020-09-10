@@ -211,6 +211,8 @@ def build_metadata():
 
         sa.Index('hive_votes_post_id_idx', 'post_id'),
         sa.Index('hive_votes_voter_id_idx', 'voter_id'),
+        sa.Index('hive_votes_voter_id_post_id_idx', 'voter_id', 'post_id'),
+        sa.Index('hive_votes_post_id_voter_id_idx', 'post_id', 'voter_id'),
         sa.Index('hive_votes_block_num_idx', 'block_num')
     )
 
@@ -842,22 +844,22 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-        DROP VIEW IF EXISTS hive_votes_accounts_permlinks_view
+        DROP VIEW IF EXISTS hive_votes_view
         ;
-        CREATE VIEW hive_votes_accounts_permlinks_view
+        CREATE OR REPLACE VIEW hive_votes_view
         AS
         SELECT
-            ha_v.id as voter_id,
+            hv.voter_id as voter_id,
             ha_a.name as author,
             hpd.permlink as permlink,
             vote_percent as percent,
             ha_a.reputation as reputation,
             rshares,
-            last_update as time,
+            last_update,
             ha_v.name as voter,
             weight,
             num_changes,
-            hpd.id as permlink_id,
+            hv.permlink_id as permlink_id,
             post_id,
             is_effective
         FROM
@@ -866,6 +868,139 @@ def setup(db):
         INNER JOIN hive_accounts ha_a ON ha_a.id = hv.author_id
         INNER JOIN hive_permlink_data hpd ON hpd.id = hv.permlink_id
         ;
+    """
+    db.query_no_return(sql)
+
+    sql = """
+        DROP TYPE IF EXISTS database_api_vote CASCADE;
+
+        CREATE TYPE database_api_vote AS (
+          voter VARCHAR(16),
+          author VARCHAR(16),
+          permlink VARCHAR(255),
+          weight NUMERIC,
+          rshares BIGINT,
+          percent INT,
+          last_update TIMESTAMP,
+          num_changes INT,
+          reputation FLOAT4
+        );
+
+        DROP FUNCTION IF EXISTS get_account(character varying, boolean);
+
+        CREATE OR REPLACE FUNCTION get_account(
+          in _account hive_accounts.name%TYPE,
+          in _check boolean)
+        RETURNS INT
+        LANGUAGE 'plpgsql'
+        AS
+        $function$
+        DECLARE 
+          account_id INT;
+        BEGIN
+          SELECT INTO account_id COALESCE( ( SELECT id FROM hive_accounts WHERE name=_account ), 0 );
+          IF _check AND account_id = 0 THEN
+            RAISE EXCEPTION 'Account % does not exist', _account;
+          END IF;
+
+          RETURN account_id;
+        END
+        $function$
+        ;
+
+        DROP FUNCTION IF EXISTS list_votes_by_voter_comment( character varying, character varying, character varying, int );
+
+        CREATE OR REPLACE FUNCTION public.list_votes_by_voter_comment
+        (
+          in _VOTER hive_accounts.name%TYPE,
+          in _AUTHOR hive_accounts.name%TYPE,
+          in _PERMLINK hive_permlink_data.permlink%TYPE,
+          in _LIMIT INT
+        )
+        RETURNS SETOF database_api_vote
+        LANGUAGE 'plpgsql'
+        AS
+        $function$
+        DECLARE _VOTER_ID INT;
+        DECLARE _POST_ID INT;
+        BEGIN
+
+        _VOTER_ID = get_account( _VOTER, true );
+        _POST_ID = find_comment_id( _AUTHOR, _PERMLINK, True);
+
+        RETURN QUERY
+        (
+                SELECT
+                    v.voter,
+                    v.author,
+                    v.permlink,
+                    v.weight,
+                    v.rshares,
+                    v.percent,
+                    v.last_update,
+                    v.num_changes,
+                    v.reputation
+                FROM
+                    hive_votes_view v
+                    WHERE
+                        ( v.voter_id = _VOTER_ID and v.post_id >= _POST_ID )
+                        OR
+                        ( v.voter_id > _VOTER_ID )
+                    ORDER BY
+                      voter_id,
+                      post_id
+                LIMIT _LIMIT
+        );
+
+        END
+        $function$;
+
+        DROP FUNCTION IF EXISTS list_votes_by_comment_voter( character varying, character varying, character varying, int );
+
+        CREATE OR REPLACE FUNCTION public.list_votes_by_comment_voter
+        (
+          in _VOTER hive_accounts.name%TYPE,
+          in _AUTHOR hive_accounts.name%TYPE,
+          in _PERMLINK hive_permlink_data.permlink%TYPE,
+          in _LIMIT INT
+        )
+        RETURNS SETOF database_api_vote
+        LANGUAGE 'plpgsql'
+        AS
+        $function$
+        DECLARE _VOTER_ID INT;
+        DECLARE _POST_ID INT;
+        BEGIN
+
+        _VOTER_ID = get_account( _VOTER, true );
+        _POST_ID = find_comment_id( _AUTHOR, _PERMLINK, True);
+
+        RETURN QUERY
+        (
+                SELECT
+                    v.voter,
+                    v.author,
+                    v.permlink,
+                    v.weight,
+                    v.rshares,
+                    v.percent,
+                    v.last_update,
+                    v.num_changes,
+                    v.reputation
+                FROM
+                    hive_votes_view v
+                    WHERE
+                        ( v.post_id = _POST_ID and v.voter_id >= _VOTER_ID )
+                        OR
+                        ( v.post_id > _POST_ID )
+                    ORDER BY
+                      post_id,
+                      voter_id
+                LIMIT _LIMIT
+        );
+
+        END
+        $function$;
     """
     db.query_no_return(sql)
 

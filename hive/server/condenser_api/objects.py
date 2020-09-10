@@ -6,7 +6,7 @@ import ujson as json
 from hive.utils.normalize import sbd_amount, rep_to_raw
 from hive.server.common.mutes import Mutes
 from hive.server.common.helpers import json_date
-from hive.server.database_api.methods import find_votes, VotesPresentation
+from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 
 log = logging.getLogger(__name__)
 
@@ -89,7 +89,7 @@ async def load_posts_keyed(db, ids, truncate_body=0):
         row['author_rep'] = author_reps[row['author']]
         post = _condenser_post_object(row, truncate_body=truncate_body)
 
-        post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']}, VotesPresentation.CondenserApi)
+        post['active_votes'] = await find_votes_impl({'db':db}, row['author'], row['permlink'], VotesPresentation.CondenserApi)
         posts_by_id[row['id']] = post
 
     return posts_by_id
@@ -139,7 +139,7 @@ async def resultset_to_posts(db, resultset, truncate_body=0):
         row = dict(row)
         row['author_rep'] = author_reps[row['author']]
         post = _condenser_post_object(row, truncate_body=truncate_body)
-        post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']}, VotesPresentation.CondenserApi)
+        post['active_votes'] = await find_votes_impl({'db':db}, row['author'], row['permlink'], VotesPresentation.CondenserApi)
         posts.append(post)
 
     return posts
