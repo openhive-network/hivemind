@@ -1,6 +1,7 @@
 """ Votes indexing and processing """
 
 import logging
+import collections
 
 from hive.db.db_state import DbState
 from hive.db.adapter import Db
@@ -10,7 +11,7 @@ log = logging.getLogger(__name__)
 
 class Votes(DbAdapterHolder):
     """ Class for managing posts votes """
-    _votes_data = {}
+    _votes_data = collections.OrderedDict()
 
     inside_flush = False
 
@@ -50,10 +51,10 @@ class Votes(DbAdapterHolder):
         key = "{}/{}/{}".format(vop['voter'], vop['author'], vop['permlink'])
 
         if key in cls._votes_data:
-          cls._votes_data[key]["weight"]       = vop["weight"]
-          cls._votes_data[key]["rshares"]      = vop["rshares"]
-          cls._votes_data[key]["is_effective"] = True
-          cls._votes_data[key]["block_num"]    = vop['block_num']
+            cls._votes_data[key]["weight"]       = vop["weight"]
+            cls._votes_data[key]["rshares"]      = vop["rshares"]
+            cls._votes_data[key]["is_effective"] = True
+            cls._votes_data[key]["block_num"]    = vop['block_num']
         else:
             cls._votes_data[key] = dict(voter=vop['voter'],
                                         author=vop['author'],
