@@ -50,6 +50,11 @@ class GitRevisionProvider(object):
 
 GIT_REVISION = GitRevisionProvider.provide_git_revision()
 
+def get_sql_scripts():
+    from os import listdir
+    from os.path import isfile, join
+    return [join('hive/db/sql_scripts/', f) for f in listdir('hive/db/sql_scripts/') if isfile(join('hive/db/sql_scripts/', f))]
+
 if __name__ == "__main__":
     setup(
         name='hivemind',
@@ -57,6 +62,7 @@ if __name__ == "__main__":
         description='Developer-friendly microservice powering social networks on the Steem blockchain.',
         long_description=open('README.md').read(),
         packages=find_packages(exclude=['scripts']),
+        data_files=[('hive/db/sql_scripts', get_sql_scripts())],
         setup_requires=[
             'pytest-runner',
         ],
