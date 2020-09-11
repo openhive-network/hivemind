@@ -5,10 +5,10 @@ CREATE OR REPLACE FUNCTION list_comments_by_permlink(
   in _permlink hive_permlink_data.permlink%TYPE,
   in _limit INT)
   RETURNS SETOF database_api_post
+  LANGUAGE sql
+  STABLE
   AS
   $function$
-  BEGIN
-    RETURN QUERY
     SELECT
         hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
         hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
@@ -20,17 +20,26 @@ CREATE OR REPLACE FUNCTION list_comments_by_permlink(
         hp.active, hp.author_rewards
     FROM
         hive_posts_view hp
+    INNER JOIN
+    (
+        SELECT hp1.id
+        FROM
+             hive_posts hp1
+        INNER JOIN hive_accounts ha ON ha.id = hp1.author_id
+        INNER JOIN hive_permlink_data hpd ON hpd.id = hp1.permlink_id
+        WHERE
+            ha.name > _author OR
+            ha.name = _author AND hpd.permlink >= _permlink
+        ORDER BY
+            ha.name ASC
+        LIMIT
+            _limit
+    ) ds ON ds.id = hp.id
     WHERE
-        NOT hp.is_muted AND
-        hp.author > _author OR
-        hp.author = _author AND hp.permlink >= _permlink
+        NOT hp.is_muted
     ORDER BY
         hp.author ASC,
         hp.permlink ASC
-    LIMIT
-        _limit
     ;
-  END
   $function$
-  LANGUAGE plpgsql
 ;
