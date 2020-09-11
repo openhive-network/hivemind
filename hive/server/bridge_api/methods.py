@@ -128,6 +128,18 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
 
     db = context['db']
 
+    if sort == 'trending' and not ( start_author and start_permlink ) and ( not tag or tag == 'all' ):
+       sql = "SELECT * FROM bridge_get_ranked_post_by_trends( (:limit)::SMALLINT )"
+       posts = []
+       sql_result = await db.query_all(sql, limit=limit )
+       for row in sql_result:
+           post = _bridge_post_object(row)
+           post['active_votes'] = await find_votes_impl({'db':db}, row['author'], row['permlink'], VotesPresentation.BridgeApi)
+           post = await append_statistics_to_post(post, row, False, None)
+           posts.append(post)
+       return posts
+
+
     sql = ''
     pinned_sql = ''
 
@@ -158,7 +170,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
 
     if start_author and start_permlink:
         if sort == 'trending':
-            sql = sql % """ AND hp.sc_trend <= (SELECT sc_trend FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)) 
+            sql = sql % """ AND hp.sc_trend <= (SELECT sc_trend FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink))
                             AND hp.id != (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)) %s """
         elif sort == 'hot':
             sql = sql % """ AND hp.sc_hot <= (SELECT sc_hot FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink))
@@ -206,6 +218,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
     pinned_post_ids = []
 
     blacklists_for_user = None
+
     if observer and context:
         blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
 
@@ -278,9 +291,9 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
 
     # pylint: disable=unused-variable
     observer_id = await get_account_id(db, observer) if observer else None # TODO
-     
+
     sql = "---bridge_api.get_account_posts\n " + SQL_TEMPLATE + """ %s """
-        
+
     if sort == 'blog':
         ids = await cursor.pids_by_blog(db, account, *start, limit)
         posts = await load_posts(context['db'], ids)
@@ -306,7 +319,7 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
         sql = sql % """ AND hp.id < (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)) """
     else:
         sql = sql % """ """
-        
+
     posts = []
     blacklists_for_user = None
     if observer:
@@ -328,7 +341,7 @@ async def get_relationship_between_accounts(context, account1, account2, observe
 
     sql = """
         SELECT state, blacklisted, follow_blacklists FROM hive_follows WHERE
-        follower = (SELECT id FROM hive_accounts WHERE name = :account1) AND 
+        follower = (SELECT id FROM hive_accounts WHERE name = :account1) AND
         following = (SELECT id FROM hive_accounts WHERE name = :account2)
     """
 
@@ -347,11 +360,10 @@ async def get_relationship_between_accounts(context, account1, account2, observe
             result['follows'] = True
         elif state == 2:
             result['ignores'] = True
-        
+
         if row['blacklisted']:
             result['is_blacklisted'] = True
         if row['follow_blacklists']:
             result['follows_blacklists'] = True
 
     return result
-
