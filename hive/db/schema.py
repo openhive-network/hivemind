@@ -74,11 +74,11 @@ def build_metadata():
         sa.Column('rshares', sa.BigInteger, nullable=False),
         sa.Column('block_num', sa.Integer,  nullable=False),
 
-#        sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),
-#        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id']),
-#        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num']),
+        sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),
+        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id']),
+        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num']),
 
-        sa.UniqueConstraint('author_id', 'permlink', 'voter_id', name='hive_reputation_data_uk')
+        sa.Index('hive_reputation_data_author_permlink_voter_idx', 'author_id', 'permlink', 'voter_id')
     )
 
     sa.Table(
@@ -1467,7 +1467,7 @@ def setup(db):
           $BODY$;
     """
 
-    db.query_no_return(sql)
+    #db.query_no_return(sql)
 
 def reset_autovac(db):
     """Initializes/resets per-table autovacuum/autoanalyze params.
