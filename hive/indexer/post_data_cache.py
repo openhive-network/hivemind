@@ -8,7 +8,7 @@ from hive.indexer.db_adapter_holder import DbAdapterHolder
 log = logging.getLogger(__name__)
 
 class PostDataCache(DbAdapterHolder):
-    """ Procides cache for DB operations on post data table in order to speed up initial sync """
+    """ Provides cache for DB operations on post data table in order to speed up initial sync """
     _data = {}
 
 
