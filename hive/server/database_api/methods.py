@@ -172,7 +172,7 @@ def api_vote_info(rows, votes_presentation):
   ret = []
   for row in rows:
       if votes_presentation == VotesPresentation.DatabaseApi:
-          ret.append(dict(voter = row.voter, author = row.author, permlink = row.permlink,
+          ret.append(dict(id = row.id, voter = row.voter, author = row.author, permlink = row.permlink,
                           weight = row.weight, rshares = row.rshares, vote_percent = row.percent,
                           last_update = json_date(row.last_update), num_changes = row.num_changes))
       elif votes_presentation == VotesPresentation.CondenserApi:
@@ -188,35 +188,20 @@ def api_vote_info(rows, votes_presentation):
   return ret
 
 @return_error_info
-async def find_votes_impl(context, author: str, permlink: str, votes_presentation):
-    """ Returns all votes for the given post """
-    valid_account(author)
-    valid_permlink(permlink)
-    db = context['db']
-    sql = """
-        SELECT
-            voter,
-            author,
-            permlink,
-            weight,
-            rshares,
-            percent,
-            last_update,
-            num_changes,
-            reputation
-        FROM
-            hive_votes_view
-        WHERE
-            author = :author AND permlink = :permlink
-        ORDER BY 
-            voter_id
-    """
-
+async def find_votes_impl(db, author: str, permlink: str, votes_presentation):
+    sql = "SELECT * FROM find_votes(:author,:permlink)"
     rows = await db.query_all(sql, author=author, permlink=permlink)
     return api_vote_info(rows, votes_presentation)
 
 @return_error_info
-async def list_votes_impl(context, start: list, limit: int, order: str, votes_presentation):
+async def find_votes(context, author: str, permlink: str):
+    """ Returns all votes for the given post """
+    valid_account(author)
+    valid_permlink(permlink)
+    return { 'votes': await find_votes_impl(context['db'], author, permlink, VotesPresentation.DatabaseApi) }
+
+@return_error_info
+async def list_votes(context, start: list, limit: int, order: str):
     """ Returns all votes, starting with the specified voter and/or author and permlink. """
     supported_order_list = ["by_comment_voter", "by_voter_comment"]
     assert order in supported_order_list, "Order {} is not supported".format(order)
@@ -224,21 +209,11 @@ async def list_votes_impl(context, start: list, limit: int, order: str, votes_pr
     assert len(start) == 3, "Expecting 3 elements in start array"
     db = context['db']
 
-    sql=""
-
     if order == "by_voter_comment":
-        sql = "select * from list_votes_by_voter_comment( '{}', '{}', '{}', {} )".format( start[0], start[1], start[2], limit )
+        sql = "SELECT * FROM list_votes_by_voter_comment(:voter,:author,:permlink,:limit)"
+        rows = await db.query_all(sql, voter=start[0], author=start[1], permlink=start[2], limit=limit)
     else:
-        sql = "select * from list_votes_by_comment_voter( '{}', '{}', '{}', {} )".format( start[2], start[0], start[1], limit )
+        sql = "SELECT * FROM list_votes_by_comment_voter(:voter,:author,:permlink,:limit)"
+        rows = await db.query_all(sql, voter=start[2], author=start[0], permlink=start[1], limit=limit)
+    return { 'votes': api_vote_info(rows, VotesPresentation.DatabaseApi) }
 
-    rows = await db.query_all(sql)
-
-    return api_vote_info(rows, votes_presentation)
-
-@return_error_info
-async def find_votes(context, author: str, permlink: str):
-  return await find_votes_impl( context, author, permlink, VotesPresentation.DatabaseApi)
-
-@return_error_info
-async def list_votes(context, start: list, limit: int, order: str):
-  return await list_votes_impl( context, start, limit, order, VotesPresentation.DatabaseApi)

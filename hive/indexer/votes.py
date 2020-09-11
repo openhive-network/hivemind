@@ -1,6 +1,7 @@
 """ Votes indexing and processing """
 
 import logging
+import collections
 
 from hive.db.db_state import DbState
 from hive.db.adapter import Db
@@ -10,7 +11,7 @@ log = logging.getLogger(__name__)
 
 class Votes(DbAdapterHolder):
     """ Class for managing posts votes """
-    _votes_data = {}
+    _votes_data = collections.OrderedDict()
 
     inside_flush = False
 
@@ -50,10 +51,10 @@ class Votes(DbAdapterHolder):
         key = "{}/{}/{}".format(vop['voter'], vop['author'], vop['permlink'])
 
         if key in cls._votes_data:
-          cls._votes_data[key]["weight"]       = vop["weight"]
-          cls._votes_data[key]["rshares"]      = vop["rshares"]
-          cls._votes_data[key]["is_effective"] = True
-          cls._votes_data[key]["block_num"]    = vop['block_num']
+            cls._votes_data[key]["weight"]       = vop["weight"]
+            cls._votes_data[key]["rshares"]      = vop["rshares"]
+            cls._votes_data[key]["is_effective"] = True
+            cls._votes_data[key]["block_num"]    = vop['block_num']
         else:
             cls._votes_data[key] = dict(voter=vop['voter'],
                                         author=vop['author'],
@@ -82,14 +83,15 @@ class Votes(DbAdapterHolder):
                 FROM
                 (
                 VALUES
-                  -- voter, author, permlink, weight, rshares, vote_percent, last_update, block_num, is_effective
+                  -- order_id, voter, author, permlink, weight, rshares, vote_percent, last_update, block_num, is_effective
                   {}
-                ) AS T(voter, author, permlink, weight, rshares, vote_percent, last_update, block_num, is_effective)
+                ) AS T(order_id, voter, author, permlink, weight, rshares, vote_percent, last_update, block_num, is_effective)
                 INNER JOIN hive_accounts ha_v ON ha_v.name = t.voter
                 INNER JOIN hive_accounts ha_a ON ha_a.name = t.author
                 INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
                 INNER JOIN hive_posts hp ON hp.author_id = ha_a.id AND hp.permlink_id = hpd_p.id
                 WHERE hp.counter_deleted = 0
+                ORDER BY t.order_id
                 ON CONFLICT ON CONSTRAINT hive_votes_ux1 DO
                 UPDATE
                   SET
@@ -106,7 +108,8 @@ class Votes(DbAdapterHolder):
             values_limit = 1000
 
             for _, vd in cls._votes_data.items():
-                values.append("('{}', '{}', '{}', {}, {}, {}, '{}'::timestamp, {}, {})".format(
+                values.append("({}, '{}', '{}', '{}', {}, {}, {}, '{}'::timestamp, {}, {})".format(
+                    len(values), # for ordering
                     vd['voter'], vd['author'], vd['permlink'], vd['weight'], vd['rshares'],
                     vd['vote_percent'], vd['last_update'], vd['block_num'], vd['is_effective']))
 
