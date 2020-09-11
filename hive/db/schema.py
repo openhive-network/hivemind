@@ -1822,9 +1822,12 @@ def setup(db):
             SELECT
               hp1.id
             , hp1.sc_trend as trend
-            FROM hive_posts hp1 WHERE NOT hp1.is_paidout AND hp1.depth = 0 ORDER BY hp1.sc_trend DESC LIMIT _limit
+            FROM hive_posts hp1 WHERE NOT hp1.is_paidout AND hp1.depth = 0
+            ORDER BY hp1.sc_trend DESC, hp1.id
+            LIMIT _limit
         ) as trends
-        JOIN hive_posts_view hp ON hp.id = trends.id ORDER BY trends.trend DESC
+        JOIN hive_posts_view hp ON hp.id = trends.id
+        ORDER BY trends.trend DESC, trends.id
         $function$
         language sql
     """

@@ -134,7 +134,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
        sql_result = await db.query_all(sql, limit=limit )
        for row in sql_result:
            post = _bridge_post_object(row)
-           post['active_votes'] = await find_votes_impl({'db':db}, row['author'], row['permlink'], VotesPresentation.BridgeApi)
+           post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.BridgeApi)
            post = await append_statistics_to_post(post, row, False, None)
            posts.append(post)
        return posts
