@@ -25,17 +25,25 @@ CREATE OR REPLACE FUNCTION list_comments_by_last_update(
         hp.active, hp.author_rewards
     FROM
         hive_posts_view hp
-    WHERE
-        NOT hp.is_muted AND
-        hp.parent_author > _parent_author OR
-        hp.parent_author = _parent_author AND ( hp.updated_at < _updated_at OR
-        hp.updated_at = _updated_at AND hp.id >= __post_id )
+    INNER JOIN
+    (
+        SELECT hp1.id
+        FROM
+          hive_posts hp1
+        INNER JOIN hive_accounts ha ON ha.id = hp1.parent_id
+      WHERE
+        ha.name > _parent_author OR
+        ha.name = _parent_author AND ( hp1.updated_at < _updated_at OR
+        hp1.updated_at = _updated_at AND hp1.id >= __post_id )
     ORDER BY
-        hp.parent_author ASC,
-        hp.updated_at DESC,
-        hp.id ASC
+        ha.name ASC,
+        hp1.updated_at DESC,
+        hp1.id ASC
     LIMIT
         _limit
+    ) ds ON ds.id = hp.id
+    WHERE
+      NOT hp.is_muted
     ;
   END
   $function$
