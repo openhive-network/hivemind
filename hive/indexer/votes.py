@@ -83,14 +83,15 @@ class Votes(DbAdapterHolder):
                 FROM
                 (
                 VALUES
-                  -- voter, author, permlink, weight, rshares, vote_percent, last_update, block_num, is_effective
+                  -- order_id, voter, author, permlink, weight, rshares, vote_percent, last_update, block_num, is_effective
                   {}
-                ) AS T(voter, author, permlink, weight, rshares, vote_percent, last_update, block_num, is_effective)
+                ) AS T(order_id, voter, author, permlink, weight, rshares, vote_percent, last_update, block_num, is_effective)
                 INNER JOIN hive_accounts ha_v ON ha_v.name = t.voter
                 INNER JOIN hive_accounts ha_a ON ha_a.name = t.author
                 INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
                 INNER JOIN hive_posts hp ON hp.author_id = ha_a.id AND hp.permlink_id = hpd_p.id
                 WHERE hp.counter_deleted = 0
+                ORDER BY t.order_id
                 ON CONFLICT ON CONSTRAINT hive_votes_ux1 DO
                 UPDATE
                   SET
@@ -107,7 +108,8 @@ class Votes(DbAdapterHolder):
             values_limit = 1000
 
             for _, vd in cls._votes_data.items():
-                values.append("('{}', '{}', '{}', {}, {}, {}, '{}'::timestamp, {}, {})".format(
+                values.append("({}, '{}', '{}', '{}', {}, {}, {}, '{}'::timestamp, {}, {})".format(
+                    len(values), # for ordering
                     vd['voter'], vd['author'], vd['permlink'], vd['weight'], vd['rshares'],
                     vd['vote_percent'], vd['last_update'], vd['block_num'], vd['is_effective']))
 
