@@ -82,6 +82,23 @@ def build_metadata():
         sa.UniqueConstraint('author_id', 'permlink', 'voter_id', name='hive_reputation_data_uk')
     )
 
+
+    sa.Table(
+        'hive_reputation_data', metadata,
+        sa.Column('id', sa.Integer, primary_key=True),
+        sa.Column('author_id', sa.Integer, nullable=False),
+        sa.Column('voter_id', sa.Integer, nullable=False),
+        sa.Column('permlink', sa.String(255, collation='C'), nullable=False),
+        sa.Column('rshares', sa.BigInteger, nullable=False),
+        sa.Column('block_num', sa.Integer,  nullable=False),
+
+#        sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),
+#        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id']),
+#        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num']),
+
+        sa.UniqueConstraint('author_id', 'permlink', 'voter_id', name='hive_reputation_data_uk')
+    )
+
     sa.Table(
         'hive_posts', metadata,
         sa.Column('id', sa.Integer, primary_key=True),

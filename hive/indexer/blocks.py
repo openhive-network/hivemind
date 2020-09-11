@@ -57,6 +57,9 @@ class Blocks:
     ]
 
     def __init__(cls):
+        log.info("Creating a reputations processor")
+        log.info("Built blocks object: {}".format(cls))
+
         head_date = cls.head_date()
         if(head_date == ''):
             cls._head_block_date = None

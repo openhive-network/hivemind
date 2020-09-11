@@ -1,5 +1,6 @@
 """Hive sync manager."""
 
+from hive.indexer.reputations import Reputations
 import logging
 import glob
 from time import perf_counter as perf
@@ -34,6 +35,7 @@ from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import WaitingStatusManager as WSM
 from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import BroadcastObject
+from hive.indexer.reputations import Reputations
 
 log = logging.getLogger(__name__)
 
@@ -92,7 +94,7 @@ def _vops_provider(node, queue, lbound, ubound, chunk_size):
     except Exception:
         log.exception("Exception caught during fetching vops...")
 
-def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size):
+def _block_consumer(node, blocksProcessor, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size):
     from hive.utils.stats import minmax
     is_debug = log.isEnabledFor(10)
     num = 0
@@ -129,7 +131,7 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
             timer.batch_start()
             
             block_start = perf()
-            Blocks.process_multi(blocks, preparedVops, node, is_initial_sync)
+            blocksProcessor.process_multi(blocks, preparedVops, node, is_initial_sync)
             block_end = perf()
 
             timer.batch_lap()
@@ -185,7 +187,7 @@ def _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size):
         try:
             pool.submit(_block_provider, self._steem, blocksQueue, lbound, ubound, chunk_size)
             pool.submit(_vops_provider, self._steem, vopsQueue, lbound, ubound, chunk_size)
-            blockConsumerFuture = pool.submit(_block_consumer, self._steem, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size)
+            blockConsumerFuture = pool.submit(_block_consumer, self._steem, self._blocksProcessor, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size)
 
             blockConsumerFuture.result()
             if not CONTINUE_PROCESSING and blocksQueue.empty() and vopsQueue.empty():
@@ -212,6 +214,7 @@ class Sync:
         log.info("Using hived url: `%s'", self._conf.get('steemd_url'))
 
         self._steem = conf.steem()
+        self._blocksProcessor = None
 
     def run(self):
         """Initialize state; setup/recovery checks; sync and runloop."""
@@ -250,11 +253,11 @@ class Sync:
             self.initial()
             if not CONTINUE_PROCESSING:
                 return
-            current_imported_block = Blocks.head_num()
+            current_imported_block = self._blocksProcessor.head_num()
             DbState.finish_initial_sync(current_imported_block, last_imported_block)
         else:
             # recover from fork
-            Blocks.verify_head(self._steem)
+            self._blocksProcessor.verify_head(self._steem)
 
         self._update_chain_state()
 
@@ -354,7 +357,7 @@ class Sync:
             timer.batch_lap()
 
             # process blocks
-            Blocks.process_multi(blocks, preparedVops, steemd, is_initial_sync)
+            self._blocksProcessor.process_multi(blocks, preparedVops, steemd, is_initial_sync)
             timer.batch_finish(len(blocks))
 
             _prefix = ("[SYNC] Got block %d @ %s" % (
@@ -376,13 +379,13 @@ class Sync:
 
         assert self._blocksProcessor 
         steemd = self._steem
-        hive_head = Blocks.head_num()
+        hive_head = self._blocksProcessor.head_num()
 
         for block in steemd.stream_blocks(hive_head + 1, trail_blocks, max_gap):
             start_time = perf()
 
             self._db.query("START TRANSACTION")
-            num = Blocks.process(block, {}, steemd)
+            num = self._blocksProcessor.process(block, {}, steemd)
             follows = Follow.flush(trx=False)
             accts = Accounts.flush(steemd, trx=False, spread=8)
             self._db.query("COMMIT")
