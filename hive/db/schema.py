@@ -75,11 +75,11 @@ def build_metadata():
         sa.Column('rshares', sa.BigInteger, nullable=False),
         sa.Column('block_num', sa.Integer,  nullable=False),
 
-#        sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),
-#        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id']),
-#        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num']),
+        sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),
+        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id']),
+        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num']),
 
-        sa.UniqueConstraint('author_id', 'permlink', 'voter_id', name='hive_reputation_data_uk')
+        sa.Index('hive_reputation_data_author_permlink_voter_idx', 'author_id', 'permlink', 'voter_id')
     )
 
     sa.Table(
@@ -1694,7 +1694,8 @@ def setup(db):
           $BODY$;
     """
 
-    db.query_no_return(sql)
+#    db.query_no_return(sql)
+
     sql = """
         DROP FUNCTION IF EXISTS public.calculate_notify_vote_score(_payout hive_posts.payout%TYPE, _abs_rshares hive_posts_view.abs_rshares%TYPE, _rshares hive_votes.rshares%TYPE) CASCADE
         ;
