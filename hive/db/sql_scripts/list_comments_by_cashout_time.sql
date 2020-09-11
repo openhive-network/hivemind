@@ -24,13 +24,21 @@ CREATE OR REPLACE FUNCTION list_comments_by_cashout_time(
         hp.active, hp.author_rewards
     FROM
         hive_posts_view hp
-    WHERE
-        NOT hp.is_muted AND
-        hp.cashout_time > _cashout_time OR
-        hp.cashout_time = _cashout_time AND hp.id >= __post_id
-    ORDER BY
-        hp.cashout_time ASC,
-        hp.id ASC
+    INNER JOIN
+    (
+        SELECT 
+            hp1.id
+        FROM 
+            hive_posts hp1
+        WHERE
+            NOT hp1.is_muted AND
+            hp1.cashout_time > _cashout_time OR
+            hp1.cashout_time = _cashout_time AND hp1.id >= __post_id
+        ORDER BY
+            hp1.cashout_time ASC,
+            hp1.id ASC
+    ) ds ON ds.id = hp.id
+    -- strange behaviour: if limit is moved into inner join it shows empty result, outside join its ok
     LIMIT
         _limit
     ;

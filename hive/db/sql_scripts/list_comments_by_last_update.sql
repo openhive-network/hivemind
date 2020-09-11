@@ -27,23 +27,24 @@ CREATE OR REPLACE FUNCTION list_comments_by_last_update(
         hive_posts_view hp
     INNER JOIN
     (
-        SELECT hp1.id
+        SELECT 
+            hp1.id
         FROM
-          hive_posts hp1
+            hive_posts hp1
         INNER JOIN hive_accounts ha ON ha.id = hp1.parent_id
-      WHERE
-        ha.name > _parent_author OR
-        ha.name = _parent_author AND ( hp1.updated_at < _updated_at OR
-        hp1.updated_at = _updated_at AND hp1.id >= __post_id )
-    ORDER BY
-        ha.name ASC,
-        hp1.updated_at DESC,
-        hp1.id ASC
-    LIMIT
-        _limit
+        WHERE
+            ha.name > _parent_author OR
+            ha.name = _parent_author AND ( hp1.updated_at < _updated_at OR
+            hp1.updated_at = _updated_at AND hp1.id >= __post_id )
+        ORDER BY
+            ha.name ASC,
+            hp1.updated_at DESC,
+            hp1.id ASC
+        LIMIT
+            _limit
     ) ds ON ds.id = hp.id
     WHERE
-      NOT hp.is_muted
+        NOT hp.is_muted
     ;
   END
   $function$
