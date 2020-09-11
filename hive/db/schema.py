@@ -1711,7 +1711,7 @@ def reset_autovac(db):
 
 
 def set_fillfactor(db):
-    """Initializes/resets FILLFACTOR for tables which are intesively updated"""
+    """Initializes/resets FILLFACTOR for tables which are intensively updated"""
 
     fillfactor_config = {
         'hive_posts': 70,
@@ -1725,7 +1725,7 @@ def set_fillfactor(db):
         db.query(sql.format(table, fillfactor))
 
 def set_logged_table_attribute(db, logged):
-    """Initializes/resets LOGGED/UNLOGGED attribute for tables which are intesively updated"""
+    """Initializes/resets LOGGED/UNLOGGED attribute for tables which are intensively updated"""
 
     logged_config = [
         'hive_accounts',
