@@ -578,14 +578,6 @@ async def _get_blog(db, account: str, start_index: int, limit: int = None):
     return out
 
 @return_error_info
-async def get_accounts(context, accounts: list):
-    """Returns accounts data for accounts given in list"""
-    assert accounts, "Empty parameters are not supported"
-    assert len(accounts) < 1000, "Query exceeds limit"
-
-    return await cursor.get_accounts(context['db'], accounts)
-
-@return_error_info
 async def get_active_votes(context, author: str, permlink: str):
     """ Returns all votes for the given post. """
     valid_account(author)
