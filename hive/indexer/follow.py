@@ -151,7 +151,7 @@ class Follow(DbAdapterHolder):
             cls.beginTx()
             for _, follow_item in cls.follow_items_to_flush.items():
                 if count < limit:
-                    values.append("({}, {}, '{}', {}, {}, {}, {})".format(follow_item['flr'],
+                    values.append("({}, {}, '{}', {}, {}, {}, /* block num: */ {})".format(follow_item['flr'],
                                                                           follow_item['flg'],
                                                                           follow_item['at'],
                                                                           follow_item['state'],
@@ -164,7 +164,7 @@ class Follow(DbAdapterHolder):
                     query += sql_postfix
                     cls.db.query(query)
                     values.clear()
-                    values.append("({}, {}, '{}', {}, {}, {}, {})".format(follow_item['flr'],
+                    values.append("({}, {}, '{}', {}, {}, {}, /* block num: */ {})".format(follow_item['flr'],
                                                                           follow_item['flg'],
                                                                           follow_item['at'],
                                                                           follow_item['state'],

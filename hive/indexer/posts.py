@@ -141,7 +141,7 @@ class Posts(DbAdapterHolder):
             post_data = dict(title=new_title, img_url=new_img, body=new_body, json=new_json)
 
 #        log.info("Adding author: {}  permlink: {}".format(op['author'], op['permlink']))
-        PostDataCache.add_data(result['id'], post_data, is_new_post)
+        PostDataCache.add_data(result['id'], post_data, is_new_post, op["block_num"])
 
         if not result['depth']:
             tags = [result['post_category']]
@@ -153,7 +153,7 @@ class Posts(DbAdapterHolder):
             tags = list(distinct(tags))[:5]
 
             for tag in tags:
-                Tags.add_tag(result['id'], tag)
+                Tags.add_tag(result['id'], tag, op["block_num"])
 
         if not DbState.is_initial_sync():
             if error:
@@ -240,7 +240,7 @@ class Posts(DbAdapterHolder):
     @classmethod
     def comment_payout_op(cls):
         values_limit = 1000
-
+        
         """ Process comment payment operations """
         for k, v in cls.comment_payout_ops.items():
             author                    = None
@@ -255,8 +255,8 @@ class Posts(DbAdapterHolder):
             # total payout for comment
             #comment_author_reward     = None
             #curators_vesting_payout   = None
-            total_payout_value        = None;
-            curator_payout_value      = None;
+            total_payout_value        = None
+            curator_payout_value      = None
             #beneficiary_payout_value  = None;
 
             payout                    = None
@@ -269,6 +269,12 @@ class Posts(DbAdapterHolder):
             is_paidout                = None
 
             total_vote_weight         = None
+            block_number              = None
+
+            for _k, _v in v.items():
+              if _v is not None and _v[0] is not None:
+                assert _v[0]["block_num"] is not None
+                block_number = _v[0]["block_num"]
 
             # final payout indicator - by default all rewards are zero, but might be overwritten by other operations
             if v[ 'comment_payout_update_operation' ] is not None:
@@ -320,7 +326,7 @@ class Posts(DbAdapterHolder):
               total_vote_weight       = value['total_vote_weight']
 
 
-            cls._comment_payout_ops.append("('{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(
+            cls._comment_payout_ops.append("('{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {} /* block number: {} */)".format(
               author,
               escape_characters(permlink),
               "NULL" if ( total_payout_value is None ) else ( "'{}'".format( legacy_amount(total_payout_value) ) ),
@@ -338,7 +344,9 @@ class Posts(DbAdapterHolder):
 
               "NULL" if ( is_paidout is None ) else is_paidout,
 
-              "NULL" if ( total_vote_weight is None ) else total_vote_weight ))
+              "NULL" if ( total_vote_weight is None ) else total_vote_weight,
+              "NULL" if ( block_number is None ) else block_number
+            ))
 
 
         n = len(cls.comment_payout_ops)

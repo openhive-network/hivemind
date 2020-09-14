@@ -30,9 +30,11 @@ from hive.server.common.payout_stats import PayoutStats
 
 from hive.server.common.mutes import Mutes
 
+from hive.utils.stats import StatusManager as SM
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import WaitingStatusManager as WSM
+from hive.utils.stats import PreProcessingStatusManager as PPSM
 from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import BroadcastObject
 
@@ -146,15 +148,7 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
             log.info("[SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
             rate = minmax(rate, len(blocks), time_current - wait_time_1, lbound)
 
-            if block_end - block_start > 1.0 or is_debug:
-                otm = OPSM.log_current("Operations present in the processed blocks")
-                ftm = FSM.log_current("Flushing times")
-                wtm = WSM.log_current("Waiting times")
-                log.info(f"Calculated time: {otm+ftm+wtm :.4f} s.")
-
-            OPSM.next_blocks()
-            FSM.next_blocks()
-            WSM.next_blocks()
+            SM.next_blocks(is_debug or block_end - block_start > 1.0)
 
             lbound = to
             PC.broadcast(BroadcastObject('sync_current_block', lbound, 'blocks'))
@@ -169,11 +163,14 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
         log.exception("Exception caught during processing blocks...")
     finally:
         stop = OPSM.stop(time_start)
+        SM.join()
         log.info("=== TOTAL STATS ===")
         wtm = WSM.log_global("Total waiting times")
         ftm = FSM.log_global("Total flush times")
         otm = OPSM.log_global("All operations present in the processed blocks")
-        ttm = ftm + otm + wtm
+        pptm = PPSM.log_global("Preprocessing time")
+        ttm = ftm + otm + wtm + pptm
+        WSM.print_row()
         log.info(f"Elapsed time: {stop :.4f}s. Calculated elapsed time: {ttm :.4f}s. Difference: {stop - ttm :.4f}s")
         log.info(f"Highest block processing rate: {rate['max'] :.4f} bps. From: {rate['max_from']} To: {rate['max_to']}")
         log.info(f"Lowest block processing rate: {rate['min'] :.4f} bps. From: {rate['min_from']} To: {rate['min_to']}")
