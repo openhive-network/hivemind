@@ -128,7 +128,6 @@ class DbState:
             #'hive_posts_cache_ix32', # API: community created
             #'hive_posts_cache_ix33', # API: community payout
             #'hive_posts_cache_ix34', # API: community muted
-            'hive_accounts_ix1', # (cached_at, name)
             'hive_accounts_ix5' # (cached_at, name)
         ]
 
@@ -297,7 +296,6 @@ class DbState:
             cls._set_ver(3)
 
         if cls._ver == 3:
-            cls.db().query("CREATE INDEX hive_accounts_ix3 ON hive_accounts (vote_weight, name varchar_pattern_ops)")
             cls._set_ver(4)
 
         if cls._ver == 4:
