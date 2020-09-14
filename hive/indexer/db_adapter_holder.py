@@ -5,21 +5,30 @@ class DbAdapterHolder(object):
     db = None
 
     _inside_tx = False
+    _use_tx = True
 
     @classmethod
-    def setup_db_access(self, sharedDb):
-        self.db = sharedDb.clone()
+    def setup_shared_db_access(cls, sharedDb):
+        cls.db = sharedDb
+        cls._use_tx = False
 
     @classmethod
-    def tx_active(self):
-        return self._inside_tx
+    def setup_own_db_access(cls, sharedDb):
+        cls.db = sharedDb.clone()
+        cls._use_tx = True
 
     @classmethod
-    def beginTx(self):
-        self.db.query("START TRANSACTION")
-        self._inside_tx = True
+    def tx_active(cls):
+        return cls._inside_tx
 
     @classmethod
-    def commitTx(self):
-        self.db.query("COMMIT")
-        self._inside_tx = False
+    def beginTx(cls):
+        if cls._use_tx:
+            cls.db.query("START TRANSACTION")
+            cls._inside_tx = True
+
+    @classmethod
+    def commitTx(cls):
+        if cls._use_tx:
+            cls.db.query("COMMIT")
+            cls._inside_tx = False

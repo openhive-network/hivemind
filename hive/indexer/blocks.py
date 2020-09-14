@@ -1,8 +1,9 @@
 """Blocks processor."""
 
-from hive.indexer.reblog import Reblog
 import logging
 import concurrent
+from time import perf_counter
+from concurrent.futures import ThreadPoolExecutor
 
 from hive.db.adapter import Db
 
@@ -16,14 +17,12 @@ from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.tags import Tags
 from hive.indexer.reputations import Reputations
 from hive.indexer.reblog import Reblog
-from time import perf_counter
+from hive.indexer.feed_cache import FeedCache
 
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.trends import update_hot_and_tranding_for_block_range
 from hive.utils.post_active import update_active_starting_from_posts_on_block
-
-from concurrent.futures import ThreadPoolExecutor
 
 log = logging.getLogger(__name__)
 
@@ -47,18 +46,19 @@ class Blocks:
     _current_block_date = None
 
     _concurrent_flush = [
-      ('Posts', Posts.flush, Posts),
-      ('PostDataCache', PostDataCache.flush, PostDataCache),
-      ('Reputations', Reputations.flush, Reputations),
-      ('Votes', Votes.flush, Votes), 
-      ('Tags', Tags.flush, Tags), 
-      ('Follow', follows_flush_helper, Follow),
-      ('Reblog', Reblog.flush, Reblog)
+        ('Posts', Posts.flush, Posts),
+        ('PostDataCache', PostDataCache.flush, PostDataCache),
+        ('Reputations', Reputations.flush, Reputations),
+        ('Votes', Votes.flush, Votes),
+        ('Tags', Tags.flush, Tags),
+        ('Follow', follows_flush_helper, Follow),
+        ('Reblog', Reblog.flush, Reblog),
+        ('Feed Cache', FeedCache.flush, FeedCache)
     ]
 
     def __init__(cls):
         head_date = cls.head_date()
-        if(head_date == ''):
+        if head_date == '':
             cls._head_block_date = None
             cls._current_block_date = None
         else:
@@ -66,14 +66,26 @@ class Blocks:
             cls._current_block_date = head_date
 
     @classmethod
-    def setup_db_access(self, sharedDbAdapter):
-        PostDataCache.setup_db_access(sharedDbAdapter)
-        Reputations.setup_db_access(sharedDbAdapter)
-        Votes.setup_db_access(sharedDbAdapter)
-        Tags.setup_db_access(sharedDbAdapter)
-        Follow.setup_db_access(sharedDbAdapter)
-        Posts.setup_db_access(sharedDbAdapter)
-        Reblog.setup_db_access(sharedDbAdapter)
+    def setup_own_db_access(cls, sharedDbAdapter):
+        PostDataCache.setup_own_db_access(sharedDbAdapter)
+        Reputations.setup_own_db_access(sharedDbAdapter)
+        Votes.setup_own_db_access(sharedDbAdapter)
+        Tags.setup_own_db_access(sharedDbAdapter)
+        Follow.setup_own_db_access(sharedDbAdapter)
+        Posts.setup_own_db_access(sharedDbAdapter)
+        Reblog.setup_own_db_access(sharedDbAdapter)
+        FeedCache.setup_own_db_access(sharedDbAdapter)
+
+    @classmethod
+    def setup_shared_db_access(cls, sharedDbAdapter):
+        PostDataCache.setup_shared_db_access(sharedDbAdapter)
+        Reputations.setup_shared_db_access(sharedDbAdapter)
+        Votes.setup_shared_db_access(sharedDbAdapter)
+        Tags.setup_shared_db_access(sharedDbAdapter)
+        Follow.setup_shared_db_access(sharedDbAdapter)
+        Posts.setup_shared_db_access(sharedDbAdapter)
+        Reblog.setup_shared_db_access(sharedDbAdapter)
+        FeedCache.setup_shared_db_access(sharedDbAdapter)
 
     @classmethod
     def head_num(cls):
@@ -99,14 +111,16 @@ class Blocks:
         Votes.flush()
         Posts.flush()
         Reblog.flush()
-        Follow.flush(trx=False)
         Reputations.flush()
-
+        follows = Follow.flush(trx=False)
+        accts = Accounts.flush(hived, trx=False, spread=8)
+        FeedCache.flush()
+        # Follow and Account flush moved from Sync.listen (sync.py line 378)
         block_num = int(block['block_id'][:8], base=16)
         cls.on_live_blocks_processed( block_num, block_num )
         time_end = perf_counter()
         log.info("[PROCESS BLOCK] %fs", time_end - time_start)
-        return ret
+        return ret, follows, accts
 
     @classmethod
     def process_multi(cls, blocks, vops, hived, is_initial_sync=False):
@@ -141,7 +155,7 @@ class Blocks:
 
         DB.query("COMMIT")
 
-        completedThreads = 0;
+        completedThreads = 0
 
         pool = ThreadPoolExecutor(max_workers = len(cls._concurrent_flush))
         flush_futures = {pool.submit(time_collector, f): (description, c) for (description, f, c) in cls._concurrent_flush}
@@ -384,9 +398,10 @@ class Blocks:
             values.append("({}, '{}', '{}', {}, {}, '{}')".format(block['num'], block['hash'],
                                                                   block['prev'], block['txs'],
                                                                   block['ops'], block['date']))
-        DB.query(query + ",".join(values))
+        query = query + ",".join(values)
+        DB.query(query)
         n = len(cls.blocks_to_flush)
-        cls.blocks_to_flush = []
+        cls.blocks_to_flush.clear()
         return n
 
     @classmethod
