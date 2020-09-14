@@ -251,7 +251,7 @@ class Sync:
             if not CONTINUE_PROCESSING:
                 return
             current_imported_block = Blocks.head_num()
-            DbState.finish_initial_sync(current_imported_block, last_imported_block)
+            DbState.finish_initial_sync(current_imported_block)
         else:
             # recover from fork
             Blocks.verify_head(self._steem)

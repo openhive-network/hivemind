@@ -66,10 +66,10 @@ class DbState:
         return cls._db
 
     @classmethod
-    def finish_initial_sync(cls, current_imported_block, last_imported_block):
+    def finish_initial_sync(cls, current_imported_block):
         """Set status to initial sync complete."""
         assert cls._is_initial_sync, "initial sync was not started."
-        cls._after_initial_sync(current_imported_block, last_imported_block)
+        cls._after_initial_sync(current_imported_block)
         cls._is_initial_sync = False
         log.info("[INIT] Initial sync complete!")
 
@@ -138,6 +138,26 @@ class DbState:
         return to_return
 
     @classmethod
+    def processing_indexes(cls, is_pre_process, drop, create ):
+      DB = cls.db()
+      engine = DB.engine()
+      log.info("[INIT] Begin %s-initial sync hooks", "pre" if is_pre_process else "post" )
+
+      for index in cls._disableable_indexes():
+          log.info("%s index %s.%s", ( "Drop" if is_pre_process else "Recreate" ), index.table, index.name)
+          try:
+            if drop:
+              sql = "SELECT count(*) FROM pg_class WHERE relname = :relname"
+              _count = DB.query_one(sql, relname=index.name)
+              if _count == 1:
+                index.drop(engine)
+          except sqlalchemy.exc.ProgrammingError as ex:
+              log.warning("Ignoring ex: {}".format(ex))
+
+          if create:
+            index.create(engine)
+
+    @classmethod
     def before_initial_sync(cls, last_imported_block, hived_head_block):
         """Routine which runs *once* after db setup.
 
@@ -150,16 +170,8 @@ class DbState:
             log.info("[INIT] Skipping pre-initial sync hooks")
             return
 
-        engine = cls.db().engine()
-        log.info("[INIT] Begin pre-initial sync hooks")
-
-        for index in cls._disableable_indexes():
-            log.info("Drop index %s.%s", index.table, index.name)
-
-            try:
-                index.drop(engine)
-            except sqlalchemy.exc.ProgrammingError as ex:
-                log.warning("Ignoring ex: {}".format(ex))
+        #is_pre_process, drop, create
+        cls.processing_indexes( True, True, False )
 
         from hive.db.schema import drop_fk, set_logged_table_attribute
         log.info("Dropping FKs")
@@ -186,32 +198,22 @@ class DbState:
         return current_work_mem
 
     @classmethod
-    def _after_initial_sync(cls, current_imported_block, last_imported_block):
+    def _after_initial_sync(cls, current_imported_block):
         """Routine which runs *once* after initial sync.
 
         Re-creates non-core indexes for serving APIs after init sync,
         as well as all foreign keys."""
 
-        assert current_imported_block >= last_imported_block
+        last_imported_block = DbState.db().query_one("SELECT block_num FROM hive_state LIMIT 1")
+
+        log.info("[INIT] Current imported block: %s Last imported block: %s", current_imported_block, last_imported_block)
+        if last_imported_block > current_imported_block:
+          last_imported_block = current_imported_block
 
         synced_blocks = current_imported_block - last_imported_block
 
-        if synced_blocks >= SYNCED_BLOCK_LIMIT:
-            engine = cls.db().engine()
-            log.info("[INIT] Begin post-initial sync hooks")
-
-            for index in cls._disableable_indexes():
-                log.info("Recreate index %s.%s", index.table, index.name)
-                try:
-                    index.drop(engine)
-                except sqlalchemy.exc.ProgrammingError as ex:
-                    log.warning("Ignoring ex: {}".format(ex))
-
-                index.create(engine)
-
-            log.info("[INIT] Finish post-initial sync hooks")
-        else:
-            log.info("[INIT] Post-initial sync hooks skipped")
+        #is_pre_process, drop, create
+        cls.processing_indexes( False, True, True )
 
         current_work_mem = cls.update_work_mem('2GB')
 
