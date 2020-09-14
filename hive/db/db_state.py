@@ -138,6 +138,30 @@ class DbState:
         return to_return
 
     @classmethod
+    def processing_indexes(cls, is_pre_process, drop, create ):
+
+        # sql = "SELECT promoted FROM hive_posts WHERE id = :id"
+        # curr_amount = DB.query_one(sql, id=record['post_id'])
+        # new_amount = curr_amount + record['amount']
+      DB = cls.db()
+      engine = DB.engine()
+      log.info("[INIT] Begin %s-initial sync hooks", "pre" if is_pre_process else "post" )
+
+      for index in cls._disableable_indexes():
+          log.info("%s index %s.%s", ( "Drop" if is_pre_process else "Recreate" ), index.table, index.name)
+          try:
+            if drop:
+              sql = "SELECT count(*) FROM pg_class WHERE relname = :relname"
+              _count = DB.query_one(sql, relname=index.name)
+              if _count == 1:
+                index.drop(engine)
+          except sqlalchemy.exc.ProgrammingError as ex:
+              log.warning("Ignoring ex: {}".format(ex))
+
+          if create:
+            index.create(engine)
+
+    @classmethod
     def before_initial_sync(cls, last_imported_block, hived_head_block):
         """Routine which runs *once* after db setup.
 
@@ -150,16 +174,8 @@ class DbState:
             log.info("[INIT] Skipping pre-initial sync hooks")
             return
 
-        engine = cls.db().engine()
-        log.info("[INIT] Begin pre-initial sync hooks")
-
-        for index in cls._disableable_indexes():
-            log.info("Drop index %s.%s", index.table, index.name)
-
-            try:
-                index.drop(engine)
-            except sqlalchemy.exc.ProgrammingError as ex:
-                log.warning("Ignoring ex: {}".format(ex))
+        #is_pre_process, drop, create
+        cls.processing_indexes( True, True, False )
 
         from hive.db.schema import drop_fk, set_logged_table_attribute
         log.info("Dropping FKs")
@@ -196,22 +212,8 @@ class DbState:
 
         synced_blocks = current_imported_block - last_imported_block
 
-        if synced_blocks >= SYNCED_BLOCK_LIMIT:
-            engine = cls.db().engine()
-            log.info("[INIT] Begin post-initial sync hooks")
-
-            for index in cls._disableable_indexes():
-                log.info("Recreate index %s.%s", index.table, index.name)
-                try:
-                    index.drop(engine)
-                except sqlalchemy.exc.ProgrammingError as ex:
-                    log.warning("Ignoring ex: {}".format(ex))
-
-                index.create(engine)
-
-            log.info("[INIT] Finish post-initial sync hooks")
-        else:
-            log.info("[INIT] Post-initial sync hooks skipped")
+        #is_pre_process, drop, create
+        cls.processing_indexes( False, True, True )
 
         current_work_mem = cls.update_work_mem('2GB')
 
