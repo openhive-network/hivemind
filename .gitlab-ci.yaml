@@ -204,16 +204,6 @@ bridge_api_smoketest_negative:
     reports:
       junit: api_smoketest_bridge_negative.xml
 
-condenser_api_smoketest_old:
-  <<: *common_api_smoketest_job
-
-  script:
-    - scripts/ci_start_api_smoketest.sh localhost "$HIVEMIND_HTTP_PORT" test_condenser_api_patterns.tavern.yaml api_smoketest_condenser_api_old.xml
-
-  artifacts:
-    reports:
-      junit: api_smoketest_condenser_api_old.xml
-
 condenser_api_smoketest:
   <<: *common_api_smoketest_job
 
