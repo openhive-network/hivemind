@@ -21,7 +21,7 @@ def _row(row):
 async def get_payout_stats(context, limit=250):
     """Get payout stats for building treemap."""
     db = context['db']
-    limit = valid_limit(limit, 250)
+    limit = valid_limit(limit, 250, 250)
 
     stats = PayoutStats.instance()
     await stats.generate()

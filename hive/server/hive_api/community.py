@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 import ujson as json
 
 from hive.server.hive_api.common import (get_account_id, get_community_id, valid_limit)
-from hive.server.common.helpers import return_error_info
+from hive.server.common.helpers import return_error_info, last_month
 
 def days_ago(days):
     """Get the date `n` days ago."""
@@ -70,13 +70,14 @@ async def get_community_context(context, name, account):
 @return_error_info
 async def list_top_communities(context, limit=25):
     """List top communities. Returns lite community list."""
-    assert limit < 100
-    #sql = """SELECT name, title FROM hive_communities
-    #          WHERE rank > 0 ORDER BY rank LIMIT :limit"""
+    limit = valid_limit(limit, 100, 25)
     sql = """SELECT name, title FROM hive_communities
-              WHERE id = 1344247 OR rank > 0
-           ORDER BY (CASE WHEN id = 1344247 THEN 0 ELSE rank END)
-              LIMIT :limit"""
+              WHERE rank > 0 ORDER BY rank LIMIT :limit"""
+    #ABW: restored older version since hardcoded id is out of the question
+    #sql = """SELECT name, title FROM hive_communities
+    #          WHERE id = 1344247 OR rank > 0
+    #       ORDER BY (CASE WHEN id = 1344247 THEN 0 ELSE rank END)
+    #          LIMIT :limit"""
 
     out = await context['db'].query_all(sql, limit=limit)
 
@@ -84,9 +85,9 @@ async def list_top_communities(context, limit=25):
 
 
 @return_error_info
-async def list_pop_communities(context, limit=25):
+async def list_pop_communities(context, limit:int=25):
     """List communities by new subscriber count. Returns lite community list."""
-    limit = valid_limit(limit, 25)
+    limit = valid_limit(limit, 25, 25)
     sql = """SELECT name, title
                FROM hive_communities
                JOIN (
@@ -98,7 +99,7 @@ async def list_pop_communities(context, limit=25):
                  ON stats.community_id = id
            ORDER BY newsubs DESC
               LIMIT :limit"""
-    out = await context['db'].query_all(sql, limit=limit)
+    out = await context['db'].query_all(sql, limit=limit, cutoff=last_month())
 
     return [(r[0], r[1]) for r in out]
 
@@ -122,7 +123,6 @@ async def list_all_subscriptions(context, account):
 @return_error_info
 async def list_subscribers(context, community):
     """Lists subscribers of `community`."""
-    #limit = valid_limit(limit, 100)
     db = context['db']
     cid = await get_community_id(db, community)
 
@@ -142,7 +142,7 @@ async def list_subscribers(context, community):
 async def list_communities(context, last='', limit=100, query=None, sort='rank', observer=None):
     """List all communities, paginated. Returns lite community list."""
     # pylint: disable=too-many-arguments, too-many-locals
-    limit = valid_limit(limit, 100)
+    limit = valid_limit(limit, 100, 100)
 
     db = context['db']
     assert sort in ('rank', 'new', 'subs'), 'invalid sort'

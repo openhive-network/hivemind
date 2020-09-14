@@ -17,7 +17,7 @@ async def fetch_tree(context, root, sort='top', limit=20, observer=None):
     root_id = await url_to_id(db, root)
     return await _fetch_children(db, root_id, None,
                                  valid_comment_sort(sort),
-                                 valid_limit(limit, 50),
+                                 valid_limit(limit, 50, 20),
                                  observer)
 
 async def fetch_more_children(context, root_id, last_sibling_id, sort='top',
@@ -26,7 +26,7 @@ async def fetch_more_children(context, root_id, last_sibling_id, sort='top',
     db = context['db']
     return await _fetch_children(db, root_id, last_sibling_id,
                                  valid_comment_sort(sort),
-                                 valid_limit(limit, 50),
+                                 valid_limit(limit, 50, 20),
                                  observer)
 
 _SORTS = dict(hot='sc_hot', top='payout', new='id')

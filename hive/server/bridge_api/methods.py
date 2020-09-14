@@ -74,13 +74,13 @@ async def get_profile(context, account, observer=None):
     return ret[0]
 
 @return_error_info
-async def get_trending_topics(context, limit=10, observer=None):
+async def get_trending_topics(context, limit:int=10, observer:str=None):
     """Return top trending topics across pending posts."""
     # pylint: disable=unused-argument
     #db = context['db']
     #observer_id = await get_account_id(db, observer) if observer else None
     #assert not observer, 'observer not supported'
-    limit = valid_limit(limit, 25)
+    limit = valid_limit(limit, 25, 10)
     out = []
     cells = await list_top_communities(context, limit)
     for name, title in cells:
@@ -114,8 +114,8 @@ async def get_post(context, author, permlink, observer=None):
     return post
 
 @return_error_info
-async def get_ranked_posts(context, sort, start_author='', start_permlink='',
-                           limit=20, tag=None, observer=None):
+async def get_ranked_posts(context, sort:str, start_author:str='', start_permlink:str='',
+                           limit:int=20, tag:str=None, observer:str=None):
     """Query posts, sorted by given method."""
 
     assert sort in ['trending', 'hot', 'created', 'promoted',
@@ -123,7 +123,7 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
 
     valid_account(start_author, allow_empty=True)
     valid_permlink(start_permlink, allow_empty=True)
-    valid_limit(limit, 100)
+    valid_limit(limit, 100, 20)
     valid_tag(tag, allow_empty=True)
 
     db = context['db']
@@ -275,8 +275,8 @@ async def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=No
     return post
 
 @return_error_info
-async def get_account_posts(context, sort, account, start_author='', start_permlink='',
-                            limit=20, observer=None):
+async def get_account_posts(context, sort:str, account:str, start_author:str='', start_permlink:str='',
+                            limit:int=20, observer:str=None):
     """Get posts for an account -- blog, feed, comments, or replies."""
     valid_sorts = ['blog', 'feed', 'posts', 'comments', 'replies', 'payout']
     assert sort in valid_sorts, 'invalid account sort'
@@ -287,7 +287,7 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
     start_author = valid_account(start_author, allow_empty=True)
     start_permlink = valid_permlink(start_permlink, allow_empty=True)
     start = (start_author, start_permlink)
-    limit = valid_limit(limit, 100)
+    limit = valid_limit(limit, 100, 20)
 
     # pylint: disable=unused-variable
     observer_id = await get_account_id(db, observer) if observer else None # TODO

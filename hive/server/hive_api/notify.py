@@ -1,9 +1,9 @@
 """Hive API: Notifications"""
 import logging
 
-from hive.server.common.helpers import return_error_info, json_date
+from hive.server.common.helpers import return_error_info, valid_number, valid_limit, valid_score, json_date
 from hive.indexer.notify import NotifyType
-from hive.server.hive_api.common import get_account_id, valid_limit, get_post_id
+from hive.server.hive_api.common import get_account_id, get_post_id
 from hive.server.common.mutes import Mutes
 
 log = logging.getLogger(__name__)
@@ -60,7 +60,7 @@ async def unread_notifications(context, account, min_score=25):
 async def account_notifications(context, account, min_score=25, last_id=None, limit=100):
     """Load notifications for named account."""
     db = context['db']
-    limit = valid_limit(limit, 100)
+    limit = valid_limit(limit, 100, 100)
 
     sql_query = "SELECT * FROM account_notifications( (:account)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::BIGINT, (:limit)::SMALLINT )"
 
@@ -72,16 +72,15 @@ async def account_notifications(context, account, min_score=25, last_id=None, li
     return [_render(row) for row in rows]
 
 @return_error_info
-async def post_notifications(context, author, permlink, min_score=25, last_id=None, limit=100):
+async def post_notifications(context, author:str, permlink:str, min_score:int=25, last_id:int=None, limit:int=100):
     """Load notifications for a specific post."""
     # pylint: disable=too-many-arguments
     db = context['db']
-    limit = valid_limit(limit, 100)
+    min_score = valid_score(min_score, 100, 25)
+    last_id = valid_number(last_id, None, None, -1, "last_id")
+    limit = valid_limit(limit, 100, 100)
 
     sql_query = "SELECT * FROM post_notifications( (:author)::VARCHAR, (:permlink)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::BIGINT, (:limit)::SMALLINT )"
-
-    if not last_id:
-        last_id = -1;
 
     rows = await db.query_all(sql_query, author=author, permlink=permlink, min_score=min_score, last_id=last_id, limit=limit)
     rows = [row for row in rows if row['author'] not in Mutes.all()]
