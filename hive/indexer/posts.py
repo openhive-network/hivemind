@@ -108,7 +108,7 @@ class Posts(DbAdapterHolder):
 
         sql = """
             SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, community_id, is_valid, is_muted, depth
-            FROM process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_block)::integer, (:block_num)::integer, (:tags)::VARCHAR[]);
+            FROM process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_block)::integer, /* block num */ (:block_num)::integer, (:tags)::VARCHAR[]);
             """
 
         row = DB.query_row(sql, author=op['author'], permlink=op['permlink'], parent_author=op['parent_author'],
@@ -147,7 +147,7 @@ class Posts(DbAdapterHolder):
             post_data = dict(title=new_title, img_url=new_img, body=new_body, json=new_json)
 
 #        log.info("Adding author: {}  permlink: {}".format(op['author'], op['permlink']))
-        PostDataCache.add_data(result['id'], post_data, is_new_post)
+        PostDataCache.add_data(result['id'], post_data, is_new_post, op['block_num'])
 
         if not DbState.is_initial_sync():
             if error:
@@ -393,7 +393,7 @@ class Posts(DbAdapterHolder):
     @classmethod
     def delete(cls, op, block_date):
         """Marks a post record as being deleted."""
-        sql = "SELECT delete_hive_post((:author)::varchar, (:permlink)::varchar, (:block_num)::int, (:date)::timestamp);"
+        sql = "SELECT delete_hive_post((:author)::varchar, (:permlink)::varchar, /* block num */ (:block_num)::int, (:date)::timestamp);"
         DB.query_no_return(sql, author=op['author'], permlink = op['permlink'], block_num=op['block_num'], date=block_date)
 
     @classmethod

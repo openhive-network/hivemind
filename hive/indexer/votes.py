@@ -112,7 +112,7 @@ class Votes(DbAdapterHolder):
             values_limit = 1000
 
             for _, vd in cls._votes_data.items():
-                values.append("({}, '{}', '{}', {}, {}, {}, {}, '{}'::timestamp, {}, {}, {})".format(
+                values.append("({}, '{}', '{}', {}, {}, {}, {}, '{}'::timestamp, {},  /* block num: */ {}, {})".format(
                     len(values), # for ordering
                     vd['voter'], vd['author'], vd['permlink'], vd['weight'], vd['rshares'],
                     vd['vote_percent'], vd['last_update'], vd['num_changes'], vd['block_num'], vd['is_effective']))

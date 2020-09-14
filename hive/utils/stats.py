@@ -8,6 +8,7 @@ from time import perf_counter as perf
 from hive.utils.system import colorize, peak_usage_mb
 from psutil import pid_exists
 from os import getpid
+from threading import Thread
 
 log = logging.getLogger(__name__)
 
@@ -92,16 +93,11 @@ class Stat:
     def __init__(self, time):
         self.time = time
 
-    def update(self, other):
-        assert type(self) == type(other)
-        attributes = self.__dict__
-        oatte = other.__dict__
-        for key, val in attributes.items():
-            setattr(self, key, oatte[key] + val)
-        return self
+    def update_time(self, other):
+        self.time += other.time
 
     def __repr__(self):
-        return self.__dict__
+        return str(self.__dict__)
 
     def __lt__(self, other):
         return self.time < other.time
@@ -111,9 +107,17 @@ class Stat:
 
 class StatusManager:
 
-    # Fully abstract class
+    global_stats = {}
+    local_stats = {}
+    deamon : Thread = None
+    metrics_to_save = Queue()
+    __join = False
+
     def __init__(self):
-        assert False
+        if StatusManager.deamon is None:
+            StatusManager.deamon = Thread(target=StatusManager.__work, args=[ getpid() ], daemon=True)
+            # StatusManager.metrics_to_save.put(None)
+            StatusManager.deamon.start()
 
     @staticmethod
     def start():
@@ -124,24 +128,65 @@ class StatusManager:
         return perf() - start
 
     @staticmethod
-    def merge_dicts(od1, od2, broadcast : bool = False, total_broadcast : bool = True):
-        if od2 is not None:
-            for k, v in od2.items():
-                if k in od1:
-                    od1[k].update(v)
-                else:
-                    od1[k] = v
-                
-                if broadcast:
-                    PrometheusClient.broadcast(v.broadcast(k))
+    def merge_dicts(od1, od2, broadcast : bool = False, total_broadcast : bool = True, print_od2 : bool = False):
+        to_print = [""]
+        if od2 is not None and len(od2) > 0:
+            for mgr, values in od2.items():
 
-                if total_broadcast:
-                    PrometheusClient.broadcast( od1[k].broadcast( f"{k}_total" ) )
+                if print_od2:
+                    to_print.append(f"{ '#' * 10 }\n{mgr}:")	
 
+                if mgr not in od1.keys():
+                    od1[mgr] = {}
+
+                for k, v in values.items():
+
+                    if print_od2:
+                        to_print.append(f"`{ k }`: { v }")
+
+                    if k in od1[mgr]:
+                        od1[mgr][k].update(v)
+                    else:
+                        od1[mgr][k] = v
+                    
+                    if broadcast:
+                        PrometheusClient.broadcast(v.broadcast(k))
+
+                    if total_broadcast:
+                        PrometheusClient.broadcast( od1[mgr][k].broadcast( f"{k}_total" ) )
+
+        if print_od2:
+            log.info('\n'.join(to_print))
         return od1
 
     @staticmethod
+    def push_value( manager, name, item ):
+        if not StatusManager.metrics_started():
+            return
+        StatusManager.metrics_to_save.put_nowait( {'manager':manager, 'key': name, 'value': item } )
+
+    @staticmethod
+    def next_blocks( print_current : bool = False ):
+        if not StatusManager.metrics_started():
+            return
+        StatusManager.metrics_to_save.put_nowait(print_current)
+
+    @staticmethod
+    def log_global_dict(mngr : str):
+        if mngr not in StatusManager.global_stats.keys():
+            return 0
+        return StatusManager.log_dict( StatusManager.global_stats[mngr] )
+
+    @staticmethod
+    def log_local_dict(mngr : str):
+        if mngr not in StatusManager.local_stats.keys():
+            return 0
+        return StatusManager.log_dict( StatusManager.local_stats[mngr].copy() )
+
+    @staticmethod
     def log_dict(col : dict) -> float:
+        if len(col) == 0:
+            return 0
         sorted_stats = sorted(col.items(), key=lambda kv: kv[1], reverse=True)
         measured_time = 0.0
         for (k, v) in sorted_stats:
@@ -150,8 +195,53 @@ class StatusManager:
         return measured_time
 
     @staticmethod
-    def print_row():
-        log.info("#" * 20)
+    def metrics_started() -> bool:
+        return StatusManager.deamon is not None
+
+    @staticmethod
+    def print_row(n : int = 1):
+        log.info("#" * 20 * n)
+
+    @staticmethod
+    def __work(pid):
+        try:
+            log.info("stats thread started")
+            while pid_exists(pid):
+                val : dict = StatusManager.metrics_to_save.get(True, 60)
+                if type(val) is type(True):
+                    StatusManager.global_stats = StatusManager.merge_dicts( StatusManager.global_stats, StatusManager.local_stats, True, print_od2=val )
+                    StatusManager.local_stats.clear()
+                    for key in StatusManager.global_stats.keys():
+                        StatusManager.local_stats[key] = {}
+                else:
+                    StatusManager.__add_value( val['manager'], val['key'], val['value'] )
+
+                if StatusManager.metrics_to_save.qsize() == 0 and StatusManager.__join:
+                    break
+        except Exception as e:
+            log.error(f"stats collector thread failed: {e}\nTraceback:\n{e.with_traceback()}")
+
+    @staticmethod
+    def __add_value( manager, key, value ):
+        if manager not in StatusManager.local_stats.keys():
+            StatusManager.local_stats[manager] = {}
+        
+        if key in StatusManager.local_stats[manager].keys():
+            StatusManager.local_stats[manager][key].update(value)
+        else:
+            StatusManager.local_stats[manager][key] = value
+
+    @staticmethod
+    def join():
+        log.info("joining stats queue...")
+        StatusManager.__join = True
+        try:
+            StatusManager.deamon.join()
+        except:
+            log.warn("joined with exception")
+            return
+        log.info("joined successfully")
+
 
 class OPStat(Stat):
     def __init__(self, time, count):
@@ -161,6 +251,10 @@ class OPStat(Stat):
     def __str__(self):
         return f"Processed {self.count :.0f} times in {self.time :.5f} seconds"
 
+    def update(self, other):
+        self.update_time(other)
+        self.count += other.count
+
     def broadcast(self, name : str):
         n = name.lower()
         if not n.endswith('operation'):
@@ -168,34 +262,18 @@ class OPStat(Stat):
         return list([ super().broadcast(n), BroadcastObject(n + "_count", self.count, 'b') ])
 
 class OPStatusManager(StatusManager):
-    # Summary for whole sync
-    global_stats = {}
 
-    # Currently processed blocks stats, merged to global stats, after `next_block`
-    cpbs = {}
+    name_sm = "OPStatusManager"
 
     @staticmethod
     def op_stats( name, time, processed = 1 ):
-        if name in OPStatusManager.cpbs.keys():
-            OPStatusManager.cpbs[name].time += time
-            OPStatusManager.cpbs[name].count += processed
-        else:
-            OPStatusManager.cpbs[name] = OPStat(time, processed)
-
-    @staticmethod
-    def next_blocks():
-        OPStatusManager.global_stats = StatusManager.merge_dicts(
-            OPStatusManager.global_stats, 
-            OPStatusManager.cpbs,
-            True
-        )
-        OPStatusManager.cpbs.clear()
+        StatusManager.push_value( OPStatusManager.name_sm, name, OPStat(time, processed) )
 
     @staticmethod
     def log_global(label : str):
         StatusManager.print_row()
         log.info(label)
-        tm = StatusManager.log_dict(OPStatusManager.global_stats)
+        tm = StatusManager.log_global_dict(OPStatusManager.name_sm)
         log.info(f"Total time for processing operations time: {tm :.4f}s.")
         return tm
 
@@ -204,7 +282,7 @@ class OPStatusManager(StatusManager):
     def log_current(label : str):
         StatusManager.print_row()
         log.info(label)
-        tm = StatusManager.log_dict(OPStatusManager.cpbs)
+        tm = StatusManager.log_local_dict(OPStatusManager.name_sm)
         log.info(f"Current time for processing operations time: {tm :.4f}s.")
         return tm
 
@@ -212,6 +290,10 @@ class FlushStat(Stat):
     def __init__(self, time, pushed):
         super().__init__(time)
         self.pushed = pushed
+
+    def update(self, other):
+        self.update_time(other)
+        self.pushed += other.pushed
 
     def __str__(self):
         return f"Pushed {self.pushed :.0f} records in {self.time :.4f} seconds"
@@ -221,34 +303,18 @@ class FlushStat(Stat):
         return list([ super().broadcast(n), BroadcastObject(n + "_items", self.pushed, 'b') ])
 
 class FlushStatusManager(StatusManager):
-    # Summary for whole sync
-    global_stats = {}
 
-    # Currently processed blocks stats, merged to global stats, after `next_block`
-    current_flushes = {}
+    name_sm = "FlushStatusManager"
 
     @staticmethod
     def flush_stat(name, time, pushed):
-        if name in FlushStatusManager.current_flushes.keys():
-            FlushStatusManager.current_flushes[name].time += time
-            FlushStatusManager.current_flushes[name].pushed += pushed
-        else:
-            FlushStatusManager.current_flushes[name] = FlushStat(time, pushed)
-
-    @staticmethod
-    def next_blocks():
-        FlushStatusManager.global_stats = StatusManager.merge_dicts(
-            FlushStatusManager.global_stats, 
-            FlushStatusManager.current_flushes,
-            True
-        )
-        FlushStatusManager.current_flushes.clear()
+        StatusManager.push_value( FlushStatusManager.name_sm, name, FlushStat(time, pushed) )
 
     @staticmethod
     def log_global(label : str):
         StatusManager.print_row()
         log.info(label)
-        tm = StatusManager.log_dict(FlushStatusManager.global_stats)
+        tm = StatusManager.log_global_dict(FlushStatusManager.name_sm)
         log.info(f"Total flushing time: {tm :.4f}s.")
         return tm
 
@@ -256,7 +322,7 @@ class FlushStatusManager(StatusManager):
     def log_current(label : str):
         StatusManager.print_row()
         log.info(label)
-        tm = StatusManager.log_dict(FlushStatusManager.current_flushes)
+        tm = StatusManager.log_local_dict(FlushStatusManager.name_sm)
         log.info(f"Current flushing time: {tm :.4f}s.")
         return tm
 
@@ -264,37 +330,25 @@ class WaitStat(Stat):
     def __init__(self, time):
         super().__init__(time)
 
+    def update(self, other):
+        self.update_time(other)
+
     def __str__(self):
         return f"Waited {self.time :.4f} seconds"
 
 class WaitingStatusManager(StatusManager):
-    # Summary for whole sync
-    global_stats = {}
 
-    # Currently processed blocks stats, merged to global stats, after `next_block`
-    current_waits = {}
+    name_sm = "WaitingStatusManager"
 
     @staticmethod
     def wait_stat(name, time):
-        if name in WaitingStatusManager.current_waits.keys():
-            WaitingStatusManager.current_waits[name].time += time
-        else:
-            WaitingStatusManager.current_waits[name] = WaitStat(time)
-
-    @staticmethod
-    def next_blocks():
-        WaitingStatusManager.global_stats = StatusManager.merge_dicts(
-            WaitingStatusManager.global_stats, 
-            WaitingStatusManager.current_waits,
-            True
-        )
-        WaitingStatusManager.current_waits.clear()
+        StatusManager.push_value( WaitingStatusManager.name_sm, name, WaitStat(time) )
 
     @staticmethod
     def log_global(label : str):
         StatusManager.print_row()
         log.info(label)
-        tm = StatusManager.log_dict(WaitingStatusManager.global_stats)
+        tm = StatusManager.log_global_dict(WaitingStatusManager.name_sm)
         log.info(f"Total waiting time: {tm :.4f}s.")
         return tm
 
@@ -302,8 +356,44 @@ class WaitingStatusManager(StatusManager):
     def log_current(label : str):
         StatusManager.print_row()
         log.info(label)
-        tm = StatusManager.log_dict(WaitingStatusManager.current_waits)
+        tm = StatusManager.log_local_dict(WaitingStatusManager.name_sm)
         log.info(f"Current waiting time: {tm :.4f}s.")
+        return tm
+
+class PreProcessingStat(Stat):
+    def __init__(self, time, items):
+        super().__init__(time)
+        self.items = items
+
+    def __str__(self):
+        return f"Preprocessed {self.items} items in {self.time :.4f} seconds"
+
+    def update(self, other):
+        self.update_time(other)
+        self.items += other.items
+
+class PreProcessingStatusManager(StatusManager):
+
+    name_sm = "PreProcessingStatusManager"
+
+    @staticmethod
+    def preprocess_stat(name, time, items):
+        StatusManager.push_value( PreProcessingStatusManager.name_sm, name, PreProcessingStat(time, items) )
+
+    @staticmethod
+    def log_global(label : str):
+        StatusManager.print_row()
+        log.info(label)
+        tm = StatusManager.log_global_dict(PreProcessingStatusManager.name_sm)
+        log.info(f"Total reprocessing time: {tm :.4f}s.")
+        return tm
+
+    @staticmethod
+    def log_current(label : str):
+        StatusManager.print_row()
+        log.info(label)
+        tm = StatusManager.log_local_dict(PreProcessingStatusManager.name_sm)
+        log.info(f"Preprocessing time: {tm :.4f}s.")
         return tm
 
 def minmax(collection : dict, blocks : int, time : float, _from : int):

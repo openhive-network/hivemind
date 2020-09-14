@@ -99,7 +99,7 @@ class Reblog(DbAdapterHolder):
                   continue
                 reblog_item = v['op']
                 if count < limit:
-                    values.append("({}, {}, {}, '{}'::timestamp, {})".format(escape_characters(reblog_item['account']),
+                    values.append("({}, {}, {}, '{}'::timestamp, /* block number: */ {})".format(escape_characters(reblog_item['account']),
                                                                                 escape_characters(reblog_item['author']),
                                                                                 escape_characters(reblog_item['permlink']),
                                                                                 reblog_item['block_date'],
@@ -110,7 +110,7 @@ class Reblog(DbAdapterHolder):
                     query = sql_prefix.format(values_str, values_str)
                     cls.db.query(query)
                     values.clear()
-                    values.append("({}, {}, {}, '{}'::timestamp, {})".format(escape_characters(reblog_item['account']),
+                    values.append("({}, {}, {}, '{}'::timestamp, /* block number: */ {})".format(escape_characters(reblog_item['account']),
                                                                                 escape_characters(reblog_item['author']),
                                                                                 escape_characters(reblog_item['permlink']),
                                                                                 reblog_item['block_date'],
@@ -124,6 +124,6 @@ class Reblog(DbAdapterHolder):
             cls.commitTx()
             cls.reblog_items_to_flush.clear()
 
-        cls.deleted_reblog_items.clear();
+        cls.deleted_reblog_items.clear()
 
         return item_count

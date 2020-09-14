@@ -23,9 +23,11 @@ from hive.server.common.mentions import Mentions
 
 from hive.server.common.mutes import Mutes
 
+from hive.utils.stats import StatusManager as SM
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import WaitingStatusManager as WSM
+from hive.utils.stats import PreProcessingStatusManager as PPSM
 from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import BroadcastObject
 from hive.utils.communities_rank import update_communities_posts_and_rank
@@ -99,15 +101,16 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
 
     def print_summary():
         stop = OPSM.stop(time_start)
+        SM.join()
         log.info("=== TOTAL STATS ===")
         wtm = WSM.log_global("Total waiting times")
         ftm = FSM.log_global("Total flush times")
         otm = OPSM.log_global("All operations present in the processed blocks")
-        ttm = ftm + otm + wtm
-        log.info(f"Elapsed time: {stop :.4f}s. Calculated elapsed time: {ttm :.4f}s. Difference: {stop - ttm :.4f}s")
-        if rate:
-            log.info(f"Highest block processing rate: {rate['max'] :.4f} bps. From: {rate['max_from']} To: {rate['max_to']}")
-            log.info(f"Lowest block processing rate: {rate['min'] :.4f} bps. From: {rate['min_from']} To: {rate['min_to']}")
+        pptm = PPSM.log_global("Preprocessing time")
+        WSM.print_row()
+        log.info(f"Elapsed time: {stop :.4f}s.")
+        log.info(f"Highest block processing rate: {rate['max'] :.4f} bps. From: {rate['max_from']} To: {rate['max_to']}")
+        log.info(f"Lowest block processing rate: {rate['min'] :.4f} bps. From: {rate['min_from']} To: {rate['min_to']}")
         log.info("=== TOTAL STATS ===")
 
     try:
@@ -121,7 +124,7 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
             vops_and_blocks = blocks_data_provider.get( number_of_blocks_to_proceed )
 
             if not can_continue_thread():
-                break;
+                break
 
             assert len(vops_and_blocks[ 'vops' ]) == number_of_blocks_to_proceed
             assert len(vops_and_blocks[ 'blocks' ]) == number_of_blocks_to_proceed
@@ -147,15 +150,7 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
             log.info("[INITIAL SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
             rate = minmax(rate, len(vops_and_blocks['blocks']), time_current - time_before_waiting_for_data, lbound)
 
-            if block_end - block_start > 1.0 or is_debug:
-                otm = OPSM.log_current("Operations present in the processed blocks")
-                ftm = FSM.log_current("Flushing times")
-                wtm = WSM.log_current("Waiting times")
-                log.info(f"Calculated time: {otm+ftm+wtm :.4f} s.")
-
-            OPSM.next_blocks()
-            FSM.next_blocks()
-            WSM.next_blocks()
+            SM.next_blocks(is_debug or block_end - block_start > 1.0)
 
             lbound = to
             PC.broadcast(BroadcastObject('sync_current_block', lbound, 'blocks'))
@@ -167,11 +162,10 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
     except Exception:
         log.exception("Exception caught during processing blocks...")
         set_exception_thrown()
-        print_summary()
         raise
-
-    print_summary()
-    return num
+    finally:
+      print_summary()
+      return num
 
 def _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size):
     blocksQueue = queue.Queue(maxsize=10000)
@@ -339,7 +333,7 @@ class Sync:
             if head >= max_block_limit:
                 self.refresh_sparse_stats()
                 log.info("Exiting [LIVE SYNC] because irreversible block sync reached specified block limit: %d", max_block_limit)
-                break;
+                break
 
             try:
                 # listen for new blocks
@@ -352,7 +346,7 @@ class Sync:
             if head >= max_block_limit:
                 self.refresh_sparse_stats()
                 log.info("Exiting [LIVE SYNC] because of specified block limit: %d", max_block_limit)
-                break;
+                break
 
             if not can_continue_thread():
                 break
@@ -389,7 +383,7 @@ class Sync:
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
         while lbound < ubound:
             if not can_continue_thread():
-                break;
+                break
             timer.batch_start()
 
             # fetch blocks
@@ -401,7 +395,7 @@ class Sync:
             timer.batch_lap()
 
             if not can_continue_thread():
-                break;
+                break
             # process blocks
             Blocks.process_multi(blocks, prepared_vops, is_initial_sync)
             timer.batch_finish(len(blocks))
@@ -436,7 +430,7 @@ class Sync:
 
         for block in steemd.stream_blocks(hive_head + 1, can_continue_thread, trail_blocks, max_gap, do_stale_block_check):
             if not can_continue_thread():
-                break;
+                break
             num = int(block['block_id'][:8], base=16)
             log.info("[LIVE SYNC] =====> About to process block %d with timestamp %s", num, block['timestamp'])
 

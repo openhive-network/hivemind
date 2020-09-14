@@ -19,6 +19,7 @@ from hive.indexer.notify import Notify
 
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.stats import FlushStatusManager as FSM
+from hive.utils.stats import PreProcessingStatusManager as PPSM
 from hive.utils.post_active import update_active_starting_from_posts_on_block
 
 from hive.server.common.payout_stats import PayoutStats
@@ -29,12 +30,11 @@ log = logging.getLogger(__name__)
 
 DB = Db.instance()
 
-def time_collector(f):
+def time_collector(f, desc):
     startTime = FSM.start()
     result = f()
-    elapsedTime = FSM.stop(startTime)
-
-    return (result, elapsedTime)
+    FSM.flush_stat( desc, FSM.stop(startTime), result )
+    return result
 
 class Blocks:
     """Processes blocks, dispatches work, manages `hive_blocks` table."""
@@ -123,16 +123,14 @@ class Blocks:
         completedThreads = 0
 
         pool = ThreadPoolExecutor(max_workers = len(cls._concurrent_flush))
-        flush_futures = {pool.submit(time_collector, f): (description, c) for (description, f, c) in cls._concurrent_flush}
+        flush_futures = {pool.submit(time_collector, f, description): (c) for (description, f, c) in cls._concurrent_flush}
         for future in concurrent.futures.as_completed(flush_futures):
-            (description, c) = flush_futures[future]
-            completedThreads = completedThreads + 1
+            c = flush_futures[future]
+            completedThreads += 1
             try:
-                (n, elapsedTime) = future.result()
+                n = future.result()
                 assert n is not None
                 assert not c.tx_active()
-
-                FSM.flush_stat(description, elapsedTime, n)
 
 #                if n > 0:
 #                    log.info('%r flush generated %d records' % (description, n))
@@ -152,11 +150,11 @@ class Blocks:
 
     @staticmethod
     def prepare_vops(comment_payout_ops, vopsList, date, block_num):
+        start = PPSM.start()
         ineffective_deleted_ops = {}
         registered_ops_stats = [ 'author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation', 'comment_payout_update_operation', 'ineffective_delete_comment_operation']
 
         for vop in vopsList:
-            start = OPSM.start()
             key = None
 
             op_type = vop['type']
@@ -198,9 +196,7 @@ class Blocks:
             elif op_type == 'ineffective_delete_comment_operation':
                 ineffective_deleted_ops[key] = {}
 
-            if op_type in registered_ops_stats:
-                OPSM.op_stats(op_type, OPSM.stop(start))
-
+        PPSM.preprocess_stat( "prepare_vops", PPSM.stop(start), len(vopsList) )
         return ineffective_deleted_ops
 
 
