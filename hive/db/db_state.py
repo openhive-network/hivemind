@@ -206,7 +206,9 @@ class DbState:
 
         last_imported_block = DbState.db().query_one("SELECT block_num FROM hive_state LIMIT 1")
 
-        assert current_imported_block >= last_imported_block
+        log.info("[INIT] Current imported block: %s Last imported block: %s", current_imported_block, last_imported_block)
+        if last_imported_block > current_imported_block:
+          last_imported_block = current_imported_block
 
         synced_blocks = current_imported_block - last_imported_block
 
