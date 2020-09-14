@@ -90,7 +90,7 @@ $function$
    JOIN hive_posts_view hp ON hp.id = trends.id ORDER BY trends.trend DESC
 $function$
 language sql
-
+;
 DROP VIEW IF EXISTS public.hive_accounts_info_view;
 
 CREATE OR REPLACE VIEW public.hive_accounts_info_view
@@ -143,3 +143,5 @@ SELECT
   raw_json
 FROM
   hive_accounts ha
+  ;
+  
