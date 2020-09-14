@@ -91,6 +91,7 @@ class DbState:
         to_locate = [
             'hive_follows_ix5a', # (following, state, created_at, follower)
             'hive_follows_ix5b', # (follower, state, created_at, following)
+            'hive_follows_created_at_idx',
 
             'hive_posts_parent_id_idx',
             'hive_posts_depth_idx',
@@ -109,9 +110,11 @@ class DbState:
             'hive_votes_post_id_idx',
             'hive_votes_voter_id_idx',
             'hive_votes_block_num_idx',
+            'hive_votes_last_update_idx',
 
             'hive_subscriptions_block_num_idx',
             'hive_communities_block_num_idx',
+            'hive_reblogs_created_at_idx',
 
             'hive_accounts_ix5', # (cached_at, name)
 
