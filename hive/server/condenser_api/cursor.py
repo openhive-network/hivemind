@@ -1,16 +1,10 @@
 """Cursor-based pagination queries, mostly supporting condenser_api."""
 
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
-
 from hive.utils.normalize import rep_to_raw
+from hive.server.common.helpers import last_month
 from json import loads
 
 # pylint: disable=too-many-lines
-
-def last_month():
-    """Get the date 1 month ago."""
-    return datetime.now() + relativedelta(months=-1)
 
 async def get_post_id(db, author, permlink):
     """Given an author/permlink, retrieve the id from db."""

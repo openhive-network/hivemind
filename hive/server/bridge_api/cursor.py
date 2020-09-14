@@ -1,16 +1,11 @@
 """Cursor-based pagination queries, mostly supporting bridge_api."""
 
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
+from hive.server.common.helpers import last_month
 
 # pylint: disable=too-many-lines
 
 DEFAULT_CID = 1317453
 PAYOUT_WINDOW = "now() + interval '12 hours' AND now() + interval '36 hours'"
-
-def last_month():
-    """Get the date 1 month ago."""
-    return datetime.now() + relativedelta(months=-1)
 
 async def _get_post_id(db, author, permlink):
     """Get post_id from hive db. (does NOT filter on is_deleted)"""

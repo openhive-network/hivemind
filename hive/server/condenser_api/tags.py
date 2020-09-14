@@ -24,7 +24,7 @@ async def get_top_trending_tags_summary(context):
 async def get_trending_tags(context, start_tag: str = '', limit: int = 250):
     """Get top 250 trending tags among pending posts, with stats."""
 
-    limit = valid_limit(limit, ubound=250)
+    limit = valid_limit(limit, 250, 250)
     start_tag = valid_tag(start_tag or '', allow_empty=True)
 
     if start_tag:

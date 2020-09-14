@@ -14,7 +14,7 @@ async def list_comments(context, start: list, limit: int, order: str):
 
     supported_order_list = ['by_cashout_time', 'by_permlink', 'by_root', 'by_parent', 'by_last_update', 'by_author_last_update']
     assert order in supported_order_list, "Unsupported order, valid orders: {}".format(", ".join(supported_order_list))
-    limit = valid_limit(limit, 1000)
+    limit = valid_limit(limit, 1000, None)
     db = context['db']
 
     result = []
@@ -205,7 +205,7 @@ async def list_votes(context, start: list, limit: int, order: str):
     """ Returns all votes, starting with the specified voter and/or author and permlink. """
     supported_order_list = ["by_comment_voter", "by_voter_comment"]
     assert order in supported_order_list, "Order {} is not supported".format(order)
-    limit = valid_limit(limit, 1000)
+    limit = valid_limit(limit, 1000, None)
     assert len(start) == 3, "Expecting 3 elements in start array"
     db = context['db']
 

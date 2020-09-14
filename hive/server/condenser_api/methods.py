@@ -90,7 +90,7 @@ async def get_followers(context, account: str, start: str, follow_type: str = No
         valid_account(account),
         valid_account(start, allow_empty=True),
         valid_follow_type(follow_type),
-        valid_limit(limit, 1000))
+        valid_limit(limit, 1000, None))
     return [_legacy_follower(name, account, follow_type) for name in followers]
 
 @return_error_info
@@ -107,7 +107,7 @@ async def get_following(context, account: str, start: str, follow_type: str = No
         valid_account(account),
         valid_account(start, allow_empty=True),
         valid_follow_type(follow_type),
-        valid_limit(limit, 1000))
+        valid_limit(limit, 1000, None))
     return [_legacy_follower(account, name, follow_type) for name in following]
 
 @return_error_info
@@ -134,7 +134,7 @@ async def get_account_reputations(context, account_lower_bound: str = None, limi
     return {'reputations': await cursor.get_account_reputations(
         context['db'],
         account_lower_bound,
-        valid_limit(limit, 1000))}
+        valid_limit(limit, 1000, None))}
 
 
 # Content Primitives
@@ -217,7 +217,7 @@ async def get_discussions_by(discussion_type, context, start_author: str = '',
                                'payout', 'payout_comments'], 'invalid discussion type'
     valid_account(start_author, allow_empty=True)
     valid_permlink(start_permlink, allow_empty=True)
-    valid_limit(limit, 100)
+    valid_limit(limit, 100, 20)
     valid_tag(tag, allow_empty=True)
     db = context['db']
 
@@ -290,7 +290,7 @@ async def get_discussions_by_trending(context, start_author: str = '', start_per
         'trending',
         valid_account(start_author, allow_empty=True),
         valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100),
+        valid_limit(limit, 100, 20),
         valid_tag(tag, allow_empty=True))
     return await load_posts(context['db'], ids, truncate_body=truncate_body)
 
@@ -307,7 +307,7 @@ async def get_discussions_by_hot(context, start_author: str = '', start_permlink
         'hot',
         valid_account(start_author, allow_empty=True),
         valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100),
+        valid_limit(limit, 100, 20),
         valid_tag(tag, allow_empty=True))
     return await load_posts(context['db'], ids, truncate_body=truncate_body)
 
@@ -324,7 +324,7 @@ async def get_discussions_by_promoted(context, start_author: str = '', start_per
         'promoted',
         valid_account(start_author, allow_empty=True),
         valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100),
+        valid_limit(limit, 100, 20),
         valid_tag(tag, allow_empty=True))
     return await load_posts(context['db'], ids, truncate_body=truncate_body)
 
@@ -341,7 +341,7 @@ async def get_discussions_by_created(context, start_author: str = '', start_perm
         'created',
         valid_account(start_author, allow_empty=True),
         valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100),
+        valid_limit(limit, 100, 20),
         valid_tag(tag, allow_empty=True))
     return await load_posts(context['db'], ids, truncate_body=truncate_body)
 
@@ -357,7 +357,7 @@ async def get_discussions_by_blog(context, tag: str = None, start_author: str = 
     valid_account(tag)
     valid_account(start_author, allow_empty=True)
     valid_permlink(start_permlink, allow_empty=True)
-    valid_limit(limit, 100)
+    valid_limit(limit, 100, 20)
 
     #force copy
     sql = str(SQL_TEMPLATE)
@@ -401,7 +401,7 @@ async def get_discussions_by_feed(context, tag: str = None, start_author: str = 
         valid_account(tag),
         valid_account(start_author, allow_empty=True),
         valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100))
+        valid_limit(limit, 100, 20))
     return await load_posts_reblogs(context['db'], res, truncate_body=truncate_body)
 
 
@@ -415,7 +415,7 @@ async def get_discussions_by_comments(context, start_author: str = None, start_p
     assert not filter_tags, 'filter_tags not supported'
     valid_account(start_author)
     valid_permlink(start_permlink, allow_empty=True)
-    valid_limit(limit, 100)
+    valid_limit(limit, 100, 20)
 
     #force copy
     sql = str(SQL_TEMPLATE)
@@ -456,7 +456,7 @@ async def get_replies_by_last_update(context, start_author: str = None, start_pe
         context['db'],
         valid_account(start_author),
         valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100))
+        valid_limit(limit, 100, 20))
     return await load_posts(context['db'], ids, truncate_body=truncate_body)
 
 
@@ -476,7 +476,7 @@ async def get_discussions_by_author_before_date(context, author: str = None, sta
         context['db'],
         valid_account(author),
         valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100))
+        valid_limit(limit, 100, 10))
     return await load_posts(context['db'], ids)
 
 
@@ -491,7 +491,7 @@ async def get_post_discussions_by_payout(context, start_author: str = '', start_
         'payout',
         valid_account(start_author, allow_empty=True),
         valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100),
+        valid_limit(limit, 100, 20),
         valid_tag(tag, allow_empty=True))
     return await load_posts(context['db'], ids, truncate_body=truncate_body)
 
@@ -508,7 +508,7 @@ async def get_comment_discussions_by_payout(context, start_author: str = '', sta
         'payout_comments',
         valid_account(start_author, allow_empty=True),
         valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100),
+        valid_limit(limit, 100, 20),
         valid_tag(tag, allow_empty=True))
     return await load_posts(context['db'], ids, truncate_body=truncate_body)
 
@@ -560,7 +560,7 @@ async def _get_blog(db, account: str, start_index: int, limit: int = None):
         db,
         valid_account(account),
         valid_offset(start_index),
-        valid_limit(limit, 500))
+        valid_limit(limit, 500, None))
 
     out = []
 

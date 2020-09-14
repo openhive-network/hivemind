@@ -37,22 +37,22 @@ async def get_accounts(context, names, observer=None):
 
 # Follows/mute
 
-async def list_followers(context, account, start='', limit=50, observer=None):
+async def list_followers(context, account:str, start:str='', limit:int=50, observer:str=None):
     """Get a list of all accounts following `account`."""
     followers = await get_followers(
         context['db'],
         valid_account(account),
         valid_account(start, allow_empty=True),
-        'blog', valid_limit(limit, 100))
+        'blog', valid_limit(limit, 100, 50))
     return await accounts_by_name(context['db'], followers, observer, lite=True)
 
-async def list_following(context, account, start='', limit=50, observer=None):
+async def list_following(context, account:str, start:str='', limit:int=50, observer:str=None):
     """Get a list of all accounts `account` follows."""
     following = await get_following(
         context['db'],
         valid_account(account),
         valid_account(start, allow_empty=True),
-        'blog', valid_limit(limit, 100))
+        'blog', valid_limit(limit, 100, 50))
     return await accounts_by_name(context['db'], following, observer, lite=True)
 
 async def list_all_muted(context, account):
@@ -66,7 +66,7 @@ async def list_all_muted(context, account):
 
 # Account post lists
 
-async def list_account_blog(context, account, limit=10, observer=None, last_post=None):
+async def list_account_blog(context, account:str, limit:int=10, observer:str=None, last_post:str=None):
     """Get a blog feed (posts and reblogs from the specified account)"""
     db = context['db']
 
@@ -74,10 +74,10 @@ async def list_account_blog(context, account, limit=10, observer=None, last_post
         db,
         valid_account(account),
         *split_url(last_post, allow_empty=True),
-        valid_limit(limit, 50))
+        valid_limit(limit, 50, 10))
     return await posts_by_id(db, post_ids, observer)
 
-async def list_account_posts(context, account, limit=10, observer=None, last_post=None):
+async def list_account_posts(context, account:str, limit:int=10, observer:str=None, last_post:str=None):
     """Get an account's posts and comments"""
     db = context['db']
     start_author, start_permlink = split_url(last_post, allow_empty=True)
@@ -86,17 +86,17 @@ async def list_account_posts(context, account, limit=10, observer=None, last_pos
         db,
         valid_account(account),
         valid_permlink(start_permlink),
-        valid_limit(limit, 50))
+        valid_limit(limit, 50, 10))
     return await posts_by_id(db, post_ids, observer)
 
-async def list_account_feed(context, account, limit=10, observer=None, last_post=None):
+async def list_account_feed(context, account:str, limit:int=10, observer:str=None, last_post:str=None):
     """Get all posts (blogs and resteems) from `account`'s follows."""
     db = context['db']
     ids_with_reblogs = await pids_by_feed_with_reblog(
         context['db'],
         valid_account(account),
         *split_url(last_post, allow_empty=True),
-        valid_limit(limit, 50))
+        valid_limit(limit, 50, 10))
 
     reblog_by = dict(ids_with_reblogs)
     post_ids = [r[0] for r in ids_with_reblogs]

@@ -5,6 +5,7 @@ from functools import wraps
 import traceback
 import logging
 import datetime
+from dateutil.relativedelta import relativedelta
 from psycopg2.errors import RaiseException
 
 log = logging.getLogger(__name__)
@@ -58,6 +59,10 @@ def json_date(date=None):
     if not date or date == datetime.datetime.max: return '1969-12-31T23:59:59'
     return 'T'.join(str(date).split(' '))
 
+def last_month():
+    """Get the date 1 month ago."""
+    return datetime.datetime.now() + relativedelta(months=-1)
+
 def valid_account(name, allow_empty=False):
     """Returns validated account name or throws Assert."""
     if not name:
@@ -99,13 +104,24 @@ def valid_tag(tag, allow_empty=False):
     assert re.match('^[a-z0-9-_]+$', tag), 'invalid tag `%s`' % tag
     return tag
 
-def valid_limit(limit, ubound=100):
-    """Given a user-provided limit, return a valid int, or raise."""
-    assert limit is not None, 'limit must be provided'
-    limit = int(limit)
-    assert limit > 0, "limit must be positive"
-    assert limit <= ubound, "limit exceeds max (%d > %d)" % (limit, ubound)
-    return limit
+def valid_number(num, lbound, ubound, default, name):
+    """Given a user-provided number, return a valid int, or raise."""
+    if not num:
+      assert default is not None, "%s must be provided" % name
+      num = default
+    try:
+      num = int(num)
+    except (TypeError, ValueError) as e:
+      raise AssertionError(str(e))
+    if lbound is not None and ubound is not None:
+      assert lbound <= num and num <= ubound, "%s = %d outside valid range [%d:%d]" % (name, num, lbound, ubound)
+    return num
+
+def valid_limit(limit, ubound, default):
+    return valid_number(limit, 1, ubound, default, "limit")
+
+def valid_score(score, ubound, default):
+    return valid_number(score, 0, ubound, default, "score")
 
 def valid_offset(offset, ubound=None):
     """Given a user-provided offset, return a valid int, or raise."""
