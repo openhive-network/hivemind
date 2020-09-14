@@ -6,7 +6,7 @@ import os
 import logging
 from hive.conf import Conf
 from hive.db.adapter import Db
-from hive.utils.stats import PrometheusClient
+from hive.utils.stats import PrometheusClient, StatusManager
 
 logging.basicConfig()
 
@@ -16,6 +16,7 @@ def run():
     conf = Conf.init_argparse()
     mode = conf.mode()
     PrometheusClient( conf.get('prometheus_port') )
+    StatusManager()
 
     if mode == 'completion':
         conf.generate_completion()
