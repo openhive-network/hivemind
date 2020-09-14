@@ -29,6 +29,7 @@ from hive.indexer.reputations import Reputations
 
 from hive.server.common.mutes import Mutes
 
+from hive.utils.stats import StatusManager as SM
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import WaitingStatusManager as WSM
@@ -165,6 +166,7 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
         log.exception("Exception caught during processing blocks...")
     finally:
         stop = OPSM.stop(time_start)
+        SM.join()
         log.info("=== TOTAL STATS ===")
         wtm = WSM.log_global("Total waiting times")
         ftm = FSM.log_global("Total flush times")
