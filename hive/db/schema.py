@@ -1214,18 +1214,15 @@ def setup(db):
               INNER JOIN hive_accounts ha ON ha.id = hp1.author_id
               INNER JOIN hive_permlink_data hpd ON hpd.id = hp1.permlink_id
               WHERE
+                  NOT hp1.is_muted AND
                   ha.name > _author OR
                   ha.name = _author AND hpd.permlink >= _permlink
               ORDER BY
-                  ha.name ASC
+                  ha.name ASC,
+                  hpd.permlink ASC
               LIMIT
                   _limit
           ) ds ON ds.id = hp.id
-          WHERE
-              NOT hp.is_muted
-          ORDER BY
-              hp.author ASC,
-              hp.permlink ASC
           ;
         $function$
       ;
@@ -1356,6 +1353,7 @@ def setup(db):
                   hive_posts hp1
               INNER JOIN hive_accounts ha ON ha.id = hp1.parent_id
               WHERE
+                  NOT hp1.is_muted AND
                   ha.name > _parent_author OR
                   ha.name = _parent_author AND ( hp1.updated_at < _updated_at OR
                   hp1.updated_at = _updated_at AND hp1.id >= __post_id )
@@ -1366,8 +1364,6 @@ def setup(db):
               LIMIT
                   _limit
           ) ds ON ds.id = hp.id
-          WHERE
-              NOT hp.is_muted
           ;
         END
         $function$
@@ -1418,11 +1414,9 @@ def setup(db):
                   ha.name ASC,
                   hp1.updated_at DESC,
                   hp1.id ASC
-              -- with limit inside it returns _limit - 1 records in 300ms, outside it return _limit records but in 1000ms
-              -- adding + 1 returns _limit records in 300ms
-              LIMIT
-                  _limit + 1
           ) ds ON ds.id = hp.id
+          LIMIT
+              _limit
           ;
         END
         $function$
