@@ -329,7 +329,7 @@ class CommunityOp:
 
         except AssertionError as e:
             payload = str(e)
-            Notify('error', dst_id=self.actor_id,
+            Notify(block_num=self.block_num, type_id='error', dst_id=self.actor_id,
                    when=self.date, payload=payload).write()
 
         return self.valid
@@ -417,11 +417,6 @@ class CommunityOp:
         return True
 
     def _notify(self, op, **kwargs):
-        if DbState.is_initial_sync():
-            # TODO: set start date for notifs?
-            # TODO: address other callers
-            return
-
         dst_id = None
         score = 35
 
@@ -430,7 +425,7 @@ class CommunityOp:
             if not self._subscribed(self.account_id):
                 score = 15
 
-        Notify(op, src_id=self.actor_id, dst_id=dst_id,
+        Notify(block_num=self.block_num, type_id=op, src_id=self.actor_id, dst_id=dst_id,
                post_id=self.post_id, when=self.date,
                community_id=self.community_id,
                score=score, **kwargs).write()

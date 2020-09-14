@@ -158,7 +158,7 @@ class Posts(DbAdapterHolder):
         if not DbState.is_initial_sync():
             if error:
                 author_id = result['author_id']
-                Notify('error', dst_id=author_id, when=block_date,
+                Notify(block_num=op['block_num'], type_id='error', dst_id=author_id, when=block_date,
                        post_id=result['id'], payload=error).write()
             cls._insert_feed_cache(result, block_date)
 
@@ -338,10 +338,10 @@ class Posts(DbAdapterHolder):
               "NULL" if ( cashout_time is None ) else ( "'{}'::timestamp".format( cashout_time ) ),
 
               "NULL" if ( is_paidout is None ) else is_paidout,
-                                           
+
               "NULL" if ( total_vote_weight is None ) else total_vote_weight ))
 
-        
+
         n = len(cls.comment_payout_ops)
         cls.comment_payout_ops.clear()
         return n

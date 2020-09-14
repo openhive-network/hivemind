@@ -387,6 +387,7 @@ def build_metadata_community(metadata=None):
     sa.Table(
         'hive_notifs', metadata,
         sa.Column('id',           sa.Integer,  primary_key=True),
+        sa.Column('block_num',    sa.Integer,  nullable=False),
         sa.Column('type_id',      SMALLINT,    nullable=False),
         sa.Column('score',        SMALLINT,    nullable=False),
         sa.Column('created_at',   sa.DateTime, nullable=False),
@@ -1777,9 +1778,9 @@ def setup(db):
                 hive_follows hf
                 WHERE hf.follower = posts_and_scores.parent_author_id AND hf.following = posts_and_scores.author_id AND hf.state = 2
             )
-            
+
             UNION ALL
-            
+
             SELECT --follows
                   hf.block_num as block_num
                 , notifs_id.notif_id as id
@@ -1811,9 +1812,9 @@ def setup(db):
                     , notification_id(hf2.block_num, 15, hf2.id) as notif_id
                 FROM hive_follows hf2
             ) as notifs_id ON notifs_id.id = hf.id
-            
+
             UNION ALL
-            
+
             SELECT --reblogs
                   hr.block_num as block_num
                 , hr_scores.notif_id as id
@@ -1842,9 +1843,9 @@ def setup(db):
                 JOIN hive_accounts_rank_view harv ON harv.id = has.id
             ) as hr_scores ON hr_scores.id = hr.id
             JOIN hive_accounts ha ON hp.author_id = ha.id
-            
+
             UNION ALL
-            
+
             SELECT --subscriptions
                   hs.block_num as block_num
                 , hs_scores.notif_id as id
@@ -1873,9 +1874,9 @@ def setup(db):
                 JOIN hive_accounts_rank_view harv ON harv.id = ha.id
             ) as hs_scores ON hs_scores.id = hs.id
             JOIN hive_accounts ha_com ON hs.community_id = ha_com.id
-            
+
             UNION ALL
-            
+
             SELECT -- new community
                   hc.block_num as block_num
                 , hc_id.notif_id as id
@@ -1901,7 +1902,7 @@ def setup(db):
             ) as hc_id ON hc_id.id = hc.id
 
             UNION ALL
-        
+
             SELECT --votes
                   hv.block_num as block_num
                 , scores.notif_id as id
@@ -1932,6 +1933,28 @@ def setup(db):
                 WHERE hv1.rshares >= 10e9 AND hpv.abs_rshares != 0
             ) as scores ON scores.id = hv.id
             WHERE scores.score > 0
+      UNION ALL
+            SELECT --persistent notifs
+            	 hn.block_num
+               , notification_id(hn.block_num, hn.type_id, CAST( hn.id as INT) ) as id
+               , hp.id as post_id
+               , hn.type_id as type_id
+               , hn.created_at as created_at
+               , ha_src.name as src
+               , ha_dst.name as dst
+               , ha_pst.name as author
+               , hpd.permlink as permlink
+               , hc.name as community
+               , hc.title as community_title
+               , hn.payload as payload
+               , hn.score as score
+            FROM hive_notifs hn
+            JOIN hive_accounts ha_dst ON hn.dst_id = ha_dst.id
+            LEFT JOIN hive_accounts ha_src ON hn.src_id = ha_src.id
+            LEFT JOIN hive_communities hc ON hn.community_id = hc.id
+            LEFT JOIN hive_posts hp ON hn.post_id = hp.id
+            LEFT JOIN hive_accounts ha_pst ON ha_pst.id = hp.author_id
+            LEFT JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
         ) as notifs
     """
     db.query_no_return(sql)

@@ -3,6 +3,8 @@
 from enum import IntEnum
 import logging
 from hive.db.adapter import Db
+from hive.db.db_state import DbState
+from hive.indexer.db_adapter_holder import DbAdapterHolder
 #pylint: disable=too-many-lines,line-too-long
 
 log = logging.getLogger(__name__)
@@ -42,12 +44,13 @@ class NotifyType(IntEnum):
     #power_down = 24
     #message = 25
 
-class Notify:
+class Notify(DbAdapterHolder):
     """Handles writing notifications/messages."""
     # pylint: disable=too-many-instance-attributes,too-many-arguments
     DEFAULT_SCORE = 35
+    _notifies = []
 
-    def __init__(self, type_id, when=None, src_id=None, dst_id=None, community_id=None,
+    def __init__(self, block_num, type_id, when=None, src_id=None, dst_id=None, community_id=None,
                  post_id=None, payload=None, score=None, **kwargs):
         """Create a notification."""
 
@@ -59,6 +62,7 @@ class Notify:
         else:
             raise Exception("unknown type %s" % repr(type_id))
 
+        self.block_num = block_num
         self.enum = enum
         self.score = score or self.DEFAULT_SCORE
         self.when = when
@@ -69,10 +73,10 @@ class Notify:
         self.payload = payload
         self._id = kwargs.get('id')
 
-    @classmethod
-    def from_dict(cls, row):
-        """Instantiate from db row."""
-        return Notify(**dict(row))
+        # for HF24 we started save notifications from block 44300000
+        # about 90 days before release day
+        if block_num > 44300000:
+            Notify._notifies.append( self )
 
     @classmethod
     def set_lastread(cls, account, date):
@@ -80,31 +84,53 @@ class Notify:
         sql = "UPDATE hive_accounts SET lastread_at = :date WHERE name = :name"
         DB.query(sql, date=date, name=account)
 
-    def to_dict(self):
+    def to_db_values(self):
         """Generate a db row."""
-        return dict(
-            type_id=self.enum.value,
-            score=self.score,
-            created_at=self.when,
-            src_id=self.src_id,
-            dst_id=self.dst_id,
-            post_id=self.post_id,
-            community_id=self.community_id,
-            payload=self.payload,
-            id=self._id)
+        return "( {}, {}, {}, '{}'::timestamp, {}, {}, {}, {}, '{}' )".format(
+                  self.block_num
+                , self.enum.value
+                , self.score
+                , self.when
+                , self.src_id if self.src_id else "NULL"
+                , self.dst_id
+                , self.post_id if self.post_id else "NULL"
+                , self.community_id if self.community_id else "NULL"
+                , self.payload if self.payload else "NULL")
 
-    def write(self):
-        """Store this notification."""
-        assert not self._id, 'notify has id %d' % self._id
-        ignore = ('reply', 'reply_comment', 'reblog', 'follow', 'mention', 'vote')
-        if self.enum.name not in ignore:
-            log.warning("[NOTIFY] %s - src %s dst %s pid %s%s cid %s (%d/100)",
-                        self.enum.name, self.src_id, self.dst_id, self.post_id,
-                        ' (%s)' % self.payload if self.payload else '',
-                        self.community_id, self.score)
-        sql = """INSERT INTO hive_notifs (type_id, score, created_at, src_id,
-                                          dst_id, post_id, community_id,
-                                          payload)
-                      VALUES (:type_id, :score, :created_at, :src_id, :dst_id,
-                              :post_id, :community_id, :payload)"""
-        DB.query(sql, **self.to_dict())
+    @classmethod
+    def flush(cls):
+        """Store buffered notifs"""
+        def execute_query( sql, values ):
+            values_str = ','.join(values)
+            actual_query = sql.format(values_str)
+            cls.db.query(actual_query)
+            values.clear()
+
+        n = 0
+        if Notify._notifies:
+            cls.beginTx()
+
+            sql = """INSERT INTO hive_notifs (block_num, type_id, score, created_at, src_id,
+                                              dst_id, post_id, community_id,
+                                              payload)
+                          VALUES
+                          -- block_num, type_id, score, created_at, src_id, dst_id, post_id, community_id, payload
+                          {}"""
+
+            values = []
+            values_limit = 1000
+
+            for notify in Notify._notifies:
+                values.append( "{}".format( notify.to_db_values() ) )
+
+                if len(values) >= values_limit:
+                    execute_query(sql, values)
+
+            if len(values) > 0:
+                execute_query(sql, values)
+
+            n = len(Notify._notifies)
+            Notify._notifies.clear()
+            cls.commitTx()
+
+        return n
