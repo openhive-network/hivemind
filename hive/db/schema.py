@@ -308,6 +308,50 @@ def build_metadata():
         sa.Index('hive_posts_api_helper_parent_permlink_or_category', 'parent_author', 'parent_permlink_or_category', 'id')
     )
 
+    # proto-history
+    # translate id <-> op name
+    sa.Table(
+        'hive_operation_names', metadata,
+        sa.Column( 'op_name_id', sa.Integer, primary_key=True, autoincrement=True, nullable=False),
+        sa.Column( 'op_name', TEXT, nullable=False, unique=True )
+    )
+
+    # transactions to block
+    sa.Table(
+        'hive_transactions', metadata,
+        sa.Column( 'trx_id', sa.Integer, nullable=False, autoincrement=True, primary_key=True ),
+        sa.Column( 'trx_hash', CHAR(40), nullable=False ),
+        sa.Column( 'block_num', sa.Integer, nullable=False ),
+        sa.Column( 'op_count',sa.SmallInteger, nullable=False ),
+        sa.UniqueConstraint('trx_hash', name='hive_trx_history_hash_ux1'),
+        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_trx_history_block_no_fk1'),
+    )
+
+    # operations to transactions
+    sa.Table(
+        'hive_operations', metadata,
+        sa.Column('trx_id', sa.Integer, nullable=False),    # PK pt. 1
+        sa.Column('position', sa.Integer, nullable=False ), # PK pt. 2
+        sa.Column('op_name_id', sa.Integer, nullable=False),    # op type
+        sa.Column('participants', sa.ARRAY(sa.INT), nullable=True), # array of participants in trx, should be INT[] to use intarray extension
+
+        sa.ForeignKeyConstraint(['op_name_id'], ['hive_operation_names.op_name_id'], name='hive_op_history_fk1'),
+        sa.ForeignKeyConstraint(['trx_id'], ['hive_transactions.trx_id'], name='hive_op_trx_id_history_fk2'),
+
+        sa.UniqueConstraint('trx_id', 'position', name='hive_unique_trx_op_pos'),
+
+        sa.Index('hive_accounts_in_hive_operations_idx1', 'participants', postgresql_using="GIST", postgresql_ops={"participants": "gist__int_ops"}),
+    )
+
+    # if operation has additional info it appears here
+    sa.Table(
+        'hive_operations_details', metadata,
+        sa.Column('trx_id', sa.Integer, nullable=False),
+        sa.Column('op_position', sa.Integer, nullable=False),
+        sa.Column('important_info', sa.TEXT, nullable=False),
+        sa.ForeignKeyConstraint(['trx_id', 'op_position'], ['hive_operations.trx_id', 'hive_operations.position'], name='hive_trx_id_op_pos_details_fk1')
+    )
+
     metadata = build_metadata_community(metadata)
 
     return metadata
@@ -419,6 +463,9 @@ def create_fk(db):
 
 def setup(db):
     """Creates all tables and seed data"""
+    is_extension_activated = len(db.query_all("select * from pg_extension where extname='intarray'"))
+    assert is_extension_activated
+
     # initialize schema
     build_metadata().create_all(db.engine())
 
@@ -455,6 +502,11 @@ def setup(db):
 
     sql = "CREATE INDEX hive_communities_ft1 ON hive_communities USING GIN (to_tsvector('english', title || ' ' || about))"
     db.query(sql)
+
+    # sql = "DROP INDEX IF EXISTS hive_accounts_in_hive_operations_idx1"
+    # db.query(sql)
+    # sql = "CREATE INDEX hive_accounts_in_hive_operations_idx1 ON hive_operations USING GIST ( participants gist__int_ops )"
+    # db.query(sql)
 
     sql = """
       DROP FUNCTION IF EXISTS find_comment_id(character varying, character varying, boolean)
@@ -2234,6 +2286,29 @@ def setup(db):
             $function$
             LANGUAGE sql STABLE
             ;
+    """
+    db.query_no_return(sql)
+
+    sql = """
+        CREATE OR REPLACE FUNCTION id_array_to_name_array( arr INTEGER[] )
+        RETURNS CHARACTER VARYING[]
+        LANGUAGE plpgsql STABLE
+        AS $$
+        BEGIN
+            RETURN ARRAY(
+                SELECT 
+                    name 
+                FROM (
+                    SELECT 
+                        unnest(arr) as acc_id 
+                ) AS sq 
+                JOIN 
+                    hive_accounts as accs 
+                ON 
+                    sq.acc_id=accs.id
+            );
+        END;
+        $$
     """
     db.query_no_return(sql)
 

@@ -1,8 +1,10 @@
+from hive.db.adapter import Db
+
 import logging
 log = logging.getLogger(__name__)
 
 class DbAdapterHolder(object):
-    db = None
+    db : Db = None
 
     _inside_tx = False
     _use_tx = True

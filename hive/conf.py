@@ -118,7 +118,7 @@ class Conf():
                 max_workers=self.get('max_workers'))
         return self._steem
 
-    def db(self):
+    def db(self) -> Db:
         """Get a configured instance of Db."""
         if not self._db:
             url = self.get('database_url')

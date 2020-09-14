@@ -9,7 +9,6 @@ from hive.indexer.accounts import Accounts
 from hive.indexer.feed_cache import FeedCache
 from hive.indexer.notify import Notify
 from hive.indexer.db_adapter_holder import DbAdapterHolder
-from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
 
@@ -40,7 +39,7 @@ class Reblog(DbAdapterHolder):
 
         blogger = op_json['account']
         author = op_json['author']
-        permlink = escape_characters(op_json['permlink'])
+        permlink = op_json['permlink']
 
         if blogger != account:
             return  # impersonation
@@ -50,7 +49,7 @@ class Reblog(DbAdapterHolder):
         if 'delete' in op_json and op_json['delete'] == 'delete':
             row = cls.db.query_row(DELETE_SQL, a=blogger, permlink=permlink)
             if row is None:
-                log.debug("reblog: post not found: %s/%s", author, op_json['permlink'])
+                log.debug("reblog: post not found: %s/%s", author, permlink)
                 return
             if not DbState.is_initial_sync():
                 result = dict(row)
@@ -89,22 +88,22 @@ class Reblog(DbAdapterHolder):
             cls.beginTx()
             for reblog_item in cls.reblog_items_to_flush:
                 if count < limit:
-                    values.append("('{}', '{}', {}, '{}'::timestamp, /* block number: */ {})".format(reblog_item[0],
-                                                                                    reblog_item[1],
-                                                                                    reblog_item[2],
-                                                                                    reblog_item[3],
-                                                                                    reblog_item[4]))
+                    values.append("('{}', '{}', '{}', '{}'::timestamp, /* block number: */ {})".format(reblog_item[0],
+                                                                                   reblog_item[1],
+                                                                                   reblog_item[2],
+                                                                                   reblog_item[3],
+                                                                                   reblog_item[4]))
                     count = count + 1
                 else:
                     values_str = ",".join(values)
                     query = sql_prefix.format(values_str, values_str)
                     cls.db.query(query)
                     values.clear()
-                    values.append("('{}', '{}', {}, '{}'::timestamp, /* block number: */ {})".format(reblog_item[0],
-                                                                                    reblog_item[1],
-                                                                                    reblog_item[2],
-                                                                                    reblog_item[3],
-                                                                                    reblog_item[4]))
+                    values.append("('{}', '{}', '{}', '{}'::timestamp, /* block number: */ {})".format(reblog_item[0],
+                                                                                   reblog_item[1],
+                                                                                   reblog_item[2],
+                                                                                   reblog_item[3],
+                                                                                   reblog_item[4]))
                     count = 1
 
             if len(values) > 0:

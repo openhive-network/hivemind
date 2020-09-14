@@ -7,3 +7,4 @@ SET client_encoding = 'UTF8';
 SET client_min_messages = 'warning';
 
 CREATE DATABASE :db_name;
+CREATE EXTENSION intarray SCHEMA public;

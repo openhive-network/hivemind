@@ -18,6 +18,8 @@ from hive.indexer.tags import Tags
 from hive.indexer.reputations import Reputations
 from hive.indexer.reblog import Reblog
 from hive.indexer.notify import Notify
+from hive.indexer.history import History
+from time import perf_counter
 
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.stats import FlushStatusManager as FSM
@@ -45,6 +47,7 @@ class Blocks:
 
     _concurrent_flush = [
       ('Posts', Posts.flush, Posts),
+      ('History', History.flush, History),
       ('PostDataCache', PostDataCache.flush, PostDataCache),
       ('Reputations', Reputations.flush, Reputations),
       ('Votes', Votes.flush, Votes),
@@ -76,6 +79,7 @@ class Blocks:
         Notify.setup_own_db_access(sharedDbAdapter)
         Accounts.setup_own_db_access(sharedDbAdapter)
         PayoutStats.setup_own_db_access(sharedDbAdapter)
+        History.setup_own_db_access(sharedDbAdapter)
 
     @classmethod
     def setup_shared_db_access(cls, sharedDbAdapter):
@@ -88,6 +92,7 @@ class Blocks:
         Reblog.setup_shared_db_access(sharedDbAdapter)
         Notify.setup_shared_db_access(sharedDbAdapter)
         Accounts.setup_shared_db_access(sharedDbAdapter)
+        History.setup_shared_db_access(sharedDbAdapter)
 
     @classmethod
     def head_num(cls):
@@ -117,6 +122,7 @@ class Blocks:
         Notify.flush()
         Reputations.flush()
         accts = Accounts.flush()
+        History.flush()
 
         cls.on_live_blocks_processed(block_num, block_num)
         time_end = perf_counter()
@@ -171,7 +177,7 @@ class Blocks:
 #                if n > 0:
 #                    log.info('%r flush generated %d records' % (description, n))
             except Exception as exc:
-                log.error('%r generated an exception: %s' % (description, exc))
+                log.error('generated an exception: %s' % (exc))
                 raise exc
         pool.shutdown()
 
@@ -233,7 +239,6 @@ class Blocks:
         PPSM.preprocess_stat( "prepare_vops", PPSM.stop(start), len(vopsList) )
         return ineffective_deleted_ops
 
-
     @classmethod
     def _process(cls, block, virtual_operations):
         """Process a single block. Assumes a trx is open."""
@@ -256,6 +261,7 @@ class Blocks:
     
         json_ops = []
         for tx_idx, tx in enumerate(block['transactions']):
+            tx_hash = block['transaction_ids'][tx_idx]
             for operation in tx['operations']:
                 start = OPSM.start()
                 op_type = operation['type']
@@ -263,6 +269,9 @@ class Blocks:
 
                 assert 'block_num' not in op
                 op['block_num'] = num
+
+                # history
+                History.archive_op(num, tx_hash, op_type, op)
 
                 account_name = None
                 op_details = None

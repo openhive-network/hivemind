@@ -219,7 +219,8 @@ class StatusManager:
                 if StatusManager.metrics_to_save.qsize() == 0 and StatusManager.__join:
                     break
         except Exception as e:
-            log.error(f"stats collector thread failed: {e}\nTraceback:\n{e.with_traceback()}")
+            from sys import exc_info
+            log.error(f"stats collector thread failed: {e}\nTraceback:\n{e.with_traceback(exc_info[2])}")
 
     @staticmethod
     def __add_value( manager, key, value ):

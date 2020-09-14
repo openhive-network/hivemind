@@ -51,9 +51,11 @@ ln -sf ./local-site/bin/hive $HIVE_NAME
 echo Attempting to recreate database $DB_NAME
 psql -U $POSTGRES_USER -h localhost -d postgres -c "DROP DATABASE IF EXISTS $DB_NAME;"
 if [ "$HIVEMIND_ENABLE_DB_MONITORING" = "yes" ]; then
-  psql -U $POSTGRES_USER -h localhost -d postgres -c "CREATE DATABASE $DB_NAME TEMPLATE template_hive_ci;"
+  psql -U $POSTGRES_USER -h localhost -d postgres -c "CREATE DATABASE $DB_NAME TEMPLATE template_hive_ci"
+  psql -U $POSTGRES_USER -h localhost -d $DB_NAME -c "CREATE EXTENSION intarray SCHEMA public" $DB_NAME
 else
-  psql -U $POSTGRES_USER -h localhost -d postgres -c "CREATE DATABASE $DB_NAME"
+  psql -U $POSTGRES_USER -h localhost -d postgres -c "CREATE DATABASE $DB_NAME;"
+  psql -U $POSTGRES_USER -h localhost -d $DB_NAME -c "CREATE EXTENSION intarray SCHEMA public" $DB_NAME
 fi
 
 echo Attempting to starting hive sync using hived node: $HIVEMIND_SOURCE_HIVED_URL . Max sync block is: $HIVEMIND_MAX_BLOCK

@@ -123,7 +123,8 @@ class DbState:
             'hive_post_tags_tag_id_idx',
 
             'hive_votes_voter_id_post_id_idx',
-            'hive_votes_post_id_voter_id_idx'
+            'hive_votes_post_id_voter_id_idx',
+            "hive_accounts_in_hive_operations_idx1"
         ]
 
         to_return = []
