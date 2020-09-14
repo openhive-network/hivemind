@@ -66,10 +66,10 @@ class DbState:
         return cls._db
 
     @classmethod
-    def finish_initial_sync(cls, current_imported_block, last_imported_block):
+    def finish_initial_sync(cls, current_imported_block):
         """Set status to initial sync complete."""
         assert cls._is_initial_sync, "initial sync was not started."
-        cls._after_initial_sync(current_imported_block, last_imported_block)
+        cls._after_initial_sync(current_imported_block)
         cls._is_initial_sync = False
         log.info("[INIT] Initial sync complete!")
 
@@ -139,10 +139,6 @@ class DbState:
 
     @classmethod
     def processing_indexes(cls, is_pre_process, drop, create ):
-
-        # sql = "SELECT promoted FROM hive_posts WHERE id = :id"
-        # curr_amount = DB.query_one(sql, id=record['post_id'])
-        # new_amount = curr_amount + record['amount']
       DB = cls.db()
       engine = DB.engine()
       log.info("[INIT] Begin %s-initial sync hooks", "pre" if is_pre_process else "post" )
@@ -202,11 +198,13 @@ class DbState:
         return current_work_mem
 
     @classmethod
-    def _after_initial_sync(cls, current_imported_block, last_imported_block):
+    def _after_initial_sync(cls, current_imported_block):
         """Routine which runs *once* after initial sync.
 
         Re-creates non-core indexes for serving APIs after init sync,
         as well as all foreign keys."""
+
+        last_imported_block = DbState.db().query_one("SELECT block_num FROM hive_state LIMIT 1")
 
         assert current_imported_block >= last_imported_block
 
