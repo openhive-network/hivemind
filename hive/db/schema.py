@@ -1220,9 +1220,9 @@ def setup(db):
               ORDER BY
                   ha.name ASC,
                   hpd.permlink ASC
-              LIMIT
-                  _limit
           ) ds ON ds.id = hp.id
+          LIMIT
+              _limit
           ;
         $function$
       ;
