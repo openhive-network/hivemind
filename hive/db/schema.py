@@ -1161,13 +1161,21 @@ def setup(db):
               hp.active, hp.author_rewards
           FROM
               hive_posts_view hp
-          WHERE
-              NOT hp.is_muted AND
-              hp.cashout_time > _cashout_time OR
-              hp.cashout_time = _cashout_time AND hp.id >= __post_id
-          ORDER BY
-              hp.cashout_time ASC,
-              hp.id ASC
+          INNER JOIN
+          (
+              SELECT 
+                  hp1.id
+              FROM 
+                  hive_posts hp1
+              WHERE
+                  NOT hp1.is_muted AND
+                  hp1.cashout_time > _cashout_time OR
+                  hp1.cashout_time = _cashout_time AND hp1.id >= __post_id
+              ORDER BY
+                  hp1.cashout_time ASC,
+                  hp1.id ASC
+          ) ds ON ds.id = hp.id
+          -- strange behaviour: if limit is moved into inner join it shows empty result, outside join its ok
           LIMIT
               _limit
           ;
@@ -1183,10 +1191,10 @@ def setup(db):
         in _permlink hive_permlink_data.permlink%TYPE,
         in _limit INT)
         RETURNS SETOF database_api_post
+        LANGUAGE sql
+        STABLE
         AS
         $function$
-        BEGIN
-          RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
               hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
@@ -1198,19 +1206,28 @@ def setup(db):
               hp.active, hp.author_rewards
           FROM
               hive_posts_view hp
+          INNER JOIN
+          (
+              SELECT hp1.id
+              FROM
+                  hive_posts hp1
+              INNER JOIN hive_accounts ha ON ha.id = hp1.author_id
+              INNER JOIN hive_permlink_data hpd ON hpd.id = hp1.permlink_id
+              WHERE
+                  ha.name > _author OR
+                  ha.name = _author AND hpd.permlink >= _permlink
+              ORDER BY
+                  ha.name ASC
+              LIMIT
+                  _limit
+          ) ds ON ds.id = hp.id
           WHERE
-              NOT hp.is_muted AND
-              hp.author > _author OR
-              hp.author = _author AND hp.permlink >= _permlink
+              NOT hp.is_muted
           ORDER BY
               hp.author ASC,
               hp.permlink ASC
-          LIMIT
-              _limit
           ;
-        END
         $function$
-        LANGUAGE plpgsql
       ;
 
       DROP FUNCTION IF EXISTS list_comments_by_root(character varying, character varying, character varying, character varying, int)
@@ -1331,17 +1348,26 @@ def setup(db):
               hp.active, hp.author_rewards
           FROM
               hive_posts_view hp
+          INNER JOIN
+          (
+              SELECT 
+                  hp1.id
+              FROM
+                  hive_posts hp1
+              INNER JOIN hive_accounts ha ON ha.id = hp1.parent_id
+              WHERE
+                  ha.name > _parent_author OR
+                  ha.name = _parent_author AND ( hp1.updated_at < _updated_at OR
+                  hp1.updated_at = _updated_at AND hp1.id >= __post_id )
+              ORDER BY
+                  ha.name ASC,
+                  hp1.updated_at DESC,
+                  hp1.id ASC
+              LIMIT
+                  _limit
+          ) ds ON ds.id = hp.id
           WHERE
-              NOT hp.is_muted AND
-              hp.parent_author > _parent_author OR
-              hp.parent_author = _parent_author AND ( hp.updated_at < _updated_at OR
-              hp.updated_at = _updated_at AND hp.id >= __post_id )
-          ORDER BY
-              hp.parent_author ASC,
-              hp.updated_at DESC,
-              hp.id ASC
-          LIMIT
-              _limit
+              NOT hp.is_muted
           ;
         END
         $function$
@@ -1375,18 +1401,28 @@ def setup(db):
               hp.active, hp.author_rewards
           FROM
               hive_posts_view hp
-          WHERE
-              NOT hp.is_muted AND
-              -- fat node used wrong index (by_last_update) so the results are vastly different
-              hp.author > _author OR
-              hp.author = _author AND ( hp.updated_at < _updated_at OR
-              hp.updated_at = _updated_at AND hp.id >= __post_id )
-          ORDER BY
-              hp.author ASC,
-              hp.updated_at DESC,
-              hp.id ASC
-          LIMIT
-              _limit
+          INNER JOIN
+          (
+              SELECT 
+                hp1.id
+              FROM
+                hive_posts hp1
+              INNER JOIN hive_accounts ha ON ha.id = hp1.author_id
+              WHERE
+                  NOT hp1.is_muted AND
+                  -- fat node used wrong index (by_last_update) so the results are vastly different
+                  ha.name > _author OR
+                  ha.name = _author AND ( hp1.updated_at < _updated_at OR
+                  hp1.updated_at = _updated_at AND hp1.id >= __post_id )
+              ORDER BY
+                  ha.name ASC,
+                  hp1.updated_at DESC,
+                  hp1.id ASC
+              -- with limit inside it returns _limit - 1 records in 300ms, outside it return _limit records but in 1000ms
+              -- adding + 1 returns _limit records in 300ms
+              LIMIT
+                  _limit + 1
+          ) ds ON ds.id = hp.id
           ;
         END
         $function$
