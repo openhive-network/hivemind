@@ -25,7 +25,7 @@ def update_hot_and_tranding_for_block_range( first_block = NO_CONSTRAINT, last_b
             {}
             GROUP BY hv.post_id
         ) as ds
-        WHERE ihp.id = ds.id
+        WHERE ihp.id = ds.id AND ihp.is_paidout = False
     """
 
     sql = ""
