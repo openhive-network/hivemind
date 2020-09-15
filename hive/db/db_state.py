@@ -333,7 +333,7 @@ class DbState:
             from hive.indexer.accounts import Accounts
             names = SteemClient().get_all_account_names()
             Accounts.load_ids()
-            Accounts.register(names, '1970-01-01T00:00:00', 0)
+            Accounts.register(names, None, '1970-01-01T00:00:00', 0)
             Accounts.clear_ids()
             cls._set_ver(6)
 

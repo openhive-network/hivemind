@@ -13,12 +13,18 @@ from hive.utils.timer import Timer
 from hive.utils.account import safe_profile_metadata
 from hive.utils.unique_fifo import UniqueFIFO
 
+from hive.indexer.db_adapter_holder import DbAdapterHolder
+
 log = logging.getLogger(__name__)
 
 DB = Db.instance()
 
-class Accounts:
+class Accounts(DbAdapterHolder):
     """Manages account id map, dirty queue, and `hive_accounts` table."""
+
+    _updates_data = {}
+
+    inside_flush = False
 
     # name->id map
     _ids = {}
@@ -31,6 +37,17 @@ class Accounts:
 
     # account core methods
     # --------------------
+
+    @classmethod
+    def update_op(cls, update_operation):
+        """Save json_metadata."""
+
+        if cls.inside_flush:
+            log.exception("Adding new update-account-info into '_updates_data' dict")
+            raise RuntimeError("Fatal error")
+
+        key = update_operation['account']
+        cls._updates_data[key] = safe_profile_metadata( update_operation )
 
     @classmethod
     def load_ids(cls):
@@ -70,7 +87,7 @@ class Accounts:
         return False
 
     @classmethod
-    def register(cls, name, block_date, block_num):
+    def register(cls, name, op_details, block_date, block_num):
         """Block processing: register "candidate" names.
 
         There are four ops which can result in account creation:
@@ -86,7 +103,13 @@ class Accounts:
         if cls.exists(name):
             return
 
-        DB.query("INSERT INTO hive_accounts (name, created_at) VALUES (:name, :date)", name=name, date=block_date)
+        profile = safe_profile_metadata( op_details )
+
+        DB.query("""INSERT INTO hive_accounts (name, created_at, display_name, about, location, website, profile_image, cover_image )
+                  VALUES (:name, :date, :display_name, :about, :location, :website, :profile_image, :cover_image )""",
+                  name=name, date=block_date, display_name = profile['name'], about = profile['about'],
+                  location = profile['location'], website = profile['website'],
+                  profile_image = profile['profile_image'], cover_image = profile['cover_image'] )
 
         # pull newly-inserted ids and merge into our map
         sql = "SELECT id FROM hive_accounts WHERE name = :name"
@@ -122,7 +145,7 @@ class Accounts:
         return cls.dirty_set(set(DB.query_col(sql, limit=limit)))
 
     @classmethod
-    def flush(cls, steem, trx=False, spread=1):
+    def flush_online(cls, steem, trx=False, spread=1):
         """Process all accounts flagged for update.
 
          - trx: bool - wrap the update in a transaction
@@ -208,3 +231,35 @@ class Accounts:
 
         bind = ', '.join([k+" = :"+k for k in list(values.keys())][1:])
         return ("UPDATE hive_accounts SET %s WHERE name = :name" % bind, values)
+
+    @classmethod
+    def flush(cls):
+        """ Flush json_metadatafrom cache to database """
+
+        cls.inside_flush = True
+        n = 0
+
+        if cls._updates_data:
+            cls.beginTx()
+
+            for name, data in cls._updates_data.items():
+              sql = """
+                        UPDATE hive_accounts
+                        SET
+                          display_name = '{}',
+                          about = '{}',
+                          location = '{}',
+                          website = '{}',
+                          profile_image = '{}',
+                          cover_image = '{}'
+                        WHERE name = '{}'
+                  """.format( data['name'], data['about'], data['location'], data['website'], data['profile_image'], data['cover_image'], name )
+              cls.db.query(sql)
+
+            n = len(cls._updates_data)
+            cls._updates_data.clear()
+            cls.commitTx()
+
+        cls.inside_flush = False
+
+        return n

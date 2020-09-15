@@ -53,7 +53,8 @@ class Blocks:
       ('Votes', Votes.flush, Votes), 
       ('Tags', Tags.flush, Tags), 
       ('Follow', follows_flush_helper, Follow),
-      ('Reblog', Reblog.flush, Reblog)
+      ('Reblog', Reblog.flush, Reblog),
+      ('Accounts', Accounts.flush, Accounts)
     ]
 
     def __init__(cls):
@@ -74,6 +75,7 @@ class Blocks:
         Follow.setup_db_access(sharedDbAdapter)
         Posts.setup_db_access(sharedDbAdapter)
         Reblog.setup_db_access(sharedDbAdapter)
+        Accounts.setup_db_access(sharedDbAdapter)
 
     @classmethod
     def head_num(cls):
@@ -260,6 +262,7 @@ class Blocks:
                 op['block_num'] = num
 
                 account_name = None
+                op_details = None
                 # account ops
                 if op_type == 'pow_operation':
                     account_name = op['worker_account']
@@ -267,20 +270,21 @@ class Blocks:
                     account_name = op['work']['value']['input']['worker_account']
                 elif op_type == 'account_create_operation':
                     account_name = op['new_account_name']
+                    op_details = op
                 elif op_type == 'account_create_with_delegation_operation':
                     account_name = op['new_account_name']
+                    op_details = op
                 elif op_type == 'create_claimed_account_operation':
                     account_name = op['new_account_name']
+                    op_details = op
 
-                Accounts.register(account_name, cls._head_block_date, num)
+                Accounts.register(account_name, op_details, cls._head_block_date, num)
 
                 # account metadata updates
                 if op_type == 'account_update_operation':
-                    if not is_initial_sync:
-                        Accounts.dirty(op['account']) # full
+                    Accounts.update_op( op )
                 elif op_type == 'account_update2_operation':
-                    if not is_initial_sync:
-                        Accounts.dirty(op['account']) # full
+                    Accounts.update_op( op )
 
                 # post ops
                 elif op_type == 'comment_operation':

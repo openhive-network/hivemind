@@ -363,7 +363,7 @@ class Sync:
 
         if not is_initial_sync:
             # This flush is low importance; accounts are swept regularly.
-            Accounts.flush(steemd, trx=True)
+            Accounts.flush_online(steemd, trx=True)
 
     def listen(self):
         """Live (block following) mode."""
@@ -384,7 +384,7 @@ class Sync:
             self._db.query("START TRANSACTION")
             num = Blocks.process(block, {}, steemd)
             follows = Follow.flush(trx=False)
-            accts = Accounts.flush(steemd, trx=False, spread=8)
+            accts = Accounts.flush_online(steemd, trx=False, spread=8)
             self._db.query("COMMIT")
 
             ms = (perf() - start_time) * 1000

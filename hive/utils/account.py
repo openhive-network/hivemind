@@ -5,6 +5,17 @@ from hive.utils.normalize import trunc
 
 def safe_profile_metadata(account):
     """Given an account, return sanitized profile data."""
+
+    if account is None:
+      return dict(
+          name='',
+          about='',
+          location='',
+          website='',
+          profile_image='',
+          cover_image='',
+      )
+
     prof = {}
 
     try:
