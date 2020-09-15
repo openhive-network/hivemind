@@ -1777,9 +1777,9 @@ def setup(db):
                 hive_follows hf
                 WHERE hf.follower = posts_and_scores.parent_author_id AND hf.following = posts_and_scores.author_id AND hf.state = 2
             )
-            
+
             UNION ALL
-            
+
             SELECT --follows
                   hf.block_num as block_num
                 , notifs_id.notif_id as id
@@ -1811,9 +1811,9 @@ def setup(db):
                     , notification_id(hf2.block_num, 15, hf2.id) as notif_id
                 FROM hive_follows hf2
             ) as notifs_id ON notifs_id.id = hf.id
-            
+
             UNION ALL
-            
+
             SELECT --reblogs
                   hr.block_num as block_num
                 , hr_scores.notif_id as id
@@ -1842,9 +1842,9 @@ def setup(db):
                 JOIN hive_accounts_rank_view harv ON harv.id = has.id
             ) as hr_scores ON hr_scores.id = hr.id
             JOIN hive_accounts ha ON hp.author_id = ha.id
-            
+
             UNION ALL
-            
+
             SELECT --subscriptions
                   hs.block_num as block_num
                 , hs_scores.notif_id as id
@@ -1873,9 +1873,9 @@ def setup(db):
                 JOIN hive_accounts_rank_view harv ON harv.id = ha.id
             ) as hs_scores ON hs_scores.id = hs.id
             JOIN hive_accounts ha_com ON hs.community_id = ha_com.id
-            
+
             UNION ALL
-            
+
             SELECT -- new community
                   hc.block_num as block_num
                 , hc_id.notif_id as id
@@ -1901,7 +1901,7 @@ def setup(db):
             ) as hc_id ON hc_id.id = hc.id
 
             UNION ALL
-        
+
             SELECT --votes
                   hv.block_num as block_num
                 , scores.notif_id as id
@@ -1981,11 +1981,19 @@ def setup(db):
 
     sql = """
         DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_trends;
-        CREATE FUNCTION bridge_get_ranked_post_by_trends( in _limit SMALLINT )
+        CREATE FUNCTION bridge_get_ranked_post_by_trends( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
         RETURNS SETOF bridge_api_post
         AS
         $function$
-        SELECT
+        DECLARE
+        	__post_id INTEGER = -1;
+        	__trending_limit FLOAT = -1.0;
+        BEGIN
+            IF _author <> '' THEN
+                __post_id = find_comment_id( _author, _permlink, True );
+                SELECT hp.sc_trend INTO __trending_limit FROM hive_posts hp WHERE hp.id = __post_id;
+            END IF;
+            RETURN QUERY SELECT
             hp.id,
             hp.author,
             hp.parent_author,
@@ -2024,17 +2032,87 @@ def setup(db):
             hp.curator_payout_value
         FROM
         (
-            SELECT
-              hp1.id
-            , hp1.sc_trend as trend
-            FROM hive_posts hp1 WHERE NOT hp1.is_paidout AND hp1.depth = 0
-            ORDER BY hp1.sc_trend DESC, hp1.id
-            LIMIT _limit
+        SELECT
+            hp1.id
+          , hp1.sc_trend as trend
+        FROM
+            hive_posts hp1
+        WHERE NOT hp1.is_paidout AND hp1.depth = 0
+            AND ( __post_id = -1 OR hp1.sc_trend < __trending_limit OR ( hp1.sc_trend = __trending_limit AND hp1.id < __post_id  ) )
+        ORDER BY hp1.sc_trend DESC
+        LIMIT _limit
         ) as trends
         JOIN hive_posts_view hp ON hp.id = trends.id
-        ORDER BY trends.trend DESC, trends.id
+        ORDER BY trends.trend DESC, trends.id LIMIT _limit;
+        END
         $function$
-        language sql
+        language plpgsql STABLE
+    """
+    db.query_no_return(sql)
+
+    sql = """
+        DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_created;
+        CREATE FUNCTION bridge_get_ranked_post_by_created( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+        RETURNS SETOF bridge_api_post
+        AS
+        $function$
+        DECLARE
+          __post_id INTEGER = -1;
+        BEGIN
+          IF _author <> '' THEN
+              __post_id = find_comment_id( _author, _permlink, True );
+          END IF;
+          RETURN QUERY SELECT
+              hp.id,
+              hp.author,
+              hp.parent_author,
+              hp.author_rep,
+              hp.root_title,
+              hp.beneficiaries,
+              hp.max_accepted_payout,
+              hp.percent_hbd,
+              hp.url,
+              hp.permlink,
+              hp.parent_permlink_or_category,
+              hp.title,
+              hp.body,
+              hp.category,
+              hp.depth,
+              hp.promoted,
+              hp.payout,
+              hp.pending_payout,
+              hp.payout_at,
+              hp.is_paidout,
+              hp.children,
+              hp.votes,
+              hp.created_at,
+              hp.updated_at,
+              hp.rshares,
+              hp.abs_rshares,
+              hp.json,
+              hp.is_hidden,
+              hp.is_grayed,
+              hp.total_votes,
+              hp.sc_trend,
+              hp.role_title,
+              hp.community_title,
+              hp.role_id,
+              hp.is_pinned,
+              hp.curator_payout_value
+        	FROM
+          (
+              SELECT
+                hp1.id
+              , hp1.created_at as created_at
+              FROM hive_posts hp1 WHERE hp1.depth = 0 AND NOT hp1.is_grayed AND ( __post_id = -1 OR hp1.id < __post_id  )
+              ORDER BY hp1.id DESC
+              LIMIT _limit
+          ) as created
+          JOIN hive_posts_view hp ON hp.id = created.id
+          ORDER BY created.created_at DESC, created.id LIMIT _limit;
+          END
+          $function$
+          language plpgsql STABLE
     """
     db.query_no_return(sql)
 
