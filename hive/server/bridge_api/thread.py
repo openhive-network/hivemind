@@ -23,72 +23,11 @@ async def get_discussion(context, author, permlink, observer=None):
     author = valid_account(author)
     permlink = valid_permlink(permlink)
 
-    sql = """
-        WITH RECURSIVE child_posts (id, parent_id) AS (
-          SELECT
-            id, parent_id
-          FROM hive_posts_view hpv WHERE hpv.author = :author
-            AND hpv.permlink = :permlink
-            AND NOT hpv.is_muted
-          UNION ALL
-          SELECT
-            children.id, children.parent_id
-          FROM hive_posts children
-          INNER JOIN child_posts ON (children.parent_id = child_posts.id) 
-          WHERE children.counter_deleted = 0 AND NOT children.is_muted
-        )
-        SELECT
-          cp.id,
-          cp.parent_id,
-          hpv.id as post_id,
-          hpv.author,
-          hpv.permlink,
-          hpv.title,
-          hpv.body,
-          hpv.category,
-          hpv.depth,
-          hpv.promoted,
-          hpv.payout,
-          hpv.pending_payout,
-          hpv.payout_at,
-          hpv.is_paidout,
-          hpv.children,
-          hpv.votes,
-          hpv.created_at,
-          hpv.updated_at,
-          hpv.rshares,
-          hpv.abs_rshares,
-          hpv.json,
-          hpv.author_rep,
-          hpv.is_hidden,
-          hpv.is_grayed,
-          hpv.total_votes,
-          hpv.sc_trend,
-          hpv.author_id AS acct_author_id,
-          hpv.root_author,
-          hpv.root_permlink,
-          hpv.parent_author,
-          hpv.parent_permlink_or_category,
-          hpv.allow_replies,
-          hpv.allow_votes,
-          hpv.allow_curation_rewards,
-          hpv.url,
-          hpv.root_title,
-          hpv.beneficiaries,
-          hpv.max_accepted_payout,
-          hpv.percent_hbd,
-          hpv.curator_payout_value
-        FROM child_posts cp
-        INNER JOIN hive_posts_view hpv ON (hpv.id = cp.id)
-        WHERE NOT hpv.is_muted
-        ORDER BY cp.id
-        LIMIT 2000
-    """
-
     blacklists_for_user = None
     if observer:
         blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
 
+    sql = "SELECT * FROM get_discussion(:author,:permlink)"
     rows = await db.query_all(sql, author=author, permlink=permlink)
     if not rows or len(rows) == 0:
         return {}
