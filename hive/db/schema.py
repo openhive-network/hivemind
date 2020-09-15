@@ -1177,13 +1177,14 @@ def setup(db):
               ORDER BY
                   hp1.cashout_time ASC,
                   hp1.id ASC
-              LIMIT
-                _limit
+              
           ) ds ON ds.id = hp.id
           -- strange behaviour: if limit is moved into inner join it shows empty result, outside join its ok
           ORDER BY
               hp.cashout_time ASC,
               hp.id ASC
+          LIMIT
+              _limit
           ;
         END
         $function$
@@ -1226,12 +1227,12 @@ def setup(db):
               ORDER BY
                   ha.name ASC,
                   hpd.permlink ASC
-              LIMIT
-                  _limit
           ) ds ON ds.id = hp.id
           ORDER BY
               hp.author ASC,
               hp.permlink ASC
+          LIMIT
+              _limit
           ;
         $function$
       ;
@@ -1373,10 +1374,6 @@ def setup(db):
               LIMIT
                   _limit
           ) ds ON ds.id = hp.id
-          ORDER BY
-              hp.author ASC,
-              hp.updated_at DESC,
-              hp.id ASC
           ;
         END
         $function$
@@ -1427,13 +1424,13 @@ def setup(db):
                   ha.name ASC,
                   hp1.updated_at DESC,
                   hp1.id ASC
-              LIMIT
-                  _limit
           ) ds ON ds.id = hp.id
           ORDER BY
               hp.author ASC,
               hp.updated_at DESC,
               hp.id ASC
+          LIMIT
+              _limit
           ;
         END
         $function$
