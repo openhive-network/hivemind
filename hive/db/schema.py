@@ -1465,11 +1465,71 @@ def setup(db):
         		, hp1.sc_trend as trend
         	  FROM hive_posts hp1 WHERE NOT hp1.is_paidout AND hp1.depth = 0 ORDER BY hp1.sc_trend DESC LIMIT _limit
            ) as trends
-           JOIN hive_posts_view hp ON hp.id = trends.id ORDER BY trends.trend DESC
+           JOIN hive_posts_view hp ON hp.id = trends.id ORDER BY trends.trend DESC LIMIT _limit
         $function$
-        language sql
+        language sql STABLE
     """
     db.query_no_return(sql)
+
+    sql = """
+        DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_created;
+        CREATE FUNCTION bridge_get_ranked_post_by_created( in _limit SMALLINT )
+        RETURNS SETOF bridge_api_post
+        AS
+        $function$
+        SELECT
+            hp.id,
+            hp.author,
+            hp.parent_author,
+            hp.author_rep,
+            hp.root_title,
+            hp.beneficiaries,
+            hp.max_accepted_payout,
+            hp.percent_hbd,
+            hp.url,
+            hp.permlink,
+            hp.parent_permlink_or_category,
+            hp.title,
+            hp.body,
+            hp.category,
+            hp.depth,
+            hp.promoted,
+            hp.payout,
+            hp.pending_payout,
+            hp.payout_at,
+            hp.is_paidout,
+            hp.children,
+            hp.votes,
+            hp.created_at,
+            hp.updated_at,
+            hp.rshares,
+            hp.abs_rshares,
+            hp.json,
+            hp.is_hidden,
+            hp.is_grayed,
+            hp.total_votes,
+            hp.sc_trend,
+            hp.role_title,
+            hp.community_title,
+            hp.role_id,
+            hp.is_pinned,
+            hp.curator_payout_value
+        FROM
+        (
+            SELECT
+              hp1.id
+            , hp1.created_at as created_at
+            FROM hive_posts hp1 WHERE hp1.depth = 0 AND NOT hp1.is_grayed
+            ORDER BY hp1.created_at DESC
+            LIMIT _limit
+        ) as created
+        JOIN hive_posts_view hp ON hp.id = created.id
+        ORDER BY created.created_at DESC, created.id LIMIT _limit
+        $function$
+        language sql STABLE
+    """
+    db.query_no_return(sql)
+
 
 def reset_autovac(db):
     """Initializes/resets per-table autovacuum/autoanalyze params.
