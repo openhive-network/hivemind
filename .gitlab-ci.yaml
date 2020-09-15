@@ -174,16 +174,6 @@ hivemind_stop_server:
   tags:
      - hivemind
 
-bridge_api_smoketest_old:
-  <<: *common_api_smoketest_job
-
-  script:
-    - scripts/ci_start_api_smoketest.sh localhost "$HIVEMIND_HTTP_PORT" test_bridge_api_patterns.tavern.yaml api_smoketest_bridge_old.xml
-
-  artifacts:
-    reports:
-      junit: api_smoketest_bridge_old.xml
-
 bridge_api_smoketest:
   <<: *common_api_smoketest_job
 
