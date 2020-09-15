@@ -128,14 +128,22 @@ class StatusManager:
         return perf() - start
 
     @staticmethod
-    def merge_dicts(od1, od2, broadcast : bool = False, total_broadcast : bool = True):
+    def merge_dicts(od1, od2, broadcast : bool = False, total_broadcast : bool = True, print_od2 : bool = False):
+        to_print = [""]
         if od2 is not None and len(od2) > 0:
             for mgr, values in od2.items():
+
+                if print_od2:
+                    to_print.append(f"{ '#' * 10 }\n{mgr}:")	
 
                 if mgr not in od1.keys():
                     od1[mgr] = {}
 
                 for k, v in values.items():
+
+                    if print_od2:
+                        to_print.append(f"`{ k }`: { v }")
+
                     if k in od1[mgr]:
                         od1[mgr][k].update(v)
                     else:
@@ -147,6 +155,8 @@ class StatusManager:
                     if total_broadcast:
                         PrometheusClient.broadcast( od1[mgr][k].broadcast( f"{k}_total" ) )
 
+        if print_od2:
+            log.info('\n'.join(to_print))
         return od1
 
     @staticmethod
@@ -156,10 +166,10 @@ class StatusManager:
         StatusManager.metrics_to_save.put_nowait( {'manager':manager, 'key': name, 'value': item } )
 
     @staticmethod
-    def next_blocks():
+    def next_blocks( print_current : bool = False ):
         if not StatusManager.metrics_started():
             return
-        StatusManager.metrics_to_save.put_nowait(None)
+        StatusManager.metrics_to_save.put_nowait(print_current)
 
     @staticmethod
     def log_global_dict(mngr : str):
@@ -198,17 +208,18 @@ class StatusManager:
             log.info("stats thread started")
             while pid_exists(pid):
                 val : dict = StatusManager.metrics_to_save.get(True, 60)
-                if val is None:
-                    StatusManager.global_stats = StatusManager.merge_dicts( StatusManager.global_stats, StatusManager.local_stats, True )
+                if type(val) is type(True):
+                    StatusManager.global_stats = StatusManager.merge_dicts( StatusManager.global_stats, StatusManager.local_stats, True, print_od2=True )
                     StatusManager.local_stats.clear()
                     for key in StatusManager.global_stats.keys():
                         StatusManager.local_stats[key] = {}
                 else:
                     StatusManager.__add_value( val['manager'], val['key'], val['value'] )
+
                 if StatusManager.metrics_to_save.qsize() == 0 and StatusManager.__join:
                     break
         except Exception as e:
-            log.error(f"stats collector thread failed: {e}")
+            log.error(f"stats collector thread failed: {e}\nTraceback:\n{e.with_traceback()}")
 
     @staticmethod
     def __add_value( manager, key, value ):
@@ -357,50 +368,32 @@ class PreProcessingStat(Stat):
     def __str__(self):
         return f"Preprocessed {self.items} items in {self.time :.4f} seconds"
 
-class PreProcessingStatusManager(StatusManager):
-    # Summary for whole sync
-    global_stats = {}
+    def update(self, other):
+        self.update_time(other)
+        self.items += other.items
 
-    # Currently processed blocks stats, merged to global stats, after `next_block`
-    current_stats = {}
+class PreProcessingStatusManager(StatusManager):
+
+    name_sm = "PreProcessingStatusManager"
 
     @staticmethod
     def preprocess_stat(name, time, items):
-        if name in PreProcessingStatusManager.current_stats.keys():
-            PreProcessingStatusManager.current_stats[name].time += time
-            PreProcessingStatusManager.current_stats[name].items += items
-        else:
-            PreProcessingStatusManager.current_stats[name] = PreProcessingStat(time, items)
-
-    @staticmethod
-    def next_blocks():
-        PreProcessingStatusManager.global_stats = StatusManager.merge_dicts(
-            PreProcessingStatusManager.global_stats, 
-            PreProcessingStatusManager.current_stats,
-            True
-        )
-        PreProcessingStatusManager.current_stats.clear()
+        StatusManager.push_value( PreProcessingStatusManager.name_sm, name, PreProcessingStat(time, items) )
 
     @staticmethod
     def log_global(label : str):
         StatusManager.print_row()
         log.info(label)
-        count = 0
-        for key, value in PreProcessingStatusManager.global_stats.items():
-            count += value.items
-        tm = StatusManager.log_dict(PreProcessingStatusManager.global_stats)
-        log.info(f"Total preprocessing time: {tm :.4f} seconds, of {count} elements")
+        tm = StatusManager.log_global_dict(PreProcessingStatusManager.name_sm)
+        log.info(f"Total reprocessing time: {tm :.4f}s.")
         return tm
 
     @staticmethod
     def log_current(label : str):
         StatusManager.print_row()
         log.info(label)
-        count = 0
-        for key, value in PreProcessingStatusManager.current_stats.items():
-            count += value.items
-        tm = StatusManager.log_dict(PreProcessingStatusManager.current_stats)
-        log.info(f"Current preprocessing time: {tm :.4f} seconds, of {count} elements")
+        tm = StatusManager.log_local_dict(PreProcessingStatusManager.name_sm)
+        log.info(f"Preprocessing time: {tm :.4f}s.")
         return tm
 
 def minmax(collection : dict, blocks : int, time : float, _from : int):

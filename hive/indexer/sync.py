@@ -144,17 +144,7 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
             log.info("[SYNC] Time elapsed: %fs", time_current - time_start)
             rate = minmax(rate, len(blocks), time_current - wait_time_1, lbound)
 
-            if block_end - block_start > 1.0 or is_debug:
-                otm = OPSM.log_current("Operations present in the processed blocks")
-                ftm = FSM.log_current("Flushing times")
-                wtm = WSM.log_current("Waiting times")
-                pptm = PPSM.log_current("Preprocessing times")
-                log.info(f"Calculated time: {otm+ftm+wtm+pptm :.4f} s.")
-
-            OPSM.next_blocks()
-            FSM.next_blocks()
-            WSM.next_blocks()
-            PPSM.next_blocks()
+            SM.next_blocks(is_debug or block_end - block_start > 1.0)
 
             lbound = to
             PC.broadcast(BroadcastObject('sync_current_block', lbound, 'blocks'))
