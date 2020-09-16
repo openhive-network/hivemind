@@ -264,6 +264,16 @@ class DbState:
         time_end = perf_counter()
         log.info("[INIT] update_all_posts_active executed in %fs", time_end - time_start)
 
+        time_start = perf_counter()
+
+        sql = """
+            SELECT update_feed_cache({}, {});
+        """.format(last_imported_block, current_imported_block)
+        DbState.db().query_no_return(sql)
+
+        time_end = perf_counter()
+        log.info("[INIT] update_feed_cache executed in %fs", time_end - time_start)
+
         cls.update_work_mem(current_work_mem)
 
         if synced_blocks >= SYNCED_BLOCK_LIMIT:

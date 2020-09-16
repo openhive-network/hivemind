@@ -160,7 +160,6 @@ class Posts(DbAdapterHolder):
                 author_id = result['author_id']
                 Notify(block_num=op['block_num'], type_id='error', dst_id=author_id, when=block_date,
                        post_id=result['id'], payload=error).write()
-            cls._insert_feed_cache(result, block_date)
 
     @classmethod
     def flush_into_db(cls):
@@ -415,28 +414,12 @@ class Posts(DbAdapterHolder):
         result = dict(row)
         pid = result['id']
 
-        if not DbState.is_initial_sync():
-            depth = result['depth']
+        depth = result['depth']
 
-            if depth == 0:
-                # TODO: delete from hive_reblogs -- otherwise feed cache gets
-                # populated with deleted posts somwrimas
-                FeedCache.delete(pid)
-
-            # force parent child recount when child is deleted
-            cls.update_child_count(pid, '-')
-
-    @classmethod
-    def _insert_feed_cache(cls, result, date):
-        """Insert the new post into feed cache if it's not a comment."""
-        if not result['depth']:
-            cls._insert_feed_cache4(result['depth'], result['id'], result['author_id'], date)
-
-    @classmethod
-    def _insert_feed_cache4(cls, post_depth, post_id, author_id, post_date):
-        """Insert the new post into feed cache if it's not a comment."""
-        if not post_depth:
-            FeedCache.insert(post_id, author_id, post_date)
+        if depth == 0 and not DbState.is_initial_sync():
+            # TODO: delete from hive_reblogs -- otherwise feed cache gets
+            # populated with deleted posts somwrimas
+            FeedCache.delete(pid)
 
     @classmethod
     def _verify_post_against_community(cls, op, community_id, is_valid, is_muted):
