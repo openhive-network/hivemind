@@ -209,7 +209,7 @@ class StatusManager:
             while pid_exists(pid):
                 val : dict = StatusManager.metrics_to_save.get(True, 60)
                 if type(val) is type(True):
-                    StatusManager.global_stats = StatusManager.merge_dicts( StatusManager.global_stats, StatusManager.local_stats, True, print_od2=True )
+                    StatusManager.global_stats = StatusManager.merge_dicts( StatusManager.global_stats, StatusManager.local_stats, True, print_od2=val )
                     StatusManager.local_stats.clear()
                     for key in StatusManager.global_stats.keys():
                         StatusManager.local_stats[key] = {}
