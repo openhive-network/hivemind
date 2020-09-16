@@ -112,12 +112,10 @@ class Accounts(DbAdapterHolder):
         sql = """
                   INSERT INTO hive_accounts (name, created_at, posting_json_metadata, json_metadata )
                   VALUES ( '{}', '{}', {}, {} )
+                  RETURNING id
               """.format( name, block_date, cls.get_json_data( _posting_json_metadata ), cls.get_json_data( _json_metadata ) )
-        DB.query( sql )
 
-        # pull newly-inserted ids and merge into our map
-        sql = "SELECT id FROM hive_accounts WHERE name = :name"
-        cls._ids[name] = DB.query_one(sql, name=name)
+        cls._ids[name] = DB.query_one( sql )
 
         # post-insert: pass to communities to check for new registrations
         from hive.indexer.community import Community, START_DATE
@@ -134,15 +132,47 @@ class Accounts(DbAdapterHolder):
         if cls._updates_data:
             cls.beginTx()
 
+            sql = """
+                    UPDATE hive_accounts ha
+                    SET
+                    posting_json_metadata = T2.posting_json_metadata,
+                    json_metadata = T2.json_metadata
+                    FROM
+                    (
+                      SELECT
+                        posting_json_metadata,
+                        json_metadata,
+                        name
+                      FROM
+                      (
+                      VALUES
+                        -- posting_json_metadata, json_metadata, name
+                        {}
+                      )T( posting_json_metadata, json_metadata, name )
+                    )T2
+                    WHERE ha.name = T2.name
+                """
+
+            values = []
+            values_limit = 1000
+
             for name, data in cls._updates_data.items():
-              sql = """
-                        UPDATE hive_accounts
-                        SET
-                          posting_json_metadata = {},
-                          json_metadata = {}
-                        WHERE name = '{}'
-                  """.format( cls.get_json_data( data['posting_json_metadata'] ), cls.get_json_data( data['json_metadata'] ), name )
-              cls.db.query(sql)
+                values.append("({}, {}, '{}')".format(
+                  cls.get_json_data( data['posting_json_metadata'] ),
+                  cls.get_json_data( data['json_metadata'] ),
+                  name))
+
+                if len(values) >= values_limit:
+                    values_str = ','.join(values)
+                    actual_query = sql.format(values_str)
+                    cls.db.query(actual_query)
+                    values.clear()
+
+            if len(values) > 0:
+                values_str = ','.join(values)
+                actual_query = sql.format(values_str)
+                cls.db.query(actual_query)
+                values.clear()
 
             n = len(cls._updates_data)
             cls._updates_data.clear()

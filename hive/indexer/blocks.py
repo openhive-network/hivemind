@@ -55,7 +55,7 @@ class Blocks:
       ('Tags', Tags.flush, Tags),
       ('Follow', follows_flush_helper, Follow),
       ('Reblog', Reblog.flush, Reblog),
-      ('Notify', Notify.flush, Notify)
+      ('Notify', Notify.flush, Notify),
       ('Accounts', Accounts.flush, Accounts)
     ]
 
