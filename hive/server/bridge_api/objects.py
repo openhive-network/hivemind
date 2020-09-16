@@ -214,7 +214,7 @@ def _condenser_profile_object(row):
             'followers': row['followers'],
         },
         'metadata': {
-            'profile': {'name': profile['display_name'],
+            'profile': {'name': profile['name'],
                         'about': profile['about'],
                         'website': profile['website'],
                         'location': profile['location'],

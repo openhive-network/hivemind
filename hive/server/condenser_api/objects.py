@@ -167,7 +167,7 @@ def _condenser_account_object(row):
         'net_vesting_shares': 0,
         'transfer_history': [],
         'json_metadata': json.dumps({
-            'profile': {'name': profile['display_name'],
+            'profile': {'name': profile['name'],
                         'about': profile['about'],
                         'website': profile['website'],
                         'location': profile['location'],

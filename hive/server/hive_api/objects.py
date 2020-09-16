@@ -25,7 +25,7 @@ async def accounts_by_name(db, names, observer=None, lite=True):
             'rank': row['rank'],
             'followers': row['followers'],
             'following': row['following'],
-            'display_name': profile['display_name'],
+            'display_name': profile['name'],
             'about': profile['about'],
         }
         if not lite:
