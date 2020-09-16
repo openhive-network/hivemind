@@ -1,8 +1,9 @@
 """Blocks processor."""
 
-from hive.indexer.reblog import Reblog
 import logging
 import concurrent
+from time import perf_counter
+from concurrent.futures import ThreadPoolExecutor
 
 from hive.db.adapter import Db
 
@@ -17,14 +18,11 @@ from hive.indexer.tags import Tags
 from hive.indexer.reputations import Reputations
 from hive.indexer.reblog import Reblog
 from hive.indexer.notify import Notify
-from time import perf_counter
 
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.trends import update_hot_and_tranding_for_block_range
 from hive.utils.post_active import update_active_starting_from_posts_on_block
-
-from concurrent.futures import ThreadPoolExecutor
 
 log = logging.getLogger(__name__)
 
@@ -48,19 +46,19 @@ class Blocks:
     _current_block_date = None
 
     _concurrent_flush = [
-      ('Posts', Posts.flush, Posts),
-      ('PostDataCache', PostDataCache.flush, PostDataCache),
-      ('Reputations', Reputations.flush, Reputations),
-      ('Votes', Votes.flush, Votes),
-      ('Tags', Tags.flush, Tags),
-      ('Follow', follows_flush_helper, Follow),
-      ('Reblog', Reblog.flush, Reblog),
-      ('Notify', Notify.flush, Notify)
+        ('Posts', Posts.flush, Posts),
+        ('PostDataCache', PostDataCache.flush, PostDataCache),
+        ('Reputations', Reputations.flush, Reputations),
+        ('Votes', Votes.flush, Votes),
+        ('Tags', Tags.flush, Tags),
+        ('Follow', follows_flush_helper, Follow),
+        ('Reblog', Reblog.flush, Reblog),
+        ('Notify', Notify.flush, Notify)
     ]
 
     def __init__(cls):
         head_date = cls.head_date()
-        if(head_date == ''):
+        if head_date == '':
             cls._head_block_date = None
             cls._current_block_date = None
         else:
@@ -68,15 +66,26 @@ class Blocks:
             cls._current_block_date = head_date
 
     @classmethod
-    def setup_db_access(self, sharedDbAdapter):
-        PostDataCache.setup_db_access(sharedDbAdapter)
-        Reputations.setup_db_access(sharedDbAdapter)
-        Votes.setup_db_access(sharedDbAdapter)
-        Tags.setup_db_access(sharedDbAdapter)
-        Follow.setup_db_access(sharedDbAdapter)
-        Posts.setup_db_access(sharedDbAdapter)
-        Reblog.setup_db_access(sharedDbAdapter)
-        Notify.setup_db_access(sharedDbAdapter)
+    def setup_own_db_access(cls, sharedDbAdapter):
+        PostDataCache.setup_own_db_access(sharedDbAdapter)
+        Reputations.setup_own_db_access(sharedDbAdapter)
+        Votes.setup_own_db_access(sharedDbAdapter)
+        Tags.setup_own_db_access(sharedDbAdapter)
+        Follow.setup_own_db_access(sharedDbAdapter)
+        Posts.setup_own_db_access(sharedDbAdapter)
+        Reblog.setup_own_db_access(sharedDbAdapter)
+        Notify.setup_own_db_access(sharedDbAdapter)
+
+    @classmethod
+    def setup_shared_db_access(cls, sharedDbAdapter):
+        PostDataCache.setup_shared_db_access(sharedDbAdapter)
+        Reputations.setup_shared_db_access(sharedDbAdapter)
+        Votes.setup_shared_db_access(sharedDbAdapter)
+        Tags.setup_shared_db_access(sharedDbAdapter)
+        Follow.setup_shared_db_access(sharedDbAdapter)
+        Posts.setup_shared_db_access(sharedDbAdapter)
+        Reblog.setup_shared_db_access(sharedDbAdapter)
+        Notify.setup_shared_db_access(sharedDbAdapter)
 
     @classmethod
     def head_num(cls):
@@ -105,12 +114,14 @@ class Blocks:
         Follow.flush(trx=False)
         Notify.flush()
         Reputations.flush()
-
+        follows = Follow.flush(trx=False)
+        accts = Accounts.flush(hived, trx=False, spread=8)
+        # Follow and Account flush moved from Sync.listen (sync.py line 378)
         block_num = int(block['block_id'][:8], base=16)
         cls.on_live_blocks_processed( block_num, block_num )
         time_end = perf_counter()
         log.info("[PROCESS BLOCK] %fs", time_end - time_start)
-        return ret
+        return ret, follows, accts
 
     @classmethod
     def process_multi(cls, blocks, vops, hived, is_initial_sync=False):
@@ -145,7 +156,7 @@ class Blocks:
 
         DB.query("COMMIT")
 
-        completedThreads = 0;
+        completedThreads = 0
 
         pool = ThreadPoolExecutor(max_workers = len(cls._concurrent_flush))
         flush_futures = {pool.submit(time_collector, f): (description, c) for (description, f, c) in cls._concurrent_flush}
@@ -388,9 +399,10 @@ class Blocks:
             values.append("({}, '{}', '{}', {}, {}, '{}')".format(block['num'], block['hash'],
                                                                   block['prev'], block['txs'],
                                                                   block['ops'], block['date']))
-        DB.query(query + ",".join(values))
+        query = query + ",".join(values)
+        DB.query(query)
         n = len(cls.blocks_to_flush)
-        cls.blocks_to_flush = []
+        cls.blocks_to_flush.clear()
         return n
 
     @classmethod
@@ -463,3 +475,4 @@ class Blocks:
         DB.query_no_return("SELECT update_hive_posts_children_count({}, {})".format(first_block, last_block))
         DB.query_no_return("SELECT update_hive_posts_root_id({},{})".format(first_block, last_block))
         DB.query_no_return("SELECT update_hive_posts_api_helper({},{})".format(first_block, last_block))
+        DB.query_no_return("SELECT update_feed_cache({}, {})".format(first_block, last_block))

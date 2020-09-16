@@ -230,13 +230,25 @@ async def pids_by_blog(db, account: str, start_author: str = '',
 
     # ignore community posts which were not reblogged
     skip = """
-        SELECT id FROM hive_posts
-         WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :account)
-           AND counter_deleted = 0
-           AND depth = 0
-           AND community_id IS NOT NULL
-           AND id NOT IN (SELECT post_id FROM hive_reblogs
-                           WHERE account = :account)"""
+        SELECT 
+            hp.id 
+        FROM 
+            hive_posts hp
+        INNER JOIN hive_accounts ha_hp ON ha_hp.id = hp.author_id
+        WHERE 
+            ha_hp.name = :account
+            AND hp.counter_deleted = 0
+            AND hp.depth = 0
+            AND hp.community_id IS NOT NULL
+            AND hp.id NOT IN (
+                SELECT
+                    hr.post_id
+                FROM 
+                    hive_reblogs hr
+                INNER JOIN hive_accounts ha_hr ON ha_hr.id = hr.blogger_id
+                WHERE ha_hr.name = :account
+            )
+    """
 
     sql = """
         SELECT post_id

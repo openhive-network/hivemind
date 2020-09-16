@@ -18,26 +18,11 @@ DELETE_SQL = """
         FROM hive_posts hp
         INNER JOIN hive_accounts ha ON hp.author_id = ha.id
         INNER JOIN hive_permlink_data hpd ON hp.permlink_id = hpd.id
-        WHERE ha.name = :a AND hpd.permlink = :permlink AND hp.depth <= 0
+        WHERE ha.name = :a AND hpd.permlink = :permlink AND hp.depth = 0 AND hp.counter_deleted = 0
     )
     DELETE FROM hive_reblogs AS hr
     WHERE hr.account = :a AND hr.post_id IN (SELECT ps.post_id FROM processing_set ps)
     RETURNING hr.post_id, (SELECT ps.account_id FROM processing_set ps) AS account_id
-"""
-
-SELECT_SQL = """
-    SELECT :blogger as blogger, hp.id as post_id, :date as date, :block_num as block_num
-    FROM hive_posts hp
-    INNER JOIN hive_accounts ha ON ha.id = hp.author_id
-    INNER JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
-    WHERE ha.name = :author AND hpd.permlink = :permlink AND hp.depth <= 0
-"""
-
-INSERT_SQL = """
-    INSERT INTO hive_reblogs (account, post_id, created_at, block_num)
-""" + SELECT_SQL + """
-    ON CONFLICT ON CONSTRAINT hive_reblogs_ux1 DO NOTHING
-    RETURNING post_id
 """
 
 class Reblog(DbAdapterHolder):
@@ -46,6 +31,7 @@ class Reblog(DbAdapterHolder):
 
     @classmethod
     def reblog_op(cls, account, op_json, block_date, block_num):
+        """ Process reblog operation """
         if 'account' not in op_json or \
             'author' not in op_json or \
             'permlink' not in op_json:
@@ -69,51 +55,62 @@ class Reblog(DbAdapterHolder):
                 result = dict(row)
                 FeedCache.delete(result['post_id'], result['account_id'])
         else:
-            if DbState.is_initial_sync():
-                row = cls.db.query_row(SELECT_SQL, blogger=blogger, author=author, permlink=permlink, date=block_date, block_num=block_num)
-                if row is not None:
-                    result = dict(row)
-                    cls.reblog_items_to_flush.append(result)
-            else:
-                row = cls.db.query_row(INSERT_SQL, blogger=blogger, author=author, permlink=permlink, date=block_date, block_num=block_num)
-                if row is not None:
-                    author_id = Accounts.get_id(author)
-                    blogger_id = Accounts.get_id(blogger)
-                    result = dict(row)
-                    post_id = result['post_id']
-                    FeedCache.insert(post_id, blogger_id, block_date)
-                else:
-                    log.warning("Error in reblog: Insert operation returned `None` as `post_id`. Op details: {}".format(op_json))
+            cls.reblog_items_to_flush.append((blogger, author, permlink, block_date, block_num))
+
     @classmethod
     def flush(cls):
+        """ Flush collected data to database """
         sql_prefix = """
-            INSERT INTO hive_reblogs (account, post_id, created_at, block_num)
-            VALUES
-        """
-        sql_postfix = """
+            INSERT INTO hive_reblogs (blogger_id, post_id, created_at, block_num)
+            SELECT 
+                data_source.blogger_id, data_source.post_id, data_source.created_at, data_source.block_num
+            FROM
+            (
+                SELECT 
+                    ha_b.id as blogger_id, hp.id as post_id, t.block_date as created_at, t.block_num 
+                FROM
+                    (VALUES
+                        {}
+                    ) AS T(blogger, author, permlink, block_date, block_num)
+                    INNER JOIN hive_accounts ha ON ha.name = t.author
+                    INNER JOIN hive_accounts ha_b ON ha_b.name = t.blogger
+                    INNER JOIN hive_permlink_data hpd ON hpd.permlink = t.permlink
+                    INNER JOIN hive_posts hp ON hp.author_id = ha.id AND hp.permlink_id = hpd.id
+            ) AS data_source (blogger_id, post_id, created_at, block_num)
             ON CONFLICT ON CONSTRAINT hive_reblogs_ux1 DO NOTHING
         """
 
-        values = []
-        limit = 1000
-        count = 0
         item_count = len(cls.reblog_items_to_flush)
+        if item_count > 0:
+            values = []
+            limit = 1000
+            count = 0
+            cls.beginTx()
+            for reblog_item in cls.reblog_items_to_flush:
+                if count < limit:
+                    values.append("('{}', '{}', '{}', '{}'::timestamp, {})".format(reblog_item[0],
+                                                                                   reblog_item[1],
+                                                                                   reblog_item[2],
+                                                                                   reblog_item[3],
+                                                                                   reblog_item[4]))
+                    count = count + 1
+                else:
+                    values_str = ",".join(values)
+                    query = sql_prefix.format(values_str, values_str)
+                    cls.db.query(query)
+                    values.clear()
+                    values.append("('{}', '{}', '{}', '{}'::timestamp, {})".format(reblog_item[0],
+                                                                                   reblog_item[1],
+                                                                                   reblog_item[2],
+                                                                                   reblog_item[3],
+                                                                                   reblog_item[4]))
+                    count = 1
 
-        for reblog_item in cls.reblog_items_to_flush:
-            if count < limit:
-                values.append("('{}', {}, '{}', {})".format(reblog_item["blogger"], reblog_item["post_id"], reblog_item["date"], reblog_item["block_num"]))
-                count = count + 1
-            else:
-                query = sql_prefix + ",".join(values)
-                query += sql_postfix
+            if len(values) > 0:
+                values_str = ",".join(values)
+                query = sql_prefix.format(values_str, values_str)
                 cls.db.query(query)
-                values.clear()
-                values.append("('{}', {}, '{}', {})".format(reblog_item["blogger"], reblog_item["post_id"], reblog_item["date"], reblog_item["block_num"]))
-                count = 1
+            cls.commitTx()
+            cls.reblog_items_to_flush.clear()
 
-        if len(values) > 0:
-            query = sql_prefix + ",".join(values)
-            query += sql_postfix
-            cls.db.query(query)
-        cls.reblog_items_to_flush.clear()
         return item_count

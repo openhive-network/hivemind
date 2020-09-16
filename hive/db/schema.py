@@ -260,16 +260,16 @@ def build_metadata():
     sa.Table(
         'hive_reblogs', metadata,
         sa.Column('id', sa.Integer, primary_key=True ),
-        sa.Column('account', VARCHAR(16), nullable=False),
+        sa.Column('blogger_id', sa.Integer, nullable=False),
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
         sa.Column('block_num', sa.Integer,  nullable=False ),
 
-        sa.ForeignKeyConstraint(['account'], ['hive_accounts.name'], name='hive_reblogs_fk1'),
+        sa.ForeignKeyConstraint(['blogger_id'], ['hive_accounts.id'], name='hive_reblogs_fk1'),
         sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_reblogs_fk2'),
         sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_reblogs_fk3'),
-        sa.UniqueConstraint('account', 'post_id', name='hive_reblogs_ux1'), # core
-        sa.Index('hive_reblogs_account', 'account'),
+        sa.UniqueConstraint('blogger_id', 'post_id', name='hive_reblogs_ux1'), # core
+        sa.Index('hive_reblogs_blogger_id', 'blogger_id'),
         sa.Index('hive_reblogs_post_id', 'post_id'),
         sa.Index('hive_reblogs_block_num_idx', 'block_num'),
         sa.Index('hive_reblogs_created_at_idx', 'created_at')
@@ -296,11 +296,12 @@ def build_metadata():
 
     sa.Table(
         'hive_feed_cache', metadata,
-        sa.Column('post_id', sa.Integer, nullable=False, primary_key=True),
+        sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('account_id', sa.Integer, nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
-        sa.Index('hive_feed_cache_account_id', 'account_id'), # API (and rebuild?)
-        sa.UniqueConstraint('account_id', 'post_id', name='hive_feed_cache_ux1')
+        sa.Column('block_num',    sa.Integer,  nullable=True),
+        sa.PrimaryKeyConstraint('account_id', 'post_id', name='hive_feed_cache_pk'),
+        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_feed_cache_fk1'),
     )
 
     sa.Table(
@@ -1821,7 +1822,7 @@ def setup(db):
                 , hp.id as post_id
                 , 14 as type_id
                 , hr.created_at as created_at
-                , hr.account as src
+                , ha_hr.name as src
                 , ha.name as dst
                 , ha.name as author
                 , hpd.permlink as permlink
@@ -1833,14 +1834,14 @@ def setup(db):
                 hive_reblogs hr
             JOIN hive_posts hp ON hr.post_id = hp.id
             JOIN hive_permlink_data hpd ON hp.permlink_id = hpd.id
+            JOIN hive_accounts ha_hr ON hr.blogger_id = ha_hr.id
             JOIN (
                 SELECT
                       hr2.id as id
                     , notification_id(hr2.block_num, 14, hr2.id) as notif_id
                     , harv.score as score
                 FROM hive_reblogs hr2
-                JOIN hive_accounts has ON hr2.account = has.name
-                JOIN hive_accounts_rank_view harv ON harv.id = has.id
+                JOIN hive_accounts_rank_view harv ON harv.id = hr2.blogger_id
             ) as hr_scores ON hr_scores.id = hr.id
             JOIN hive_accounts ha ON hp.author_id = ha.id
 
@@ -2330,6 +2331,15 @@ def setup(db):
     """
 
     db.query_no_return(sql)
+
+    sql_scripts = [
+      "update_feed_cache.sql"
+    ]
+    from os.path import dirname, realpath
+    dir_path = dirname(realpath(__file__))
+    for script in sql_scripts:
+        execute_sql_script(db.query_no_return, "{}/sql_scripts/{}".format(dir_path, script))
+
 
 
 def reset_autovac(db):

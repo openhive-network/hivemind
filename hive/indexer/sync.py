@@ -21,7 +21,6 @@ from hive.steem.block.stream import MicroForkException
 
 from hive.indexer.blocks import Blocks
 from hive.indexer.accounts import Accounts
-from hive.indexer.feed_cache import FeedCache
 from hive.indexer.follow import Follow
 from hive.indexer.community import Community
 from hive.indexer.reblog import Reblog
@@ -34,6 +33,8 @@ from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import WaitingStatusManager as WSM
 from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import BroadcastObject
+
+from datetime import datetime
 
 log = logging.getLogger(__name__)
 
@@ -140,6 +141,7 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
                 to - 1, blocks[-1]['timestamp']))
             log.info(timer.batch_status(prefix))
             log.info("[SYNC] Time elapsed: %fs", time_current - time_start)
+            log.info("[SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
             rate = minmax(rate, len(blocks), time_current - wait_time_1, lbound)
 
             if block_end - block_start > 1.0 or is_debug:
@@ -224,7 +226,7 @@ class Sync:
 
         # ensure db schema up to date, check app status
         DbState.initialize()
-        Blocks.setup_db_access(self._db)
+        Blocks.setup_own_db_access(self._db)
 
         # prefetch id->name and id->rank memory maps
         Accounts.load_ids()
@@ -255,7 +257,7 @@ class Sync:
         else:
             # recover from fork
             Blocks.verify_head(self._steem)
-
+        Blocks.setup_shared_db_access(self._db)
         self._update_chain_state()
 
         if self._conf.get('test_max_block'):
@@ -290,7 +292,6 @@ class Sync:
             return
 
         log.info("[INIT] *** Initial cache build ***")
-        FeedCache.rebuild()
         Follow.force_recount()
 
     def from_checkpoints(self, chunk_size=1000):
@@ -374,7 +375,6 @@ class Sync:
         # debug: no max gap if disable_sync in effect
         max_gap = None if self._conf.get('test_disable_sync') else 100
 
-        assert self._blocksProcessor 
         steemd = self._steem
         hive_head = Blocks.head_num()
 
@@ -382,9 +382,7 @@ class Sync:
             start_time = perf()
 
             self._db.query("START TRANSACTION")
-            num = Blocks.process(block, {}, steemd)
-            follows = Follow.flush(trx=False)
-            accts = Accounts.flush(steemd, trx=False, spread=8)
+            num, follows, accts = Blocks.process(block, {}, steemd)
             self._db.query("COMMIT")
 
             ms = (perf() - start_time) * 1000
