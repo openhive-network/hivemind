@@ -128,17 +128,24 @@ async def get_ranked_posts(context, sort, start_author='', start_permlink='',
 
     db = context['db']
 
-    if sort == 'trending' and not ( start_author and start_permlink ) and ( not tag or tag == 'all' ):
-       sql = "SELECT * FROM bridge_get_ranked_post_by_trends( (:limit)::SMALLINT )"
-       posts = []
-       sql_result = await db.query_all(sql, limit=limit )
-       for row in sql_result:
-           post = _bridge_post_object(row)
-           post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']}, VotesPresentation.BridgeApi)
-           post = await append_statistics_to_post(post, row, False, None)
-           posts.append(post)
-       return posts
+    if ( not observer ) and ( not tag or tag == 'all' ):
+        async def execute_query(db, sql, limit):
+           posts = []
+           sql_result = await db.query_all(sql, author=start_author, permlink=start_permlink, limit=limit )
+           for row in sql_result:
+               post = _bridge_post_object(row)
+               post['active_votes'] = await find_votes({'db':db}, {'author':row['author'], 'permlink':row['permlink']}, VotesPresentation.BridgeApi)
+               post = await append_statistics_to_post(post, row, False, None)
+               posts.append(post)
+           return posts
 
+        if sort == 'trending':
+            sql = "SELECT * FROM bridge_get_ranked_post_by_trends( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+            return await execute_query(db, sql, limit)
+
+        if sort == 'created':
+            sql = "SELECT * FROM bridge_get_ranked_post_by_created( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+            return await execute_query(db, sql, limit)
 
     sql = ''
     pinned_sql = ''
