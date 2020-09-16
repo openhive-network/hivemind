@@ -9,10 +9,9 @@ BEGIN
     INSERT INTO
       hive_feed_cache (account_id, post_id, created_at, block_num)
     SELECT
-      hive_accounts.id, hive_posts.id, hive_posts.created_at, hive_posts.block_num
+      hive_posts.author_id, hive_posts.id, hive_posts.created_at, hive_posts.block_num
     FROM
       hive_posts
-    JOIN hive_accounts ON hive_posts.author_id = hive_accounts.id
     WHERE depth = 0 AND counter_deleted = 0
     ON CONFLICT DO NOTHING;
 
@@ -28,10 +27,9 @@ BEGIN
     INSERT INTO
       hive_feed_cache (account_id, post_id, created_at, block_num)
     SELECT
-      hive_accounts.id, hive_posts.id, hive_posts.created_at, hive_posts.block_num
+      hive_posts.author_id, hive_posts.id, hive_posts.created_at, hive_posts.block_num
     FROM
       hive_posts
-    JOIN hive_accounts ON hive_posts.author_id = hive_accounts.id
     WHERE depth = 0 AND counter_deleted = 0 AND block_num BETWEEN _from_block_num AND _to_block_num
     ON CONFLICT DO NOTHING;
 
