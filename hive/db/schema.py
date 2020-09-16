@@ -143,8 +143,8 @@ def build_metadata():
         sa.Index('hive_posts_payout_at_idx', 'payout_at'),
         sa.Index('hive_posts_payout_idx', 'payout'),
         sa.Index('hive_posts_promoted_idx', 'promoted'),
-        sa.Index('hive_posts_sc_trend_idx', 'sc_trend'),
-        sa.Index('hive_posts_sc_hot_idx', 'sc_hot'),
+        sa.Index('hive_posts_sc_trend_id_idx', 'sc_trend', 'id'),
+        sa.Index('hive_posts_sc_hot_id_idx', 'sc_hot', 'id'),
         sa.Index('hive_posts_created_at_idx', 'created_at'),
         sa.Index('hive_posts_block_num_idx', 'block_num')
     )
@@ -379,7 +379,7 @@ def build_metadata_community(metadata=None):
         sa.Column('block_num', sa.Integer,  nullable=False ),
 
         sa.UniqueConstraint('account_id', 'community_id', name='hive_subscriptions_ux1'),
-        sa.Index('hive_subscriptions_ix1', 'community_id', 'account_id', 'created_at'),
+        sa.Index('hive_subscriptions_community_idx', 'community_id'),
         sa.Index('hive_subscriptions_block_num_idx', 'block_num')
     )
 
@@ -1162,9 +1162,9 @@ def setup(db):
               hive_posts_view hp
           INNER JOIN
           (
-              SELECT 
+              SELECT
                   hp1.id
-              FROM 
+              FROM
                   hive_posts hp1
               WHERE
                   hp1.counter_deleted = 0
@@ -1263,13 +1263,13 @@ def setup(db):
             hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
             hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
             hp.active, hp.author_rewards
-          FROM 
+          FROM
             hive_posts_view hp
           INNER JOIN
           (
-            SELECT 
+            SELECT
               hp2.id
-            FROM 
+            FROM
               hive_posts hp2
             WHERE
               hp2.counter_deleted = 0
@@ -1430,7 +1430,7 @@ def setup(db):
               hive_posts_view hp
           INNER JOIN
           (
-            SELECT 
+            SELECT
               hp1.id
             FROM
               hive_posts hp1
@@ -2022,182 +2022,22 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-        DROP TYPE IF EXISTS bridge_api_post CASCADE;
-        CREATE TYPE bridge_api_post AS (
-            id INTEGER,
-            author VARCHAR,
-            parent_author VARCHAR,
-            author_rep FLOAT4,
-            root_title VARCHAR,
-            beneficiaries JSON,
-            max_accepted_payout VARCHAR,
-            percent_hbd INTEGER,
-            url TEXT,
-            permlink VARCHAR,
-            parent_permlink_or_category VARCHAR,
-            title VARCHAR,
-            body TEXT,
-            category VARCHAR,
-            depth SMALLINT,
-            promoted DECIMAL(10,3),
-            payout DECIMAL(10,3),
-            pending_payout DECIMAL(10,3),
-            payout_at TIMESTAMP,
-            is_paidout BOOLEAN,
-            children INTEGER,
-            votes INTEGER,
-            created_at TIMESTAMP,
-            updated_at TIMESTAMP,
-            rshares NUMERIC,
-            abs_rshares NUMERIC,
-            json TEXT,
-            is_hidden BOOLEAN,
-            is_grayed BOOLEAN,
-            total_votes BIGINT,
-            sc_trend FLOAT4,
-            role_title VARCHAR,
-            community_title VARCHAR,
-            role_id SMALLINT,
-            is_pinned BOOLEAN,
-            curator_payout_value VARCHAR
-        );
-    """
-    db.query_no_return(sql)
-
-    sql = """
-        DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_trends;
-        CREATE FUNCTION bridge_get_ranked_post_by_trends( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
-        RETURNS SETOF bridge_api_post
-        AS
-        $function$
-        DECLARE
-        	__post_id INTEGER = -1;
-        	__trending_limit FLOAT = -1.0;
-        BEGIN
-            IF _author <> '' THEN
-                __post_id = find_comment_id( _author, _permlink, True );
-                SELECT hp.sc_trend INTO __trending_limit FROM hive_posts hp WHERE hp.id = __post_id;
-            END IF;
-            RETURN QUERY SELECT
-            hp.id,
-            hp.author,
-            hp.parent_author,
-            hp.author_rep,
-            hp.root_title,
-            hp.beneficiaries,
-            hp.max_accepted_payout,
-            hp.percent_hbd,
-            hp.url,
-            hp.permlink,
-            hp.parent_permlink_or_category,
-            hp.title,
-            hp.body,
-            hp.category,
-            hp.depth,
-            hp.promoted,
-            hp.payout,
-            hp.pending_payout,
-            hp.payout_at,
-            hp.is_paidout,
-            hp.children,
-            hp.votes,
-            hp.created_at,
-            hp.updated_at,
-            hp.rshares,
-            hp.abs_rshares,
-            hp.json,
-            hp.is_hidden,
-            hp.is_grayed,
-            hp.total_votes,
-            hp.sc_trend,
-            hp.role_title,
-            hp.community_title,
-            hp.role_id,
-            hp.is_pinned,
-            hp.curator_payout_value
-        FROM
+        DROP TYPE IF EXISTS notification
+        ;
+        CREATE TYPE notification AS
         (
-        SELECT
-            hp1.id
-          , hp1.sc_trend as trend
-        FROM
-            hive_posts hp1
-        WHERE NOT hp1.is_paidout AND hp1.depth = 0
-            AND ( __post_id = -1 OR hp1.sc_trend < __trending_limit OR ( hp1.sc_trend = __trending_limit AND hp1.id < __post_id  ) )
-        ORDER BY hp1.sc_trend DESC
-        LIMIT _limit
-        ) as trends
-        JOIN hive_posts_view hp ON hp.id = trends.id
-        ORDER BY trends.trend DESC, trends.id LIMIT _limit;
-        END
-        $function$
-        language plpgsql STABLE
-    """
-    db.query_no_return(sql)
-
-    sql = """
-        DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_created;
-        CREATE FUNCTION bridge_get_ranked_post_by_created( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
-        RETURNS SETOF bridge_api_post
-        AS
-        $function$
-        DECLARE
-          __post_id INTEGER = -1;
-        BEGIN
-          IF _author <> '' THEN
-              __post_id = find_comment_id( _author, _permlink, True );
-          END IF;
-          RETURN QUERY SELECT
-              hp.id,
-              hp.author,
-              hp.parent_author,
-              hp.author_rep,
-              hp.root_title,
-              hp.beneficiaries,
-              hp.max_accepted_payout,
-              hp.percent_hbd,
-              hp.url,
-              hp.permlink,
-              hp.parent_permlink_or_category,
-              hp.title,
-              hp.body,
-              hp.category,
-              hp.depth,
-              hp.promoted,
-              hp.payout,
-              hp.pending_payout,
-              hp.payout_at,
-              hp.is_paidout,
-              hp.children,
-              hp.votes,
-              hp.created_at,
-              hp.updated_at,
-              hp.rshares,
-              hp.abs_rshares,
-              hp.json,
-              hp.is_hidden,
-              hp.is_grayed,
-              hp.total_votes,
-              hp.sc_trend,
-              hp.role_title,
-              hp.community_title,
-              hp.role_id,
-              hp.is_pinned,
-              hp.curator_payout_value
-        	FROM
-          (
-              SELECT
-                hp1.id
-              , hp1.created_at as created_at
-              FROM hive_posts hp1 WHERE hp1.depth = 0 AND NOT hp1.is_grayed AND ( __post_id = -1 OR hp1.id < __post_id  )
-              ORDER BY hp1.id DESC
-              LIMIT _limit
-          ) as created
-          JOIN hive_posts_view hp ON hp.id = created.id
-          ORDER BY created.created_at DESC, created.id LIMIT _limit;
-          END
-          $function$
-          language plpgsql STABLE
+          id BIGINT
+        , type_id SMALLINT
+        , created_at TIMESTAMP
+        , src VARCHAR
+        , dst VARCHAR
+        , author VARCHAR
+        , permlink VARCHAR
+        , community VARCHAR
+        , community_title VARCHAR
+        , payload VARCHAR
+        , score SMALLINT
+        );
     """
     db.query_no_return(sql)
 
@@ -2397,7 +2237,13 @@ def setup(db):
       "update_feed_cache.sql",
       "get_account_post_replies.sql",
       "payout_stats_view.sql",
-      "update_hive_posts_mentions.sql"
+      "update_hive_posts_mentions.sql",
+      "find_tag_id.sql",
+      "bridge_get_ranked_post_type.sql",
+      "bridge_get_ranked_post_for_communities.sql",
+      "bridge_get_ranked_post_for_observer_communities.sql",
+      "bridge_get_ranked_post_for_tag.sql",
+      "bridge_get_ranked_post_for_all.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
