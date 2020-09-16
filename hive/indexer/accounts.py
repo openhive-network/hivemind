@@ -10,10 +10,11 @@ import ujson as json
 from hive.db.adapter import Db
 from hive.utils.normalize import rep_log10, vests_amount
 from hive.utils.timer import Timer
-from hive.utils.account import safe_profile_metadata
+from hive.utils.account import get_profile_str
 from hive.utils.unique_fifo import UniqueFIFO
 
 from hive.indexer.db_adapter_holder import DbAdapterHolder
+from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
 
@@ -44,7 +45,8 @@ class Accounts(DbAdapterHolder):
             raise RuntimeError("Fatal error")
 
         key = update_operation['account']
-        cls._updates_data[key] = safe_profile_metadata( update_operation )
+        ( _posting_json_metadata, _json_metadata ) = get_profile_str( update_operation )
+        cls._updates_data[key] = { 'posting_json_metadata' : _posting_json_metadata, 'json_metadata' : _json_metadata }
 
     @classmethod
     def load_ids(cls):
@@ -84,6 +86,11 @@ class Accounts(DbAdapterHolder):
         return False
 
     @classmethod
+    def get_json_data(cls, source ):
+        """json-data preprocessing."""
+        return escape_characters( source )
+
+    @classmethod
     def register(cls, name, op_details, block_date, block_num):
         """Block processing: register "candidate" names.
 
@@ -100,13 +107,13 @@ class Accounts(DbAdapterHolder):
         if cls.exists(name):
             return
 
-        profile = safe_profile_metadata( op_details )
+        ( _posting_json_metadata, _json_metadata ) = get_profile_str( op_details )
 
-        DB.query("""INSERT INTO hive_accounts (name, created_at, display_name, about, location, website, profile_image, cover_image )
-                  VALUES (:name, :date, :display_name, :about, :location, :website, :profile_image, :cover_image )""",
-                  name=name, date=block_date, display_name = profile['name'], about = profile['about'],
-                  location = profile['location'], website = profile['website'],
-                  profile_image = profile['profile_image'], cover_image = profile['cover_image'] )
+        sql = """
+                  INSERT INTO hive_accounts (name, created_at, posting_json_metadata, json_metadata )
+                  VALUES ( '{}', '{}', {}, {} )
+              """.format( name, block_date, cls.get_json_data( _posting_json_metadata ), cls.get_json_data( _json_metadata ) )
+        DB.query( sql )
 
         # pull newly-inserted ids and merge into our map
         sql = "SELECT id FROM hive_accounts WHERE name = :name"
@@ -131,14 +138,10 @@ class Accounts(DbAdapterHolder):
               sql = """
                         UPDATE hive_accounts
                         SET
-                          display_name = '{}',
-                          about = '{}',
-                          location = '{}',
-                          website = '{}',
-                          profile_image = '{}',
-                          cover_image = '{}'
+                          posting_json_metadata = {},
+                          json_metadata = {}
                         WHERE name = '{}'
-                  """.format( data['name'], data['about'], data['location'], data['website'], data['profile_image'], data['cover_image'], name )
+                  """.format( cls.get_json_data( data['posting_json_metadata'] ), cls.get_json_data( data['json_metadata'] ), name )
               cls.db.query(sql)
 
             n = len(cls._updates_data)

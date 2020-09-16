@@ -41,20 +41,14 @@ def build_metadata():
         #sa.Column('block_num', sa.Integer, nullable=False),
         sa.Column('reputation', sa.Float(precision=6), nullable=False, server_default='25'),
 
-        sa.Column('display_name', sa.String(20)),
-        sa.Column('about', sa.String(160)),
-        sa.Column('location', sa.String(30)),
-        sa.Column('website', sa.String(1024)),
-        sa.Column('profile_image', sa.String(1024), nullable=False, server_default=''),
-        sa.Column('cover_image', sa.String(1024), nullable=False, server_default=''),
-
         sa.Column('followers', sa.Integer, nullable=False, server_default='0'),
         sa.Column('following', sa.Integer, nullable=False, server_default='0'),
 
         sa.Column('rank', sa.Integer, nullable=False, server_default='0'),
 
         sa.Column('lastread_at', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
-        sa.Column('raw_json', sa.Text),
+        sa.Column('posting_json_metadata', sa.Text),
+        sa.Column('json_metadata', sa.Text),
 
         sa.UniqueConstraint('name', name='hive_accounts_ux1'),
         sa.Index('hive_accounts_ix6', 'reputation')
@@ -706,18 +700,13 @@ def setup(db):
               )
             )
           ) active_at,
-          display_name,
-          about,
           reputation,
-          profile_image,
-          location,
-          website,
-          cover_image,
           rank,
           following,
           followers,
           lastread_at,
-          raw_json
+          posting_json_metadata,
+          json_metadata
         FROM
           hive_accounts ha
           """

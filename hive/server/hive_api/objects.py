@@ -1,6 +1,7 @@
 """Hive API: account, post, and comment object retrieval"""
 import logging
 from hive.server.hive_api.common import get_account_id, estimated_sp
+from hive.utils.account import safe_db_profile_metadata
 log = logging.getLogger(__name__)
 
 # Account objects
@@ -9,14 +10,14 @@ log = logging.getLogger(__name__)
 async def accounts_by_name(db, names, observer=None, lite=True):
     """Find and return accounts by `name`."""
 
-    sql = """SELECT id, name, display_name, about, created_at,
-                    rank, followers, following %s
+    sql = """SELECT id, name, about, created_at,
+                    rank, followers, following, posting_json_metadata, json_metadata
                FROM hive_accounts WHERE name IN :names"""
-    fields = '' if lite else ', location, website, profile_image, cover_image'
-    rows = await db.query_all(sql % fields, names=tuple(names))
+    rows = await db.query_all(names=tuple(names))
 
     accounts = {}
     for row in rows:
+        profile = safe_db_profile_metadata(row['posting_json_metadata'], row['json_metadata'])
         account = {
             'id': row['id'],
             'name': row['name'],
@@ -24,14 +25,14 @@ async def accounts_by_name(db, names, observer=None, lite=True):
             'rank': row['rank'],
             'followers': row['followers'],
             'following': row['following'],
-            'display_name': row['display_name'],
-            'about': row['about'],
+            'display_name': profile['display_name'],
+            'about': profile['about'],
         }
         if not lite:
-            account['location'] = row['location']
-            account['website'] = row['website']
-            account['profile_image'] = row['profile_image']
-            account['cover_image'] = row['cover_image']
+            account['location'] = profile['location']
+            account['website'] = profile['website']
+            account['profile_image'] = profile['profile_image']
+            account['cover_image'] = profile['cover_image']
         accounts[account['id']] = account
 
     if observer:
