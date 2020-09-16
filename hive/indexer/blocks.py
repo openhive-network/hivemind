@@ -16,6 +16,7 @@ from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.tags import Tags
 from hive.indexer.reputations import Reputations
 from hive.indexer.reblog import Reblog
+from hive.indexer.notify import Notify
 from time import perf_counter
 
 from hive.utils.stats import OPStatusManager as OPSM
@@ -50,10 +51,11 @@ class Blocks:
       ('Posts', Posts.flush, Posts),
       ('PostDataCache', PostDataCache.flush, PostDataCache),
       ('Reputations', Reputations.flush, Reputations),
-      ('Votes', Votes.flush, Votes), 
-      ('Tags', Tags.flush, Tags), 
+      ('Votes', Votes.flush, Votes),
+      ('Tags', Tags.flush, Tags),
       ('Follow', follows_flush_helper, Follow),
-      ('Reblog', Reblog.flush, Reblog)
+      ('Reblog', Reblog.flush, Reblog),
+      ('Notify', Notify.flush, Notify)
     ]
 
     def __init__(cls):
@@ -74,6 +76,7 @@ class Blocks:
         Follow.setup_db_access(sharedDbAdapter)
         Posts.setup_db_access(sharedDbAdapter)
         Reblog.setup_db_access(sharedDbAdapter)
+        Notify.setup_db_access(sharedDbAdapter)
 
     @classmethod
     def head_num(cls):
@@ -100,6 +103,7 @@ class Blocks:
         Posts.flush()
         Reblog.flush()
         Follow.flush(trx=False)
+        Notify.flush()
         Reputations.flush()
 
         block_num = int(block['block_id'][:8], base=16)
