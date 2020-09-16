@@ -25,14 +25,6 @@ DELETE_SQL = """
     RETURNING hr.post_id, (SELECT ps.account_id FROM processing_set ps) AS account_id
 """
 
-SELECT_SQL = """
-    SELECT :blogger as blogger, hp.id as post_id, :date as date, :block_num as block_num
-    FROM hive_posts hp
-    INNER JOIN hive_accounts ha ON ha.id = hp.author_id
-    INNER JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
-    WHERE ha.name = :author AND hpd.permlink = :permlink AND hp.depth = 0 AND hp.counter_deleted = 0
-"""
-
 class Reblog(DbAdapterHolder):
     """ Class for reblog operations """
     reblog_items_to_flush = []
@@ -62,29 +54,38 @@ class Reblog(DbAdapterHolder):
             result = dict(row)
             FeedCache.delete(result['post_id'], result['account_id'])
         else:
-            row = cls.db.query_row(SELECT_SQL, blogger=blogger, author=author, permlink=permlink,
-                               date=block_date, block_num=block_num)
-            if row is not None:
-                result = dict(row)
-                cls.reblog_items_to_flush.append(result)
-                author_id = Accounts.get_id(author)
-                blogger_id = Accounts.get_id(blogger)
-                post_id = result['post_id']
-                FeedCache.insert(post_id, blogger_id, block_date, block_num)
-                if not DbState.is_initial_sync():
-                    Notify('reblog', src_id=blogger_id, dst_id=author_id,
-                           post_id=post_id, when=block_date,
-                           score=Accounts.default_score(blogger)).write()
+            cls.reblog_items_to_flush.append((blogger, author, permlink, block_date, block_num))
 
     @classmethod
     def flush(cls):
         """ Flush collected data to database """
         sql_prefix = """
             INSERT INTO hive_reblogs (account, post_id, created_at, block_num)
-            VALUES
-        """
-        sql_postfix = """
-            ON CONFLICT ON CONSTRAINT hive_reblogs_ux1 DO NOTHING
+            SELECT 
+                data_source.blogger, data_source.post_id, data_source.created_at, data_source.block_num
+            FROM
+            (
+                SELECT 
+                    t.blogger, hp.id as post_id, t.block_date as created_at, t.block_num 
+                FROM
+                    (VALUES
+                        {}
+                    ) AS T(blogger, author, permlink, block_date, block_num)
+                    INNER JOIN hive_accounts ha ON ha.name = t.author
+                    INNER JOIN hive_permlink_data hpd ON hpd.permlink = t.permlink
+                    INNER JOIN hive_posts hp ON hp.author_id = ha.id AND hp.permlink_id = hpd.id
+            ) AS data_source (blogger, post_id, created_at, block_num)
+            ON CONFLICT ON CONSTRAINT hive_reblogs_ux1 DO NOTHING;
+            SELECT 
+                    ha_b.id as blogger_id, hp.id as post_id, t.block_date, t.block_num 
+            FROM
+                (VALUES
+                    {}
+                ) AS T(blogger, author, permlink, block_date, block_num)
+                INNER JOIN hive_accounts ha_a ON ha_a.name = t.author
+                INNER JOIN hive_accounts ha_b ON ha_b.name = t.blogger
+                INNER JOIN hive_permlink_data hpd ON hpd.permlink = t.permlink
+                INNER JOIN hive_posts hp ON hp.author_id = ha_a.id AND hp.permlink_id = hpd.id
         """
 
         values = []
@@ -94,26 +95,37 @@ class Reblog(DbAdapterHolder):
         cls.beginTx()
         for reblog_item in cls.reblog_items_to_flush:
             if count < limit:
-                values.append("('{}', {}, '{}', {})".format(reblog_item["blogger"],
-                                                            reblog_item["post_id"],
-                                                            reblog_item["date"],
-                                                            reblog_item["block_num"]))
+                values.append("('{}', '{}', '{}', '{}'::timestamp, {})".format(reblog_item[0],
+                                                                               reblog_item[1],
+                                                                               reblog_item[2],
+                                                                               reblog_item[3],
+                                                                               reblog_item[4]))
                 count = count + 1
             else:
-                query = sql_prefix + ",".join(values)
-                query += sql_postfix
-                cls.db.query(query)
+                values_str = ",".join(values)
+                query = sql_prefix.format(values_str, values_str)
+                result = cls.db.query_all(query)
+                for row in result:
+                    row_as_dict = dict(row)
+                    FeedCache.insert(row_as_dict["post_id"], row_as_dict["blogger_id"],
+                                     row_as_dict["block_date"], row_as_dict["block_num"])
                 values.clear()
-                values.append("('{}', {}, '{}', {})".format(reblog_item["blogger"],
-                                                            reblog_item["post_id"],
-                                                            reblog_item["date"],
-                                                            reblog_item["block_num"]))
+                values.append("('{}', '{}', '{}', '{}'::timestamp, {})".format(reblog_item[0],
+                                                                               reblog_item[1],
+                                                                               reblog_item[2],
+                                                                               reblog_item[3],
+                                                                               reblog_item[4]))
                 count = 1
 
         if len(values) > 0:
-            query = sql_prefix + ",".join(values)
-            query += sql_postfix
-            cls.db.query(query)
+            values_str = ",".join(values)
+            query = sql_prefix.format(values_str, values_str)
+            result = cls.db.query_all(query)
+            for row in result:
+                row_as_dict = dict(row)
+                FeedCache.insert(row_as_dict["post_id"], row_as_dict["blogger_id"],
+                                 row_as_dict["block_date"], row_as_dict["block_num"])
         cls.commitTx()
         cls.reblog_items_to_flush.clear()
+
         return item_count
