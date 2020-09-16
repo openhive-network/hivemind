@@ -53,7 +53,6 @@ class Blocks:
         ('Tags', Tags.flush, Tags),
         ('Follow', follows_flush_helper, Follow),
         ('Reblog', Reblog.flush, Reblog),
-        ('Feed Cache', FeedCache.flush, FeedCache)
     ]
 
     def __init__(cls):
@@ -114,7 +113,6 @@ class Blocks:
         Reputations.flush()
         follows = Follow.flush(trx=False)
         accts = Accounts.flush(hived, trx=False, spread=8)
-        FeedCache.flush()
         # Follow and Account flush moved from Sync.listen (sync.py line 378)
         block_num = int(block['block_id'][:8], base=16)
         cls.on_live_blocks_processed( block_num, block_num )
@@ -474,3 +472,4 @@ class Blocks:
         DB.query_no_return("SELECT update_hive_posts_children_count({}, {})".format(first_block, last_block))
         DB.query_no_return("SELECT update_hive_posts_root_id({},{})".format(first_block, last_block))
         DB.query_no_return("SELECT update_hive_posts_api_helper({},{})".format(first_block, last_block))
+        DB.query_no_return("SELECT update_feed_cache({}, {})".format(first_block, last_block))

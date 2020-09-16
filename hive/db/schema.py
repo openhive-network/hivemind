@@ -2231,6 +2231,15 @@ def setup(db):
 
     db.query_no_return(sql)
 
+    sql_scripts = [
+      "update_feed_cache.sql"
+    ]
+    from os.path import dirname, realpath
+    dir_path = dirname(realpath(__file__))
+    for script in sql_scripts:
+        execute_sql_script(db.query_no_return, "{}/sql_scripts/{}".format(dir_path, script))
+
+
 
 def reset_autovac(db):
     """Initializes/resets per-table autovacuum/autoanalyze params.

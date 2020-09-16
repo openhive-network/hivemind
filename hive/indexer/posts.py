@@ -155,8 +155,6 @@ class Posts(DbAdapterHolder):
             for tag in tags:
                 Tags.add_tag(result['id'], tag)
 
-            FeedCache.insert(result['id'], result['author_id'], block_date, op['block_num'])
-
         if not DbState.is_initial_sync():
             if error:
                 author_id = result['author_id']
@@ -418,14 +416,10 @@ class Posts(DbAdapterHolder):
 
         depth = result['depth']
 
-        if depth == 0:
+        if depth == 0 and not DbState.is_initial_sync():
             # TODO: delete from hive_reblogs -- otherwise feed cache gets
             # populated with deleted posts somwrimas
             FeedCache.delete(pid)
-
-        if not DbState.is_initial_sync():
-            # force parent child recount when child is deleted
-            cls.update_child_count(pid, '-')
 
     @classmethod
     def _verify_post_against_community(cls, op, community_id, is_valid, is_muted):

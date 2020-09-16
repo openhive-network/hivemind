@@ -21,7 +21,6 @@ from hive.steem.block.stream import MicroForkException
 
 from hive.indexer.blocks import Blocks
 from hive.indexer.accounts import Accounts
-from hive.indexer.feed_cache import FeedCache
 from hive.indexer.follow import Follow
 from hive.indexer.community import Community
 from hive.indexer.reblog import Reblog
