@@ -116,8 +116,6 @@ class DbState:
             'hive_communities_block_num_idx',
             'hive_reblogs_created_at_idx',
 
-            'hive_accounts_ix5', # (cached_at, name)
-
             'hive_post_tags_tag_id_idx',
 
             'hive_votes_voter_id_post_id_idx',
@@ -333,7 +331,7 @@ class DbState:
             from hive.indexer.accounts import Accounts
             names = SteemClient().get_all_account_names()
             Accounts.load_ids()
-            Accounts.register(names, '1970-01-01T00:00:00', 0)
+            Accounts.register(names, None, '1970-01-01T00:00:00', 0)
             Accounts.clear_ids()
             cls._set_ver(6)
 
@@ -348,7 +346,6 @@ class DbState:
 
         if cls._ver == 7:
             cls.db().query("DROP INDEX IF EXISTS hive_accounts_ix4; CREATE INDEX hive_accounts_ix4 ON hive_accounts (id, name)")
-            cls.db().query("DROP INDEX IF EXISTS hive_accounts_ix5; CREATE INDEX hive_accounts_ix5 ON hive_accounts (cached_at, name)")
             cls._set_ver(8)
 
         if cls._ver == 8:
