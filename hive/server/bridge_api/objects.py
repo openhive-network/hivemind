@@ -8,6 +8,7 @@ from hive.server.common.helpers import json_date
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 from hive.utils.normalize import sbd_amount
 from hive.indexer.votes import Votes
+from hive.utils.account import safe_db_profile_metadata
 
 
 log = logging.getLogger(__name__)
@@ -197,6 +198,8 @@ def _condenser_profile_object(row):
 
     #Important. The member `sp` in `stats` is removed, because currently the hivemind doesn't hold any balances.
     # The member `vote_weight` from `hive_accounts` is removed as well.
+    profile = safe_db_profile_metadata(row['posting_json_metadata'], row['json_metadata'])
+
     return {
         'id': row['id'],
         'name': row['name'],
@@ -211,12 +214,12 @@ def _condenser_profile_object(row):
             'followers': row['followers'],
         },
         'metadata': {
-            'profile': {'name': row['display_name'] if row['display_name'] else "",
-                        'about': row['about'] if row['about'] else "",
-                        'website': row['website'] if row['website'] else "",
-                        'location': row['location'] if row['location'] else "",
-                        'cover_image': row['cover_image'],
-                        'profile_image': row['profile_image'],
+            'profile': {'name': profile['name'],
+                        'about': profile['about'],
+                        'website': profile['website'],
+                        'location': profile['location'],
+                        'cover_image': profile['cover_image'],
+                        'profile_image': profile['profile_image'],
                        }}}
 
 def _bridge_post_object(row, truncate_body=0):

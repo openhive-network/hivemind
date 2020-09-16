@@ -3,8 +3,34 @@
 import ujson as json
 from hive.utils.normalize import trunc
 
-def safe_profile_metadata(account):
-    """Given an account, return sanitized profile data."""
+def get_profile_str(account):
+    _posting_json_metadata = ""
+    _json_metadata = ""
+
+    if account is not None:
+      if 'posting_json_metadata' in account:
+        _posting_json_metadata = account['posting_json_metadata']
+      if 'json_metadata' in account:
+        _json_metadata = account['json_metadata']
+
+    return ( _posting_json_metadata, _json_metadata )
+
+def get_db_profile(posting_json_metadata, json_metadata):
+    prof = {}
+
+    try:
+        # read from posting_json_metadata, if version==2
+        prof = json.loads(posting_json_metadata)['profile']
+    except Exception:
+        try:
+            # fallback to json_metadata
+            prof = json.loads(json_metadata)['profile']
+        except Exception:
+            prof = {}
+
+    return prof
+
+def get_profile(account):
     prof = {}
 
     try:
@@ -19,6 +45,11 @@ def safe_profile_metadata(account):
             assert isinstance(prof, dict)
         except Exception:
             prof = {}
+
+    return prof
+
+def process_profile(prof):
+    """Returns profile data."""
 
     name = str(prof['name']) if 'name' in prof else None
     about = str(prof['about']) if 'about' in prof else None
@@ -59,6 +90,14 @@ def safe_profile_metadata(account):
         profile_image=profile_image or '',
         cover_image=cover_image or '',
     )
+
+def safe_db_profile_metadata(posting_json_metadata, json_metadata):
+  prof = get_db_profile(posting_json_metadata, json_metadata)
+  return process_profile(prof)
+
+def safe_profile_metadata(account):
+  prof = get_profile(account)
+  return process_profile(prof)
 
 def _valid_url_proto(url):
     assert url

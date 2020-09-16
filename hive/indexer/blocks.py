@@ -46,14 +46,15 @@ class Blocks:
     _current_block_date = None
 
     _concurrent_flush = [
-        ('Posts', Posts.flush, Posts),
-        ('PostDataCache', PostDataCache.flush, PostDataCache),
-        ('Reputations', Reputations.flush, Reputations),
-        ('Votes', Votes.flush, Votes),
-        ('Tags', Tags.flush, Tags),
-        ('Follow', follows_flush_helper, Follow),
-        ('Reblog', Reblog.flush, Reblog),
-        ('Notify', Notify.flush, Notify)
+      ('Posts', Posts.flush, Posts),
+      ('PostDataCache', PostDataCache.flush, PostDataCache),
+      ('Reputations', Reputations.flush, Reputations),
+      ('Votes', Votes.flush, Votes),
+      ('Tags', Tags.flush, Tags),
+      ('Follow', follows_flush_helper, Follow),
+      ('Reblog', Reblog.flush, Reblog),
+      ('Notify', Notify.flush, Notify),
+      ('Accounts', Accounts.flush, Accounts)
     ]
 
     def __init__(cls):
@@ -75,6 +76,7 @@ class Blocks:
         Posts.setup_own_db_access(sharedDbAdapter)
         Reblog.setup_own_db_access(sharedDbAdapter)
         Notify.setup_own_db_access(sharedDbAdapter)
+        Accounts.setup_own_db_access(sharedDbAdapter)
 
     @classmethod
     def setup_shared_db_access(cls, sharedDbAdapter):
@@ -86,6 +88,7 @@ class Blocks:
         Posts.setup_shared_db_access(sharedDbAdapter)
         Reblog.setup_shared_db_access(sharedDbAdapter)
         Notify.setup_shared_db_access(sharedDbAdapter)
+        Accounts.setup_shared_db_access(sharedDbAdapter)
 
     @classmethod
     def head_num(cls):
@@ -114,9 +117,9 @@ class Blocks:
         Follow.flush(trx=False)
         Notify.flush()
         Reputations.flush()
-        follows = Follow.flush(trx=False)
-        accts = Accounts.flush(hived, trx=False, spread=8)
+        accts = Accounts.flush()
         # Follow and Account flush moved from Sync.listen (sync.py line 378)
+
         block_num = int(block['block_id'][:8], base=16)
         cls.on_live_blocks_processed( block_num, block_num )
         time_end = perf_counter()
@@ -275,6 +278,7 @@ class Blocks:
                 op['block_num'] = num
 
                 account_name = None
+                op_details = None
                 # account ops
                 if op_type == 'pow_operation':
                     account_name = op['worker_account']
@@ -282,26 +286,25 @@ class Blocks:
                     account_name = op['work']['value']['input']['worker_account']
                 elif op_type == 'account_create_operation':
                     account_name = op['new_account_name']
+                    op_details = op
                 elif op_type == 'account_create_with_delegation_operation':
                     account_name = op['new_account_name']
+                    op_details = op
                 elif op_type == 'create_claimed_account_operation':
                     account_name = op['new_account_name']
+                    op_details = op
 
-                Accounts.register(account_name, cls._head_block_date, num)
+                Accounts.register(account_name, op_details, cls._head_block_date, num)
 
                 # account metadata updates
                 if op_type == 'account_update_operation':
-                    if not is_initial_sync:
-                        Accounts.dirty(op['account']) # full
+                    Accounts.update_op( op )
                 elif op_type == 'account_update2_operation':
-                    if not is_initial_sync:
-                        Accounts.dirty(op['account']) # full
+                    Accounts.update_op( op )
 
                 # post ops
                 elif op_type == 'comment_operation':
                     Posts.comment_op(op, cls._head_block_date)
-                    if not is_initial_sync:
-                        Accounts.dirty(op['author']) # lite - stats
                 elif op_type == 'delete_comment_operation':
                     key = "{}/{}".format(op['author'], op['permlink'])
                     if ( ineffective_deleted_ops is None ) or ( key not in ineffective_deleted_ops ):
@@ -309,9 +312,6 @@ class Blocks:
                 elif op_type == 'comment_options_operation':
                     Posts.comment_options_op(op)
                 elif op_type == 'vote_operation':
-                    if not is_initial_sync:
-                        Accounts.dirty(op['author']) # lite - rep
-                        Accounts.dirty(op['voter']) # lite - stats
                     Votes.vote_op(op, cls._head_block_date)
 
                 # misc ops
