@@ -75,10 +75,6 @@ def build_metadata():
         sa.Column('rshares', sa.BigInteger, nullable=False),
         sa.Column('block_num', sa.Integer,  nullable=False),
 
-        sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id']),
-        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id']),
-        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num']),
-
         sa.Index('hive_reputation_data_author_permlink_voter_idx', 'author_id', 'permlink', 'voter_id')
     )
 
