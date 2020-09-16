@@ -103,6 +103,7 @@ class Blocks:
         Reblog.flush()
         Follow.flush(trx=False)
         Reputations.flush()
+        Accounts.flush()
 
         block_num = int(block['block_id'][:8], base=16)
         cls.on_live_blocks_processed( block_num, block_num )
@@ -289,8 +290,6 @@ class Blocks:
                 # post ops
                 elif op_type == 'comment_operation':
                     Posts.comment_op(op, cls._head_block_date)
-                    if not is_initial_sync:
-                        Accounts.dirty(op['author']) # lite - stats
                 elif op_type == 'delete_comment_operation':
                     key = "{}/{}".format(op['author'], op['permlink'])
                     if ( ineffective_deleted_ops is None ) or ( key not in ineffective_deleted_ops ):
@@ -298,9 +297,6 @@ class Blocks:
                 elif op_type == 'comment_options_operation':
                     Posts.comment_options_op(op)
                 elif op_type == 'vote_operation':
-                    if not is_initial_sync:
-                        Accounts.dirty(op['author']) # lite - rep
-                        Accounts.dirty(op['voter']) # lite - stats
                     Votes.vote_op(op, cls._head_block_date)
 
                 # misc ops
