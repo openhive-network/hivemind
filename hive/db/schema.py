@@ -2119,26 +2119,6 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-        DROP TYPE IF EXISTS notification
-        ;
-        CREATE TYPE notification AS
-        (
-          id BIGINT
-        , type_id SMALLINT
-        , created_at TIMESTAMP
-        , src VARCHAR
-        , dst VARCHAR
-        , author VARCHAR
-        , permlink VARCHAR
-        , community VARCHAR
-        , community_title VARCHAR
-        , payload VARCHAR
-        , score SMALLINT
-        );
-    """
-    db.query_no_return(sql)
-
-    sql = """
             DROP FUNCTION IF EXISTS account_notifications
                     ;
             CREATE OR REPLACE FUNCTION account_notifications(in _account VARCHAR, in _min_score SMALLINT, in _last_id BIGINT, in _limit SMALLINT)
@@ -2311,7 +2291,12 @@ def setup(db):
     db.query_no_return(sql)
 
     sql_scripts = [
-      "update_feed_cache.sql"
+      "update_feed_cache.sql",
+      "bridge_get_ranked_post_by_hot.sql",
+      "bridge_get_ranked_post_by_promoted.sql",
+      "bridge_get_ranked_post_by_payout.sql",
+      "bridge_get_ranked_post_by_payout_comments.sql",
+      "bridge_get_ranked_post_by_muted.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))

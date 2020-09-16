@@ -147,6 +147,26 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
             sql = "SELECT * FROM bridge_get_ranked_post_by_created( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
             return await execute_query(db, sql, limit)
 
+        if sort == 'hot':
+            sql = "SELECT * FROM bridge_get_ranked_post_by_hot( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+            return await execute_query(db, sql, limit)
+
+        if sort == 'promoted':
+            sql = "SELECT * FROM bridge_get_ranked_post_by_promoted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+            return await execute_query(db, sql, limit)
+
+        if sort == 'payout':
+            sql = "SELECT * FROM bridge_get_ranked_post_by_payout( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+            return await execute_query(db, sql, limit)
+
+        if sort == 'payout_comments':
+            sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+            return await execute_query(db, sql, limit)
+
+        if sort == 'muted':
+            sql = "SELECT * FROM bridge_get_ranked_post_by_muted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+            return await execute_query(db, sql, limit)
+
     sql = ''
     pinned_sql = ''
 
