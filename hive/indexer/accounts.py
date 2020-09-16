@@ -10,27 +10,43 @@ import ujson as json
 from hive.db.adapter import Db
 from hive.utils.normalize import rep_log10, vests_amount
 from hive.utils.timer import Timer
-from hive.utils.account import safe_profile_metadata
+from hive.utils.account import get_profile_str
 from hive.utils.unique_fifo import UniqueFIFO
+
+from hive.indexer.db_adapter_holder import DbAdapterHolder
+from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
 
 DB = Db.instance()
 
-class Accounts:
+class Accounts(DbAdapterHolder):
     """Manages account id map, dirty queue, and `hive_accounts` table."""
+
+    _updates_data = {}
+
+    inside_flush = False
 
     # name->id map
     _ids = {}
-
-    # fifo queue
-    _dirty = UniqueFIFO()
 
     # in-mem id->rank map
     _ranks = {}
 
     # account core methods
     # --------------------
+
+    @classmethod
+    def update_op(cls, update_operation):
+        """Save json_metadata."""
+
+        if cls.inside_flush:
+            log.exception("Adding new update-account-info into '_updates_data' dict")
+            raise RuntimeError("Fatal error")
+
+        key = update_operation['account']
+        ( _posting_json_metadata, _json_metadata ) = get_profile_str( update_operation )
+        cls._updates_data[key] = { 'posting_json_metadata' : _posting_json_metadata, 'json_metadata' : _json_metadata }
 
     @classmethod
     def load_ids(cls):
@@ -70,7 +86,12 @@ class Accounts:
         return False
 
     @classmethod
-    def register(cls, name, block_date, block_num):
+    def get_json_data(cls, source ):
+        """json-data preprocessing."""
+        return escape_characters( source )
+
+    @classmethod
+    def register(cls, name, op_details, block_date, block_num):
         """Block processing: register "candidate" names.
 
         There are four ops which can result in account creation:
@@ -86,125 +107,77 @@ class Accounts:
         if cls.exists(name):
             return
 
-        DB.query("INSERT INTO hive_accounts (name, created_at) VALUES (:name, :date)", name=name, date=block_date)
+        ( _posting_json_metadata, _json_metadata ) = get_profile_str( op_details )
 
-        # pull newly-inserted ids and merge into our map
-        sql = "SELECT id FROM hive_accounts WHERE name = :name"
-        cls._ids[name] = DB.query_one(sql, name=name)
+        sql = """
+                  INSERT INTO hive_accounts (name, created_at, posting_json_metadata, json_metadata )
+                  VALUES ( '{}', '{}', {}, {} )
+                  RETURNING id
+              """.format( name, block_date, cls.get_json_data( _posting_json_metadata ), cls.get_json_data( _json_metadata ) )
+
+        cls._ids[name] = DB.query_one( sql )
 
         # post-insert: pass to communities to check for new registrations
         from hive.indexer.community import Community, START_DATE
         if block_date > START_DATE:
             Community.register(name, block_date, block_num)
 
-    # account cache methods
-    # ---------------------
-
     @classmethod
-    def dirty(cls, account):
-        """Marks given account as needing an update."""
-        return cls._dirty.add(account)
+    def flush(cls):
+        """ Flush json_metadatafrom cache to database """
 
-    @classmethod
-    def dirty_set(cls, accounts):
-        """Marks given accounts as needing an update."""
-        return cls._dirty.extend(accounts)
+        cls.inside_flush = True
+        n = 0
 
-    @classmethod
-    def dirty_all(cls):
-        """Marks all accounts as dirty. Use to rebuild entire table."""
-        cls.dirty(set(DB.query_col("SELECT name FROM hive_accounts")))
+        if cls._updates_data:
+            cls.beginTx()
 
-    @classmethod
-    def dirty_oldest(cls, limit=50000):
-        """Flag `limit` least-recently updated accounts for update."""
-        sql = "SELECT name FROM hive_accounts ORDER BY cached_at LIMIT :limit"
-        return cls.dirty_set(set(DB.query_col(sql, limit=limit)))
+            sql = """
+                    UPDATE hive_accounts ha
+                    SET
+                    posting_json_metadata = T2.posting_json_metadata,
+                    json_metadata = T2.json_metadata
+                    FROM
+                    (
+                      SELECT
+                        posting_json_metadata,
+                        json_metadata,
+                        name
+                      FROM
+                      (
+                      VALUES
+                        -- posting_json_metadata, json_metadata, name
+                        {}
+                      )T( posting_json_metadata, json_metadata, name )
+                    )T2
+                    WHERE ha.name = T2.name
+                """
 
-    @classmethod
-    def flush(cls, steem, trx=False, spread=1):
-        """Process all accounts flagged for update.
+            values = []
+            values_limit = 1000
 
-         - trx: bool - wrap the update in a transaction
-         - spread: int - spread writes over a period of `n` calls
-        """
-        accounts = cls._dirty.shift_portion(spread)
+            for name, data in cls._updates_data.items():
+                values.append("({}, {}, '{}')".format(
+                  cls.get_json_data( data['posting_json_metadata'] ),
+                  cls.get_json_data( data['json_metadata'] ),
+                  name))
 
-        count = len(accounts)
-        if not count:
-            return 0
+                if len(values) >= values_limit:
+                    values_str = ','.join(values)
+                    actual_query = sql.format(values_str)
+                    cls.db.query(actual_query)
+                    values.clear()
 
-        if trx:
-            log.info("[SYNC] update %d accounts", count)
+            if len(values) > 0:
+                values_str = ','.join(values)
+                actual_query = sql.format(values_str)
+                cls.db.query(actual_query)
+                values.clear()
 
-        cls._cache_accounts(accounts, steem, trx=trx)
-        return count
+            n = len(cls._updates_data)
+            cls._updates_data.clear()
+            cls.commitTx()
 
-    @classmethod
-    def _cache_accounts(cls, accounts, steem, trx=True):
-        """Fetch all `accounts` and write to db."""
-        timer = Timer(len(accounts), 'account', ['rps', 'wps'])
-        for name_batch in partition_all(1000, accounts):
-            cached_at = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+        cls.inside_flush = False
 
-            timer.batch_start()
-            batch = steem.get_accounts(name_batch)
-
-            timer.batch_lap()
-            sqls = [cls._sql(acct, cached_at) for acct in batch]
-            DB.batch_queries(sqls, trx)
-
-            timer.batch_finish(len(batch))
-            if trx or len(accounts) > 1000:
-                log.info(timer.batch_status())
-
-    @classmethod
-    def _sql(cls, account, cached_at):
-        """Prepare a SQL query from a steemd account."""
-        vests = vests_amount(account['vesting_shares'])
-
-        #Not used. The member `vote_weight` from `hive_accounts` is removed.
-        # vote_weight = (vests
-        #                + vests_amount(account['received_vesting_shares'])
-        #                - vests_amount(account['delegated_vesting_shares']))
-
-        proxy_weight = 0 if account['proxy'] else float(vests)
-        for satoshis in account['proxied_vsf_votes']:
-            proxy_weight += float(satoshis) / 1e6
-
-        # remove empty keys
-        useless = ['transfer_history', 'market_history', 'post_history',
-                   'vote_history', 'other_history', 'tags_usage',
-                   'guest_bloggers']
-        for key in useless:
-            del account[key]
-
-        # pull out valid profile md and delete the key
-        profile = safe_profile_metadata(account)
-        del account['json_metadata']
-        del account['posting_json_metadata']
-
-        values = {
-            'name':         account['name'],
-            'created_at':   account['created'],
-            'proxy':        account['proxy'],
-            'reputation':   rep_log10(account['reputation']),
-            'proxy_weight': proxy_weight,
-            'cached_at':    cached_at,
-
-            'display_name':  profile['name'],
-            'about':         profile['about'],
-            'location':      profile['location'],
-            'website':       profile['website'],
-            'profile_image': profile['profile_image'],
-            'cover_image':   profile['cover_image'],
-
-            'raw_json': json.dumps(account)}
-
-        # update rank field, if present
-        _id = cls.get_id(account['name'])
-        if _id in cls._ranks:
-            values['rank'] = cls._ranks[_id]
-
-        bind = ', '.join([k+" = :"+k for k in list(values.keys())][1:])
-        return ("UPDATE hive_accounts SET %s WHERE name = :name" % bind, values)
+        return n

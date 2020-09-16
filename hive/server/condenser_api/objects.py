@@ -7,6 +7,7 @@ from hive.utils.normalize import sbd_amount, rep_to_raw
 from hive.server.common.mutes import Mutes
 from hive.server.common.helpers import json_date
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
+from hive.utils.account import safe_db_profile_metadata
 
 log = logging.getLogger(__name__)
 
@@ -155,6 +156,9 @@ async def _query_author_rep_map(db, posts):
 def _condenser_account_object(row):
     """Convert an internal account record into legacy-steemd style."""
     #The member `vote_weight` from `hive_accounts` is removed, so currently the member `net_vesting_shares` is equals to zero.
+
+    profile = safe_db_profile_metadata(row['posting_json_metadata'], row['json_metadata'])
+
     return {
         'name': row['name'],
         'created': str(row['created_at']),
@@ -163,12 +167,12 @@ def _condenser_account_object(row):
         'net_vesting_shares': 0,
         'transfer_history': [],
         'json_metadata': json.dumps({
-            'profile': {'name': row['display_name'],
-                        'about': row['about'],
-                        'website': row['website'],
-                        'location': row['location'],
-                        'cover_image': row['cover_image'],
-                        'profile_image': row['profile_image'],
+            'profile': {'name': profile['name'],
+                        'about': profile['about'],
+                        'website': profile['website'],
+                        'location': profile['location'],
+                        'cover_image': profile['cover_image'],
+                        'profile_image': profile['profile_image'],
                        }})}
 
 def _condenser_post_object(row, truncate_body=0):

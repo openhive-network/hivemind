@@ -362,10 +362,6 @@ class Sync:
                 to - 1, blocks[-1]['timestamp']))
             log.info(timer.batch_status(_prefix))
 
-        if not is_initial_sync:
-            # This flush is low importance; accounts are swept regularly.
-            Accounts.flush(steemd, trx=True)
-
     def listen(self):
         """Live (block following) mode."""
         trail_blocks = self._conf.get('trail_blocks')
@@ -386,9 +382,9 @@ class Sync:
             self._db.query("COMMIT")
 
             ms = (perf() - start_time) * 1000
-            log.info("[LIVE] Got block %d at %s --% 4d txs,% 3d accts,% 3d follows"
+            log.info("[LIVE] Got block %d at %s --% 4d txs, % 3d follows"
                      " --% 5dms%s", num, block['timestamp'], len(block['transactions']),
-                     accts, follows, ms, ' SLOW' if ms > 1000 else '')
+                     follows, ms, ' SLOW' if ms > 1000 else '')
 
             if num % 1200 == 0: #1hr
                 log.warning("head block %d @ %s", num, block['timestamp'])
