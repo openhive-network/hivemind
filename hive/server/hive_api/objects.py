@@ -216,9 +216,16 @@ async def _append_flags(db, posts):
     return posts
 
 async def _reblogged_ids(db, observer, post_ids):
-    sql = """SELECT post_id FROM hive_reblogs
-              WHERE account = :observer
-                AND post_id IN :ids"""
+    sql = """
+        SELECT
+            hr.post_id
+        FROM 
+            hive_reblogs hr
+        INNER JOIN hive_accounts ha ON ha.id = hr.blogger_id
+        WHERE
+            ha.name = :observer
+            AND hr.post_id IN :ids
+    """
     return  await db.query_col(sql, observer=observer, ids=tuple(post_ids))
 
 def _top_votes(obj, limit, observer):

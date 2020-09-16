@@ -61,21 +61,22 @@ class Reblog(DbAdapterHolder):
     def flush(cls):
         """ Flush collected data to database """
         sql_prefix = """
-            INSERT INTO hive_reblogs (account, post_id, created_at, block_num)
+            INSERT INTO hive_reblogs (blogger_id, post_id, created_at, block_num)
             SELECT 
-                data_source.blogger, data_source.post_id, data_source.created_at, data_source.block_num
+                data_source.blogger_id, data_source.post_id, data_source.created_at, data_source.block_num
             FROM
             (
                 SELECT 
-                    t.blogger, hp.id as post_id, t.block_date as created_at, t.block_num 
+                    ha_b.id as blogger_id, hp.id as post_id, t.block_date as created_at, t.block_num 
                 FROM
                     (VALUES
                         {}
                     ) AS T(blogger, author, permlink, block_date, block_num)
                     INNER JOIN hive_accounts ha ON ha.name = t.author
+                    INNER JOIN hive_accounts ha_b ON ha_b.name = t.blogger
                     INNER JOIN hive_permlink_data hpd ON hpd.permlink = t.permlink
                     INNER JOIN hive_posts hp ON hp.author_id = ha.id AND hp.permlink_id = hpd.id
-            ) AS data_source (blogger, post_id, created_at, block_num)
+            ) AS data_source (blogger_id, post_id, created_at, block_num)
             ON CONFLICT ON CONSTRAINT hive_reblogs_ux1 DO NOTHING
         """
 
