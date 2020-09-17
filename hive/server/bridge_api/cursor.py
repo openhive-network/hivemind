@@ -351,50 +351,14 @@ async def pids_by_comments(db, account: str, start_permlink: str = '', limit: in
     return await db.query_col(sql, account=account, start_id=start_id, limit=limit)
 
 
-async def pids_by_replies(db, start_author: str, start_permlink: str = '',
+async def pids_by_replies(db, author: str, start_replies_author: str, start_replies_permlink: str = '',
                           limit: int = 20):
     """Get a list of post_ids representing replies to an author.
-
-    To get the first page of results, specify `start_author` as the
-    account being replied to. For successive pages, provide the
-    last loaded reply's author/permlink.
     """
-    seek = ''
-    start_id = None
-    if start_permlink:
-        sql = """
-          SELECT (SELECT name FROM hive_accounts WHERE id = parent.author_id),
-                 child.id
-            FROM hive_posts child
-            JOIN hive_posts parent
-              ON child.parent_id = parent.id
-           WHERE child.author_id = (SELECT id FROM hive_accounts WHERE name = :author)
-             AND child.permlink = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)
-        """
 
-        row = await db.query_row(sql, author=start_author, permlink=start_permlink)
-        if not row:
-            return []
-
-        parent_account = row[0]
-        start_id = row[1]
-        seek = "AND id <= :start_id"
-    else:
-        parent_account = start_author
-
-    sql = """
-       SELECT id FROM hive_posts
-        WHERE parent_id IN (SELECT id FROM hive_posts
-                             WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :parent)
-                               AND counter_deleted = 0
-                          ORDER BY id DESC
-                             LIMIT 10000) %s
-          AND counter_deleted = 0
-     ORDER BY id DESC
-        LIMIT :limit
-    """ % seek
-
-    return await db.query_col(sql, parent=parent_account, start_id=start_id, limit=limit)
+    sql = "SELECT get_account_post_replies( (:author)::VARCHAR, (:start_author)::VARCHAR, (:start_permlink)::VARCHAR, (:limit)::SMALLINT ) as id"
+    return await db.query_col(
+        sql, author=author, start_author=start_replies_author, start_permlink=start_replies_permlink, limit=limit)
 
 async def pids_by_payout(db, account: str, start_author: str = '',
                          start_permlink: str = '', limit: int = 20):

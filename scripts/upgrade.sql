@@ -319,3 +319,50 @@ END
 $function$
 language plpgsql STABLE
 ;
+
+DROP FUNCTION IF EXISTS find_account_id(character varying, boolean)
+;
+CREATE OR REPLACE FUNCTION find_account_id(
+  in _account hive_accounts.name%TYPE,
+  in _check boolean)
+RETURNS INT
+LANGUAGE 'plpgsql'
+AS
+$function$
+DECLARE
+  account_id INT;
+BEGIN
+  SELECT INTO account_id COALESCE( ( SELECT id FROM hive_accounts WHERE name=_account ), 0 );
+  IF _check AND account_id = 0 THEN
+    RAISE EXCEPTION 'Account % does not exist', _account;
+  END IF;
+  RETURN account_id;
+END
+$function$
+;
+
+DROP FUNCTION IF EXISTS get_account_post_replies;
+CREATE FUNCTION get_account_post_replies( in _account VARCHAR, in start_author VARCHAR, in start_permlink VARCHAR, in _limit SMALLINT )
+RETURNS SETOF INTEGER
+AS
+$function$
+DECLARE
+	__post_id INTEGER = -1;
+	__account_id INTEGER;
+BEGIN
+	IF start_author <> '' THEN
+    __post_id = find_comment_id( start_author, start_permlink, True );
+  END IF;
+  __account_id = find_account_id(_account, False);
+  IF __account_id = 0 THEN
+    RETURN;
+  END IF;
+	RETURN QUERY SELECT
+	hpr.id as id
+	FROM hive_posts hpr
+	JOIN hive_posts hp ON hp.id = hpr.parent_id
+	WHERE hp.author_id = __account_id AND hp.counter_deleted = 0 AND hpr.counter_deleted = 0 AND ( __post_id = -1 OR hpr.id < __post_id  )
+	ORDER BY hpr.id DESC LIMIT _limit;
+END
+$function$
+LANGUAGE plpgsql STABLE
