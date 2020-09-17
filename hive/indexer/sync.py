@@ -392,9 +392,6 @@ class Sync:
                 #Community.recalc_pending_payouts()
             if num % 200 == 0: #10min
                 Community.recalc_pending_payouts()
-            if num % 100 == 0: #5min
-                log.info("[LIVE] 5-min stats")
-                Accounts.dirty_oldest(500)
             if num % 20 == 0: #1min
                 self._update_chain_state()
 
