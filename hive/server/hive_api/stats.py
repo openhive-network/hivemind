@@ -23,27 +23,44 @@ async def get_payout_stats(context, limit=250):
     db = context['db']
     limit = valid_limit(limit, 250, 250)
 
-    stats = PayoutStats.instance()
-    await stats.generate()
-
     sql = """
-        SELECT hc.name, hc.title, author, payout, posts, authors
-          FROM payout_stats
-     LEFT JOIN hive_communities hc ON hc.id = community_id
-         WHERE (community_id IS NULL AND author IS NOT NULL)
-            OR (community_id IS NOT NULL AND author IS NULL)
-      ORDER BY payout DESC
-         LIMIT :limit
+          SELECT hc.name, hc.title, author, payout, posts, NULL authors
+          FROM
+          (
+            SELECT community_id, ha.name as author, SUM( payout + pending_payout ) payout, COUNT(*) posts, NULL authors
+            FROM hive_posts
+            INNER JOIN hive_accounts ha ON ha.id = hive_posts.author_id
+            WHERE is_paidout = '0' and counter_deleted = 0
+            GROUP BY community_id, author
+
+            UNION ALL
+
+            SELECT community_id, NULL author, SUM( payout + pending_payout ) payout, COUNT(*) posts, COUNT(DISTINCT(author_id)) authors
+            FROM hive_posts
+            WHERE is_paidout = '0' and counter_deleted = 0
+            GROUP BY community_id
+          ) T
+          LEFT JOIN hive_communities hc ON hc.id = T.community_id
+          WHERE (T.community_id IS NULL AND T.author IS NOT NULL) OR (T.community_id IS NOT NULL AND T.author IS NULL)
+          ORDER BY payout DESC
+          LIMIT :limit
     """
 
     rows = await db.query_all(sql, limit=limit)
     items = list(map(_row, rows))
 
-    sql = """SELECT SUM(payout) FROM payout_stats WHERE author IS NULL"""
+    sql = """
+          SELECT SUM( payout + pending_payout ) payout
+          FROM hive_posts
+          WHERE is_paidout = '0' and counter_deleted = 0
+          """
     total = await db.query_one(sql)
 
-    sql = """SELECT SUM(payout) FROM payout_stats
-              WHERE community_id IS NULL AND author IS NULL"""
+    sql = """
+          SELECT SUM( payout + pending_payout ) payout
+          FROM hive_posts
+          WHERE is_paidout = '0' and counter_deleted = 0 and community_id IS NULL
+          """
     blog_ttl = await db.query_one(sql)
 
     return dict(items=items, total=float(total if total is not None else 0.), blogs=float(blog_ttl if blog_ttl is not None else 0.))
