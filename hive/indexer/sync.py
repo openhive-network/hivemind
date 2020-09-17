@@ -130,7 +130,7 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
             timer.batch_start()
             
             block_start = perf()
-            Blocks.process_multi(blocks, preparedVops, node, is_initial_sync)
+            Blocks.process_multi(blocks, preparedVops, is_initial_sync)
             block_end = perf()
 
             timer.batch_lap()
@@ -286,45 +286,12 @@ class Sync:
         assert DbState.is_initial_sync(), "already synced"
 
         log.info("[INIT] *** Initial fast sync ***")
-        self.from_checkpoints()
         self.from_steemd(is_initial_sync=True)
         if not CONTINUE_PROCESSING:
             return
 
         log.info("[INIT] *** Initial cache build ***")
         Follow.force_recount()
-
-    def from_checkpoints(self, chunk_size=1000):
-        """Initial sync strategy: read from blocks on disk.
-
-        This methods scans for files matching ./checkpoints/*.json.lst
-        and uses them for hive's initial sync. Each line must contain
-        exactly one block in JSON format.
-        """
-        # pylint: disable=no-self-use
-
-        last_block = Blocks.head_num()
-
-        tuplize = lambda path: [int(path.split('/')[-1].split('.')[0]), path]
-        basedir = os.path.dirname(os.path.realpath(__file__ + "/../.."))
-        files = glob.glob(basedir + "/checkpoints/*.json.lst")
-        tuples = sorted(map(tuplize, files), key=lambda f: f[0])
-        vops = {}
-
-        last_read = 0
-        for (num, path) in tuples:
-            if last_block < num:
-                log.info("[SYNC] Load %s. Last block: %d", path, last_block)
-                with open(path) as f:
-                    # each line in file represents one block
-                    # we can skip the blocks we already have
-                    skip_lines = last_block - last_read
-                    remaining = drop(skip_lines, f)
-                    for lines in partition_all(chunk_size, remaining):
-                        raise RuntimeError("Sync from checkpoint disabled")
-#                        Blocks.process_multi(map(json.loads, lines), True)
-                last_block = num
-            last_read = num
 
     def from_steemd(self, is_initial_sync=False, chunk_size=1000):
         """Fast sync strategy: read/process blocks in batches."""
@@ -338,8 +305,8 @@ class Sync:
             return
 
         if is_initial_sync:
-          _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size)
-          return
+            _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size)
+            return
 
         log.info("[SYNC] start block %d, +%d to sync", lbound, count)
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
@@ -350,12 +317,12 @@ class Sync:
             to = min(lbound + chunk_size, ubound)
             blocks = steemd.get_blocks_range(lbound, to)
             vops = steemd.enum_virtual_ops(lbound, to)
-            preparedVops = prepare_vops(vops)
+            prepared_vops = prepare_vops(vops)
             lbound = to
             timer.batch_lap()
 
             # process blocks
-            Blocks.process_multi(blocks, preparedVops, steemd, is_initial_sync)
+            Blocks.process_multi(blocks, prepared_vops, is_initial_sync)
             timer.batch_finish(len(blocks))
 
             _prefix = ("[SYNC] Got block %d @ %s" % (
@@ -377,14 +344,21 @@ class Sync:
         for block in steemd.stream_blocks(hive_head + 1, trail_blocks, max_gap):
             start_time = perf()
 
+            num = int(block['block_id'][:8], base=16)
+            log.info("[LIVE] About to process block %d", num)
+            vops = steemd.enum_virtual_ops(num, num + 1)
+            prepared_vops = prepare_vops(vops)
+
+            num_vops = len(prepared_vops[num]) if num in prepared_vops else 0
+
             self._db.query("START TRANSACTION")
-            num, follows, accts = Blocks.process(block, {}, steemd)
+            follows, accounts = Blocks.process(block, num, prepared_vops)
             self._db.query("COMMIT")
 
             ms = (perf() - start_time) * 1000
-            log.info("[LIVE] Got block %d at %s --% 4d txs, % 3d follows"
+            log.info("[LIVE] Processed block %d at %s --% 4d txs, % 3d follows, % 3d accounts, % 4d vops"
                      " --% 5dms%s", num, block['timestamp'], len(block['transactions']),
-                     follows, ms, ' SLOW' if ms > 1000 else '')
+                     follows, accounts, num_vops, ms, ' SLOW' if ms > 1000 else '')
 
             if num % 1200 == 0: #1hr
                 log.warning("head block %d @ %s", num, block['timestamp'])

@@ -119,65 +119,74 @@ class Follow(DbAdapterHolder):
 
     @classmethod
     def _flush_follow_items(cls):
-        sql_prefix = """
-              INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists, block_num)
-              VALUES """
+        n = 0
+        if cls.follow_items_to_flush:
+            sql_prefix = """
+                INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists, block_num)
+                VALUES """
 
-        sql_postfix = """
-              ON CONFLICT ON CONSTRAINT hive_follows_ux1 DO UPDATE
-                SET
-                    state = (CASE EXCLUDED.state
-                                WHEN 0 THEN 0 -- 0 blocks possibility to update state
-                                ELSE EXCLUDED.state
-                            END),
-                    blacklisted = (CASE EXCLUDED.state
-                                    WHEN 3 THEN TRUE
-                                    WHEN 5 THEN FALSE
-                                    ELSE EXCLUDED.blacklisted
+            sql_postfix = """
+                ON CONFLICT ON CONSTRAINT hive_follows_ux1 DO UPDATE
+                    SET
+                        state = (CASE EXCLUDED.state
+                                    WHEN 0 THEN 0 -- 0 blocks possibility to update state
+                                    ELSE EXCLUDED.state
                                 END),
-                    follow_blacklists = (CASE EXCLUDED.state
-                                            WHEN 4 THEN TRUE
-                                            WHEN 6 THEN FALSE
-                                            ELSE EXCLUDED.follow_blacklists
-                                        END)
-              WHERE hf.following = EXCLUDED.following AND hf.follower = EXCLUDED.follower
-              """
-        values = []
-        limit = 1000
-        count = 0
-        cls.beginTx()
-        for _, follow_item in cls.follow_items_to_flush.items():
-            if count < limit:
-                values.append("({}, {}, '{}', {}, {}, {}, {})".format(follow_item['flr'], follow_item['flg'],
-                                                                  follow_item['at'], follow_item['state'],
-                                                                  follow_item['state'] == 3,
-                                                                  follow_item['state'] == 4,
-                                                                  follow_item['block_num']))
-                count = count + 1
-            else:
+                        blacklisted = (CASE EXCLUDED.state
+                                        WHEN 3 THEN TRUE
+                                        WHEN 5 THEN FALSE
+                                        ELSE EXCLUDED.blacklisted
+                                    END),
+                        follow_blacklists = (CASE EXCLUDED.state
+                                                WHEN 4 THEN TRUE
+                                                WHEN 6 THEN FALSE
+                                                ELSE EXCLUDED.follow_blacklists
+                                            END)
+                WHERE hf.following = EXCLUDED.following AND hf.follower = EXCLUDED.follower
+                """
+            values = []
+            limit = 1000
+            count = 0
+
+            cls.beginTx()
+            for _, follow_item in cls.follow_items_to_flush.items():
+                if count < limit:
+                    values.append("({}, {}, '{}', {}, {}, {}, {})".format(follow_item['flr'],
+                                                                          follow_item['flg'],
+                                                                          follow_item['at'],
+                                                                          follow_item['state'],
+                                                                          follow_item['state'] == 3,
+                                                                          follow_item['state'] == 4,
+                                                                          follow_item['block_num']))
+                    count = count + 1
+                else:
+                    query = sql_prefix + ",".join(values)
+                    query += sql_postfix
+                    cls.db.query(query)
+                    values.clear()
+                    values.append("({}, {}, '{}', {}, {}, {}, {})".format(follow_item['flr'],
+                                                                          follow_item['flg'],
+                                                                          follow_item['at'],
+                                                                          follow_item['state'],
+                                                                          follow_item['state'] == 3,
+                                                                          follow_item['state'] == 4,
+                                                                          follow_item['block_num']))
+                    count = 1
+                n += 1
+
+            if len(values) > 0:
                 query = sql_prefix + ",".join(values)
                 query += sql_postfix
                 cls.db.query(query)
-                values.clear()
-                values.append("({}, {}, '{}', {}, {}, {}, {})".format(follow_item['flr'], follow_item['flg'],
-                                                                  follow_item['at'], follow_item['state'],
-                                                                  follow_item['state'] == 3,
-                                                                  follow_item['state'] == 4,
-                                                                  follow_item['block_num']))
-                count = 1
-
-        if len(values) > 0:
-            query = sql_prefix + ",".join(values)
-            query += sql_postfix
-            cls.db.query(query)
-        cls.commitTx()
-        cls.follow_items_to_flush.clear()
+            cls.commitTx()
+            cls.follow_items_to_flush.clear()
+        return n
 
     @classmethod
-    def flush(cls, trx=True):
+    def flush(cls, trx=False):
         """Flushes pending follow count deltas."""
 
-        cls._flush_follow_items()
+        n = cls._flush_follow_items()
 
         updated = 0
         sqls = []
@@ -188,7 +197,7 @@ class Follow(DbAdapterHolder):
                 sqls.append((sql % (col, col), dict(mag=delta, ids=tuple(names))))
 
         if not updated:
-            return 0
+            return n
 
         start = perf()
         cls.db.batch_queries(sqls, trx=trx)
@@ -197,7 +206,7 @@ class Follow(DbAdapterHolder):
                      updated, perf() - start)
 
         cls._delta = {FOLLOWERS: {}, FOLLOWING: {}}
-        return updated
+        return updated + n
 
     @classmethod
     def flush_recount(cls):
