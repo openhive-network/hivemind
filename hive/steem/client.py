@@ -168,7 +168,6 @@ class SteemClient:
         ineffective_delete_comment_operation    = 0x800000
 
         tracked_ops_filter = author_reward_operation | comment_reward_operation | effective_comment_vote_operation | comment_payout_update_operation | ineffective_delete_comment_operation
-        tracked_ops = ['author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation', 'comment_payout_update_operation', 'ineffective_delete_comment_operation']
 
         resume_on_operation = 0
 
@@ -180,7 +179,7 @@ class SteemClient:
             one_block_ops = {opb["block"] : {"timestamp":opb["timestamp"], "ops":[op["op"] for op in opb["ops"]]} for opb in call_result["ops_by_block"]}
 
             if one_block_ops:
-                first_block = list(one_block_ops.keys())[0];
+                first_block = list(one_block_ops.keys())[0]
                 # if we continue collecting ops from previous iteration
                 if first_block in ret:
                     ret.update( { first_block : { "timestamp":ret[ first_block ]["timestamp"], "ops":ret[ first_block ]["ops"] + one_block_ops[ first_block ]["ops"]} } )

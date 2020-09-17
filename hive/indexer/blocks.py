@@ -35,10 +35,6 @@ def time_collector(f):
 
     return (result, elapsedTime)
 
-def follows_flush_helper():
-    folllow_items = len(Follow.follow_items_to_flush) + Follow.flush(trx=False)
-    return folllow_items
-
 class Blocks:
     """Processes blocks, dispatches work, manages `hive_blocks` table."""
     blocks_to_flush = []
@@ -51,7 +47,7 @@ class Blocks:
       ('Reputations', Reputations.flush, Reputations),
       ('Votes', Votes.flush, Votes),
       ('Tags', Tags.flush, Tags),
-      ('Follow', follows_flush_helper, Follow),
+      ('Follow', Follow.flush, Follow),
       ('Reblog', Reblog.flush, Reblog),
       ('Notify', Notify.flush, Notify),
       ('Accounts', Accounts.flush, Accounts)
@@ -103,31 +99,29 @@ class Blocks:
         return str(DB.query_one(sql) or '')
 
     @classmethod
-    def process(cls, block, vops_in_block, hived):
+    def process(cls, block, block_num, vops_in_block):
         """Process a single block. Always wrap in a transaction!"""
         time_start = perf_counter()
-        #assert is_trx_active(), "Block.process must be in a trx"
-        ret = cls._process(block, vops_in_block, hived, is_initial_sync=False)
+        ret = cls._process(block, vops_in_block)
+        assert ret == block_num, "{} != {}".format(block_num, ret)
         cls._flush_blocks()
         PostDataCache.flush()
         Tags.flush()
         Votes.flush()
         Posts.flush()
         Reblog.flush()
-        Follow.flush(trx=False)
+        follows = Follow.flush()
         Notify.flush()
         Reputations.flush()
         accts = Accounts.flush()
-        # Follow and Account flush moved from Sync.listen (sync.py line 378)
 
-        block_num = int(block['block_id'][:8], base=16)
-        cls.on_live_blocks_processed( block_num, block_num )
+        cls.on_live_blocks_processed(block_num, block_num)
         time_end = perf_counter()
         log.info("[PROCESS BLOCK] %fs", time_end - time_start)
-        return ret, follows, accts
+        return follows, accts
 
     @classmethod
-    def process_multi(cls, blocks, vops, hived, is_initial_sync=False):
+    def process_multi(cls, blocks, vops, is_initial_sync):
         """Batch-process blocks; wrapped in a transaction."""
         time_start = OPSM.start()
 
@@ -139,7 +133,7 @@ class Blocks:
             for block in blocks:
                 if first_block == -1:
                     first_block = int(block['block_id'][:8], base=16)
-                last_num = cls._process(block, vops, hived, is_initial_sync)
+                last_num = cls._process(block, vops)
         except Exception as e:
             log.error("exception encountered block %d", last_num + 1)
             raise e
@@ -197,7 +191,6 @@ class Blocks:
         for vop in vopsList:
             start = OPSM.start()
             key = None
-            val = None
 
             op_type = vop['type']
             op_value = vop['value']
@@ -243,7 +236,7 @@ class Blocks:
 
 
     @classmethod
-    def _process(cls, block, virtual_operations, hived, is_initial_sync=False):
+    def _process(cls, block, virtual_operations):
         """Process a single block. Assumes a trx is open."""
         #pylint: disable=too-many-branches
         num = cls._push(block)
@@ -257,16 +250,11 @@ class Blocks:
         if cls._head_block_date is None:
             cls._head_block_date = cls._current_block_date
 
-        comment_payout_stats    = None
         ineffective_deleted_ops = None
 
-        if is_initial_sync:
-            if num in virtual_operations:
-                ineffective_deleted_ops = Blocks.prepare_vops(Posts.comment_payout_ops, virtual_operations[num], cls._current_block_date, num)
-        else:
-            vops = hived.get_virtual_operations(num)
-            ineffective_deleted_ops = Blocks.prepare_vops(Posts.comment_payout_ops, vops, cls._current_block_date, num)
-
+        if num in virtual_operations:
+            ineffective_deleted_ops = Blocks.prepare_vops(Posts.comment_payout_ops, virtual_operations[num], cls._current_block_date, num)
+    
         json_ops = []
         for tx_idx, tx in enumerate(block['transactions']):
             for operation in tx['operations']:

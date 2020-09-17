@@ -25,7 +25,10 @@ class GitRevisionProvider(object):
             command = 'git describe --tags --long --dirty'
             version = check_output(command.split()).decode('utf-8').strip()
             parts = version.split('-')
-            _, _, sha = parts[:3]
+            if parts[-1] == 'dirty':
+                sha = parts[-2]
+            else:
+                sha = parts[-1]
             git_revision = sha.lstrip('g')
             GitRevisionProvider._save_version_file(VERSION, git_revision)
             return git_revision
