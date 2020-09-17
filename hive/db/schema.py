@@ -2311,7 +2311,8 @@ def setup(db):
     db.query_no_return(sql)
 
     sql_scripts = [
-      "update_feed_cache.sql"
+      "update_feed_cache.sql",
+      "get_account_post_replies.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
