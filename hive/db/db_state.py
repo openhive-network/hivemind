@@ -8,12 +8,16 @@ from time import perf_counter
 import logging
 import sqlalchemy
 
+from concurrent.futures import ThreadPoolExecutor
+
 from hive.db.schema import (setup, reset_autovac, set_logged_table_attribute, build_metadata,
                             build_metadata_community, teardown, DB_VERSION)
 from hive.db.adapter import Db
 
 from hive.utils.trends import update_hot_and_tranding_for_block_range
 from hive.utils.post_active import update_active_starting_from_posts_on_block
+
+from hive.server.common.payout_stats import PayoutStats
 
 log = logging.getLogger(__name__)
 
@@ -280,6 +284,13 @@ class DbState:
 
             log.info("Recreating FKs")
             create_fk(cls.db())
+
+        time_start = perf_counter()
+
+        PayoutStats.generate(cls.db())
+
+        time_end = perf_counter()
+        log.info("[INIT] filling payout_stats_view executed in %fs", time_end - time_start)
 
     @staticmethod
     def status():

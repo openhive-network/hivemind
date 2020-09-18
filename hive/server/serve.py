@@ -19,7 +19,6 @@ from hive.server.condenser_api.tags import get_trending_tags as condenser_api_ge
 from hive.server.condenser_api.get_state import get_state as condenser_api_get_state
 from hive.server.condenser_api.call import call as condenser_api_call
 from hive.server.common.mutes import Mutes
-from hive.server.common.payout_stats import PayoutStats
 
 from hive.server.bridge_api import methods as bridge_api
 from hive.server.bridge_api.thread import get_discussion as bridge_api_get_discussion
@@ -216,9 +215,6 @@ def run_server(conf):
         """Initialize db adapter."""
         args = app['config']['args']
         app['db'] = await Db.create(args['database_url'])
-
-        stats = PayoutStats(app['db'])
-        stats.set_shared_instance(stats)
 
     async def close_db(app):
         """Teardown db adapter."""

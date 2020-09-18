@@ -26,6 +26,8 @@ from hive.indexer.community import Community
 from hive.indexer.reblog import Reblog
 from hive.indexer.reputations import Reputations
 
+from hive.server.common.payout_stats import PayoutStats
+
 from hive.server.common.mutes import Mutes
 
 from hive.utils.stats import OPStatusManager as OPSM
@@ -364,6 +366,10 @@ class Sync:
                 log.warning("head block %d @ %s", num, block['timestamp'])
                 log.info("[LIVE] hourly stats")
                 #Community.recalc_pending_payouts()
+            if num % 1200 == 0: #1hour
+              log.info("[LIVE] filling payout_stats_view executed")
+              with ThreadPoolExecutor(max_workers=1) as executor:
+                executor.submit(PayoutStats.generate, cls.db())
             if num % 200 == 0: #10min
                 Community.recalc_pending_payouts()
             if num % 20 == 0: #1min
