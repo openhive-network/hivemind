@@ -318,8 +318,7 @@ async def get_account_posts(context, sort, account, start_author='', start_perml
         res = await cursor.pids_by_feed_with_reblog(db, account, *start, limit)
         return await load_posts_reblogs(context['db'], res)
     elif sort == 'replies':
-        start = start if start_permlink else (account, None)
-        ids = await cursor.pids_by_replies(db, *start, limit)
+        ids = await cursor.pids_by_replies(db, account, start_author, start_permlink, limit)
         return await load_posts(context['db'], ids)
 
     if start_author and start_permlink:
