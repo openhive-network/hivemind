@@ -1171,15 +1171,15 @@ def setup(db):
               FROM 
                   hive_posts hp1
               WHERE
-                  NOT hp1.is_muted AND
+                  hp1.counter_deleted = 0 AND NOT hp1.is_muted AND
                   hp1.cashout_time > _cashout_time OR
                   hp1.cashout_time = _cashout_time AND hp1.id >= __post_id
               ORDER BY
                   hp1.cashout_time ASC,
                   hp1.id ASC
-              
+              LIMIT
+                  _limit + 1
           ) ds ON ds.id = hp.id
-          -- strange behaviour: if limit is moved into inner join it shows empty result, outside join its ok
           ORDER BY
               hp.cashout_time ASC,
               hp.id ASC
@@ -1221,19 +1221,19 @@ def setup(db):
               INNER JOIN hive_accounts ha ON ha.id = hp1.author_id
               INNER JOIN hive_permlink_data hpd ON hpd.id = hp1.permlink_id
               WHERE
-                  NOT hp1.is_muted AND
+                  hp1.counter_deleted = 0 AND NOT hp1.is_muted AND
                   ha.name > _author OR
                   ha.name = _author AND hpd.permlink >= _permlink
               ORDER BY
-                  ha.name ASC,
-                  hpd.permlink ASC
+                  ha.name ASC
+              LIMIT
+                  1000
           ) ds ON ds.id = hp.id
           ORDER BY
               hp.author ASC,
               hp.permlink ASC
           LIMIT
               _limit
-          ;
         $function$
       ;
 
@@ -1424,6 +1424,8 @@ def setup(db):
                   ha.name ASC,
                   hp1.updated_at DESC,
                   hp1.id ASC
+              LIMIT
+                  _limit + 1
           ) ds ON ds.id = hp.id
           ORDER BY
               hp.author ASC,
