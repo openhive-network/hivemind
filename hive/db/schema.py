@@ -1130,7 +1130,7 @@ def setup(db):
         DECLARE
           __post_id INT;
         BEGIN
-          __post_id = find_comment_id(_author,_permlink, False);
+          __post_id = find_comment_id(_author,_permlink, True);
           RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
