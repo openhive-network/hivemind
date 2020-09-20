@@ -9,6 +9,7 @@ from hive.indexer.accounts import Accounts
 from hive.indexer.feed_cache import FeedCache
 from hive.indexer.notify import Notify
 from hive.indexer.db_adapter_holder import DbAdapterHolder
+from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
 
@@ -39,7 +40,7 @@ class Reblog(DbAdapterHolder):
 
         blogger = op_json['account']
         author = op_json['author']
-        permlink = op_json['permlink']
+        permlink = escape_characters(op_json['permlink'])
 
         if blogger != account:
             return  # impersonation
@@ -49,7 +50,7 @@ class Reblog(DbAdapterHolder):
         if 'delete' in op_json and op_json['delete'] == 'delete':
             row = cls.db.query_row(DELETE_SQL, a=blogger, permlink=permlink)
             if row is None:
-                log.debug("reblog: post not found: %s/%s", author, permlink)
+                log.debug("reblog: post not found: %s/%s", author, op_json['permlink'])
                 return
             if not DbState.is_initial_sync():
                 result = dict(row)
