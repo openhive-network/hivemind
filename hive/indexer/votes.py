@@ -6,6 +6,7 @@ import collections
 from hive.db.db_state import DbState
 from hive.db.adapter import Db
 from hive.indexer.db_adapter_holder import DbAdapterHolder
+from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ class Votes(DbAdapterHolder):
         else:
             cls._votes_data[key] = dict(voter=voter,
                                         author=author,
-                                        permlink=permlink,
+                                        permlink=escape_characters(permlink),
                                         vote_percent=weight,
                                         weight=0,
                                         rshares=0,
@@ -58,7 +59,7 @@ class Votes(DbAdapterHolder):
         else:
             cls._votes_data[key] = dict(voter=vop['voter'],
                                         author=vop['author'],
-                                        permlink=vop['permlink'],
+                                        permlink=escape_characters(vop['permlink']),
                                         vote_percent=0,
                                         weight=vop["weight"],
                                         rshares=vop["rshares"],
