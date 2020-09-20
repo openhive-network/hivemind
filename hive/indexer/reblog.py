@@ -89,7 +89,7 @@ class Reblog(DbAdapterHolder):
             cls.beginTx()
             for reblog_item in cls.reblog_items_to_flush:
                 if count < limit:
-                    values.append("('{}', '{}', '{}', '{}'::timestamp, {})".format(reblog_item[0],
+                    values.append("('{}', '{}', {}, '{}'::timestamp, {})".format(reblog_item[0],
                                                                                    reblog_item[1],
                                                                                    reblog_item[2],
                                                                                    reblog_item[3],
@@ -100,7 +100,7 @@ class Reblog(DbAdapterHolder):
                     query = sql_prefix.format(values_str, values_str)
                     cls.db.query(query)
                     values.clear()
-                    values.append("('{}', '{}', '{}', '{}'::timestamp, {})".format(reblog_item[0],
+                    values.append("('{}', '{}', {}, '{}'::timestamp, {})".format(reblog_item[0],
                                                                                    reblog_item[1],
                                                                                    reblog_item[2],
                                                                                    reblog_item[3],
