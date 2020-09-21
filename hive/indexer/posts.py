@@ -159,7 +159,7 @@ class Posts(DbAdapterHolder):
             if error:
                 author_id = result['author_id']
                 Notify(block_num=op['block_num'], type_id='error', dst_id=author_id, when=block_date,
-                       post_id=result['id'], payload=error).write()
+                       post_id=result['id'], payload=error)
 
     @classmethod
     def flush_into_db(cls):
