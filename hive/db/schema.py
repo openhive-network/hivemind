@@ -1152,9 +1152,11 @@ def setup(db):
               FROM 
                   hive_posts hp1
               WHERE
-                  hp1.counter_deleted = 0 AND NOT hp1.is_muted AND
-                  hp1.cashout_time > _cashout_time OR
-                  hp1.cashout_time = _cashout_time AND hp1.id >= __post_id
+                  hp1.counter_deleted = 0
+                  AND NOT hp1.is_muted
+                  AND hp1.cashout_time > _cashout_time
+                  OR hp1.cashout_time = _cashout_time
+                  AND hp1.id >= __post_id
               ORDER BY
                   hp1.cashout_time ASC
               LIMIT
@@ -1199,9 +1201,11 @@ def setup(db):
               INNER JOIN hive_accounts ha ON ha.id = hp1.author_id
               INNER JOIN hive_permlink_data hpd ON hpd.id = hp1.permlink_id
               WHERE
-                  hp1.counter_deleted = 0 AND NOT hp1.is_muted AND
-                  ha.name > _author OR
-                  ha.name = _author AND hpd.permlink >= _permlink
+                  hp1.counter_deleted = 0
+                  AND NOT hp1.is_muted
+                  AND ha.name > _author
+                  OR ha.name = _author
+                  AND hpd.permlink >= _permlink
               ORDER BY
                   ha.name ASC
               LIMIT
@@ -1250,13 +1254,16 @@ def setup(db):
             FROM 
               hive_posts hp2
             WHERE
-              NOT hp2.is_muted
+              hp2.counter_deleted = 0
+              AND NOT hp2.is_muted
               AND hp2.root_id = __root_id
               AND hp2.id >= __post_id
             ORDER BY
               hp2.id ASC
             LIMIT _limit
           ) ds on hp.id = ds.id
+          ORDER BY
+            hp.id
           ;
         END
         $function$
@@ -1296,7 +1303,8 @@ def setup(db):
           SELECT hp1.id FROM
             hive_posts hp1
           WHERE
-            NOT hp1.is_muted
+            hp1.counter_deleted = 0
+            AND NOT hp1.is_muted
             AND hp1.parent_id = __parent_id
             AND hp1.id >= __post_id
           ORDER BY
@@ -1304,6 +1312,8 @@ def setup(db):
           LIMIT
             _limit
         ) ds ON ds.id = hp.id
+        ORDER BY
+          hp.id
         ;
       END
       $function$
@@ -1346,7 +1356,8 @@ def setup(db):
               FROM
                 hive_posts hp1
               WHERE
-                NOT hp1.is_muted
+                hp1.counter_deleted = 0
+                AND NOT hp1.is_muted
                 AND hp1.parent_id = __parent_id
                 AND (
                   hp1.updated_at < _updated_at
@@ -1403,7 +1414,8 @@ def setup(db):
             FROM
               hive_posts hp1
             WHERE
-              NOT hp1.is_muted
+              hp1.counter_deleted = 0
+              AND NOT hp1.is_muted
               AND hp1.author_id = __author_id
               AND (
                 hp1.updated_at < _updated_at
