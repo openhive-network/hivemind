@@ -1158,7 +1158,8 @@ def setup(db):
                   OR hp1.cashout_time = _cashout_time
                   AND hp1.id >= __post_id
               ORDER BY
-                  hp1.cashout_time ASC
+                  hp1.cashout_time ASC,
+                  hp1.id ASC
               LIMIT
                   _limit
           ) ds ON ds.id = hp.id
@@ -1207,7 +1208,8 @@ def setup(db):
                   OR ha.name = _author
                   AND hpd.permlink >= _permlink
               ORDER BY
-                  ha.name ASC
+                  ha.name ASC,
+                  hpd.permlink ASC
               LIMIT
                   _limit
           ) ds ON ds.id = hp.id
@@ -1365,7 +1367,8 @@ def setup(db):
                   AND hp1.id >= __post_id
                 )
               ORDER BY
-                hp1.updated_at DESC
+                hp1.updated_at DESC,
+                hp1.id ASC
               LIMIT
                 _limit
           ) ds ON ds.id = hp.id
@@ -1423,7 +1426,8 @@ def setup(db):
                 AND hp1.id >= __post_id
               )
             ORDER BY
-              hp1.updated_at DESC
+              hp1.updated_at DESC,
+              hp1.id ASC
             LIMIT
               _limit
           ) ds ON ds.id = hp.id
