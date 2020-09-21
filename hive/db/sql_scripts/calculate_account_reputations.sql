@@ -28,7 +28,7 @@ DECLARE
   __traced_author int;
   __account_name varchar;
 BEGIN
-  __traced_author := 0; --16332;
+  __traced_author := 0; --42411; --16332;
   SELECT INTO __account_reputations ARRAY(SELECT ROW(a.id, 0, True)::AccountReputation
   FROM hive_accounts a
   WHERE a.id != 0
@@ -46,7 +46,7 @@ BEGIN
     LOOP
       __voter_rep := __account_reputations[__vote_data.voter_id - 1].reputation;
       __implicit_voter_rep := __account_reputations[__vote_data.voter_id - 1].is_implicit;
-      __implicit_author_rep := False;
+      __implicit_author_rep := __account_reputations[__vote_data.author_id - 1].is_implicit;
     
       IF __vote_data.author_id = __traced_author THEN
            raise notice 'Processing vote <%> rshares: %, prev_rshares: %', __vote_data.id, __vote_data.rshares, __vote_data.prev_rshares;
@@ -60,8 +60,9 @@ BEGIN
       __rshares := __vote_data.rshares;
       __prev_rshares := __vote_data.prev_rshares;
 
-      IF __prev_rshares > 0 OR
-       (__prev_rshares < 0 AND __voter_rep > __author_rep - __prev_rep_delta) THEN
+      IF NOT __implicit_author_rep AND
+       (__prev_rshares > 0 OR
+         (__prev_rshares < 0 AND __voter_rep > __author_rep - __prev_rep_delta)) THEN
         __prev_rep_delta := (__prev_rshares >> 6)::bigint;
         __author_rep := __author_rep - __prev_rep_delta;
         __implicit_author_rep := __author_rep = 0;
