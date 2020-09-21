@@ -5,7 +5,7 @@ CREATE TYPE AccountReputation AS (id int, reputation bigint, is_implicit boolean
 DROP FUNCTION IF EXISTS public.calculate_account_reputations();
 
 CREATE OR REPLACE FUNCTION public.calculate_account_reputations(
-  )
+  _tracked_account varchar = null)
     RETURNS SETOF accountreputation 
     LANGUAGE 'plpgsql'
 
@@ -28,7 +28,7 @@ DECLARE
   __traced_author int;
   __account_name varchar;
 BEGIN
-  __traced_author := 0; --42411; --16332;
+  select coalesce((select ha.id from hive_accounts ha where ha.name = _tracked_account), 0) into __traced_author;
   SELECT INTO __account_reputations ARRAY(SELECT ROW(a.id, 0, True)::AccountReputation
   FROM hive_accounts a
   WHERE a.id != 0
@@ -45,7 +45,6 @@ BEGIN
       ORDER BY rd.id
     LOOP
       __voter_rep := __account_reputations[__vote_data.voter_id - 1].reputation;
-      __implicit_voter_rep := __account_reputations[__vote_data.voter_id - 1].is_implicit;
       __implicit_author_rep := __account_reputations[__vote_data.author_id - 1].is_implicit;
     
       IF __vote_data.author_id = __traced_author THEN
@@ -71,7 +70,11 @@ BEGIN
          raise notice 'Corrected author_rep by prev_rep_delta: % to have reputation: %', __prev_rep_delta, __author_rep;
         END IF;
       END IF;
-    
+
+      __implicit_voter_rep := __account_reputations[__vote_data.voter_id - 1].is_implicit;
+      --- reread voter's rep. since it can change above if author == voter
+      __voter_rep := __account_reputations[__vote_data.voter_id - 1].reputation;
+
       IF __rshares > 0 OR
          (__rshares < 0 AND NOT __implicit_voter_rep AND __voter_rep > __author_rep) THEN
 
