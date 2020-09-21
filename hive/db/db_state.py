@@ -103,8 +103,8 @@ class DbState:
             'hive_posts_payout_at_idx',
             'hive_posts_payout_idx',
             'hive_posts_promoted_idx',
-            'hive_posts_sc_trend_idx',
-            'hive_posts_sc_hot_idx',
+            'hive_posts_sc_trend_id_idx',
+            'hive_posts_sc_hot_id_idx',
             'hive_posts_block_num_idx',
 
             'hive_votes_post_id_idx',
