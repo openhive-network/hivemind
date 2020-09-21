@@ -24,6 +24,8 @@ from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.trends import update_hot_and_tranding_for_block_range
 from hive.utils.post_active import update_active_starting_from_posts_on_block
 
+from hive.server.common.payout_stats import PayoutStats
+
 log = logging.getLogger(__name__)
 
 DB = Db.instance()
@@ -73,6 +75,7 @@ class Blocks:
         Reblog.setup_own_db_access(sharedDbAdapter)
         Notify.setup_own_db_access(sharedDbAdapter)
         Accounts.setup_own_db_access(sharedDbAdapter)
+        PayoutStats.setup_own_db_access(sharedDbAdapter)
 
     @classmethod
     def setup_shared_db_access(cls, sharedDbAdapter):

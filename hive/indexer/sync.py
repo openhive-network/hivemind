@@ -369,7 +369,7 @@ class Sync:
             if num % 1200 == 0: #1hour
               log.info("[LIVE] filling payout_stats_view executed")
               with ThreadPoolExecutor(max_workers=1) as executor:
-                executor.submit(PayoutStats.generate, cls.db())
+                executor.submit(PayoutStats.generate)
             if num % 200 == 0: #10min
                 Community.recalc_pending_payouts()
             if num % 20 == 0: #1min

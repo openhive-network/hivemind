@@ -287,7 +287,7 @@ class DbState:
 
         time_start = perf_counter()
 
-        PayoutStats.generate(cls.db())
+        PayoutStats.generate()
 
         time_end = perf_counter()
         log.info("[INIT] filling payout_stats_view executed in %fs", time_end - time_start)
