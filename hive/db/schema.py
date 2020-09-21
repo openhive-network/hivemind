@@ -1176,13 +1176,10 @@ def setup(db):
         in _permlink hive_permlink_data.permlink%TYPE,
         in _limit INT)
         RETURNS SETOF database_api_post
+        LANGUAGE sql
+        STABLE
         AS
         $function$
-        DECLARE
-          __post_id INT;
-        BEGIN
-          __post_id = find_comment_id(_author, _permlink, True);
-          RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
               hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
@@ -1202,12 +1199,9 @@ def setup(db):
               INNER JOIN hive_accounts ha ON ha.id = hp1.author_id
               INNER JOIN hive_permlink_data hpd ON hpd.id = hp1.permlink_id
               WHERE
-                  hp1.counter_deleted = 0
-                  AND NOT hp1.is_muted
-                  AND ha.name > _author
-                  OR ha.name = _author
-                  AND hpd.permlink >= _permlink
-                  AND hp1.id >= __post_id
+                  hp1.counter_deleted = 0 AND NOT hp1.is_muted AND
+                  ha.name > _author OR
+                  ha.name = _author AND hpd.permlink >= _permlink
               ORDER BY
                   ha.name ASC
               LIMIT
@@ -1216,11 +1210,9 @@ def setup(db):
           ORDER BY
               hp.author ASC,
               hp.permlink ASC
-          ;
-        END
         $function$
-        LANGUAGE plpgsql
       ;
+
 
       DROP FUNCTION IF EXISTS list_comments_by_root(character varying, character varying, character varying, character varying, int)
       ;
