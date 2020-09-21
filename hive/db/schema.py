@@ -488,31 +488,6 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-      DROP FUNCTION IF EXISTS find_account_id(character varying, boolean)
-      ;
-      CREATE OR REPLACE FUNCTION find_account_id(
-        in _account_name hive_accounts.name%TYPE,
-        in _check boolean)
-      RETURNS INT
-      LANGUAGE 'plpgsql'
-      AS
-      $function$
-      DECLARE
-        account_id INT;
-      BEGIN
-        SELECT INTO account_id COALESCE( (SELECT id FROM hive_accounts WHERE name = _account_name), 0);
-        IF _check AND account_id = 0 THEN
-          RAISE EXCEPTION 'Account % does not exists', _account_name;
-        END IF;
-        RETURN account_id;
-      END
-      $function$
-      ;
-    """
-
-    db.query_no_return(sql)
-
-    sql = """
         DROP FUNCTION IF EXISTS find_account_id(character varying, boolean)
         ;
         CREATE OR REPLACE FUNCTION find_account_id(
@@ -534,6 +509,7 @@ def setup(db):
         $function$
         ;
     """
+
     db.query_no_return(sql)
 
     sql = """
