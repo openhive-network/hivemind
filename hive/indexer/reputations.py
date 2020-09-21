@@ -2,6 +2,7 @@
 
 import logging
 from hive.indexer.db_adapter_holder import DbAdapterHolder
+from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
 
@@ -13,8 +14,8 @@ class Reputations(DbAdapterHolder):
 
     @classmethod
     def process_vote(self, block_num, effective_vote_op):
-        tuple = "('{}', '{}', '{}', {}, {})".format(effective_vote_op['author'], effective_vote_op['voter'],
-            effective_vote_op['permlink'], effective_vote_op['rshares'], block_num)
+        tuple = "('{}', '{}', {}, {}, {})".format(effective_vote_op['author'], effective_vote_op['voter'],
+            escape_characters(effective_vote_op['permlink']), effective_vote_op['rshares'], block_num)
         self._values.append(tuple)
 
     @classmethod

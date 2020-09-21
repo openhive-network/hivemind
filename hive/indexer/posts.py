@@ -18,7 +18,7 @@ from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.tags import Tags
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 
-from hive.utils.normalize import sbd_amount, legacy_amount, asset_to_hbd_hive, safe_img_url
+from hive.utils.normalize import sbd_amount, legacy_amount, asset_to_hbd_hive, safe_img_url, escape_characters
 
 log = logging.getLogger(__name__)
 DB = Db.instance()
@@ -320,9 +320,9 @@ class Posts(DbAdapterHolder):
               total_vote_weight       = value['total_vote_weight']
 
 
-            cls._comment_payout_ops.append("('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(
+            cls._comment_payout_ops.append("('{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(
               author,
-              permlink,
+              escape_characters(permlink),
               "NULL" if ( total_payout_value is None ) else ( "'{}'".format( legacy_amount(total_payout_value) ) ),
               "NULL" if ( curator_payout_value is None ) else ( "'{}'".format( legacy_amount(curator_payout_value) ) ),
               author_rewards,

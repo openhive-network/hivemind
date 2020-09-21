@@ -1154,16 +1154,13 @@ def setup(db):
                   hp1.cashout_time > _cashout_time OR
                   hp1.cashout_time = _cashout_time AND hp1.id >= __post_id
               ORDER BY
-                  hp1.cashout_time ASC,
-                  hp1.id ASC
+                  hp1.cashout_time ASC
               LIMIT
-                  _limit + 1
+                  _limit
           ) ds ON ds.id = hp.id
           ORDER BY
               hp.cashout_time ASC,
               hp.id ASC
-          LIMIT
-              _limit
           ;
         END
         $function$
@@ -1206,13 +1203,11 @@ def setup(db):
               ORDER BY
                   ha.name ASC
               LIMIT
-                  1000
+                  _limit
           ) ds ON ds.id = hp.id
           ORDER BY
               hp.author ASC,
               hp.permlink ASC
-          LIMIT
-              _limit
         $function$
       ;
 
@@ -1270,11 +1265,12 @@ def setup(db):
         in _start_post_permlink hive_permlink_data.permlink%TYPE,
         in _limit INT)
         RETURNS SETOF database_api_post
-        LANGUAGE sql
-        COST 100
-        STABLE
-        ROWS 1000
       AS $function$
+      DECLARE
+        __post_id INT;
+      BEGIN
+        __post_id = find_comment_id(_start_post_author, _start_post_permlink, True);
+        RETURN QUERY
         SELECT
           hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
           hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
@@ -1293,7 +1289,7 @@ def setup(db):
             WHERE
               h.parent_author > _parent_author OR
               h.parent_author = _parent_author AND ( h.parent_permlink_or_category > _parent_permlink OR
-              h.parent_permlink_or_category = _parent_permlink AND h.id >= find_comment_id(_start_post_author, _start_post_permlink, True) )
+              h.parent_permlink_or_category = _parent_permlink AND h.id >= __post_id)
             ORDER BY
               h.parent_author ASC,
               h.parent_permlink_or_category ASC,
@@ -1304,7 +1300,9 @@ def setup(db):
         WHERE
           NOT hp.is_muted
           ;
+      END
       $function$
+      LANGUAGE plpgsql
       ;
 
       DROP FUNCTION IF EXISTS list_comments_by_last_update(character varying, timestamp, character varying, character varying, int)
@@ -1347,12 +1345,14 @@ def setup(db):
                   ha.name = _parent_author AND ( hp1.updated_at < _updated_at OR
                   hp1.updated_at = _updated_at AND hp1.id >= __post_id )
               ORDER BY
-                  ha.name ASC,
-                  hp1.updated_at DESC,
-                  hp1.id ASC
+                  ha.name ASC
               LIMIT
                   _limit
           ) ds ON ds.id = hp.id
+          ORDER BY
+              hp.parent_author ASC,
+              hp.updated_at DESC,
+              hp.id ASC
           ;
         END
         $function$
@@ -1404,7 +1404,7 @@ def setup(db):
                   hp1.updated_at DESC,
                   hp1.id ASC
               LIMIT
-                  _limit + 1
+                  _limit
           ) ds ON ds.id = hp.id
           ORDER BY
               hp.author ASC,
