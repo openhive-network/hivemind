@@ -55,14 +55,17 @@ BEGIN
 
       CONTINUE WHEN __voter_rep < 0;
 
-      __author_rep := __account_reputations[__vote_data.author_id - 1].reputation;
+      __implicit_voter_rep := __account_reputations[__vote_data.voter_id - 1].is_implicit;
+
+    __author_rep := __account_reputations[__vote_data.author_id - 1].reputation;
       __rshares := __vote_data.rshares;
       __prev_rshares := __vote_data.prev_rshares;
       __prev_rep_delta := (__prev_rshares >> 6)::bigint;
 
-      IF NOT __implicit_author_rep AND
-	     (__prev_rshares > 0 OR
-         (__prev_rshares < 0 AND __voter_rep > __author_rep - __prev_rep_delta)) THEN
+      IF NOT __implicit_author_rep AND --- Author must have set explicit reputation to allow its correction
+        (__prev_rshares > 0 OR
+        --- Voter must have explicitly set reputation to match hived old conditions
+        (__prev_rshares < 0 AND NOT __implicit_voter_rep AND __voter_rep > __author_rep - __prev_rep_delta)) THEN
         __author_rep := __author_rep - __prev_rep_delta;
         __implicit_author_rep := __author_rep = 0;
         __account_reputations[__vote_data.author_id - 1] := ROW(__vote_data.author_id, __author_rep, __implicit_author_rep)::AccountReputation;
@@ -73,8 +76,8 @@ BEGIN
 
       __implicit_voter_rep := __account_reputations[__vote_data.voter_id - 1].is_implicit;
       --- reread voter's rep. since it can change above if author == voter
-	  __voter_rep := __account_reputations[__vote_data.voter_id - 1].reputation;
-	  
+    __voter_rep := __account_reputations[__vote_data.voter_id - 1].reputation;
+    
       IF __rshares > 0 OR
          (__rshares < 0 AND NOT __implicit_voter_rep AND __voter_rep > __author_rep) THEN
 
