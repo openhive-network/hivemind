@@ -118,7 +118,7 @@ class Community:
         _id = Accounts.get_id(name)
 
         # insert community
-        sql = """INSERT INTO hive_communities (id, name, type_id, created_at)
+        sql = """INSERT INTO hive_communities (id, name, type_id, created_at, block_num)
                         VALUES (:id, :name, :type_id, :date, :block_num)"""
         DB.query(sql, id=_id, name=name, type_id=type_id, date=block_date, block_num=block_num)
 
