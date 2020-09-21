@@ -244,16 +244,6 @@ database_api_smoketest_negative:
     reports:
       junit: api_smoketest_database_api_negative.xml
 
-follow_api_smoketest_old:
-  <<: *common_api_smoketest_job
-
-  script:
-    - scripts/ci_start_api_smoketest.sh localhost "$HIVEMIND_HTTP_PORT" test_follow_api_patterns.tavern.yaml api_smoketest_follow_api_old.xml
-
-  artifacts:
-    reports:
-      junit: api_smoketest_follow_api_old.xml
-
 follow_api_smoketest:
   <<: *common_api_smoketest_job
 
