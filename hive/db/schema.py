@@ -302,10 +302,8 @@ def build_metadata():
     sa.Table(
         'hive_posts_api_helper', metadata,
         sa.Column('id', sa.Integer, primary_key=True, autoincrement = False),
-        sa.Column('author', VARCHAR(16, collation='C'), nullable=False),
-        sa.Column('parent_author', VARCHAR(16, collation='C'), nullable=False),
-        sa.Column('parent_permlink_or_category', sa.String(255, collation='C'), nullable=False),
-        sa.Index('hive_posts_api_helper_parent_permlink_or_category', 'parent_author', 'parent_permlink_or_category', 'id')
+        sa.Column('author_permlink', VARCHAR(512, collation='C'), nullable=False),
+        sa.Index('hive_posts_api_helper_author_permlink', 'author_permlink', 'id')
     )
 
     metadata = build_metadata_community(metadata)
@@ -1198,19 +1196,15 @@ def setup(db):
           (
               SELECT hp1.id
               FROM
-                  hive_posts hp1
-              INNER JOIN hive_accounts ha ON ha.id = hp1.author_id
-              INNER JOIN hive_permlink_data hpd ON hpd.id = hp1.permlink_id
+                  hive_posts_api_helper hp1
+              INNER JOIN hive_posts hp2 ON hp2.id = hp1.id
               WHERE
-                  hp1.counter_deleted = 0
-                  AND NOT hp1.is_muted
-                  AND ha.name > _author
-                  OR ha.name = _author
-                  AND hpd.permlink >= _permlink
-                  AND hp1.id != 0
+                  hp2.counter_deleted = 0 
+                  AND NOT hp2.is_muted
+                  AND hp1.author_permlink >= _author || '/' || _permlink
+                  AND hp1.id > 0
               ORDER BY
-                  ha.name ASC,
-                  hpd.permlink ASC
+                  hp1.author_permlink ASC
               LIMIT
                   _limit
           ) ds ON ds.id = hp.id
@@ -1654,15 +1648,15 @@ def setup(db):
             -- initial creation of table.
 
             INSERT INTO hive_posts_api_helper
-            (id, author, parent_author, parent_permlink_or_category)
-            SELECT hp.id, hp.author, hp.parent_author, hp.parent_permlink_or_category
+            (id, author_permlink)
+            SELECT hp.id, hp.author || '/' || hp.permlink
             FROM hive_posts_view hp
             ;
           ELSE
             -- Regular incremental update.
             INSERT INTO hive_posts_api_helper
-            (id, author, parent_author, parent_permlink_or_category)
-            SELECT hp.id, hp.author, hp.parent_author, hp.parent_permlink_or_category
+            (id, author_permlink)
+            SELECT hp.id, hp.author || '/' || hp.permlink
             FROM hive_posts_view hp
             WHERE hp.block_num BETWEEN _first_block_num AND _last_block_num AND
                    NOT EXISTS (SELECT NULL FROM hive_posts_api_helper h WHERE h.id = hp.id)
