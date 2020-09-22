@@ -230,3 +230,21 @@ async def list_votes(context, start: list, limit: int, order: str):
         rows = await db.query_all(sql, voter=start_voter, author=author, permlink=permlink, limit=limit)
     return { 'votes': api_vote_info(rows, VotesPresentation.DatabaseApi) }
 
+@return_error_info
+async def list_votes_pre24(context, start: list, limit: int, order: str):
+    """ Returns all votes, starting with the specified voter and/or author and permlink. """
+    supported_order_list = ["by_comment_voter", "by_voter_comment"]
+    assert order in supported_order_list, "Order {} is not supported".format(order)
+    limit = valid_limit(limit, 1000, None)
+    assert len(start) == 3, "Expecting 3 elements in start array"
+    db = context['db']
+
+    if order == "by_voter_comment":
+        sql = "SELECT * FROM list_votes_by_voter_comment_pre24(:voter,:author,:permlink,:limit)"
+        rows = await db.query_all(sql, voter=start[0], author=start[1], permlink=start[2], limit=limit)
+    else:
+        sql = "SELECT * FROM list_votes_by_comment_voter_pre24(:voter,:author,:permlink,:limit)"
+        rows = await db.query_all(sql, voter=start[2], author=start[0], permlink=start[1], limit=limit)
+    return { 'votes': api_vote_info(rows, VotesPresentation.DatabaseApi) }
+
+

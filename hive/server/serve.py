@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """Hive JSON-RPC API server."""
-from hive.server.database_api.methods import find_votes, list_votes
 import os
 import sys
 import logging
@@ -167,6 +166,7 @@ def build_methods():
         'database_api.list_comments' : database_api.list_comments,
         'database_api.find_comments' : database_api.find_comments,
         'database_api.list_votes' : database_api.list_votes,
+        'database_api.list_votes_pre24' : database_api.list_votes_pre24,
         'database_api.find_votes' : database_api.find_votes
     })
 
