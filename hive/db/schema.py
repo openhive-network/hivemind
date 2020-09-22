@@ -988,12 +988,12 @@ def setup(db):
         LANGUAGE 'plpgsql'
         AS
         $function$
-        DECLARE _VOTER_ID INT;
-        DECLARE _POST_ID INT;
+        DECLARE __voter_id INT;
+        DECLARE __post_id INT;
         BEGIN
 
-        _VOTER_ID = find_account_id( _VOTER, _VOTER != '' );
-        _POST_ID = find_comment_id( _AUTHOR, _PERMLINK, True );
+        __voter_id = find_account_id( _VOTER, True );
+        __post_id = find_comment_id( _AUTHOR, _PERMLINK, True );
 
         RETURN QUERY
         (
@@ -1011,12 +1011,10 @@ def setup(db):
             FROM
                 hive_votes_view v
             WHERE
-                ( v.voter_id = _VOTER_ID and v.post_id >= _POST_ID )
-                OR
-                ( v.voter_id > _VOTER_ID )
+                v.voter_id = __voter_id
+                AND v.post_id >= __post_id
             ORDER BY
-                voter_id,
-                post_id
+                v.post_id
             LIMIT _LIMIT
         );
 
@@ -1036,12 +1034,12 @@ def setup(db):
         LANGUAGE 'plpgsql'
         AS
         $function$
-        DECLARE _VOTER_ID INT;
-        DECLARE _POST_ID INT;
+        DECLARE __voter_id INT;
+        DECLARE __post_id INT;
         BEGIN
 
-        _VOTER_ID = find_account_id( _VOTER, _VOTER != '' );
-        _POST_ID = find_comment_id( _AUTHOR, _PERMLINK, True );
+        __voter_id = find_account_id( _VOTER, _VOTER != '' ); -- voter is optional
+        __post_id = find_comment_id( _AUTHOR, _PERMLINK, True );
 
         RETURN QUERY
         (
@@ -1059,12 +1057,10 @@ def setup(db):
             FROM
                 hive_votes_view v
             WHERE
-                ( v.post_id = _POST_ID and v.voter_id >= _VOTER_ID )
-                OR
-                ( v.post_id > _POST_ID )
+                v.post_id = __post_id
+                AND v.voter_id >= __voter_id
             ORDER BY
-                post_id,
-                voter_id
+                v.voter_id
             LIMIT _LIMIT
         );
 

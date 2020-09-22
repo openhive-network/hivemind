@@ -19,7 +19,7 @@ async def list_comments(context, start: list, limit: int, order: str):
 
     result = []
     if order == 'by_cashout_time':
-        assert len(start) == 3, "Expecting three arguments"
+        assert len(start) == 3, "Expecting three arguments in 'start' array: cashout time, optional page start author and permlink"
         cashout_time = start[0]
         valid_date(cashout_time)
         if cashout_time[0:4] == '1969':
@@ -31,7 +31,7 @@ async def list_comments(context, start: list, limit: int, order: str):
         sql = "SELECT * FROM list_comments_by_cashout_time(:cashout_time, :author, :permlink, :limit)"
         result = await db.query_all(sql, cashout_time=cashout_time, author=author, permlink=permlink, limit=limit)
     elif order == 'by_permlink':
-        assert len(start) == 2, "Expecting two arguments"
+        assert len(start) == 2, "Expecting two arguments in 'start' array: author and permlink"
         author = start[0]
         valid_account(author, allow_empty=True)
         permlink = start[1]
@@ -39,7 +39,7 @@ async def list_comments(context, start: list, limit: int, order: str):
         sql = "SELECT * FROM list_comments_by_permlink(:author, :permlink, :limit)"
         result = await db.query_all(sql, author=author, permlink=permlink, limit=limit)
     elif order == 'by_root':
-        assert len(start) == 4, "Expecting 4 arguments"
+        assert len(start) == 4, "Expecting 4 arguments in 'start' array: discussion root author and permlink, optional page start author and permlink"
         root_author = start[0]
         valid_account(root_author)
         root_permlink = start[1]
@@ -51,7 +51,7 @@ async def list_comments(context, start: list, limit: int, order: str):
         sql = "SELECT * FROM list_comments_by_root(:root_author, :root_permlink, :start_post_author, :start_post_permlink, :limit)"
         result = await db.query_all(sql, root_author=root_author, root_permlink=root_permlink, start_post_author=start_post_author, start_post_permlink=start_post_permlink, limit=limit)
     elif order == 'by_parent':
-        assert len(start) == 4, "Expecting 4 arguments"
+        assert len(start) == 4, "Expecting 4 arguments in 'start' array: parent post author and permlink, optional page start author and permlink"
         parent_author = start[0]
         valid_account(parent_author)
         parent_permlink = start[1]
@@ -63,7 +63,7 @@ async def list_comments(context, start: list, limit: int, order: str):
         sql = "SELECT * FROM list_comments_by_parent(:parent_author, :parent_permlink, :start_post_author, :start_post_permlink, :limit)"
         result = await db.query_all(sql, parent_author=parent_author, parent_permlink=parent_permlink, start_post_author=start_post_author, start_post_permlink=start_post_permlink, limit=limit)
     elif order == 'by_last_update':
-        assert len(start) == 4, "Expecting 4 arguments"
+        assert len(start) == 4, "Expecting 4 arguments in 'start' array: parent author, update time, optional page start author and permlink"
         parent_author = start[0]
         valid_account(parent_author)
         updated_at = start[1]
@@ -75,7 +75,7 @@ async def list_comments(context, start: list, limit: int, order: str):
         sql = "SELECT * FROM list_comments_by_last_update(:parent_author, :updated_at, :start_post_author, :start_post_permlink, :limit)"
         result = await db.query_all(sql, parent_author=parent_author, updated_at=updated_at, start_post_author=start_post_author, start_post_permlink=start_post_permlink, limit=limit)
     elif order == 'by_author_last_update':
-        assert len(start) == 4, "Expecting 4 arguments"
+        assert len(start) == 4, "Expecting 4 arguments in 'start' array: author, update time, optional page start author and permlink"
         author = start[0]
         valid_account(author)
         updated_at = start[1]
@@ -206,14 +206,27 @@ async def list_votes(context, start: list, limit: int, order: str):
     supported_order_list = ["by_comment_voter", "by_voter_comment"]
     assert order in supported_order_list, "Order {} is not supported".format(order)
     limit = valid_limit(limit, 1000, None)
-    assert len(start) == 3, "Expecting 3 elements in start array"
     db = context['db']
 
     if order == "by_voter_comment":
+        assert len(start) == 3, "Expecting 3 arguments in 'start' array: voter, optional page start author and permlink"
+        voter = start[0]
+        valid_account(voter)
+        start_post_author = start[1]
+        valid_account(start_post_author, allow_empty=True)
+        start_post_permlink = start[2]
+        valid_permlink(start_post_permlink, allow_empty=True)
         sql = "SELECT * FROM list_votes_by_voter_comment(:voter,:author,:permlink,:limit)"
-        rows = await db.query_all(sql, voter=start[0], author=start[1], permlink=start[2], limit=limit)
+        rows = await db.query_all(sql, voter=voter, author=start_post_author, permlink=start_post_permlink, limit=limit)
     else:
+        assert len(start) == 3, "Expecting 3 arguments in 'start' array: post author and permlink, optional page start voter"
+        author = start[0]
+        valid_account(author)
+        permlink = start[1]
+        valid_permlink(permlink)
+        start_voter = start[2]
+        valid_account(start_voter, allow_empty=True)
         sql = "SELECT * FROM list_votes_by_comment_voter(:voter,:author,:permlink,:limit)"
-        rows = await db.query_all(sql, voter=start[2], author=start[0], permlink=start[1], limit=limit)
+        rows = await db.query_all(sql, voter=start_voter, author=author, permlink=permlink, limit=limit)
     return { 'votes': api_vote_info(rows, VotesPresentation.DatabaseApi) }
 
