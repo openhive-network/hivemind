@@ -484,6 +484,7 @@ def setup(db):
       $function$
       ;
     """
+
     db.query_no_return(sql)
 
     sql = """
@@ -508,6 +509,7 @@ def setup(db):
         $function$
         ;
     """
+
     db.query_no_return(sql)
 
     sql = """
@@ -991,7 +993,7 @@ def setup(db):
         BEGIN
 
         _VOTER_ID = find_account_id( _VOTER, _VOTER != '' );
-        _POST_ID = find_comment_id( _AUTHOR, _PERMLINK, _AUTHOR != '' OR _PERMLINK != '' );
+        _POST_ID = find_comment_id( _AUTHOR, _PERMLINK, True );
 
         RETURN QUERY
         (
@@ -1039,7 +1041,7 @@ def setup(db):
         BEGIN
 
         _VOTER_ID = find_account_id( _VOTER, _VOTER != '' );
-        _POST_ID = find_comment_id( _AUTHOR, _PERMLINK, _AUTHOR != '' OR _PERMLINK != '' );
+        _POST_ID = find_comment_id( _AUTHOR, _PERMLINK, True );
 
         RETURN QUERY
         (
@@ -1130,7 +1132,7 @@ def setup(db):
         DECLARE
           __post_id INT;
         BEGIN
-          __post_id = find_comment_id(_author,_permlink, False);
+          __post_id = find_comment_id(_author,_permlink, True);
           RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
@@ -1150,20 +1152,20 @@ def setup(db):
               FROM 
                   hive_posts hp1
               WHERE
-                  hp1.counter_deleted = 0 AND NOT hp1.is_muted AND
-                  hp1.cashout_time > _cashout_time OR
-                  hp1.cashout_time = _cashout_time AND hp1.id >= __post_id
+                  hp1.counter_deleted = 0
+                  AND NOT hp1.is_muted
+                  AND hp1.cashout_time > _cashout_time
+                  OR hp1.cashout_time = _cashout_time
+                  AND hp1.id >= __post_id AND hp1.id != 0
               ORDER BY
                   hp1.cashout_time ASC,
                   hp1.id ASC
               LIMIT
-                  _limit + 1
+                  _limit
           ) ds ON ds.id = hp.id
           ORDER BY
               hp.cashout_time ASC,
               hp.id ASC
-          LIMIT
-              _limit
           ;
         END
         $function$
@@ -1200,21 +1202,24 @@ def setup(db):
               INNER JOIN hive_accounts ha ON ha.id = hp1.author_id
               INNER JOIN hive_permlink_data hpd ON hpd.id = hp1.permlink_id
               WHERE
-                  hp1.counter_deleted = 0 AND NOT hp1.is_muted AND
-                  ha.name > _author OR
-                  ha.name = _author AND hpd.permlink >= _permlink
+                  hp1.counter_deleted = 0
+                  AND NOT hp1.is_muted
+                  AND ha.name > _author
+                  OR ha.name = _author
+                  AND hpd.permlink >= _permlink
+                  AND hp1.id != 0
               ORDER BY
-                  ha.name ASC
+                  ha.name ASC,
+                  hpd.permlink ASC
               LIMIT
-                  1000
+                  _limit
           ) ds ON ds.id = hp.id
           ORDER BY
               hp.author ASC,
               hp.permlink ASC
-          LIMIT
-              _limit
         $function$
       ;
+
 
       DROP FUNCTION IF EXISTS list_comments_by_root(character varying, character varying, character varying, character varying, int)
       ;
@@ -1243,18 +1248,25 @@ def setup(db):
             hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
             hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
             hp.active, hp.author_rewards
-          FROM hive_posts_view hp
+          FROM 
+            hive_posts_view hp
           INNER JOIN
           (
-          SELECT hp2.id, hp2.root_id FROM hive_posts hp2
-          WHERE NOT hp2.is_muted
-                AND hp2.root_id > __root_id
-                OR hp2.root_id = __root_id AND hp2.id >= __post_id AND hp2.id > 0
-          ORDER BY
-             hp2.root_id ASC
-            ,hp2.id ASC
-          LIMIT _limit
+            SELECT 
+              hp2.id
+            FROM 
+              hive_posts hp2
+            WHERE
+              hp2.counter_deleted = 0
+              AND NOT hp2.is_muted
+              AND hp2.root_id = __root_id
+              AND hp2.id >= __post_id
+            ORDER BY
+              hp2.id ASC
+            LIMIT _limit
           ) ds on hp.id = ds.id
+          ORDER BY
+            hp.id
           ;
         END
         $function$
@@ -1270,11 +1282,14 @@ def setup(db):
         in _start_post_permlink hive_permlink_data.permlink%TYPE,
         in _limit INT)
         RETURNS SETOF database_api_post
-        LANGUAGE sql
-        COST 100
-        STABLE
-        ROWS 1000
       AS $function$
+      DECLARE
+        __post_id INT;
+        __parent_id INT;
+      BEGIN
+        __parent_id = find_comment_id(_parent_author, _parent_permlink, True);
+        __post_id = find_comment_id(_start_post_author, _start_post_permlink, True);
+        RETURN QUERY
         SELECT
           hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
           hp.category, hp.depth, hp.promoted, hp.payout, hp.last_payout_at, hp.cashout_time, hp.is_paidout,
@@ -1286,25 +1301,26 @@ def setup(db):
           hp.active, hp.author_rewards
         FROM
           hive_posts_view hp
-          INNER JOIN
-          (
-            SELECT h.id FROM
-            hive_posts_api_helper h
-            WHERE
-              h.parent_author > _parent_author OR
-              h.parent_author = _parent_author AND ( h.parent_permlink_or_category > _parent_permlink OR
-              h.parent_permlink_or_category = _parent_permlink AND h.id >= find_comment_id(_start_post_author, _start_post_permlink, True) )
-            ORDER BY
-              h.parent_author ASC,
-              h.parent_permlink_or_category ASC,
-              h.id ASC
-            LIMIT
-              _limit
-          ) ds ON ds.id = hp.id
-        WHERE
-          NOT hp.is_muted
-          ;
+        INNER JOIN
+        (
+          SELECT hp1.id FROM
+            hive_posts hp1
+          WHERE
+            hp1.counter_deleted = 0
+            AND NOT hp1.is_muted
+            AND hp1.parent_id = __parent_id
+            AND hp1.id >= __post_id
+          ORDER BY
+            hp1.id ASC
+          LIMIT
+            _limit
+        ) ds ON ds.id = hp.id
+        ORDER BY
+          hp.id
+        ;
+      END
       $function$
+      LANGUAGE plpgsql
       ;
 
       DROP FUNCTION IF EXISTS list_comments_by_last_update(character varying, timestamp, character varying, character varying, int)
@@ -1320,7 +1336,9 @@ def setup(db):
         $function$
         DECLARE
           __post_id INT;
+          __parent_author_id INT;
         BEGIN
+          __parent_author_id = find_account_id(_parent_author, True);
           __post_id = find_comment_id(_start_post_author, _start_post_permlink, True);
           RETURN QUERY
           SELECT
@@ -1336,23 +1354,30 @@ def setup(db):
               hive_posts_view hp
           INNER JOIN
           (
-              SELECT 
-                  hp1.id
+              SELECT
+                hp1.id
               FROM
-                  hive_posts hp1
-              INNER JOIN hive_accounts ha ON ha.id = hp1.parent_id
+                hive_posts hp1
+              JOIN
+                hive_posts hp2 ON hp1.parent_id = hp2.id
               WHERE
-                  NOT hp1.is_muted AND
-                  ha.name > _parent_author OR
-                  ha.name = _parent_author AND ( hp1.updated_at < _updated_at OR
-                  hp1.updated_at = _updated_at AND hp1.id >= __post_id )
+                hp1.counter_deleted = 0
+                AND NOT hp1.is_muted
+                AND hp2.author_id = __parent_author_id
+                AND (
+                  hp1.updated_at < _updated_at
+                  OR hp1.updated_at = _updated_at
+                  AND hp1.id >= __post_id
+                )
               ORDER BY
-                  ha.name ASC,
-                  hp1.updated_at DESC,
-                  hp1.id ASC
+                hp1.updated_at DESC,
+                hp1.id ASC
               LIMIT
-                  _limit
+                _limit
           ) ds ON ds.id = hp.id
+          ORDER BY
+            hp.updated_at DESC,
+            hp.id ASC
           ;
         END
         $function$
@@ -1371,8 +1396,10 @@ def setup(db):
         AS
         $function$
         DECLARE
+          __author_id INT;
           __post_id INT;
         BEGIN
+          __author_id = find_account_id(_author, True);
           __post_id = find_comment_id(_start_post_author, _start_post_permlink, True);
           RETURN QUERY
           SELECT
@@ -1388,30 +1415,28 @@ def setup(db):
               hive_posts_view hp
           INNER JOIN
           (
-              SELECT 
-                hp1.id
-              FROM
-                hive_posts hp1
-              INNER JOIN hive_accounts ha ON ha.id = hp1.author_id
-              WHERE
-                  NOT hp1.is_muted AND
-                  -- fat node used wrong index (by_last_update) so the results are vastly different
-                  ha.name > _author OR
-                  ha.name = _author AND ( hp1.updated_at < _updated_at OR
-                  hp1.updated_at = _updated_at AND hp1.id >= __post_id )
-              ORDER BY
-                  ha.name ASC,
-                  hp1.updated_at DESC,
-                  hp1.id ASC
-              LIMIT
-                  _limit + 1
+            SELECT 
+              hp1.id
+            FROM
+              hive_posts hp1
+            WHERE
+              hp1.counter_deleted = 0
+              AND NOT hp1.is_muted
+              AND hp1.author_id = __author_id
+              AND (
+                hp1.updated_at < _updated_at
+                OR hp1.updated_at = _updated_at
+                AND hp1.id >= __post_id
+              )
+            ORDER BY
+              hp1.updated_at DESC,
+              hp1.id ASC
+            LIMIT
+              _limit
           ) ds ON ds.id = hp.id
           ORDER BY
-              hp.author ASC,
               hp.updated_at DESC,
               hp.id ASC
-          LIMIT
-              _limit
           ;
         END
         $function$
@@ -2355,7 +2380,8 @@ def setup(db):
 
     sql_scripts = [
       "update_feed_cache.sql",
-      "get_account_post_replies.sql"
+      "get_account_post_replies.sql",
+      "payout_stats_view.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
