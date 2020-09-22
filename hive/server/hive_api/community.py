@@ -4,7 +4,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import ujson as json
 
-from hive.server.hive_api.common import (get_account_id, get_community_id, valid_limit)
+from hive.server.hive_api.common import (get_account_id, get_community_id, valid_account, valid_limit)
 from hive.server.common.helpers import return_error_info, last_month
 
 def days_ago(days):
@@ -51,6 +51,8 @@ async def get_community_context(context, name, account):
     db = context['db']
     cid = await get_community_id(db, name)
     assert cid, 'community not found'
+
+    valid_account(account)
     aid = await get_account_id(db, account)
     assert aid, 'account not found'
 
@@ -108,6 +110,7 @@ async def list_pop_communities(context, limit:int=25):
 async def list_all_subscriptions(context, account):
     """Lists all communities `account` subscribes to, plus role and title in each."""
     db = context['db']
+    valid_account(account)
     account_id = await get_account_id(db, account)
 
     sql = """SELECT c.name, c.title, COALESCE(r.role_id, 0), COALESCE(r.title, '')

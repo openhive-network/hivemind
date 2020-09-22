@@ -1,7 +1,7 @@
 """Hive API: Notifications"""
 import logging
 
-from hive.server.common.helpers import return_error_info, valid_number, valid_limit, valid_score, json_date
+from hive.server.common.helpers import return_error_info, valid_account, valid_permlink, valid_number, valid_limit, valid_score, json_date
 from hive.indexer.notify import NotifyType
 from hive.server.hive_api.common import get_account_id, get_post_id
 from hive.server.common.mutes import Mutes
@@ -44,6 +44,7 @@ STRINGS = {
 async def unread_notifications(context, account, min_score=25):
     """Load notification status for a named account."""
     db = context['db']
+    valid_account(account)
     account_id = await get_account_id(db, account)
 
     sql = """SELECT lastread_at,
@@ -61,7 +62,7 @@ async def account_notifications(context, account, min_score=25, last_id=None, li
     """Load notifications for named account."""
     db = context['db']
     limit = valid_limit(limit, 100, 100)
-
+    valid_account(account)
     sql_query = "SELECT * FROM account_notifications( (:account)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::BIGINT, (:limit)::SMALLINT )"
 
     if not last_id:
@@ -79,7 +80,8 @@ async def post_notifications(context, author:str, permlink:str, min_score:int=25
     min_score = valid_score(min_score, 100, 25)
     last_id = valid_number(last_id, None, None, -1, "last_id")
     limit = valid_limit(limit, 100, 100)
-
+    valid_account(author)
+    valid_permlink(permlink)
     sql_query = "SELECT * FROM post_notifications( (:author)::VARCHAR, (:permlink)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::BIGINT, (:limit)::SMALLINT )"
 
     rows = await db.query_all(sql_query, author=author, permlink=permlink, min_score=min_score, last_id=last_id, limit=limit)
