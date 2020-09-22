@@ -5,6 +5,7 @@ import logging
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 from hive.indexer.db_adapter_holder import DbAdapterHolder
+from hive.utils.normalize import escape_characters
 #pylint: disable=too-many-lines,line-too-long
 
 log = logging.getLogger(__name__)
@@ -86,7 +87,7 @@ class Notify(DbAdapterHolder):
 
     def to_db_values(self):
         """Generate a db row."""
-        return "( {}, {}, {}, '{}'::timestamp, {}, {}, {}, {}, '{}' )".format(
+        return "( {}, {}, {}, '{}'::timestamp, {}, {}, {}, {}, {} )".format(
                   self.block_num
                 , self.enum.value
                 , self.score
@@ -95,7 +96,7 @@ class Notify(DbAdapterHolder):
                 , self.dst_id
                 , self.post_id if self.post_id else "NULL"
                 , self.community_id if self.community_id else "NULL"
-                , self.payload if self.payload else "NULL")
+                , escape_characters(str(self.payload)) if self.payload else "NULL")
 
     @classmethod
     def flush(cls):
