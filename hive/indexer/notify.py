@@ -90,9 +90,9 @@ class Notify(DbAdapterHolder):
                   self.block_num
                 , self.enum.value
                 , self.score
-                , self.when
+                , self.when if self.when else "NULL"
                 , self.src_id if self.src_id else "NULL"
-                , self.dst_id
+                , self.dst_id if self.dst_id else "NULL"
                 , self.post_id if self.post_id else "NULL"
                 , self.community_id if self.community_id else "NULL"
                 , self.payload if self.payload else "NULL")
