@@ -41,9 +41,9 @@ async def list_comments(context, start: list, limit: int, order: str):
     elif order == 'by_root':
         assert len(start) == 4, "Expecting 4 arguments"
         root_author = start[0]
-        valid_account(root_author, allow_empty=True)
+        valid_account(root_author)
         root_permlink = start[1]
-        valid_permlink(root_permlink, allow_empty=True)
+        valid_permlink(root_permlink)
         start_post_author = start[2]
         valid_account(start_post_author, allow_empty=True)
         start_post_permlink = start[3]
@@ -53,9 +53,9 @@ async def list_comments(context, start: list, limit: int, order: str):
     elif order == 'by_parent':
         assert len(start) == 4, "Expecting 4 arguments"
         parent_author = start[0]
-        valid_account(parent_author, allow_empty=True)
+        valid_account(parent_author)
         parent_permlink = start[1]
-        valid_permlink(parent_permlink, allow_empty=True)
+        valid_permlink(parent_permlink)
         start_post_author = start[2]
         valid_account(start_post_author, allow_empty=True)
         start_post_permlink = start[3]
@@ -65,7 +65,7 @@ async def list_comments(context, start: list, limit: int, order: str):
     elif order == 'by_last_update':
         assert len(start) == 4, "Expecting 4 arguments"
         parent_author = start[0]
-        valid_account(parent_author, allow_empty=True)
+        valid_account(parent_author)
         updated_at = start[1]
         valid_date(updated_at)
         start_post_author = start[2]
@@ -77,7 +77,7 @@ async def list_comments(context, start: list, limit: int, order: str):
     elif order == 'by_author_last_update':
         assert len(start) == 4, "Expecting 4 arguments"
         author = start[0]
-        valid_account(author, allow_empty=True)
+        valid_account(author)
         updated_at = start[1]
         valid_date(updated_at)
         start_post_author = start[2]

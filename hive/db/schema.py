@@ -993,7 +993,7 @@ def setup(db):
         BEGIN
 
         _VOTER_ID = find_account_id( _VOTER, _VOTER != '' );
-        _POST_ID = find_comment_id( _AUTHOR, _PERMLINK, _AUTHOR != '' OR _PERMLINK != '' );
+        _POST_ID = find_comment_id( _AUTHOR, _PERMLINK, True );
 
         RETURN QUERY
         (
@@ -1041,7 +1041,7 @@ def setup(db):
         BEGIN
 
         _VOTER_ID = find_account_id( _VOTER, _VOTER != '' );
-        _POST_ID = find_comment_id( _AUTHOR, _PERMLINK, _AUTHOR != '' OR _PERMLINK != '' );
+        _POST_ID = find_comment_id( _AUTHOR, _PERMLINK, True );
 
         RETURN QUERY
         (
@@ -1132,7 +1132,7 @@ def setup(db):
         DECLARE
           __post_id INT;
         BEGIN
-          __post_id = find_comment_id(_author,_permlink, False);
+          __post_id = find_comment_id(_author,_permlink, True);
           RETURN QUERY
           SELECT
               hp.id, hp.community_id, hp.author, hp.permlink, hp.title, hp.body,
@@ -1156,7 +1156,7 @@ def setup(db):
                   AND NOT hp1.is_muted
                   AND hp1.cashout_time > _cashout_time
                   OR hp1.cashout_time = _cashout_time
-                  AND hp1.id >= __post_id
+                  AND hp1.id >= __post_id AND hp1.id != 0
               ORDER BY
                   hp1.cashout_time ASC,
                   hp1.id ASC
@@ -1207,6 +1207,7 @@ def setup(db):
                   AND ha.name > _author
                   OR ha.name = _author
                   AND hpd.permlink >= _permlink
+                  AND hp1.id != 0
               ORDER BY
                   ha.name ASC,
                   hpd.permlink ASC
@@ -1335,9 +1336,9 @@ def setup(db):
         $function$
         DECLARE
           __post_id INT;
-          __parent_id INT;
+          __parent_author_id INT;
         BEGIN
-          __parent_id = find_account_id(_parent_author, True);
+          __parent_author_id = find_account_id(_parent_author, True);
           __post_id = find_comment_id(_start_post_author, _start_post_permlink, True);
           RETURN QUERY
           SELECT
@@ -1357,10 +1358,12 @@ def setup(db):
                 hp1.id
               FROM
                 hive_posts hp1
+              JOIN
+                hive_posts hp2 ON hp1.parent_id = hp2.id
               WHERE
                 hp1.counter_deleted = 0
                 AND NOT hp1.is_muted
-                AND hp1.parent_id = __parent_id
+                AND hp2.author_id = __parent_author_id
                 AND (
                   hp1.updated_at < _updated_at
                   OR hp1.updated_at = _updated_at
