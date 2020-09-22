@@ -118,7 +118,7 @@ class Community:
         _id = Accounts.get_id(name)
 
         # insert community
-        sql = """INSERT INTO hive_communities (id, name, type_id, created_at)
+        sql = """INSERT INTO hive_communities (id, name, type_id, created_at, block_num)
                         VALUES (:id, :name, :type_id, :date, :block_num)"""
         DB.query(sql, id=_id, name=name, type_id=type_id, date=block_date, block_num=block_num)
 
@@ -330,7 +330,7 @@ class CommunityOp:
         except AssertionError as e:
             payload = str(e)
             Notify(block_num=self.block_num, type_id='error', dst_id=self.actor_id,
-                   when=self.date, payload=payload).write()
+                   when=self.date, payload=payload)
 
         return self.valid
 
@@ -428,7 +428,7 @@ class CommunityOp:
         Notify(block_num=self.block_num, type_id=op, src_id=self.actor_id, dst_id=dst_id,
                post_id=self.post_id, when=self.date,
                community_id=self.community_id,
-               score=score, **kwargs).write()
+               score=score, **kwargs)
 
     def _validate_raw_op(self, raw_op):
         assert isinstance(raw_op, list), 'op json must be list'
