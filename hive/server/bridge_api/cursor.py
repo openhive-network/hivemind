@@ -2,18 +2,9 @@
 
 from hive.server.common.helpers import last_month
 
+from hive.server.hive_api.common import (get_account_id, get_post_id)
+
 # pylint: disable=too-many-lines
-
-async def _get_post_id(db, author, permlink):
-    """Get post_id from hive db."""
-    post_id = await db.query_one("SELECT find_comment_id( :a, :p, True )", a=author, p=permlink)
-    return post_id
-
-async def _get_account_id(db, name):
-    """Get account id from hive db."""
-    assert name, 'no account name specified'
-    _id = await db.query_one("SELECT find_account_id( :n, True )", n=name)
-    return _id
 
 async def _pinned(db, community_id):
     """Get a list of pinned post `id`s in `community`."""
@@ -28,12 +19,12 @@ async def _pinned(db, community_id):
 async def pids_by_blog(db, account: str, start_author: str = '',
                        start_permlink: str = '', limit: int = 20):
     """Get a list of post_ids for an author's blog."""
-    account_id = await _get_account_id(db, account)
+    account_id = await get_account_id(db, account)
 
     seek = ''
     start_id = None
     if start_permlink:
-        start_id = await _get_post_id(db, start_author, start_permlink)
+        start_id = await get_post_id(db, start_author, start_permlink)
         seek = """
           AND created_at <= (
             SELECT created_at
@@ -93,12 +84,12 @@ async def pids_by_blog(db, account: str, start_author: str = '',
 async def pids_by_feed_with_reblog(db, account: str, start_author: str = '',
                                    start_permlink: str = '', limit: int = 20):
     """Get a list of [post_id, reblogged_by_str] for an account's feed."""
-    account_id = await _get_account_id(db, account)
+    account_id = await get_account_id(db, account)
 
     seek = ''
     start_id = None
     if start_permlink:
-        start_id = await _get_post_id(db, start_author, start_permlink)
+        start_id = await get_post_id(db, start_author, start_permlink)
         if not start_id:
             return []
 
@@ -129,7 +120,7 @@ async def pids_by_comments(db, account: str, start_permlink: str = '', limit: in
     seek = ''
     start_id = None
     if start_permlink:
-        start_id = await _get_post_id(db, account, start_permlink)
+        start_id = await get_post_id(db, account, start_permlink)
         if not start_id:
             return []
 

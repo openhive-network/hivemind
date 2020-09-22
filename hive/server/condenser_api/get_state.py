@@ -26,6 +26,7 @@ from hive.server.condenser_api.tags import (
     get_top_trending_tags_summary)
 
 import hive.server.condenser_api.cursor as cursor
+from hive.server.hive_api.common import get_post_id
 
 log = logging.getLogger(__name__)
 
@@ -236,7 +237,7 @@ async def _child_ids(db, parent_ids):
 
 async def _load_discussion(db, author, permlink):
     """Load a full discussion thread."""
-    root_id = await cursor.get_post_id(db, author, permlink)
+    root_id = await get_post_id(db, author, permlink)
     if not root_id:
         return {}
 

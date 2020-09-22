@@ -1,50 +1,20 @@
 """Cursor-based pagination queries, mostly supporting condenser_api."""
 
 from hive.server.common.helpers import last_month
+from hive.server.hive_api.common import (get_account_id, get_post_id)
 from json import loads
 
 # pylint: disable=too-many-lines
-
-async def get_post_id(db, author, permlink):
-    """Given an author/permlink, retrieve the id from db."""
-    sql = """
-        SELECT
-            hp.id
-        FROM hive_posts hp
-        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
-            AND counter_deleted = 0 LIMIT 1""" # ABW: replace with find_comment_id(:author,:permlink,True)?
-    return await db.query_one(sql, author=author, permlink=permlink)
 
 async def get_child_ids(db, post_id):
     """Given a parent post id, retrieve all child ids."""
     sql = "SELECT id FROM hive_posts WHERE parent_id = :id AND counter_deleted = 0"
     return await db.query_col(sql, id=post_id)
 
-async def _get_post_id(db, author, permlink):
-    """Get post_id from hive db."""
-    sql = """
-        SELECT
-            hp.id
-        FROM hive_posts hp
-        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        WHERE ha_a.name = :author AND hpd_p.permlink = :permlink""" # ABW: what's the difference between that and get_post_id?
-    return await db.query_one(sql, author=author, permlink=permlink)
-
-async def _get_account_id(db, name):
-    """Get account id from hive db."""
-    assert name, 'no account name specified'
-    _id = await db.query_one("SELECT id FROM hive_accounts WHERE name = :n", n=name)
-    assert _id, "account not found: `%s`" % name
-    return _id
-
-
 async def get_followers(db, account: str, start: str, follow_type: str, limit: int):
     """Get a list of accounts following a given account."""
-    account_id = await _get_account_id(db, account)
-    start_id = await _get_account_id(db, start) if start else None
+    account_id = await get_account_id(db, account)
+    start_id = await get_account_id(db, start) if start else None
     state = 2 if follow_type == 'ignore' else 1
 
     seek = ''
@@ -69,8 +39,8 @@ async def get_followers(db, account: str, start: str, follow_type: str, limit: i
 
 async def get_following(db, account: str, start: str, follow_type: str, limit: int):
     """Get a list of accounts followed by a given account."""
-    account_id = await _get_account_id(db, account)
-    start_id = await _get_account_id(db, start) if start else None
+    account_id = await get_account_id(db, account)
+    start_id = await get_account_id(db, start) if start else None
     state = 2 if follow_type == 'ignore' else 1
 
     seek = ''
@@ -95,7 +65,7 @@ async def get_following(db, account: str, start: str, follow_type: str, limit: i
 
 async def get_follow_counts(db, account: str):
     """Return following/followers count for `account`."""
-    account_id = await _get_account_id(db, account)
+    account_id = await get_account_id(db, account)
     sql = """SELECT following, followers
                FROM hive_accounts
               WHERE id = :account_id"""
@@ -104,8 +74,7 @@ async def get_follow_counts(db, account: str):
 
 async def get_reblogged_by(db, author: str, permlink: str):
     """Return all rebloggers of a post."""
-    post_id = await _get_post_id(db, author, permlink)
-    assert post_id, "post not found"
+    post_id = await get_post_id(db, author, permlink)
     sql = """SELECT name FROM hive_accounts
                JOIN hive_feed_cache ON id = account_id
               WHERE post_id = :post_id"""
@@ -235,13 +204,14 @@ async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):
 async def pids_by_blog(db, account: str, start_author: str = '',
                        start_permlink: str = '', limit: int = 20):
     """Get a list of post_ids for an author's blog."""
-    account_id = await _get_account_id(db, account)
+    account_id = await get_account_id(db, account)
 
     seek = ''
     start_id = None
     if start_permlink:
-        start_id = await _get_post_id(db, start_author, start_permlink)
-        if not start_id:
+        try:
+            start_id = await get_post_id(db, start_author, start_permlink)
+        except AssertionError:
             return []
 
         seek = """
@@ -305,8 +275,9 @@ async def pids_by_blog_without_reblog(db, account: str, start_permlink: str = ''
     seek = ''
     start_id = None
     if start_permlink:
-        start_id = await _get_post_id(db, account, start_permlink)
-        if not start_id:
+        try:
+            start_id = await get_post_id(db, account, start_permlink)
+        except AssertionError:
             return []
         seek = "AND id <= :start_id"
 
@@ -326,13 +297,14 @@ async def pids_by_blog_without_reblog(db, account: str, start_permlink: str = ''
 async def pids_by_feed_with_reblog(db, account: str, start_author: str = '',
                                    start_permlink: str = '', limit: int = 20):
     """Get a list of [post_id, reblogged_by_str] for an account's feed."""
-    account_id = await _get_account_id(db, account)
+    account_id = await get_account_id(db, account)
 
     seek = ''
     start_id = None
     if start_permlink:
-        start_id = await _get_post_id(db, start_author, start_permlink)
-        if not start_id:
+        try:
+            start_id = await get_post_id(db, start_author, start_permlink)
+        except AssertionError:
             return []
 
         seek = """
@@ -363,8 +335,9 @@ async def pids_by_account_comments(db, account: str, start_permlink: str = '', l
     seek = ''
     start_id = None
     if start_permlink:
-        start_id = await _get_post_id(db, account, start_permlink)
-        if not start_id:
+        try:
+            start_id = await get_post_id(db, account, start_permlink)
+        except AssertionError:
             return []
 
         seek = "AND id <= :start_id"
