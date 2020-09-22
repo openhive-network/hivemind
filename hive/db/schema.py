@@ -2355,7 +2355,8 @@ def setup(db):
 
     sql_scripts = [
       "update_feed_cache.sql",
-      "get_account_post_replies.sql"
+      "get_account_post_replies.sql",
+      "payout_stats_view.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
