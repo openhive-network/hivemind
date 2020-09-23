@@ -2340,6 +2340,7 @@ def setup(db):
       "get_account_post_replies.sql",
       "payout_stats_view.sql",
       "update_hive_posts_mentions.sql"
+     ,"calculate_account_reputations.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
