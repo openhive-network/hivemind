@@ -467,3 +467,4 @@ class Blocks:
         DB.query_no_return("SELECT update_hive_posts_root_id({},{})".format(first_block, last_block))
         DB.query_no_return("SELECT update_hive_posts_api_helper({},{})".format(first_block, last_block))
         DB.query_no_return("SELECT update_feed_cache({}, {})".format(first_block, last_block))
+        DB.query_no_return("SELECT update_hive_posts_mentions({}, {})".format(first_block, last_block))
