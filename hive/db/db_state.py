@@ -21,7 +21,7 @@ from hive.server.common.payout_stats import PayoutStats
 
 log = logging.getLogger(__name__)
 
-SYNCED_BLOCK_LIMIT = 12*1200
+SYNCED_BLOCK_LIMIT = 7*24*1200 # 7 days
 
 class DbState:
     """Manages database state: sync status, migrations, etc."""
@@ -179,7 +179,8 @@ class DbState:
         log.info("Dropping FKs")
         drop_fk(cls.db())
 
-        set_logged_table_attribute(cls.db(), False)
+        # intentionally disabled since it needs a lot of WAL disk space when switching back to LOGGED
+        #set_logged_table_attribute(cls.db(), False)
 
         log.info("[INIT] Finish pre-initial sync hooks")
 
@@ -276,21 +277,26 @@ class DbState:
         time_end = perf_counter()
         log.info("[INIT] update_feed_cache executed in %fs", time_end - time_start)
 
-        cls.update_work_mem(current_work_mem)
-
-        if synced_blocks >= SYNCED_BLOCK_LIMIT:
-            from hive.db.schema import create_fk, set_logged_table_attribute
-            set_logged_table_attribute(cls.db(), True)
-
-            log.info("Recreating FKs")
-            create_fk(cls.db())
-
         time_start = perf_counter()
 
         PayoutStats.generate()
 
         time_end = perf_counter()
         log.info("[INIT] filling payout_stats_view executed in %fs", time_end - time_start)
+
+        # Update a block num immediately
+        DbState.db().query_no_return("UPDATE hive_state SET block_num = :block_num", block_num = current_imported_block)
+
+        cls.update_work_mem(current_work_mem)
+
+        if synced_blocks >= SYNCED_BLOCK_LIMIT:
+            from hive.db.schema import create_fk, set_logged_table_attribute
+            # intentionally disabled since it needs a lot of WAL disk space when switching back to LOGGED
+            #set_logged_table_attribute(cls.db(), True)
+
+            log.info("Recreating FKs")
+            create_fk(cls.db())
+
 
     @staticmethod
     def status():
