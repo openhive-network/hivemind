@@ -302,8 +302,9 @@ def build_metadata():
     sa.Table(
         'hive_posts_api_helper', metadata,
         sa.Column('id', sa.Integer, primary_key=True, autoincrement = False),
-        sa.Column('author_permlink', VARCHAR(512, collation='C'), nullable=False),
-        sa.Index('hive_posts_api_helper_author_permlink', 'author_permlink', 'id')
+        sa.Column('author', VARCHAR(16, collation='C'), nullable=False),
+        sa.Column('permlink', VARCHAR(255, collation='C'), nullable=False),
+        sa.Index('hive_posts_api_helper_author_permlink', 'author', 'permlink')
     )
 
     metadata = build_metadata_community(metadata)
@@ -1201,10 +1202,12 @@ def setup(db):
               WHERE
                   hp2.counter_deleted = 0 
                   AND NOT hp2.is_muted
-                  AND hp1.author_permlink >= _author || '/' || _permlink
-                  AND hp1.id > 0
+                  AND hp1.author > _author
+                  OR hp1.author = _author
+                  AND hp1.permlink >= _permlink
+                  AND hp1.id != 0
               ORDER BY
-                  hp1.author_permlink ASC
+                  hp1.author ASC
               LIMIT
                   _limit
           ) ds ON ds.id = hp.id
@@ -1648,15 +1651,15 @@ def setup(db):
             -- initial creation of table.
 
             INSERT INTO hive_posts_api_helper
-            (id, author_permlink)
-            SELECT hp.id, hp.author || '/' || hp.permlink
+            (id, author, permlink)
+            SELECT hp.id, hp.author, hp.permlink
             FROM hive_posts_view hp
             ;
           ELSE
             -- Regular incremental update.
             INSERT INTO hive_posts_api_helper
-            (id, author_permlink)
-            SELECT hp.id, hp.author || '/' || hp.permlink
+            (id, author, permlink)
+            SELECT hp.id, hp.author, hp.permlink
             FROM hive_posts_view hp
             WHERE hp.block_num BETWEEN _first_block_num AND _last_block_num AND
                    NOT EXISTS (SELECT NULL FROM hive_posts_api_helper h WHERE h.id = hp.id)
