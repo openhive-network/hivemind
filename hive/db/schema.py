@@ -308,6 +308,19 @@ def build_metadata():
         sa.Index('hive_posts_api_helper_parent_permlink_or_category', 'parent_author', 'parent_permlink_or_category', 'id')
     )
 
+    sa.Table(
+        'hive_mentions', metadata,
+        sa.Column('post_id', sa.Integer, nullable=False),
+        sa.Column('account_id', sa.Integer, nullable=False),
+
+        sa.PrimaryKeyConstraint('account_id', 'post_id', name='hive_mentions_pk'),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_mentions_fk1'),
+        sa.ForeignKeyConstraint(['account_id'], ['hive_accounts.id'], name='hive_mentions_fk2'),
+
+        sa.Index('hive_mentions_post_id_idx', 'post_id'),
+        sa.Index('hive_mentions_account_id_idx', 'account_id')
+    )
+
     metadata = build_metadata_community(metadata)
 
     return metadata
@@ -2383,7 +2396,8 @@ def setup(db):
     sql_scripts = [
       "update_feed_cache.sql",
       "get_account_post_replies.sql",
-      "payout_stats_view.sql"
+      "payout_stats_view.sql",
+      "update_hive_posts_mentions.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
