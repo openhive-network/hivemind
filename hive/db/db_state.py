@@ -110,6 +110,8 @@ class DbState:
             'hive_posts_sc_trend_idx',
             'hive_posts_sc_hot_idx',
             'hive_posts_block_num_idx',
+            'hive_posts_cashout_time_idx',
+            'hive_posts_updated_at_idx',
 
             'hive_votes_post_id_idx',
             'hive_votes_voter_id_idx',
@@ -141,23 +143,23 @@ class DbState:
 
     @classmethod
     def processing_indexes(cls, is_pre_process, drop, create ):
-      DB = cls.db()
-      engine = DB.engine()
-      log.info("[INIT] Begin %s-initial sync hooks", "pre" if is_pre_process else "post" )
+        DB = cls.db()
+        engine = DB.engine()
+        log.info("[INIT] Begin %s-initial sync hooks", "pre" if is_pre_process else "post")
 
-      for index in cls._disableable_indexes():
-          log.info("%s index %s.%s", ( "Drop" if is_pre_process else "Recreate" ), index.table, index.name)
-          try:
-            if drop:
-              sql = "SELECT count(*) FROM pg_class WHERE relname = :relname"
-              _count = DB.query_one(sql, relname=index.name)
-              if _count == 1:
-                index.drop(engine)
-          except sqlalchemy.exc.ProgrammingError as ex:
-              log.warning("Ignoring ex: {}".format(ex))
+        for index in cls._disableable_indexes():
+            log.info("%s index %s.%s", ("Drop" if is_pre_process else "Recreate"), index.table, index.name)
+            try:
+                if drop:
+                    sql = "SELECT count(*) FROM pg_class WHERE relname = :relname"
+                    _count = DB.query_one(sql, relname=index.name)
+                    if _count == 1:
+                        index.drop(engine)
+            except sqlalchemy.exc.ProgrammingError as ex:
+                log.warning("Ignoring ex: {}".format(ex))
 
-          if create:
-            index.create(engine)
+            if create:
+                index.create(engine)
 
     @classmethod
     def before_initial_sync(cls, last_imported_block, hived_head_block):
