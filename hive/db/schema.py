@@ -859,9 +859,10 @@ def setup(db):
 
           CREATE OR REPLACE FUNCTION public.update_hive_posts_children_count(in _first_block INTEGER, in _last_block INTEGER)
               RETURNS void
-              LANGUAGE SQL
+              LANGUAGE 'plpgsql'
               VOLATILE
           AS $BODY$
+          BEGIN
           UPDATE hive_posts uhp
           SET children = data_source.children_count
           FROM
@@ -887,6 +888,7 @@ def setup(db):
           ) data_source
           WHERE uhp.id = data_source.queried_parent
           ;
+          END
           $BODY$;
           """
     db.query_no_return(sql)
