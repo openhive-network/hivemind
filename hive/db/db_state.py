@@ -143,8 +143,8 @@ class DbState:
     @classmethod
     def has_index(cls, idx_name):
         sql = "SELECT count(*) FROM pg_class WHERE relname = :relname"
-        _count = DB.query_one(sql, relname=idx_name)
-        if _count == 1:
+        count = cls.db().query_one(sql, relname=idx_name)
+        if count == 1:
             return True
         else:
             return False
