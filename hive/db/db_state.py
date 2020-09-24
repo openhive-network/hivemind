@@ -141,6 +141,15 @@ class DbState:
         return to_return
 
     @classmethod
+    def has_index(cls, idx_name):
+        sql = "SELECT count(*) FROM pg_class WHERE relname = :relname"
+        _count = DB.query_one(sql, relname=idx_name)
+        if _count == 1:
+            return True
+        else:
+            return False
+
+    @classmethod
     def processing_indexes(cls, is_pre_process, drop, create ):
       DB = cls.db()
       engine = DB.engine()
@@ -150,9 +159,7 @@ class DbState:
           log.info("%s index %s.%s", ( "Drop" if is_pre_process else "Recreate" ), index.table, index.name)
           try:
             if drop:
-              sql = "SELECT count(*) FROM pg_class WHERE relname = :relname"
-              _count = DB.query_one(sql, relname=index.name)
-              if _count == 1:
+              if cls.has_index(index.name):
                 time_start = perf_counter()
                 index.drop(engine)
                 end_time = perf_counter()
@@ -161,7 +168,7 @@ class DbState:
           except sqlalchemy.exc.ProgrammingError as ex:
               log.warning("Ignoring ex: {}".format(ex))
 
-          if create:
+          if create and cls.has_index(index.name) == False:
             time_start = perf_counter()
             index.create(engine)
             end_time = perf_counter()
