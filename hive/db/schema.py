@@ -146,7 +146,8 @@ def build_metadata():
         sa.Index('hive_posts_sc_trend_idx', 'sc_trend'),
         sa.Index('hive_posts_sc_hot_idx', 'sc_hot'),
         sa.Index('hive_posts_created_at_idx', 'created_at'),
-        sa.Index('hive_posts_block_num_idx', 'block_num')
+        sa.Index('hive_posts_block_num_idx', 'block_num'),
+        sa.Index('hive_posts_cashout_time', 'cashout_time'),
     )
 
     sa.Table(
