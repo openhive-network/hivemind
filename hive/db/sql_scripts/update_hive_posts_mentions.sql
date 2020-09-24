@@ -17,25 +17,25 @@ BEGIN
     FIRST_BLOCK_TIME = LAST_BLOCK_TIME - '90 days'::interval;
   END IF;
 
-  INSERT INTO hive_mentions( post_id, account_id )
-    SELECT DISTINCT T.id_post, ha.id
+  INSERT INTO hive_mentions( post_id, account_id, block_num )
+    SELECT DISTINCT T.id_post, ha.id, T.block_num
     FROM
       hive_accounts ha
     INNER JOIN
     (
-      SELECT T.id_post, LOWER( ( SELECT trim( T.mention::text, '{""}') ) ) mention, T.author_id
+      SELECT T.id_post, LOWER( ( SELECT trim( T.mention::text, '{""}') ) ) mention, T.author_id, T.block_num
       FROM
       (
         SELECT
-          hp.id, REGEXP_MATCHES( hpd.body, '(?:^|[^a-zA-Z0-9_!#$%&*@\\/])(?:@)([a-zA-Z0-9\\.-]{1,16}[a-zA-Z0-9])(?![a-z])', 'g') mention, hp.author_id
+          hp.id, REGEXP_MATCHES( hpd.body, '(?:^|[^a-zA-Z0-9_!#$%&*@\\/])(?:@)([a-zA-Z0-9\\.-]{1,16}[a-zA-Z0-9])(?![a-z])', 'g') mention, hp.author_id, hp.block_num
         FROM hive_posts hp
           INNER JOIN hive_post_data hpd ON hp.id = hpd.id
         WHERE
         (
           hp.created_at >= FIRST_BLOCK_TIME
         )
-      )T( id_post, mention, author_id )
-    )T( id_post, mention, author_id ) ON ha.name = T.mention
+      )T( id_post, mention, author_id, block_num )
+    )T( id_post, mention, author_id, block_num ) ON ha.name = T.mention
     WHERE ha.id != T.author_id
   ON CONFLICT DO NOTHING;
 
