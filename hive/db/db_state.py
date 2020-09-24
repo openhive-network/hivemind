@@ -153,12 +153,20 @@ class DbState:
               sql = "SELECT count(*) FROM pg_class WHERE relname = :relname"
               _count = DB.query_one(sql, relname=index.name)
               if _count == 1:
+                time_start = perf_counter()
                 index.drop(engine)
+                end_time = perf_counter()
+                elapsed_time = end_time - time_start
+                log.info("Index {} dropped in time {} s".format(index.name, elapsed_time))
           except sqlalchemy.exc.ProgrammingError as ex:
               log.warning("Ignoring ex: {}".format(ex))
 
           if create:
+            time_start = perf_counter()
             index.create(engine)
+            end_time_start = perf_counter()
+            elapsed_time = end_time - time_start
+            log.info("Index {} created in time {} s".format(index.name, elapsed_time))
 
     @classmethod
     def before_initial_sync(cls, last_imported_block, hived_head_block):
@@ -216,8 +224,12 @@ class DbState:
 
         synced_blocks = current_imported_block - last_imported_block
 
+        force_index_rebuild = False
+        if synced_blocks >= SYNCED_BLOCK_LIMIT:
+            force_index_rebuild = True
+
         #is_pre_process, drop, create
-        cls.processing_indexes( False, True, True )
+        cls.processing_indexes( False, force_index_rebuild, True )
 
         current_work_mem = cls.update_work_mem('2GB')
 
