@@ -1216,7 +1216,8 @@ def setup(db):
                   AND hp1.permlink >= _permlink
                   AND hp1.id != 0
               ORDER BY
-                  hp1.author ASC
+                  hp1.author ASC,
+                  hp1.permlink ASC
               LIMIT
                   _limit
           ) ds ON ds.id = hp.id
