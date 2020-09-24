@@ -164,7 +164,7 @@ class DbState:
           if create:
             time_start = perf_counter()
             index.create(engine)
-            end_time_start = perf_counter()
+            end_time = perf_counter()
             elapsed_time = end_time - time_start
             log.info("Index {} created in time {} s".format(index.name, elapsed_time))
 
