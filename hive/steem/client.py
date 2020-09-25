@@ -153,7 +153,7 @@ class SteemClient:
                 ret.append(vop['op'])
         return ret
 
-    def enum_virtual_ops(self, begin_block, end_block):
+    def enum_virtual_ops(self, conf, begin_block, end_block):
         """ Get virtual ops for range of blocks """
         ret = {}
 
@@ -175,6 +175,14 @@ class SteemClient:
             call_result = self.__exec('enum_virtual_ops', {"block_range_begin":from_block, "block_range_end":end_block
                 , "group_by_block": True, "operation_begin": resume_on_operation, "limit": 1000, "filter": tracked_ops_filter
             })
+
+            if conf.get('log_virtual_op_calls'):
+                call = """
+                Call enum_virtual_ops:
+                Query: {{"block_range_begin":{}, "block_range_end":{}, "group_by_block": True, "operation_begin": {}, "limit": 1000, "filter": {} }}
+                Response: {}""".format ( from_block, end_block, resume_on_operation, tracked_ops_filter, call_result )
+                logger.info( call )
+
 
             one_block_ops = {opb["block"] : {"timestamp":opb["timestamp"], "ops":[op["op"] for op in opb["ops"]]} for opb in call_result["ops_by_block"]}
 
