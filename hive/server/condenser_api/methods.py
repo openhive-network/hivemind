@@ -232,10 +232,10 @@ async def get_discussions_by(discussion_type, context, start_author: str = '',
     elif discussion_type == 'promoted':
         sql = sql + """ NOT hp.is_paidout AND hp.promoted > 0
                         %s ORDER BY hp.promoted DESC LIMIT :limit """
-    elif discussion_type == 'payout':
+    elif discussion_type == 'payout': # wrong: now we should be using payout + pending_payout here
         sql = sql + """ NOT hp.is_paidout AND hp.depth = 0
                         %s ORDER BY hp.payout DESC LIMIT :limit """
-    elif discussion_type == 'payout_comments':
+    elif discussion_type == 'payout_comments': # wrong: now we should be using payout + pending_payout here
         sql = sql + """ NOT hp.is_paidout AND hp.depth > 0
                         %s ORDER BY hp.payout DESC LIMIT :limit """
 
@@ -262,7 +262,7 @@ async def get_discussions_by(discussion_type, context, start_author: str = '',
         elif discussion_type == 'promoted':
             sql = sql % """ AND hp.promoted <= (SELECT promoted FROM hp WHERE permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink) AND author_id = (SELECT id FROM hive_accounts WHERE name = :author))
                             AND hp.post_id != (SELECT post_id FROM hp WHERE permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink) AND author_id = (SELECT id FROM hive_accounts WHERE name = :author)) """
-        else:
+        else: # wrong: now we should be using payout + pending_payout here
             sql = sql % """ AND hp.payout <= (SELECT payout FROM hp where permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink) AND author_id = (SELECT id FROM hive_accounts WHERE name = :author))
                             AND hp.post_id != (SELECT post_id FROM hp WHERE permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink) AND author_id = (SELECT id FROM hive_accounts WHERE name = :author)) """
     else:
