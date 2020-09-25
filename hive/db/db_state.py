@@ -110,6 +110,8 @@ class DbState:
             'hive_posts_sc_trend_id_idx',
             'hive_posts_sc_hot_id_idx',
             'hive_posts_block_num_idx',
+            'hive_posts_cashout_time_idx',
+            'hive_posts_updated_at_idx',
 
             'hive_votes_post_id_idx',
             'hive_votes_voter_id_idx',
@@ -150,30 +152,30 @@ class DbState:
             return False
 
     @classmethod
-    def processing_indexes(cls, is_pre_process, drop, create ):
-      DB = cls.db()
-      engine = DB.engine()
-      log.info("[INIT] Begin %s-initial sync hooks", "pre" if is_pre_process else "post" )
+    def processing_indexes(cls, is_pre_process, drop, create):
+        DB = cls.db()
+        engine = DB.engine()
+        log.info("[INIT] Begin %s-initial sync hooks", "pre" if is_pre_process else "post")
 
-      for index in cls._disableable_indexes():
-          log.info("%s index %s.%s", ( "Drop" if is_pre_process else "Recreate" ), index.table, index.name)
-          try:
-            if drop:
-              if cls.has_index(index.name):
+        for index in cls._disableable_indexes():
+            log.info("%s index %s.%s", ("Drop" if is_pre_process else "Recreate"), index.table, index.name)
+            try:
+                if drop:
+                    if cls.has_index(index.name):
+                        time_start = perf_counter()
+                        index.drop(engine)
+                        end_time = perf_counter()
+                        elapsed_time = end_time - time_start
+                        log.info("Index {} dropped in time {} s".format(index.name, elapsed_time))
+            except sqlalchemy.exc.ProgrammingError as ex:
+                log.warning("Ignoring ex: {}".format(ex))
+
+            if create and cls.has_index(index.name) == False:
                 time_start = perf_counter()
-                index.drop(engine)
+                index.create(engine)
                 end_time = perf_counter()
                 elapsed_time = end_time - time_start
-                log.info("Index {} dropped in time {} s".format(index.name, elapsed_time))
-          except sqlalchemy.exc.ProgrammingError as ex:
-              log.warning("Ignoring ex: {}".format(ex))
-
-          if create and cls.has_index(index.name) == False:
-            time_start = perf_counter()
-            index.create(engine)
-            end_time = perf_counter()
-            elapsed_time = end_time - time_start
-            log.info("Index {} created in time {} s".format(index.name, elapsed_time))
+                log.info("Index {} created in time {} s".format(index.name, elapsed_time))
 
     @classmethod
     def before_initial_sync(cls, last_imported_block, hived_head_block):
