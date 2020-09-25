@@ -196,8 +196,14 @@ class SteemClient:
 
             resume_on_operation = call_result['next_operation_begin'] if 'next_operation_begin' in call_result else 0
 
-
             next_block = call_result['next_block_range_begin']
+
+            if next_block == 0:
+                return ret
+
+            if next_block < begin_block:
+                logger.error( "Next next block nr {} returned by enum_virtual_ops is smaller than begin block {}.".format( next_block, begin_block ) )
+                return ret;
 
             # Move to next block only if operations from current one have been processed completely.
             from_block = next_block
