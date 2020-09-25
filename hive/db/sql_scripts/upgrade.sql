@@ -122,9 +122,9 @@ CREATE OR REPLACE FUNCTION list_comments_by_cashout_time(
         hive_posts_view hp
     INNER JOIN
     (
-        SELECT 
+        SELECT
             hp1.id
-        FROM 
+        FROM
             hive_posts hp1
         WHERE
             hp1.counter_deleted = 0
@@ -222,13 +222,13 @@ CREATE OR REPLACE FUNCTION list_comments_by_root(
       hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
       hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
       hp.active, hp.author_rewards
-    FROM 
+    FROM
       hive_posts_view hp
     INNER JOIN
     (
-      SELECT 
+      SELECT
         hp2.id
-      FROM 
+      FROM
         hive_posts hp2
       WHERE
         hp2.counter_deleted = 0
@@ -389,7 +389,7 @@ CREATE OR REPLACE FUNCTION list_comments_by_author_last_update(
         hive_posts_view hp
     INNER JOIN
     (
-      SELECT 
+      SELECT
         hp1.id
       FROM
         hive_posts hp1
@@ -523,7 +523,7 @@ CREATE TABLE IF NOT EXISTS hive_mentions
   CONSTRAINT hive_mentions_PK PRIMARY KEY (post_id, account_id),
   CONSTRAINT hive_mentions_post_id_FK FOREIGN KEY (post_id)
     REFERENCES public.hive_posts (id),
-  CONSTRAINT hive_mentions_account_id_FK FOREIGN KEY (post_id)
+  CONSTRAINT hive_mentions_account_id_FK FOREIGN KEY (account_id)
     REFERENCES public.hive_accounts (id)
 );
 
@@ -571,4 +571,3 @@ BEGIN
 END
 $function$
 ;
-
