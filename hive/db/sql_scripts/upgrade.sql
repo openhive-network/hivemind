@@ -2650,3 +2650,11 @@ ORDER BY trends.trend DESC, trends.id LIMIT _limit;
 END
 $function$
 language plpgsql STABLE;
+
+DROP INDEX IF EXISTS hive_posts_sc_trend_id_idx;
+CREATE INDEX hive_posts_sc_trend_id_idx ON hive_posts(sc_trend,id);
+DROP INDEX IF EXISTS hive_posts_sc_hot_id_idx;
+CREATE INDEX hive_posts_sc_hot_id_idx ON hive_posts(sc_hot, id);
+DROP INDEX IF EXISTS hive_subscriptions_community_idx;
+CREATE INDEX hive_subscriptions_community_idx ON hive_subscriptions(community_id);
+
