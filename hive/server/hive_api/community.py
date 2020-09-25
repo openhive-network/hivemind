@@ -4,7 +4,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import ujson as json
 
-from hive.server.hive_api.common import (get_account_id, get_community_id, valid_limit)
+from hive.server.hive_api.common import (get_account_id, get_community_id, valid_account, valid_limit)
 from hive.server.common.helpers import return_error_info, last_month
 
 def days_ago(days):
@@ -39,6 +39,7 @@ async def get_community(context, name, observer=None):
     communities = await load_communities(db, [cid], lite=False)
 
     if observer:
+        valid_account(observer)
         observer_id = await get_account_id(db, observer)
         await _append_observer_roles(db, communities, observer_id)
         await _append_observer_subs(db, communities, observer_id)
@@ -49,8 +50,10 @@ async def get_community(context, name, observer=None):
 async def get_community_context(context, name, account):
     """For a community/account: returns role, title, subscribed state"""
     db = context['db']
+    valid_account(account)
     cid = await get_community_id(db, name)
     assert cid, 'community not found'
+
     aid = await get_account_id(db, account)
     assert aid, 'account not found'
 
@@ -108,6 +111,7 @@ async def list_pop_communities(context, limit:int=25):
 async def list_all_subscriptions(context, account):
     """Lists all communities `account` subscribes to, plus role and title in each."""
     db = context['db']
+    valid_account(account)
     account_id = await get_account_id(db, account)
 
     sql = """SELECT c.name, c.title, COALESCE(r.role_id, 0), COALESCE(r.title, '')

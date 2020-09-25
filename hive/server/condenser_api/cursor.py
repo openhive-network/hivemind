@@ -1,6 +1,5 @@
 """Cursor-based pagination queries, mostly supporting condenser_api."""
 
-from hive.utils.normalize import rep_to_raw
 from hive.server.common.helpers import last_month
 from json import loads
 
@@ -127,7 +126,7 @@ async def get_account_reputations(db, account_lower_bound, limit):
            ORDER BY name
               LIMIT :limit""" % seek
     rows = await db.query_all(sql, start=account_lower_bound, limit=limit)
-    return [dict(name=r[0], reputation=rep_to_raw(r[1])) for r in rows]
+    return [dict(name=r[0], reputation=r[1]) for r in rows]
 
 
 async def pids_by_query(db, sort, start_author, start_permlink, limit, tag):

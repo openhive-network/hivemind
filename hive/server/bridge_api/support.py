@@ -1,6 +1,9 @@
 """Handles building condenser-compatible response objects."""
 
 import logging
+from hive.server.common.helpers import (
+    valid_account,
+    valid_permlink)
 #import ujson as json
 import traceback
 
@@ -17,6 +20,8 @@ ROLES = {-2: 'muted', 0: 'guest', 2: 'member', 4: 'admin', 6: 'mod', 8: 'admin'}
 async def get_post_header(context, author, permlink):
     """Fetch basic post data"""
     db = context['db']
+    valid_account(author)
+    valid_permlink(permlink)
     sql = """
         SELECT 
             hp.id, ha_a.name as author, hpd_p.permlink as permlink, hcd.category as category, depth
