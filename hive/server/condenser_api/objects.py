@@ -3,7 +3,7 @@
 import logging
 import ujson as json
 
-from hive.utils.normalize import sbd_amount, rep_to_raw
+from hive.utils.normalize import sbd_amount
 from hive.server.common.mutes import Mutes
 from hive.server.common.helpers import json_date
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
@@ -163,7 +163,7 @@ def _condenser_account_object(row):
         'name': row['name'],
         'created': str(row['created_at']),
         'post_count': row['post_count'],
-        'reputation': rep_to_raw(row['reputation']),
+        'reputation': row['reputation'],
         'net_vesting_shares': 0,
         'transfer_history': [],
         'json_metadata': json.dumps({
@@ -209,7 +209,7 @@ def _condenser_post_object(row, truncate_body=0):
 
     post['replies'] = []
     post['body_length'] = len(row['body'])
-    post['author_reputation'] = rep_to_raw(row['author_rep'])
+    post['author_reputation'] = row['author_rep']
 
     post['parent_author'] = row['parent_author']
     post['parent_permlink'] = row['parent_permlink_or_category']

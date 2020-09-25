@@ -310,6 +310,14 @@ class DbState:
         time_end = perf_counter()
         log.info("[INIT] filling payout_stats_view executed in %fs", time_end - time_start)
 
+        time_start = perf_counter()
+        sql = """
+            SELECT update_account_reputations({}, {});
+        """.format(last_imported_block, current_imported_block)
+        DbState.db().query_no_return(sql)
+        time_end = perf_counter()
+        log.info("[INIT] update_account_reputations executed in %fs", time_end - time_start)
+
         # Update a block num immediately
         DbState.db().query_no_return("UPDATE hive_state SET block_num = :block_num", block_num = current_imported_block)
 
