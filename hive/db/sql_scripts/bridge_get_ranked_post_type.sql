@@ -3,7 +3,7 @@ CREATE TYPE bridge_api_post AS (
     id INTEGER,
     author VARCHAR,
     parent_author VARCHAR,
-    author_rep FLOAT4,
+    author_rep BIGINT,
     root_title VARCHAR,
     beneficiaries JSON,
     max_accepted_payout VARCHAR,

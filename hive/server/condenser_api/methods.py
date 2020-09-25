@@ -16,7 +16,7 @@ from hive.server.common.helpers import (
     valid_follow_type)
 from hive.server.common.mutes import Mutes
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
-from hive.utils.normalize import rep_to_raw, time_string_with_t
+from hive.utils.normalize import time_string_with_t
 
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
 

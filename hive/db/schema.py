@@ -39,7 +39,7 @@ def build_metadata():
         sa.Column('name', VARCHAR(16, collation='C'), nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
         #sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Column('reputation', sa.Float(precision=6), nullable=False, server_default='25'),
+        sa.Column('reputation', sa.BigInteger, nullable=False, server_default='0'),
 
         sa.Column('followers', sa.Integer, nullable=False, server_default='0'),
         sa.Column('following', sa.Integer, nullable=False, server_default='0'),
@@ -54,6 +54,12 @@ def build_metadata():
         sa.Index('hive_accounts_ix6', 'reputation')
     )
 
+    sa.Table(
+        'hive_account_reputation_status', metadata,
+        sa.Column('account_id', sa.Integer, primary_key=True),
+        sa.Column('reputation', sa.BigInteger, nullable=False),
+        sa.Column('is_implicit', sa.Boolean, nullable=False)
+    )
 
     sa.Table(
         'hive_reputation_data', metadata,
@@ -948,7 +954,7 @@ def setup(db):
           percent INT,
           last_update TIMESTAMP,
           num_changes INT,
-          reputation FLOAT4
+          reputation BIGINT
         );
 
         DROP FUNCTION IF EXISTS find_votes( character varying, character varying )
@@ -1003,12 +1009,12 @@ def setup(db):
         LANGUAGE 'plpgsql'
         AS
         $function$
-        DECLARE _VOTER_ID INT;
-        DECLARE _POST_ID INT;
+        DECLARE __voter_id INT;
+        DECLARE __post_id INT;
         BEGIN
 
-        _VOTER_ID = find_account_id( _VOTER, _VOTER != '' );
-        _POST_ID = find_comment_id( _AUTHOR, _PERMLINK, True );
+        __voter_id = find_account_id( _VOTER, True );
+        __post_id = find_comment_id( _AUTHOR, _PERMLINK, True );
 
         RETURN QUERY
         (
@@ -1026,12 +1032,10 @@ def setup(db):
             FROM
                 hive_votes_view v
             WHERE
-                ( v.voter_id = _VOTER_ID and v.post_id >= _POST_ID )
-                OR
-                ( v.voter_id > _VOTER_ID )
+                v.voter_id = __voter_id
+                AND v.post_id >= __post_id
             ORDER BY
-                voter_id,
-                post_id
+                v.post_id
             LIMIT _LIMIT
         );
 
@@ -1051,12 +1055,12 @@ def setup(db):
         LANGUAGE 'plpgsql'
         AS
         $function$
-        DECLARE _VOTER_ID INT;
-        DECLARE _POST_ID INT;
+        DECLARE __voter_id INT;
+        DECLARE __post_id INT;
         BEGIN
 
-        _VOTER_ID = find_account_id( _VOTER, _VOTER != '' );
-        _POST_ID = find_comment_id( _AUTHOR, _PERMLINK, True );
+        __voter_id = find_account_id( _VOTER, _VOTER != '' ); -- voter is optional
+        __post_id = find_comment_id( _AUTHOR, _PERMLINK, True );
 
         RETURN QUERY
         (
@@ -1074,12 +1078,10 @@ def setup(db):
             FROM
                 hive_votes_view v
             WHERE
-                ( v.post_id = _POST_ID and v.voter_id >= _VOTER_ID )
-                OR
-                ( v.post_id > _POST_ID )
+                v.post_id = __post_id
+                AND v.voter_id >= __voter_id
             ORDER BY
-                post_id,
-                voter_id
+                v.voter_id
             LIMIT _LIMIT
         );
 
@@ -1690,64 +1692,6 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-          DROP FUNCTION IF EXISTS process_reputation_data(in _block_num hive_blocks.num%TYPE, in _author hive_accounts.name%TYPE,
-            in _permlink hive_permlink_data.permlink%TYPE, in _voter hive_accounts.name%TYPE, in _rshares hive_votes.rshares%TYPE)
-            ;
-
-          CREATE OR REPLACE FUNCTION process_reputation_data(in _block_num hive_blocks.num%TYPE,
-            in _author hive_accounts.name%TYPE, in _permlink hive_permlink_data.permlink%TYPE,
-            in _voter hive_accounts.name%TYPE, in _rshares hive_votes.rshares%TYPE)
-          RETURNS void
-          LANGUAGE sql
-          VOLATILE
-          AS $BODY$
-            WITH __insert_info AS (
-              INSERT INTO hive_reputation_data
-                (author_id, voter_id, permlink, block_num, rshares)
-              --- Warning DISTINCT is needed here since we have to strict join to hv table and there is really made a CROSS JOIN
-              --- between ha and hv records (producing 2 duplicated records)
-              SELECT DISTINCT ha.id as author_id, hv.id as voter_id, _permlink, _block_num, _rshares
-              FROM hive_accounts ha
-              JOIN hive_accounts hv ON hv.name = _voter
-              JOIN hive_posts hp ON hp.author_id = ha.id
-              JOIN hive_permlink_data hpd ON hp.permlink_id = hpd.id
-              WHERE hpd.permlink = _permlink
-                    AND ha.name = _author
-
-                    AND NOT hp.is_paidout --- voting on paidout posts shall have no effect
-                    AND hv.reputation >= 0 --- voter's negative reputation eliminates vote from processing
-                    AND (_rshares >= 0
-                          OR (hv.reputation >= (ha.reputation - COALESCE((SELECT (hrd.rshares >> 6) -- if previous vote was a downvote we need to correct author reputation before current comparison to voter's reputation
-                                                                        FROM hive_reputation_data hrd
-                                                                        WHERE hrd.author_id = ha.id
-                                                                              AND hrd.voter_id=hv.id
-                                                                              AND hrd.permlink=_permlink
-                                                                              AND hrd.rshares < 0), 0)))
-                        )
-              ON CONFLICT ON CONSTRAINT hive_reputation_data_uk DO
-              UPDATE SET
-                rshares = EXCLUDED.rshares
-              RETURNING (xmax = 0) AS is_new_vote,
-                        (SELECT hrd.rshares
-                        FROM hive_reputation_data hrd
-                        --- Warning we want OLD row here, not both, so we're using old ID to select old one (new record has different value) !!!
-                        WHERE hrd.id = hive_reputation_data.id AND hrd.author_id = author_id and hrd.voter_id=voter_id and hrd.permlink=_permlink) AS old_rshares, author_id, voter_id
-            )
-          UPDATE hive_accounts uha
-            SET reputation = CASE __insert_info.is_new_vote
-                               WHEN true THEN ha.reputation + (_rshares >> 6)
-                               ELSE ha.reputation - (__insert_info.old_rshares >> 6) + (_rshares >> 6)
-                             END
-            FROM hive_accounts ha
-            JOIN __insert_info ON ha.id = __insert_info.author_id
-            WHERE uha.id = __insert_info.author_id
-            ;
-          $BODY$;
-    """
-
-#    db.query_no_return(sql)
-
-    sql = """
         DROP FUNCTION IF EXISTS public.calculate_notify_vote_score(_payout hive_posts.payout%TYPE, _abs_rshares hive_posts_view.abs_rshares%TYPE, _rshares hive_votes.rshares%TYPE) CASCADE
         ;
         CREATE OR REPLACE FUNCTION public.calculate_notify_vote_score(_payout hive_posts.payout%TYPE, _abs_rshares hive_posts_view.abs_rshares%TYPE, _rshares hive_votes.rshares%TYPE)
@@ -2244,6 +2188,7 @@ def setup(db):
       "bridge_get_ranked_post_for_observer_communities.sql",
       "bridge_get_ranked_post_for_tag.sql",
       "bridge_get_ranked_post_for_all.sql"
+     ,"calculate_account_reputations.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
