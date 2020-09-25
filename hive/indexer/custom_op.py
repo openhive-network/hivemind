@@ -27,7 +27,6 @@ def _get_auth(op):
     `required_active_auths` in the future. For now, these are ignored.
     """
     if op['required_auths']:
-        log.warning("unexpected active auths: %s", op)
         return None
     if len(op['required_posting_auths']) != 1:
         log.warning("unexpected auths: %s", op)
