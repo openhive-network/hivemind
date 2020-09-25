@@ -52,6 +52,7 @@ class Conf():
         add('--test-max-block', type=int, env_var='TEST_MAX_BLOCK', help='(debug) only sync to given block, for running sync test', default=None)
         add('--exit-after-sync', help='exit when sync is completed', action='store_true')
         add('--test-profile', type=strtobool, env_var='TEST_PROFILE', help='(debug) profile execution', default=False)
+        add('--log-virtual-op-calls', type=strtobool, env_var='LOG_VIRTUAL_OP_CALLS', help='(debug) log virtual op calls and responses', default=False)
 
         add('--pid-file', type=str, env_var='PID_FILE', help='Allows to dump current process pid into specified file', default=None)
 

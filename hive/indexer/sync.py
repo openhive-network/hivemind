@@ -72,7 +72,7 @@ def _block_provider(node, queue, lbound, ubound, chunk_size):
     except Exception:
         log.exception("Exception caught during fetching blocks")
 
-def _vops_provider(node, queue, lbound, ubound, chunk_size):
+def _vops_provider(conf, node, queue, lbound, ubound, chunk_size):
     try:
         num = 0
         count = ubound - lbound
@@ -82,7 +82,7 @@ def _vops_provider(node, queue, lbound, ubound, chunk_size):
         while CONTINUE_PROCESSING and lbound < ubound:
             to = min(lbound + chunk_size, ubound)
             timer.batch_start()
-            vops = node.enum_virtual_ops(lbound, to)
+            vops = node.enum_virtual_ops(conf, lbound, to)
             preparedVops = prepare_vops(vops)
             lbound = to
             timer.batch_lap()
@@ -110,7 +110,7 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
             wait_time_1 = WSM.start()
             if blocksQueue.empty() and CONTINUE_PROCESSING:
                 log.info("Awaiting any block to process...")
-            
+
             blocks = []
             if not blocksQueue.empty() or CONTINUE_PROCESSING:
                 blocks = blocksQueue.get()
@@ -120,7 +120,7 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
             wait_time_2 = WSM.start()
             if vopsQueue.empty() and CONTINUE_PROCESSING:
                 log.info("Awaiting any vops to process...")
-            
+
             preparedVops = []
             if not vopsQueue.empty() or CONTINUE_PROCESSING:
                 preparedVops = vopsQueue.get()
@@ -130,7 +130,7 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
             to = min(lbound + chunk_size, ubound)
 
             timer.batch_start()
-            
+
             block_start = perf()
             Blocks.process_multi(blocks, preparedVops, is_initial_sync)
             block_end = perf()
@@ -188,7 +188,7 @@ def _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size):
     with ThreadPoolExecutor(max_workers = 4) as pool:
         try:
             pool.submit(_block_provider, self._steem, blocksQueue, lbound, ubound, chunk_size)
-            pool.submit(_vops_provider, self._steem, vopsQueue, lbound, ubound, chunk_size)
+            pool.submit(_vops_provider, self._conf, self._steem, vopsQueue, lbound, ubound, chunk_size)
             blockConsumerFuture = pool.submit(_block_consumer, self._steem, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size)
 
             blockConsumerFuture.result()
@@ -318,7 +318,7 @@ class Sync:
             # fetch blocks
             to = min(lbound + chunk_size, ubound)
             blocks = steemd.get_blocks_range(lbound, to)
-            vops = steemd.enum_virtual_ops(lbound, to)
+            vops = steemd.enum_virtual_ops(self._conf, lbound, to)
             prepared_vops = prepare_vops(vops)
             lbound = to
             timer.batch_lap()
@@ -348,7 +348,7 @@ class Sync:
 
             num = int(block['block_id'][:8], base=16)
             log.info("[LIVE] About to process block %d", num)
-            vops = steemd.enum_virtual_ops(num, num + 1)
+            vops = steemd.enum_virtual_ops(self._conf, num, num + 1)
             prepared_vops = prepare_vops(vops)
 
             num_vops = len(prepared_vops[num]) if num in prepared_vops else 0
