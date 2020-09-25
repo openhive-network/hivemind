@@ -39,7 +39,7 @@ def build_metadata():
         sa.Column('name', VARCHAR(16, collation='C'), nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
         #sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Column('reputation', sa.Float(precision=6), nullable=False, server_default='25'),
+        sa.Column('reputation', sa.BigInteger, nullable=False, server_default='0'),
 
         sa.Column('followers', sa.Integer, nullable=False, server_default='0'),
         sa.Column('following', sa.Integer, nullable=False, server_default='0'),
@@ -954,7 +954,7 @@ def setup(db):
           percent INT,
           last_update TIMESTAMP,
           num_changes INT,
-          reputation FLOAT4
+          reputation BIGINT
         );
 
         DROP FUNCTION IF EXISTS find_votes( character varying, character varying )

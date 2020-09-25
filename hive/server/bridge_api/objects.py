@@ -6,7 +6,7 @@ import ujson as json
 from hive.server.common.mutes import Mutes
 from hive.server.common.helpers import json_date
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
-from hive.utils.normalize import sbd_amount
+from hive.utils.normalize import sbd_amount, rep_log10
 from hive.indexer.votes import Votes
 from hive.utils.account import safe_db_profile_metadata
 
@@ -206,7 +206,7 @@ def _condenser_profile_object(row):
         'created': json_date(row['created_at']),
         'active': json_date(row['active_at']),
         'post_count': row['post_count'],
-        'reputation': row['reputation'],
+        'reputation': rep_log10(row['reputation']),
         'blacklists': blacklists,
         'stats': {
             'rank': row['rank'],
@@ -254,7 +254,7 @@ def _bridge_post_object(row, truncate_body=0):
     post['promoted'] = _amount(row['promoted'])
 
     post['replies'] = []
-    post['author_reputation'] = float(row['author_rep'])
+    post['author_reputation'] = rep_log10(row['author_rep'])
 
     neg_rshares = ( row['rshares'] - row['abs_rshares'] ) // 2 # effectively sum of all negative rshares
     # take negative rshares, divide by 2, truncate 10 digits (plus neg sign),

@@ -222,7 +222,7 @@ def rep_log10(rep):
     out = _log10(rep)
     out = max(out - 9, 0) * sign  # @ -9, $1 earned is approx magnitude 1
     out = (out * 9) + 25          # 9 points per magnitude. center at 25
-    return round(out, 2)
+    return float(round(out, 2))
 
 def rep_to_raw(rep):
     """Convert a UI-ready rep score back into its approx raw value."""
