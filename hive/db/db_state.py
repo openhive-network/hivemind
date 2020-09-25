@@ -107,8 +107,8 @@ class DbState:
             'hive_posts_payout_at_idx',
             'hive_posts_payout_idx',
             'hive_posts_promoted_idx',
-            'hive_posts_sc_trend_idx',
-            'hive_posts_sc_hot_idx',
+            'hive_posts_sc_trend_id_idx',
+            'hive_posts_sc_hot_id_idx',
             'hive_posts_block_num_idx',
 
             'hive_votes_post_id_idx',
@@ -117,6 +117,7 @@ class DbState:
             'hive_votes_last_update_idx',
 
             'hive_subscriptions_block_num_idx',
+            'hive_subscriptions_community_idx',
             'hive_communities_block_num_idx',
             'hive_reblogs_created_at_idx',
 
