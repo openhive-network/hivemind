@@ -219,42 +219,6 @@ class Community:
             return role >= Role.member
         return role >= Role.guest # or at least not muted
 
-    @classmethod
-    def recalc_pending_payouts(cls):
-        """Update all pending payout and rank fields."""
-        sql = """SELECT id,
-                        COALESCE(posts, 0),
-                        COALESCE(payouts, 0),
-                        COALESCE(authors, 0)
-                   FROM hive_communities c
-              LEFT JOIN (
-                             SELECT community_id,
-                                    COUNT(*) posts,
-                                    ROUND(SUM(payout)) payouts,
-                                    COUNT(DISTINCT author_id) authors
-                               FROM hive_posts
-                              WHERE community_id IS NOT NULL
-                                AND is_paidout = '0'
-                                AND counter_deleted = 0
-                           GROUP BY community_id
-                        ) p
-                     ON community_id = id
-               ORDER BY COALESCE(payouts, 0) DESC,
-                        COALESCE(authors, 0) DESC,
-                        COALESCE(posts, 0) DESC,
-                        subscribers DESC,
-                        (CASE WHEN c.title = '' THEN 1 ELSE 0 END)
-        """
-
-        for rank, row in enumerate(DB.query_all(sql)):
-            cid, posts, payouts, authors = row
-            sql = """UPDATE hive_communities
-                        SET sum_pending = :payouts, num_pending = :posts,
-                            num_authors = :authors, rank = :rank
-                      WHERE id = :id"""
-            DB.query(sql, id=cid, payouts=payouts, posts=posts,
-                     authors=authors, rank=rank+1)
-
 class CommunityOp:
     """Handles validating and processing of community custom_json ops."""
     #pylint: disable=too-many-instance-attributes
