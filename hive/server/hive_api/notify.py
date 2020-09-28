@@ -47,16 +47,8 @@ async def unread_notifications(context, account, min_score=25):
     valid_account(account)
     min_score = valid_score(min_score, 100, 25)
 
-    account_id = await get_account_id(db, account)
-
-    sql = """SELECT lastread_at,
-                    (SELECT COUNT(*) FROM hive_notifs
-                      WHERE dst_id = ha.id
-                        AND score >= :min_score
-                        AND created_at > lastread_at) unread
-               FROM hive_accounts ha
-              WHERE id = :account_id"""
-    row = await db.query_row(sql, account_id=account_id, min_score=min_score)
+    sql = """SELECT * FROM get_number_of_unreaded_notifications( :account, (:min_score)::SMALLINT)"""
+    row = await db.query_row(sql, account=account, min_score=min_score)
     return dict(lastread=str(row['lastread_at']), unread=row['unread'])
 
 @return_error_info
