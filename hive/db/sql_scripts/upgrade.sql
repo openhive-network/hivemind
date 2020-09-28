@@ -3617,3 +3617,66 @@ ALTER DATABASE hive SET join_collapse_limit = 16;
 ALTER DATABASE hive SET from_collapse_limit = 16;
 
 
+--- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/210/diffs 
+
+DROP FUNCTION IF EXISTS find_comment_id(character varying, character varying, boolean)
+      ;
+CREATE OR REPLACE FUNCTION find_comment_id(
+  in _author hive_accounts.name%TYPE,
+  in _permlink hive_permlink_data.permlink%TYPE,
+  in _check boolean)
+RETURNS INT
+LANGUAGE 'plpgsql'
+AS
+$function$
+DECLARE
+  post_id INT;
+  post_id INT = 0;
+BEGIN
+  SELECT INTO post_id COALESCE( (SELECT hp.id
+  IF (_author <> '' OR _permlink <> '') THEN
+    SELECT INTO post_id COALESCE( (
+      SELECT hp.id
+      FROM hive_posts hp
+      JOIN hive_accounts ha ON ha.id = hp.author_id
+      JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
+      WHERE ha.name = _author AND hpd.permlink = _permlink AND hp.counter_deleted = 0
+    ), 0 );
+  IF _check AND (_author <> '' OR _permlink <> '') AND post_id = 0 THEN
+    IF _check AND post_id = 0 THEN
+      RAISE EXCEPTION 'Post %/% does not exist', _author, _permlink;
+    END IF;
+  END IF;
+  RETURN post_id;
+END
+$function$
+;
+
+ DROP VIEW IF EXISTS hive_votes_view
+;
+CREATE OR REPLACE VIEW hive_votes_view
+AS
+SELECT
+    hv.id,
+    hv.voter_id as voter_id,
+    ha_a.name as author,
+    hpd.permlink as permlink,
+    vote_percent as percent,
+    COALESCE(( SELECT hrs.reputation
+           FROM hive_account_reputation_status hrs
+          WHERE hrs.account_id = ha_v.id), 0::bigint) AS reputation,
+    rshares,
+    last_update,
+    ha_v.name as voter,
+    weight,
+    num_changes,
+    hv.permlink_id as permlink_id,
+    post_id,
+    is_effective
+FROM
+    hive_votes hv
+INNER JOIN hive_accounts ha_v ON ha_v.id = hv.voter_id
+INNER JOIN hive_accounts ha_a ON ha_a.id = hv.author_id
+INNER JOIN hive_permlink_data hpd ON hpd.id = hv.permlink_id
+;
+
