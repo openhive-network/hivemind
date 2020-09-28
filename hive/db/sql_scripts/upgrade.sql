@@ -3435,7 +3435,7 @@ ALTER DATABASE hive SET from_collapse_limit = 16;
 --- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/210/diffs 
 
 DROP FUNCTION IF EXISTS find_comment_id(character varying, character varying, boolean)
-      ;
+;
 CREATE OR REPLACE FUNCTION find_comment_id(
   in _author hive_accounts.name%TYPE,
   in _permlink hive_permlink_data.permlink%TYPE,
@@ -3447,7 +3447,6 @@ $function$
 DECLARE
   post_id INT = 0;
 BEGIN
-  SELECT INTO post_id COALESCE( (SELECT hp.id
   IF (_author <> '' OR _permlink <> '') THEN
     SELECT INTO post_id COALESCE( (
       SELECT hp.id
@@ -3456,7 +3455,6 @@ BEGIN
       JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
       WHERE ha.name = _author AND hpd.permlink = _permlink AND hp.counter_deleted = 0
     ), 0 );
-  IF _check AND (_author <> '' OR _permlink <> '') AND post_id = 0 THEN
     IF _check AND post_id = 0 THEN
       RAISE EXCEPTION 'Post %/% does not exist', _author, _permlink;
     END IF;
