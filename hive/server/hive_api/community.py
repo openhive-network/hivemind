@@ -357,6 +357,7 @@ async def top_community_muted(context, community):
 
 async def _top_community_posts(db, community, limit=50):
     # TODO: muted equivalent
+    # wrong: now we should be using payout + pending_payout here
     sql = """
     SELECT ha_a.name as author,
         0 as votes,

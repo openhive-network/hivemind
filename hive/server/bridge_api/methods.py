@@ -122,7 +122,7 @@ async def _get_ranked_posts_for_observer_communities( db, sort:str, start_author
         return []
 
     if sort == 'trending':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_observer_community( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
         return await execute_observer_community_query(db, sql, limit)
 
     if sort == 'created':
@@ -146,7 +146,7 @@ async def _get_ranked_posts_for_observer_communities( db, sort:str, start_author
         return await execute_observer_community_query(db, sql, limit)
 
     if sort == 'muted':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_muted_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
         return await execute_observer_community_query(db, sql, limit)
 
     assert False, "Unknown sort order"
@@ -156,7 +156,9 @@ async def _get_ranked_posts_for_communities( db, sort:str, community, start_auth
     async def execute_community_query(db, sql, limit):
         return await db.query_all(sql, community=community, author=start_author, permlink=start_permlink, limit=limit )
 
-    pinned_sql = "SELECT * FROM bridge_get_ranked_post_pinned_for_community( (:community)::VARCHAR )"
+    pinned_sql = "SELECT * FROM bridge_get_ranked_post_pinned_for_community( (:community)::VARCHAR, (:limit)::SMALLINT )"
+    # missing paging which results in inability to get all pinned posts
+    # and/or causes the same posts to be on each page (depending on limit and number of pinned)
     if sort == 'hot':
         sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
         return await execute_community_query(db, sql, limit)
@@ -165,7 +167,9 @@ async def _get_ranked_posts_for_communities( db, sort:str, community, start_auth
         result_with_pinned_posts = []
         sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
         result_with_pinned_posts = await execute_community_query(db, pinned_sql, limit)
-        result_with_pinned_posts += await execute_community_query(db, sql, limit)
+        limit -= len(result_with_pinned_posts)
+        if limit > 0:
+            result_with_pinned_posts += await execute_community_query(db, sql, limit)
         return result_with_pinned_posts
 
     if sort == 'promoted':
@@ -175,7 +179,9 @@ async def _get_ranked_posts_for_communities( db, sort:str, community, start_auth
     if sort == 'created':
         sql = "SELECT * FROM bridge_get_ranked_post_by_created_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
         result_with_pinned_posts = await execute_community_query(db, pinned_sql, limit)
-        result_with_pinned_posts += await execute_community_query(db, sql, limit)
+        limit -= len(result_with_pinned_posts)
+        if limit > 0:
+            result_with_pinned_posts += await execute_community_query(db, sql, limit)
         return result_with_pinned_posts
 
     if sort == 'muted':
@@ -341,7 +347,6 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
     """Get posts for an account -- blog, feed, comments, or replies."""
     valid_sorts = ['blog', 'feed', 'posts', 'comments', 'replies', 'payout']
     assert sort in valid_sorts, 'invalid account sort'
-    assert account, 'account is required'
 
     db = context['db']
     account = valid_account(account)
