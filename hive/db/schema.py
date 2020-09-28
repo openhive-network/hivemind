@@ -70,7 +70,8 @@ def build_metadata():
         sa.Column('rshares', sa.BigInteger, nullable=False),
         sa.Column('block_num', sa.Integer,  nullable=False),
 
-        sa.Index('hive_reputation_data_author_permlink_voter_idx', 'author_id', 'permlink', 'voter_id')
+        sa.Index('hive_reputation_data_author_permlink_voter_idx', 'author_id', 'permlink', 'voter_id'),
+        sa.Index('hive_reputation_data_block_num_idx', 'block_num')
     )
 
     sa.Table(

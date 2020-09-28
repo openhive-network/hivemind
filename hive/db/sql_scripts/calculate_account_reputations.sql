@@ -5,12 +5,15 @@ CREATE TYPE AccountReputation AS (id int, reputation bigint, is_implicit boolean
 DROP FUNCTION IF EXISTS public.calculate_account_reputations;
 
 CREATE OR REPLACE FUNCTION public.calculate_account_reputations(
-  in _first_block_num INTEGER,
-  in _last_block_num INTEGER,
-  in _tracked_account varchar = null)
+  _first_block_num integer,
+  _last_block_num integer,
+  _tracked_account character varying DEFAULT NULL::character varying)
     RETURNS SETOF accountreputation 
     LANGUAGE 'plpgsql'
-    STABLE
+
+    COST 100
+    STABLE 
+    ROWS 1000
 AS $BODY$
 DECLARE
   __vote_data RECORD;
@@ -97,9 +100,12 @@ BEGIN
 
     RETURN QUERY
       SELECT id, Reputation, is_implicit
-      FROM unnest(__account_reputations);
+      FROM unnest(__account_reputations)
+    WHERE Reputation IS NOT NULL
+    ;
 END
-$BODY$;
+$BODY$
+;
 
 DROP FUNCTION IF EXISTS public.update_account_reputations;
 
