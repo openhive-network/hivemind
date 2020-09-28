@@ -488,16 +488,19 @@ def setup(db):
       AS
       $function$
       DECLARE
-        post_id INT;
+        post_id INT = 0;
       BEGIN
-        SELECT INTO post_id COALESCE( (SELECT hp.id
-        FROM hive_posts hp
-        JOIN hive_accounts ha ON ha.id = hp.author_id
-        JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
-        WHERE ha.name = _author AND hpd.permlink = _permlink AND hp.counter_deleted = 0
-        ), 0 );
-        IF _check AND (_author <> '' OR _permlink <> '') AND post_id = 0 THEN
-          RAISE EXCEPTION 'Post %/% does not exist', _author, _permlink;
+        IF (_author <> '' OR _permlink <> '') THEN
+          SELECT INTO post_id COALESCE( (
+            SELECT hp.id
+            FROM hive_posts hp
+            JOIN hive_accounts ha ON ha.id = hp.author_id
+            JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
+            WHERE ha.name = _author AND hpd.permlink = _permlink AND hp.counter_deleted = 0
+          ), 0 );
+          IF _check AND post_id = 0 THEN
+            RAISE EXCEPTION 'Post %/% does not exist', _author, _permlink;
+          END IF;
         END IF;
         RETURN post_id;
       END
@@ -924,7 +927,7 @@ def setup(db):
             ha_a.name as author,
             hpd.permlink as permlink,
             vote_percent as percent,
-            ha_a.reputation as reputation,
+            ha_v.reputation as reputation,
             rshares,
             last_update,
             ha_v.name as voter,
@@ -1942,7 +1945,7 @@ def setup(db):
             WHERE scores.score > 0
       UNION ALL
             SELECT --persistent notifs
-            	 hn.block_num
+                 hn.block_num
                , notification_id(hn.block_num, hn.type_id, CAST( hn.id as INT) ) as id
                , hp.id as post_id
                , hn.type_id as type_id
