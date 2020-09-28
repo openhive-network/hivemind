@@ -17,6 +17,7 @@ async def get_top_trending_tags_summary(context):
       ORDER BY SUM(payout) DESC
          LIMIT 50
     """
+    # wrong: now we should be using payout + pending_payout here
     return await context['db'].query_col(sql)
 
 @return_error_info
