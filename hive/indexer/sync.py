@@ -35,6 +35,7 @@ from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import WaitingStatusManager as WSM
 from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import BroadcastObject
+from hive.utils.communities_rank import update_communities_posts_and_rank
 
 from datetime import datetime
 
@@ -240,7 +241,7 @@ class Sync:
         Mutes.set_shared_instance(mutes)
 
         # community stats
-        Community.recalc_pending_payouts()
+        update_communities_posts_and_rank()
 
         last_imported_block = Blocks.head_num()
         hived_head_block = self._conf.get('test_max_block') or self._steem.last_irreversible()
@@ -365,13 +366,13 @@ class Sync:
             if num % 1200 == 0: #1hr
                 log.warning("head block %d @ %s", num, block['timestamp'])
                 log.info("[LIVE] hourly stats")
-                #Community.recalc_pending_payouts()
+
             if num % 1200 == 0: #1hour
               log.info("[LIVE] filling payout_stats_view executed")
               with ThreadPoolExecutor(max_workers=1) as executor:
                 executor.submit(PayoutStats.generate)
             if num % 200 == 0: #10min
-                Community.recalc_pending_payouts()
+                update_communities_posts_and_rank()
             if num % 20 == 0: #1min
                 self._update_chain_state()
 

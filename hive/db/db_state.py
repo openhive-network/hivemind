@@ -16,6 +16,7 @@ from hive.db.adapter import Db
 
 from hive.utils.trends import update_hot_and_tranding_for_block_range
 from hive.utils.post_active import update_active_starting_from_posts_on_block
+from hive.utils.communities_rank import update_communities_posts_and_rank
 
 from hive.server.common.payout_stats import PayoutStats
 
@@ -317,6 +318,11 @@ class DbState:
         DbState.db().query_no_return(sql)
         time_end = perf_counter()
         log.info("[INIT] update_account_reputations executed in %fs", time_end - time_start)
+	
+        time_start = perf_counter()
+        update_communities_posts_and_rank()
+        time_end = perf_counter()
+        log.info("[INIT] update_communities_posts_and_rank executed in %fs", time_end - time_start)
 
         # Update a block num immediately
         DbState.db().query_no_return("UPDATE hive_state SET block_num = :block_num", block_num = current_imported_block)
