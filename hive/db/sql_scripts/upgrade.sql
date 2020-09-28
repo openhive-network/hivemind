@@ -577,7 +577,7 @@ CREATE TYPE bridge_api_post AS (
     id INTEGER,
     author VARCHAR,
     parent_author VARCHAR,
-    author_rep FLOAT4,
+    author_rep BIGINT,
     root_title VARCHAR,
     beneficiaries JSON,
     max_accepted_payout VARCHAR,
@@ -2660,7 +2660,7 @@ CREATE INDEX hive_subscriptions_community_idx ON hive_subscriptions(community_id
 
 --- Account reputation recalc changes:
 
-ALTER TYPE bridge_api_post 
+ALTER TYPE bridge_api_post
   ALTER ATTRIBUTE author_rep SET DATA TYPE BIGINT CASCADE;
 
 CREATE SEQUENCE IF NOT EXISTS public.hive_account_reputation_status_account_id_seq
@@ -2787,7 +2787,7 @@ CREATE OR REPLACE FUNCTION public.calculate_account_reputations(
   in _first_block_num INTEGER,
   in _last_block_num INTEGER,
   in _tracked_account varchar = null)
-    RETURNS SETOF accountreputation 
+    RETURNS SETOF accountreputation
     LANGUAGE 'plpgsql'
     STABLE
 AS $BODY$
@@ -2820,13 +2820,13 @@ BEGIN
                 WHERE prd.author_id = rd.author_id and prd.voter_id = rd.voter_id
                       and prd.permlink = rd.permlink and prd.id < rd.id
                         ORDER BY prd.id DESC LIMIT 1), 0) as prev_rshares
-      FROM hive_reputation_data rd 
+      FROM hive_reputation_data rd
       WHERE (_first_block_num IS NULL AND _last_block_num IS NULL) OR (rd.block_num BETWEEN _first_block_num AND _last_block_num)
       ORDER BY rd.id
     LOOP
       __voter_rep := __account_reputations[__vote_data.voter_id - 1].reputation;
       __implicit_author_rep := __account_reputations[__vote_data.author_id - 1].is_implicit;
-    
+
       IF __vote_data.author_id = __traced_author THEN
            raise notice 'Processing vote <%> rshares: %, prev_rshares: %', __vote_data.id, __vote_data.rshares, __vote_data.prev_rshares;
        select ha.name into __account_name from hive_accounts ha where ha.id = __vote_data.voter_id;
@@ -2836,7 +2836,7 @@ BEGIN
       CONTINUE WHEN __voter_rep < 0;
 
       __implicit_voter_rep := __account_reputations[__vote_data.voter_id - 1].is_implicit;
-    
+
       __author_rep := __account_reputations[__vote_data.author_id - 1].reputation;
       __rshares := __vote_data.rshares;
       __prev_rshares := __vote_data.prev_rshares;
@@ -2857,7 +2857,7 @@ BEGIN
       __implicit_voter_rep := __account_reputations[__vote_data.voter_id - 1].is_implicit;
       --- reread voter's rep. since it can change above if author == voter
     __voter_rep := __account_reputations[__vote_data.voter_id - 1].reputation;
-    
+
       IF __rshares > 0 OR
          (__rshares < 0 AND NOT __implicit_voter_rep AND __voter_rep > __author_rep) THEN
 
@@ -2885,9 +2885,9 @@ DROP FUNCTION IF EXISTS public.update_account_reputations;
 CREATE OR REPLACE FUNCTION public.update_account_reputations(
   in _first_block_num INTEGER,
   in _last_block_num INTEGER)
-  RETURNS VOID 
+  RETURNS VOID
   LANGUAGE 'plpgsql'
-  VOLATILE 
+  VOLATILE
 AS $BODY$
 BEGIN
   --- At first step update hive_account_reputation_status table with new accounts.
@@ -2896,7 +2896,7 @@ BEGIN
   SELECT ha.id, 0, True
   FROM hive_accounts ha
   WHERE ha.id != 0
-        AND NOT EXISTS (SELECT NULL 
+        AND NOT EXISTS (SELECT NULL
                         FROM hive_account_reputation_status rs
                         WHERE rs.account_id = ha.id)
   ;
@@ -2904,7 +2904,7 @@ BEGIN
   UPDATE hive_account_reputation_status urs
   SET reputation = ds.reputation,
       is_implicit = ds.is_implicit
-  FROM 
+  FROM
   (
     SELECT p.id as account_id, p.reputation, p.is_implicit
     FROM calculate_account_reputations(_first_block_num, _last_block_num) p
@@ -2920,4 +2920,3 @@ BEGIN
 END
 $BODY$
 ;
-
