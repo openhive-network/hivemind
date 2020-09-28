@@ -3036,7 +3036,6 @@ CREATE INDEX hive_reputation_data_block_num_idx
 
 -- Changes from https://gitlab.syncad.com/hive/hivemind/-/merge_requests/208/diffs
 
-DROP VIEW IF EXISTS public.hive_posts_view;
 CREATE OR REPLACE VIEW public.hive_posts_view
 AS
 SELECT hp.id,
