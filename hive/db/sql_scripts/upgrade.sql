@@ -3152,3 +3152,321 @@ SELECT hp.id,
     LEFT JOIN hive_communities hc ON hp.community_id = hc.id
     LEFT JOIN hive_roles hr ON hp.author_id = hr.account_id AND hp.community_id = hr.community_id
   WHERE hp.counter_deleted = 0;
+
+
+drop VIEW IF EXISTS hive_notifications_view;
+DROP VIEW IF EXISTS hive_posts_view;
+CREATE OR REPLACE VIEW public.hive_posts_view
+        AS
+        SELECT hp.id,
+          hp.community_id,
+          hp.root_id,
+          hp.parent_id,
+          ha_a.name AS author,
+          hp.active,
+          hp.author_rewards,
+          hp.author_id,
+          hpd_p.permlink,
+          hpd.title,
+          hpd.body,
+          hpd.img_url,
+          hpd.preview,
+          hcd.category,
+          hp.depth,
+          hp.promoted,
+          hp.payout,
+          hp.pending_payout,
+          hp.payout_at,
+          hp.last_payout_at,
+          hp.cashout_time,
+          hp.is_paidout,
+          hp.children,
+          0 AS votes,
+          0 AS active_votes,
+          hp.created_at,
+          hp.updated_at,
+            COALESCE(
+              (
+                SELECT SUM( v.rshares )
+                FROM hive_votes v
+                WHERE v.post_id = hp.id
+                GROUP BY v.post_id
+              ), 0
+            ) AS rshares,
+            COALESCE(
+              (
+                SELECT SUM( CASE v.rshares >= 0 WHEN True THEN v.rshares ELSE -v.rshares END )
+                FROM hive_votes v
+                WHERE v.post_id = hp.id AND NOT v.rshares = 0
+                GROUP BY v.post_id
+              ), 0
+            ) AS abs_rshares,
+            COALESCE(
+              (
+                SELECT COUNT( 1 )
+                FROM hive_votes v
+                WHERE v.post_id = hp.id AND v.is_effective
+                GROUP BY v.post_id
+              ), 0
+            ) AS total_votes,
+            COALESCE(
+              (
+                SELECT SUM( CASE v.rshares > 0 WHEN True THEN 1 ELSE -1 END )
+                FROM hive_votes v
+                WHERE v.post_id = hp.id AND NOT v.rshares = 0
+                GROUP BY v.post_id
+              ), 0
+            ) AS net_votes,
+          hpd.json,
+          COALESCE((SELECT hrs.reputation FROM hive_account_reputation_status hrs
+					WHERE hrs.account_id = ha_a.id), 0) AS author_rep,
+          hp.is_hidden,
+          hp.is_grayed,
+          hp.total_vote_weight,
+          ha_pp.name AS parent_author,
+          ha_pp.id AS parent_author_id,
+            ( CASE hp.depth > 0
+              WHEN True THEN hpd_pp.permlink
+              ELSE hcd.category
+            END ) AS parent_permlink_or_category,
+          hp.curator_payout_value,
+          ha_rp.name AS root_author,
+          hpd_rp.permlink AS root_permlink,
+          rcd.category as root_category,
+          hp.max_accepted_payout,
+          hp.percent_hbd,
+            True AS allow_replies,
+          hp.allow_votes,
+          hp.allow_curation_rewards,
+          hp.beneficiaries,
+            CONCAT('/', rcd.category, '/@', ha_rp.name, '/', hpd_rp.permlink,
+              CASE (rp.id)
+                WHEN hp.id THEN ''
+                ELSE CONCAT('#@', ha_a.name, '/', hpd_p.permlink)
+              END
+            ) AS url,
+          rpd.title AS root_title,
+          hp.sc_trend,
+          hp.sc_hot,
+          hp.is_pinned,
+          hp.is_muted,
+          hp.is_nsfw,
+          hp.is_valid,
+          hr.title AS role_title,
+          hr.role_id AS role_id,
+          hc.title AS community_title,
+          hc.name AS community_name,
+          hp.block_num
+          FROM hive_posts hp
+            JOIN hive_posts pp ON pp.id = hp.parent_id
+            JOIN hive_posts rp ON rp.id = hp.root_id
+            JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+            JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+            JOIN hive_post_data hpd ON hpd.id = hp.id
+            JOIN hive_accounts ha_pp ON ha_pp.id = pp.author_id
+            JOIN hive_permlink_data hpd_pp ON hpd_pp.id = pp.permlink_id
+            JOIN hive_accounts ha_rp ON ha_rp.id = rp.author_id
+            JOIN hive_permlink_data hpd_rp ON hpd_rp.id = rp.permlink_id
+            JOIN hive_post_data rpd ON rpd.id = rp.id
+            JOIN hive_category_data hcd ON hcd.id = hp.category_id
+            JOIN hive_category_data rcd ON rcd.id = rp.category_id
+            LEFT JOIN hive_communities hc ON hp.community_id = hc.id
+            LEFT JOIN hive_roles hr ON hp.author_id = hr.account_id AND hp.community_id = hr.community_id
+          WHERE hp.counter_deleted = 0;
+
+CREATE OR REPLACE VIEW public.hive_notifications_view
+ AS
+ SELECT notifs.block_num,
+    notifs.id,
+    notifs.post_id,
+    notifs.type_id,
+    notifs.created_at,
+    notifs.src,
+    notifs.dst,
+    notifs.author,
+    notifs.permlink,
+    notifs.community,
+    notifs.community_title,
+    notifs.payload,
+    notifs.score
+   FROM ( SELECT posts_and_scores.block_num,
+            posts_and_scores.id,
+            posts_and_scores.post_id,
+            posts_and_scores.type_id,
+            posts_and_scores.created_at,
+            posts_and_scores.author AS src,
+            posts_and_scores.parent_author AS dst,
+            posts_and_scores.parent_author AS author,
+            posts_and_scores.parent_permlink AS permlink,
+            ''::character varying AS community,
+            ''::character varying AS community_title,
+            ''::character varying AS payload,
+            posts_and_scores.score
+           FROM ( SELECT hpv.block_num,
+                    notification_id(hpv.block_num,
+                        CASE hpv.depth
+                            WHEN 1 THEN 12
+                            ELSE 13
+                        END, hpv.id) AS id,
+                        CASE hpv.depth
+                            WHEN 1 THEN 12
+                            ELSE 13
+                        END AS type_id,
+                    hpv.created_at,
+                    hpv.author,
+                    hpv.parent_id AS post_id,
+                    hpv.parent_author,
+                    hpv.parent_permlink_or_category AS parent_permlink,
+                    hpv.depth,
+                    hpv.parent_author_id,
+                    hpv.author_id,
+                    harv.score
+                   FROM hive_posts_view hpv
+                     JOIN hive_accounts_rank_view harv ON harv.id = hpv.author_id
+                  WHERE hpv.depth > 0) posts_and_scores
+          WHERE NOT (EXISTS ( SELECT 1
+                   FROM hive_follows hf
+                  WHERE hf.follower = posts_and_scores.parent_author_id AND hf.following = posts_and_scores.author_id AND hf.state = 2))
+        UNION ALL
+         SELECT hf.block_num,
+            notifs_id.notif_id AS id,
+            0 AS post_id,
+            15 AS type_id,
+            hf.created_at,
+            followers_scores.follower_name AS src,
+            ha2.name AS dst,
+            ''::character varying AS author,
+            ''::character varying AS permlink,
+            ''::character varying AS community,
+            ''::character varying AS community_title,
+            ''::character varying AS payload,
+            followers_scores.score
+           FROM hive_follows hf
+             JOIN hive_accounts ha2 ON hf.following = ha2.id
+             JOIN ( SELECT ha.id AS follower_id,
+                    ha.name AS follower_name,
+                    harv.score
+                   FROM hive_accounts ha
+                     JOIN hive_accounts_rank_view harv ON harv.id = ha.id) followers_scores ON followers_scores.follower_id = hf.follower
+             JOIN ( SELECT hf2.id,
+                    notification_id(hf2.block_num, 15, hf2.id) AS notif_id
+                   FROM hive_follows hf2) notifs_id ON notifs_id.id = hf.id
+        UNION ALL
+         SELECT hr.block_num,
+            hr_scores.notif_id AS id,
+            hp.id AS post_id,
+            14 AS type_id,
+            hr.created_at,
+            ha_hr.name AS src,
+            ha.name AS dst,
+            ha.name AS author,
+            hpd.permlink,
+            ''::character varying AS community,
+            ''::character varying AS community_title,
+            ''::character varying AS payload,
+            hr_scores.score
+           FROM hive_reblogs hr
+             JOIN hive_posts hp ON hr.post_id = hp.id
+             JOIN hive_permlink_data hpd ON hp.permlink_id = hpd.id
+             JOIN hive_accounts ha_hr ON hr.blogger_id = ha_hr.id
+             JOIN ( SELECT hr2.id,
+                    notification_id(hr2.block_num, 14, hr2.id) AS notif_id,
+                    harv.score
+                   FROM hive_reblogs hr2
+                     JOIN hive_accounts_rank_view harv ON harv.id = hr2.blogger_id) hr_scores ON hr_scores.id = hr.id
+             JOIN hive_accounts ha ON hp.author_id = ha.id
+        UNION ALL
+         SELECT hs.block_num,
+            hs_scores.notif_id AS id,
+            0 AS post_id,
+            11 AS type_id,
+            hs.created_at,
+            hs_scores.src,
+            ha_com.name AS dst,
+            ''::character varying AS author,
+            ''::character varying AS permlink,
+            hc.name AS community,
+            hc.title AS community_title,
+            ''::character varying AS payload,
+            hs_scores.score
+           FROM hive_subscriptions hs
+             JOIN hive_communities hc ON hs.community_id = hc.id
+             JOIN ( SELECT hs2.id,
+                    notification_id(hs2.block_num, 11, hs2.id) AS notif_id,
+                    harv.score,
+                    ha.name AS src
+                   FROM hive_subscriptions hs2
+                     JOIN hive_accounts ha ON hs2.account_id = ha.id
+                     JOIN hive_accounts_rank_view harv ON harv.id = ha.id) hs_scores ON hs_scores.id = hs.id
+             JOIN hive_accounts ha_com ON hs.community_id = ha_com.id
+        UNION ALL
+         SELECT hc.block_num,
+            hc_id.notif_id AS id,
+            0 AS post_id,
+            1 AS type_id,
+            hc.created_at,
+            ''::character varying AS src,
+            ha.name AS dst,
+            ''::character varying AS author,
+            ''::character varying AS permlink,
+            hc.name AS community,
+            ''::character varying AS community_title,
+            ''::character varying AS payload,
+            35 AS score
+           FROM hive_communities hc
+             JOIN hive_accounts ha ON ha.id = hc.id
+             JOIN ( SELECT hc2.id,
+                    notification_id(hc2.block_num, 11, hc2.id) AS notif_id
+                   FROM hive_communities hc2) hc_id ON hc_id.id = hc.id
+        UNION ALL
+         SELECT hv.block_num,
+            scores.notif_id AS id,
+            scores.post_id,
+            17 AS type_id,
+            hv.last_update AS created_at,
+            scores.src,
+            scores.dst,
+            scores.dst AS author,
+            scores.permlink,
+            ''::character varying AS community,
+            ''::character varying AS community_title,
+            ''::character varying AS payload,
+            scores.score
+           FROM hive_votes hv
+             JOIN ( SELECT hv1.id,
+                    hpv.id AS post_id,
+                    notification_id(hv1.block_num, 17, hv1.id::integer) AS notif_id,
+                    calculate_notify_vote_score(hpv.payout + hpv.pending_payout, hpv.abs_rshares, hv1.rshares) AS score,
+                    hpv.author AS dst,
+                    ha.name AS src,
+                    hpv.permlink
+                   FROM hive_votes hv1
+                     JOIN hive_posts_view hpv ON hv1.post_id = hpv.id
+                     JOIN hive_accounts ha ON ha.id = hv1.voter_id
+                  WHERE hv1.rshares::numeric >= '10000000000'::numeric AND hpv.abs_rshares <> 0::numeric) scores ON scores.id = hv.id
+          WHERE scores.score > 0
+        UNION ALL
+         SELECT hn.block_num,
+            notification_id(hn.block_num, hn.type_id::integer, hn.id) AS id,
+            hp.id AS post_id,
+            hn.type_id,
+            hn.created_at,
+            ha_src.name AS src,
+            ha_dst.name AS dst,
+            ha_pst.name AS author,
+            hpd.permlink,
+            hc.name AS community,
+            hc.title AS community_title,
+            hn.payload,
+            hn.score
+           FROM hive_notifs hn
+             JOIN hive_accounts ha_dst ON hn.dst_id = ha_dst.id
+             LEFT JOIN hive_accounts ha_src ON hn.src_id = ha_src.id
+             LEFT JOIN hive_communities hc ON hn.community_id = hc.id
+             LEFT JOIN hive_posts hp ON hn.post_id = hp.id
+             LEFT JOIN hive_accounts ha_pst ON ha_pst.id = hp.author_id
+             LEFT JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id) notifs;
+
+ALTER DATABASE hive SET join_collapse_limit = 16;
+ALTER DATABASE hive SET from_collapse_limit = 16;
+
