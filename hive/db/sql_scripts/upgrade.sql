@@ -2929,11 +2929,11 @@ CREATE OR REPLACE FUNCTION public.calculate_account_reputations(
   _first_block_num integer,
   _last_block_num integer,
   _tracked_account character varying DEFAULT NULL::character varying)
-    RETURNS SETOF accountreputation 
+    RETURNS SETOF accountreputation
     LANGUAGE 'plpgsql'
 
     COST 100
-    STABLE 
+    STABLE
     ROWS 1000
 AS $BODY$
 DECLARE
@@ -2965,13 +2965,13 @@ BEGIN
                 WHERE prd.author_id = rd.author_id and prd.voter_id = rd.voter_id
                       and prd.permlink = rd.permlink and prd.id < rd.id
                         ORDER BY prd.id DESC LIMIT 1), 0) as prev_rshares
-      FROM hive_reputation_data rd 
+      FROM hive_reputation_data rd
       WHERE (_first_block_num IS NULL AND _last_block_num IS NULL) OR (rd.block_num BETWEEN _first_block_num AND _last_block_num)
       ORDER BY rd.id
     LOOP
       __voter_rep := __account_reputations[__vote_data.voter_id - 1].reputation;
       __implicit_author_rep := __account_reputations[__vote_data.author_id - 1].is_implicit;
-    
+
       IF __vote_data.author_id = __traced_author THEN
            raise notice 'Processing vote <%> rshares: %, prev_rshares: %', __vote_data.id, __vote_data.rshares, __vote_data.prev_rshares;
        select ha.name into __account_name from hive_accounts ha where ha.id = __vote_data.voter_id;
@@ -2981,7 +2981,7 @@ BEGIN
       CONTINUE WHEN __voter_rep < 0;
 
       __implicit_voter_rep := __account_reputations[__vote_data.voter_id - 1].is_implicit;
-    
+
       __author_rep := __account_reputations[__vote_data.author_id - 1].reputation;
       __rshares := __vote_data.rshares;
       __prev_rshares := __vote_data.prev_rshares;
@@ -3002,7 +3002,7 @@ BEGIN
       __implicit_voter_rep := __account_reputations[__vote_data.voter_id - 1].is_implicit;
       --- reread voter's rep. since it can change above if author == voter
     __voter_rep := __account_reputations[__vote_data.voter_id - 1].reputation;
-    
+
       IF __rshares > 0 OR
          (__rshares < 0 AND NOT __implicit_voter_rep AND __voter_rep > __author_rep) THEN
 
@@ -3036,7 +3036,6 @@ CREATE INDEX hive_reputation_data_block_num_idx
 
 -- Changes from https://gitlab.syncad.com/hive/hivemind/-/merge_requests/208/diffs
 
-DROP VIEW IF EXISTS public.hive_posts_view;
 CREATE OR REPLACE VIEW public.hive_posts_view
 AS
 SELECT hp.id,
@@ -3153,5 +3152,3 @@ SELECT hp.id,
     LEFT JOIN hive_communities hc ON hp.community_id = hc.id
     LEFT JOIN hive_roles hr ON hp.author_id = hr.account_id AND hp.community_id = hr.community_id
   WHERE hp.counter_deleted = 0;
-
-
