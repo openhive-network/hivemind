@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Hive JSON-RPC API server."""
+from logging import Logger
 from hive.server.database_api.methods import find_votes, list_votes
 import os
 import sys
@@ -292,8 +293,50 @@ def run_server(conf):
         """Handles all hive jsonrpc API requests."""
         request = await request.text()
         # debug=True refs https://github.com/bcb/jsonrpcserver/issues/71
-        response = await dispatch(request, methods=methods, debug=True, context=app, serialize=decimal_serialize, deserialize=decimal_deserialize)
-        if response.wanted:
+        response = None
+        try:
+            response = await dispatch(request, methods=methods, debug=True, context=app, serialize=decimal_serialize, deserialize=decimal_deserialize)
+        except simplejson.errors.JSONDecodeError as ex:
+            # in case of malformed json in request try to salvage some data from it
+            # and return error response instead 503 internal server error
+            # first log exception
+            # TODO: consider removing this log - potential log spam
+            log.exception(ex)
+            # now we need method and id data from malformed json
+            # we cannot do a loads because it will fail so we need to parse
+            # request manually
+            request_str = str(request)
+            # strip outer brackets
+            request_str = request_str.rstrip("}")
+            request_str = request_str.lstrip("{")
+
+            # extract method and request id
+            method = ""
+            response_id = -1
+            for item in request_str.split(","):
+                line = item.split(":")
+                if len(line) == 2:
+                    if line[0].strip('"') == "method":
+                        method = line[1].strip('"')
+                    if line[0].strip('"') == "id":
+                        try:
+                            response_id = int(line[1])
+                        except:
+                            response_id = line[1]
+            # create and send error response
+            error_response = {
+                "jsonrpc":"2.0",
+                "method" : method,
+                "error" : {
+                    "code": -32602,
+                    "data": str(ex),
+                    "message": "Invalid JSON in request"
+                },
+                "id" : response_id
+            }
+            headers = {'Access-Control-Allow-Origin': '*'}
+            return web.json_response(error_response, status=200, headers=headers, dumps=decimal_serialize)
+        if response is not None and response.wanted:
             headers = {'Access-Control-Allow-Origin': '*'}
             return web.json_response(response.deserialized(), status=200, headers=headers, dumps=decimal_serialize)
         return web.Response()
