@@ -349,7 +349,7 @@ class Sync:
             start_time = perf()
 
             num = int(block['block_id'][:8], base=16)
-            log.info("[LIVE] About to process block %d", num)
+            log.info("[LIVE SYNC] =====> About to process block %d", num)
             vops = steemd.enum_virtual_ops(self._conf, num, num + 1)
             prepared_vops = prepare_vops(vops)
 
@@ -360,19 +360,19 @@ class Sync:
             self._db.query("COMMIT")
 
             ms = (perf() - start_time) * 1000
-            log.info("[LIVE] Processed block %d at %s --% 4d txs, % 3d follows, % 3d accounts, % 4d vops"
+            log.info("[LIVE SYNC] <===== Processed block %d at %s --% 4d txs, % 3d follows, % 3d accounts, % 4d vops"
                      " --% 5dms%s", num, block['timestamp'], len(block['transactions']),
                      follows, accounts, num_vops, ms, ' SLOW' if ms > 1000 else '')
 
             if num % 1200 == 0: #1hr
                 log.warning("head block %d @ %s", num, block['timestamp'])
-                log.info("[LIVE] hourly stats")
+                log.info("[LIVE SYNC] hourly stats")
 
             if num % 1200 == 0: #1hour
-              log.info("[LIVE] filling payout_stats_view executed")
-              with ThreadPoolExecutor(max_workers=2) as executor:
-                executor.submit(PayoutStats.generate)
-                executor.submit(Mentions.refresh)
+                log.info("[LIVE SYNC] filling payout_stats_view executed")
+                with ThreadPoolExecutor(max_workers=2) as executor:
+                    executor.submit(PayoutStats.generate)
+                    executor.submit(Mentions.refresh)
             if num % 200 == 0: #10min
                 update_communities_posts_and_rank()
             if num % 20 == 0: #1min
