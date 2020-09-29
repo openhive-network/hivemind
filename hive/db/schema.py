@@ -2199,7 +2199,10 @@ def setup(db):
       "delete_hive_posts_mentions.sql",
       "head_block_time.sql",
       "notifications_view.sql",
-      "get_number_of_unreaded_notifications.sql"
+      "get_number_of_unreaded_notifications.sql",
+      "bridge_get_account_posts_by_comments.sql",
+      "bridge_get_account_posts_by_payout.sql",
+      "bridge_get_account_posts_by_posts.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
