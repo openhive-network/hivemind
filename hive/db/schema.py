@@ -2191,8 +2191,11 @@ def setup(db):
       "bridge_get_ranked_post_for_communities.sql",
       "bridge_get_ranked_post_for_observer_communities.sql",
       "bridge_get_ranked_post_for_tag.sql",
-      "bridge_get_ranked_post_for_all.sql"
-     ,"calculate_account_reputations.sql"
+      "bridge_get_ranked_post_for_all.sql",
+      "calculate_account_reputations.sql",
+      "head_block_time.sql",
+      "notifications_view.sql",
+      "get_number_of_unreaded_notifications.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
