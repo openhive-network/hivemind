@@ -5,7 +5,7 @@ ENV ENVIRONMENT DEV
 ENV LOG_LEVEL INFO
 ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
-ENV PIPENV_VENV_IN_PROJECT 1
+#ENV PIPENV_VENV_IN_PROJECT 1
 ARG SOURCE_COMMIT
 ENV SOURCE_COMMIT ${SOURCE_COMMIT}
 ARG SCHEMA_HASH
@@ -39,10 +39,11 @@ RUN \
         runit \
         s3cmd \
         libpcre3 \
-        libpcre3-dev
+        libpcre3-dev \
+        git
 
-RUN \
-    pip3 install --upgrade pip setuptools
+#RUN \
+#    pip3 install --upgrade pip setuptools
 
 ADD . /app
 
@@ -56,7 +57,7 @@ RUN chmod +x /usr/local/bin/hivesync.sh
 RUN chmod +x /usr/local/bin/hivesynccontinue.sh
 
 RUN \
-    pip3 install . && \
+    python3 setup.py build && python3 setup.py install && \
     apt-get remove -y \
         build-essential \
         libffi-dev \
