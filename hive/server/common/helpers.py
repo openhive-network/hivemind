@@ -143,7 +143,7 @@ def valid_date(date, allow_empty=False):
     check_date = False
     # check format "%Y-%m-%d %H:%M:%S"
     try:
-        check_date = (date == datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S").strftime('%Y-%m-%d %H:%M%S'))
+        check_date = (date == datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S").strftime('%Y-%m-%d %H:%M:%S'))
     except ValueError:
         check_date = False
     # if check failed for format above try another format
