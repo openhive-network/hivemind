@@ -1,50 +1,71 @@
 # Postgresql monitoring
 
-Tutorial for Postgres version 10.
+Tutorial for Postgres version 10 on Ubuntu 18.04, assuming default
+configuration. We'll setup monitoring with
+[pgwatch2](https://github.com/cybertec-postgresql/pgwatch2)
+and [pghero](https://github.com/ankane/pghero). If you don't need these
+both tools, modify this tutorial accordingly.
 
-1. Install [pgwatch2](https://github.com/cybertec-postgresql/pgwatch2)
-in docker container by running `docker-compose up -d` in directory
-`scripts/db-monitoring`. We are going to setup monitoring by
-unprivileged user `pgwatch2`, added to standard postgresql role
-`pg_monitor`.
+1. Install required apt packages:
+```
+sudo apt-get install postgresql-contrib postgresql-plpython3 python3-psutil postgresql-10-pg-qualstats
+```
+Note: you should install official Postgresql ubuntu
+[pgdg](https://www.postgresql.org/about/news/pgdg-apt-repository-for-debianubuntu-1432/) repository to get apt package postgresql-10-pg-qualstats.
 
-2. Install required apt packages:
+2. Install postgresql custom configuration file:
 ```
-sudo apt-get install postgresql-contrib postgresql-plpython3 python3-psutil
+sudo cp scripts/db-monitoring/setup/postgresql_monitoring.conf /etc/postgresql/10/main/conf.d/90-monitoring.conf
 ```
+Restart postgresql.
 
-3. Set in `postgresql.conf`:
-```
-track_functions = pl
-track_io_timing = on
-shared_preload_libraries = 'pg_stat_statements'
-track_activity_query_size = 2048
-pg_stat_statements.max = 10000
-pg_stat_statements.track = all
-```
-Then restart postgresql.
+3. Create roles `pgwatch2` and `pghero` (these are unprivileged roles
+for monitoring) in postgresql and create template database
+`template_hive_ci`, in all postgresql instances, that you want to monitor
+(we need postgres superuser here):
 
-4. Create role `pgwatch` in postgresql:
 ```
-CREATE ROLE pgwatch2 WITH LOGIN PASSWORD 'pgwatch2';
--- NB! For critical databases it might make sense to ensure that the user account
--- used for monitoring can only open a limited number of connections
--- (there are according checks in code, but multiple instances might be launched)
-ALTER ROLE pgwatch2 CONNECTION LIMIT 10;
-GRANT pg_monitor TO pgwatch2;
+cd scripts/db-monitoring/setup
+PSQL_OPTIONS="-p 5432 -U postgres -h 127.0.0.1" ./setup_monitoring.sh
 ```
 
-5. Create template database `template_hive_ci`
-(you'll need db superuser privileges):
+Note that above script creates also database `pghero` for gathering historical
+stats data.
+
+Remember, that all databases under monitoring should replicate the structure
+and objects from template `template_hive_ci`, so you should create them with
+command:
 ```
-psql -p 5432 -U postgres -h 127.0.0.1 -f ./create_database.sql --set=db_name=template_hive_ci
-psql -p 5432 -U postgres -h 127.0.0.1 -d template_hive_ci -f ./setup_monitoring.sql
-psql -p 5432 -U postgres -h 127.0.0.1 -f ./setup_template.sql --set=db_name=template_hive_ci
+create database some_db template template_hive_ci
 ```
 
-6. Enter databases to be monitored by pgwatch2
+In case of already existing database, which you can't recreate, you should
+install needed stuff into it by running command:
+```
+cd scripts/db-monitoring/setup
+PSQL_OPTIONS="-p 5432 -U postgres -h 127.0.0.1" ./setup_monitoring.sh some_existing_db_name yes yes no no
+```
+
+4. Create `.env` file and create configuration file for `pghero`
+(edit to your needs):
+```
+cp scripts/db-monitoring/docker/.env_example scripts/db-monitoring/.env
+cp scripts/db-monitoring/docker/pghero_example.yml scripts/db-monitoring/docker/pghero.yml
+```
+
+5. Run services `pgwatch2` and `pghero` in docker containers:
+```
+cd scripts/db-monitoring
+docker-compose up -d
+```
+
+7. Enter databases to be monitored by `pgwatch2`
 at http://ci-server.domain:8080. It's recommended to setup
-[postgres-continuous-discovery](https://pgwatch2.readthedocs.io/en/latest/preparing_databases.html#different-db-types-explained). Use unprivileged
-user `pgwatch2` created earlier.
+[postgres-continuous-discovery](https://pgwatch2.readthedocs.io/en/latest/preparing_databases.html#different-db-types-explained).
+Use unprivileged user `pgwatch2` created earlier.
 
-7. Go to http://ci-server.domain:30000/ to see stats.
+8. Go to http://ci-server.domain:30000/ to see dashboard produced by
+`pgwatch2`.
+
+9. Go to http://ci-server.domain:8085/ to see dashboard produced by
+`pghero`.

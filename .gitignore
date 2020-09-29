@@ -136,3 +136,8 @@ hive/version.py
 
 # hivemind.port
 hivemind.port
+
+Pipfile.lock
+
+pghero.yml
+*~
