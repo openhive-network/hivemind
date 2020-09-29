@@ -25,6 +25,7 @@ from hive.utils.trends import update_hot_and_tranding_for_block_range
 from hive.utils.post_active import update_active_starting_from_posts_on_block
 
 from hive.server.common.payout_stats import PayoutStats
+from hive.utils.timer import time_it
 
 log = logging.getLogger(__name__)
 
@@ -107,20 +108,34 @@ class Blocks:
         time_start = perf_counter()
         ret = cls._process(block, vops_in_block)
         assert ret == block_num, "{} != {}".format(block_num, ret)
-        cls._flush_blocks()
-        PostDataCache.flush()
-        Tags.flush()
-        Votes.flush()
-        Posts.flush()
-        Reblog.flush()
+        time_end = perf_counter()
+        log.info("[PROCESS BLOCK] Processed block operations in %fs", time_end - time_start)
+        log.info("[PROCESS BLOCK] Flushing data to database")
+        flush_time = FSM.start()
+        def register_time(f_time, name, pushed):
+            assert pushed is not None
+            FSM.flush_stat(name, FSM.stop(f_time), pushed)
+            return FSM.start()
+
+        flush_time = register_time(flush_time, "Blocks", cls._flush_blocks())
+        flush_time = register_time(flush_time, "Posts", Posts.flush())
+        flush_time = register_time(flush_time, "Post Data Cache", PostDataCache.flush())
+        flush_time = register_time(flush_time, "Reputations", Reputations.flush())
+        flush_time = register_time(flush_time, "Votes", Votes.flush())
+        flush_time = register_time(flush_time, "Tags", Tags.flush())
         follows = Follow.flush()
-        Notify.flush()
-        Reputations.flush()
+        flush_time = register_time(flush_time, "Follows", follows)
+        flush_time = register_time(flush_time, "Reblog", Reblog.flush())
+        flush_time = register_time(flush_time, "Notify", Notify.flush())
         accts = Accounts.flush()
+        flush_time = register_time(flush_time, "Accounts", accts)
+        ftm = FSM.log_current("Flushing times")
+        log.info("[PROCESS BLOCK] Flushing done")
 
         cls.on_live_blocks_processed(block_num, block_num)
-        time_end = perf_counter()
-        log.info("[PROCESS BLOCK] %fs", time_end - time_start)
+
+        FSM.next_blocks()
+
         return follows, accts
 
     @classmethod
@@ -455,18 +470,25 @@ class Blocks:
         # TODO: manually re-process here the blocks which were just popped.
 
     @classmethod
+    @time_it
     def on_live_blocks_processed( cls, first_block, last_block ):
         """Is invoked when processing of block range is done and received
            informations from hived are already stored in db
         """
-
         update_hot_and_tranding_for_block_range( first_block, last_block )
         update_active_starting_from_posts_on_block( first_block, last_block )
 
-        DB.query_no_return("SELECT update_hive_posts_children_count({}, {})".format(first_block, last_block))
-        DB.query_no_return("SELECT update_hive_posts_root_id({},{})".format(first_block, last_block))
-        DB.query_no_return("SELECT update_hive_posts_api_helper({},{})".format(first_block, last_block))
-        DB.query_no_return("SELECT update_feed_cache({}, {})".format(first_block, last_block))
-        DB.query_no_return("SELECT update_hive_posts_mentions({}, {})".format(first_block, last_block))
-        DB.query_no_return("SELECT update_account_reputations({}, {})".format(first_block, last_block))
+        queries = [
+            "SELECT update_hive_posts_children_count({}, {})".format(first_block, last_block),
+            "SELECT update_hive_posts_root_id({},{})".format(first_block, last_block),
+            "SELECT update_hive_posts_api_helper({},{})".format(first_block, last_block),
+            "SELECT update_feed_cache({}, {})".format(first_block, last_block),
+            "SELECT update_hive_posts_mentions({}, {})".format(first_block, last_block),
+            "SELECT update_account_reputations({}, {})".format(first_block, last_block)
+        ]
+
+        for query in queries:
+            time_start = perf_counter()
+            DB.query_no_return(query)
+            log.info("%s executed in: %.4f s", query, perf_counter() - time_start)
 

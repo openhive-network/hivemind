@@ -167,7 +167,7 @@ class DbState:
                 index.drop(engine)
                 end_time = perf_counter()
                 elapsed_time = end_time - time_start
-                log.info("Index {} dropped in time {} s".format(index.name, elapsed_time))
+                log.info("Index %s dropped in time %.4f s", index.name, elapsed_time)
           except sqlalchemy.exc.ProgrammingError as ex:
               log.warning("Ignoring ex: {}".format(ex))
 
@@ -176,7 +176,7 @@ class DbState:
             index.create(engine)
             end_time = perf_counter()
             elapsed_time = end_time - time_start
-            log.info("Index {} created in time {} s".format(index.name, elapsed_time))
+            log.info("Index %s created in time %.4f s", index.name, elapsed_time)
 
     @classmethod
     def before_initial_sync(cls, last_imported_block, hived_head_block):
