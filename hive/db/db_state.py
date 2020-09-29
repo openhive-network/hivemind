@@ -252,7 +252,7 @@ class DbState:
         row = DbState.db().query_row(sql)
 
         time_end = perf_counter()
-        log.info("[INIT] update_hive_posts_children_count executed in %fs", time_end - time_start)
+        log.info("[INIT] update_hive_posts_children_count executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
 
@@ -263,7 +263,7 @@ class DbState:
         row = DbState.db().query_row(sql)
 
         time_end = perf_counter()
-        log.info("[INIT] update_hive_posts_root_id executed in %fs", time_end - time_start)
+        log.info("[INIT] update_hive_posts_root_id executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
 
@@ -274,21 +274,21 @@ class DbState:
         row = DbState.db().query_row(sql)
 
         time_end = perf_counter()
-        log.info("[INIT] update_hive_posts_api_helper executed in %fs", time_end - time_start)
+        log.info("[INIT] update_hive_posts_api_helper executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
 
         update_hot_and_tranding_for_block_range(last_imported_block, current_imported_block)
 
         time_end = perf_counter()
-        log.info("[INIT] update_all_hot_and_tranding executed in %fs", time_end - time_start)
+        log.info("[INIT] update_all_hot_and_tranding executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
 
         update_active_starting_from_posts_on_block(last_imported_block, current_imported_block)
 
         time_end = perf_counter()
-        log.info("[INIT] update_all_posts_active executed in %fs", time_end - time_start)
+        log.info("[INIT] update_all_posts_active executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
 
@@ -298,7 +298,7 @@ class DbState:
         DbState.db().query_no_return(sql)
 
         time_end = perf_counter()
-        log.info("[INIT] update_feed_cache executed in %fs", time_end - time_start)
+        log.info("[INIT] update_feed_cache executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
         sql = """
@@ -306,12 +306,12 @@ class DbState:
         """.format(last_imported_block, current_imported_block)
         DbState.db().query_no_return(sql)
         time_end = perf_counter()
-        log.info("[INIT] update_hive_posts_mentions executed in %fs", time_end - time_start)
+        log.info("[INIT] update_hive_posts_mentions executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
         PayoutStats.generate()
         time_end = perf_counter()
-        log.info("[INIT] filling payout_stats_view executed in %fs", time_end - time_start)
+        log.info("[INIT] filling payout_stats_view executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
         sql = """
@@ -319,12 +319,12 @@ class DbState:
         """.format(last_imported_block, current_imported_block)
         DbState.db().query_no_return(sql)
         time_end = perf_counter()
-        log.info("[INIT] update_account_reputations executed in %fs", time_end - time_start)
+        log.info("[INIT] update_account_reputations executed in %.4fs", time_end - time_start)
 	
         time_start = perf_counter()
         update_communities_posts_and_rank()
         time_end = perf_counter()
-        log.info("[INIT] update_communities_posts_and_rank executed in %fs", time_end - time_start)
+        log.info("[INIT] update_communities_posts_and_rank executed in %.4fs", time_end - time_start)
 
         # Update a block num immediately
         DbState.db().query_no_return("UPDATE hive_state SET block_num = :block_num", block_num = current_imported_block)
