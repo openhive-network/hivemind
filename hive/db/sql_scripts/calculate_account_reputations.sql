@@ -136,13 +136,13 @@ BEGIN
     SELECT p.id as account_id, p.reputation, p.is_implicit
     FROM calculate_account_reputations(_first_block_num, _last_block_num) p
   ) ds
-  WHERE urs.account_id = ds.account_id
+  WHERE urs.account_id = ds.account_id AND (urs.reputation != ds.reputation OR urs.is_implicit != ds.is_implicit)
   ;
 
   UPDATE hive_accounts uha
   SET reputation = rs.reputation
   FROM hive_account_reputation_status rs
-  WHERE uha.id = rs.account_id
+  WHERE uha.id = rs.account_id AND uha.reputation != rs.reputation
   ;
 END
 $BODY$
