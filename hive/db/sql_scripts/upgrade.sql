@@ -3552,7 +3552,7 @@ IF NOT EXISTS (SELECT FROM pg_catalog.pg_tables
 END IF;--- IF NOT EXIST 
 END
 $BODY$
-
+;
 -- View: public.hive_accounts_info_view
 
 -- DROP VIEW public.hive_accounts_info_view;
