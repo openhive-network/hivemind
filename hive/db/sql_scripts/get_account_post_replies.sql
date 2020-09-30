@@ -7,8 +7,8 @@ DECLARE
   __post_id INT;
   __account_id INT;
 BEGIN
-  __post_id = find_comment_id( start_author, start_permlink, True );
   __account_id = find_account_id( _account, True );
+  __post_id = find_comment_id( start_author, start_permlink, True );
   RETURN QUERY SELECT
       hpr.id as id
   FROM hive_posts hpr
