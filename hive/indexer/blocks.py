@@ -105,42 +105,6 @@ class Blocks:
         return str(DB.query_one(sql) or '')
 
     @classmethod
-    def process(cls, block, block_num, vops_in_block):
-        """Process a single block. Always wrap in a transaction!"""
-        time_start = perf_counter()
-        ret = cls._process(block, vops_in_block)
-        assert ret == block_num, "{} != {}".format(block_num, ret)
-        time_end = perf_counter()
-        log.info("[PROCESS BLOCK] Processed block operations in %fs", time_end - time_start)
-        log.info("[PROCESS BLOCK] Flushing data to database")
-        flush_time = FSM.start()
-        def register_time(f_time, name, pushed):
-            assert pushed is not None
-            FSM.flush_stat(name, FSM.stop(f_time), pushed)
-            return FSM.start()
-
-        flush_time = register_time(flush_time, "Blocks", cls._flush_blocks())
-        flush_time = register_time(flush_time, "Posts", Posts.flush())
-        flush_time = register_time(flush_time, "Post Data Cache", PostDataCache.flush())
-        flush_time = register_time(flush_time, "Reputations", Reputations.flush())
-        flush_time = register_time(flush_time, "Votes", Votes.flush())
-        flush_time = register_time(flush_time, "Tags", Tags.flush())
-        follows = Follow.flush()
-        flush_time = register_time(flush_time, "Follows", follows)
-        flush_time = register_time(flush_time, "Reblog", Reblog.flush())
-        flush_time = register_time(flush_time, "Notify", Notify.flush())
-        accts = Accounts.flush()
-        flush_time = register_time(flush_time, "Accounts", accts)
-        ftm = FSM.log_current("Flushing times")
-        log.info("[PROCESS BLOCK] Flushing done")
-
-        cls.on_live_blocks_processed(block_num, block_num)
-
-        FSM.next_blocks()
-
-        return follows, accts
-
-    @classmethod
     def process_multi(cls, blocks, vops, is_initial_sync):
         """Batch-process blocks; wrapped in a transaction."""
         time_start = OPSM.start()
@@ -173,6 +137,9 @@ class Blocks:
 
         DB.query("COMMIT")
 
+        if not is_initial_sync:
+            DB.query("START TRANSACTION")
+
         completedThreads = 0
 
         pool = ThreadPoolExecutor(max_workers = len(cls._concurrent_flush))
@@ -195,6 +162,8 @@ class Blocks:
         pool.shutdown()
 
         assert completedThreads == len(cls._concurrent_flush)
+        if not is_initial_sync:
+            DB.query("COMMIT")
 
         if (not is_initial_sync) and (first_block > -1):
             DB.query("START TRANSACTION")

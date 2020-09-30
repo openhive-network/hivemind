@@ -353,16 +353,14 @@ class Sync:
             vops = steemd.enum_virtual_ops(self._conf, num, num + 1)
             prepared_vops = prepare_vops(vops)
 
-            num_vops = len(prepared_vops[num]) if num in prepared_vops else 0
-
-            self._db.query("START TRANSACTION")
-            follows, accounts = Blocks.process(block, num, prepared_vops)
-            self._db.query("COMMIT")
+            Blocks.process_multi([block], prepared_vops, False)
+            otm = OPSM.log_current("Operations present in the processed blocks")
+            ftm = FSM.log_current("Flushing times")
 
             ms = (perf() - start_time) * 1000
-            log.info("[LIVE SYNC] <===== Processed block %d at %s --% 4d txs, % 3d follows, % 3d accounts, % 4d vops"
+            log.info("[LIVE SYNC] <===== Processed block %d at %s --% 4d txs"
                      " --% 5dms%s", num, block['timestamp'], len(block['transactions']),
-                     follows, accounts, num_vops, ms, ' SLOW' if ms > 1000 else '')
+                     ms, ' SLOW' if ms > 1000 else '')
 
             if num % 1200 == 0: #1hr
                 log.warning("head block %d @ %s", num, block['timestamp'])
@@ -377,6 +375,10 @@ class Sync:
                 update_communities_posts_and_rank()
             if num % 20 == 0: #1min
                 self._update_chain_state()
+
+            PC.broadcast(BroadcastObject('sync_current_block', num, 'blocks'))
+            FSM.next_blocks()
+            OPSM.next_blocks()
 
     # refetch dynamic_global_properties, feed price, etc
     def _update_chain_state(self):
