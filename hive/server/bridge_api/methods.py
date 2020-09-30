@@ -287,6 +287,7 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
         return posts
 
     valid_account(start_author, allow_empty=True)
+    valid_account(observer, allow_empty=True)
     valid_permlink(start_permlink, allow_empty=True)
     valid_limit(limit, 100, 20)
     valid_tag(tag, allow_empty=True)
@@ -294,6 +295,8 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
     db = context['db']
 
     if tag == "my":
+        # as tag is "my", observer is required
+        valid_account(observer)
         result = await _get_ranked_posts_for_observer_communities(db, sort, start_author, start_permlink, limit, observer)
         return await process_query_results(result)
 
