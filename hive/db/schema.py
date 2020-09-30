@@ -147,7 +147,7 @@ def build_metadata():
         sa.Index('hive_posts_sc_hot_id_idx', 'sc_hot', 'id'),
         sa.Index('hive_posts_created_at_idx', 'created_at'),
         sa.Index('hive_posts_block_num_idx', 'block_num'),
-        sa.Index('hive_posts_cashout_time_idx', 'cashout_time', 'id'),
+        sa.Index('hive_posts_cashout_time_id_idx', 'cashout_time', 'id'),
         sa.Index('hive_posts_updated_at_idx', sa.text('updated_at DESC'))
     )
 
@@ -306,7 +306,7 @@ def build_metadata():
         sa.Column('id', sa.Integer, primary_key=True, autoincrement = False),
         sa.Column('author', VARCHAR(16, collation='C'), nullable=False),
         sa.Column('permlink', VARCHAR(255, collation='C'), nullable=False),
-        sa.Index('hive_posts_api_helper_author_permlink', 'author', 'permlink')
+        sa.Index('hive_posts_api_helper_author_permlink_idx', 'author', 'permlink')
     )
 
     sa.Table(

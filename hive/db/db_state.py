@@ -110,7 +110,7 @@ class DbState:
             'hive_posts_sc_trend_id_idx',
             'hive_posts_sc_hot_id_idx',
             'hive_posts_block_num_idx',
-            'hive_posts_cashout_time_idx',
+            'hive_posts_cashout_time_id_idx',
             'hive_posts_updated_at_idx',
 
             'hive_votes_post_id_idx',
