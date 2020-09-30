@@ -141,11 +141,11 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
             timer.batch_finish(len(blocks))
             time_current = perf()
 
-            prefix = ("[SYNC] Got block %d @ %s" % (
+            prefix = ("[INITIAL SYNC] Got block %d @ %s" % (
                 to - 1, blocks[-1]['timestamp']))
             log.info(timer.batch_status(prefix))
-            log.info("[SYNC] Time elapsed: %fs", time_current - time_start)
-            log.info("[SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
+            log.info("[INITIAL SYNC] Time elapsed: %fs", time_current - time_start)
+            log.info("[INITIAL SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
             rate = minmax(rate, len(blocks), time_current - wait_time_1, lbound)
 
             if block_end - block_start > 1.0 or is_debug:
@@ -312,7 +312,7 @@ class Sync:
             _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size)
             return
 
-        log.info("[SYNC] start block %d, +%d to sync", lbound, count)
+        log.info("[FAST SYNC] start block %d, +%d to sync", lbound, count)
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
         while lbound < ubound:
             timer.batch_start()
@@ -329,9 +329,17 @@ class Sync:
             Blocks.process_multi(blocks, prepared_vops, is_initial_sync)
             timer.batch_finish(len(blocks))
 
-            _prefix = ("[SYNC] Got block %d @ %s" % (
+            otm = OPSM.log_current("Operations present in the processed blocks")
+            ftm = FSM.log_current("Flushing times")
+
+            _prefix = ("[FAST SYNC] Got block %d @ %s" % (
                 to - 1, blocks[-1]['timestamp']))
             log.info(timer.batch_status(_prefix))
+
+            OPSM.next_blocks()
+            FSM.next_blocks()
+
+            PC.broadcast(BroadcastObject('sync_current_block', to, 'blocks'))
 
     def listen(self):
         """Live (block following) mode."""
@@ -361,6 +369,7 @@ class Sync:
             log.info("[LIVE SYNC] <===== Processed block %d at %s --% 4d txs"
                      " --% 5dms%s", num, block['timestamp'], len(block['transactions']),
                      ms, ' SLOW' if ms > 1000 else '')
+            log.info("[LIVE SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
 
             if num % 1200 == 0: #1hr
                 log.warning("head block %d @ %s", num, block['timestamp'])
