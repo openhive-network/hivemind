@@ -2012,80 +2012,6 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-            DROP FUNCTION IF EXISTS account_notifications
-                    ;
-            CREATE OR REPLACE FUNCTION account_notifications(in _account VARCHAR, in _min_score SMALLINT, in _last_id BIGINT, in _limit SMALLINT)
-            RETURNS SETOF notification
-            AS
-            $function$
-            SELECT
-                  hnv.id
-                , CAST( hnv.type_id as SMALLINT) as type_id
-                , hnv.created_at
-                , hnv.src
-                , hnv.dst
-                , hnv.author
-                , hnv.permlink
-                , hnv.community
-                , hnv.community_title
-                , hnv.payload
-                , CAST( hnv.score as SMALLINT) as score
-            FROM
-                hive_notifications_view hnv
-            WHERE hnv.block_num > ( SELECT num as head_block FROM hive_blocks ORDER BY num DESC LIMIT 1 ) - (90 * 24 * 3600 / 3) -- 90 days in blocks
-                AND hnv.dst = _account AND hnv.score >= _min_score AND ( _last_id = -1 OR hnv.id < _last_id )
-            ORDER BY hnv.id DESC LIMIT _limit
-            ;
-            $function$
-            LANGUAGE sql STABLE
-            ;
-    """
-    db.query_no_return(sql)
-
-    sql = """
-        DROP FUNCTION IF EXISTS post_notifications
-        ;
-        CREATE OR REPLACE FUNCTION post_notifications(in _author VARCHAR, in _permlink VARCHAR, in _min_score SMALLINT, in _last_id BIGINT, in _limit SMALLINT)
-        RETURNS SETOF notification
-        AS
-        $function$
-        DECLARE
-            __post_id INT;
-            __start_block INT;
-        BEGIN
-            __post_id = find_comment_id(_author, _permlink, True);
-            __start_block = ( SELECT num AS head_block FROM hive_blocks ORDER BY num DESC LIMIT 1 ) - (90 * 24 * 3600 / 3); -- 90 days in blocks
-            RETURN QUERY
-            (
-                SELECT
-                      hnv.id
-                    , CAST( hnv.type_id as SMALLINT) as type_id
-                    , hnv.created_at
-                    , hnv.src
-                    , hnv.dst
-                    , hnv.author
-                    , hnv.permlink
-                    , hnv.community
-                    , hnv.community_title
-                    , hnv.payload
-                    , CAST( hnv.score as SMALLINT) as score
-                FROM
-                    hive_notifications_view hnv
-                WHERE
-                    hnv.block_num > __start_block
-                    AND hnv.post_id = __post_id
-                    AND hnv.score >= _min_score
-                    AND ( _last_id = -1 OR hnv.id < _last_id )
-                ORDER BY hnv.id DESC
-                LIMIT _limit
-            );
-        END
-        $function$
-        LANGUAGE plpgsql STABLE
-    """
-    db.query_no_return(sql)
-
-    sql = """
         DROP FUNCTION IF EXISTS get_discussion
         ;
         CREATE OR REPLACE FUNCTION get_discussion(
@@ -2197,7 +2123,7 @@ def setup(db):
       "calculate_account_reputations.sql",
       "head_block_time.sql",
       "notifications_view.sql",
-      "get_number_of_unreaded_notifications.sql",
+      "notifications_api.sql",
       "delete_hive_posts_mentions.sql"      	
     ]
     from os.path import dirname, realpath
