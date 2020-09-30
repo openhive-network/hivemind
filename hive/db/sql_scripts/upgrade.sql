@@ -3537,6 +3537,212 @@ FROM public.hive_accounts ha
 JOIN hive_account_reputation_status rs ON rs.account_id = ha.id
 ;
 
+INSERT INTO hive_accounts2
+(id, name, created_at, reputation, followers, following, rank, lastread_at, posting_json_metadata, json_metadata)
+SELECT ha.id, ha.name, ha.created_at, 0, ha.followers, ha.following, ha.rank, ha.lastread_at,
+       ha.posting_json_metadata, ha.json_metadata
+FROM public.hive_accounts ha
+where ha.id = 0;
+
 ALTER TABLE IF EXISTS hive_accounts RENAME TO hive_accounts_old;
 ALTER TABLE IF EXISTS hive_accounts2 RENAME TO hive_accounts;
+
+-- View: public.hive_accounts_info_view
+
+-- DROP VIEW public.hive_accounts_info_view;
+
+CREATE OR REPLACE VIEW public.hive_accounts_info_view
+ AS
+ SELECT ha.id,
+    ha.name,
+    ( SELECT count(*) AS post_count
+           FROM hive_posts hp
+          WHERE ha.id = hp.author_id) AS post_count,
+    ha.created_at,
+    ( SELECT GREATEST(ha.created_at, COALESCE(( SELECT max(hp.created_at) AS max
+                   FROM hive_posts hp
+                  WHERE ha.id = hp.author_id), '1970-01-01 00:00:00'::timestamp without time zone), COALESCE(( SELECT max(hv.last_update) AS max
+                   FROM hive_votes hv
+                  WHERE ha.id = hv.voter_id), '1970-01-01 00:00:00'::timestamp without time zone)) AS "greatest") AS active_at,
+    COALESCE(( SELECT hrs.reputation
+           FROM hive_account_reputation_status hrs
+          WHERE hrs.account_id = ha.id), 0::bigint) AS reputation,
+    ha.rank,
+    ha.following,
+    ha.followers,
+    ha.lastread_at,
+    ha.posting_json_metadata,
+    ha.json_metadata
+   FROM hive_accounts ha;
+
+-- View: public.hive_accounts_rank_view
+
+-- DROP VIEW public.hive_accounts_rank_view;
+
+CREATE OR REPLACE VIEW public.hive_accounts_rank_view
+ AS
+ SELECT ha.id,
+        CASE
+            WHEN rank."position" < 200 THEN 70
+            WHEN rank."position" < 1000 THEN 60
+            WHEN rank."position" < 6500 THEN 50
+            WHEN rank."position" < 25000 THEN 40
+            WHEN rank."position" < 100000 THEN 30
+            ELSE 20
+        END AS score
+   FROM hive_accounts ha
+     JOIN ( SELECT ha2.id,
+            rank() OVER (ORDER BY ha2.reputation DESC) AS "position"
+           FROM hive_accounts ha2) rank ON ha.id = rank.id;
+
+-- Notifications view can be skipped since it is defined in separate .sql file
+
+-- View: public.hive_posts_view
+
+-- DROP VIEW public.hive_posts_view;
+
+CREATE OR REPLACE VIEW public.hive_posts_view
+ AS
+ SELECT hp.id,
+    hp.community_id,
+    hp.root_id,
+    hp.parent_id,
+    ha_a.name AS author,
+    hp.active,
+    hp.author_rewards,
+    hp.author_id,
+    hpd_p.permlink,
+    hpd.title,
+    hpd.body,
+    hpd.img_url,
+    hpd.preview,
+    hcd.category,
+    hp.depth,
+    hp.promoted,
+    hp.payout,
+    hp.pending_payout,
+    hp.payout_at,
+    hp.last_payout_at,
+    hp.cashout_time,
+    hp.is_paidout,
+    hp.children,
+    0 AS votes,
+    0 AS active_votes,
+    hp.created_at,
+    hp.updated_at,
+    COALESCE(( SELECT sum(v.rshares) AS sum
+           FROM hive_votes v
+          WHERE v.post_id = hp.id
+          GROUP BY v.post_id), 0::numeric) AS rshares,
+    COALESCE(( SELECT sum(
+                CASE v.rshares >= 0
+                    WHEN true THEN v.rshares
+                    ELSE - v.rshares
+                END) AS sum
+           FROM hive_votes v
+          WHERE v.post_id = hp.id AND NOT v.rshares = 0
+          GROUP BY v.post_id), 0::numeric) AS abs_rshares,
+    COALESCE(( SELECT count(1) AS count
+           FROM hive_votes v
+          WHERE v.post_id = hp.id AND v.is_effective
+          GROUP BY v.post_id), 0::bigint) AS total_votes,
+    COALESCE(( SELECT sum(
+                CASE v.rshares > 0
+                    WHEN true THEN 1
+                    ELSE '-1'::integer
+                END) AS sum
+           FROM hive_votes v
+          WHERE v.post_id = hp.id AND NOT v.rshares = 0
+          GROUP BY v.post_id), 0::bigint) AS net_votes,
+    hpd.json,
+    COALESCE(( SELECT hrs.reputation
+           FROM hive_account_reputation_status hrs
+          WHERE hrs.account_id = ha_a.id), 0::bigint) AS author_rep,
+    hp.is_hidden,
+    hp.is_grayed,
+    hp.total_vote_weight,
+    ha_pp.name AS parent_author,
+    ha_pp.id AS parent_author_id,
+        CASE hp.depth > 0
+            WHEN true THEN hpd_pp.permlink
+            ELSE hcd.category
+        END AS parent_permlink_or_category,
+    hp.curator_payout_value,
+    ha_rp.name AS root_author,
+    hpd_rp.permlink AS root_permlink,
+    rcd.category AS root_category,
+    hp.max_accepted_payout,
+    hp.percent_hbd,
+    true AS allow_replies,
+    hp.allow_votes,
+    hp.allow_curation_rewards,
+    hp.beneficiaries,
+    concat('/', rcd.category, '/@', ha_rp.name, '/', hpd_rp.permlink,
+        CASE rp.id
+            WHEN hp.id THEN ''::text
+            ELSE concat('#@', ha_a.name, '/', hpd_p.permlink)
+        END) AS url,
+    rpd.title AS root_title,
+    hp.sc_trend,
+    hp.sc_hot,
+    hp.is_pinned,
+    hp.is_muted,
+    hp.is_nsfw,
+    hp.is_valid,
+    hr.title AS role_title,
+    hr.role_id,
+    hc.title AS community_title,
+    hc.name AS community_name,
+    hp.block_num
+   FROM hive_posts hp
+     JOIN hive_posts pp ON pp.id = hp.parent_id
+     JOIN hive_posts rp ON rp.id = hp.root_id
+     JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+     JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+     JOIN hive_post_data hpd ON hpd.id = hp.id
+     JOIN hive_accounts ha_pp ON ha_pp.id = pp.author_id
+     JOIN hive_permlink_data hpd_pp ON hpd_pp.id = pp.permlink_id
+     JOIN hive_accounts ha_rp ON ha_rp.id = rp.author_id
+     JOIN hive_permlink_data hpd_rp ON hpd_rp.id = rp.permlink_id
+     JOIN hive_post_data rpd ON rpd.id = rp.id
+     JOIN hive_category_data hcd ON hcd.id = hp.category_id
+     JOIN hive_category_data rcd ON rcd.id = rp.category_id
+     LEFT JOIN hive_communities hc ON hp.community_id = hc.id
+     LEFT JOIN hive_roles hr ON hp.author_id = hr.account_id AND hp.community_id = hr.community_id
+  WHERE hp.counter_deleted = 0;
+
+CREATE OR REPLACE VIEW public.hive_votes_view
+ AS
+ SELECT hv.id,
+    hv.voter_id,
+    ha_a.name AS author,
+    hpd.permlink,
+    hv.vote_percent AS percent,
+    COALESCE(( SELECT hrs.reputation
+           FROM hive_account_reputation_status hrs
+          WHERE hrs.account_id = ha_v.id), 0::bigint) AS reputation,
+    hv.rshares,
+    hv.last_update,
+    ha_v.name AS voter,
+    hv.weight,
+    hv.num_changes,
+    hv.permlink_id,
+    hv.post_id,
+    hv.is_effective
+   FROM hive_votes hv
+     JOIN hive_accounts ha_v ON ha_v.id = hv.voter_id
+     JOIN hive_accounts ha_a ON ha_a.id = hv.author_id
+     JOIN hive_permlink_data hpd ON hpd.id = hv.permlink_id;
+
+
+drop index if exists hive_posts_sc_hot_idx;
+drop index if exists hive_posts_sc_trend_idx;
+drop index if exists hive_reblogs_blogger_id;
+drop index if exists hive_subscriptions_community_idx;
+drop index if exists hive_votes_post_id_idx;
+drop index if exists hive_votes_voter_id_idx;
+
+CREATE INDEX IF NOT EXISTS hive_account_reputation_status_reputation_idx
+ON hive_account_reputation_status (reputation);
+
 
