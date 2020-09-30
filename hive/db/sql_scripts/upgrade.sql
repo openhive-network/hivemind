@@ -3493,59 +3493,65 @@ INNER JOIN hive_permlink_data hpd ON hpd.id = hv.permlink_id
 ;
 
 --- Fix to damaging of hive_accounts due to whole table updates
-
+DO
+$BODY$
+BEGIN
+--- Execute code below only if old hive_accounts does not exists yet.
+IF NOT EXISTS (SELECT FROM pg_catalog.pg_tables 
+              WHERE  schemaname = 'public'
+              AND    tablename  = 'hive_accounts_old') THEN
 -- Table: public.hive_accounts
+  DROP TABLE IF EXISTS public.hive_accounts2;
 
-DROP TABLE IF EXISTS public.hive_accounts2;
+  CREATE TABLE public.hive_accounts2
+  (
+      id integer NOT NULL DEFAULT nextval('hive_accounts_id_seq'::regclass),
+      name character varying(16) COLLATE pg_catalog."C" NOT NULL,
+      created_at timestamp without time zone NOT NULL,
+      reputation bigint NOT NULL DEFAULT 0::bigint,
+      followers integer NOT NULL DEFAULT 0,
+      following integer NOT NULL DEFAULT 0,
+      rank integer NOT NULL DEFAULT 0,
+      lastread_at timestamp without time zone NOT NULL DEFAULT '1970-01-01 00:00:00'::timestamp without time zone,
+      posting_json_metadata text COLLATE pg_catalog."default",
+      json_metadata text COLLATE pg_catalog."default",
+      CONSTRAINT hive_accounts2_pkey PRIMARY KEY (id),
+      CONSTRAINT hive_accounts2_ux1 UNIQUE (name)
+  )
+  WITH (
+      OIDS = FALSE
+  )
+  TABLESPACE pg_default;
 
-CREATE TABLE public.hive_accounts2
-(
-    id integer NOT NULL DEFAULT nextval('hive_accounts_id_seq'::regclass),
-    name character varying(16) COLLATE pg_catalog."C" NOT NULL,
-    created_at timestamp without time zone NOT NULL,
-    reputation bigint NOT NULL DEFAULT 0::bigint,
-    followers integer NOT NULL DEFAULT 0,
-    following integer NOT NULL DEFAULT 0,
-    rank integer NOT NULL DEFAULT 0,
-    lastread_at timestamp without time zone NOT NULL DEFAULT '1970-01-01 00:00:00'::timestamp without time zone,
-    posting_json_metadata text COLLATE pg_catalog."default",
-    json_metadata text COLLATE pg_catalog."default",
-    CONSTRAINT hive_accounts2_pkey PRIMARY KEY (id),
-    CONSTRAINT hive_accounts2_ux1 UNIQUE (name)
-)
-WITH (
-    OIDS = FALSE
-)
-TABLESPACE pg_default;
+  ALTER TABLE public.hive_accounts2
+      OWNER to hive;
+  -- Index: hive_accounts_ix6
 
-ALTER TABLE public.hive_accounts2
-    OWNER to hive;
--- Index: hive_accounts_ix6
-
--- DROP INDEX public.hive_accounts_ix6;
-
-CREATE INDEX hive_accounts2_ix6
-    ON public.hive_accounts2 USING btree
-    (reputation ASC NULLS LAST)
-    TABLESPACE pg_default;
+  CREATE INDEX hive_accounts2_ix6
+      ON public.hive_accounts2 USING btree
+      (reputation ASC NULLS LAST)
+      TABLESPACE pg_default;
 	
-INSERT INTO hive_accounts2
-(id, name, created_at, reputation, followers, following, rank, lastread_at, posting_json_metadata, json_metadata)
-SELECT ha.id, ha.name, ha.created_at, rs.reputation, ha.followers, ha.following, ha.rank, ha.lastread_at,
-       ha.posting_json_metadata, ha.json_metadata
-FROM public.hive_accounts ha
-JOIN hive_account_reputation_status rs ON rs.account_id = ha.id
-;
+  INSERT INTO hive_accounts2
+  (id, name, created_at, reputation, followers, following, rank, lastread_at, posting_json_metadata, json_metadata)
+  SELECT ha.id, ha.name, ha.created_at, rs.reputation, ha.followers, ha.following, ha.rank, ha.lastread_at,
+         ha.posting_json_metadata, ha.json_metadata
+  FROM public.hive_accounts ha
+  JOIN hive_account_reputation_status rs ON rs.account_id = ha.id
+  ;
 
-INSERT INTO hive_accounts2
-(id, name, created_at, reputation, followers, following, rank, lastread_at, posting_json_metadata, json_metadata)
-SELECT ha.id, ha.name, ha.created_at, 0, ha.followers, ha.following, ha.rank, ha.lastread_at,
-       ha.posting_json_metadata, ha.json_metadata
-FROM public.hive_accounts ha
-where ha.id = 0;
+  INSERT INTO hive_accounts2
+  (id, name, created_at, reputation, followers, following, rank, lastread_at, posting_json_metadata, json_metadata)
+  SELECT ha.id, ha.name, ha.created_at, 0, ha.followers, ha.following, ha.rank, ha.lastread_at,
+         ha.posting_json_metadata, ha.json_metadata
+  FROM public.hive_accounts ha
+  where ha.id = 0;
 
-ALTER TABLE IF EXISTS hive_accounts RENAME TO hive_accounts_old;
-ALTER TABLE IF EXISTS hive_accounts2 RENAME TO hive_accounts;
+  ALTER TABLE IF EXISTS hive_accounts RENAME TO hive_accounts_old;
+  ALTER TABLE IF EXISTS hive_accounts2 RENAME TO hive_accounts;
+END IF;--- IF NOT EXIST 
+END
+$BODY$
 
 -- View: public.hive_accounts_info_view
 
