@@ -106,7 +106,7 @@ def valid_tag(tag, allow_empty=False):
 
 def valid_number(num, lbound, ubound, default, name):
     """Given a user-provided number, return a valid int, or raise."""
-    if not num:
+    if not num and num != 0:
       assert default is not None, "%s must be provided" % name
       num = default
     try:

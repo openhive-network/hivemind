@@ -963,12 +963,13 @@ def setup(db):
           reputation BIGINT
         );
 
-        DROP FUNCTION IF EXISTS find_votes( character varying, character varying )
+        DROP FUNCTION IF EXISTS find_votes( character varying, character varying, int )
         ;
         CREATE OR REPLACE FUNCTION public.find_votes
         (
           in _AUTHOR hive_accounts.name%TYPE,
-          in _PERMLINK hive_permlink_data.permlink%TYPE
+          in _PERMLINK hive_permlink_data.permlink%TYPE,
+          in _LIMIT INT
         )
         RETURNS SETOF database_api_vote
         LANGUAGE 'plpgsql'
@@ -997,6 +998,7 @@ def setup(db):
                 v.post_id = _POST_ID
             ORDER BY
                 voter_id
+            LIMIT _LIMIT
         );
 
         END
