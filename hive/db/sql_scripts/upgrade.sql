@@ -3745,4 +3745,12 @@ drop index if exists hive_votes_voter_id_idx;
 CREATE INDEX IF NOT EXISTS hive_account_reputation_status_reputation_idx
 ON hive_account_reputation_status (reputation);
 
+ALTER TABLE public.hive_mentions
+    drop CONSTRAINT IF EXISTS hive_mentions_account_id_fk;
+
+ALTER TABLE public.hive_mentions
+    ADD CONSTRAINT hive_mentions_account_id_fk FOREIGN KEY (account_id)
+    REFERENCES public.hive_accounts (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
 
