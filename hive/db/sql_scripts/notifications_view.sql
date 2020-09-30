@@ -20,6 +20,7 @@ FROM
         , ''::VARCHAR as community_title
         , ''::VARCHAR as payload
         , posts_and_scores.score as score
+		    , posts_and_scores.parent_author_id as dst_id
     FROM
     (
         SELECT
@@ -70,6 +71,7 @@ FROM
         , ''::VARCHAR as community_title
         , ''::VARCHAR as payload
         , followers_scores.score as score
+		, ha2.id as dst_id
     FROM
         hive_follows hf
     JOIN hive_accounts ha2 ON hf.following = ha2.id
@@ -102,6 +104,7 @@ FROM
         , ''::VARCHAR as community_title
         , ''::VARCHAR as payload
         , hr_scores.score as score
+		    , ha.id as dst_id
     FROM
         hive_reblogs hr
     JOIN hive_posts hp ON hr.post_id = hp.id
@@ -131,6 +134,7 @@ FROM
         , hc.title as community_title
         , ''::VARCHAR as payload
         , hs_scores.score
+		    , ha_com.id as dst_id
     FROM
         hive_subscriptions hs
     JOIN hive_communities hc ON hs.community_id = hc.id
@@ -160,6 +164,7 @@ FROM
         , ''::VARCHAR as community_title
         , ''::VARCHAR as payload
         , 35 as score
+		    , ha.id as dst_id
     FROM
         hive_communities hc
     JOIN hive_accounts ha ON ha.id = hc.id
@@ -167,7 +172,7 @@ FROM
         SELECT
               hc2.id as id
             , notification_id(hc2.block_num, 11, hc2.id) as notif_id
-        FROM hive_communities hc2
+        FROM  hive_communities hc2
     ) as hc_id ON hc_id.id = hc.id
     UNION ALL
     SELECT --votes
@@ -184,6 +189,7 @@ FROM
         , ''::VARCHAR as community_title
         , ''::VARCHAR as payload
         , scores.score as score
+		    , scores.dst_id as dst_id
     FROM
     (
         SELECT
@@ -196,6 +202,7 @@ FROM
             , ha.name as src
             , hpv.permlink as permlink
             , hv1.last_update
+			      , hpv.author_id as dst_id
         FROM hive_votes hv1
         JOIN hive_posts_view hpv ON hv1.post_id = hpv.id
         JOIN hive_accounts ha ON ha.id = hv1.voter_id
@@ -204,7 +211,7 @@ FROM
     WHERE scores.score > 0
 UNION ALL
     SELECT --persistent notifs
-       hn.block_num
+         hn.block_num
        , notification_id(hn.block_num, hn.type_id, CAST( hn.id as INT) ) as id
        , hp.id as post_id
        , hn.type_id as type_id
@@ -217,6 +224,7 @@ UNION ALL
        , hc.title as community_title
        , hn.payload as payload
        , hn.score as score
+	     , ha_dst.id as dst_id
     FROM hive_notifs hn
     JOIN hive_accounts ha_dst ON hn.dst_id = ha_dst.id
     LEFT JOIN hive_accounts ha_src ON hn.src_id = ha_src.id
@@ -224,5 +232,27 @@ UNION ALL
     LEFT JOIN hive_posts hp ON hn.post_id = hp.id
     LEFT JOIN hive_accounts ha_pst ON ha_pst.id = hp.author_id
     LEFT JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
+UNION All
+  SELECT --mentions notifs
+	  hm.block_num as block_num
+    , notification_id(hm.block_num, 16, CAST( hm.id as INT) ) as id
+    , hm.post_id as post_id
+    , 16 as type_id
+    , hp.created_at as created_at
+    , ha_pst.name as src
+    , ha_dst.name as dst
+    , ha_pst.name as author
+    , hpd.permlink as permlink
+    , '' as community
+    , '' as community_title
+    , '' as payload
+    , harv.score as score
+    , ha_dst.id as dst_id
+  FROM hive_mentions hm
+  JOIN hive_accounts ha_dst ON hm.account_id = ha_dst.id
+  LEFT JOIN hive_posts hp ON hm.post_id = hp.id
+  LEFT JOIN hive_accounts ha_pst ON ha_pst.id = hp.author_id
+  LEFT JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
+  JOIN hive_accounts_rank_view harv ON harv.id = ha_dst.id
 ) as notifs
 WHERE notifs.block_num >= block_before_head( '90 days' );
