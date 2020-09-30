@@ -400,9 +400,6 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
     start_permlink =  valid_permlink(start_permlink, allow_empty=True)
     limit =           valid_limit(limit, 100, 20)
 
-    # pylint: disable=unused-variable
-    observer_id = await get_account_id(db, observer) if observer else None # TODO
-
     if sort == 'blog' or sort == 'feed' or sort == 'replies':
       return await _get_final_posts(db, sort, account, start_author, start_permlink, limit)
     else:
