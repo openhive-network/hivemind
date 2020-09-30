@@ -341,6 +341,51 @@ async def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=No
         post['stats']['is_pinned'] = True
     return post
 
+async def _get_account_posts_by_blog(db, account : str, start_author : str, start_permlink : str, limit : int):
+  _ids = await cursor.pids_by_blog(db, account, start_author, start_permlink, limit)
+  posts = await load_posts(db, _ids)
+  for post in posts:
+      if post['author'] != account:
+          post['reblogged_by'] = [account]
+  return posts
+
+async def _get_account_posts_by_feed(db, account : str, start_author : str, start_permlink : str, limit : int):
+  _ids = await cursor.pids_by_feed_with_reblog(db, account, start_author, start_permlink, limit)
+  return await load_posts_reblogs(db, _ids)
+
+async def _get_account_posts_by_replies(db, account : str, start_author : str, start_permlink : str, limit : int):
+  _ids = await cursor.pids_by_replies(db, account, start_author, start_permlink, limit)
+  return await load_posts(db, _ids)
+
+async def _get_final_posts(db, sort : str, account, start_author : str, start_permlink : str, limit : int):
+  if sort == 'blog':
+    return await _get_account_posts_by_blog(db, account, start_author, start_permlink, limit)
+  elif sort == 'feed':
+    return await _get_account_posts_by_feed(db, account, start_author, start_permlink, limit)
+  elif sort == 'replies':
+    return await _get_account_posts_by_replies(db, account, start_author, start_permlink, limit)
+
+async def _get_posts(db, sort : str, account, start_author : str, start_permlink : str, limit : int, observer : str ):
+  if sort == 'posts':
+    sql = "SELECT * FROM bridge_get_account_posts_by_posts( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+  elif sort == 'comments':
+    sql = "SELECT * FROM bridge_get_account_posts_by_comments( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+  elif sort == 'payout':
+    sql = "SELECT * FROM bridge_get_account_posts_by_payout( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+
+  sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit )
+  posts = []
+  blacklists_for_user = None
+  if observer:
+      blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
+
+  for row in sql_result:
+      post = _bridge_post_object(row)
+      post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.BridgeApi)
+      post = await append_statistics_to_post(post, row, False, blacklists_for_user)
+      posts.append(post)
+  return posts
+
 @return_error_info
 async def get_account_posts(context, sort:str, account:str, start_author:str='', start_permlink:str='',
                             limit:int=20, observer:str=None):
@@ -349,53 +394,17 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
     assert sort in valid_sorts, 'invalid account sort'
 
     db = context['db']
-    account = valid_account(account)
-    start_author = valid_account(start_author, allow_empty=True)
-    start_permlink = valid_permlink(start_permlink, allow_empty=True)
-    start = (start_author, start_permlink)
-    limit = valid_limit(limit, 100, 20)
 
-    # pylint: disable=unused-variable
-    observer_id = await get_account_id(db, observer) if observer else None # TODO
+    account =         valid_account(account)
+    start_author =    valid_account(start_author, allow_empty=True)
+    start_permlink =  valid_permlink(start_permlink, allow_empty=True)
+    limit =           valid_limit(limit, 100, 20)
 
-    sql = "---bridge_api.get_account_posts\n " + SQL_TEMPLATE + """ %s """
-
-    if sort == 'blog':
-        ids = await cursor.pids_by_blog(db, account, *start, limit)
-        posts = await load_posts(context['db'], ids)
-        for post in posts:
-            if post['author'] != account:
-                post['reblogged_by'] = [account]
-        return posts
-    elif sort == 'posts':
-        sql = sql % """ hp.author = :account AND hp.depth = 0 %s ORDER BY hp.id DESC LIMIT :limit"""
-    elif sort == 'comments':
-        sql = sql % """ hp.author = :account AND hp.depth > 0 %s ORDER BY hp.id DESC, hp.depth LIMIT :limit"""
-    elif sort == 'payout':
-        sql = sql % """ hp.author = :account AND NOT hp.is_paidout %s ORDER BY hp.payout DESC, hp.id LIMIT :limit"""
-    elif sort == 'feed':
-        res = await cursor.pids_by_feed_with_reblog(db, account, *start, limit)
-        return await load_posts_reblogs(context['db'], res)
-    elif sort == 'replies':
-        ids = await cursor.pids_by_replies(db, account, start_author, start_permlink, limit)
-        return await load_posts(context['db'], ids)
-
-    if start_author and start_permlink:
-        sql = sql % """ AND hp.id < (SELECT id FROM hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)) """
+    if sort == 'blog' or sort == 'feed' or sort == 'replies':
+      return await _get_final_posts(db, sort, account, start_author, start_permlink, limit)
     else:
-        sql = sql % """ """
+      return await _get_posts(db, sort, account, start_author, start_permlink, limit, observer)
 
-    posts = []
-    blacklists_for_user = None
-    if observer:
-        blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
-    sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit)
-    for row in sql_result:
-        post = _bridge_post_object(row)
-        post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.BridgeApi)
-        post = await append_statistics_to_post(post, row, False, blacklists_for_user)
-        posts.append(post)
-    return posts
 
 @return_error_info
 async def get_relationship_between_accounts(context, account1, account2, observer=None):
