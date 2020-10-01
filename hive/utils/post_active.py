@@ -1,4 +1,5 @@
 from hive.db.adapter import Db
+from hive.utils.timer import time_it
 
 DB = Db.instance()
 """
@@ -49,7 +50,7 @@ update_active_sql = """
 
 def update_all_posts_active():
     DB.query_no_return(update_active_sql.format( "WHERE ( children = 0 OR hp1.counter_deleted > 0 ) AND depth > 0" ))
-
+@time_it
 def update_active_starting_from_posts_on_block( first_block_num, last_block_num ):
     if first_block_num == last_block_num:
             DB.query_no_return(update_active_sql.format( "WHERE block_num={} AND depth > 0" ).format(first_block_num) )
