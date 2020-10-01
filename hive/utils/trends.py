@@ -3,6 +3,7 @@ import decimal
 
 
 from hive.db.adapter import Db
+from hive.utils.timer import time_it
 
 DB = Db.instance()
 
@@ -12,6 +13,7 @@ def update_all_hot_and_tranding():
 
 NO_CONSTRAINT = -1
 
+@time_it
 def update_hot_and_tranding_for_block_range( first_block = NO_CONSTRAINT, last_block = NO_CONSTRAINT):
     """Calculate and set hot and trending values of all posts"""
     hot_and_trend_sql = """
