@@ -25,6 +25,7 @@ from hive.utils.trends import update_hot_and_tranding_for_block_range
 from hive.utils.post_active import update_active_starting_from_posts_on_block
 
 from hive.server.common.payout_stats import PayoutStats
+from hive.server.common.mentions import Mentions
 
 log = logging.getLogger(__name__)
 
@@ -76,6 +77,7 @@ class Blocks:
         Notify.setup_own_db_access(sharedDbAdapter)
         Accounts.setup_own_db_access(sharedDbAdapter)
         PayoutStats.setup_own_db_access(sharedDbAdapter)
+        Mentions.setup_own_db_access(sharedDbAdapter)
 
     @classmethod
     def setup_shared_db_access(cls, sharedDbAdapter):

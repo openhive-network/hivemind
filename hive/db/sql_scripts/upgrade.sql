@@ -3432,7 +3432,7 @@ ALTER DATABASE hive SET join_collapse_limit = 16;
 ALTER DATABASE hive SET from_collapse_limit = 16;
 
 
---- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/210/diffs 
+--- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/210/diffs
 
 DROP FUNCTION IF EXISTS find_comment_id(character varying, character varying, boolean)
 ;
@@ -3497,7 +3497,7 @@ DO
 $BODY$
 BEGIN
 --- Execute code below only if old hive_accounts does not exists yet.
-IF NOT EXISTS (SELECT FROM pg_catalog.pg_tables 
+IF NOT EXISTS (SELECT FROM pg_catalog.pg_tables
               WHERE  schemaname = 'public'
               AND    tablename  = 'hive_accounts_old') THEN
 -- Table: public.hive_accounts
@@ -3531,7 +3531,7 @@ IF NOT EXISTS (SELECT FROM pg_catalog.pg_tables
       ON public.hive_accounts2 USING btree
       (reputation ASC NULLS LAST)
       TABLESPACE pg_default;
-	
+
   INSERT INTO hive_accounts2
   (id, name, created_at, reputation, followers, following, rank, lastread_at, posting_json_metadata, json_metadata)
   SELECT ha.id, ha.name, ha.created_at, rs.reputation, ha.followers, ha.following, ha.rank, ha.lastread_at,
@@ -3549,7 +3549,7 @@ IF NOT EXISTS (SELECT FROM pg_catalog.pg_tables
 
   ALTER TABLE IF EXISTS hive_accounts RENAME TO hive_accounts_old;
   ALTER TABLE IF EXISTS hive_accounts2 RENAME TO hive_accounts;
-END IF;--- IF NOT EXIST 
+END IF;--- IF NOT EXIST
 END
 $BODY$
 ;
@@ -3751,8 +3751,12 @@ drop index if exists hive_votes_voter_id_idx;
 CREATE INDEX IF NOT EXISTS hive_account_reputation_status_reputation_idx
 ON hive_account_reputation_status (reputation);
 
+
 ALTER TABLE public.hive_mentions
     drop CONSTRAINT IF EXISTS hive_mentions_account_id_fk;
+    ADD COLUMN IF NOT EXISTS
+
+
 
 ALTER TABLE public.hive_mentions
     ADD CONSTRAINT hive_mentions_account_id_fk FOREIGN KEY (account_id)
@@ -3760,3 +3764,15 @@ ALTER TABLE public.hive_mentions
     ON UPDATE NO ACTION
     ON DELETE NO ACTION;
 
+DELETE FROM public.hive_mentions;
+DO $$
+    BEGIN
+        BEGIN
+            ALTER TABLE public.hive_mentions ADD COLUMN id SERIAL PRIMARY KEY;
+            ALTER TABLE public.hive_mentions ADD COLUMN block_num INTEGER;
+        EXCEPTION
+            WHEN duplicate_column THEN RAISE NOTICE 'column id already exists in hive_mentions.';
+        END;
+    END;
+$$;
+SELECT update_hive_posts_mentions(0, (SELECT hb.num FROM hive_blocks hb ORDER BY hb.num DESC LIMIT 1) );
