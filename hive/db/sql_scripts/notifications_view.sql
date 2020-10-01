@@ -45,12 +45,7 @@ FROM
           , hpv.parent_author_id
           , hpv.author_id
           , harv.score as score
-      FROM
-      (
-		SELECT hpv2.*
-		FROM hive_posts_view hpv2
-		WHERE hpv2.block_num > block_before_head( '90 days' )
-	) as hpv
+      FROM hive_posts_view hpv
       JOIN hive_accounts_rank_view harv ON harv.id = hpv.author_id
       WHERE hpv.depth > 0
   ) as posts_and_scores
@@ -261,6 +256,6 @@ UNION All
   LEFT JOIN hive_posts hp ON hm.post_id = hp.id
   LEFT JOIN hive_accounts ha_pst ON ha_pst.id = hp.author_id
   LEFT JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
-  JOIN hive_accounts_rank_view harv ON harv.id = ha_dst.id
+  JOIN hive_accounts_rank_view harv ON harv.id = ha_pst.id
 ) as notifs
 WHERE notifs.block_num >= block_before_head( '90 days' );
