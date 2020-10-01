@@ -273,9 +273,9 @@ async def _get_ranked_posts_for_all( db, sort:str, start_author:str, start_perml
 async def get_ranked_posts(context, sort:str, start_author:str='', start_permlink:str='',
                            limit:int=20, tag:str=None, observer:str=None):
     """Query posts, sorted by given method."""
-
-    assert sort in ['trending', 'hot', 'created', 'promoted',
-                    'payout', 'payout_comments', 'muted'], 'invalid sort'
+    supported_sort_list = ['trending', 'hot', 'created', 'promoted',
+                           'payout', 'payout_comments', 'muted']
+    assert sort in supported_sort_list, "Unsupported sort, valid sorts: {}".format(", ".join(supported_sort_list))
 
     async def process_query_results( sql_result ):
         posts = []
@@ -366,6 +366,8 @@ async def _get_final_posts(db, sort : str, account, start_author : str, start_pe
     return await _get_account_posts_by_replies(db, account, start_author, start_permlink, limit)
 
 async def _get_posts(db, sort : str, account, start_author : str, start_permlink : str, limit : int, observer : str ):
+  observer = valid_account(observer, allow_empty=True)
+
   if sort == 'posts':
     sql = "SELECT * FROM bridge_get_account_posts_by_posts( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
   elif sort == 'comments':
@@ -390,8 +392,8 @@ async def _get_posts(db, sort : str, account, start_author : str, start_permlink
 async def get_account_posts(context, sort:str, account:str, start_author:str='', start_permlink:str='',
                             limit:int=20, observer:str=None):
     """Get posts for an account -- blog, feed, comments, or replies."""
-    valid_sorts = ['blog', 'feed', 'posts', 'comments', 'replies', 'payout']
-    assert sort in valid_sorts, 'invalid account sort'
+    supported_sort_list = ['blog', 'feed', 'posts', 'comments', 'replies', 'payout']
+    assert sort in supported_sort_list, "Unsupported sort, valid sorts: {}".format(", ".join(supported_sort_list))
 
     db = context['db']
 
