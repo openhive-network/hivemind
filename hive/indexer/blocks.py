@@ -26,6 +26,7 @@ from hive.utils.post_active import update_active_starting_from_posts_on_block
 
 from hive.server.common.payout_stats import PayoutStats
 from hive.server.common.mentions import Mentions
+from hive.utils.timer import time_it
 
 log = logging.getLogger(__name__)
 
@@ -80,18 +81,6 @@ class Blocks:
         Mentions.setup_own_db_access(sharedDbAdapter)
 
     @classmethod
-    def setup_shared_db_access(cls, sharedDbAdapter):
-        PostDataCache.setup_shared_db_access(sharedDbAdapter)
-        Reputations.setup_shared_db_access(sharedDbAdapter)
-        Votes.setup_shared_db_access(sharedDbAdapter)
-        Tags.setup_shared_db_access(sharedDbAdapter)
-        Follow.setup_shared_db_access(sharedDbAdapter)
-        Posts.setup_shared_db_access(sharedDbAdapter)
-        Reblog.setup_shared_db_access(sharedDbAdapter)
-        Notify.setup_shared_db_access(sharedDbAdapter)
-        Accounts.setup_shared_db_access(sharedDbAdapter)
-
-    @classmethod
     def head_num(cls):
         """Get hive's head block number."""
         sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
@@ -102,28 +91,6 @@ class Blocks:
         """Get hive's head block date."""
         sql = "SELECT created_at FROM hive_blocks ORDER BY num DESC LIMIT 1"
         return str(DB.query_one(sql) or '')
-
-    @classmethod
-    def process(cls, block, block_num, vops_in_block):
-        """Process a single block. Always wrap in a transaction!"""
-        time_start = perf_counter()
-        ret = cls._process(block, vops_in_block)
-        assert ret == block_num, "{} != {}".format(block_num, ret)
-        cls._flush_blocks()
-        PostDataCache.flush()
-        Tags.flush()
-        Votes.flush()
-        Posts.flush()
-        Reblog.flush()
-        follows = Follow.flush()
-        Notify.flush()
-        Reputations.flush()
-        accts = Accounts.flush()
-
-        cls.on_live_blocks_processed(block_num, block_num)
-        time_end = perf_counter()
-        log.info("[PROCESS BLOCK] %fs", time_end - time_start)
-        return follows, accts
 
     @classmethod
     def process_multi(cls, blocks, vops, is_initial_sync):
@@ -457,18 +424,25 @@ class Blocks:
         # TODO: manually re-process here the blocks which were just popped.
 
     @classmethod
+    @time_it
     def on_live_blocks_processed( cls, first_block, last_block ):
         """Is invoked when processing of block range is done and received
            informations from hived are already stored in db
         """
-
         update_hot_and_tranding_for_block_range( first_block, last_block )
         update_active_starting_from_posts_on_block( first_block, last_block )
 
-        DB.query_no_return("SELECT update_hive_posts_children_count({}, {})".format(first_block, last_block))
-        DB.query_no_return("SELECT update_hive_posts_root_id({},{})".format(first_block, last_block))
-        DB.query_no_return("SELECT update_hive_posts_api_helper({},{})".format(first_block, last_block))
-        DB.query_no_return("SELECT update_feed_cache({}, {})".format(first_block, last_block))
-        DB.query_no_return("SELECT update_hive_posts_mentions({}, {})".format(first_block, last_block))
-        DB.query_no_return("SELECT update_account_reputations({}, {})".format(first_block, last_block))
+        queries = [
+            "SELECT update_hive_posts_children_count({}, {})".format(first_block, last_block),
+            "SELECT update_hive_posts_root_id({},{})".format(first_block, last_block),
+            "SELECT update_hive_posts_api_helper({},{})".format(first_block, last_block),
+            "SELECT update_feed_cache({}, {})".format(first_block, last_block),
+            "SELECT update_hive_posts_mentions({}, {})".format(first_block, last_block),
+            "SELECT update_account_reputations({}, {})".format(first_block, last_block)
+        ]
+
+        for query in queries:
+            time_start = perf_counter()
+            DB.query_no_return(query)
+            log.info("%s executed in: %.4f s", query, perf_counter() - time_start)
 
