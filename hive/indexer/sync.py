@@ -261,7 +261,7 @@ class Sync:
         else:
             # recover from fork
             Blocks.verify_head(self._steem)
-        Blocks.setup_shared_db_access(self._db)
+
         self._update_chain_state()
 
         if self._conf.get('test_max_block'):

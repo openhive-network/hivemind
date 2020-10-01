@@ -81,18 +81,6 @@ class Blocks:
         Mentions.setup_own_db_access(sharedDbAdapter)
 
     @classmethod
-    def setup_shared_db_access(cls, sharedDbAdapter):
-        PostDataCache.setup_shared_db_access(sharedDbAdapter)
-        Reputations.setup_shared_db_access(sharedDbAdapter)
-        Votes.setup_shared_db_access(sharedDbAdapter)
-        Tags.setup_shared_db_access(sharedDbAdapter)
-        Follow.setup_shared_db_access(sharedDbAdapter)
-        Posts.setup_shared_db_access(sharedDbAdapter)
-        Reblog.setup_shared_db_access(sharedDbAdapter)
-        Notify.setup_shared_db_access(sharedDbAdapter)
-        Accounts.setup_shared_db_access(sharedDbAdapter)
-
-    @classmethod
     def head_num(cls):
         """Get hive's head block number."""
         sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
@@ -137,9 +125,6 @@ class Blocks:
 
         DB.query("COMMIT")
 
-        if not is_initial_sync:
-            DB.query("START TRANSACTION")
-
         completedThreads = 0
 
         pool = ThreadPoolExecutor(max_workers = len(cls._concurrent_flush))
@@ -162,8 +147,6 @@ class Blocks:
         pool.shutdown()
 
         assert completedThreads == len(cls._concurrent_flush)
-        if not is_initial_sync:
-            DB.query("COMMIT")
 
         if (not is_initial_sync) and (first_block > -1):
             DB.query("START TRANSACTION")
