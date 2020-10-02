@@ -546,25 +546,25 @@ BEGIN
     FIRST_BLOCK_TIME = LAST_BLOCK_TIME - '90 days'::interval;
   END IF;
 
-  INSERT INTO hive_mentions( post_id, account_id )
-    SELECT DISTINCT T.id_post, ha.id
+  INSERT INTO hive_mentions( post_id, account_id, block_num )
+    SELECT DISTINCT T.id_post, ha.id, T.block_num
     FROM
       hive_accounts ha
     INNER JOIN
     (
-      SELECT T.id_post, LOWER( ( SELECT trim( T.mention::text, '{""}') ) ) mention, T.author_id
+      SELECT T.id_post, LOWER( ( SELECT trim( T.mention::text, '{""}') ) ) mention, T.author_id, T.block_num
       FROM
       (
         SELECT
-          hp.id, REGEXP_MATCHES( hpd.body, '(?:^|[^a-zA-Z0-9_!#$%&*@\\/])(?:@)([a-zA-Z0-9\\.-]{1,16}[a-zA-Z0-9])(?![a-z])', 'g') mention, hp.author_id
+          hp.id, REGEXP_MATCHES( hpd.body, '(?:^|[^a-zA-Z0-9_!#$%&*@\\/])(?:@)([a-zA-Z0-9\\.-]{1,16}[a-zA-Z0-9])(?![a-z])', 'g') mention, hp.author_id, hp.block_num
         FROM hive_posts hp
           INNER JOIN hive_post_data hpd ON hp.id = hpd.id
         WHERE
         (
           hp.created_at >= FIRST_BLOCK_TIME
         )
-      )T( id_post, mention, author_id )
-    )T( id_post, mention, author_id ) ON ha.name = T.mention
+      )T( id_post, mention, author_id, block_num )
+    )T( id_post, mention, author_id, block_num ) ON ha.name = T.mention
     WHERE ha.id != T.author_id
   ON CONFLICT DO NOTHING;
 
@@ -2739,7 +2739,7 @@ RETURNS TABLE
     title hive_post_data.title%TYPE, body hive_post_data.body%TYPE, category hive_category_data.category%TYPE, depth hive_posts.depth%TYPE,
     promoted hive_posts.promoted%TYPE, payout hive_posts.payout%TYPE, pending_payout hive_posts.pending_payout%TYPE, payout_at hive_posts.payout_at%TYPE,
     is_paidout hive_posts.is_paidout%TYPE, children hive_posts.children%TYPE, created_at hive_posts.created_at%TYPE, updated_at hive_posts.updated_at%TYPE,
-    rshares hive_posts_view.rshares%TYPE, abs_rshares hive_posts_view.abs_rshares%TYPE, json hive_post_data.json%TYPE, author_rep hive_account_reputation_status.reputation%TYPE,
+    rshares hive_posts_view.rshares%TYPE, abs_rshares hive_posts_view.abs_rshares%TYPE, json hive_post_data.json%TYPE, author_rep hive_accounts.reputation%TYPE,
     is_hidden hive_posts.is_hidden%TYPE, is_grayed hive_posts.is_grayed%TYPE, total_votes BIGINT, sc_trend hive_posts.sc_trend%TYPE,
     acct_author_id hive_posts.author_id%TYPE, root_author hive_accounts.name%TYPE, root_permlink hive_permlink_data.permlink%TYPE,
     parent_author hive_accounts.name%TYPE, parent_permlink_or_category hive_permlink_data.permlink%TYPE, allow_replies BOOLEAN,
