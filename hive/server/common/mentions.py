@@ -1,7 +1,6 @@
 """Utility stats functions."""
 
 import logging
-from time import perf_counter as perf
 
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 

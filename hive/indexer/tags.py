@@ -1,5 +1,4 @@
 import logging
-from hive.db.adapter import Db
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 
 log = logging.getLogger(__name__)

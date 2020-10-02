@@ -10,7 +10,6 @@ import ujson as json
 from hive.db.adapter import Db
 from hive.indexer.accounts import Accounts
 from hive.indexer.notify import Notify
-from hive.db.db_state import DbState
 
 log = logging.getLogger(__name__)
 

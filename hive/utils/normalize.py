@@ -3,7 +3,6 @@
 import logging
 import math
 import decimal
-import time
 
 from datetime import datetime
 from pytz import utc

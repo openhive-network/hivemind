@@ -5,7 +5,6 @@ from hive.server.common.helpers import (
     valid_account,
     valid_permlink)
 #import ujson as json
-import traceback
 
 from hive.server.bridge_api.methods import get_post
 from hive.server.common.helpers import (

@@ -1,4 +1,3 @@
-from hive.indexer.votes import Votes
 from hive.server.common.helpers import json_date
 from hive.utils.normalize import sbd_amount, to_nai
 

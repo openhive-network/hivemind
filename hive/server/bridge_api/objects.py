@@ -7,7 +7,6 @@ from hive.server.common.mutes import Mutes
 from hive.server.common.helpers import json_date, get_hive_accounts_info_view_query_string
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 from hive.utils.normalize import sbd_amount, rep_log10
-from hive.indexer.votes import Votes
 from hive.utils.account import safe_db_profile_metadata
 
 ROLES = {-2: 'muted', 0: 'guest', 2: 'member', 4: 'mod', 6: 'admin', 8: 'owner'}

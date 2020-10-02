@@ -1,6 +1,6 @@
 """Hive API: account, post, and comment object retrieval"""
 import logging
-from hive.server.hive_api.common import get_account_id, estimated_sp
+from hive.server.hive_api.common import get_account_id
 from hive.utils.account import safe_db_profile_metadata
 log = logging.getLogger(__name__)
 
