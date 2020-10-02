@@ -8,6 +8,3 @@
 
 # Pghero remove query stats
 @monthly docker exec -e DATABASE_URL=postgres://pghero:pghero@hive-4.pl.syncad.com:5432/pghero dbmonitoring_pghero_1 bin/rake pghero:clean_query_stats > /dev/null 2>&1
-
-set-option -s set-clipboard off
-bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "xclip -se c -i"

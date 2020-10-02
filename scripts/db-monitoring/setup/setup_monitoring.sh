@@ -68,5 +68,4 @@ main() {
 
 }
 
-# main
-echo "$PSQL_OPTIONS"
+main
