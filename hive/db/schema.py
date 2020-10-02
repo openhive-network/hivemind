@@ -190,7 +190,7 @@ def build_metadata():
         sa.Column('block_num', sa.Integer,  nullable=False ),
         sa.Column('is_effective', BOOLEAN, nullable=False, server_default='0'),
 
-        sa.UniqueConstraint('voter_id', 'author_id', 'permlink_id', name='hive_votes_ux1'),
+        sa.UniqueConstraint('voter_id', 'author_id', 'permlink_id', name='hive_votes_voter_id_author_id_permlink_id_UK'),
 
         sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_votes_fk1'),
         sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id'], name='hive_votes_fk2'),
@@ -198,8 +198,6 @@ def build_metadata():
         sa.ForeignKeyConstraint(['permlink_id'], ['hive_permlink_data.id'], name='hive_votes_fk4'),
         sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_votes_fk5'),
 
-        sa.Index('hive_votes_post_id_idx', 'post_id'),
-        sa.Index('hive_votes_voter_id_idx', 'voter_id'),
         sa.Index('hive_votes_voter_id_post_id_idx', 'voter_id', 'post_id'),
         sa.Index('hive_votes_post_id_voter_id_idx', 'post_id', 'voter_id'),
         sa.Index('hive_votes_block_num_idx', 'block_num'),
@@ -256,7 +254,6 @@ def build_metadata():
         sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_reblogs_fk2'),
         sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_reblogs_fk3'),
         sa.UniqueConstraint('blogger_id', 'post_id', name='hive_reblogs_ux1'), # core
-        sa.Index('hive_reblogs_blogger_id', 'blogger_id'),
         sa.Index('hive_reblogs_post_id', 'post_id'),
         sa.Index('hive_reblogs_block_num_idx', 'block_num'),
         sa.Index('hive_reblogs_created_at_idx', 'created_at')
@@ -319,7 +316,6 @@ def build_metadata():
         sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_mentions_fk1'),
         sa.ForeignKeyConstraint(['account_id'], ['hive_accounts.id'], name='hive_mentions_fk2'),
 
-        sa.Index('hive_mentions_post_id_idx', 'post_id'),
         sa.Index('hive_mentions_account_id_idx', 'account_id'),
         sa.UniqueConstraint('post_id', 'account_id', 'block_num', name='hive_mentions_ux1')
     )
