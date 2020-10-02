@@ -20,7 +20,7 @@ FROM
       , ''::VARCHAR as community_title
       , ''::VARCHAR as payload
       , posts_and_scores.score as score
-	    , posts_and_scores.parent_author_id as dst_id
+      , posts_and_scores.parent_author_id as dst_id
   FROM
   (
       SELECT
@@ -70,9 +70,9 @@ UNION ALL
       , ''::VARCHAR as community_title
       , ''::VARCHAR as payload
       , followers_scores.score as score
-	, ha2.id as dst_id
+      , ha2.id as dst_id
   FROM
-	hive_follows hf
+      hive_follows hf
   JOIN hive_accounts ha2 ON hf.following = ha2.id
   JOIN (
       SELECT
@@ -103,7 +103,7 @@ UNION ALL
       , ''::VARCHAR as community_title
       , ''::VARCHAR as payload
       , hr_scores.score as score
-	    , ha.id as dst_id
+      , ha.id as dst_id
   FROM
       hive_reblogs hr
   JOIN hive_posts hp ON hr.post_id = hp.id
@@ -133,7 +133,7 @@ UNION ALL
       , hc.title as community_title
       , ''::VARCHAR as payload
       , hs_scores.score
-	    , ha_com.id as dst_id
+      , ha_com.id as dst_id
   FROM
       hive_subscriptions hs
   JOIN hive_communities hc ON hs.community_id = hc.id
@@ -163,7 +163,7 @@ UNION ALL
       , ''::VARCHAR as community_title
       , ''::VARCHAR as payload
       , 35 as score
-	, ha.id as dst_id
+      , ha.id as dst_id
   FROM
       hive_communities hc
   JOIN hive_accounts ha ON ha.id = hc.id
@@ -188,7 +188,7 @@ UNION ALL
       , ''::VARCHAR as community_title
       , ''::VARCHAR as payload
       , scores.score as score
-	    , scores.dst_id as dst_id
+      , scores.dst_id as dst_id
   FROM
   (
       SELECT
@@ -201,13 +201,13 @@ UNION ALL
           , ha.name as src
           , hpv.permlink as permlink
           , hv1.last_update
-		      , hpv.author_id as dst_id
+          , hpv.author_id as dst_id
       FROM hive_votes hv1
       JOIN (
-		SELECT hpv2.*
-		FROM hive_posts_view hpv2
-		WHERE hpv2.block_num > block_before_head( '90 days' )
-	) as hpv ON hv1.post_id = hpv.id
+          SELECT hpv2.*
+          FROM hive_posts_view hpv2
+          WHERE hpv2.block_num > block_before_head( '90 days' )
+      ) as hpv ON hv1.post_id = hpv.id
       JOIN hive_accounts ha ON ha.id = hv1.voter_id
       WHERE hv1.rshares >= 10e9 AND hpv.abs_rshares != 0
   ) as scores
@@ -237,7 +237,7 @@ UNION ALL
   LEFT JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
 UNION All
   SELECT --mentions notifs
-	  hm.block_num as block_num
+      hm.block_num as block_num
     , notification_id(hm.block_num, 16, CAST( hm.id as INT) ) as id
     , hm.post_id as post_id
     , 16 as type_id

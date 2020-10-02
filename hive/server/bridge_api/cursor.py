@@ -146,13 +146,3 @@ async def pids_by_comments(db, account: str, start_permlink: str = '', limit: in
     """ % seek
 
     return await db.query_col(sql, account=account, start_id=start_id, limit=limit)
-
-
-async def pids_by_replies(db, author: str, start_replies_author: str, start_replies_permlink: str = '',
-                          limit: int = 20):
-    """Get a list of post_ids representing replies to an author.
-    """
-
-    sql = "SELECT get_account_post_replies( (:author)::VARCHAR, (:start_author)::VARCHAR, (:start_permlink)::VARCHAR, (:limit)::SMALLINT ) as id"
-    return await db.query_col(
-        sql, author=author, start_author=start_replies_author, start_permlink=start_replies_permlink, limit=limit)

@@ -1827,7 +1827,6 @@ def setup(db):
 
     sql_scripts = [
       "update_feed_cache.sql",
-      "get_account_post_replies.sql",
       "payout_stats_view.sql",
       "update_hive_posts_mentions.sql",
       "find_tag_id.sql",
@@ -1844,7 +1843,10 @@ def setup(db):
       "notifications_api.sql",
       "bridge_get_account_posts_by_comments.sql",
       "bridge_get_account_posts_by_payout.sql",
-      "bridge_get_account_posts_by_posts.sql"
+      "bridge_get_account_posts_by_posts.sql",
+      "bridge_get_account_posts_by_replies.sql",
+      "bridge_get_relationship_between_accounts.sql",
+      "bridge_get_post.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
