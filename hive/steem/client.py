@@ -128,9 +128,8 @@ class SteemClient:
             return "%.6f" % price
         return "0"
 
-    def get_blocks_range(self, lbound, ubound):
-        """Retrieves blocks in the range of [lbound, ubound)."""
-        block_nums = range(lbound, ubound)
+    def get_blocks(self, block_nums):
+        """Retrieves blocks according to blocks numbers."""
         blocks = {}
 
         batch_params = [{'block_num': i} for i in block_nums]
@@ -141,6 +140,11 @@ class SteemClient:
             blocks[num] = block
 
         return [blocks[x] for x in block_nums]
+
+    def get_blocks_range(self, lbound, ubound):
+        """Retrieves blocks in the range of [lbound, ubound)."""
+        block_nums = range(lbound, ubound)
+        return self.get_blocks(block_nums)
 
     def get_virtual_operations(self, block):
         """ Get virtual ops from block """

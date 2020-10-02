@@ -32,6 +32,8 @@ class DbState:
     # prop is true until initial sync complete
     _is_initial_sync = True
 
+    is_load_mock_data = False
+
     # db schema version
     _ver = None
 
@@ -339,7 +341,7 @@ class DbState:
             #set_logged_table_attribute(cls.db(), True)
 
             log.info("Recreating FKs")
-            create_fk(cls.db())
+            create_fk(cls.db(), cls.is_load_mock_data)
 
 
     @staticmethod

@@ -36,6 +36,8 @@ def _get_auth(op):
 class CustomOp:
     """Processes custom ops and dispatches updates."""
 
+    is_load_mock_data = False
+
     @classmethod
     def process_ops(cls, ops, block_num, block_date):
         """Given a list of operation in block, filter and process them."""
@@ -48,19 +50,27 @@ class CustomOp:
                 continue
 
             op_json = load_json_key(op, 'json')
-            if op['id'] == 'follow':
-                if block_num < 6000000 and not isinstance(op_json, list):
-                    op_json = ['follow', op_json]  # legacy compat
-                cls._process_legacy(account, op_json, block_date, block_num)
-            elif op['id'] == 'reblog':
-                if block_num < 6000000 and not isinstance(op_json, list):
-                    op_json = ['reblog', op_json]  # legacy compat
-                cls._process_legacy(account, op_json, block_date, block_num)
-            elif op['id'] == 'community':
-                if block_num > START_BLOCK:
-                    process_json_community_op(account, op_json, block_date, block_num)
-            elif op['id'] == 'notify':
+
+            if not cls.is_load_mock_data:
+              if op['id'] == 'follow':
+                  if block_num < 6000000 and not isinstance(op_json, list):
+                      op_json = ['follow', op_json]  # legacy compat
+                  cls._process_legacy(account, op_json, block_date, block_num)
+              elif op['id'] == 'reblog':
+                  if block_num < 6000000 and not isinstance(op_json, list):
+                      op_json = ['reblog', op_json]  # legacy compat
+                  cls._process_legacy(account, op_json, block_date, block_num)
+              elif op['id'] == 'community':
+                  if block_num > START_BLOCK:
+                      process_json_community_op(account, op_json, block_date, block_num)
+              elif op['id'] == 'notify':
+                  cls._process_notify(account, op_json, block_date)
+            else:
+              if op['id'] == 'notify':
                 cls._process_notify(account, op_json, block_date)
+              elif op['id'] == 'community':
+                process_json_community_op(account, op_json, block_date, block_num)
+
             OPSM.op_stats(opName, OPSM.stop(start))
 
     @classmethod

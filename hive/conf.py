@@ -58,6 +58,9 @@ class Conf():
 
         add('--auto-http-server-port', nargs='+', type=int, help='Hivemind will listen on first available port from this range')
 
+        add('--load-mock-data', help='loading artificial data f.e. related to communities', action='store_true')
+        add('--mock-blocks-source', required=False, help='number of blocks which should be loaded in order to fill hivemind by artificial data', default='community_blocks.json')
+
         # needed for e.g. tests - other args may be present
         args = (parser.parse_args() if strict
                 else parser.parse_known_args()[0])

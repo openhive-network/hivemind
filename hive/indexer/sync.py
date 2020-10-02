@@ -25,6 +25,7 @@ from hive.indexer.follow import Follow
 from hive.indexer.community import Community
 from hive.indexer.reblog import Reblog
 from hive.indexer.reputations import Reputations
+from hive.indexer.custom_op import CustomOp
 
 from hive.server.common.payout_stats import PayoutStats
 from hive.server.common.mentions import Mentions
@@ -52,6 +53,30 @@ def prepare_vops(vops_by_block):
         preparedVops[blockNum] = vopsList
 
     return preparedVops
+
+
+def _mock_block_provider(node, queue, lbound, ubound, chunk_size, mock_blocks):
+    try:
+        list_mock_blocks = sorted( mock_blocks )
+        num = 0
+        count = ubound - lbound
+        log.info("[MOCK-SYNC] start block %d, +%d to sync", lbound, count)
+        timer = Timer(count, entity='block', laps=['rps', 'wps'])
+        while CONTINUE_PROCESSING and lbound < ubound:
+            to = min(lbound + chunk_size, ubound)
+            timer.batch_start()
+            _chunk = list_mock_blocks[ lbound : to ]
+            blocks = node.get_blocks(_chunk)
+            lbound = to
+            timer.batch_lap()
+            queue.put(blocks)
+            num = num + 1
+        return num
+    except KeyboardInterrupt:
+        log.info("Caught SIGINT")
+
+    except Exception:
+        log.exception("Exception caught during mock fetching blocks")
 
 def _block_provider(node, queue, lbound, ubound, chunk_size):
     try:
@@ -96,6 +121,82 @@ def _vops_provider(conf, node, queue, lbound, ubound, chunk_size):
 
     except Exception:
         log.exception("Exception caught during fetching vops...")
+
+def _mock_block_consumer(node, blocksQueue, is_initial_sync, lbound, ubound, chunk_size):
+    from hive.utils.stats import minmax
+    is_debug = log.isEnabledFor(10)
+    num = 0
+    time_start = OPSM.start()
+    rate = {}
+    try:
+        count = ubound - lbound
+        timer = Timer(count, entity='block', laps=['rps', 'wps'])
+
+        while lbound < ubound:
+
+            wait_time_1 = WSM.start()
+            if blocksQueue.empty() and CONTINUE_PROCESSING:
+                log.info("Awaiting any block to process...")
+
+            blocks = []
+            if not blocksQueue.empty() or CONTINUE_PROCESSING:
+                blocks = blocksQueue.get()
+                blocksQueue.task_done()
+            WSM.wait_stat('block_consumer_block', WSM.stop(wait_time_1))
+
+            to = min(lbound + chunk_size, ubound)
+
+            timer.batch_start()
+
+            block_start = perf()
+            preparedVops = []
+            Blocks.process_multi(blocks, preparedVops, is_initial_sync)
+            block_end = perf()
+
+            timer.batch_lap()
+            timer.batch_finish(len(blocks))
+            time_current = perf()
+
+            prefix = ("[INITIAL SYNC] Got block %d @ %s" % (
+                to - 1, blocks[-1]['timestamp']))
+            log.info(timer.batch_status(prefix))
+            log.info("[INITIAL SYNC] Time elapsed: %fs", time_current - time_start)
+            log.info("[INITIAL SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
+            rate = minmax(rate, len(blocks), time_current - wait_time_1, lbound)
+
+            if block_end - block_start > 1.0 or is_debug:
+                otm = OPSM.log_current("Operations present in the processed blocks")
+                ftm = FSM.log_current("Flushing times")
+                wtm = WSM.log_current("Waiting times")
+                log.info(f"Calculated time: {otm+ftm+wtm :.4f} s.")
+
+            OPSM.next_blocks()
+            FSM.next_blocks()
+            WSM.next_blocks()
+
+            lbound = to
+            PC.broadcast(BroadcastObject('sync_current_block', lbound, 'blocks'))
+
+            num = num + 1
+
+            if not CONTINUE_PROCESSING and blocksQueue.empty():
+                break
+    except KeyboardInterrupt:
+        log.info("Caught SIGINT")
+    except Exception:
+        log.exception("Exception caught during processing blocks...")
+    finally:
+        stop = OPSM.stop(time_start)
+        log.info("=== TOTAL MOCK STATS===")
+        wtm = WSM.log_global("Total waiting times")
+        ftm = FSM.log_global("Total flush times")
+        otm = OPSM.log_global("All operations present in the processed blocks")
+        ttm = ftm + otm + wtm
+        log.info(f"Elapsed time: {stop :.4f}s. Calculated elapsed time: {ttm :.4f}s. Difference: {stop - ttm :.4f}s")
+        log.info(f"Highest block processing rate: {rate['max'] :.4f} bps. From: {rate['max_from']} To: {rate['max_to']}")
+        log.info(f"Lowest block processing rate: {rate['min'] :.4f} bps. From: {rate['min_from']} To: {rate['min_to']}")
+        log.info("=== TOTAL MOCK STATS ===")
+        return num
 
 def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size):
     from hive.utils.stats import minmax
@@ -182,6 +283,31 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
         log.info("=== TOTAL STATS ===")
         return num
 
+def _mock_node_data_provider(self, is_initial_sync, chunk_size):
+    blocksQueue = queue.Queue(maxsize=10)
+    global CONTINUE_PROCESSING
+
+    lbound = 0
+    ubound = len( self.mock_blocks )
+
+    log.info("lbound: `%s' ubound: `%s'", lbound, ubound)
+
+    with ThreadPoolExecutor(max_workers = 4) as pool:
+        try:
+            pool.submit(_mock_block_provider, self._steem, blocksQueue, lbound, ubound, chunk_size, self.mock_blocks)
+            blockConsumerFuture = pool.submit(_mock_block_consumer, self._steem, blocksQueue, is_initial_sync, lbound, ubound, chunk_size)
+
+            blockConsumerFuture.result()
+            if not CONTINUE_PROCESSING and blocksQueue.empty():
+                pool.shutdown(False)
+        except KeyboardInterrupt:
+            log.info(""" **********************************************************
+                          CAUGHT SIGINT. PLEASE WAIT... PROCESSING DATA IN QUEUES...
+                          **********************************************************
+            """)
+            CONTINUE_PROCESSING = False
+    blocksQueue.join()
+
 def _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size):
     blocksQueue = queue.Queue(maxsize=10)
     vopsQueue = queue.Queue(maxsize=10)
@@ -218,6 +344,7 @@ class Sync:
         log.info("Using hived url: `%s'", self._conf.get('steemd_url'))
 
         self._steem = conf.steem()
+        self.mock_blocks = set()
 
     def run(self):
         """Initialize state; setup/recovery checks; sync and runloop."""
@@ -227,6 +354,15 @@ class Sync:
 
         from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
         log.info("database_schema_version : %s", SCHEMA_DB_VERSION)
+
+        _mock_val = self.is_load_mock_data()
+        log.info("mock status : %s", _mock_val)
+        DbState.is_load_mock_data   = _mock_val
+        Blocks.is_load_mock_data    = _mock_val
+        Accounts.is_load_mock_data  = _mock_val
+        CustomOp.is_load_mock_data  = _mock_val
+        if _mock_val:
+          self.mock_blocks = self.load_mock_blocks()
 
         # ensure db schema up to date, check app status
         DbState.initialize()
@@ -309,7 +445,10 @@ class Sync:
             return
 
         if is_initial_sync:
-            _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size)
+            if self.is_load_mock_data():
+              _mock_node_data_provider(self, is_initial_sync, chunk_size)
+            else:
+              _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size)
             return
 
         log.info("[FAST SYNC] start block %d, +%d to sync", lbound, count)
@@ -392,13 +531,32 @@ class Sync:
     # refetch dynamic_global_properties, feed price, etc
     def _update_chain_state(self):
         """Update basic state props (head block, feed price) in db."""
-        state = self._steem.gdgp_extended()
-        self._db.query("""UPDATE hive_state SET block_num = :block_num,
-                       steem_per_mvest = :spm, usd_per_steem = :ups,
-                       sbd_per_steem = :sps, dgpo = :dgpo""",
-                       block_num=state['dgpo']['head_block_number'],
-                       spm=state['steem_per_mvest'],
-                       ups=state['usd_per_steem'],
-                       sps=state['sbd_per_steem'],
-                       dgpo=json.dumps(state['dgpo']))
-        return state['dgpo']['head_block_number']
+        if not self.is_load_mock_data():
+          state = self._steem.gdgp_extended()
+          self._db.query("""UPDATE hive_state SET block_num = :block_num,
+                        steem_per_mvest = :spm, usd_per_steem = :ups,
+                        sbd_per_steem = :sps, dgpo = :dgpo""",
+                        block_num=state['dgpo']['head_block_number'],
+                        spm=state['steem_per_mvest'],
+                        ups=state['usd_per_steem'],
+                        sps=state['sbd_per_steem'],
+                        dgpo=json.dumps(state['dgpo']))
+          return state['dgpo']['head_block_number']
+
+    def is_load_mock_data(self):
+        """Is an artificial mode enabled?"""
+        return self._conf.get("load_mock_data")
+
+    def load_mock_blocks(self):
+        """Is an artificial mode enabled?"""
+        assert self.is_load_mock_data
+
+        _set = set()
+        with open( self._conf.get("mock_blocks_source"), 'r' ) as f:
+          blocks = json.load( f )
+          if 'blocks' in blocks:
+            for block in blocks['blocks']:
+              _set.add( block )
+
+        log.info("Loaded blocks %s", len(_set))
+        return _set

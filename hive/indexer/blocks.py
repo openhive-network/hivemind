@@ -45,6 +45,8 @@ class Blocks:
     _head_block_date = None
     _current_block_date = None
 
+    is_load_mock_data = False
+
     _concurrent_flush = [
       ('Posts', Posts.flush, Posts),
       ('PostDataCache', PostDataCache.flush, PostDataCache),
@@ -256,33 +258,36 @@ class Blocks:
 
                 Accounts.register(account_name, op_details, cls._head_block_date, num)
 
-                # account metadata updates
-                if op_type == 'account_update_operation':
-                    Accounts.update_op( op )
-                elif op_type == 'account_update2_operation':
-                    Accounts.update_op( op )
+                if not cls.is_load_mock_data:
+                  # account metadata updates
+                  if op_type == 'account_update_operation':
+                      Accounts.update_op( op )
+                  elif op_type == 'account_update2_operation':
+                      Accounts.update_op( op )
 
-                # post ops
-                elif op_type == 'comment_operation':
-                    Posts.comment_op(op, cls._head_block_date)
-                elif op_type == 'delete_comment_operation':
-                    key = "{}/{}".format(op['author'], op['permlink'])
-                    if ( ineffective_deleted_ops is None ) or ( key not in ineffective_deleted_ops ):
-                        Posts.delete_op(op)
-                elif op_type == 'comment_options_operation':
-                    Posts.comment_options_op(op)
-                elif op_type == 'vote_operation':
-                    Votes.vote_op(op, cls._head_block_date)
+                  # post ops
+                  elif op_type == 'comment_operation':
+                      Posts.comment_op(op, cls._head_block_date)
+                  elif op_type == 'delete_comment_operation':
+                      key = "{}/{}".format(op['author'], op['permlink'])
+                      if ( ineffective_deleted_ops is None ) or ( key not in ineffective_deleted_ops ):
+                          Posts.delete_op(op)
+                  elif op_type == 'comment_options_operation':
+                      Posts.comment_options_op(op)
+                  elif op_type == 'vote_operation':
+                      Votes.vote_op(op, cls._head_block_date)
 
-                # misc ops
-                elif op_type == 'transfer_operation':
-                    Payments.op_transfer(op, tx_idx, num, cls._head_block_date)
-                elif op_type == 'custom_json_operation':
-                    json_ops.append(op)
+                  # misc ops
+                  elif op_type == 'transfer_operation':
+                      Payments.op_transfer(op, tx_idx, num, cls._head_block_date)
+                  elif op_type == 'custom_json_operation':
+                      json_ops.append(op)
 
-                if op_type != 'custom_json_operation':
-                    OPSM.op_stats(op_type, OPSM.stop(start))
-
+                  if op_type != 'custom_json_operation':
+                      OPSM.op_stats(op_type, OPSM.stop(start))
+                else:
+                  if op_type == 'custom_json_operation':
+                      json_ops.append(op)
         # follow/reblog/community ops
         if json_ops:
             CustomOp.process_ops(json_ops, num, cls._head_block_date)

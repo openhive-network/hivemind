@@ -423,13 +423,14 @@ def drop_fk(db):
             db.query_no_return(sql)
     db.query_no_return("COMMIT")
 
-def create_fk(db):
+def create_fk(db, is_load_mock_data):
     from sqlalchemy.schema import AddConstraint
     from sqlalchemy import text
     connection = db.engine().connect()
     connection.execute(text("START TRANSACTION"))
     for table in build_metadata().sorted_tables:
         for fk in table.foreign_keys:
+          if ( not is_load_mock_data ) or ( is_load_mock_data and table.name != 'hive_blocks' ):
             connection.execute(AddConstraint(fk.constraint))
     connection.execute(text("COMMIT"))
 

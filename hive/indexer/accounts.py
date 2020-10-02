@@ -27,6 +27,8 @@ class Accounts(DbAdapterHolder):
 
     inside_flush = False
 
+    is_load_mock_data = False
+
     # name->id map
     _ids = {}
 
@@ -119,7 +121,7 @@ class Accounts(DbAdapterHolder):
 
         # post-insert: pass to communities to check for new registrations
         from hive.indexer.community import Community, START_DATE
-        if block_date > START_DATE:
+        if block_date > START_DATE or cls.is_load_mock_data:
             Community.register(name, block_date, block_num)
 
     @classmethod
