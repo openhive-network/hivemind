@@ -8,16 +8,27 @@ services:
     ports:
       - "30000:3000"  # Grafana dashboarding
       - "8080:8080"   # Management Web UI (monitored hosts, metrics, metrics configurations)
-      - "8081:8081"   # Gatherer healthcheck / statistics on number of gathered metrics (JSON)
-      - "54320:5432"  # Postgres configuration (or metrics storage DB, when using the cybertec/pgwatch2-postgres image)
+      # - "8081:8081"   # Gatherer healthcheck / statistics on number of gathered metrics (JSON)
+      # - "54320:5432"  # Postgres configuration (or metrics storage DB, when using the cybertec/pgwatch2-postgres image)
       # - "8086:8086" # InfluxDB API (when using the InfluxDB version)
       # - "8088:8088" # InfluxDB Backup port (when using the InfluxDB version)
-    restart: always
+    restart: unless-stopped
     volumes:
       - pgwatch2-postgresql:/var/lib/postgresql
       - pgwatch2-grafana:/var/lib/grafana
       - pgwatch2-influxdb:/var/lib/influxdb
       - pgwatch2-pgwatch2:/pgwatch2/persistent-config
+
+  pghero:
+    # Docs: https://github.com/ankane/pghero
+    image: ankane/pghero:v2.7.2
+    environment:
+      DATABASE_URL: ${PGHERO_DATABASE_URL}
+    restart: unless-stopped
+    ports:
+      - "8085:8080"
+    volumes:
+      - ./pghero.yml:/app/config/pghero.yml
 
 volumes:
   pgwatch2-postgresql:

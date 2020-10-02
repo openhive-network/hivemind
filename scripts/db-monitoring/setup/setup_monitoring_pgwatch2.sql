@@ -2,16 +2,17 @@
 -- using program https://github.com/cybertec-postgresql/pgwatch2/
 
 -- Example run:
--- psql -p 5432 -U postgres -h 127.0.0.1 -d template_hive_ci -f ./setup_monitoring.sql
+-- psql -p 5432 -U postgres -h 127.0.0.1 -d template_hive_ci -f ./setup_monitoring_pgwatch2.sql
 
 SET client_encoding = 'UTF8';
 SET client_min_messages = 'warning';
 
+-- TODO We need extension pg_qualstats, see https://www.cybertec-postgresql.com/en/pgwatch2-v1-7-0-released/
 
 BEGIN;
 
 
-CREATE SCHEMA pgwatch2;
+CREATE SCHEMA IF NOT EXISTS pgwatch2;
 
 CREATE EXTENSION IF NOT EXISTS plpython3u WITH SCHEMA pg_catalog;
 COMMENT ON EXTENSION plpython3u IS 'PL/Python3U untrusted procedural language';
@@ -20,6 +21,9 @@ CREATE EXTENSION IF NOT EXISTS pg_stat_statements WITH SCHEMA public;
 COMMENT ON EXTENSION pg_stat_statements
     IS 'Track execution statistics of all SQL statements executed';
 
+CREATE EXTENSION IF NOT EXISTS pg_qualstats;
+COMMENT ON EXTENSION pg_qualstats
+    IS 'Statistics on predicates found in WHERE statements and JOIN clauses.';
 
 CREATE FUNCTION pgwatch2.get_load_average(OUT load_1min double precision,
         OUT load_5min double precision, OUT load_15min double precision)
