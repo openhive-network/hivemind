@@ -190,7 +190,7 @@ def build_metadata():
         sa.Column('block_num', sa.Integer,  nullable=False ),
         sa.Column('is_effective', BOOLEAN, nullable=False, server_default='0'),
 
-        sa.UniqueConstraint('voter_id', 'author_id', 'permlink_id', name='hive_votes_voter_id_author_id_permlink_id_UK'),
+        sa.UniqueConstraint('voter_id', 'author_id', 'permlink_id', name='hive_votes_voter_id_author_id_permlink_id_uk'),
 
         sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_votes_fk1'),
         sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id'], name='hive_votes_fk2'),
