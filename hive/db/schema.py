@@ -40,7 +40,7 @@ def build_metadata():
         sa.Column('created_at', sa.DateTime, nullable=False),
         #sa.Column('block_num', sa.Integer, nullable=False),
         sa.Column('reputation', sa.BigInteger, nullable=False, server_default='0'),
-
+        sa.Column('is_implicit', sa.Boolean, nullable=False, server_default='1'),
         sa.Column('followers', sa.Integer, nullable=False, server_default='0'),
         sa.Column('following', sa.Integer, nullable=False, server_default='0'),
 
@@ -52,13 +52,6 @@ def build_metadata():
 
         sa.UniqueConstraint('name', name='hive_accounts_ux1'),
         sa.Index('hive_accounts_ix6', 'reputation')
-    )
-
-    sa.Table(
-        'hive_account_reputation_status', metadata,
-        sa.Column('account_id', sa.Integer, primary_key=True),
-        sa.Column('reputation', sa.BigInteger, nullable=False),
-        sa.Column('is_implicit', sa.Boolean, nullable=False)
     )
 
     sa.Table(
