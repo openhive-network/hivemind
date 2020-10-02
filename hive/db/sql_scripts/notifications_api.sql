@@ -1,4 +1,4 @@
-DROP TYPE IF EXISTS notification
+DROP TYPE IF EXISTS notification CASCADE
 ;
 CREATE TYPE notification AS
 (
