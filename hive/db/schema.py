@@ -107,7 +107,6 @@ def build_metadata():
         sa.Column('is_declined', BOOLEAN, nullable=False, server_default='0'),
         sa.Column('is_full_power', BOOLEAN, nullable=False, server_default='0'),
         sa.Column('is_hidden', BOOLEAN, nullable=False, server_default='0'),
-        sa.Column('is_grayed', BOOLEAN, nullable=False, server_default='0'),
 
         # important indexes
         sa.Column('sc_trend', sa.Float(precision=6), nullable=False, server_default='0'),
@@ -804,7 +803,7 @@ def setup(db):
           hpd.json,
           ha_a.reputation AS author_rep,
           hp.is_hidden,
-          hp.is_grayed,
+          ( ha_a.reputation < 1 ) is_grayed,
           hp.total_vote_weight,
           ha_pp.name AS parent_author,
           ha_pp.id AS parent_author_id,
@@ -2101,7 +2100,7 @@ def setup(db):
             promoted hive_posts.promoted%TYPE, payout hive_posts.payout%TYPE, pending_payout hive_posts.pending_payout%TYPE, payout_at hive_posts.payout_at%TYPE,
             is_paidout hive_posts.is_paidout%TYPE, children hive_posts.children%TYPE, created_at hive_posts.created_at%TYPE, updated_at hive_posts.updated_at%TYPE,
             rshares hive_posts_view.rshares%TYPE, abs_rshares hive_posts_view.abs_rshares%TYPE, json hive_post_data.json%TYPE, author_rep hive_accounts.reputation%TYPE,
-            is_hidden hive_posts.is_hidden%TYPE, is_grayed hive_posts.is_grayed%TYPE, total_votes BIGINT, sc_trend hive_posts.sc_trend%TYPE,
+            is_hidden hive_posts.is_hidden%TYPE, is_grayed BOOLEAN, total_votes BIGINT, sc_trend hive_posts.sc_trend%TYPE,
             acct_author_id hive_posts.author_id%TYPE, root_author hive_accounts.name%TYPE, root_permlink hive_permlink_data.permlink%TYPE,
             parent_author hive_accounts.name%TYPE, parent_permlink_or_category hive_permlink_data.permlink%TYPE, allow_replies BOOLEAN,
             allow_votes hive_posts.allow_votes%TYPE, allow_curation_rewards hive_posts.allow_curation_rewards%TYPE, url TEXT, root_title hive_post_data.title%TYPE,
