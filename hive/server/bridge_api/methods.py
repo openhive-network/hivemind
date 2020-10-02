@@ -1,7 +1,7 @@
 """Bridge API public endpoints for posts"""
 
 import hive.server.bridge_api.cursor as cursor
-from hive.server.bridge_api.objects import load_posts, load_posts_reblogs, load_profiles, _bridge_post_object
+from hive.server.bridge_api.objects import load_posts, load_posts_reblogs, load_profiles, _bridge_post_object, append_statistics_to_post
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 from hive.server.common.helpers import (
     return_error_info,
@@ -13,51 +13,6 @@ from hive.server.hive_api.common import get_account_id
 from hive.server.hive_api.objects import _follow_contexts
 from hive.server.hive_api.community import list_top_communities
 from hive.server.common.mutes import Mutes
-
-
-ROLES = {-2: 'muted', 0: 'guest', 2: 'member', 4: 'mod', 6: 'admin', 8: 'owner'}
-
-SQL_TEMPLATE = """
-        SELECT
-            hp.id,
-            hp.author,
-            hp.parent_author,
-            hp.author_rep,
-            hp.root_title,
-            hp.beneficiaries,
-            hp.max_accepted_payout,
-            hp.percent_hbd,
-            hp.url,
-            hp.permlink,
-            hp.parent_permlink_or_category,
-            hp.title,
-            hp.body,
-            hp.category,
-            hp.depth,
-            hp.promoted,
-            hp.payout,
-            hp.pending_payout,
-            hp.payout_at,
-            hp.is_paidout,
-            hp.children,
-            hp.votes,
-            hp.created_at,
-            hp.updated_at,
-            hp.rshares,
-            hp.abs_rshares,
-            hp.json,
-            hp.is_hidden,
-            hp.is_grayed,
-            hp.total_votes,
-            hp.sc_trend,
-            hp.role_title,
-            hp.community_title,
-            hp.role_id,
-            hp.is_pinned,
-            hp.curator_payout_value
-        FROM hive_posts_view hp
-        WHERE
-    """
 
 #pylint: disable=too-many-arguments, no-else-return
 
@@ -104,22 +59,18 @@ async def get_post(context, author, permlink, observer=None):
     if observer and context:
         blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
 
-    sql = "---bridge_api.get_post\n" + SQL_TEMPLATE + """ hp.author = :author AND hp.permlink = :permlink """
-
+    sql = "SELECT * FROM bridge_get_post( (:author)::VARCHAR, (:permlink)::VARCHAR )"
     result = await db.query_all(sql, author=author, permlink=permlink)
-    assert len(result) == 1, 'invalid author/permlink or post not found in cache'
+
     post = _bridge_post_object(result[0])
     post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.BridgeApi)
-    post = await append_statistics_to_post(post, result[0], False, blacklists_for_user)
+    post = append_statistics_to_post(post, result[0], False, blacklists_for_user)
     return post
 
 @return_error_info
 async def _get_ranked_posts_for_observer_communities( db, sort:str, start_author:str, start_permlink:str, limit, observer:str):
     async def execute_observer_community_query(db, sql, limit):
         return await db.query_all(sql, observer=observer, author=start_author, permlink=start_permlink, limit=limit )
-
-    if not observer:
-        return []
 
     if sort == 'trending':
         sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
@@ -273,16 +224,20 @@ async def _get_ranked_posts_for_all( db, sort:str, start_author:str, start_perml
 async def get_ranked_posts(context, sort:str, start_author:str='', start_permlink:str='',
                            limit:int=20, tag:str=None, observer:str=None):
     """Query posts, sorted by given method."""
-    supported_sort_list = ['trending', 'hot', 'created', 'promoted',
-                           'payout', 'payout_comments', 'muted']
+    supported_sort_list = ['trending', 'hot', 'created', 'promoted', 'payout', 'payout_comments', 'muted']
     assert sort in supported_sort_list, "Unsupported sort, valid sorts: {}".format(", ".join(supported_sort_list))
 
+    db = context['db']
+
     async def process_query_results( sql_result ):
+        blacklists_for_user = None
+        if observer:
+            blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
         posts = []
         for row in sql_result:
             post = _bridge_post_object(row)
             post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.BridgeApi)
-            post = await append_statistics_to_post(post, row, False, None)
+            post = append_statistics_to_post(post, row, False, blacklists_for_user)
             posts.append(post)
         return posts
 
@@ -290,8 +245,7 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
     valid_permlink(start_permlink, allow_empty=True)
     valid_limit(limit, 100, 20)
     valid_tag(tag, allow_empty=True)
-
-    db = context['db']
+    valid_account(observer, allow_empty=(tag != "my"))
 
     if tag == "my":
         result = await _get_ranked_posts_for_observer_communities(db, sort, start_author, start_permlink, limit, observer)
@@ -305,41 +259,8 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
         result = await _get_ranked_posts_for_tag(db, sort, tag, start_author, start_permlink, limit)
         return await process_query_results(result)
 
-
     result = await _get_ranked_posts_for_all(db, sort, start_author, start_permlink, limit)
     return await process_query_results(result)
-
-async def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=None):
-    """ apply information such as blacklists and community names/roles to a given post """
-    if not blacklists_for_user:
-        post['blacklists'] = Mutes.lists(row['author'], row['author_rep'])
-    else:
-        post['blacklists'] = []
-        if row['author'] in blacklists_for_user:
-            blacklists = blacklists_for_user[row['author']]
-            for blacklist in blacklists:
-                post['blacklists'].append(blacklist)
-        reputation = row['author_rep']
-        if reputation < 1:
-            post['blacklists'].append('reputation-0')
-        elif reputation  == 1:
-            post['blacklists'].append('reputation-1')
-
-    if 'community_title' in row and row['community_title']:
-        post['community'] = row['category']
-        post['community_title'] = row['community_title']
-        if row['role_id']:
-            post['author_role'] = ROLES[row['role_id']]
-            post['author_title'] = row['role_title']
-        else:
-            post['author_role'] = 'guest'
-            post['author_title'] = ''
-    else:
-        post['stats']['gray'] = row['is_grayed']
-    post['stats']['hide'] = 'irredeemables' in post['blacklists']
-    if is_pinned:
-        post['stats']['is_pinned'] = True
-    return post
 
 async def _get_account_posts_by_blog(db, account : str, start_author : str, start_permlink : str, limit : int):
   _ids = await cursor.pids_by_blog(db, account, start_author, start_permlink, limit)
@@ -384,7 +305,7 @@ async def _get_posts(db, sort : str, account, start_author : str, start_permlink
   for row in sql_result:
       post = _bridge_post_object(row)
       post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.BridgeApi)
-      post = await append_statistics_to_post(post, row, False, blacklists_for_user)
+      post = append_statistics_to_post(post, row, False, blacklists_for_user)
       posts.append(post)
   return posts
 
@@ -415,12 +336,7 @@ async def get_relationship_between_accounts(context, account1, account2, observe
 
     db = context['db']
 
-    sql = """
-        SELECT state, blacklisted, follow_blacklists FROM hive_follows WHERE
-        follower = (SELECT id FROM hive_accounts WHERE name = :account1) AND
-        following = (SELECT id FROM hive_accounts WHERE name = :account2)
-    """
-
+    sql = "SELECT * FROM bridge_get_relationship_between_accounts( (:account1)::VARCHAR, (:account2)::VARCHAR )"
     sql_result = await db.query_all(sql, account1=account1, account2=account2)
 
     result = {

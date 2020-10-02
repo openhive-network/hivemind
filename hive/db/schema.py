@@ -1851,7 +1851,9 @@ def setup(db):
       "notifications_api.sql",
       "bridge_get_account_posts_by_comments.sql",
       "bridge_get_account_posts_by_payout.sql",
-      "bridge_get_account_posts_by_posts.sql"
+      "bridge_get_account_posts_by_posts.sql",
+      "bridge_get_relationship_between_accounts.sql",
+      "bridge_get_post.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
