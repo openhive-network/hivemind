@@ -1480,28 +1480,6 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-        DROP VIEW IF EXISTS hive_accounts_rank_view CASCADE
-        ;
-        CREATE VIEW hive_accounts_rank_view
-        AS
-        SELECT
-            ha.id as id
-          , CASE
-                 WHEN rank.position < 200 THEN 70
-                 WHEN rank.position < 1000 THEN 60
-                 WHEN rank.position < 6500 THEN 50
-                 WHEN rank.position < 25000 THEN 40
-                 WHEN rank.position < 100000 THEN 30
-                 ELSE 20
-             END as score
-        FROM hive_accounts ha
-        JOIN (
-        SELECT ha2.id, RANK () OVER ( ORDER BY ha2.reputation DESC ) as position FROM hive_accounts ha2
-        ) as rank ON ha.id = rank.id
-    """
-    db.query_no_return(sql)
-
-    sql = """
           DO $$
           BEGIN
             EXECUTE 'ALTER DATABASE '||current_database()||' SET join_collapse_limit TO 16';
@@ -1560,41 +1538,6 @@ def setup(db):
           END
           $BODY$
           """
-    db.query_no_return(sql)
-
-    sql = """
-        DROP FUNCTION IF EXISTS public.calculate_notify_vote_score(_payout hive_posts.payout%TYPE, _abs_rshares hive_posts_view.abs_rshares%TYPE, _rshares hive_votes.rshares%TYPE) CASCADE
-        ;
-        CREATE OR REPLACE FUNCTION public.calculate_notify_vote_score(_payout hive_posts.payout%TYPE, _abs_rshares hive_posts_view.abs_rshares%TYPE, _rshares hive_votes.rshares%TYPE)
-        RETURNS INT
-        LANGUAGE 'sql'
-        IMMUTABLE
-        AS $BODY$
-            SELECT CASE
-                WHEN ((( _payout )/_abs_rshares) * 1000 * _rshares < 20 ) THEN -1
-                    ELSE LEAST(100, (LENGTH(CAST( CAST( ( (( _payout )/_abs_rshares) * 1000 * _rshares ) as BIGINT) as text)) - 1) * 25)
-            END;
-        $BODY$;
-    """
-
-    db.query_no_return(sql)
-
-    sql = """
-        DROP FUNCTION IF EXISTS notification_id(in _block_number INTEGER, in _notifyType INTEGER, in _id INTEGER)
-        ;
-        CREATE OR REPLACE FUNCTION notification_id(in _block_number INTEGER, in _notifyType INTEGER, in _id INTEGER)
-        RETURNS BIGINT
-        AS
-        $function$
-        BEGIN
-        RETURN CAST( _block_number as BIGINT ) << 32
-               | ( _notifyType << 16 )
-               | ( _id & CAST( x'00FF' as INTEGER) );
-        END
-        $function$
-        LANGUAGE plpgsql IMMUTABLE
-        ;
-    """
     db.query_no_return(sql)
 
     sql = """
