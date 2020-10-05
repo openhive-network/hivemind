@@ -389,8 +389,8 @@ BEGIN
       FROM
           hive_posts hp1
           JOIN hive_communities hc ON hp1.community_id = hc.id
-          INNER JOIN hive_accounts ha ON hp1.author_id = ha.id
-      WHERE hc.name = _community AND NOT hp1.is_paidout AND ( ha.reputation < 1 ) AND ( hp1.payout + hp1.pending_payout ) > 0
+          INNER JOIN hive_accounts_view ha ON hp1.author_id = ha.id
+      WHERE hc.name = _community AND NOT hp1.is_paidout AND ha.is_grayed AND ( hp1.payout + hp1.pending_payout ) > 0
           AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
       ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
       LIMIT _limit
@@ -525,9 +525,9 @@ BEGIN
       FROM
           hive_posts hp1
           JOIN hive_communities hc ON hp1.community_id = hc.id
-          INNER JOIN hive_accounts ha ON hp1.author_id = ha.id
+          INNER JOIN hive_accounts_view ha ON hp1.author_id = ha.id
       WHERE hc.name = _community AND hp1.depth = 0 AND NOT hp1.is_pinned -- concatenated with bridge_get_ranked_post_pinned_for_community
-          AND ( ha.reputation >= 1 ) AND ( __post_id = 0 OR hp1.id < __post_id )
+          AND NOT ha.is_grayed AND ( __post_id = 0 OR hp1.id < __post_id )
       ORDER BY hp1.id DESC
       LIMIT _limit
   ) as created

@@ -53,8 +53,8 @@ BEGIN
       FROM
           hive_post_tags hpt
           JOIN hive_posts hp1 ON hp1.id = hpt.post_id
-          INNER JOIN hive_accounts ha ON hp1.author_id = ha.id
-      WHERE hpt.tag_id = __hive_tag AND hp1.depth = 0 AND ( ha.reputation >= 1 ) AND ( __post_id = 0 OR hp1.id < __post_id )
+          INNER JOIN hive_accounts_view ha ON hp1.author_id = ha.id
+      WHERE hpt.tag_id = __hive_tag AND hp1.depth = 0 AND NOT ha.is_grayed AND ( __post_id = 0 OR hp1.id < __post_id )
       ORDER BY hp1.id DESC
       LIMIT _limit
   ) as created
@@ -197,8 +197,8 @@ BEGIN
       FROM
           hive_posts hp1
           JOIN hive_post_tags hpt ON hp1.id = hpt.post_id
-          INNER JOIN hive_accounts ha ON hp1.author_id = ha.id
-      WHERE hpt.tag_id = __hive_tag AND NOT hp1.is_paidout AND ( ha.reputation < 1 ) AND ( hp1.payout + hp1.pending_payout ) > 0
+          INNER JOIN hive_accounts_view ha ON hp1.author_id = ha.id
+      WHERE hpt.tag_id = __hive_tag AND NOT hp1.is_paidout AND ha.is_grayed AND ( hp1.payout + hp1.pending_payout ) > 0
           AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
       ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
       LIMIT _limit

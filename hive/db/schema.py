@@ -731,6 +731,27 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
+        DROP VIEW IF EXISTS public.hive_accounts_view;
+
+        CREATE OR REPLACE VIEW public.hive_accounts_view
+        AS
+        SELECT id,
+          name,
+          created_at,
+          reputation,
+          is_implicit,
+          followers,
+          following,
+          rank,
+          lastread_at,
+          posting_json_metadata,
+          json_metadata,
+          ( reputation < 1 ) is_grayed
+          FROM hive_accounts
+          """
+    db.query_no_return(sql)
+
+    sql = """
         DROP VIEW IF EXISTS public.hive_posts_view;
 
         CREATE OR REPLACE VIEW public.hive_posts_view
@@ -797,7 +818,7 @@ def setup(db):
           hpd.json,
           ha_a.reputation AS author_rep,
           hp.is_hidden,
-          ( ha_a.reputation < 1 ) is_grayed,
+          ha_a.is_grayed,
           hp.total_vote_weight,
           ha_pp.name AS parent_author,
           ha_pp.id AS parent_author_id,
@@ -836,7 +857,7 @@ def setup(db):
           FROM hive_posts hp
             JOIN hive_posts pp ON pp.id = hp.parent_id
             JOIN hive_posts rp ON rp.id = hp.root_id
-            JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+            JOIN hive_accounts_view ha_a ON ha_a.id = hp.author_id
             JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
             JOIN hive_post_data hpd ON hpd.id = hp.id
             JOIN hive_accounts ha_pp ON ha_pp.id = pp.author_id
