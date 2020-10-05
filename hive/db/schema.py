@@ -199,7 +199,6 @@ def build_metadata():
         sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_votes_fk5'),
 
         sa.Index('hive_votes_post_id_idx', 'post_id'),
-        sa.Index('hive_votes_voter_id_idx', 'voter_id'),
         sa.Index('hive_votes_voter_id_post_id_idx', 'voter_id', 'post_id'),
         sa.Index('hive_votes_post_id_voter_id_idx', 'post_id', 'voter_id'),
         sa.Index('hive_votes_block_num_idx', 'block_num')
