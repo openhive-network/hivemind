@@ -1,26 +1,23 @@
 version: '3'
 services:
-  db:
+  postgres-db:
     image: postgres
     environment:
-      POSTGRES_USER: testuser
-      POSTGRES_PASSWORD: testuserpass
-      POSTGRES_DB: testdb
-    ports:
-     - 3306:3306
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_DB: $POSTGRES_DB
+    volumes:
+        - postgres-db:/var/lib/postgresql/data
   hive:
     depends_on:
-      - db
-    image: steemit/hive
+      - postgres-db
+    image: hivemind:latest
     build: .
+    command: >
+       hive sync --test-max-block=5000000 --test-profile=False --exit-after-sync --steemd-url '{"default" : $HIVE_SYNC_URL}' --database-url $DATABASE_URL
     environment:
-      DATABASE_URL: postgresql://testuser:testuserpass@db:5432/testdb
-      LOG_LEVEL: INFO
-      STEEMD_URL: '{"default" : "https://api.hive.blog"}'
-    links:
-      - db:db
-    ports:
-      - 8080:8080
-    volumes:
-      - .:/app
+      DATABASE_URL: $DATABASE_URL
     restart: always
+volumes:
+  postgres-db:
+    driver: local
