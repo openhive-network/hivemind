@@ -106,7 +106,7 @@ def valid_tag(tag, allow_empty=False):
 
 def valid_number(num, lbound, ubound, default, name):
     """Given a user-provided number, return a valid int, or raise."""
-    if not num:
+    if not num and num != 0:
       assert default is not None, "%s must be provided" % name
       num = default
     try:
@@ -143,7 +143,7 @@ def valid_date(date, allow_empty=False):
     check_date = False
     # check format "%Y-%m-%d %H:%M:%S"
     try:
-        check_date = (date == datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S").strftime('%Y-%m-%d %H:%M%S'))
+        check_date = (date == datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S").strftime('%Y-%m-%d %H:%M:%S'))
     except ValueError:
         check_date = False
     # if check failed for format above try another format

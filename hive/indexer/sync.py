@@ -27,6 +27,7 @@ from hive.indexer.reblog import Reblog
 from hive.indexer.reputations import Reputations
 
 from hive.server.common.payout_stats import PayoutStats
+from hive.server.common.mentions import Mentions
 
 from hive.server.common.mutes import Mutes
 
@@ -35,6 +36,7 @@ from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import WaitingStatusManager as WSM
 from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import BroadcastObject
+from hive.utils.communities_rank import update_communities_posts_and_rank
 
 from datetime import datetime
 
@@ -139,11 +141,11 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
             timer.batch_finish(len(blocks))
             time_current = perf()
 
-            prefix = ("[SYNC] Got block %d @ %s" % (
+            prefix = ("[INITIAL SYNC] Got block %d @ %s" % (
                 to - 1, blocks[-1]['timestamp']))
             log.info(timer.batch_status(prefix))
-            log.info("[SYNC] Time elapsed: %fs", time_current - time_start)
-            log.info("[SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
+            log.info("[INITIAL SYNC] Time elapsed: %fs", time_current - time_start)
+            log.info("[INITIAL SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
             rate = minmax(rate, len(blocks), time_current - wait_time_1, lbound)
 
             if block_end - block_start > 1.0 or is_debug:
@@ -240,7 +242,7 @@ class Sync:
         Mutes.set_shared_instance(mutes)
 
         # community stats
-        Community.recalc_pending_payouts()
+        update_communities_posts_and_rank()
 
         last_imported_block = Blocks.head_num()
         hived_head_block = self._conf.get('test_max_block') or self._steem.last_irreversible()
@@ -259,7 +261,7 @@ class Sync:
         else:
             # recover from fork
             Blocks.verify_head(self._steem)
-        Blocks.setup_shared_db_access(self._db)
+
         self._update_chain_state()
 
         if self._conf.get('test_max_block'):
@@ -310,7 +312,7 @@ class Sync:
             _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size)
             return
 
-        log.info("[SYNC] start block %d, +%d to sync", lbound, count)
+        log.info("[FAST SYNC] start block %d, +%d to sync", lbound, count)
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
         while lbound < ubound:
             timer.batch_start()
@@ -327,9 +329,17 @@ class Sync:
             Blocks.process_multi(blocks, prepared_vops, is_initial_sync)
             timer.batch_finish(len(blocks))
 
-            _prefix = ("[SYNC] Got block %d @ %s" % (
+            otm = OPSM.log_current("Operations present in the processed blocks")
+            ftm = FSM.log_current("Flushing times")
+
+            _prefix = ("[FAST SYNC] Got block %d @ %s" % (
                 to - 1, blocks[-1]['timestamp']))
             log.info(timer.batch_status(_prefix))
+
+            OPSM.next_blocks()
+            FSM.next_blocks()
+
+            PC.broadcast(BroadcastObject('sync_current_block', to, 'blocks'))
 
     def listen(self):
         """Live (block following) mode."""
@@ -347,33 +357,37 @@ class Sync:
             start_time = perf()
 
             num = int(block['block_id'][:8], base=16)
-            log.info("[LIVE] About to process block %d", num)
+            log.info("[LIVE SYNC] =====> About to process block %d", num)
             vops = steemd.enum_virtual_ops(self._conf, num, num + 1)
             prepared_vops = prepare_vops(vops)
 
-            num_vops = len(prepared_vops[num]) if num in prepared_vops else 0
-
-            self._db.query("START TRANSACTION")
-            follows, accounts = Blocks.process(block, num, prepared_vops)
-            self._db.query("COMMIT")
+            Blocks.process_multi([block], prepared_vops, False)
+            otm = OPSM.log_current("Operations present in the processed blocks")
+            ftm = FSM.log_current("Flushing times")
 
             ms = (perf() - start_time) * 1000
-            log.info("[LIVE] Processed block %d at %s --% 4d txs, % 3d follows, % 3d accounts, % 4d vops"
+            log.info("[LIVE SYNC] <===== Processed block %d at %s --% 4d txs"
                      " --% 5dms%s", num, block['timestamp'], len(block['transactions']),
-                     follows, accounts, num_vops, ms, ' SLOW' if ms > 1000 else '')
+                     ms, ' SLOW' if ms > 1000 else '')
+            log.info("[LIVE SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
 
             if num % 1200 == 0: #1hr
                 log.warning("head block %d @ %s", num, block['timestamp'])
-                log.info("[LIVE] hourly stats")
-                #Community.recalc_pending_payouts()
+                log.info("[LIVE SYNC] hourly stats")
+
             if num % 1200 == 0: #1hour
-              log.info("[LIVE] filling payout_stats_view executed")
-              with ThreadPoolExecutor(max_workers=1) as executor:
-                executor.submit(PayoutStats.generate)
+                log.info("[LIVE SYNC] filling payout_stats_view executed")
+                with ThreadPoolExecutor(max_workers=2) as executor:
+                    executor.submit(PayoutStats.generate)
+                    executor.submit(Mentions.refresh)
             if num % 200 == 0: #10min
-                Community.recalc_pending_payouts()
+                update_communities_posts_and_rank()
             if num % 20 == 0: #1min
                 self._update_chain_state()
+
+            PC.broadcast(BroadcastObject('sync_current_block', num, 'blocks'))
+            FSM.next_blocks()
+            OPSM.next_blocks()
 
     # refetch dynamic_global_properties, feed price, etc
     def _update_chain_state(self):

@@ -40,7 +40,7 @@ def build_metadata():
         sa.Column('created_at', sa.DateTime, nullable=False),
         #sa.Column('block_num', sa.Integer, nullable=False),
         sa.Column('reputation', sa.BigInteger, nullable=False, server_default='0'),
-
+        sa.Column('is_implicit', sa.Boolean, nullable=False, server_default='1'),
         sa.Column('followers', sa.Integer, nullable=False, server_default='0'),
         sa.Column('following', sa.Integer, nullable=False, server_default='0'),
 
@@ -52,13 +52,6 @@ def build_metadata():
 
         sa.UniqueConstraint('name', name='hive_accounts_ux1'),
         sa.Index('hive_accounts_ix6', 'reputation')
-    )
-
-    sa.Table(
-        'hive_account_reputation_status', metadata,
-        sa.Column('account_id', sa.Integer, primary_key=True),
-        sa.Column('reputation', sa.BigInteger, nullable=False),
-        sa.Column('is_implicit', sa.Boolean, nullable=False)
     )
 
     sa.Table(
@@ -153,7 +146,9 @@ def build_metadata():
         sa.Index('hive_posts_sc_trend_id_idx', 'sc_trend', 'id'),
         sa.Index('hive_posts_sc_hot_id_idx', 'sc_hot', 'id'),
         sa.Index('hive_posts_created_at_idx', 'created_at'),
-        sa.Index('hive_posts_block_num_idx', 'block_num')
+        sa.Index('hive_posts_block_num_idx', 'block_num'),
+        sa.Index('hive_posts_cashout_time_id_idx', 'cashout_time', 'id'),
+        sa.Index('hive_posts_updated_at_idx', sa.text('updated_at DESC'))
     )
 
     sa.Table(
@@ -204,11 +199,9 @@ def build_metadata():
         sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_votes_fk5'),
 
         sa.Index('hive_votes_post_id_idx', 'post_id'),
-        sa.Index('hive_votes_voter_id_idx', 'voter_id'),
         sa.Index('hive_votes_voter_id_post_id_idx', 'voter_id', 'post_id'),
         sa.Index('hive_votes_post_id_voter_id_idx', 'post_id', 'voter_id'),
-        sa.Index('hive_votes_block_num_idx', 'block_num'),
-        sa.Index('hive_votes_last_update_idx', 'last_update')
+        sa.Index('hive_votes_block_num_idx', 'block_num')
     )
 
     sa.Table(
@@ -310,22 +303,23 @@ def build_metadata():
         'hive_posts_api_helper', metadata,
         sa.Column('id', sa.Integer, primary_key=True, autoincrement = False),
         sa.Column('author', VARCHAR(16, collation='C'), nullable=False),
-        sa.Column('parent_author', VARCHAR(16, collation='C'), nullable=False),
-        sa.Column('parent_permlink_or_category', sa.String(255, collation='C'), nullable=False),
-        sa.Index('hive_posts_api_helper_parent_permlink_or_category', 'parent_author', 'parent_permlink_or_category', 'id')
+        sa.Column('permlink', VARCHAR(255, collation='C'), nullable=False),
+        sa.Index('hive_posts_api_helper_author_permlink_idx', 'author', 'permlink')
     )
 
     sa.Table(
         'hive_mentions', metadata,
+        sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('account_id', sa.Integer, nullable=False),
+        sa.Column('block_num', sa.Integer, nullable=False),
 
-        sa.PrimaryKeyConstraint('account_id', 'post_id', name='hive_mentions_pk'),
         sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_mentions_fk1'),
         sa.ForeignKeyConstraint(['account_id'], ['hive_accounts.id'], name='hive_mentions_fk2'),
 
         sa.Index('hive_mentions_post_id_idx', 'post_id'),
-        sa.Index('hive_mentions_account_id_idx', 'account_id')
+        sa.Index('hive_mentions_account_id_idx', 'account_id'),
+        sa.UniqueConstraint('post_id', 'account_id', 'block_num', name='hive_mentions_ux1')
     )
 
     metadata = build_metadata_community(metadata)
@@ -488,16 +482,19 @@ def setup(db):
       AS
       $function$
       DECLARE
-        post_id INT;
+        post_id INT = 0;
       BEGIN
-        SELECT INTO post_id COALESCE( (SELECT hp.id
-        FROM hive_posts hp
-        JOIN hive_accounts ha ON ha.id = hp.author_id
-        JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
-        WHERE ha.name = _author AND hpd.permlink = _permlink AND hp.counter_deleted = 0
-        ), 0 );
-        IF _check AND (_author <> '' OR _permlink <> '') AND post_id = 0 THEN
-          RAISE EXCEPTION 'Post %/% does not exist', _author, _permlink;
+        IF (_author <> '' OR _permlink <> '') THEN
+          SELECT INTO post_id COALESCE( (
+            SELECT hp.id
+            FROM hive_posts hp
+            JOIN hive_accounts ha ON ha.id = hp.author_id
+            JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
+            WHERE ha.name = _author AND hpd.permlink = _permlink AND hp.counter_deleted = 0
+          ), 0 );
+          IF _check AND post_id = 0 THEN
+            RAISE EXCEPTION 'Post %/% does not exist', _author, _permlink;
+          END IF;
         END IF;
         RETURN post_id;
       END
@@ -704,7 +701,7 @@ def setup(db):
               created_at,
               COALESCE(
                 (
-                  select max(hp.created_at)
+                  select max(hp.created_at + '0 days'::interval)
                   FROM hive_posts hp
                   WHERE ha.id=hp.author_id
                 ),
@@ -712,7 +709,7 @@ def setup(db):
               ),
               COALESCE(
                 (
-                  select max(hv.last_update)
+                  select max(hv.last_update + '0 days'::interval)
                   from hive_votes hv
                   WHERE ha.id=hv.voter_id
                 ),
@@ -924,7 +921,7 @@ def setup(db):
             ha_a.name as author,
             hpd.permlink as permlink,
             vote_percent as percent,
-            ha_a.reputation as reputation,
+            ha_v.reputation as reputation,
             rshares,
             last_update,
             ha_v.name as voter,
@@ -958,12 +955,13 @@ def setup(db):
           reputation BIGINT
         );
 
-        DROP FUNCTION IF EXISTS find_votes( character varying, character varying )
+        DROP FUNCTION IF EXISTS find_votes( character varying, character varying, int )
         ;
         CREATE OR REPLACE FUNCTION public.find_votes
         (
           in _AUTHOR hive_accounts.name%TYPE,
-          in _PERMLINK hive_permlink_data.permlink%TYPE
+          in _PERMLINK hive_permlink_data.permlink%TYPE,
+          in _LIMIT INT
         )
         RETURNS SETOF database_api_vote
         LANGUAGE 'plpgsql'
@@ -992,6 +990,7 @@ def setup(db):
                 v.post_id = _POST_ID
             ORDER BY
                 voter_id
+            LIMIT _LIMIT
         );
 
         END
@@ -1216,19 +1215,18 @@ def setup(db):
           (
               SELECT hp1.id
               FROM
-                  hive_posts hp1
-              INNER JOIN hive_accounts ha ON ha.id = hp1.author_id
-              INNER JOIN hive_permlink_data hpd ON hpd.id = hp1.permlink_id
+                  hive_posts_api_helper hp1
+              INNER JOIN hive_posts hp2 ON hp2.id = hp1.id
               WHERE
-                  hp1.counter_deleted = 0
-                  AND NOT hp1.is_muted
-                  AND ha.name > _author
-                  OR ha.name = _author
-                  AND hpd.permlink >= _permlink
+                  hp2.counter_deleted = 0 
+                  AND NOT hp2.is_muted
+                  AND hp1.author > _author
+                  OR hp1.author = _author
+                  AND hp1.permlink >= _permlink
                   AND hp1.id != 0
               ORDER BY
-                  ha.name ASC,
-                  hpd.permlink ASC
+                  hp1.author ASC,
+                  hp1.permlink ASC
               LIMIT
                   _limit
           ) ds ON ds.id = hp.id
@@ -1672,15 +1670,15 @@ def setup(db):
             -- initial creation of table.
 
             INSERT INTO hive_posts_api_helper
-            (id, author, parent_author, parent_permlink_or_category)
-            SELECT hp.id, hp.author, hp.parent_author, hp.parent_permlink_or_category
+            (id, author, permlink)
+            SELECT hp.id, hp.author, hp.permlink
             FROM hive_posts_view hp
             ;
           ELSE
             -- Regular incremental update.
             INSERT INTO hive_posts_api_helper
-            (id, author, parent_author, parent_permlink_or_category)
-            SELECT hp.id, hp.author, hp.parent_author, hp.parent_permlink_or_category
+            (id, author, permlink)
+            SELECT hp.id, hp.author, hp.permlink
             FROM hive_posts_view hp
             WHERE hp.block_num BETWEEN _first_block_num AND _last_block_num AND
                    NOT EXISTS (SELECT NULL FROM hive_posts_api_helper h WHERE h.id = hp.id)
@@ -1724,359 +1722,6 @@ def setup(db):
         $function$
         LANGUAGE plpgsql IMMUTABLE
         ;
-    """
-    db.query_no_return(sql)
-
-    sql = """
-        DROP VIEW IF EXISTS hive_notifications_view
-        ;
-        CREATE VIEW hive_notifications_view
-        AS
-        SELECT
-        *
-        FROM
-        (
-            SELECT --replies
-                  posts_and_scores.block_num as block_num
-                , posts_and_scores.id as id
-                , posts_and_scores.post_id as post_id
-                , posts_and_scores.type_id as type_id
-                , posts_and_scores.created_at as created_at
-                , posts_and_scores.author as src
-                , posts_and_scores.parent_author as dst
-                , posts_and_scores.parent_author as author
-                , posts_and_scores.parent_permlink as permlink
-                , ''::VARCHAR as community
-                , ''::VARCHAR as community_title
-                , ''::VARCHAR as payload
-                , posts_and_scores.score as score
-            FROM
-            (
-                SELECT
-                      hpv.block_num as block_num
-                    , notification_id(
-                          hpv.block_num
-                        , CASE ( hpv.depth )
-                            WHEN 1 THEN 12 --replies
-                            ELSE 13 --comment replies
-                          END
-                        , hpv.id ) as id
-                    , CASE ( hpv.depth )
-                        WHEN 1 THEN 12 --replies
-                        ELSE 13 --comment replies
-                      END as type_id
-                    , hpv.created_at
-                    , hpv.author
-                    , hpv.parent_id as post_id
-                    , hpv.parent_author as parent_author
-                    , hpv.parent_permlink_or_category as parent_permlink
-                    , hpv.depth
-                    , hpv.parent_author_id
-                    , hpv.author_id
-                    , harv.score as score
-                FROM
-                    hive_posts_view hpv
-                JOIN hive_accounts_rank_view harv ON harv.id = hpv.author_id
-                WHERE hpv.depth > 0
-            ) as posts_and_scores
-            WHERE NOT EXISTS(
-                SELECT 1
-                FROM
-                hive_follows hf
-                WHERE hf.follower = posts_and_scores.parent_author_id AND hf.following = posts_and_scores.author_id AND hf.state = 2
-            )
-
-            UNION ALL
-
-            SELECT --follows
-                  hf.block_num as block_num
-                , notifs_id.notif_id as id
-                , 0 as post_id
-                , 15 as type_id
-                , hf.created_at as created_at
-                , followers_scores.follower_name as src
-                , ha2.name as dst
-                , ''::VARCHAR as author
-                , ''::VARCHAR as permlink
-                , ''::VARCHAR as community
-                , ''::VARCHAR as community_title
-                , ''::VARCHAR as payload
-                , followers_scores.score as score
-            FROM
-                hive_follows hf
-            JOIN hive_accounts ha2 ON hf.following = ha2.id
-            JOIN (
-                SELECT
-                      ha.id as follower_id
-                    , ha.name as follower_name
-                    , harv.score as score
-                FROM hive_accounts ha
-                JOIN hive_accounts_rank_view harv ON harv.id = ha.id
-            ) as followers_scores ON followers_scores.follower_id = hf.follower
-            JOIN (
-                SELECT
-                      hf2.id as id
-                    , notification_id(hf2.block_num, 15, hf2.id) as notif_id
-                FROM hive_follows hf2
-            ) as notifs_id ON notifs_id.id = hf.id
-
-            UNION ALL
-
-            SELECT --reblogs
-                  hr.block_num as block_num
-                , hr_scores.notif_id as id
-                , hp.id as post_id
-                , 14 as type_id
-                , hr.created_at as created_at
-                , ha_hr.name as src
-                , ha.name as dst
-                , ha.name as author
-                , hpd.permlink as permlink
-                , ''::VARCHAR as community
-                , ''::VARCHAR as community_title
-                , ''::VARCHAR as payload
-                , hr_scores.score as score
-            FROM
-                hive_reblogs hr
-            JOIN hive_posts hp ON hr.post_id = hp.id
-            JOIN hive_permlink_data hpd ON hp.permlink_id = hpd.id
-            JOIN hive_accounts ha_hr ON hr.blogger_id = ha_hr.id
-            JOIN (
-                SELECT
-                      hr2.id as id
-                    , notification_id(hr2.block_num, 14, hr2.id) as notif_id
-                    , harv.score as score
-                FROM hive_reblogs hr2
-                JOIN hive_accounts_rank_view harv ON harv.id = hr2.blogger_id
-            ) as hr_scores ON hr_scores.id = hr.id
-            JOIN hive_accounts ha ON hp.author_id = ha.id
-
-            UNION ALL
-
-            SELECT --subscriptions
-                  hs.block_num as block_num
-                , hs_scores.notif_id as id
-                , 0 as post_id
-                , 11 as type_id
-                , hs.created_at as created_at
-                , hs_scores.src as src
-                , ha_com.name as dst
-                , ''::VARCHAR as author
-                , ''::VARCHAR as permlink
-                , hc.name as community
-                , hc.title as community_title
-                , ''::VARCHAR as payload
-                , hs_scores.score
-            FROM
-                hive_subscriptions hs
-            JOIN hive_communities hc ON hs.community_id = hc.id
-            JOIN (
-                SELECT
-                      hs2.id as id
-                    , notification_id(hs2.block_num, 11, hs2.id) as notif_id
-                    , harv.score as score
-                    , ha.name as src
-                FROM hive_subscriptions hs2
-                JOIN hive_accounts ha ON hs2.account_id = ha.id
-                JOIN hive_accounts_rank_view harv ON harv.id = ha.id
-            ) as hs_scores ON hs_scores.id = hs.id
-            JOIN hive_accounts ha_com ON hs.community_id = ha_com.id
-
-            UNION ALL
-
-            SELECT -- new community
-                  hc.block_num as block_num
-                , hc_id.notif_id as id
-                , 0 as post_id
-                , 1 as type_id
-                , hc.created_at as created_at
-                , ''::VARCHAR as src
-                , ha.name as dst
-                , ''::VARCHAR as author
-                , ''::VARCHAR as permlink
-                , hc.name as community
-                , ''::VARCHAR as community_title
-                , ''::VARCHAR as payload
-                , 35 as score
-            FROM
-                hive_communities hc
-            JOIN hive_accounts ha ON ha.id = hc.id
-            JOIN (
-                SELECT
-                      hc2.id as id
-                    , notification_id(hc2.block_num, 11, hc2.id) as notif_id
-                FROM hive_communities hc2
-            ) as hc_id ON hc_id.id = hc.id
-
-            UNION ALL
-
-            SELECT --votes
-                  hv.block_num as block_num
-                , scores.notif_id as id
-                , scores.post_id as post_id
-                , 17 as type_id
-                , hv.last_update as created_at
-                , scores.src as src
-                , scores.dst as dst
-                , scores.dst as author
-                , scores.permlink as permlink
-                , ''::VARCHAR as community
-                , ''::VARCHAR as community_title
-                , ''::VARCHAR as payload
-                , scores.score as score
-            FROM hive_votes hv
-            JOIN (
-                SELECT
-                      hv1.id as id
-                    , hpv.id as post_id
-                    , notification_id(hv1.block_num, 17, CAST( hv1.id as INT) ) as notif_id
-                    , calculate_notify_vote_score( (hpv.payout + hpv.pending_payout), hpv.abs_rshares, hv1.rshares ) as score
-                    , hpv.author as dst
-                    , ha.name as src
-                    , hpv.permlink as permlink
-                FROM hive_votes hv1
-                JOIN hive_posts_view hpv ON hv1.post_id = hpv.id
-                JOIN hive_accounts ha ON ha.id = hv1.voter_id
-                WHERE hv1.rshares >= 10e9 AND hpv.abs_rshares != 0
-            ) as scores ON scores.id = hv.id
-            WHERE scores.score > 0
-      UNION ALL
-            SELECT --persistent notifs
-            	 hn.block_num
-               , notification_id(hn.block_num, hn.type_id, CAST( hn.id as INT) ) as id
-               , hp.id as post_id
-               , hn.type_id as type_id
-               , hn.created_at as created_at
-               , ha_src.name as src
-               , ha_dst.name as dst
-               , ha_pst.name as author
-               , hpd.permlink as permlink
-               , hc.name as community
-               , hc.title as community_title
-               , hn.payload as payload
-               , hn.score as score
-            FROM hive_notifs hn
-            JOIN hive_accounts ha_dst ON hn.dst_id = ha_dst.id
-            LEFT JOIN hive_accounts ha_src ON hn.src_id = ha_src.id
-            LEFT JOIN hive_communities hc ON hn.community_id = hc.id
-            LEFT JOIN hive_posts hp ON hn.post_id = hp.id
-            LEFT JOIN hive_accounts ha_pst ON ha_pst.id = hp.author_id
-            LEFT JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
-        ) as notifs
-    """
-    db.query_no_return(sql)
-
-    sql = """
-        DROP TYPE IF EXISTS notification
-        ;
-        CREATE TYPE notification AS
-        (
-          id BIGINT
-        , type_id SMALLINT
-        , created_at TIMESTAMP
-        , src VARCHAR
-        , dst VARCHAR
-        , author VARCHAR
-        , permlink VARCHAR
-        , community VARCHAR
-        , community_title VARCHAR
-        , payload VARCHAR
-        , score SMALLINT
-        );
-    """
-    db.query_no_return(sql)
-
-    sql = """
-        DROP TYPE IF EXISTS notification
-        ;
-        CREATE TYPE notification AS
-        (
-          id BIGINT
-        , type_id SMALLINT
-        , created_at TIMESTAMP
-        , src VARCHAR
-        , dst VARCHAR
-        , author VARCHAR
-        , permlink VARCHAR
-        , community VARCHAR
-        , community_title VARCHAR
-        , payload VARCHAR
-        , score SMALLINT
-        );
-    """
-    db.query_no_return(sql)
-
-    sql = """
-            DROP FUNCTION IF EXISTS account_notifications
-                    ;
-            CREATE OR REPLACE FUNCTION account_notifications(in _account VARCHAR, in _min_score SMALLINT, in _last_id BIGINT, in _limit SMALLINT)
-            RETURNS SETOF notification
-            AS
-            $function$
-            SELECT
-                  hnv.id
-                , CAST( hnv.type_id as SMALLINT) as type_id
-                , hnv.created_at
-                , hnv.src
-                , hnv.dst
-                , hnv.author
-                , hnv.permlink
-                , hnv.community
-                , hnv.community_title
-                , hnv.payload
-                , CAST( hnv.score as SMALLINT) as score
-            FROM
-                hive_notifications_view hnv
-            WHERE hnv.block_num > ( SELECT num as head_block FROM hive_blocks ORDER BY num DESC LIMIT 1 ) - (90 * 24 * 3600 / 3) -- 90 days in blocks
-                AND hnv.dst = _account AND hnv.score >= _min_score AND ( _last_id = -1 OR hnv.id < _last_id )
-            ORDER BY hnv.id DESC LIMIT _limit
-            ;
-            $function$
-            LANGUAGE sql STABLE
-            ;
-    """
-    db.query_no_return(sql)
-
-    sql = """
-        DROP FUNCTION IF EXISTS post_notifications
-        ;
-        CREATE OR REPLACE FUNCTION post_notifications(in _author VARCHAR, in _permlink VARCHAR, in _min_score SMALLINT, in _last_id BIGINT, in _limit SMALLINT)
-        RETURNS SETOF notification
-        AS
-        $function$
-        DECLARE
-            __post_id INT;
-            __start_block INT;
-        BEGIN
-            __post_id = find_comment_id(_author, _permlink, True);
-            __start_block = ( SELECT num AS head_block FROM hive_blocks ORDER BY num DESC LIMIT 1 ) - (90 * 24 * 3600 / 3); -- 90 days in blocks
-            RETURN QUERY
-            (
-                SELECT
-                      hnv.id
-                    , CAST( hnv.type_id as SMALLINT) as type_id
-                    , hnv.created_at
-                    , hnv.src
-                    , hnv.dst
-                    , hnv.author
-                    , hnv.permlink
-                    , hnv.community
-                    , hnv.community_title
-                    , hnv.payload
-                    , CAST( hnv.score as SMALLINT) as score
-                FROM
-                    hive_notifications_view hnv
-                WHERE
-                    hnv.block_num > __start_block
-                    AND hnv.post_id = __post_id
-                    AND hnv.score >= _min_score
-                    AND ( _last_id = -1 OR hnv.id < _last_id )
-                ORDER BY hnv.id DESC
-                LIMIT _limit
-            );
-        END
-        $function$
-        LANGUAGE plpgsql STABLE
     """
     db.query_no_return(sql)
 
@@ -2180,7 +1825,6 @@ def setup(db):
 
     sql_scripts = [
       "update_feed_cache.sql",
-      "get_account_post_replies.sql",
       "payout_stats_view.sql",
       "update_hive_posts_mentions.sql",
       "find_tag_id.sql",
@@ -2188,8 +1832,19 @@ def setup(db):
       "bridge_get_ranked_post_for_communities.sql",
       "bridge_get_ranked_post_for_observer_communities.sql",
       "bridge_get_ranked_post_for_tag.sql",
-      "bridge_get_ranked_post_for_all.sql"
-     ,"calculate_account_reputations.sql"
+      "bridge_get_ranked_post_for_all.sql",
+      "calculate_account_reputations.sql",
+      "update_communities_rank.sql",
+      "delete_hive_posts_mentions.sql",
+      "head_block_time.sql",
+      "notifications_view.sql",
+      "notifications_api.sql",
+      "bridge_get_account_posts_by_comments.sql",
+      "bridge_get_account_posts_by_payout.sql",
+      "bridge_get_account_posts_by_posts.sql",
+      "bridge_get_account_posts_by_replies.sql",
+      "bridge_get_relationship_between_accounts.sql",
+      "bridge_get_post.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))

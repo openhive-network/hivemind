@@ -14,8 +14,6 @@ from hive.server.common.helpers import (
 
 log = logging.getLogger(__name__)
 
-ROLES = {-2: 'muted', 0: 'guest', 2: 'member', 4: 'admin', 6: 'mod', 8: 'admin'}
-
 @return_error_info
 async def get_post_header(context, author, permlink):
     """Fetch basic post data"""

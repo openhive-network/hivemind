@@ -16,6 +16,7 @@ from hive.db.adapter import Db
 
 from hive.utils.trends import update_hot_and_tranding_for_block_range
 from hive.utils.post_active import update_active_starting_from_posts_on_block
+from hive.utils.communities_rank import update_communities_posts_and_rank
 
 from hive.server.common.payout_stats import PayoutStats
 
@@ -110,6 +111,8 @@ class DbState:
             'hive_posts_sc_trend_id_idx',
             'hive_posts_sc_hot_id_idx',
             'hive_posts_block_num_idx',
+            'hive_posts_cashout_time_id_idx',
+            'hive_posts_updated_at_idx',
 
             'hive_votes_post_id_idx',
             'hive_votes_voter_id_idx',
@@ -152,30 +155,30 @@ class DbState:
             return False
 
     @classmethod
-    def processing_indexes(cls, is_pre_process, drop, create ):
-      DB = cls.db()
-      engine = DB.engine()
-      log.info("[INIT] Begin %s-initial sync hooks", "pre" if is_pre_process else "post" )
+    def processing_indexes(cls, is_pre_process, drop, create):
+        DB = cls.db()
+        engine = DB.engine()
+        log.info("[INIT] Begin %s-initial sync hooks", "pre" if is_pre_process else "post")
 
-      for index in cls._disableable_indexes():
-          log.info("%s index %s.%s", ( "Drop" if is_pre_process else "Recreate" ), index.table, index.name)
-          try:
-            if drop:
-              if cls.has_index(index.name):
+        for index in cls._disableable_indexes():
+            log.info("%s index %s.%s", ("Drop" if is_pre_process else "Recreate"), index.table, index.name)
+            try:
+                if drop:
+                    if cls.has_index(index.name):
+                        time_start = perf_counter()
+                        index.drop(engine)
+                        end_time = perf_counter()
+                        elapsed_time = end_time - time_start
+                        log.info("Index %s dropped in time %.4f s", index.name, elapsed_time)
+            except sqlalchemy.exc.ProgrammingError as ex:
+                log.warning("Ignoring ex: {}".format(ex))
+
+            if create and cls.has_index(index.name) == False:
                 time_start = perf_counter()
-                index.drop(engine)
+                index.create(engine)
                 end_time = perf_counter()
                 elapsed_time = end_time - time_start
-                log.info("Index {} dropped in time {} s".format(index.name, elapsed_time))
-          except sqlalchemy.exc.ProgrammingError as ex:
-              log.warning("Ignoring ex: {}".format(ex))
-
-          if create and cls.has_index(index.name) == False:
-            time_start = perf_counter()
-            index.create(engine)
-            end_time = perf_counter()
-            elapsed_time = end_time - time_start
-            log.info("Index {} created in time {} s".format(index.name, elapsed_time))
+                log.info("Index %s created in time %.4f s", index.name, elapsed_time)
 
     @classmethod
     def before_initial_sync(cls, last_imported_block, hived_head_block):
@@ -251,7 +254,7 @@ class DbState:
         row = DbState.db().query_row(sql)
 
         time_end = perf_counter()
-        log.info("[INIT] update_hive_posts_children_count executed in %fs", time_end - time_start)
+        log.info("[INIT] update_hive_posts_children_count executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
 
@@ -262,7 +265,7 @@ class DbState:
         row = DbState.db().query_row(sql)
 
         time_end = perf_counter()
-        log.info("[INIT] update_hive_posts_root_id executed in %fs", time_end - time_start)
+        log.info("[INIT] update_hive_posts_root_id executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
 
@@ -273,21 +276,21 @@ class DbState:
         row = DbState.db().query_row(sql)
 
         time_end = perf_counter()
-        log.info("[INIT] update_hive_posts_api_helper executed in %fs", time_end - time_start)
+        log.info("[INIT] update_hive_posts_api_helper executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
 
         update_hot_and_tranding_for_block_range(last_imported_block, current_imported_block)
 
         time_end = perf_counter()
-        log.info("[INIT] update_all_hot_and_tranding executed in %fs", time_end - time_start)
+        log.info("[INIT] update_all_hot_and_tranding executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
 
         update_active_starting_from_posts_on_block(last_imported_block, current_imported_block)
 
         time_end = perf_counter()
-        log.info("[INIT] update_all_posts_active executed in %fs", time_end - time_start)
+        log.info("[INIT] update_all_posts_active executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
 
@@ -297,7 +300,7 @@ class DbState:
         DbState.db().query_no_return(sql)
 
         time_end = perf_counter()
-        log.info("[INIT] update_feed_cache executed in %fs", time_end - time_start)
+        log.info("[INIT] update_feed_cache executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
         sql = """
@@ -305,12 +308,12 @@ class DbState:
         """.format(last_imported_block, current_imported_block)
         DbState.db().query_no_return(sql)
         time_end = perf_counter()
-        log.info("[INIT] update_hive_posts_mentions executed in %fs", time_end - time_start)
+        log.info("[INIT] update_hive_posts_mentions executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
         PayoutStats.generate()
         time_end = perf_counter()
-        log.info("[INIT] filling payout_stats_view executed in %fs", time_end - time_start)
+        log.info("[INIT] filling payout_stats_view executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
         sql = """
@@ -318,7 +321,12 @@ class DbState:
         """.format(last_imported_block, current_imported_block)
         DbState.db().query_no_return(sql)
         time_end = perf_counter()
-        log.info("[INIT] update_account_reputations executed in %fs", time_end - time_start)
+        log.info("[INIT] update_account_reputations executed in %.4fs", time_end - time_start)
+	
+        time_start = perf_counter()
+        update_communities_posts_and_rank()
+        time_end = perf_counter()
+        log.info("[INIT] update_communities_posts_and_rank executed in %.4fs", time_end - time_start)
 
         # Update a block num immediately
         DbState.db().query_no_return("UPDATE hive_state SET block_num = :block_num", block_num = current_imported_block)

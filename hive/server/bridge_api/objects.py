@@ -10,17 +10,54 @@ from hive.utils.normalize import sbd_amount, rep_log10
 from hive.indexer.votes import Votes
 from hive.utils.account import safe_db_profile_metadata
 
+ROLES = {-2: 'muted', 0: 'guest', 2: 'member', 4: 'mod', 6: 'admin', 8: 'owner'}
 
 log = logging.getLogger(__name__)
 
 # pylint: disable=too-many-lines
+
+def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=None, override_gray=False):
+    """ apply information such as blacklists and community names/roles to a given post """
+    if not blacklists_for_user:
+        post['blacklists'] = Mutes.lists(row['author'], row['author_rep'])
+    else:
+        post['blacklists'] = []
+        if row['author'] in blacklists_for_user:
+            blacklists = blacklists_for_user[row['author']]
+            for blacklist in blacklists:
+                post['blacklists'].append(blacklist)
+        reputation = row['author_rep']
+        if reputation < 1:
+            post['blacklists'].append('reputation-0')
+        elif reputation  == 1:
+            post['blacklists'].append('reputation-1')
+
+    if 'community_title' in row and row['community_title']:
+        post['community'] = row['category']
+        post['community_title'] = row['community_title']
+        if row['role_id']:
+            post['author_role'] = ROLES[row['role_id']]
+            post['author_title'] = row['role_title']
+        else:
+            post['author_role'] = 'guest'
+            post['author_title'] = ''
+    elif override_gray:
+        post['stats']['gray'] = ('irredeemables' in post['blacklists'] or len(post['blacklists']) >= 2)
+    else:
+        post['stats']['gray'] = row['is_grayed']
+
+    post['stats']['hide'] = 'irredeemables' in post['blacklists']
+      # it overrides 'is_hidden' flag from post, is that the intent?
+    if is_pinned:
+        post['stats']['is_pinned'] = True
+    return post
 
 async def load_profiles(db, names):
     """`get_accounts`-style lookup for `get_state` compat layer."""
     sql = """SELECT * FROM hive_accounts_info_view
               WHERE name IN :names"""
     rows = await db.query_all(sql, names=tuple(names))
-    return [_condenser_profile_object(row) for row in rows]
+    return [_bridge_profile_object(row) for row in rows]
 
 async def load_posts_reblogs(db, ids_with_reblogs, truncate_body=0):
     """Given a list of (id, reblogged_by) tuples, return posts w/ reblog key."""
@@ -37,8 +74,6 @@ async def load_posts_reblogs(db, ids_with_reblogs, truncate_body=0):
 
     return posts
 
-ROLES = {-2: 'muted', 0: 'guest', 2: 'member', 4: 'mod', 6: 'admin', 8: 'owner'}
-
 async def load_posts_keyed(db, ids, truncate_body=0):
     """Given an array of post ids, returns full posts objects keyed by id."""
     # pylint: disable=too-many-locals
@@ -48,9 +83,16 @@ async def load_posts_keyed(db, ids, truncate_body=0):
     sql = """
         SELECT
             hp.id,
-            hp.community_id,
             hp.author,
+            hp.parent_author,
+            hp.author_rep,
+            hp.root_title,
+            hp.beneficiaries,
+            hp.max_accepted_payout,
+            hp.percent_hbd,
+            hp.url,
             hp.permlink,
+            hp.parent_permlink_or_category,
             hp.title,
             hp.body,
             hp.category,
@@ -70,86 +112,27 @@ async def load_posts_keyed(db, ids, truncate_body=0):
             hp.is_hidden,
             hp.is_grayed,
             hp.total_votes,
-            hp.parent_author,
-            hp.parent_permlink_or_category,
-            hp.curator_payout_value,
-            hp.root_author,
-            hp.root_permlink,
-            hp.max_accepted_payout,
-            hp.percent_hbd,
-            hp.allow_replies,
-            hp.allow_votes,
-            hp.allow_curation_rewards,
-            hp.beneficiaries,
-            hp.url,
-            hp.root_title
+            hp.sc_trend,
+            hp.role_title,
+            hp.community_title,
+            hp.role_id,
+            hp.is_pinned,
+            hp.curator_payout_value
         FROM hive_posts_view hp
         WHERE hp.id IN :ids
     """
     result = await db.query_all(sql, ids=tuple(ids))
-    author_map = await _query_author_map(db, result)
 
     # TODO: author affiliation?
-    ctx = {}
     posts_by_id = {}
-    author_ids = {}
-    post_cids = {}
     for row in result:
         row = dict(row)
-        author = author_map[row['author']]
-        author_ids[author['id']] = author['name']
 
-        row['author_rep'] = author['reputation']
         post = _bridge_post_object(row, truncate_body=truncate_body)
         post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.BridgeApi)
-
-        post['blacklists'] = Mutes.lists(post['author'], author['reputation'])
+        append_statistics_to_post(post, row, row['is_pinned'], None, True)
 
         posts_by_id[row['id']] = post
-        post_cids[row['id']] = row['community_id']
-
-        cid = row['community_id']
-        if cid:
-            if cid not in ctx:
-                ctx[cid] = []
-            ctx[cid].append(author['id'])
-
-    # TODO: optimize
-    titles = {}
-    roles = {}
-    for cid, account_ids in ctx.items():
-        sql = "SELECT title FROM hive_communities WHERE id = :id"
-        titles[cid] = await db.query_one(sql, id=cid)
-        sql = """SELECT account_id, role_id, title
-                   FROM hive_roles
-                  WHERE community_id = :cid
-                    AND account_id IN :ids"""
-        roles[cid] = {}
-        ret = await db.query_all(sql, cid=cid, ids=tuple(account_ids))
-        for row in ret:
-            name = author_ids[row['account_id']]
-            roles[cid][name] = (row['role_id'], row['title'])
-
-    for pid, post in posts_by_id.items():
-        author = post['author']
-        cid = post_cids[pid]
-        if cid:
-            post['community'] = post['category'] # TODO: True?
-            post['community_title'] = titles[cid] or post['category']
-            role = roles[cid][author] if author in roles[cid] else (0, '')
-            post['author_role'] = ROLES[role[0]]
-            post['author_title'] = role[1]
-        else:
-            post['stats']['gray'] = ('irredeemables' in post['blacklists']
-                                     or len(post['blacklists']) >= 2)
-        post['stats']['hide'] = 'irredeemables' in post['blacklists']
-
-
-    sql = """SELECT id FROM hive_posts
-              WHERE id IN :ids AND is_pinned = '1' AND counter_deleted = 0"""
-    for pid in await db.query_col(sql, ids=tuple(ids)):
-        if pid in posts_by_id:
-            posts_by_id[pid]['stats']['is_pinned'] = True
 
     return posts_by_id
 
@@ -184,14 +167,7 @@ async def load_posts(db, ids, truncate_body=0):
 
     return [posts_by_id[_id] for _id in ids]
 
-async def _query_author_map(db, posts):
-    """Given a list of posts, returns an author->reputation map."""
-    if not posts: return {}
-    names = tuple({post['author'] for post in posts})
-    sql = "SELECT id, name, reputation FROM hive_accounts WHERE name IN :names"
-    return {r['name']: r for r in await db.query_all(sql, names=names)}
-
-def _condenser_profile_object(row):
+def _bridge_profile_object(row):
     """Convert an internal account record into legacy-steemd style."""
 
     blacklists = Mutes.lists(row['name'], row['reputation'])

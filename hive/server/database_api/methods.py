@@ -9,12 +9,13 @@ from hive.server.common.helpers import json_date
 import datetime
 
 @return_error_info
-async def list_comments(context, start: list, limit: int, order: str):
+async def list_comments(context, start: list, limit: int = 1000, order: str = None):
     """Returns all comments, starting with the specified options."""
 
     supported_order_list = ['by_cashout_time', 'by_permlink', 'by_root', 'by_parent', 'by_last_update', 'by_author_last_update']
+    assert not order is None, "missing a required argument: 'order'"
     assert order in supported_order_list, "Unsupported order, valid orders: {}".format(", ".join(supported_order_list))
-    limit = valid_limit(limit, 1000, None)
+    limit = valid_limit(limit, 1000, 1000)
     db = context['db']
 
     result = []
@@ -94,6 +95,7 @@ async def find_comments(context, comments: list):
     """ Search for comments: limit and order is ignored in hive code """
     result = []
 
+    assert isinstance(comments, list), "Expected array of author+permlink pairs"
     assert len(comments) <= 1000, "Parameters count is greather than max allowed (1000)"
     db = context['db']
 
@@ -149,16 +151,23 @@ async def find_comments(context, comments: list):
     idx = 0
     values = ""
     for arg in comments:
+        if not isinstance(arg, list) or len(arg) < 2:
+            continue
+        author = arg[0]
+        permlink = arg[1]
+        if not isinstance(author, str) or not isinstance(permlink, str):
+            continue
         if idx > 0:
             values += ","
-        values += "('{}','{}')".format(arg[0], arg[1])
+        values += "('{}','{}')".format(author, permlink) # escaping most likely needed
         idx += 1
     sql = SQL_TEMPLATE.format(values)
 
-    rows = await db.query_all(sql)
-    for row in rows:
-        cpo = database_post_object(dict(row))
-        result.append(cpo)
+    if idx > 0:
+        rows = await db.query_all(sql)
+        for row in rows:
+            cpo = database_post_object(dict(row))
+            result.append(cpo)
 
     return { "comments": result }
 
@@ -188,9 +197,9 @@ def api_vote_info(rows, votes_presentation):
   return ret
 
 @return_error_info
-async def find_votes_impl(db, author: str, permlink: str, votes_presentation):
-    sql = "SELECT * FROM find_votes(:author,:permlink)"
-    rows = await db.query_all(sql, author=author, permlink=permlink)
+async def find_votes_impl(db, author: str, permlink: str, votes_presentation, limit: int = 1000):
+    sql = "SELECT * FROM find_votes(:author,:permlink,:limit)"
+    rows = await db.query_all(sql, author=author, permlink=permlink, limit=limit)
     return api_vote_info(rows, votes_presentation)
 
 @return_error_info
@@ -201,11 +210,12 @@ async def find_votes(context, author: str, permlink: str):
     return { 'votes': await find_votes_impl(context['db'], author, permlink, VotesPresentation.DatabaseApi) }
 
 @return_error_info
-async def list_votes(context, start: list, limit: int, order: str):
+async def list_votes(context, start: list, limit: int = 1000, order: str = None):
     """ Returns all votes, starting with the specified voter and/or author and permlink. """
     supported_order_list = ["by_comment_voter", "by_voter_comment"]
-    assert order in supported_order_list, "Order {} is not supported".format(order)
-    limit = valid_limit(limit, 1000, None)
+    assert not order is None, "missing a required argument: 'order'"
+    assert order in supported_order_list, "Unsupported order, valid orders: {}".format(", ".join(supported_order_list))
+    limit = valid_limit(limit, 1000, 1000)
     db = context['db']
 
     if order == "by_voter_comment":

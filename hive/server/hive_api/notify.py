@@ -47,16 +47,8 @@ async def unread_notifications(context, account, min_score=25):
     valid_account(account)
     min_score = valid_score(min_score, 100, 25)
 
-    account_id = await get_account_id(db, account)
-
-    sql = """SELECT lastread_at,
-                    (SELECT COUNT(*) FROM hive_notifs
-                      WHERE dst_id = ha.id
-                        AND score >= :min_score
-                        AND created_at > lastread_at) unread
-               FROM hive_accounts ha
-              WHERE id = :account_id"""
-    row = await db.query_row(sql, account_id=account_id, min_score=min_score)
+    sql = """SELECT * FROM get_number_of_unread_notifications( :account, (:min_score)::SMALLINT)"""
+    row = await db.query_row(sql, account=account, min_score=min_score)
     return dict(lastread=str(row['lastread_at']), unread=row['unread'])
 
 @return_error_info
@@ -65,13 +57,10 @@ async def account_notifications(context, account, min_score=25, last_id=None, li
     db = context['db']
     valid_account(account)
     min_score = valid_score(min_score, 100, 25)
-    last_id = valid_number(last_id, None, None, -1, "last_id")
+    last_id = valid_number(last_id, None, None, 0, "last_id")
     limit = valid_limit(limit, 100, 100)
 
     sql_query = "SELECT * FROM account_notifications( (:account)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::BIGINT, (:limit)::SMALLINT )"
-
-    if not last_id:
-        last_id = -1;
 
     rows = await db.query_all(sql_query, account=account, min_score=min_score, last_id=last_id, limit=limit)
     rows = [row for row in rows if row['author'] not in Mutes.all()]
@@ -85,7 +74,7 @@ async def post_notifications(context, author:str, permlink:str, min_score:int=25
     valid_account(author)
     valid_permlink(permlink)
     min_score = valid_score(min_score, 100, 25)
-    last_id = valid_number(last_id, None, None, -1, "last_id")
+    last_id = valid_number(last_id, None, None, 0, "last_id")
     limit = valid_limit(limit, 100, 100)
 
     sql_query = "SELECT * FROM post_notifications( (:author)::VARCHAR, (:permlink)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::BIGINT, (:limit)::SMALLINT )"
