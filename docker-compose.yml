@@ -8,13 +8,14 @@ services:
       POSTGRES_DB: $POSTGRES_DB
     volumes:
         - postgres-db:/var/lib/postgresql/data
-  hive:
+  hivemind:
     depends_on:
       - postgres-db
     image: hivemind:latest
     build: .
     command: >
        hive sync --test-max-block=5000000 --test-profile=False --exit-after-sync --steemd-url '{"default" : $HIVE_SYNC_URL}' --database-url $DATABASE_URL
+       tail -f /dev/null
     environment:
       DATABASE_URL: $DATABASE_URL
     restart: always
