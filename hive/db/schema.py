@@ -880,6 +880,9 @@ def setup(db):
               VOLATILE
           AS $BODY$
           BEGIN
+          set enable_sort=false;
+          set work_mem='2GB';
+
           UPDATE hive_posts uhp
           SET children = data_source.children_count
           FROM
