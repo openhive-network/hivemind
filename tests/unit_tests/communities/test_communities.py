@@ -40,6 +40,7 @@ def test_community_set_admin(database_connection):
     assert len(ret) == 1
     assert ret[0]['account_id'] == account_id
     assert ret[0]['community_id'] == community_id
+    assert ret[0]['role_id'] == Community.Role.admin.value
 
 def test_community_change_props(database_connection):
     json = [
