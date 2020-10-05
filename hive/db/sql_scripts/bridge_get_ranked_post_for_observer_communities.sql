@@ -50,8 +50,8 @@ BEGIN
   FROM
       hive_posts_view hp
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
-      JOIN hive_accounts ha ON ha.id = hs.account_id
-  WHERE ha.name = _observer AND hp.depth = 0 AND NOT hp.is_grayed AND ( __post_id = 0 OR hp.id < __post_id )
+      JOIN hive_accounts_view ha ON ha.id = hs.account_id
+  WHERE ha.name = _observer AND hp.depth = 0 AND NOT ha.is_grayed AND ( __post_id = 0 OR hp.id < __post_id )
   ORDER BY hp.id DESC
   LIMIT _limit;
   IF __enable_sort THEN
@@ -480,8 +480,8 @@ BEGIN
   FROM
       hive_posts_view hp
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
-      JOIN hive_accounts ha ON ha.id = hs.account_id
-  WHERE ha.name = _observer AND NOT hp.is_paidout AND hp.is_grayed AND ( hp.payout + hp.pending_payout ) > 0
+      JOIN hive_accounts_view ha ON ha.id = hs.account_id
+  WHERE ha.name = _observer AND NOT hp.is_paidout AND ha.is_grayed AND ( hp.payout + hp.pending_payout ) > 0
       AND ( __post_id = 0 OR ( hp.payout + hp.pending_payout ) < __payout_limit OR ( ( hp.payout + hp.pending_payout ) = __payout_limit AND hp.id < __post_id ) )
   ORDER BY ( hp.payout + hp.pending_payout ) DESC, hp.id DESC
   LIMIT _limit;

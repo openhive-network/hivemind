@@ -100,7 +100,6 @@ def build_metadata():
         sa.Column('is_declined', BOOLEAN, nullable=False, server_default='0'),
         sa.Column('is_full_power', BOOLEAN, nullable=False, server_default='0'),
         sa.Column('is_hidden', BOOLEAN, nullable=False, server_default='0'),
-        sa.Column('is_grayed', BOOLEAN, nullable=False, server_default='0'),
 
         # important indexes
         sa.Column('sc_trend', sa.Float(precision=6), nullable=False, server_default='0'),
@@ -732,6 +731,27 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
+        DROP VIEW IF EXISTS public.hive_accounts_view;
+
+        CREATE OR REPLACE VIEW public.hive_accounts_view
+        AS
+        SELECT id,
+          name,
+          created_at,
+          reputation,
+          is_implicit,
+          followers,
+          following,
+          rank,
+          lastread_at,
+          posting_json_metadata,
+          json_metadata,
+          ( reputation < 1 ) is_grayed
+          FROM hive_accounts
+          """
+    db.query_no_return(sql)
+
+    sql = """
         DROP VIEW IF EXISTS public.hive_posts_view;
 
         CREATE OR REPLACE VIEW public.hive_posts_view
@@ -798,7 +818,7 @@ def setup(db):
           hpd.json,
           ha_a.reputation AS author_rep,
           hp.is_hidden,
-          hp.is_grayed,
+          ha_a.is_grayed,
           hp.total_vote_weight,
           ha_pp.name AS parent_author,
           ha_pp.id AS parent_author_id,
@@ -837,7 +857,7 @@ def setup(db):
           FROM hive_posts hp
             JOIN hive_posts pp ON pp.id = hp.parent_id
             JOIN hive_posts rp ON rp.id = hp.root_id
-            JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+            JOIN hive_accounts_view ha_a ON ha_a.id = hp.author_id
             JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
             JOIN hive_post_data hpd ON hpd.id = hp.id
             JOIN hive_accounts ha_pp ON ha_pp.id = pp.author_id
@@ -1741,7 +1761,7 @@ def setup(db):
             promoted hive_posts.promoted%TYPE, payout hive_posts.payout%TYPE, pending_payout hive_posts.pending_payout%TYPE, payout_at hive_posts.payout_at%TYPE,
             is_paidout hive_posts.is_paidout%TYPE, children hive_posts.children%TYPE, created_at hive_posts.created_at%TYPE, updated_at hive_posts.updated_at%TYPE,
             rshares hive_posts_view.rshares%TYPE, abs_rshares hive_posts_view.abs_rshares%TYPE, json hive_post_data.json%TYPE, author_rep hive_accounts.reputation%TYPE,
-            is_hidden hive_posts.is_hidden%TYPE, is_grayed hive_posts.is_grayed%TYPE, total_votes BIGINT, sc_trend hive_posts.sc_trend%TYPE,
+            is_hidden hive_posts.is_hidden%TYPE, is_grayed BOOLEAN, total_votes BIGINT, sc_trend hive_posts.sc_trend%TYPE,
             acct_author_id hive_posts.author_id%TYPE, root_author hive_accounts.name%TYPE, root_permlink hive_permlink_data.permlink%TYPE,
             parent_author hive_accounts.name%TYPE, parent_permlink_or_category hive_permlink_data.permlink%TYPE, allow_replies BOOLEAN,
             allow_votes hive_posts.allow_votes%TYPE, allow_curation_rewards hive_posts.allow_curation_rewards%TYPE, url TEXT, root_title hive_post_data.title%TYPE,
