@@ -198,11 +198,9 @@ def build_metadata():
         sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_votes_fk5'),
 
         sa.Index('hive_votes_post_id_idx', 'post_id'),
-        sa.Index('hive_votes_voter_id_idx', 'voter_id'),
         sa.Index('hive_votes_voter_id_post_id_idx', 'voter_id', 'post_id'),
         sa.Index('hive_votes_post_id_voter_id_idx', 'post_id', 'voter_id'),
-        sa.Index('hive_votes_block_num_idx', 'block_num'),
-        sa.Index('hive_votes_last_update_idx', 'last_update')
+        sa.Index('hive_votes_block_num_idx', 'block_num')
     )
 
     sa.Table(
@@ -702,7 +700,7 @@ def setup(db):
               created_at,
               COALESCE(
                 (
-                  select max(hp.created_at)
+                  select max(hp.created_at + '0 days'::interval)
                   FROM hive_posts hp
                   WHERE ha.id=hp.author_id
                 ),
@@ -710,7 +708,7 @@ def setup(db):
               ),
               COALESCE(
                 (
-                  select max(hv.last_update)
+                  select max(hv.last_update + '0 days'::interval)
                   from hive_votes hv
                   WHERE ha.id=hv.voter_id
                 ),
