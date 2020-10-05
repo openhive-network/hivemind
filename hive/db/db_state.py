@@ -114,7 +114,6 @@ class DbState:
             'hive_posts_cashout_time_id_idx',
             'hive_posts_updated_at_idx',
 
-            'hive_votes_post_id_idx',
             'hive_votes_block_num_idx',
 
             'hive_subscriptions_block_num_idx',
