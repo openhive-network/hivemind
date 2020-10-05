@@ -48,7 +48,9 @@ BEGIN
   (
       SELECT
           hp1.id
-      FROM hive_posts hp1 WHERE hp1.depth = 0 AND NOT hp1.is_grayed AND ( __post_id = 0 OR hp1.id < __post_id )
+      FROM hive_posts hp1
+      INNER JOIN hive_accounts_view ha ON hp1.author_id = ha.id
+      WHERE hp1.depth = 0 AND NOT ha.is_grayed AND ( __post_id = 0 OR hp1.id < __post_id )
       ORDER BY hp1.id DESC
       LIMIT _limit
   ) as created
@@ -185,7 +187,8 @@ BEGIN
         , ( hp1.payout + hp1.pending_payout ) as all_payout
       FROM
           hive_posts hp1
-      WHERE NOT hp1.is_paidout AND hp1.is_grayed AND ( hp1.payout + hp1.pending_payout ) > 0
+      INNER JOIN hive_accounts_view ha ON hp1.author_id = ha.id
+      WHERE NOT hp1.is_paidout AND ha.is_grayed AND ( hp1.payout + hp1.pending_payout ) > 0
           AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
       ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
       LIMIT _limit
