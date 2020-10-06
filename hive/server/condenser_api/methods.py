@@ -360,15 +360,36 @@ async def get_discussions_by_blog(context, tag: str = None, start_author: str = 
     valid_limit(limit, 100, 20)
 
     #force copy
-    sql = str(SQL_TEMPLATE)
+    sql = """
+        WITH post_ids AS (
+            SELECT 
+                post_id 
+            FROM 
+                hive_feed_cache hfc
+            JOIN 
+                hive_accounts hfc_ha ON hfc.account_id = hfc_ha.id
+            WHERE 
+                hfc_ha.name = :author
+        )
+    """
+    sql += str(SQL_TEMPLATE)
     sql += """
-            hp.id IN (SELECT post_id FROM hive_feed_cache JOIN hive_accounts ON (hive_feed_cache.account_id = hive_accounts.id) WHERE hive_accounts.name = :author)
+            hp.id IN (SELECT pids.post_id FROM post_ids AS pids)
           """
     if start_author and start_permlink != '':
         sql += """
-         AND hp.created_at <= (SELECT created_at from hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :start_author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :start_permlink))
+            AND hp.created_at <= (
+                SELECT 
+                    hp1.created_at
+                FROM
+                    hive_posts hp1
+                INNER JOIN hive_accounts ha ON ha.id = hp1.author_id
+                INNER JOIN hive_permlink_data hpd ON hpd.id = hp1.permlink_id
+                WHERE
+                    ha.name = :start_author
+                    AND hpd.permlink = :start_permlink
+            )
         """
-
     sql += """
         ORDER BY hp.created_at DESC
         LIMIT :limit
