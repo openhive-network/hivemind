@@ -19,18 +19,22 @@ CREATE TYPE notification AS
 DROP FUNCTION IF EXISTS get_number_of_unread_notifications;
 CREATE OR REPLACE FUNCTION get_number_of_unread_notifications(in _account VARCHAR, in _minimum_score SMALLINT)
 RETURNS TABLE( lastread_at TIMESTAMP, unread BIGINT )
-LANGUAGE 'sql' STABLE
+LANGUAGE 'plpgsql' STABLE
 AS
 $BODY$
-SELECT
-  ha.lastread_at as lastread_at,
-  COUNT(1) as unread
-FROM
-  hive_notifications_view hnv
-  JOIN hive_accounts ha
-  ON ha.name = hnv.dst
-  WHERE hnv.created_at > ha.lastread_at AND hnv.score >= _minimum_score AND hnv.dst = _account
-  GROUP BY ha.lastread_at
+DECLARE
+    __account_id INT;
+BEGIN
+  __account_id = find_account_id( _account, True );
+  RETURN QUERY SELECT
+    ha.lastread_at as lastread_at,
+    SUM( ( hnv.created_at > ha.lastread_at AND hnv.score >= _minimum_score )::INT ) as unread
+  FROM
+    hive_accounts ha
+    LEFT JOIN hive_notifications_view hnv ON hnv.dst_id = ha.id
+	WHERE ha.id = __account_id
+  GROUP BY ha.id, ha.lastread_at;
+END
 $BODY$
 ;
 
