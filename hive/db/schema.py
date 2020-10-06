@@ -1864,7 +1864,8 @@ def setup(db):
       "bridge_get_account_posts_by_posts.sql",
       "bridge_get_account_posts_by_replies.sql",
       "bridge_get_relationship_between_accounts.sql",
-      "bridge_get_post.sql"
+      "bridge_get_post.sql",
+      "condenser_get_discussions_by_created.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
