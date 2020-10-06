@@ -1,5 +1,6 @@
 """Handles legacy `call` method."""
 
+from hive.server.condenser_api.cursor import get_account_reputations, get_reblogged_by
 from hive.server.common.helpers import (
     ApiError,
     return_error_info,
@@ -7,7 +8,7 @@ from hive.server.common.helpers import (
 from hive.server.condenser_api.get_state import get_state
 from hive.server.condenser_api.tags import get_trending_tags
 from hive.server.condenser_api.methods import (
-    get_followers,
+    get_active_votes, get_followers,
     get_following,
     get_follow_count,
     get_content,
@@ -92,6 +93,11 @@ async def call(context, api, method, params):
     elif method == 'get_follow_count':
         return await get_follow_count(context, *_strict_list(params, 1))
 
+    elif method == 'get_reblogged_by':
+        return await get_reblogged_by(context, *_strict_list(params, 2))
+    elif method == 'get_account_reputations':
+        return await get_account_reputations(context, *_strict_list(params, 2))
+
     # Content primitives
     elif method == 'get_content':
         return await get_content(context, *_strict_list(params, 3, 2))
@@ -141,5 +147,7 @@ async def call(context, api, method, params):
     # Misc/dummy
     elif method == 'get_account_votes':
         return await get_account_votes(context, *_strict_list(params, 1))
+    elif method == 'get_active_votes':
+        return await get_active_votes(context, *_strict_list(params, 2))
 
     raise ApiError("unknown method: %s.%s" % (api, method))
