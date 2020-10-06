@@ -15,6 +15,7 @@ BEGIN
         -- NB! For critical databases it might make sense to ensure that the user account
         -- used for monitoring can only open a limited number of connections
         -- (there are according checks in code, but multiple instances might be launched)
+        CREATE ROLE pgwatch2 WITH LOGIN PASSWORD 'pgwatch2';
         ALTER ROLE pgwatch2 CONNECTION LIMIT 10;
         GRANT pg_monitor TO pgwatch2;
    END IF;
