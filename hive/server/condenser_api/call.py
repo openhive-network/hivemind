@@ -1,5 +1,6 @@
 """Handles legacy `call` method."""
 
+from hive.server.condenser_api.cursor import get_account_reputations, get_reblogged_by
 from hive.server.common.helpers import (
     ApiError,
     return_error_info,
@@ -91,6 +92,11 @@ async def call(context, api, method, params):
         return await get_following(context, *_strict_list(params, 4))
     elif method == 'get_follow_count':
         return await get_follow_count(context, *_strict_list(params, 1))
+
+    elif method == 'get_reblogged_by':
+        return await get_reblogged_by(context, *_strict_list(params, 2))
+    elif method == 'get_account_reputations':
+        return await get_account_reputations(context, *_strict_list(params, 2))
 
     # Content primitives
     elif method == 'get_content':
