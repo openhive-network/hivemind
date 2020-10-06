@@ -279,7 +279,7 @@ tags_api_smoketest_negative:
   stage: reports
   environment: hive-4.pl.syncad.com
   needs:
-    - job: .hivemind_start_api_smoketest
+    - job: hivemind_stop_server
       artifacts: true
 
   variables:
