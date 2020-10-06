@@ -8,6 +8,7 @@ stages:
 - deploy
 - e2e-test
 - post-deploy
+- reports
 
 variables:
   GIT_DEPTH: 1
@@ -273,4 +274,124 @@ tags_api_smoketest_negative:
   artifacts:
     reports:
       junit: api_smoketest_tags_api_negative.xml
+
+.hivemind_reports: &common_api_reports
+  stage: reports
+  environment: hive-4.pl.syncad.com
+  needs:
+    - job: hivemind_start_api_smoketest
+      artifacts: true
+
+  variables:
+    GIT_STRATEGY: none
+
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: manual
+    - when: on_success
+
+  tags:
+      - hivemind
+
+bridge_api_smoketest_report:
+  <<: *common_api_reports
+
+  script:
+    - scripts/xml_report_parser.py api_smoketest_bridge.xml
+
+  artifacts:
+    paths:
+      - api_smoketest_bridge.html
+
+bridge_api_smoketest_negative_report:
+  <<: *common_api_reports
+
+  script:
+    - scripts/xml_report_parser.py api_smoketest_bridge_negative.xml
+
+  artifacts:
+    paths:
+      - api_smoketest_bridge_negative.html
+
+condenser_api_smoketest_report:
+  <<: *common_api_reports
+
+  script:
+    - scripts/xml_report_parser.py api_smoketest_condenser_api.xml
+
+  artifacts:
+    paths:
+      - api_smoketest_condenser_api.html
+
+condenser_api_smoketest_negative_report:
+  <<: *common_api_reports
+
+  script:
+    - scripts/xml_report_parser.py api_smoketest_condenser_api_negative.xml
+
+  artifacts:
+    paths:
+      - api_smoketest_condenser_api_negative.html
+
+database_api_smoketest_report:
+  <<: *common_api_reports
+
+  script:
+    - scripts/xml_report_parser.py api_smoketest_database_api.xml
+
+  artifacts:
+    paths:
+      - api_smoketest_database_api.html
+
+database_api_smoketest_negative_report:
+  <<: *common_api_reports
+
+  script:
+    - scripts/xml_report_parser.py api_smoketest_database_api_negative.xml
+
+  artifacts:
+    paths:
+      - api_smoketest_database_api_negative.html
+
+follow_api_smoketest_report:
+  <<: *common_api_reports
+
+  script:
+    - scripts/xml_report_parser.py api_smoketest_follow_api.xml
+
+  artifacts:
+    paths:
+      - api_smoketest_follow_api.html
+
+follow_api_smoketest_negative_report:
+  <<: *common_api_reports
+
+  script:
+    - scripts/xml_report_parser.py api_smoketest_follow_api_negative.xml
+
+  artifacts:
+    paths:
+      - api_smoketest_follow_api_negative.html
+
+tags_api_smoketest_report:
+  <<: *common_api_reports
+
+  script:
+    - scripts/xml_report_parser.py api_smoketest_tags_api.xml
+
+  artifacts:
+    paths:
+      - api_smoketest_tags_api.html
+
+tags_api_smoketest_negative_report:
+  <<: *common_api_reports
+
+  script:
+    - scripts/xml_report_parser.py api_smoketest_tags_api_negative.xml
+
+  artifacts:
+    paths:
+      - api_smoketest_tags_api_negative.html
 
