@@ -741,7 +741,7 @@ def setup(db):
           lastread_at,
           posting_json_metadata,
           json_metadata,
-          ( reputation < 1 ) is_grayed
+          ( reputation <= -464800000000 ) is_grayed -- biggest number where rep_log10 gives < 1.0
           FROM hive_accounts
           """
     db.query_no_return(sql)
