@@ -24,7 +24,9 @@ $ export DATABASE_URL=postgresql://user:pass@localhost:5432/hive
 ```bash
 $ git clone https://github.com/steemit/hivemind.git
 $ cd hivemind
-$ pip3 install -e .[test]
+$ git submodule update --init --recursive
+$ python3 setup.py build
+$ python3 setup.py install --user
 ```
 
 Start the indexer:
