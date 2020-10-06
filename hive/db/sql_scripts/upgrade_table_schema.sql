@@ -1,3 +1,10 @@
+CREATE TABLE IF NOT EXISTS hive_db_patch_level
+(
+  level SERIAL NOT NULL PRIMARY KEY,
+  patch_date timestamp without time zone NOT NULL,
+  patched_to_revision TEXT
+);
+
 CREATE TABLE IF NOT EXISTS hive_db_data_migration
 (
   migration varchar(128) not null
@@ -100,3 +107,33 @@ END IF;
 END
 $BODY$
 ;
+
+DO
+$BODY$
+BEGIN
+IF EXISTS(SELECT data_type
+              FROM information_schema.columns
+              WHERE table_name = 'hive_posts' AND column_name = 'is_grayed') THEN
+  RAISE NOTICE 'Performing hive_posts upgrade - dropping is_grayed column';
+
+  --- Warning we need to first drop hive_posts view since it references column is_grayed, which will be dropped.
+  --- Saving it in the dependencies, will restore wrong (old) definition of the view and make an error.
+  DROP VIEW IF EXISTS hive_posts_view CASCADE;
+
+  PERFORM deps_save_and_drop_dependencies('public', 'hive_posts', true);
+
+  ALTER TABLE hive_posts
+    DROP COLUMN IF EXISTS is_grayed;
+
+  perform deps_restore_dependencies('public', 'hive_posts');
+
+  INSERT INTO hive_db_data_migration VALUES ('hive_mentions fill');
+END IF;
+END
+$BODY$
+;
+
+DROP INDEX IF EXISTS hive_mentions_post_id_idx;
+
+-- updated up to 7b8def051be224a5ebc360465f7a1522090c7125
+

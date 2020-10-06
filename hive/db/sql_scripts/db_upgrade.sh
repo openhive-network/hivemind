@@ -1,6 +1,7 @@
 #!/bin/bash 
 
 set -e 
+set -o pipefail 
 
 echo "Usage ./db_upgrade.sh <user-name> <db-name>"
 rm -f ./upgrade.log
@@ -33,7 +34,7 @@ for sql in postgres_handle_view_changes.sql \
           upgrade_runtime_migration.sql
 do
 	echo Executing psql -U $1 -d $2 -f $sql
-	psql -1 -v ON_ERROR_STOP=1 -U $1 -d $2 -f $sql 2>&1 | tee -a -i upgrade.log
+	psql -1 -v "ON_ERROR_STOP=1" -U $1 -d $2 -f $sql 2>&1 | tee -a -i upgrade.log
   echo $?
 done
 

@@ -28,11 +28,16 @@ IF EXISTS(SELECT * FROM hive_db_data_migration WHERE migration = 'hive_mentions 
   PERFORM update_hive_posts_mentions(0, (SELECT hb.num FROM hive_blocks hb ORDER BY hb.num DESC LIMIT 1) );
   CREATE INDEX IF NOT EXISTS hive_mentions_block_num_idx ON hive_mentions (block_num);
 ELSE
-  RAISE NOTICE 'Performing initial post body mentions collection...';
+  RAISE NOTICE 'Skipping initial post body mentions collection...';
 END IF;
 
 END
 $BODY$;
 
 TRUNCATE TABLE hive_db_data_migration;
+
+insert into hive_db_patch_level
+(patch_date, patched_to_revision)
+values
+(now(), '7b8def051be224a5ebc360465f7a1522090c7125');
 
