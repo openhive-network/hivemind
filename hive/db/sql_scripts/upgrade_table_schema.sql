@@ -10,6 +10,16 @@ CREATE TABLE IF NOT EXISTS hive_db_data_migration
   migration varchar(128) not null
 );
 
+DO $$
+BEGIN
+  EXECUTE 'ALTER DATABASE '||current_database()||' SET join_collapse_limit TO 16';
+  EXECUTE 'ALTER DATABASE '||current_database()||' SET from_collapse_limit TO 16';
+END
+$$; 
+
+SHOW join_collapse_limit;
+SHOW from_collapse_limit;
+
 DO
 $BODY$
 BEGIN

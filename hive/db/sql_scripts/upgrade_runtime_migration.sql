@@ -38,6 +38,14 @@ TRUNCATE TABLE hive_db_data_migration;
 
 insert into hive_db_patch_level
 (patch_date, patched_to_revision)
+select ds.patch_date, ds.patch_revision
+from 
+(
 values
-(now(), '7b8def051be224a5ebc360465f7a1522090c7125');
+(now(), '7b8def051be224a5ebc360465f7a1522090c7125'),
+(now(), 'e17bfcb08303cbf07b3ce7d1c435d59a368b4a9e')
+) ds (patch_date, patch_revision)
+where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
+
+;
 
