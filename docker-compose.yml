@@ -17,8 +17,7 @@ services:
       context: .
       dockerfile: Dockerfile
     command: >
-      sh -c "hive sync --test-max-block=5000000 --test-profile=False --exit-after-sync --steemd-url '{\"default\" : $HIVE_SYNC_URL}' --database-url $DATABASE_URL &&
-             tail -f /dev/null"
+      sh -c "hive sync   --steemd-url '{\"default\": $HIVE_SYNC_URL}' --database-url $DATABASE_URL"
     environment:
       DATABASE_URL: $DATABASE_URL
     restart: unless-stopped
