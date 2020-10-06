@@ -336,15 +336,23 @@ async def get_discussions_by_created(context, start_author: str = '', start_perm
                                      truncate_body: int = 0, filter_tags: list = None):
     """Query posts, sorted by creation date."""
     assert not filter_tags, 'filter_tags not supported'
-    ids = await cursor.pids_by_query(
-        context['db'],
-        'created',
-        valid_account(start_author, allow_empty=True),
-        valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100, 20),
-        valid_tag(tag, allow_empty=True))
-    return await load_posts(context['db'], ids, truncate_body=truncate_body)
 
+    db = context['db']
+
+    start_author    = valid_account(start_author, allow_empty=True),
+    start_permlink  = valid_permlink(start_permlink, allow_empty=True),
+    limit           = valid_limit(limit, 100, 20),
+    tag             = valid_tag(tag, allow_empty=True)
+
+    sql = "SELECT * FROM condenser_get_discussions_by_created( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+    sql_result = await db.query_all(sql, tag=tag, author=start_author, permlink=start_permlink, limit=limit )
+
+    posts = []
+    for row in sql_result:
+        post = _condenser_post_object(row, truncate_body)
+        post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
+        posts.append(post)
+    return posts
 
 @return_error_info
 @nested_query_compat
