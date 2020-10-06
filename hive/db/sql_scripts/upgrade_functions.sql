@@ -155,7 +155,7 @@ CREATE OR REPLACE FUNCTION public.update_hive_posts_children_count(in _first_blo
     VOLATILE
 AS $BODY$
 BEGIN
-set local enable_sort=false;
+
 set local work_mem='2GB';
 
 UPDATE hive_posts uhp
@@ -184,7 +184,6 @@ FROM
 WHERE uhp.id = data_source.queried_parent
 ;
 
-reset enable_sort;
 reset work_mem;
 
 END
