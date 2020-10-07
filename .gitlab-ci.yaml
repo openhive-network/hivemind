@@ -295,6 +295,8 @@ tags_api_smoketest_negative:
   tags:
       - hivemind
 
+  allow_failure: true
+
 bridge_api_smoketest_report:
   <<: *common_api_reports
 
@@ -302,6 +304,7 @@ bridge_api_smoketest_report:
     - scripts/xml_report_parser.py api_smoketest_bridge.xml
 
   artifacts:
+    when: always
     paths:
       - api_smoketest_bridge.html
 
@@ -312,6 +315,7 @@ bridge_api_smoketest_negative_report:
     - scripts/xml_report_parser.py api_smoketest_bridge_negative.xml
 
   artifacts:
+    when: always
     paths:
       - api_smoketest_bridge_negative.html
 
@@ -322,6 +326,7 @@ condenser_api_smoketest_report:
     - scripts/xml_report_parser.py api_smoketest_condenser_api.xml
 
   artifacts:
+    when: always
     paths:
       - api_smoketest_condenser_api.html
 
@@ -332,6 +337,7 @@ condenser_api_smoketest_negative_report:
     - scripts/xml_report_parser.py api_smoketest_condenser_api_negative.xml
 
   artifacts:
+    when: always
     paths:
       - api_smoketest_condenser_api_negative.html
 
@@ -342,6 +348,7 @@ database_api_smoketest_report:
     - scripts/xml_report_parser.py api_smoketest_database_api.xml
 
   artifacts:
+    when: always
     paths:
       - api_smoketest_database_api.html
 
@@ -352,6 +359,7 @@ database_api_smoketest_negative_report:
     - scripts/xml_report_parser.py api_smoketest_database_api_negative.xml
 
   artifacts:
+    when: always
     paths:
       - api_smoketest_database_api_negative.html
 
@@ -362,6 +370,7 @@ follow_api_smoketest_report:
     - scripts/xml_report_parser.py api_smoketest_follow_api.xml
 
   artifacts:
+    when: always
     paths:
       - api_smoketest_follow_api.html
 
@@ -372,6 +381,7 @@ follow_api_smoketest_negative_report:
     - scripts/xml_report_parser.py api_smoketest_follow_api_negative.xml
 
   artifacts:
+    when: always
     paths:
       - api_smoketest_follow_api_negative.html
 
@@ -382,6 +392,7 @@ tags_api_smoketest_report:
     - scripts/xml_report_parser.py api_smoketest_tags_api.xml
 
   artifacts:
+    when: always
     paths:
       - api_smoketest_tags_api.html
 
@@ -392,6 +403,7 @@ tags_api_smoketest_negative_report:
     - scripts/xml_report_parser.py api_smoketest_tags_api_negative.xml
 
   artifacts:
+    when: always
     paths:
       - api_smoketest_tags_api_negative.html
 
