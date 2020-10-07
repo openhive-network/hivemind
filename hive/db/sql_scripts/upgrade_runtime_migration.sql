@@ -53,7 +53,8 @@ from
 values
 (now(), '7b8def051be224a5ebc360465f7a1522090c7125'),
 (now(), 'e17bfcb08303cbf07b3ce7d1c435d59a368b4a9e'),
-(now(), '0be8e6e8b2121a8f768113e35e47725856c5da7c') -- update_hot_and_trending_for_blocks fix, https://gitlab.syncad.com/hive/hivemind/-/merge_requests/247
+(now(), '0be8e6e8b2121a8f768113e35e47725856c5da7c'), -- update_hot_and_trending_for_blocks fix, https://gitlab.syncad.com/hive/hivemind/-/merge_requests/247
+(now(), '26c2f1862770178d4575ec09e9f9c225dcf3d206')  -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/252
 ) ds (patch_date, patch_revision)
 where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
 

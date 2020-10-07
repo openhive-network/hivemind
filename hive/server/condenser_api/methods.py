@@ -73,8 +73,7 @@ SQL_TEMPLATE = """
 async def get_account_votes(context, account):
     """Return an info message about get_acccount_votes being unsupported."""
     # pylint: disable=unused-argument
-    raise ApiError("get_account_votes is no longer supported, for details see "
-                   "https://steemit.com/steemit/@steemitdev/additional-public-api-change")
+    assert False, "get_account_votes is no longer supported, for details see https://hive.blog/steemit/@steemitdev/additional-public-api-change"
 
 
 # Follows Queries
