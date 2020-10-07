@@ -1,8 +1,8 @@
 # Hivemind [BETA]
 
-#### Developer-friendly microservice powering social networks on the Steem blockchain.
+#### Developer-friendly microservice powering social networks on the Hive blockchain.
 
-Hive is a "consensus interpretation" layer for the Steem blockchain, maintaining the state of social features such as post feeds, follows, and communities. Written in Python, it synchronizes an SQL database with chain state, providing developers with a more flexible/extensible alternative to the raw steemd API.
+Hivemind is a "consensus interpretation" layer for the Hive blockchain, maintaining the state of social features such as post feeds, follows, and communities. Written in Python, it synchronizes an SQL database with chain state, providing developers with a more flexible/extensible alternative to the raw hived API.
 
 ## Development Environment
 
@@ -22,7 +22,7 @@ $ export DATABASE_URL=postgresql://user:pass@localhost:5432/hive
 ```
 
 ```bash
-$ git clone https://github.com/steemit/hivemind.git
+$ git clone https://gitlab.syncad.com/hive/hivemind.git
 $ cd hivemind
 $ python3 setup.py build
 $ python3 setup.py install --user
@@ -64,10 +64,10 @@ Hivemind is deployed as a Docker container.
 Here is an example command that will initialize the DB schema and start the syncing process:
 
 ```
-docker run -d --name hivemind --env DATABASE_URL=postgresql://user:pass@hostname:5432/databasename --env STEEMD_URL='{"default":"https://yoursteemnode"}' --env SYNC_SERVICE=1 -p 8080:8080 steemit/hivemind:latest
+docker run -d --name hivemind --env DATABASE_URL=postgresql://user:pass@hostname:5432/databasename --env STEEMD_URL='{"default":"https://yourhivenode"}' --env SYNC_SERVICE=1 -p 8080:8080 hive/hivemind:latest
 ```
 
-Be sure to set `DATABASE_URL` to point to your postgres database and `STEEMD_URL` to point to your steemd node to sync from.
+Be sure to set `DATABASE_URL` to point to your postgres database and `STEEMD_URL` to point to your hived node to sync from.
 
 Once the database is synced, Hivemind will be available for serving requests.
 
@@ -85,7 +85,7 @@ docker logs -f hivemind
 | `LOG_LEVEL`              | `--log-level`        | INFO    |
 | `HTTP_SERVER_PORT`       | `--http-server-port` | 8080    |
 | `DATABASE_URL`           | `--database-url`     | postgresql://user:pass@localhost:5432/hive |
-| `STEEMD_URL`             | `--steemd-url`       | '{"default":"https://yoursteemnode"}' |
+| `STEEMD_URL`             | `--steemd-url`       | '{"default":"https://yourhivenode"}' |
 | `MAX_BATCH`              | `--max-batch`        | 50      |
 | `MAX_WORKERS`            | `--max-workers`      | 4       |
 | `TRAIL_BLOCKS`           | `--trail-blocks`     | 2       |
@@ -104,7 +104,7 @@ Precedence: CLI over ENV over hive.conf. Check `hive --help` for details.
  - 250GB storage for database
 
 
-### Steem config
+### Hive config
 
 Build flags
 
