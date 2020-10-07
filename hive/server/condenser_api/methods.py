@@ -161,7 +161,7 @@ async def get_content(context, author: str, permlink: str, observer=None):
     result = await db.query_all(sql, author=author, permlink=permlink)
     if result:
         result = dict(result[0])
-        post = _condenser_post_object(result, 0)
+        post = _condenser_post_object(result, 0, True)
         post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.ActiveVotes)
         if not observer:
             post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
