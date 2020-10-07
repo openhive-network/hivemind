@@ -445,6 +445,7 @@ def setup(db):
 
         "INSERT INTO hive_permlink_data (id, permlink) VALUES (0, '')",
         "INSERT INTO hive_category_data (id, category) VALUES (0, '')",
+        "INSERT INTO hive_tag_data (id, tag) VALUES (0, '')",
         "INSERT INTO hive_accounts (id, name, created_at) VALUES (0, '', '1970-01-01T00:00:00')",
 
         "INSERT INTO hive_accounts (name, created_at) VALUES ('miners',    '2016-03-24 16:05:00')",
@@ -765,6 +766,7 @@ def setup(db):
           hpd.img_url,
           hpd.preview,
           hcd.category,
+          hp.category_id,
           hp.depth,
           hp.promoted,
           hp.payout,
@@ -1719,7 +1721,12 @@ def setup(db):
       "bridge_get_post.sql",
       "condenser_get_discussions_by_created.sql",
       "condenser_get_discussions_by_blog.sql",
-      "hot_and_trends.sql"
+      "hot_and_trends.sql",
+      "condenser_get_discussions_by_trending.sql",
+      "condenser_get_discussions_by_hot.sql",
+      "condenser_get_discussions_by_promoted.sql",
+      "condenser_get_post_discussions_by_payout.sql",
+      "condenser_get_comment_discussions_by_payout.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
