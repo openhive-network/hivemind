@@ -14,10 +14,12 @@ function wait_for_accepting_db () {
 }
 
 function alter_db_settings () {
-    while read line; do
-        psql -U tester -d hivemind -c "ALTER SYSTEM SET $line ;"
-    done < /src/hivemind/postgres.auto.conf
-    service postgresql restart
+    if [ -f /src/hivemind/postgres.auto.conf ]; then
+        while read line; do
+            psql -U tester -d hivemind -c "ALTER SYSTEM SET $line ;"
+        done < /src/hivemind/postgres.auto.conf
+        service postgresql restart
+    do
 }
 
 function start_db () {
