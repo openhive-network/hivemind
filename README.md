@@ -14,7 +14,7 @@ Dependencies:
  - OSX: `$ brew install python3 postgresql`
  - Ubuntu: `$ sudo apt-get install python3 python3-pip`
 
-Installation:
+Installation (DO NOT USE pip! It will install incorrect versions of some packages):
 
 ```bash
 $ createdb hive
@@ -24,7 +24,8 @@ $ export DATABASE_URL=postgresql://user:pass@localhost:5432/hive
 ```bash
 $ git clone https://github.com/steemit/hivemind.git
 $ cd hivemind
-$ pip3 install -e .[test]
+$ python3 setup.py build
+$ python3 setup.py install --user
 ```
 
 Start the indexer:
