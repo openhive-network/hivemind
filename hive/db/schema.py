@@ -1718,6 +1718,7 @@ def setup(db):
       "bridge_get_relationship_between_accounts.sql",
       "bridge_get_post.sql",
       "condenser_get_discussions_by_created.sql",
+      "condenser_get_discussions_by_blog.sql",
       "hot_and_trends.sql"
     ]
     from os.path import dirname, realpath
