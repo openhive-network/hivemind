@@ -1,6 +1,5 @@
 """Handles legacy `call` method."""
 
-from hive.server.condenser_api.cursor import get_account_reputations, get_reblogged_by
 from hive.server.common.helpers import (
     ApiError,
     return_error_info,
@@ -8,27 +7,34 @@ from hive.server.common.helpers import (
 from hive.server.condenser_api.get_state import get_state
 from hive.server.condenser_api.tags import get_trending_tags
 from hive.server.condenser_api.methods import (
-    get_active_votes, get_followers,
+    get_followers,
     get_following,
     get_follow_count,
+
+    get_reblogged_by,
+    get_account_reputations,
+
     get_content,
     get_content_replies,
+    
     get_discussions_by_trending,
     get_discussions_by_hot,
     get_discussions_by_promoted,
     get_discussions_by_created,
+    get_post_discussions_by_payout,
+    get_comment_discussions_by_payout,
+
     get_discussions_by_blog,
     get_discussions_by_feed,
     get_discussions_by_comments,
     get_replies_by_last_update,
 
-    get_post_discussions_by_payout,
-    get_comment_discussions_by_payout,
-
     get_discussions_by_author_before_date,
     get_blog,
     get_blog_entries,
+
     get_account_votes,
+    get_active_votes
 )
 
 def _strict_list(params, expected_len, min_len=None):
@@ -150,4 +156,4 @@ async def call(context, api, method, params):
     elif method == 'get_active_votes':
         return await get_active_votes(context, *_strict_list(params, 2))
 
-    raise ApiError("unknown method: %s.%s" % (api, method))
+    assert False, "unknown method: %s.%s" % (api, method)
