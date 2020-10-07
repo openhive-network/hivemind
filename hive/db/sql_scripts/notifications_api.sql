@@ -32,7 +32,7 @@ BEGIN
   FROM
     hive_accounts ha
     LEFT JOIN hive_notifications_view hnv ON hnv.dst_id = ha.id
-	WHERE ha.id = __account_id
+    WHERE ha.id = __account_id
   GROUP BY ha.id, ha.lastread_at;
 END
 $BODY$
