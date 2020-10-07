@@ -32,6 +32,7 @@ for sql in postgres_handle_view_changes.sql \
           bridge_get_relationship_between_accounts.sql \
           bridge_get_post.sql \
           condenser_get_discussions_by_created.sql \
+          condenser_get_discussions_by_blog.sql \
           upgrade_runtime_migration.sql
 do
 	echo Executing psql -U $1 -d $2 -f $sql

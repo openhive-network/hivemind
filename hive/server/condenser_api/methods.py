@@ -35,6 +35,8 @@ SQL_TEMPLATE = """
         hp.payout,
         hp.payout_at,
         hp.pending_payout,
+        hp.last_payout_at,
+        hp.cashout_time,
         hp.is_paidout,
         hp.children,
         hp.votes,
@@ -46,6 +48,8 @@ SQL_TEMPLATE = """
         hp.is_hidden,
         hp.is_grayed,
         hp.total_votes,
+        hp.net_votes,
+        hp.total_vote_weight,
         hp.parent_author,
         hp.parent_permlink_or_category,
         hp.curator_payout_value,
@@ -58,9 +62,11 @@ SQL_TEMPLATE = """
         hp.allow_curation_rewards,
         hp.beneficiaries,
         hp.url,
-        hp.root_title
+        hp.root_title,
+        hp.abs_rshares,
+        hp.active,
+        hp.author_rewards
     FROM hive_posts_view hp
-    WHERE
 """
 
 @return_error_info
@@ -147,14 +153,17 @@ async def get_content(context, author: str, permlink: str, observer=None):
     valid_permlink(permlink)
     #force copy
     sql = str(SQL_TEMPLATE)
-    sql += """ hp.author = :author AND hp.permlink = :permlink """
+    sql += """
+        WHERE
+            hp.author = :author AND hp.permlink = :permlink
+    """
 
     post = None
     result = await db.query_all(sql, author=author, permlink=permlink)
     if result:
         result = dict(result[0])
-        post = _condenser_post_object(result, 0)
-        post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.CondenserApi)
+        post = _condenser_post_object(result, 0, True)
+        post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.ActiveVotes)
         if not observer:
             post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
         else:
@@ -174,8 +183,11 @@ async def get_content_replies(context, author: str, permlink: str):
     #force copy
     sql = str(SQL_TEMPLATE)
     sql += """
-        hp.parent_author = :author AND hp.parent_permlink_or_category = :permlink
-        ORDER BY hp.id LIMIT :limit
+        WHERE
+            hp.parent_author = :author AND hp.parent_permlink_or_category = :permlink
+        ORDER BY
+            hp.id
+        LIMIT :limit
     """
 
     result = await db.query_all(sql, author=author, permlink=permlink, limit=5000)
@@ -224,19 +236,19 @@ async def get_discussions_by(discussion_type, context, start_author: str = '',
     sql = "---get_discussions_by_" + discussion_type + "\r\n" + str(SQL_TEMPLATE)
 
     if discussion_type == 'trending':
-        sql = sql + """ NOT hp.is_paidout %s ORDER BY hp.sc_trend DESC LIMIT :limit """
+        sql = sql + """WHERE NOT hp.is_paidout %s ORDER BY hp.sc_trend DESC LIMIT :limit """
     elif discussion_type == 'hot':
-        sql = sql + """ NOT hp.is_paidout %s ORDER BY hp.sc_hot DESC LIMIT :limit """
+        sql = sql + """WHERE NOT hp.is_paidout %s ORDER BY hp.sc_hot DESC LIMIT :limit """
     elif discussion_type == 'created':
-        sql = sql + """ hp.depth = 0 %s ORDER BY hp.created_at DESC LIMIT :limit """
+        sql = sql + """WHERE hp.depth = 0 %s ORDER BY hp.created_at DESC LIMIT :limit """
     elif discussion_type == 'promoted':
-        sql = sql + """ NOT hp.is_paidout AND hp.promoted > 0
+        sql = sql + """WHERE NOT hp.is_paidout AND hp.promoted > 0
                         %s ORDER BY hp.promoted DESC LIMIT :limit """
     elif discussion_type == 'payout': # wrong: now we should be using payout + pending_payout here
-        sql = sql + """ NOT hp.is_paidout AND hp.depth = 0
+        sql = sql + """WHERE NOT hp.is_paidout AND hp.depth = 0
                         %s ORDER BY hp.payout DESC LIMIT :limit """
     elif discussion_type == 'payout_comments': # wrong: now we should be using payout + pending_payout here
-        sql = sql + """ NOT hp.is_paidout AND hp.depth > 0
+        sql = sql + """WHERE NOT hp.is_paidout AND hp.depth > 0
                         %s ORDER BY hp.payout DESC LIMIT :limit """
 
     if tag and tag != 'all':
@@ -367,40 +379,8 @@ async def get_discussions_by_blog(context, tag: str = None, start_author: str = 
     valid_permlink(start_permlink, allow_empty=True)
     valid_limit(limit, 100, 20)
 
-    #force copy
     sql = """
-        WITH post_ids AS (
-            SELECT 
-                post_id 
-            FROM 
-                hive_feed_cache hfc
-            JOIN 
-                hive_accounts hfc_ha ON hfc.account_id = hfc_ha.id
-            WHERE 
-                hfc_ha.name = :author
-        )
-    """
-    sql += str(SQL_TEMPLATE)
-    sql += """
-            hp.id IN (SELECT pids.post_id FROM post_ids AS pids)
-          """
-    if start_author and start_permlink != '':
-        sql += """
-            AND hp.created_at <= (
-                SELECT 
-                    hp1.created_at
-                FROM
-                    hive_posts hp1
-                INNER JOIN hive_accounts ha ON ha.id = hp1.author_id
-                INNER JOIN hive_permlink_data hpd ON hpd.id = hp1.permlink_id
-                WHERE
-                    ha.name = :start_author
-                    AND hpd.permlink = :start_permlink
-            )
-        """
-    sql += """
-        ORDER BY hp.created_at DESC
-        LIMIT :limit
+        SELECT * FROM get_discussions_by_blog(:author, :start_author, :start_permlink, :limit)
     """
 
     db = context['db']
@@ -449,7 +429,8 @@ async def get_discussions_by_comments(context, start_author: str = None, start_p
     #force copy
     sql = str(SQL_TEMPLATE)
     sql += """
-        hp.author = :start_author AND hp.depth > 0
+        WHERE
+            hp.author = :start_author AND hp.depth > 0
     """
 
     if start_permlink:
