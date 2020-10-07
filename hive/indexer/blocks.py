@@ -21,7 +21,6 @@ from hive.indexer.notify import Notify
 
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.stats import FlushStatusManager as FSM
-from hive.utils.trends import update_hot_and_tranding_for_block_range
 from hive.utils.post_active import update_active_starting_from_posts_on_block
 
 from hive.server.common.payout_stats import PayoutStats
@@ -226,7 +225,7 @@ class Blocks:
 
         if num in virtual_operations:
             ineffective_deleted_ops = Blocks.prepare_vops(Posts.comment_payout_ops, virtual_operations[num], cls._current_block_date, num)
-    
+
         json_ops = []
         for tx_idx, tx in enumerate(block['transactions']):
             for operation in tx['operations']:
@@ -429,10 +428,10 @@ class Blocks:
         """Is invoked when processing of block range is done and received
            informations from hived are already stored in db
         """
-        update_hot_and_tranding_for_block_range( first_block, last_block )
         update_active_starting_from_posts_on_block( first_block, last_block )
 
         queries = [
+            "SELECT update_hot_and_trending_for_blocks({}, {})".format(first_block, last_block),
             "SELECT update_hive_posts_children_count({}, {})".format(first_block, last_block),
             "SELECT update_hive_posts_root_id({},{})".format(first_block, last_block),
             "SELECT update_hive_posts_api_helper({},{})".format(first_block, last_block),
@@ -445,4 +444,3 @@ class Blocks:
             time_start = perf_counter()
             DB.query_no_return(query)
             log.info("%s executed in: %.4f s", query, perf_counter() - time_start)
-
