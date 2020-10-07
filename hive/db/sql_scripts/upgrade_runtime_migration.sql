@@ -31,6 +31,15 @@ ELSE
   RAISE NOTICE 'Skipping initial post body mentions collection...';
 END IF;
 
+
+IF EXISTS (SELECT * FROM hive_db_data_migration WHERE migration = 'update_hot_and_trending_for_blocks( 0, head_block_number) execution') THEN
+  RAISE NOTICE 'Performing update_hot_and_trending_for_blocks( 0, head_block_number) recalculation...';
+  SET work_mem='2GB';
+  PERFORM update_hot_and_trending_for_blocks(0, (SELECT hb.num FROM hive_blocks hb ORDER BY hb.num DESC LIMIT 1) );
+ELSE
+  RAISE NOTICE 'Skipping update_hot_and_trending_for_blocks( 0, head_block_number) recalculation...';
+END IF;
+
 END
 $BODY$;
 
@@ -43,7 +52,8 @@ from
 (
 values
 (now(), '7b8def051be224a5ebc360465f7a1522090c7125'),
-(now(), 'e17bfcb08303cbf07b3ce7d1c435d59a368b4a9e')
+(now(), 'e17bfcb08303cbf07b3ce7d1c435d59a368b4a9e'),
+(now(), '0be8e6e8b2121a8f768113e35e47725856c5da7c') -- update_hot_and_trending_for_blocks fix, https://gitlab.syncad.com/hive/hivemind/-/merge_requests/247
 ) ds (patch_date, patch_revision)
 where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
 

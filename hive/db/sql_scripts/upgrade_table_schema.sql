@@ -147,3 +147,6 @@ DROP INDEX IF EXISTS hive_mentions_post_id_idx;
 
 -- updated up to 7b8def051be224a5ebc360465f7a1522090c7125
 
+INSERT INTO hive_db_data_migration 
+select 'update_hot_and_trending_for_blocks( 0, head_block_number) execution'
+where not exists (select null from hive_db_patch_level where patched_to_revision = '0be8e6e8b2121a8f768113e35e47725856c5da7c' )
