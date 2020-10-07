@@ -14,7 +14,7 @@ Dependencies:
  - OSX: `$ brew install python3 postgresql`
  - Ubuntu: `$ sudo apt-get install python3 python3-pip`
 
-Installation (do not use pip! it will install incorrect versions of some packages):
+Installation (DO NOT USE pip! It will install incorrect versions of some packages):
 
 ```bash
 $ createdb hive
