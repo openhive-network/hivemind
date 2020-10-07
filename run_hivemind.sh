@@ -2,8 +2,8 @@
 
 function wait_for_accepting_db () {
     counter=0
-    while !  pg_isready -d $POSTGRES_DB -h 0.0.0.0 -p $POSTGRES_PORT -U $POSTGRES_USER ; do
-        echo "waiting for port 0.0.0.0 $POSTGRES_PORT ..."
+    while !  pg_isready -d $POSTGRES_DB -h $POSTGRES_IP -p $POSTGRES_PORT -U $POSTGRES_USER ; do
+        echo "waiting for port $POSTGRES_IP $POSTGRES_PORT ..."
         sleep 1
         if [ $counter -eq 10 ]; then 
             echo "Timeout reached... exiting."
@@ -14,12 +14,12 @@ function wait_for_accepting_db () {
 }
 
 function alter_db_settings () {
-    if [ -f /src/hivemind/postgres.auto.conf ]; then
+    if [ -f "/src/hivemind/postgres.auto.conf" ]; then
         while read line; do
             psql -U tester -d hivemind -c "ALTER SYSTEM SET $line ;"
         done < /src/hivemind/postgres.auto.conf
         service postgresql restart
-    do
+    fi
 }
 
 function start_db () {
