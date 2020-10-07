@@ -364,40 +364,8 @@ async def get_discussions_by_blog(context, tag: str = None, start_author: str = 
     valid_permlink(start_permlink, allow_empty=True)
     valid_limit(limit, 100, 20)
 
-    #force copy
-    sql = str(SQL_TEMPLATE)
-    sql += """
-        INNER JOIN
-        (
-            SELECT
-                post_id
-            FROM
-                hive_feed_cache hfc
-            INNER JOIN hive_accounts hfc_ha ON hfc.account_id = hfc_ha.id
-            INNER JOIN hive_posts hfc_hp ON hfc.post_id = hfc_hp.id
-            WHERE
-                hfc_ha.name = :author
-            ORDER BY
-                hfc_hp.created_at DESC
-            LIMIT :limit
-        ) ds on ds.post_id = hp.id
-    """
-    if start_author and start_permlink != '':
-        sql += """
-            WHERE hp.created_at <= (
-                SELECT 
-                    hp1.created_at
-                FROM
-                    hive_posts hp1
-                INNER JOIN hive_accounts ha ON ha.id = hp1.author_id
-                INNER JOIN hive_permlink_data hpd ON hpd.id = hp1.permlink_id
-                WHERE
-                    ha.name = :start_author
-                    AND hpd.permlink = :start_permlink
-            )
-        """
-    sql += """
-        ORDER BY hp.created_at DESC
+    sql = """
+        SELECT * FROM get_discussions_by_blog(:author, :start_author, :start_permlink, :limit)
     """
 
     db = context['db']
