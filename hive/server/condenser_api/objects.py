@@ -233,7 +233,7 @@ def _condenser_post_object(row, truncate_body=0):
     post['children_abs_rshares'] = 0    # see: hive/server/database_api/objects.py:68
     post['total_pending_payout_value'] = 0      # no data
 
-    if not paid:
+    if paid:
         post['total_vote_weight'] = 0
         post['vote_rshares'] = 0
         post['abs_rshares'] = 0
