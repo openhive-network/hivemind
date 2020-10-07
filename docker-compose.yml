@@ -1,26 +1,20 @@
 version: '3'
 services:
-  db:
-    image: postgres
+  hivemind:
+    image: hivemind:postgres
+    build: 
+      context: .
+      dockerfile: Dockerfile
     environment:
-      POSTGRES_USER: testuser
-      POSTGRES_PASSWORD: testuserpass
-      POSTGRES_DB: testdb
-    ports:
-     - 3306:3306
-  hive:
-    depends_on:
-      - db
-    image: steemit/hive
-    build: .
-    environment:
-      DATABASE_URL: postgresql://testuser:testuserpass@db:5432/testdb
-      LOG_LEVEL: INFO
-      STEEMD_URL: '{"default" : "https://api.hive.blog"}'
-    links:
-      - db:db
-    ports:
-      - 8080:8080
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_DB: $POSTGRES_DB
+      POSTGRES_PORT: $POSTGRES_PORT
+      DATABASE_URL: postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@hivemind:$POSTGRES_PORT/$POSTGRES_DB
+      HIVE_SYNC_URL: $HIVE_SYNC_URL
+    restart: unless-stopped
     volumes:
-      - .:/app
-    restart: always
+        - hivemind:/var/lib/postgresql/data
+volumes:
+  hivemind:
+    driver: local
