@@ -152,7 +152,7 @@ max_wal_size = 4GB
 
 ## JSON-RPC API
 
-The minimum viable API is to remove the requirement for the `follow` and `tags` plugins (now rolled into [`condenser_api`](https://github.com/steemit/steem/blob/master/libraries/plugins/apis/condenser_api/condenser_api.cpp)) from the backend node while still being able to power condenser's non-wallet features. Thus, this is the core API set:
+The minimum viable API is to remove the requirement for the `follow` and `tags` plugins (now rolled into [`condenser_api`](https://gitlab.syncad.com/hive/hive/-/tree/master/libraries/plugins/apis/condenser_api/condenser_api.cpp)) from the backend node while still being able to power condenser's non-wallet features. Thus, this is the core API set:
 
 ```
 condenser_api.get_followers
@@ -193,13 +193,13 @@ Hivemind's API is focused on providing social media-related information to Hive 
 ##### Hive tracks posts, relationships, social actions, custom operations, and derived states.
 
  - *discussions:* by blog, trending, hot, created, etc
- - *communities:* mod roles/actions, members, feeds (in 1.5; [spec](https://github.com/steemit/hivemind/blob/master/docs/communities.md))
+ - *communities:* mod roles/actions, members, feeds (in 1.5; [spec](https://gitlab.syncad.com/hive/hivemind/-/blob/master/docs/communities.md))
  - *accounts:* normalized profile data, reputation
  - *feeds:* un/follows and un/reblogs
 
 ##### Hive does not track most blockchain operations.
 
-For anything to do with wallets, orders, escrow, keys, recovery, or account history, query SBDS or steemd.
+For anything to do with wallets, orders, escrow, keys, recovery, or account history, query hived.
 
 ##### Hive can be extended or leveraged to create:
 
@@ -219,15 +219,15 @@ For anything to do with wallets, orders, escrow, keys, recovery, or account hist
 
 #### Core indexer
 
-Ingests blocks sequentially, processing operations relevant to accounts, post creations/edits/deletes, and custom_json ops for follows, reblogs, and communities. From these we build account and post lookup tables, follow/reblog state, and communities/members data. Built exclusively from raw blocks, it becomes the ground truth for internal state. Hive does not reimplement logic required for deriving payout values, reputation, and other statistics which are much more easily attained from steemd itself in the cache layer.
+Ingests blocks sequentially, processing operations relevant to accounts, post creations/edits/deletes, and custom_json ops for follows, reblogs, and communities. From these we build account and post lookup tables, follow/reblog state, and communities/members data. Built exclusively from raw blocks, it becomes the ground truth for internal state. Hive does not reimplement logic required for deriving payout values, reputation, and other statistics which are much more easily attained from hived itself in the cache layer.
 
 #### Cache layer
 
-Synchronizes the latest state of posts and users, allowing us to serve discussions and lists of posts with all expected information (title, preview, image, payout, votes, etc) without needing `steemd`. This layer is first built once the initial core indexing is complete. Incoming blocks trigger cache updates (including recalculation of trending score) for any posts referenced in `comment` or `vote` operations. There is a sweep to paid out posts to ensure they are updated in full with their final state.
+Synchronizes the latest state of posts and users, allowing us to serve discussions and lists of posts with all expected information (title, preview, image, payout, votes, etc) without needing `hived`. This layer is first built once the initial core indexing is complete. Incoming blocks trigger cache updates (including recalculation of trending score) for any posts referenced in `comment` or `vote` operations. There is a sweep to paid out posts to ensure they are updated in full with their final state.
 
 #### API layer
 
-Performs queries against the core and cache tables, merging them into a response in such a way that the frontend will not need to perform any additional calls to `steemd` itself. The initial API simply mimics steemd's `condenser_api` for backwards compatibility, but will be extended to leverage new opportunities and simplify application development.
+Performs queries against the core and cache tables, merging them into a response in such a way that the frontend will not need to perform any additional calls to `hived` itself. The initial API simply mimics hived's `condenser_api` for backwards compatibility, but will be extended to leverage new opportunities and simplify application development.
 
 
 #### Fork Resolution
