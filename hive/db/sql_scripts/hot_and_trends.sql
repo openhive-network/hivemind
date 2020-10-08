@@ -131,23 +131,30 @@ RETURNS void
 LANGUAGE 'sql'
 AS
 $BODY$
-UPDATE
-  hive_posts hp
+UPDATE hive_posts hp
 SET
-    sc_hot = calculate_hot(votes_rshares.rshares, hp.created_at)
-  , sc_trend = calculate_tranding(votes_rshares.rshares, hp.created_at)
+    sc_hot = calculate_hot( votes.rshares, hp.created_at)
+  , sc_trend = calculate_tranding( votes.rshares, hp.created_at)
 FROM
+(
+SELECT
+    hv1.post_id
+ , CAST( SUM(hv1.rshares) as BIGINT) as rshares
+FROM
+  hive_votes hv1
+  JOIN
   (
-   SELECT
- 	    hv.post_id as post_id
- 	  , CAST(sum(hv.rshares) AS BIGINT) as rshares
- 	 FROM
- 		hive_votes hv
- 	 WHERE hv.block_num >= _first_block AND hv.block_num <= _last_block
-   GROUP BY hv.post_id
-  ) as votes_rshares
+  SELECT
+    hv.post_id
+  FROM
+    hive_votes hv
+  WHERE hv.block_num >= _first_block AND hv.block_num <= _last_block
+  GROUP BY hv.post_id
+  ) as filtered_votes ON hv1.post_id = filtered_votes.post_id
+GROUP BY hv1.post_id
+) as votes
 WHERE
   hp.is_paidout = False
-  AND votes_rshares.post_id = hp.id
+  AND votes.post_id = hp.id
 $BODY$
 ;
