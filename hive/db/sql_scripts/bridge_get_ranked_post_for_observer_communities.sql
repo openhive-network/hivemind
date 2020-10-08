@@ -356,21 +356,18 @@ $function$
 language plpgsql VOLATILE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_trends_for_observer_communities;
-CREATE FUNCTION bridge_get_ranked_post_by_trends_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE OR REPLACE FUNCTION bridge_get_ranked_post_by_trends_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
 RETURNS SETOF bridge_api_post
 AS
 $function$
 DECLARE
   __post_id INT;
-  __trending_limit FLOAT;
-  __enable_sort BOOLEAN;
+  __trending_limit FLOAT := 0;
 BEGIN
-  SHOW enable_sort INTO __enable_sort;
   __post_id = find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
       SELECT hp.sc_trend INTO __trending_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
-  SET enable_sort=false;
   RETURN QUERY SELECT
       hp.id,
       hp.author,
@@ -409,18 +406,17 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value
   FROM
-      hive_posts_view hp
-      JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
+  (
+      SELECT thp.id
+      FROM hive_posts thp
+      JOIN hive_subscriptions hs ON thp.community_id = hs.community_id
       JOIN hive_accounts ha ON ha.id = hs.account_id
-  WHERE ha.name = _observer AND NOT hp.is_paidout AND hp.depth = 0
-      AND ( __post_id = 0 OR hp.sc_trend < __trending_limit OR ( hp.sc_trend = __trending_limit AND hp.id < __post_id ) )
-  ORDER BY hp.sc_trend DESC, hp.id DESC
-  LIMIT _limit;
-  IF __enable_sort THEN
-      SET enable_sort=true;
-  ELSE
-      SET enable_sort=false;
-  END IF;
+      WHERE ha.name = _observer AND NOT thp.is_paidout AND thp.depth = 0
+      AND ( __post_id = 0 OR thp.sc_trend < __trending_limit OR ( thp.sc_trend = __trending_limit AND thp.id < __post_id ) )
+      ORDER BY thp.sc_trend DESC, thp.id DESC
+      LIMIT _limit
+  ) ds
+  JOIN hive_posts_view hp ON ds.id = hp.id;
 END
 $function$
 language plpgsql VOLATILE;
