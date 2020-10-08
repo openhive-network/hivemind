@@ -1,22 +1,15 @@
-DROP FUNCTION IF EXISTS condenser_get_discussions_by_created;
+DROP FUNCTION IF EXISTS condenser_get_comment_discussions_by_payout;
 
-CREATE FUNCTION condenser_get_discussions_by_created( in _tag VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION condenser_get_comment_discussions_by_payout( in _tag VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
 RETURNS SETOF bridge_api_post
 AS
 $function$
 DECLARE
   __post_id INT;
-  __community VARCHAR;
-  __tag_id INT;
   __category_id INT;
 BEGIN
-
-  __post_id     = find_comment_id( _author, _permlink, True );
-  __community   = ( SELECT substring(_tag from '^hive-') );
-
-  __tag_id      = ( SELECT id FROM hive_tag_data WHERE tag = _tag );
+  __post_id = find_comment_id( _author, _permlink, True );
   __category_id = ( SELECT id FROM hive_category_data WHERE category = _tag );
-
   RETURN QUERY SELECT
       hp.id,
       hp.author,
@@ -55,10 +48,8 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value
     FROM hive_posts_view hp
-    INNER JOIN hive_post_tags hpt ON hpt.post_id = hp.id
-    WHERE ( __tag_id = 0 OR hpt.tag_id = __tag_id ) AND ( __post_id = 0 OR hp.id < __post_id )
-          AND ( ( __community IS NULL ) OR ( ( __community IS NOT NULL ) AND ( __category_id = 0 OR hp.category_id = __category_id ) ) )
-    ORDER BY hp.id DESC LIMIT _limit;
+    WHERE hp.is_paidout = '0' AND hp.depth > 0 AND ( __category_id = 0 OR hp.category_id = __category_id )
+    ORDER BY (hp.payout+hp.pending_payout) DESC, hp.id DESC LIMIT _limit;
 END
 $function$
 language plpgsql STABLE;

@@ -284,58 +284,7 @@ async def get_discussions_by(discussion_type, context, start_author: str = '',
 
 @return_error_info
 @nested_query_compat
-async def get_discussions_by_trending(context, start_author: str = '', start_permlink: str = '',
-                                      limit: int = 20, tag: str = None,
-                                      truncate_body: int = 0, filter_tags: list = None):
-    """Query posts, sorted by trending score."""
-    assert not filter_tags, 'filter_tags not supported'
-    ids = await cursor.pids_by_query(
-        context['db'],
-        'trending',
-        valid_account(start_author, allow_empty=True),
-        valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100, 20),
-        valid_tag(tag, allow_empty=True))
-    return await load_posts(context['db'], ids, truncate_body=truncate_body)
-
-
-@return_error_info
-@nested_query_compat
-async def get_discussions_by_hot(context, start_author: str = '', start_permlink: str = '',
-                                 limit: int = 20, tag: str = None,
-                                 truncate_body: int = 0, filter_tags: list = None):
-    """Query posts, sorted by hot score."""
-    assert not filter_tags, 'filter_tags not supported'
-    ids = await cursor.pids_by_query(
-        context['db'],
-        'hot',
-        valid_account(start_author, allow_empty=True),
-        valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100, 20),
-        valid_tag(tag, allow_empty=True))
-    return await load_posts(context['db'], ids, truncate_body=truncate_body)
-
-
-@return_error_info
-@nested_query_compat
-async def get_discussions_by_promoted(context, start_author: str = '', start_permlink: str = '',
-                                      limit: int = 20, tag: str = None,
-                                      truncate_body: int = 0, filter_tags: list = None):
-    """Query posts, sorted by promoted amount."""
-    assert not filter_tags, 'filter_tags not supported'
-    ids = await cursor.pids_by_query(
-        context['db'],
-        'promoted',
-        valid_account(start_author, allow_empty=True),
-        valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100, 20),
-        valid_tag(tag, allow_empty=True))
-    return await load_posts(context['db'], ids, truncate_body=truncate_body)
-
-
-@return_error_info
-@nested_query_compat
-async def get_discussions_by_created(context, start_author: str = '', start_permlink: str = '',
+async def get_posts_by_given_sort(context, sort: str, start_author: str = '', start_permlink: str = '',
                                      limit: int = 20, tag: str = None,
                                      truncate_body: int = 0, filter_tags: list = None):
     """Query posts, sorted by creation date."""
@@ -348,15 +297,72 @@ async def get_discussions_by_created(context, start_author: str = '', start_perm
     limit           = valid_limit(limit, 100, 20),
     tag             = valid_tag(tag, allow_empty=True)
 
-    sql = "SELECT * FROM condenser_get_discussions_by_created( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+    posts = []
+   
+    if sort == 'created':
+      sql = "SELECT * FROM condenser_get_discussions_by_created( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+    elif sort == 'trending':
+      sql = "SELECT * FROM condenser_get_discussions_by_trending( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+    elif sort == 'hot':
+      sql = "SELECT * FROM condenser_get_discussions_by_hot( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+    elif sort == 'promoted':
+      sql = "SELECT * FROM condenser_get_discussions_by_promoted( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+    elif sort == 'post_by_payout':
+      sql = "SELECT * FROM condenser_get_post_discussions_by_payout( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+    elif sort == 'comment_by_payout':
+      sql = "SELECT * FROM condenser_get_comment_discussions_by_payout( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+    else:
+      return posts
+
     sql_result = await db.query_all(sql, tag=tag, author=start_author, permlink=start_permlink, limit=limit )
 
-    posts = []
     for row in sql_result:
         post = _condenser_post_object(row, truncate_body)
         post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
         posts.append(post)
     return posts
+
+@return_error_info
+@nested_query_compat
+async def get_discussions_by_created(context, start_author: str = '', start_permlink: str = '',
+                                     limit: int = 20, tag: str = None,
+                                     truncate_body: int = 0, filter_tags: list = None):
+  return await get_posts_by_given_sort(context, 'created', start_author, start_permlink, limit, tag, truncate_body, filter_tags)
+
+@return_error_info
+@nested_query_compat
+async def get_discussions_by_trending(context, start_author: str = '', start_permlink: str = '',
+                                      limit: int = 20, tag: str = None,
+                                      truncate_body: int = 0, filter_tags: list = None):
+  return await get_posts_by_given_sort(context, 'trending', start_author, start_permlink, limit, tag, truncate_body, filter_tags)
+
+@return_error_info
+@nested_query_compat
+async def get_discussions_by_hot(context, start_author: str = '', start_permlink: str = '',
+                                 limit: int = 20, tag: str = None,
+                                 truncate_body: int = 0, filter_tags: list = None):
+  return await get_posts_by_given_sort(context, 'hot', start_author, start_permlink, limit, tag, truncate_body, filter_tags)
+
+@return_error_info
+@nested_query_compat
+async def get_discussions_by_promoted(context, start_author: str = '', start_permlink: str = '',
+                                      limit: int = 20, tag: str = None,
+                                      truncate_body: int = 0, filter_tags: list = None):
+  return await get_posts_by_given_sort(context, 'promoted', start_author, start_permlink, limit, tag, truncate_body, filter_tags)
+
+@return_error_info
+@nested_query_compat
+async def get_post_discussions_by_payout(context, start_author: str = '', start_permlink: str = '',
+                                         limit: int = 20, tag: str = None,
+                                         truncate_body: int = 0):
+  return await get_posts_by_given_sort(context, 'post_by_payout', start_author, start_permlink, limit, tag, truncate_body, [])
+
+@return_error_info
+@nested_query_compat
+async def get_comment_discussions_by_payout(context, start_author: str = '', start_permlink: str = '',
+                                            limit: int = 20, tag: str = None,
+                                            truncate_body: int = 0):
+  return await get_posts_by_given_sort(context, 'comment_by_payout', start_author, start_permlink, limit, tag, truncate_body, [])
 
 @return_error_info
 @nested_query_compat
@@ -480,40 +486,6 @@ async def get_discussions_by_author_before_date(context, author: str = None, sta
         valid_permlink(start_permlink, allow_empty=True),
         valid_limit(limit, 100, 10))
     return await load_posts(context['db'], ids)
-
-
-@return_error_info
-@nested_query_compat
-async def get_post_discussions_by_payout(context, start_author: str = '', start_permlink: str = '',
-                                         limit: int = 20, tag: str = None,
-                                         truncate_body: int = 0):
-    """Query top-level posts, sorted by payout."""
-    ids = await cursor.pids_by_query(
-        context['db'],
-        'payout',
-        valid_account(start_author, allow_empty=True),
-        valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100, 20),
-        valid_tag(tag, allow_empty=True))
-    return await load_posts(context['db'], ids, truncate_body=truncate_body)
-
-
-@return_error_info
-@nested_query_compat
-async def get_comment_discussions_by_payout(context, start_author: str = '', start_permlink: str = '',
-                                            limit: int = 20, tag: str = None,
-                                            truncate_body: int = 0):
-    """Query comments, sorted by payout."""
-    # pylint: disable=invalid-name
-    ids = await cursor.pids_by_query(
-        context['db'],
-        'payout_comments',
-        valid_account(start_author, allow_empty=True),
-        valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100, 20),
-        valid_tag(tag, allow_empty=True))
-    return await load_posts(context['db'], ids, truncate_body=truncate_body)
-
 
 @return_error_info
 @nested_query_compat
