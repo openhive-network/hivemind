@@ -58,7 +58,7 @@ BEGIN
     INNER JOIN hive_post_tags hpt ON hpt.post_id = hp.id
     WHERE hp.promoted > 0 AND ( __tag_id = 0 OR hpt.tag_id = __tag_id ) AND ( __post_id = 0 OR hp.id < __post_id )
           AND ( ( __community IS NULL ) OR ( ( __community IS NOT NULL ) AND ( __category_id = 0 OR hp.category_id = __category_id ) ) )
-    ORDER BY hp.promoted DESC, hp.id LIMIT _limit;
+    ORDER BY hp.promoted DESC, hp.id DESC LIMIT _limit;
 END
 $function$
 language plpgsql STABLE;
