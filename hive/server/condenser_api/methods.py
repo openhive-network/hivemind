@@ -4,7 +4,7 @@ from functools import wraps
 
 import hive.server.condenser_api.cursor as cursor
 from hive.server.condenser_api.objects import load_posts, load_posts_reblogs, resultset_to_posts
-from hive.server.condenser_api.objects import _mute_votes, _condenser_post_object
+from hive.server.condenser_api.objects import _mute_votes, _condenser_post_object, _condenser_post_process
 from hive.server.common.helpers import (
     ApiError,
     return_error_info,
@@ -144,18 +144,15 @@ async def get_content(context, author: str, permlink: str, observer=None):
     valid_account(author)
     valid_permlink(permlink)
     #force copy
-    sql = str(SQL_TEMPLATE)
-    sql += """
-        WHERE
-            hp.author = :author AND hp.permlink = :permlink
-    """
+    # sql = str(SQL_TEMPLATE)
+    sql = "SELECT * FROM condenser_api_get_content_get_post_object( :author, :permlink );"
 
     post = None
     result = await db.query_all(sql, author=author, permlink=permlink)
     if result:
-        result = dict(result[0])
-        post = _condenser_post_object(result, 0)
-        post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.CondenserApi)
+        post = dict(result[0])
+        post = _condenser_post_process(post, 0)
+        post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.ActiveVotes)
         if not observer:
             post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
         else:

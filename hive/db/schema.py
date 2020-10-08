@@ -1480,6 +1480,124 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
+    DROP FUNCTION condenser_api_get_content_get_post_object;
+    CREATE FUNCTION condenser_api_get_content_get_post_object( _author character varying(16), _permlink character varying(255) ) RETURNS TABLE(
+        active_votes integer, 
+        author_reputation bigint, 
+        author character varying(16), 
+        beneficiaries json,
+        body_length integer,
+        body text, 
+        cashout_time char(19), 
+        category character varying(255), 
+        children integer, 
+        created character(19), 
+        curator_payout_value character varying(30), 
+        depth smallint, 
+        id integer, 
+        is_paidout boolean, 
+        json_metadata text, 
+        last_payout char(19), 
+        max_accepted_payout character varying(30), 
+        parent_author character varying(16), 
+        parent_permlink character varying(255), 
+        payout_at char(19), 
+        payout numeric(10,3), 
+        pending_payout numeric(10,3), 
+        percent_hbd integer, 
+        permlink character varying(255), 
+        promoted numeric(10,3), 
+        root_title character varying(512), 
+        net_rshares numeric, 
+        title character varying(512), 
+        total_votes bigint, 
+        last_update char(19), 
+        url text, 
+        abs_rshares numeric, 
+        active char(19), 
+        allow_curation_rewards boolean, 
+        allow_replies boolean, 
+        allow_votes boolean, 
+        author_rewards bigint, 
+        net_votes bigint, 
+        root_author character varying(16), 
+        root_permlink character varying(255),
+        total_vote_weight integer,
+        replies integer[],
+        reblogged_by integer[],
+        vote_rshares numeric,
+        children_abs_rshares integer,
+        reward_weight integer,
+        total_pending_payout_value character(9)
+    ) AS $function$ 
+    BEGIN
+        RETURN QUERY SELECT
+            hp.active_votes,
+            hp.author_rep,
+            hp.author,
+            hp.beneficiaries,
+            char_length(hp.body),
+            hp.body,
+            to_iso_timestamp(hp.cashout_time),
+            hp.category,
+            hp.children,
+            to_iso_timestamp(hp.created_at),
+            hp.curator_payout_value,
+            hp.depth,
+            hp.id,
+            hp.is_paidout,
+            hp.json,
+            to_iso_timestamp(hp.last_payout_at),
+            hp.max_accepted_payout,
+            hp.parent_author,
+            hp.parent_permlink_or_category,
+            to_iso_timestamp(hp.payout_at),
+            hp.payout,
+            hp.pending_payout,
+            hp.percent_hbd,
+            hp.permlink,
+            hp.promoted,
+            hp.root_title,
+            hp.rshares,
+            hp.title,
+            hp.total_votes,
+            to_iso_timestamp(hp.updated_at),
+            hp.url,
+            hp.abs_rshares,
+            to_iso_timestamp(hp.active),
+            hp.allow_curation_rewards,
+            hp.allow_replies,
+            hp.allow_votes,
+            hp.author_rewards,
+            hp.net_votes,
+            hp.root_author,
+            hp.root_permlink,
+            0 as total_vote_weight,
+            '{}'::int[] as replies,
+            '{}'::int[] as reblogged_by,
+            (( hp.abs_rshares + hp.rshares ) / 2),
+            0,
+            10000,
+            '0.000 HBD'::char(9)
+        FROM
+            hive_posts_view AS hp
+        WHERE
+            hp.author=_author AND hp.permlink=_permlink;
+
+    END $function$
+    LANGUAGE plpgsql STABLE
+    ;
+
+    CREATE OR REPLACE FUNCTION to_iso_timestamp( t timestamp with time zone ) RETURNS CHAR(19) AS $$
+    BEGIN
+        RETURN to_char(t, 'YYYY-MM-DD"T"HH24:MI:SS');
+    END $$ LANGUAGE plpgsql
+    ;
+    """
+
+    db.query_no_return(sql)
+
+    sql = """
         DROP VIEW IF EXISTS hive_accounts_rank_view CASCADE
         ;
         CREATE VIEW hive_accounts_rank_view

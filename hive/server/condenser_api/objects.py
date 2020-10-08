@@ -175,6 +175,20 @@ def _condenser_account_object(row):
                         'profile_image': profile['profile_image'],
                        }})}
 
+def _condenser_post_process( row, truncate_body = 0) -> dict:
+    paid = row['is_paidout']
+    full_payout = row['pending_payout'] + row['payout']
+
+    row["post_id"] = row["id"]
+    row['body'] = row['body'][0:truncate_body] if truncate_body else row['body']
+    row['cashout_time'] = json_date(None if paid else row['payout_at'])
+    row['last_payout'] = json_date(row['payout_at'] if paid else None)
+    row['max_cashout_time'] = json_date(None)
+    row['pending_payout_value'] = _amount(0 if paid else full_payout)
+    row['promoted'] = _amount(row['promoted'])
+    row['total_payout_value'] = _amount(row['payout'] if paid else 0)
+    return row
+
 def _condenser_post_object(row, truncate_body=0):
     """Given a hive_posts row, create a legacy-style post object."""
     paid = row['is_paidout']
@@ -183,7 +197,7 @@ def _condenser_post_object(row, truncate_body=0):
     if not row['category']:
         row['category'] = 'undefined'
 
-    full_payout = row['pending_payout'] + row['payout'];
+    full_payout = row['pending_payout'] + row['payout']
     post = {}
     post['post_id'] = row['id']
     post['author'] = row['author']
