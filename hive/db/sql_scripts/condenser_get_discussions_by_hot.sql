@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS condenser_get_discussions_by_created;
+DROP FUNCTION IF EXISTS condenser_get_discussions_by_hot;
 
-CREATE FUNCTION condenser_get_discussions_by_created( in _tag VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION condenser_get_discussions_by_hot( in _tag VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -56,9 +56,9 @@ BEGIN
       hp.curator_payout_value
     FROM hive_posts_view hp
     INNER JOIN hive_post_tags hpt ON hpt.post_id = hp.id
-    WHERE ( __tag_id = 0 OR hpt.tag_id = __tag_id ) AND ( __post_id = 0 OR hp.id < __post_id )
-          AND ( ( __community IS NULL ) OR ( ( __community IS NOT NULL ) AND ( __category_id = 0 OR hp.category_id = __category_id ) ) )
-    ORDER BY hp.id DESC LIMIT _limit;
+    WHERE hp.is_paidout = '0' AND ( __tag_id = 0 OR hpt.tag_id = __tag_id ) AND ( __post_id = 0 OR hp.id < __post_id )
+          AND ( ( __community IS NULL ) OR ( ( __community IS NOT NULL ) AND ( ( __category_id = 0 OR hp.category_id = __category_id ) AND hp.depth = 0 ) ) )
+    ORDER BY hp.sc_hot DESC, hp.id DESC LIMIT _limit;
 END
 $function$
 language plpgsql STABLE;
