@@ -53,7 +53,7 @@ $ curl --data '{"jsonrpc":"2.0","id":0,"method":"hive.db_head_state","params":{}
 
 ### Run tests:
 
-To run unit tests use:
+To run unit tests:
 
 ```bash
 $ make test
@@ -61,7 +61,7 @@ $ make test
 
 To run api tests:
 1. Make sure that current version of `hivemind` is installed,
-2. Api tests requires that `hivemind` is synced to a node replayed up to 5 000 000 blocks,
+2. Api tests require that `hivemind` is synced to a node replayed up to 5 000 000 blocks,
 3. Run `hivemind` in `server` mode
 4. Set env variables:
 ```bash
@@ -77,17 +77,17 @@ $ tox -- -v -n auto --durations=0
 
 Hivemind is deployed as a Docker container.
 
-Here is an example command that will initialize the DB schema and start the syncing process:
+Here is an example command that will initialize the database schema and start the syncing process:
 
 ```
 docker run -d --name hivemind --env DATABASE_URL=postgresql://user:pass@hostname:5432/databasename --env STEEMD_URL='{"default":"https://yourhivenode"}' --env SYNC_SERVICE=1 -p 8080:8080 hive/hivemind:latest
 ```
 
-Be sure to set `DATABASE_URL` to point to your postgres database and `STEEMD_URL` to point to your hived node to sync from.
+Be sure to set `DATABASE_URL` to point to your postgres database and set `STEEMD_URL` to point to your hived node to sync from.
 
 Once the database is synced, Hivemind will be available for serving requests.
 
-To follow along the logs, use this:
+To watch the logs on your console, use:
 
 ```
 docker logs -f hivemind
