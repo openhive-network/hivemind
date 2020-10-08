@@ -126,35 +126,41 @@ $BODY$
 ;
 
 DROP FUNCTION IF EXISTS public.update_hot_and_trending_for_blocks;
-CREATE OR REPLACE FUNCTION public.update_hot_and_trending_for_blocks( _first_block INTEGER, _last_block INTEGER )
-RETURNS void
-LANGUAGE 'sql'
-AS
-$BODY$
+CREATE OR REPLACE FUNCTION public.update_hot_and_trending_for_blocks(
+  _first_block integer,
+  _last_block integer)
+    RETURNS void
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+BEGIN
 UPDATE hive_posts hp
 SET
     sc_hot = calculate_hot( votes.rshares, hp.created_at)
   , sc_trend = calculate_tranding( votes.rshares, hp.created_at)
 FROM
 (
-SELECT
-    hv1.post_id
- , CAST( SUM(hv1.rshares) as BIGINT) as rshares
-FROM
-  hive_votes hv1
-  JOIN
-  (
   SELECT
-    hv.post_id
+    hv1.post_id
+   ,CAST( SUM(hv1.rshares) as BIGINT) as rshares
   FROM
-    hive_votes hv
-  WHERE hv.block_num >= _first_block AND hv.block_num <= _last_block
-  GROUP BY hv.post_id
-  ) as filtered_votes ON hv1.post_id = filtered_votes.post_id
-GROUP BY hv1.post_id
+    hive_votes hv1
+    JOIN
+    (
+      SELECT
+        hv.post_id
+      FROM
+        hive_votes hv
+      WHERE hv.block_num >= _first_block AND hv.block_num <= _last_block
+      GROUP BY hv.post_id
+    ) as filtered_votes ON hv1.post_id = filtered_votes.post_id
+  GROUP BY hv1.post_id
 ) as votes
 WHERE
   hp.is_paidout = False
-  AND votes.post_id = hp.id
+  AND votes.post_id = hp.id;
+END
 $BODY$
 ;
