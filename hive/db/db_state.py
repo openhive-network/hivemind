@@ -14,7 +14,6 @@ from hive.db.schema import (setup, reset_autovac, set_logged_table_attribute, bu
                             build_metadata_community, teardown, DB_VERSION)
 from hive.db.adapter import Db
 
-from hive.utils.trends import update_hot_and_tranding_for_block_range
 from hive.utils.post_active import update_active_starting_from_posts_on_block
 from hive.utils.communities_rank import update_communities_posts_and_rank
 
@@ -277,7 +276,10 @@ class DbState:
 
         time_start = perf_counter()
 
-        update_hot_and_tranding_for_block_range(last_imported_block, current_imported_block)
+        sql = """
+              select update_hot_and_trending_for_blocks({}, {})
+              """.format(last_imported_block, current_imported_block)
+        row = DbState.db().query_row(sql)
 
         time_end = perf_counter()
         log.info("[INIT] update_all_hot_and_tranding executed in %.4fs", time_end - time_start)
@@ -319,7 +321,7 @@ class DbState:
         DbState.db().query_no_return(sql)
         time_end = perf_counter()
         log.info("[INIT] update_account_reputations executed in %.4fs", time_end - time_start)
-	
+
         time_start = perf_counter()
         update_communities_posts_and_rank()
         time_end = perf_counter()
