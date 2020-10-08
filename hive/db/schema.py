@@ -148,7 +148,8 @@ def build_metadata():
         sa.Index('hive_posts_block_num_idx', 'block_num'),
         sa.Index('hive_posts_cashout_time_id_idx', 'cashout_time', 'id'),
         sa.Index('hive_posts_updated_at_idx', sa.text('updated_at DESC')),
-        sa.Index('hive_posts_is_paidout_idx', 'is_paidout')
+        sa.Index('hive_posts_is_paidout_idx', 'is_paidout'),
+        sa.Index('hive_posts_payout_plus_pending_payout_id', sa.text('(payout+pending_payout), id'))
     )
 
     sa.Table(
