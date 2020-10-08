@@ -23,17 +23,21 @@ LANGUAGE 'plpgsql' STABLE
 AS
 $BODY$
 DECLARE
-    __account_id INT;
+    __account_id INT := 0;
+    __last_read_at TIMESTAMP;
 BEGIN
   __account_id = find_account_id( _account, True );
+
+  SELECT ha.lastread_at INTO __last_read_at
+  FROM hive_accounts ha
+  WHERE ha.id = __account_id;
+
   RETURN QUERY SELECT
-    ha.lastread_at as lastread_at,
-    SUM( ( hnv.created_at > ha.lastread_at AND hnv.score >= _minimum_score )::INT ) as unread
-  FROM
-    hive_accounts ha
-    LEFT JOIN hive_notifications_view hnv ON hnv.dst_id = ha.id
-    WHERE ha.id = __account_id
-  GROUP BY ha.id, ha.lastread_at;
+    __last_read_at as lastread_at,
+    count(1) as unread
+  FROM hive_notifications_view hnv 
+  WHERE hnv.dst_id = __account_id AND hnv.created_at > __last_read_at AND hnv.score >= _minimum_score
+  ;
 END
 $BODY$
 ;
