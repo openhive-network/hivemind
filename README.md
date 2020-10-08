@@ -87,7 +87,7 @@ Be sure to set `DATABASE_URL` to point to your postgres database and set `STEEMD
 
 Once the database is synced, Hivemind will be available for serving requests.
 
-To watch the logs on your console, use:
+To watch the logs on your console:
 
 ```
 docker logs -f hivemind
