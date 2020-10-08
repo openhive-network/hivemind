@@ -83,6 +83,9 @@ SELECT id,
   FROM hive_accounts
 ;
 
+SELECT deps_save_and_drop_dependencies('public', 'hive_posts_view', true);
+
+DROP VIEW IF EXISTS public.hive_posts_view CASCADE;
 CREATE OR REPLACE VIEW public.hive_posts_view
 AS
 SELECT hp.id,
@@ -99,6 +102,7 @@ SELECT hp.id,
   hpd.img_url,
   hpd.preview,
   hcd.category,
+  hp.category_id,
   hp.depth,
   hp.promoted,
   hp.payout,
@@ -200,4 +204,6 @@ SELECT hp.id,
     LEFT JOIN hive_roles hr ON hp.author_id = hr.account_id AND hp.community_id = hr.community_id
   WHERE hp.counter_deleted = 0
   ;
+
+SELECT deps_restore_dependencies('public', 'hive_posts_view');
 

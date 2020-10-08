@@ -150,3 +150,12 @@ DROP INDEX IF EXISTS hive_mentions_post_id_idx;
 INSERT INTO hive_db_data_migration 
 select 'update_hot_and_trending_for_blocks( 0, head_block_number) execution'
 where not exists (select null from hive_db_patch_level where patched_to_revision = '0be8e6e8b2121a8f768113e35e47725856c5da7c' )
+;
+
+-- updated to e8b65adf22654203f5a79937ff2a95c5c47e10c5 - See merge request hive/hivemind!251
+
+CREATE INDEX IF NOT EXISTS hive_posts_is_paidout_idx ON hive_posts (is_paidout);
+CREATE INDEX IF NOT EXISTS hive_posts_payout_plus_pending_payout_id ON hive_posts ((payout+pending_payout), id);
+
+INSERT INTO hive_tag_data (id, tag) VALUES (0, '')
+ON CONFLICT DO NOTHING;
