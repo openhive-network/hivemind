@@ -9,12 +9,12 @@ Hivemind is a "consensus interpretation" layer for the Hive blockchain, maintain
  - Python 3.6 required
  - Postgres 10+ recommended
 
-Dependencies:
+### Dependencies:
 
  - OSX: `$ brew install python3 postgresql`
  - Ubuntu: `$ sudo apt-get install python3 python3-pip`
 
-Installation (DO NOT USE pip! It will install incorrect versions of some packages):
+### Installation (DO NOT USE pip! It will install incorrect versions of some packages):
 
 ```bash
 $ createdb hive
@@ -24,11 +24,12 @@ $ export DATABASE_URL=postgresql://user:pass@localhost:5432/hive
 ```bash
 $ git clone https://gitlab.syncad.com/hive/hivemind.git
 $ cd hivemind
+$ git submodule update --init --recursive
 $ python3 setup.py build
 $ python3 setup.py install --user
 ```
 
-Start the indexer:
+### Start the indexer:
 
 ```bash
 $ hive sync
@@ -39,7 +40,7 @@ $ hive status
 {'db_head_block': 19930833, 'db_head_time': '2018-02-16 21:37:36', 'db_head_age': 10}
 ```
 
-Start the server:
+### Start the server:
 
 ```bash
 $ hive server
@@ -50,12 +51,27 @@ $ curl --data '{"jsonrpc":"2.0","id":0,"method":"hive.db_head_state","params":{}
 {"jsonrpc": "2.0", "result": {"db_head_block": 19930795, "db_head_time": "2018-02-16 21:35:42", "db_head_age": 10}, "id": 0}
 ```
 
-Run tests:
+### Run tests:
+
+To run unit tests use:
 
 ```bash
 $ make test
 ```
 
+To run api tests:
+1. Make sure that current version of `hivemind` is installed,
+2. Api tests requires that `hivemind` is synced to a node replayed up to 5 000 000 blocks,
+3. Run `hivemind` in `server` mode
+4. Set env variables:
+```bash
+$ export HIVEMIND_PORT=8080
+$ export HIVEMIND_ADDRESS=127.0.0.1
+```
+5. Run tests using tox:
+```bash
+$ tox -- -v -n auto --durations=0
+```
 
 ## Production Environment
 
