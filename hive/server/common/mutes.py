@@ -58,7 +58,6 @@ class Mutes:
 
     def load(self):
         """Reload all accounts from irredeemables endpoint and global lists."""
-        return
         self.accounts = set(_read_url(self.url).decode('utf8').split())
         jsn = _read_url(self.blacklist_api_url + "/blacklists")
         self.blist = set(json.loads(jsn))
@@ -101,12 +100,11 @@ class Mutes:
     @classmethod
     def lists(cls, name, rep):
         """Return blacklists the account belongs to."""
-        return[]
         assert name
         inst = cls.instance()
 
         # update hourly
-        if perf() - inst.fetched > 3600:
+        if int(perf() - inst.fetched) > 3600:
             inst.load()
 
         if name not in inst.blist and name not in inst.accounts:
