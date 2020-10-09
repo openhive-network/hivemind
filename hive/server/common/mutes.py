@@ -19,6 +19,15 @@ WITH blacklisted_users AS (
     (SELECT following FROM hive_follows WHERE follower =
         (SELECT id FROM hive_accounts WHERE name = :observer )
     AND follow_blacklists) AND blacklisted
+    UNION ALL
+    SELECT following, 'my_muted' AS source FROM hive_follows WHERE follower =
+        (SELECT id FROM hive_accounts WHERE name = :observer )
+    AND state = 2
+    UNION ALL
+    SELECT following, 'my_followed_mutes' AS source FROM hive_follows WHERE follower IN
+    (SELECT following FROM hive_follows WHERE follower =
+        (SELECT id FROM hive_accounts WHERE name = :observer )
+    AND follow_muted) AND state = 2
 )
 SELECT following, source FROM blacklisted_users
 """
