@@ -25,15 +25,11 @@ CREATE SEQUENCE if not exists deps_saved_ddl_deps_id_seq
 CREATE TABLE if not exists deps_saved_ddl
 (
     deps_id integer NOT NULL DEFAULT nextval('deps_saved_ddl_deps_id_seq'::regclass),
-    deps_view_schema character varying(255) COLLATE pg_catalog."default",
-    deps_view_name character varying(255) COLLATE pg_catalog."default",
-    deps_ddl_to_run text COLLATE pg_catalog."default",
+    deps_view_schema character varying(255),
+    deps_view_name character varying(255),
+    deps_ddl_to_run text,
     CONSTRAINT deps_saved_ddl_pkey PRIMARY KEY (deps_id)
 )
-WITH (
-    OIDS = FALSE
-)
-TABLESPACE pg_default;
 
 
 -- FUNCTION: deps_save_and_drop_dependencies(character varying, character varying, boolean)
