@@ -26,19 +26,17 @@ SQL_TEMPLATE = """
         hp.community_id,
         hp.author,
         hp.permlink,
-        hp.author_rep,
         hp.title,
         hp.body,
         hp.category,
         hp.depth,
         hp.promoted,
         hp.payout,
-        hp.payout_at,
-        hp.pending_payout,
+        hp.last_payout_at,
+        hp.cashout_time,
         hp.is_paidout,
         hp.children,
         hp.votes,
-        hp.active_votes,
         hp.created_at,
         hp.updated_at,
         hp.rshares,
@@ -46,6 +44,8 @@ SQL_TEMPLATE = """
         hp.is_hidden,
         hp.is_grayed,
         hp.total_votes,
+        hp.net_votes,
+        hp.total_vote_weight,
         hp.parent_author,
         hp.parent_permlink_or_category,
         hp.curator_payout_value,
@@ -58,7 +58,14 @@ SQL_TEMPLATE = """
         hp.allow_curation_rewards,
         hp.beneficiaries,
         hp.url,
-        hp.root_title
+        hp.root_title,
+        hp.abs_rshares,
+        hp.active,
+        hp.author_rewards,
+        hp.author_rep,
+        hp.payout_at,
+        hp.pending_payout,
+        hp.active_votes
     FROM hive_posts_view hp
 """
 
@@ -154,8 +161,8 @@ async def get_content(context, author: str, permlink: str, observer=None):
     result = await db.query_all(sql, author=author, permlink=permlink)
     if result:
         result = dict(result[0])
-        post = _condenser_post_object(result, 0)
-        post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.CondenserApi)
+        post = _condenser_post_object(result, 0, True)
+        post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.ActiveVotes)
         if not observer:
             post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
         else:
