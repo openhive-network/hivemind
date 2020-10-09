@@ -50,7 +50,7 @@ BEGIN
           hp1.id
       FROM hive_posts hp1
           JOIN hive_accounts_view ha ON hp1.author_id = ha.id
-      WHERE hp1.depth = 0 AND NOT ha.is_grayed AND ( __post_id = 0 OR hp1.id < __post_id )
+      WHERE hp1.counter_deleted = 0 AND hp1.depth = 0 AND NOT ha.is_grayed AND ( __post_id = 0 OR hp1.id < __post_id )
       ORDER BY hp1.id DESC
       LIMIT _limit
   ) as created
@@ -118,7 +118,7 @@ BEGIN
         , hp1.sc_hot as hot
       FROM
           hive_posts hp1
-      WHERE NOT hp1.is_paidout AND hp1.depth = 0
+      WHERE hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth = 0
           AND ( __post_id = 0 OR hp1.sc_hot < __hot_limit OR ( hp1.sc_hot = __hot_limit AND hp1.id < __post_id ) )
       ORDER BY hp1.sc_hot DESC, hp1.id DESC
       LIMIT _limit
@@ -188,7 +188,7 @@ BEGIN
       FROM
           hive_posts hp1
           JOIN hive_accounts_view ha ON hp1.author_id = ha.id
-      WHERE NOT hp1.is_paidout AND ha.is_grayed AND ( hp1.payout + hp1.pending_payout ) > 0
+      WHERE hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND ha.is_grayed AND ( hp1.payout + hp1.pending_payout ) > 0
           AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
       ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
       LIMIT _limit
@@ -257,7 +257,7 @@ BEGIN
         , ( hp1.payout + hp1.pending_payout ) as all_payout
       FROM
           hive_posts hp1
-      WHERE NOT hp1.is_paidout AND hp1.depth > 0
+      WHERE hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth > 0
           AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
       ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
       LIMIT _limit
@@ -283,7 +283,7 @@ BEGIN
   IF __post_id <> 0 THEN
       SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
-  SELECT blck.created_at INTO __head_block_time FROM hive_blocks blck ORDER BY blck.num DESC LIMIT 1;
+  __head_block_time = head_block_time();
   RETURN QUERY SELECT
       hp.id,
       hp.author,
@@ -328,7 +328,7 @@ BEGIN
         , ( hp1.payout + hp1.pending_payout ) as all_payout
       FROM
           hive_posts hp1
-      WHERE NOT hp1.is_paidout AND hp1.payout_at BETWEEN __head_block_time + interval '12 hours' AND __head_block_time + interval '36 hours'
+      WHERE hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.payout_at BETWEEN __head_block_time + interval '12 hours' AND __head_block_time + interval '36 hours'
           AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
       ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
       LIMIT _limit
@@ -397,7 +397,7 @@ BEGIN
         , hp1.promoted as promoted
       FROM
           hive_posts hp1
-      WHERE NOT hp1.is_paidout AND hp1.promoted > 0
+      WHERE hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.promoted > 0
           AND ( __post_id = 0 OR hp1.promoted < __promoted_limit OR ( hp1.promoted = __promoted_limit AND hp1.id < __post_id ) )
       ORDER BY hp1.promoted DESC, hp1.id DESC
       LIMIT _limit
@@ -466,7 +466,7 @@ BEGIN
         , hp1.sc_trend as trend
       FROM
           hive_posts hp1
-      WHERE NOT hp1.is_paidout AND hp1.depth = 0
+      WHERE hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth = 0
           AND ( __post_id = 0 OR hp1.sc_trend < __trending_limit OR ( hp1.sc_trend = __trending_limit AND hp1.id < __post_id ) )
       ORDER BY hp1.sc_trend DESC, hp1.id DESC
       LIMIT _limit
