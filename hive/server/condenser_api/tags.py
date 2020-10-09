@@ -12,12 +12,11 @@ async def get_top_trending_tags_summary(context):
     sql = """
         SELECT (SELECT category FROM hive_category_data WHERE id = category_id) as category
           FROM hive_posts
-         WHERE is_paidout = '0'
+         WHERE counter_deleted = 0 AND NOT is_paidout
       GROUP BY category
-      ORDER BY SUM(payout) DESC
+      ORDER BY SUM(payout + pending_payout) DESC
          LIMIT 50
     """
-    # wrong: now we should be using payout + pending_payout here
     return await context['db'].query_col(sql)
 
 @return_error_info

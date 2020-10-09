@@ -357,17 +357,16 @@ async def top_community_muted(context, community):
 
 async def _top_community_posts(db, community, limit=50):
     # TODO: muted equivalent
-    # wrong: now we should be using payout + pending_payout here
     sql = """
     SELECT ha_a.name as author,
         0 as votes,
-        payout
+        ( hp.payout + hp.pending_payout ) as payout
     FROM hive_posts hp
     INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
     LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
     LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
-    WHERE hcdcategory = :community AND is_paidout = '0'
+    WHERE hcd.category = :community AND hp.counter_deleted = 0 AND NOT hp.is_paidout
         AND post_id IN (SELECT id FROM hive_posts WHERE is_muted = '0')
-    ORDER BY payout DESC LIMIT :limit"""
+    ORDER BY ( hp.payout + hp.pending_payout ) DESC LIMIT :limit"""
     
     return await db.query_all(sql, community=community, limit=limit)
