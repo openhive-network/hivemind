@@ -1696,6 +1696,7 @@ def setup(db):
     db.query_no_return(sql)
 
     sql_scripts = [
+      "head_block_time.sql",
       "update_feed_cache.sql",
       "payout_stats_view.sql",
       "update_hive_posts_mentions.sql",
@@ -1708,7 +1709,6 @@ def setup(db):
       "calculate_account_reputations.sql",
       "update_communities_rank.sql",
       "delete_hive_posts_mentions.sql",
-      "head_block_time.sql",
       "notifications_view.sql",
       "notifications_api.sql",
       "bridge_get_account_posts_by_comments.sql",

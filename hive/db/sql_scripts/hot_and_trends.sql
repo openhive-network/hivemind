@@ -138,13 +138,13 @@ SET
   , sc_trend = calculate_tranding(votes_rshares.rshares, hp.created_at)
 FROM
   (
-   SELECT
- 	    hv.post_id as post_id
- 	  , CAST(sum(hv.rshares) AS BIGINT) as rshares
- 	 FROM
- 		hive_votes hv
- 	 WHERE hv.block_num >= _first_block AND hv.block_num <= _last_block
-   GROUP BY hv.post_id
+    SELECT
+        hv.post_id as post_id
+      , CAST(sum(hv.rshares) AS BIGINT) as rshares
+    FROM
+        hive_votes hv
+    WHERE hv.block_num >= _first_block AND hv.block_num <= _last_block
+    GROUP BY hv.post_id
   ) as votes_rshares
 WHERE
   hp.is_paidout = False

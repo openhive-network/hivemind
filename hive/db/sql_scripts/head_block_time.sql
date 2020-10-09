@@ -10,7 +10,7 @@ $BODY$
 
 
 DROP FUNCTION IF EXISTS block_before_head;
-CREATE OR REPLACE FUNCTION block_before_head( in _time  INTERVAL )
+CREATE OR REPLACE FUNCTION block_before_head( in _time INTERVAL )
 RETURNS hive_blocks.num%TYPE
 LANGUAGE 'sql' STABLE
 AS

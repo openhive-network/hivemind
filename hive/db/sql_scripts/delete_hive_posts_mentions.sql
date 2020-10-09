@@ -6,17 +6,17 @@ LANGUAGE 'plpgsql'
 AS
 $function$
 DECLARE
-  LAST_BLOCK_TIME TIMESTAMP;
+  __head_block_time TIMESTAMP;
 BEGIN
 
-  LAST_BLOCK_TIME = ( SELECT created_at FROM hive_blocks ORDER BY num DESC LIMIT 1 );
+  __head_block_time = head_block_time();
 
   DELETE FROM hive_mentions hm
   WHERE post_id in
   (
     SELECT id
     FROM hive_posts
-    WHERE created_at < ( LAST_BLOCK_TIME - '90 days'::interval )
+    WHERE created_at < ( __head_block_time - '90 days'::interval )
   );
 
 END

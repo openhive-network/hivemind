@@ -88,7 +88,7 @@ class Blocks:
     @classmethod
     def head_date(cls):
         """Get hive's head block date."""
-        sql = "SELECT created_at FROM hive_blocks ORDER BY num DESC LIMIT 1"
+        sql = "SELECT head_block_time()"
         return str(DB.query_one(sql) or '')
 
     @classmethod
