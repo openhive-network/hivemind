@@ -49,6 +49,8 @@ screen -L -Logfile hive_server.log -dmS $HIVE_NAME ./$HIVE_NAME server --pid-fil
 for i in `seq 1 10`; do if [ -f hive_server.pid ]; then break; else sleep 1; fi;  done
 
 SAVED_PID=`cat hive_server.pid`
+# downloading blacklist can take a while
+sleep 5
 LISTENING_PID=$(fuser $HIVEMIND_HTTP_PORT/tcp 2>/dev/null)
 echo "Retrieved hive pid is: $SAVED_PID"
 echo "Listening hive pid is: $LISTENING_PID"
