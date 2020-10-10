@@ -30,7 +30,7 @@ CREATE TABLE if not exists deps_saved_ddl
     deps_ddl_to_run text,
     CONSTRAINT deps_saved_ddl_pkey PRIMARY KEY (deps_id)
 )
-
+;
 
 -- FUNCTION: deps_save_and_drop_dependencies(character varying, character varying, boolean)
 
