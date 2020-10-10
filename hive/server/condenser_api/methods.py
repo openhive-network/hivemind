@@ -246,7 +246,9 @@ async def get_content(context, author: str, permlink: str, observer=None):
         result = dict(result[0])
         deleted = result['counter_deleted']
         post = _condenser_post_object(result, 0, True, deleted)
-        if not deleted:
+        if deleted:
+            post['active_votes'] = []
+        else:
             post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.ActiveVotes)
             if not observer:
                 post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
