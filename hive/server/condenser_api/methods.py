@@ -19,7 +19,94 @@ from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 from hive.utils.normalize import time_string_with_t
 
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
-
+SQL_CONTENT = """
+    SELECT 
+        hp.id,
+        hp.counter_deleted,
+        ha_a.name AS author,
+        hp.active,
+        hp.author_rewards,
+        hpd_p.permlink,
+        hpd.title,
+        hpd.body,
+        hcd.category,
+        hp.depth,
+        hp.promoted,
+        hp.payout,
+        hp.pending_payout,
+        hp.payout_at,
+        hp.last_payout_at,
+        hp.cashout_time,
+        hp.is_paidout,
+        hp.children,
+        0 AS active_votes,
+        hp.created_at,
+        hp.updated_at,
+        COALESCE(( SELECT sum(v.rshares) AS sum
+            FROM hive_votes v
+            WHERE (v.post_id = hp.id)
+            GROUP BY v.post_id), (0)::numeric) AS rshares,
+        COALESCE(( SELECT sum(
+                    CASE (v.rshares >= 0)
+                        WHEN true THEN v.rshares
+                        ELSE (- v.rshares)
+                    END) AS sum
+            FROM hive_votes v
+            WHERE ((v.post_id = hp.id) AND (NOT (v.rshares = 0)))
+            GROUP BY v.post_id), (0)::numeric) AS abs_rshares,
+        COALESCE(( SELECT count(1) AS count
+            FROM hive_votes v
+            WHERE ((v.post_id = hp.id) AND v.is_effective)
+            GROUP BY v.post_id), (0)::bigint) AS total_votes,
+        COALESCE(( SELECT sum(
+                    CASE (v.rshares > 0)
+                        WHEN true THEN 1
+                        ELSE '-1'::integer
+                    END) AS sum
+            FROM hive_votes v
+            WHERE ((v.post_id = hp.id) AND (NOT (v.rshares = 0)))
+            GROUP BY v.post_id), (0)::bigint) AS net_votes,
+        hpd.json,
+        ha_a.reputation AS author_rep,
+        hp.total_vote_weight,
+        ha_pp.name AS parent_author,
+        ha_pp.id AS parent_author_id,
+            CASE (hp.depth > 0)
+                WHEN true THEN hpd_pp.permlink
+                ELSE hcd.category
+            END AS parent_permlink_or_category,
+        hp.curator_payout_value,
+        ha_rp.name AS root_author,
+        hpd_rp.permlink AS root_permlink,
+        hp.max_accepted_payout,
+        hp.percent_hbd,
+        true AS allow_replies,
+        hp.allow_votes,
+        hp.allow_curation_rewards,
+        hp.beneficiaries,
+        concat('/', rcd.category, '/@', ha_rp.name, '/', hpd_rp.permlink,
+            CASE rp.id
+                WHEN hp.id THEN ''::text
+                ELSE concat('#@', ha_a.name, '/', hpd_p.permlink)
+            END) AS url,
+        rpd.title AS root_title
+    FROM
+        hive_posts hp
+            JOIN hive_accounts_view ha_a ON ha_a.id = hp.author_id
+            JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+            JOIN hive_post_data hpd ON hpd.id = hp.id
+            JOIN hive_category_data hcd ON hcd.id = hp.category_id
+            JOIN hive_posts pp ON pp.id = hp.parent_id
+                JOIN hive_accounts ha_pp ON ha_pp.id = pp.author_id
+                JOIN hive_permlink_data hpd_pp ON hpd_pp.id = pp.permlink_id
+            JOIN hive_posts rp ON rp.id = hp.root_id
+                JOIN hive_accounts ha_rp ON ha_rp.id = rp.author_id
+                JOIN hive_permlink_data hpd_rp ON hpd_rp.id = rp.permlink_id
+                JOIN hive_category_data rcd ON rcd.id = rp.category_id
+                LEFT JOIN hive_post_data rpd ON rpd.id = rp.id
+    WHERE
+        ha_a.name = :author AND hpd_p.permlink = :permlink
+"""
 SQL_TEMPLATE = """
     SELECT
         hp.id,
@@ -151,23 +238,21 @@ async def get_content(context, author: str, permlink: str, observer=None):
     valid_account(author)
     valid_permlink(permlink)
     #force copy
-    sql = str(SQL_TEMPLATE)
-    sql += """
-        WHERE
-            hp.author = :author AND hp.permlink = :permlink
-    """
+    sql = str(SQL_CONTENT)
 
     post = None
     result = await db.query_all(sql, author=author, permlink=permlink)
     if result:
         result = dict(result[0])
-        post = _condenser_post_object(result, 0, True)
-        post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.ActiveVotes)
-        if not observer:
-            post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
-        else:
-            blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
-            post['active_votes'] = _mute_votes(post['active_votes'], blacklists_for_user.keys())
+        deleted = result['counter_deleted']
+        post = _condenser_post_object(result, 0, True, deleted)
+        if not deleted:
+            post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.ActiveVotes)
+            if not observer:
+                post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
+            else:
+                blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
+                post['active_votes'] = _mute_votes(post['active_votes'], blacklists_for_user.keys())
 
     assert post, 'post was not found in cache'
     return post
