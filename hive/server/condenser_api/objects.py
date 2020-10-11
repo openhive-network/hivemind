@@ -175,9 +175,10 @@ def _condenser_account_object(row):
                         'profile_image': profile['profile_image'],
                        }})}
 
-def _condenser_post_object(row, truncate_body=0, get_content_additions=False):
+def _condenser_post_object(row, truncate_body=0, get_content_additions=False, deleted=False):
     """Given a hive_posts row, create a legacy-style post object."""
     paid = row['is_paidout']
+    date_default = '1970-01-01 00:00:00'
 
     # condenser#3424 mitigation
     if not row['category']:
@@ -185,67 +186,67 @@ def _condenser_post_object(row, truncate_body=0, get_content_additions=False):
 
     full_payout = row['pending_payout'] + row['payout'];
     post = {}
-    post['post_id'] = row['id']
-    post['author'] = row['author']
-    post['permlink'] = row['permlink']
-    post['category'] = row['category']
+    post['post_id'] = row['id'] if not deleted else 0
+    post['author'] = row['author'] if not deleted else ''
+    post['permlink'] = row['permlink'] if not deleted else ''
+    post['category'] = row['category'] if not deleted else ''
 
-    post['title'] = row['title']
-    post['body'] = row['body'][0:truncate_body] if truncate_body else row['body']
-    post['json_metadata'] = row['json']
+    post['title'] = row['title'] if not deleted else ''
+    post['body'] = (row['body'][0:truncate_body] if truncate_body else row['body']) if not deleted else ''
+    post['json_metadata'] = row['json']  if not deleted else ''
 
-    post['created'] = json_date(row['created_at'])
-    post['last_update'] = json_date(row['updated_at'])
-    post['depth'] = row['depth']
-    post['children'] = row['children']
-    post['net_rshares'] = row['rshares']
+    post['created'] = json_date(row['created_at'] if not deleted else date_default) 
+    post['last_update'] = json_date(row['updated_at'] if not deleted else date_default)
+    post['depth'] = row['depth'] if not deleted else 0
+    post['children'] = row['children'] if not deleted else 0
+    post['net_rshares'] = row['rshares'] if not deleted else 0
 
-    post['last_payout'] = json_date(row['payout_at'] if paid else None)
-    post['cashout_time'] = json_date(None if paid else row['payout_at'])
+    post['last_payout'] = json_date(row['payout_at'] if paid and not deleted else date_default)
+    post['cashout_time'] = json_date(None if paid or deleted else row['payout_at'])
 
     post['total_payout_value'] = _amount(row['payout'] if paid else 0)
     post['curator_payout_value'] = _amount(0)
 
-    post['pending_payout_value'] = _amount(0 if paid else full_payout)
-    post['promoted'] = _amount(row['promoted'])
+    post['pending_payout_value'] = _amount(0 if paid or deleted else full_payout)
+    post['promoted'] = _amount(row['promoted'] if not deleted else 0)
 
     post['replies'] = []
-    post['body_length'] = len(row['body'])
-    post['author_reputation'] = row['author_rep']
+    post['body_length'] = len(row['body'])  if not deleted else 0
+    post['author_reputation'] = row['author_rep'] if not deleted else 0
 
-    post['parent_author'] = row['parent_author']
-    post['parent_permlink'] = row['parent_permlink_or_category']
+    post['parent_author'] = row['parent_author'] if not deleted else ''
+    post['parent_permlink'] = row['parent_permlink_or_category'] if not deleted else ''
 
-    post['url'] = row['url']
-    post['root_title'] = row['root_title']
-    post['beneficiaries'] = row['beneficiaries']
-    post['max_accepted_payout'] = row['max_accepted_payout']
-    post['percent_hbd'] = row['percent_hbd']
+    post['url'] = row['url'] if not deleted else ''
+    post['root_title'] = row['root_title'] if not deleted else ''
+    post['beneficiaries'] = row['beneficiaries']  if not deleted else []
+    post['max_accepted_payout'] = row['max_accepted_payout'] if not deleted else '0.000 HBD'
+    post['percent_hbd'] = row['percent_hbd'] if not deleted else 0
 
     if get_content_additions:  
-        post['id'] = row['id'] # let's be compatible with old code until this API is supported.
-        post['active'] = json_date(row['active'])
-        post['author_rewards'] = row['author_rewards']
-        post['max_cashout_time'] = json_date(None) # ABW: only relevant up to HF17, timestamp::max for all posts later (and also all paid) 
+        post['id'] = row['id'] if not deleted else 0 # let's be compatible with old code until this API is supported.
+        post['active'] = json_date(row['active'] if not deleted else date_default)
+        post['author_rewards'] = row['author_rewards'] if not deleted else 0
+        post['max_cashout_time'] = json_date(None) if not deleted else date_default # ABW: only relevant up to HF17, timestamp::max for all posts later (and also all paid) 
         curator_payout = sbd_amount(row['curator_payout_value'])
-        post['curator_payout_value'] = _amount(curator_payout)
-        post['total_payout_value'] = _amount(row['payout'] - curator_payout)
+        post['curator_payout_value'] = _amount(curator_payout if not deleted else 0)
+        post['total_payout_value'] = _amount(row['payout'] - curator_payout if not deleted else 0)
     
-        post['reward_weight'] = 10000
+        post['reward_weight'] = 10000 if not deleted else 0
     
-        post['root_author'] = row['root_author']
-        post['root_permlink'] = row['root_permlink']
+        post['root_author'] = row['root_author'] if not deleted else ''
+        post['root_permlink'] = row['root_permlink'] if not deleted else ''
     
-        post['allow_replies'] = row['allow_replies']
-        post['allow_votes'] = row['allow_votes']
-        post['allow_curation_rewards'] = row['allow_curation_rewards']
+        post['allow_replies'] = row['allow_replies'] if not deleted else False
+        post['allow_votes'] = row['allow_votes'] if not deleted else False
+        post['allow_curation_rewards'] = row['allow_curation_rewards'] if not deleted else False
         post['reblogged_by'] = []
-        post['net_votes'] = row['net_votes']
+        post['net_votes'] = row['net_votes'] if not deleted else 0
 
         post['children_abs_rshares'] = 0    # see: hive/server/database_api/objects.py:68
         post['total_pending_payout_value'] = '0.000 HBD'      # no data
 
-        if paid:
+        if paid or deleted:
             post['total_vote_weight'] = 0
             post['vote_rshares'] = 0
             post['abs_rshares'] = 0
@@ -255,9 +256,9 @@ def _condenser_post_object(row, truncate_body=0, get_content_additions=False):
             post['abs_rshares'] = row['abs_rshares']
     else:
         if paid:
-            curator_payout = sbd_amount(row['curator_payout_value'])
-            post['curator_payout_value'] = _amount(curator_payout)
-            post['total_payout_value'] = _amount(row['payout'] - curator_payout)
+            curator_payout = sbd_amount(row['curator_payout_value'] if not deleted else 0)
+            post['curator_payout_value'] = _amount(curator_payout if not deleted else 0)
+            post['total_payout_value'] = _amount(row['payout'] - curator_payout if not deleted else 0)
 
     return post
 

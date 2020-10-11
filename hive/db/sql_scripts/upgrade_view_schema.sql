@@ -197,7 +197,7 @@ SELECT hp.id,
     JOIN hive_permlink_data hpd_pp ON hpd_pp.id = pp.permlink_id
     JOIN hive_accounts ha_rp ON ha_rp.id = rp.author_id
     JOIN hive_permlink_data hpd_rp ON hpd_rp.id = rp.permlink_id
-    JOIN hive_post_data rpd ON rpd.id = rp.id
+    LEFT JOIN hive_post_data rpd ON rpd.id = rp.id
     JOIN hive_category_data hcd ON hcd.id = hp.category_id
     JOIN hive_category_data rcd ON rcd.id = rp.category_id
     LEFT JOIN hive_communities hc ON hp.community_id = hc.id
