@@ -94,7 +94,7 @@ class Follow(DbAdapterHolder):
         op['block_num'] = block_num
         k = '{}/{}'.format(op['flr'], op['flg'])
 
-        if not DbState.is_initial_sync and isinstance(op['flg'], list):
+        if isinstance(op['flg'], list):
             #Special processing if following is a list, need to figure out how to integrate it with the code below
             #but i'm in a hurry so I'm taking a bit of a shortcut to get past this blocker for now
             # [DK] we expect op['flg'] in form [[1],[2],[3],...]
@@ -194,7 +194,7 @@ class Follow(DbAdapterHolder):
                 return None
 
         return dict(flr=Accounts.get_id(op['follower']),
-                    flg=Accounts.get_id(op['following'] if not isinstance(op['following'], list) else cls._get_ids_for_accounts(op['following'])),
+                    flg=Accounts.get_id(op['following']) if not isinstance(op['following'], list) else cls._get_ids_for_accounts(op['following']),
                     state=defs[what],
                     at=date)
 
@@ -380,7 +380,7 @@ class Follow(DbAdapterHolder):
             return False
         sql = "select count(*) from hive_accounts where name in :names"
         sql_result = DB.query_all(sql, names=tuple(accounts))
-        names_found = sql_result[0]['total']
+        names_found = sql_result[0]['count']
         if names_found != len(accounts):
             return False
         return True
