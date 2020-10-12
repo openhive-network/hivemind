@@ -131,7 +131,7 @@ async def load_posts(db, ids, truncate_body=0):
 
     return [posts_by_id[_id] for _id in ids]
 
-async def resultset_to_posts(db, resultset, truncate_body=0):
+async def resultset_to_posts(db, fat_node_style, resultset, truncate_body=0):
     author_reps = await _query_author_rep_map(db, resultset)
     muted_accounts = Mutes.all()
 
@@ -139,8 +139,8 @@ async def resultset_to_posts(db, resultset, truncate_body=0):
     for row in resultset:
         row = dict(row)
         row['author_rep'] = author_reps[row['author']]
-        post = _condenser_post_object(row, truncate_body=truncate_body)
-        post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
+        post = _condenser_post_object(row, truncate_body=truncate_body, get_content_additions=fat_node_style)
+        post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.ActiveVotes if fat_node_style else VotesPresentation.CondenserApi)
         posts.append(post)
 
     return posts
@@ -175,7 +175,7 @@ def _condenser_account_object(row):
                         'profile_image': profile['profile_image'],
                        }})}
 
-def _condenser_post_object(row, truncate_body=0):
+def _condenser_post_object(row, truncate_body=0, get_content_additions=False):
     """Given a hive_posts row, create a legacy-style post object."""
     paid = row['is_paidout']
 
@@ -185,7 +185,6 @@ def _condenser_post_object(row, truncate_body=0):
 
     full_payout = row['pending_payout'] + row['payout'];
     post = {}
-    post['post_id'] = row['id']
     post['author'] = row['author']
     post['permlink'] = row['permlink']
     post['category'] = row['category']
@@ -198,12 +197,13 @@ def _condenser_post_object(row, truncate_body=0):
     post['last_update'] = json_date(row['updated_at'])
     post['depth'] = row['depth']
     post['children'] = row['children']
-    post['net_rshares'] = row['rshares']
 
     post['last_payout'] = json_date(row['payout_at'] if paid else None)
     post['cashout_time'] = json_date(None if paid else row['payout_at'])
+
     post['total_payout_value'] = _amount(row['payout'] if paid else 0)
     post['curator_payout_value'] = _amount(0)
+
     post['pending_payout_value'] = _amount(0 if paid else full_payout)
     post['promoted'] = _amount(row['promoted'])
 
@@ -220,10 +220,46 @@ def _condenser_post_object(row, truncate_body=0):
     post['max_accepted_payout'] = row['max_accepted_payout']
     post['percent_hbd'] = row['percent_hbd']
 
-    if paid:
+    if get_content_additions:
+        post['id'] = row['id'] # let's be compatible with old code until this API is supported.
+        post['active'] = json_date(row['active'])
+        post['author_rewards'] = row['author_rewards']
+        post['max_cashout_time'] = json_date(None) # ABW: only relevant up to HF17, timestamp::max for all posts later (and also all paid) 
         curator_payout = sbd_amount(row['curator_payout_value'])
         post['curator_payout_value'] = _amount(curator_payout)
         post['total_payout_value'] = _amount(row['payout'] - curator_payout)
+
+        post['reward_weight'] = 10000
+
+        post['root_author'] = row['root_author']
+        post['root_permlink'] = row['root_permlink']
+
+        post['allow_replies'] = row['allow_replies']
+        post['allow_votes'] = row['allow_votes']
+        post['allow_curation_rewards'] = row['allow_curation_rewards']
+        post['reblogged_by'] = []
+        post['net_votes'] = row['net_votes']
+
+        post['children_abs_rshares'] = 0    # see: hive/server/database_api/objects.py:68
+        post['total_pending_payout_value'] = '0.000 HBD'      # no data
+
+        if paid:
+            post['total_vote_weight'] = 0
+            post['vote_rshares'] = 0
+            post['net_rshares'] = 0
+            post['abs_rshares'] = 0
+        else:
+            post['total_vote_weight'] = row['total_vote_weight']
+            post['vote_rshares'] = ( row['rshares'] + row['abs_rshares'] ) // 2
+            post['net_rshares'] = row['rshares']
+            post['abs_rshares'] = row['abs_rshares']
+    else:
+        post['post_id'] = row['id']
+        post['net_rshares'] = row['rshares']
+        if paid:
+            curator_payout = sbd_amount(row['curator_payout_value'])
+            post['curator_payout_value'] = _amount(curator_payout)
+            post['total_payout_value'] = _amount(row['payout'] - curator_payout)
 
     return post
 

@@ -1,4 +1,10 @@
+from hive.server.condenser_api.methods import _get_account_reputations_impl
 from hive.server.common.helpers import return_error_info
+
+@return_error_info
+async def get_account_reputations(context, account_lower_bound: str = None, limit: int = None):
+    db = context['db']
+    return await _get_account_reputations_impl(db, False, account_lower_bound, limit)
 
 @return_error_info
 async def get_feed_entries(context, account: str, start_entry_id: int, limit: int):

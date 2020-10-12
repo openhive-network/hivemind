@@ -191,7 +191,7 @@ def api_vote_info(rows, votes_presentation):
           ret.append(dict(rshares = row.rshares, voter = row.voter))
       else:
           ret.append(dict(percent = row.percent, reputation = row.reputation,
-                          rshares = row.rshares, time = json_date(row.last_update), 
+                          rshares = row.rshares, time = json_date(row.last_update),
                           voter = row.voter, weight = row.weight
                           ))
   return ret
