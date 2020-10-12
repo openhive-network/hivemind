@@ -101,12 +101,15 @@ class Follow(DbAdapterHolder):
             for following_id in op['flg']:
                 following_id = following_id[0]
                 k = '{}/{}'.format(op['flr'], following_id)
-                cls.follow_items_to_flush[k] = dict(
-                    flr=op['flr'],
-                    flg=following_id,
-                    state=op['state'],
-                    at=op['at'],
-                    block_num=op['block_num'])
+                if k in cls.follow_items_to_flush:
+                    cls.follow_items_to_flush[k]['state'] = op['state']
+                else:
+                    cls.follow_items_to_flush[k] = dict(
+                        flr=op['flr'],
+                        flg=following_id,
+                        state=op['state'],
+                        at=op['at'],
+                        block_num=op['block_num'])
             return
 
         state = op['state']
