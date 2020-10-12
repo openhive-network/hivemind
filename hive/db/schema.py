@@ -726,7 +726,9 @@ def setup(db):
           followers,
           lastread_at,
           posting_json_metadata,
-          json_metadata
+          json_metadata,
+          blacklist_description,
+          muted_list_description
         FROM
           hive_accounts ha
           """
