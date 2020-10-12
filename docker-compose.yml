@@ -1,26 +1,83 @@
 version: '3'
 services:
-  postgres-db:
-    image: postgres
+  init-db:
+    build:
+      context: ./postgres/docker
+      dockerfile: Dockerfile
+    image: hivemind:postgres
+    command: init
     environment:
+      POSTGRES_IP: $POSTGRES_IP
+      POSTGRES_PORT: $POSTGRES_PORT
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+    volumes:
+        - ./postgres/init:/docker-entrypoint-initdb.d 
+        - ./postgres/data:/var/lib/postgresql/data
+        - ./postgres/postgresql.conf:/etc/postgresql.conf
+  postgres-db:
+    build:
+      context: ./postgres/docker
+      dockerfile: Dockerfile
+    image: hivemind:postgres
+    command: run
+    environment:
+      POSTGRES_IP: postgres-db
       POSTGRES_USER: $POSTGRES_USER
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_PORT: $POSTGRES_PORT
       POSTGRES_DB: $POSTGRES_DB
-    restart: unless-stopped
     volumes:
-        - postgres-db:/var/lib/postgresql/data
-  hivemind:
+        - ./postgres/data:/var/lib/postgresql/data
+        - ./postgres/postgresql.conf:/etc/postgresql.conf     
+  hivemind-init-sync:
     depends_on:
       - postgres-db
     image: hivemind:latest
+    container_name: hivemind-init-sync
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    command: bash -c "/src/hivemind/run_hivemind.sh sync"
+    environment:
+      POSTGRES_IP: postgres-db
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_PORT: $POSTGRES_PORT
+      POSTGRES_DB: $POSTGRES_DB
+      HIVE_SYNC_URL: $HIVE_SYNC_URL
+      DATABASE_URL: postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_NAME:$POSTGRES_PORT/$POSTGRES_DB
+  hivemind-server:
+    depends_on:
+      - postgres-db
+      - hivemind-init-sync
+    image: hivemind:latest
+    container_name: hivemind-server
     build: 
       context: .
       dockerfile: Dockerfile
     command: >
+<<<<<<< Updated upstream
       sh -c "hive sync   --steemd-url '{\"default\": $HIVE_SYNC_URL}' --database-url $DATABASE_URL"
+=======
+      bash -c "
+        while ping -c1 hivemind-init-sync &>/dev/null
+        do
+          echo Waiting for hivemind-init-sync to finish
+          sleep 1
+        done
+        /src/hivemind/run_hivemind.sh sync_and_server
+      "
+>>>>>>> Stashed changes
     environment:
-      DATABASE_URL: $DATABASE_URL
-    restart: unless-stopped
+      POSTGRES_IP: postgres-db
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_PORT: $POSTGRES_PORT
+      POSTGRES_DB: $POSTGRES_DB
+      HIVE_SYNC_URL: $HIVE_SYNC_URL
+      DATABASE_URL: postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_NAME:$POSTGRES_PORT/$POSTGRES_DB
+    ports:
+        - 8080:8080
 volumes:
   postgres-db:
     driver: local
