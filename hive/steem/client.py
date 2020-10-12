@@ -173,7 +173,7 @@ class SteemClient:
 
         while from_block < end_block:
             call_result = self.__exec('enum_virtual_ops', {"block_range_begin":from_block, "block_range_end":end_block
-                , "group_by_block": True, "operation_begin": resume_on_operation, "limit": 1000, "filter": tracked_ops_filter
+                , "group_by_block": True, "include_reversible": True, "operation_begin": resume_on_operation, "limit": 1000, "filter": tracked_ops_filter
             })
 
             if conf.get('log_virtual_op_calls'):
