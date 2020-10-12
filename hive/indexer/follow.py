@@ -16,6 +16,8 @@ log = logging.getLogger(__name__)
 FOLLOWERS = 'followers'
 FOLLOWING = 'following'
 
+DB = Db.instance()
+
 FOLLOW_ITEM_INSERT_QUERY = """
     INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists, follow_muted, block_number)
     VALUES
@@ -97,7 +99,7 @@ class Follow(DbAdapterHolder):
             #but i'm in a hurry so I'm taking a bit of a shortcut to get past this blocker for now
             for following_id in op['flg']:
                 following_id = following_id[0]
-                DB.query(FOLLOW_ITEM_INSERT_QUERY, flr=op['flr'], flg=following_id,at=op['at'], state=op['state'], block_num=block_num)
+                DB.query(FOLLOW_ITEM_INSERT_QUERY, flr=op['flr'], flg=following_id, at=op['at'], state=op['state'], block_num=block_num)
             return
 
         state = op['state']
@@ -126,9 +128,8 @@ class Follow(DbAdapterHolder):
                 sql = """UPDATE hive_follows set blacklisted = false, follow_blacklists = false, follow_muted = false, state = 0 where follower = :follower"""
                 sql2 = """UPDATE hive_follows SET follow_blacklists = true, follow_muted = true WHERE follower = :follower AND following = (SELECT id FROM hive_accounts WHERE name = 'null')"""
 
+            sql = sql + ";" + sql2
             DB.query(sql, follower=op['flr'])
-            if sql2 != '':
-                DB.query(sql2, follower=op['flr'])
             return
 
 
@@ -258,7 +259,7 @@ class Follow(DbAdapterHolder):
             cls.beginTx()
             for _, follow_item in cls.follow_items_to_flush.items():
                 if count < limit:
-                    values.append("({}, {}, '{}', {}, {}, {}, {})".format(follow_item['flr'],
+                    values.append("({}, {}, '{}', {}, {}, {}, {}, {})".format(follow_item['flr'],
                                                                           follow_item['flg'],
                                                                           follow_item['at'],
                                                                           follow_item['state'],
@@ -272,7 +273,7 @@ class Follow(DbAdapterHolder):
                     query += sql_postfix
                     cls.db.query(query)
                     values.clear()
-                    values.append("({}, {}, '{}', {}, {}, {}, {})".format(follow_item['flr'],
+                    values.append("({}, {}, '{}', {}, {}, {}, {}, {})".format(follow_item['flr'],
                                                                           follow_item['flg'],
                                                                           follow_item['at'],
                                                                           follow_item['state'],
@@ -368,7 +369,7 @@ class Follow(DbAdapterHolder):
         if not isinstance(accounts, list):
             return False
         sql = "select count(*) from hive_accounts where name in :names"
-        sql_result = DB.query_all(sql, names-tuple(accounts))
+        sql_result = DB.query_all(sql, names=tuple(accounts))
         names_found = sql_result[0]['total']
         if names_found != len(accounts):
             return False
