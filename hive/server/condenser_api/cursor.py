@@ -114,20 +114,6 @@ async def get_reblogged_by(db, author: str, permlink: str):
         names.remove(author)
     return names
 
-
-async def get_account_reputations(db, account_lower_bound, limit):
-    """Enumerate account reputations."""
-    seek = ''
-    if account_lower_bound:
-        seek = "WHERE name >= :start"
-
-    sql = """SELECT name, reputation
-              FROM hive_accounts %s
-           ORDER BY name
-              LIMIT :limit""" % seek
-    rows = await db.query_all(sql, start=account_lower_bound, limit=limit)
-    return [dict(name=r[0], reputation=r[1]) for r in rows]
-
 async def pids_by_blog(db, account: str, start_author: str = '',
                        start_permlink: str = '', limit: int = 20):
     """Get a list of post_ids for an author's blog."""

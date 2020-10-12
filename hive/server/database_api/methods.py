@@ -190,9 +190,10 @@ def api_vote_info(rows, votes_presentation):
       elif votes_presentation == VotesPresentation.BridgeApi:
           ret.append(dict(rshares = row.rshares, voter = row.voter))
       else:
-          ret.append(dict(voter = row.voter, weight = row.weight, rshares = row.rshares,
-                          percent = row.percent, reputation = row.reputation,
-                          time = json_date(row.last_update)))
+          ret.append(dict(percent = row.percent, reputation = row.reputation,
+                          rshares = row.rshares, time = json_date(row.last_update),
+                          voter = row.voter, weight = row.weight
+                          ))
   return ret
 
 @return_error_info
