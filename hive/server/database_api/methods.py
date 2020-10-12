@@ -34,9 +34,9 @@ async def list_comments(context, start: list, limit: int = 1000, order: str = No
     elif order == 'by_permlink':
         assert len(start) == 2, "Expecting two arguments in 'start' array: author and permlink"
         author = start[0]
-        valid_account(author, allow_empty=True)
+        assert isinstance(author, str), "invalid account name type"
         permlink = start[1]
-        valid_permlink(permlink, allow_empty=True)
+        assert isinstance(permlink, str), "permlink must be string"
         sql = "SELECT * FROM list_comments_by_permlink(:author, :permlink, :limit)"
         result = await db.query_all(sql, author=author, permlink=permlink, limit=limit)
     elif order == 'by_root':
