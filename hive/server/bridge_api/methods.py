@@ -397,22 +397,12 @@ async def get_follow_list(context, observer, follow_type='blacklisted'):
         return results
 
     blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
-    for account in blacklists_for_user.keys():
-        sources = blacklists_for_user[account]
-        if follow_type == 'blacklisted':
-            if 'my_blacklist' in sources:
-                row_result = {'name': account, 'blacklist_description':'', 'muted_list_description':''}
-                results.append(row_result)
-        elif follow_type == 'follow_blacklist':
-            if 'my_followed_blacklists' in sources:
-                row_result = {'name': account, 'blacklist_description':'', 'muted_list_description':''}
-                results.append(row_result)
-        elif follow_type == 'muted':
-            if 'my_muted' in sources:
-                row_result = {'name': account, 'blacklist_description':'', 'muted_list_description':''}
-                results.append(row_result)
-        elif follow_type == 'follow_muted':
-            if 'my_followed_mutes' in sources:
-                row_result = {'name': account, 'blacklist_description':'', 'muted_list_description':''}
-                results.append(row_result)
+    if follow_type == 'blacklisted':
+        results.extend([{'name': account, 'blacklist_description':'', 'muted_list_description':''} for account, sources in blacklists_for_user.items() if 'my_blacklist' in sources])
+    elif follow_type == 'follow_blacklist':
+        results.extend([{'name': account, 'blacklist_description':'', 'muted_list_description':''} for account, sources in blacklists_for_user.items() if 'my_followed_blacklists' in sources])
+    elif follow_type == 'muted':
+        results.extend([{'name': account, 'blacklist_description':'', 'muted_list_description':''} for account, sources in blacklists_for_user.items() if 'my_muted' in sources])
+    elif follow_type == 'follow_muted':
+        results.extend([{'name': account, 'blacklist_description':'', 'muted_list_description':''} for account, sources in blacklists_for_user.items() if 'my_followed_mutes' in sources])
     return results
