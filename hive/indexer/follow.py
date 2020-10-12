@@ -97,9 +97,16 @@ class Follow(DbAdapterHolder):
         if not DbState.is_initial_sync and isinstance(op['flg'], list):
             #Special processing if following is a list, need to figure out how to integrate it with the code below
             #but i'm in a hurry so I'm taking a bit of a shortcut to get past this blocker for now
+            # [DK] we expect op['flg'] in form [[1],[2],[3],...]
             for following_id in op['flg']:
                 following_id = following_id[0]
-                DB.query(FOLLOW_ITEM_INSERT_QUERY, flr=op['flr'], flg=following_id, at=op['at'], state=op['state'], block_num=block_num)
+                k = '{}/{}'.format(op['flr'], following_id)
+                cls.follow_items_to_flush[k] = dict(
+                    flr=op['flr'],
+                    flg=following_id,
+                    state=op['state'],
+                    at=op['at'],
+                    block_num=op['block_num'])
             return
 
         state = op['state']
