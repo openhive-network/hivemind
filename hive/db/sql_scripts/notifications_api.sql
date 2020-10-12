@@ -15,7 +15,6 @@ CREATE TYPE notification AS
 , score SMALLINT
 );
 
-
 DROP FUNCTION IF EXISTS get_number_of_unread_notifications;
 CREATE OR REPLACE FUNCTION get_number_of_unread_notifications(in _account VARCHAR, in _minimum_score SMALLINT)
 RETURNS TABLE( lastread_at TIMESTAMP, unread BIGINT )
@@ -35,18 +34,24 @@ BEGIN
   RETURN QUERY SELECT
     __last_read_at as lastread_at,
     count(1) as unread
-  FROM hive_notifications_view hnv 
-  WHERE hnv.dst_id = __account_id AND hnv.created_at > __last_read_at AND hnv.score >= _minimum_score
+  FROM hive_raw_notifications_view hnv 
+  WHERE hnv.dst = __account_id AND hnv.created_at > __last_read_at AND hnv.score >= _minimum_score
   ;
 END
 $BODY$
 ;
 
-DROP FUNCTION IF EXISTS account_notifications;
-CREATE OR REPLACE FUNCTION account_notifications(in _account VARCHAR, in _min_score SMALLINT, in _last_id BIGINT, in _limit SMALLINT)
-RETURNS SETOF notification
-AS
-$function$
+DROP FUNCTION account_notifications;
+
+CREATE OR REPLACE FUNCTION public.account_notifications(
+  _account character varying,
+  _min_score smallint,
+  _last_id bigint,
+  _limit smallint)
+    RETURNS SETOF notification 
+    LANGUAGE 'plpgsql'
+    STABLE 
+AS $BODY$
 DECLARE
   __account_id INT;
 BEGIN
@@ -55,23 +60,33 @@ BEGIN
       hnv.id
     , CAST( hnv.type_id as SMALLINT) as type_id
     , hnv.created_at
-    , hnv.src
-    , hnv.dst
-    , hnv.author
-    , hnv.permlink
+    , hs.name as src
+    , hd.name as dst
+    , ha.name as author
+    , hpd.permlink
     , hnv.community
     , hnv.community_title
     , hnv.payload
     , CAST( hnv.score as SMALLINT) as score
   FROM
-      hive_notifications_view hnv
-  WHERE hnv.dst_id = __account_id AND hnv.score >= _min_score AND ( _last_id = 0 OR hnv.id < _last_id )
+  (
+    select nv.id, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.score, nv.community, nv.community_title, nv.payload
+      from hive_raw_notifications_view nv
+  WHERE nv.dst = __account_id AND nv.score >= _min_score AND ( _last_id = 0 OR nv.id < _last_id )
+  ORDER BY nv.id DESC
+  LIMIT _limit
+  ) hnv
+  join hive_posts hp on hnv.dst_post_id = hp.id
+  join hive_accounts ha on hp.author_id = ha.id
+  join hive_accounts hs on hs.id = hnv.src
+  join hive_accounts hd on hd.id = hnv.dst
+  join hive_permlink_data hpd on hp.permlink_id = hpd.id
   ORDER BY hnv.id DESC
-  LIMIT _limit;
+  LIMIT _limit
+  
+  ;
 END
-$function$
-LANGUAGE plpgsql STABLE
-;
+$BODY$;
 
 DROP FUNCTION IF EXISTS post_notifications
 ;
@@ -87,21 +102,30 @@ BEGIN
       hnv.id
     , CAST( hnv.type_id as SMALLINT) as type_id
     , hnv.created_at
-    , hnv.src
-    , hnv.dst
-    , hnv.author
-    , hnv.permlink
+    , hs.name as src
+    , hd.name as dst
+    , ha.name as author
+    , hpd.permlink
     , hnv.community
     , hnv.community_title
     , hnv.payload
     , CAST( hnv.score as SMALLINT) as score
   FROM
-      hive_notifications_view hnv
-  WHERE
-      hnv.post_id = __post_id AND hnv.score >= _min_score
-      AND ( _last_id = 0 OR hnv.id < _last_id )
+  (
+    SELECT nv.id, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.score, nv.community, nv.community_title, nv.payload
+    FROM hive_raw_notifications_view nv
+    WHERE nv.post_id = __post_id AND nv.score >= _min_score AND ( _last_id = 0 OR nv.id < _last_id )
+    ORDER BY nv.id DESC
+    LIMIT _limit
+  ) hnv
+  JOIN hive_posts hp ON hnv.dst_post_id = hp.id
+  JOIN hive_accounts ha ON hp.author_id = ha.id
+  JOIN hive_accounts hs ON hs.id = hnv.src
+  JOIN hive_accounts hd ON hd.id = hnv.dst
+  JOIN hive_permlink_data hpd ON hp.permlink_id = hpd.id
   ORDER BY hnv.id DESC
   LIMIT _limit;
 END
 $function$
 LANGUAGE plpgsql STABLE
+;

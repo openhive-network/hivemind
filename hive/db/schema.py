@@ -1484,28 +1484,6 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-        DROP VIEW IF EXISTS hive_accounts_rank_view CASCADE
-        ;
-        CREATE VIEW hive_accounts_rank_view
-        AS
-        SELECT
-            ha.id as id
-          , CASE
-                 WHEN rank.position < 200 THEN 70
-                 WHEN rank.position < 1000 THEN 60
-                 WHEN rank.position < 6500 THEN 50
-                 WHEN rank.position < 25000 THEN 40
-                 WHEN rank.position < 100000 THEN 30
-                 ELSE 20
-             END as score
-        FROM hive_accounts ha
-        JOIN (
-        SELECT ha2.id, RANK () OVER ( ORDER BY ha2.reputation DESC ) as position FROM hive_accounts ha2
-        ) as rank ON ha.id = rank.id
-    """
-    db.query_no_return(sql)
-
-    sql = """
           DO $$
           BEGIN
             EXECUTE 'ALTER DATABASE '||current_database()||' SET join_collapse_limit TO 16';
@@ -1700,6 +1678,7 @@ def setup(db):
     db.query_no_return(sql)
 
     sql_scripts = [
+      "hive_posts_base_view.sql",
       "head_block_time.sql",
       "update_feed_cache.sql",
       "payout_stats_view.sql",
