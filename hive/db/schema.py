@@ -241,7 +241,6 @@ def build_metadata():
         sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_follows_fk1'),
         sa.Index('hive_follows_ix5a', 'following', 'state', 'created_at', 'follower'),
         sa.Index('hive_follows_ix5b', 'follower', 'state', 'created_at', 'following'),
-        sa.Index('hive_follows_all_columns_idx', 'follower', 'following', 'state', 'created_at', 'blacklisted', 'follow_blacklists', 'follow_muted'),
         sa.Index('hive_follows_block_num_idx', 'block_num'),
         sa.Index('hive_follows_created_at_idx', 'created_at'),
     )
