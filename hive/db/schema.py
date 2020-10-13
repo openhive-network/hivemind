@@ -906,6 +906,8 @@ def setup(db):
               VOLATILE
           AS $BODY$
           BEGIN
+          set local work_mem='2GB';
+
           UPDATE hive_posts uhp
           SET children = data_source.children_count
           FROM
@@ -931,6 +933,7 @@ def setup(db):
           ) data_source
           WHERE uhp.id = data_source.queried_parent
           ;
+          reset work_mem;
           END
           $BODY$;
           """
