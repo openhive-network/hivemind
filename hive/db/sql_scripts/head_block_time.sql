@@ -1,4 +1,4 @@
-DROP FUNCTION IF EXISTS head_block_time;
+DROP FUNCTION IF EXISTS head_block_time CASCADE;
 CREATE OR REPLACE FUNCTION head_block_time()
 RETURNS TIMESTAMP
 LANGUAGE 'sql' STABLE
@@ -9,7 +9,7 @@ $BODY$
 ;
 
 
-DROP FUNCTION IF EXISTS block_before_head;
+DROP FUNCTION IF EXISTS block_before_head CASCADE;
 CREATE OR REPLACE FUNCTION block_before_head( in _time INTERVAL )
 RETURNS hive_blocks.num%TYPE
 LANGUAGE 'sql' STABLE

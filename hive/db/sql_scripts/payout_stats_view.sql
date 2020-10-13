@@ -27,5 +27,5 @@ CREATE MATERIALIZED VIEW payout_stats_view AS
 WITH DATA
 ;
 
-CREATE UNIQUE INDEX payout_stats_view_ix1 ON payout_stats_view (community_id, author );
-CREATE INDEX payout_stats_view_ix2 ON payout_stats_view (community_id, author, payout);
+CREATE UNIQUE INDEX IF NOT EXISTS payout_stats_view_ix1 ON payout_stats_view (community_id, author );
+CREATE INDEX IF NOT EXISTS payout_stats_view_ix2 ON payout_stats_view (community_id, author, payout);
