@@ -26,5 +26,4 @@ USER ${user}
 WORKDIR /src/hivemind
 
 COPY --from=hivemind-base /src/hivemind/install /src/hivemind
-COPY ./scripts/run_hivemind.sh /src/hivemind/run_hivemind.sh
-ENTRYPOINT [ "/src/hivemind/run_hivemind.sh" ]
+COPY ./scripts/run_hivemind.sh /usr/local/bin/

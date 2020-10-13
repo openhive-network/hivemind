@@ -1,10 +1,9 @@
 #!/bin/bash
 
 function wait_for_accepting_db () {
-    while !  pg_isready -d $POSTGRES_DB -h $POSTGRES_IP -p $POSTGRES_PORT -U $POSTGRES_USER ; do
+    while ! pg_isready -h $POSTGRES_IP -p $POSTGRES_PORT ; do
         echo "Waiting for port $POSTGRES_IP $POSTGRES_PORT ..."
-        sleep 1
-        ((counter++))
+        sleep 10
     done
 }
 
@@ -26,6 +25,14 @@ function sync_and_server () {
     exec hive server --steemd-url "{\"default\": \"${HIVE_SYNC_URL}\"}" --database-url $DATABASE_URL 
 }
 
+function wait_for_finish () {
+    while ping -c1 $1 &>/dev/null
+    do
+        echo "Waiting for $1 to finish"
+        sleep 10
+    done
+}
+
 case "$1" in
     'sync')
         sync
@@ -35,5 +42,8 @@ case "$1" in
     ;;
     'sync_and_server')
         sync_and_server
+    ;;
+    'wait_for_finish')
+        wait_for_finish $2
     ;;
 esac

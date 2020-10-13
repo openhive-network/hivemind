@@ -5,30 +5,35 @@ services:
       context: ./postgres/docker
       dockerfile: Dockerfile
     image: hivemind:postgres
-    command: init
+    container_name: hivemind-init-db
+    command: bash -c "run_db.sh init"
     environment:
-      POSTGRES_IP: $POSTGRES_IP
-      POSTGRES_PORT: $POSTGRES_PORT
+      POSTGRES_USER: $POSTGRES_USER
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_DB: $POSTGRES_DB
     volumes:
         - ./postgres/init:/docker-entrypoint-initdb.d 
         - ./postgres/data:/var/lib/postgresql/data
-        - ./postgres/postgresql.conf:/etc/postgresql.conf
+        - ./postgres/docker/postgresql.conf:/etc/postgresql.conf
   postgres-db:
     build:
       context: ./postgres/docker
       dockerfile: Dockerfile
     image: hivemind:postgres
-    command: run
+    user: 1000:1000
+    command: >
+      bash -c "
+        run_db.sh wait_for_finish hivemind-init-db
+        run_db.sh run
+      "
     environment:
-      POSTGRES_IP: postgres-db
       POSTGRES_USER: $POSTGRES_USER
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
       POSTGRES_PORT: $POSTGRES_PORT
       POSTGRES_DB: $POSTGRES_DB
     volumes:
         - ./postgres/data:/var/lib/postgresql/data
-        - ./postgres/postgresql.conf:/etc/postgresql.conf     
+        - ./postgres/docker/postgresql.conf:/etc/postgresql.conf     
   hivemind-init-sync:
     depends_on:
       - postgres-db
@@ -37,7 +42,7 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
-    command: bash -c "/src/hivemind/run_hivemind.sh sync"
+    command: bash -c "run_hivemind.sh sync"
     environment:
       POSTGRES_IP: postgres-db
       POSTGRES_USER: $POSTGRES_USER
@@ -56,18 +61,10 @@ services:
       context: .
       dockerfile: Dockerfile
     command: >
-<<<<<<< Updated upstream
-      sh -c "hive sync   --steemd-url '{\"default\": $HIVE_SYNC_URL}' --database-url $DATABASE_URL"
-=======
       bash -c "
-        while ping -c1 hivemind-init-sync &>/dev/null
-        do
-          echo Waiting for hivemind-init-sync to finish
-          sleep 1
-        done
-        /src/hivemind/run_hivemind.sh sync_and_server
+        run_hivemind.sh wait_for_finish hivemind-init-sync
+        run_hivemind.sh sync_and_server
       "
->>>>>>> Stashed changes
     environment:
       POSTGRES_IP: postgres-db
       POSTGRES_USER: $POSTGRES_USER
