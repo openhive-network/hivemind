@@ -26,21 +26,17 @@ SQL_TEMPLATE = """
         hp.community_id,
         hp.author,
         hp.permlink,
-        hp.author_rep,
         hp.title,
         hp.body,
         hp.category,
         hp.depth,
         hp.promoted,
         hp.payout,
-        hp.payout_at,
-        hp.pending_payout,
         hp.last_payout_at,
         hp.cashout_time,
         hp.is_paidout,
         hp.children,
         hp.votes,
-        hp.active_votes,
         hp.created_at,
         hp.updated_at,
         hp.rshares,
@@ -65,7 +61,11 @@ SQL_TEMPLATE = """
         hp.root_title,
         hp.abs_rshares,
         hp.active,
-        hp.author_rewards
+        hp.author_rewards,
+        hp.author_rep,
+        hp.payout_at,
+        hp.pending_payout,
+        hp.active_votes
     FROM hive_posts_view hp
 """
 
@@ -135,19 +135,37 @@ async def get_reblogged_by(context, author: str, permlink: str):
 
 @return_error_info
 async def get_account_reputations(context, account_lower_bound: str = None, limit: int = None):
-    """List account reputations"""
-    return {'reputations': await cursor.get_account_reputations(
-        context['db'],
-        account_lower_bound,
-        valid_limit(limit, 1000, None))}
+    db = context['db']
+    return await _get_account_reputations_impl(db, True, account_lower_bound, limit)
 
+async def _get_account_reputations_impl(db, fat_node_style, account_lower_bound, limit):
+    """Enumerate account reputations."""
+    limit = valid_limit(limit, 1000, None)
+    seek = ''
+    if account_lower_bound:
+        seek = "WHERE name >= :start"
+
+    sql = """SELECT name, reputation
+              FROM hive_accounts %s
+           ORDER BY name
+              LIMIT :limit""" % seek
+
+    rows = await db.query_all(sql, start=account_lower_bound, limit=limit)
+    if fat_node_style:
+        return [dict(account=r[0], reputation=r[1]) for r in rows]
+    else:
+        return {'reputations': [dict(name=r[0], reputation=r[1]) for r in rows]}
 
 # Content Primitives
 
 @return_error_info
 async def get_content(context, author: str, permlink: str, observer=None):
-    """Get a single post object."""
     db = context['db']
+    return await _get_content_impl(db, True, author, permlink, observer)
+
+@return_error_info
+async def _get_content_impl(db, fat_node_style, author: str, permlink: str, observer=None):
+    """Get a single post object."""
     valid_account(author)
     valid_permlink(permlink)
     #force copy
@@ -161,8 +179,8 @@ async def get_content(context, author: str, permlink: str, observer=None):
     result = await db.query_all(sql, author=author, permlink=permlink)
     if result:
         result = dict(result[0])
-        post = _condenser_post_object(result, 0, True)
-        post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.ActiveVotes)
+        post = _condenser_post_object(result, 0, fat_node_style)
+        post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.ActiveVotes if fat_node_style else VotesPresentation.CondenserApi)
         if not observer:
             post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
         else:
@@ -174,8 +192,12 @@ async def get_content(context, author: str, permlink: str, observer=None):
 
 @return_error_info
 async def get_content_replies(context, author: str, permlink: str):
-    """Get a list of post objects based on parent."""
     db = context['db']
+    return await _get_content_replies_impl(db, True, author, permlink)
+
+@return_error_info
+async def _get_content_replies_impl(db, fat_node_style, author: str, permlink: str):
+    """Get a list of post objects based on parent."""
     valid_account(author)
     valid_permlink(permlink)
 
@@ -191,7 +213,7 @@ async def get_content_replies(context, author: str, permlink: str):
 
     result = await db.query_all(sql, author=author, permlink=permlink, limit=5000)
 
-    posts = await resultset_to_posts(db=db, resultset=result, truncate_body=0)
+    posts = await resultset_to_posts(db=db, fat_node_style=fat_node_style, resultset=result, truncate_body=0)
     return posts
 
 # Discussion Queries
@@ -286,7 +308,6 @@ async def get_discussions_by(discussion_type, context, start_author: str = '',
         post['active_votes'] = await find_votes_impl(db, post['author'], post['permlink'], VotesPresentation.DatabaseApi )
         post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
         posts.append(post)
-    #posts = await resultset_to_posts(db=db, resultset=result, truncate_body=truncate_body)
     return posts
 
 @return_error_info

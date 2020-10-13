@@ -56,7 +56,14 @@ values
 (now(), '0be8e6e8b2121a8f768113e35e47725856c5da7c'), -- update_hot_and_trending_for_blocks fix, https://gitlab.syncad.com/hive/hivemind/-/merge_requests/247
 (now(), '26c2f1862770178d4575ec09e9f9c225dcf3d206'), -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/252
 (now(), 'e8b65adf22654203f5a79937ff2a95c5c47e10c5'), -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/251
-(now(), '8d0b673e7c40c05d2b8ae74ccf32adcb6b11f906')  -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/265
+(now(), '8d0b673e7c40c05d2b8ae74ccf32adcb6b11f906'), -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/265
+-- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/281
+-- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/282
+-- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/257
+-- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/251
+-- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/265
+-- 
+(now(), '45c2883131472cc14a03fe4e355ba1435020d720')
 ) ds (patch_date, patch_revision)
 where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
 
