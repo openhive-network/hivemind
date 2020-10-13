@@ -1548,41 +1548,6 @@ def setup(db):
     db.query_no_return(sql)
 
     sql = """
-        DROP FUNCTION IF EXISTS public.calculate_notify_vote_score(_payout hive_posts.payout%TYPE, _abs_rshares hive_posts_view.abs_rshares%TYPE, _rshares hive_votes.rshares%TYPE) CASCADE
-        ;
-        CREATE OR REPLACE FUNCTION public.calculate_notify_vote_score(_payout hive_posts.payout%TYPE, _abs_rshares hive_posts_view.abs_rshares%TYPE, _rshares hive_votes.rshares%TYPE)
-        RETURNS INT
-        LANGUAGE 'sql'
-        IMMUTABLE
-        AS $BODY$
-            SELECT CASE
-                WHEN ((( _payout )/_abs_rshares) * 1000 * _rshares < 20 ) THEN -1
-                    ELSE LEAST(100, (LENGTH(CAST( CAST( ( (( _payout )/_abs_rshares) * 1000 * _rshares ) as BIGINT) as text)) - 1) * 25)
-            END;
-        $BODY$;
-    """
-
-    db.query_no_return(sql)
-
-    sql = """
-        DROP FUNCTION IF EXISTS notification_id(in _block_number INTEGER, in _notifyType INTEGER, in _id INTEGER)
-        ;
-        CREATE OR REPLACE FUNCTION notification_id(in _block_number INTEGER, in _notifyType INTEGER, in _id INTEGER)
-        RETURNS BIGINT
-        AS
-        $function$
-        BEGIN
-        RETURN CAST( _block_number as BIGINT ) << 32
-               | ( _notifyType << 16 )
-               | ( _id & CAST( x'00FF' as INTEGER) );
-        END
-        $function$
-        LANGUAGE plpgsql IMMUTABLE
-        ;
-    """
-    db.query_no_return(sql)
-
-    sql = """
         DROP FUNCTION IF EXISTS get_discussion
         ;
         CREATE OR REPLACE FUNCTION get_discussion(
