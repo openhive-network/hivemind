@@ -103,7 +103,7 @@ def build_methods():
         'follow_api.get_followers': condenser_api.get_followers,
         'follow_api.get_following': condenser_api.get_following,
         'follow_api.get_follow_count': condenser_api.get_follow_count,
-        'follow_api.get_account_reputations': condenser_api.get_account_reputations,
+        'follow_api.get_account_reputations': follow_api.get_account_reputations,
         'follow_api.get_blog': condenser_api.get_blog,
         'follow_api.get_blog_entries': condenser_api.get_blog_entries,
         'follow_api.get_reblogged_by': condenser_api.get_reblogged_by,
@@ -114,8 +114,8 @@ def build_methods():
 
     # tags_api aliases
     methods.add(**{
-        'tags_api.get_discussion': condenser_api.get_content,
-        'tags_api.get_content_replies': condenser_api.get_content_replies,
+        'tags_api.get_discussion': tags_api.get_discussion,
+        'tags_api.get_content_replies': tags_api.get_content_replies,
         'tags_api.get_discussions_by_trending': condenser_api.get_discussions_by_trending,
         'tags_api.get_discussions_by_hot': condenser_api.get_discussions_by_hot,
         'tags_api.get_discussions_by_promoted': condenser_api.get_discussions_by_promoted,
