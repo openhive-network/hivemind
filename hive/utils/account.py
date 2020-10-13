@@ -57,14 +57,20 @@ def process_profile(prof):
     website = str(prof['website']) if 'website' in prof else None
     profile_image = str(prof['profile_image']) if 'profile_image' in prof else None
     cover_image = str(prof['cover_image']) if 'cover_image' in prof else None
+    blacklist_description = str(prof['blacklist_description']) if 'blacklist_description' in prof else None
+    muted_list_description = str(prof['muted_list_description']) if 'muted_list_description' in prof else None
 
     name = _char_police(name)
     about = _char_police(about)
     location = _char_police(location)
+    blacklist_description = _char_police(blacklist_description)
+    muted_list_description = _char_police(muted_list_description)
 
     name = trunc(name, 20)
     about = trunc(about, 160)
     location = trunc(location, 30)
+    blacklist_description = trunc(blacklist_description, 256)
+    muted_list_description = trunc(muted_list_description, 256)
 
     if name and name[0:1] == '@':
         name = None
@@ -89,6 +95,8 @@ def process_profile(prof):
         website=website or '',
         profile_image=profile_image or '',
         cover_image=cover_image or '',
+        blacklist_description=blacklist_description or '',
+        muted_list_description=muted_list_description or '',
     )
 
 def safe_db_profile_metadata(posting_json_metadata, json_metadata):

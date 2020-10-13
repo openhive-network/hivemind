@@ -61,10 +61,12 @@ SELECT
   followers,
   lastread_at,
   posting_json_metadata,
-  json_metadata
+  json_metadata,
+  blacklist_description,
+  muted_list_description
 FROM
   hive_accounts ha
-;
+  ;
 
 CREATE OR REPLACE VIEW public.hive_accounts_view
 AS
