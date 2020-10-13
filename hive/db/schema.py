@@ -49,6 +49,8 @@ def build_metadata():
         sa.Column('lastread_at', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('posting_json_metadata', sa.Text),
         sa.Column('json_metadata', sa.Text),
+        sa.Column('blacklist_description', sa.String(256)),
+        sa.Column('muted_list_description', sa.String(256)),
 
         sa.UniqueConstraint('name', name='hive_accounts_ux1'),
         sa.Index('hive_accounts_ix6', 'reputation')
@@ -232,6 +234,7 @@ def build_metadata():
         sa.Column('created_at', sa.DateTime, nullable=False),
         sa.Column('blacklisted', sa.Boolean, nullable=False, server_default='0'),
         sa.Column('follow_blacklists', sa.Boolean, nullable=False, server_default='0'),
+        sa.Column('follow_muted', BOOLEAN, nullable=False, server_default='0'),
         sa.Column('block_num', sa.Integer,  nullable=False ),
 
         sa.UniqueConstraint('following', 'follower', name='hive_follows_ux1'), # core
@@ -722,7 +725,9 @@ def setup(db):
           followers,
           lastread_at,
           posting_json_metadata,
-          json_metadata
+          json_metadata,
+          blacklist_description,
+          muted_list_description
         FROM
           hive_accounts ha
           """
