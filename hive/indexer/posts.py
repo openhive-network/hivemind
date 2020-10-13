@@ -17,6 +17,7 @@ from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.tags import Tags
 from hive.indexer.db_adapter_holder import DbAdapterHolder
+from hive.utils.misc import chunks
 
 from hive.utils.normalize import sbd_amount, legacy_amount, asset_to_hbd_hive, safe_img_url, escape_characters
 
@@ -218,11 +219,6 @@ class Posts(DbAdapterHolder):
               ) as data_source
               WHERE ihp.permlink_id = data_source.permlink_id and ihp.author_id = data_source.author_id
         """
-
-        def chunks(lst, n):
-            """Yield successive n-sized chunks from lst."""
-            for i in range(0, len(lst), n):
-                yield lst[i:i + n]
 
         for chunk in chunks(cls._comment_payout_ops, 1000):
             cls.beginTx()

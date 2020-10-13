@@ -8,6 +8,7 @@ from hive.db.adapter import Db
 from hive.db.db_state import DbState
 from hive.indexer.accounts import Accounts
 from hive.indexer.notify import Notify
+from hive.utils.misc import chunks
 
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 
@@ -84,6 +85,7 @@ class Follow(DbAdapterHolder):
     """Handles processing of incoming follow ups and flushing to db."""
 
     follow_items_to_flush = dict()
+    follow_update_items_to_flush = dict()
 
     @classmethod
     def follow_op(cls, account, op_json, date, block_num):
@@ -92,74 +94,42 @@ class Follow(DbAdapterHolder):
         if not op:
             return
         op['block_num'] = block_num
-        k = '{}/{}'.format(op['flr'], op['flg'])
-
-        if isinstance(op['flg'], list):
-            #Special processing if following is a list, need to figure out how to integrate it with the code below
-            #but i'm in a hurry so I'm taking a bit of a shortcut to get past this blocker for now
-            # [DK] we expect op['flg'] in form [[1],[2],[3],...]
-            for following_id in op['flg']:
-                following_id = following_id[0]
-                k = '{}/{}'.format(op['flr'], following_id)
-                if k in cls.follow_items_to_flush:
-                    cls.follow_items_to_flush[k]['state'] = op['state']
-                else:
-                    cls.follow_items_to_flush[k] = dict(
-                        flr=op['flr'],
-                        flg=following_id,
-                        state=op['state'],
-                        at=op['at'],
-                        block_num=op['block_num'])
-            return
 
         state = op['state']
-        if state > 8:
-            sql = ''
-            sql2 = ''
-            if state == 9:
-                #reset blacklists for follower
-                sql = """UPDATE hive_follows set blacklisted = false where follower = :follower"""
-            elif state == 10:
-                #reset following list for follower
-                sql = """UPDATE hive_follows set state = 0 where follower = :follower AND state = 1"""
-            elif state == 11:
-                #reset all muted list for follower
-                sql = """UPDATE hive_follows set state = 0 where follower = :follower AND state = 2"""
-            elif state == 12:
-                #reset followed blacklists
-                sql = """UPDATE hive_follows set follow_blacklists = false where follower = :follower"""
-                sql2 = """UPDATE hive_follows SET follow_blacklists = true WHERE follower = :follower AND following = (SELECT id FROM hive_accounts WHERE name = 'null')"""
-            elif state == 13:
-                #reset followed mute lists
-                sql = """UPDATE hive_follows set follow_muted = false where follower = :follower"""
-                sql2 = """UPDATE hive_follows SET follow_muted = true WHERE follower = :follower AND following = (SELECT id FROM hive_accounts WHERE name = 'null')"""
-            elif state == 14:
-                #reset all lists
-                sql = """UPDATE hive_follows set blacklisted = false, follow_blacklists = false, follow_muted = false, state = 0 where follower = :follower"""
-                sql2 = """UPDATE hive_follows SET follow_blacklists = true, follow_muted = true WHERE follower = :follower AND following = (SELECT id FROM hive_accounts WHERE name = 'null')"""
 
-            sql = sql + ";" + sql2
-            DB.query(sql, follower=op['flr'])
-            return
+        # [DK] op['flg'] can have a form of a list
+        # [DK] we expect op['flg'] in form [[1],[2],[3],...]
+        if not isinstance(op['flg'], list):
+            op['flg'] = [[op['flg']]]
 
-
-        if k in cls.follow_items_to_flush:
-            cls.follow_items_to_flush[k]['state'] = op['state']
-        else:
-            cls.follow_items_to_flush[k] = dict(
-                flr=op['flr'],
-                flg=op['flg'],
-                state=op['state'],
-                at=op['at'],
-                block_num=op['block_num'])
+        for following_id in op['flg']:
+            following_id = following_id[0]
+            k = '{}/{}'.format(op['flr'], following_id)
+            if k in cls.follow_items_to_flush:
+                cls.follow_items_to_flush[k]['state'] = state
+            else:
+                cls.follow_items_to_flush[k] = dict(
+                    flr=op['flr'],
+                    flg=following_id,
+                    state=state,
+                    at=op['at'],
+                    block_num=op['block_num'])
 
         if not DbState.is_initial_sync():
-            new_state = op['state']
-            old_state = cls._get_follow_db_state(op['flr'], op['flg'])
-            if new_state == 1:
-                Follow.follow(op['flr'], op['flg'])
-            if old_state == 1:
-                Follow.unfollow(op['flr'], op['flg'])
+            for following_id in op['flg']:
+                following_id = following_id[0]
+                new_state = state
+                old_state = cls._get_follow_db_state(op['flr'], following_id)
+                if new_state == 1:
+                    Follow.follow(op['flr'], following_id)
+                if old_state == 1:
+                    Follow.unfollow(op['flr'], following_id)
+
+        if state > 8:
+            if state in cls.follow_update_items_to_flush:
+                cls.follow_update_items_to_flush[state].append(op['flr'])
+            else:
+                cls.follow_update_items_to_flush[state] = [op['flr']]
 
     @classmethod
     def _validated_op(cls, account, op, date):
@@ -300,6 +270,38 @@ class Follow(DbAdapterHolder):
                 cls.db.query(query)
             cls.commitTx()
             cls.follow_items_to_flush.clear()
+
+            for state, update_flush_items in cls.follow_update_items_to_flush.items():
+                for chunk in chunks(update_flush_items, 1000):
+                    sql = None
+                    # [DK] probaly not a bad idea to move that logic to SQL function
+                    if state == 9:
+                        #reset blacklists for follower
+                        sql = """UPDATE hive_follows set blacklisted = false where follower in :follower"""
+                    elif state == 10:
+                        #reset following list for follower
+                        sql = """UPDATE hive_follows set state = 0 where follower in :follower AND state = 1"""
+                    elif state == 11:
+                        #reset all muted list for follower
+                        sql = """UPDATE hive_follows set state = 0 where follower in :follower AND state = 2"""
+                    elif state == 12:
+                        #reset followed blacklists
+                        sql = """UPDATE hive_follows set follow_blacklists = false where follower in :follower;"""
+                        sql = sql + """UPDATE hive_follows SET follow_blacklists = true WHERE follower in :follower AND following = (SELECT id FROM hive_accounts WHERE name = 'null')"""
+                    elif state == 13:
+                        #reset followed mute lists
+                        sql = """UPDATE hive_follows set follow_muted = false where follower in :follower;"""
+                        sql = sql + """UPDATE hive_follows SET follow_muted = true WHERE follower in :follower AND following = (SELECT id FROM hive_accounts WHERE name = 'null')"""
+                    elif state == 14:
+                        #reset all lists
+                        sql = """UPDATE hive_follows set blacklisted = false, follow_blacklists = false, follow_muted = false, state = 0 where follower in :follower;"""
+                        sql = sql + """UPDATE hive_follows SET follow_blacklists = true, follow_muted = true WHERE follower in :follower AND following = (SELECT id FROM hive_accounts WHERE name = 'null')"""
+                    if sql is not None:
+                        cls.beginTx()
+                        DB.query(sql, follower=tuple(chunk))
+                        cls.commitTx()
+                    n += len(chunk)
+            cls.follow_update_items_to_flush.clear()
         return n
 
     @classmethod
