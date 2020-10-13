@@ -188,7 +188,8 @@ async def _get_content_impl(db, fat_node_style, author: str, permlink: str, obse
             post['active_votes'] = _mute_votes(post['active_votes'], blacklists_for_user.keys())
 
     if post is None:
-      post = _condenser_post_object(result, 0, fat_node_style, False) #generate empty pattern
+        post = _condenser_post_object(result, 0, fat_node_style, False) #generate empty pattern
+        post['active_votes'] = []
 
     return post
 
