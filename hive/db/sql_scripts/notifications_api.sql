@@ -41,7 +41,7 @@ END
 $BODY$
 ;
 
-DROP FUNCTION account_notifications;
+DROP FUNCTION IF EXISTS account_notifications;
 
 CREATE OR REPLACE FUNCTION public.account_notifications(
   _account character varying,
