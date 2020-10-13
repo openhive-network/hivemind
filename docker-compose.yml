@@ -20,6 +20,7 @@ services:
       context: ./postgres/docker
       dockerfile: Dockerfile
     image: hivemind:postgres
+    container_name: $POSTGRES_NAME
     user: 1000:1000
     command: >
       bash -c "
@@ -44,7 +45,7 @@ services:
       dockerfile: Dockerfile
     command: bash -c "run_hivemind.sh sync"
     environment:
-      POSTGRES_IP: postgres-db
+      POSTGRES_IP: $POSTGRES_NAME
       POSTGRES_USER: $POSTGRES_USER
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
       POSTGRES_PORT: $POSTGRES_PORT
@@ -66,7 +67,7 @@ services:
         run_hivemind.sh sync_and_server
       "
     environment:
-      POSTGRES_IP: postgres-db
+      POSTGRES_IP: $POSTGRES_NAME
       POSTGRES_USER: $POSTGRES_USER
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
       POSTGRES_PORT: $POSTGRES_PORT
