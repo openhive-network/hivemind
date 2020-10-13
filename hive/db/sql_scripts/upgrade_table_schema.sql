@@ -159,3 +159,45 @@ CREATE INDEX IF NOT EXISTS hive_posts_payout_plus_pending_payout_id ON hive_post
 
 INSERT INTO hive_tag_data (id, tag) VALUES (0, '')
 ON CONFLICT DO NOTHING;
+
+--- updated to f2e5f656a421eb1dd71328a94a421934eda27a87 - See MR https://gitlab.syncad.com/hive/hivemind/-/merge_requests/275
+DO
+$BODY$
+BEGIN
+IF NOT EXISTS(SELECT data_type
+              FROM information_schema.columns
+              WHERE table_name = 'hive_accounts' AND column_name = 'blacklist_description') THEN
+    RAISE NOTICE 'Performing hive_accounts upgrade - adding new columns: blacklist_description and muted_list_description';
+    PERFORM deps_save_and_drop_dependencies('public', 'hive_accounts', true);
+    alter table ONlY hive_accounts
+      add column blacklist_description VARCHAR(256),
+      add column muted_list_description VARCHAR(256);
+
+    perform deps_restore_dependencies('public', 'hive_accounts');
+ELSE
+  RAISE NOTICE 'hive_accounts::blacklist_description, muted_list_description migration skipped';
+END IF;
+
+IF NOT EXISTS(SELECT data_type
+              FROM information_schema.columns
+              WHERE table_name = 'hive_follows' AND column_name = 'follow_muted') THEN
+    RAISE NOTICE 'Performing hive_follows upgrade - adding new column follow_muted';
+    PERFORM deps_save_and_drop_dependencies('public', 'hive_follows', true);
+    alter table ONLY hive_follows
+      add column follow_muted boolean,
+      alter column follow_muted set default False;
+  
+    --- Fill the default value for all existing records.
+    update hive_follows set follow_muted = False;
+  
+    alter table ONlY hive_follows
+      alter column follow_muted set not null;
+  
+    perform deps_restore_dependencies('public', 'hive_follows');
+ELSE
+  RAISE NOTICE 'hive_follows::follow_muted migration skipped';
+END IF;
+
+END
+$BODY$;
+

@@ -5,6 +5,7 @@ from time import perf_counter as perf
 from collections import OrderedDict
 from funcy.seqs import first
 import sqlalchemy
+import os
 
 from hive.utils.stats import Stats
 
@@ -56,9 +57,15 @@ class Db:
     def engine(self):
         """Lazy-loaded SQLAlchemy engine."""
         if not self._engine:
+            pool_size = os.cpu_count()
+            if pool_size > 5:
+                pool_size = pool_size - 1
+            else:
+                pool_size = 5
             self._engine = sqlalchemy.create_engine(
                 self._url,
                 isolation_level="READ UNCOMMITTED", # only supported in mysql
+                pool_size=pool_size,
                 pool_recycle=3600,
                 echo=False)
         return self._engine
