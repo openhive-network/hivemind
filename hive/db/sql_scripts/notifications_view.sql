@@ -11,11 +11,42 @@ CREATE OR REPLACE VIEW public.hive_accounts_rank_view
             WHEN rank."position" < 100000 THEN 30
             ELSE 20
         END AS score
-FROM 
+FROM
 ( SELECT ha2.id,
          rank() OVER (ORDER BY ha2.reputation DESC) AS "position"
   FROM hive_accounts ha2
 ) rank
+;
+
+DROP FUNCTION IF EXISTS public.calculate_notify_vote_score(_payout hive_posts.payout%TYPE, _abs_rshares hive_posts_view.abs_rshares%TYPE, _rshares hive_votes.rshares%TYPE) CASCADE
+;
+CREATE OR REPLACE FUNCTION public.calculate_notify_vote_score(_payout hive_posts.payout%TYPE, _abs_rshares hive_posts_view.abs_rshares%TYPE, _rshares hive_votes.rshares%TYPE)
+RETURNS INT
+LANGUAGE 'sql'
+IMMUTABLE
+AS $BODY$
+    SELECT CASE
+        WHEN ((( _payout )/_abs_rshares) * 1000 * _rshares < 20 ) THEN -1
+            ELSE LEAST(100, (LENGTH(CAST( CAST( ( (( _payout )/_abs_rshares) * 1000 * _rshares ) as BIGINT) as text)) - 1) * 25)
+    END;
+$BODY$;
+
+
+
+
+DROP FUNCTION IF EXISTS notification_id CASCADE;
+;
+CREATE OR REPLACE FUNCTION notification_id(in _block_number INTEGER, in _notifyType INTEGER, in _id INTEGER)
+RETURNS BIGINT
+AS
+$function$
+BEGIN
+RETURN CAST( _block_number as BIGINT ) << 32
+       | ( _notifyType << 16 )
+       | ( _id & CAST( x'0000FFFF' as INTEGER) );
+END
+$function$
+LANGUAGE plpgsql IMMUTABLE
 ;
 
 -- View: public.hive_raw_notifications_as_view
@@ -191,4 +222,3 @@ FROM
   SELECT * FROM hive_raw_notifications_view_noas
   ) as notifs
 WHERE notifs.block_num >= block_before_head( '90 days' ) AND notifs.score >= 0;
-
