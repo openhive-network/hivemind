@@ -175,91 +175,96 @@ def _condenser_account_object(row):
                         'profile_image': profile['profile_image'],
                        }})}
 
-def _condenser_post_object(row, truncate_body=0, get_content_additions=False):
+def _condenser_post_object(row, truncate_body=0, get_content_additions=False, post_exists=True):
     """Given a hive_posts row, create a legacy-style post object."""
-    paid = row['is_paidout']
+    date_default = '1970-01-01T00:00:00'
+
+    #Either has to be data('row') retrieved from database or allowing that empty pattern('post_exists') is generated
+    assert ( row is not None ) or ( not post_exists ), "incorrect call of '_condenser_post_object'"
+
+    paid = row['is_paidout'] if post_exists else False
 
     # condenser#3424 mitigation
-    if not row['category']:
+    if post_exists and not row['category']:
         row['category'] = 'undefined'
 
-    full_payout = row['pending_payout'] + row['payout'];
+    full_payout = (row['pending_payout'] + row['payout']) if post_exists else _amount(0)
     post = {}
-    post['author'] = row['author']
-    post['permlink'] = row['permlink']
-    post['category'] = row['category']
+    post['author']    = row['author']       if post_exists else ''
+    post['permlink']  = row['permlink']     if post_exists else ''
+    post['category']  = row['category']     if post_exists else ''
 
-    post['title'] = row['title']
-    post['body'] = row['body'][0:truncate_body] if truncate_body else row['body']
-    post['json_metadata'] = row['json']
+    post['title']         = row['title']                                                        if post_exists else ''
+    post['body']          = ( row['body'][0:truncate_body] if truncate_body else row['body'] )  if post_exists else ''
+    post['json_metadata'] = row['json']                                                         if post_exists else ''
 
-    post['created'] = json_date(row['created_at'])
-    post['last_update'] = json_date(row['updated_at'])
-    post['depth'] = row['depth']
-    post['children'] = row['children']
+    post['created']     = json_date(row['created_at'])  if post_exists else date_default
+    post['last_update'] = json_date(row['updated_at'])  if post_exists else date_default
+    post['depth']       = row['depth']                  if post_exists else 0
+    post['children']    = row['children']               if post_exists else 0
 
-    post['last_payout'] = json_date(row['payout_at'] if paid else None)
-    post['cashout_time'] = json_date(None if paid else row['payout_at'])
+    post['last_payout']   = ( json_date(row['payout_at'] if paid else None) ) if post_exists else date_default
+    post['cashout_time']  = ( json_date(None if paid else row['payout_at']) ) if post_exists else date_default
 
-    post['total_payout_value'] = _amount(row['payout'] if paid else 0)
-    post['curator_payout_value'] = _amount(0)
+    post['total_payout_value']    = _amount((row['payout'] if paid else 0) if post_exists else 0)
+    post['curator_payout_value']  = _amount(0)
 
-    post['pending_payout_value'] = _amount(0 if paid else full_payout)
-    post['promoted'] = _amount(row['promoted'])
+    post['pending_payout_value']  = _amount(  (0 if paid else full_payout)  if post_exists else 0)
+    post['promoted']              = _amount(  row['promoted']               if post_exists else 0)
 
     post['replies'] = []
-    post['body_length'] = len(row['body'])
-    post['author_reputation'] = row['author_rep']
+    post['body_length']       = len(row['body'])  if post_exists else 0
+    post['author_reputation'] = row['author_rep'] if post_exists else 0
 
-    post['parent_author'] = row['parent_author']
-    post['parent_permlink'] = row['parent_permlink_or_category']
+    post['parent_author']   = row['parent_author']                if post_exists else ''
+    post['parent_permlink'] = row['parent_permlink_or_category']  if post_exists else ''
 
-    post['url'] = row['url']
-    post['root_title'] = row['root_title']
-    post['beneficiaries'] = row['beneficiaries']
-    post['max_accepted_payout'] = row['max_accepted_payout']
-    post['percent_hbd'] = row['percent_hbd']
+    post['url']                 = row['url']                  if post_exists else ''
+    post['root_title']          = row['root_title']           if post_exists else ''
+    post['beneficiaries']       = row['beneficiaries']        if post_exists else []
+    post['max_accepted_payout'] = row['max_accepted_payout']  if post_exists else _amount(0)
+    post['percent_hbd']         = row['percent_hbd']          if post_exists else 0
 
     if get_content_additions:
-        post['id'] = row['id'] # let's be compatible with old code until this API is supported.
-        post['active'] = json_date(row['active'])
-        post['author_rewards'] = row['author_rewards']
-        post['max_cashout_time'] = json_date(None) # ABW: only relevant up to HF17, timestamp::max for all posts later (and also all paid) 
-        curator_payout = sbd_amount(row['curator_payout_value'])
-        post['curator_payout_value'] = _amount(curator_payout)
-        post['total_payout_value'] = _amount(row['payout'] - curator_payout)
+        post['id']                    = row['id']                                 if post_exists else 0# let's be compatible with old code until this API is supported.
+        post['active']                = json_date(row['active'])                  if post_exists else date_default
+        post['author_rewards']        = row['author_rewards']                     if post_exists else 0
+        post['max_cashout_time']      = json_date(None)                           if post_exists else date_default# ABW: only relevant up to HF17, timestamp::max for all posts later (and also all paid) 
+        curator_payout                = sbd_amount(row['curator_payout_value'])   if post_exists else _amount(0)
+        post['curator_payout_value']  = _amount(curator_payout                    if post_exists else 0)
+        post['total_payout_value']    = _amount((row['payout'] - curator_payout)  if post_exists else 0)
 
-        post['reward_weight'] = 10000
+        post['reward_weight']           = 10000                         if post_exists else 0
 
-        post['root_author'] = row['root_author']
-        post['root_permlink'] = row['root_permlink']
+        post['root_author']             = row['root_author']            if post_exists else ''
+        post['root_permlink']           = row['root_permlink']          if post_exists else ''
 
-        post['allow_replies'] = row['allow_replies']
-        post['allow_votes'] = row['allow_votes']
-        post['allow_curation_rewards'] = row['allow_curation_rewards']
-        post['reblogged_by'] = []
-        post['net_votes'] = row['net_votes']
+        post['allow_replies']           = row['allow_replies']          if post_exists else False
+        post['allow_votes']             = row['allow_votes']            if post_exists else False
+        post['allow_curation_rewards']  = row['allow_curation_rewards'] if post_exists else False
+        post['reblogged_by']            = []
+        post['net_votes']               = row['net_votes']              if post_exists else 0
 
-        post['children_abs_rshares'] = 0    # see: hive/server/database_api/objects.py:68
-        post['total_pending_payout_value'] = '0.000 HBD'      # no data
+        post['children_abs_rshares']        = 0 # see: hive/server/database_api/objects.py:68
+        post['total_pending_payout_value']  = '0.000 HBD' # no data
 
-        if paid:
+        if paid or not post_exists:
             post['total_vote_weight'] = 0
-            post['vote_rshares'] = 0
-            post['net_rshares'] = 0
-            post['abs_rshares'] = 0
+            post['vote_rshares']      = 0
+            post['net_rshares']       = 0
+            post['abs_rshares']       = 0
         else:
             post['total_vote_weight'] = row['total_vote_weight']
-            post['vote_rshares'] = ( row['rshares'] + row['abs_rshares'] ) // 2
-            post['net_rshares'] = row['rshares']
-            post['abs_rshares'] = row['abs_rshares']
+            post['vote_rshares']      = ( row['rshares'] + row['abs_rshares'] ) // 2
+            post['net_rshares']       = row['rshares']
+            post['abs_rshares']       = row['abs_rshares']
     else:
-        post['post_id'] = row['id']
-        post['net_rshares'] = row['rshares']
+        post['post_id']               = row['id']       if post_exists else 0
+        post['net_rshares']           = row['rshares']  if post_exists else 0
         if paid:
-            curator_payout = sbd_amount(row['curator_payout_value'])
+            curator_payout = sbd_amount(row['curator_payout_value'])              if post_exists else _amount(0)
             post['curator_payout_value'] = _amount(curator_payout)
-            post['total_payout_value'] = _amount(row['payout'] - curator_payout)
+            post['total_payout_value'] = _amount((row['payout'] - curator_payout) if post_exists else 0)
 
     return post
 

@@ -187,7 +187,9 @@ async def _get_content_impl(db, fat_node_style, author: str, permlink: str, obse
             blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
             post['active_votes'] = _mute_votes(post['active_votes'], blacklists_for_user.keys())
 
-    assert post, 'post was not found in cache'
+    if post is None:
+      post = _condenser_post_object(result, 0, fat_node_style, False) #generate empty pattern
+
     return post
 
 @return_error_info
