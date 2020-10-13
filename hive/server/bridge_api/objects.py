@@ -196,6 +196,8 @@ def _bridge_profile_object(row):
                         'location': profile['location'],
                         'cover_image': profile['cover_image'],
                         'profile_image': profile['profile_image'],
+                        'blacklist_description': row['blacklist_description'] or "",
+                        'muted_list_description': row['muted_list_description'] or ""
                        }}}
 
 def _bridge_post_object(row, truncate_body=0):
