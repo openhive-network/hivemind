@@ -42,8 +42,8 @@ async def load_posts_keyed(db, ids, truncate_body=0):
     # fetch posts and associated author reps
     sql = """
     SELECT hp.id,
-        hp.community_id,
         hp.author,
+        hp.author_rep,
         hp.permlink,
         hp.title,
         hp.body,
@@ -56,7 +56,6 @@ async def load_posts_keyed(db, ids, truncate_body=0):
         hp.is_paidout,
         hp.children,
         hp.votes,
-        hp.active_votes,
         hp.created_at,
         hp.updated_at,
         hp.rshares,
@@ -81,13 +80,11 @@ async def load_posts_keyed(db, ids, truncate_body=0):
     WHERE hp.id IN :ids"""
 
     result = await db.query_all(sql, ids=tuple(ids))
-    author_reps = await _query_author_rep_map(db, result)
 
     muted_accounts = Mutes.all()
     posts_by_id = {}
     for row in result:
         row = dict(row)
-        row['author_rep'] = author_reps[row['author']]
         post = _condenser_post_object(row, truncate_body=truncate_body)
 
         post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
@@ -130,28 +127,6 @@ async def load_posts(db, ids, truncate_body=0):
                 log.info("requested deleted post: %s", dict(post))
 
     return [posts_by_id[_id] for _id in ids]
-
-async def resultset_to_posts(db, fat_node_style, resultset, truncate_body=0):
-    author_reps = await _query_author_rep_map(db, resultset)
-    muted_accounts = Mutes.all()
-
-    posts = []
-    for row in resultset:
-        row = dict(row)
-        row['author_rep'] = author_reps[row['author']]
-        post = _condenser_post_object(row, truncate_body=truncate_body, get_content_additions=fat_node_style)
-        post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.ActiveVotes if fat_node_style else VotesPresentation.CondenserApi)
-        posts.append(post)
-
-    return posts
-
-async def _query_author_rep_map(db, posts):
-    """Given a list of posts, returns an author->reputation map."""
-    if not posts:
-        return {}
-    names = tuple({post['author'] for post in posts})
-    sql = "SELECT name, reputation FROM hive_accounts WHERE name IN :names"
-    return {r['name']: r['reputation'] for r in await db.query_all(sql, names=names)}
 
 def _condenser_account_object(row):
     """Convert an internal account record into legacy-steemd style."""
