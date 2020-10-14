@@ -16,6 +16,9 @@ class ApiError(Exception):
     # pylint: disable=unnecessary-pass
     pass
 
+# values -32768..-32000 are reserved
+ACCESS_TO_DELETED_POST_ERROR_CODE = -31999
+
 def return_error_info(function):
     """Async API method decorator which catches and formats exceptions."""
     @wraps(function)
@@ -26,7 +29,7 @@ def return_error_info(function):
         except (RaiseException) as e:
             msg = e.diag.message_primary
             if 'was deleted' in msg:
-                raise RPCApiError('Invalid parameters',-32199,msg) # deleted post
+                raise RPCApiError('Invalid parameters', ACCESS_TO_DELETED_POST_ERROR_CODE, msg)
             else:
                 raise AssertionError(msg)
         except (ApiError, AssertionError, TypeError, Exception) as e:
