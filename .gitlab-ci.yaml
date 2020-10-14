@@ -301,7 +301,7 @@ bridge_api_smoketest_report:
   <<: *common_api_reports
 
   script:
-    - scripts/xml_report_parser.py api_smoketest_bridge.xml
+    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/bridge_api_patterns/ api_smoketest_bridge.xml
 
   artifacts:
     when: always
@@ -312,7 +312,7 @@ bridge_api_smoketest_negative_report:
   <<: *common_api_reports
 
   script:
-    - scripts/xml_report_parser.py api_smoketest_bridge_negative.xml
+    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/bridge_api_negative/ api_smoketest_bridge_negative.xml
 
   artifacts:
     when: always
@@ -323,7 +323,7 @@ condenser_api_smoketest_report:
   <<: *common_api_reports
 
   script:
-    - scripts/xml_report_parser.py api_smoketest_condenser_api.xml
+    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/condenser_api_patterns/ api_smoketest_condenser_api.xml
 
   artifacts:
     when: always
@@ -334,7 +334,7 @@ condenser_api_smoketest_negative_report:
   <<: *common_api_reports
 
   script:
-    - scripts/xml_report_parser.py api_smoketest_condenser_api_negative.xml
+    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/condenser_api_negative/ api_smoketest_condenser_api_negative.xml
 
   artifacts:
     when: always
@@ -345,7 +345,7 @@ database_api_smoketest_report:
   <<: *common_api_reports
 
   script:
-    - scripts/xml_report_parser.py api_smoketest_database_api.xml
+    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/database_api_patterns/ api_smoketest_database_api.xml
 
   artifacts:
     when: always
@@ -356,7 +356,7 @@ database_api_smoketest_negative_report:
   <<: *common_api_reports
 
   script:
-    - scripts/xml_report_parser.py api_smoketest_database_api_negative.xml
+    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/database_api_negative/ api_smoketest_database_api_negative.xml
 
   artifacts:
     when: always
@@ -367,7 +367,7 @@ follow_api_smoketest_report:
   <<: *common_api_reports
 
   script:
-    - scripts/xml_report_parser.py api_smoketest_follow_api.xml
+    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/follow_api_patterns/ api_smoketest_follow_api.xml
 
   artifacts:
     when: always
@@ -378,7 +378,7 @@ follow_api_smoketest_negative_report:
   <<: *common_api_reports
 
   script:
-    - scripts/xml_report_parser.py api_smoketest_follow_api_negative.xml
+    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/follow_api_negative/ api_smoketest_follow_api_negative.xml
 
   artifacts:
     when: always
@@ -389,7 +389,7 @@ tags_api_smoketest_report:
   <<: *common_api_reports
 
   script:
-    - scripts/xml_report_parser.py api_smoketest_tags_api.xml
+    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/tags_api_patterns/ api_smoketest_tags_api.xml
 
   artifacts:
     when: always
@@ -400,7 +400,7 @@ tags_api_smoketest_negative_report:
   <<: *common_api_reports
 
   script:
-    - scripts/xml_report_parser.py api_smoketest_tags_api_negative.xml
+    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/tags_api_negative/ api_smoketest_tags_api_negative.xml
 
   artifacts:
     when: always
