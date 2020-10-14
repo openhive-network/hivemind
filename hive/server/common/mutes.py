@@ -64,7 +64,13 @@ class Mutes:
 
     def load(self):
         """Reload all accounts from irredeemables endpoint and global lists."""
-        # TODO: Refactor/remove this method
+        self.all_accounts.clear()
+        sql = "select id, name from hive_accounts"
+        db = Db.instance()
+        sql_result = db.query_all(sql)
+        for row in sql_result:
+            self.all_accounts[row['id']] = row['name']
+        self.fetched = perf()
 
     @classmethod
     def all(cls):
