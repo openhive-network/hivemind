@@ -5,8 +5,6 @@ import os
 from sys import exit
 from json import dumps
 
-TIME_TRESHOLD = 1.
-
 def get_request_from_yaml(path_to_yaml):
     import yaml
     yaml_document = None
@@ -47,6 +45,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("path_to_test_dir", type = str, help = "Path to test directory for given xml file")
     parser.add_argument("xml_file", type = str, help = "Path to report file in xml format")
+    parser.add_argument("--time-threshold", dest="time_threshold", type=float, default=1.0, help="Time threshold for test execution time, tests with execution time greater than threshold will be marked on red.")
     args = parser.parse_args()
     html_file, _ = os.path.splitext(args.xml_file)
     html_file += ".html"
@@ -71,7 +70,7 @@ if __name__ == '__main__':
         tests_collection = document.documentElement
         for test in tests_collection.getElementsByTagName("testcase"):
             if test.hasAttribute("name") and test.hasAttribute("time"):
-                if float(test.getAttribute("time")) > TIME_TRESHOLD:
+                if float(test.getAttribute("time")) > args.time_threshold:
                     ofile.write("      <tr><td>{}<br/>Parameters: {}</td><td bgcolor=\"red\">{}</td></tr>\n".format(test.getAttribute("name"), get_request_from_yaml(class_to_path(test.getAttribute("classname"), class_to_path_dic)), test.getAttribute("time")))
                     above_treshold = True
                 else:
