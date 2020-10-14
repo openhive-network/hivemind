@@ -85,6 +85,15 @@ class Follow(DbAdapterHolder):
     """Handles processing of incoming follow ups and flushing to db."""
 
     follow_items_to_flush = dict()
+
+    # [DK] this dictionary will hold data for table update operations
+    # since for each status update query is different we will group
+    # follower id per status:
+    # {
+    #   state_number_1 : [follower_id_1, follower_id_2, ...]
+    #   state_number_2 : [follower_id_3, follower_id_4, ...]
+    # }
+    # we will use this dict later to perform batch updates
     follow_update_items_to_flush = dict()
 
     @classmethod
@@ -126,6 +135,9 @@ class Follow(DbAdapterHolder):
                     Follow.unfollow(op['flr'], following_id)
 
         if state > 8:
+            # check if given state exists in dict
+            # if exists add follower to a list for a given state
+            # if not exists create list and set that list for given state
             if state in cls.follow_update_items_to_flush:
                 cls.follow_update_items_to_flush[state].append(op['flr'])
             else:
@@ -271,6 +283,12 @@ class Follow(DbAdapterHolder):
             cls.commitTx()
             cls.follow_items_to_flush.clear()
 
+            # process follow_update_items_to_flush dictionary
+            # .items() will return list of tuples: [(state_number, [list of follower ids]), ...]
+            # for each state get list of follower_id and make update query
+            # for that list, if list size is greater than 1000 it will be divided
+            # to chunks of 1000
+            #
             for state, update_flush_items in cls.follow_update_items_to_flush.items():
                 for chunk in chunks(update_flush_items, 1000):
                     sql = None
