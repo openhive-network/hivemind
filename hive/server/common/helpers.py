@@ -7,6 +7,7 @@ import logging
 import datetime
 from dateutil.relativedelta import relativedelta
 from psycopg2.errors import RaiseException
+from jsonrpcserver.exceptions import ApiError as RPCApiError
 
 log = logging.getLogger(__name__)
 
@@ -19,12 +20,15 @@ def return_error_info(function):
     """Async API method decorator which catches and formats exceptions."""
     @wraps(function)
     async def wrapper(*args, **kwargs):
-        """Catch ApiError and AssersionError (always due to user error)."""
+        """Catch ApiError and AssertionError (always due to user error)."""
         try:
             return await function(*args, **kwargs)
         except (RaiseException) as e:
-            log.error("PGSQL: %s\n%s", repr(e), traceback.format_exc())
-            raise AssertionError(e.diag.message_primary)
+            msg = e.diag.message_primary
+            if 'was deleted' in msg:
+                raise RPCApiError('Invalid parameters',-32199,msg) # deleted post
+            else:
+                raise AssertionError(msg)
         except (ApiError, AssertionError, TypeError, Exception) as e:
             if isinstance(e, KeyError):
                 #TODO: KeyError overloaded for method not found. Any KeyErrors
