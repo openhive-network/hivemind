@@ -3,6 +3,7 @@
 import logging
 from time import perf_counter as perf
 from urllib.request import urlopen, Request
+from hive.db.adapter import Db
 
 log = logging.getLogger(__name__)
 
