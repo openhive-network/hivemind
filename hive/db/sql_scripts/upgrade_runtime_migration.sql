@@ -77,6 +77,12 @@ values
 (now(), '7cfc2b90a01b32688075b22a6ab173f210fc770f'), -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/286
 (now(), 'f2e5f656a421eb1dd71328a94a421934eda27a87')  -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/275
 ,(now(), '4cdf5d19f6cfcb73d3fa504cac9467c4df31c02e') -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/295
+--- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/294
+--- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/298
+--- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/301
+--- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/297
+--- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/302
+,(now(), '166327bfa87beda588b20bfcfa574389f4100389')
 ) ds (patch_date, patch_revision)
 where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
 

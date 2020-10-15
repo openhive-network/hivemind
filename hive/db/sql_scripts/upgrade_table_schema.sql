@@ -154,8 +154,11 @@ where not exists (select null from hive_db_patch_level where patched_to_revision
 
 -- updated to e8b65adf22654203f5a79937ff2a95c5c47e10c5 - See merge request hive/hivemind!251
 
-CREATE INDEX IF NOT EXISTS hive_posts_is_paidout_idx ON hive_posts (is_paidout);
-CREATE INDEX IF NOT EXISTS hive_posts_payout_plus_pending_payout_id ON hive_posts ((payout+pending_payout), id);
+-- COMMENTED OUT DUE TO MRs:processed below.
+--- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/298
+--- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/302
+--CREATE INDEX IF NOT EXISTS hive_posts_is_paidout_idx ON hive_posts (is_paidout);
+--CREATE INDEX IF NOT EXISTS hive_posts_payout_plus_pending_payout_id ON hive_posts ((payout+pending_payout), id);
 
 INSERT INTO hive_tag_data (id, tag) VALUES (0, '')
 ON CONFLICT DO NOTHING;
@@ -208,3 +211,16 @@ select 'update_hive_post_mentions refill execution'
 where not exists (select null from hive_db_patch_level where patched_to_revision = '4cdf5d19f6cfcb73d3fa504cac9467c4df31c02e' )
 ;
 
+--- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/298
+
+DROP INDEX IF EXISTS hive_posts_is_paidout_idx;
+DROP INDEX IF EXISTS hive_posts_sc_trend_id_idx;
+DROP INDEX IF EXISTS hive_posts_sc_hot_id_idx;
+
+CREATE INDEX IF NOT EXISTS hive_posts_sc_trend_id_is_paidout_idx ON hive_posts(sc_trend, id, is_paidout );
+CREATE INDEX IF NOT EXISTS hive_posts_sc_hot_id_is_paidout_idx ON hive_posts(sc_hot, id, is_paidout );
+
+--- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/302
+
+DROP INDEX IF EXISTS hive_posts_payout_plus_pending_payout_id;
+CREATE INDEX IF NOT EXISTS hive_posts_payout_plus_pending_payout_id_is_paidout_idx ON hive_posts ((payout+pending_payout), id, is_paidout);
