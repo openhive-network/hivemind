@@ -138,7 +138,7 @@ async def get_state(context, path: str):
         sort = valid_sort(part[0])
         tag = valid_tag(part[1].lower(), allow_empty=True)
         pids = await get_posts_by_given_sort(context, sort, '', '', 20, tag)
-        state['content'] = _keyed_posts(await load_posts(db, pids))
+        state['content'] = _keyed_posts(pids)
         state['discussion_idx'] = {tag: {sort: list(state['content'].keys())}}
         state['tag_idx'] = {'trending': await get_top_trending_tags_summary(context)}
 

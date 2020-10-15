@@ -247,13 +247,25 @@ async def get_posts_by_given_sort(context, sort: str, start_author: str = '', st
     posts = []
    
     if sort == 'created':
-      sql = "SELECT * FROM condenser_get_discussions_by_created( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      if tag == '':
+        sql = "SELECT * FROM condenser_get_discussions_by_created_with_empty_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      else:
+        sql = "SELECT * FROM condenser_get_discussions_by_created( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'trending':
-      sql = "SELECT * FROM condenser_get_discussions_by_trending( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      if tag == '':
+        sql = "SELECT * FROM condenser_get_discussions_by_trending_with_empty_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      else:
+        sql = "SELECT * FROM condenser_get_discussions_by_trending( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'hot':
-      sql = "SELECT * FROM condenser_get_discussions_by_hot( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      if tag == '':
+        sql = "SELECT * FROM condenser_get_discussions_by_hot_with_empty_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      else:
+        sql = "SELECT * FROM condenser_get_discussions_by_hot( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'promoted':
-      sql = "SELECT * FROM condenser_get_discussions_by_promoted( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      if tag == '':
+        sql = "SELECT * FROM condenser_get_discussions_by_promoted_with_empty_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      else:
+        sql = "SELECT * FROM condenser_get_discussions_by_promoted( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'post_by_payout':
       sql = "SELECT * FROM condenser_get_post_discussions_by_payout( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'comment_by_payout':
