@@ -1,4 +1,3 @@
-
 DROP FUNCTION IF EXISTS find_comment_id(character varying, character varying, boolean)
 ;
 CREATE OR REPLACE FUNCTION find_comment_id(
@@ -10,25 +9,35 @@ LANGUAGE 'plpgsql'
 AS
 $function$
 DECLARE
-  post_id INT = 0;
+  __post_id INT = 0;
 BEGIN
   IF (_author <> '' OR _permlink <> '') THEN
-    SELECT INTO post_id COALESCE( (
+    SELECT INTO __post_id COALESCE( (
       SELECT hp.id
       FROM hive_posts hp
       JOIN hive_accounts ha ON ha.id = hp.author_id
       JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
       WHERE ha.name = _author AND hpd.permlink = _permlink AND hp.counter_deleted = 0
     ), 0 );
-    IF _check AND post_id = 0 THEN
-      RAISE EXCEPTION 'Post %/% does not exist', _author, _permlink;
+    IF _check AND __post_id = 0 THEN
+      SELECT INTO __post_id (
+        SELECT COUNT(hp.id)
+        FROM hive_posts hp
+        JOIN hive_accounts ha ON ha.id = hp.author_id
+        JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
+        WHERE ha.name = _author AND hpd.permlink = _permlink
+      );
+      IF __post_id = 0 THEN
+        RAISE EXCEPTION 'Post %/% does not exist', _author, _permlink;
+      ELSE
+        RAISE EXCEPTION 'Post %/% was deleted % time(s)', _author, _permlink, __post_id;
+      END IF;
     END IF;
   END IF;
-  RETURN post_id;
+  RETURN __post_id;
 END
 $function$
 ;
-
 DROP FUNCTION IF EXISTS find_votes( character varying, character varying, int )
 ;
 CREATE OR REPLACE FUNCTION public.find_votes

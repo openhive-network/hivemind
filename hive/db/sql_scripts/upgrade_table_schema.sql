@@ -201,3 +201,10 @@ END IF;
 END
 $BODY$;
 
+--- 4cdf5d19f6cfcb73d3fa504cac9467c4df31c02e - https://gitlab.syncad.com/hive/hivemind/-/merge_requests/295
+
+INSERT INTO hive_db_data_migration 
+select 'update_hive_post_mentions refill execution'
+where not exists (select null from hive_db_patch_level where patched_to_revision = '4cdf5d19f6cfcb73d3fa504cac9467c4df31c02e' )
+;
+

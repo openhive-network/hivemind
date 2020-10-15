@@ -3,7 +3,7 @@ from json import loads
 from functools import wraps
 
 import hive.server.condenser_api.cursor as cursor
-from hive.server.condenser_api.objects import load_posts, load_posts_reblogs, resultset_to_posts
+from hive.server.condenser_api.objects import load_posts, load_posts_reblogs
 from hive.server.condenser_api.objects import _mute_votes, _condenser_post_object
 from hive.server.common.helpers import (
     ApiError,
@@ -23,23 +23,24 @@ from hive.utils.normalize import time_string_with_t
 SQL_TEMPLATE = """
     SELECT
         hp.id,
-        hp.community_id,
         hp.author,
         hp.permlink,
+        hp.author_rep,
         hp.title,
         hp.body,
         hp.category,
         hp.depth,
         hp.promoted,
         hp.payout,
-        hp.last_payout_at,
-        hp.cashout_time,
+        hp.pending_payout,
+        hp.payout_at,
         hp.is_paidout,
         hp.children,
         hp.votes,
         hp.created_at,
         hp.updated_at,
         hp.rshares,
+        hp.abs_rshares,
         hp.json,
         hp.is_hidden,
         hp.is_grayed,
@@ -59,13 +60,8 @@ SQL_TEMPLATE = """
         hp.beneficiaries,
         hp.url,
         hp.root_title,
-        hp.abs_rshares,
         hp.active,
-        hp.author_rewards,
-        hp.author_rep,
-        hp.payout_at,
-        hp.pending_payout,
-        hp.active_votes
+        hp.author_rewards
     FROM hive_posts_view hp
 """
 
@@ -168,12 +164,8 @@ async def _get_content_impl(db, fat_node_style, author: str, permlink: str, obse
     """Get a single post object."""
     valid_account(author)
     valid_permlink(permlink)
-    #force copy
-    sql = str(SQL_TEMPLATE)
-    sql += """
-        WHERE
-            hp.author = :author AND hp.permlink = :permlink
-    """
+
+    sql = "SELECT * FROM condenser_get_content(:author, :permlink)"
 
     post = None
     result = await db.query_all(sql, author=author, permlink=permlink)
@@ -187,7 +179,6 @@ async def _get_content_impl(db, fat_node_style, author: str, permlink: str, obse
             blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
             post['active_votes'] = _mute_votes(post['active_votes'], blacklists_for_user.keys())
 
-    assert post, 'post was not found in cache'
     return post
 
 @return_error_info
@@ -201,19 +192,19 @@ async def _get_content_replies_impl(db, fat_node_style, author: str, permlink: s
     valid_account(author)
     valid_permlink(permlink)
 
-    #force copy
-    sql = str(SQL_TEMPLATE)
-    sql += """
-        WHERE
-            hp.parent_author = :author AND hp.parent_permlink_or_category = :permlink
-        ORDER BY
-            hp.id
-        LIMIT :limit
-    """
+    sql = "SELECT * FROM condenser_get_content_replies(:author, :permlink)"
+    result = await db.query_all(sql, author=author, permlink=permlink)
 
-    result = await db.query_all(sql, author=author, permlink=permlink, limit=5000)
+    muted_accounts = Mutes.all()
 
-    posts = await resultset_to_posts(db=db, fat_node_style=fat_node_style, resultset=result, truncate_body=0)
+    posts = []
+    for row in result:
+        row = dict(row)
+        post = _condenser_post_object(row, get_content_additions=fat_node_style)
+        post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.ActiveVotes if fat_node_style else VotesPresentation.CondenserApi)
+        post['active_votes'] = _mute_votes(post['active_votes'], muted_accounts)
+        posts.append(post)
+
     return posts
 
 # Discussion Queries
@@ -237,78 +228,6 @@ def nested_query_compat(function):
             return function(args[0], **args[1])
         return function(*args, **kwargs)
     return wrapper
-
-@return_error_info
-@nested_query_compat
-async def get_discussions_by(discussion_type, context, start_author: str = '',
-                             start_permlink: str = '', limit: int = 20,
-                             tag: str = None, truncate_body: int = 0,
-                             filter_tags: list = None):
-    """ Common implementation for get_discussions_by calls  """
-    assert not filter_tags, 'filter tags not supported'
-    assert discussion_type in ['trending', 'hot', 'created', 'promoted',
-                               'payout', 'payout_comments'], 'invalid discussion type'
-    valid_account(start_author, allow_empty=True)
-    valid_permlink(start_permlink, allow_empty=True)
-    valid_limit(limit, 100, 20)
-    valid_tag(tag, allow_empty=True)
-    db = context['db']
-
-    sql = "---get_discussions_by_" + discussion_type + "\r\n" + str(SQL_TEMPLATE)
-
-    if discussion_type == 'trending':
-        sql = sql + """WHERE NOT hp.is_paidout %s ORDER BY hp.sc_trend DESC LIMIT :limit """
-    elif discussion_type == 'hot':
-        sql = sql + """WHERE NOT hp.is_paidout %s ORDER BY hp.sc_hot DESC LIMIT :limit """
-    elif discussion_type == 'created':
-        sql = sql + """WHERE hp.depth = 0 %s ORDER BY hp.created_at DESC LIMIT :limit """
-    elif discussion_type == 'promoted':
-        sql = sql + """WHERE NOT hp.is_paidout AND hp.promoted > 0
-                        %s ORDER BY hp.promoted DESC LIMIT :limit """
-    elif discussion_type == 'payout': # wrong: now we should be using payout + pending_payout here
-        sql = sql + """WHERE NOT hp.is_paidout AND hp.depth = 0
-                        %s ORDER BY hp.payout DESC LIMIT :limit """
-    elif discussion_type == 'payout_comments': # wrong: now we should be using payout + pending_payout here
-        sql = sql + """WHERE NOT hp.is_paidout AND hp.depth > 0
-                        %s ORDER BY hp.payout DESC LIMIT :limit """
-
-    if tag and tag != 'all':
-        if tag[:5] == 'hive-':
-            sql = sql % """ %s AND hp.category = :tag """
-        else:
-            sql = sql % """ %s AND EXISTS
-                (SELECT NULL
-                    FROM hive_post_tags hpt
-                    INNER JOIN hive_tag_data htd ON hpt.tag_id=htd.id
-                    WHERE hp.id = hpt.post_id AND htd.tag = :tag
-                ) """
-
-    if start_author and start_permlink:
-        if discussion_type == 'trending':
-            sql = sql % """ AND hp.sc_trend <= (SELECT sc_trend FROM hp WHERE permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink) AND author_id = (SELECT id FROM hive_accounts WHERE name = :author))
-                            AND hp.post_id != (SELECT post_id FROM hp WHERE permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink) AND author_id = (SELECT id FROM hive_accounts WHERE name = :author)) """
-        elif discussion_type == 'hot':
-            sql = sql % """ AND hp.sc_hot <= (SELECT sc_hot FROM hp WHERE permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink) AND author_id = (SELECT id FROM hive_accounts WHERE name = :author))
-                            AND hp.post_id != (SELECT post_id FROM hp WHERE permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink) AND author_id = (SELECT id FROM hive_accounts WHERE name = :author)) """
-        elif discussion_type == 'created':
-            sql = sql % """ AND hp.post_id < (SELECT post_id FROM hp WHERE permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink) AND author_id = (SELECT id FROM hive_accounts WHERE name = :author)) """
-        elif discussion_type == 'promoted':
-            sql = sql % """ AND hp.promoted <= (SELECT promoted FROM hp WHERE permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink) AND author_id = (SELECT id FROM hive_accounts WHERE name = :author))
-                            AND hp.post_id != (SELECT post_id FROM hp WHERE permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink) AND author_id = (SELECT id FROM hive_accounts WHERE name = :author)) """
-        else: # wrong: now we should be using payout + pending_payout here
-            sql = sql % """ AND hp.payout <= (SELECT payout FROM hp where permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink) AND author_id = (SELECT id FROM hive_accounts WHERE name = :author))
-                            AND hp.post_id != (SELECT post_id FROM hp WHERE permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink) AND author_id = (SELECT id FROM hive_accounts WHERE name = :author)) """
-    else:
-        sql = sql % """ """
-
-    result = await db.query_all(sql, tag=tag, limit=limit, author=start_author, permlink=start_permlink)
-    posts = []
-    for row in result:
-        post = _condenser_post_object(row, truncate_body)
-        post['active_votes'] = await find_votes_impl(db, post['author'], post['permlink'], VotesPresentation.DatabaseApi )
-        post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
-        posts.append(post)
-    return posts
 
 @return_error_info
 @nested_query_compat
