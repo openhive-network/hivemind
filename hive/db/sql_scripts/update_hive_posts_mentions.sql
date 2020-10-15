@@ -30,6 +30,7 @@ BEGIN
       )T( id_post, mention, author_id, block_num )
     )T( id_post, mention, author_id, block_num ) ON ha.name = T.mention
     WHERE ha.id != T.author_id
+    ORDER BY T.id_post
   ON CONFLICT DO NOTHING;
 
 END
