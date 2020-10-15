@@ -20,7 +20,7 @@ CREATE OR REPLACE VIEW public.hive_posts_base_view
    FROM hive_posts hp
 ;
 
-DROP VIEW IF EXISTS public.hive_posts_pp_view;
+DROP VIEW IF EXISTS public.hive_posts_pp_view CASCADE;
 
 CREATE OR REPLACE VIEW public.hive_posts_pp_view
  AS
