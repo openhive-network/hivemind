@@ -5,7 +5,7 @@ import ujson as json
 
 from hive.utils.normalize import sbd_amount
 from hive.server.common.mutes import Mutes
-from hive.server.common.helpers import json_date
+from hive.server.common.helpers import json_date, get_hive_accounts_info_view_query_string
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 from hive.utils.account import safe_db_profile_metadata
 
@@ -15,8 +15,7 @@ log = logging.getLogger(__name__)
 
 async def load_accounts(db, names):
     """`get_accounts`-style lookup for `get_state` compat layer."""
-    sql = """SELECT * FROM hive_accounts_info_view
-              WHERE name IN :names"""
+    sql = get_hive_accounts_info_view_query_string( names )
     rows = await db.query_all(sql, names=tuple(names))
     return [_condenser_account_object(row) for row in rows]
 
