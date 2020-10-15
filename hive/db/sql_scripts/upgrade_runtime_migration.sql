@@ -40,8 +40,18 @@ ELSE
   RAISE NOTICE 'Skipping update_hot_and_trending_for_blocks( 0, head_block_number) recalculation...';
 END IF;
 
+IF EXISTS (SELECT * FROM hive_db_data_migration WHERE migration = 'update_hive_post_mentions refill execution') THEN
+  RAISE NOTICE 'Performing hive_mentions refill...';
+  SET work_mem='2GB';
+  TRUNCATE TABLE hive_mentions;
+  PERFORM update_hive_posts_mentions(0, (select max(num) from hive_blocks));
+ELSE
+  RAISE NOTICE 'Skipping hive_mentions refill...';
+END IF;
+
 END
 $BODY$;
+
 
 TRUNCATE TABLE hive_db_data_migration;
 
@@ -66,6 +76,7 @@ values
 (now(), '45c2883131472cc14a03fe4e355ba1435020d720'),
 (now(), '7cfc2b90a01b32688075b22a6ab173f210fc770f'), -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/286
 (now(), 'f2e5f656a421eb1dd71328a94a421934eda27a87')  -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/275
+,(now(), '4cdf5d19f6cfcb73d3fa504cac9467c4df31c02e') -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/295
 ) ds (patch_date, patch_revision)
 where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
 

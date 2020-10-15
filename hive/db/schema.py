@@ -484,21 +484,32 @@ def setup(db):
       AS
       $function$
       DECLARE
-        post_id INT = 0;
+        __post_id INT = 0;
       BEGIN
         IF (_author <> '' OR _permlink <> '') THEN
-          SELECT INTO post_id COALESCE( (
+          SELECT INTO __post_id COALESCE( (
             SELECT hp.id
             FROM hive_posts hp
             JOIN hive_accounts ha ON ha.id = hp.author_id
             JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
             WHERE ha.name = _author AND hpd.permlink = _permlink AND hp.counter_deleted = 0
           ), 0 );
-          IF _check AND post_id = 0 THEN
+          IF _check AND __post_id = 0 THEN
+            SELECT INTO __post_id (
+              SELECT COUNT(hp.id)
+              FROM hive_posts hp
+              JOIN hive_accounts ha ON ha.id = hp.author_id
+              JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
+              WHERE ha.name = _author AND hpd.permlink = _permlink
+            );
+            IF __post_id = 0 THEN
             RAISE EXCEPTION 'Post %/% does not exist', _author, _permlink;
+            ELSE
+              RAISE EXCEPTION 'Post %/% was deleted % time(s)', _author, _permlink, __post_id;
+            END IF;
           END IF;
         END IF;
-        RETURN post_id;
+        RETURN __post_id;
       END
       $function$
       ;
@@ -1673,6 +1684,8 @@ def setup(db):
       "bridge_get_account_posts_by_replies.sql",
       "bridge_get_relationship_between_accounts.sql",
       "bridge_get_post.sql",
+      "condenser_api_post_ex_type.sql",
+      "condenser_get_content.sql",
       "condenser_get_discussions_by_created.sql",
       "condenser_get_discussions_by_blog.sql",
       "hot_and_trends.sql",
