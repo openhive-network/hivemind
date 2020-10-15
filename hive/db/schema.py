@@ -144,13 +144,12 @@ def build_metadata():
         sa.Index('hive_posts_payout_at_idx', 'payout_at'),
         sa.Index('hive_posts_payout_idx', 'payout'),
         sa.Index('hive_posts_promoted_idx', 'promoted'),
-        sa.Index('hive_posts_sc_trend_id_idx', 'sc_trend', 'id'),
-        sa.Index('hive_posts_sc_hot_id_idx', 'sc_hot', 'id'),
+        sa.Index('hive_posts_sc_trend_id_is_paidout_idx', 'sc_trend', 'id', 'is_paidout'),
+        sa.Index('hive_posts_sc_hot_id_is_paidout_idx', 'sc_hot', 'id', 'is_paidout'),
         sa.Index('hive_posts_created_at_idx', 'created_at'),
         sa.Index('hive_posts_block_num_idx', 'block_num'),
         sa.Index('hive_posts_cashout_time_id_idx', 'cashout_time', 'id'),
         sa.Index('hive_posts_updated_at_idx', sa.text('updated_at DESC')),
-        sa.Index('hive_posts_is_paidout_idx', 'is_paidout'),
         sa.Index('hive_posts_payout_plus_pending_payout_id', sa.text('(payout+pending_payout), id'))
     )
 
