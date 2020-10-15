@@ -215,5 +215,5 @@ DROP INDEX IF EXISTS hive_posts_sc_hot_id_idx;
 DROP INDEX IF EXISTS hive_posts_sc_trend_id_is_paidout_idx;
 DROP INDEX IF EXISTS hive_posts_sc_hot_id_is_paidout_idx;
 
-CREATE INDEX hive_posts_sc_trend_id_is_paidout_idx ON hive_posts(sc_trend, id, is_paidout )
-CREATE INDEX hive_posts_sc_hot_id_is_paidout_idx ON hive_posts(sc_hot, id, is_paidout )
+CREATE INDEX IF NOT EXISTS hive_posts_sc_trend_id_is_paidout_idx ON hive_posts(sc_trend, id, is_paidout )
+CREATE INDEX IF NOT EXISTS hive_posts_sc_hot_id_is_paidout_idx ON hive_posts(sc_hot, id, is_paidout )
