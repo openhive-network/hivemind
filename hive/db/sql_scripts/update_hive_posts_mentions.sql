@@ -6,15 +6,11 @@ LANGUAGE 'plpgsql'
 AS
 $function$
 DECLARE
-  FIRST_BLOCK_TIME TIMESTAMP;
-  LAST_BLOCK_TIME TIMESTAMP;
+  __block_limit INT := 1200*24*90; --- 1200 blocks is equal to 1hr, so 90 days
 BEGIN
 
-  FIRST_BLOCK_TIME = ( SELECT created_at FROM hive_blocks WHERE num = _first_block );
-  LAST_BLOCK_TIME = ( SELECT created_at FROM hive_blocks WHERE num = _last_block );
-
-  IF (LAST_BLOCK_TIME - '90 days'::interval) > FIRST_BLOCK_TIME THEN
-    FIRST_BLOCK_TIME = LAST_BLOCK_TIME - '90 days'::interval;
+  IF (_last_block - __block_limit) > _first_block THEN
+    _first_block = _last_block - __block_limit;
   END IF;
 
   INSERT INTO hive_mentions( post_id, account_id, block_num )
@@ -23,20 +19,18 @@ BEGIN
       hive_accounts ha
     INNER JOIN
     (
-      SELECT T.id_post, LOWER( ( SELECT trim( T.mention::text, '{""}') ) ) mention, T.author_id, T.block_num
+      SELECT T.id_post, LOWER( ( SELECT trim( T.mention::text, '{""}') ) ) AS mention, T.author_id, T.block_num
       FROM
       (
         SELECT
-          hp.id, REGEXP_MATCHES( hpd.body, '(?:^|[^a-zA-Z0-9_!#$%&*@\\/])(?:@)([a-zA-Z0-9\\.-]{1,16}[a-zA-Z0-9])(?![a-z])', 'g') mention, hp.author_id, hp.block_num
+          hp.id, REGEXP_MATCHES( hpd.body, '(?:^|[^a-zA-Z0-9_!#$%&*@\\/])(?:@)([a-zA-Z0-9\\.-]{1,16}[a-zA-Z0-9])(?![a-z])', 'g') AS mention, hp.author_id, hp.block_num
         FROM hive_posts hp
-          INNER JOIN hive_post_data hpd ON hp.id = hpd.id
-        WHERE
-        (
-          hp.created_at >= FIRST_BLOCK_TIME
-        )
+        INNER JOIN hive_post_data hpd ON hp.id = hpd.id
+        WHERE hp.block_num >= _first_block
       )T( id_post, mention, author_id, block_num )
     )T( id_post, mention, author_id, block_num ) ON ha.name = T.mention
     WHERE ha.id != T.author_id
+    ORDER BY T.id_post
   ON CONFLICT DO NOTHING;
 
 END
