@@ -694,7 +694,7 @@ def setup(db):
     # and posting/voting after an account updating, fixes `active_at` value immediately.
 
     sql = """
-        DROP VIEW IF EXISTS public.get_hive_accounts_info;
+        DROP FUNCTION IF EXISTS public.get_hive_accounts_info;
 
         CREATE OR REPLACE FUNCTION get_hive_accounts_info(
         in names VARCHAR[])
