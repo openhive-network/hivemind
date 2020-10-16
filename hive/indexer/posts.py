@@ -403,9 +403,9 @@ class Posts(DbAdapterHolder):
 
         sql = """
               SELECT id, depth
-              FROM delete_hive_post((:author)::varchar, (:permlink)::varchar);
+              FROM delete_hive_post((:author)::varchar, (:permlink)::varchar, (:block_num)::int);
               """
-        row = DB.query_row(sql, author=op['author'], permlink = op['permlink'])
+        row = DB.query_row(sql, author=op['author'], permlink = op['permlink'], block_num=op['block_num'])
 
         result = dict(row)
         pid = result['id']
