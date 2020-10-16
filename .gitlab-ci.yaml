@@ -392,7 +392,7 @@ follow_api_smoketest_negative_benchmark:
   <<: *common_api_benchmarks
 
   script:
-    - tests/tests_api/hivemind/benchmarks/benchmark_generator.py tests/tests_api/hivemind/tavern/follow_api_negative/ api_benchmark_follow_negative.py "localhost:$HIVEMIND_HTTP_PORT"
+    - tests/tests_api/hivemind/benchmarks/benchmark_generator.py tests/tests_api/hivemind/tavern/follow_api_negative/ api_benchmark_follow_negative.py "http://localhost:$HIVEMIND_HTTP_PORT"
     - tox -e benchmark -- api_benchmark_follow_negative.py
     - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/follow_api_negative/ api_smoketest_follow_api_negative.xml
 
@@ -405,7 +405,7 @@ tags_api_smoketest_benchmark:
   <<: *common_api_benchmarks
 
   script:
-    - tests/tests_api/hivemind/benchmarks/benchmark_generator.py tests/tests_api/hivemind/tavern/tags_api_patterns/ api_benchmark_tags.py "localhost:$HIVEMIND_HTTP_PORT"
+    - tests/tests_api/hivemind/benchmarks/benchmark_generator.py tests/tests_api/hivemind/tavern/tags_api_patterns/ api_benchmark_tags.py "http://localhost:$HIVEMIND_HTTP_PORT"
     - tox -e benchmark -- api_benchmark_tags.py
     - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/tags_api_patterns/ api_smoketest_tags_api.xml
 
@@ -418,7 +418,7 @@ tags_api_smoketest_negative_benchmark:
   <<: *common_api_benchmarks
 
   script:
-    - tests/tests_api/hivemind/benchmarks/benchmark_generator.py tests/tests_api/hivemind/tavern/tags_api_negative/ api_benchmark_tags_negative.py "localhost:$HIVEMIND_HTTP_PORT"
+    - tests/tests_api/hivemind/benchmarks/benchmark_generator.py tests/tests_api/hivemind/tavern/tags_api_negative/ api_benchmark_tags_negative.py "http://localhost:$HIVEMIND_HTTP_PORT"
     - tox -e benchmark -- api_benchmark_tags_negative.py
     - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/tags_api_negative/ api_smoketest_tags_api_negative.xml
 
