@@ -4,7 +4,7 @@ import logging
 import ujson as json
 
 from hive.server.common.mutes import Mutes
-from hive.server.common.helpers import json_date, get_hive_accounts_info_view_query_string
+from hive.server.common.helpers import json_date, get_hive_accounts_info_query_string
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 from hive.utils.normalize import sbd_amount, rep_log10
 from hive.indexer.votes import Votes
@@ -54,7 +54,7 @@ def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=None, ov
 
 async def load_profiles(db, names):
     """`get_accounts`-style lookup for `get_state` compat layer."""
-    sql = get_hive_accounts_info_view_query_string( names )
+    sql = get_hive_accounts_info_query_string( names )
     rows = await db.query_all(sql, names=tuple(names))
     return [_bridge_profile_object(row) for row in rows]
 

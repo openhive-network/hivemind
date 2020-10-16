@@ -694,52 +694,86 @@ def setup(db):
     # and posting/voting after an account updating, fixes `active_at` value immediately.
 
     sql = """
-        DROP VIEW IF EXISTS public.hive_accounts_info_view;
+        DROP VIEW IF EXISTS public.get_hive_accounts_info;
 
-        CREATE OR REPLACE VIEW public.hive_accounts_info_view
+        CREATE OR REPLACE FUNCTION get_hive_accounts_info(
+        in names VARCHAR[])
+        RETURNS TABLE
+        (
+          id hive_accounts.id%TYPE,
+          name hive_accounts.name%TYPE,
+          post_count BIGINT,
+          created_at hive_accounts.created_at%TYPE,
+          active_at hive_accounts.created_at%TYPE,
+          reputation hive_accounts.reputation%TYPE,
+          rank hive_accounts.rank%TYPE,
+          following hive_accounts.following%TYPE,
+          followers hive_accounts.followers%TYPE,
+          lastread_at hive_accounts.lastread_at%TYPE,
+          posting_json_metadata hive_accounts.posting_json_metadata%TYPE,
+          json_metadata hive_accounts.json_metadata%TYPE,
+          blacklist_description hive_accounts.blacklist_description%TYPE,
+          muted_list_description hive_accounts.muted_list_description%TYPE
+        )
         AS
-        SELECT
-          id,
-          name,
-          (
-            select count(*) post_count
-            FROM hive_posts hp
-            WHERE ha.id=hp.author_id
-          ) post_count,
-          created_at,
-          (
-            SELECT GREATEST
-            (
-              created_at,
-              COALESCE(
-                (
-                  select max(hp.created_at + '0 days'::interval)
-                  FROM hive_posts hp
-                  WHERE ha.id=hp.author_id
-                ),
+        $function$
+        DECLARE
+          __data INTEGER[] := ARRAY( SELECT ha.id FROM hive_accounts ha WHERE ha.name = ANY( names ) );
+        BEGIN
+          RETURN QUERY
+            SELECT
+              ha.id,
+              ha.name,
+              COALESCE(	
+                _posts_data.post_count,
+                0
+              )post_count,
+              ha.created_at,
+              (
+              SELECT GREATEST
+              (
+                ha.created_at,
+                COALESCE(
+                _posts_data.max_created_at,
                 '1970-01-01 00:00:00.0'
-              ),
-              COALESCE(
-                (
-                  select max(hv.last_update + '0 days'::interval)
-                  from hive_votes hv
-                  WHERE ha.id=hv.voter_id
                 ),
+                COALESCE(
+                _votes_data.vote_last_update,
                 '1970-01-01 00:00:00.0'
+                )
               )
-            )
-          ) active_at,
-          reputation,
-          rank,
-          following,
-          followers,
-          lastread_at,
-          posting_json_metadata,
-          json_metadata,
-          blacklist_description,
-          muted_list_description
-        FROM
-          hive_accounts ha
+              ) active_at,
+              ha.reputation,
+              ha.rank,
+              ha.following,
+              ha.followers,
+              ha.lastread_at,
+              ha.posting_json_metadata,
+              ha.json_metadata,
+              ha.blacklist_description,
+              ha.muted_list_description
+            FROM
+              hive_accounts ha
+              LEFT JOIN
+              (
+              SELECT hp.author_id, count(*) post_count, max(hp.created_at + '0 days'::interval) max_created_at
+              FROM
+              hive_posts hp
+              WHERE hp.author_id = ANY( __data )
+              GROUP BY hp.author_id
+              )_posts_data ON ha.id = _posts_data.author_id
+              LEFT JOIN
+              (
+              SELECT hv.voter_id, max(hv.last_update + '0 days'::interval) vote_last_update
+              FROM
+              hive_votes hv
+              WHERE hv.voter_id = ANY( __data )
+              GROUP BY hv.voter_id
+              )_votes_data ON ha.id = _votes_data.voter_id
+              WHERE ha.id = ANY( __data );
+        END
+        $function$
+        LANGUAGE plpgsql
           """
     db.query_no_return(sql)
 

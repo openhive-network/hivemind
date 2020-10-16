@@ -66,18 +66,14 @@ def json_date(date=None):
     if not date or date == datetime.datetime.max: return '1969-12-31T23:59:59'
     return 'T'.join(str(date).split(' '))
 
-def get_hive_accounts_info_view_query_string(names):
+def get_hive_accounts_info_query_string(names):
     values = []
     for name in names:
       values.append("('{}')".format( name ))
     values_str = ','.join(values)
     sql = """
               SELECT *
-              FROM hive_accounts_info_view v
-              JOIN
-                (
-                  VALUES {}
-                )T( _name ) ON v.name = T._name
+              FROM get_hive_accounts_info( ARRAY[ {} ] )
           """.format( values_str )
     return sql
    
