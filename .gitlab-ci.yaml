@@ -297,6 +297,9 @@ tags_api_smoketest_negative:
 
   allow_failure: true
 
+  script:
+    - pip3 install --user pytest-benchmark
+
 bridge_api_smoketest_benchmark:
   <<: *common_api_benchmarks
 
