@@ -83,6 +83,7 @@ values
 --- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/297
 --- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/302
 ,(now(), '166327bfa87beda588b20bfcfa574389f4100389')
+,(now(), '88e62bdf1fcc47809fec84424cf98c71ce87ca89') -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/310
 ) ds (patch_date, patch_revision)
 where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
 

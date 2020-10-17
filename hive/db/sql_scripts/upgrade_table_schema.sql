@@ -224,3 +224,9 @@ CREATE INDEX IF NOT EXISTS hive_posts_sc_hot_id_is_paidout_idx ON hive_posts(sc_
 
 DROP INDEX IF EXISTS hive_posts_payout_plus_pending_payout_id;
 CREATE INDEX IF NOT EXISTS hive_posts_payout_plus_pending_payout_id_is_paidout_idx ON hive_posts ((payout+pending_payout), id, is_paidout);
+
+--- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/310
+
+CREATE INDEX IF NOT EXISTS hive_votes_voter_id_last_update_idx ON hive_votes (voter_id, last_update);
+
+

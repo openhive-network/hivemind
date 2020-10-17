@@ -10,6 +10,7 @@ for sql in postgres_handle_view_changes.sql \
           upgrade_table_schema.sql \
           upgrade_view_schema.sql \
           upgrade_functions.sql \
+          hive_accounts_info_view.sql \
           hive_posts_base_view.sql \
           head_block_time.sql \
           update_feed_cache.sql \
