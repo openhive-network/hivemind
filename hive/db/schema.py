@@ -200,9 +200,10 @@ def build_metadata():
         sa.ForeignKeyConstraint(['permlink_id'], ['hive_permlink_data.id'], name='hive_votes_fk4'),
         sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_votes_fk5'),
 
-        sa.Index('hive_votes_voter_id_post_id_idx', 'voter_id', 'post_id'),
+        sa.Index('hive_votes_voter_id_post_id_idx', 'voter_id', 'post_id'), # probably this index is redundant to hive_votes_voter_id_last_update_idx because of starting voter_id.
+        sa.Index('hive_votes_voter_id_last_update_idx', 'voter_id', 'last_update'), # this index is critical for hive_accounts_info_view performance
         sa.Index('hive_votes_post_id_voter_id_idx', 'post_id', 'voter_id'),
-        sa.Index('hive_votes_block_num_idx', 'block_num')
+        sa.Index('hive_votes_block_num_idx', 'block_num') # this is also important for hive_accounts_info_view 
     )
 
     sa.Table(
@@ -692,56 +693,6 @@ def setup(db):
     #   }
     # In order to simplify calculations, `last_account_update` is not taken into consideration, because this updating accounts is very rare
     # and posting/voting after an account updating, fixes `active_at` value immediately.
-
-    sql = """
-        DROP VIEW IF EXISTS public.hive_accounts_info_view;
-
-        CREATE OR REPLACE VIEW public.hive_accounts_info_view
-        AS
-        SELECT
-          id,
-          name,
-          (
-            select count(*) post_count
-            FROM hive_posts hp
-            WHERE ha.id=hp.author_id
-          ) post_count,
-          created_at,
-          (
-            SELECT GREATEST
-            (
-              created_at,
-              COALESCE(
-                (
-                  select max(hp.created_at + '0 days'::interval)
-                  FROM hive_posts hp
-                  WHERE ha.id=hp.author_id
-                ),
-                '1970-01-01 00:00:00.0'
-              ),
-              COALESCE(
-                (
-                  select max(hv.last_update + '0 days'::interval)
-                  from hive_votes hv
-                  WHERE ha.id=hv.voter_id
-                ),
-                '1970-01-01 00:00:00.0'
-              )
-            )
-          ) active_at,
-          reputation,
-          rank,
-          following,
-          followers,
-          lastread_at,
-          posting_json_metadata,
-          json_metadata,
-          blacklist_description,
-          muted_list_description
-        FROM
-          hive_accounts ha
-          """
-    db.query_no_return(sql)
 
     sql = """
         DROP VIEW IF EXISTS public.hive_accounts_view;
@@ -1661,6 +1612,7 @@ def setup(db):
     db.query_no_return(sql)
 
     sql_scripts = [
+      "hive_accounts_info_view.sql",
       "hive_posts_base_view.sql",
       "head_block_time.sql",
       "update_feed_cache.sql",
