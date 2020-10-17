@@ -114,6 +114,7 @@ class DbState:
             'hive_posts_updated_at_idx',
             'hive_posts_payout_plus_pending_payout_id_is_paidout_idx',
 
+            'hive_votes_voter_id_last_update_idx',
             'hive_votes_block_num_idx',
 
             'hive_subscriptions_block_num_idx',

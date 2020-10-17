@@ -55,7 +55,7 @@ BEGIN
           hive_posts hpr
           JOIN hive_posts hp1 ON hp1.id = hpr.parent_id
       WHERE hp1.author_id = __account_id AND hpr.counter_deleted = 0 AND ( __post_id = 0 OR hpr.id < __post_id )
-      ORDER BY hpr.id DESC
+      ORDER BY hpr.id + 0 DESC
       LIMIT _limit
   ) as replies
   JOIN hive_posts_view hp ON hp.id = replies.id
