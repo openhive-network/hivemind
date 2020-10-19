@@ -148,25 +148,17 @@ async def pids_by_blog(db, account: str, start_author: str = '',
 async def pids_by_blog_without_reblog(db, account: str, start_permlink: str = '', limit: int = 20):
     """Get a list of post_ids for an author's blog without reblogs."""
 
-    seek = ''
-    start_id = None
+    is_start_id = False
+    start_id = 0
     if start_permlink:
         start_id = await _get_post_id(db, account, start_permlink)
         if not start_id:
             return []
-        seek = "AND id <= :start_id"
+        is_start_id = True
 
-    sql = """
-        SELECT id
-          FROM hive_posts
-         WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :account) %s
-           AND counter_deleted = 0
-           AND depth = 0
-      ORDER BY id DESC
-         LIMIT :limit
-    """ % seek
+    sql = "SELECT id FROM get_pids_by_blog_without_reblog( '{}', {}, {}, {} )".format( account, start_id, is_start_id, limit )
 
-    return await db.query_col(sql, account=account, start_id=start_id, limit=limit)
+    return await db.query_col(sql)
 
 
 async def pids_by_feed_with_reblog(db, account: str, start_author: str = '',
@@ -206,26 +198,17 @@ async def pids_by_feed_with_reblog(db, account: str, start_author: str = '',
 
 async def pids_by_account_comments(db, account: str, start_permlink: str = '', limit: int = 20):
     """Get a list of post_ids representing comments by an author."""
-    seek = ''
-    start_id = None
+    is_start_id = False
+    start_id = 0
     if start_permlink:
         start_id = await _get_post_id(db, account, start_permlink)
         if not start_id:
             return []
-
-        seek = "AND id <= :start_id"
+        is_start_id = True
 
     # `depth` in ORDER BY is a no-op, but forces an ix3 index scan (see #189)
-    sql = """
-        SELECT id FROM hive_posts
-         WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :account) %s
-           AND depth > 0
-           AND counter_deleted = 0
-      ORDER BY id DESC, depth
-         LIMIT :limit
-    """ % seek
-
-    return await db.query_col(sql, account=account, start_id=start_id, limit=limit)
+    sql = "SELECT id FROM get_pids_by_account_comments( '{}', {}, {}, {} )".format( account, start_id, is_start_id, limit )
+    return await db.query_col(sql)
 
 
 async def pids_by_replies_to_account(db, start_author: str, start_permlink: str = '',
@@ -236,8 +219,8 @@ async def pids_by_replies_to_account(db, start_author: str, start_permlink: str 
     account being replied to. For successive pages, provide the
     last loaded reply's author/permlink.
     """
-    seek = ''
-    start_id = None
+    start_id = 0
+    is_start_id = False
     if start_permlink:
         sql = """
           SELECT (SELECT name FROM hive_accounts WHERE id = parent.author_id),
@@ -253,22 +236,12 @@ async def pids_by_replies_to_account(db, start_author: str, start_permlink: str 
         if not row:
             return []
 
+        is_start_id = True
         parent_account = row[0]
         start_id = row[1]
-        seek = "AND id <= :start_id"
     else:
         parent_account = start_author
 
-    sql = """
-       SELECT id FROM hive_posts
-        WHERE parent_id IN (SELECT id FROM hive_posts
-                             WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :parent)
-                               AND counter_deleted = 0
-                          ORDER BY id DESC
-                             LIMIT 10000) %s
-          AND counter_deleted = 0
-     ORDER BY id DESC
-        LIMIT :limit
-    """ % seek
+    sql = " SELECT id FROM get_pids_by_replies_to_account( '{}', {}, {}, {} ) ".format( parent_account, start_id, is_start_id, limit )
 
-    return await db.query_col(sql, parent=parent_account, start_id=start_id, limit=limit)
+    return await db.query_col(sql)
