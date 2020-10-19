@@ -184,12 +184,8 @@ def api_vote_info(rows, votes_presentation):
           ret.append(dict(id = row.id, voter = row.voter, author = row.author, permlink = row.permlink,
                           weight = row.weight, rshares = row.rshares, vote_percent = row.percent,
                           last_update = json_date(row.last_update), num_changes = row.num_changes))
-      elif votes_presentation == VotesPresentation.CondenserApi:
-          ret.append(dict(percent = str(row.percent), reputation = row.reputation,
-                          rshares = row.rshares, voter = row.voter))
-      elif votes_presentation == VotesPresentation.BridgeApi:
-          ret.append(dict(rshares = row.rshares, voter = row.voter))
       else:
+          # CondenserApi and BridgeApi
           ret.append(dict(percent = row.percent, reputation = row.reputation,
                           rshares = row.rshares, time = json_date(row.last_update),
                           voter = row.voter, weight = row.weight
