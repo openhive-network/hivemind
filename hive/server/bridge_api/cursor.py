@@ -90,40 +90,6 @@ async def pids_by_blog(db, account: str, start_author: str = '',
     return await db.query_col(sql, account_id=account_id, account=account,
                               start_id=start_id, limit=limit)
 
-async def pids_by_feed_with_reblog(db, account: str, start_author: str = '',
-                                   start_permlink: str = '', limit: int = 20):
-    """Get a list of [post_id, reblogged_by_str] for an account's feed."""
-    account_id = await _get_account_id(db, account)
-
-    seek = ''
-    start_id = None
-    if start_permlink:
-        start_id = await _get_post_id(db, start_author, start_permlink)
-        if not start_id:
-            return []
-
-        seek = """
-          HAVING MIN(hive_feed_cache.created_at) <= (
-            SELECT MIN(created_at) FROM hive_feed_cache WHERE post_id = :start_id
-               AND account_id IN (SELECT following FROM hive_follows
-                                  WHERE follower = :account AND state = 1))
-        """
-
-    sql = """
-        SELECT post_id, string_agg(name, ',') accounts
-          FROM hive_feed_cache
-          JOIN hive_follows ON account_id = hive_follows.following AND state = 1
-          JOIN hive_accounts ON hive_follows.following = hive_accounts.id
-         WHERE hive_follows.follower = :account
-           AND hive_feed_cache.created_at > :cutoff
-      GROUP BY post_id %s
-      ORDER BY MIN(hive_feed_cache.created_at) DESC LIMIT :limit
-    """ % seek
-
-    result = await db.query_all(sql, account=account_id, start_id=start_id,
-                                limit=limit, cutoff=last_month())
-    return [(row[0], row[1]) for row in result]
-
 async def pids_by_comments(db, account: str, start_permlink: str = '', limit: int = 20):
     """Get a list of post_ids representing comments by an author."""
     seek = ''

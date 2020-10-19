@@ -2,6 +2,9 @@
 
 from hive.server.common.helpers import last_month
 
+from hive.server.condenser_api.objects import _condenser_post_object
+from hive.server.database_api.methods import find_votes_impl, VotesPresentation
+
 # pylint: disable=too-many-lines
 
 async def get_post_id(db, author, permlink):
@@ -143,131 +146,31 @@ async def pids_by_blog(db, account: str, start_author: str = '',
 
     return await db.query_col(sql, account_id=account_id, start_id=start_id, limit=limit)
 
-
-async def pids_by_blog_without_reblog(db, account: str, start_permlink: str = '', limit: int = 20):
-    """Get a list of post_ids for an author's blog without reblogs."""
-
-    seek = ''
-    start_id = None
-    if start_permlink:
-        start_id = await _get_post_id(db, account, start_permlink)
-        if not start_id:
-            return []
-        seek = "AND id <= :start_id"
-
-    sql = """
-        SELECT id
-          FROM hive_posts
-         WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :account) %s
-           AND counter_deleted = 0
-           AND depth = 0
-      ORDER BY id DESC
-         LIMIT :limit
-    """ % seek
-
-    return await db.query_col(sql, account=account, start_id=start_id, limit=limit)
-
-
-async def pids_by_feed_with_reblog(db, account: str, start_author: str = '',
-                                   start_permlink: str = '', limit: int = 20):
-    """Get a list of [post_id, reblogged_by_str] for an account's feed."""
-    account_id = await _get_account_id(db, account)
-
-    seek = ''
-    start_id = None
-    if start_permlink:
-        start_id = await _get_post_id(db, start_author, start_permlink)
-        if not start_id:
-            return []
-
-        seek = """
-          HAVING MIN(hive_feed_cache.created_at) <= (
-            SELECT MIN(created_at) FROM hive_feed_cache WHERE post_id = :start_id
-               AND account_id IN (SELECT following FROM hive_follows
-                                  WHERE follower = :account AND state = 1))
-        """
-
-    sql = """
-        SELECT post_id, string_agg(name, ',') accounts
-          FROM hive_feed_cache
-          JOIN hive_follows ON account_id = hive_follows.following AND state = 1
-          JOIN hive_accounts ON hive_follows.following = hive_accounts.id
-         WHERE hive_follows.follower = :account
-           AND hive_feed_cache.created_at > :cutoff
-      GROUP BY post_id %s
-      ORDER BY MIN(hive_feed_cache.created_at) DESC LIMIT :limit
-    """ % seek
-
-    result = await db.query_all(sql, account=account_id, start_id=start_id,
-                                limit=limit, cutoff=last_month())
-    return [(row[0], row[1]) for row in result]
-
-
-async def pids_by_account_comments(db, account: str, start_permlink: str = '', limit: int = 20):
+async def get_data(db, sql:str, truncate_body: int = 0):
     """Get a list of post_ids representing comments by an author."""
-    seek = ''
-    start_id = None
-    if start_permlink:
-        start_id = await _get_post_id(db, account, start_permlink)
-        if not start_id:
-            return []
+    result = await db.query_all(sql); 
 
-        seek = "AND id <= :start_id"
+    posts = []
+    for row in result:
+        row = dict(row)
+        post = _condenser_post_object(row, truncate_body=truncate_body)
 
-    # `depth` in ORDER BY is a no-op, but forces an ix3 index scan (see #189)
-    sql = """
-        SELECT id FROM hive_posts
-         WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :account) %s
-           AND depth > 0
-           AND counter_deleted = 0
-      ORDER BY id DESC, depth
-         LIMIT :limit
-    """ % seek
+        post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
+        posts.append(post)
 
-    return await db.query_col(sql, account=account, start_id=start_id, limit=limit)
+    return posts
 
+async def get_by_blog_without_reblog(db, account: str, start_permlink: str = '', limit: int = 20, truncate_body: int = 0):
+  """Get a list of posts for an author's blog without reblogs."""
+  sql = " SELECT * FROM condenser_get_by_blog_without_reblog( '{}', '{}', {} ) ".format( account, start_permlink, limit )
+  return await get_data(db, sql, truncate_body )
 
-async def pids_by_replies_to_account(db, start_author: str, start_permlink: str = '',
-                                     limit: int = 20):
-    """Get a list of post_ids representing replies to an author.
+async def get_by_account_comments(db, account: str, start_permlink: str = '', limit: int = 20, truncate_body: int = 0):
+  """Get a list of posts representing comments by an author."""
+  sql = " SELECT * FROM condenser_get_by_account_comments( '{}', '{}', {} ) ".format( account, start_permlink, limit )
+  return await get_data(db, sql, truncate_body )
 
-    To get the first page of results, specify `start_author` as the
-    account being replied to. For successive pages, provide the
-    last loaded reply's author/permlink.
-    """
-    seek = ''
-    start_id = None
-    if start_permlink:
-        sql = """
-          SELECT (SELECT name FROM hive_accounts WHERE id = parent.author_id),
-                 child.id
-            FROM hive_posts child
-            JOIN hive_posts parent
-              ON child.parent_id = parent.id
-           WHERE child.author_id = (SELECT id FROM hive_accounts WHERE name = :author)
-             AND child.permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)
-        """
-
-        row = await db.query_row(sql, author=start_author, permlink=start_permlink)
-        if not row:
-            return []
-
-        parent_account = row[0]
-        start_id = row[1]
-        seek = "AND id <= :start_id"
-    else:
-        parent_account = start_author
-
-    sql = """
-       SELECT id FROM hive_posts
-        WHERE parent_id IN (SELECT id FROM hive_posts
-                             WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :parent)
-                               AND counter_deleted = 0
-                          ORDER BY id DESC
-                             LIMIT 10000) %s
-          AND counter_deleted = 0
-     ORDER BY id DESC
-        LIMIT :limit
-    """ % seek
-
-    return await db.query_col(sql, parent=parent_account, start_id=start_id, limit=limit)
+async def get_by_replies_to_account(db, start_author: str, start_permlink: str = '', limit: int = 20, truncate_body: int = 0):
+  """Get a list of posts representing replies to an author."""
+  sql = " SELECT * FROM condenser_get_by_replies_to_account( '{}', '{}', {} ) ".format( start_author, start_permlink, limit )
+  return await get_data(db, sql, truncate_body )

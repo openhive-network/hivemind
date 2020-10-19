@@ -1,7 +1,7 @@
 """Bridge API public endpoints for posts"""
 
 import hive.server.bridge_api.cursor as cursor
-from hive.server.bridge_api.objects import load_posts, load_posts_reblogs, load_profiles, _bridge_post_object, append_statistics_to_post
+from hive.server.bridge_api.objects import load_posts, load_profiles, _bridge_post_object, append_statistics_to_post
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 from hive.server.common.helpers import (
     return_error_info,
@@ -13,6 +13,7 @@ from hive.server.hive_api.common import get_account_id
 from hive.server.hive_api.objects import _follow_contexts
 from hive.server.hive_api.community import list_top_communities
 from hive.server.common.mutes import Mutes
+from hive.server.hive_api.public import get_by_feed_with_reblog_impl
 
 #pylint: disable=too-many-arguments, no-else-return
 
@@ -272,8 +273,7 @@ async def _get_account_posts_by_blog(db, account : str, start_author : str, star
   return posts
 
 async def _get_account_posts_by_feed(db, account : str, start_author : str, start_permlink : str, limit : int):
-  _ids = await cursor.pids_by_feed_with_reblog(db, account, start_author, start_permlink, limit)
-  return await load_posts_reblogs(db, _ids)
+  return await get_by_feed_with_reblog_impl(db, account, start_author, start_permlink, limit)
 
 @return_error_info
 async def get_account_posts(context, sort:str, account:str, start_author:str='', start_permlink:str='',
