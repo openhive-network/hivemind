@@ -6,18 +6,13 @@ LANGUAGE 'plpgsql'
 AS
 $function$
 DECLARE
-  __head_block_time TIMESTAMP;
+  __90_days_beyond_head_block_number INTEGER;
 BEGIN
 
-  __head_block_time = head_block_time();
+  __90_days_beyond_head_block_number = block_before_head('90 days'::interval);
 
-  DELETE FROM hive_mentions hm
-  WHERE post_id in
-  (
-    SELECT id
-    FROM hive_posts
-    WHERE created_at < ( __head_block_time - '90 days'::interval )
-  );
+  DELETE FROM hive_mentions
+  WHERE block_num < __90_days_beyond_head_block_number;
 
 END
 $function$
