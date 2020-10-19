@@ -110,6 +110,7 @@ class DbState:
             'hive_posts_sc_trend_id_is_paidout_idx',
             'hive_posts_sc_hot_id_is_paidout_idx',
             'hive_posts_block_num_idx',
+            'hive_posts_block_num_created_idx',
             'hive_posts_cashout_time_id_idx',
             'hive_posts_updated_at_idx',
             'hive_posts_payout_plus_pending_payout_id_is_paidout_idx',
