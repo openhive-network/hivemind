@@ -1613,7 +1613,7 @@ def setup(db):
       "condenser_get_post_discussions_by_payout.sql",
       "condenser_get_comment_discussions_by_payout.sql",
       "update_hive_posts_children_count.sql",
-      "get_pids_by_replies_to_account.sql",
+      "get_by_replies_to_account.sql",
       "get_pids_by_account_comments.sql",
       "get_pids_by_blog_without_reblog.sql"
     ]

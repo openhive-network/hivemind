@@ -2,6 +2,8 @@
 
 from hive.server.common.helpers import last_month
 from json import loads
+from hive.server.condenser_api.objects import _condenser_post_object
+from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 
 # pylint: disable=too-many-lines
 
@@ -211,37 +213,20 @@ async def pids_by_account_comments(db, account: str, start_permlink: str = '', l
     return await db.query_col(sql)
 
 
-async def pids_by_replies_to_account(db, start_author: str, start_permlink: str = '',
-                                     limit: int = 20):
-    """Get a list of post_ids representing replies to an author.
+async def get_by_replies_to_account(db, start_author: str, start_permlink: str = '',
+                                     limit: int = 20, truncate_body: int = 0):
+    """Get a list of post_ids representing replies to an author."""
 
-    To get the first page of results, specify `start_author` as the
-    account being replied to. For successive pages, provide the
-    last loaded reply's author/permlink.
-    """
-    start_id = 0
-    is_start_id = False
-    if start_permlink:
-        sql = """
-          SELECT (SELECT name FROM hive_accounts WHERE id = parent.author_id),
-                 child.id
-            FROM hive_posts child
-            JOIN hive_posts parent
-              ON child.parent_id = parent.id
-           WHERE child.author_id = (SELECT id FROM hive_accounts WHERE name = :author)
-             AND child.permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)
-        """
+    sql = " SELECT * FROM get_by_replies_to_account( '{}', '{}', {} ) ".format( start_author, start_permlink, limit )
+    result = await db.query_all(sql); 
 
-        row = await db.query_row(sql, author=start_author, permlink=start_permlink)
-        if not row:
-            return []
+    #muted_accounts = Mutes.all()
+    posts = []
+    for row in result:
+        row = dict(row)
+        post = _condenser_post_object(row, truncate_body=truncate_body)
 
-        is_start_id = True
-        parent_account = row[0]
-        start_id = row[1]
-    else:
-        parent_account = start_author
+        post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
+        posts.append(post)
 
-    sql = " SELECT id FROM get_pids_by_replies_to_account( '{}', {}, {}, {} ) ".format( parent_account, start_id, is_start_id, limit )
-
-    return await db.query_col(sql)
+    return posts

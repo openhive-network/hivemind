@@ -420,13 +420,12 @@ async def get_replies_by_last_update(context, start_author: str = None, start_pe
     """Get all replies made to any of author's posts."""
     assert start_author, '`start_author` cannot be blank'
 
-    ids = await cursor.pids_by_replies_to_account(
+    return await cursor.get_by_replies_to_account(
         context['db'],
         valid_account(start_author),
         valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100, 20))
-    return await load_posts(context['db'], ids, truncate_body=truncate_body)
-
+        valid_limit(limit, 100, 20),
+        truncate_body)
 
 @return_error_info
 @nested_query_compat
