@@ -237,7 +237,7 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
         for row in sql_result:
             post = _bridge_post_object(row)
             post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.BridgeApi)
-            post = append_statistics_to_post(post, row, False, blacklists_for_user)
+            post = append_statistics_to_post(post, row, row['is_pinned'], blacklists_for_user)
             posts.append(post)
         return posts
 
