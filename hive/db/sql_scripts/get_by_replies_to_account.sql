@@ -51,8 +51,7 @@ BEGIN
       LIMIT _limit;
 END
 $function$
-LANGUAGE plpgsql
-;
+LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS get_by_replies_to_account;
 

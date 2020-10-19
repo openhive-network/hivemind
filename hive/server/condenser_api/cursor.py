@@ -197,30 +197,20 @@ async def pids_by_feed_with_reblog(db, account: str, start_author: str = '',
                                 limit=limit, cutoff=last_month())
     return [(row[0], row[1]) for row in result]
 
-
-async def pids_by_account_comments(db, account: str, start_permlink: str = '', limit: int = 20):
+async def get_data(db, query:str, account: str, start_permlink: str = '', limit: int = 20, truncate_body: int = 0):
     """Get a list of post_ids representing comments by an author."""
-    is_start_id = False
-    start_id = 0
-    if start_permlink:
-        start_id = await _get_post_id(db, account, start_permlink)
-        if not start_id:
-            return []
-        is_start_id = True
 
-    # `depth` in ORDER BY is a no-op, but forces an ix3 index scan (see #189)
-    sql = "SELECT id FROM get_pids_by_account_comments( '{}', {}, {}, {} )".format( account, start_id, is_start_id, limit )
-    return await db.query_col(sql)
+    sql = ""
 
+    if query == "blog_without_reblog":
+      sql = " SELECT * FROM get_by_blog_without_reblog( '{}', '{}', {} ) ".format( account, start_permlink, limit )
+    elif query == "account_comments":
+      sql = " SELECT * FROM get_by_account_comments( '{}', '{}', {} ) ".format( account, start_permlink, limit )
+    elif query == "replies_to_account":
+      sql = " SELECT * FROM get_by_replies_to_account( '{}', '{}', {} ) ".format( account, start_permlink, limit )
 
-async def get_by_replies_to_account(db, start_author: str, start_permlink: str = '',
-                                     limit: int = 20, truncate_body: int = 0):
-    """Get a list of post_ids representing replies to an author."""
-
-    sql = " SELECT * FROM get_by_replies_to_account( '{}', '{}', {} ) ".format( start_author, start_permlink, limit )
     result = await db.query_all(sql); 
 
-    #muted_accounts = Mutes.all()
     posts = []
     for row in result:
         row = dict(row)
@@ -230,3 +220,15 @@ async def get_by_replies_to_account(db, start_author: str, start_permlink: str =
         posts.append(post)
 
     return posts
+
+async def get_by_blog_without_reblog(db, account: str, start_permlink: str = '', limit: int = 20, truncate_body: int = 0):
+  """Get a list of post_ids for an author's blog without reblogs."""
+  return await get_data(db, "blog_without_reblog", account, start_permlink, limit, truncate_body )
+
+async def get_by_account_comments(db, account: str, start_permlink: str = '', limit: int = 20, truncate_body: int = 0):
+  """Get a list of post_ids representing comments by an author."""
+  return await get_data(db, "account_comments", account, start_permlink, limit, truncate_body )
+
+async def get_by_replies_to_account(db, start_author: str, start_permlink: str = '', limit: int = 20, truncate_body: int = 0):
+  """Get a list of post_ids representing replies to an author."""
+  return await get_data(db, "replies_to_account", start_author, start_permlink, limit, truncate_body )

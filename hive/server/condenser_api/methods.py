@@ -439,12 +439,11 @@ async def get_discussions_by_author_before_date(context, author: str = None, sta
     """
     # pylint: disable=invalid-name,unused-argument
     assert author, '`author` cannot be blank'
-    ids = await cursor.pids_by_blog_without_reblog(
+    return await cursor.get_by_blog_without_reblog(
         context['db'],
         valid_account(author),
         valid_permlink(start_permlink, allow_empty=True),
         valid_limit(limit, 100, 10))
-    return await load_posts(context['db'], ids)
 
 @return_error_info
 @nested_query_compat

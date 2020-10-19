@@ -164,8 +164,7 @@ async def _get_account_discussion_by_key(db, account, key):
     if key == 'recent_replies':
         posts = await cursor.get_by_replies_to_account(db, account, '', 20)
     elif key == 'comments':
-        pids = await cursor.pids_by_account_comments(db, account, '', 20)
-        posts = await load_posts(db, pids)
+        posts = await cursor.get_by_account_comments(db, account, '', 20)
     elif key == 'blog':
         pids = await cursor.pids_by_blog(db, account, '', '', 20)
         posts = await load_posts(db, pids)
