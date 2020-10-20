@@ -73,7 +73,7 @@ CREATE OR REPLACE FUNCTION list_comments_by_permlink(
         INNER JOIN hive_posts hp2 ON hp2.id = hp1.id
         WHERE
             hp2.counter_deleted = 0 AND NOT hp2.is_muted AND hp1.id != 0
-            AND hp1.author_s_permlink >= _author || '/' "" _permlink
+            AND hp1.author_s_permlink >= _author || '/' || _permlink
         ORDER BY
             hp1.author_s_permlink
         LIMIT

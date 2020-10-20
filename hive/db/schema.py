@@ -1204,7 +1204,9 @@ def setup(db):
       "condenser_get_discussions_by_promoted.sql",
       "condenser_get_post_discussions_by_payout.sql",
       "condenser_get_comment_discussions_by_payout.sql",
-      "update_hive_posts_children_count.sql"
+      "update_hive_posts_children_count.sql",
+      "update_hive_posts_api_helper.sql",
+      "database_api_list_comments.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
