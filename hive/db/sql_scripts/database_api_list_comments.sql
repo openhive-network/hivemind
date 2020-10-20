@@ -80,7 +80,7 @@ CREATE OR REPLACE FUNCTION list_comments_by_permlink(
             _limit
     ) ds ON ds.id = hp.id
     ORDER BY
-      hp1.author_s_permlink
+      hp.author, hp.permlink
   $function$
 ;
 
