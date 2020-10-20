@@ -8,6 +8,7 @@ from hive.server.condenser_api.objects import _mute_votes, _condenser_post_objec
 from hive.server.common.helpers import (
     ApiError,
     return_error_info,
+    json_date,
     valid_account,
     valid_permlink,
     valid_tag,
@@ -176,7 +177,7 @@ async def _get_content_impl(db, fat_node_style, author: str, permlink: str, obse
         if not observer:
             post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
         else:
-            blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
+            blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, {'db':db})
             post['active_votes'] = _mute_votes(post['active_votes'], blacklists_for_user.keys())
 
     return post
@@ -440,8 +441,43 @@ async def get_blog(context, account: str, start_entry_id: int = 0, limit: int = 
     """Get posts for an author's blog (w/ reblogs), paged by index/limit.
 
     Equivalent to get_discussions_by_blog, but uses offset-based pagination.
+
+    Examples: (ABW: old description and examples were misleading as in many cases code worked differently, also now more cases actually work that gave error earlier)
+    (acct, -1, limit) for limit 1..500 - returns latest (no more than) limit posts
+    (acct, 0) - returns latest single post (ABW: this is a bug but I left it here because I'm afraid it was actively used - it should return oldest post)
+    (acct, 0, limit) for limit 1..500 - same as (acct, -1, limit) - see above
+    (acct, last_idx) for positive last_idx - returns last_idx oldest posts, or posts in range [last_idx..last_idx-500) when last_idx >= 500
+    (acct, last_idx, limit) for positive last_idx and limit 1..500 - returns posts in range [last_idx..last_idx-limit)
     """
-    return await _get_blog(context['db'], account, start_entry_id, limit)
+    db = context['db']
+
+    account = valid_account(account)
+    if not start_entry_id:
+        start_entry_id = -1
+    start_entry_id = valid_offset(start_entry_id)
+    if not limit:
+        limit = max(start_entry_id + 1, 1)
+        limit = min(limit, 500)
+    limit = valid_limit(limit, 500, None)
+
+    sql = "SELECT * FROM condenser_get_blog(:account, :last, :limit)"
+    result = await db.query_all(sql, account=account, last=start_entry_id, limit=limit)
+
+    muted_accounts = Mutes.all()
+    out = []
+    for row in result:
+        row = dict(row)
+        post = _condenser_post_object(row)
+
+        post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
+        post['active_votes'] = _mute_votes(post['active_votes'], muted_accounts)
+
+        out.append({"blog": account,
+                    "entry_id": row['entry_id'],
+                    "comment": post,
+                    "reblogged_on": json_date(row['reblogged_at'])})
+
+    return list(reversed(out))
 
 @return_error_info
 @nested_query_compat
@@ -450,53 +486,30 @@ async def get_blog_entries(context, account: str, start_entry_id: int = 0, limit
 
     Interface identical to get_blog, but returns minimalistic post references.
     """
+    db = context['db']
 
-    entries = await _get_blog(context['db'], account, start_entry_id, limit)
-    for entry in entries:
-        # replace the comment body with just author/permlink
-        post = entry.pop('comment')
-        entry['author'] = post['author']
-        entry['permlink'] = post['permlink']
-
-    return entries
-
-async def _get_blog(db, account: str, start_index: int, limit: int = None):
-    """Get posts for an author's blog (w/ reblogs), paged by index/limit.
-
-    Examples:
-    (acct, 2) = returns blog entries 0 up to 2 (3 oldest)
-    (acct, 0) = returns all blog entries (limit 0 means return all?)
-    (acct, 2, 1) = returns 1 post starting at idx 2
-    (acct, 2, 3) = returns 3 posts: idxs (2,1,0)
-    (acct, -1, 10) = returns latest 10 posts
-    """
-
-    if start_index is None:
-        start_index = 0
-
+    account = valid_account(account)
+    if not start_entry_id:
+        start_entry_id = -1
+    start_entry_id = valid_offset(start_entry_id)
     if not limit:
-        limit = start_index + 1
+        limit = max(start_entry_id + 1, 1)
+        limit = min(limit, 500)
+    limit = valid_limit(limit, 500, None)
 
-    start_index, ids = await cursor.pids_by_blog_by_index(
-        db,
-        valid_account(account),
-        valid_offset(start_index),
-        valid_limit(limit, 500, None))
+    sql = "SELECT * FROM condenser_get_blog_entries(:account, :last, :limit)"
+    result = await db.query_all(sql, account=account, last=start_entry_id, limit=limit)
 
     out = []
-
-    idx = int(start_index)
-    for post in await load_posts(db, ids):
-        reblog = post['author'] != account
-        reblog_on = post['created'] if reblog else "1970-01-01T00:00:00"
-
+    for row in result:
+        row = dict(row)
         out.append({"blog": account,
-                    "entry_id": idx,
-                    "comment": post,
-                    "reblogged_on": reblog_on})
-        idx -= 1
+                    "entry_id": row['entry_id'],
+                    "author": row['author'],
+                    "permlink": row['permlink'],
+                    "reblogged_on": json_date(row['reblogged_at'])})
 
-    return out
+    return list(reversed(out))
 
 @return_error_info
 async def get_active_votes(context, author: str, permlink: str):

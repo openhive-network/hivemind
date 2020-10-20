@@ -88,6 +88,7 @@ async def load_posts_keyed(db, ids, truncate_body=0):
         post = _condenser_post_object(row, truncate_body=truncate_body)
 
         post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
+        post['active_votes'] = _mute_votes(post['active_votes'], muted_accounts)
         posts_by_id[row['id']] = post
 
     return posts_by_id

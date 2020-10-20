@@ -145,42 +145,6 @@ async def pids_by_blog(db, account: str, start_author: str = '',
     return await db.query_col(sql, account_id=account_id, start_id=start_id, limit=limit)
 
 
-async def pids_by_blog_by_index(db, account: str, start_index: int, limit: int = 20):
-    """Get post_ids for an author's blog (w/ reblogs), paged by index/limit.
-
-    Examples:
-    (acct, 2) = returns blog entries 0 up to 2 (3 oldest)
-    (acct, 0) = returns all blog entries (limit 0 means return all?)
-    (acct, 2, 1) = returns 1 post starting at idx 2
-    (acct, 2, 3) = returns 3 posts: idxs (2,1,0)
-    """
-
-    if start_index in (-1, 0):
-        sql = """SELECT COUNT(*) - 1 FROM hive_posts_view hp
-                  WHERE hp.author = :account"""
-        start_index = await db.query_one(sql, account=account)
-        if start_index < 0:
-            return (0, [])
-        if limit > start_index + 1:
-            limit = start_index + 1
-
-    offset = start_index - limit + 1
-    assert offset >= 0, ('start_index and limit combination is invalid (%d, %d)'
-                         % (start_index, limit))
-
-    sql = """
-        SELECT hp.id
-          FROM hive_posts_view hp
-         WHERE hp.author = :account
-      ORDER BY hp.created_at
-         LIMIT :limit
-        OFFSET :offset
-    """
-
-    ids = await db.query_col(sql, account=account, limit=limit, offset=offset)
-    return (start_index, list(reversed(ids)))
-
-
 async def pids_by_blog_without_reblog(db, account: str, start_permlink: str = '', limit: int = 20):
     """Get a list of post_ids for an author's blog without reblogs."""
 
