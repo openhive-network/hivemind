@@ -301,9 +301,7 @@ bridge_api_smoketest_benchmark:
   <<: *common_api_benchmarks
 
   script:
-    - tests/tests_api/hivemind/benchmarks/benchmark_generator.py tests/tests_api/hivemind/tavern/bridge_api_patterns/ api_benchmark_bridge.py "http://localhost:$HIVEMIND_HTTP_PORT"
-    - tox -e benchmark -- api_benchmark_bridge.py
-    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/bridge_api_patterns/ api_smoketest_bridge.xml
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/bridge_api_patterns/ api_benchmark_bridge.py api_smoketest_bridge.xml
 
   artifacts:
     when: always
@@ -314,9 +312,7 @@ bridge_api_smoketest_negative_benchmark:
   <<: *common_api_benchmarks
 
   script:
-    - tests/tests_api/hivemind/benchmarks/benchmark_generator.py tests/tests_api/hivemind/tavern/bridge_api_negative/ api_benchmark_bridge_negative.py "http://localhost:$HIVEMIND_HTTP_PORT"
-    - tox -e benchmark -- api_benchmark_bridge_negative.py
-    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/bridge_api_negative/ api_smoketest_bridge_negative.xml
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/bridge_api_negative/ api_benchmark_bridge_negative.py api_smoketest_bridge_negative.xml
 
   artifacts:
     when: always
@@ -327,9 +323,7 @@ condenser_api_smoketest_benchmark:
   <<: *common_api_benchmarks
 
   script:
-    - tests/tests_api/hivemind/benchmarks/benchmark_generator.py tests/tests_api/hivemind/tavern/condenser_api_patterns/ api_benchmark_condenser.py "http://localhost:$HIVEMIND_HTTP_PORT"
-    - tox -e benchmark -- api_benchmark_condenser.py
-    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/condenser_api_patterns/ api_smoketest_condenser_api.xml
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/condenser_api_patterns/ api_benchmark_condenser.py api_smoketest_condenser_api.xml
 
   artifacts:
     when: always
@@ -340,9 +334,7 @@ condenser_api_smoketest_negative_benchmark:
   <<: *common_api_benchmarks
 
   script:
-    - tests/tests_api/hivemind/benchmarks/benchmark_generator.py tests/tests_api/hivemind/tavern/condenser_api_negative/ api_benchmark_condenser_negative.py "http://localhost:$HIVEMIND_HTTP_PORT"
-    - tox -e benchmark -- api_benchmark_condenser_negative.py
-    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/condenser_api_negative/ api_smoketest_condenser_api_negative.xml
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/condenser_api_negative/ api_benchmark_condenser_negative.py api_smoketest_condenser_api_negative.xml
 
   artifacts:
     when: always
@@ -353,9 +345,7 @@ database_api_smoketest_benchmark:
   <<: *common_api_benchmarks
 
   script:
-    - tests/tests_api/hivemind/benchmarks/benchmark_generator.py tests/tests_api/hivemind/tavern/database_api_patterns/ api_benchmark_database.py "http://localhost:$HIVEMIND_HTTP_PORT"
-    - tox -e benchmark -- api_benchmark_database.py
-    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/database_api_patterns/ api_smoketest_database_api.xml
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/database_api_patterns/ api_benchmark_database.py api_smoketest_database_api.xml
 
   artifacts:
     when: always
@@ -366,9 +356,7 @@ database_api_smoketest_negative_benchmark:
   <<: *common_api_benchmarks
 
   script:
-    - tests/tests_api/hivemind/benchmarks/benchmark_generator.py tests/tests_api/hivemind/tavern/database_api_negative/ api_benchmark_database_negative.py "http://localhost:$HIVEMIND_HTTP_PORT"
-    - tox -e benchmark -- api_benchmark_database_negative.py
-    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/database_api_negative/ api_smoketest_database_api_negative.xml
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/database_api_negative/ api_benchmark_database_negative.py api_smoketest_database_api_negative.xml
 
   artifacts:
     when: always
@@ -379,9 +367,7 @@ follow_api_smoketest_benchmark:
   <<: *common_api_benchmarks
 
   script:
-    - tests/tests_api/hivemind/benchmarks/benchmark_generator.py tests/tests_api/hivemind/tavern/follow_api_patterns/ api_benchmark_follow.py "http://localhost:$HIVEMIND_HTTP_PORT"
-    - tox -e benchmark -- api_benchmark_follow.py
-    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/follow_api_patterns/ api_smoketest_follow_api.xml
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/follow_api_patterns/ api_benchmark_follow.py pi_smoketest_follow_api.xml
 
   artifacts:
     when: always
@@ -392,9 +378,7 @@ follow_api_smoketest_negative_benchmark:
   <<: *common_api_benchmarks
 
   script:
-    - tests/tests_api/hivemind/benchmarks/benchmark_generator.py tests/tests_api/hivemind/tavern/follow_api_negative/ api_benchmark_follow_negative.py "http://localhost:$HIVEMIND_HTTP_PORT"
-    - tox -e benchmark -- api_benchmark_follow_negative.py
-    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/follow_api_negative/ api_smoketest_follow_api_negative.xml
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/follow_api_negative/ api_benchmark_follow_negative.py api_smoketest_follow_api_negative.xml
 
   artifacts:
     when: always
@@ -405,9 +389,7 @@ tags_api_smoketest_benchmark:
   <<: *common_api_benchmarks
 
   script:
-    - tests/tests_api/hivemind/benchmarks/benchmark_generator.py tests/tests_api/hivemind/tavern/tags_api_patterns/ api_benchmark_tags.py "http://localhost:$HIVEMIND_HTTP_PORT"
-    - tox -e benchmark -- api_benchmark_tags.py
-    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/tags_api_patterns/ api_smoketest_tags_api.xml
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/tags_api_patterns/ api_benchmark_tags.py api_smoketest_tags_api.xml
 
   artifacts:
     when: always
@@ -418,9 +400,7 @@ tags_api_smoketest_negative_benchmark:
   <<: *common_api_benchmarks
 
   script:
-    - tests/tests_api/hivemind/benchmarks/benchmark_generator.py tests/tests_api/hivemind/tavern/tags_api_negative/ api_benchmark_tags_negative.py "http://localhost:$HIVEMIND_HTTP_PORT"
-    - tox -e benchmark -- api_benchmark_tags_negative.py
-    - scripts/xml_report_parser.py tests/tests_api/hivemind/tavern/tags_api_negative/ api_smoketest_tags_api_negative.xml
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/tags_api_negative/ api_benchmark_tags_negative.py api_smoketest_tags_api_negative.xml
 
   artifacts:
     when: always
