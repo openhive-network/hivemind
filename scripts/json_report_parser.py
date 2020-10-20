@@ -50,7 +50,6 @@ if __name__ == '__main__':
     html_file, _ = os.path.splitext(args.json_file)
     html_file = "tavern_benchmark_report_" + html_file + ".html"
     class_to_path_dic = make_class_path_dict(args.path_to_test_dir)
-    print(class_to_path_dic)
     with open(html_file, "w") as ofile:
         ofile.write("<html>\n")
         ofile.write("  <head>\n")
