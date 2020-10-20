@@ -326,7 +326,7 @@ condenser_api_smoketest_benchmark:
   artifacts:
     when: always
     paths:
-      - tavern_benchmark_report_api_benchmark_condenser_api.html
+      - tavern_benchmark_report_api_benchmark_condenser.html
 
 condenser_api_smoketest_negative_benchmark:
   <<: *common_api_benchmarks
@@ -337,7 +337,7 @@ condenser_api_smoketest_negative_benchmark:
   artifacts:
     when: always
     paths:
-      - tavern_benchmark_report_api_benchmark_condenser_api_negative.html
+      - tavern_benchmark_report_api_benchmark_condenser_negative.html
 
 database_api_smoketest_benchmark:
   <<: *common_api_benchmarks
@@ -348,7 +348,7 @@ database_api_smoketest_benchmark:
   artifacts:
     when: always
     paths:
-      - tavern_benchmark_report_api_benchmark_database_api.html
+      - tavern_benchmark_report_api_benchmark_database.html
 
 database_api_smoketest_negative_benchmark:
   <<: *common_api_benchmarks
@@ -359,7 +359,7 @@ database_api_smoketest_negative_benchmark:
   artifacts:
     when: always
     paths:
-      - tavern_benchmark_report_api_benchmark_database_api_negative.html
+      - tavern_benchmark_report_api_benchmark_database_negative.html
 
 follow_api_smoketest_benchmark:
   <<: *common_api_benchmarks
@@ -370,7 +370,7 @@ follow_api_smoketest_benchmark:
   artifacts:
     when: always
     paths:
-      - tavern_benchmark_report_api_benchmark_follow_api.html
+      - tavern_benchmark_report_api_benchmark_follow.html
 
 follow_api_smoketest_negative_benchmark:
   <<: *common_api_benchmarks
@@ -381,7 +381,7 @@ follow_api_smoketest_negative_benchmark:
   artifacts:
     when: always
     paths:
-      - tavern_benchmark_report_api_benchmark_follow_api_negative.html
+      - tavern_benchmark_report_api_benchmark_follow_negative.html
 
 tags_api_smoketest_benchmark:
   <<: *common_api_benchmarks
@@ -392,7 +392,7 @@ tags_api_smoketest_benchmark:
   artifacts:
     when: always
     paths:
-      - tavern_benchmark_report_api_benchmark_tags_api.html
+      - tavern_benchmark_report_api_benchmark_tags.html
 
 tags_api_smoketest_negative_benchmark:
   <<: *common_api_benchmarks
@@ -403,5 +403,5 @@ tags_api_smoketest_negative_benchmark:
   artifacts:
     when: always
     paths:
-      - tavern_benchmark_report_api_benchmark_tags_api_negative.html
+      - tavern_benchmark_report_api_benchmark_tags_negative.html
 
