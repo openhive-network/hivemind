@@ -48,7 +48,7 @@ if __name__ == '__main__':
     parser.add_argument("--time-threshold", dest="time_threshold", type=float, default=1.0, help="Time threshold for test execution time, tests with execution time greater than threshold will be marked on red.")
     args = parser.parse_args()
     html_file, _ = os.path.splitext(args.xml_file)
-    html_file += ".html"
+    html_file = "tavern_time_report_" + html_file + ".html"
     class_to_path_dic = make_class_path_dict(args.path_to_test_dir)
     with open(html_file, "w") as ofile:
         ofile.write("<html>\n")
