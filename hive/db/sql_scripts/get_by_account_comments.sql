@@ -12,21 +12,19 @@ RETURNS TABLE
 AS
 $function$
 DECLARE
-  _start_id INTEGER := 0;
-  _is_start_id BOOLEAN := False;
-  _id INTEGER := ( SELECT ha.id FROM hive_accounts ha WHERE ha.name = _author );
+  __post_id INTEGER := 0;
+  __id INTEGER := ( SELECT ha.id FROM hive_accounts ha WHERE ha.name = _author );
 BEGIN
 
   IF _permlink <> '' THEN
-    _is_start_id = True;
-    _start_id = find_comment_id( _author, _permlink, True );
+    __post_id = find_comment_id( _author, _permlink, True );
   END IF;
 
 	RETURN QUERY
 		SELECT hp.id
 		FROM hive_posts hp
-		WHERE author_id = _id
-		AND ( ( _is_start_id = false ) OR ( ( _is_start_id = true ) AND ( hp.id <= _start_id ) ) )
+		WHERE author_id = __id
+		AND ( ( __post_id = 0 ) OR ( hp.id <= __post_id ) )
 		AND depth > 0
 		AND counter_deleted = 0
 		ORDER BY id DESC, depth
