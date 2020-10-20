@@ -1,22 +1,17 @@
-DROP FUNCTION IF EXISTS get_pids_by_replies_to_account;
+DROP FUNCTION IF EXISTS get_by_replies_to_account;
 
-CREATE OR REPLACE FUNCTION get_pids_by_replies_to_account(
+CREATE OR REPLACE FUNCTION get_by_replies_to_account(
   in _author VARCHAR,
   in _permlink VARCHAR,
   in _limit INTEGER
 )
-RETURNS TABLE
-(
-  id hive_posts.id%TYPE
-)
+RETURNS SETOF bridge_api_post
 AS
 $function$
 DECLARE
   __post_id INTEGER := 0;
-  __id INTEGER;
   __posts_ids INTEGER[];
 BEGIN
-
 
   IF _permlink <> '' THEN
     SELECT
@@ -28,41 +23,17 @@ BEGIN
     WHERE child.author_id = (SELECT ha.id FROM hive_accounts ha WHERE ha.name = _author)
     AND child.permlink_id = (SELECT hpd.id FROM hive_permlink_data hpd WHERE hpd.permlink = _permlink);
   END IF;
-
-  __id = ( SELECT ha.id FROM hive_accounts ha WHERE ha.name = _author );
-
+ 
   __posts_ids = ARRAY
   (
     SELECT hp.id
     FROM hive_posts hp
-    WHERE hp.author_id = __id AND hp.counter_deleted = 0
+    JOIN hive_accounts ha ON hp.author_id = ha.id
+    WHERE ha.name = _author
     ORDER BY hp.id DESC
     LIMIT 10000
   );
-
-  RETURN QUERY
-      SELECT hp.id FROM hive_posts hp
-      WHERE hp.parent_id = ANY( __posts_ids )
-      AND ( ( __post_id = 0 ) OR ( hp.id <= __post_id ) )
-      AND hp.counter_deleted = 0
-      ORDER BY hp.id DESC
-      LIMIT _limit;
-END
-$function$
-LANGUAGE plpgsql;
-
-DROP FUNCTION IF EXISTS get_by_replies_to_account;
-
-CREATE OR REPLACE FUNCTION get_by_replies_to_account(
-  in _author VARCHAR,
-  in _permlink VARCHAR,
-  in _limit INTEGER
-)
-RETURNS SETOF bridge_api_post
-AS
-$function$
-BEGIN
-
+ 
   RETURN QUERY SELECT
       hp.id,
       hp.author,
@@ -101,8 +72,11 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value
     FROM hive_posts_view hp
-    INNER JOIN get_pids_by_replies_to_account( _author, _permlink, _limit ) as fun
-    ON hp.id = fun.id;
+    WHERE hp.parent_id = ANY( __posts_ids )
+    AND ( ( __post_id = 0 ) OR ( hp.id <= __post_id ) )
+    ORDER BY hp.id DESC
+    LIMIT _limit;
+
 END
 $function$
 language plpgsql STABLE;
