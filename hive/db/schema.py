@@ -306,9 +306,8 @@ def build_metadata():
     sa.Table(
         'hive_posts_api_helper', metadata,
         sa.Column('id', sa.Integer, primary_key=True, autoincrement = False),
-        sa.Column('author', VARCHAR(16, collation='C'), nullable=False),
-        sa.Column('permlink', VARCHAR(255, collation='C'), nullable=False),
-        sa.Index('hive_posts_api_helper_author_permlink_idx', 'author', 'permlink')
+        sa.Column('author_s_permlink', VARCHAR(275, collation='C'), nullable=False), # concatenation of author '/' permlink
+        sa.Index('hive_posts_api_helper_author_s_permlink_idx', 'author_s_permlink')
     )
 
     sa.Table(
@@ -1071,39 +1070,6 @@ def setup(db):
         END
         $BODY$;
         """
-    db.query_no_return(sql)
-
-    sql = """
-          DROP FUNCTION IF EXISTS public.update_hive_posts_api_helper(INTEGER, INTEGER);
-
-          CREATE OR REPLACE FUNCTION public.update_hive_posts_api_helper(in _first_block_num INTEGER, _last_block_num INTEGER)
-            RETURNS void
-            LANGUAGE 'plpgsql'
-            VOLATILE
-          AS $BODY$
-          BEGIN
-          IF _first_block_num IS NULL OR _last_block_num IS NULL THEN
-            -- initial creation of table.
-
-            INSERT INTO hive_posts_api_helper
-            (id, author, permlink)
-            SELECT hp.id, hp.author, hp.permlink
-            FROM hive_posts_view hp
-            ;
-          ELSE
-            -- Regular incremental update.
-            INSERT INTO hive_posts_api_helper
-            (id, author, permlink)
-            SELECT hp.id, hp.author, hp.permlink
-            FROM hive_posts_view hp
-            WHERE hp.block_num BETWEEN _first_block_num AND _last_block_num AND
-                   NOT EXISTS (SELECT NULL FROM hive_posts_api_helper h WHERE h.id = hp.id)
-            ;
-          END IF;
-
-          END
-          $BODY$
-          """
     db.query_no_return(sql)
 
     sql = """
