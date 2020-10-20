@@ -72,10 +72,10 @@ if __name__ == '__main__':
             json_data = load(json_file)
         for benchmark in json_data['benchmarks']:
             if float(benchmark['stats']['mean']) > args.time_threshold:
-                ofile.write("      <tr><td>{}<br/>Parameters: {}</td><td bgcolor=\"red\">{}</td></tr>\n".format(benchmark['name'], get_request_from_yaml(class_to_path(benchmark['name'][5:], class_to_path_dic)), benchmark['stats']['mean']))
+                ofile.write("      <tr><td>{}<br/>Parameters: {}</td><td bgcolor=\"red\">{:.4f}</td></tr>\n".format(benchmark['name'], get_request_from_yaml(class_to_path(benchmark['name'][5:], class_to_path_dic)), benchmark['stats']['mean']))
                 above_treshold = True
             else:
-                ofile.write("      <tr><td>{}</td><td>{}</td></tr>\n".format(benchmark['name'], benchmark['stats']['mean']))
+                ofile.write("      <tr><td>{}</td><td>{:.4f}</td></tr>\n".format(benchmark['name'], benchmark['stats']['mean']))
         ofile.write("    </table>\n")
         ofile.write("  </body>\n")
         ofile.write("</html>\n")
