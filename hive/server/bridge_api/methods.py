@@ -53,6 +53,7 @@ async def get_post(context, author, permlink, observer=None):
     #TODO: `observer` logic for user-post state
     db = context['db']
     valid_account(author)
+    valid_account(observer, allow_empty=True)
     valid_permlink(permlink)
 
     blacklists_for_user = None
@@ -286,6 +287,7 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
     account =         valid_account(account)
     start_author =    valid_account(start_author, allow_empty=True)
     start_permlink =  valid_permlink(start_permlink, allow_empty=True)
+    observer =        valid_account(observer, allow_empty=True)
     limit =           valid_limit(limit, 100, 20)
 
     sql = None
@@ -303,8 +305,6 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
         sql = "SELECT * FROM bridge_get_account_posts_by_replies( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'payout':
         sql = "SELECT * FROM bridge_get_account_posts_by_payout( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
-
-    observer = valid_account(observer, allow_empty=True)
 
     sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit )
     posts = []
