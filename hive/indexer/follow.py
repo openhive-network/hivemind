@@ -407,9 +407,11 @@ class Follow(DbAdapterHolder):
 
     @classmethod
     def _get_ids_for_accounts(cls, accounts):
-        sql = "select id from hive_accounts where name in :names"
-        sql_result = DB.query_all(sql, names=tuple(accounts))
         results = []
-        for row in sql_result:
-            results.append(row)
+        if accounts:
+            sql = "select id from hive_accounts where name in :names"
+            sql_result = DB.query_all(sql, names=tuple(accounts))
+
+            for row in sql_result:
+                results.append(row)
         return results
