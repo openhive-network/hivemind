@@ -374,25 +374,29 @@ async def get_follow_list(context, observer, follow_type='blacklisted'):
     valid_types = ['blacklisted', 'follow_blacklist', 'muted', 'follow_muted']
     assert follow_type in valid_types, 'invalid follow_type'
 
-    results = []
+    account_data = get_profile(context, observer)
+    metadata = account_data["metadata"]["profile"]
+    blacklist_description = metadata["blacklist_description"] if "blacklist_description" in metadata else ''
+    muted_list_description = metadata["muted_list_description"] if "muted_list_description" in metadata else ''
 
+    results = []
     if follow_type == 'follow_blacklist':
-        sql = """select hive_accounts.name, hive_accounts.blacklist_description, hive_accounts.muted_list_description
+        sql = """select hive_accounts.name
                  from hive_accounts join hive_follows on (hive_accounts.id = hive_follows.following) where
                  hive_follows.follower = (select id from hive_accounts where name = :observer) and follow_blacklists"""
         sql_result = await db.query_all(sql, observer=observer)
         for row in sql_result:
-            row_result = {'name': row['name'], 'blacklist_description': row['blacklist_description'], 'muted_list_description': row['muted_list_description']}
+            row_result = {'name': row['name'], 'blacklist_description': blacklist_description, 'muted_list_description': muted_list_description}
             results.append(row_result)
         return results
 
     elif follow_type == 'follow_muted':
-        sql = """select hive_accounts.name, hive_accounts.blacklist_description, hive_accounts.muted_list_description
+        sql = """select hive_accounts.name,
                  from hive_accounts join hive_follows on (hive_accounts.id = hive_follows.following) where
                  hive_follows.follower = (select id from hive_accounts where name = :observer) and follow_muted"""
         sql_result = await db.query_all(sql, observer=observer)
         for row in sql_result:
-            row_result = {'name': row['name'], 'blacklist_description': row['blacklist_description'], 'muted_list_description': row['muted_list_description']}
+            row_result = {'name': row['name'], 'blacklist_description': blacklist_description, 'muted_list_description': muted_list_description}
             results.append(row_result)
         return results
 

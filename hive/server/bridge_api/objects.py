@@ -195,8 +195,8 @@ def _bridge_profile_object(row):
                         'location': profile['location'],
                         'cover_image': profile['cover_image'],
                         'profile_image': profile['profile_image'],
-                        'blacklist_description': row['blacklist_description'] or "",
-                        'muted_list_description': row['muted_list_description'] or ""
+                        'blacklist_description': profile['blacklist_description'] if 'blacklist_description' in profile else '',
+                        'muted_list_description': profile['muted_list_description'] if 'muted_list_description' in profile else ''
                        }}}
 
 def _bridge_post_object(row, truncate_body=0):
