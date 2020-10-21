@@ -19,58 +19,6 @@ FOLLOWING = 'following'
 
 DB = Db.instance()
 
-FOLLOW_ITEM_INSERT_QUERY = """
-    INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists, follow_muted, block_number)
-    VALUES
-        (
-            :flr,
-            :flg,
-            :at,
-            :state,
-            (CASE :state
-                WHEN 3 THEN TRUE
-                WHEN 5 THEN FALSE
-                ELSE FALSE
-            END
-            ),
-            (CASE :state
-                WHEN 4 THEN FALSE
-                WHEN 6 THEN TRUE
-                ELSE FALSE
-            END
-            ),
-            (CASE :state
-                WHEN 7 THEN TRUE
-                WHEN 8 THEN FALSE
-                ELSE FALSE
-            END
-            ),
-            :block_num
-        )
-    ON CONFLICT (follower, following) DO UPDATE
-        SET
-            state = (CASE EXCLUDED.state
-                        WHEN 0 THEN 0 -- 0 blocks possibility to update state
-                        ELSE EXCLUDED.state
-                     END),
-            blacklisted = (CASE EXCLUDED.state
-                              WHEN 3 THEN TRUE
-                              WHEN 5 THEN FALSE
-                              ELSE hf.blacklisted
-                          END),
-            follow_blacklists = (CASE EXCLUDED.state
-                                    WHEN 4 THEN TRUE
-                                    WHEN 6 THEN FALSE
-                                    ELSE hf.follow_blacklists
-                                END),
-            follow_muted = (CASE EXCLUDED.state
-                                WHEN 7 THEN TRUE
-                                WHEN 8 THEN FALSE
-                                ELSE hf.follow_muted
-                            END)
-    """
-
-
 def _flip_dict(dict_to_flip):
     """Swap keys/values. Returned dict values are array of keys."""
     flipped = {}
@@ -109,30 +57,28 @@ class Follow(DbAdapterHolder):
         # [DK] op['flg'] can have a form of a list
         # [DK] we expect op['flg'] in form [[1],[2],[3],...]
         if not isinstance(op['flg'], list):
-            op['flg'] = [[op['flg']]]
+            op['flg'] = [op['flg']]
 
-        for following_id in op['flg']:
-            following_id = following_id[0]
-            k = '{}/{}'.format(op['flr'], following_id)
+        for following in op['flg']:
+            k = '{}/{}'.format(op['flr'], following)
             if k in cls.follow_items_to_flush:
                 cls.follow_items_to_flush[k]['state'] = state
             else:
                 cls.follow_items_to_flush[k] = dict(
                     flr=op['flr'],
-                    flg=following_id,
+                    flg=following,
                     state=state,
                     at=op['at'],
                     block_num=op['block_num'])
 
         if not DbState.is_initial_sync():
-            for following_id in op['flg']:
-                following_id = following_id[0]
+            for following in op['flg']:
                 new_state = state
-                old_state = cls._get_follow_db_state(op['flr'], following_id)
+                old_state = cls._get_follow_db_state(op['flr'], following)
                 if new_state == 1:
-                    Follow.follow(op['flr'], following_id)
+                    Follow.follow(op['flr'], following)
                 if old_state == 1:
-                    Follow.unfollow(op['flr'], following_id)
+                    Follow.unfollow(op['flr'], following)
 
         if state > 8:
             # check if given state exists in dict
@@ -161,33 +107,30 @@ class Follow(DbAdapterHolder):
         if what not in defs:
             return None
 
-        if isinstance(op['following'], list):
-            all_accounts = list(op['following'])
-            all_accounts.append(op['follower'])
-            if (op['follower'] in op['following']
+        all_accounts = op['following'] if isinstance(op['following'], list) else [op['following']]
+        all_accounts.append(op['follower'])
+        if (op['follower'] in op['following']
             or op['follower'] != account
             or not cls._are_accounts_valid(all_accounts)):
-                return None
-        else:
-            if(op['follower'] == op['following']        # can't follow self
-                or op['follower'] != account             # impersonation
-                or not Accounts.exists(op['following'])  # invalid account
-                or not Accounts.exists(op['follower'])): # invalid account
-                return None
+            return None
 
-        return dict(flr=Accounts.get_id(op['follower']),
-                    flg=Accounts.get_id(op['following']) if not isinstance(op['following'], list) else cls._get_ids_for_accounts(op['following']),
+        return dict(flr=op['follower'],
+                    flg=op['following'],
                     state=defs[what],
                     at=date)
 
     @classmethod
     def _get_follow_db_state(cls, follower, following):
         """Retrieve current follow state of an account pair."""
-        sql = """SELECT state FROM hive_follows
-                  WHERE follower = :follower
-                    AND following = :following"""
+        sql = """
+            SELECT
+                state
+            FROM
+                hive_follows hf
+            INNER JOIN hive_accounts ha_flr ON ha_flr.id = hf.follower AND ha_flr.name = :follower
+            INNER JOIN hive_accounts ha_flg ON ha_flg.id = hf.following AND ha_flg.name = :following
+        """
         return cls.db.query_one(sql, follower=follower, following=following)
-
 
     # -- stat tracking --
 
@@ -218,8 +161,27 @@ class Follow(DbAdapterHolder):
         if cls.follow_items_to_flush:
             sql_prefix = """
                 INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
-                VALUES """
-
+                SELECT ds.follower_id, ds.following_id, ds.created_at, ds.state, ds.blacklisted, ds.follow_blacklists, ds.follow_muted, ds.block_num
+                FROM
+                (
+                    SELECT 
+                        ha_flr.id as follower_id,
+                        ha_flg.id as following_id,
+                        t.created_at,
+                        t.state,
+                        t.blacklisted,
+                        t.follow_blacklists,
+                        t.follow_muted,
+                        t.block_num
+                    FROM
+                        (
+                            VALUES
+                            {}
+                        ) as T (follower, following, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
+                    INNER JOIN hive_accounts ha_flr ON ha_flr.name = T.follower
+                    INNER JOIN hive_accounts ha_flg ON ha_flg.name = T.following
+                ) AS ds(follower_id, following_id, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
+            """
             sql_postfix = """
                 ON CONFLICT ON CONSTRAINT hive_follows_ux1 DO UPDATE
                     SET
@@ -251,7 +213,7 @@ class Follow(DbAdapterHolder):
             cls.beginTx()
             for _, follow_item in cls.follow_items_to_flush.items():
                 if count < limit:
-                    values.append("({}, {}, '{}', {}, {}, {}, {}, {})".format(follow_item['flr'],
+                    values.append("('{}', '{}', '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['flr'],
                                                                           follow_item['flg'],
                                                                           follow_item['at'],
                                                                           follow_item['state'],
@@ -261,11 +223,11 @@ class Follow(DbAdapterHolder):
                                                                           follow_item['block_num']))
                     count = count + 1
                 else:
-                    query = sql_prefix + ",".join(values)
+                    query = str(sql_prefix).format(",".join(values))
                     query += sql_postfix
                     cls.db.query(query)
                     values.clear()
-                    values.append("({}, {}, '{}', {}, {}, {}, {}, {})".format(follow_item['flr'],
+                    values.append("('{}', '{}', '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['flr'],
                                                                           follow_item['flg'],
                                                                           follow_item['at'],
                                                                           follow_item['state'],
@@ -277,7 +239,7 @@ class Follow(DbAdapterHolder):
                 n += 1
 
             if len(values) > 0:
-                query = sql_prefix + ",".join(values)
+                query = str(sql_prefix).format(",".join(values))
                 query += sql_postfix
                 cls.db.query(query)
             cls.commitTx()
@@ -292,31 +254,201 @@ class Follow(DbAdapterHolder):
             for state, update_flush_items in cls.follow_update_items_to_flush.items():
                 for chunk in chunks(update_flush_items, 1000):
                     sql = None
+                    query_values = ','.join(["('{}')".format(account) for account in chunk])
                     # [DK] probaly not a bad idea to move that logic to SQL function
                     if state == 9:
                         #reset blacklists for follower
-                        sql = """UPDATE hive_follows set blacklisted = false where follower in :follower"""
+                        sql = """
+                            UPDATE 
+                                hive_follows hf
+                            SET
+                                hf.blacklisted = false
+                            FROM
+                            (
+                                SELECT 
+                                    ha.id as follower_id
+                                FROM
+                                    (
+                                        VALUES
+                                        {}
+                                    ) AS T(name)
+                                INNER JOIN hive_accounts ha ON ha.name = T.name
+                            ) AS ds (follower_id)
+                            WHERE 
+                                hf.follower = ds.follower_id
+                        """.format(query_values)
                     elif state == 10:
                         #reset following list for follower
-                        sql = """UPDATE hive_follows set state = 0 where follower in :follower AND state = 1"""
+                        sql = """
+                            UPDATE
+                                hive_follows hf
+                            SET
+                                hf.state = 0 
+                            FROM
+                            (
+                                SELECT 
+                                    ha.id as follower_id
+                                FROM
+                                    (
+                                        VALUES
+                                        {}
+                                    ) AS T(name)
+                                INNER JOIN hive_accounts ha ON ha.name = T.name
+                            ) AS ds (follower_id)
+                            WHERE 
+                                hf.follower = ds.follower_id
+                                AND hf.state = 1
+                        """.format(query_values)
                     elif state == 11:
                         #reset all muted list for follower
-                        sql = """UPDATE hive_follows set state = 0 where follower in :follower AND state = 2"""
+                        sql = """
+                            UPDATE
+                                hive_follows hf
+                            SET
+                                hf.state = 0 
+                            FROM
+                            (
+                                SELECT 
+                                    ha.id as follower_id
+                                FROM
+                                    (
+                                        VALUES
+                                        {}
+                                    ) AS T(name)
+                                INNER JOIN hive_accounts ha ON ha.name = T.name
+                            ) AS ds (follower_id)
+                            WHERE 
+                                hf.follower = ds.follower_id
+                                AND hf.state = 2
+                        """.format(query_values)
                     elif state == 12:
                         #reset followed blacklists
-                        sql = """UPDATE hive_follows set follow_blacklists = false where follower in :follower;"""
-                        sql = sql + """UPDATE hive_follows SET follow_blacklists = true WHERE follower in :follower AND following = (SELECT id FROM hive_accounts WHERE name = 'null')"""
+                        sql = """
+                            UPDATE 
+                                hive_follows hf
+                            SET
+                                hf.follow_blacklists = false
+                            FROM
+                            (
+                                SELECT 
+                                    ha.id as follower_id
+                                FROM
+                                    (
+                                        VALUES
+                                        {0}
+                                    ) AS T(name)
+                                INNER JOIN hive_accounts ha ON ha.name = T.name
+                            ) AS ds (follower_id)
+                            WHERE 
+                                hf.follower = ds.follower_id;
+
+                            UPDATE 
+                                hive_follows hf
+                            SET
+                                hf.follow_blacklists = true
+                            FROM
+                            (
+                                SELECT 
+                                    ha.id as follower_id
+                                FROM
+                                    (
+                                        VALUES
+                                        {0}
+                                    ) AS T(name)
+                                INNER JOIN hive_accounts ha ON ha.name = T.name
+                            ) AS ds (follower_id)
+                            WHERE 
+                                hf.follower = ds.follower_id
+                                AND following = (SELECT id FROM hive_accounts WHERE name = 'null')
+                        """.format(query_values)
+
                     elif state == 13:
                         #reset followed mute lists
-                        sql = """UPDATE hive_follows set follow_muted = false where follower in :follower;"""
-                        sql = sql + """UPDATE hive_follows SET follow_muted = true WHERE follower in :follower AND following = (SELECT id FROM hive_accounts WHERE name = 'null')"""
+                        sql = """
+                            UPDATE 
+                                hive_follows hf
+                            SET
+                                hf.follow_muted = false
+                            FROM
+                            (
+                                SELECT 
+                                    ha.id as follower_id
+                                FROM
+                                    (
+                                        VALUES
+                                        {0}
+                                    ) AS T(name)
+                                INNER JOIN hive_accounts ha ON ha.name = T.name
+                            ) AS ds (follower_id)
+                            WHERE 
+                                hf.follower = ds.follower_id;
+
+                            UPDATE 
+                                hive_follows hf
+                            SET
+                                hf.follow_muted = true
+                            FROM
+                            (
+                                SELECT 
+                                    ha.id as follower_id
+                                FROM
+                                    (
+                                        VALUES
+                                        {0}
+                                    ) AS T(name)
+                                INNER JOIN hive_accounts ha ON ha.name = T.name
+                            ) AS ds (follower_id)
+                            WHERE 
+                                hf.follower = ds.follower_id
+                                AND following = (SELECT id FROM hive_accounts WHERE name = 'null')
+                        """.format(query_values)
                     elif state == 14:
                         #reset all lists
-                        sql = """UPDATE hive_follows set blacklisted = false, follow_blacklists = false, follow_muted = false, state = 0 where follower in :follower;"""
-                        sql = sql + """UPDATE hive_follows SET follow_blacklists = true, follow_muted = true WHERE follower in :follower AND following = (SELECT id FROM hive_accounts WHERE name = 'null')"""
+                        sql = """
+                            UPDATE 
+                                hive_follows hf
+                            SET
+                                hf.blacklisted = false,
+                                hf.follow_blacklists = false,
+                                hf.follow_muted = false,
+                                hf.state = 0
+                            FROM
+                            (
+                                SELECT 
+                                    ha.id as follower_id
+                                FROM
+                                    (
+                                        VALUES
+                                        {0}
+                                    ) AS T(name)
+                                INNER JOIN hive_accounts ha ON ha.name = T.name
+                            ) AS ds (follower_id)
+                            WHERE 
+                                hf.follower = ds.follower_id;
+
+                            UPDATE 
+                                hive_follows hf
+                            SET
+                                hf.follow_blacklists = true,
+                                hf.follow_muted = true
+                            FROM
+                            (
+                                SELECT 
+                                    ha.id as follower_id
+                                FROM
+                                    (
+                                        VALUES
+                                        {0}
+                                    ) AS T(name)
+                                INNER JOIN hive_accounts ha ON ha.name = T.name
+                            ) AS ds (follower_id)
+                            WHERE 
+                                hf.follower = ds.follower_id
+                                AND following = (SELECT id FROM hive_accounts WHERE name = 'null')
+                        """.format(query_values)
                     if sql is not None:
                         cls.beginTx()
-                        DB.query(sql, follower=tuple(chunk))
+                        DB.query(sql)
                         cls.commitTx()
                     n += len(chunk)
             cls.follow_update_items_to_flush.clear()
@@ -333,8 +465,20 @@ class Follow(DbAdapterHolder):
         for col, deltas in cls._delta.items():
             for delta, names in _flip_dict(deltas).items():
                 updated += len(names)
-                sql = "UPDATE hive_accounts SET %s = %s + :mag WHERE id IN :ids"
-                sqls.append((sql % (col, col), dict(mag=delta, ids=tuple(names))))
+                query_values = ','.join(["('{}')".format(account) for account in names])
+                sql = """
+                    UPDATE
+                        hive_accounts ha
+                    SET
+                        %s = %s + :mag 
+                    FROM
+                    (
+                        VALUES
+                        %s
+                    ) AS T(name)
+                    WHERE ha.name = T.name
+                """
+                sqls.append((sql % (col, col, query_values), dict(mag=delta)))
 
         if not updated:
             return n
@@ -356,15 +500,23 @@ class Follow(DbAdapterHolder):
         expensive, but it's useful in case follow counts manage to get
         out of sync.
         """
-        ids = set([*cls._delta[FOLLOWERS].keys(),
+        names = set([*cls._delta[FOLLOWERS].keys(),
                    *cls._delta[FOLLOWING].keys()])
+        query_values = ','.join(["('{}')".format(account) for account in names])
         sql = """
-            UPDATE hive_accounts
-               SET followers = (SELECT COUNT(*) FROM hive_follows WHERE state = 1 AND following = hive_accounts.id),
-                   following = (SELECT COUNT(*) FROM hive_follows WHERE state = 1 AND follower  = hive_accounts.id)
-             WHERE id IN :ids
-        """
-        cls.db.query(sql, ids=tuple(ids))
+            UPDATE 
+                hive_accounts ha
+            SET 
+                followers = (SELECT COUNT(*) FROM hive_follows WHERE state = 1 AND following = ha.id),
+                following = (SELECT COUNT(*) FROM hive_follows WHERE state = 1 AND follower  = ha.id)
+            FROM
+            (
+                VALUES
+                {}
+            ) AS T(name)
+            WHERE ha.name = T.name
+        """.format(query_values)
+        cls.db.query(sql)
 
     @classmethod
     def force_recount(cls):
@@ -398,18 +550,23 @@ class Follow(DbAdapterHolder):
     def _are_accounts_valid(cls, accounts):
         if not isinstance(accounts, list):
             return False
-        sql = "select count(*) from hive_accounts where name in :names"
-        sql_result = DB.query_all(sql, names=tuple(accounts))
+        
+        query_values = ','.join(["('{}')".format(account) for account in accounts])
+
+        sql = """
+            SELECT 
+                count(*) 
+            FROM
+                hive_accounts ha
+            INNER JOIN
+            (
+                VALUES
+                {}
+            ) AS T(name) ON t.name = ha.name
+        """.format(query_values)
+
+        sql_result = DB.query_all(sql)
         names_found = sql_result[0]['count']
         if names_found != len(accounts):
             return False
         return True
-
-    @classmethod
-    def _get_ids_for_accounts(cls, accounts):
-        sql = "select id from hive_accounts where name in :names"
-        sql_result = DB.query_all(sql, names=tuple(accounts))
-        results = []
-        for row in sql_result:
-            results.append(row)
-        return results
