@@ -96,7 +96,7 @@ CREATE OR REPLACE VIEW public.hive_raw_notifications_as_view
             ''::character varying AS community_title,
             ''::character varying AS payload
            FROM hive_posts_pp_view hpv
-                  WHERE hpv.block_num >= block_before_head('90 days'::interval) and hpv.depth > 0 AND
+                  WHERE hpv.depth > 0 AND
                         NOT EXISTS (SELECT NULL::text
                                     FROM hive_follows hf
                                     WHERE hf.follower = hpv.parent_author_id AND hf.following = hpv.author_id AND hf.state = 2)
