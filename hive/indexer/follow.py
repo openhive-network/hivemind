@@ -6,8 +6,6 @@ from time import perf_counter as perf
 from funcy.seqs import first
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
-from hive.indexer.accounts import Accounts
-from hive.indexer.notify import Notify
 from hive.utils.misc import chunks
 
 from hive.indexer.db_adapter_holder import DbAdapterHolder
@@ -44,6 +42,8 @@ class Follow(DbAdapterHolder):
     # we will use this dict later to perform batch updates
     follow_update_items_to_flush = dict()
 
+    idx = 0
+
     @classmethod
     def follow_op(cls, account, op_json, date, block_num):
         """Process an incoming follow op."""
@@ -65,11 +65,13 @@ class Follow(DbAdapterHolder):
                 cls.follow_items_to_flush[k]['state'] = state
             else:
                 cls.follow_items_to_flush[k] = dict(
+                    idx=cls.idx,
                     flr=op['flr'],
                     flg=following,
                     state=state,
                     at=op['at'],
                     block_num=op['block_num'])
+            cls.idx += 1
 
         if not DbState.is_initial_sync():
             for following in op['flg']:
@@ -96,6 +98,10 @@ class Follow(DbAdapterHolder):
            or not isinstance(op['what'], list)
            or not 'follower' in op
            or not 'following' in op):
+            return None
+
+        # follower/following is empty
+        if not op['follower'] or not op['following']:
             return None
 
         what = first(op['what']) or ''
@@ -164,7 +170,8 @@ class Follow(DbAdapterHolder):
                 SELECT ds.follower_id, ds.following_id, ds.created_at, ds.state, ds.blacklisted, ds.follow_blacklists, ds.follow_muted, ds.block_num
                 FROM
                 (
-                    SELECT 
+                    SELECT
+                        t.id,
                         ha_flr.id as follower_id,
                         ha_flg.id as following_id,
                         t.created_at,
@@ -177,10 +184,12 @@ class Follow(DbAdapterHolder):
                         (
                             VALUES
                             {}
-                        ) as T (follower, following, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
+                        ) as T (id, follower, following, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
                     INNER JOIN hive_accounts ha_flr ON ha_flr.name = T.follower
                     INNER JOIN hive_accounts ha_flg ON ha_flg.name = T.following
-                ) AS ds(follower_id, following_id, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
+                    ORDER BY t.id
+                ) AS ds(id, follower_id, following_id, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
+                ORDER BY ds.id
             """
             sql_postfix = """
                 ON CONFLICT ON CONSTRAINT hive_follows_ux1 DO UPDATE
@@ -213,7 +222,7 @@ class Follow(DbAdapterHolder):
             cls.beginTx()
             for _, follow_item in cls.follow_items_to_flush.items():
                 if count < limit:
-                    values.append("('{}', '{}', '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['flr'],
+                    values.append("({}, '{}', '{}', '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['idx'], follow_item['flr'],
                                                                           follow_item['flg'],
                                                                           follow_item['at'],
                                                                           follow_item['state'],
@@ -227,7 +236,7 @@ class Follow(DbAdapterHolder):
                     query += sql_postfix
                     cls.db.query(query)
                     values.clear()
-                    values.append("('{}', '{}', '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['flr'],
+                    values.append("({}, '{}', '{}', '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['idx'], follow_item['flr'],
                                                                           follow_item['flg'],
                                                                           follow_item['at'],
                                                                           follow_item['state'],
