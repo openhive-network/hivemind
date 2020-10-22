@@ -257,9 +257,9 @@ class Blocks:
 
                 # account metadata updates
                 if op_type == 'account_update_operation':
-                    Accounts.update_op( op )
+                    Accounts.update_op( op, False )
                 elif op_type == 'account_update2_operation':
-                    Accounts.update_op( op )
+                    Accounts.update_op( op, True )
 
                 # post ops
                 elif op_type == 'comment_operation':

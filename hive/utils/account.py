@@ -17,14 +17,20 @@ def get_profile_str(account):
 
 def get_db_profile(posting_json_metadata, json_metadata):
     prof = {}
+    json_metadata_is_read = False
 
     try:
         # read from posting_json_metadata, if version==2
-        prof = json.loads(posting_json_metadata)['profile']
+        if posting_json_metadata is None or len( posting_json_metadata ) <= 2:
+            json_metadata_is_read = True
+            prof = json.loads(json_metadata)['profile']
+        else:
+            prof = json.loads(posting_json_metadata)['profile']
     except Exception:
         try:
             # fallback to json_metadata
-            prof = json.loads(json_metadata)['profile']
+            if not json_metadata_is_read:
+                prof = json.loads(json_metadata)['profile']
         except Exception:
             prof = {}
 

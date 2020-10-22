@@ -37,7 +37,7 @@ class Accounts(DbAdapterHolder):
     # --------------------
 
     @classmethod
-    def update_op(cls, update_operation):
+    def update_op(cls, update_operation, allow_change_posting):
         """Save json_metadata."""
 
         if cls.inside_flush:
@@ -46,7 +46,15 @@ class Accounts(DbAdapterHolder):
 
         key = update_operation['account']
         ( _posting_json_metadata, _json_metadata ) = get_profile_str( update_operation )
-        cls._updates_data[key] = { 'posting_json_metadata' : _posting_json_metadata, 'json_metadata' : _json_metadata }
+
+        if key in cls._updates_data:
+            if allow_change_posting:
+                cls._updates_data[key]['allow_change_posting'] = True
+                cls._updates_data[key]['posting_json_metadata'] = _posting_json_metadata
+
+            cls._updates_data[key]['json_metadata'] = _json_metadata
+        else:
+            cls._updates_data[key] = { 'allow_change_posting' : allow_change_posting, 'posting_json_metadata' : _posting_json_metadata, 'json_metadata' : _json_metadata }
 
     @classmethod
     def load_ids(cls):
@@ -135,20 +143,27 @@ class Accounts(DbAdapterHolder):
             sql = """
                     UPDATE hive_accounts ha
                     SET
-                    posting_json_metadata = T2.posting_json_metadata,
+                    posting_json_metadata = 
+                            (
+                                CASE T2.allow_change_posting
+                                    WHEN True THEN T2.posting_json_metadata
+                                    ELSE ha.posting_json_metadata
+                                END
+                            ),
                     json_metadata = T2.json_metadata
                     FROM
                     (
                       SELECT
+                        allow_change_posting,
                         posting_json_metadata,
                         json_metadata,
                         name
                       FROM
                       (
                       VALUES
-                        -- posting_json_metadata, json_metadata, name
+                        -- allow_change_posting, posting_json_metadata, json_metadata, name
                         {}
-                      )T( posting_json_metadata, json_metadata, name )
+                      )T( allow_change_posting, posting_json_metadata, json_metadata, name )
                     )T2
                     WHERE ha.name = T2.name
                 """
@@ -157,7 +172,8 @@ class Accounts(DbAdapterHolder):
             values_limit = 1000
 
             for name, data in cls._updates_data.items():
-                values.append("({}, {}, '{}')".format(
+                values.append("({}, {}, {}, '{}')".format(
+                  data['allow_change_posting'],
                   cls.get_json_data( data['posting_json_metadata'] ),
                   cls.get_json_data( data['json_metadata'] ),
                   name))
