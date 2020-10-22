@@ -54,11 +54,6 @@ class Follow(DbAdapterHolder):
 
         state = op['state']
 
-        # [DK] op['flg'] can have a form of a list
-        # [DK] we expect op['flg'] in form [[1],[2],[3],...]
-        if not isinstance(op['flg'], list):
-            op['flg'] = [op['flg']]
-
         for following in op['flg']:
             k = '{}/{}'.format(op['flr'], following)
             if k in cls.follow_items_to_flush:
@@ -121,7 +116,7 @@ class Follow(DbAdapterHolder):
             return None
 
         return dict(flr=op['follower'],
-                    flg=op['following'],
+                    flg=op['following'] if isinstance(op['following'], list) else [op['following']],
                     state=defs[what],
                     at=date)
 
@@ -187,9 +182,9 @@ class Follow(DbAdapterHolder):
                         ) as T (id, follower, following, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
                     INNER JOIN hive_accounts ha_flr ON ha_flr.name = T.follower
                     INNER JOIN hive_accounts ha_flg ON ha_flg.name = T.following
-                    ORDER BY t.id
+                    ORDER BY T.block_num ASC, T.id ASC
                 ) AS ds(id, follower_id, following_id, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
-                ORDER BY ds.id
+                ORDER BY ds.block_num ASC, ds.id ASC
             """
             sql_postfix = """
                 ON CONFLICT ON CONSTRAINT hive_follows_ux1 DO UPDATE
@@ -222,7 +217,8 @@ class Follow(DbAdapterHolder):
             cls.beginTx()
             for _, follow_item in cls.follow_items_to_flush.items():
                 if count < limit:
-                    values.append("({}, '{}', '{}', '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['idx'], follow_item['flr'],
+                    values.append("({}, '{}', '{}', '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['idx'],
+                                                                          follow_item['flr'],
                                                                           follow_item['flg'],
                                                                           follow_item['at'],
                                                                           follow_item['state'],
@@ -236,7 +232,8 @@ class Follow(DbAdapterHolder):
                     query += sql_postfix
                     cls.db.query(query)
                     values.clear()
-                    values.append("({}, '{}', '{}', '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['idx'], follow_item['flr'],
+                    values.append("({}, '{}', '{}', '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['idx'],
+                                                                          follow_item['flr'],
                                                                           follow_item['flg'],
                                                                           follow_item['at'],
                                                                           follow_item['state'],
@@ -461,6 +458,7 @@ class Follow(DbAdapterHolder):
                         cls.commitTx()
                     n += len(chunk)
             cls.follow_update_items_to_flush.clear()
+            cls.idx = 0
         return n
 
     @classmethod
