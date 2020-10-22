@@ -72,7 +72,7 @@ BEGIN
   (
     select nv.id, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.score, nv.community, nv.community_title, nv.payload
       from hive_raw_notifications_view nv
-  WHERE nv.dst = __account_id  AND hnv.block_num > block_before_head( '90 days' ) AND nv.score >= _min_score AND ( _last_id = 0 OR nv.id < _last_id )
+  WHERE nv.dst = __account_id  AND nv.block_num > block_before_head( '90 days' ) AND nv.score >= _min_score AND ( _last_id = 0 OR nv.id < _last_id )
   ORDER BY nv.id DESC
   LIMIT _limit
   ) hnv
@@ -82,9 +82,7 @@ BEGIN
   join hive_accounts hd on hd.id = hnv.dst
   join hive_permlink_data hpd on hp.permlink_id = hpd.id
   ORDER BY hnv.id DESC
-  LIMIT _limit
-
-  ;
+  LIMIT _limit;
 END
 $BODY$;
 
@@ -114,7 +112,7 @@ BEGIN
   (
     SELECT nv.id, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.score, nv.community, nv.community_title, nv.payload
     FROM hive_raw_notifications_view nv
-    WHERE nv.post_id = __post_id AND hnv.block_num > block_before_head( '90 days' ) AND nv.score >= _min_score AND ( _last_id = 0 OR nv.id < _last_id )
+    WHERE nv.post_id = __post_id AND nv.block_num > block_before_head( '90 days' ) AND nv.score >= _min_score AND ( _last_id = 0 OR nv.id < _last_id )
     ORDER BY nv.id DESC
     LIMIT _limit
   ) hnv

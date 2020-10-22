@@ -114,8 +114,8 @@ def build_metadata():
         sa.Column('author_rewards_hbd', sa.BigInteger, nullable=False, server_default='0'),
         sa.Column('author_rewards_vests', sa.BigInteger, nullable=False, server_default='0'),
 
-        sa.Column('abs_rshares', sa.BigInteger, nullable=False, server_default='0'),
-        sa.Column('vote_rshares', sa.BigInteger, nullable=False, server_default='0'),
+        sa.Column('abs_rshares', sa.Numeric, nullable=False, server_default='0'),
+        sa.Column('vote_rshares', sa.Numeric, nullable=False, server_default='0'),
         sa.Column('total_vote_weight', sa.Numeric, nullable=False, server_default='0'),
         sa.Column('active', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
         sa.Column('cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
@@ -754,22 +754,8 @@ def setup(db):
           0 AS active_votes,
           hp.created_at,
           hp.updated_at,
-            COALESCE(
-              (
-                SELECT SUM( v.rshares )
-                FROM hive_votes v
-                WHERE v.post_id = hp.id
-                GROUP BY v.post_id
-              ), 0
-            ) AS rshares,
-            COALESCE(
-              (
-                SELECT SUM( CASE v.rshares >= 0 WHEN True THEN v.rshares ELSE -v.rshares END )
-                FROM hive_votes v
-                WHERE v.post_id = hp.id AND NOT v.rshares = 0
-                GROUP BY v.post_id
-              ), 0
-            ) AS abs_rshares,
+          hp.vote_rshares AS rshares,
+          hp.abs_rshares AS abs_rshares,
             COALESCE(
               (
                 SELECT COUNT( 1 )
@@ -1208,7 +1194,8 @@ def setup(db):
       "condenser_get_comment_discussions_by_payout.sql",
       "update_hive_posts_children_count.sql",
       "update_hive_posts_api_helper.sql",
-      "database_api_list_comments.sql"
+      "database_api_list_comments.sql",
+      "update_posts_rshares.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))

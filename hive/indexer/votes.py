@@ -104,7 +104,8 @@ class Votes(DbAdapterHolder):
                     rshares = CASE EXCLUDED.is_effective WHEN true THEN EXCLUDED.rshares ELSE hive_votes.rshares END,
                     vote_percent = EXCLUDED.vote_percent,
                     last_update = EXCLUDED.last_update,
-                    num_changes = hive_votes.num_changes + EXCLUDED.num_changes + 1
+                    num_changes = hive_votes.num_changes + EXCLUDED.num_changes + 1,
+                    block_num = EXCLUDED.block_num
                   WHERE hive_votes.voter_id = EXCLUDED.voter_id and hive_votes.author_id = EXCLUDED.author_id and hive_votes.permlink_id = EXCLUDED.permlink_id;
                 """
             # WHERE clause above seems superfluous (and works all the same without it, at least up to 5mln)

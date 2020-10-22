@@ -1,4 +1,4 @@
-DROP VIEW if exists public.hive_posts_base_view cascade;
+DROP VIEW IF EXISTS public.hive_posts_base_view cascade;
 CREATE OR REPLACE VIEW public.hive_posts_base_view
 AS
 SELECT
@@ -8,19 +8,9 @@ SELECT
     , hp.permlink_id
     , hp.payout
     , hp.pending_payout
-    , COALESCE( SUM( CASE hv.rshares >= 0 WHEN true THEN hv.rshares ELSE - hv.rshares END), 0::numeric ) AS abs_rshares
-    , COALESCE( SUM( hv.rshares ), 0::numeric ) AS rshares
-   FROM hive_posts hp
-   JOIN hive_votes hv ON hp.id = hv.post_id
-   WHERE NOT hv.rshares = 0
-   GROUP BY
-      hv.post_id
-    , hp.block_num
-    , hp.id
-    , hp.author_id
-    , hp.permlink_id
-    , hp.payout
-    , hp.pending_payout
+    , hp.abs_rshares
+    , hp.vote_rshares AS rshares
+FROM hive_posts hp
 ;
 
 DROP VIEW IF EXISTS public.hive_posts_pp_view CASCADE;
