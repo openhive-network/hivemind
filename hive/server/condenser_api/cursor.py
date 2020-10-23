@@ -1,7 +1,6 @@
 """Cursor-based pagination queries, mostly supporting condenser_api."""
 
 from hive.server.common.helpers import last_month
-from json import loads
 
 # pylint: disable=too-many-lines
 

@@ -3,7 +3,6 @@
 from enum import IntEnum
 import logging
 from hive.db.adapter import Db
-from hive.db.db_state import DbState
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
 #pylint: disable=too-many-lines,line-too-long

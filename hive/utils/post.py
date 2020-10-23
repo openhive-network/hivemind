@@ -2,13 +2,6 @@
 #pylint: disable=line-too-long,too-many-lines
 
 import re
-import math
-import ujson as json
-import datetime
-from funcy.seqs import first, distinct
-
-from hive.utils.normalize import sbd_amount
-from hive.indexer.votes import Votes
 
 def mentions(body):
     """Given a post body, return proper @-mentioned account names."""

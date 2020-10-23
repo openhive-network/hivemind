@@ -1,18 +1,11 @@
 """Hive sync manager."""
 
 import logging
-import glob
 from time import perf_counter as perf
-import os
 import ujson as json
-import time
 
-import concurrent, threading, queue
+import queue
 from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures import Future
-
-from funcy.seqs import drop
-from toolz import partition_all
 
 from hive.db.db_state import DbState
 
@@ -22,9 +15,6 @@ from hive.steem.block.stream import MicroForkException
 from hive.indexer.blocks import Blocks
 from hive.indexer.accounts import Accounts
 from hive.indexer.follow import Follow
-from hive.indexer.community import Community
-from hive.indexer.reblog import Reblog
-from hive.indexer.reputations import Reputations
 
 from hive.server.common.payout_stats import PayoutStats
 from hive.server.common.mentions import Mentions

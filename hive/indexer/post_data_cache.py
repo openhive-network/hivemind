@@ -1,7 +1,5 @@
 import logging
-import logging
 from hive.utils.normalize import escape_characters
-from hive.db.adapter import Db
 
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 

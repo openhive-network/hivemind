@@ -10,7 +10,6 @@ from diff_match_patch import diff_match_patch
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 
-from hive.indexer.accounts import Accounts
 from hive.indexer.feed_cache import FeedCache
 from hive.indexer.community import Community, START_DATE
 from hive.indexer.notify import Notify
@@ -19,7 +18,7 @@ from hive.indexer.tags import Tags
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.misc import chunks
 
-from hive.utils.normalize import sbd_amount, legacy_amount, asset_to_hbd_hive, safe_img_url, escape_characters
+from hive.utils.normalize import sbd_amount, legacy_amount, safe_img_url, escape_characters
 
 log = logging.getLogger(__name__)
 DB = Db.instance()

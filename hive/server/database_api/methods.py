@@ -3,10 +3,7 @@ from enum import Enum
 
 from hive.server.common.helpers import return_error_info, valid_limit, valid_account, valid_permlink, valid_date
 from hive.server.database_api.objects import database_post_object
-from hive.utils.normalize import time_string_with_t
 from hive.server.common.helpers import json_date
-
-import datetime
 
 @return_error_info
 async def list_comments(context, start: list, limit: int = 1000, order: str = None):

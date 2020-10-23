@@ -7,7 +7,6 @@ from funcy.seqs import first
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 from hive.indexer.accounts import Accounts
-from hive.indexer.notify import Notify
 from hive.utils.misc import chunks
 
 from hive.indexer.db_adapter_holder import DbAdapterHolder

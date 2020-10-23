@@ -3,7 +3,6 @@ import logging
 
 from hive.server.common.helpers import return_error_info, valid_account, valid_permlink, valid_number, valid_limit, valid_score, json_date
 from hive.indexer.notify import NotifyType
-from hive.server.hive_api.common import get_account_id, get_post_id
 from hive.server.common.mutes import Mutes
 
 log = logging.getLogger(__name__)

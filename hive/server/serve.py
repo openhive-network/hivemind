@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """Hive JSON-RPC API server."""
-from hive.server.database_api.methods import find_votes, list_votes
 import os
 import sys
 import logging

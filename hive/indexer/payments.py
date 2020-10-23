@@ -3,7 +3,6 @@
 import logging
 
 from hive.db.adapter import Db
-from hive.db.db_state import DbState
 from hive.utils.normalize import parse_amount
 
 from hive.indexer.posts import Posts

@@ -8,7 +8,6 @@ from time import perf_counter
 import logging
 import sqlalchemy
 
-from concurrent.futures import ThreadPoolExecutor
 
 from hive.db.schema import (setup, reset_autovac, set_logged_table_attribute, build_metadata,
                             build_metadata_community, teardown, DB_VERSION)
