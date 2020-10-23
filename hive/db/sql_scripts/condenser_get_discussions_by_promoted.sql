@@ -65,20 +65,15 @@ language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS condenser_get_discussions_by_promoted_with_empty_tag;
 
-CREATE FUNCTION condenser_get_discussions_by_promoted_with_empty_tag( in _tag VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION condenser_get_discussions_by_promoted_with_empty_tag( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
 RETURNS SETOF bridge_api_post
 AS
 $function$
 DECLARE
   __post_id INT;
-  __community VARCHAR;
-  __category_id INT;
 BEGIN
 
-  __post_id     = find_comment_id( _author, _permlink, True );
-  __community   = ( SELECT substring(_tag from '^hive-') );
-
-  __category_id = ( SELECT id FROM hive_category_data WHERE category = _tag );
+  __post_id = find_comment_id( _author, _permlink, True );
 
   RETURN QUERY SELECT
       hp.id,
@@ -118,9 +113,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value
     FROM hive_posts_view hp
-    INNER JOIN hive_post_tags hpt ON hpt.post_id = hp.id
     WHERE hp.promoted > 0 AND ( __post_id = 0 OR hp.id < __post_id )
-          AND ( ( __community IS NULL ) OR ( ( __community IS NOT NULL ) AND ( __category_id = 0 OR hp.category_id = __category_id ) ) )
     ORDER BY hp.promoted DESC, hp.id DESC LIMIT _limit;
 END
 $function$

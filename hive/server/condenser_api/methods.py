@@ -246,25 +246,30 @@ async def get_posts_by_given_sort(context, sort: str, start_author: str = '', st
     tag             = valid_tag(tag, allow_empty=True)
 
     posts = []
+    is_tag = True
    
     if sort == 'created':
       if tag == '':
-        sql = "SELECT * FROM condenser_get_discussions_by_created_with_empty_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        is_tag = False
+        sql = "SELECT * FROM condenser_get_discussions_by_created_with_empty_tag( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
       else:
         sql = "SELECT * FROM condenser_get_discussions_by_created( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'trending':
       if tag == '':
-        sql = "SELECT * FROM condenser_get_discussions_by_trending_with_empty_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        is_tag = False
+        sql = "SELECT * FROM condenser_get_discussions_by_trending_with_empty_tag( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
       else:
         sql = "SELECT * FROM condenser_get_discussions_by_trending( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'hot':
       if tag == '':
-        sql = "SELECT * FROM condenser_get_discussions_by_hot_with_empty_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        is_tag = False
+        sql = "SELECT * FROM condenser_get_discussions_by_hot_with_empty_tag( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
       else:
         sql = "SELECT * FROM condenser_get_discussions_by_hot( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'promoted':
       if tag == '':
-        sql = "SELECT * FROM condenser_get_discussions_by_promoted_with_empty_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        is_tag = False
+        sql = "SELECT * FROM condenser_get_discussions_by_promoted_with_empty_tag( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
       else:
         sql = "SELECT * FROM condenser_get_discussions_by_promoted( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'post_by_payout':
@@ -274,7 +279,10 @@ async def get_posts_by_given_sort(context, sort: str, start_author: str = '', st
     else:
       return posts
 
-    sql_result = await db.query_all(sql, tag=tag, author=start_author, permlink=start_permlink, limit=limit )
+    if is_tag:
+        sql_result = await db.query_all(sql, tag=tag, author=start_author, permlink=start_permlink, limit=limit )
+    else:
+        sql_result = await db.query_all(sql, author=start_author, permlink=start_permlink, limit=limit )
 
     for row in sql_result:
         post = _condenser_post_object(row, truncate_body)
