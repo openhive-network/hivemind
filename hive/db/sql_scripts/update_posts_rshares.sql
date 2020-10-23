@@ -9,11 +9,13 @@ VOLATILE
 AS
 $BODY$
 BEGIN
-UPDATE pg_settings SET setting = 'off' WHERE name = 'enable_seqscan';
+SET LOCAL work_mem='2GB';
 UPDATE hive_posts hp
 SET
     abs_rshares = votes_rshares.abs_rshares
   , vote_rshares = votes_rshares.rshares
+  , sc_hot = calculate_hot( votes_rshares.rshares, hp.created_at)
+  , sc_trend = calculate_tranding( votes_rshares.rshares, hp.created_at)
 FROM
   (
     SELECT
@@ -31,7 +33,7 @@ FROM
   ) as votes_rshares
 WHERE hp.id = votes_rshares.post_id
 AND (hp.abs_rshares != votes_rshares.abs_rshares OR hp.vote_rshares != votes_rshares.rshares);
-UPDATE pg_settings SET setting = reset_val WHERE name = 'enable_seqscan';
+RESET work_mem;
 END;
 $BODY$
 ;

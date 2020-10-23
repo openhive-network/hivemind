@@ -281,16 +281,6 @@ class DbState:
 
         time_start = perf_counter()
 
-        sql = """
-              select update_hot_and_trending_for_blocks({}, {})
-              """.format(last_imported_block, current_imported_block)
-        row = DbState.db().query_row(sql)
-
-        time_end = perf_counter()
-        log.info("[INIT] update_all_hot_and_tranding executed in %.4fs", time_end - time_start)
-
-        time_start = perf_counter()
-
         update_active_starting_from_posts_on_block(last_imported_block, current_imported_block)
 
         time_end = perf_counter()

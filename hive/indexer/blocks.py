@@ -432,7 +432,6 @@ class Blocks:
 
         queries = [
             "SELECT update_posts_rshares({}, {})".format(first_block, last_block),
-            "SELECT update_hot_and_trending_for_blocks({}, {})".format(first_block, last_block),
             "SELECT update_hive_posts_children_count({}, {})".format(first_block, last_block),
             "SELECT update_hive_posts_root_id({},{})".format(first_block, last_block),
             "SELECT update_hive_posts_api_helper({},{})".format(first_block, last_block),

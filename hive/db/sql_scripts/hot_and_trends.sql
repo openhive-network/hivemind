@@ -78,8 +78,8 @@ END;
 $BODY$
 ;
 
-DROP FUNCTION IF EXISTS public.calculate_rhsares_part_of_hot_and_trend(_rshares hive_votes.rshares%TYPE) CASCADE;
-CREATE OR REPLACE FUNCTION public.calculate_rhsares_part_of_hot_and_trend(_rshares hive_votes.rshares%TYPE)
+DROP FUNCTION IF EXISTS public.calculate_rhsares_part_of_hot_and_trend(_rshares hive_posts.vote_rshares%TYPE) CASCADE;
+CREATE OR REPLACE FUNCTION public.calculate_rhsares_part_of_hot_and_trend(_rshares hive_posts.vote_rshares%TYPE)
 RETURNS double precision
 LANGUAGE 'plpgsql'
 IMMUTABLE
@@ -97,9 +97,9 @@ END;
 $BODY$
 ;
 
-DROP FUNCTION IF EXISTS public.calculate_hot(hive_votes.rshares%TYPE, hive_posts.created_at%TYPE);
+DROP FUNCTION IF EXISTS public.calculate_hot(hive_posts.vote_rshares%TYPE, hive_posts.created_at%TYPE);
 CREATE OR REPLACE FUNCTION public.calculate_hot(
-    _rshares hive_votes.rshares%TYPE,
+    _rshares hive_posts.vote_rshares%TYPE,
     _post_created_at hive_posts.created_at%TYPE)
 RETURNS hive_posts.sc_hot%TYPE
 LANGUAGE 'plpgsql'
@@ -111,9 +111,9 @@ END;
 $BODY$
 ;
 
-DROP FUNCTION IF EXISTS public.calculate_tranding(hive_votes.rshares%TYPE, hive_posts.created_at%TYPE);
+DROP FUNCTION IF EXISTS public.calculate_tranding(hive_posts.vote_rshares%TYPE, hive_posts.created_at%TYPE);
 CREATE OR REPLACE FUNCTION public.calculate_tranding(
-    _rshares hive_votes.rshares%TYPE,
+    _rshares hive_posts.vote_rshares%TYPE,
     _post_created_at hive_posts.created_at%TYPE)
 RETURNS hive_posts.sc_trend%TYPE
 LANGUAGE 'plpgsql'
@@ -122,45 +122,5 @@ AS $BODY$
 BEGIN
     return calculate_rhsares_part_of_hot_and_trend(_rshares) + calculate_time_part_of_trending( _post_created_at );
 END;
-$BODY$
-;
-
-DROP FUNCTION IF EXISTS public.update_hot_and_trending_for_blocks;
-CREATE OR REPLACE FUNCTION public.update_hot_and_trending_for_blocks(
-  _first_block integer,
-  _last_block integer)
-    RETURNS void
-    LANGUAGE 'plpgsql'
-
-    COST 100
-    VOLATILE 
-AS $BODY$
-BEGIN
-UPDATE hive_posts hp
-SET
-    sc_hot = calculate_hot( votes.rshares, hp.created_at)
-  , sc_trend = calculate_tranding( votes.rshares, hp.created_at)
-FROM
-(
-  SELECT
-    hv1.post_id
-   ,CAST( SUM(hv1.rshares) as BIGINT) as rshares
-  FROM
-    hive_votes hv1
-    JOIN
-    (
-      SELECT
-        hv.post_id
-      FROM
-        hive_votes hv
-      WHERE hv.block_num >= _first_block AND hv.block_num <= _last_block
-      GROUP BY hv.post_id
-    ) as filtered_votes ON hv1.post_id = filtered_votes.post_id
-  GROUP BY hv1.post_id
-) as votes
-WHERE
-  hp.is_paidout = False
-  AND votes.post_id = hp.id;
-END
 $BODY$
 ;
