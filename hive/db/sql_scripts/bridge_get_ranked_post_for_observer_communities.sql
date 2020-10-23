@@ -5,11 +5,10 @@ AS
 $function$
 DECLARE
   __post_id INT;
-  __enable_sort BOOLEAN;
+  __account_id INT;
 BEGIN
-  SHOW enable_sort INTO __enable_sort;
   __post_id = find_comment_id( _author, _permlink, True );
-  SET enable_sort=false;
+  __account_id = find_account_id( _observer, True );
   RETURN QUERY SELECT
       hp.id,
       hp.author,
@@ -50,16 +49,10 @@ BEGIN
   FROM
       hive_posts_view hp
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
-      JOIN hive_accounts ha_o ON ha_o.id = hs.account_id
       JOIN hive_accounts_view ha ON ha.id = hp.author_id
-  WHERE ha_o.name = _observer AND hp.depth = 0 AND NOT ha.is_grayed AND ( __post_id = 0 OR hp.id < __post_id )
+  WHERE hs.account_id = __account_id AND hp.depth = 0 AND NOT ha.is_grayed AND ( __post_id = 0 OR hp.id < __post_id )
   ORDER BY hp.id DESC
   LIMIT _limit;
-  IF __enable_sort THEN
-      SET enable_sort=true;
-  ELSE
-      SET enable_sort=false;
-  END IF;
 END
 $function$
 language plpgsql VOLATILE;
@@ -72,14 +65,13 @@ $function$
 DECLARE
   __post_id INT;
   __hot_limit FLOAT;
-  __enable_sort BOOLEAN;
+  __account_id INT;
 BEGIN
-  SHOW enable_sort INTO __enable_sort;
   __post_id = find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
       SELECT hp.sc_hot INTO __hot_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
-  SET enable_sort=false;
+  __account_id = find_account_id( _observer, True );
   RETURN QUERY SELECT
       hp.id,
       hp.author,
@@ -120,16 +112,10 @@ BEGIN
   FROM
       hive_posts_view hp
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
-      JOIN hive_accounts ha ON ha.id = hs.account_id
-  WHERE ha.name = _observer AND NOT hp.is_paidout AND hp.depth = 0
+  WHERE hs.account_id = __account_id AND NOT hp.is_paidout AND hp.depth = 0
       AND ( __post_id = 0 OR hp.sc_hot < __hot_limit OR ( hp.sc_hot = __hot_limit AND hp.id < __post_id ) )
   ORDER BY hp.sc_hot DESC, hp.id DESC
   LIMIT _limit;
-  IF __enable_sort THEN
-      SET enable_sort=true;
-  ELSE
-      SET enable_sort=false;
-  END IF;
 END
 $function$
 language plpgsql VOLATILE;
@@ -142,14 +128,13 @@ $function$
 DECLARE
   __post_id INT;
   __payout_limit hive_posts.payout%TYPE;
-  __enable_sort BOOLEAN;
+  __account_id INT;
 BEGIN
-  SHOW enable_sort INTO __enable_sort;
   __post_id = find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
       SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
-  SET enable_sort=false;
+  __account_id = find_account_id( _observer, True );
   RETURN QUERY SELECT
       hp.id,
       hp.author,
@@ -195,8 +180,7 @@ BEGIN
       FROM
           hive_posts hp1
           JOIN hive_subscriptions hs ON hp1.community_id = hs.community_id
-          JOIN hive_accounts ha ON ha.id = hs.account_id
-      WHERE ha.name = _observer AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth > 0
+      WHERE hs.account_id = __account_id AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth > 0
           AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
       ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
       LIMIT _limit
@@ -204,11 +188,6 @@ BEGIN
   JOIN hive_posts_view hp ON hp.id = payout.id
   ORDER BY payout.all_payout DESC, payout.id DESC
   LIMIT _limit;
-  IF __enable_sort THEN
-      SET enable_sort=true;
-  ELSE
-      SET enable_sort=false;
-  END IF;
 END
 $function$
 language plpgsql VOLATILE;
@@ -222,15 +201,14 @@ DECLARE
   __post_id INT;
   __payout_limit hive_posts.payout%TYPE;
   __head_block_time TIMESTAMP;
-  __enable_sort BOOLEAN;
+  __account_id INT;
 BEGIN
-  SHOW enable_sort INTO __enable_sort;
   __post_id = find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
       SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
+  __account_id = find_account_id( _observer, True );
   __head_block_time = head_block_time();
-  SET enable_sort=false;
   RETURN QUERY SELECT
       hp.id,
       hp.author,
@@ -271,16 +249,10 @@ BEGIN
   FROM
       hive_posts_view hp
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
-      JOIN hive_accounts ha ON ha.id = hs.account_id
-  WHERE ha.name = _observer AND NOT hp.is_paidout AND hp.payout_at BETWEEN __head_block_time + interval '12 hours' AND __head_block_time + interval '36 hours'
+  WHERE hs.account_id = __account_id AND NOT hp.is_paidout AND hp.payout_at BETWEEN __head_block_time + interval '12 hours' AND __head_block_time + interval '36 hours'
       AND ( __post_id = 0 OR ( hp.payout + hp.pending_payout ) < __payout_limit OR ( ( hp.payout + hp.pending_payout ) = __payout_limit AND hp.id < __post_id ) )
   ORDER BY ( hp.payout + hp.pending_payout ) DESC, hp.id DESC
   LIMIT _limit;
-  IF __enable_sort THEN
-      SET enable_sort=true;
-  ELSE
-      SET enable_sort=false;
-  END IF;
 END
 $function$
 language plpgsql VOLATILE;
@@ -293,14 +265,13 @@ $function$
 DECLARE
   __post_id INT;
   __promoted_limit hive_posts.promoted%TYPE;
-  __enable_sort BOOLEAN;
+  __account_id INT;
 BEGIN
-  SHOW enable_sort INTO __enable_sort;
   __post_id = find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
       SELECT hp.promoted INTO __promoted_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
-  SET enable_sort=false;
+  __account_id = find_account_id( _observer, True );
   RETURN QUERY SELECT
       hp.id,
       hp.author,
@@ -341,16 +312,10 @@ BEGIN
   FROM
       hive_posts_view hp
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
-      JOIN hive_accounts ha ON ha.id = hs.account_id
-  WHERE ha.name = _observer AND NOT hp.is_paidout AND hp.promoted > 0
+  WHERE hs.account_id = __account_id AND NOT hp.is_paidout AND hp.promoted > 0
       AND ( __post_id = 0 OR hp.promoted < __promoted_limit OR ( hp.promoted = __promoted_limit AND hp.id < __post_id ) )
   ORDER BY hp.promoted DESC, hp.id DESC
   LIMIT _limit;
-  IF __enable_sort THEN
-      SET enable_sort=true;
-  ELSE
-      SET enable_sort=false;
-  END IF;
 END
 $function$
 language plpgsql VOLATILE;
@@ -435,14 +400,13 @@ $function$
 DECLARE
   __post_id INT;
   __payout_limit hive_posts.payout%TYPE;
-  __enable_sort BOOLEAN;
+  __account_id INT;
 BEGIN
-  SHOW enable_sort INTO __enable_sort;
   __post_id = find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
       SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
-  SET enable_sort=false;
+  __account_id = find_account_id( _observer, True );
   RETURN QUERY SELECT
       hp.id,
       hp.author,
@@ -483,17 +447,11 @@ BEGIN
   FROM
       hive_posts_view hp
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
-      JOIN hive_accounts ha_o ON ha_o.id = hs.account_id
       JOIN hive_accounts_view ha ON ha.id = hp.author_id
-  WHERE ha_o.name = _observer AND NOT hp.is_paidout AND ha.is_grayed AND ( hp.payout + hp.pending_payout ) > 0
+  WHERE hs.account_id = __account_id AND NOT hp.is_paidout AND ha.is_grayed AND ( hp.payout + hp.pending_payout ) > 0
       AND ( __post_id = 0 OR ( hp.payout + hp.pending_payout ) < __payout_limit OR ( ( hp.payout + hp.pending_payout ) = __payout_limit AND hp.id < __post_id ) )
   ORDER BY ( hp.payout + hp.pending_payout ) DESC, hp.id DESC
   LIMIT _limit;
-  IF __enable_sort THEN
-      SET enable_sort=true;
-  ELSE
-      SET enable_sort=false;
-  END IF;
 END
 $function$
 language plpgsql VOLATILE;
