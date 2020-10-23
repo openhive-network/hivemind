@@ -16,9 +16,7 @@ CREATE OR REPLACE VIEW public.hive_accounts_info_view
     ha.followers,
     ha.lastread_at,
     ha.posting_json_metadata,
-    ha.json_metadata,
-    ha.blacklist_description,
-    ha.muted_list_description
+    ha.json_metadata
    FROM
    (
    SELECT max(hb.num) - 1200 * 24 * 7 AS block_limit FROM hive_blocks hb
