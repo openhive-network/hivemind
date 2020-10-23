@@ -88,7 +88,6 @@ def build_metadata():
 
         sa.Column('children', sa.Integer, nullable=False, server_default='0'),
 
-
         # core stats/indexes
         sa.Column('payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
         sa.Column('pending_payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
