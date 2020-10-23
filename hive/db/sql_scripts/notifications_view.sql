@@ -31,9 +31,6 @@ AS $BODY$
     END;
 $BODY$;
 
-
-
-
 DROP FUNCTION IF EXISTS notification_id CASCADE;
 ;
 CREATE OR REPLACE FUNCTION notification_id(in _block_number INTEGER, in _notifyType INTEGER, in _id INTEGER)
@@ -48,6 +45,19 @@ END
 $function$
 LANGUAGE plpgsql IMMUTABLE
 ;
+
+DROP FUNCTION IF EXISTS public.calculate_value_of_vote_on_post;
+CREATE OR REPLACE FUNCTION public.calculate_value_of_vote_on_post(
+    _post_payout hive_posts.payout%TYPE
+  , _post_rshares hive_posts_view.rshares%TYPE
+  , _vote_rshares hive_votes.rshares%TYPE)
+RETURNS FLOAT
+LANGUAGE 'sql'
+IMMUTABLE
+AS $BODY$
+    SELECT CAST( ( _post_payout/_post_rshares ) * _vote_rshares as FLOAT);
+$BODY$;
+
 
 -- View: public.hive_raw_notifications_as_view
 
@@ -86,7 +96,7 @@ CREATE OR REPLACE VIEW public.hive_raw_notifications_as_view
             ''::character varying AS community_title,
             ''::character varying AS payload
            FROM hive_posts_pp_view hpv
-                  WHERE hpv.block_num >= block_before_head('90 days'::interval) and hpv.depth > 0 AND
+                  WHERE hpv.depth > 0 AND
                         NOT EXISTS (SELECT NULL::text
                                     FROM hive_follows hf
                                     WHERE hf.follower = hpv.parent_author_id AND hf.following = hpv.author_id AND hf.state = 2)
@@ -156,6 +166,50 @@ CREATE OR REPLACE VIEW public.hive_raw_notifications_as_view
 drop view if exists hive_raw_notifications_view_noas cascade;
 CREATE OR REPLACE VIEW hive_raw_notifications_view_noas
 AS
+SELECT
+      vn.block_num
+    , vn.id
+    , vn.post_id
+    , vn.type_id
+    , vn.created_at
+    , vn.src
+    , vn.dst
+    , vn.dst_post_id
+    , vn.community
+    , vn.community_title
+    , CAST( to_char(vn.vote_value, '990D99') AS VARCHAR ) AS payload
+    , vn.score
+FROM
+  (
+    SELECT
+        hv1.block_num
+      , notification_id(hv1.block_num, 17, hv1.id::integer) AS id
+      , hpv.id AS post_id
+      , 17 AS type_id
+      , hv1.last_update AS created_at
+      , hv1.voter_id AS src
+      , hpv.author_id AS dst
+      , hpv.id AS dst_post_id
+      , ''::VARCHAR(16) AS community
+      , ''::VARCHAR AS community_title
+      , calculate_value_of_vote_on_post(hpv.payout + hpv.pending_payout, hpv.rshares, hv1.rshares) AS vote_value
+      , calculate_notify_vote_score(hpv.payout + hpv.pending_payout, hpv.abs_rshares, hv1.rshares) AS score
+    FROM hive_votes hv1
+    JOIN
+      (
+        SELECT
+            hpvi.id
+          , hpvi.author_id
+          , hpvi.payout
+          , hpvi.pending_payout
+          , hpvi.abs_rshares
+          , hpvi.rshares
+         FROM hive_posts_base_view hpvi
+         WHERE hpvi.block_num > block_before_head('97 days'::interval)) hpv ON hv1.post_id = hpv.id
+    WHERE hv1.rshares >= 10e9 AND hv1.block_num > block_before_head('90 days'::interval)
+  ) as vn
+WHERE vn.vote_value >= 0.02
+UNION ALL
 SELECT -- new community
         hc.block_num as block_num
       , notification_id(hc.block_num, 11, hc.id) as id
@@ -173,25 +227,6 @@ SELECT -- new community
       hive_communities hc
     where hc.block_num >= block_before_head( '90 days' )
 UNION ALL
-  SELECT --votes
-        hv1.block_num as block_num
-      , notification_id(hv1.block_num, 17, CAST( hv1.id as INT) ) as id
-      , hpv.id as post_id
-      , 17 as type_id
-      , hv1.last_update as created_at
-      , hv1.voter_id as src
-      , hpv.author_id as dst
-      , hpv.id as dst_post_id
-      , ''::VARCHAR(16) as community
-      , ''::VARCHAR as community_title
-      , ''::VARCHAR as payload
-      , calculate_notify_vote_score( (hpv.payout + hpv.pending_payout), hpv.abs_rshares, hv1.rshares ) as score
-  FROM
-    hive_votes hv1
-    JOIN (SELECT hpvi.id, hpvi.author_id, hpvi.payout, hpvi.pending_payout, hpvi.abs_rshares
-      FROM hive_posts_base_view hpvi WHERE hpvi.block_num > block_before_head( '90 days' ) ) as hpv ON hv1.post_id = hpv.id
-    WHERE hv1.rshares >= 10e9 and hv1.block_num > block_before_head( '90 days' )
-UNION ALL
   SELECT --persistent notifs
        hn.block_num
      , notification_id(hn.block_num, hn.type_id, CAST( hn.id as INT) ) as id
@@ -207,7 +242,7 @@ UNION ALL
      , hn.score as score
   FROM hive_notifs hn
   JOIN hive_communities hc ON hn.community_id = hc.id
-  where hn.block_num >= block_before_head( '90 days' )
+  WHERE hn.block_num >= block_before_head( '90 days' )
 ;
 
 DROP VIEW IF EXISTS hive_raw_notifications_view cascade
