@@ -58,6 +58,8 @@ class Follow(DbAdapterHolder):
             k = '{}/{}'.format(op['flr'], following)
             if k in cls.follow_items_to_flush:
                 cls.follow_items_to_flush[k]['state'] = state
+                cls.follow_items_to_flush[k]['idx'] = cls.idx
+                cls.follow_items_to_flush[k]['block_num'] = block_num
             else:
                 cls.follow_items_to_flush[k] = dict(
                     idx=cls.idx,
@@ -65,7 +67,7 @@ class Follow(DbAdapterHolder):
                     flg=following,
                     state=state,
                     at=op['at'],
-                    block_num=op['block_num'])
+                    block_num=block_num)
             cls.idx += 1
 
         if not DbState.is_initial_sync():
@@ -89,6 +91,7 @@ class Follow(DbAdapterHolder):
     @classmethod
     def _validated_op(cls, account, op, date):
         """Validate and normalize the operation."""
+        op['following'] = op['following'] if isinstance(op['following'], list) else [op['following']]
         if(not 'what' in op
            or not isinstance(op['what'], list)
            or not 'follower' in op
@@ -108,7 +111,7 @@ class Follow(DbAdapterHolder):
         if what not in defs:
             return None
 
-        all_accounts = op['following'] if isinstance(op['following'], list) else [op['following']]
+        all_accounts = list(op['following'])
         all_accounts.append(op['follower'])
         if (op['follower'] in op['following']
             or op['follower'] != account
@@ -116,7 +119,7 @@ class Follow(DbAdapterHolder):
             return None
 
         return dict(flr=op['follower'],
-                    flg=op['following'] if isinstance(op['following'], list) else [op['following']],
+                    flg=op['following'],
                     state=defs[what],
                     at=date)
 
@@ -573,7 +576,7 @@ class Follow(DbAdapterHolder):
         """.format(query_values)
 
         sql_result = DB.query_all(sql)
-        names_found = sql_result[0]['count']
+        names_found = int(sql_result[0]['count'])
         if names_found != len(accounts):
             return False
         return True
