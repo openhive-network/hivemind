@@ -91,7 +91,7 @@ class Accounts(DbAdapterHolder):
     def check_names(cls, names):
         """ Check which names from name list does not exists in the database """
         assert isinstance(names, list), "Expecting list as argument"
-        return [name not in cls._ids for name in names]
+        return [name for name in names if name not in cls._ids]
 
     @classmethod
     def get_json_data(cls, source ):
