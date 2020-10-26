@@ -79,10 +79,12 @@ class Accounts(DbAdapterHolder):
         return cls._ids[name]
 
     @classmethod
-    def exists(cls, name):
+    def exists(cls, names):
         """Check if an account name exists."""
-        if isinstance(name, str):
-            return name in cls._ids
+        if isinstance(names, str):
+            return names in cls._ids
+        if isinstance(names, list):
+            return all(name in cls._ids for name in names)
         return False
 
     @classmethod
