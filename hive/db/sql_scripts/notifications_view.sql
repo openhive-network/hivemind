@@ -1,20 +1,32 @@
 DROP VIEW IF EXISTS public.hive_accounts_rank_view CASCADE;
 
 CREATE OR REPLACE VIEW public.hive_accounts_rank_view
- AS
- SELECT rank.id,
-        CASE
-            WHEN rank."position" < 200 THEN 70
-            WHEN rank."position" < 1000 THEN 60
-            WHEN rank."position" < 6500 THEN 50
-            WHEN rank."position" < 25000 THEN 40
-            WHEN rank."position" < 100000 THEN 30
-            ELSE 20
-        END AS score
+AS
+SELECT rank.id,
+CASE
+	WHEN rank."position" < 200 THEN 70
+	WHEN rank."position" < 1000 THEN 60
+	WHEN rank."position" < 6500 THEN 50
+	WHEN rank."position" < 25000 THEN 40
+	WHEN rank."position" < 100000 THEN 30
+	ELSE 20
+END AS score
 FROM
-( SELECT ha2.id,
-         rank() OVER (ORDER BY ha2.reputation DESC) AS "position"
-  FROM hive_accounts ha2
+(
+  SELECT
+	  ha.id as id
+    , CASE WHEN ha2.rank ISNULL THEN 10e6 ELSE ha2.rank END AS "position"
+  FROM
+ 	hive_accounts ha
+  LEFT JOIN
+	(
+	  SELECT
+		  ha3.id
+		, rank() OVER(order by ha3.reputation DESC) as rank
+	  FROM	hive_accounts ha3
+	  ORDER BY ha3.reputation DESC LIMIT 150000
+		-- only 2% of account has the same reputations, it means only 2000 in 100000, but we get 150000 as 50% would repeat
+	) as ha2 ON ha2.id = ha.id
 ) rank
 ;
 
