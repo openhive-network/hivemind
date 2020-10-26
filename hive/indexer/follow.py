@@ -565,7 +565,7 @@ class Follow(DbAdapterHolder):
 
         sql = """
             SELECT 
-                count(*) 
+                count(1) 
             FROM
                 hive_accounts ha
             INNER JOIN
@@ -573,7 +573,8 @@ class Follow(DbAdapterHolder):
                 VALUES
                 {}
             ) AS T(name) ON t.name = ha.name
-        """.format(query_values)
+            LIMIT {}
+        """.format(query_values, len(accounts))
 
         sql_result = DB.query_all(sql)
         names_found = int(sql_result[0]['count'])
