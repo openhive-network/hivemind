@@ -115,9 +115,12 @@ class Follow(DbAdapterHolder):
         all_accounts = list(op['following'])
         all_accounts.append(op['follower'])
         if (op['follower'] in op['following']
-            or op['follower'] != account
-            or not Accounts.exists(all_accounts)):
+            or op['follower'] != account):
             return None
+
+        non_existent_names = Accounts.check_names(all_accounts)
+        if non_existent_names:
+            log.warning("Follow op validation, following names does not exists in database: {}".format(non_existent_names))
 
         return dict(flr=op['follower'],
                     flg=op['following'],
