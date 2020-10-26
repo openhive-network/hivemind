@@ -10,10 +10,10 @@ log = logging.getLogger(__name__)
 async def accounts_by_name(db, names, observer=None, lite=True):
     """Find and return accounts by `name`."""
 
-    sql = """SELECT id, name, about, created_at,
+    sql = """SELECT id, name, created_at,
                     rank, followers, following, posting_json_metadata, json_metadata
                FROM hive_accounts WHERE name IN :names"""
-    rows = await db.query_all(names=tuple(names))
+    rows = await db.query_all(sql, names=tuple(names))
 
     accounts = {}
     for row in rows:
