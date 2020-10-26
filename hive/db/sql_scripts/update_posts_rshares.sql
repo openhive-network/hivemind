@@ -14,8 +14,8 @@ UPDATE hive_posts hp
 SET
     abs_rshares = votes_rshares.abs_rshares
   , vote_rshares = votes_rshares.rshares
-  , sc_hot = calculate_hot( votes_rshares.rshares, hp.created_at)
-  , sc_trend = calculate_tranding( votes_rshares.rshares, hp.created_at)
+  , sc_hot = CASE hp.is_paidout WHEN True Then 0 ELSE calculate_hot( votes_rshares.rshares, hp.created_at) END
+  , sc_trend = CASE hp.is_paidout WHEN True Then 0 ELSE calculate_tranding( votes_rshares.rshares, hp.created_at) END
 FROM
   (
     SELECT
