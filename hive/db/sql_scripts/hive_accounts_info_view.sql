@@ -1,9 +1,3 @@
-DROP INDEX if exists public.hive_posts_created_at_id_idx;
-
-CREATE INDEX if not exists hive_posts_created_at_id_author_id_idx
-    ON public.hive_posts USING btree
-    (created_at ASC, id ASC, author_id ASC)
-;
 DROP VIEW IF EXISTS hive_accounts_info_view;
 CREATE OR REPLACE VIEW public.hive_accounts_info_view
  AS
