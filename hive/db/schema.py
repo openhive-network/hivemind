@@ -86,7 +86,6 @@ def build_metadata():
 
         sa.Column('children', sa.Integer, nullable=False, server_default='0'),
 
-
         # core stats/indexes
         sa.Column('payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
         sa.Column('pending_payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
@@ -145,7 +144,7 @@ def build_metadata():
         sa.Index('hive_posts_promoted_idx', 'promoted'),
         sa.Index('hive_posts_sc_trend_id_is_paidout_idx', 'sc_trend', 'id', 'is_paidout'),
         sa.Index('hive_posts_sc_hot_id_is_paidout_idx', 'sc_hot', 'id', 'is_paidout'),
-        sa.Index('hive_posts_created_at_idx', 'created_at'),
+        sa.Index('hive_posts_created_at_author_id_idx', 'created_at', 'author_id'),
         sa.Index('hive_posts_block_num_idx', 'block_num'),
         sa.Index('hive_posts_block_num_created_idx', 'block_num_created'),
         sa.Index('hive_posts_cashout_time_id_idx', 'cashout_time', 'id'),

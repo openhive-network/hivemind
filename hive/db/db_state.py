@@ -98,7 +98,7 @@ class DbState:
 
             'hive_posts_parent_id_idx',
             'hive_posts_depth_idx',
-            'hive_posts_created_at_idx',
+            'hive_posts_created_at_author_id_idx',
             'hive_posts_root_id_id_idx',
 
             'hive_posts_community_id_idx',
