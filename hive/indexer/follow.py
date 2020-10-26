@@ -7,6 +7,7 @@ from funcy.seqs import first
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 from hive.utils.misc import chunks
+from hive.indexer.accounts import Accounts
 
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 
@@ -115,7 +116,7 @@ class Follow(DbAdapterHolder):
         all_accounts.append(op['follower'])
         if (op['follower'] in op['following']
             or op['follower'] != account
-            or not cls._are_accounts_valid(all_accounts)):
+            or not Accounts.exists(all_accounts)):
             return None
 
         return dict(flr=op['follower'],
@@ -555,29 +556,3 @@ class Follow(DbAdapterHolder):
              WHERE id = account_id AND following != num;
         """
         cls.db.query(sql)
-
-    @classmethod
-    def _are_accounts_valid(cls, accounts):
-        if not isinstance(accounts, list):
-            return False
-        
-        query_values = ','.join(["('{}')".format(account) for account in accounts])
-
-        sql = """
-            SELECT 
-                count(1) 
-            FROM
-                hive_accounts ha
-            INNER JOIN
-            (
-                VALUES
-                {}
-            ) AS T(name) ON t.name = ha.name
-            LIMIT {}
-        """.format(query_values, len(accounts))
-
-        sql_result = DB.query_all(sql)
-        names_found = int(sql_result[0]['count'])
-        if names_found != len(accounts):
-            return False
-        return True
