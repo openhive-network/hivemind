@@ -17,6 +17,7 @@ BASE_DIR=$(pwd)
 echo "Script base dir is: $BASE_DIR"
 
 pip3 install tox --user
+pip3 install prettytable --user
 
 echo "Creating benchmark test file as: $4.py"
 $BASE_DIR/tests/tests_api/hivemind/benchmarks/benchmark_generator.py $3 "$4.py" "http://$1:$2"

@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-import xml.dom.minidom
 import os
 from sys import exit
 from json import dumps, load
@@ -40,7 +39,7 @@ def class_to_path(class_name, class_to_path_dic):
     return None
 
 if __name__ == '__main__':
-    above_treshold = False
+    above_treshold = []
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("path_to_test_dir", type = str, help = "Path to test directory for given json benchmark file")
@@ -65,19 +64,26 @@ if __name__ == '__main__':
         ofile.write("  </head>\n")
         ofile.write("  <body>\n")
         ofile.write("    <table>\n")
-        ofile.write("      <tr><th>Test name</th><th>Time [s]</th></tr>\n")
+        ofile.write("      <tr><th>Test name</th><th>Mean time [s]</th></tr>\n")
         json_data = None
         with open(args.json_file, "r") as json_file:
             json_data = load(json_file)
         for benchmark in json_data['benchmarks']:
             if float(benchmark['stats']['mean']) > args.time_threshold:
                 ofile.write("      <tr><td>{}<br/>Parameters: {}</td><td bgcolor=\"red\">{:.4f}</td></tr>\n".format(benchmark['name'], get_request_from_yaml(class_to_path(benchmark['name'][5:], class_to_path_dic)), benchmark['stats']['mean']))
-                above_treshold = True
+                above_treshold.append((benchmark['name'], benchmark['stats']['mean'], get_request_from_yaml(class_to_path(benchmark['name'][5:], class_to_path_dic))))
             else:
                 ofile.write("      <tr><td>{}</td><td>{:.4f}</td></tr>\n".format(benchmark['name'], benchmark['stats']['mean']))
         ofile.write("    </table>\n")
         ofile.write("  </body>\n")
         ofile.write("</html>\n")
     if above_treshold:
+        from prettytable import PrettyTable
+        summary = PrettyTable()
+        print("########## Test failed with following tests above {}s threshold ##########".format(args.time_threshold))
+        summary.field_names = ['Test name', 'Mean time [s]', 'Call parameters']
+        for entry in above_treshold:
+            summary.add_row(entry)
+        print(summary)
         exit(1)
     exit(0)
