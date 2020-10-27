@@ -470,11 +470,11 @@ def setup(db):
     sql = "CREATE INDEX hive_communities_ft1 ON hive_communities USING GIN (to_tsvector('english', title || ' ' || about))"
     db.query(sql)
 
-		--- find_comment_id definition moved to utility_functions.sql
-		--- find_account_id definition moved to utility_functions.sql
+    # find_comment_id definition moved to utility_functions.sql
+    # find_account_id definition moved to utility_functions.sql
 
-		--- process_hive_post_operation definition moved to hive_post_operations.sql
-		--- delete_hive_post moved to hive_post_operations.sql
+    # process_hive_post_operation definition moved to hive_post_operations.sql
+    # delete_hive_post moved to hive_post_operations.sql
 
     # In original hivemind, a value of 'active_at' was calculated from
     # max
@@ -488,15 +488,15 @@ def setup(db):
     # In order to simplify calculations, `last_account_update` is not taken into consideration, because this updating accounts is very rare
     # and posting/voting after an account updating, fixes `active_at` value immediately.
 
-		--- hive_accounts_view definition moved to hive_accounts_view.sql
+    # hive_accounts_view definition moved to hive_accounts_view.sql
 
-    --- hive_posts_view definition moved to hive_posts_view.sql
+    # hive_posts_view definition moved to hive_posts_view.sql
 
-    --- update_hive_posts_root_id moved to update_hive_posts_root_id.sql
+    # update_hive_posts_root_id moved to update_hive_posts_root_id.sql
 
-    --- hive_votes_view definition moved into hive_votes_view.sql
+    # hive_votes_view definition moved into hive_votes_view.sql
 
-    --- database_api_vote, find_votes, list_votes_by_voter_comment, list_votes_by_comment_voter moved into database_api_list_votes.sql
+    # database_api_vote, find_votes, list_votes_by_voter_comment, list_votes_by_comment_voter moved into database_api_list_votes.sql
 
     sql = """
           DO $$
@@ -508,9 +508,9 @@ def setup(db):
           """
     db.query_no_return(sql)
 
-    --- max_time_stamp definition moved into utility_functions.sql
+    # max_time_stamp definition moved into utility_functions.sql
 
-    --- get_discussion definition moved to bridge_get_discussion.sql
+    # get_discussion definition moved to bridge_get_discussion.sql
 
     sql_scripts = [
       "utility_functions.sql",
