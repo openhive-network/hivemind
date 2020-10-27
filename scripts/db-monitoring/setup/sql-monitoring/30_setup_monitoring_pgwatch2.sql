@@ -2,17 +2,20 @@
 -- using program https://github.com/cybertec-postgresql/pgwatch2/
 
 -- Example run:
--- psql -p 5432 -U postgres -h 127.0.0.1 -d template_hive_ci -f ./setup_monitoring_pgwatch2.sql
+-- psql -p 5432 -U postgres -h 127.0.0.1 -d template_monitoring -f ./setup_monitoring_pgwatch2.sql
 
 SET client_encoding = 'UTF8';
 SET client_min_messages = 'warning';
 
--- TODO We need extension pg_qualstats, see https://www.cybertec-postgresql.com/en/pgwatch2-v1-7-0-released/
+
+\echo Installing monitoring stuff for pgwatch2
 
 BEGIN;
 
-
 CREATE SCHEMA IF NOT EXISTS pgwatch2;
+COMMENT ON SCHEMA pgwatch2 IS
+    'Schema contains objects for monitoring https://github.com/cybertec-postgresql/pgwatch2';
+
 
 CREATE EXTENSION IF NOT EXISTS plpython3u WITH SCHEMA pg_catalog;
 COMMENT ON EXTENSION plpython3u IS 'PL/Python3U untrusted procedural language';

@@ -51,7 +51,7 @@ ln -sf ./local-site/bin/hive $HIVE_NAME
 echo Attempting to recreate database $DB_NAME
 psql -U $POSTGRES_USER -h localhost -d postgres -c "DROP DATABASE IF EXISTS $DB_NAME;"
 if [ "$HIVEMIND_ENABLE_DB_MONITORING" = "yes" ]; then
-  psql -U $POSTGRES_USER -h localhost -d postgres -c "CREATE DATABASE $DB_NAME TEMPLATE template_hive_ci;"
+  psql -U $POSTGRES_USER -h localhost -d postgres -c "CREATE DATABASE $DB_NAME TEMPLATE template_monitoring;"
 else
   psql -U $POSTGRES_USER -h localhost -d postgres -c "CREATE DATABASE $DB_NAME"
 fi
