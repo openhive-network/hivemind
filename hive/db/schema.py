@@ -687,7 +687,8 @@ def setup(db):
       "update_hive_posts_api_helper.sql",
       "database_api_list_comments.sql",
       "database_api_list_votes.sql",
-      "update_posts_rshares.sql"
+      "update_posts_rshares.sql",
+      "update_hive_post_root_id.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
