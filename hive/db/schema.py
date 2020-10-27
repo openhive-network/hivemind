@@ -488,26 +488,7 @@ def setup(db):
     # In order to simplify calculations, `last_account_update` is not taken into consideration, because this updating accounts is very rare
     # and posting/voting after an account updating, fixes `active_at` value immediately.
 
-    sql = """
-        DROP VIEW IF EXISTS public.hive_accounts_view;
-
-        CREATE OR REPLACE VIEW public.hive_accounts_view
-        AS
-        SELECT id,
-          name,
-          created_at,
-          reputation,
-          is_implicit,
-          followers,
-          following,
-          rank,
-          lastread_at,
-          posting_json_metadata,
-          json_metadata,
-          ( reputation <= -464800000000 ) is_grayed -- biggest number where rep_log10 gives < 1.0
-          FROM hive_accounts
-          """
-    db.query_no_return(sql)
+		--- hive_accounts_view definition moved to hive_accounts_view.sql
 
     sql = """
         DROP VIEW IF EXISTS public.hive_posts_view;
@@ -945,8 +926,11 @@ def setup(db):
     db.query_no_return(sql)
 
     sql_scripts = [
+      "utility_functions.sql",
+      "hive_accounts_view.sql",
       "hive_accounts_info_view.sql",
       "hive_posts_base_view.sql",
+      "hive_post_operations.sql",
       "head_block_time.sql",
       "update_feed_cache.sql",
       "payout_stats_view.sql",
