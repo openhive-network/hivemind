@@ -1,20 +1,32 @@
 DROP VIEW IF EXISTS public.hive_accounts_rank_view CASCADE;
 
 CREATE OR REPLACE VIEW public.hive_accounts_rank_view
- AS
- SELECT rank.id,
-        CASE
-            WHEN rank."position" < 200 THEN 70
-            WHEN rank."position" < 1000 THEN 60
-            WHEN rank."position" < 6500 THEN 50
-            WHEN rank."position" < 25000 THEN 40
-            WHEN rank."position" < 100000 THEN 30
-            ELSE 20
-        END AS score
+AS
+SELECT rank.id,
+CASE
+  WHEN rank."position" < 200 THEN 70
+  WHEN rank."position" < 1000 THEN 60
+  WHEN rank."position" < 6500 THEN 50
+  WHEN rank."position" < 25000 THEN 40
+  WHEN rank."position" < 100000 THEN 30
+  ELSE 20
+END AS score
 FROM
-( SELECT ha2.id,
-         rank() OVER (ORDER BY ha2.reputation DESC) AS "position"
-  FROM hive_accounts ha2
+(
+  SELECT
+    ha.id as id
+    , CASE WHEN ha2.rank ISNULL THEN 10e6 ELSE ha2.rank END AS "position"
+  FROM
+   hive_accounts ha
+  LEFT JOIN
+  (
+    SELECT
+      ha3.id
+    , rank() OVER(order by ha3.reputation DESC) as rank
+    FROM  hive_accounts ha3
+    ORDER BY ha3.reputation DESC LIMIT 150000
+    -- only 2% of account has the same reputations, it means only 2000 in 100000, but we get 150000 as 50% would repeat
+  ) as ha2 ON ha2.id = ha.id
 ) rank
 ;
 
@@ -62,7 +74,6 @@ $BODY$;
 -- View: public.hive_raw_notifications_as_view
 
 DROP VIEW IF EXISTS public.hive_raw_notifications_as_view CASCADE;
-
 CREATE OR REPLACE VIEW public.hive_raw_notifications_as_view
  AS
  SELECT notifs.block_num,
@@ -100,73 +111,69 @@ CREATE OR REPLACE VIEW public.hive_raw_notifications_as_view
                         NOT EXISTS (SELECT NULL::text
                                     FROM hive_follows hf
                                     WHERE hf.follower = hpv.parent_author_id AND hf.following = hpv.author_id AND hf.state = 2)
-        UNION ALL
-         SELECT hf.block_num,
-            notification_id(hf.block_num, 15, hf.id) AS id,
-            0 AS post_id,
-            15 AS type_id,
-            hf.created_at,
-            hf.follower AS src,
-            hf.following AS dst,
-            0 as dst_post_id,
-            ''::character varying(16) AS community,
-            ''::character varying AS community_title,
-            ''::character varying AS payload
-           FROM hive_follows hf
-       WHERE hf.block_num >= block_before_head('90 days'::interval)
-        UNION ALL
-         SELECT hr.block_num,
-            notification_id(hr.block_num, 14, hr.id) AS id,
-            hp.id AS post_id,
-            14 AS type_id,
-            hr.created_at,
-            hr.blogger_id AS src,
-            hp.author_id AS dst,
-            hr.post_id as dst_post_id,
-            ''::character varying(16) AS community,
-            ''::character varying AS community_title,
-            ''::character varying AS payload
-           FROM hive_reblogs hr
-             JOIN hive_posts hp ON hr.post_id = hp.id
-       WHERE hr.block_num >= block_before_head('90 days'::interval)
-        UNION ALL
-         SELECT hs.block_num,
-            notification_id(hs.block_num, 11, hs.id) AS id,
-            0 AS post_id,
-            11 AS type_id,
-            hs.created_at,
-            hs.account_id AS src,
-            hs.community_id AS dst,
-            0 as dst_post_id,
-            hc.name AS community,
-            hc.title AS community_title,
-            ''::character varying AS payload
-           FROM hive_subscriptions hs
-           JOIN hive_communities hc ON hs.community_id = hc.id
-       WHERE hs.block_num >= block_before_head('90 days'::interval)
-        UNION ALL
-         SELECT hm.block_num,
-            notification_id(hm.block_num, 16, hm.id) AS id,
-            hm.post_id,
-            16 AS type_id,
-            hp.created_at,
-            hp.author_id AS src,
-            hm.account_id AS dst,
-            hm.post_id as dst_post_id,
-            ''::character varying(16) AS community,
-            ''::character varying AS community_title,
-            ''::character varying AS payload
-           FROM hive_mentions hm
-           JOIN hive_posts hp ON hm.post_id = hp.id
-           WHERE hm.block_num >= block_before_head('90 days'::interval)
-    ) notifs
-     JOIN hive_accounts_rank_view harv ON harv.id = notifs.src
-   ;
+UNION ALL
+ SELECT hf.block_num,
+    notification_id(hf.block_num, 15, hf.id) AS id,
+    0 AS post_id,
+    15 AS type_id,
+    hf.created_at,
+    hf.follower AS src,
+    hf.following AS dst,
+    0 as dst_post_id,
+    ''::character varying(16) AS community,
+    ''::character varying AS community_title,
+    ''::character varying AS payload
+   FROM hive_follows hf
+UNION ALL
+ SELECT hr.block_num,
+    notification_id(hr.block_num, 14, hr.id) AS id,
+    hp.id AS post_id,
+    14 AS type_id,
+    hr.created_at,
+    hr.blogger_id AS src,
+    hp.author_id AS dst,
+    hr.post_id as dst_post_id,
+    ''::character varying(16) AS community,
+    ''::character varying AS community_title,
+    ''::character varying AS payload
+   FROM hive_reblogs hr
+   JOIN hive_posts hp ON hr.post_id = hp.id
+UNION ALL
+ SELECT hs.block_num,
+    notification_id(hs.block_num, 11, hs.id) AS id,
+    0 AS post_id,
+    11 AS type_id,
+    hs.created_at,
+    hs.account_id AS src,
+    hs.community_id AS dst,
+    0 as dst_post_id,
+    hc.name AS community,
+    hc.title AS community_title,
+    ''::character varying AS payload
+   FROM hive_subscriptions hs
+   JOIN hive_communities hc ON hs.community_id = hc.id
+UNION ALL
+ SELECT hm.block_num,
+    notification_id(hm.block_num, 16, hm.id) AS id,
+    hm.post_id,
+    16 AS type_id,
+    hp.created_at,
+    hp.author_id AS src,
+    hm.account_id AS dst,
+    hm.post_id as dst_post_id,
+    ''::character varying(16) AS community,
+    ''::character varying AS community_title,
+    ''::character varying AS payload
+   FROM hive_mentions hm
+   JOIN hive_posts hp ON hm.post_id = hp.id
+) notifs
+JOIN hive_accounts_rank_view harv ON harv.id = notifs.src
+;
 
-drop view if exists hive_raw_notifications_view_noas cascade;
+DROP VIEW IF EXISTS hive_raw_notifications_view_noas cascade;
 CREATE OR REPLACE VIEW hive_raw_notifications_view_noas
 AS
-SELECT
+SELECT -- votes
       vn.block_num
     , vn.id
     , vn.post_id
@@ -203,15 +210,16 @@ FROM
           , hpvi.payout
           , hpvi.pending_payout
           , hpvi.abs_rshares
-          , hpvi.rshares
-         FROM hive_posts_base_view hpvi
-         WHERE hpvi.block_num > block_before_head('97 days'::interval)) hpv ON hv1.post_id = hpv.id
-    WHERE hv1.rshares >= 10e9 AND hv1.block_num > block_before_head('90 days'::interval)
+          , hpvi.vote_rshares as rshares
+         FROM hive_posts hpvi
+         WHERE hpvi.block_num > block_before_head('97 days'::interval)
+       ) hpv ON hv1.post_id = hpv.id
+    WHERE hv1.rshares >= 10e9
   ) as vn
-WHERE vn.vote_value >= 0.02
+  WHERE vn.vote_value >= 0.02
 UNION ALL
-SELECT -- new community
-        hc.block_num as block_num
+  SELECT -- new community
+      hc.block_num as block_num
       , notification_id(hc.block_num, 11, hc.id) as id
       , 0 as post_id
       , 1 as type_id
@@ -225,7 +233,6 @@ SELECT -- new community
       , 35 as score
   FROM
       hive_communities hc
-    where hc.block_num >= block_before_head( '90 days' )
 UNION ALL
   SELECT --persistent notifs
        hn.block_num
@@ -242,11 +249,9 @@ UNION ALL
      , hn.score as score
   FROM hive_notifs hn
   JOIN hive_communities hc ON hn.community_id = hc.id
-  WHERE hn.block_num >= block_before_head( '90 days' )
 ;
 
-DROP VIEW IF EXISTS hive_raw_notifications_view cascade
-;
+DROP VIEW IF EXISTS hive_raw_notifications_view CASCADE;
 CREATE OR REPLACE VIEW hive_raw_notifications_view
 AS
 SELECT *
@@ -256,4 +261,4 @@ FROM
   UNION ALL
   SELECT * FROM hive_raw_notifications_view_noas
   ) as notifs
-WHERE notifs.block_num >= block_before_head( '90 days' ) AND notifs.score >= 0;
+WHERE notifs.score >= 0;
