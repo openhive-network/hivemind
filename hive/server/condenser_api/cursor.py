@@ -19,135 +19,36 @@ async def get_post_id(db, author, permlink):
             AND counter_deleted = 0 LIMIT 1""" # ABW: replace with find_comment_id(:author,:permlink,True)?
     return await db.query_one(sql, author=author, permlink=permlink)
 
-async def get_child_ids(db, post_id):
-    """Given a parent post id, retrieve all child ids."""
-    sql = "SELECT id FROM hive_posts WHERE parent_id = :id AND counter_deleted = 0"
-    return await db.query_col(sql, id=post_id)
-
-async def _get_post_id(db, author, permlink):
-    """Get post_id from hive db."""
-    sql = """
-        SELECT
-            hp.id
-        FROM hive_posts hp
-        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        WHERE ha_a.name = :author AND hpd_p.permlink = :permlink""" # ABW: what's the difference between that and get_post_id?
-    return await db.query_one(sql, author=author, permlink=permlink)
-
-async def _get_account_id(db, name):
-    """Get account id from hive db."""
-    assert name, 'no account name specified'
-    _id = await db.query_one("SELECT id FROM hive_accounts WHERE name = :n", n=name)
-    assert _id, "account not found: `%s`" % name
-    return _id
-
-
 async def get_followers(db, account: str, start: str, follow_type: str, limit: int):
-    """Get a list of accounts following a given account."""
-    account_id = await _get_account_id(db, account)
-    start_id = await _get_account_id(db, start) if start else None
+    """Get a list of accounts following by a given account."""
     state = 2 if follow_type == 'ignore' else 1
+    sql = " SELECT * FROM condenser_get_names_by_followers( '{}', '{}', {}::SMALLINT, {}::SMALLINT ) ".format( account, start, state, limit )
 
-    seek = ''
-    if start_id:
-        seek = """AND hf.created_at <= (
-                     SELECT created_at FROM hive_follows
-                      WHERE following = :account_id
-                        AND follower = :start_id)"""
-
-    sql = """
-        SELECT name FROM hive_follows hf
-     LEFT JOIN hive_accounts ha ON hf.follower = ha.id
-         WHERE hf.following = :account_id
-           AND state = :state %s
-      ORDER BY hf.created_at DESC
-         LIMIT :limit
-    """ % seek
-
-    return await db.query_col(sql, account_id=account_id, start_id=start_id,
-                              state=state, limit=limit)
-
+    return await db.query_col(sql)
 
 async def get_following(db, account: str, start: str, follow_type: str, limit: int):
     """Get a list of accounts followed by a given account."""
-    account_id = await _get_account_id(db, account)
-    start_id = await _get_account_id(db, start) if start else None
     state = 2 if follow_type == 'ignore' else 1
+    sql = " SELECT * FROM condenser_get_names_by_following( '{}', '{}', {}::SMALLINT, {}::SMALLINT ) ".format( account, start, state, limit )
 
-    seek = ''
-    if start_id:
-        seek = """AND hf.created_at <= (
-                     SELECT created_at FROM hive_follows
-                      WHERE follower = :account_id
-                        AND following = :start_id)"""
-
-    sql = """
-        SELECT name FROM hive_follows hf
-     LEFT JOIN hive_accounts ha ON hf.following = ha.id
-         WHERE hf.follower = :account_id
-           AND state = :state %s
-      ORDER BY hf.created_at DESC
-         LIMIT :limit
-    """ % seek
-
-    return await db.query_col(sql, account_id=account_id, start_id=start_id,
-                              state=state, limit=limit)
-
+    return await db.query_col(sql)
 
 async def get_follow_counts(db, account: str):
     """Return following/followers count for `account`."""
-    account_id = await _get_account_id(db, account)
-    sql = """SELECT following, followers
-               FROM hive_accounts
-              WHERE id = :account_id"""
-    return dict(await db.query_row(sql, account_id=account_id))
-
+    sql = "SELECT * FROM condenser_get_follow_counts( '{}' )".format( account )
+    return dict (await db.query_row(sql) )
 
 async def get_reblogged_by(db, author: str, permlink: str):
     """Return all rebloggers of a post."""
-    post_id = await _get_post_id(db, author, permlink)
-    assert post_id, "post not found"
-    sql = """SELECT name FROM hive_accounts
-               JOIN hive_feed_cache ON id = account_id
-              WHERE post_id = :post_id"""
-    names = await db.query_col(sql, post_id=post_id)
+
+    sql = "SELECT * FROM condenser_get_names_by_reblogged( '{}', '{}' )".format( author, permlink )
+    names = await db.query_col(sql)
+
     if author in names:
         names.remove(author)
     return names
 
-async def pids_by_blog(db, account: str, start_author: str = '',
-                       start_permlink: str = '', limit: int = 20):
-    """Get a list of post_ids for an author's blog."""
-    account_id = await _get_account_id(db, account)
-
-    seek = ''
-    start_id = None
-    if start_permlink:
-        start_id = await _get_post_id(db, start_author, start_permlink)
-        if not start_id:
-            return []
-
-        seek = """
-          AND created_at <= (
-            SELECT created_at
-              FROM hive_feed_cache
-             WHERE account_id = :account_id
-               AND post_id = :start_id)
-        """
-
-    sql = """
-        SELECT post_id
-          FROM hive_feed_cache
-         WHERE account_id = :account_id %s
-      ORDER BY created_at DESC
-         LIMIT :limit
-    """ % seek
-
-    return await db.query_col(sql, account_id=account_id, start_id=start_id, limit=limit)
-
 async def get_data(db, sql:str, truncate_body: int = 0):
-    """Get a list of post_ids representing comments by an author."""
     result = await db.query_all(sql); 
 
     posts = []
@@ -174,3 +75,8 @@ async def get_by_replies_to_account(db, start_author: str, start_permlink: str =
   """Get a list of posts representing replies to an author."""
   sql = " SELECT * FROM condenser_get_by_replies_to_account( '{}', '{}', {} ) ".format( start_author, start_permlink, limit )
   return await get_data(db, sql, truncate_body )
+
+async def get_by_blog(db, account: str = '', start_author: str = '', start_permlink: str = '', limit: int = 20):
+  """Get a list of posts for an author's blog."""
+  sql = " SELECT * FROM condenser_get_by_blog( '{}', '{}', '{}', {} ) ".format( account, start_author, start_permlink, limit )
+  return await get_data(db, sql )

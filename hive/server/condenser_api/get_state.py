@@ -167,8 +167,7 @@ async def _get_account_discussion_by_key(db, account, key):
     elif key == 'comments':
         posts = await cursor.get_by_account_comments(db, account, '', 20)
     elif key == 'blog':
-        pids = await cursor.pids_by_blog(db, account, '', '', 20)
-        posts = await load_posts(db, pids)
+        posts = await cursor.get_by_blog(db, account, '', '', 20)
     elif key == 'feed':
         posts = await get_by_feed_with_reblog_impl(db, account, '', '', 20)
     else:

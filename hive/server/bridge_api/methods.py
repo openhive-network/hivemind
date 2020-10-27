@@ -264,14 +264,6 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
     result = await _get_ranked_posts_for_all(db, sort, start_author, start_permlink, limit)
     return await process_query_results(result)
 
-async def _get_account_posts_by_blog(db, account : str, start_author : str, start_permlink : str, limit : int):
-  _ids = await cursor.pids_by_blog(db, account, start_author, start_permlink, limit)
-  posts = await load_posts(db, _ids)
-  for post in posts:
-      if post['author'] != account:
-          post['reblogged_by'] = [account]
-  return posts
-
 async def _get_account_posts_by_feed(db, account : str, start_author : str, start_permlink : str, limit : int):
   return await get_by_feed_with_reblog_impl(db, account, start_author, start_permlink, limit)
 
@@ -293,7 +285,7 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
     sql = None
     account_posts = True # set when only posts (or reblogs) of given account are supposed to be in results
     if sort == 'blog':
-        return await _get_account_posts_by_blog(db, account, start_author, start_permlink, limit)
+        sql = "SELECT * FROM bridge_get_account_posts_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'feed':
         return await _get_account_posts_by_feed(db, account, start_author, start_permlink, limit)
     elif sort == 'posts':
@@ -318,6 +310,9 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
     for row in sql_result:
         post = _bridge_post_object(row)
         post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.BridgeApi)
+        if sort == 'blog':
+          if post['author'] != account:
+            post['reblogged_by'] = [account]
         post = append_statistics_to_post(post, row, False if account_posts else row['is_pinned'], blacklists_for_user, not account_posts)
         posts.append(post)
     return posts

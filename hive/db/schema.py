@@ -582,7 +582,14 @@ def setup(db):
       "condenser_get_by_replies_to_account.sql",
       "condenser_get_by_account_comments.sql",
       "condenser_get_by_blog_without_reblog.sql",
-      "condenser_get_by_feed_with_reblog.sql"
+      "condenser_get_by_feed_with_reblog.sql",
+      "condenser_get_by_blog.sql",
+      "bridge_get_account_posts_by_blog.sql",
+      "condenser_get_follow_counts.sql",
+      "condenser_get_names_by_followers.sql",
+      "condenser_get_names_by_following.sql",
+      "condenser_get_names_by_reblogged.sql"
+
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))

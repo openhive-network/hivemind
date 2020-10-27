@@ -7,8 +7,6 @@ from hive.server.hive_api.common import (
     get_account_id, split_url,
     valid_account, valid_permlink, valid_limit)
 from hive.server.condenser_api.cursor import get_followers, get_following
-from hive.server.bridge_api.cursor import (
-    pids_by_blog, pids_by_comments)
 
 from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
 
@@ -65,41 +63,6 @@ async def list_all_muted(context, account):
                JOIN hive_accounts a ON f.following_id = a.id
               WHERE follower = :follower AND state = 2"""
     return await db.query_col(sql, follower=get_account_id(db, account))
-
-
-# Account post lists
-
-async def list_account_blog(context, account:str, limit:int=10, observer:str=None, last_post:str=None):
-    """Get a blog feed (posts and reblogs from the specified account)"""
-    db = context['db']
-
-    post_ids = await pids_by_blog(
-        db,
-        valid_account(account),
-        *split_url(last_post, allow_empty=True),
-        valid_limit(limit, 50, 10))
-    return await posts_by_id(db, post_ids, observer)
-
-async def list_account_posts(context, account:str, limit:int=10, observer:str=None, last_post:str=None):
-    """Get an account's posts and comments"""
-    db = context['db']
-    start_author, start_permlink = split_url(last_post, allow_empty=True)
-    assert not start_author or (start_author == account)
-    post_ids = await pids_by_comments(
-        db,
-        valid_account(account),
-        valid_permlink(start_permlink),
-        valid_limit(limit, 50, 10))
-    return await posts_by_id(db, post_ids, observer)
-
-async def list_account_feed(context, account:str, limit:int=10, observer:str=None, last_post:str=None):
-    """Get all posts (blogs and resteems) from `account`'s follows."""
-    db = context['db']
-    return await get_by_feed_with_reblog_impl(
-        context['db'],
-        valid_account(account),
-        *split_url(last_post, allow_empty=True),
-        valid_limit(limit, 50, 10))
 
 async def get_info(context):
     db = context['db']
