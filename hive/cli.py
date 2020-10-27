@@ -1,14 +1,39 @@
-#!/usr/local/bin/python3
+#!/usr/bin/env python
 
 """CLI service router"""
 
 import os
 import logging
+import time
 from hive.conf import Conf
 from hive.db.adapter import Db
 from hive.utils.stats import PrometheusClient
 
-logging.basicConfig()
+
+def setup_logging(conf):
+    """Setup logging with timestamps"""
+
+    timestamp = conf.get('log_timestamp')
+    epoch = conf.get('log_epoch')
+    if timestamp and epoch:
+        datefmt='%Y-%m-%d %H:%M:%S'
+        timezone = time.strftime('%z')
+        fmt = '%(asctime)s.%(msecs)03d{} %(created).6f ' \
+            '%(levelname)s - %(name)s - %(message)s'.format(timezone)
+        logging.basicConfig(format=fmt, datefmt=datefmt)
+    if timestamp:
+        datefmt='%Y-%m-%d %H:%M:%S'
+        timezone = time.strftime('%z')
+        fmt = '%(asctime)s.%(msecs)03d{} ' \
+            '%(levelname)s - %(name)s - %(message)s'.format(timezone)
+        logging.basicConfig(format=fmt, datefmt=datefmt)
+    if epoch:
+        fmt = '%(created).6f %(levelname)s - %(name)s - %(message)s'
+        logging.basicConfig(format=fmt)
+    else:
+        fmt = '%(levelname)s - %(name)s - %(message)s'
+        logging.basicConfig(format=fmt)
+
 
 def run():
     """Run the service specified in the `--mode` argument."""
@@ -16,6 +41,8 @@ def run():
     conf = Conf.init_argparse()
     mode = conf.mode()
     PrometheusClient( conf.get('prometheus_port') )
+
+    setup_logging(conf)
 
     if mode == 'completion':
         conf.generate_completion()
@@ -29,9 +56,9 @@ def run():
         if fh is None:
           print("Cannot write into specified pid_file: %s", pid_file_name)
         else:
-          pid = os.getpid()
-          fh.write(str(pid))
-          fh.close()
+            pid = os.getpid()
+            fh.write(str(pid))
+            fh.close()
 
 
     if conf.get('test_profile'):

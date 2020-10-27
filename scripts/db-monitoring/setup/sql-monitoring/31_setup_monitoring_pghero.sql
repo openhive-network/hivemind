@@ -2,15 +2,19 @@
 -- using program https://github.com/cybertec-postgresql/pgwatch2/
 
 -- Example run:
--- psql -p 5432 -U postgres -h 127.0.0.1 -d template_hive_ci -f ./setup_monitoring.sql
+-- psql -p 5432 -U postgres -h 127.0.0.1 -d template_monitoring -f ./setup_monitoring.sql
 
 SET client_encoding = 'UTF8';
 SET client_min_messages = 'warning';
 
 
+\echo Installing monitoring stuff for pghero
+
 BEGIN;
 
 CREATE SCHEMA IF NOT EXISTS pghero;
+COMMENT ON SCHEMA pghero IS
+    'Schema contains objects for monitoring https://github.com/ankane/pghero/';
 
 CREATE EXTENSION IF NOT EXISTS pg_stat_statements WITH SCHEMA public;
 COMMENT ON EXTENSION pg_stat_statements
@@ -22,7 +26,7 @@ $$
   SELECT * FROM pg_catalog.pg_stat_activity;
 $$ LANGUAGE sql VOLATILE SECURITY DEFINER;
 
-CREATE VIEW pghero.pg_stat_activity AS SELECT * FROM pghero.pg_stat_activity();
+CREATE OR REPLACE VIEW pghero.pg_stat_activity AS SELECT * FROM pghero.pg_stat_activity();
 
 -- kill queries
 CREATE OR REPLACE FUNCTION pghero.pg_terminate_backend(pid int) RETURNS boolean AS
@@ -36,7 +40,7 @@ $$
   SELECT * FROM public.pg_stat_statements;
 $$ LANGUAGE sql VOLATILE SECURITY DEFINER;
 
-CREATE VIEW pghero.pg_stat_statements AS SELECT * FROM pghero.pg_stat_statements();
+CREATE OR REPLACE VIEW pghero.pg_stat_statements AS SELECT * FROM pghero.pg_stat_statements();
 
 -- query stats reset
 CREATE OR REPLACE FUNCTION pghero.pg_stat_statements_reset() RETURNS void AS
@@ -57,7 +61,7 @@ $$
   SELECT schemaname, tablename, attname, null_frac, avg_width, n_distinct FROM pg_catalog.pg_stats;
 $$ LANGUAGE sql VOLATILE SECURITY DEFINER;
 
-CREATE VIEW pghero.pg_stats AS SELECT * FROM pghero.pg_stats();
+CREATE OR REPLACE VIEW pghero.pg_stats AS SELECT * FROM pghero.pg_stats();
 
 GRANT USAGE ON SCHEMA pghero TO pg_monitor;
 

@@ -54,6 +54,11 @@ class Conf():
         add('--test-profile', type=strtobool, env_var='TEST_PROFILE', help='(debug) profile execution', default=False)
         add('--log-virtual-op-calls', type=strtobool, env_var='LOG_VIRTUAL_OP_CALLS', help='(debug) log virtual op calls and responses', default=False)
 
+        # logging
+        add('--log-timestamp', help='Output timestamp in log', action='store_true')
+        add('--log-epoch', help='Output unix epoch in log', action='store_true')
+        add('--log-mask-sensitive-data', help='Mask sensitive data, e.g. passwords', action='store_true')
+
         add('--pid-file', type=str, env_var='PID_FILE', help='Allows to dump current process pid into specified file', default=None)
 
         add('--auto-http-server-port', nargs='+', type=int, help='Hivemind will listen on first available port from this range')
@@ -80,8 +85,23 @@ class Conf():
             root.error("Value error: {}".format(ex))
             exit(1)
 
+        # Print command line args, but on continuous integration server
+        # hide db connection string.
         from sys import argv
-        root.info("Used command line args: %s", " ".join(argv[1:]))
+        if conf.get('log_mask_sensitive_data'):
+            my_args = []
+            upcoming_connection_string = False
+            for elem in argv[1:]:
+                if upcoming_connection_string:
+                    upcoming_connection_string = False
+                    my_args.append('MASKED')
+                    continue
+                if elem == '--database-url':
+                    upcoming_connection_string = True
+                my_args.append(elem)
+            root.info("Used command line args: %s", " ".join(my_args))
+        else:
+            root.info("Used command line args: %s", " ".join(argv[1:]))
 
         # uncomment for full list of program args
         #args_list = ["--" + k + " " + str(v) for k,v in vars(args).items()]

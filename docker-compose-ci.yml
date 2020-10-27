@@ -1,0 +1,130 @@
+version: "3"
+
+services:
+
+  python-3.6:
+    image: hivemind/python:3.6
+    build:
+      context: .
+      dockerfile: ./scripts/ci/python/3.6/Dockerfile
+      args:
+        - user=${USER}
+        - workdir=/home/${USER}
+    user: ${USER}
+    shm_size: 0
+    # Below command makes your container running forever.
+    # command: ["tail", "-f", "/dev/null"]
+
+  python-3.8:
+    image: hivemind/python:3.8
+    shm_size: 0
+    build:
+      context: .
+      dockerfile: ./scripts/ci/python/3.8/Dockerfile
+      args:
+        - user=${USER}
+        - workdir=/home/${USER}
+    user: ${USER}
+    # Below command makes your container running forever.
+    # command: ["tail", "-f", "/dev/null"]
+
+  postgres-10:
+    image: hivemind/postgres:10
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: ./scripts/ci/postgres/10/Dockerfile
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-10-pgdata:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_10_PUBLISHED_PORT}:5432"
+    shm_size: 0
+    command: [
+      "postgres",
+      "-c", "shared_preload_libraries=pg_stat_statements,pg_qualstats",
+      "-c", "track_functions=pl",
+      "-c", "track_io_timing=on",
+      "-c", "track_activity_query_size=2048",
+      "-c", "pg_stat_statements.max=10000",
+      "-c", "pg_stat_statements.track=all",
+      "-c", "max_connections=100",
+      "-c", "shared_buffers=12GB",
+      "-c", "effective_cache_size=36GB",
+      "-c", "maintenance_work_mem=2GB",
+      "-c", "checkpoint_completion_target=0.9",
+      "-c", "wal_buffers=16MB",
+      "-c", "default_statistics_target=100",
+      "-c", "random_page_cost=1.1",
+      "-c", "effective_io_concurrency=200",
+      "-c", "work_mem=31457kB",
+      "-c", "min_wal_size=2GB",
+      "-c", "max_wal_size=8GB",
+      "-c", "max_worker_processes=12",
+      "-c", "max_parallel_workers_per_gather=4",
+      "-c", "max_parallel_workers=12",
+    ]
+
+  postgres-12:
+    image: hivemind/postgres:12
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: ./scripts/ci/postgres/12/Dockerfile
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-12-pgdata:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_12_PUBLISHED_PORT}:5432"
+    shm_size: 0
+    # https://pgtune.leopard.in.ua/#/ oltp 48G ram, 12 cpus, ssd
+    command: [
+      "postgres",
+      "-c", "shared_preload_libraries=pg_stat_statements,pg_qualstats",
+      "-c", "track_functions=pl",
+      "-c", "track_io_timing=on",
+      "-c", "track_activity_query_size=2048",
+      "-c", "pg_stat_statements.max=10000",
+      "-c", "pg_stat_statements.track=all",
+      "-c", "max_connections=100",
+      "-c", "shared_buffers=12GB",
+      "-c", "effective_cache_size=36GB",
+      "-c", "maintenance_work_mem=2GB",
+      "-c", "checkpoint_completion_target=0.9",
+      "-c", "wal_buffers=16MB",
+      "-c", "default_statistics_target=100",
+      "-c", "random_page_cost=1.1",
+      "-c", "effective_io_concurrency=200",
+      "-c", "work_mem=31457kB",
+      "-c", "min_wal_size=2GB",
+      "-c", "max_wal_size=8GB",
+      "-c", "max_worker_processes=12",
+      "-c", "max_parallel_workers_per_gather=4",
+      "-c", "max_parallel_workers=12",
+      "-c", "max_parallel_maintenance_workers=4",
+    ]
+
+  hived-node:
+    image: registry.gitlab.syncad.com/hive/hive/consensus_node:00b5ff55
+    restart: unless-stopped
+    # ports:
+    #   - "2001:2001"
+    #   - "8090:8090"
+    #   - "8091:8091"
+    shm_size: 0
+    entrypoint: /usr/local/hive/consensus/entrypoint.sh
+    command: >-
+      --replay-blockchain
+      --stop-replay-at-block 5000000
+    volumes:
+      - $PWD/scripts/ci/hived-node/entrypoint.sh:/usr/local/hive/consensus/entrypoint.sh
+      - $PWD/scripts/ci/hived-node/config.ini:/usr/local/hive/consensus/datadir/config.ini
+      - ${HIVED_BLOCK_LOG_FILE}:/usr/local/hive/consensus/datadir/blockchain/block_log
+      - hived-node-datadir:/usr/local/hive/consensus/datadir
+
+volumes:
+  postgres-10-pgdata:
+  postgres-12-pgdata:
+  hived-node-datadir:

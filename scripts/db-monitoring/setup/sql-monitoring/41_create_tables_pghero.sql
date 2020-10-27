@@ -8,12 +8,15 @@
 SET client_encoding = 'UTF8';
 SET client_min_messages = 'warning';
 
+\echo Creating tables in database pghero
+
+\c pghero pghero
 
 BEGIN;
 
 CREATE SCHEMA pghero;
 
-CREATE TABLE "pghero_query_stats" (
+CREATE TABLE "pghero"."pghero_query_stats" (
   "id" bigserial primary key,
   "database" text,
   "user" text,
@@ -23,7 +26,7 @@ CREATE TABLE "pghero_query_stats" (
   "calls" bigint,
   "captured_at" timestamp
 );
-CREATE INDEX ON "pghero_query_stats" ("database", "captured_at");
+CREATE INDEX ON "pghero"."pghero_query_stats" ("database", "captured_at");
 
 CREATE TABLE "pghero_space_stats" (
   "id" bigserial primary key,

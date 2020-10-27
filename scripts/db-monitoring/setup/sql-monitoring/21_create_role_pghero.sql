@@ -6,6 +6,8 @@
 SET client_encoding = 'UTF8';
 SET client_min_messages = 'warning';
 
+\echo Creating role pghero
+
 DO
 $do$
 BEGIN
@@ -13,9 +15,11 @@ BEGIN
         raise warning 'Role % already exists', 'pghero';
     ELSE
         CREATE ROLE pghero WITH LOGIN PASSWORD 'pghero';
+        COMMENT ON ROLE pghero IS
+            'Role for monitoring https://github.com/ankane/pghero/';
         ALTER ROLE pghero CONNECTION LIMIT 10;
         ALTER ROLE pghero SET search_path = pghero, pg_catalog, public;
         GRANT pg_monitor TO pghero;
    END IF;
 END
-$do$
+$do$;
