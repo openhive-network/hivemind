@@ -491,9 +491,6 @@ def setup(db):
 		--- hive_accounts_view definition moved to hive_accounts_view.sql
 
     --- hive_posts_view definition moved to hive_posts_view.sql
-    sql = """
-          """
-    db.query_no_return(sql)
 
     sql = """
           DROP FUNCTION IF EXISTS public.update_hive_posts_root_id(INTEGER, INTEGER);
@@ -515,34 +512,7 @@ def setup(db):
           """
     db.query_no_return(sql)
 
-    sql = """
-        DROP VIEW IF EXISTS hive_votes_view
-        ;
-        CREATE OR REPLACE VIEW hive_votes_view
-        AS
-        SELECT
-            hv.id,
-            hv.voter_id as voter_id,
-            ha_a.name as author,
-            hpd.permlink as permlink,
-            vote_percent as percent,
-            ha_v.reputation as reputation,
-            rshares,
-            last_update,
-            ha_v.name as voter,
-            weight,
-            num_changes,
-            hv.permlink_id as permlink_id,
-            post_id,
-            is_effective
-        FROM
-            hive_votes hv
-        INNER JOIN hive_accounts ha_v ON ha_v.id = hv.voter_id
-        INNER JOIN hive_accounts ha_a ON ha_a.id = hv.author_id
-        INNER JOIN hive_permlink_data hpd ON hpd.id = hv.permlink_id
-        ;
-    """
-    db.query_no_return(sql)
+    --- hive_votes_view definition moved into hive_votes_view.sql
 
     sql = """
         DROP TYPE IF EXISTS database_api_vote CASCADE;
@@ -827,6 +797,7 @@ def setup(db):
       "hive_accounts_info_view.sql",
       "hive_posts_base_view.sql",
       "hive_posts_view.sql",
+      "hive_votes_view.sql",
       "hive_post_operations.sql",
       "head_block_time.sql",
       "update_feed_cache.sql",
