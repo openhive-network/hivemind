@@ -508,23 +508,7 @@ def setup(db):
           """
     db.query_no_return(sql)
 
-    sql = """
-        DROP FUNCTION IF EXISTS public.max_time_stamp() CASCADE;
-        CREATE OR REPLACE FUNCTION public.max_time_stamp( _first TIMESTAMP, _second TIMESTAMP )
-        RETURNS TIMESTAMP
-        LANGUAGE 'plpgsql'
-        IMMUTABLE
-        AS $BODY$
-        BEGIN
-          IF _first > _second THEN
-               RETURN _first;
-            ELSE
-               RETURN _second;
-            END IF;
-        END
-        $BODY$;
-        """
-    db.query_no_return(sql)
+    --- max_time_stamp definition moved into utility_functions.sql
 
     sql = """
         DROP FUNCTION IF EXISTS get_discussion
