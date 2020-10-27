@@ -510,10 +510,7 @@ def setup(db):
 
     --- max_time_stamp definition moved into utility_functions.sql
 
-    sql = """
-    """
-
-    db.query_no_return(sql)
+    --- get_discussion definition moved to bridge_get_discussion.sql
 
     sql_scripts = [
       "utility_functions.sql",
