@@ -184,7 +184,10 @@ SELECT -- votes
     , vn.dst_post_id
     , vn.community
     , vn.community_title
-    , CAST( to_char(vn.vote_value, '990D99') AS VARCHAR ) AS payload
+    , CASE
+        WHEN vn.vote_value < 0.01 THEN ''::VARCHAR
+        ELSE CAST( to_char(vn.vote_value, '($FM99990.00)') AS VARCHAR )
+      END as payload
     , vn.score
 FROM
   (

@@ -121,10 +121,7 @@ def _render_msg(row):
     msg = STRINGS[row['type_id']]
     payload = row['payload']
     if row['type_id'] == NotifyType.vote and payload:
-        amt = float(payload[1:])
-        if amt >= 0.01:
-            msg += ' (<payload>)'
-            payload = "$%.2f" % amt
+        msg += ' <payload>'
 
     if '<dst>' in msg: msg = msg.replace('<dst>', '@' + row['dst'])
     if '<src>' in msg: msg = msg.replace('<src>', '@' + row['src'])
