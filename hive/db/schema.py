@@ -492,25 +492,7 @@ def setup(db):
 
     --- hive_posts_view definition moved to hive_posts_view.sql
 
-    sql = """
-          DROP FUNCTION IF EXISTS public.update_hive_posts_root_id(INTEGER, INTEGER);
-
-          CREATE OR REPLACE FUNCTION public.update_hive_posts_root_id(in _first_block_num INTEGER, _last_block_num INTEGER)
-              RETURNS void
-              LANGUAGE 'plpgsql'
-              VOLATILE
-          AS $BODY$
-          BEGIN
-
-          --- _first_block_num can be null together with _last_block_num
-          UPDATE hive_posts uhp
-          SET root_id = id
-          WHERE uhp.root_id = 0 AND (_first_block_num IS NULL OR (uhp.block_num >= _first_block_num AND uhp.block_num <= _last_block_num))
-          ;
-          END
-          $BODY$;
-          """
-    db.query_no_return(sql)
+    --- update_hive_posts_root_id moved to update_hive_posts_root_id.sql
 
     --- hive_votes_view definition moved into hive_votes_view.sql
 
