@@ -25,7 +25,10 @@ FROM
     , rank() OVER(order by ha3.reputation DESC) as rank
     FROM  hive_accounts ha3
     ORDER BY ha3.reputation DESC LIMIT 150000
-    -- only 2% of account has the same reputations, it means only 2000 in 100000, but we get 150000 as 50% would repeat
+    -- Conditions above (related to rank.position) eliminates all records having rank > 100k. So with inclding some 
+    -- additional space for redundant accounts (having same reputation) lets assume we're limiting it to 150k
+    -- As another reason, it can be pointed that only 2% of account has the same reputations, it means only 2000
+    -- in 100000, but we get 150000 as 50% would repeat
   ) as ha2 ON ha2.id = ha.id
 ) rank
 ;
@@ -58,7 +61,7 @@ $function$
 LANGUAGE plpgsql IMMUTABLE
 ;
 
-DROP FUNCTION IF EXISTS public.calculate_value_of_vote_on_post;
+DROP FUNCTION IF EXISTS public.calculate_value_of_vote_on_post CASCADE;
 CREATE OR REPLACE FUNCTION public.calculate_value_of_vote_on_post(
     _post_payout hive_posts.payout%TYPE
   , _post_rshares hive_posts_view.rshares%TYPE
