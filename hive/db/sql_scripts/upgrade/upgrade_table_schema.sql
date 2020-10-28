@@ -117,7 +117,7 @@ IF NOT EXISTS(SELECT data_type
               WHERE table_name = 'hive_mentions' AND column_name = 'block_num') THEN
   RAISE NOTICE 'Performing hive_mentions upgrade - adding new column block_num';
 
-  TRUNCATE TABLE public.hive_mentions;
+  TRUNCATE TABLE public.hive_mentions RESTART IDENTITY;
   PERFORM deps_save_and_drop_dependencies('public', 'hive_mentions', true);
 
   ALTER TABLE hive_mentions
@@ -274,4 +274,7 @@ INSERT INTO hive_db_data_migration
 select 'update_hive_posts_children_count execution'
 where not exists (select null from hive_db_patch_level where patched_to_revision = '0e3c8700659d98b45f1f7146dc46a195f905fc2d' )
 ;
+
+--- 1847c75702384c7e34c624fc91f24d2ef20df91d latest version of develop included in this migration script.
+
 

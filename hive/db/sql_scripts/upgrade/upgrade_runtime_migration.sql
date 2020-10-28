@@ -53,7 +53,7 @@ END IF;
 IF EXISTS (SELECT * FROM hive_db_data_migration WHERE migration = 'update_hive_post_mentions refill execution') THEN
   RAISE NOTICE 'Performing hive_mentions refill...';
   SET work_mem='2GB';
-  TRUNCATE TABLE hive_mentions;
+  TRUNCATE TABLE hive_mentions RESTART IDENTITY;
   PERFORM update_hive_posts_mentions(0, (select max(num) from hive_blocks));
 ELSE
   RAISE NOTICE 'Skipping hive_mentions refill...';
@@ -98,6 +98,7 @@ values
 ,(now(), '0e3c8700659d98b45f1f7146dc46a195f905fc2d') -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/306 update posts children count fix
 ,(now(), '9e126e9d762755f2b9a0fd68f076c9af6bb73b76') -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/314 mentions fix
 ,(now(), '033619277eccea70118a5b8dc0c73b913da0025f') -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/326 https://gitlab.syncad.com/hive/hivemind/-/merge_requests/322 posts rshares recalc
+,(now(), '1847c75702384c7e34c624fc91f24d2ef20df91d') -- latest version of develop containing included changes.
 ) ds (patch_date, patch_revision)
 where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
 
