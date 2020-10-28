@@ -1,4 +1,5 @@
 """Tight and reliable steem API client for hive indexer."""
+
 import logging
 
 from time import perf_counter as perf
@@ -8,6 +9,8 @@ from hive.utils.stats import Stats
 from hive.utils.normalize import parse_amount, steem_amount, vests_amount
 from hive.steem.http_client import HttpClient
 from hive.steem.block.stream import BlockStream
+from hive.indexer.mock_block_provider import MockBlockProvider
+from hive.indexer.mock_vops_provider import MockVopsProvider
 
 logger = logging.getLogger(__name__)
 
@@ -140,6 +143,12 @@ class SteemClient:
             num = int(block['block_id'][:8], base=16)
             blocks[num] = block
 
+        for block_num in block_nums:
+            data = MockBlockProvider.get_block_data(str(block_num), True)
+            if data is not None:
+                blocks[block_num]["transactions"].extend(data["transactions"])
+                blocks[block_num]["transaction_ids"].extend(data["transaction_ids"])
+
         return [blocks[x] for x in block_nums]
 
     def get_virtual_operations(self, block):
@@ -175,6 +184,11 @@ class SteemClient:
             call_result = self.__exec('enum_virtual_ops', {"block_range_begin":from_block, "block_range_end":end_block
                 , "group_by_block": True, "include_reversible": True, "operation_begin": resume_on_operation, "limit": 1000, "filter": tracked_ops_filter
             })
+
+            mock_vops = MockVopsProvider.get_block_data(str(from_block), True)
+            if mock_vops is not None:
+                call_result['ops_by_block'].extend(mock_vops['ops_by_block'])
+                call_result['ops'].extend(mock_vops['ops'])
 
             if conf.get('log_virtual_op_calls'):
                 call = """

@@ -3,6 +3,7 @@
 import logging
 from time import sleep
 from hive.steem.block.schedule import BlockSchedule
+from hive.indexer.mock_block_provider import MockBlockProvider
 
 log = logging.getLogger(__name__)
 
@@ -90,6 +91,11 @@ class BlockStream:
             if not block:
                 sleep(0.5)
                 continue
+
+            data = MockBlockProvider.get_block_data(str(curr), True)
+            if data is not None:
+                block["transactions"].extend(data["transactions"])
+                block["transaction_ids"].extend(data["transaction_ids"])
 
             popped = queue.push(block)
             if popped:

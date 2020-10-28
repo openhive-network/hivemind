@@ -28,6 +28,9 @@ from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import BroadcastObject
 from hive.utils.communities_rank import update_communities_posts_and_rank
 
+from hive.indexer.mock_block_provider import MockBlockProvider
+from hive.indexer.mock_vops_provider import MockVopsProvider
+
 from datetime import datetime
 
 log = logging.getLogger(__name__)
@@ -230,6 +233,16 @@ class Sync:
             self._conf.get('muted_accounts_url'),
             self._conf.get('blacklist_api_url'))
         Mutes.set_shared_instance(mutes)
+
+        mock_block_data_path = self._conf.get("mock_block_data_path")
+        if mock_block_data_path:
+            log.warning("Loading mock block data from: {}".format(mock_block_data_path))
+            MockBlockProvider.load_block_data(mock_block_data_path)
+
+        mock_vops_data_path = self._conf.get("mock_vops_data_path")
+        if mock_vops_data_path:
+            log.warning("Loading mock virtual ops data from: {}".format(mock_vops_data_path))
+            MockVopsProvider.load_block_data(mock_vops_data_path)
 
         # community stats
         update_communities_posts_and_rank()
