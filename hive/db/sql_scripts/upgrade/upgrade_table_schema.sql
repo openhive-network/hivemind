@@ -174,8 +174,8 @@ IF EXISTS(SELECT data_type FROM information_schema.columns
   PERFORM deps_save_and_drop_dependencies('public', 'hive_posts', true);
 
   ALTER TABLE ONLY hive_posts
-    ALTER COLUMN abs_rshares SET TYPE NUMERIC,
-    ALTER COLUMN vote_rshares SET TYPE NUMERIC,
+    ALTER COLUMN abs_rshares SET DATA TYPE NUMERIC,
+    ALTER COLUMN vote_rshares SET DATA TYPE NUMERIC,
     ADD COLUMN block_num_created INTEGER;
 
     UPDATE hive_posts SET block_num_created = 1; -- Artificial number, since we don't have this info atm, it requires full sync
@@ -202,7 +202,7 @@ DROP INDEX IF EXISTS hive_mentions_post_id_idx;
 -- updated up to 033619277eccea70118a5b8dc0c73b913da0025f
 INSERT INTO hive_db_data_migration 
 select 'update_posts_rshares( 0, head_block_number) execution'
-where not exists (select null from hive_db_patch_level where patched_to_revision = '033619277eccea70118a5b8dc0c73b913da0025f' )
+where not exists (select null from hive_db_patch_level where patched_to_revision = '033619277eccea70118a5b8dc0c73b913da0025f')
 ;
 
 -- updated to e8b65adf22654203f5a79937ff2a95c5c47e10c5 - See merge request hive/hivemind!251
