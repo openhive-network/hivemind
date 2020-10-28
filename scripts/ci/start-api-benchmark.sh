@@ -18,6 +18,7 @@ echo "Script base dir is: $BASE_DIR"
 
 pip install tox
 pip install prettytable
+pip install pyyaml
 
 echo "Creating benchmark test file as: $4.py"
 $BASE_DIR/tests/tests_api/hivemind/benchmarks/benchmark_generator.py $3 "$4.py" "http://$1:$2"
