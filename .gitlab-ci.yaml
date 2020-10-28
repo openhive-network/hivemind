@@ -316,7 +316,7 @@ api_smoketest:
   stage: e2e-test
   extends: .e2e-test-common
   script:
-    - scripts/ci/start-api-smoketest.sh localhost "$HIVEMIND_HTTP_PORT" . api_smoketest.xml
+    - scripts/ci/start-api-smoketest.sh localhost "$HIVEMIND_HTTP_PORT" tests/tests_api/hivemind/tavern/ api_smoketest.xml
   artifacts:
     reports:
       junit: api_smoketest.xml
