@@ -92,12 +92,14 @@ class Follow(DbAdapterHolder):
     @classmethod
     def _validated_op(cls, account, op, date):
         """Validate and normalize the operation."""
-        op['following'] = op['following'] if isinstance(op['following'], list) else [op['following']]
-        if(not 'what' in op
+        if ( not 'what' in op
            or not isinstance(op['what'], list)
            or not 'follower' in op
            or not 'following' in op):
             return None
+
+        op['following'] = op['following'] if isinstance(op['following'], list) else [op['following']]
+
 
         # follower/following is empty
         if not op['follower'] or not op['following']:
@@ -272,13 +274,13 @@ class Follow(DbAdapterHolder):
                     if state == 9:
                         #reset blacklists for follower
                         sql = """
-                            UPDATE 
+                            UPDATE
                                 hive_follows hf
                             SET
                                 hf.blacklisted = false
                             FROM
                             (
-                                SELECT 
+                                SELECT
                                     ha.id as follower_id
                                 FROM
                                     (
@@ -287,7 +289,7 @@ class Follow(DbAdapterHolder):
                                     ) AS T(name)
                                 INNER JOIN hive_accounts ha ON ha.name = T.name
                             ) AS ds (follower_id)
-                            WHERE 
+                            WHERE
                                 hf.follower = ds.follower_id
                         """.format(query_values)
                     elif state == 10:
@@ -296,10 +298,10 @@ class Follow(DbAdapterHolder):
                             UPDATE
                                 hive_follows hf
                             SET
-                                hf.state = 0 
+                                hf.state = 0
                             FROM
                             (
-                                SELECT 
+                                SELECT
                                     ha.id as follower_id
                                 FROM
                                     (
@@ -308,7 +310,7 @@ class Follow(DbAdapterHolder):
                                     ) AS T(name)
                                 INNER JOIN hive_accounts ha ON ha.name = T.name
                             ) AS ds (follower_id)
-                            WHERE 
+                            WHERE
                                 hf.follower = ds.follower_id
                                 AND hf.state = 1
                         """.format(query_values)
@@ -318,10 +320,10 @@ class Follow(DbAdapterHolder):
                             UPDATE
                                 hive_follows hf
                             SET
-                                hf.state = 0 
+                                hf.state = 0
                             FROM
                             (
-                                SELECT 
+                                SELECT
                                     ha.id as follower_id
                                 FROM
                                     (
@@ -330,20 +332,20 @@ class Follow(DbAdapterHolder):
                                     ) AS T(name)
                                 INNER JOIN hive_accounts ha ON ha.name = T.name
                             ) AS ds (follower_id)
-                            WHERE 
+                            WHERE
                                 hf.follower = ds.follower_id
                                 AND hf.state = 2
                         """.format(query_values)
                     elif state == 12:
                         #reset followed blacklists
                         sql = """
-                            UPDATE 
+                            UPDATE
                                 hive_follows hf
                             SET
                                 hf.follow_blacklists = false
                             FROM
                             (
-                                SELECT 
+                                SELECT
                                     ha.id as follower_id
                                 FROM
                                     (
@@ -352,16 +354,16 @@ class Follow(DbAdapterHolder):
                                     ) AS T(name)
                                 INNER JOIN hive_accounts ha ON ha.name = T.name
                             ) AS ds (follower_id)
-                            WHERE 
+                            WHERE
                                 hf.follower = ds.follower_id;
 
-                            UPDATE 
+                            UPDATE
                                 hive_follows hf
                             SET
                                 hf.follow_blacklists = true
                             FROM
                             (
-                                SELECT 
+                                SELECT
                                     ha.id as follower_id
                                 FROM
                                     (
@@ -370,7 +372,7 @@ class Follow(DbAdapterHolder):
                                     ) AS T(name)
                                 INNER JOIN hive_accounts ha ON ha.name = T.name
                             ) AS ds (follower_id)
-                            WHERE 
+                            WHERE
                                 hf.follower = ds.follower_id
                                 AND following = (SELECT id FROM hive_accounts WHERE name = 'null')
                         """.format(query_values)
@@ -378,13 +380,13 @@ class Follow(DbAdapterHolder):
                     elif state == 13:
                         #reset followed mute lists
                         sql = """
-                            UPDATE 
+                            UPDATE
                                 hive_follows hf
                             SET
                                 hf.follow_muted = false
                             FROM
                             (
-                                SELECT 
+                                SELECT
                                     ha.id as follower_id
                                 FROM
                                     (
@@ -393,16 +395,16 @@ class Follow(DbAdapterHolder):
                                     ) AS T(name)
                                 INNER JOIN hive_accounts ha ON ha.name = T.name
                             ) AS ds (follower_id)
-                            WHERE 
+                            WHERE
                                 hf.follower = ds.follower_id;
 
-                            UPDATE 
+                            UPDATE
                                 hive_follows hf
                             SET
                                 hf.follow_muted = true
                             FROM
                             (
-                                SELECT 
+                                SELECT
                                     ha.id as follower_id
                                 FROM
                                     (
@@ -411,14 +413,14 @@ class Follow(DbAdapterHolder):
                                     ) AS T(name)
                                 INNER JOIN hive_accounts ha ON ha.name = T.name
                             ) AS ds (follower_id)
-                            WHERE 
+                            WHERE
                                 hf.follower = ds.follower_id
                                 AND following = (SELECT id FROM hive_accounts WHERE name = 'null')
                         """.format(query_values)
                     elif state == 14:
                         #reset all lists
                         sql = """
-                            UPDATE 
+                            UPDATE
                                 hive_follows hf
                             SET
                                 hf.blacklisted = false,
@@ -427,7 +429,7 @@ class Follow(DbAdapterHolder):
                                 hf.state = 0
                             FROM
                             (
-                                SELECT 
+                                SELECT
                                     ha.id as follower_id
                                 FROM
                                     (
@@ -436,17 +438,17 @@ class Follow(DbAdapterHolder):
                                     ) AS T(name)
                                 INNER JOIN hive_accounts ha ON ha.name = T.name
                             ) AS ds (follower_id)
-                            WHERE 
+                            WHERE
                                 hf.follower = ds.follower_id;
 
-                            UPDATE 
+                            UPDATE
                                 hive_follows hf
                             SET
                                 hf.follow_blacklists = true,
                                 hf.follow_muted = true
                             FROM
                             (
-                                SELECT 
+                                SELECT
                                     ha.id as follower_id
                                 FROM
                                     (
@@ -455,7 +457,7 @@ class Follow(DbAdapterHolder):
                                     ) AS T(name)
                                 INNER JOIN hive_accounts ha ON ha.name = T.name
                             ) AS ds (follower_id)
-                            WHERE 
+                            WHERE
                                 hf.follower = ds.follower_id
                                 AND following = (SELECT id FROM hive_accounts WHERE name = 'null')
                         """.format(query_values)
@@ -484,7 +486,7 @@ class Follow(DbAdapterHolder):
                     UPDATE
                         hive_accounts ha
                     SET
-                        %s = %s + :mag 
+                        %s = %s + :mag
                     FROM
                     (
                         VALUES
@@ -518,9 +520,9 @@ class Follow(DbAdapterHolder):
                    *cls._delta[FOLLOWING].keys()])
         query_values = ','.join(["('{}')".format(account) for account in names])
         sql = """
-            UPDATE 
+            UPDATE
                 hive_accounts ha
-            SET 
+            SET
                 followers = (SELECT COUNT(*) FROM hive_follows WHERE state = 1 AND following = ha.id),
                 following = (SELECT COUNT(*) FROM hive_follows WHERE state = 1 AND follower  = ha.id)
             FROM
