@@ -1,5 +1,6 @@
 """Streams incoming blocks from the Steem blockchain."""
 
+from hive.indexer.mock_data_provider import MockDataProvider
 import logging
 from time import sleep
 from hive.steem.block.schedule import BlockSchedule
@@ -66,6 +67,7 @@ class BlockStream:
         self._client = client
         self._min_gap = min_gap
         self._max_gap = max_gap
+        self._last_irreversible = self._client.last_irreversible()
 
     def _gap_ok(self, curr, head):
         """Ensures gap between curr and head is within limits (max_gap)."""
@@ -82,6 +84,13 @@ class BlockStream:
 
         queue = BlockQueue(self._min_gap, prev)
         schedule = BlockSchedule(head)
+
+        mock_max_block_number = MockBlockProvider.get_max_block_number()
+        if curr > self._last_irreversible and curr <= mock_max_block_number:
+            for block_num in MockBlockProvider.get_blocks_greater_than(curr):
+                popped = queue.push(MockBlockProvider.get_block_data(block_num, True))
+                if popped:
+                    yield popped
 
         while self._gap_ok(curr, head):
             head = schedule.wait_for_block(curr)

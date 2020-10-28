@@ -10,7 +10,9 @@ class MockDataProvider():
 
     @classmethod
     def get_max_block_number(cls):
-        return max([int(block) for block in cls.block_data.keys()])
+        block_numbers = [int(block) for block in cls.block_data]
+        block_numbers.append(0)
+        return max(block_numbers)
 
     @classmethod
     def load_block_data(cls, data_path):
