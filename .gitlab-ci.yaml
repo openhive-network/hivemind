@@ -441,123 +441,31 @@ tags_api_smoketest_negative:
   tags:
     - hivemind-light-job
 
-
-bridge_api_smoketest_benchmark:
+api_smoketest_benchmark:
   stage: benchmark-tests
   extends: .benchmark-tests-common
   script:
-    - >
-      scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/bridge_api_patterns/ api_benchmark_bridge
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/bridge_api_patterns/ api_benchmark_bridge
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/bridge_api_negative/ api_benchmark_bridge_negative
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/condenser_api_patterns/ api_benchmark_condenser
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/condenser_api_negative/ api_benchmark_condenser_negative
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/database_api_patterns/ api_benchmark_database
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/database_api_negative/ api_benchmark_database_negative
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/follow_api_patterns/ api_benchmark_follow
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/follow_api_negative/ api_benchmark_follow_negative
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/tags_api_patterns/ api_benchmark_tags
+    - scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/tags_api_negative/ api_benchmark_tags_negative
 
   artifacts:
     when: always
     paths:
       - tavern_benchmark_report_api_benchmark_bridge.html
-
-bridge_api_smoketest_negative_benchmark:
-  stage: benchmark-tests
-  extends: .benchmark-tests-common
-  script:
-    - >
-      scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/bridge_api_negative/ api_benchmark_bridge_negative
-
-  artifacts:
-    when: always
-    paths:
       - tavern_benchmark_report_api_benchmark_bridge_negative.html
-
-condenser_api_smoketest_benchmark:
-  stage: benchmark-tests
-  extends: .benchmark-tests-common
-  script:
-    - >
-      scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/condenser_api_patterns/ api_benchmark_condenser
-
-  artifacts:
-    when: always
-    paths:
       - tavern_benchmark_report_api_benchmark_condenser.html
-
-condenser_api_smoketest_negative_benchmark:
-  stage: benchmark-tests
-  extends: .benchmark-tests-common
-  script:
-    - >
-      scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/condenser_api_negative/ api_benchmark_condenser_negative
-
-  artifacts:
-    when: always
-    paths:
       - tavern_benchmark_report_api_benchmark_condenser_negative.html
-
-database_api_smoketest_benchmark:
-  stage: benchmark-tests
-  extends: .benchmark-tests-common
-  script:
-    - >
-      scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/database_api_patterns/ api_benchmark_database
-
-  artifacts:
-    when: always
-    paths:
       - tavern_benchmark_report_api_benchmark_database.html
-
-database_api_smoketest_negative_benchmark:
-  stage: benchmark-tests
-  extends: .benchmark-tests-common
-  script:
-    - >
-      scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/database_api_negative/ api_benchmark_database_negative
-
-  artifacts:
-    when: always
-    paths:
       - tavern_benchmark_report_api_benchmark_database_negative.html
-
-follow_api_smoketest_benchmark:
-  stage: benchmark-tests
-  extends: .benchmark-tests-common
-  script:
-    - >
-      scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/follow_api_patterns/ api_benchmark_follow
-
-  artifacts:
-    when: always
-    paths:
       - tavern_benchmark_report_api_benchmark_follow.html
-
-follow_api_smoketest_negative_benchmark:
-  stage: benchmark-tests
-  extends: .benchmark-tests-common
-  script:
-    - >
-      scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/follow_api_negative/ api_benchmark_follow_negative
-
-  artifacts:
-    when: always
-    paths:
       - tavern_benchmark_report_api_benchmark_follow_negative.html
-
-tags_api_smoketest_benchmark:
-  stage: benchmark-tests
-  extends: .benchmark-tests-common
-  script:
-    - >
-      scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/tags_api_patterns/ api_benchmark_tags
-
-  artifacts:
-    when: always
-    paths:
       - tavern_benchmark_report_api_benchmark_tags.html
-
-tags_api_smoketest_negative_benchmark:
-  stage: benchmark-tests
-  extends: .benchmark-tests-common
-  script:
-    - >
-      scripts/ci_start_api_benchmark.sh localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern/tags_api_negative/ api_benchmark_tags_negative
-
-  artifacts:
-    when: always
-    paths:
       - tavern_benchmark_report_api_benchmark_tags_negative.html
