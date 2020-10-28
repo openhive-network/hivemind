@@ -8,7 +8,6 @@ rm -f ./upgrade.log
 
 for sql in postgres_handle_view_changes.sql \
           upgrade/upgrade_table_schema.sql \
-          \
           utility_functions.sql \
           hive_accounts_view.sql \
           hive_accounts_info_view.sql \
@@ -55,8 +54,7 @@ for sql in postgres_handle_view_changes.sql \
           database_api_list_comments.sql \
           database_api_list_votes.sql \
           update_posts_rshares.sql \
-          update_hive_post_root_id.sql
-          \
+          update_hive_post_root_id.sql \
           upgrade/upgrade_runtime_migration.sql
 do
 	echo Executing psql -U $1 -d $2 -f $sql
