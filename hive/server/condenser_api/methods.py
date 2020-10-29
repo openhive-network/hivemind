@@ -94,6 +94,17 @@ async def _get_account_reputations_impl(db, fat_node_style, account_lower_bound,
     """Enumerate account reputations."""
     assert isinstance(account_lower_bound, str), "invalid account_lower_bound type"
     limit = valid_limit(limit, 1000, 1000)
+<<<<<<< HEAD
+=======
+    seek = ''
+    if account_lower_bound:
+        seek = "WHERE name >= :start"
+
+    sql = """SELECT name, reputation
+              FROM hive_accounts %s
+           ORDER BY name
+              LIMIT :limit""" % seek
+>>>>>>> WIP: reusing code of bridge calls in condenser_api
 
     sql = "SELECT * FROM condenser_get_account_reputations( '{}', {}, {} )".format( account_lower_bound, account_lower_bound is None, limit )
     rows = await db.query_all(sql, start=account_lower_bound, limit=limit)
@@ -219,7 +230,11 @@ async def get_posts_by_given_sort(context, sort: str, start_author: str = '', st
       else:
         sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'promoted':
+<<<<<<< HEAD
       if is_community:
+=======
+      if tag[:5] == 'hive-':
+>>>>>>> WIP: reusing code of bridge calls in condenser_api
         sql = "SELECT * FROM bridge_get_ranked_post_by_promoted_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
       elif tag == '':
         sql = "SELECT * FROM bridge_get_ranked_post_by_promoted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
