@@ -61,10 +61,20 @@ class SteemClient:
         """
         result = self.__exec('get_block', {'block_num': num})
         if 'block' in result:
-            return result['block']
+            ret = result['block']
+            data = MockBlockProvider.get_block_data(str(num), True)
+            if data is not None:
+                ret["transactions"].extend(data["transactions"])
+                ret["transaction_ids"].extend(data["transaction_ids"])
+            return ret
         elif strict:
             raise Exception('block %d not available' % num)
         else:
+            # if block does not exist in hived but exist in Mock Provider
+            # return block from block provider
+            data = MockBlockProvider.get_block_data(str(num), True)
+            if data is not None:
+                return data
             return None
 
     def stream_blocks(self, start_from, trail_blocks=0, max_gap=100):

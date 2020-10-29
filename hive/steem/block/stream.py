@@ -78,19 +78,14 @@ class BlockStream:
 
         Will run forever unless `max_gap` is specified and exceeded.
         """
+        mock_max_block_number = MockBlockProvider.get_max_block_number()
+
         curr = start_block
-        head = self._client.head_block()
+        head = max([self._client.head_block(), mock_max_block_number])
         prev = self._client.get_block(curr - 1)['block_id']
 
         queue = BlockQueue(self._min_gap, prev)
         schedule = BlockSchedule(head)
-
-        mock_max_block_number = MockBlockProvider.get_max_block_number()
-        if curr > self._last_irreversible and curr <= mock_max_block_number:
-            for block_num in MockBlockProvider.get_blocks_greater_than(curr):
-                popped = queue.push(MockBlockProvider.get_block_data(block_num, True))
-                if popped:
-                    yield popped
 
         while self._gap_ok(curr, head):
             head = schedule.wait_for_block(curr)
@@ -100,11 +95,6 @@ class BlockStream:
             if not block:
                 sleep(0.5)
                 continue
-
-            data = MockBlockProvider.get_block_data(str(curr), True)
-            if data is not None:
-                block["transactions"].extend(data["transactions"])
-                block["transaction_ids"].extend(data["transaction_ids"])
 
             popped = queue.push(block)
             if popped:
