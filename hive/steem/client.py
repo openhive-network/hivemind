@@ -62,7 +62,7 @@ class SteemClient:
         result = self.__exec('get_block', {'block_num': num})
         if 'block' in result:
             ret = result['block']
-            data = MockBlockProvider.get_block_data(str(num), True)
+            data = MockBlockProvider.get_block_data(num, True)
             if data is not None:
                 ret["transactions"].extend(data["transactions"])
                 ret["transaction_ids"].extend(data["transaction_ids"])
@@ -72,7 +72,7 @@ class SteemClient:
         else:
             # if block does not exist in hived but exist in Mock Provider
             # return block from block provider
-            data = MockBlockProvider.get_block_data(str(num), True)
+            data = MockBlockProvider.get_block_data(num, True)
             if data is not None:
                 return data
             return None
@@ -84,6 +84,11 @@ class SteemClient:
     def _gdgp(self):
         ret = self.__exec('get_dynamic_global_properties')
         assert 'time' in ret, "gdgp invalid resp: %s" % ret
+        mock_max_block_number = MockBlockProvider.get_max_block_number()
+        if mock_max_block_number > ret['head_block_number']:
+            ret['time'] = MockBlockProvider.get_block_data(mock_max_block_number)['timestamp']
+        ret['head_block_number'] = max([int(ret['head_block_number']), mock_max_block_number])
+        #ret['last_irreversible_block_num'] = max([int(ret['last_irreversible_block_num']), mock_max_block_number])
         return ret
 
     def head_time(self):
@@ -154,7 +159,7 @@ class SteemClient:
             blocks[num] = block
 
         for block_num in block_nums:
-            data = MockBlockProvider.get_block_data(str(block_num), True)
+            data = MockBlockProvider.get_block_data(block_num, True)
             if data is not None:
                 blocks[block_num]["transactions"].extend(data["transactions"])
                 blocks[block_num]["transaction_ids"].extend(data["transaction_ids"])
@@ -174,6 +179,24 @@ class SteemClient:
 
     def enum_virtual_ops(self, conf, begin_block, end_block):
         """ Get virtual ops for range of blocks """
+        def add_mock_vops(ret, from_block, end_block):
+            for block_num in range(from_block, end_block):
+                mock_vops = MockVopsProvider.get_block_data(block_num)
+                if block_num in ret:
+                    if mock_vops['ops_by_block']:
+                        ret[block_num]['ops'].extend([op['op'] for op in mock_vops['ops_by_block']])
+                        print(ret)
+                    if mock_vops['ops']:
+                        ret[block_num]['ops'].extend([op['op'] for op in mock_vops['ops']])
+                        print(ret)
+                else:
+                    if mock_vops['ops_by_block']:
+                        ret[block_num] = {'timestamp':mock_vops['timestamp'], "ops" : [op['op'] for op in mock_vops['ops_by_block']]}
+                        print(ret)
+                    if mock_vops['ops']:
+                        ret[block_num] = {'timestamp':mock_vops['timestamp'], "ops" : [op['op'] for op in mock_vops['ops']]}
+                        print(ret)
+
         ret = {}
 
         from_block = begin_block
@@ -194,11 +217,6 @@ class SteemClient:
             call_result = self.__exec('enum_virtual_ops', {"block_range_begin":from_block, "block_range_end":end_block
                 , "group_by_block": True, "include_reversible": True, "operation_begin": resume_on_operation, "limit": 1000, "filter": tracked_ops_filter
             })
-
-            mock_vops = MockVopsProvider.get_block_data(str(from_block), True)
-            if mock_vops is not None:
-                call_result['ops_by_block'].extend(mock_vops['ops_by_block'])
-                call_result['ops'].extend(mock_vops['ops'])
 
             if conf.get('log_virtual_op_calls'):
                 call = """
@@ -223,14 +241,18 @@ class SteemClient:
             next_block = call_result['next_block_range_begin']
 
             if next_block == 0:
+                add_mock_vops(ret, from_block, end_block)
                 return ret
 
             if next_block < begin_block:
                 logger.error( "Next next block nr {} returned by enum_virtual_ops is smaller than begin block {}.".format( next_block, begin_block ) )
-                return ret;
+                add_mock_vops(ret, from_block, end_block)
+                return ret
 
             # Move to next block only if operations from current one have been processed completely.
             from_block = next_block
+
+        add_mock_vops(ret, begin_block, end_block)
 
         return ret
 

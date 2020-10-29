@@ -221,6 +221,16 @@ class Sync:
         from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
         log.info("database_schema_version : %s", SCHEMA_DB_VERSION)
 
+        mock_block_data_path = self._conf.get("mock_block_data_path")
+        if mock_block_data_path:
+            log.warning("Loading mock block data from: {}".format(mock_block_data_path))
+            MockBlockProvider.load_block_data(mock_block_data_path)
+
+        mock_vops_data_path = self._conf.get("mock_vops_data_path")
+        if mock_vops_data_path:
+            log.warning("Loading mock virtual ops data from: {}".format(mock_vops_data_path))
+            MockVopsProvider.load_block_data(mock_vops_data_path)
+
         # ensure db schema up to date, check app status
         DbState.initialize()
         Blocks.setup_own_db_access(self._db)
@@ -233,16 +243,6 @@ class Sync:
             self._conf.get('muted_accounts_url'),
             self._conf.get('blacklist_api_url'))
         Mutes.set_shared_instance(mutes)
-
-        mock_block_data_path = self._conf.get("mock_block_data_path")
-        if mock_block_data_path:
-            log.warning("Loading mock block data from: {}".format(mock_block_data_path))
-            MockBlockProvider.load_block_data(mock_block_data_path)
-
-        mock_vops_data_path = self._conf.get("mock_vops_data_path")
-        if mock_vops_data_path:
-            log.warning("Loading mock virtual ops data from: {}".format(mock_vops_data_path))
-            MockVopsProvider.load_block_data(mock_vops_data_path)
 
         # community stats
         update_communities_posts_and_rank()
