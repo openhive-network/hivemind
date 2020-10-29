@@ -53,7 +53,8 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value
+      hp.curator_payout_value,
+      hp.is_muted
     FROM hive_posts_view hp
     INNER JOIN hive_post_tags hpt ON hpt.post_id = hp.id
     WHERE hp.is_paidout = '0' AND ( __tag_id = 0 OR hpt.tag_id = __tag_id ) AND ( __post_id = 0 OR hp.id < __post_id )
@@ -116,7 +117,8 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value
+      hp.curator_payout_value,
+      hp.is_muted
     FROM hive_posts_view hp
     WHERE hp.is_paidout = '0' AND ( __post_id = 0 OR hp.id < __post_id )
           AND ( ( __community IS NULL ) OR ( ( __community IS NOT NULL ) AND ( ( __category_id = 0 OR hp.category_id = __category_id ) AND hp.depth = 0 ) ) )

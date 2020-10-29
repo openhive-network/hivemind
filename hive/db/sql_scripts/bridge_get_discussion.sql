@@ -64,7 +64,8 @@ BEGIN
         hpv.beneficiaries,
         hpv.max_accepted_payout,
         hpv.percent_hbd,
-        hpv.curator_payout_value
+        hpv.curator_payout_value,
+        hpv.is_muted
     FROM
     (
         WITH RECURSIVE child_posts (id, parent_id) AS

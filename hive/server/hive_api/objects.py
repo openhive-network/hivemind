@@ -147,6 +147,7 @@ async def posts_by_id(db, ids, observer=None, lite=True):
     reblogged_ids = await _reblogged_ids(db, observer, ids) if observer else []
 
     # TODO: filter out observer's mutes?
+    # ^ [jes] this is handled in append_statistics_to_post
 
     # key by id.. returns sorted by input order
     authors = set()
