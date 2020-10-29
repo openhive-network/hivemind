@@ -282,7 +282,7 @@ $function$
 language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_payout_for_category;
-CREATE FUNCTION bridge_get_ranked_post_by_payout_for_category( in _category VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION bridge_get_ranked_post_by_payout_for_category( in _category VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -342,7 +342,8 @@ BEGIN
         , ( hp1.payout + hp1.pending_payout ) as all_payout
       FROM
           hive_posts hp1
-      WHERE hp1.category_id = __hive_category AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.payout_at BETWEEN __head_block_time + interval '12 hours' AND __head_block_time + interval '36 hours'
+      WHERE hp1.category_id = __hive_category AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout
+          AND ( ( NOT _bridge_api AND hp1.depth = 0 ) OR ( _bridge_api AND hp1.payout_at BETWEEN __head_block_time + interval '12 hours' AND __head_block_time + interval '36 hours' ) )
           AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
       ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
       LIMIT _limit

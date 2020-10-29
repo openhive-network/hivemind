@@ -137,7 +137,8 @@ async def get_account_reputations(context, account_lower_bound: str = None, limi
 
 async def _get_account_reputations_impl(db, fat_node_style, account_lower_bound, limit):
     """Enumerate account reputations."""
-    limit = valid_limit(limit, 1000, None)
+    assert isinstance(account_lower_bound, str), "invalid account_lower_bound type"
+    limit = valid_limit(limit, 1000, 1000)
     seek = ''
     if account_lower_bound:
         seek = "WHERE name >= :start"
@@ -263,22 +264,32 @@ async def get_posts_by_given_sort(context, sort: str, start_author: str = '', st
       else:
         sql = "SELECT * FROM condenser_get_discussions_by_hot( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'promoted':
-      if tag == '':
-        sql = "SELECT * FROM condenser_get_discussions_by_promoted_with_empty_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      if tag[:5] == 'hive-':
+        sql = "SELECT * FROM bridge_get_ranked_post_by_promoted_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      elif tag == '':
+        sql = "SELECT * FROM bridge_get_ranked_post_by_promoted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
       else:
-        sql = "SELECT * FROM condenser_get_discussions_by_promoted( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_promoted_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'post_by_payout':
-      sql = "SELECT * FROM condenser_get_post_discussions_by_payout( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      if tag == '':
+        sql = "SELECT * FROM bridge_get_ranked_post_by_payout( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False )"
+      else:
+        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False )"
     elif sort == 'comment_by_payout':
-      sql = "SELECT * FROM condenser_get_comment_discussions_by_payout( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      if tag == '':
+        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      else:
+        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     else:
       return posts
 
     sql_result = await db.query_all(sql, tag=tag, author=start_author, permlink=start_permlink, limit=limit )
 
+    muted_accounts = Mutes.all()
     for row in sql_result:
         post = _condenser_post_object(row, truncate_body)
         post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
+        post['active_votes'] = _mute_votes(post['active_votes'], muted_accounts)
         posts.append(post)
     return posts
 
