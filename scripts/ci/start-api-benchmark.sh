@@ -17,12 +17,8 @@ BASE_DIR=$(pwd)
 echo "Script base dir is: $BASE_DIR"
 
 python3 -m pip install tox
-python3 -m pip install prettytable
-python3 -m pip install PyYAML
-
-echo "Creating benchmark test file as: $4.py"
-$BASE_DIR/tests/tests_api/hivemind/benchmarks/benchmark_generator.py $3 "$4.py" "http://$1:$2"
-echo "Running benchmark tests on http://$1:$2"
-tox -e benchmark -- --benchmark-json="$4.json" "$4.py"
-echo "Creating html report from $4.json"
-$BASE_DIR/scripts/json_report_parser.py $3 "$4.json"
+export HIVEMIND_ADDRESS=$1
+export HIVEMIND_PORT=$2
+export BENCHMARKS_TESTS_PATH=$3
+export BENCHMARKS_SCRIPT_NAME=$4
+tox -e benchmark
