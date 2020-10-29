@@ -11,11 +11,12 @@ END IF;
 
 IF EXISTS(SELECT * FROM hive_db_data_migration WHERE migration = 'hive_posts_api_helper fill') THEN
   RAISE NOTICE 'Performing initial hive_posts_api_helper collection...';
-  SET work_mem='2GB';
-  PERFORM update_hive_posts_api_helper(NULL, NULL);
-
-    CREATE INDEX hive_posts_api_helper_author_permlink_idx ON hive_posts_api_helper
-      (author COLLATE pg_catalog."C" ASC NULLS LAST, permlink COLLATE pg_catalog."C" ASC NULLS LAST)
+    SET work_mem='2GB';
+    TRUNCATE TABLE hive_posts_api_helper;
+    DROP INDEX IF EXISTS hive_posts_api_helper_author_permlink_idx;
+    DROP INDEX IF EXISTS hive_posts_api_helper_author_s_permlink_idx;
+    PERFORM update_hive_posts_api_helper(NULL, NULL);
+    CREATE INDEX IF NOT EXISTS hive_posts_api_helper_author_s_permlink_idx ON hive_posts_api_helper (author_s_permlink)
     ;
 ELSE
   RAISE NOTICE 'Skipping initial hive_posts_api_helper collection...';
