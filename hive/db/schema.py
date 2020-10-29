@@ -593,28 +593,7 @@ def setup(db):
       "hot_and_trends.sql",
       "condenser_get_discussions_by_trending.sql",
       "condenser_get_discussions_by_hot.sql",
-      "condenser_get_discussions_by_promoted.sql",
-      "condenser_get_post_discussions_by_payout.sql",
-      "condenser_get_comment_discussions_by_payout.sql",
-      "update_hive_posts_children_count.sql",
-      "update_hive_posts_api_helper.sql",
-      "database_api_list_comments.sql",
-      "database_api_list_votes.sql",
-      "update_posts_rshares.sql",
-      "update_hive_post_root_id.sql",
-      "condenser_get_by_replies_to_account.sql",
-      "condenser_get_by_account_comments.sql",
-      "condenser_get_by_blog_without_reblog.sql",
-      "condenser_get_by_feed_with_reblog.sql",
-      "condenser_get_by_blog.sql",
-      "bridge_get_account_posts_by_blog.sql",
-      "condenser_get_follow_counts.sql",
-      "condenser_get_names_by_followers.sql",
-      "condenser_get_names_by_following.sql",
-      "condenser_get_names_by_reblogged.sql",
-      "condenser_get_discussions_by_comments.sql",
-      "condenser_get_account_reputations.sql"
-
+      "update_hive_posts_children_count.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))

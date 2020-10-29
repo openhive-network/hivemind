@@ -168,7 +168,7 @@ async def _get_ranked_posts_for_tag( db, sort:str, tag, start_author:str, start_
         return await execute_tags_query(db, sql, limit)
 
     if sort == 'payout':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True )"
         return await execute_tags_query(db, sql, limit)
 
     if sort == 'payout_comments':
@@ -211,7 +211,7 @@ async def _get_ranked_posts_for_all( db, sort:str, start_author:str, start_perml
         return await execute_query(db, sql, limit)
 
     if sort == 'payout':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_payout( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_payout( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True )"
         return await execute_query(db, sql, limit)
 
     if sort == 'payout_comments':
