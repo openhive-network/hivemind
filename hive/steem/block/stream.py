@@ -67,7 +67,6 @@ class BlockStream:
         self._client = client
         self._min_gap = min_gap
         self._max_gap = max_gap
-        self._last_irreversible = self._client.last_irreversible()
 
     def _gap_ok(self, curr, head):
         """Ensures gap between curr and head is within limits (max_gap)."""
@@ -78,10 +77,8 @@ class BlockStream:
 
         Will run forever unless `max_gap` is specified and exceeded.
         """
-        mock_max_block_number = MockBlockProvider.get_max_block_number()
-
         curr = start_block
-        head = max([self._client.head_block(), mock_max_block_number])
+        head = self._client.head_block()
         prev = self._client.get_block(curr - 1)['block_id']
 
         queue = BlockQueue(self._min_gap, prev)
