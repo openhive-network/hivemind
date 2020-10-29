@@ -60,7 +60,8 @@ SQL_TEMPLATE = """
         hp.url,
         hp.root_title,
         hp.active,
-        hp.author_rewards
+        hp.author_rewards,
+        hp.is_muted
     FROM hive_posts_view hp
 """
 

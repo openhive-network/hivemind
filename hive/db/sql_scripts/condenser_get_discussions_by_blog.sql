@@ -118,7 +118,8 @@ BEGIN
         hp.allow_curation_rewards,
         hp.beneficiaries,
         hp.url,
-        hp.root_title
+        hp.root_title,
+        hp.is_muted
     FROM hive_posts_view hp
     INNER JOIN
     (

@@ -46,7 +46,8 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value
+      hp.curator_payout_value,
+      hp.is_muted
     FROM hive_posts_view hp
     WHERE hp.is_paidout = '0' AND hp.depth = 0 AND ( __category_id = 0 OR hp.category_id = __category_id )
     ORDER BY (hp.payout+hp.pending_payout) DESC, hp.id DESC LIMIT _limit;
