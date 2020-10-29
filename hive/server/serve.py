@@ -293,8 +293,27 @@ def run_server(conf):
         """Handles all hive jsonrpc API requests."""
         request = await request.text()
         # debug=True refs https://github.com/bcb/jsonrpcserver/issues/71
-        response = await dispatch(request, methods=methods, debug=True, context=app, serialize=decimal_serialize, deserialize=decimal_deserialize)
-        if response.wanted:
+        response = None
+        try:
+            response = await dispatch(request, methods=methods, debug=True, context=app, serialize=decimal_serialize, deserialize=decimal_deserialize)
+        except simplejson.errors.JSONDecodeError as ex:
+            # first log exception
+            # TODO: consider removing this log - potential log spam
+            log.exception(ex)
+
+            # create and send error response
+            error_response = {
+                "jsonrpc":"2.0",
+                "error" : {
+                    "code": -32602,
+                    "data": "Invalid JSON in request: " + str(ex),
+                    "message": "Invalid parameters"
+                },
+                "id" : -1
+            }
+            headers = {'Access-Control-Allow-Origin': '*'}
+            return web.json_response(error_response, status=200, headers=headers, dumps=decimal_serialize)
+        if response is not None and response.wanted:
             headers = {'Access-Control-Allow-Origin': '*'}
             return web.json_response(response.deserialized(), status=200, headers=headers, dumps=decimal_serialize)
         return web.Response()
