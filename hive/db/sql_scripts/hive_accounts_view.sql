@@ -1,4 +1,4 @@
-DROP VIEW IF EXISTS public.hive_accounts_view;
+DROP VIEW IF EXISTS public.hive_accounts_view CASCADE;
 
 CREATE OR REPLACE VIEW public.hive_accounts_view
 AS
