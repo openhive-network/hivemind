@@ -38,7 +38,7 @@ def join_benchmark_data(file_name, json_files):
             if data[2] is not None:
                 bmean.append(data[2])
         benchmark['stats']['min'] = min(bmin)
-        benchmark['stats']['max'] = min(bmax)
+        benchmark['stats']['max'] = max(bmax)
         benchmark['stats']['mean'] = mean(bmean)
 
     with open("{}.json".format(file_name), "w") as out:
