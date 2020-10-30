@@ -60,3 +60,51 @@ WHERE uhp.id = data_source.queried_parent
 ;
 END
 $BODY$;
+
+DROP FUNCTION IF EXISTS public.update_all_hive_posts_children_count;
+CREATE OR REPLACE FUNCTION public.update_all_hive_posts_children_count()
+  RETURNS void
+  LANGUAGE 'plpgsql'
+  VOLATILE
+AS $BODY$
+declare __depth int;
+BEGIN
+  SELECT MAX(hp.depth) into __depth FROM hive_posts hp ;
+
+  DROP TABLE if exists __post_children;
+  create unlogged table __post_children
+  (
+    id int not null,
+    child_count int not null,
+    CONSTRAINT __post_children2_pkey PRIMARY KEY (id)
+  );
+  
+  WHILE __depth >= 0 LOOP
+    INSERT INTO __post_children
+    (id, child_count)
+      SELECT
+        h1.parent_id AS queried_parent,
+        SUM(COALESCE((SELECT pc.child_count FROM __post_children pc WHERE pc.id = h1.id),
+                      0
+                    ) + 1
+        ) AS count
+      FROM hive_posts h1
+      WHERE (h1.parent_id != 0 OR __depth = 0) AND h1.counter_deleted = 0 AND h1.id != 0 AND h1.depth = __depth
+      GROUP BY h1.parent_id
+
+    ON CONFLICT ON CONSTRAINT __post_children2_pkey DO UPDATE
+      SET child_count = __post_children.child_count + excluded.child_count
+    ;
+
+    __depth := __depth -1;
+  END LOOP;
+
+  UPDATE hive_posts uhp
+  SET children = s.child_count
+  FROM
+  __post_children s 
+  WHERE s.id = uhp.id and s.child_count != uhp.children
+  ;
+
+END
+$BODY$;

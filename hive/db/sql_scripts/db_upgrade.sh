@@ -54,11 +54,14 @@ for sql in postgres_handle_view_changes.sql \
           database_api_list_comments.sql \
           database_api_list_votes.sql \
           update_posts_rshares.sql \
-          update_hive_post_root_id.sql \
-          upgrade/upgrade_runtime_migration.sql
+          update_hive_post_root_id.sql 
+
 do
 	echo Executing psql -U $1 -d $2 -f $sql
-	psql -1 -v "ON_ERROR_STOP=1" -U $1 -d $2 -f $sql 2>&1 | tee -a -i upgrade.log
+	time psql -1 -v "ON_ERROR_STOP=1" -U $1 -d $2  -c '\timing' -f $sql 2>&1 | tee -a -i upgrade.log
   echo $?
 done
+
+time psql -v "ON_ERROR_STOP=1" -U $1 -d $2  -c '\timing' -f upgrade/upgrade_runtime_migration.sql 2>&1 | tee -a -i upgrade.log
+          
 
