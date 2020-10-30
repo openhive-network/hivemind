@@ -93,16 +93,7 @@ def json_report_parser(path_to_test_dir, json_file, time_threshold=1.0):
         ofile.write("    </table>\n")
         ofile.write("  </body>\n")
         ofile.write("</html>\n")
-    if above_treshold:
-        from prettytable import PrettyTable
-        summary = PrettyTable()
-        print("########## Test failed with following tests above {}s threshold ##########".format(time_threshold))
-        summary.field_names = ['Test name', 'Mean time [s]', 'Call parameters']
-        for entry in above_treshold:
-            summary.add_row(entry)
-        print(summary)
-        return False
-    return True
+    return above_treshold
 
 if __name__ == '__main__':
     import argparse

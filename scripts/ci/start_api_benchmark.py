@@ -52,6 +52,7 @@ if __name__ == "__main__":
     parser.add_argument("hivemind_port", type=int, help="Port of hivemind instance")
     parser.add_argument("tests_root_dir", type=str, help="Path to tests root dir")
     parser.add_argument("--benchmark-runs", type=int, default=3, help="How many benchmark runs")
+    parser.add_argument("--time-threshold", dest="time_threshold", type=float, default=1.0, help="Time threshold for test execution time, tests with execution time greater than threshold will be marked on red.")
     args = parser.parse_args()
 
     assert os.path.exists(args.tests_root_dir), "Directory does not exist"
@@ -90,14 +91,21 @@ if __name__ == "__main__":
     for name, json_files in benchmark_json_files.items():
         join_benchmark_data(name, json_files)
 
-    failed = False
+    failed = []
     for test_directory in test_directories:
         json_file_name = "benchmark_" + test_directory.split("/")[-1] + ".json"
-        ret = json_report_parser(test_directory, json_file_name)
-        if not failed and not ret:
-          failed = True
+        ret = json_report_parser(test_directory, json_file_name, args.time_threshold)
+        if ret:
+          failed.extend(ret)
 
     if failed:
+        from prettytable import PrettyTable
+        summary = PrettyTable()
+        print("########## Test failed with following tests above {}s threshold ##########".format(args.time_threshold))
+        summary.field_names = ['Test name', 'Mean time [s]', 'Call parameters']
+        for entry in failed:
+            summary.add_row(entry)
+        print(summary)
         exit(2)
     exit(0)
 
