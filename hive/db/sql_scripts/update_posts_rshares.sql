@@ -10,6 +10,7 @@ AS
 $BODY$
 BEGIN
 SET LOCAL work_mem='2GB';
+SET LOCAL enable_seqscan=False;
 UPDATE hive_posts hp
 SET
     abs_rshares = votes_rshares.abs_rshares
@@ -34,6 +35,7 @@ FROM
 WHERE hp.id = votes_rshares.post_id
 AND (hp.abs_rshares != votes_rshares.abs_rshares OR hp.vote_rshares != votes_rshares.rshares);
 RESET work_mem;
+RESET enable_seqscan;
 END;
 $BODY$
 ;

@@ -238,8 +238,10 @@ class DbState:
         synced_blocks = current_imported_block - last_imported_block
 
         force_index_rebuild = False
+        massive_sync_preconditions = False
         if synced_blocks >= SYNCED_BLOCK_LIMIT:
             force_index_rebuild = True
+            massive_sync_preconditions = True
 
         #is_pre_process, drop, create
         cls.processing_indexes( False, force_index_rebuild, True )
@@ -248,14 +250,24 @@ class DbState:
 
         time_start = perf_counter()
 
-        # Update count of all child posts (what was hold during initial sync)
-        sql = """
-              select update_hive_posts_children_count({}, {})
-              """.format(last_imported_block, current_imported_block)
-        row = DbState.db().query_row(sql)
+        if massive_sync_preconditions:
+            # Update count of all child posts (what was hold during initial sync)
+            sql = """
+                  select update_all_hive_posts_children_count()
+                  """
+            row = DbState.db().query_row(sql)
 
-        time_end = perf_counter()
-        log.info("[INIT] update_hive_posts_children_count executed in %.4fs", time_end - time_start)
+            time_end = perf_counter()
+            log.info("[INIT] update_all_hive_posts_children_count executed in %.4fs", time_end - time_start)
+        else:
+            # Update count of child posts processed during partial sync (what was hold during initial sync)
+            sql = """
+                  select update_hive_posts_children_count({}, {})
+                  """.format(last_imported_block, current_imported_block)
+            row = DbState.db().query_row(sql)
+
+            time_end = perf_counter()
+            log.info("[INIT] update_hive_posts_children_count executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
 
@@ -335,7 +347,7 @@ class DbState:
 
         cls.update_work_mem(current_work_mem)
 
-        if synced_blocks >= SYNCED_BLOCK_LIMIT:
+        if massive_sync_preconditions:
             from hive.db.schema import create_fk, set_logged_table_attribute
             # intentionally disabled since it needs a lot of WAL disk space when switching back to LOGGED
             #set_logged_table_attribute(cls.db(), True)

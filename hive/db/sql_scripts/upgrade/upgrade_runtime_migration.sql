@@ -1,3 +1,6 @@
+
+START TRANSACTION;
+
 DO
 $BODY$
 BEGIN
@@ -8,7 +11,16 @@ IF EXISTS(SELECT * FROM hive_db_data_migration WHERE migration = 'Reputation cal
 ELSE
   RAISE NOTICE 'Skipping initial account reputation calculation...';
 END IF;
+END
+$BODY$;
 
+COMMIT;
+
+START TRANSACTION;
+
+DO
+$BODY$
+BEGIN
 IF EXISTS(SELECT * FROM hive_db_data_migration WHERE migration = 'hive_posts_api_helper fill') THEN
   RAISE NOTICE 'Performing initial hive_posts_api_helper collection...';
     SET work_mem='2GB';
@@ -16,12 +28,19 @@ IF EXISTS(SELECT * FROM hive_db_data_migration WHERE migration = 'hive_posts_api
     DROP INDEX IF EXISTS hive_posts_api_helper_author_permlink_idx;
     DROP INDEX IF EXISTS hive_posts_api_helper_author_s_permlink_idx;
     PERFORM update_hive_posts_api_helper(NULL, NULL);
-    CREATE INDEX IF NOT EXISTS hive_posts_api_helper_author_s_permlink_idx ON hive_posts_api_helper (author_s_permlink)
-    ;
+    CREATE INDEX IF NOT EXISTS hive_posts_api_helper_author_s_permlink_idx ON hive_posts_api_helper (author_s_permlink);
 ELSE
   RAISE NOTICE 'Skipping initial hive_posts_api_helper collection...';
 END IF;
+END
+$BODY$;
 
+COMMIT;
+
+START TRANSACTION;
+DO
+$BODY$
+BEGIN
 IF EXISTS(SELECT * FROM hive_db_data_migration WHERE migration = 'hive_mentions fill') THEN
   RAISE NOTICE 'Performing initial post body mentions collection...';
   SET work_mem='2GB';
@@ -31,38 +50,65 @@ IF EXISTS(SELECT * FROM hive_db_data_migration WHERE migration = 'hive_mentions 
 ELSE
   RAISE NOTICE 'Skipping initial post body mentions collection...';
 END IF;
+END
+$BODY$;
 
+COMMIT;
 
+START TRANSACTION;
+
+DO
+$BODY$
+BEGIN
 IF EXISTS (SELECT * FROM hive_db_data_migration WHERE migration = 'update_posts_rshares( 0, head_block_number) execution') THEN
   RAISE NOTICE 'Performing posts rshares, hot and trend recalculation on range ( 0, head_block_number)...';
   SET work_mem='2GB';
   PERFORM update_posts_rshares(0, (SELECT hb.num FROM hive_blocks hb ORDER BY hb.num DESC LIMIT 1) );
+  DELETE FROM hive_db_data_migration WHERE migration = 'update_posts_rshares( 0, head_block_number) execution';
 ELSE
   RAISE NOTICE 'Skipping update_posts_rshares( 0, head_block_number) recalculation...';
 END IF;
+END
+$BODY$;
 
+COMMIT;
+
+START TRANSACTION;
+DO
+$BODY$
+BEGIN
 IF EXISTS (SELECT * FROM hive_db_data_migration WHERE migration = 'update_hive_posts_children_count execution') THEN
   RAISE NOTICE 'Performing initial post children count execution ( 0, head_block_number)...';
   SET work_mem='2GB';
   update hive_posts set children = 0 where children != 0;
-  PERFORM update_hive_posts_children_count(0, (SELECT hb.num FROM hive_blocks hb ORDER BY hb.num DESC LIMIT 1) );
+  PERFORM update_all_hive_posts_children_count();
+  DELETE FROM hive_db_data_migration WHERE migration = 'update_hive_posts_children_count execution';
 ELSE
   RAISE NOTICE 'Skipping initial post children count execution ( 0, head_block_number) recalculation...';
 END IF;
+END
+$BODY$;
+COMMIT;
 
-
+START TRANSACTION;
+DO
+$BODY$
+BEGIN
 IF EXISTS (SELECT * FROM hive_db_data_migration WHERE migration = 'update_hive_post_mentions refill execution') THEN
   RAISE NOTICE 'Performing hive_mentions refill...';
   SET work_mem='2GB';
   TRUNCATE TABLE hive_mentions RESTART IDENTITY;
   PERFORM update_hive_posts_mentions(0, (select max(num) from hive_blocks));
+  DELETE FROM hive_db_data_migration WHERE migration = 'update_hive_post_mentions refill execution';
 ELSE
   RAISE NOTICE 'Skipping hive_mentions refill...';
 END IF;
 
 END
 $BODY$;
+COMMIT;
 
+START TRANSACTION;
 
 TRUNCATE TABLE hive_db_data_migration;
 
@@ -102,6 +148,8 @@ values
 ,(now(), '1847c75702384c7e34c624fc91f24d2ef20df91d') -- latest version of develop containing included changes.
 ) ds (patch_date, patch_revision)
 where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
+
+COMMIT;
 
 ;
 
