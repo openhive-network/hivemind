@@ -60,17 +60,11 @@ def class_to_path(class_name, class_to_path_dic):
             return p
     return None
 
-if __name__ == '__main__':
+def json_report_parser(path_to_test_dir, json_file, time_threshold=1.0):
     above_treshold = []
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("path_to_test_dir", type = str, help = "Path to test directory for given json benchmark file")
-    parser.add_argument("json_file", type = str, help = "Path to benchmark json file")
-    parser.add_argument("--time-threshold", dest="time_threshold", type=float, default=1.0, help="Time threshold for test execution time, tests with execution time greater than threshold will be marked on red.")
-    args = parser.parse_args()
-    html_file, _ = os.path.splitext(args.json_file)
-    html_file = "tavern_benchmark_report_" + html_file + ".html"
-    class_to_path_dic = make_class_path_dict(args.path_to_test_dir)
+    html_file, _ = os.path.splitext(json_file)
+    html_file = "tavern_report_" + html_file + ".html"
+    class_to_path_dic = make_class_path_dict(path_to_test_dir)
     with open(html_file, "w") as ofile:
         ofile.write("<html>\n")
         ofile.write("  <head>\n")
@@ -86,26 +80,39 @@ if __name__ == '__main__':
         ofile.write("  </head>\n")
         ofile.write("  <body>\n")
         ofile.write("    <table>\n")
-        ofile.write("      <tr><th>Test name</th><th>Mean time [s]</th></tr>\n")
+        ofile.write("      <tr><th>Test name</th><th>Min time [s]</th><th>Max time [s]</th><th>Mean time [s]</th></tr>\n")
         json_data = None
-        with open(args.json_file, "r") as json_file:
+        with open(json_file, "r") as json_file:
             json_data = load(json_file)
         for benchmark in json_data['benchmarks']:
-            if float(benchmark['stats']['mean']) > args.time_threshold:
-                ofile.write("      <tr><td>{}<br/>Parameters: {}</td><td bgcolor=\"red\">{:.4f}</td></tr>\n".format(benchmark['name'], get_request_from_yaml(class_to_path(benchmark['name'][5:], class_to_path_dic)), benchmark['stats']['mean']))
+            if float(benchmark['stats']['mean']) > time_threshold:
+                ofile.write("      <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td></tr>\n".format(benchmark['name'], get_request_from_yaml(class_to_path(benchmark['name'][5:], class_to_path_dic)), benchmark['stats']['min'], benchmark['stats']['max'], benchmark['stats']['mean']))
                 above_treshold.append((benchmark['name'], "{:.4f}".format(benchmark['stats']['mean']), get_request_from_yaml(class_to_path(benchmark['name'][5:], class_to_path_dic))))
             else:
-                ofile.write("      <tr><td>{}</td><td>{:.4f}</td></tr>\n".format(benchmark['name'], benchmark['stats']['mean']))
+                ofile.write("      <tr><td>{}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(benchmark['name'], benchmark['stats']['min'], benchmark['stats']['max'], benchmark['stats']['mean']))
         ofile.write("    </table>\n")
         ofile.write("  </body>\n")
         ofile.write("</html>\n")
     if above_treshold:
         from prettytable import PrettyTable
         summary = PrettyTable()
-        print("########## Test failed with following tests above {}s threshold ##########".format(args.time_threshold))
+        print("########## Test failed with following tests above {}s threshold ##########".format(time_threshold))
         summary.field_names = ['Test name', 'Mean time [s]', 'Call parameters']
         for entry in above_treshold:
             summary.add_row(entry)
         print(summary)
+        return False
+    return True
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("path_to_test_dir", type = str, help = "Path to test directory for given json benchmark file")
+    parser.add_argument("json_file", type = str, help = "Path to benchmark json file")
+    parser.add_argument("--time-threshold", dest="time_threshold", type=float, default=1.0, help="Time threshold for test execution time, tests with execution time greater than threshold will be marked on red.")
+    args = parser.parse_args()
+
+    if not json_report_parser(args.path_to_test_dir, args.json_file, args.time_threshold):
         exit(1)
     exit(0)
+
