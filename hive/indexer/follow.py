@@ -277,7 +277,7 @@ class Follow(DbAdapterHolder):
                             UPDATE
                                 hive_follows hf
                             SET
-                                hf.blacklisted = false
+                                blacklisted = false
                             FROM
                             (
                                 SELECT
@@ -298,7 +298,7 @@ class Follow(DbAdapterHolder):
                             UPDATE
                                 hive_follows hf
                             SET
-                                hf.state = 0
+                                state = 0
                             FROM
                             (
                                 SELECT
@@ -320,7 +320,7 @@ class Follow(DbAdapterHolder):
                             UPDATE
                                 hive_follows hf
                             SET
-                                hf.state = 0
+                                state = 0
                             FROM
                             (
                                 SELECT
@@ -342,7 +342,7 @@ class Follow(DbAdapterHolder):
                             UPDATE
                                 hive_follows hf
                             SET
-                                hf.follow_blacklists = false
+                                follow_blacklists = false
                             FROM
                             (
                                 SELECT
@@ -383,7 +383,7 @@ class Follow(DbAdapterHolder):
                             UPDATE
                                 hive_follows hf
                             SET
-                                hf.follow_muted = false
+                                follow_muted = false
                             FROM
                             (
                                 SELECT
@@ -401,7 +401,7 @@ class Follow(DbAdapterHolder):
                             UPDATE
                                 hive_follows hf
                             SET
-                                hf.follow_muted = true
+                                follow_muted = true
                             FROM
                             (
                                 SELECT
@@ -423,10 +423,10 @@ class Follow(DbAdapterHolder):
                             UPDATE
                                 hive_follows hf
                             SET
-                                hf.blacklisted = false,
-                                hf.follow_blacklists = false,
-                                hf.follow_muted = false,
-                                hf.state = 0
+                                blacklisted = false,
+                                follow_blacklists = false,
+                                follow_muted = false,
+                                state = 0
                             FROM
                             (
                                 SELECT
@@ -444,8 +444,8 @@ class Follow(DbAdapterHolder):
                             UPDATE
                                 hive_follows hf
                             SET
-                                hf.follow_blacklists = true,
-                                hf.follow_muted = true
+                                follow_blacklists = true,
+                                follow_muted = true
                             FROM
                             (
                                 SELECT
