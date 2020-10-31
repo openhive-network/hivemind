@@ -104,7 +104,7 @@ BEGIN
             __author_rep := __author_rep - __prev_rep_delta;
             __implicit_author_rep := __author_rep = 0;
             __author_rep_changed = true;
-            if __vote_data.author_id == __vote_data.voter_id THEN
+            if __vote_data.author_id = __vote_data.voter_id THEN
               __implicit_voter_rep := __implicit_author_rep;
               __voter_rep := __author_rep;
             end if;
