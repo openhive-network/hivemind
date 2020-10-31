@@ -67,17 +67,18 @@ CREATE OR REPLACE FUNCTION public.update_all_hive_posts_children_count()
   LANGUAGE 'plpgsql'
   VOLATILE
 AS $BODY$
-declare __depth int;
+declare __depth INT;
 BEGIN
   SELECT MAX(hp.depth) into __depth FROM hive_posts hp ;
 
-  DROP TABLE if exists __post_children;
-  create unlogged table __post_children
+  CREATE UNLOGGED TABLE IF NOT EXISTS __post_children
   (
-    id int not null,
-    child_count int not null,
-    CONSTRAINT __post_children2_pkey PRIMARY KEY (id)
+    id INT NOT NULL,
+    child_count INT NOT NULL,
+    CONSTRAINT __post_children_pkey PRIMARY KEY (id)
   );
+
+  TRUNCATE TABLE __post_children;
   
   WHILE __depth >= 0 LOOP
     INSERT INTO __post_children
@@ -92,7 +93,7 @@ BEGIN
       WHERE (h1.parent_id != 0 OR __depth = 0) AND h1.counter_deleted = 0 AND h1.id != 0 AND h1.depth = __depth
       GROUP BY h1.parent_id
 
-    ON CONFLICT ON CONSTRAINT __post_children2_pkey DO UPDATE
+    ON CONFLICT ON CONSTRAINT __post_children_pkey DO UPDATE
       SET child_count = __post_children.child_count + excluded.child_count
     ;
 
