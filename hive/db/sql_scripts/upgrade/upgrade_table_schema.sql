@@ -277,4 +277,12 @@ where not exists (select null from hive_db_patch_level where patched_to_revision
 
 --- 1847c75702384c7e34c624fc91f24d2ef20df91d latest version of develop included in this migration script.
 
-
+--- Rename hive_votes_ux1 unique constraint to the hive_votes_voter_id_author_id_permlink_id_uk
+DO $$
+BEGIN
+IF EXISTS (SELECT * FROM pg_constraint WHERE conname='hive_votes_ux1') THEN
+  RAISE NOTICE 'Attempting to rename hive_votes_ux1 to hive_votes_voter_id_author_id_permlink_id_uk...';
+  ALTER TABLE hive_votes RENAME CONSTRAINT hive_votes_ux1 to hive_votes_voter_id_author_id_permlink_id_uk;
+END IF;
+END
+$$
