@@ -299,21 +299,6 @@ def run_server(conf):
         try:
             response = await dispatch(request, methods=methods, debug=True, context=app, serialize=decimal_serialize, deserialize=decimal_deserialize)
         except simplejson.errors.JSONDecodeError as ex:
-<<<<<<< HEAD
-            # first log exception
-            # TODO: consider removing this log - potential log spam
-            log.exception(ex)
-
-            # create and send error response
-            error_response = {
-                "jsonrpc":"2.0",
-                "error" : {
-                    "code": -32602,
-                    "data": "Invalid JSON in request: " + str(ex),
-                    "message": "Invalid parameters"
-                },
-                "id" : -1
-=======
             # in case of malformed json in request try to salvage some data from it
             # and return error response instead 503 internal server error
             # first log exception
@@ -350,7 +335,6 @@ def run_server(conf):
                     "message": "Invalid JSON in request"
                 },
                 "id" : response_id
->>>>>>> Fix for issue #65
             }
             headers = {'Access-Control-Allow-Origin': '*'}
             return web.json_response(error_response, status=200, headers=headers, dumps=decimal_serialize)
