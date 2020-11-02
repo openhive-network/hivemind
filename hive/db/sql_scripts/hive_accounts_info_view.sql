@@ -1,5 +1,4 @@
-
-DROP VIEW IF EXISTS hive_accounts_info_view_lite;
+DROP VIEW IF EXISTS hive_accounts_info_view_lite CASCADE;
 CREATE OR REPLACE VIEW public.hive_accounts_info_view_lite
  AS
  SELECT ha.id,
