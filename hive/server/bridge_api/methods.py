@@ -120,7 +120,7 @@ async def _get_ranked_posts_for_communities( db, sort:str, community, start_auth
 
     if sort == 'trending':
         result_with_pinned_posts = []
-        sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True )"
         result_with_pinned_posts = await execute_community_query(db, pinned_sql, limit)
         limit -= len(result_with_pinned_posts)
         if limit > 0:

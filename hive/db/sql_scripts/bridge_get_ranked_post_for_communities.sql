@@ -51,7 +51,7 @@ $function$
 language sql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_trends_for_community;
-CREATE FUNCTION bridge_get_ranked_post_by_trends_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION bridge_get_ranked_post_by_trends_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -109,7 +109,8 @@ BEGIN
       FROM
          hive_posts hp1
          JOIN hive_communities hc ON hp1.community_id = hc.id
-      WHERE hc.name = _community AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth = 0 AND NOT hp1.is_pinned -- concatenated with bridge_get_ranked_post_pinned_for_community
+      WHERE hc.name = _community AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth = 0
+         AND ( NOT _bridge_api OR NOT hp1.is_pinned ) -- concatenated with bridge_get_ranked_post_pinned_for_community when called for bridge_api
          AND ( __post_id = 0 OR hp1.sc_trend < __trending_limit OR ( hp1.sc_trend = __trending_limit AND hp1.id < __post_id ) )
       ORDER BY hp1.sc_trend DESC, hp1.id DESC
       LIMIT _limit
@@ -534,7 +535,8 @@ BEGIN
           hive_posts hp1
           JOIN hive_communities hc ON hp1.community_id = hc.id
           JOIN hive_accounts_view ha ON hp1.author_id = ha.id
-      WHERE hc.name = _community AND hp1.counter_deleted = 0 AND hp1.depth = 0 AND NOT hp1.is_pinned -- concatenated with bridge_get_ranked_post_pinned_for_community
+      WHERE hc.name = _community AND hp1.counter_deleted = 0 AND hp1.depth = 0
+          AND NOT hp1.is_pinned -- concatenated with bridge_get_ranked_post_pinned_for_community
           AND NOT ha.is_grayed AND ( __post_id = 0 OR hp1.id < __post_id )
       ORDER BY hp1.id DESC
       LIMIT _limit
