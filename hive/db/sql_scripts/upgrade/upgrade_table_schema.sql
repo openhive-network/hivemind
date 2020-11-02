@@ -286,3 +286,10 @@ IF EXISTS (SELECT * FROM pg_constraint WHERE conname='hive_votes_ux1') THEN
 END IF;
 END
 $$
+;
+
+--- Change definition of index hive_posts_created_at_author_id_idx to hive_posts_author_id_created_at_idx to improve hive_accounts_info_view performance.
+DROP INDEX IF EXISTS public.hive_posts_created_at_author_id_idx;
+
+CREATE INDEX IF NOT EXISTS hive_posts_author_id_created_at_idx ON public.hive_posts ( author_id DESC, created_at DESC);
+
