@@ -1,7 +1,7 @@
 """Bridge API public endpoints for posts"""
 
 import hive.server.bridge_api.cursor as cursor
-from hive.server.bridge_api.objects import load_posts, load_profiles, _bridge_post_object, append_statistics_to_post
+from hive.server.bridge_api.objects import load_profiles, _bridge_post_object, append_statistics_to_post
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 from hive.server.common.helpers import (
     return_error_info,

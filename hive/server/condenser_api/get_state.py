@@ -11,8 +11,6 @@ from hive.server.common.mutes import Mutes
 
 from hive.server.condenser_api.objects import (
     load_accounts,
-    load_posts,
-    load_posts_keyed,
     _mute_votes,
     _condenser_post_object)
 from hive.server.common.helpers import (

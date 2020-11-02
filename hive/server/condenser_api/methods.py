@@ -2,7 +2,6 @@
 from functools import wraps
 
 import hive.server.condenser_api.cursor as cursor
-from hive.server.condenser_api.objects import load_posts
 from hive.server.condenser_api.objects import _mute_votes, _condenser_post_object
 from hive.server.common.helpers import (
     ApiError,
