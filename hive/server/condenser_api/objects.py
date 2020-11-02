@@ -13,9 +13,9 @@ log = logging.getLogger(__name__)
 
 # Building of legacy account objects
 
-async def load_accounts(db, names):
+async def load_accounts(db, names, lite = False):
     """`get_accounts`-style lookup for `get_state` compat layer."""
-    sql = get_hive_accounts_info_view_query_string( names )
+    sql = get_hive_accounts_info_view_query_string( names, lite )
     rows = await db.query_all(sql, names=tuple(names))
     return [_condenser_account_object(row) for row in rows]
 
