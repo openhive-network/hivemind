@@ -182,20 +182,17 @@ class SteemClient:
         def add_mock_vops(ret, from_block, end_block):
             for block_num in range(from_block, end_block):
                 mock_vops = MockVopsProvider.get_block_data(block_num)
-                if block_num in ret:
-                    if mock_vops['ops_by_block']:
-                        ret[block_num]['ops'].extend([op['op'] for op in mock_vops['ops_by_block']])
-                        print(ret)
-                    if mock_vops['ops']:
-                        ret[block_num]['ops'].extend([op['op'] for op in mock_vops['ops']])
-                        print(ret)
-                else:
-                    if mock_vops['ops_by_block']:
-                        ret[block_num] = {'timestamp':mock_vops['timestamp'], "ops" : [op['op'] for op in mock_vops['ops_by_block']]}
-                        print(ret)
-                    if mock_vops['ops']:
-                        ret[block_num] = {'timestamp':mock_vops['timestamp'], "ops" : [op['op'] for op in mock_vops['ops']]}
-                        print(ret)
+                if mock_vops:
+                    if block_num in ret:
+                        if 'ops_by_block' in mock_vops:
+                            ret[block_num]['ops'].extend([op['op'] for op in mock_vops['ops_by_block'] if op['block'] == block_num])
+                        if 'ops' in mock_vops:
+                            ret[block_num]['ops'].extend([op['op'] for op in mock_vops['ops'] if op['block'] == block_num])
+                    else:
+                        if 'ops_by_block' in mock_vops:
+                            ret[block_num] = {'timestamp':mock_vops['timestamp'], "ops" : [op['op'] for op in mock_vops['ops_by_block'] if op['block'] == block_num]}
+                        if 'ops' in mock_vops:
+                            ret[block_num] = {'timestamp':mock_vops['timestamp'], "ops" : [op['op'] for op in mock_vops['ops'] if op['block'] == block_num]}
 
         ret = {}
 
