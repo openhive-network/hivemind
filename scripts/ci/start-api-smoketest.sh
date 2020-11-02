@@ -9,5 +9,4 @@ echo "Starting tests on hivemind server running on ${HIVEMIND_ADDRESS}:${HIVEMIN
 
 echo "Selected test group (if empty all will be executed): $3"
 
-tox -- -W ignore::pytest.PytestDeprecationWarning -n auto --durations=0 \
-        --junitxml=../../../../$4 $3
+tox -e tavern -- -W ignore::pytest.PytestDeprecationWarning -n auto --junitxml=../../../../$4 $3
