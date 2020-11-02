@@ -1607,8 +1607,6 @@ def setup(db):
       "condenser_get_discussions_by_created.sql",
       "condenser_get_discussions_by_blog.sql",
       "hot_and_trends.sql",
-      "condenser_get_discussions_by_trending.sql",
-      "condenser_get_discussions_by_hot.sql",
       "update_hive_posts_children_count.sql"
     ]
     from os.path import dirname, realpath

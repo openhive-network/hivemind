@@ -247,6 +247,7 @@ async def get_posts_by_given_sort(context, sort: str, start_author: str = '', st
     tag             = valid_tag(tag, allow_empty=True)
 
     posts = []
+    is_community = tag[:5] == 'hive-'
    
     if sort == 'created':
       if tag == '':
@@ -254,17 +255,21 @@ async def get_posts_by_given_sort(context, sort: str, start_author: str = '', st
       else:
         sql = "SELECT * FROM condenser_get_discussions_by_created( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'trending':
-      if tag == '':
-        sql = "SELECT * FROM condenser_get_discussions_by_trending_with_empty_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      if is_community:
+        sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False )"
+      elif tag == '':
+        sql = "SELECT * FROM bridge_get_ranked_post_by_trends( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
       else:
-        sql = "SELECT * FROM condenser_get_discussions_by_trending( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'hot':
-      if tag == '':
-        sql = "SELECT * FROM condenser_get_discussions_by_hot_with_empty_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      if is_community:
+        sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      elif tag == '':
+        sql = "SELECT * FROM bridge_get_ranked_post_by_hot( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
       else:
-        sql = "SELECT * FROM condenser_get_discussions_by_hot( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'promoted':
-      if tag[:5] == 'hive-':
+      if is_community:
         sql = "SELECT * FROM bridge_get_ranked_post_by_promoted_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
       elif tag == '':
         sql = "SELECT * FROM bridge_get_ranked_post_by_promoted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
