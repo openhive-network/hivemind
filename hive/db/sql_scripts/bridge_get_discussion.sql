@@ -73,12 +73,11 @@ BEGIN
             SELECT hp.id, hp.parent_id
             FROM hive_posts hp
             WHERE hp.id = __post_id
-            AND NOT hp.is_muted
             UNION ALL
             SELECT children.id, children.parent_id
             FROM hive_posts children
             JOIN child_posts ON children.parent_id = child_posts.id
-            WHERE children.counter_deleted = 0 AND NOT children.is_muted
+            WHERE children.counter_deleted = 0
         )
         SELECT hp2.id
         FROM hive_posts hp2
