@@ -144,7 +144,7 @@ def build_metadata():
         sa.Index('hive_posts_promoted_idx', 'promoted'),
         sa.Index('hive_posts_sc_trend_id_is_paidout_idx', 'sc_trend', 'id', 'is_paidout'),
         sa.Index('hive_posts_sc_hot_id_is_paidout_idx', 'sc_hot', 'id', 'is_paidout'),
-        sa.Index('hive_posts_created_at_author_id_idx', 'created_at', 'author_id'),
+        sa.Index('hive_posts_author_id_created_at_idx', sa.text('author_id DESC, created_at DESC')),
         sa.Index('hive_posts_block_num_idx', 'block_num'),
         sa.Index('hive_posts_block_num_created_idx', 'block_num_created'),
         sa.Index('hive_posts_cashout_time_id_idx', 'cashout_time', 'id'),
@@ -508,6 +508,25 @@ def setup(db):
           """
     db.query_no_return(sql)
 
+    sql = """
+          CREATE TABLE IF NOT EXISTS hive_db_patch_level
+          (
+            level SERIAL NOT NULL PRIMARY KEY,
+            patch_date timestamp without time zone NOT NULL,
+            patched_to_revision TEXT
+          );
+    """
+    db.query_no_return(sql)
+    sql = """
+          INSERT INTO hive_db_patch_level
+          (patch_date, patched_to_revision)
+          values
+          (now(), '{}');
+          """
+
+    from hive.version import GIT_REVISION
+    db.query_no_return(sql.format(GIT_REVISION))
+
     # max_time_stamp definition moved into utility_functions.sql
 
     # get_discussion definition moved to bridge_get_discussion.sql
@@ -565,6 +584,8 @@ def setup(db):
     dir_path = dirname(realpath(__file__))
     for script in sql_scripts:
         execute_sql_script(db.query_no_return, "{}/sql_scripts/{}".format(dir_path, script))
+    
+    
 
 
 

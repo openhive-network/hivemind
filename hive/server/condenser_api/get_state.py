@@ -13,7 +13,9 @@ from hive.server.condenser_api.objects import (
     load_accounts,
     load_posts,
     load_posts_keyed,
-    load_posts_reblogs)
+    load_posts_reblogs,
+    _mute_votes,
+    _condenser_post_object)
 from hive.server.common.helpers import (
     ApiError,
     return_error_info,
@@ -28,6 +30,8 @@ from hive.server.condenser_api.tags import (
 import hive.server.condenser_api.cursor as cursor
 
 from hive.server.condenser_api.methods import get_posts_by_given_sort
+
+from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 
 log = logging.getLogger(__name__)
 
@@ -130,7 +134,7 @@ async def get_state(context, path: str):
         author = valid_account(part[1][1:])
         permlink = valid_permlink(part[2])
         state['content'] = await _load_discussion(db, author, permlink)
-        state['accounts'] = await _load_content_accounts(db, state['content'])
+        state['accounts'] = await _load_content_accounts(db, state['content'], True)
 
     # ranked posts - `/sort/category`
     elif part[0] in POST_LIST_SORTS:
@@ -208,12 +212,15 @@ def _keyed_posts(posts):
 def _ref(post):
     return post['author'] + '/' + post['permlink']
 
-async def _load_content_accounts(db, content):
+def _ref_parent(post):
+    return post['parent_author'] + '/' + post['parent_permlink']
+
+async def _load_content_accounts(db, content, lite = False):
     if not content:
         return {}
     posts = content.values()
     names = set(map(lambda p: p['author'], posts))
-    accounts = await load_accounts(db, names)
+    accounts = await load_accounts(db, names, lite)
     return {a['name']: a for a in accounts}
 
 async def _load_account(db, name):
@@ -238,47 +245,39 @@ async def _child_ids(db, parent_ids):
 
 async def _load_discussion(db, author, permlink):
     """Load a full discussion thread."""
-    root_id = await cursor.get_post_id(db, author, permlink)
-    if not root_id:
-        return {}
 
-    # build `ids` list and `tree` map
-    ids = []
-    tree = {}
-    todo = [root_id]
-    while todo:
-        ids.extend(todo)
-        rows = await _child_ids(db, todo)
-        todo = []
-        for pid, cids in rows:
-            tree[pid] = cids
-            todo.extend(cids)
+    sql = "SELECT * FROM get_discussion('{}','{}')".format( author, permlink)
+    sql_result = await db.query_all(sql)
 
-    # load all post objects, build ref-map
-    posts = await load_posts_keyed(db, ids)
-
-    # remove posts/comments from muted accounts
     muted_accounts = Mutes.all()
-    rem_pids = []
-    for pid, post in posts.items():
-        if post['author'] in muted_accounts:
-            rem_pids.append(pid)
-    for pid in rem_pids:
-        if pid in posts:
-            del posts[pid]
-        if pid in tree:
-            rem_pids.extend(tree[pid])
+    posts = []
+    posts_by_id = {}
+    replies = {}
 
-    refs = {pid: _ref(post) for pid, post in posts.items()}
+    for row in sql_result:
+      post = _condenser_post_object(row)
 
-    # add child refs to parent posts
-    for pid, post in posts.items():
-        if pid in tree:
-            post['replies'] = [refs[cid] for cid in tree[pid]
-                               if cid in refs]
+      if post['author'] not in muted_accounts:
+        post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
+        post['active_votes'] = _mute_votes(post['active_votes'], muted_accounts)
+        posts.append(post)
 
-    # return all nodes keyed by ref
-    return {refs[pid]: post for pid, post in posts.items()}
+        parent_key = _ref_parent(post)
+        _key = _ref(post)
+        if parent_key not in replies:
+          replies[parent_key] = []
+        replies[parent_key].append(_key)
+
+    for post in posts:
+      _key = _ref(post)
+      if _key in replies:
+        replies[_key].sort()
+        post['replies'] = replies[_key]
+
+    for post in posts:
+      posts_by_id[_ref(post)] = post
+
+    return posts_by_id
 
 @cached(ttl=1800, timeout=1200)
 async def _get_feed_price(db):

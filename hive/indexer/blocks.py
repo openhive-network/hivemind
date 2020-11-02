@@ -164,6 +164,8 @@ class Blocks:
             key = None
 
             op_type = vop['type']
+            if op_type not in registered_ops_stats:
+                continue
             op_value = vop['value']
             op_value['block_num'] = block_num
             key = "{}/{}".format(op_value['author'], op_value['permlink'])
@@ -436,8 +438,8 @@ class Blocks:
             "SELECT update_hive_posts_root_id({},{})".format(first_block, last_block),
             "SELECT update_hive_posts_api_helper({},{})".format(first_block, last_block),
             "SELECT update_feed_cache({}, {})".format(first_block, last_block),
-            "SELECT update_hive_posts_mentions({}, {})".format(first_block, last_block),
-            "SELECT update_account_reputations({}, {})".format(first_block, last_block)
+            "SELECT update_hive_posts_mentions({}, {})".format(first_block, last_block)
+            #,"SELECT update_account_reputations({}, {})".format(first_block, last_block)
         ]
 
         for query in queries:
