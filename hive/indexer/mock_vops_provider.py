@@ -51,7 +51,7 @@ class MockVopsProvider(MockDataProvider):
     @classmethod
     def get_block_data(cls, block_num):
         ret = {}
-        if cls.block_data:
+        if 'ops' in cls.block_data:
             for ops in cls.block_data['ops']:
                 if ops['block'] == block_num:
                     ret['timestamp'] = ops['timestamp']
@@ -59,6 +59,7 @@ class MockVopsProvider(MockDataProvider):
                         ret['ops'].append(ops)
                     else:
                         ret['ops'] = [ops]
+        if 'ops_by_block' in cls.block_data:
             for ops in cls.block_data['ops_by_block']:
                 if ops['block'] == block_num:
                     ret['timestamp'] = ops['timestamp']
