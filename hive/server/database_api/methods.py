@@ -144,7 +144,7 @@ async def find_comments(context, comments: list):
         WHERE
             NOT hp.is_muted
     """
-
+    #TODO: check above, we may not want that is_muted filter applied here
     idx = 0
     values = ""
     for arg in comments:
