@@ -146,6 +146,7 @@ values
 ,(now(), '9e126e9d762755f2b9a0fd68f076c9af6bb73b76') -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/314 mentions fix
 ,(now(), '033619277eccea70118a5b8dc0c73b913da0025f') -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/326 https://gitlab.syncad.com/hive/hivemind/-/merge_requests/322 posts rshares recalc
 ,(now(), '1847c75702384c7e34c624fc91f24d2ef20df91d') -- latest version of develop containing included changes.
+,(now(), '1f23e1326f3010bc84353aba82d4aa7ff2f999e4') -- hive_posts_author_id_created_at_idx index def. to speedup hive_accounts_info_view.
 ) ds (patch_date, patch_revision)
 where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
 
