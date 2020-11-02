@@ -9,21 +9,23 @@ RETURNS SETOF bridge_api_post
 AS
 $function$
 DECLARE
+  __account_id INTEGER;
   __post_id INTEGER := 0;
 BEGIN
 
+  __account_id = find_account_id( _author, True );
+
   IF _permlink <> '' THEN
     SELECT
-        ha_pp.name, hp.id
+        ha_pp.id, hp.id
     INTO
-        _author, __post_id
+        __account_id, __post_id
     FROM hive_posts hp
     JOIN hive_posts pp ON hp.parent_id = pp.id
     JOIN hive_accounts ha_pp ON ha_pp.id = pp.author_id
     JOIN hive_permlink_data hpd_pp ON hpd_pp.id = pp.permlink_id
-    JOIN hive_accounts ha ON hp.author_id = ha.id
     WHERE 
-      hpd_pp.permlink = _permlink AND ha.name =  _author;
+      hpd_pp.permlink = _permlink AND hp.author_id = __account_id;
   END IF;
 
   RETURN QUERY SELECT
@@ -67,10 +69,8 @@ BEGIN
     JOIN
     (
 	    SELECT hp.id
-	    FROM hive_posts_view hp
-	    WHERE hp.author = _author
-	    ORDER BY hp.id DESC
-	    LIMIT _limit
+	    FROM hive_posts hp
+	    WHERE hp.author_id = __account_id
     ) T ON hp.parent_id = T.id
     WHERE ( ( __post_id = 0 ) OR ( hp.id <= __post_id ) )
     ORDER BY hp.id DESC
