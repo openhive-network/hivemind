@@ -1,7 +1,5 @@
 """ Data provider for test operations """
-import logging
-from json import load, dumps
-log = logging.getLogger(__name__)
+from json import dumps
 
 class MockDataProvider():
     """ Data provider for test operations """
