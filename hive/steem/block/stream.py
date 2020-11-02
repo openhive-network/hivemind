@@ -1,10 +1,8 @@
 """Streams incoming blocks from the Steem blockchain."""
 
-from hive.indexer.mock_data_provider import MockDataProvider
 import logging
 from time import sleep
 from hive.steem.block.schedule import BlockSchedule
-from hive.indexer.mock_block_provider import MockBlockProvider
 
 log = logging.getLogger(__name__)
 
