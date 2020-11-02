@@ -300,9 +300,6 @@ def run_server(conf):
             response = await dispatch(request, methods=methods, debug=True, context=app, serialize=decimal_serialize, deserialize=decimal_deserialize)
         except simplejson.errors.JSONDecodeError as ex:
 <<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 97a595135670762a8863928953559e2d6e1206b9
             # first log exception
             # TODO: consider removing this log - potential log spam
             log.exception(ex)
@@ -316,7 +313,6 @@ def run_server(conf):
                     "message": "Invalid parameters"
                 },
                 "id" : -1
-<<<<<<< HEAD
 =======
             # in case of malformed json in request try to salvage some data from it
             # and return error response instead 503 internal server error
@@ -355,8 +351,6 @@ def run_server(conf):
                 },
                 "id" : response_id
 >>>>>>> Fix for issue #65
-=======
->>>>>>> 97a595135670762a8863928953559e2d6e1206b9
             }
             headers = {'Access-Control-Allow-Origin': '*'}
             return web.json_response(error_response, status=200, headers=headers, dumps=decimal_serialize)
