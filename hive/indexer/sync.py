@@ -28,6 +28,9 @@ from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import BroadcastObject
 from hive.utils.communities_rank import update_communities_posts_and_rank
 
+from hive.indexer.mock_block_provider import MockBlockProvider
+from hive.indexer.mock_vops_provider import MockVopsProvider
+
 from datetime import datetime
 
 log = logging.getLogger(__name__)
@@ -217,6 +220,16 @@ class Sync:
 
         from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
         log.info("database_schema_version : %s", SCHEMA_DB_VERSION)
+
+        mock_block_data_path = self._conf.get("mock_block_data_path")
+        if mock_block_data_path:
+            MockBlockProvider.load_block_data(mock_block_data_path)
+            MockBlockProvider.print_data()
+
+        mock_vops_data_path = self._conf.get("mock_vops_data_path")
+        if mock_vops_data_path:
+            MockVopsProvider.load_block_data(mock_vops_data_path)
+            MockVopsProvider.print_data()
 
         # ensure db schema up to date, check app status
         DbState.initialize()

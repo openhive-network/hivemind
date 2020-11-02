@@ -53,6 +53,8 @@ class Conf():
         add('--exit-after-sync', help='exit when sync is completed', action='store_true')
         add('--test-profile', type=strtobool, env_var='TEST_PROFILE', help='(debug) profile execution', default=False)
         add('--log-virtual-op-calls', type=strtobool, env_var='LOG_VIRTUAL_OP_CALLS', help='(debug) log virtual op calls and responses', default=False)
+        add('--mock-block-data-path', type=str, env_var='MOCK_BLOCK_DATA_PATH', help='(debug/testing) load additional data from block data file')
+        add('--mock-vops-data-path', type=str, env_var='MOCK_VOPS_DATA_PATH', help='(debug/testing) load additional data from virtual operations data file')
 
         # logging
         add('--log-timestamp', help='Output timestamp in log', action='store_true')
