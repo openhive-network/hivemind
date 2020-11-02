@@ -231,10 +231,14 @@ async def get_posts_by_given_sort(context, sort: str, start_author: str = '', st
         sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'promoted':
 <<<<<<< HEAD
+<<<<<<< HEAD
       if is_community:
 =======
       if tag[:5] == 'hive-':
 >>>>>>> WIP: reusing code of bridge calls in condenser_api
+=======
+      if is_community:
+>>>>>>> [ABW]: reused code of bridge.get_ranked_posts with hot/trending for their equivalents in condenser_api
         sql = "SELECT * FROM bridge_get_ranked_post_by_promoted_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
       elif tag == '':
         sql = "SELECT * FROM bridge_get_ranked_post_by_promoted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
