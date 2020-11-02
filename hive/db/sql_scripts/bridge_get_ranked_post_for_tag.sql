@@ -56,7 +56,8 @@ BEGIN
           JOIN hive_posts hp1 ON hp1.id = hpt.post_id
           JOIN hive_accounts_view ha ON hp1.author_id = ha.id
       WHERE hpt.tag_id = __hive_tag AND hp1.counter_deleted = 0 AND hp1.depth = 0 AND NOT ha.is_grayed AND ( __post_id = 0 OR hp1.id < __post_id )
-      ORDER BY hp1.id + 0 DESC
+      --ORDER BY hp1.id + 0 DESC -- this workaround helped the query to better choose indexes, but after some time it started to significally slow down
+      ORDER BY hp1.id DESC
       LIMIT _limit
   ) as created
   JOIN hive_posts_view hp ON hp.id = created.id
