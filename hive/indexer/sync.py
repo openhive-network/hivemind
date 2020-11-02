@@ -223,13 +223,13 @@ class Sync:
 
         mock_block_data_path = self._conf.get("mock_block_data_path")
         if mock_block_data_path:
-            log.warning("Loading mock block data from: {}".format(mock_block_data_path))
             MockBlockProvider.load_block_data(mock_block_data_path)
+            MockBlockProvider.print_data()
 
         mock_vops_data_path = self._conf.get("mock_vops_data_path")
         if mock_vops_data_path:
-            log.warning("Loading mock virtual ops data from: {}".format(mock_vops_data_path))
             MockVopsProvider.load_block_data(mock_vops_data_path)
+            MockVopsProvider.print_data()
 
         # ensure db schema up to date, check app status
         DbState.initialize()

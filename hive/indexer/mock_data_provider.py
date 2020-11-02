@@ -1,14 +1,12 @@
 """ Data provider for test operations """
 import logging
+from json import load, dumps
 log = logging.getLogger(__name__)
-
-from json import load
 
 class MockDataProvider():
     """ Data provider for test operations """
     block_data = {}
 
     @classmethod
-    def load_block_data(cls, data_path):
-        with open(data_path, "r") as data_file:
-            cls.block_data = load(data_file)
+    def print_data(cls):
+        print(dumps(cls.block_data, indent=4, sort_keys=True))
