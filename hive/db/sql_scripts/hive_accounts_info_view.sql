@@ -3,7 +3,7 @@ CREATE OR REPLACE VIEW public.hive_accounts_info_view
  AS
  SELECT ha.id,
     ha.name,
-    COALESCE(posts.post_count, 0::bigint) AS post_count,
+    ha.post_count,
     ha.created_at,
     ( SELECT GREATEST(ha.created_at,
                       COALESCE(latest_post.latest_post, '1970-01-01 00:00:00'::timestamp without time zone),
@@ -21,13 +21,7 @@ CREATE OR REPLACE VIEW public.hive_accounts_info_view
    (
    SELECT max(hb.num) - 1200 * 24 * 7 AS block_limit FROM hive_blocks hb
    ) bl,
-   hive_accounts ha
-   LEFT JOIN LATERAL
-   ( 
-     SELECT COUNT(1) AS post_count
-     FROM hive_posts hp
-     WHERE hp.counter_deleted = 0 and hp.author_id = ha.id
-   ) posts ON true
+   hive_accounts_info_view_lite ha
    LEFT JOIN lateral 
    (
       SELECT hp1.created_at AS latest_post
@@ -53,3 +47,25 @@ CREATE OR REPLACE VIEW public.hive_accounts_info_view
    ) whole_votes ON true
    ;
 
+DROP VIEW IF EXISTS hive_accounts_info_view_lite;
+CREATE OR REPLACE VIEW public.hive_accounts_info_view_lite
+ AS
+ SELECT ha.id,
+    ha.name,
+    COALESCE(posts.post_count, 0::bigint) AS post_count,
+    ha.created_at,
+    ha.reputation,
+    ha.rank,
+    ha.following,
+    ha.followers,
+    ha.lastread_at,
+    ha.posting_json_metadata,
+    ha.json_metadata
+   FROM hive_accounts ha
+   LEFT JOIN LATERAL
+   ( 
+     SELECT COUNT(1) AS post_count
+     FROM hive_posts hp
+     WHERE hp.counter_deleted = 0 and hp.author_id = ha.id
+   ) posts ON true
+   ;
