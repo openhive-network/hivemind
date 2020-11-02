@@ -2,7 +2,6 @@
 from functools import wraps
 
 import hive.server.condenser_api.cursor as cursor
-from hive.server.condenser_api.objects import load_posts, load_posts_reblogs
 from hive.server.condenser_api.objects import _mute_votes, _condenser_post_object
 from hive.server.common.helpers import (
     ApiError,
@@ -16,6 +15,8 @@ from hive.server.common.helpers import (
     valid_follow_type)
 from hive.server.common.mutes import Mutes
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
+
+from hive.server.hive_api.public import get_by_feed_with_reblog_impl
 
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
 
@@ -361,13 +362,13 @@ async def get_discussions_by_feed(context, tag: str = None, start_author: str = 
     """Retrieve account's personalized feed."""
     assert tag, '`tag` cannot be blank'
     assert not filter_tags, 'filter_tags not supported'
-    res = await cursor.pids_by_feed_with_reblog(
+    return await get_by_feed_with_reblog_impl(
         context['db'],
         valid_account(tag),
         valid_account(start_author, allow_empty=True),
         valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100, 20))
-    return await load_posts_reblogs(context['db'], res, truncate_body=truncate_body)
+        valid_limit(limit, 100, 20),
+        truncate_body)
 
 
 @return_error_info
@@ -418,13 +419,12 @@ async def get_replies_by_last_update(context, start_author: str = None, start_pe
     """Get all replies made to any of author's posts."""
     assert start_author, '`start_author` cannot be blank'
 
-    ids = await cursor.pids_by_replies_to_account(
+    return await cursor.get_by_replies_to_account(
         context['db'],
         valid_account(start_author),
         valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100, 20))
-    return await load_posts(context['db'], ids, truncate_body=truncate_body)
-
+        valid_limit(limit, 100, 20),
+        truncate_body)
 
 @return_error_info
 @nested_query_compat
@@ -438,12 +438,11 @@ async def get_discussions_by_author_before_date(context, author: str = None, sta
     """
     # pylint: disable=invalid-name,unused-argument
     assert author, '`author` cannot be blank'
-    ids = await cursor.pids_by_blog_without_reblog(
+    return await cursor.get_by_blog_without_reblog(
         context['db'],
         valid_account(author),
         valid_permlink(start_permlink, allow_empty=True),
         valid_limit(limit, 100, 10))
-    return await load_posts(context['db'], ids)
 
 @return_error_info
 @nested_query_compat

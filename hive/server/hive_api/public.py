@@ -7,10 +7,11 @@ from hive.server.hive_api.common import (
     get_account_id, split_url,
     valid_account, valid_permlink, valid_limit)
 from hive.server.condenser_api.cursor import get_followers, get_following
-from hive.server.bridge_api.cursor import (
-    pids_by_blog, pids_by_comments, pids_by_feed_with_reblog)
 
 from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
+
+from hive.server.condenser_api.objects import _condenser_post_object
+from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 
 log = logging.getLogger(__name__)
 
@@ -63,53 +64,6 @@ async def list_all_muted(context, account):
               WHERE follower = :follower AND state = 2"""
     return await db.query_col(sql, follower=get_account_id(db, account))
 
-
-# Account post lists
-
-async def list_account_blog(context, account:str, limit:int=10, observer:str=None, last_post:str=None):
-    """Get a blog feed (posts and reblogs from the specified account)"""
-    db = context['db']
-
-    post_ids = await pids_by_blog(
-        db,
-        valid_account(account),
-        *split_url(last_post, allow_empty=True),
-        valid_limit(limit, 50, 10))
-    return await posts_by_id(db, post_ids, observer)
-
-async def list_account_posts(context, account:str, limit:int=10, observer:str=None, last_post:str=None):
-    """Get an account's posts and comments"""
-    db = context['db']
-    start_author, start_permlink = split_url(last_post, allow_empty=True)
-    assert not start_author or (start_author == account)
-    post_ids = await pids_by_comments(
-        db,
-        valid_account(account),
-        valid_permlink(start_permlink),
-        valid_limit(limit, 50, 10))
-    return await posts_by_id(db, post_ids, observer)
-
-async def list_account_feed(context, account:str, limit:int=10, observer:str=None, last_post:str=None):
-    """Get all posts (blogs and resteems) from `account`'s follows."""
-    db = context['db']
-    ids_with_reblogs = await pids_by_feed_with_reblog(
-        context['db'],
-        valid_account(account),
-        *split_url(last_post, allow_empty=True),
-        valid_limit(limit, 50, 10))
-
-    reblog_by = dict(ids_with_reblogs)
-    post_ids = [r[0] for r in ids_with_reblogs]
-    posts = await posts_by_id(db, post_ids, observer)
-
-    # Merge reblogged_by data into result set
-    for post in posts:
-        rby = set(reblog_by[post['post_id']].split(','))
-        rby.discard(post['author'])
-        if rby: post['reblogged_by'] = list(rby)
-
-    return posts
-
 async def get_info(context):
     db = context['db']
 
@@ -126,3 +80,19 @@ async def get_info(context):
     }
 
     return ret
+
+async def get_by_feed_with_reblog_impl(db, account: str, start_author: str = '',
+                                   start_permlink: str = '', limit: int = 20, truncate_body: int = 0):
+    """Get a list of [post_id, reblogged_by_str] for an account's feed."""
+    sql = " SELECT * FROM condenser_get_by_feed_with_reblog( '{}', '{}', '{}', {} ) ".format( account, start_author, start_permlink, limit )
+    result = await db.query_all(sql)
+
+    posts = []
+    for row in result:
+        row = dict(row)
+        post = _condenser_post_object(row, truncate_body=truncate_body)
+
+        post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
+        posts.append(post)
+
+    return posts

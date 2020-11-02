@@ -1,7 +1,7 @@
 """Bridge API public endpoints for posts"""
 
 import hive.server.bridge_api.cursor as cursor
-from hive.server.bridge_api.objects import load_posts, load_posts_reblogs, load_profiles, _bridge_post_object, append_statistics_to_post
+from hive.server.bridge_api.objects import load_profiles, _bridge_post_object, append_statistics_to_post
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 from hive.server.common.helpers import (
     return_error_info,
@@ -13,6 +13,7 @@ from hive.server.hive_api.common import get_account_id
 from hive.server.hive_api.objects import _follow_contexts
 from hive.server.hive_api.community import list_top_communities
 from hive.server.common.mutes import Mutes
+from hive.server.hive_api.public import get_by_feed_with_reblog_impl
 
 #pylint: disable=too-many-arguments, no-else-return
 
@@ -263,17 +264,8 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
     result = await _get_ranked_posts_for_all(db, sort, start_author, start_permlink, limit)
     return await process_query_results(result)
 
-async def _get_account_posts_by_blog(db, account : str, start_author : str, start_permlink : str, limit : int):
-  _ids = await cursor.pids_by_blog(db, account, start_author, start_permlink, limit)
-  posts = await load_posts(db, _ids)
-  for post in posts:
-      if post['author'] != account:
-          post['reblogged_by'] = [account]
-  return posts
-
 async def _get_account_posts_by_feed(db, account : str, start_author : str, start_permlink : str, limit : int):
-  _ids = await cursor.pids_by_feed_with_reblog(db, account, start_author, start_permlink, limit)
-  return await load_posts_reblogs(db, _ids)
+  return await get_by_feed_with_reblog_impl(db, account, start_author, start_permlink, limit)
 
 @return_error_info
 async def get_account_posts(context, sort:str, account:str, start_author:str='', start_permlink:str='',
@@ -293,7 +285,7 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
     sql = None
     account_posts = True # set when only posts (or reblogs) of given account are supposed to be in results
     if sort == 'blog':
-        return await _get_account_posts_by_blog(db, account, start_author, start_permlink, limit)
+        sql = "SELECT * FROM bridge_get_account_posts_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'feed':
         return await _get_account_posts_by_feed(db, account, start_author, start_permlink, limit)
     elif sort == 'posts':
@@ -318,6 +310,9 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
     for row in sql_result:
         post = _bridge_post_object(row)
         post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.BridgeApi)
+        if sort == 'blog':
+          if post['author'] != account:
+            post['reblogged_by'] = [account]
         post = append_statistics_to_post(post, row, False if account_posts else row['is_pinned'], blacklists_for_user, not account_posts)
         posts.append(post)
     return posts

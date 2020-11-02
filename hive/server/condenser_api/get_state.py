@@ -11,9 +11,6 @@ from hive.server.common.mutes import Mutes
 
 from hive.server.condenser_api.objects import (
     load_accounts,
-    load_posts,
-    load_posts_keyed,
-    load_posts_reblogs,
     _mute_votes,
     _condenser_post_object)
 from hive.server.common.helpers import (
@@ -31,6 +28,7 @@ import hive.server.condenser_api.cursor as cursor
 
 from hive.server.condenser_api.methods import get_posts_by_given_sort
 
+from hive.server.hive_api.public import get_by_feed_with_reblog_impl
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 
 log = logging.getLogger(__name__)
@@ -166,17 +164,13 @@ async def _get_account_discussion_by_key(db, account, key):
     assert key, 'discussion key must be specified'
 
     if key == 'recent_replies':
-        pids = await cursor.pids_by_replies_to_account(db, account, '', 20)
-        posts = await load_posts(db, pids)
+        posts = await cursor.get_by_replies_to_account(db, account, '', 20)
     elif key == 'comments':
-        pids = await cursor.pids_by_account_comments(db, account, '', 20)
-        posts = await load_posts(db, pids)
+        posts = await cursor.get_by_account_comments(db, account, '', 20)
     elif key == 'blog':
-        pids = await cursor.pids_by_blog(db, account, '', '', 20)
-        posts = await load_posts(db, pids)
+        posts = await cursor.get_by_blog(db, account, '', '', 20)
     elif key == 'feed':
-        res = await cursor.pids_by_feed_with_reblog(db, account, '', '', 20)
-        posts = await load_posts_reblogs(db, res)
+        posts = await get_by_feed_with_reblog_impl(db, account, '', '', 20)
     else:
         raise ApiError("unknown account discussion key %s" % key)
 
