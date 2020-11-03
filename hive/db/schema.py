@@ -1604,7 +1604,6 @@ def setup(db):
       "condenser_api_post_ex_type.sql",
       "condenser_get_blog.sql",
       "condenser_get_content.sql",
-      "condenser_get_discussions_by_created.sql",
       "condenser_get_discussions_by_blog.sql",
       "hot_and_trends.sql",
       "update_hive_posts_children_count.sql"

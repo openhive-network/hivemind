@@ -474,7 +474,7 @@ $function$
 language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_created_for_community;
-CREATE FUNCTION bridge_get_ranked_post_by_created_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION bridge_get_ranked_post_by_created_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -528,7 +528,7 @@ BEGIN
           JOIN hive_communities hc ON hp1.community_id = hc.id
           JOIN hive_accounts_view ha ON hp1.author_id = ha.id
       WHERE hc.name = _community AND hp1.counter_deleted = 0 AND hp1.depth = 0
-          AND NOT hp1.is_pinned -- concatenated with bridge_get_ranked_post_pinned_for_community
+          AND ( NOT _bridge_api OR NOT hp1.is_pinned ) -- concatenated with bridge_get_ranked_post_pinned_for_community when called for bridge_api
           AND NOT ha.is_grayed AND ( __post_id = 0 OR hp1.id < __post_id )
       ORDER BY hp1.id DESC
       LIMIT _limit
