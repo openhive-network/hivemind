@@ -227,7 +227,7 @@ class Follow(DbAdapterHolder):
             cls.beginTx()
             for _, follow_item in cls.follow_items_to_flush.items():
                 if count < limit:
-                    values.append("({}, '{}', '{}', '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['idx'],
+                    values.append("({}, {}, {}, '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['idx'],
                                                                           follow_item['flr'],
                                                                           follow_item['flg'],
                                                                           follow_item['at'],
@@ -242,7 +242,7 @@ class Follow(DbAdapterHolder):
                     query += sql_postfix
                     cls.db.query(query)
                     values.clear()
-                    values.append("({}, '{}', '{}', '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['idx'],
+                    values.append("({}, {}, {}, '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['idx'],
                                                                           follow_item['flr'],
                                                                           follow_item['flg'],
                                                                           follow_item['at'],
@@ -270,7 +270,7 @@ class Follow(DbAdapterHolder):
             for state, update_flush_items in cls.follow_update_items_to_flush.items():
                 for chunk in chunks(update_flush_items, 1000):
                     sql = None
-                    query_values = ','.join(["('{}')".format(account) for account in chunk])
+                    query_values = ','.join(["({})".format(account) for account in chunk])
                     # [DK] probaly not a bad idea to move that logic to SQL function
                     if state == 9:
                         #reset blacklists for follower
@@ -482,7 +482,7 @@ class Follow(DbAdapterHolder):
         for col, deltas in cls._delta.items():
             for delta, names in _flip_dict(deltas).items():
                 updated += len(names)
-                query_values = ','.join(["('{}')".format(account) for account in names])
+                query_values = ','.join(["({})".format(account) for account in names])
                 sql = """
                     UPDATE
                         hive_accounts ha
@@ -519,7 +519,7 @@ class Follow(DbAdapterHolder):
         """
         names = set([*cls._delta[FOLLOWERS].keys(),
                    *cls._delta[FOLLOWING].keys()])
-        query_values = ','.join(["('{}')".format(account) for account in names])
+        query_values = ','.join(["({})".format(account) for account in names])
         sql = """
             UPDATE
                 hive_accounts ha
