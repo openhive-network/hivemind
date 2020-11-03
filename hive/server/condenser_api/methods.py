@@ -92,15 +92,8 @@ async def get_account_reputations(context, account_lower_bound: str = None, limi
 async def _get_account_reputations_impl(db, fat_node_style, account_lower_bound, limit):
     """Enumerate account reputations."""
     limit = valid_limit(limit, 1000, None)
-    seek = ''
-    if account_lower_bound:
-        seek = "WHERE name >= :start"
 
-    sql = """SELECT name, reputation
-              FROM hive_accounts %s
-           ORDER BY name
-              LIMIT :limit""" % seek
-
+    sql = "SELECT * FROM condenser_get_account_reputations( '{}', {}, {} )".format( account_lower_bound, account_lower_bound is None, limit )
     rows = await db.query_all(sql, start=account_lower_bound, limit=limit)
     if fat_node_style:
         return [dict(account=r[0], reputation=r[1]) for r in rows]
