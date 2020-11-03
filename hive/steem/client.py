@@ -153,16 +153,19 @@ class SteemClient:
 
         batch_params = [{'block_num': i} for i in block_nums]
         for result in self.__exec_batch('get_block', batch_params):
-            assert 'block' in result, "result w/o block key: %s" % result
-            block = result['block']
-            num = int(block['block_id'][:8], base=16)
-            blocks[num] = block
+            if 'block' in result:
+                block = result['block']
+                num = int(block['block_id'][:8], base=16)
+                blocks[num] = block
 
         for block_num in block_nums:
             data = MockBlockProvider.get_block_data(block_num, True)
             if data is not None:
-                blocks[block_num]["transactions"].extend(data["transactions"])
-                blocks[block_num]["transaction_ids"].extend(data["transaction_ids"])
+                if block_num in blocks:
+                    blocks[block_num]["transactions"].extend(data["transactions"])
+                    blocks[block_num]["transaction_ids"].extend(data["transaction_ids"])
+                else:
+                    blocks[block_num] = data
 
         return [blocks[x] for x in block_nums]
 
