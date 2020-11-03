@@ -361,7 +361,7 @@ class Follow(DbAdapterHolder):
                             UPDATE
                                 hive_follows hf
                             SET
-                                hf.follow_blacklists = true
+                                follow_blacklists = true
                             FROM
                             (
                                 SELECT
