@@ -20,51 +20,6 @@ from hive.server.hive_api.public import get_by_feed_with_reblog_impl
 
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
 
-SQL_TEMPLATE = """
-    SELECT
-        hp.id,
-        hp.author,
-        hp.permlink,
-        hp.author_rep,
-        hp.title,
-        hp.body,
-        hp.category,
-        hp.depth,
-        hp.promoted,
-        hp.payout,
-        hp.pending_payout,
-        hp.payout_at,
-        hp.is_paidout,
-        hp.children,
-        hp.votes,
-        hp.created_at,
-        hp.updated_at,
-        hp.rshares,
-        hp.abs_rshares,
-        hp.json,
-        hp.is_hidden,
-        hp.is_grayed,
-        hp.total_votes,
-        hp.net_votes,
-        hp.total_vote_weight,
-        hp.parent_author,
-        hp.parent_permlink_or_category,
-        hp.curator_payout_value,
-        hp.root_author,
-        hp.root_permlink,
-        hp.max_accepted_payout,
-        hp.percent_hbd,
-        hp.allow_replies,
-        hp.allow_votes,
-        hp.allow_curation_rewards,
-        hp.beneficiaries,
-        hp.url,
-        hp.root_title,
-        hp.active,
-        hp.author_rewards
-    FROM hive_posts_view hp
-"""
-
 @return_error_info
 async def get_account_votes(context, account):
     """Return an info message about get_acccount_votes being unsupported."""
@@ -370,7 +325,6 @@ async def get_discussions_by_feed(context, tag: str = None, start_author: str = 
         valid_limit(limit, 100, 20),
         truncate_body)
 
-
 @return_error_info
 @nested_query_compat
 async def get_discussions_by_comments(context, start_author: str = None, start_permlink: str = '',
@@ -383,25 +337,11 @@ async def get_discussions_by_comments(context, start_author: str = None, start_p
     valid_permlink(start_permlink, allow_empty=True)
     valid_limit(limit, 100, 20)
 
-    #force copy
-    sql = str(SQL_TEMPLATE)
-    sql += """
-        WHERE
-            hp.author = :start_author AND hp.depth > 0
-    """
-
-    if start_permlink:
-        sql += """
-            AND hp.id <= (SELECT hive_posts.id FROM  hive_posts WHERE author_id = (SELECT id FROM hive_accounts WHERE name = :start_author) AND permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :start_permlink))
-        """
-
-    sql += """
-        ORDER BY hp.id DESC, hp.depth LIMIT :limit
-    """
-
     posts = []
     db = context['db']
-    result = await db.query_all(sql, start_author=start_author, start_permlink=start_permlink, limit=limit)
+
+    sql = " SELECT * FROM condenser_get_discussions_by_comments( '{}', '{}', {} ) ".format( start_author, start_permlink, limit )
+    result = await db.query_all(sql)
 
     for row in result:
         row = dict(row)
