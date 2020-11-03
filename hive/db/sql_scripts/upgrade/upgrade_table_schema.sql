@@ -293,3 +293,5 @@ DROP INDEX IF EXISTS public.hive_posts_created_at_author_id_idx;
 
 CREATE INDEX IF NOT EXISTS hive_posts_author_id_created_at_idx ON public.hive_posts ( author_id DESC, created_at DESC);
 
+CREATE INDEX IF NOT EXISTS hive_blocks_created_at_idx ON hive_blocks (created_at);
+

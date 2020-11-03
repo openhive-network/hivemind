@@ -24,6 +24,7 @@ $BODY$
 DECLARE
     __account_id INT := 0;
     __last_read_at TIMESTAMP;
+    __last_read_at_block hive_blocks.num%TYPE;
     __limit_block hive_blocks.num%TYPE = block_before_head( '90 days' );
 BEGIN
   __account_id = find_account_id( _account, True );
@@ -32,11 +33,19 @@ BEGIN
   FROM hive_accounts ha
   WHERE ha.id = __account_id;
 
+  --- Warning given account can have no last_read_at set, so lets fallback to the block limit to avoid comparison to NULL.
+  SELECT COALESCE((SELECT hb.num 
+                   FROM hive_blocks hb
+                   WHERE hb.created_at <= __last_read_at
+                   ORDER by hb.created_at desc
+                   LIMIT 1), __limit_block)
+    INTO __last_read_at_block;
+
   RETURN QUERY SELECT
     __last_read_at as lastread_at,
     count(1) as unread
   FROM hive_raw_notifications_view hnv
-  WHERE hnv.dst = __account_id  AND hnv.block_num > __limit_block AND hnv.created_at > __last_read_at AND hnv.score >= _minimum_score
+  WHERE hnv.dst = __account_id  AND hnv.block_num > __limit_block AND hnv.block_num > __last_read_at_block AND hnv.score >= _minimum_score
   ;
 END
 $BODY$
