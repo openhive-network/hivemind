@@ -31,6 +31,7 @@ def build_metadata():
 
         sa.UniqueConstraint('hash', name='hive_blocks_ux1'),
         sa.ForeignKeyConstraint(['prev'], ['hive_blocks.hash'], name='hive_blocks_fk1'),
+        sa.Index('hive_blocks_created_at_idx', 'created_at')
     )
 
     sa.Table(
