@@ -10,6 +10,7 @@ from hive.utils.misc import chunks
 from hive.indexer.accounts import Accounts
 
 from hive.indexer.db_adapter_holder import DbAdapterHolder
+from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
 
@@ -124,8 +125,8 @@ class Follow(DbAdapterHolder):
         if non_existent_names:
             log.warning("Follow op validation, following names does not exists in database: {}".format(non_existent_names))
 
-        return dict(flr=op['follower'],
-                    flg=op['following'],
+        return dict(flr=escape_characters(op['follower']),
+                    flg=[escape_characters(following) for following in op['following']],
                     state=defs[what],
                     at=date)
 
