@@ -17,24 +17,6 @@ async def get_community_id(db, name):
     return await db.query_one("SELECT id FROM hive_communities WHERE name = :name",
                               name=name)
 
-async def url_to_id(db, url):
-    """Get post_id based on post url."""
-    return await get_post_id(db, *split_url(url))
-
-async def get_post_id(db, author, permlink):
-    """Get post_id based on author/permlink."""
-    sql = """
-        SELECT 
-            hp.id, ha_a.name as author, hpd_p.permlink as permlink
-        FROM 
-            hive_posts hp
-        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        WHERE ha_a.name = :a AND hpd_p.permlink = :p"""
-    _id = await db.query_one(sql, a=author, p=permlink)
-    assert _id, 'post id not found'
-    return _id
-
 async def get_account_id(db, name):
     """Get account id from account name."""
     assert name, 'no account name specified'

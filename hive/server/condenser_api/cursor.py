@@ -7,18 +7,6 @@ from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 
 # pylint: disable=too-many-lines
 
-async def get_post_id(db, author, permlink):
-    """Given an author/permlink, retrieve the id from db."""
-    sql = """
-        SELECT
-            hp.id
-        FROM hive_posts hp
-        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
-            AND counter_deleted = 0 LIMIT 1""" # ABW: replace with find_comment_id(:author,:permlink,True)?
-    return await db.query_one(sql, author=author, permlink=permlink)
-
 async def get_followers(db, account: str, start: str, follow_type: str, limit: int):
     """Get a list of accounts following by a given account."""
     state = 2 if follow_type == 'ignore' else 1
