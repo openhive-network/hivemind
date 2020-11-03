@@ -589,6 +589,7 @@ def setup(db):
       "condenser_get_blog.sql",
       "condenser_get_content.sql",
       "condenser_get_discussions_by_blog.sql",
+      "condenser_tags.sql",
       "hot_and_trends.sql",
       "update_hive_posts_children_count.sql"
     ]

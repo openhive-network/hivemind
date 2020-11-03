@@ -7,16 +7,7 @@ from hive.server.common.helpers import (return_error_info, valid_tag, valid_limi
 @cached(ttl=7200, timeout=1200)
 async def get_top_trending_tags_summary(context):
     """Get top 50 trending tags among pending posts."""
-    # Same results, more overhead:
-    #return [tag['name'] for tag in await get_trending_tags('', 50)]
-    sql = """
-        SELECT (SELECT category FROM hive_category_data WHERE id = category_id) as category
-          FROM hive_posts
-         WHERE counter_deleted = 0 AND NOT is_paidout
-      GROUP BY category
-      ORDER BY SUM(payout + pending_payout) DESC
-         LIMIT 50
-    """
+    sql = "SELECT condenser_get_top_trending_tags_summary(50)"
     return await context['db'].query_col(sql)
 
 @return_error_info
@@ -27,32 +18,10 @@ async def get_trending_tags(context, start_tag: str = '', limit: int = 250):
     limit = valid_limit(limit, 250, 250)
     start_tag = valid_tag(start_tag or '', allow_empty=True)
 
-    if start_tag:
-        seek = """
-          HAVING SUM(payout + pending_payout) <= (
-            SELECT SUM(payout + pending_payout)
-              FROM hive_posts hp
-              JOIN hive_category_data hcd ON hcd.id = hp.category_id
-             WHERE NOT is_paidout AND counter_deleted = 0 AND hcd.category = :start_tag)
-        """
-    else:
-        seek = ''
-
-    sql = """
-      SELECT hcd.category,
-             COUNT(*) AS total_posts,
-             SUM(CASE WHEN hp.depth = 0 THEN 1 ELSE 0 END) AS top_posts,
-             SUM(hp.payout + hp.pending_payout) AS total_payouts
-        FROM hive_posts hp
-        JOIN hive_category_data hcd ON hcd.id = hp.category_id
-       WHERE NOT hp.is_paidout AND counter_deleted = 0
-    GROUP BY hcd.category %s
-    ORDER BY SUM(hp.payout + hp.pending_payout) DESC, hcd.category ASC
-       LIMIT :limit
-    """ % seek
+    sql = "SELECT * FROM condenser_get_trending_tags( (:tag)::VARCHAR, :limit )"
 
     out = []
-    for row in await context['db'].query_all(sql, limit=limit, start_tag=start_tag):
+    for row in await context['db'].query_all(sql, limit=limit, tag=start_tag):
         out.append({
             'name': row['category'],
             'comments': row['total_posts'] - row['top_posts'],
