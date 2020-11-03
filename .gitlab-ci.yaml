@@ -278,6 +278,8 @@ api_smoketest_benchmark:
     - job: hivemind_start_server
       artifacts: true
 
+  allow_failure: true
+
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: always
