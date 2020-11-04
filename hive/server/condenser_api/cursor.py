@@ -21,11 +21,6 @@ async def get_following(db, account: str, start: str, follow_type: str, limit: i
 
     return await db.query_col(sql)
 
-async def get_follow_counts(db, account: str):
-    """Return following/followers count for `account`."""
-    sql = "SELECT * FROM condenser_get_follow_counts( '{}' )".format( account )
-    return dict (await db.query_row(sql) )
-
 async def get_reblogged_by(db, author: str, permlink: str):
     """Return all rebloggers of a post."""
 

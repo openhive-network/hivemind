@@ -69,12 +69,13 @@ async def get_following(context, account: str, start: str, follow_type: str = No
 @return_error_info
 async def get_follow_count(context, account: str):
     """Get follow count stats. (EOL)"""
-    count = await cursor.get_follow_counts(
-        context['db'],
-        valid_account(account))
+    db = context['db']
+    account = valid_account(account)
+    sql = "SELECT * FROM condenser_get_follow_count( (:account)::VARCHAR )"
+    counters = await db.query_row(sql, account=account)
     return dict(account=account,
-                following_count=count['following'],
-                follower_count=count['followers'])
+                following_count=counters[0],
+                follower_count=counters[1])
 
 @return_error_info
 async def get_reblogged_by(context, author: str, permlink: str):
