@@ -101,5 +101,5 @@ if __name__ == "__main__":
         for entry in above_treshold:
             summary.add_row(entry)
         print(summary)
-        exit(1)
+        exit(2)
     exit(0)
