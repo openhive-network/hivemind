@@ -93,15 +93,6 @@ async def get_following(db, account: str, start: str, follow_type: str, limit: i
                               state=state, limit=limit)
 
 
-async def get_follow_counts(db, account: str):
-    """Return following/followers count for `account`."""
-    account_id = await _get_account_id(db, account)
-    sql = """SELECT following, followers
-               FROM hive_accounts
-              WHERE id = :account_id"""
-    return dict(await db.query_row(sql, account_id=account_id))
-
-
 async def get_reblogged_by(db, author: str, permlink: str):
     """Return all rebloggers of a post."""
     post_id = await _get_post_id(db, author, permlink)
