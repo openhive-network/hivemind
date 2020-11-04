@@ -432,13 +432,16 @@ class Blocks:
         """
         update_active_starting_from_posts_on_block( first_block, last_block )
 
+        is_hour_action = last_block % 1200 == 0
+
         queries = [
             "SELECT update_posts_rshares({}, {})".format(first_block, last_block),
             "SELECT update_hive_posts_children_count({}, {})".format(first_block, last_block),
             "SELECT update_hive_posts_root_id({},{})".format(first_block, last_block),
             "SELECT update_hive_posts_api_helper({},{})".format(first_block, last_block),
             "SELECT update_feed_cache({}, {})".format(first_block, last_block),
-            "SELECT update_hive_posts_mentions({}, {})".format(first_block, last_block)
+            "SELECT update_hive_posts_mentions({}, {})".format(first_block, last_block),
+            "SELECT update_notification_cache({}, {}, {})".format(first_block, last_block, is_hour_action)
             #,"SELECT update_account_reputations({}, {})".format(first_block, last_block)
         ]
 

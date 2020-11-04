@@ -44,7 +44,7 @@ BEGIN
   RETURN QUERY SELECT
     __last_read_at as lastread_at,
     count(1) as unread
-  FROM hive_raw_notifications_view hnv
+  FROM hive_notification_cache hnv
   WHERE hnv.dst = __account_id  AND hnv.block_num > __limit_block AND hnv.block_num > __last_read_at_block AND hnv.score >= _minimum_score
   ;
 END
@@ -82,7 +82,7 @@ BEGIN
   FROM
   (
     select nv.id, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.score, nv.community, nv.community_title, nv.payload
-      from hive_raw_notifications_view nv
+      from hive_notification_cache nv
   WHERE nv.dst = __account_id  AND nv.block_num > __limit_block AND nv.score >= _min_score AND ( _last_id = 0 OR nv.id < _last_id )
   ORDER BY nv.id DESC
   LIMIT _limit
@@ -123,7 +123,7 @@ BEGIN
   FROM
   (
     SELECT nv.id, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.score, nv.community, nv.community_title, nv.payload
-    FROM hive_raw_notifications_view nv
+    FROM hive_notification_cache nv
     WHERE nv.post_id = __post_id AND nv.block_num > __limit_block AND nv.score >= _min_score AND ( _last_id = 0 OR nv.id < _last_id )
     ORDER BY nv.id DESC
     LIMIT _limit
@@ -138,4 +138,30 @@ BEGIN
 END
 $function$
 LANGUAGE plpgsql STABLE
+;
+
+DROP FUNCTION IF EXISTS update_notification_cache;
+;
+CREATE OR REPLACE FUNCTION update_notification_cache(in _first_block_num INT, in _last_block_num INT, in _prune_old BOOLEAN)
+RETURNS VOID
+AS
+$function$
+DECLARE
+  __limit_block hive_blocks.num%TYPE = block_before_head( '90 days' );
+BEGIN
+  IF _first_block_num IS NULL THEN
+    TRUNCATE TABLE hive_notification_cache;
+  ELSE
+    DELETE FROM hive_notification_cache nc WHERE _prune_old AND nc.block_num <= __limit_block;
+  END IF;
+
+  INSERT INTO hive_notification_cache
+  (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+  SELECT nv.id, nv.block_num, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.post_id, nv.score, nv.payload, nv.community, nv.community_title
+  FROM hive_raw_notifications_view nv
+  WHERE nv.block_num > __limit_block AND (_first_block_num IS NULL OR nv.block_num BETWEEN _first_block_num AND _last_block_num)
+  ;
+END
+$function$
+LANGUAGE plpgsql VOLATILE
 ;
