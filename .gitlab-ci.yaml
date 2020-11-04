@@ -73,7 +73,7 @@ hivemind_sync:
 
   script:
     - pip3 install --user --upgrade pip setuptools
-    - scripts/ci_sync.sh "$HIVEMIND_DB_NAME" "$HIVEMIND_POSTGRESQL_CONNECTION_STRING" "$HIVEMIND_SOURCE_HIVED_URL" 5000017 $HIVEMIND_HTTP_PORT
+    - scripts/ci_sync.sh "$HIVEMIND_DB_NAME" "$HIVEMIND_POSTGRESQL_CONNECTION_STRING" "$HIVEMIND_SOURCE_HIVED_URL" $HIVEMIND_MAX_BLOCK $HIVEMIND_HTTP_PORT
 
   artifacts:
     paths:

@@ -1,4 +1,16 @@
 #!/usr/bin/python3
+"""
+This script will scan blocks from range `from_block` to `to_block` if it finds operation defined in `operations` it will
+save such block to a `output_file`. Blocks not containing any operations from list `operations` will be saved empty.
+
+There is an option to save only operations data, without blocks data: use `--dump-ops-only`
+
+You can pass multiple operations.
+
+Example:
+./operation_extractor.py https://api.hive.blog 20000000 25000000 dump.json custom_json_operation --dump-ops-only True
+
+"""
 
 from json import dumps
 from hive.steem.client import SteemClient
@@ -7,16 +19,16 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("hivemind_address", type=str, help="Address of hivemind instance")
+    parser.add_argument("hived_url", type=str, help="Url address of hived instance")
     parser.add_argument("from_block", type=int, help="Scan from block")
     parser.add_argument("to_block", type=int, help="Scan to block")
     parser.add_argument("output_file", type=str, help="Prepared blocks will be saved in this file")
     parser.add_argument("operations", type=str, nargs='+', help="Save selected operations")
-    parser.add_argument("--dump-ops-only", type=bool, default=False, help="Dump only selected ops without block data")
+    parser.add_argument("--dump-ops-only", type=bool, default=False, help="Dump only selected ops, without block data")
 
     args = parser.parse_args()
 
-    client = SteemClient({"default":args.hivemind_address})
+    client = SteemClient({"default":args.hived_url})
     from_block = args.from_block
     with open(args.output_file, "w") as output_file:
         if not args.dump_ops_only:
