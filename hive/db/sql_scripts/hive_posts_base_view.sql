@@ -63,5 +63,5 @@ CREATE OR REPLACE VIEW public.hive_posts_pp_view
      JOIN hive_posts pp ON pp.id = hp.parent_id
      JOIN hive_permlink_data hpd_pp ON hpd_pp.id = pp.permlink_id
      JOIN hive_category_data hcd ON hcd.id = hp.category_id
-  WHERE hp.counter_deleted = 0 AND hp.id <> 0
-  ;
+  WHERE pp.block_num >= block_before_head( '90 days' ) AND hp.counter_deleted = 0 AND hp.id <> 0
+;

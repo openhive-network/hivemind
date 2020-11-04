@@ -203,7 +203,7 @@ def build_metadata():
         sa.Index('hive_votes_voter_id_post_id_idx', 'voter_id', 'post_id'), # probably this index is redundant to hive_votes_voter_id_last_update_idx because of starting voter_id.
         sa.Index('hive_votes_voter_id_last_update_idx', 'voter_id', 'last_update'), # this index is critical for hive_accounts_info_view performance
         sa.Index('hive_votes_post_id_voter_id_idx', 'post_id', 'voter_id'),
-        sa.Index('hive_votes_block_num_idx', 'block_num') # this is also important for hive_accounts_info_view 
+        sa.Index('hive_votes_block_num_idx', 'block_num') # this is also important for hive_accounts_info_view
     )
 
     sa.Table(
@@ -534,13 +534,13 @@ def setup(db):
 
     sql_scripts = [
       "utility_functions.sql",
+      "head_block_time.sql",
       "hive_accounts_view.sql",
       "hive_accounts_info_view.sql",
       "hive_posts_base_view.sql",
       "hive_posts_view.sql",
       "hive_votes_view.sql",
       "hive_post_operations.sql",
-      "head_block_time.sql",
       "update_feed_cache.sql",
       "payout_stats_view.sql",
       "update_hive_posts_mentions.sql",
@@ -596,8 +596,8 @@ def setup(db):
     dir_path = dirname(realpath(__file__))
     for script in sql_scripts:
         execute_sql_script(db.query_no_return, "{}/sql_scripts/{}".format(dir_path, script))
-    
-    
+
+
 
 
 
