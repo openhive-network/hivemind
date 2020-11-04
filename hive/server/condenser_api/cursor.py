@@ -14,8 +14,28 @@ async def get_followers(db, account: str, start: str, state: int, limit: int):
 
 async def get_following(db, account: str, start: str, state: int, limit: int):
     """Get a list of accounts followed by a given account."""
-    sql = "SELECT * FROM condenser_get_following( (:account)::VARCHAR, (:start)::VARCHAR, :type, :limit )"
-    return await db.query_col(sql, account=account, start=start, type=state, limit=limit)
+    account_id = await _get_account_id(db, account)
+    start_id = await _get_account_id(db, start) if start else None
+    state = 2 if follow_type == 'ignore' else 1
+
+    seek = ''
+    if start_id:
+        seek = """AND hf.created_at <= (
+                     SELECT created_at FROM hive_follows
+                      WHERE follower = :account_id
+                        AND following = :start_id)"""
+
+    sql = """
+        SELECT name FROM hive_follows hf
+     LEFT JOIN hive_accounts ha ON hf.following = ha.id
+         WHERE hf.follower = :account_id
+           AND state = :state %s
+      ORDER BY hf.created_at DESC
+         LIMIT :limit
+    """ % seek
+
+    return await db.query_col(sql, account_id=account_id, start_id=start_id,
+                              state=state, limit=limit)
 
 
 async def get_reblogged_by(db, author: str, permlink: str):
