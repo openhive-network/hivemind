@@ -291,18 +291,9 @@ api_smoketest_benchmark:
      - hivemind
 
   script:
-    - tox -e benchmark -- localhost $HIVEMIND_HTTP_PORT tests/tests_api/hivemind/tavern
+    - ./scripts/ci_start_api_benchmarks.sh localhost $HIVEMIND_HTTP_PORT 5
 
   artifacts:
     when: always
     paths:
-      - tavern_report_benchmark_bridge_api_patterns.html
-      - tavern_report_benchmark_bridge_api_negative.html
-      - tavern_report_benchmark_condenser_api_patterns.html
-      - tavern_report_benchmark_condenser_api_negative.html
-      - tavern_report_benchmark_database_api_patterns.html
-      - tavern_report_benchmark_database_api_negative.html
-      - tavern_report_benchmark_follow_api_patterns.html
-      - tavern_report_benchmark_follow_api_negative.html
-      - tavern_report_benchmark_tags_api_patterns.html
-      - tavern_report_benchmark_tags_api_negative.html
+      - tavern_benchmarks_report.html
