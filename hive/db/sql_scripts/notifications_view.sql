@@ -70,7 +70,11 @@ RETURNS FLOAT
 LANGUAGE 'sql'
 IMMUTABLE
 AS $BODY$
-    SELECT CAST( ( _post_payout/_post_rshares ) * _vote_rshares as FLOAT);
+    SELECT CASE _post_rshares != 0
+              WHEN TRUE THEN CAST( ( _post_payout/_post_rshares ) * _vote_rshares as FLOAT)
+           ELSE
+              CAST(0 AS FLOAT)
+           END
 $BODY$;
 
 

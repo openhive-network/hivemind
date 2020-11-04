@@ -295,3 +295,30 @@ CREATE INDEX IF NOT EXISTS hive_posts_author_id_created_at_idx ON public.hive_po
 
 CREATE INDEX IF NOT EXISTS hive_blocks_created_at_idx ON hive_blocks (created_at);
 
+INSERT INTO hive_db_data_migration
+SELECT 'Notification cache initial fill'
+WHERE NOT EXISTS (SELECT data_type
+              FROM information_schema.columns
+              WHERE table_name = 'hive_notification_cache');
+
+--- Notification cache to significantly speedup notification APIs.
+CREATE TABLE IF NOT EXISTS hive_notification_cache
+(
+  id BIGINT NOT NULL,
+  block_num INT NOT NULL,
+  type_id INT NOT NULL,
+  dst INT NULL,
+  src INT NULL,
+  dst_post_id INT NULL,
+  post_id INT NULL,
+  score INT NOT NULL,
+  created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+  community_title VARCHAR(32) NULL,
+  community VARCHAR(16) NULL,
+  payload VARCHAR NULL,
+
+  CONSTRAINT hive_notification_cache_pk PRIMARY KEY (id)
+);
+
+CREATE INDEX IF NOT EXISTS hive_notification_cache_block_num_idx ON hive_notification_cache (block_num);
+CREATE INDEX IF NOT EXISTS hive_notification_cache_dst_score_idx ON hive_notification_cache (dst, score) WHERE dst IS NOT NULL;

@@ -395,7 +395,7 @@ def build_metadata_community(metadata=None):
         sa.Column('dst_id',       sa.Integer,  nullable=True),
         sa.Column('post_id',      sa.Integer,  nullable=True),
         sa.Column('community_id', sa.Integer,  nullable=True),
-        sa.Column('block_num',    sa.Integer,  nullable=True),
+        sa.Column('block_num',    sa.Integer,  nullable=False),
         sa.Column('payload',      sa.Text,     nullable=True),
 
         sa.Index('hive_notifs_ix1', 'dst_id',                  'id', postgresql_where=sql_text("dst_id IS NOT NULL")),
@@ -404,6 +404,25 @@ def build_metadata_community(metadata=None):
         sa.Index('hive_notifs_ix4', 'community_id', 'post_id', 'type_id', 'id', postgresql_where=sql_text("community_id IS NOT NULL AND post_id IS NOT NULL")),
         sa.Index('hive_notifs_ix5', 'post_id', 'type_id', 'dst_id', 'src_id', postgresql_where=sql_text("post_id IS NOT NULL AND type_id IN (16,17)")), # filter: dedupe
         sa.Index('hive_notifs_ix6', 'dst_id', 'created_at', 'score', 'id', postgresql_where=sql_text("dst_id IS NOT NULL")), # unread
+    )
+
+    sa.Table('hive_notification_cache', metadata,
+        sa.Column('id', sa.BigInteger, primary_key=True),
+        sa.Column('block_num', sa.Integer, nullable = False),
+        sa.Column('type_id', sa.Integer, nullable = False),
+        sa.Column('dst', sa.Integer, nullable=True), # dst account id except persistent notifs from hive_notifs
+        sa.Column('src', sa.Integer, nullable=True), # src account id
+        sa.Column('dst_post_id', sa.Integer, nullable=True), # destination post id
+        sa.Column('post_id', sa.Integer, nullable=True),
+        sa.Column('created_at', sa.DateTime, nullable=False), # notification creation time
+        sa.Column('score', sa.Integer, nullable=False),
+        sa.Column('community_title', sa.String(32), nullable=True),
+        sa.Column('community', sa.String(16), nullable=True),
+        sa.Column('payload', sa.String, nullable=True),
+
+        sa.Index('hive_notification_cache_block_num_idx', 'block_num'),
+        sa.Index('hive_notification_cache_dst_score_idx', 'dst', 'score', postgresql_where=sql_text("dst IS NOT NULL"))
+
     )
 
     return metadata

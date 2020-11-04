@@ -284,7 +284,7 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
     sql = None
     account_posts = True # set when only posts (or reblogs) of given account are supposed to be in results
     if sort == 'blog':
-        sql = "SELECT * FROM bridge_get_account_posts_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_account_posts_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER )"
     elif sort == 'feed':
         return await _get_account_posts_by_feed(db, account, start_author, start_permlink, limit)
     elif sort == 'posts':

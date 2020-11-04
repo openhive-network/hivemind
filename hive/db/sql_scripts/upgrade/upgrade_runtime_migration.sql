@@ -109,6 +109,23 @@ $BODY$;
 COMMIT;
 
 START TRANSACTION;
+DO
+$BODY$
+BEGIN
+IF EXISTS (SELECT * FROM hive_db_data_migration WHERE migration = 'Notification cache initial fill') THEN
+  RAISE NOTICE 'Performing notification cache initial fill...';
+  SET work_mem='2GB';
+  PERFORM update_notification_cache(NULL, NULL, False);
+  DELETE FROM hive_db_data_migration WHERE migration = 'Notification cache initial fill';
+ELSE
+  RAISE NOTICE 'Skipping notification cache initial fill...';
+END IF;
+
+END
+$BODY$;
+COMMIT;
+
+START TRANSACTION;
 
 TRUNCATE TABLE hive_db_data_migration;
 

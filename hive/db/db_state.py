@@ -132,7 +132,10 @@ class DbState:
             'hive_votes_voter_id_post_id_idx',
             'hive_votes_post_id_voter_id_idx',
 
-            'hive_reputation_data_block_num_idx'
+            'hive_reputation_data_block_num_idx',
+
+            'hive_notification_cache_block_num_idx',
+            'hive_notification_cache_dst_score_idx'
         ]
 
         to_return = []
@@ -343,6 +346,14 @@ class DbState:
         DbState.db().query_no_return(sql)
         time_end = perf_counter()
         log.info("[INIT] update_posts_rshares executed in %.4fs", time_end - time_start)
+
+        time_start = perf_counter()
+        sql = """
+              SELECT update_notification_cache(NULL, NULL, False);
+              """
+        DbState.db().query_no_return(sql)
+        time_end = perf_counter()
+        log.info("[INIT] update_notification_cache executed in %.4fs", time_end - time_start)
 
         # Update a block num immediately
         DbState.db().query_no_return("UPDATE hive_state SET block_num = :block_num", block_num = current_imported_block)
