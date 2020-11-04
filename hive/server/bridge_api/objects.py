@@ -24,12 +24,18 @@ def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=None, ov
         if row['author'] in blacklists_for_user:
             blacklists = blacklists_for_user[row['author']]
             for blacklist in blacklists:
+                if blacklist in ('my_muted', 'my_followed_mutes'):
+                    post['should_be_excluded'] = True
                 post['blacklists'].append(blacklist)
         reputation = row['author_rep']
-        if reputation < 1:
-            post['blacklists'].append('reputation-0')
-        elif reputation  == 1:
-            post['blacklists'].append('reputation-1')
+        if reputation <= 1:
+            post['stats']['gray'] = True    # gray any low reputation posts
+        if 'is_muted' in row and row['is_muted']:
+            post['stats']['gray'] = True    # gray any muted posts
+        #if reputation < 1:
+        #    post['blacklists'].append('reputation-0')
+        #elif reputation  == 1:
+        #    post['blacklists'].append('reputation-1')
 
     if 'community_title' in row and row['community_title']:
         post['community'] = row['category']
@@ -40,12 +46,12 @@ def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=None, ov
         else:
             post['author_role'] = 'guest'
             post['author_title'] = ''
-    elif override_gray:
-        post['stats']['gray'] = ('irredeemables' in post['blacklists'] or len(post['blacklists']) >= 2)
+    #elif override_gray:
+    #    post['stats']['gray'] = ('irredeemables' in post['blacklists'] or len(post['blacklists']) >= 2)
     else:
         post['stats']['gray'] = row['is_grayed']
 
-    post['stats']['hide'] = 'irredeemables' in post['blacklists']
+    #post['stats']['hide'] = 'irredeemables' in post['blacklists']
       # it overrides 'is_hidden' flag from post, is that the intent?
     if is_pinned:
         post['stats']['is_pinned'] = True
@@ -143,6 +149,7 @@ def _bridge_post_object(row, truncate_body=0):
     post['beneficiaries'] = row['beneficiaries']
     post['max_accepted_payout'] = row['max_accepted_payout']
     post['percent_hbd'] = row['percent_hbd']
+    post['is_muted'] = row['is_muted']
 
     if paid:
         curator_payout = sbd_amount(row['curator_payout_value'])

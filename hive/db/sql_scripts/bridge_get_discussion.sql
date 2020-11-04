@@ -16,7 +16,7 @@ RETURNS TABLE
     parent_author hive_accounts.name%TYPE, parent_permlink_or_category hive_permlink_data.permlink%TYPE, allow_replies BOOLEAN,
     allow_votes hive_posts.allow_votes%TYPE, allow_curation_rewards hive_posts.allow_curation_rewards%TYPE, url TEXT, root_title hive_post_data.title%TYPE,
     beneficiaries hive_posts.beneficiaries%TYPE, max_accepted_payout hive_posts.max_accepted_payout%TYPE, percent_hbd hive_posts.percent_hbd%TYPE,
-    curator_payout_value hive_posts.curator_payout_value%TYPE
+    curator_payout_value hive_posts.curator_payout_value%TYPE, is_muted BOOLEAN
 )
 LANGUAGE plpgsql
 AS
@@ -64,7 +64,8 @@ BEGIN
         hpv.beneficiaries,
         hpv.max_accepted_payout,
         hpv.percent_hbd,
-        hpv.curator_payout_value
+        hpv.curator_payout_value,
+        hpv.is_muted
     FROM
     (
         WITH RECURSIVE child_posts (id, parent_id) AS
@@ -72,12 +73,11 @@ BEGIN
             SELECT hp.id, hp.parent_id
             FROM hive_posts hp
             WHERE hp.id = __post_id
-            AND NOT hp.is_muted
             UNION ALL
             SELECT children.id, children.parent_id
             FROM hive_posts children
             JOIN child_posts ON children.parent_id = child_posts.id
-            WHERE children.counter_deleted = 0 AND NOT children.is_muted
+            WHERE children.counter_deleted = 0
         )
         SELECT hp2.id
         FROM hive_posts hp2
