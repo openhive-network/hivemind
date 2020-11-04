@@ -83,7 +83,7 @@ async def get_info(context):
 
 async def get_by_feed_with_reblog_impl(db, account: str, start_author: str = '',
                                    start_permlink: str = '', limit: int = 20, truncate_body: int = 0):
-    """Get a list of [post_id, reblogged_by_str] for an account's feed."""
+    """Get a list of posts for an account's feed."""
     sql = " SELECT * FROM condenser_get_by_feed_with_reblog( '{}', '{}', '{}', {} ) ".format( account, start_author, start_permlink, limit )
     result = await db.query_all(sql)
 
