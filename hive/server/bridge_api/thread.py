@@ -35,6 +35,8 @@ async def get_discussion(context, author, permlink, observer=None):
     root_post = _bridge_post_object(rows[0])
     root_post['active_votes'] = await find_votes_impl(db, rows[0]['author'], rows[0]['permlink'], VotesPresentation.BridgeApi)
     root_post = append_statistics_to_post(root_post, rows[0], False, blacklists_for_user)
+    if 'should_be_excluded' in root_post and root_post['should_be_excluded']:
+        return {}
     root_post['replies'] = []
     all_posts[root_id] = root_post
 
@@ -48,6 +50,8 @@ async def get_discussion(context, author, permlink, observer=None):
         post = _bridge_post_object(rows[index])
         post['active_votes'] = await find_votes_impl(db, rows[index]['author'], rows[index]['permlink'], VotesPresentation.BridgeApi)
         post = append_statistics_to_post(post, rows[index], False, blacklists_for_user)
+        if 'should_be_excluded' in post and post['should_be_excluded']:
+            continue
         post['replies'] = []
         all_posts[post['post_id']] = post
 
