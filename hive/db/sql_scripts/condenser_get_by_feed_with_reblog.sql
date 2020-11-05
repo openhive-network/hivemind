@@ -76,8 +76,7 @@ BEGIN
         SELECT following
         FROM hive_follows
         WHERE state = 1 AND follower = __account_id
-      ) T ON hfc.account_id = T.following
-      JOIN hive_feed_cache hfc2 ON hfc2.account_id = T.following AND( __post_id = 0 OR hfc.post_id <= __post_id )
+      ) T ON hfc.account_id = T.following AND( __post_id = 0 OR hfc.post_id <= __post_id )
       WHERE hfc.block_num > __cutoff
       GROUP BY hfc.post_id
       HAVING ( __post_id = 0 ) OR ( MIN(hfc.created_at) <= __min_data )
