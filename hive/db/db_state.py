@@ -94,6 +94,9 @@ class DbState:
         to_locate = [
             'hive_blocks_created_at_idx',
 
+            'hive_feed_cache_block_num_idx',
+            'hive_feed_cache_created_at_idx',
+
             'hive_follows_ix5a', # (following, state, created_at, follower)
             'hive_follows_ix5b', # (follower, state, created_at, following)
             'hive_follows_block_num_idx',
