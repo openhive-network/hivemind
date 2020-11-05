@@ -48,8 +48,8 @@ def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=None, ov
             post['author_title'] = ''
     #elif override_gray:
     #    post['stats']['gray'] = ('irredeemables' in post['blacklists'] or len(post['blacklists']) >= 2)
-    else:
-        post['stats']['gray'] = row['is_grayed']
+    #else:
+    #    post['stats']['gray'] = row['is_grayed']
 
     #post['stats']['hide'] = 'irredeemables' in post['blacklists']
       # it overrides 'is_hidden' flag from post, is that the intent?
