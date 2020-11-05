@@ -1,33 +1,27 @@
 DROP FUNCTION IF EXISTS condenser_get_by_feed_with_reblog;
 
-CREATE OR REPLACE FUNCTION condenser_get_by_feed_with_reblog(
-  in _account VARCHAR,
-  in _author VARCHAR,
-  in _permlink VARCHAR,
-  in _limit INTEGER
-)
-RETURNS SETOF bridge_api_post
-AS
-$function$
+CREATE OR REPLACE FUNCTION condenser_get_by_feed_with_reblog( IN _account VARCHAR, IN _author VARCHAR, IN _permlink VARCHAR, IN _limit INTEGER)
+    RETURNS SETOF bridge_api_post 
+    LANGUAGE 'plpgsql'
+    STABLE 
+    ROWS 1000
+AS $BODY$
 DECLARE
   __post_id INTEGER := 0;
-  __cutoff INTEGER;
+  __cutoff INTEGER := 0;
   __account_id INTEGER := find_account_id( _account, True );
-  __min_data TIMESTAMP;
+  __min_date TIMESTAMP;
 BEGIN
 
   IF _permlink <> '' THEN
     __post_id = find_comment_id( _author, _permlink, True );
+    SELECT MIN(hfc.created_at) INTO __min_date
+    FROM hive_feed_cache hfc
+    JOIN hive_follows hf ON hfc.account_id = hf.following
+    WHERE hf.state = 1 AND hf.follower = __account_id AND  hfc.post_id = __post_id;
   END IF;
 
   __cutoff = block_before_head( '1 month' );
-  __min_data =
-  (
-      SELECT MIN(hfc.created_at)
-      FROM hive_feed_cache hfc
-      JOIN hive_follows hf ON hfc.account_id = hf.following
-      WHERE hf.state = 1 AND hf.follower = __account_id AND ( ( __post_id = 0 ) OR ( hfc.post_id = __post_id ) )
-  );
 
   RETURN QUERY SELECT
       hp.id,
@@ -69,21 +63,16 @@ BEGIN
     FROM hive_posts_view hp
     JOIN
     (
-      SELECT hfc.post_id
+      SELECT hfc.post_id, MIN(hfc.created_at) as min_created
       FROM hive_feed_cache hfc
-      JOIN
-      (
-        SELECT following
-        FROM hive_follows
-        WHERE state = 1 AND follower = __account_id
-      ) T ON hfc.account_id = T.following
-      JOIN hive_feed_cache hfc2 ON hfc2.account_id = T.following AND( __post_id = 0 OR hfc.post_id <= __post_id )
-      WHERE hfc.block_num > __cutoff
+      JOIN hive_follows hf ON hfc.account_id = hf.following
+      WHERE (__post_id = 0 OR hfc.created_at <= __min_date) 
+            AND hfc.block_num > __cutoff AND hf.state = 1 AND hf.follower = __account_id
       GROUP BY hfc.post_id
-      HAVING ( __post_id = 0 ) OR ( MIN(hfc.created_at) <= __min_data )
-      ORDER BY MIN(hfc.created_at) DESC
+      ORDER BY min_created DESC
       LIMIT _limit
-    ) T ON hp.id =  T.post_id;
+    ) T ON hp.id =  T.post_id
+    ORDER BY T.min_created DESC;
 END
-$function$
-language plpgsql STABLE;
+$BODY$
+;
