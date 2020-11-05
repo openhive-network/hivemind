@@ -41,14 +41,10 @@ for sql in postgres_handle_view_changes.sql \
           condenser_api_post_ex_type.sql \
           condenser_get_blog.sql \
           condenser_get_content.sql \
-          condenser_get_discussions_by_created.sql \
           condenser_get_discussions_by_blog.sql \
+          condenser_tags.sql \
+          condenser_follows.sql \
           hot_and_trends.sql \
-          condenser_get_discussions_by_trending.sql \
-          condenser_get_discussions_by_hot.sql \
-          condenser_get_discussions_by_promoted.sql \
-          condenser_get_post_discussions_by_payout.sql \
-          condenser_get_comment_discussions_by_payout.sql \
           update_hive_posts_children_count.sql \
           update_hive_posts_api_helper.sql \
           database_api_list_comments.sql \
@@ -61,14 +57,13 @@ for sql in postgres_handle_view_changes.sql \
           condenser_get_by_feed_with_reblog.sql \
           condenser_get_by_blog.sql \
           bridge_get_account_posts_by_blog.sql \
-          condenser_get_follow_counts.sql \
-          condenser_get_names_by_followers.sql \
-          condenser_get_names_by_following.sql \
-          condenser_get_names_by_reblogged.sql
+          condenser_get_names_by_reblogged.sql \
+          condenser_get_discussions_by_comments.sql \
+          condenser_get_account_reputations.sql
 
 do
-	echo Executing psql -U $1 -d $2 -f $sql
-	time psql -1 -v "ON_ERROR_STOP=1" -U $1 -d $2  -c '\timing' -f $sql 2>&1 | tee -a -i upgrade.log
+    echo Executing psql -U $1 -d $2 -f $sql
+    time psql -1 -v "ON_ERROR_STOP=1" -U $1 -d $2  -c '\timing' -f $sql 2>&1 | tee -a -i upgrade.log
   echo $?
 done
 
