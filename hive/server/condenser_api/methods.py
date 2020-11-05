@@ -79,8 +79,8 @@ def _legacy_follower(follower, following, follow_type):
     return dict(follower=follower, following=following, what=[follow_type])
 
 @return_error_info
-async def get_followers(context, account: str, start: str, follow_type: str = None,
-                        limit: int = None, **kwargs):
+async def get_followers(context, account: str, start: str = '', follow_type: str = None,
+                        limit: int = 1000, **kwargs):
     """Get all accounts following `account`. (EOL)"""
     # `type` reserved word workaround
     if not follow_type and 'type' in kwargs:
@@ -92,12 +92,12 @@ async def get_followers(context, account: str, start: str, follow_type: str = No
         valid_account(account),
         valid_account(start, allow_empty=True),
         valid_follow_type(follow_type),
-        valid_limit(limit, 1000, None))
+        valid_limit(limit, 1000, 1000))
     return [_legacy_follower(name, account, follow_type) for name in followers]
 
 @return_error_info
-async def get_following(context, account: str, start: str, follow_type: str = None,
-                        limit: int = None, **kwargs):
+async def get_following(context, account: str, start: str = '', follow_type: str = None,
+                        limit: int = 1000, **kwargs):
     """Get all accounts `account` follows. (EOL)"""
     # `type` reserved word workaround
     if not follow_type and 'type' in kwargs:
@@ -109,7 +109,7 @@ async def get_following(context, account: str, start: str, follow_type: str = No
         valid_account(account),
         valid_account(start, allow_empty=True),
         valid_follow_type(follow_type),
-        valid_limit(limit, 1000, None))
+        valid_limit(limit, 1000, 1000))
     return [_legacy_follower(account, name, follow_type) for name in following]
 
 @return_error_info
