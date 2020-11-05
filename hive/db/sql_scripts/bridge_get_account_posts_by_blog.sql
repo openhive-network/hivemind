@@ -67,7 +67,7 @@ BEGIN
       WHERE hfc.account_id = __account_id AND (__post_id = 0 OR hfc.created_at <= __created_at)
         AND NOT EXISTS (SELECT NULL FROM hive_posts hp
                         WHERE hp.id = hfc.post_id AND hp.counter_deleted = 0 AND hp.depth = 0 AND hp.community_id IS NOT NULL
-                              AND NOT EXISTS (SELECT NULL FROM hive_reblogs hr WHERE hr.blogger_id = __account_id)
+                              AND NOT EXISTS (SELECT NULL FROM hive_reblogs hr WHERE hr.blogger_id = __account_id AND hr.post_id = hp.id)
             )
       ORDER BY created_at DESC
       LIMIT _limit
