@@ -155,8 +155,10 @@ def valid_offset(offset, ubound=None):
 
 def valid_follow_type(follow_type: str):
     """Ensure follow type is valid steemd type."""
-    assert follow_type in ['blog', 'ignore'], 'invalid follow_type `%s`' % follow_type
-    return follow_type
+    # ABW: should be extended with blacklists etc. (and those should be implemented as next 'state' values)
+    supported_follow_types = dict(blog=1, ignore=2)
+    assert follow_type in supported_follow_types, "Unsupported follow type, valid types: {}".format(", ".join(supported_follow_types.keys()))
+    return supported_follow_types[follow_type]
 
 def valid_date(date, allow_empty=False):
     """ Ensure that date is in correct format """

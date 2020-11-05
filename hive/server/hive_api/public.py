@@ -44,7 +44,8 @@ async def list_followers(context, account:str, start:str='', limit:int=50, obser
         context['db'],
         valid_account(account),
         valid_account(start, allow_empty=True),
-        'blog', valid_limit(limit, 100, 50))
+        1, # blog
+        valid_limit(limit, 100, 50))
     return await accounts_by_name(context['db'], followers, observer, lite=True)
 
 async def list_following(context, account:str, start:str='', limit:int=50, observer:str=None):
@@ -53,7 +54,8 @@ async def list_following(context, account:str, start:str='', limit:int=50, obser
         context['db'],
         valid_account(account),
         valid_account(start, allow_empty=True),
-        'blog', valid_limit(limit, 100, 50))
+        1, # blog
+        valid_limit(limit, 100, 50))
     return await accounts_by_name(context['db'], following, observer, lite=True)
 
 async def list_all_muted(context, account):

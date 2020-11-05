@@ -33,8 +33,8 @@ def _legacy_follower(follower, following, follow_type):
     return dict(follower=follower, following=following, what=[follow_type])
 
 @return_error_info
-async def get_followers(context, account: str, start: str, follow_type: str = None,
-                        limit: int = None, **kwargs):
+async def get_followers(context, account: str, start: str = '', follow_type: str = None,
+                        limit: int = 1000, **kwargs):
     """Get all accounts following `account`. (EOL)"""
     # `type` reserved word workaround
     if not follow_type and 'type' in kwargs:
@@ -46,12 +46,12 @@ async def get_followers(context, account: str, start: str, follow_type: str = No
         valid_account(account),
         valid_account(start, allow_empty=True),
         valid_follow_type(follow_type),
-        valid_limit(limit, 1000, None))
+        valid_limit(limit, 1000, 1000))
     return [_legacy_follower(name, account, follow_type) for name in followers]
 
 @return_error_info
-async def get_following(context, account: str, start: str, follow_type: str = None,
-                        limit: int = None, **kwargs):
+async def get_following(context, account: str, start: str = '', follow_type: str = None,
+                        limit: int = 1000, **kwargs):
     """Get all accounts `account` follows. (EOL)"""
     # `type` reserved word workaround
     if not follow_type and 'type' in kwargs:
@@ -63,18 +63,19 @@ async def get_following(context, account: str, start: str, follow_type: str = No
         valid_account(account),
         valid_account(start, allow_empty=True),
         valid_follow_type(follow_type),
-        valid_limit(limit, 1000, None))
+        valid_limit(limit, 1000, 1000))
     return [_legacy_follower(account, name, follow_type) for name in following]
 
 @return_error_info
 async def get_follow_count(context, account: str):
     """Get follow count stats. (EOL)"""
-    count = await cursor.get_follow_counts(
-        context['db'],
-        valid_account(account))
+    db = context['db']
+    account = valid_account(account)
+    sql = "SELECT * FROM condenser_get_follow_count( (:account)::VARCHAR )"
+    counters = await db.query_row(sql, account=account)
     return dict(account=account,
-                following_count=count['following'],
-                follower_count=count['followers'])
+                following_count=counters[0],
+                follower_count=counters[1])
 
 @return_error_info
 async def get_reblogged_by(context, author: str, permlink: str):
@@ -91,7 +92,8 @@ async def get_account_reputations(context, account_lower_bound: str = None, limi
 
 async def _get_account_reputations_impl(db, fat_node_style, account_lower_bound, limit):
     """Enumerate account reputations."""
-    limit = valid_limit(limit, 1000, None)
+    assert isinstance(account_lower_bound, str), "invalid account_lower_bound type"
+    limit = valid_limit(limit, 1000, 1000)
 
     sql = "SELECT * FROM condenser_get_account_reputations( '{}', {}, {} )".format( account_lower_bound, account_lower_bound is None, limit )
     rows = await db.query_all(sql, start=account_lower_bound, limit=limit)
@@ -193,39 +195,56 @@ async def get_posts_by_given_sort(context, sort: str, start_author: str = '', st
     tag             = valid_tag(tag, allow_empty=True)
 
     posts = []
+    is_community = tag[:5] == 'hive-'
    
     if sort == 'created':
-      if tag == '':
-        sql = "SELECT * FROM condenser_get_discussions_by_created_with_empty_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      if is_community:
+        sql = "SELECT * FROM bridge_get_ranked_post_by_created_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False )"
+      elif tag == '':
+        sql = "SELECT * FROM bridge_get_ranked_post_by_created( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
       else:
-        sql = "SELECT * FROM condenser_get_discussions_by_created( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_created_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'trending':
-      if tag == '':
-        sql = "SELECT * FROM condenser_get_discussions_by_trending_with_empty_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      if is_community:
+        sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False )"
+      elif tag == '':
+        sql = "SELECT * FROM bridge_get_ranked_post_by_trends( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
       else:
-        sql = "SELECT * FROM condenser_get_discussions_by_trending( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'hot':
-      if tag == '':
-        sql = "SELECT * FROM condenser_get_discussions_by_hot_with_empty_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      if is_community:
+        sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      elif tag == '':
+        sql = "SELECT * FROM bridge_get_ranked_post_by_hot( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
       else:
-        sql = "SELECT * FROM condenser_get_discussions_by_hot( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'promoted':
-      if tag == '':
-        sql = "SELECT * FROM condenser_get_discussions_by_promoted_with_empty_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      if is_community:
+        sql = "SELECT * FROM bridge_get_ranked_post_by_promoted_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      elif tag == '':
+        sql = "SELECT * FROM bridge_get_ranked_post_by_promoted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
       else:
-        sql = "SELECT * FROM condenser_get_discussions_by_promoted( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_promoted_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'post_by_payout':
-      sql = "SELECT * FROM condenser_get_post_discussions_by_payout( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      if tag == '':
+        sql = "SELECT * FROM bridge_get_ranked_post_by_payout( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False )"
+      else:
+        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False )"
     elif sort == 'comment_by_payout':
-      sql = "SELECT * FROM condenser_get_comment_discussions_by_payout( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      if tag == '':
+        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+      else:
+        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     else:
       return posts
 
     sql_result = await db.query_all(sql, tag=tag, author=start_author, permlink=start_permlink, limit=limit )
 
+    muted_accounts = Mutes.all()
     for row in sql_result:
         post = _condenser_post_object(row, truncate_body)
         post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
+        post['active_votes'] = _mute_votes(post['active_votes'], muted_accounts)
         posts.append(post)
     return posts
 
