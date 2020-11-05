@@ -39,7 +39,8 @@ $function$
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value
+      hp.curator_payout_value,
+      hp.is_muted
   FROM
       hive_posts_view hp
       JOIN hive_communities hc ON hc.id = hp.community_id
@@ -98,7 +99,8 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value
+      hp.curator_payout_value,
+      hp.is_muted
   FROM
   (
       SELECT
