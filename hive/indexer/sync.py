@@ -399,7 +399,7 @@ class Sync:
         self._db.query("""UPDATE hive_state SET block_num = :block_num,
                        steem_per_mvest = :spm, usd_per_steem = :ups,
                        sbd_per_steem = :sps, dgpo = :dgpo""",
-                       block_num=state['dgpo']['head_block_number'],
+                       block_num=Blocks.head_num(),
                        spm=state['steem_per_mvest'],
                        ups=state['usd_per_steem'],
                        sps=state['sbd_per_steem'],
