@@ -36,9 +36,15 @@ def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=None, ov
             post['blacklists'].append('reputation-1')
         if reputation <= 1:
             post['stats']['gray'] = True    # gray any low reputation posts
-    if 'is_muted' in row and row['is_muted']:
-        post['stats']['gray'] = True    # gray any muted posts
-        
+        if 'is_muted' in row and row['is_muted']:
+            post['stats']['gray'] = True    # gray any muted posts
+        if 'is_muted' in row:
+            print("*****DEBUG***** is_muted has been returned in the row, but may not be True")
+        #if reputation < 1:
+        #    post['blacklists'].append('reputation-0')
+        #elif reputation  == 1:
+        #    post['blacklists'].append('reputation-1')
+
     if 'community_title' in row and row['community_title']:
         post['community'] = row['category']
         post['community_title'] = row['community_title']
