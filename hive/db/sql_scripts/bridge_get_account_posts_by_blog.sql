@@ -17,16 +17,12 @@ BEGIN
 
   IF _permlink <> '' THEN
     __post_id = find_comment_id( _author, _permlink, True );
-    __created_at = 
-    (
-      SELECT created_at
-      FROM hive_feed_cache
-      WHERE account_id = __account_id
-      AND post_id = __post_id
-    );
+    SELECT hfc.created_at INTO __created_at
+    FROM hive_feed_cache hfc
+    WHERE hfc.account_id = __account_id AND hfc.post_id = __post_id;
   END IF;
 
-  RETURN QUERY SELECT
+  RETURN QUERY SELECT -- bridge_get_account_posts_by_blog
       hp.id,
       hp.author,
       hp.parent_author,
@@ -67,25 +63,18 @@ BEGIN
     FROM hive_posts_view hp
     JOIN
     (
-      SELECT hfc.post_id
+      SELECT hfc.post_id, hfc.created_at
       FROM hive_feed_cache hfc
-      LEFT JOIN
-      (
-        SELECT
-            hp.id
-        FROM
-            hive_posts_view hp
-            LEFT JOIN hive_reblogs hr ON hp.id = hr.post_id
-        WHERE
-            hp.author_id = __account_id
-            AND hp.depth = 0
-            AND hp.community_id IS NOT NULL
-      ) T ON hfc.post_id = T.id
-      WHERE hfc.account_id = __account_id AND ( __post_id = 0 OR hfc.created_at <= __created_at )
-      ORDER BY hfc.created_at DESC
+      WHERE hfc.account_id = __account_id AND (__post_id = 0 OR hfc.created_at <= __created_at)
+        AND NOT EXISTS (SELECT NULL FROM hive_posts hp
+                        WHERE hp.id = hfc.post_id AND hp.counter_deleted = 0 AND hp.depth = 0 AND hp.community_id IS NOT NULL
+                              AND NOT EXISTS (SELECT NULL FROM hive_reblogs hr WHERE hr.blogger_id = __account_id)
+            )
+      ORDER BY created_at DESC
+      LIMIT _limit
     )T ON hp.id = T.post_id
-    LIMIT _limit;
-
+    ORDER BY T.created_at DESC
+    ;
 END
 $function$
 language plpgsql STABLE;
