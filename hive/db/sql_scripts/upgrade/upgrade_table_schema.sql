@@ -322,3 +322,7 @@ CREATE TABLE IF NOT EXISTS hive_notification_cache
 
 CREATE INDEX IF NOT EXISTS hive_notification_cache_block_num_idx ON hive_notification_cache (block_num);
 CREATE INDEX IF NOT EXISTS hive_notification_cache_dst_score_idx ON hive_notification_cache (dst, score) WHERE dst IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS hive_feed_cache_block_num_idx on hive_feed_cache (block_num);
+CREATE INDEX IF NOT EXISTS hive_feed_cache_created_at_idx on hive_feed_cache (created_at);
+

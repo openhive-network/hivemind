@@ -286,9 +286,12 @@ def build_metadata():
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('account_id', sa.Integer, nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
-        sa.Column('block_num',    sa.Integer,  nullable=True),
+        sa.Column('block_num',    sa.Integer,  nullable=False),
         sa.PrimaryKeyConstraint('account_id', 'post_id', name='hive_feed_cache_pk'),
         sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_feed_cache_fk1'),
+
+        sa.Index('hive_feed_cache_block_num_idx', 'block_num'),
+        sa.Index('hive_feed_cache_created_at_idx', 'created_at')
     )
 
     sa.Table(
