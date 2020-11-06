@@ -10,7 +10,7 @@ from hive.server.condenser_api.cursor import get_followers, get_following
 
 from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
 
-from hive.server.condenser_api.objects import _condenser_post_object
+from hive.server.bridge_api.objects import _bridge_post_object
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 
 log = logging.getLogger(__name__)
@@ -84,15 +84,20 @@ async def get_info(context):
 async def get_by_feed_with_reblog_impl(db, account: str, start_author: str = '',
                                    start_permlink: str = '', limit: int = 20, truncate_body: int = 0):
     """Get a list of posts for an account's feed."""
-    sql = " SELECT * FROM condenser_get_by_feed_with_reblog( '{}', '{}', '{}', {} ) ".format( account, start_author, start_permlink, limit )
+    sql = " SELECT * FROM bridge_get_by_feed_with_reblog( '{}', '{}', '{}', {} ) ".format( account, start_author, start_permlink, limit )
     result = await db.query_all(sql)
 
     posts = []
     for row in result:
         row = dict(row)
-        post = _condenser_post_object(row, truncate_body=truncate_body)
+        post = _bridge_post_object(row, truncate_body=truncate_body)
+        reblogged_by = set(row['reblogged_by'])
+        reblogged_by.discard(row['author']) # Eliminate original author of reblogged post
+        if reblogged_by:
+            post['reblogged_by'] = list(reblogged_by)
+        log.info("Reblogged_by: {}".format(reblogged_by))
 
-        post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
+        post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.BridgeApi)
         posts.append(post)
 
     return posts
