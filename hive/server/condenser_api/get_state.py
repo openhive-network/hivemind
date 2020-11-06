@@ -26,9 +26,7 @@ from hive.server.condenser_api.tags import (
 
 import hive.server.condenser_api.cursor as cursor
 
-from hive.server.condenser_api.methods import get_posts_by_given_sort
-
-from hive.server.hive_api.public import get_by_feed_with_reblog_impl
+from hive.server.condenser_api.methods import get_posts_by_given_sort, get_discussions_by_feed_impl
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 
 log = logging.getLogger(__name__)
@@ -170,7 +168,7 @@ async def _get_account_discussion_by_key(db, account, key):
     elif key == 'blog':
         posts = await cursor.get_by_blog(db, account, '', '', 20)
     elif key == 'feed':
-        posts = await get_by_feed_with_reblog_impl(db, account, '', '', 20)
+        posts = await get_discussions_by_feed_impl(db, account, '', '', 20)
     else:
         raise ApiError("unknown account discussion key %s" % key)
 

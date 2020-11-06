@@ -1,7 +1,7 @@
-DROP FUNCTION IF EXISTS condenser_get_by_feed_with_reblog;
+DROP FUNCTION IF EXISTS bridge_get_by_feed_with_reblog;
 
-CREATE OR REPLACE FUNCTION condenser_get_by_feed_with_reblog( IN _account VARCHAR, IN _author VARCHAR, IN _permlink VARCHAR, IN _limit INTEGER)
-    RETURNS SETOF bridge_api_post 
+CREATE OR REPLACE FUNCTION bridge_get_by_feed_with_reblog( IN _account VARCHAR, IN _author VARCHAR, IN _permlink VARCHAR, IN _limit INTEGER)
+    RETURNS SETOF bridge_api_post_reblogs
     LANGUAGE 'plpgsql'
     STABLE 
     ROWS 1000
@@ -23,7 +23,7 @@ BEGIN
 
   __cutoff = block_before_head( '1 month' );
 
-  RETURN QUERY SELECT
+  RETURN QUERY SELECT -- bridge_get_by_feed_with_reblog
       hp.id,
       hp.author,
       hp.parent_author,
@@ -59,16 +59,18 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value
+      hp.curator_payout_value,
+      T.reblogged_by
     FROM hive_posts_view hp
     JOIN
     (
-      SELECT hfc.post_id, MIN(hfc.created_at) as min_created
+      SELECT hfc.post_id, MIN(hfc.created_at) as min_created, array_agg(ha.name) AS reblogged_by
       FROM hive_feed_cache hfc
       JOIN hive_follows hf ON hfc.account_id = hf.following
-      WHERE (__post_id = 0 OR hfc.created_at <= __min_date) 
-            AND hfc.block_num > __cutoff AND hf.state = 1 AND hf.follower = __account_id
+      JOIN hive_accounts ha ON ha.id = hf.following
+      WHERE hfc.block_num > __cutoff AND hf.state = 1 AND hf.follower = __account_id
       GROUP BY hfc.post_id
+      HAVING __post_id = 0 OR MIN(hfc.created_at) <= __min_date 
       ORDER BY min_created DESC
       LIMIT _limit
     ) T ON hp.id =  T.post_id
