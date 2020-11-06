@@ -2,46 +2,13 @@
 
 from hive.server.common.helpers import last_month
 
+from hive.server.condenser_api.objects import _condenser_post_object
+from hive.server.database_api.methods import find_votes_impl, VotesPresentation
+
 # pylint: disable=too-many-lines
 
-async def get_post_id(db, author, permlink):
-    """Given an author/permlink, retrieve the id from db."""
-    sql = """
-        SELECT
-            hp.id
-        FROM hive_posts hp
-        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        WHERE ha_a.name = :author AND hpd_p.permlink = :permlink
-            AND counter_deleted = 0 LIMIT 1""" # ABW: replace with find_comment_id(:author,:permlink,True)?
-    return await db.query_one(sql, author=author, permlink=permlink)
-
-async def get_child_ids(db, post_id):
-    """Given a parent post id, retrieve all child ids."""
-    sql = "SELECT id FROM hive_posts WHERE parent_id = :id AND counter_deleted = 0"
-    return await db.query_col(sql, id=post_id)
-
-async def _get_post_id(db, author, permlink):
-    """Get post_id from hive db."""
-    sql = """
-        SELECT
-            hp.id
-        FROM hive_posts hp
-        INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-        INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        WHERE ha_a.name = :author AND hpd_p.permlink = :permlink""" # ABW: what's the difference between that and get_post_id?
-    return await db.query_one(sql, author=author, permlink=permlink)
-
-async def _get_account_id(db, name):
-    """Get account id from hive db."""
-    assert name, 'no account name specified'
-    _id = await db.query_one("SELECT id FROM hive_accounts WHERE name = :n", n=name)
-    assert _id, "account not found: `%s`" % name
-    return _id
-
-
 async def get_followers(db, account: str, start: str, state: int, limit: int):
-    """Get a list of accounts following a given account."""
+    """Get a list of accounts following given account."""
     sql = "SELECT * FROM condenser_get_followers( (:account)::VARCHAR, (:start)::VARCHAR, :type, :limit )"
     return await db.query_col(sql, account=account, start=start, type=state, limit=limit)
 
