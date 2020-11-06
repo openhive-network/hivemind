@@ -10,20 +10,27 @@ AS
 $function$
 DECLARE
   __post_id INTEGER := 0;
+  __parent_author_id INTEGER := 0;
 BEGIN
 
   IF _permlink <> '' THEN
+
+    __post_id = find_comment_id( _author, _permlink, True );
+
     SELECT
-        ha_pp.name, hp.id
+      pp.author_id
     INTO
-        _author, __post_id
+      __parent_author_id
     FROM hive_posts hp
     JOIN hive_posts pp ON hp.parent_id = pp.id
-    JOIN hive_accounts ha_pp ON ha_pp.id = pp.author_id
-    JOIN hive_permlink_data hpd_pp ON hpd_pp.id = pp.permlink_id
-    JOIN hive_accounts ha ON hp.author_id = ha.id
-    WHERE 
-      hpd_pp.permlink = _permlink AND ha.name =  _author;
+    WHERE hp.id = __post_id;
+  ELSE
+    SELECT
+      id
+    INTO
+      __parent_author_id
+    FROM hive_accounts
+    WHERE name = _author;
   END IF;
 
   RETURN QUERY SELECT
@@ -64,15 +71,8 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value
     FROM hive_posts_view hp
-    JOIN
-    (
-	    SELECT hp.id
-	    FROM hive_posts_view hp
-	    WHERE hp.author = _author
-	    ORDER BY hp.id DESC
-	    LIMIT _limit
-    ) T ON hp.parent_id = T.id
-    WHERE ( ( __post_id = 0 ) OR ( hp.id <= __post_id ) )
+    JOIN hive_posts pp ON hp.parent_id = pp.id
+    WHERE pp.author_id = __parent_author_id AND ( ( __post_id = 0 ) OR ( hp.id <= __post_id ) )
     ORDER BY hp.id DESC
     LIMIT _limit;
 
