@@ -274,27 +274,8 @@ tags_api_smoketest_negative:
 api_smoketest_benchmark:
   stage: benchmark-tests
   environment: hive-4.pl.syncad.com
-  needs:
-    - job: bridge_api_smoketest
-      artifacts: true
-    - job: bridge_api_smoketest_negative
-      artifacts: true
-    - job: condenser_api_smoketest
-      artifacts: true
-    - job: condenser_api_smoketest_negative
-      artifacts: true
-    - job: database_api_smoketest
-      artifacts: true
-    - job: database_api_smoketest_negative
-      artifacts: true
-    - job: follow_api_smoketest
-      artifacts: true
-    - job: follow_api_smoketest_negative
-      artifacts: true
-    - job: tags_api_smoketest
-      artifacts: true
-    - job: tags_api_smoketest_negative
-      artifacts: true
+  # according to docs we should leave it on defaults:
+  # Jobs of the next stage are run after the jobs from the previous stage complete successfully. 
 
   allow_failure: true
 
