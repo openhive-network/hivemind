@@ -1,6 +1,11 @@
 """Handles follow operations."""
 
 import logging
+<<<<<<< HEAD
+=======
+from time import perf_counter as perf
+from json import dumps
+>>>>>>> Cast all follow name data to string. Should protect against setting non string data types as names in follower and following
 
 from funcy.seqs import first
 from hive.db.adapter import Db
@@ -82,6 +87,15 @@ class Follow(DbAdapterHolder):
             return None
 
         op['following'] = op['following'] if isinstance(op['following'], list) else [op['following']]
+        
+        # additional layer of protection against putting complex data types as user names
+        as_str = []
+        for following in op['following']:
+            if isinstance(following, list) or isinstance(following, dict):
+                as_str.append(dumps(following))
+            else:
+                as_str.append(str(following))
+        op['following'] = as_str
 
         # mimic original behaviour
         # if following name does not exist do not process it: basically equal to drop op for single following entry
