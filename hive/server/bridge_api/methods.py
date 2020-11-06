@@ -62,7 +62,6 @@ async def get_post(context, author, permlink, observer=None):
 
     sql = "SELECT * FROM bridge_get_post( (:author)::VARCHAR, (:permlink)::VARCHAR )"
     result = await db.query_all(sql, author=author, permlink=permlink)
-    print("*****DEBUG***** result is: ", result[0])
 
     post = _bridge_post_object(result[0])
     post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.BridgeApi)
