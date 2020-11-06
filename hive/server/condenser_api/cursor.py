@@ -7,24 +7,16 @@ from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 
 # pylint: disable=too-many-lines
 
-async def get_followers(db, account: str, start: str, follow_type: str, limit: int):
-    """Get a list of accounts following by a given account."""
-    state = 2 if follow_type == 'ignore' else 1
-    sql = " SELECT * FROM condenser_get_names_by_followers( '{}', '{}', {}::SMALLINT, {}::SMALLINT ) ".format( account, start, state, limit )
+async def get_followers(db, account: str, start: str, state: int, limit: int):
+    """Get a list of accounts following given account."""
+    sql = "SELECT * FROM condenser_get_followers( (:account)::VARCHAR, (:start)::VARCHAR, :type, :limit )"
+    return await db.query_col(sql, account=account, start=start, type=state, limit=limit)
 
-    return await db.query_col(sql)
-
-async def get_following(db, account: str, start: str, follow_type: str, limit: int):
+async def get_following(db, account: str, start: str, state: int, limit: int):
     """Get a list of accounts followed by a given account."""
-    state = 2 if follow_type == 'ignore' else 1
-    sql = " SELECT * FROM condenser_get_names_by_following( '{}', '{}', {}::SMALLINT, {}::SMALLINT ) ".format( account, start, state, limit )
+    sql = "SELECT * FROM condenser_get_following( (:account)::VARCHAR, (:start)::VARCHAR, :type, :limit )"
+    return await db.query_col(sql, account=account, start=start, type=state, limit=limit)
 
-    return await db.query_col(sql)
-
-async def get_follow_counts(db, account: str):
-    """Return following/followers count for `account`."""
-    sql = "SELECT * FROM condenser_get_follow_counts( '{}' )".format( account )
-    return dict (await db.query_row(sql) )
 
 async def get_reblogged_by(db, author: str, permlink: str):
     """Return all rebloggers of a post."""
