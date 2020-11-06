@@ -10,9 +10,6 @@ from hive.server.condenser_api.cursor import get_followers, get_following
 
 from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
 
-from hive.server.bridge_api.objects import _bridge_post_object
-from hive.server.database_api.methods import find_votes_impl, VotesPresentation
-
 log = logging.getLogger(__name__)
 
 # Accounts
