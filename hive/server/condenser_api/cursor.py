@@ -8,7 +8,7 @@ from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 # pylint: disable=too-many-lines
 
 async def get_followers(db, account: str, start: str, state: int, limit: int):
-    """Get a list of accounts following a given account."""
+    """Get a list of accounts following given account."""
     sql = "SELECT * FROM condenser_get_followers( (:account)::VARCHAR, (:start)::VARCHAR, :type, :limit )"
     return await db.query_col(sql, account=account, start=start, type=state, limit=limit)
 

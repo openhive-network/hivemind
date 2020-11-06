@@ -94,14 +94,6 @@ async def _get_account_reputations_impl(db, fat_node_style, account_lower_bound,
     """Enumerate account reputations."""
     assert isinstance(account_lower_bound, str), "invalid account_lower_bound type"
     limit = valid_limit(limit, 1000, 1000)
-    seek = ''
-    if account_lower_bound:
-        seek = "WHERE name >= :start"
-
-    sql = """SELECT name, reputation
-              FROM hive_accounts %s
-           ORDER BY name
-              LIMIT :limit""" % seek
 
     sql = "SELECT * FROM condenser_get_account_reputations( '{}', {}, {} )".format( account_lower_bound, account_lower_bound is None, limit )
     rows = await db.query_all(sql, start=account_lower_bound, limit=limit)
