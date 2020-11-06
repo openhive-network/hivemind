@@ -5,6 +5,8 @@ See http://pretius.com/postgresql-stop-worrying-about-table-and-view-dependencie
 Enhanced by Wojciech Barcik wbarcik@syncad.com (handling of rules).
 */
 
+DROP TABLE IF EXISTS deps_saved_ddl;
+DROP SEQUENCE IF EXISTS deps_saved_ddl_deps_id_seq;
 
 -- SEQUENCE: deps_saved_ddl_deps_id_seq
 
