@@ -16,8 +16,6 @@ from hive.server.common.helpers import (
 from hive.server.common.mutes import Mutes
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 
-from hive.server.hive_api.public import get_by_feed_with_reblog_impl
-
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
 
 @return_error_info
@@ -302,6 +300,29 @@ async def get_discussions_by_blog(context, tag: str = None, start_author: str = 
 
     return posts_by_id
 
+async def get_discussions_by_feed_impl(db, account: str, start_author: str = '',
+                                   start_permlink: str = '', limit: int = 20, truncate_body: int = 0):
+    """Get a list of posts for an account's feed."""
+    sql = "SELECT * FROM bridge_get_by_feed_with_reblog((:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER)"
+    result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit)
+
+    posts = []
+    for row in result:
+        row = dict(row)
+        post = _condenser_post_object(row, truncate_body=truncate_body)
+        reblogged_by = set(row['reblogged_by'])
+        reblogged_by.discard(row['author']) # Eliminate original author of reblogged post
+        if reblogged_by:
+            reblogged_by_list = list(reblogged_by)
+            reblogged_by_list.sort()
+            post['reblogged_by'] = reblogged_by_list
+
+        post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
+        posts.append(post)
+
+    return posts
+
+
 @return_error_info
 @nested_query_compat
 async def get_discussions_by_feed(context, tag: str = None, start_author: str = '',
@@ -310,7 +331,7 @@ async def get_discussions_by_feed(context, tag: str = None, start_author: str = 
     """Retrieve account's personalized feed."""
     assert tag, '`tag` cannot be blank'
     assert not filter_tags, 'filter_tags not supported'
-    return await get_by_feed_with_reblog_impl(
+    return await get_discussions_by_feed_impl(
         context['db'],
         valid_account(tag),
         valid_account(start_author, allow_empty=True),

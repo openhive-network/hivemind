@@ -12,7 +12,6 @@ from hive.server.hive_api.common import get_account_id
 from hive.server.hive_api.objects import _follow_contexts
 from hive.server.hive_api.community import list_top_communities
 from hive.server.common.mutes import Mutes
-from hive.server.hive_api.public import get_by_feed_with_reblog_impl
 
 #pylint: disable=too-many-arguments, no-else-return
 
@@ -262,9 +261,6 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
 
     result = await _get_ranked_posts_for_all(db, sort, start_author, start_permlink, limit)
     return await process_query_results(result)
-
-async def _get_account_posts_by_feed(db, account : str, start_author : str, start_permlink : str, limit : int):
-  return await get_by_feed_with_reblog_impl(db, account, start_author, start_permlink, limit)
 
 @return_error_info
 async def get_account_posts(context, sort:str, account:str, start_author:str='', start_permlink:str='',
