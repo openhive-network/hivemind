@@ -37,6 +37,7 @@ async def get_discussion(context, author, permlink, observer=None):
     root_post = append_statistics_to_post(root_post, rows[0], False, blacklists_for_user)
     if 'should_be_excluded' in root_post and root_post['should_be_excluded']:
         return {}
+    root_post.pop('is_muted', '')
     root_post['replies'] = []
     all_posts[root_id] = root_post
 
@@ -52,6 +53,7 @@ async def get_discussion(context, author, permlink, observer=None):
         post = append_statistics_to_post(post, rows[index], False, blacklists_for_user)
         if 'should_be_excluded' in post and post['should_be_excluded']:
             continue
+        post.pop('is_muted', '')
         post['replies'] = []
         all_posts[post['post_id']] = post
 

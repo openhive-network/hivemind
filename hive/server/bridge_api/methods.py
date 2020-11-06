@@ -62,13 +62,13 @@ async def get_post(context, author, permlink, observer=None):
 
     sql = "SELECT * FROM bridge_get_post( (:author)::VARCHAR, (:permlink)::VARCHAR )"
     result = await db.query_all(sql, author=author, permlink=permlink)
-    print("*****DEBUG***** result is: ", result[0])
 
     post = _bridge_post_object(result[0])
     post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.BridgeApi)
     post = append_statistics_to_post(post, result[0], False, blacklists_for_user)
     if 'should_be_excluded' in post and post['should_be_excluded']:
         return []
+    post.pop('is_muted', '')
     return post
 
 @return_error_info
@@ -244,6 +244,7 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
             post = append_statistics_to_post(post, row, row['is_pinned'], blacklists_for_user)
             if 'should_be_excluded' in post and post['should_be_excluded']:
                 continue
+            post.pop('is_muted', '')
             posts.append(post)
         return posts
 
@@ -320,6 +321,7 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
         post = append_statistics_to_post(post, row, False if account_posts else row['is_pinned'], blacklists_for_user, not account_posts)
         if 'should_be_excluded' in post and post['should_be_excluded']:
             continue
+        post.pop('is_muted', '')
         posts.append(post)
     return posts
 
