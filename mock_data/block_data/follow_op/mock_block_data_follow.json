@@ -365,6 +365,72 @@
               "id": "follow",
               "json": "[\"follow\",{\"follower\":\"te'%@ter1\",\"following\":[\"tester3\", \"tester4\"],\"what\":[\"blog\"]}]"
             }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "{\"tester1\":\"tester1\"}"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":{\"tester1\":\"tester1\"},\"following\":{\"tester3\":\"tester4\"},\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":{\"tester3\":\"tester4\"},\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester3\", [\"tester4\"]],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":[\"tester1\"],\"following\":[\"tester3\", [\"tester4\"]],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "[\"tester1\"]"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":[\"tester1\"],\"following\":[\"tester3\", {\"tester4\":\"tester5\"}],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester3\", {\"tester4\":\"tester5\"}],\"what\":[\"blog\"]}]"
+            }
           }
         ]
       }

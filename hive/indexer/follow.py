@@ -2,6 +2,7 @@
 
 import logging
 from time import perf_counter as perf
+from json import dumps
 
 from funcy.seqs import first
 from hive.db.adapter import Db
@@ -11,6 +12,7 @@ from hive.indexer.accounts import Accounts
 
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
+
 
 log = logging.getLogger(__name__)
 
@@ -100,7 +102,20 @@ class Follow(DbAdapterHolder):
             return None
 
         op['following'] = op['following'] if isinstance(op['following'], list) else [op['following']]
+        
+        # additional layer of protection against putting complex data types as user names
+        as_str = []
+        for following in op['following']:
+            if isinstance(following, list) or isinstance(following, dict):
+                as_str.append(dumps(following))
+            else:
+                as_str.append(str(following))
+        op['following'] = as_str
 
+        if isinstance(op['follower'], list) or isinstance(op['follower'], dict):
+            op['follower'] = dumps(op['follower'])
+        else:
+            op['follower'] = str(op['follower'])
 
         # follower/following is empty
         if not op['follower'] or not op['following']:
