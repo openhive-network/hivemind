@@ -158,14 +158,15 @@ class SteemClient:
                 num = int(block['block_id'][:8], base=16)
                 blocks[num] = block
 
-        for block_num in block_nums:
-            data = MockBlockProvider.get_block_data(block_num, True)
-            if data is not None:
-                if block_num in blocks:
-                    blocks[block_num]["transactions"].extend(data["transactions"])
-                    blocks[block_num]["transaction_ids"].extend(data["transaction_ids"])
-                else:
-                    blocks[block_num] = data
+        if MockBlockProvider.is_data():
+            for block_num in block_nums:
+                data = MockBlockProvider.get_block_data(block_num, True)
+                if data is not None:
+                    if block_num in blocks:
+                        blocks[block_num]["transactions"].extend(data["transactions"])
+                        blocks[block_num]["transaction_ids"].extend(data["transaction_ids"])
+                    else:
+                        blocks[block_num] = data
 
         return [blocks[x] for x in block_nums]
 
@@ -183,19 +184,20 @@ class SteemClient:
     def enum_virtual_ops(self, conf, begin_block, end_block):
         """ Get virtual ops for range of blocks """
         def add_mock_vops(ret, from_block, end_block):
-            for block_num in range(from_block, end_block):
-                mock_vops = MockVopsProvider.get_block_data(block_num)
-                if mock_vops:
-                    if block_num in ret:
-                        if 'ops_by_block' in mock_vops:
-                            ret[block_num]['ops'].extend([op['op'] for op in mock_vops['ops_by_block'] if op['block'] == block_num])
-                        if 'ops' in mock_vops:
-                            ret[block_num]['ops'].extend([op['op'] for op in mock_vops['ops'] if op['block'] == block_num])
-                    else:
-                        if 'ops_by_block' in mock_vops:
-                            ret[block_num] = {'timestamp':mock_vops['timestamp'], "ops" : [op['op'] for op in mock_vops['ops_by_block'] if op['block'] == block_num]}
-                        if 'ops' in mock_vops:
-                            ret[block_num] = {'timestamp':mock_vops['timestamp'], "ops" : [op['op'] for op in mock_vops['ops'] if op['block'] == block_num]}
+            if MockVopsProvider.is_data():
+                for block_num in range(from_block, end_block):
+                    mock_vops = MockVopsProvider.get_block_data(block_num)
+                    if mock_vops:
+                        if block_num in ret:
+                            if 'ops_by_block' in mock_vops:
+                                ret[block_num]['ops'].extend([op['op'] for op in mock_vops['ops_by_block'] if op['block'] == block_num])
+                            if 'ops' in mock_vops:
+                                ret[block_num]['ops'].extend([op['op'] for op in mock_vops['ops'] if op['block'] == block_num])
+                        else:
+                            if 'ops_by_block' in mock_vops:
+                                ret[block_num] = {'timestamp':mock_vops['timestamp'], "ops" : [op['op'] for op in mock_vops['ops_by_block'] if op['block'] == block_num]}
+                            if 'ops' in mock_vops:
+                                ret[block_num] = {'timestamp':mock_vops['timestamp'], "ops" : [op['op'] for op in mock_vops['ops'] if op['block'] == block_num]}
 
         ret = {}
 
