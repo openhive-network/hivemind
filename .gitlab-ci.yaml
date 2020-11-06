@@ -73,7 +73,9 @@ hivemind_sync:
 
   script:
     - pip3 install --user --upgrade pip setuptools
-    - scripts/ci_sync.sh "$HIVEMIND_DB_NAME" "$HIVEMIND_POSTGRESQL_CONNECTION_STRING" "$HIVEMIND_SOURCE_HIVED_URL" $HIVEMIND_MAX_BLOCK $HIVEMIND_HTTP_PORT
+    # WARNING!!! temporarily hardcoded 5000017 instead $HIVEMIND_MAX_BLOCK
+    # revert that change when $HIVEMIND_MAX_BLOCK will be set to 5000017
+    - scripts/ci_sync.sh "$HIVEMIND_DB_NAME" "$HIVEMIND_POSTGRESQL_CONNECTION_STRING" "$HIVEMIND_SOURCE_HIVED_URL" 5000017 $HIVEMIND_HTTP_PORT
 
   artifacts:
     paths:
@@ -270,6 +272,12 @@ tags_api_smoketest_negative:
 
   script:
     - scripts/ci_start_api_smoketest.sh localhost "$HIVEMIND_HTTP_PORT" tags_api_negative/ api_smoketest_tags_api_negative.xml
+
+mock_tests:
+  <<: *common_api_smoketest_job
+
+  script:
+    - scripts/ci_start_api_smoketest.sh localhost "$HIVEMIND_HTTP_PORT" mock_tests/ api_smoketest_mock_tests.xml
 
 api_smoketest_benchmark:
   stage: benchmark-tests
