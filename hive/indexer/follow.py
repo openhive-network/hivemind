@@ -104,18 +104,15 @@ class Follow(DbAdapterHolder):
         op['following'] = op['following'] if isinstance(op['following'], list) else [op['following']]
         
         # additional layer of protection against putting complex data types as user names
-        as_str = []
+        # we expecting follower and following entries to be strings
+        # in older hivemind this check was done in Accounts.exists
+        # now following can be list of names so we need to check if all entries are strings
         for following in op['following']:
-            if isinstance(following, list) or isinstance(following, dict):
-                as_str.append(dumps(following))
-            else:
-                as_str.append(str(following))
-        op['following'] = as_str
+            if not isinstance(following, str):
+                return None
 
-        if isinstance(op['follower'], list) or isinstance(op['follower'], dict):
-            op['follower'] = dumps(op['follower'])
-        else:
-            op['follower'] = str(op['follower'])
+        if not isinstance(op['follower'], str):
+            return None
 
         # follower/following is empty
         if not op['follower'] or not op['following']:
