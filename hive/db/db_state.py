@@ -108,17 +108,17 @@ class DbState:
             'hive_posts_root_id_id_idx',
 
             'hive_posts_community_id_idx',
-            'hive_posts_category_id_idx',
             'hive_posts_payout_at_idx',
             'hive_posts_payout_idx',
-            'hive_posts_promoted_idx',
-            'hive_posts_sc_trend_id_is_paidout_idx',
-            'hive_posts_sc_hot_id_is_paidout_idx',
+            'hive_posts_promoted_id_idx',
+            'hive_posts_sc_trend_id_idx',
+            'hive_posts_sc_hot_id_idx',
             'hive_posts_block_num_idx',
             'hive_posts_block_num_created_idx',
             'hive_posts_cashout_time_id_idx',
             'hive_posts_updated_at_idx',
-            'hive_posts_payout_plus_pending_payout_id_is_paidout_idx',
+            'hive_posts_payout_plus_pending_payout_id_idx',
+            'hive_posts_category_id_payout_plus_pending_payout_depth_idx',
 
             'hive_posts_api_helper_author_s_permlink_idx',
 

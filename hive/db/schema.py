@@ -139,18 +139,18 @@ def build_metadata():
         sa.Index('hive_posts_parent_id_idx', 'parent_id'),
         sa.Index('hive_posts_community_id_idx', 'community_id'),
 
-        sa.Index('hive_posts_category_id_idx', 'category_id'),
         sa.Index('hive_posts_payout_at_idx', 'payout_at'),
         sa.Index('hive_posts_payout_idx', 'payout'),
-        sa.Index('hive_posts_promoted_idx', 'promoted'),
-        sa.Index('hive_posts_sc_trend_id_is_paidout_idx', 'sc_trend', 'id', 'is_paidout'),
-        sa.Index('hive_posts_sc_hot_id_is_paidout_idx', 'sc_hot', 'id', 'is_paidout'),
+        sa.Index('hive_posts_promoted_id_idx', 'promoted', 'id', postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0")),
+        sa.Index('hive_posts_sc_trend_id_idx', 'sc_trend', 'id', postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0 AND depth = 0")),
+        sa.Index('hive_posts_sc_hot_id_idx', 'sc_hot', 'id', postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0 AND depth = 0")),
         sa.Index('hive_posts_author_id_created_at_idx', sa.text('author_id DESC, created_at DESC')),
         sa.Index('hive_posts_block_num_idx', 'block_num'),
         sa.Index('hive_posts_block_num_created_idx', 'block_num_created'),
         sa.Index('hive_posts_cashout_time_id_idx', 'cashout_time', 'id'),
         sa.Index('hive_posts_updated_at_idx', sa.text('updated_at DESC')),
-        sa.Index('hive_posts_payout_plus_pending_payout_id_is_paidout_idx', sa.text('(payout+pending_payout), id, is_paidout'))
+        sa.Index('hive_posts_payout_plus_pending_payout_id_idx', sa.text('(payout+pending_payout), id, is_paidout'), postgresql_where=sql_text("counter_deleted = 0 AND NOT is_paidout")),
+        sa.Index('hive_posts_category_id_payout_plus_pending_payout_depth_idx', sa.text('category_id, (payout+pending_payout), depth'), postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0"))
     )
 
     sa.Table(

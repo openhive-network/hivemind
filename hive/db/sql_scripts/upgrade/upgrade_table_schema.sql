@@ -326,3 +326,34 @@ CREATE INDEX IF NOT EXISTS hive_notification_cache_dst_score_idx ON hive_notific
 CREATE INDEX IF NOT EXISTS hive_feed_cache_block_num_idx on hive_feed_cache (block_num);
 CREATE INDEX IF NOT EXISTS hive_feed_cache_created_at_idx on hive_feed_cache (created_at);
 
+--- condenser_get_trending_tags optimizations and slight index improvements.
+
+DROP INDEX IF EXISTS hive_posts_category_id_idx;
+
+CREATE INDEX IF NOT EXISTS hive_posts_category_id_payout_plus_pending_payout_depth_idx ON hive_posts (category_id, (payout + pending_payout), depth)
+  WHERE NOT is_paidout AND counter_deleted = 0;
+
+DROP INDEX IF EXISTS hive_posts_sc_trend_id_is_paidout_idx;
+
+CREATE INDEX IF NOT EXISTS hive_posts_sc_trend_id_idx ON hive_posts USING btree (sc_trend, id)
+  WHERE NOT is_paidout AND counter_deleted = 0 AND depth = 0
+;
+
+DROP INDEX IF EXISTS hive_posts_sc_hot_id_is_paidout_idx;
+
+CREATE INDEX IF NOT EXISTS hive_posts_sc_hot_id_idx ON hive_posts (sc_hot, id)
+  WHERE NOT is_paidout AND counter_deleted = 0 AND depth = 0
+  ;
+
+DROP INDEX IF EXISTS hive_posts_payout_plus_pending_payout_id_is_paidout_idx;
+
+CREATE INDEX IF NOT EXISTS hive_posts_payout_plus_pending_payout_id_idx ON hive_posts ((payout + pending_payout), id)
+  WHERE counter_deleted = 0 AND NOT is_paidout
+;
+
+DROP INDEX IF EXISTS hive_posts_promoted_idx;
+
+CREATE INDEX IF NOT EXISTS hive_posts_promoted_id_idx ON hive_posts (promoted, id)
+  WHERE NOT is_paidout AND counter_deleted = 0
+ ;
+
