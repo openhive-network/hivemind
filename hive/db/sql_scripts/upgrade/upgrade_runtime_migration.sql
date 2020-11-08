@@ -125,6 +125,27 @@ END
 $BODY$;
 COMMIT;
 
+
+START TRANSACTION;
+
+DO
+$BODY$
+BEGIN
+SET work_mem='2GB';
+IF EXISTS(SELECT * FROM hive_db_data_migration WHERE migration = 'Reputation livesync recalculation') THEN
+  RAISE NOTICE 'Performing reputation livesync recalculation...';
+  --- reputations have to be recalculated from scratch.
+  UPDATE hive_accounts SET reputation = 0, is_implicit = True;
+  PERFORM update_account_reputations(NULL, NULL);
+  DELETE FROM hive_db_data_migration WHERE migration = 'Reputation livesync recalculation';
+ELSE
+  RAISE NOTICE 'Skipping reputation livesync recalculation...';
+END IF;
+END
+$BODY$;
+
+COMMIT;
+
 START TRANSACTION;
 
 TRUNCATE TABLE hive_db_data_migration;
