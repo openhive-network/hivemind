@@ -83,8 +83,6 @@ class Accounts(DbAdapterHolder):
         """Check if an account name exists."""
         if isinstance(names, str):
             return names in cls._ids
-        if isinstance(names, list):
-            return all(name in cls._ids for name in names)
         return False
 
     @classmethod
