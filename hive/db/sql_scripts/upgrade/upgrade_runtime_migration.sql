@@ -132,7 +132,7 @@ DO
 $BODY$
 BEGIN
 SET work_mem='2GB';
-IF NOT EXISTS(SELECT * FROM hive_db_patch_level WHERE patch_revision = '90f24b0bf011661aaa31bd371c65363a5af920fb') THEN
+IF NOT EXISTS(SELECT * FROM hive_db_patch_level WHERE patched_to_revision = 'fe1429e3af20069c866f71bef3f92f4db487af30') THEN
   RAISE NOTICE 'Performing reputation livesync recalculation...';
   --- reputations have to be recalculated from scratch.
   UPDATE hive_accounts SET reputation = 0, is_implicit = True;
@@ -185,7 +185,7 @@ values
 ,(now(), '1847c75702384c7e34c624fc91f24d2ef20df91d') -- latest version of develop containing included changes.
 ,(now(), '1f23e1326f3010bc84353aba82d4aa7ff2f999e4') -- hive_posts_author_id_created_at_idx index def. to speedup hive_accounts_info_view.
 ,(now(), '2a274e586454968a4f298a855a7e60394ed90bde') -- get_number_of_unread_notifications speedup https://gitlab.syncad.com/hive/hivemind/-/merge_requests/348/diffs
-,(now(), '90f24b0bf011661aaa31bd371c65363a5af920fb') -- reputation calc at LIVE sync.
+,(now(), 'fe1429e3af20069c866f71bef3f92f4db487af30') -- reputation calc at LIVE sync.
 ) ds (patch_date, patch_revision)
 where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
 
