@@ -352,7 +352,7 @@
                 "tester1"
               ],
               "id": "follow",
-              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester3\", \"tester4\"],\"what\":[\"blogo-doggo\"]}]"
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester3\", \"gtg\"],\"what\":[\"blogo-doggo\"]}]"
             }
           },
           {
@@ -363,7 +363,7 @@
                 "te'%@ter1"
               ],
               "id": "follow",
-              "json": "[\"follow\",{\"follower\":\"te'%@ter1\",\"following\":[\"tester3\", \"tester4\"],\"what\":[\"blog\"]}]"
+              "json": "[\"follow\",{\"follower\":\"te'%@ter1\",\"following\":[\"gtg\", \"tester4\"],\"what\":[\"blog\"]}]"
             }
           },
           {
@@ -374,7 +374,7 @@
                 "{\"tester1\":\"tester1\"}"
               ],
               "id": "follow",
-              "json": "[\"follow\",{\"follower\":{\"tester1\":\"tester1\"},\"following\":{\"tester3\":\"tester4\"},\"what\":[\"blog\"]}]"
+              "json": "[\"follow\",{\"follower\":{\"tester1\":\"tester1\"},\"following\":{\"gtg\":\"gtg\"},\"what\":[\"blog\"]}]"
             }
           },
           {
@@ -385,7 +385,7 @@
                 "tester1"
               ],
               "id": "follow",
-              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":{\"tester3\":\"tester4\"},\"what\":[\"blog\"]}]"
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":{\"gtg\":\"gtg\"},\"what\":[\"blog\"]}]"
             }
           },
           {
@@ -396,7 +396,7 @@
                 "tester1"
               ],
               "id": "follow",
-              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester3\", [\"tester4\"]],\"what\":[\"blog\"]}]"
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester3\", [\"gtg\"]],\"what\":[\"blog\"]}]"
             }
           },
           {
@@ -407,7 +407,7 @@
                 "tester1"
               ],
               "id": "follow",
-              "json": "[\"follow\",{\"follower\":[\"tester1\"],\"following\":[\"tester3\", [\"tester4\"]],\"what\":[\"blog\"]}]"
+              "json": "[\"follow\",{\"follower\":[\"tester1\"],\"following\":[\"tester3\", [\"gtg\"]],\"what\":[\"blog\"]}]"
             }
           },
           {
@@ -418,7 +418,7 @@
                 "[\"tester1\"]"
               ],
               "id": "follow",
-              "json": "[\"follow\",{\"follower\":[\"tester1\"],\"following\":[\"tester3\", {\"tester4\":\"tester5\"}],\"what\":[\"blog\"]}]"
+              "json": "[\"follow\",{\"follower\":[\"tester1\"],\"following\":[\"tester3\", {\"gtg\":\"gtg\"}],\"what\":[\"blog\"]}]"
             }
           },
           {
@@ -429,7 +429,7 @@
                 "tester1"
               ],
               "id": "follow",
-              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester3\", {\"tester4\":\"tester5\"}],\"what\":[\"blog\"]}]"
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester3\", {\"gtg\":\"gtg\"}],\"what\":[\"blog\"]}]"
             }
           }
         ]
