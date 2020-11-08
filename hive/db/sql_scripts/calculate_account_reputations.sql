@@ -253,7 +253,7 @@ BEGIN
 
     SELECT p.id as account_id, p.reputation, p.is_implicit
     FROM calculate_account_reputations_for_block(_first_block_num) p
-    WHERE _first_block_num IS NOT NULL AND _last_block_num IS NOT NULL AND _first_block_num == _last_block_num
+    WHERE _first_block_num IS NOT NULL AND _last_block_num IS NOT NULL AND _first_block_num = _last_block_num
 
   ) ds
   WHERE urs.id = ds.account_id AND (urs.reputation != ds.reputation OR urs.is_implicit != ds.is_implicit)

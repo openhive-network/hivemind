@@ -192,7 +192,8 @@ $BODY$
 ;
 
 DROP INDEX IF EXISTS hive_posts_created_at_idx;
-CREATE INDEX IF NOT EXISTS hive_posts_created_at_author_id_idx ON hive_posts (created_at, author_id);
+-- skip it since it is dropped below.
+-- CREATE INDEX IF NOT EXISTS hive_posts_created_at_author_id_idx ON hive_posts (created_at, author_id);
 
 CREATE INDEX IF NOT EXISTS hive_posts_block_num_created_idx ON hive_posts (block_num_created);
 
@@ -256,13 +257,17 @@ DROP INDEX IF EXISTS hive_posts_is_paidout_idx;
 DROP INDEX IF EXISTS hive_posts_sc_trend_id_idx;
 DROP INDEX IF EXISTS hive_posts_sc_hot_id_idx;
 
-CREATE INDEX IF NOT EXISTS hive_posts_sc_trend_id_is_paidout_idx ON hive_posts(sc_trend, id, is_paidout );
-CREATE INDEX IF NOT EXISTS hive_posts_sc_hot_id_is_paidout_idx ON hive_posts(sc_hot, id, is_paidout );
+--- Commented out as it is dropped below.
+--- CREATE INDEX IF NOT EXISTS hive_posts_sc_trend_id_is_paidout_idx ON hive_posts(sc_trend, id, is_paidout );
+
+--- Commented out as it is dropped below.
+--- CREATE INDEX IF NOT EXISTS hive_posts_sc_hot_id_is_paidout_idx ON hive_posts(sc_hot, id, is_paidout );
 
 --- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/302
 
 DROP INDEX IF EXISTS hive_posts_payout_plus_pending_payout_id;
-CREATE INDEX IF NOT EXISTS hive_posts_payout_plus_pending_payout_id_is_paidout_idx ON hive_posts ((payout+pending_payout), id, is_paidout);
+--- Commented out as dropped below.
+--- CREATE INDEX IF NOT EXISTS hive_posts_payout_plus_pending_payout_id_is_paidout_idx ON hive_posts ((payout+pending_payout), id, is_paidout);
 
 --- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/310
 
