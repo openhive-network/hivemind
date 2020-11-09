@@ -1,11 +1,6 @@
 """Handles follow operations."""
 
 import logging
-<<<<<<< HEAD
-=======
-from time import perf_counter as perf
-from json import dumps
->>>>>>> Cast all follow name data to string. Should protect against setting non string data types as names in follower and following
 
 from funcy.seqs import first
 from hive.db.adapter import Db
