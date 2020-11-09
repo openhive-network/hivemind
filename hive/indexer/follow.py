@@ -1,12 +1,9 @@
 """Handles follow operations."""
 
 import logging
-from time import perf_counter as perf
-from json import dumps
 
 from funcy.seqs import first
 from hive.db.adapter import Db
-from hive.db.db_state import DbState
 from hive.utils.misc import chunks
 from hive.indexer.accounts import Accounts
 
@@ -74,7 +71,7 @@ class Follow(DbAdapterHolder):
     @classmethod
     def _validated_op(cls, account, op, date):
         """Validate and normalize the operation."""
-        if ( not 'what' in op
+        if (not 'what' in op
            or not isinstance(op['what'], list)
            or not 'follower' in op
            or not 'following' in op):
