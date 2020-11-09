@@ -61,7 +61,7 @@ BEGIN
   LIMIT _limit;
 END
 $function$
-language plpgsql VOLATILE;
+language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_hot_for_observer_communities;
 CREATE FUNCTION bridge_get_ranked_post_by_hot_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
@@ -130,7 +130,7 @@ BEGIN
   LIMIT _limit;
 END
 $function$
-language plpgsql VOLATILE;
+language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_payout_comments_for_observer_communities;
 CREATE FUNCTION bridge_get_ranked_post_by_payout_comments_for_observer_communities( in _observer VARCHAR,  in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
@@ -209,7 +209,7 @@ BEGIN
   LIMIT _limit;
 END
 $function$
-language plpgsql VOLATILE;
+language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_payout_for_observer_communities;
 CREATE FUNCTION bridge_get_ranked_post_by_payout_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
@@ -281,7 +281,7 @@ BEGIN
   LIMIT _limit;
 END
 $function$
-language plpgsql VOLATILE;
+language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_promoted_for_observer_communities;
 CREATE FUNCTION bridge_get_ranked_post_by_promoted_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
@@ -351,7 +351,7 @@ BEGIN
   LIMIT _limit;
 END
 $function$
-language plpgsql VOLATILE;
+language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_trends_for_observer_communities;
 CREATE OR REPLACE FUNCTION bridge_get_ranked_post_by_trends_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
@@ -432,7 +432,7 @@ BEGIN
   LIMIT _limit;
 END
 $function$
-language plpgsql VOLATILE;
+language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_muted_for_observer_communities;
 CREATE FUNCTION bridge_get_ranked_post_by_muted_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
@@ -503,4 +503,4 @@ BEGIN
   LIMIT _limit;
 END
 $function$
-language plpgsql VOLATILE;
+language plpgsql STABLE;
