@@ -132,7 +132,7 @@ TRUNCATE TABLE hive_db_data_migration;
 insert into hive_db_patch_level
 (patch_date, patched_to_revision)
 select ds.patch_date, ds.patch_revision
-from 
+from
 (
 values
 (now(), '7b8def051be224a5ebc360465f7a1522090c7125'),
@@ -146,7 +146,7 @@ values
 -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/257
 -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/251
 -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/265
--- 
+--
 (now(), '45c2883131472cc14a03fe4e355ba1435020d720'),
 (now(), '7cfc2b90a01b32688075b22a6ab173f210fc770f'), -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/286
 (now(), 'f2e5f656a421eb1dd71328a94a421934eda27a87')  -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/275
@@ -165,10 +165,10 @@ values
 ,(now(), '1847c75702384c7e34c624fc91f24d2ef20df91d') -- latest version of develop containing included changes.
 ,(now(), '1f23e1326f3010bc84353aba82d4aa7ff2f999e4') -- hive_posts_author_id_created_at_idx index def. to speedup hive_accounts_info_view.
 ,(now(), '2a274e586454968a4f298a855a7e60394ed90bde') -- get_number_of_unread_notifications speedup https://gitlab.syncad.com/hive/hivemind/-/merge_requests/348/diffs
+,(now(), '431fdaead7dcd69e4d2a45e7ce8a3186b8075515') -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/367
 ) ds (patch_date, patch_revision)
 where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
 
 COMMIT;
 
 ;
-
