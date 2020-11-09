@@ -277,6 +277,17 @@
                 "tester1"
               ],
               "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester7\", \"<script>alert('hello world');</script>\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
               "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester3\", \"tester4\"],\"what\":[\"blogo-doggo\"]}]"
             }
           },
@@ -430,6 +441,17 @@
               ],
               "id": "follow",
               "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester3\", {\"gtg\":\"gtg\"}],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester7\", \"<script>alert('hello world');</script>\"],\"what\":[\"blog\"]}]"
             }
           }
         ]
