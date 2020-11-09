@@ -2,6 +2,7 @@
 
 import logging
 from time import perf_counter as perf
+from json import dumps
 
 from funcy.seqs import first
 from hive.db.adapter import Db
@@ -11,6 +12,7 @@ from hive.indexer.accounts import Accounts
 
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
+
 
 log = logging.getLogger(__name__)
 
@@ -99,11 +101,22 @@ class Follow(DbAdapterHolder):
            or not 'following' in op):
             return None
 
+                # follower/following is empty
+        if not op['follower'] or not op['following']:
+            return None
+
         op['following'] = op['following'] if isinstance(op['following'], list) else [op['following']]
 
+        # mimic original behaviour
+        # if following name does not exist do not process it: basically equal to drop op for single following entry
 
-        # follower/following is empty
-        if not op['follower'] or not op['following']:
+        op['following'] = [op for op in op['following'] if Accounts.exists(op)]
+
+        # if follower name does not exist drop op
+        if not Accounts.exists(op['follower']):
+            return None
+
+        if op['follower'] in op['following'] or op['follower'] != account:
             return None
 
         what = first(op['what']) or ''
@@ -114,16 +127,6 @@ class Follow(DbAdapterHolder):
                 'reset_follow_blacklist': 12, 'reset_follow_muted_list': 13, 'reset_all_lists': 14}
         if what not in defs:
             return None
-
-        all_accounts = list(op['following'])
-        all_accounts.append(op['follower'])
-        if (op['follower'] in op['following']
-            or op['follower'] != account):
-            return None
-
-        non_existent_names = Accounts.check_names(all_accounts)
-        if non_existent_names:
-            log.warning("Follow op validation, following names does not exists in database: {}".format(non_existent_names))
 
         return dict(flr=escape_characters(op['follower']),
                     flg=[escape_characters(following) for following in op['following']],
