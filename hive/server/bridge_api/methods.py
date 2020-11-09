@@ -235,15 +235,15 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
 
     async def process_query_results( sql_result ):
         blacklists_for_user = None
-        if observer:
-            blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
+        #if observer:
+            #blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
         posts = []
         for row in sql_result:
             post = _bridge_post_object(row)
             post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.BridgeApi)
             post = append_statistics_to_post(post, row, row['is_pinned'], blacklists_for_user)
-            if 'should_be_excluded' in post and post['should_be_excluded']:
-                continue
+            #if 'should_be_excluded' in post and post['should_be_excluded']:
+            #    continue
             post.pop('is_muted', '')
             posts.append(post)
         return posts
@@ -253,6 +253,8 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
     valid_limit(limit, 100, 20)
     valid_tag(tag, allow_empty=True)
     valid_account(observer, allow_empty=(tag != "my"))
+    if observer == '':
+        observer = None
 
     if tag == "my":
         result = await _get_ranked_posts_for_observer_communities(db, sort, start_author, start_permlink, limit, observer)
