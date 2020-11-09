@@ -24,9 +24,9 @@ def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=None, ov
         if row['author'] in blacklists_for_user:
             blacklists = blacklists_for_user[row['author']]
             for blacklist in blacklists:
-                if blacklist in ('my_muted', 'my_followed_mutes'):
-                    post['should_be_excluded'] = True
-                elif blacklist in ('my_blacklist', 'my_followed_blacklists'):
+                #if blacklist in ('my_muted', 'my_followed_mutes'):
+                #    post['should_be_excluded'] = True
+                if blacklist in ('my_blacklist', 'my_followed_blacklists'):
                     post['stats']['gray'] = True
                 post['blacklists'].append(blacklist)
         reputation = row['author_rep']
