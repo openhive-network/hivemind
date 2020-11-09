@@ -606,8 +606,8 @@ def setup(db):
       "bridge_get_account_posts_by_blog.sql",
       "condenser_get_names_by_reblogged.sql",
       "condenser_get_discussions_by_comments.sql",
-      "condenser_get_account_reputations.sql"
-
+      "condenser_get_account_reputations.sql",
+      "update_follow_count.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))

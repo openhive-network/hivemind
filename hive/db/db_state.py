@@ -358,6 +358,14 @@ class DbState:
         time_end = perf_counter()
         log.info("[INIT] update_notification_cache executed in %.4fs", time_end - time_start)
 
+        time_start = perf_counter()
+        sql = """
+            SELECT update_follow_count({}, {});
+        """.format(last_imported_block, current_imported_block)
+        DbState.db().query_no_return(sql)
+        time_end = perf_counter()
+        log.info("[INIT] update_follow_count executed in %.4fs", time_end - time_start)
+
         # Update a block num immediately
         DbState.db().query_no_return("UPDATE hive_state SET block_num = :block_num", block_num = current_imported_block)
 
@@ -458,8 +466,8 @@ class DbState:
             cls._set_ver(9)
 
         if cls._ver == 9:
-            from hive.indexer.follow import Follow
-            Follow.force_recount()
+            #from hive.indexer.follow import Follow
+            #Follow.force_recount()
             cls._set_ver(10)
 
         if cls._ver == 10:
