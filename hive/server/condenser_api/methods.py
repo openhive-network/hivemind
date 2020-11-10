@@ -2,7 +2,7 @@
 from functools import wraps
 
 import hive.server.condenser_api.cursor as cursor
-from hive.server.condenser_api.objects import _mute_votes, _condenser_post_object
+from hive.server.condenser_api.objects import _condenser_post_object
 from hive.server.common.helpers import (
     ApiError,
     return_error_info,
@@ -13,7 +13,6 @@ from hive.server.common.helpers import (
     valid_offset,
     valid_limit,
     valid_follow_type)
-from hive.server.common.mutes import Mutes
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
@@ -84,16 +83,18 @@ async def get_reblogged_by(context, author: str, permlink: str):
         valid_permlink(permlink))
 
 @return_error_info
-async def get_account_reputations(context, account_lower_bound: str = None, limit: int = None):
+async def get_account_reputations(context, account_lower_bound: str = '', limit: int = 1000):
     db = context['db']
     return await _get_account_reputations_impl(db, True, account_lower_bound, limit)
 
 async def _get_account_reputations_impl(db, fat_node_style, account_lower_bound, limit):
     """Enumerate account reputations."""
+    if not account_lower_bound:
+      account_lower_bound = ''
     assert isinstance(account_lower_bound, str), "invalid account_lower_bound type"
     limit = valid_limit(limit, 1000, 1000)
 
-    sql = "SELECT * FROM condenser_get_account_reputations( '{}', {}, {} )".format( account_lower_bound, account_lower_bound is None, limit )
+    sql = "SELECT * FROM condenser_get_account_reputations( (:start)::VARCHAR, :limit )"
     rows = await db.query_all(sql, start=account_lower_bound, limit=limit)
     if fat_node_style:
         return [dict(account=r[0], reputation=r[1]) for r in rows]
@@ -121,11 +122,6 @@ async def _get_content_impl(db, fat_node_style, author: str, permlink: str, obse
         result = dict(result[0])
         post = _condenser_post_object(result, 0, fat_node_style)
         post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.ActiveVotes if fat_node_style else VotesPresentation.CondenserApi)
-        if not observer:
-            post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
-        else:
-            blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, {'db':db})
-            post['active_votes'] = _mute_votes(post['active_votes'], blacklists_for_user.keys())
 
     return post
 
@@ -143,14 +139,11 @@ async def _get_content_replies_impl(db, fat_node_style, author: str, permlink: s
     sql = "SELECT * FROM condenser_get_content_replies(:author, :permlink)"
     result = await db.query_all(sql, author=author, permlink=permlink)
 
-    muted_accounts = Mutes.all()
-
     posts = []
     for row in result:
         row = dict(row)
         post = _condenser_post_object(row, get_content_additions=fat_node_style)
         post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.ActiveVotes if fat_node_style else VotesPresentation.CondenserApi)
-        post['active_votes'] = _mute_votes(post['active_votes'], muted_accounts)
         posts.append(post)
 
     return posts
@@ -238,11 +231,9 @@ async def get_posts_by_given_sort(context, sort: str, start_author: str = '', st
 
     sql_result = await db.query_all(sql, tag=tag, author=start_author, permlink=start_permlink, limit=limit )
 
-    muted_accounts = Mutes.all()
     for row in sql_result:
         post = _condenser_post_object(row, truncate_body)
         post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
-        post['active_votes'] = _mute_votes(post['active_votes'], muted_accounts)
         posts.append(post)
     return posts
 
@@ -313,8 +304,6 @@ async def get_discussions_by_blog(context, tag: str = None, start_author: str = 
         row = dict(row)
         post = _condenser_post_object(row, truncate_body=truncate_body)
         post['active_votes'] = await find_votes_impl(db, post['author'], post['permlink'], VotesPresentation.CondenserApi)
-        post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
-        #posts_by_id[row['post_id']] = post
         posts_by_id.append(post)
 
     return posts_by_id
@@ -380,7 +369,6 @@ async def get_discussions_by_comments(context, start_author: str = None, start_p
         row = dict(row)
         post = _condenser_post_object(row, truncate_body=truncate_body)
         post['active_votes'] = await find_votes_impl(db, post['author'], post['permlink'], VotesPresentation.CondenserApi)
-        post['active_votes'] = _mute_votes(post['active_votes'], Mutes.all())
         posts.append(post)
 
     return posts
@@ -445,15 +433,12 @@ async def get_blog(context, account: str, start_entry_id: int = 0, limit: int = 
     sql = "SELECT * FROM condenser_get_blog(:account, :last, :limit)"
     result = await db.query_all(sql, account=account, last=start_entry_id, limit=limit)
 
-    muted_accounts = Mutes.all()
     out = []
     for row in result:
         row = dict(row)
         post = _condenser_post_object(row)
 
         post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
-        post['active_votes'] = _mute_votes(post['active_votes'], muted_accounts)
-
         out.append({"blog": account,
                     "entry_id": row['entry_id'],
                     "comment": post,
