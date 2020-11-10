@@ -64,9 +64,9 @@ class Follow(DbAdapterHolder):
             # if exists add follower to a list for a given state
             # if not exists create list and set that list for given state
             if state in cls.follow_update_items_to_flush:
-                cls.follow_update_items_to_flush[state].append(op['flr'])
+                cls.follow_update_items_to_flush[state].append((op['flr'], block_num))
             else:
-                cls.follow_update_items_to_flush[state] = [op['flr']]
+                cls.follow_update_items_to_flush[state] = [(op['flr'], block_num)]
 
     @classmethod
     def _validated_op(cls, account, op, date):
@@ -214,7 +214,7 @@ class Follow(DbAdapterHolder):
             for state, update_flush_items in cls.follow_update_items_to_flush.items():
                 for chunk in chunks(update_flush_items, 1000):
                     sql = None
-                    query_values = ','.join(["({})".format(account) for account in chunk])
+                    query_values = ','.join(["({}, {})".format(account[0], account[1]) for account in chunk])
                     # [DK] probaly not a bad idea to move that logic to SQL function
                     if state == 9:
                         #reset blacklists for follower
@@ -222,18 +222,20 @@ class Follow(DbAdapterHolder):
                             UPDATE
                                 hive_follows hf
                             SET
-                                blacklisted = false
+                                blacklisted = false,
+                                block_num = ds.block_num
                             FROM
                             (
                                 SELECT
-                                    ha.id as follower_id
+                                    ha.id as follower_id,
+                                    block_num
                                 FROM
                                     (
                                         VALUES
                                         {}
-                                    ) AS T(name)
+                                    ) AS T(name, block_num)
                                 INNER JOIN hive_accounts ha ON ha.name = T.name
-                            ) AS ds (follower_id)
+                            ) AS ds (follower_id, block_num)
                             WHERE
                                 hf.follower = ds.follower_id
                         """.format(query_values)
@@ -243,18 +245,20 @@ class Follow(DbAdapterHolder):
                             UPDATE
                                 hive_follows hf
                             SET
-                                state = 0
+                                state = 0,
+                                block_num = ds.block_num
                             FROM
                             (
                                 SELECT
-                                    ha.id as follower_id
+                                    ha.id as follower_id,
+                                    block_num
                                 FROM
                                     (
                                         VALUES
                                         {}
-                                    ) AS T(name)
+                                    ) AS T(name, block_num)
                                 INNER JOIN hive_accounts ha ON ha.name = T.name
-                            ) AS ds (follower_id)
+                            ) AS ds (follower_id, block_num)
                             WHERE
                                 hf.follower = ds.follower_id
                                 AND hf.state = 1
@@ -265,18 +269,20 @@ class Follow(DbAdapterHolder):
                             UPDATE
                                 hive_follows hf
                             SET
-                                state = 0
+                                state = 0,
+                                block_num = ds.block_num
                             FROM
                             (
                                 SELECT
-                                    ha.id as follower_id
+                                    ha.id as follower_id,
+                                    block_num
                                 FROM
                                     (
                                         VALUES
                                         {}
-                                    ) AS T(name)
+                                    ) AS T(name, block_num)
                                 INNER JOIN hive_accounts ha ON ha.name = T.name
-                            ) AS ds (follower_id)
+                            ) AS ds (follower_id, block_num)
                             WHERE
                                 hf.follower = ds.follower_id
                                 AND hf.state = 2
@@ -287,36 +293,40 @@ class Follow(DbAdapterHolder):
                             UPDATE
                                 hive_follows hf
                             SET
-                                follow_blacklists = false
+                                follow_blacklists = false,
+                                block_num = ds.block_num
                             FROM
                             (
                                 SELECT
-                                    ha.id as follower_id
+                                    ha.id as follower_id,
+                                    block_num
                                 FROM
                                     (
                                         VALUES
                                         {0}
-                                    ) AS T(name)
+                                    ) AS T(name, block_num)
                                 INNER JOIN hive_accounts ha ON ha.name = T.name
-                            ) AS ds (follower_id)
+                            ) AS ds (follower_id, block_num)
                             WHERE
                                 hf.follower = ds.follower_id;
 
                             UPDATE
                                 hive_follows hf
                             SET
-                                follow_blacklists = true
+                                follow_blacklists = true,
+                                block_num = ds.block_num
                             FROM
                             (
                                 SELECT
-                                    ha.id as follower_id
+                                    ha.id as follower_id,
+                                    block_num
                                 FROM
                                     (
                                         VALUES
                                         {0}
-                                    ) AS T(name)
+                                    ) AS T(name, block_num)
                                 INNER JOIN hive_accounts ha ON ha.name = T.name
-                            ) AS ds (follower_id)
+                            ) AS ds (follower_id, block_num)
                             WHERE
                                 hf.follower = ds.follower_id
                                 AND following = (SELECT id FROM hive_accounts WHERE name = 'null')
@@ -328,36 +338,40 @@ class Follow(DbAdapterHolder):
                             UPDATE
                                 hive_follows hf
                             SET
-                                follow_muted = false
+                                follow_muted = false,
+                                block_num = ds.block_num
                             FROM
                             (
                                 SELECT
-                                    ha.id as follower_id
+                                    ha.id as follower_id,
+                                    block_num
                                 FROM
                                     (
                                         VALUES
                                         {0}
-                                    ) AS T(name)
+                                    ) AS T(name, block_num)
                                 INNER JOIN hive_accounts ha ON ha.name = T.name
-                            ) AS ds (follower_id)
+                            ) AS ds (follower_id, block_num)
                             WHERE
                                 hf.follower = ds.follower_id;
 
                             UPDATE
                                 hive_follows hf
                             SET
-                                follow_muted = true
+                                follow_muted = true,
+                                block_num = ds.block_num
                             FROM
                             (
                                 SELECT
-                                    ha.id as follower_id
+                                    ha.id as follower_id,
+                                    block_num
                                 FROM
                                     (
                                         VALUES
                                         {0}
-                                    ) AS T(name)
+                                    ) AS T(name, block_num)
                                 INNER JOIN hive_accounts ha ON ha.name = T.name
-                            ) AS ds (follower_id)
+                            ) AS ds (follower_id, block_num)
                             WHERE
                                 hf.follower = ds.follower_id
                                 AND following = (SELECT id FROM hive_accounts WHERE name = 'null')
@@ -371,18 +385,20 @@ class Follow(DbAdapterHolder):
                                 blacklisted = false,
                                 follow_blacklists = false,
                                 follow_muted = false,
-                                state = 0
+                                state = 0,
+                                block_num = ds.block_num
                             FROM
                             (
                                 SELECT
-                                    ha.id as follower_id
+                                    ha.id as follower_id,
+                                    block_num
                                 FROM
                                     (
                                         VALUES
                                         {0}
-                                    ) AS T(name)
+                                    ) AS T(name, block_num)
                                 INNER JOIN hive_accounts ha ON ha.name = T.name
-                            ) AS ds (follower_id)
+                            ) AS ds (follower_id, block_num)
                             WHERE
                                 hf.follower = ds.follower_id;
 
@@ -390,18 +406,20 @@ class Follow(DbAdapterHolder):
                                 hive_follows hf
                             SET
                                 follow_blacklists = true,
-                                follow_muted = true
+                                follow_muted = true,
+                                block_num = ds.block_num
                             FROM
                             (
                                 SELECT
-                                    ha.id as follower_id
+                                    ha.id as follower_id,
+                                    block_num
                                 FROM
                                     (
                                         VALUES
                                         {0}
-                                    ) AS T(name)
+                                    ) AS T(name, block_num)
                                 INNER JOIN hive_accounts ha ON ha.name = T.name
-                            ) AS ds (follower_id)
+                            ) AS ds (follower_id, block_num)
                             WHERE
                                 hf.follower = ds.follower_id
                                 AND following = (SELECT id FROM hive_accounts WHERE name = 'null')
