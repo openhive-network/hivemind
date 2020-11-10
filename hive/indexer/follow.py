@@ -1,33 +1,20 @@
 """Handles follow operations."""
 
 import logging
-from time import perf_counter as perf
 
 from funcy.seqs import first
 from hive.db.adapter import Db
-from hive.db.db_state import DbState
 from hive.utils.misc import chunks
 from hive.indexer.accounts import Accounts
 
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
 
+
 log = logging.getLogger(__name__)
 
-FOLLOWERS = 'followers'
-FOLLOWING = 'following'
 
 DB = Db.instance()
-
-def _flip_dict(dict_to_flip):
-    """Swap keys/values. Returned dict values are array of keys."""
-    flipped = {}
-    for key, value in dict_to_flip.items():
-        if value in flipped:
-            flipped[value].append(key)
-        else:
-            flipped[value] = [key]
-    return flipped
 
 class Follow(DbAdapterHolder):
     """Handles processing of incoming follow ups and flushing to db."""
@@ -72,15 +59,6 @@ class Follow(DbAdapterHolder):
                     block_num=block_num)
             cls.idx += 1
 
-        if not DbState.is_initial_sync():
-            for following in op['flg']:
-                new_state = state
-                old_state = cls._get_follow_db_state(op['flr'], following)
-                if new_state == 1:
-                    Follow.follow(op['flr'], following)
-                if old_state == 1:
-                    Follow.unfollow(op['flr'], following)
-
         if state > 8:
             # check if given state exists in dict
             # if exists add follower to a list for a given state
@@ -93,17 +71,28 @@ class Follow(DbAdapterHolder):
     @classmethod
     def _validated_op(cls, account, op, date):
         """Validate and normalize the operation."""
-        if ( not 'what' in op
+        if (not 'what' in op
            or not isinstance(op['what'], list)
            or not 'follower' in op
            or not 'following' in op):
             return None
 
+                # follower/following is empty
+        if not op['follower'] or not op['following']:
+            return None
+
         op['following'] = op['following'] if isinstance(op['following'], list) else [op['following']]
 
+        # mimic original behaviour
+        # if following name does not exist do not process it: basically equal to drop op for single following entry
 
-        # follower/following is empty
-        if not op['follower'] or not op['following']:
+        op['following'] = [op for op in op['following'] if Accounts.exists(op)]
+
+        # if follower name does not exist drop op
+        if not Accounts.exists(op['follower']):
+            return None
+
+        if op['follower'] in op['following'] or op['follower'] != account:
             return None
 
         what = first(op['what']) or ''
@@ -115,59 +104,13 @@ class Follow(DbAdapterHolder):
         if what not in defs:
             return None
 
-        all_accounts = list(op['following'])
-        all_accounts.append(op['follower'])
-        if (op['follower'] in op['following']
-            or op['follower'] != account):
-            return None
-
-        non_existent_names = Accounts.check_names(all_accounts)
-        if non_existent_names:
-            log.warning("Follow op validation, following names does not exists in database: {}".format(non_existent_names))
-
         return dict(flr=escape_characters(op['follower']),
                     flg=[escape_characters(following) for following in op['following']],
                     state=defs[what],
                     at=date)
 
     @classmethod
-    def _get_follow_db_state(cls, follower, following):
-        """Retrieve current follow state of an account pair."""
-        sql = """
-            SELECT
-                state
-            FROM
-                hive_follows hf
-            INNER JOIN hive_accounts ha_flr ON ha_flr.id = hf.follower AND ha_flr.name = :follower
-            INNER JOIN hive_accounts ha_flg ON ha_flg.id = hf.following AND ha_flg.name = :following
-        """
-        return cls.db.query_one(sql, follower=follower, following=following)
-
-    # -- stat tracking --
-
-    _delta = {FOLLOWERS: {}, FOLLOWING: {}}
-
-    @classmethod
-    def follow(cls, follower, following):
-        """Applies follow count change the next flush."""
-        cls._apply_delta(follower, FOLLOWING, 1)
-        cls._apply_delta(following, FOLLOWERS, 1)
-
-    @classmethod
-    def unfollow(cls, follower, following):
-        """Applies follow count change the next flush."""
-        cls._apply_delta(follower, FOLLOWING, -1)
-        cls._apply_delta(following, FOLLOWERS, -1)
-
-    @classmethod
-    def _apply_delta(cls, account, role, direction):
-        """Modify an account's follow delta in specified direction."""
-        if not account in cls._delta[role]:
-            cls._delta[role][account] = 0
-        cls._delta[role][account] += direction
-
-    @classmethod
-    def _flush_follow_items(cls):
+    def flush(cls):
         n = 0
         if cls.follow_items_to_flush:
             sql_prefix = """
@@ -217,7 +160,8 @@ class Follow(DbAdapterHolder):
                                            WHEN 7 THEN TRUE
                                            WHEN 8 THEN FALSE
                                            ELSE EXCLUDED.follow_muted
-                                        END)
+                                        END),
+                        block_num = EXCLUDED.block_num
                 WHERE hf.following = EXCLUDED.following AND hf.follower = EXCLUDED.follower
                 """
             values = []
@@ -470,95 +414,3 @@ class Follow(DbAdapterHolder):
             cls.follow_update_items_to_flush.clear()
             cls.idx = 0
         return n
-
-    @classmethod
-    def flush(cls, trx=False):
-        """Flushes pending follow count deltas."""
-
-        n = cls._flush_follow_items()
-
-        updated = 0
-        sqls = []
-        for col, deltas in cls._delta.items():
-            for delta, names in _flip_dict(deltas).items():
-                updated += len(names)
-                query_values = ','.join(["({})".format(account) for account in names])
-                sql = """
-                    UPDATE
-                        hive_accounts ha
-                    SET
-                        %s = %s + :mag
-                    FROM
-                    (
-                        VALUES
-                        %s
-                    ) AS T(name)
-                    WHERE ha.name = T.name
-                """
-                sqls.append((sql % (col, col, query_values), dict(mag=delta)))
-
-        if not updated:
-            return n
-
-        start = perf()
-        cls.db.batch_queries(sqls, trx=trx)
-        if trx:
-            log.info("[SYNC] flushed %d follow deltas in %ds",
-                     updated, perf() - start)
-
-        cls._delta = {FOLLOWERS: {}, FOLLOWING: {}}
-        return updated + n
-
-    @classmethod
-    def flush_recount(cls):
-        """Recounts follows/following counts for all queued accounts.
-
-        This is currently not used; this approach was shown to be too
-        expensive, but it's useful in case follow counts manage to get
-        out of sync.
-        """
-        names = set([*cls._delta[FOLLOWERS].keys(),
-                   *cls._delta[FOLLOWING].keys()])
-        query_values = ','.join(["({})".format(account) for account in names])
-        sql = """
-            UPDATE
-                hive_accounts ha
-            SET
-                followers = (SELECT COUNT(*) FROM hive_follows WHERE state = 1 AND following = ha.id),
-                following = (SELECT COUNT(*) FROM hive_follows WHERE state = 1 AND follower  = ha.id)
-            FROM
-            (
-                VALUES
-                {}
-            ) AS T(name)
-            WHERE ha.name = T.name
-        """.format(query_values)
-        cls.db.query(sql)
-
-    @classmethod
-    def force_recount(cls):
-        """Recounts all follows after init sync."""
-        log.info("[SYNC] query follower counts")
-        sql = """
-            CREATE TEMPORARY TABLE following_counts AS (
-                  SELECT ha.id account_id, COUNT(state) num
-                    FROM hive_accounts ha
-               LEFT JOIN hive_follows hf ON ha.id = hf.follower AND state = 1
-                GROUP BY ha.id);
-            CREATE TEMPORARY TABLE follower_counts AS (
-                  SELECT ha.id account_id, COUNT(state) num
-                    FROM hive_accounts ha
-               LEFT JOIN hive_follows hf ON ha.id = hf.following AND state = 1
-                GROUP BY ha.id);
-        """
-        cls.db.query(sql)
-
-        log.info("[SYNC] update follower counts")
-        sql = """
-            UPDATE hive_accounts SET followers = num FROM follower_counts
-             WHERE id = account_id AND followers != num;
-
-            UPDATE hive_accounts SET following = num FROM following_counts
-             WHERE id = account_id AND following != num;
-        """
-        cls.db.query(sql)
