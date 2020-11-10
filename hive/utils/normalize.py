@@ -68,6 +68,7 @@ def to_nai(value):
 
 def escape_characters(text):
     """ Escape special charactes """
+    assert isinstance(text, str), "Expected string got: {}".format(type(text))
     if len(text.strip()) == 0:
         return "'" + text + "'"
 
