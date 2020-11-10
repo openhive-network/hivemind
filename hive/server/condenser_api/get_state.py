@@ -11,7 +11,6 @@ from hive.server.common.mutes import Mutes
 
 from hive.server.condenser_api.objects import (
     load_accounts,
-    _mute_votes,
     _condenser_post_object)
 from hive.server.common.helpers import (
     ApiError,
@@ -253,7 +252,6 @@ async def _load_discussion(db, author, permlink):
 
       if post['author'] not in muted_accounts:
         post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
-        post['active_votes'] = _mute_votes(post['active_votes'], muted_accounts)
         posts.append(post)
 
         parent_key = _ref_parent(post)

@@ -316,8 +316,6 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
         posts.append(post)
     return posts
 
-    return await _get_posts(db, sort, account, start_author, start_permlink, limit, observer)
-
 
 @return_error_info
 async def get_relationship_between_accounts(context, account1, account2, observer=None):
