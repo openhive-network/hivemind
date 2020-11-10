@@ -4,7 +4,6 @@ import logging
 import ujson as json
 
 from hive.utils.normalize import sbd_amount
-from hive.server.common.mutes import Mutes
 from hive.server.common.helpers import json_date, get_hive_accounts_info_view_query_string
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 from hive.utils.account import safe_db_profile_metadata
@@ -18,11 +17,6 @@ async def load_accounts(db, names, lite = False):
     sql = get_hive_accounts_info_view_query_string( names, lite )
     rows = await db.query_all(sql, names=tuple(names))
     return [_condenser_account_object(row) for row in rows]
-
-def _mute_votes(votes, muted_accounts):
-    if not muted_accounts:
-        return votes
-    return [v for v in votes if v['voter'] not in muted_accounts]
 
 def _condenser_account_object(row):
     """Convert an internal account record into legacy-steemd style."""
