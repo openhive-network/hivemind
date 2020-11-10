@@ -340,6 +340,7 @@ BEGIN
   IF __post_id <> 0 THEN
       SELECT hp.sc_trend INTO __trending_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
+  __account_id = find_account_id( _observer, True );
   RETURN QUERY SELECT
       hp.id,
       hp.author,
@@ -385,9 +386,8 @@ BEGIN
       FROM
           hive_posts hp1
           JOIN hive_subscriptions hs ON hp1.community_id = hs.community_id
-          JOIN hive_accounts ha ON ha.id = hs.account_id
       WHERE
-          ha.name = _observer AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth = 0
+          hs.account_id = __account_id AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth = 0
           AND ( __post_id = 0 OR hp1.sc_trend < __trending_limit OR ( hp1.sc_trend = __trending_limit AND hp1.id < __post_id ) )
       ORDER BY hp1.sc_trend DESC, hp1.id DESC
       LIMIT _limit
