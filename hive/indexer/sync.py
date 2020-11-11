@@ -297,9 +297,6 @@ class Sync:
         if not CONTINUE_PROCESSING:
             return
 
-        log.info("[INIT] *** Initial cache build ***")
-        Follow.force_recount()
-
     def from_steemd(self, is_initial_sync=False, chunk_size=1000):
         """Fast sync strategy: read/process blocks in batches."""
         steemd = self._steem
