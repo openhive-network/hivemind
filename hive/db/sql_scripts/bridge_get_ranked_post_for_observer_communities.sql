@@ -45,8 +45,7 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value,
-      hp.is_muted
+      hp.curator_payout_value
   FROM
       hive_posts_view hp
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
@@ -110,8 +109,7 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value,
-      hp.is_muted
+      hp.curator_payout_value
   FROM
       hive_posts_view hp
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
@@ -175,8 +173,7 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value,
-      hp.is_muted
+      hp.curator_payout_value
   FROM
   (
       SELECT
@@ -251,8 +248,7 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value,
-      hp.is_muted
+      hp.curator_payout_value
   FROM
       hive_posts_view hp
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
@@ -316,8 +312,7 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value,
-      hp.is_muted
+      hp.curator_payout_value
   FROM
       hive_posts_view hp
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
@@ -381,8 +376,7 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value,
-      hp.is_muted
+      hp.curator_payout_value
   FROM
   (
       SELECT
@@ -457,8 +451,7 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value,
-      hp.is_muted
+      hp.curator_payout_value
   FROM
       hive_posts_view hp
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
