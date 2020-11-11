@@ -18,7 +18,6 @@ hive sync \
     --log-mask-sensitive-data \
     --pid-file hive_sync.pid \
     --test-max-block=${HIVEMIND_MAX_BLOCK} \
-    --exit-after-sync \
     --test-profile=False \
     --steemd-url "$HIVED_URL" \
     --prometheus-port 11011 \
