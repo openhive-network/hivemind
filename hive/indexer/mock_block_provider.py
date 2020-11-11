@@ -6,9 +6,14 @@ from hive.indexer.mock_data_provider import MockDataProvider
 log = logging.getLogger(__name__)
 
 class MockBlockProvider(MockDataProvider):
+
+    max_block = 0
+
     """ Data provider for test ops """
     @classmethod
     def load_block_data(cls, data_path):
+        cls.max_block = 0
+
         if os.path.isdir(data_path):
             log.warning("Loading mock block data from directory: {}".format(data_path))
             cls.add_block_data_from_directory(data_path)
@@ -33,24 +38,22 @@ class MockBlockProvider(MockDataProvider):
             cls.add_block_data(block_num, transactions)
 
     @classmethod
-    def add_block_data(cls, block_num, transactions):
+    def add_block_data(cls, _block_num, transactions):
+        block_num = int(_block_num)
+
+        if block_num > cls.max_block:
+            cls.max_block = block_num
+
         if block_num in cls.block_data:
-            cls.block_data[str(block_num)].extend(transactions)
+            cls.block_data[block_num].extend(transactions)
         else:
-            cls.block_data[str(block_num)] = transactions
+            cls.block_data[block_num] = transactions
 
     @classmethod
-    def get_block_data(cls, block_num, pop=False):
-        if pop:
-            return cls.block_data.pop(str(block_num), None)
-        return cls.block_data.get(str(block_num), None)
+    def get_block_data(cls, block_num):
+        return cls.block_data.get(block_num, None)
 
     @classmethod
     def get_max_block_number(cls):
-        block_numbers = [int(block) for block in cls.block_data]
-        block_numbers.append(0)
-        return max(block_numbers)
+        return cls.max_block
 
-    @classmethod
-    def get_blocks_greater_than(cls, block_num):
-        return sorted([int(block) for block in cls.block_data if int(block) >= block_num])

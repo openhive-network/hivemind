@@ -62,7 +62,7 @@ class SteemClient:
         result = self.__exec('get_block', {'block_num': num})
         if 'block' in result:
             ret = result['block']
-            data = MockBlockProvider.get_block_data(num, True)
+            data = MockBlockProvider.get_block_data(num)
             if data is not None:
                 ret["transactions"].extend(data["transactions"])
                 ret["transaction_ids"].extend(data["transaction_ids"])
@@ -72,14 +72,14 @@ class SteemClient:
         else:
             # if block does not exist in hived but exist in Mock Provider
             # return block from block provider
-            data = MockBlockProvider.get_block_data(num, True)
+            data = MockBlockProvider.get_block_data(num)
             if data is not None:
                 return data
             return None
 
-    def stream_blocks(self, start_from, trail_blocks=0, max_gap=100):
+    def stream_blocks(self, start_from, trail_blocks=0, max_gap=100, do_stale_block_check=True):
         """Stream blocks. Returns a generator."""
-        return BlockStream.stream(self, start_from, trail_blocks, max_gap)
+        return BlockStream.stream(self, start_from, trail_blocks, max_gap, do_stale_block_check)
 
     def _gdgp(self):
         ret = self.__exec('get_dynamic_global_properties')
@@ -159,7 +159,7 @@ class SteemClient:
                 blocks[num] = block
 
         for block_num in block_nums:
-            data = MockBlockProvider.get_block_data(block_num, True)
+            data = MockBlockProvider.get_block_data(block_num)
             if data is not None:
                 if block_num in blocks:
                     blocks[block_num]["transactions"].extend(data["transactions"])
