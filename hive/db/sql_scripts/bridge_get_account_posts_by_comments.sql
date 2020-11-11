@@ -48,9 +48,14 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value
   FROM
-      hive_posts_view hp
-  WHERE
-      hp.author_id = __account_id AND hp.depth > 0 AND ( __post_id = 0 OR hp.id < __post_id )
+  (
+    SELECT hp1.id
+    FROM hive_posts hp1 
+    WHERE hp1.author_id = __account_id AND hp1.counter_deleted = 0 AND hp1.depth > 0 AND ( __post_id = 0 OR hp1.id < __post_id )
+    ORDER BY hp1.id DESC
+    LIMIT _limit
+  ) ds
+  JOIN hive_posts_view hp ON ds.id = hp.id
   ORDER BY hp.id DESC
   LIMIT _limit;
 END
