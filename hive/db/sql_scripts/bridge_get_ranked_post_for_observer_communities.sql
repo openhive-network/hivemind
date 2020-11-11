@@ -45,7 +45,8 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value
+      hp.curator_payout_value,
+      hp.is_muted
   FROM
       hive_posts_view hp
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
@@ -394,12 +395,11 @@ BEGIN
       WHERE
           ha.name = _observer AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth = 0
           AND ( __post_id = 0 OR hp1.sc_trend < __trending_limit OR ( hp1.sc_trend = __trending_limit AND hp1.id < __post_id ) )
-          AND hp.author NOT IN (SELECT muted FROM muted_accounts_view WHERE observer = _observer)
       ORDER BY hp1.sc_trend DESC, hp1.id DESC
       LIMIT _limit
   ) trending
   JOIN hive_posts_view hp ON trending.id = hp.id
-  
+  WHERE hp.author NOT IN (SELECT muted FROM muted_accounts_view WHERE observer = _observer)
   ORDER BY trending.sc_trend DESC, trending.id DESC
   LIMIT _limit;
 END
