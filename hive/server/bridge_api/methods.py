@@ -188,7 +188,7 @@ async def _get_ranked_posts_for_tag( db, sort:str, tag, start_author:str, start_
 @return_error_info
 async def _get_ranked_posts_for_all( db, sort:str, start_author:str, start_permlink:str, limit, observer:str=None):
     async def execute_query(db, sql, limit, observer=None):
-        return await db.query_all(sql, author=start_author, permlink=start_permlink, limit=limit, obsver=observer )
+        return await db.query_all(sql, author=start_author, permlink=start_permlink, limit=limit, observer=observer )
 
     if sort == 'trending':
         sql = "SELECT * FROM bridge_get_ranked_post_by_trends( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
