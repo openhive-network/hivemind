@@ -56,7 +56,7 @@ BEGIN
       LIMIT _limit
   ) as created
   JOIN hive_posts_view hp ON hp.id = created.id
-  WHERE (CASE WHEN _observer <> '' THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE True END)
+  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE True END)
   ORDER BY created.id DESC
   LIMIT _limit;
 END
@@ -64,7 +64,7 @@ $function$
 language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_hot;
-CREATE FUNCTION bridge_get_ranked_post_by_hot( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION bridge_get_ranked_post_by_hot( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -127,6 +127,7 @@ BEGIN
       LIMIT _limit
   ) as hot
   JOIN hive_posts_view hp ON hp.id = hot.id
+  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE True END)
   ORDER BY hot.hot DESC, hot.id DESC
   LIMIT _limit;
 END
@@ -134,7 +135,7 @@ $function$
 language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_muted;
-CREATE FUNCTION bridge_get_ranked_post_by_muted( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION bridge_get_ranked_post_by_muted( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -198,6 +199,7 @@ BEGIN
       LIMIT _limit
   ) as payout
   JOIN hive_posts_view hp ON hp.id = payout.id
+  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE True END)
   ORDER BY payout.all_payout DESC, payout.id DESC
   LIMIT _limit;
 END
@@ -205,7 +207,7 @@ $function$
 language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_payout_comments;
-CREATE FUNCTION bridge_get_ranked_post_by_payout_comments( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION bridge_get_ranked_post_by_payout_comments( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -268,6 +270,7 @@ BEGIN
       LIMIT _limit
   ) as payout
   JOIN hive_posts_view hp ON hp.id = payout.id
+  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE True END)
   ORDER BY payout.all_payout DESC, payout.id DESC
   LIMIT _limit;
 END
@@ -275,7 +278,7 @@ $function$
 language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_payout;
-CREATE FUNCTION bridge_get_ranked_post_by_payout( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN )
+CREATE FUNCTION bridge_get_ranked_post_by_payout( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN, in _observer VARCHAR )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -341,6 +344,7 @@ BEGIN
       LIMIT _limit
   ) as payout
   JOIN hive_posts_view hp ON hp.id = payout.id
+  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE True END)
   ORDER BY payout.all_payout DESC, payout.id DESC
   LIMIT _limit;
 END
@@ -348,7 +352,7 @@ $function$
 language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_promoted;
-CREATE FUNCTION bridge_get_ranked_post_by_promoted( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION bridge_get_ranked_post_by_promoted( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -411,6 +415,7 @@ BEGIN
       LIMIT _limit
   ) as promoted
   JOIN hive_posts_view hp ON hp.id = promoted.id
+  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE True END)
   ORDER BY promoted.promoted DESC, promoted.id DESC
   LIMIT _limit;
 END
@@ -418,7 +423,7 @@ $function$
 language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_trends;
-CREATE FUNCTION bridge_get_ranked_post_by_trends( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION bridge_get_ranked_post_by_trends( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -481,6 +486,7 @@ BEGIN
       LIMIT _limit
   ) as trends
   JOIN hive_posts_view hp ON hp.id = trends.id
+  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE True END)
   ORDER BY trends.trend DESC, trends.id DESC
   LIMIT _limit;
 END
