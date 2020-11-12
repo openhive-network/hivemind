@@ -186,7 +186,7 @@ async def _get_ranked_posts_for_tag( db, sort:str, tag, start_author:str, start_
     assert False, "Unknown sort order"
 
 @return_error_info
-async def _get_ranked_posts_for_all( db, sort:str, start_author:str, start_permlink:str, limit):
+async def _get_ranked_posts_for_all( db, sort:str, start_author:str, start_permlink:str, limit, observer:str=None):
     async def execute_query(db, sql, limit):
         return await db.query_all(sql, author=start_author, permlink=start_permlink, limit=limit )
 
@@ -195,8 +195,8 @@ async def _get_ranked_posts_for_all( db, sort:str, start_author:str, start_perml
         return await execute_query(db, sql, limit)
 
     if sort == 'created':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_created( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
-        return await execute_query(db, sql, limit)
+        sql = "SELECT * FROM bridge_get_ranked_post_by_created( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+        return await execute_query(db, sql, limit, observer)
 
     if sort == 'hot':
         sql = "SELECT * FROM bridge_get_ranked_post_by_hot( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
@@ -259,7 +259,7 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
         result = await _get_ranked_posts_for_tag(db, sort, tag, start_author, start_permlink, limit)
         return await process_query_results(result)
 
-    result = await _get_ranked_posts_for_all(db, sort, start_author, start_permlink, limit)
+    result = await _get_ranked_posts_for_all(db, sort, start_author, start_permlink, limit, observer)
     return await process_query_results(result)
 
 @return_error_info
