@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_created;
-CREATE FUNCTION bridge_get_ranked_post_by_created( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION bridge_get_ranked_post_by_created( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -52,6 +52,7 @@ BEGIN
       FROM hive_posts hp1
           JOIN hive_accounts_view ha ON hp1.author_id = ha.id
       WHERE hp1.counter_deleted = 0 AND hp1.depth = 0 AND NOT ha.is_grayed AND ( __post_id = 0 OR hp1.id < __post_id )
+      AND (CASE WHEN _observer <> '' THEN hp.aouthor NOT IN (SELECT muted FROM muted_accounts_view WHERE observer = _observer) ELSE True END)
       ORDER BY hp1.id DESC
       LIMIT _limit
   ) as created
