@@ -52,11 +52,11 @@ BEGIN
       FROM hive_posts hp1
           JOIN hive_accounts_view ha ON hp1.author_id = ha.id
       WHERE hp1.counter_deleted = 0 AND hp1.depth = 0 AND NOT ha.is_grayed AND ( __post_id = 0 OR hp1.id < __post_id )
-      AND (CASE WHEN _observer <> '' THEN hp.aouthor NOT IN (SELECT muted FROM muted_accounts_view WHERE observer = _observer) ELSE True END)
       ORDER BY hp1.id DESC
       LIMIT _limit
   ) as created
   JOIN hive_posts_view hp ON hp.id = created.id
+  WHERE (CASE WHEN _observer <> '' THEN hp.author NOT IN (SELECT muted FROM muted_accounts_view WHERE observer = _observer) ELSE True END)
   ORDER BY created.id DESC
   LIMIT _limit;
 END

@@ -19,7 +19,7 @@ def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=[], over
     """ apply information such as blacklists and community names/roles to a given post """
     
     post['blacklists'] = []
-    if row['author'] in blacklists_for_user:
+    if blacklists_for_user and row['author'] in blacklists_for_user:
         blacklists = blacklists_for_user[row['author']]
         for blacklist in blacklists:
             post['blacklists'].append(blacklist)
