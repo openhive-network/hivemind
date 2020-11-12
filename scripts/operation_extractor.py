@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """
 This script will scan blocks from range `from_block` to `to_block` if it finds operation defined in `operations` it will
 save such block to a `output_file`. Blocks not containing any operations from list `operations` will be saved empty.

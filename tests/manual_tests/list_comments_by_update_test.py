@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 from test_base import run_test
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 from test_base import run_test
 
 if __name__ == '__main__':
@@ -6,7 +6,7 @@ if __name__ == '__main__':
     test_hive_node_url = 'http://127.0.0.1:8080'
 
     payload = {
-        "jsonrpc" : "2.0", 
+        "jsonrpc" : "2.0",
         "method" : "database_api.list_comments",
         "params" : {
             "start" : ['steemit', 'firstpost', '', ''],
