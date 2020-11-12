@@ -14,7 +14,6 @@ from hive.indexer.feed_cache import FeedCache
 from hive.indexer.community import Community
 from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
-from hive.indexer.tags import Tags
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.misc import chunks
 
@@ -152,8 +151,8 @@ class Posts(DbAdapterHolder):
             from funcy.seqs import distinct
             tags = list(distinct(tags))[:5]
 
-            for tag in tags:
-                Tags.add_tag(result['id'], tag)
+            sql = """SELECT add_tags( (:post_id)::INTEGER, (:tags)::VARCHAR[] )"""
+            DB.query_row( sql, post_id = result['id'], tags=tags );
 
         if not DbState.is_initial_sync():
             if error:

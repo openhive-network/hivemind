@@ -14,7 +14,6 @@ from hive.indexer.payments import Payments
 from hive.indexer.follow import Follow
 from hive.indexer.votes import Votes
 from hive.indexer.post_data_cache import PostDataCache
-from hive.indexer.tags import Tags
 from hive.indexer.reputations import Reputations
 from hive.indexer.reblog import Reblog
 from hive.indexer.notify import Notify
@@ -49,7 +48,6 @@ class Blocks:
       ('PostDataCache', PostDataCache.flush, PostDataCache),
       ('Reputations', Reputations.flush, Reputations),
       ('Votes', Votes.flush, Votes),
-      ('Tags', Tags.flush, Tags),
       ('Follow', Follow.flush, Follow),
       ('Reblog', Reblog.flush, Reblog),
       ('Notify', Notify.flush, Notify),
@@ -70,7 +68,6 @@ class Blocks:
         PostDataCache.setup_own_db_access(sharedDbAdapter)
         Reputations.setup_own_db_access(sharedDbAdapter)
         Votes.setup_own_db_access(sharedDbAdapter)
-        Tags.setup_own_db_access(sharedDbAdapter)
         Follow.setup_own_db_access(sharedDbAdapter)
         Posts.setup_own_db_access(sharedDbAdapter)
         Reblog.setup_own_db_access(sharedDbAdapter)
@@ -413,7 +410,6 @@ class Blocks:
 
             # remove posts: core, tags, cache entries
             if post_ids:
-                DB.query("DELETE FROM hive_post_tags   WHERE post_id IN :ids", ids=post_ids)
                 DB.query("DELETE FROM hive_posts       WHERE id      IN :ids", ids=post_ids)
                 DB.query("DELETE FROM hive_post_data   WHERE id      IN :ids", ids=post_ids)
 

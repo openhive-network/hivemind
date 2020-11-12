@@ -138,3 +138,29 @@ BEGIN
 END
 $function$
 ;
+
+DROP FUNCTION IF EXISTS add_tags;
+CREATE FUNCTION add_tags( in _post_id hive_posts.id%TYPE, in _tags VARCHAR[] )
+RETURNS void
+LANGUAGE 'plpgsql'
+VOLATILE
+AS
+$function$
+DECLARE
+	__tags_ids INTEGER[];
+BEGIN
+	WITH tags_ids(id) AS
+	(
+		INSERT INTO
+			hive_tag_data AS htd(tag)
+		SELECT UNNEST( _tags )
+		ON CONFLICT("tag") DO UPDATE SET tag=EXCLUDED.tag --trick to always return id
+		RETURNING htd.id
+	)
+	SELECT ARRAY_AGG( id ) INTO __tags_ids FROM tags_ids;
+
+	UPDATE hive_posts hp
+	SET tags_ids = __tags_ids
+	WHERE hp.id = _post_id;
+END
+$function$
