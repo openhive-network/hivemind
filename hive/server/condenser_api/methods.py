@@ -378,8 +378,11 @@ async def get_discussions_by_comments(context, start_author: str = None, start_p
 async def get_replies_by_last_update(context, start_author: str = None, start_permlink: str = '',
                                      limit: int = 20, truncate_body: int = 0):
     """Get all replies made to any of author's posts."""
-    assert start_author, '`start_author` cannot be blank'
-
+    # note that in this call start_author has dual meaning:
+    # - when there is only start_author it means account that authored posts that we seek replies to
+    # - when there is also start_permlink it points to one of replies (last post of previous page) and
+    #   we'll be getting account like above in form of author of parent post to the post pointed by
+    #   given start_author+start_permlink
     return await cursor.get_by_replies_to_account(
         context['db'],
         valid_account(start_author),
