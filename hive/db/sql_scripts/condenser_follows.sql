@@ -27,7 +27,7 @@ BEGIN
   __account_id = find_account_id( _account, True );
   __start_id = find_account_id( _start, _start <> '' );
   IF __start_id <> 0 THEN
-      SELECT INTO __start_id COALESCE( ( SELECT id FROM hive_follows WHERE following = __account_id AND follower = __start_id ), 0 );
+      SELECT INTO __start_id ( SELECT id FROM hive_follows WHERE following = __account_id AND follower = __start_id );
   END IF;
   RETURN QUERY SELECT
      ha.name
@@ -55,7 +55,7 @@ BEGIN
   __account_id = find_account_id( _account, True );
   __start_id = find_account_id( _start, _start <> '' );
   IF __start_id <> 0 THEN
-      SELECT INTO __start_id COALESCE( ( SELECT id FROM hive_follows WHERE follower = __account_id AND following = __start_id ), 0 );
+      SELECT INTO __start_id ( SELECT id FROM hive_follows WHERE follower = __account_id AND following = __start_id );
   END IF;
   RETURN QUERY SELECT
      ha.name
