@@ -15,21 +15,19 @@ log = logging.getLogger(__name__)
 
 # pylint: disable=too-many-lines
 
-def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=None, override_gray=False):
+def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=[], override_gray=False):
     """ apply information such as blacklists and community names/roles to a given post """
-    if not blacklists_for_user:
-        post['blacklists'] = Mutes.lists(row['author'], row['author_rep'])
-    else:
-        post['blacklists'] = []
-        if row['author'] in blacklists_for_user:
-            blacklists = blacklists_for_user[row['author']]
-            for blacklist in blacklists:
-                post['blacklists'].append(blacklist)
-        reputation = row['author_rep']
-        if reputation < 1:
-            post['blacklists'].append('reputation-0')
-        elif reputation  == 1:
-            post['blacklists'].append('reputation-1')
+    
+    post['blacklists'] = []
+    if row['author'] in blacklists_for_user:
+        blacklists = blacklists_for_user[row['author']]
+        for blacklist in blacklists:
+            post['blacklists'].append(blacklist)
+    reputation = row['author_rep']
+    if reputation < 1:
+        post['blacklists'].append('reputation-0')
+    elif reputation  == 1:
+        post['blacklists'].append('reputation-1')
 
     if 'community_title' in row and row['community_title']:
         post['community'] = row['category']
@@ -40,11 +38,10 @@ def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=None, ov
         else:
             post['author_role'] = 'guest'
             post['author_title'] = ''
-    elif override_gray:
-        post['stats']['gray'] = ('irredeemables' in post['blacklists'] or len(post['blacklists']) >= 2)
-    else:
-        post['stats']['gray'] = row['is_grayed']
 
+    post['stats']['gray'] = row['is_grayed']
+    if 'is_muted' in row and row['is_muted']:
+        post['stats']['gray'] = True
     post['stats']['hide'] = 'irredeemables' in post['blacklists']
       # it overrides 'is_hidden' flag from post, is that the intent?
     if is_pinned:
