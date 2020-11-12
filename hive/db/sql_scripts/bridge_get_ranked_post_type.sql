@@ -35,7 +35,8 @@ CREATE TYPE bridge_api_post AS (
     community_title VARCHAR,
     role_id SMALLINT,
     is_pinned BOOLEAN,
-    curator_payout_value VARCHAR
+    curator_payout_value VARCHAR,
+    is_muted BOOLEAN
 );
 
 DROP TYPE IF EXISTS bridge_api_post_reblogs CASCADE;
