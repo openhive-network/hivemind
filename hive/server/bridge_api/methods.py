@@ -103,7 +103,7 @@ async def _get_ranked_posts_for_observer_communities( db, sort:str, start_author
     assert False, "Unknown sort order"
 
 @return_error_info
-async def _get_ranked_posts_for_communities( db, sort:str, community, start_author:str, start_permlink:str, limit):
+async def _get_ranked_posts_for_communities( db, sort:str, community, start_author:str, start_permlink:str, limit, observer:str=None):
     async def execute_community_query(db, sql, limit):
         return await db.query_all(sql, community=community, author=start_author, permlink=start_permlink, limit=limit )
 
@@ -128,7 +128,7 @@ async def _get_ranked_posts_for_communities( db, sort:str, community, start_auth
         return await execute_community_query(db, sql, limit)
 
     if sort == 'created':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_created_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_created_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True, (:observer)::VARCHAR )"
         result_with_pinned_posts = await execute_community_query(db, pinned_sql, limit)
         limit -= len(result_with_pinned_posts)
         if limit > 0:
