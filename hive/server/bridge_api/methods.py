@@ -105,7 +105,7 @@ async def _get_ranked_posts_for_observer_communities( db, sort:str, start_author
 @return_error_info
 async def _get_ranked_posts_for_communities( db, sort:str, community, start_author:str, start_permlink:str, limit, observer:str=None):
     async def execute_community_query(db, sql, limit):
-        return await db.query_all(sql, community=community, author=start_author, permlink=start_permlink, limit=limit )
+        return await db.query_all(sql, community=community, author=start_author, permlink=start_permlink, limit=limit, observer=observer )
 
     pinned_sql = "SELECT * FROM bridge_get_ranked_post_pinned_for_community( (:community)::VARCHAR, (:limit)::SMALLINT )"
     # missing paging which results in inability to get all pinned posts
