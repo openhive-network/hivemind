@@ -56,7 +56,7 @@ BEGIN
       LIMIT _limit
   ) as created
   JOIN hive_posts_view hp ON hp.id = created.id
-  WHERE (CASE WHEN _observer <> '' THEN hp.author NOT IN (SELECT muted FROM muted_accounts_view WHERE observer = _observer) ELSE True END)
+  WHERE (CASE WHEN _observer <> '' THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE True END)
   ORDER BY created.id DESC
   LIMIT _limit;
 END
