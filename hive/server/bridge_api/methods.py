@@ -252,7 +252,7 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
         return await process_query_results(result)
 
     if tag and tag[:5] == 'hive-':
-        result = await _get_ranked_posts_for_communities(db, sort, tag, start_author, start_permlink, limit)
+        result = await _get_ranked_posts_for_communities(db, sort, tag, start_author, start_permlink, limit, observer)
         return await process_query_results(result)
 
     if ( tag and tag != "all" ):

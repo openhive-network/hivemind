@@ -481,7 +481,7 @@ $function$
 language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_created_for_community;
-CREATE FUNCTION bridge_get_ranked_post_by_created_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN )
+CREATE FUNCTION bridge_get_ranked_post_by_created_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN, in _observer VARCHAR )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -542,6 +542,7 @@ BEGIN
       LIMIT _limit
   ) as created
   JOIN hive_posts_view hp ON hp.id = created.id
+  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE true END)
   ORDER BY created.id DESC
   LIMIT _limit;
 END
