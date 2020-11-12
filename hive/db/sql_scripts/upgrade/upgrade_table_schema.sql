@@ -1,3 +1,8 @@
+do $$
+BEGIN
+   ASSERT EXISTS (SELECT * FROM pg_extension WHERE extname='intarray'), 'The database requires created "intarray" extension';
+END$$;
+
 CREATE TABLE IF NOT EXISTS hive_db_patch_level
 (
   level SERIAL NOT NULL PRIMARY KEY,
@@ -213,6 +218,15 @@ IF NOT EXISTS (SELECT data_type FROM information_schema.columns
 ELSE
   RAISE NOTICE 'SKIPPING hive_posts upgrade - adding total_votes and net_votes columns';
 END IF;
+
+IF NOT EXISTS(SELECT data_type FROM information_schema.columns
+          WHERE table_name = 'hive_posts' AND column_name = 'tags_ids') THEN
+    ALTER TABLE ONLY hive_posts
+            ADD COLUMN tags_ids INTEGER[];
+ELSE
+    RAISE NOTICE 'SKIPPING hive_posts upgrade - adding a tags_ids column';
+END IF;
+
 END
 
 $BODY$
@@ -383,3 +397,6 @@ DROP INDEX IF EXISTS hive_posts_promoted_idx;
 CREATE INDEX IF NOT EXISTS hive_posts_promoted_id_idx ON hive_posts (promoted, id)
   WHERE NOT is_paidout AND counter_deleted = 0
  ;
+
+
+ CREATE INDEX IF NOT EXISTS hive_posts_tags_ids_idx ON hive_posts USING gin(tags_ids gin__int_ops);

@@ -119,6 +119,7 @@ class DbState:
             'hive_posts_updated_at_idx',
             'hive_posts_payout_plus_pending_payout_id_idx',
             'hive_posts_category_id_payout_plus_pending_payout_depth_idx',
+            'hive_posts_tags_ids_idx',
 
             'hive_posts_api_helper_author_s_permlink_idx',
 
@@ -129,8 +130,6 @@ class DbState:
             'hive_subscriptions_community_idx',
             'hive_communities_block_num_idx',
             'hive_reblogs_created_at_idx',
-
-            'hive_post_tags_tag_id_idx',
 
             'hive_votes_voter_id_post_id_idx',
             'hive_votes_post_id_voter_id_idx',

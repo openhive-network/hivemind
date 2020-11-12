@@ -128,6 +128,7 @@ def build_metadata():
         sa.Column('beneficiaries', sa.JSON, nullable=False, server_default='[]'),
         sa.Column('block_num', sa.Integer,  nullable=False ),
         sa.Column('block_num_created', sa.Integer,  nullable=False ),
+        sa.Column('tags_ids', sa.ARRAY(sa.Integer),  nullable=True ),
 
         sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_posts_fk1'),
         sa.ForeignKeyConstraint(['root_id'], ['hive_posts.id'], name='hive_posts_fk2'),
@@ -152,8 +153,9 @@ def build_metadata():
         sa.Index('hive_posts_cashout_time_id_idx', 'cashout_time', 'id'),
         sa.Index('hive_posts_updated_at_idx', sa.text('updated_at DESC')),
         sa.Index('hive_posts_payout_plus_pending_payout_id_idx', sa.text('(payout+pending_payout), id, is_paidout'), postgresql_where=sql_text("counter_deleted = 0 AND NOT is_paidout")),
-        sa.Index('hive_posts_category_id_payout_plus_pending_payout_depth_idx', sa.text('category_id, (payout+pending_payout), depth'), postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0"))
-    )
+        sa.Index('hive_posts_category_id_payout_plus_pending_payout_depth_idx', sa.text('category_id, (payout+pending_payout), depth'), postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0")),
+        sa.Index('hive_posts_tags_ids_idx', 'tags_ids', postgresql_using="gin", postgresql_ops={'tags_ids': 'gin__int_ops'})
+        )
 
     sa.Table(
         'hive_post_data', metadata,
@@ -213,18 +215,6 @@ def build_metadata():
         sa.Column('id', sa.Integer, nullable=False, primary_key=True),
         sa.Column('tag', VARCHAR(64, collation='C'), nullable=False, server_default=''),
         sa.UniqueConstraint('tag', name='hive_tag_data_ux1')
-    )
-
-    sa.Table(
-        'hive_post_tags', metadata,
-        sa.Column('post_id', sa.Integer, nullable=False),
-        sa.Column('tag_id', sa.Integer, nullable=False),
-        sa.PrimaryKeyConstraint('post_id', 'tag_id', name='hive_post_tags_pk1'),
-
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_post_tags_fk1'),
-        sa.ForeignKeyConstraint(['tag_id'], ['hive_tag_data.id'], name='hive_post_tags_fk2'),
-
-        sa.Index('hive_post_tags_tag_id_idx', 'tag_id')
     )
 
     sa.Table(
@@ -457,6 +447,9 @@ def create_fk(db):
 
 def setup(db):
     """Creates all tables and seed data"""
+
+    sql = """SELECT * FROM pg_extension WHERE extname='intarray'"""
+    assert db.query_row( sql ), "The database requires created 'intarray' extension"
     # initialize schema
     build_metadata().create_all(db.engine())
 
@@ -615,8 +608,8 @@ def setup(db):
     dir_path = dirname(realpath(__file__))
     for script in sql_scripts:
         execute_sql_script(db.query_no_return, "{}/sql_scripts/{}".format(dir_path, script))
-    
-    
+
+
 
 
 
@@ -629,7 +622,6 @@ def reset_autovac(db):
     autovac_config = { #    vacuum  analyze
         'hive_accounts':    (50000, 100000),
         'hive_posts':       (2500, 10000),
-        'hive_post_tags':   (5000, 10000),
         'hive_follows':     (5000, 5000),
         'hive_feed_cache':  (5000, 5000),
         'hive_blocks':      (5000, 25000),
@@ -665,7 +657,6 @@ def set_logged_table_attribute(db, logged):
     logged_config = [
         'hive_accounts',
         'hive_permlink_data',
-        'hive_post_tags',
         'hive_posts',
         'hive_post_data',
         'hive_votes',
