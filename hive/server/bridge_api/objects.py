@@ -42,8 +42,6 @@ def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=[], over
     post['stats']['gray'] = row['is_grayed']
     if 'is_muted' in row and row['is_muted']:
         post['stats']['gray'] = True
-    post['stats']['hide'] = 'irredeemables' in post['blacklists']
-      # it overrides 'is_hidden' flag from post, is that the intent?
     if is_pinned:
         post['stats']['is_pinned'] = True
     return post
