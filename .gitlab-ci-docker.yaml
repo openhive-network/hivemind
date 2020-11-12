@@ -3,7 +3,6 @@ stages:
   - data-supply
   - e2e-test
 
-
 variables:
 
   PGPASSWORD: $HIVEMIND_POSTGRES_PASSWORD

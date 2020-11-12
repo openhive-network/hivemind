@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 import os
 import subprocess
 from json import load, dump
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     hivemind_url = "http://{}:{}".format(args.hivemind_address, args.hivemind_port)
     test_directories = get_test_directories(args.tests_root_dir)
-    
+
     benchmarks_files = []
     for test_directory in test_directories:
         benchmark_file_name = "benchmark_" + test_directory.split("/")[-1] + ".py"
