@@ -32,22 +32,8 @@ SELECT hp.id,
   hp.updated_at,
   hp.vote_rshares AS rshares,
   hp.abs_rshares AS abs_rshares,
-    COALESCE(
-      (
-        SELECT COUNT( 1 )
-        FROM hive_votes v
-        WHERE v.post_id = hp.id AND v.is_effective
-        GROUP BY v.post_id
-      ), 0
-    ) AS total_votes,
-    COALESCE(
-      (
-        SELECT SUM( CASE v.rshares > 0 WHEN True THEN 1 ELSE -1 END )
-        FROM hive_votes v
-        WHERE v.post_id = hp.id AND NOT v.rshares = 0
-        GROUP BY v.post_id
-      ), 0
-    ) AS net_votes,
+  hp.total_votes AS total_votes,
+  hp.net_votes as net_votes,
   hpd.json,
   ha_a.reputation AS author_rep,
   hp.is_hidden,
