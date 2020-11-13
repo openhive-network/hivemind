@@ -15,7 +15,7 @@ BEGIN
   EXECUTE 'ALTER DATABASE '||current_database()||' SET join_collapse_limit TO 16';
   EXECUTE 'ALTER DATABASE '||current_database()||' SET from_collapse_limit TO 16';
 END
-$$; 
+$$;
 
 SHOW join_collapse_limit;
 SHOW from_collapse_limit;
@@ -31,13 +31,13 @@ IF NOT EXISTS(SELECT data_type
     alter table ONlY hive_accounts
       add column is_implicit boolean,
       alter column is_implicit set default True;
-  
+
     --- reputations have to be recalculated from scratch.
     update hive_accounts set reputation = 0, is_implicit = True;
-  
+
     alter table ONlY hive_accounts
       alter column is_implicit set not null;
-  
+
     perform deps_restore_dependencies('public', 'hive_accounts');
 
     INSERT INTO hive_db_data_migration VALUES ('Reputation calculation');
@@ -187,7 +187,34 @@ IF EXISTS(SELECT data_type FROM information_schema.columns
 ELSE
   RAISE NOTICE 'SKIPPING hive_posts upgrade - adding a block_num_created column, type change for abs_rshares/vote_rshares columns';
 END IF;
+
+--- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/367
+IF NOT EXISTS (SELECT data_type FROM information_schema.columns
+               WHERE table_name = 'hive_posts' AND column_name = 'total_votes')
+   AND NOT EXISTS (SELECT data_type FROM information_schema.columns
+                 WHERE table_name = 'hive_posts' AND column_name = 'net_votes') THEN
+  RAISE NOTICE 'Performing hive_posts upgrade - adding total_votes and net_votes columns';
+
+  PERFORM deps_save_and_drop_dependencies('public', 'hive_posts', true);
+
+  ALTER TABLE ONLY hive_posts
+    ADD COLUMN total_votes BIGINT,
+    ADD COLUMN net_votes BIGINT;
+
+  UPDATE hive_posts SET total_votes = 0, net_votes = 0; -- Artificial number, requires to start update_posts_rshares for all blocks
+
+  ALTER TABLE ONLY hive_posts
+    ALTER COLUMN total_votes SET NOT NULL,
+    ALTER COLUMN total_votes SET DEFAULT 0,
+    ALTER COLUMN net_votes SET NOT NULL,
+    ALTER COLUMN net_votes SET DEFAULT 0;
+
+  PERFORM deps_restore_dependencies('public', 'hive_posts');
+ELSE
+  RAISE NOTICE 'SKIPPING hive_posts upgrade - adding total_votes and net_votes columns';
+END IF;
 END
+
 $BODY$
 ;
 
@@ -200,9 +227,9 @@ DROP INDEX IF EXISTS hive_mentions_post_id_idx;
 
 -- updated up to 7b8def051be224a5ebc360465f7a1522090c7125
 -- updated up to 033619277eccea70118a5b8dc0c73b913da0025f
-INSERT INTO hive_db_data_migration 
+INSERT INTO hive_db_data_migration
 select 'update_posts_rshares( 0, head_block_number) execution'
-where not exists (select null from hive_db_patch_level where patched_to_revision = '033619277eccea70118a5b8dc0c73b913da0025f')
+where not exists (select null from hive_db_patch_level where patched_to_revision = '431fdaead7dcd69e4d2a45e7ce8a3186b8075515')
 ;
 
 -- updated to e8b65adf22654203f5a79937ff2a95c5c47e10c5 - See merge request hive/hivemind!251
@@ -228,13 +255,13 @@ IF NOT EXISTS(SELECT data_type
     alter table ONLY hive_follows
       add column follow_muted boolean,
       alter column follow_muted set default False;
-  
+
     --- Fill the default value for all existing records.
     update hive_follows set follow_muted = False;
-  
+
     alter table ONlY hive_follows
       alter column follow_muted set not null;
-  
+
     perform deps_restore_dependencies('public', 'hive_follows');
 ELSE
   RAISE NOTICE 'hive_follows::follow_muted migration skipped';
@@ -245,7 +272,7 @@ $BODY$;
 
 --- 4cdf5d19f6cfcb73d3fa504cac9467c4df31c02e - https://gitlab.syncad.com/hive/hivemind/-/merge_requests/295
 --- 9e126e9d762755f2b9a0fd68f076c9af6bb73b76 - https://gitlab.syncad.com/hive/hivemind/-/merge_requests/314 mentions fix
-INSERT INTO hive_db_data_migration 
+INSERT INTO hive_db_data_migration
 select 'update_hive_post_mentions refill execution'
 where not exists (select null from hive_db_patch_level where patched_to_revision = '9e126e9d762755f2b9a0fd68f076c9af6bb73b76' )
 ;
@@ -270,7 +297,7 @@ CREATE INDEX IF NOT EXISTS hive_votes_voter_id_last_update_idx ON hive_votes (vo
 
 --- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/306 update posts children count fix
 --- 0e3c8700659d98b45f1f7146dc46a195f905fc2d
-INSERT INTO hive_db_data_migration 
+INSERT INTO hive_db_data_migration
 select 'update_hive_posts_children_count execution'
 where not exists (select null from hive_db_patch_level where patched_to_revision = '0e3c8700659d98b45f1f7146dc46a195f905fc2d' )
 ;
