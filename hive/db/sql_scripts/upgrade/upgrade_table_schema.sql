@@ -204,8 +204,10 @@ IF NOT EXISTS (SELECT data_type FROM information_schema.columns
   UPDATE hive_posts SET total_votes = 0, net_votes = 0; -- Artificial number, requires to start update_posts_rshares for all blocks
 
   ALTER TABLE ONLY hive_posts
-      ALTER COLUMN total_votes set not null,
-      ALTER COLUMN net_votes set not null;
+    ALTER COLUMN total_votes SET NOT NULL,
+    ALTER COLUMN total_votes SET DEFAULT 0,
+    ALTER COLUMN net_votes SET NOT NULL,
+    ALTER COLUMN net_votes SET DEFAULT 0;
 
   PERFORM deps_restore_dependencies('public', 'hive_posts');
 ELSE
