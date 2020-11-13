@@ -792,5 +792,36 @@
     "block_id": "004c4b5100000000000000000000000000000000",
     "signing_key": "",
     "transaction_ids": []
+  },
+  "5000045": {
+    "previous": "004c4b6c00000000000000000000000000000000",
+    "timestamp": "2016-09-15T19:49:36",
+    "witness": "initminer",
+    "transaction_merkle_root": "0000000000000000000000000000000000000000",
+    "extensions": [],
+    "witness_signature": "",
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"reset_all_lists\"]}]"
+            }
+          }
+        ]
+      }
+    ],
+    "block_id": "004c4b6d00000000000000000000000000000000",
+    "signing_key": "",
+    "transaction_ids": []
   }
 }
