@@ -174,7 +174,7 @@ def nested_query_compat(function):
 @nested_query_compat
 async def get_posts_by_given_sort(context, sort: str, start_author: str = '', start_permlink: str = '',
                                      limit: int = 20, tag: str = None,
-                                     truncate_body: int = 0, filter_tags: list = None):
+                                     truncate_body: int = 0, filter_tags: list = None, observer:str=None):
     """Query posts, sorted by creation date."""
     assert not filter_tags, 'filter_tags not supported'
 
@@ -190,46 +190,46 @@ async def get_posts_by_given_sort(context, sort: str, start_author: str = '', st
    
     if sort == 'created':
       if is_community:
-        sql = "SELECT * FROM bridge_get_ranked_post_by_created_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_created_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False, (:observer)::VARCHAR )"
       elif tag == '':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_created( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_created( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
       else:
-        sql = "SELECT * FROM bridge_get_ranked_post_by_created_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_created_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
     elif sort == 'trending':
       if is_community:
-        sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False, (:observer)::VARCHAR )"
       elif tag == '':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_trends( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_trends( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
       else:
-        sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
     elif sort == 'hot':
       if is_community:
-        sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
       elif tag == '':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_hot( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_hot( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
       else:
-        sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
     elif sort == 'promoted':
       if is_community:
-        sql = "SELECT * FROM bridge_get_ranked_post_by_promoted_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_promoted_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
       elif tag == '':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_promoted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_promoted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
       else:
-        sql = "SELECT * FROM bridge_get_ranked_post_by_promoted_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_promoted_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
     elif sort == 'post_by_payout':
       if tag == '':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_payout( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_payout( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False, (:observer)::VARCHAR )"
       else:
-        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False, (:observer)::VARCHAR )"
     elif sort == 'comment_by_payout':
       if tag == '':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
       else:
-        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
     else:
       return posts
 
-    sql_result = await db.query_all(sql, tag=tag, author=start_author, permlink=start_permlink, limit=limit )
+    sql_result = await db.query_all(sql, tag=tag, author=start_author, permlink=start_permlink, limit=limit, observer=observer )
 
     for row in sql_result:
         post = _condenser_post_object(row, truncate_body)
@@ -241,43 +241,43 @@ async def get_posts_by_given_sort(context, sort: str, start_author: str = '', st
 @nested_query_compat
 async def get_discussions_by_created(context, start_author: str = '', start_permlink: str = '',
                                      limit: int = 20, tag: str = None,
-                                     truncate_body: int = 0, filter_tags: list = None):
-  return await get_posts_by_given_sort(context, 'created', start_author, start_permlink, limit, tag, truncate_body, filter_tags)
+                                     truncate_body: int = 0, filter_tags: list = None, observer:str=None):
+  return await get_posts_by_given_sort(context, 'created', start_author, start_permlink, limit, tag, truncate_body, filter_tags, observer)
 
 @return_error_info
 @nested_query_compat
 async def get_discussions_by_trending(context, start_author: str = '', start_permlink: str = '',
                                       limit: int = 20, tag: str = None,
-                                      truncate_body: int = 0, filter_tags: list = None):
-  return await get_posts_by_given_sort(context, 'trending', start_author, start_permlink, limit, tag, truncate_body, filter_tags)
+                                      truncate_body: int = 0, filter_tags: list = None, observer:str=None):
+  return await get_posts_by_given_sort(context, 'trending', start_author, start_permlink, limit, tag, truncate_body, filter_tags, observer)
 
 @return_error_info
 @nested_query_compat
 async def get_discussions_by_hot(context, start_author: str = '', start_permlink: str = '',
                                  limit: int = 20, tag: str = None,
-                                 truncate_body: int = 0, filter_tags: list = None):
-  return await get_posts_by_given_sort(context, 'hot', start_author, start_permlink, limit, tag, truncate_body, filter_tags)
+                                 truncate_body: int = 0, filter_tags: list = None, observer:str=None):
+  return await get_posts_by_given_sort(context, 'hot', start_author, start_permlink, limit, tag, truncate_body, filter_tags, observer)
 
 @return_error_info
 @nested_query_compat
 async def get_discussions_by_promoted(context, start_author: str = '', start_permlink: str = '',
                                       limit: int = 20, tag: str = None,
-                                      truncate_body: int = 0, filter_tags: list = None):
-  return await get_posts_by_given_sort(context, 'promoted', start_author, start_permlink, limit, tag, truncate_body, filter_tags)
+                                      truncate_body: int = 0, filter_tags: list = None, observer:str=None):
+  return await get_posts_by_given_sort(context, 'promoted', start_author, start_permlink, limit, tag, truncate_body, filter_tags, observer)
 
 @return_error_info
 @nested_query_compat
 async def get_post_discussions_by_payout(context, start_author: str = '', start_permlink: str = '',
                                          limit: int = 20, tag: str = None,
-                                         truncate_body: int = 0):
-  return await get_posts_by_given_sort(context, 'post_by_payout', start_author, start_permlink, limit, tag, truncate_body, [])
+                                         truncate_body: int = 0, observer:str=None):
+  return await get_posts_by_given_sort(context, 'post_by_payout', start_author, start_permlink, limit, tag, truncate_body, [], observer)
 
 @return_error_info
 @nested_query_compat
 async def get_comment_discussions_by_payout(context, start_author: str = '', start_permlink: str = '',
                                             limit: int = 20, tag: str = None,
-                                            truncate_body: int = 0):
-  return await get_posts_by_given_sort(context, 'comment_by_payout', start_author, start_permlink, limit, tag, truncate_body, [])
+                                            truncate_body: int = 0, observer:str=None):
+  return await get_posts_by_given_sort(context, 'comment_by_payout', start_author, start_permlink, limit, tag, truncate_body, [], observer)
 
 @return_error_info
 @nested_query_compat
@@ -309,10 +309,10 @@ async def get_discussions_by_blog(context, tag: str = None, start_author: str = 
     return posts_by_id
 
 async def get_discussions_by_feed_impl(db, account: str, start_author: str = '',
-                                   start_permlink: str = '', limit: int = 20, truncate_body: int = 0):
+                                   start_permlink: str = '', limit: int = 20, truncate_body: int = 0, observer:str=None):
     """Get a list of posts for an account's feed."""
-    sql = "SELECT * FROM bridge_get_by_feed_with_reblog((:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER)"
-    result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit)
+    sql = "SELECT * FROM bridge_get_by_feed_with_reblog((:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, (:observer)::VARCHAR)"
+    result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit, observer=observer)
 
     posts = []
     for row in result:
@@ -335,7 +335,7 @@ async def get_discussions_by_feed_impl(db, account: str, start_author: str = '',
 @nested_query_compat
 async def get_discussions_by_feed(context, tag: str = None, start_author: str = '',
                                   start_permlink: str = '', limit: int = 20,
-                                  truncate_body: int = 0, filter_tags: list = None):
+                                  truncate_body: int = 0, filter_tags: list = None, observer:str=None):
     """Retrieve account's personalized feed."""
     assert tag, '`tag` cannot be blank'
     assert not filter_tags, 'filter_tags not supported'
@@ -345,7 +345,7 @@ async def get_discussions_by_feed(context, tag: str = None, start_author: str = 
         valid_account(start_author, allow_empty=True),
         valid_permlink(start_permlink, allow_empty=True),
         valid_limit(limit, 100, 20),
-        truncate_body)
+        truncate_body, observer)
 
 @return_error_info
 @nested_query_compat
