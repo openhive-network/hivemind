@@ -84,6 +84,7 @@ class HttpClient(object):
     METHOD_API = dict(
         lookup_accounts='condenser_api',
         get_block='block_api',
+        get_block_range='block_api',
         get_order_book='condenser_api',
         get_feed_history='database_api',
         get_dynamic_global_properties='database_api',

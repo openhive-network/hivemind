@@ -148,26 +148,25 @@ class SteemClient:
 
     def get_blocks_range(self, lbound, ubound):
         """Retrieves blocks in the range of [lbound, ubound)."""
-        block_nums = range(lbound, ubound)
-        blocks = {}
 
-        batch_params = [{'block_num': i} for i in block_nums]
-        for result in self.__exec_batch('get_block', batch_params):
-            if 'block' in result:
-                block = result['block']
-                num = int(block['block_id'][:8], base=16)
-                blocks[num] = block
-
-        for block_num in block_nums:
+        result = self.__exec('get_block_range',  {'starting_block_num': lbound, 'count': ubound - lbound } )        
+        if 'blocks' in result:
+            blocks = result['blocks']
+        last_block_num_returned = lbound + len(blocks) - 1
+        for block_num in range(lbound, last_block_num_returned + 1):
             data = MockBlockProvider.get_block_data(block_num, True)
             if data is not None:
-                if block_num in blocks:
-                    blocks[block_num]["transactions"].extend(data["transactions"])
-                    blocks[block_num]["transaction_ids"].extend(data["transaction_ids"])
-                else:
-                    blocks[block_num] = data
+                block_index = block_num - lbound
+                blocks[block_index]["transactions"].extend(data["transactions"])
+                blocks[block_index]["transaction_ids"].extend(data["transaction_ids"])
 
-        return [blocks[x] for x in block_nums]
+        for block_num in range(last_block_num_returned + 1, ubound):
+            data = MockBlockProvider.get_block_data(block_num, True)
+            if data is not None:
+                block_index = block_num - lbound
+                blocks[block_index] = data
+
+        return blocks
 
     def get_virtual_operations(self, block):
         """ Get virtual ops from block """
