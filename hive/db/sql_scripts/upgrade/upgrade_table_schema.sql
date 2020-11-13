@@ -15,7 +15,7 @@ BEGIN
   EXECUTE 'ALTER DATABASE '||current_database()||' SET join_collapse_limit TO 16';
   EXECUTE 'ALTER DATABASE '||current_database()||' SET from_collapse_limit TO 16';
 END
-$$; 
+$$;
 
 SHOW join_collapse_limit;
 SHOW from_collapse_limit;
@@ -31,13 +31,13 @@ IF NOT EXISTS(SELECT data_type
     alter table ONlY hive_accounts
       add column is_implicit boolean,
       alter column is_implicit set default True;
-  
+
     --- reputations have to be recalculated from scratch.
     update hive_accounts set reputation = 0, is_implicit = True;
-  
+
     alter table ONlY hive_accounts
       alter column is_implicit set not null;
-  
+
     perform deps_restore_dependencies('public', 'hive_accounts');
 
     INSERT INTO hive_db_data_migration VALUES ('Reputation calculation');
@@ -200,7 +200,7 @@ DROP INDEX IF EXISTS hive_mentions_post_id_idx;
 
 -- updated up to 7b8def051be224a5ebc360465f7a1522090c7125
 -- updated up to 033619277eccea70118a5b8dc0c73b913da0025f
-INSERT INTO hive_db_data_migration 
+INSERT INTO hive_db_data_migration
 select 'update_posts_rshares( 0, head_block_number) execution'
 where not exists (select null from hive_db_patch_level where patched_to_revision = '033619277eccea70118a5b8dc0c73b913da0025f')
 ;
@@ -228,13 +228,13 @@ IF NOT EXISTS(SELECT data_type
     alter table ONLY hive_follows
       add column follow_muted boolean,
       alter column follow_muted set default False;
-  
+
     --- Fill the default value for all existing records.
     update hive_follows set follow_muted = False;
-  
+
     alter table ONlY hive_follows
       alter column follow_muted set not null;
-  
+
     perform deps_restore_dependencies('public', 'hive_follows');
 ELSE
   RAISE NOTICE 'hive_follows::follow_muted migration skipped';
@@ -245,7 +245,7 @@ $BODY$;
 
 --- 4cdf5d19f6cfcb73d3fa504cac9467c4df31c02e - https://gitlab.syncad.com/hive/hivemind/-/merge_requests/295
 --- 9e126e9d762755f2b9a0fd68f076c9af6bb73b76 - https://gitlab.syncad.com/hive/hivemind/-/merge_requests/314 mentions fix
-INSERT INTO hive_db_data_migration 
+INSERT INTO hive_db_data_migration
 select 'update_hive_post_mentions refill execution'
 where not exists (select null from hive_db_patch_level where patched_to_revision = '9e126e9d762755f2b9a0fd68f076c9af6bb73b76' )
 ;
@@ -270,9 +270,15 @@ CREATE INDEX IF NOT EXISTS hive_votes_voter_id_last_update_idx ON hive_votes (vo
 
 --- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/306 update posts children count fix
 --- 0e3c8700659d98b45f1f7146dc46a195f905fc2d
-INSERT INTO hive_db_data_migration 
+INSERT INTO hive_db_data_migration
 select 'update_hive_posts_children_count execution'
 where not exists (select null from hive_db_patch_level where patched_to_revision = '0e3c8700659d98b45f1f7146dc46a195f905fc2d' )
+;
+
+-- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/372
+INSERT INTO hive_db_data_migration
+select 'Notification cache initial fill'
+where not exists (select null from hive_db_patch_level where patched_to_revision = 'cc7bb174d40fe1a0e2221d5d7e1c332c344dca34' )
 ;
 
 --- 1847c75702384c7e34c624fc91f24d2ef20df91d latest version of develop included in this migration script.
@@ -294,12 +300,6 @@ DROP INDEX IF EXISTS public.hive_posts_created_at_author_id_idx;
 CREATE INDEX IF NOT EXISTS hive_posts_author_id_created_at_idx ON public.hive_posts ( author_id DESC, created_at DESC);
 
 CREATE INDEX IF NOT EXISTS hive_blocks_created_at_idx ON hive_blocks (created_at);
-
-INSERT INTO hive_db_data_migration
-SELECT 'Notification cache initial fill'
-WHERE NOT EXISTS (SELECT data_type
-              FROM information_schema.columns
-              WHERE table_name = 'hive_notification_cache');
 
 --- Notification cache to significantly speedup notification APIs.
 CREATE TABLE IF NOT EXISTS hive_notification_cache
@@ -356,4 +356,3 @@ DROP INDEX IF EXISTS hive_posts_promoted_idx;
 CREATE INDEX IF NOT EXISTS hive_posts_promoted_id_idx ON hive_posts (promoted, id)
   WHERE NOT is_paidout AND counter_deleted = 0
  ;
-
