@@ -20,11 +20,14 @@ def get_head_num_and_timestamp():
 
 class MockBlockProvider(MockDataProvider):
 
+    min_block = 0
     max_block = 0
 
     """ Data provider for test ops """
     @classmethod
     def load_block_data(cls, data_path):
+        cls.block_data.clear()
+        cls.min_block = 0
         cls.max_block = 0
 
         if os.path.isdir(data_path):
@@ -56,6 +59,8 @@ class MockBlockProvider(MockDataProvider):
 
         if block_num > cls.max_block:
             cls.max_block = block_num
+        if block_num < cls.min_block:
+            cls.min_block = block_num
 
         if block_num in cls.block_data:
             cls.block_data[block_num].extend(transactions)
@@ -98,7 +103,7 @@ class MockBlockProvider(MockDataProvider):
             }
         # supply enough blocks to fill block queue with empty blocks only
         # throw exception if there is no more data to serve
-        if block_num < cls.max_block + 3:
+        if block_num > cls.min_block and block_num < cls.max_block + 3:
             return block_data
         return None
 

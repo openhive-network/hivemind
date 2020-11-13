@@ -7,6 +7,10 @@ log = logging.getLogger(__name__)
 
 class MockVopsProvider(MockDataProvider):
     """ Data provider for test vops """
+    block_data = {
+        'ops' : {},
+        'ops_by_block' : {}
+    }
     @classmethod
     def load_block_data(cls, data_path):
         #clear old data and prepare container
@@ -77,7 +81,7 @@ class MockVopsProvider(MockDataProvider):
     @classmethod
     def add_mock_vops(cls, ret, from_block, end_block):
         # dont do anyting when there is no block data
-        if not cls.block_data or (not cls.block_data['ops_by_block'] and not cls.block_data['ops']):
+        if not cls.block_data['ops_by_block'] and not cls.block_data['ops']:
             return
         for block_num in range(from_block, end_block):
             mock_vops = cls.get_block_data(block_num)
