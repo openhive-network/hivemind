@@ -6,11 +6,5 @@ class MockDataProvider():
     block_data = {}
 
     @classmethod
-    def is_data(cls):
-        if cls.block_data:
-            return True
-        return False
-
-    @classmethod
     def print_data(cls):
         print(dumps(cls.block_data, indent=4, sort_keys=True))
