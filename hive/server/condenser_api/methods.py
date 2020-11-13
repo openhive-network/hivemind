@@ -184,6 +184,7 @@ async def get_posts_by_given_sort(context, sort: str, start_author: str = '', st
     start_permlink  = valid_permlink(start_permlink, allow_empty=True),
     limit           = valid_limit(limit, 100, 20),
     tag             = valid_tag(tag, allow_empty=True)
+    observer        = valid_account(observer, allow_empty=True)
 
     posts = []
     is_community = tag[:5] == 'hive-'
