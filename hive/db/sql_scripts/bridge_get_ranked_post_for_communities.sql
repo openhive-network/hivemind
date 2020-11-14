@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_pinned_for_community;
-CREATE FUNCTION bridge_get_ranked_post_pinned_for_community( in _community VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION bridge_get_ranked_post_pinned_for_community( in _community VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -39,18 +39,20 @@ $function$
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value
+      hp.curator_payout_value,
+      hp.is_muted
   FROM
       hive_posts_view hp
       JOIN hive_communities hc ON hc.id = hp.community_id
   WHERE hc.name = _community AND hp.is_pinned
+  AND (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE true END)
   ORDER BY hp.id DESC
   LIMIT _limit;
 $function$
 language sql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_trends_for_community;
-CREATE FUNCTION bridge_get_ranked_post_by_trends_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN )
+CREATE FUNCTION bridge_get_ranked_post_by_trends_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN, in _observer VARCHAR )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -98,7 +100,8 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value
+      hp.curator_payout_value,
+      hp.is_muted
   FROM
   (
       SELECT
@@ -114,6 +117,7 @@ BEGIN
       LIMIT _limit
   ) as trends
   JOIN hive_posts_view hp ON hp.id = trends.id
+  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE true END)
   ORDER BY trends.trend DESC, trends.id DESC
   LIMIT _limit;
 END
@@ -121,7 +125,7 @@ $function$
 language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_promoted_for_community;
-CREATE FUNCTION bridge_get_ranked_post_by_promoted_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION bridge_get_ranked_post_by_promoted_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -169,7 +173,8 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value
+      hp.curator_payout_value,
+      hp.is_muted
   FROM
   (
       SELECT
@@ -184,6 +189,7 @@ BEGIN
       LIMIT _limit
   ) as promoted
   JOIN hive_posts_view hp ON hp.id = promoted.id
+  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE true END)
   ORDER BY promoted.promoted DESC, promoted.id DESC
   LIMIT _limit;
 END
@@ -191,7 +197,7 @@ $function$
 language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_payout_for_community;
-CREATE FUNCTION bridge_get_ranked_post_by_payout_for_community(in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION bridge_get_ranked_post_by_payout_for_community(in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -241,7 +247,8 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value
+      hp.curator_payout_value,
+      hp.is_muted
   FROM
   (
       SELECT
@@ -256,6 +263,7 @@ BEGIN
       LIMIT _limit
   ) as payout
   JOIN hive_posts_view hp ON hp.id = payout.id
+  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE true END)
   ORDER BY payout.all_payout DESC, payout.id DESC
   LIMIT _limit;
 END
@@ -263,7 +271,7 @@ $function$
 language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_payout_comments_for_community;
-CREATE FUNCTION bridge_get_ranked_post_by_payout_comments_for_community( in _community VARCHAR,  in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION bridge_get_ranked_post_by_payout_comments_for_community( in _community VARCHAR,  in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -311,7 +319,8 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value
+      hp.curator_payout_value,
+      hp.is_muted
   FROM
   (
       SELECT
@@ -326,6 +335,7 @@ BEGIN
       LIMIT _limit
   ) as payout
   JOIN hive_posts_view hp ON hp.id = payout.id
+  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE true END)
   ORDER BY payout.all_payout DESC, payout.id DESC
   LIMIT _limit;
 END
@@ -333,7 +343,7 @@ $function$
 language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_muted_for_community;
-CREATE FUNCTION bridge_get_ranked_post_by_muted_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION bridge_get_ranked_post_by_muted_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -381,7 +391,8 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value
+      hp.curator_payout_value,
+      hp.is_muted
   FROM
   (
       SELECT
@@ -397,6 +408,7 @@ BEGIN
       LIMIT _limit
   ) as payout
   JOIN hive_posts_view hp ON hp.id = payout.id
+  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE true END)
   ORDER BY payout.all_payout DESC, payout.id DESC
   LIMIT _limit;
 END
@@ -404,7 +416,7 @@ $function$
 language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_hot_for_community;
-CREATE FUNCTION bridge_get_ranked_post_by_hot_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION bridge_get_ranked_post_by_hot_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -452,7 +464,8 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value
+      hp.curator_payout_value,
+      hp.is_muted
   FROM
   (
       SELECT
@@ -467,6 +480,7 @@ BEGIN
       LIMIT _limit
   ) as hot
   JOIN hive_posts_view hp ON hp.id = hot.id
+  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE true END)
   ORDER BY hot.hot DESC, hot.id DESC
   LIMIT _limit;
 END
@@ -474,7 +488,7 @@ $function$
 language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_created_for_community;
-CREATE FUNCTION bridge_get_ranked_post_by_created_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN )
+CREATE FUNCTION bridge_get_ranked_post_by_created_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN, in _observer VARCHAR )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -518,7 +532,8 @@ BEGIN
       hp.community_title,
       hp.role_id,
       hp.is_pinned,
-      hp.curator_payout_value
+      hp.curator_payout_value,
+      hp.is_muted
   FROM
   (
       SELECT
@@ -534,6 +549,7 @@ BEGIN
       LIMIT _limit
   ) as created
   JOIN hive_posts_view hp ON hp.id = created.id
+  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE true END)
   ORDER BY created.id DESC
   LIMIT _limit;
 END
