@@ -73,13 +73,13 @@ BEGIN
             SELECT hp.id, hp.parent_id
             FROM hive_posts hp
             WHERE hp.id = __post_id
-            AND NOT hp.is_muted
             UNION ALL
             SELECT children.id, children.parent_id
             FROM hive_posts children
             JOIN child_posts ON children.parent_id = child_posts.id
+            JOIN hive_accounts on children.author_id = hive_accounts.id
             WHERE children.counter_deleted = 0 AND
-            (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = children.author) ELSE True END)
+            (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hive_accounts.name) ELSE True END)
         )
         SELECT hp2.id
         FROM hive_posts hp2
