@@ -312,7 +312,7 @@ async def get_discussions_by_blog(context, tag: str = None, start_author: str = 
 async def get_discussions_by_feed_impl(db, account: str, start_author: str = '',
                                    start_permlink: str = '', limit: int = 20, truncate_body: int = 0, observer:str=None):
     """Get a list of posts for an account's feed."""
-    sql = "SELECT * FROM bridge_get_by_feed_with_reblog((:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, (:observer)::VARCHAR)"
+    sql = "SELECT * FROM bridge_get_by_feed_with_reblog((:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER)"
     result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit, observer=observer)
 
     posts = []
