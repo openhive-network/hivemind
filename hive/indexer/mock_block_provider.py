@@ -50,11 +50,13 @@ class MockBlockProvider(MockDataProvider):
         data = {}
         with open(file_name, "r") as src:
             data = load(src)
-        for block_num, transactions in data.items():
-            cls.add_block_data(block_num, transactions)
+        for block_num, block_data in data.items():
+            assert isinstance(block_num, str), "Expected string as block_num"
+            assert isinstance(block_data, dict), "Expected dict as block_data"
+            cls.add_block_data(block_num, block_data)
 
     @classmethod
-    def add_block_data(cls, _block_num, transactions):
+    def add_block_data(cls, _block_num, block_data):
         block_num = int(_block_num)
 
         if block_num > cls.max_block:
@@ -63,9 +65,12 @@ class MockBlockProvider(MockDataProvider):
             cls.min_block = block_num
 
         if block_num in cls.block_data:
-            cls.block_data[block_num].extend(transactions)
+            if 'transactions' in cls.block_data[block_num] and 'transactions' in block_data:
+                cls.block_data[block_num]['transactions'].extend(block_data['transactions'])
+            if 'transaction_ids' in cls.block_data[block_num] and 'transaction_ids' in block_data:
+                cls.block_data[block_num]['transaction_ids'].extend(block_data['transaction_ids'])
         else:
-            cls.block_data[block_num] = transactions
+            cls.block_data[block_num] = block_data
 
     @classmethod
     def get_block_data(cls, block_num):
