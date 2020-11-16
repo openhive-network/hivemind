@@ -1,6 +1,6 @@
 DROP FUNCTION IF EXISTS bridge_get_account_posts_by_replies;
 
-CREATE FUNCTION bridge_get_account_posts_by_replies( in _account VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+CREATE FUNCTION bridge_get_account_posts_by_replies( in _account VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -8,8 +8,18 @@ DECLARE
   __account_id INT;
   __post_id INT;
 BEGIN
-  __account_id = find_account_id( _account, True );
-  __post_id = find_comment_id( _author, _permlink, True );
+  IF NOT _bridge_api AND _permlink <> '' THEN
+      -- find blogger account using parent author of page defining post
+      __post_id = find_comment_id( _author, _permlink, True );
+      SELECT pp.author_id INTO __account_id
+      FROM hive_posts hp
+      JOIN hive_posts pp ON hp.parent_id = pp.id
+      WHERE hp.id = __post_id;
+      IF __account_id = 0 THEN __account_id = NULL; END IF;
+  ELSE
+      __account_id = find_account_id( _account, True );
+      __post_id = find_comment_id( _author, _permlink, True );
+  END IF;
   RETURN QUERY SELECT
       hp.id,
       hp.author,

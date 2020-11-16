@@ -289,7 +289,7 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
         sql = "SELECT * FROM bridge_get_account_posts_by_comments( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'replies':
         account_posts = False
-        sql = "SELECT * FROM bridge_get_account_posts_by_replies( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = "SELECT * FROM bridge_get_account_posts_by_replies( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True )"
     elif sort == 'payout':
         sql = "SELECT * FROM bridge_get_account_posts_by_payout( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
 
