@@ -1,50 +1,31 @@
 """ Data provider for test operations """
-import logging
-import os
+import datetime
 import dateutil.parser
 from hive.db.adapter import Db
 
-from hive.indexer.mock_data_provider import MockDataProvider, MockDataProviderException
-
-log = logging.getLogger(__name__)
-
-import datetime
+from hive.indexer.mock_data_provider import MockDataProvider
 
 def get_head_num_and_timestamp():
-    DB = Db.instance()
+    db = Db.instance()
     sql = "SELECT num, created_at FROM hive_blocks ORDER BY num DESC LIMIT 1"
-    ret = DB.query_row(sql)
+    ret = db.query_row(sql)
     if ret:
         return (ret["num"], ret["created_at"])
     return (1, dateutil.parser.isoparse("2016-03-24T16:05:00"))
 
 class MockBlockProvider(MockDataProvider):
+    """ Data provider for test ops """
 
     min_block = 0
     max_block = 0
 
-    """ Data provider for test ops """
     @classmethod
     def load_block_data(cls, data_path):
         cls.block_data.clear()
         cls.min_block = 0
         cls.max_block = 0
 
-        if os.path.isdir(data_path):
-            log.warning("Loading mock block data from directory: {}".format(data_path))
-            cls.add_block_data_from_directory(data_path)
-        else:
-            log.warning("Loading mock block data from file: {}".format(data_path))
-            cls.add_block_data_from_file(data_path)
-
-    @classmethod
-    def add_block_data_from_directory(cls, dir_name):
-        from fnmatch import fnmatch
-        pattern = "*.json"
-        for path, _, files in os.walk(dir_name):
-            for name in files:
-                if fnmatch(name, pattern):
-                    cls.add_block_data_from_file(os.path.join(path, name))
+        super().load_block_data(data_path)
 
     @classmethod
     def add_block_data_from_file(cls, file_name):
@@ -94,7 +75,7 @@ class MockBlockProvider(MockDataProvider):
         ret_time = ref_time + time_delta
         return ret_time.replace(microsecond=0).isoformat()
 
-    @classmethod 
+    @classmethod
     def make_empty_block(cls, block_num, witness="initminer"):
         block_data = {
             "previous": cls.make_block_id(block_num - 1),
@@ -110,7 +91,6 @@ class MockBlockProvider(MockDataProvider):
             }
         # supply enough blocks to fill block queue with empty blocks only
         # throw exception if there is no more data to serve
-        if block_num > cls.min_block and block_num < cls.max_block + 3:
+        if cls.min_block < block_num < cls.max_block + 3:
             return block_data
         return None
-

@@ -1,9 +1,5 @@
 """ Data provider for test vops """
-import logging
-import os
 from hive.indexer.mock_data_provider import MockDataProvider
-
-log = logging.getLogger(__name__)
 
 class MockVopsProvider(MockDataProvider):
     """ Data provider for test vops """
@@ -11,6 +7,7 @@ class MockVopsProvider(MockDataProvider):
         'ops' : {},
         'ops_by_block' : {}
     }
+
     @classmethod
     def load_block_data(cls, data_path):
         #clear old data and prepare container
@@ -18,19 +15,7 @@ class MockVopsProvider(MockDataProvider):
         cls.block_data['ops'] = {}
         cls.block_data['ops_by_block'] = {}
 
-        if os.path.isdir(data_path):
-            log.warning("Loading mock virtual ops data from directory: {}".format(data_path))
-            cls.add_block_data_from_directory(data_path)
-        else:
-            log.warning("Loading mock virtual ops data from file: {}".format(data_path))
-            cls.add_block_data_from_file(data_path)
-
-    @classmethod
-    def add_block_data_from_directory(cls, dir_name):
-        for name in os.listdir(dir_name):
-            file_path = os.path.join(dir_name, name)
-            if os.path.isfile(file_path) and file_path.endswith(".json"):
-                cls.add_block_data_from_file(file_path)
+        super().load_block_data(data_path)
 
     @classmethod
     def add_block_data_from_file(cls, file_name):
