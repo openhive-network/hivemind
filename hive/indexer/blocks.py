@@ -4,7 +4,6 @@ import logging
 import concurrent
 from time import perf_counter
 from concurrent.futures import ThreadPoolExecutor
-
 from hive.db.adapter import Db
 
 from hive.indexer.accounts import Accounts

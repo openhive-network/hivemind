@@ -15,13 +15,14 @@ class BlockSchedule:
 
     BLOCK_INTERVAL = 3
 
-    def __init__(self, current_head_block):
+    def __init__(self, current_head_block, do_stale_block_check):
         self._start_block = current_head_block
         self._head_num = current_head_block
         self._next_expected = time() + self.BLOCK_INTERVAL / 2
         self._drift = self.BLOCK_INTERVAL / 2
         self._missed = 0
         self._last_date = None
+        self._do_stale_block_check = do_stale_block_check
 
     def wait_for_block(self, num):
         """Sleep until the requested block is expected to be available.
@@ -70,7 +71,7 @@ class BlockSchedule:
         It's possible a steemd node could fall behind or stop syncing;
         we can identify this case by comparing current time to latest
         received block time."""
-        if num == self._head_num:
+        if self._do_stale_block_check and num == self._head_num:
             gap = int(time() - utc_timestamp(date))
             assert gap > -60, 'system clock is %ds behind chain' % gap
             if gap > 60:

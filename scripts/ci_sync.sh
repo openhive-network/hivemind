@@ -58,5 +58,5 @@ fi
 
 echo Attempting to starting hive sync using hived node: $HIVEMIND_SOURCE_HIVED_URL . Max sync block is: $HIVEMIND_MAX_BLOCK
 echo Attempting to access database $DB_URL
-./$HIVE_NAME sync --pid-file hive_sync.pid --test-max-block=$HIVEMIND_MAX_BLOCK --exit-after-sync --test-profile=False --steemd-url "$HIVEMIND_SOURCE_HIVED_URL" --prometheus-port 11011 --database-url $DB_URL --mock-block-data-path mock_data/block_data/follow_op/mock_block_data_follow.json 2>&1 | tee -i hivemind-sync.log
+./$HIVE_NAME sync --pid-file hive_sync.pid --test-max-block=$HIVEMIND_MAX_BLOCK --test-profile=False --steemd-url "$HIVEMIND_SOURCE_HIVED_URL" --prometheus-port 11011 --database-url $DB_URL --mock-block-data-path mock_data/block_data/ 2>&1 | tee -i hivemind-sync.log
 rm hive_sync.pid
