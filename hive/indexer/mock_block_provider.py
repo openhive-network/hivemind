@@ -39,10 +39,12 @@ class MockBlockProvider(MockDataProvider):
 
     @classmethod
     def add_block_data_from_directory(cls, dir_name):
-        for name in os.listdir(dir_name):
-            file_path = os.path.join(dir_name, name)
-            if os.path.isfile(file_path) and file_path.endswith(".json"):
-                cls.add_block_data_from_file(file_path)
+        from fnmatch import fnmatch
+        pattern = "*.json"
+        for path, _, files in os.walk(dir_name):
+            for name in files:
+                if fnmatch(name, pattern):
+                    cls.add_block_data_from_file(os.path.join(path, name))
 
     @classmethod
     def add_block_data_from_file(cls, file_name):
