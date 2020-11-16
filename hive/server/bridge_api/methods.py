@@ -370,7 +370,7 @@ async def get_follow_list(context, observer, follow_type='blacklisted'):
     valid_types = ['blacklisted', 'follow_blacklist', 'muted', 'follow_muted']
     assert follow_type in valid_types, 'invalid follow_type'
 
-    account_data = get_profile(context, observer)
+    account_data = await get_profile(context, observer)
     metadata = account_data["metadata"]["profile"]
     blacklist_description = metadata["blacklist_description"] if "blacklist_description" in metadata else ''
     muted_list_description = metadata["muted_list_description"] if "muted_list_description" in metadata else ''
