@@ -28,9 +28,6 @@ from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import BroadcastObject
 from hive.utils.communities_rank import update_communities_posts_and_rank
 
-from hive.indexer.mock_block_provider import MockBlockProvider
-from hive.indexer.mock_vops_provider import MockVopsProvider
-
 from datetime import datetime
 
 log = logging.getLogger(__name__)
@@ -221,6 +218,13 @@ class Sync:
         from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
         log.info("database_schema_version : %s", SCHEMA_DB_VERSION)
 
+        # ensure db schema up to date, check app status
+        DbState.initialize()
+        Blocks.setup_own_db_access(self._db)
+
+        # initialize mock data
+        from hive.indexer.mock_block_provider import MockBlockProvider
+        from hive.indexer.mock_vops_provider import MockVopsProvider
         mock_block_data_path = self._conf.get("mock_block_data_path")
         if mock_block_data_path:
             MockBlockProvider.load_block_data(mock_block_data_path)
@@ -230,10 +234,6 @@ class Sync:
         if mock_vops_data_path:
             MockVopsProvider.load_block_data(mock_vops_data_path)
             MockVopsProvider.print_data()
-
-        # ensure db schema up to date, check app status
-        DbState.initialize()
-        Blocks.setup_own_db_access(self._db)
 
         # prefetch id->name and id->rank memory maps
         Accounts.load_ids()
@@ -267,26 +267,44 @@ class Sync:
 
         self._update_chain_state()
 
+        trail_blocks = self._conf.get('trail_blocks')
+        assert trail_blocks >= 0
+        assert trail_blocks <= 100
+
+        import sys
+        max_block_limit = sys.maxsize
+        do_stale_block_check = True
         if self._conf.get('test_max_block'):
-            # debug mode: partial sync
-            return self.from_steemd()
-        if self._conf.get("exit_after_sync"):
-            log.info("Exiting after sync on user request...")
-            return
+            max_block_limit = self._conf.get('test_max_block')
+            do_stale_block_check = False
+            # Correct max_block_limit by trail_blocks 
+            max_block_limit = max_block_limit - trail_blocks
+            log.info("max_block_limit corrected by specified trail_blocks number: %d is: %d", trail_blocks, max_block_limit)
+
         if self._conf.get('test_disable_sync'):
             # debug mode: no sync, just stream
-            return self.listen()
+            return self.listen(trail_blocks, max_block_limit, do_stale_block_check)
 
         while True:
             # sync up to irreversible block
             self.from_steemd()
 
+            head = Blocks.head_num()
+            if head >= max_block_limit:
+                log.info("Exiting [LIVE SYNC] because irreversible block sync reached specified block limit: %d", max_block_limit)
+                break;
+
             try:
                 # listen for new blocks
-                self.listen()
+                self.listen(trail_blocks, max_block_limit, do_stale_block_check)
             except MicroForkException as e:
                 # attempt to recover by restarting stream
                 log.error("microfork: %s", repr(e))
+
+            head = Blocks.head_num()
+            if head >= max_block_limit:
+                log.info("Exiting [LIVE SYNC] because of specified block limit: %d", max_block_limit)
+                break;
 
     def initial(self):
         """Initial sync routine."""
@@ -302,7 +320,10 @@ class Sync:
         steemd = self._steem
 
         lbound = Blocks.head_num() + 1
-        ubound = self._conf.get('test_max_block') or steemd.last_irreversible()
+        ubound = steemd.last_irreversible()
+
+        if self._conf.get('test_max_block') and self._conf.get('test_max_block') < ubound:
+            ubound = self._conf.get('test_max_block')
 
         count = ubound - lbound
         if count < 1:
@@ -341,11 +362,8 @@ class Sync:
 
             PC.broadcast(BroadcastObject('sync_current_block', to, 'blocks'))
 
-    def listen(self):
+    def listen(self, trail_blocks, max_sync_block, do_stale_block_check):
         """Live (block following) mode."""
-        trail_blocks = self._conf.get('trail_blocks')
-        assert trail_blocks >= 0
-        assert trail_blocks <= 100
 
         # debug: no max gap if disable_sync in effect
         max_gap = None if self._conf.get('test_disable_sync') else 100
@@ -353,11 +371,19 @@ class Sync:
         steemd = self._steem
         hive_head = Blocks.head_num()
 
-        for block in steemd.stream_blocks(hive_head + 1, trail_blocks, max_gap):
-            start_time = perf()
+        log.info("[LIVE SYNC] Entering listen with HM head: %d", hive_head)
+
+        if hive_head >= max_sync_block:
+            log.info("[LIVE SYNC] Exiting due to block limit exceeded: synced block number: %d, max_sync_block: %d", hive_head, max_sync_block)
+            return
+
+        for block in steemd.stream_blocks(hive_head + 1, trail_blocks, max_gap, do_stale_block_check):
 
             num = int(block['block_id'][:8], base=16)
             log.info("[LIVE SYNC] =====> About to process block %d", num)
+
+            start_time = perf()
+
             vops = steemd.enum_virtual_ops(self._conf, num, num + 1)
             prepared_vops = prepare_vops(vops)
 
@@ -371,11 +397,10 @@ class Sync:
                      ms, ' SLOW' if ms > 1000 else '')
             log.info("[LIVE SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
 
-            if num % 1200 == 0: #1hr
+            if num % 1200 == 0: #1hour
                 log.warning("head block %d @ %s", num, block['timestamp'])
                 log.info("[LIVE SYNC] hourly stats")
 
-            if num % 1200 == 0: #1hour
                 log.info("[LIVE SYNC] filling payout_stats_view executed")
                 with ThreadPoolExecutor(max_workers=2) as executor:
                     executor.submit(PayoutStats.generate)
@@ -388,6 +413,10 @@ class Sync:
             PC.broadcast(BroadcastObject('sync_current_block', num, 'blocks'))
             FSM.next_blocks()
             OPSM.next_blocks()
+
+            if num >= max_sync_block:
+                log.info("Stopping [LIVE SYNC] because of specified block limit: %d", max_sync_block)
+                break
 
     # refetch dynamic_global_properties, feed price, etc
     def _update_chain_state(self):
