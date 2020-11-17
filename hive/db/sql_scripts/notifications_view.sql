@@ -25,7 +25,7 @@ FROM
     , rank() OVER(order by ha3.reputation DESC) as rank
     FROM  hive_accounts ha3
     ORDER BY ha3.reputation DESC LIMIT 150000
-    -- Conditions above (related to rank.position) eliminates all records having rank > 100k. So with inclding some 
+    -- Conditions above (related to rank.position) eliminates all records having rank > 100k. So with inclding some
     -- additional space for redundant accounts (having same reputation) lets assume we're limiting it to 150k
     -- As another reason, it can be pointed that only 2% of account has the same reputations, it means only 2000
     -- in 100000, but we get 150000 as 50% would repeat
@@ -130,7 +130,7 @@ UNION ALL
     ''::character varying(16) AS community,
     ''::character varying AS community_title,
     ''::character varying AS payload
-   FROM hive_follows hf
+   FROM hive_follows hf WHERE hf.state = 1 --only follow blog
 UNION ALL
  SELECT hr.block_num,
     notification_id(hr.block_num, 14, hr.id) AS id,
