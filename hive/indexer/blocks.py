@@ -449,3 +449,8 @@ class Blocks:
             time_start = perf_counter()
             DB.query_no_return(query)
             log.info("%s executed in: %.4f s", query, perf_counter() - time_start)
+
+        time_start = perf_counter()
+        PayoutStats.generate()
+        time_end = perf_counter()
+        log.info("filling payout_stats_view executed in %.4fs", time_end - time_start)
