@@ -89,21 +89,6 @@ class Posts(DbAdapterHolder):
     def comment_op(cls, op, block_date):
         """Register new/edited/undeleted posts; insert into feed cache."""
 
-        sql = """
-            SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, community_id, is_valid, is_muted, depth
-            FROM process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_date)::timestamp, (:block_num)::integer);
-            """
-
-        row = DB.query_row(sql, author=op['author'], permlink=op['permlink'], parent_author=op['parent_author'],
-                   parent_permlink=op['parent_permlink'], date=block_date, community_support_start_date=START_DATE, block_num=op['block_num'])
-
-        result = dict(row)
-
-        # TODO we need to enhance checking related community post validation and honor is_muted.
-        error = cls._verify_post_against_community(op, result['community_id'], result['is_valid'], result['is_muted'])
-
-        cls._set_id(op['author']+'/'+op['permlink'], result['id'])
-
         md = {}
         # At least one case where jsonMetadata was double-encoded: condenser#895
         # jsonMetadata = JSON.parse(jsonMetadata);
@@ -113,6 +98,25 @@ class Posts(DbAdapterHolder):
                 md = {}
         except Exception:
             pass
+
+        tags = []
+        if md and 'tags' in md and isinstance(md['tags'], list):
+            tags = md['tags']
+
+        sql = """
+            SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, community_id, is_valid, is_muted, depth
+            FROM process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_date)::timestamp, (:block_num)::integer, (:tags)::VARCHAR[]);
+            """
+
+        row = DB.query_row(sql, author=op['author'], permlink=op['permlink'], parent_author=op['parent_author'],
+                   parent_permlink=op['parent_permlink'], date=block_date, community_support_start_date=START_DATE, block_num=op['block_num'], tags=tags)
+
+        result = dict(row)
+
+        # TODO we need to enhance checking related community post validation and honor is_muted.
+        error = cls._verify_post_against_community(op, result['community_id'], result['is_valid'], result['is_muted'])
+
+        cls._set_id(op['author']+'/'+op['permlink'], result['id'])
 
         img_url = None
         if 'image' in md:
@@ -141,18 +145,6 @@ class Posts(DbAdapterHolder):
 
 #        log.info("Adding author: {}  permlink: {}".format(op['author'], op['permlink']))
         PostDataCache.add_data(result['id'], post_data, is_new_post)
-
-        if not result['depth']:
-            tags = [result['post_category']]
-            if md and 'tags' in md and isinstance(md['tags'], list):
-                tags = tags + md['tags']
-            tags = map(lambda tag: (str(tag) or '').strip('# ').lower()[:32], tags)
-            tags = filter(None, tags)
-            from funcy.seqs import distinct
-            tags = list(distinct(tags))[:5]
-
-            sql = """SELECT add_tags( (:post_id)::INTEGER, (:tags)::VARCHAR[] )"""
-            DB.query_row( sql, post_id = result['id'], tags=tags );
 
         if not DbState.is_initial_sync():
             if error:
