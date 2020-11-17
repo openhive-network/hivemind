@@ -21,18 +21,16 @@ async def get_following(db, account: str, start: str, state: int, limit: int):
 async def get_reblogged_by(db, author: str, permlink: str):
     """Return all rebloggers of a post."""
 
-    sql = "SELECT * FROM condenser_get_names_by_reblogged( '{}', '{}' )".format( author, permlink )
-    names = await db.query_col(sql)
+    sql = "SELECT * FROM condenser_get_names_by_reblogged( (:author)::VARCHAR, (:permlink)::VARCHAR )"
+    names = await db.query_col(sql, author=author, permlink=permlink)
 
     if author in names:
         names.remove(author)
     return names
 
-async def get_data(db, sql:str, truncate_body: int = 0):
-    result = await db.query_all(sql); 
-
+async def process_posts(db, sql_result, truncate_body: int = 0):
     posts = []
-    for row in result:
+    for row in sql_result:
         row = dict(row)
         post = _condenser_post_object(row, truncate_body=truncate_body)
 
@@ -43,20 +41,24 @@ async def get_data(db, sql:str, truncate_body: int = 0):
 
 async def get_by_blog_without_reblog(db, account: str, start_permlink: str = '', limit: int = 20, truncate_body: int = 0):
   """Get a list of posts for an author's blog without reblogs."""
-  sql = " SELECT * FROM condenser_get_by_blog_without_reblog( '{}', '{}', {} ) ".format( account, start_permlink, limit )
-  return await get_data(db, sql, truncate_body )
+  sql = "SELECT * FROM condenser_get_by_blog_without_reblog( (:author)::VARCHAR, (:permlink)::VARCHAR, :limit )"
+  result = await db.query_all(sql, author=account, permlink=start_permlink, limit=limit);
+  return await process_posts(db, result, truncate_body)
 
 async def get_by_account_comments(db, account: str, start_permlink: str = '', limit: int = 20, truncate_body: int = 0):
   """Get a list of posts representing comments by an author."""
-  sql = " SELECT * FROM condenser_get_by_account_comments( '{}', '{}', {} ) ".format( account, start_permlink, limit )
-  return await get_data(db, sql, truncate_body )
+  sql = "SELECT * FROM condenser_get_by_account_comments( (:author)::VARCHAR, (:permlink)::VARCHAR, :limit )"
+  result = await db.query_all(sql, author=account, permlink=start_permlink, limit=limit);
+  return await process_posts(db, result, truncate_body)
 
 async def get_by_replies_to_account(db, start_author: str, start_permlink: str = '', limit: int = 20, truncate_body: int = 0):
   """Get a list of posts representing replies to an author."""
-  sql = " SELECT * FROM condenser_get_by_replies_to_account( '{}', '{}', {} ) ".format( start_author, start_permlink, limit )
-  return await get_data(db, sql, truncate_body )
+  sql = "SELECT * FROM bridge_get_account_posts_by_replies( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False )"
+  result = await db.query_all(sql, account=start_author, author=start_author if start_permlink else '', permlink=start_permlink, limit=limit);
+  return await process_posts(db, result, truncate_body)
 
 async def get_by_blog(db, account: str = '', start_author: str = '', start_permlink: str = '', limit: int = 20):
   """Get a list of posts for an author's blog."""
-  sql = " SELECT * FROM condenser_get_by_blog( '{}', '{}', '{}', {} ) ".format( account, start_author, start_permlink, limit )
-  return await get_data(db, sql )
+  sql = "SELECT * FROM condenser_get_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, :limit )"
+  result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit);
+  return await process_posts(db, result)
