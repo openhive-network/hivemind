@@ -103,7 +103,7 @@ async def _get_ranked_posts_for_observer_communities( db, sort:str, start_author
     assert False, "Unknown sort order"
 
 @return_error_info
-async def _get_ranked_posts_for_communities( db, sort:str, community, start_author:str, start_permlink:str, limit, observer:str=None):
+async def _get_ranked_posts_for_communities( db, sort:str, community, start_author:str, start_permlink:str, limit, observer:str ):
     async def execute_community_query(db, sql, limit):
         return await db.query_all(sql, community=community, author=start_author, permlink=start_permlink, limit=limit, observer=observer )
 
@@ -151,72 +151,72 @@ async def _get_ranked_posts_for_communities( db, sort:str, community, start_auth
 
 
 @return_error_info
-async def _get_ranked_posts_for_tag( db, sort:str, tag, start_author:str, start_permlink:str, limit, observer:str=None):
-    async def execute_tags_query(db, sql, limit):
+async def _get_ranked_posts_for_tag( db, sort:str, tag, start_author:str, start_permlink:str, limit, observer:str ):
+    async def execute_tags_query(db, sql):
         return await db.query_all(sql, tag=tag, author=start_author, permlink=start_permlink, limit=limit, observer=observer )
 
     if sort == 'hot':
         sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_tags_query(db, sql, limit)
+        return await execute_tags_query(db, sql)
 
     if sort == 'promoted':
         sql = "SELECT * FROM bridge_get_ranked_post_by_promoted_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_tags_query(db, sql, limit)
+        return await execute_tags_query(db, sql)
 
     if sort == 'payout':
         sql = "SELECT * FROM bridge_get_ranked_post_by_payout_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True, (:observer)::VARCHAR )"
-        return await execute_tags_query(db, sql, limit)
+        return await execute_tags_query(db, sql)
 
     if sort == 'payout_comments':
         sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_tags_query(db, sql, limit)
+        return await execute_tags_query(db, sql)
 
     if sort == 'muted':
         sql = "SELECT * FROM bridge_get_ranked_post_by_muted_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_tags_query(db, sql, limit)
+        return await execute_tags_query(db, sql)
 
     if sort == 'trending':
         sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_tags_query(db, sql, limit)
+        return await execute_tags_query(db, sql)
 
     if sort == 'created':
         sql = "SELECT * FROM bridge_get_ranked_post_by_created_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_tags_query(db, sql, limit)
+        return await execute_tags_query(db, sql)
 
     assert False, "Unknown sort order"
 
 @return_error_info
-async def _get_ranked_posts_for_all( db, sort:str, start_author:str, start_permlink:str, limit, observer:str=None):
-    async def execute_query(db, sql, limit, observer=None):
+async def _get_ranked_posts_for_all( db, sort:str, start_author:str, start_permlink:str, limit, observer:str ):
+    async def execute_query(db, sql):
         return await db.query_all(sql, author=start_author, permlink=start_permlink, limit=limit, observer=observer )
 
     if sort == 'trending':
         sql = "SELECT * FROM bridge_get_ranked_post_by_trends( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_query(db, sql, limit)
+        return await execute_query(db, sql)
 
     if sort == 'created':
         sql = "SELECT * FROM bridge_get_ranked_post_by_created( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_query(db, sql, limit, observer)
+        return await execute_query(db, sql)
 
     if sort == 'hot':
         sql = "SELECT * FROM bridge_get_ranked_post_by_hot( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_query(db, sql, limit)
+        return await execute_query(db, sql)
 
     if sort == 'promoted':
         sql = "SELECT * FROM bridge_get_ranked_post_by_promoted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_query(db, sql, limit)
+        return await execute_query(db, sql)
 
     if sort == 'payout':
         sql = "SELECT * FROM bridge_get_ranked_post_by_payout( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True, (:observer)::VARCHAR )"
-        return await execute_query(db, sql, limit)
+        return await execute_query(db, sql)
 
     if sort == 'payout_comments':
         sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_query(db, sql, limit)
+        return await execute_query(db, sql)
 
     if sort == 'muted':
         sql = "SELECT * FROM bridge_get_ranked_post_by_muted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_query(db, sql, limit)
+        return await execute_query(db, sql)
 
     assert False, "Unknown sort order"
 
@@ -316,7 +316,7 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
                 reblogged_by_list.sort()
                 post['reblogged_by'] = reblogged_by_list
 
-        post = append_statistics_to_post(post, row, False if account_posts else row['is_pinned'], blacklists_for_user, not account_posts)
+        post = append_statistics_to_post(post, row, False if account_posts else row['is_pinned'], blacklists_for_user)
         posts.append(post)
     return posts
 
