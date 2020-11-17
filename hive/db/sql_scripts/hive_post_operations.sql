@@ -1,4 +1,31 @@
-DROP FUNCTION if exists process_hive_post_operation(character varying,character varying,character varying,character varying,timestamp without time zone,integer,integer)
+DROP FUNCTION IF EXISTS prepare_tags;
+CREATE OR REPLACE FUNCTION prepare_tags( in _raw_tags VARCHAR[] )
+RETURNS SETOF hive_tag_data.id%TYPE
+LANGUAGE 'plpgsql'
+VOLATILE
+AS
+$function$
+DECLARE
+   __i INTEGER;
+   __tags VARCHAR[];
+   __tag VARCHAR;
+BEGIN
+  FOR __i IN 1 .. ARRAY_UPPER( _raw_tags, 1)
+  LOOP
+    __tag = CAST( LEFT(LOWER(REGEXP_REPLACE( _raw_tags[ __i ], '[#\s]', '', 'g' )),32) as VARCHAR);
+    CONTINUE WHEN __tag = '' OR __tag = ANY(__tags);
+    __tags = ARRAY_APPEND( __tags, __tag );
+  END LOOP;
+
+  RETURN QUERY INSERT INTO
+     hive_tag_data AS htd(tag)
+  SELECT UNNEST( __tags )
+  ON CONFLICT("tag") DO UPDATE SET tag=EXCLUDED.tag --trick to always return id
+  RETURNING htd.id;
+END
+$function$;
+
+DROP FUNCTION IF EXISTS process_hive_post_operation;
 ;
 CREATE OR REPLACE FUNCTION process_hive_post_operation(
   in _author hive_accounts.name%TYPE,
@@ -7,7 +34,8 @@ CREATE OR REPLACE FUNCTION process_hive_post_operation(
   in _parent_permlink hive_permlink_data.permlink%TYPE,
   in _date hive_posts.created_at%TYPE,
   in _community_support_start_block hive_posts.block_num%TYPE,
-  in _block_num hive_posts.block_num%TYPE)
+  in _block_num hive_posts.block_num%TYPE,
+  in _metadata_tags VARCHAR[])
 RETURNS TABLE (is_new_post boolean, id hive_posts.id%TYPE, author_id hive_posts.author_id%TYPE, permlink_id hive_posts.permlink_id%TYPE,
                 post_category hive_category_data.category%TYPE, parent_id hive_posts.parent_id%TYPE, community_id hive_posts.community_id%TYPE,
                 is_valid hive_posts.is_valid%TYPE, is_muted hive_posts.is_muted%TYPE, depth hive_posts.depth%TYPE)
@@ -74,7 +102,9 @@ ELSE
   RETURN QUERY INSERT INTO hive_posts as hp
   (parent_id, depth, community_id, category_id,
     root_id, is_muted, is_valid,
-    author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted, block_num, block_num_created)
+    author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,
+    active, payout_at, cashout_time, counter_deleted, block_num, block_num_created,
+    tags_ids)
   SELECT 0 AS parent_id, 0 AS depth,
       (CASE
         WHEN _block_num > _community_support_start_block THEN
@@ -90,6 +120,10 @@ ELSE
       calculate_time_part_of_trending(_date) AS sc_trend,
       _date AS active, (_date + INTERVAL '7 days') AS payout_at, (_date + INTERVAL '7 days') AS cashout_time, 0
       , _block_num as block_num, _block_num as block_num_created
+      , (
+          SELECT ARRAY_AGG( prepare_tags )
+          FROM prepare_tags( ARRAY_APPEND(_metadata_tags, _parent_permlink ) )
+        ) as tags_ids
   FROM hive_accounts ha,
         hive_permlink_data hpd
   WHERE ha.name = _author and hpd.permlink = _permlink
@@ -100,7 +134,8 @@ ELSE
     --- post edit part
     updated_at = _date,
     active = _date,
-    block_num = _block_num
+    block_num = _block_num,
+    tags_ids = EXCLUDED.tags_ids
 
   RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, _parent_permlink as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth
   ;
@@ -138,29 +173,3 @@ BEGIN
 END
 $function$
 ;
-
-DROP FUNCTION IF EXISTS add_tags;
-CREATE FUNCTION add_tags( in _post_id hive_posts.id%TYPE, in _tags VARCHAR[] )
-RETURNS void
-LANGUAGE 'plpgsql'
-VOLATILE
-AS
-$function$
-DECLARE
-	__tags_ids INTEGER[];
-BEGIN
-	WITH tags_ids(id) AS
-	(
-		INSERT INTO
-			hive_tag_data AS htd(tag)
-		SELECT UNNEST( _tags )
-		ON CONFLICT("tag") DO UPDATE SET tag=EXCLUDED.tag --trick to always return id
-		RETURNING htd.id
-	)
-	SELECT ARRAY_AGG( id ) INTO __tags_ids FROM tags_ids;
-
-	UPDATE hive_posts hp
-	SET tags_ids = __tags_ids
-	WHERE hp.id = _post_id;
-END
-$function$
