@@ -125,10 +125,6 @@ END
 $BODY$;
 COMMIT;
 
-END
-$BODY$;
-COMMIT;
-
 START TRANSACTION;
 
 TRUNCATE TABLE hive_db_data_migration;
