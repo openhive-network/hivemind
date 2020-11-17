@@ -302,6 +302,12 @@ select 'update_hive_posts_children_count execution'
 where not exists (select null from hive_db_patch_level where patched_to_revision = '0e3c8700659d98b45f1f7146dc46a195f905fc2d' )
 ;
 
+-- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/372
+INSERT INTO hive_db_data_migration
+select 'Notification cache initial fill'
+where not exists (select null from hive_db_patch_level where patched_to_revision = 'cc7bb174d40fe1a0e2221d5d7e1c332c344dca34' )
+;
+
 --- 1847c75702384c7e34c624fc91f24d2ef20df91d latest version of develop included in this migration script.
 
 --- Rename hive_votes_ux1 unique constraint to the hive_votes_voter_id_author_id_permlink_id_uk
@@ -321,12 +327,6 @@ DROP INDEX IF EXISTS public.hive_posts_created_at_author_id_idx;
 CREATE INDEX IF NOT EXISTS hive_posts_author_id_created_at_idx ON public.hive_posts ( author_id DESC, created_at DESC);
 
 CREATE INDEX IF NOT EXISTS hive_blocks_created_at_idx ON hive_blocks (created_at);
-
-INSERT INTO hive_db_data_migration
-SELECT 'Notification cache initial fill'
-WHERE NOT EXISTS (SELECT data_type
-              FROM information_schema.columns
-              WHERE table_name = 'hive_notification_cache');
 
 --- Notification cache to significantly speedup notification APIs.
 CREATE TABLE IF NOT EXISTS hive_notification_cache

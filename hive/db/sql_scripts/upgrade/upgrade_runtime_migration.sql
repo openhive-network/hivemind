@@ -125,6 +125,10 @@ END
 $BODY$;
 COMMIT;
 
+END
+$BODY$;
+COMMIT;
+
 START TRANSACTION;
 
 TRUNCATE TABLE hive_db_data_migration;
@@ -166,6 +170,7 @@ values
 ,(now(), '1f23e1326f3010bc84353aba82d4aa7ff2f999e4') -- hive_posts_author_id_created_at_idx index def. to speedup hive_accounts_info_view.
 ,(now(), '2a274e586454968a4f298a855a7e60394ed90bde') -- get_number_of_unread_notifications speedup https://gitlab.syncad.com/hive/hivemind/-/merge_requests/348/diffs
 ,(now(), '431fdaead7dcd69e4d2a45e7ce8a3186b8075515') -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/367
+,(now(), 'cc7bb174d40fe1a0e2221d5d7e1c332c344dca34') -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/372
 ) ds (patch_date, patch_revision)
 where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
 
