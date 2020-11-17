@@ -234,11 +234,11 @@ async def _child_ids(db, parent_ids):
     rows = await db.query_all(sql, ids=tuple(parent_ids))
     return [[row[0], row[1]] for row in rows]
 
-async def _load_discussion(db, author, permlink):
+async def _load_discussion(db, author, permlink, observer=None):
     """Load a full discussion thread."""
 
-    sql = "SELECT * FROM get_discussion('{}','{}')".format( author, permlink)
-    sql_result = await db.query_all(sql)
+    sql = "SELECT * FROM get_discussion(:author,:permlink,:observer)"
+    sql_result = await db.query_all(sql, author=author, permlink=permlink, observer=observer)
 
     muted_accounts = Mutes.all()
     posts = []
