@@ -346,7 +346,7 @@ async def get_discussions_by_feed(context, tag: str = None, start_author: str = 
         valid_account(start_author, allow_empty=True),
         valid_permlink(start_permlink, allow_empty=True),
         valid_limit(limit, 100, 20),
-        truncate_body)
+        truncate_body, observer)
 
 @return_error_info
 @nested_query_compat
