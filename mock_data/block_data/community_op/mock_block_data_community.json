@@ -418,8 +418,8 @@
               "parent_author": "",
               "parent_permlink": "hive-135485",
               "author": "test-safari",
-              "permlink": "secrets",
-              "title": "Secrets",
+              "permlink": "secrets1",
+              "title": "Secrets1",
               "body": "![7fa7d618acbe1313d323c0db42ecf211.jpg](https:\/\/i.pinimg.com\/originals\/7f\/a7\/d6\/7fa7d618acbe1313d323c0db42ecf211.jpg)",
               "json_metadata": "{\"image\":[\"https:\/\/i.pinimg.com\/originals\/7f\/a7\/d6\/7fa7d618acbe1313d323c0db42ecf211.jpg\"],\"app\":\"steemit\/0.1\",\"format\":\"markdown\"}"
             }
@@ -482,6 +482,17 @@
               "title": "Secrets6",
               "body": "![7fa7d618acbe1313d323c0db42ecf211.jpg](https:\/\/i.pinimg.com\/originals\/7f\/a7\/d6\/7fa7d618acbe1313d323c0db42ecf211.jpg)",
               "json_metadata": "{\"image\":[\"https:\/\/i.pinimg.com\/originals\/7f\/a7\/d6\/7fa7d618acbe1313d323c0db42ecf211.jpg\"],\"app\":\"steemit\/0.1\",\"format\":\"markdown\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-135485"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"role\":\"admin\"}]"
             }
           }
         ],
@@ -571,7 +582,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"permlink\":\"secrets\",\"notes\":\"spamming\"}]"
+              "json": "[\"mutePost\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"permlink\":\"secrets1\",\"notes\":\"spamming\"}]"
             }
           },
           {
@@ -582,7 +593,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"unmutePost\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"permlink\":\"secrets\",\"notes\":\"testibgn\"}]"
+              "json": "[\"unmutePost\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"permlink\":\"secrets1\",\"notes\":\"testibgn\"}]"
             }
           },
           {
@@ -593,7 +604,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"permlink\":\"secrets\"}]"
+              "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"permlink\":\"secrets1\"}]"
             }
           },
           {
@@ -604,7 +615,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"unpinPost\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"permlink\":\"secrets\"}]"
+              "json": "[\"unpinPost\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"permlink\":\"secrets1\"}]"
             }
           },
           {
@@ -615,7 +626,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"flagPost\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"permlink\":\"secrets\",\"comment\":\"This is not a kitten..\"}]"
+              "json": "[\"flagPost\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"permlink\":\"secrets1\",\"notes\":\"This is not a kitten..\"}]"
             }
           }
         ]
