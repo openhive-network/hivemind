@@ -26,8 +26,8 @@ async def get_discussion(context, author, permlink, observer=None):
     if observer:
         blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
 
-    sql = "SELECT * FROM get_discussion(:author,:permlink)"
-    rows = await db.query_all(sql, author=author, permlink=permlink)
+    sql = "SELECT * FROM get_discussion(:author,:permlink,:observer)"
+    rows = await db.query_all(sql, author=author, permlink=permlink, observer=observer)
     if not rows or len(rows) == 0:
         return {}
     root_id = rows[0]['id']

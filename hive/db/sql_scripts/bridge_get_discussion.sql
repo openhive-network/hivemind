@@ -2,7 +2,8 @@ DROP FUNCTION IF EXISTS get_discussion
 ;
 CREATE OR REPLACE FUNCTION get_discussion(
     in _author hive_accounts.name%TYPE,
-    in _permlink hive_permlink_data.permlink%TYPE
+    in _permlink hive_permlink_data.permlink%TYPE,
+    in _observer VARCHAR
 )
 RETURNS TABLE
 (
@@ -72,12 +73,13 @@ BEGIN
             SELECT hp.id, hp.parent_id
             FROM hive_posts hp
             WHERE hp.id = __post_id
-            AND NOT hp.is_muted
             UNION ALL
             SELECT children.id, children.parent_id
             FROM hive_posts children
             JOIN child_posts ON children.parent_id = child_posts.id
-            WHERE children.counter_deleted = 0 AND NOT children.is_muted
+            JOIN hive_accounts ON children.author_id = hive_accounts.id
+            WHERE children.counter_deleted = 0 AND
+            (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hive_accounts.name) ELSE True END)
         )
         SELECT hp2.id
         FROM hive_posts hp2
