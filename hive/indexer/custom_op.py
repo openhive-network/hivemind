@@ -9,7 +9,7 @@ from hive.indexer.follow import Follow
 from hive.indexer.reblog import Reblog
 from hive.indexer.notify import Notify
 
-from hive.indexer.community import process_json_community_op, START_BLOCK
+from hive.indexer.community import Community, process_json_community_op
 from hive.utils.normalize import load_json_key
 from hive.utils.json import valid_op_json, valid_date, valid_command, valid_keys
 
@@ -57,7 +57,7 @@ class CustomOp:
                     op_json = ['reblog', op_json]  # legacy compat
                 cls._process_legacy(account, op_json, block_date, block_num)
             elif op['id'] == 'community':
-                if block_num > START_BLOCK:
+                if block_num > Community.start_block:
                     process_json_community_op(account, op_json, block_date, block_num)
             elif op['id'] == 'notify':
                 cls._process_notify(account, op_json, block_date)

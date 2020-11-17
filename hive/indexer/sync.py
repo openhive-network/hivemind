@@ -15,6 +15,7 @@ from hive.steem.block.stream import MicroForkException
 from hive.indexer.blocks import Blocks
 from hive.indexer.accounts import Accounts
 from hive.indexer.follow import Follow
+from hive.indexer.community import Community
 
 from hive.server.common.payout_stats import PayoutStats
 from hive.server.common.mentions import Mentions
@@ -212,6 +213,12 @@ class Sync:
 
         self._steem = conf.steem()
 
+    def load_mock_data(self,path):
+        mock_block_data_path = self._conf.get(path)
+        if mock_block_data_path:
+            MockBlockProvider.load_block_data(mock_block_data_path)
+            MockBlockProvider.print_data()
+
     def run(self):
         """Initialize state; setup/recovery checks; sync and runloop."""
         from hive.version import VERSION, GIT_REVISION
@@ -221,10 +228,11 @@ class Sync:
         from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
         log.info("database_schema_version : %s", SCHEMA_DB_VERSION)
 
-        mock_block_data_path = self._conf.get("mock_block_data_path")
-        if mock_block_data_path:
-            MockBlockProvider.load_block_data(mock_block_data_path)
-            MockBlockProvider.print_data()
+        Community.start_block = self._conf.get("community_start_block")
+        Community.start_date = self._conf.get("community_start_date")
+
+        self.load_mock_data("mock_follow_block_data_path")
+        self.load_mock_data("mock_community_block_data_path")
 
         mock_vops_data_path = self._conf.get("mock_vops_data_path")
         if mock_vops_data_path:

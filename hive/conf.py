@@ -53,8 +53,11 @@ class Conf():
         add('--exit-after-sync', help='exit when sync is completed', action='store_true')
         add('--test-profile', type=strtobool, env_var='TEST_PROFILE', help='(debug) profile execution', default=False)
         add('--log-virtual-op-calls', type=strtobool, env_var='LOG_VIRTUAL_OP_CALLS', help='(debug) log virtual op calls and responses', default=False)
-        add('--mock-block-data-path', type=str, env_var='MOCK_BLOCK_DATA_PATH', help='(debug/testing) load additional data from block data file')
+        add('--mock-follow-block-data-path', type=str, env_var='MOCK_FOLLOW_BLOCK_DATA_PATH', help='(debug/testing) load additional follow data from block data file')
+        add('--mock-community-block-data-path', type=str, env_var='MOCK_COMMUNITY_BLOCK_DATA_PATH', help='(debug/testing) load additional community data from block data file')
         add('--mock-vops-data-path', type=str, env_var='MOCK_VOPS_DATA_PATH', help='(debug/testing) load additional data from virtual operations data file')
+        add('--community-start-block', type=int, env_var='COMMUNITY_START_BLOCK', default=37500000)
+        add('--community-start-date', type=str, env_var='COMMUNITY_START_DATE', default='2019-10-22T07:12:36')
 
         # logging
         add('--log-timestamp', help='Output timestamp in log', action='store_true')

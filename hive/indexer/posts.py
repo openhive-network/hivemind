@@ -11,7 +11,7 @@ from hive.db.adapter import Db
 from hive.db.db_state import DbState
 
 from hive.indexer.feed_cache import FeedCache
-from hive.indexer.community import Community, START_DATE
+from hive.indexer.community import Community
 from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.tags import Tags
@@ -96,7 +96,7 @@ class Posts(DbAdapterHolder):
             """
 
         row = DB.query_row(sql, author=op['author'], permlink=op['permlink'], parent_author=op['parent_author'],
-                   parent_permlink=op['parent_permlink'], date=block_date, community_support_start_date=START_DATE, block_num=op['block_num'])
+                   parent_permlink=op['parent_permlink'], date=block_date, community_support_start_date=Community.start_date, block_num=op['block_num'])
 
         result = dict(row)
 
