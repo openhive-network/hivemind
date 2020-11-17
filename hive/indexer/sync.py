@@ -371,6 +371,13 @@ class Sync:
         steemd = self._steem
         hive_head = Blocks.head_num()
 
+        # refresh stats on entering to listen mode
+        self._update_chain_state()
+        update_communities_posts_and_rank()
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            executor.submit(PayoutStats.generate)
+            executor.submit(Mentions.refresh)
+
         log.info("[LIVE SYNC] Entering listen with HM head: %d", hive_head)
 
         if hive_head >= max_sync_block:
