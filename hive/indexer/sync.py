@@ -209,6 +209,15 @@ class Sync:
 
         self._steem = conf.steem()
 
+    def refresh_sparse_stats(self):
+        # normally it should be refreshed in various time windows
+        # but we need the ability to do it all at the same time
+        self._update_chain_state()
+        update_communities_posts_and_rank()
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            executor.submit(PayoutStats.generate)
+            executor.submit(Mentions.refresh)
+
     def run(self):
         """Initialize state; setup/recovery checks; sync and runloop."""
         from hive.version import VERSION, GIT_REVISION
@@ -291,6 +300,7 @@ class Sync:
 
             head = Blocks.head_num()
             if head >= max_block_limit:
+                self.refresh_sparse_stats()
                 log.info("Exiting [LIVE SYNC] because irreversible block sync reached specified block limit: %d", max_block_limit)
                 break;
 
@@ -303,6 +313,7 @@ class Sync:
 
             head = Blocks.head_num()
             if head >= max_block_limit:
+                self.refresh_sparse_stats()
                 log.info("Exiting [LIVE SYNC] because of specified block limit: %d", max_block_limit)
                 break;
 
@@ -371,16 +382,10 @@ class Sync:
         steemd = self._steem
         hive_head = Blocks.head_num()
 
-        # refresh stats on entering to listen mode
-        self._update_chain_state()
-        update_communities_posts_and_rank()
-        with ThreadPoolExecutor(max_workers=2) as executor:
-            executor.submit(PayoutStats.generate)
-            executor.submit(Mentions.refresh)
-
         log.info("[LIVE SYNC] Entering listen with HM head: %d", hive_head)
 
         if hive_head >= max_sync_block:
+            self.refresh_sparse_stats()
             log.info("[LIVE SYNC] Exiting due to block limit exceeded: synced block number: %d, max_sync_block: %d", hive_head, max_sync_block)
             return
 
