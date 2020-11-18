@@ -83,7 +83,7 @@ class Posts(DbAdapterHolder):
 
         Also remove it from post-cache and feed-cache.
         """
-        cls.delete(op)
+        # cls.delete(op)
 
     @classmethod
     def comment_op(cls, op, block_date):
@@ -110,7 +110,8 @@ class Posts(DbAdapterHolder):
 
         row = DB.query_row(sql, author=op['author'], permlink=op['permlink'], parent_author=op['parent_author'],
                    parent_permlink=op['parent_permlink'], date=block_date, community_support_start_date=START_DATE, block_num=op['block_num'], tags=tags)
-
+        if not row:
+            return
         result = dict(row)
 
         # TODO we need to enhance checking related community post validation and honor is_muted.
@@ -361,6 +362,7 @@ class Posts(DbAdapterHolder):
     @classmethod
     def comment_options_op(cls, op):
         """ Process comment_options_operation """
+        log.info( "[MI] comment_options_op: {}".format(op) )
         max_accepted_payout = legacy_amount(op['max_accepted_payout']) if 'max_accepted_payout' in op else '1000000.000 HBD'
         allow_votes = op['allow_votes'] if 'allow_votes' in op else True
         allow_curation_rewards = op['allow_curation_rewards'] if 'allow_curation_rewards' in op else True

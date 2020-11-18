@@ -85,14 +85,7 @@ if _parent_author != '' THEN
   INNER JOIN hive_permlink_data phpd ON phpd.id = php.permlink_id
   WHERE pha.name = _parent_author AND phpd.permlink = _parent_permlink AND
           ha.name = _author AND hpd.permlink = _permlink AND php.counter_deleted = 0
-
-  ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
-    --- During post update it is disallowed to change: parent-post, category, community-id
-    --- then also depth, is_valid and is_muted is impossible to change
-    --- post edit part
-    updated_at = _date,
-    active = _date,
-    block_num = _block_num
+  ON CONFLICT DO NOTHING
   RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, (SELECT hcd.category FROM hive_category_data hcd WHERE hcd.id = hp.category_id) as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth
 ;
 ELSE
@@ -130,16 +123,7 @@ ELSE
   FROM hive_accounts ha,
        hive_permlink_data hpd
   WHERE ha.name = _author and hpd.permlink = _permlink
-
-  ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
-    --- During post update it is disallowed to change: parent-post, category, community-id
-    --- then also depth, is_valid and is_muted is impossible to change
-    --- post edit part
-    updated_at = _date,
-    active = _date,
-    block_num = _block_num,
-    tags_ids = EXCLUDED.tags_ids
-
+  ON CONFLICT DO NOTHING
   RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, _parent_permlink as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth
   ;
 END IF;
