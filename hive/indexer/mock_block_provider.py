@@ -29,15 +29,17 @@ class MockBlockProvider(MockDataProvider):
         data = {}
         with open(file_name, "r") as src:
             data = load(src)
-        for block_num, transactions in data.items():
-            cls.add_block_data(block_num, transactions)
+        for block_num, block_content in data.items():
+            cls.add_block_data(block_num, block_content)
 
     @classmethod
-    def add_block_data(cls, block_num, transactions):
+    def add_block_data(cls, block_num, block_content):
         if block_num in cls.block_data:
-            cls.block_data[str(block_num)].extend(transactions)
+            assert 'transactions' in cls.block_data[str(block_num)]
+            assert 'transactions' in block_content
+            cls.block_data[str(block_num)]['transactions'] = cls.block_data[str(block_num)]['transactions'] + block_content['transactions']
         else:
-            cls.block_data[str(block_num)] = transactions
+            cls.block_data[str(block_num)] = block_content
 
     @classmethod
     def get_block_data(cls, block_num, pop=False):
