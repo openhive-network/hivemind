@@ -2,25 +2,27 @@
 
 set -euo pipefail
 
-collect_stats() {
+collect_db_stats() {
 
     echo "Collecting statistics from database ${HIVEMIND_DB_NAME}"
 
     mkdir -p pg-stats
     DIR=$PWD/pg-stats
 
-    PGPASSWORD=${POSTGRES_PASSWORD} psql \
-        --username "${POSTGRES_USER}" \
-        --host ${POSTGRES_HOST} \
-        --port ${POSTGRES_PORT} \
+    PGPASSWORD=${RUNNER_POSTGRES_APP_USER_PASSWORD} psql \
+        --username "${RUNNER_POSTGRES_APP_USER=}" \
+        --host ${RUNNER_POSTGRES_HOST} \
+        --port ${RUNNER_POSTGRES_PORT} \
         --dbname ${HIVEMIND_DB_NAME} << EOF
 \timing
 \copy (select * from pg_settings) to '$DIR/pg_settings.csv' WITH CSV HEADER
 \copy (select * from pg_stat_user_tables) to '$DIR/pg_stat_user_tables.csv' WITH CSV HEADER
 
 -- Disabled, because this table is too big.
---\copy (select * from pg_stat_statements) to '$DIR/pg_stat_statements.csv' WITH CSV HEADER
+-- \copy (select * from pg_stat_statements) to '$DIR/pg_stat_statements.csv' WITH CSV HEADER
 
+/*
+-- Looks to be unuseful.
 -- See https://github.com/powa-team/pg_qualstats
 \echo pg_qualstats index advisor
 SELECT v
@@ -33,8 +35,9 @@ SELECT v
   FROM json_array_elements(
     pg_qualstats_index_advisor(min_filter => 50)->'unoptimised') v
   ORDER BY v::text COLLATE "C";
+*/
 EOF
 
 }
 
-collect_stats
+collect_db_stats

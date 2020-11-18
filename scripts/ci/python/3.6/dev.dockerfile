@@ -1,5 +1,7 @@
 FROM python:3.6.12-buster
 
+# For running python as non-root user, e.g. on devel machine.
+
 # Setup python environment.
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
@@ -39,8 +41,11 @@ ENV user ${user}
 ## Add user ##
 RUN groupadd --gid 1000 ${user} \
     && useradd --create-home --uid 1000 --gid ${user} ${user}
-USER ${user}
-WORKDIR /home/${user}
+
+RUN mkdir -p /home/${user}/src/hivemind
 RUN chown -R ${user}:${user} /home/${user}
+
+WORKDIR /home/${user}/src/hivemind
+USER ${user}
 
 CMD [ "python3" ]

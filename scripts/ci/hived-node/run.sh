@@ -4,6 +4,7 @@
 
 MYDIR="$PWD"
 WORKDIR="/usr/local/hive/consensus"
+IMAGE="registry.gitlab.syncad.com/hive/hive/consensus_node:00b5ff55"
 
 docker run -d \
     --name hived-replay-5000000 \
@@ -14,5 +15,5 @@ docker run -d \
     -v $MYDIR/blockchain/block_log:$WORKDIR/datadir/blockchain/block_log \
     -v $MYDIR/entrypoint.sh:$WORKDIR/entrypoint.sh \
     --entrypoint $WORKDIR/entrypoint.sh \
-    registry.gitlab.syncad.com/hive/hive/consensus_node:00b5ff55 \
+    $IMAGE \
     --replay-blockchain --stop-replay-at-block 5000000

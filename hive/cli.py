@@ -21,13 +21,13 @@ def setup_logging(conf):
         fmt = '%(asctime)s.%(msecs)03d{} %(created).6f ' \
             '%(levelname)s - %(name)s - %(message)s'.format(timezone)
         logging.basicConfig(format=fmt, datefmt=datefmt)
-    if timestamp:
+    elif timestamp:
         datefmt='%Y-%m-%d %H:%M:%S'
         timezone = time.strftime('%z')
         fmt = '%(asctime)s.%(msecs)03d{} ' \
             '%(levelname)s - %(name)s - %(message)s'.format(timezone)
         logging.basicConfig(format=fmt, datefmt=datefmt)
-    if epoch:
+    elif epoch:
         fmt = '%(created).6f %(levelname)s - %(name)s - %(message)s'
         logging.basicConfig(format=fmt)
     else:

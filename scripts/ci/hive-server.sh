@@ -4,16 +4,10 @@
 
 set -euo pipefail
 
+JOB=$1
 HIVEMIND_PID=0
 MERCY_KILL_TIMEOUT=5
 START_DELAY=5
-
-# For debug only!
-# HIVED_URL='{"default":"http://hived-node:8091"}'
-# HIVED_URL='{"default":"http://172.17.0.1:8091"}'
-# HIVED_URL='{"default":"http://127.0.0.1:8091"}'
-# HIVEMIND_HTTP_PORT="8080"
-# HIVEMIND_POSTGRESQL_CONNECTION_STRING="postgresql://syncad:devdev@localhost:5432/hive_test"
 
 check_pid() {
   if [ -f hive_server.pid ]; then
@@ -24,6 +18,7 @@ check_pid() {
       echo "Process pid $HIVEMIND_PID is running"
     else
       # Process is not running
+      echo "Process pid $HIVEMIND_PID is not running"
       rm hive_server.pid
       HIVEMIND_PID=0
     fi
@@ -33,7 +28,7 @@ check_pid() {
 }
 
 stop() {
-  if [ "$HIVEMIND_PID" -gt "0" ]; then
+  if [ "$HIVEMIND_PID" -gt 0 ]; then
     HIVEMIND_PID=`cat hive_server.pid`
 
     # Send INT signal and give it some time to stop.
@@ -52,22 +47,25 @@ stop() {
   fi
 }
 
-
 start() {
 
-  if [ "$HIVEMIND_PID" -gt "0" ]; then
+  if [ "$HIVEMIND_PID" -gt 0 ]; then
     echo "Hive server is already running (pid $HIVEMIND_PID)"
     exit 0
   fi
 
-  echo "Starting hive server on port ${HIVEMIND_HTTP_PORT}"
+  echo "Starting hive server on port ${RUNNER_HIVEMIND_SERVER_HTTP_PORT}"
+
+  USER=${RUNNER_POSTGRES_APP_USER}:${RUNNER_POSTGRES_APP_USER_PASSWORD}
+  OPTIONS="host=${RUNNER_POSTGRES_HOST}&port=${RUNNER_POSTGRES_PORT}"
+  DATABASE_URL="postgresql://${USER}@/${HIVEMIND_DB_NAME}?${OPTIONS}"
 
   hive server \
       --log-mask-sensitive-data \
       --pid-file hive_server.pid \
-      --http-server-port $HIVEMIND_HTTP_PORT \
-      --steemd-url "$HIVED_URL" \
-      --database-url "$HIVEMIND_POSTGRESQL_CONNECTION_STRING" 2>&1 \
+      --http-server-port ${RUNNER_HIVEMIND_SERVER_HTTP_PORT} \
+      --steemd-url "${RUNNER_HIVED_URL}" \
+      --database-url "${DATABASE_URL}" 2>&1 \
       | tee -ia hivemind-server.log &
 
   HIVEMIND_PID=$!
@@ -81,11 +79,14 @@ start() {
       if ps -p $HIVEMIND_PID > /dev/null
       then
         echo "Hive server is running (pid $HIVEMIND_PID)"
+        # Write pid to file, sometimes there's wrong pid there.
+        echo $HIVEMIND_PID > hive_server.pid
         exit 0
       else
         # Check if process executed successfully or not.
         if wait $HIVEMIND_PID; then
           echo "Hive server has been started (pid $HIVEMIND_PID)"
+          echo $HIVEMIND_PID > hive_server.pid
           exit 0
         else
           RESULT=$?
@@ -107,5 +108,16 @@ start() {
 }
 
 
-check_pid
-"$1"
+main() {
+  check_pid
+  if [ "$JOB" = "start" ]; then
+    start
+  elif [ "$JOB" = "stop" ]; then
+    stop
+  else
+    echo "Invalid argument"
+    exit 1
+  fi
+}
+
+main

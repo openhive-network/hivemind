@@ -6,19 +6,26 @@
 
 set -e
 
-LIMIT=30 #seconds
-shift
-cmd="$@"
+LIMIT=10 #seconds
+
+HOST=$1
+PORT=$2
+
+if [ -z "$HOST" ]
+then
+    HOST="$RUNNER_POSTGRES_HOST"
+fi
+if [ -z "$PORT" ]
+then
+    PORT="$RUNNER_POSTGRES_PORT"
+fi
 
 wait_for_postgres() {
-    # wkedzierski@syncad.com work, but customized by wbarcik@syncad.com
     counter=0
-    echo "Waiting for postgres on ${POSTGRES_HOST}:${POSTGRES_PORT}. Timeout is ${LIMIT}s."
+    echo "Waiting for postgres on ${HOST}:${PORT}."
     while ! pg_isready \
-            --username $ADMIN_POSTGRES_USER \
-            --host $POSTGRES_HOST \
-            --port $POSTGRES_PORT \
-            --dbname postgres \
+            --host $HOST \
+            --port $PORT \
             --timeout=1 --quiet; do
         counter=$((counter+1))
         sleep 1
@@ -38,14 +45,15 @@ output_configuration() {
     echo "-------------------------------------------------"
     echo "Postgres version and configuration"
     echo "-------------------------------------------------"
-    PGPASSWORD=$ADMIN_POSTGRES_USER_PASSWORD psql \
-            --username "$ADMIN_POSTGRES_USER" \
-            --host "$POSTGRES_HOST" \
-            --port $POSTGRES_PORT \
+    PGPASSWORD=$RUNNER_POSTGRES_ADMIN_USER_PASSWORD psql \
+            --username "$RUNNER_POSTGRES_ADMIN_USER" \
+            --host "$HOST" \
+            --port $PORT \
             --dbname postgres <<EOF
 SELECT version();
-select name, setting, unit from pg_settings;
-\copy (select * from pg_settings) to '$DIR/pg_settings_on_start.csv' WITH CSV HEADER
+-- select name, setting, unit from pg_settings;
+-- show all;
+\copy (select name, setting, unit from pg_settings) to '$DIR/pg_settings_on_start.csv' WITH CSV HEADER
 \q
 EOF
     echo "-------------------------------------------------"
