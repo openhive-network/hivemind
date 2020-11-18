@@ -712,7 +712,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"setRole\",{\"community\":\"hive-117600\",\"account\":\"roadscape\",\"role\":\"admin\"}]"
+              "json": "[\"setRole\",{\"community\":\"hive-117600\",\"account\":\"roadscape\",\"role\":\"mod\"}]"
             }
           },
           {
@@ -1530,13 +1530,34 @@
               "id": "community",
               "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"blocktrades\",\"permlink\":\"crocodile03\"}]"
             }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "blocktrades",
+              "permlink": "elephant01",
+              "title": "powerful elephant 01",
+              "body": "only elephants 01",
+              "json_metadata": "{}"
+            }
           }
         ]
       }
     ],
     "block_id": "004c4b4900000000000000000000000000000000",
     "signing_key": "",
-    "transaction_ids": []
+    "transaction_ids": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+        ]
+      }
+
+    ]
   },
   "5000010": {
     "previous": "004c4b4900000000000000000000000000000000",
@@ -1545,7 +1566,73 @@
     "transaction_merkle_root": "0000000000000000000000000000000000000000",
     "extensions": [],
     "witness_signature": "",
-    "transactions": [],
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"pinPost\",{\"community\":\"hive-117600\",\"account\":\"test-safari\",\"permlink\":\"secrets6\"}]"
+            }
+          },
+          {
+            "type": "delete_comment_operation",
+            "value": {
+              "author": "test-safari",
+              "permlink": "secrets3"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"mutePost\",{\"community\":\"hive-117600\",\"account\":\"test-safari\",\"permlink\":\"secrets6\",\"notes\":\"I dont like it\"}]"
+            }
+          },
+          {
+            "type": "delete_comment_operation",
+            "value": {
+              "author": "test-safari",
+              "permlink": "secrets6"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "blocktrades"
+              ],
+              "id": "community",
+              "json": "[\"mutePost\",{\"community\":\"hive-135485\",\"account\":\"blocktrades\",\"permlink\":\"elephant01\",\"notes\":\"I don't like elephants\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "blocktrades"
+              ],
+              "id": "community",
+              "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"blocktrades\",\"permlink\":\"elephant01\"}]"
+            }
+          }
+        ]
+      }
+    ],
     "block_id": "004c4b4a00000000000000000000000000000000",
     "signing_key": "",
     "transaction_ids": []
@@ -1557,7 +1644,44 @@
     "transaction_merkle_root": "0000000000000000000000000000000000000000",
     "extensions": [],
     "witness_signature": "",
-    "transactions": [],
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "gtg"
+              ],
+              "id": "community",
+              "json": "[\"unsubscribe\",{\"community\":\"hive-103459\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "good-karma"
+              ],
+              "id": "community",
+              "json": "[\"unsubscribe\",{\"community\":\"hive-103459\"}]"
+            }
+          },
+          {
+            "type": "delete_comment_operation",
+            "value": {
+              "author": "blocktrades",
+              "permlink": "elephant01"
+            }
+          }
+        ]
+      }
+    ],
     "block_id": "004c4b4b00000000000000000000000000000000",
     "signing_key": "",
     "transaction_ids": []
