@@ -4,7 +4,6 @@ import logging
 import concurrent
 from time import perf_counter
 from concurrent.futures import ThreadPoolExecutor
-
 from hive.db.adapter import Db
 
 from hive.indexer.accounts import Accounts
@@ -443,7 +442,7 @@ class Blocks:
             "SELECT update_hive_posts_mentions({}, {})".format(first_block, last_block),
             "SELECT update_notification_cache({}, {}, {})".format(first_block, last_block, is_hour_action),
             "SELECT update_follow_count({}, {})".format(first_block, last_block),
-            #,"SELECT update_account_reputations({}, {})".format(first_block, last_block)
+            "SELECT update_account_reputations({}, {})".format(first_block, last_block)
         ]
 
         for query in queries:
