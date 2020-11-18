@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+JOB=$1
+
 start() {
   mkdir -p ".tmp"
   echo `date +%s` > ".tmp/timer-start"
@@ -18,4 +20,15 @@ check() {
     fi
 }
 
-"$1"
+main() {
+  if [ "$JOB" = "start" ]; then
+    start
+  elif [ "$JOB" = "check" ]; then
+    check
+  else
+    echo "Invalid argument"
+    exit 1
+  fi
+}
+
+main

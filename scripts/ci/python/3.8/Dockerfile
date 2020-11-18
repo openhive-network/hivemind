@@ -39,12 +39,7 @@ ENV user ${user}
 ## Add user ##
 RUN groupadd --gid 1000 ${user} \
     && useradd --create-home --uid 1000 --gid ${user} ${user}
-
-# Gitlab CI accepts only root user, so we don't set user here.
-# You can (and should) run command in container as user `alice` this way:
-# docker-compose run --rm --user=alice --name=myrunner runner /bin/bash
-# USER ${user}
-
+USER ${user}
 WORKDIR /home/${user}
 RUN chown -R ${user}:${user} /home/${user}
 

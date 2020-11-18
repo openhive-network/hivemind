@@ -144,3 +144,5 @@ Pipfile.lock
 pghero.yml
 *~
 .tmp
+
+.private

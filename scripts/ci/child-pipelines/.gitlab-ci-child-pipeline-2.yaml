@@ -1,0 +1,38 @@
+stages:
+  - run
+
+variables:
+
+  GIT_DEPTH: 10
+
+  GIT_STRATEGY: fetch # It's quick, but noticed errors with that, sometimes.
+  # GIT_STRATEGY: clone
+  # GIT_STRATEGY: none
+
+  GIT_SUBMODULE_STRATEGY: recursive
+  MY_VARIABLE: "bamboo"
+
+default:
+  image: hivemind/python:3.6
+  interruptible: false
+  cache: &global-cache
+    # Per-branch caching. CI_COMMIT_REF_SLUG is the same thing.
+    # key: "$CI_COMMIT_REF_NAME"
+    # Per project caching – use any key.
+    # Change this key, if you need to clear cache.
+    key: common-1
+    paths:
+      - .cache/
+      - .venv/
+      - .tox/
+  before_script:
+    - echo "I am before_script in child-2. MY_VARIABLE is $MY_VARIABLE"
+  after_script:
+    - echo "I am after_script in child-2. MY_VARIABLE is $MY_VARIABLE"
+
+child-2-job:
+  stage: run
+  script:
+    - echo "I am script in child-2-job. MY_VARIABLE is $MY_VARIABLE"
+  tags:
+    - hivemind-light-job

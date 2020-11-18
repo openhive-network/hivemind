@@ -1,6 +1,42 @@
-version: "3"
+version: "3.2"
 
 services:
+
+
+  python-3.6-dev:
+    image: hivemind/python:3.6-dev
+    build:
+      context: .
+      dockerfile: ./scripts/ci/python/3.6/dev.dockerfile
+      args:
+        - user=${USER}
+        - workdir=/home/${USER}/hivemind
+    user: ${USER}
+    # security_opt:
+    #   # Significant performance boost (about 5%), but very insecure.
+    #   # See https://medium.com/better-programming/faster-python-in-docker-d1a71a9b9917
+    #   # See https://docs.docker.com/engine/security/seccomp/
+    #   - seccomp:unconfined
+    shm_size: 2g
+    # command: ["tail", "-f", "/dev/null"]
+    volumes:
+      # Sockets of postgres servers on dockers.
+      - "postgres-10-run:/var/run/postgres-10"
+      - "postgres-12-run:/var/run/postgres-12"
+      # Sockets of postgres servers on host.
+      - "/var/run/postgresql:/var/run/postgresql"
+      # For keeping python dependencies created in docker.
+      - "python-3.6-dev:/home/${USER}"
+      # Application stuff from host.
+      - "$PWD/hive:$PWD/hive"
+      - "$PWD/tests:$PWD/tests"
+      - "$PWD/hive.conf:$PWD/hive.conf"
+      - "$PWD/pyproject.toml:$PWD/pyproject.toml"
+      - "$PWD/README.md:$PWD/README.md"
+      - "$PWD/setup.cfg:$PWD/setup.cfg"
+      - "$PWD/setup.py:$PWD/setup.py"
+      - "$PWD/tox.ini:$PWD/tox.ini"
+
 
   python-3.6:
     image: hivemind/python:3.6
@@ -8,25 +44,27 @@ services:
       context: .
       dockerfile: ./scripts/ci/python/3.6/Dockerfile
       args:
-        - user=${USER}
-        - workdir=/home/${USER}
-    user: ${USER}
-    shm_size: 0
-    # Below command makes your container running forever.
-    # command: ["tail", "-f", "/dev/null"]
+        - user=worker
+    user: worker
+    shm_size: 2g
+    volumes:
+      # Sockets of postgres servers on host.
+      - "/var/run/postgresql:/var/run/postgresql"
+
 
   python-3.8:
     image: hivemind/python:3.8
-    shm_size: 0
     build:
       context: .
       dockerfile: ./scripts/ci/python/3.8/Dockerfile
       args:
-        - user=${USER}
-        - workdir=/home/${USER}
-    user: ${USER}
-    # Below command makes your container running forever.
-    # command: ["tail", "-f", "/dev/null"]
+        - user=worker
+    user: worker
+    shm_size: 2g
+    volumes:
+      # Sockets of postgres servers on host.
+      - "/var/run/postgresql:/var/run/postgresql"
+
 
   postgres-10:
     image: hivemind/postgres:10
@@ -37,34 +75,16 @@ services:
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
-      - postgres-10-pgdata:/var/lib/postgresql/data
+      - $PWD/$POSTGRES_10_CONF_FILE:/etc/postgresql/postgresql.conf:ro
+      - postgres-10-run:/var/run/postgresql
     ports:
       - "${POSTGRES_10_PUBLISHED_PORT}:5432"
-    shm_size: 0
+    shm_size: 12g
     command: [
       "postgres",
-      "-c", "shared_preload_libraries=pg_stat_statements,pg_qualstats",
-      "-c", "track_functions=pl",
-      "-c", "track_io_timing=on",
-      "-c", "track_activity_query_size=2048",
-      "-c", "pg_stat_statements.max=10000",
-      "-c", "pg_stat_statements.track=all",
-      "-c", "max_connections=100",
-      "-c", "shared_buffers=12GB",
-      "-c", "effective_cache_size=36GB",
-      "-c", "maintenance_work_mem=2GB",
-      "-c", "checkpoint_completion_target=0.9",
-      "-c", "wal_buffers=16MB",
-      "-c", "default_statistics_target=100",
-      "-c", "random_page_cost=1.1",
-      "-c", "effective_io_concurrency=200",
-      "-c", "work_mem=31457kB",
-      "-c", "min_wal_size=2GB",
-      "-c", "max_wal_size=8GB",
-      "-c", "max_worker_processes=12",
-      "-c", "max_parallel_workers_per_gather=4",
-      "-c", "max_parallel_workers=12",
+      "-c", "config_file=/etc/postgresql/postgresql.conf"
     ]
+
 
   postgres-12:
     image: hivemind/postgres:12
@@ -75,56 +95,38 @@ services:
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
-      - postgres-12-pgdata:/var/lib/postgresql/data
+      - $PWD/$POSTGRES_12_CONF_FILE:/etc/postgresql/postgresql.conf:ro
+      - postgres-12-run:/var/run/postgresql
     ports:
       - "${POSTGRES_12_PUBLISHED_PORT}:5432"
-    shm_size: 0
-    # https://pgtune.leopard.in.ua/#/ oltp 48G ram, 12 cpus, ssd
+    shm_size: 12g
     command: [
       "postgres",
-      "-c", "shared_preload_libraries=pg_stat_statements,pg_qualstats",
-      "-c", "track_functions=pl",
-      "-c", "track_io_timing=on",
-      "-c", "track_activity_query_size=2048",
-      "-c", "pg_stat_statements.max=10000",
-      "-c", "pg_stat_statements.track=all",
-      "-c", "max_connections=100",
-      "-c", "shared_buffers=12GB",
-      "-c", "effective_cache_size=36GB",
-      "-c", "maintenance_work_mem=2GB",
-      "-c", "checkpoint_completion_target=0.9",
-      "-c", "wal_buffers=16MB",
-      "-c", "default_statistics_target=100",
-      "-c", "random_page_cost=1.1",
-      "-c", "effective_io_concurrency=200",
-      "-c", "work_mem=31457kB",
-      "-c", "min_wal_size=2GB",
-      "-c", "max_wal_size=8GB",
-      "-c", "max_worker_processes=12",
-      "-c", "max_parallel_workers_per_gather=4",
-      "-c", "max_parallel_workers=12",
-      "-c", "max_parallel_maintenance_workers=4",
+      "-c", "config_file=/etc/postgresql/postgresql.conf"
     ]
 
+
   hived-node:
-    image: registry.gitlab.syncad.com/hive/hive/consensus_node:00b5ff55
+    image: $HIVED_IMAGE
     restart: unless-stopped
-    # ports:
-    #   - "2001:2001"
-    #   - "8090:8090"
-    #   - "8091:8091"
-    shm_size: 0
+    ports:
+      - "$HIVED_PUBLISHED_WS_PORT:8090" # websocket
+      - "$HIVED_PUBLISHED_HTTP_PORT:8091"
+    shm_size: 12g
     entrypoint: /usr/local/hive/consensus/entrypoint.sh
-    command: >-
-      --replay-blockchain
-      --stop-replay-at-block 5000000
+    command: [
+      "--replay-blockchain",
+      "--stop-replay-at-block 5000000"
+    ]
     volumes:
       - $PWD/scripts/ci/hived-node/entrypoint.sh:/usr/local/hive/consensus/entrypoint.sh
       - $PWD/scripts/ci/hived-node/config.ini:/usr/local/hive/consensus/datadir/config.ini
       - ${HIVED_BLOCK_LOG_FILE}:/usr/local/hive/consensus/datadir/blockchain/block_log
       - hived-node-datadir:/usr/local/hive/consensus/datadir
 
+
 volumes:
-  postgres-10-pgdata:
-  postgres-12-pgdata:
+  postgres-10-run:
+  postgres-12-run:
   hived-node-datadir:
+  python-3.6-dev:

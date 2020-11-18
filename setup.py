@@ -91,9 +91,14 @@ if __name__ == "__main__":
             'pdoc',
             'diff-match-patch',
             'prometheus-client',
-            'psutil'
+            'psutil',
         ],
-
+        extras_require={
+            'dev': [
+                'pyYAML',
+                'prettytable',
+            ]
+        },
         entry_points={
             'console_scripts': [
                 'hive=hive.cli:run',
