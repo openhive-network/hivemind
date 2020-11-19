@@ -20,7 +20,8 @@ BEGIN
         hive_follows hf
         JOIN hive_accounts ha ON ha.id = hf.following
     WHERE
-        hf.follower = __observer_id AND hf.blacklisted;
+        hf.follower = __observer_id AND hf.blacklisted
+    ORDER BY account, source;
   END IF;
   IF (_flags & 2)::BOOLEAN THEN
     RETURN QUERY SELECT -- mutes_get_blacklisted_for_observer (indirect observer blacklists)
@@ -33,7 +34,8 @@ BEGIN
         JOIN hive_accounts ha_i ON ha_i.id = hf_i.following
         JOIN hive_accounts ha ON ha.id = hf.following
     WHERE
-        hf.follower = __observer_id AND hf.follow_blacklists AND hf_i.blacklisted;
+        hf.follower = __observer_id AND hf.follow_blacklists AND hf_i.blacklisted
+    ORDER BY account, source;
   END IF;
   IF (_flags & 4)::BOOLEAN THEN
     RETURN QUERY SELECT-- mutes_get_blacklisted_for_observer (local observer mute list)
@@ -44,7 +46,8 @@ BEGIN
         hive_follows hf
         JOIN hive_accounts ha ON ha.id = hf.following
     WHERE
-        hf.follower = __observer_id AND hf.state = 2;
+        hf.follower = __observer_id AND hf.state = 2
+    ORDER BY account, source;
   END IF;
   IF (_flags & 8)::BOOLEAN THEN
     RETURN QUERY SELECT-- mutes_get_blacklisted_for_observer (indirect observer mute list)
@@ -57,7 +60,8 @@ BEGIN
         JOIN hive_accounts ha_i ON ha_i.id = hf_i.following
         JOIN hive_accounts ha ON ha.id = hf.following
     WHERE
-        hf.follower = __observer_id AND hf.follow_muted AND hf_i.state = 2;
+        hf.follower = __observer_id AND hf.follow_muted AND hf_i.state = 2
+    ORDER BY account, source;
   END IF;
 END
 $function$
@@ -66,7 +70,7 @@ language plpgsql STABLE;
 DROP FUNCTION IF EXISTS mutes_get_blacklists_for_observer;
 CREATE FUNCTION mutes_get_blacklists_for_observer( in _observer VARCHAR, in _follow_blacklist BOOLEAN, in _follow_muted BOOLEAN )
 RETURNS TABLE(
-    account hive_accounts.name%TYPE,
+    list hive_accounts.name%TYPE,
     is_blacklist BOOLEAN -- False means mute list
 )
 AS
@@ -83,7 +87,8 @@ BEGIN
         hive_follows hf
         JOIN hive_accounts ha ON ha.id = hf.following
     WHERE
-        hf.follower = __observer_id AND hf.follow_blacklists;
+        hf.follower = __observer_id AND hf.follow_blacklists
+    ORDER BY list;
   END IF;
   IF _follow_muted THEN
     RETURN QUERY SELECT -- mutes_get_blacklists_for_observer (observer mute lists)
@@ -93,7 +98,8 @@ BEGIN
         hive_follows hf
         JOIN hive_accounts ha ON ha.id = hf.following
     WHERE
-        hf.follower = __observer_id AND hf.follow_muted;
+        hf.follower = __observer_id AND hf.follow_muted
+    ORDER BY list;
   END IF;
 END
 $function$

@@ -408,7 +408,7 @@
                 ]
               },
               "memo_key": "",
-              "json_metadata": "",
+              "json_metadata": "{\"profile\":{\"blacklist_description\":\"People I don't like\",\"muted_list_description\":\"People that need to STFU\"}}",
               "extensions": []
             }
           }
@@ -822,6 +822,17 @@
               ],
               "id": "follow",
               "json": "[\"follow\",{\"follower\":\"alice\",\"following\":[\"spaminator\",\"hivewatchers\",\"buildawhale\",\"redeemer\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "alice"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"alice\",\"following\":\"ignoreall\",\"what\":[\"follow_muted\"]}]"
             }
           }
         ]

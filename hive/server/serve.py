@@ -105,11 +105,7 @@ def build_methods():
         'follow_api.get_account_reputations': follow_api.get_account_reputations,
         'follow_api.get_blog': condenser_api.get_blog,
         'follow_api.get_blog_entries': condenser_api.get_blog_entries,
-        'follow_api.get_reblogged_by': condenser_api.get_reblogged_by,
-        # three functions under are not implemented, should we remove them?
-        'follow_api.get_feed_entries': follow_api.get_feed_entries,
-        'follow_api.get_feed': follow_api.get_feed,
-        'follow_api.get_blog_authors': follow_api.get_blog_authors
+        'follow_api.get_reblogged_by': condenser_api.get_reblogged_by
     })
 
     # tags_api aliases
@@ -124,14 +120,7 @@ def build_methods():
         'tags_api.get_discussions_by_comments': condenser_api.get_discussions_by_comments,
         'tags_api.get_discussions_by_author_before_date': condenser_api.get_discussions_by_author_before_date,
         'tags_api.get_post_discussions_by_payout': condenser_api.get_post_discussions_by_payout,
-        'tags_api.get_comment_discussions_by_payout': condenser_api.get_comment_discussions_by_payout,
-        'tags_api.get_active_votes' : tags_api.get_active_votes,
-        # five functions under are not implemented, should we remove them?
-        'tags_api.get_tags_used_by_author' : tags_api.get_tags_used_by_author,
-        'tags_api.get_discussions_by_active' : tags_api.get_discussions_by_active,
-        'tags_api.get_discussions_by_cashout' : tags_api.get_discussions_by_cashout,
-        'tags_api.get_discussions_by_votes' : tags_api.get_discussions_by_votes,
-        'tags_api.get_discussions_by_children' : tags_api.get_discussions_by_children
+        'tags_api.get_comment_discussions_by_payout': condenser_api.get_comment_discussions_by_payout
     })
 
     # legacy `call` style adapter
