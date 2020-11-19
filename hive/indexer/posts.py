@@ -385,9 +385,9 @@ class Posts(DbAdapterHolder):
             hp.author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND
             hp.permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)
         """
-        DB.query(sql, author=op['author'], permlink=op['permlink'], max_accepted_payout=max_accepted_payout,
-                 percent_hbd=percent_hbd, allow_votes=allow_votes, allow_curation_rewards=allow_curation_rewards,
-                 beneficiaries=dumps(beneficiaries))
+        #DB.query(sql, author=op['author'], permlink=op['permlink'], max_accepted_payout=max_accepted_payout,
+        #         percent_hbd=percent_hbd, allow_votes=allow_votes, allow_curation_rewards=allow_curation_rewards,
+        #         beneficiaries=dumps(beneficiaries))
 
     @classmethod
     def delete(cls, op):
