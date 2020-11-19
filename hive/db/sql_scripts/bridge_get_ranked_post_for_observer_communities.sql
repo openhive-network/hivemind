@@ -52,7 +52,7 @@ BEGIN
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
       JOIN hive_accounts_view ha ON ha.id = hp.author_id
   WHERE hs.account_id = __account_id AND hp.depth = 0 AND NOT ha.is_grayed AND ( __post_id = 0 OR hp.id < __post_id )
-  AND (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE True END)
+  AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp.author_id))
   ORDER BY hp.id DESC
   LIMIT _limit;
 END
@@ -117,7 +117,7 @@ BEGIN
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
   WHERE hs.account_id = __account_id AND NOT hp.is_paidout AND hp.depth = 0
       AND ( __post_id = 0 OR hp.sc_hot < __hot_limit OR ( hp.sc_hot = __hot_limit AND hp.id < __post_id ) )
-      AND (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE True END)
+      AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp.author_id))
   ORDER BY hp.sc_hot DESC, hp.id DESC
   LIMIT _limit;
 END
@@ -187,11 +187,11 @@ BEGIN
           JOIN hive_subscriptions hs ON hp1.community_id = hs.community_id
       WHERE hs.account_id = __account_id AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth > 0
           AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
+          AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp1.author_id))
       ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
       LIMIT _limit
   ) as payout
   JOIN hive_posts_view hp ON hp.id = payout.id
-  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE True END)
   ORDER BY payout.all_payout DESC, payout.id DESC
   LIMIT _limit;
 END
@@ -258,7 +258,7 @@ BEGIN
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
   WHERE hs.account_id = __account_id AND NOT hp.is_paidout AND hp.payout_at BETWEEN __head_block_time + interval '12 hours' AND __head_block_time + interval '36 hours'
       AND ( __post_id = 0 OR ( hp.payout + hp.pending_payout ) < __payout_limit OR ( ( hp.payout + hp.pending_payout ) = __payout_limit AND hp.id < __post_id ) )
-      AND (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE True END)
+      AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp.author_id))
   ORDER BY ( hp.payout + hp.pending_payout ) DESC, hp.id DESC
   LIMIT _limit;
 END
@@ -323,7 +323,7 @@ BEGIN
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
   WHERE hs.account_id = __account_id AND NOT hp.is_paidout AND hp.promoted > 0
       AND ( __post_id = 0 OR hp.promoted < __promoted_limit OR ( hp.promoted = __promoted_limit AND hp.id < __post_id ) )
-      AND (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE True END)
+      AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp.author_id))
   ORDER BY hp.promoted DESC, hp.id DESC
   LIMIT _limit;
 END
@@ -395,11 +395,11 @@ BEGIN
       WHERE
           hs.account_id = __account_id AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth = 0
           AND ( __post_id = 0 OR hp1.sc_trend < __trending_limit OR ( hp1.sc_trend = __trending_limit AND hp1.id < __post_id ) )
+          AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp1.author_id))
       ORDER BY hp1.sc_trend DESC, hp1.id DESC
       LIMIT _limit
   ) trending
   JOIN hive_posts_view hp ON trending.id = hp.id
-  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE True END)
   ORDER BY trending.sc_trend DESC, trending.id DESC
   LIMIT _limit;
 END
@@ -465,7 +465,6 @@ BEGIN
       JOIN hive_accounts_view ha ON ha.id = hp.author_id
   WHERE hs.account_id = __account_id AND NOT hp.is_paidout AND ha.is_grayed AND ( hp.payout + hp.pending_payout ) > 0
       AND ( __post_id = 0 OR ( hp.payout + hp.pending_payout ) < __payout_limit OR ( ( hp.payout + hp.pending_payout ) = __payout_limit AND hp.id < __post_id ) )
-      AND (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE True END)
   ORDER BY ( hp.payout + hp.pending_payout ) DESC, hp.id DESC
   LIMIT _limit;
 END
