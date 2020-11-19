@@ -15,15 +15,16 @@ log = logging.getLogger(__name__)
 
 # pylint: disable=too-many-lines
 
-def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=[], override_gray=False):
+def append_statistics_to_post(post, row, is_pinned, blacklisted_for_user={}):
     """ apply information such as blacklists and community names/roles to a given post """
     
     post['blacklists'] = []
-    if blacklists_for_user and row['author'] in blacklists_for_user:
-        blacklists = blacklists_for_user[row['author']]
-        for blacklist in blacklists:
-            post['blacklists'].append(blacklist)
-    reputation = row['author_rep']
+    if blacklisted_for_user and row['author'] in blacklisted_for_user:
+        blacklists = blacklisted_for_user[row['author']]
+        post['blacklists'].extend(blacklists[0])
+        for mute_list in blacklists[1]:
+            post['blacklists'].append(mute_list + ' (mute list)')
+    reputation = post['author_reputation']
     if reputation < 1:
         post['blacklists'].append('reputation-0')
     elif reputation  == 1:
@@ -39,9 +40,7 @@ def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=[], over
             post['author_role'] = 'guest'
             post['author_title'] = ''
 
-    post['stats']['gray'] = row['is_grayed']
-    if 'is_muted' in row and row['is_muted']:
-        post['stats']['gray'] = True
+    post['stats']['gray'] = row['is_grayed'] or row['is_muted']
     if is_pinned:
         post['stats']['is_pinned'] = True
     return post

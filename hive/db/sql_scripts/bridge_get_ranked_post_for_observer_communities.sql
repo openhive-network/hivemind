@@ -74,7 +74,7 @@ BEGIN
       SELECT hp.sc_hot INTO __hot_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   __account_id = find_account_id( _observer, True );
-  RETURN QUERY SELECT 
+  RETURN QUERY SELECT
       hp.id,
       hp.author,
       hp.parent_author,

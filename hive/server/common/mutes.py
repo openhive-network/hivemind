@@ -7,29 +7,6 @@ from hive.db.adapter import Db
 
 log = logging.getLogger(__name__)
 
-GET_BLACKLISTED_ACCOUNTS_SQL = """
-WITH blacklisted_users AS (
-    SELECT following, 'my_blacklist' AS source FROM hive_follows WHERE follower =
-        (SELECT id FROM hive_accounts WHERE name = :observer )
-    AND blacklisted
-    UNION ALL
-    SELECT following, 'my_followed_blacklists' AS source FROM hive_follows WHERE follower IN
-    (SELECT following FROM hive_follows WHERE follower =
-        (SELECT id FROM hive_accounts WHERE name = :observer )
-    AND follow_blacklists) AND blacklisted
-    UNION ALL
-    SELECT following, 'my_muted' AS source FROM hive_follows WHERE follower =
-        (SELECT id FROM hive_accounts WHERE name = :observer )
-    AND state = 2
-    UNION ALL
-    SELECT following, 'my_followed_mutes' AS source FROM hive_follows WHERE follower IN
-    (SELECT following FROM hive_follows WHERE follower =
-        (SELECT id FROM hive_accounts WHERE name = :observer )
-    AND follow_muted) AND state = 2
-)
-SELECT following, source FROM blacklisted_users
-"""
-
 def _read_url(url):
     req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
     return urlopen(req).read()
@@ -79,8 +56,15 @@ class Mutes:
         return cls.instance().accounts
 
     @classmethod
-    async def get_blacklists_for_observer(cls, observer=None, context=None):
-        """ fetch the list of users that the observer has blacklisted """
+    async def get_blacklisted_for_observer(cls, observer, context, flags=1+2+4+8):
+        """ fetch the list of users that the observer has blacklisted
+            flags allow filtering the query:
+            1 - accounts blacklisted by observer
+            2 - accounts blacklisted by observer's follow_blacklist lists
+            4 - accounts muted by observer
+            8 - accounts muted by observer's follow_mutes lists
+            by default all flags are set
+        """
         if not observer or not context:
             return {}
 
@@ -90,14 +74,27 @@ class Mutes:
         blacklisted_users = {}
 
         db = context['db']
-        sql = GET_BLACKLISTED_ACCOUNTS_SQL
-        sql_result = await db.query_all(sql, observer=observer)
+        sql = "SELECT * FROM mutes_get_blacklisted_for_observer( (:observer)::VARCHAR, (:flags)::INTEGER )"
+        sql_result = await db.query_all(sql, observer=observer, flags=flags)
         for row in sql_result:
-            account_name = cls.all_accounts[row['following']]
+            account_name = row['account']
             if account_name not in blacklisted_users:
-                blacklisted_users[account_name] = []
-            blacklisted_users[account_name].append(row['source'])
+                blacklisted_users[account_name] = ([], [])
+            if row['is_blacklisted']:
+                blacklisted_users[account_name][0].append(row['source'])
+            else: # muted
+                blacklisted_users[account_name][1].append(row['source'])
         return blacklisted_users
+
+    @classmethod
+    async def get_blacklists_for_observer(cls, observer, context, follow_blacklist = True, follow_muted = True):
+        """ fetch the list of accounts that are followed by observer through follow_blacklist/follow_muted """
+        if not observer or not context:
+            return {}
+
+        db = context['db']
+        sql = "SELECT * FROM mutes_get_blacklists_for_observer( (:observer)::VARCHAR, (:fb)::BOOLEAN, (:fm)::BOOLEAN )"
+        return await db.query_all(sql, observer=observer, fb=follow_blacklist, fm=follow_muted)
 
     @classmethod
     def lists(cls, name, rep):

@@ -55,16 +55,16 @@ async def get_post(context, author, permlink, observer=None):
     valid_account(observer, allow_empty=True)
     valid_permlink(permlink)
 
-    blacklists_for_user = None
-    if observer and context:
-        blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
+    blacklisted_for_user = None
+    if observer:
+        blacklisted_for_user = await Mutes.get_blacklisted_for_observer(observer, context)
 
     sql = "SELECT * FROM bridge_get_post( (:author)::VARCHAR, (:permlink)::VARCHAR )"
     result = await db.query_all(sql, author=author, permlink=permlink)
 
     post = _bridge_post_object(result[0])
     post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.BridgeApi)
-    post = append_statistics_to_post(post, result[0], False, blacklists_for_user)
+    post = append_statistics_to_post(post, result[0], False, blacklisted_for_user)
     return post
 
 @return_error_info
@@ -103,7 +103,7 @@ async def _get_ranked_posts_for_observer_communities( db, sort:str, start_author
     assert False, "Unknown sort order"
 
 @return_error_info
-async def _get_ranked_posts_for_communities( db, sort:str, community, start_author:str, start_permlink:str, limit, observer:str=None):
+async def _get_ranked_posts_for_communities( db, sort:str, community, start_author:str, start_permlink:str, limit, observer:str ):
     async def execute_community_query(db, sql, limit):
         return await db.query_all(sql, community=community, author=start_author, permlink=start_permlink, limit=limit, observer=observer )
 
@@ -151,72 +151,72 @@ async def _get_ranked_posts_for_communities( db, sort:str, community, start_auth
 
 
 @return_error_info
-async def _get_ranked_posts_for_tag( db, sort:str, tag, start_author:str, start_permlink:str, limit, observer:str=None):
-    async def execute_tags_query(db, sql, limit):
+async def _get_ranked_posts_for_tag( db, sort:str, tag, start_author:str, start_permlink:str, limit, observer:str ):
+    async def execute_tags_query(db, sql):
         return await db.query_all(sql, tag=tag, author=start_author, permlink=start_permlink, limit=limit, observer=observer )
 
     if sort == 'hot':
         sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_tags_query(db, sql, limit)
+        return await execute_tags_query(db, sql)
 
     if sort == 'promoted':
         sql = "SELECT * FROM bridge_get_ranked_post_by_promoted_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_tags_query(db, sql, limit)
+        return await execute_tags_query(db, sql)
 
     if sort == 'payout':
         sql = "SELECT * FROM bridge_get_ranked_post_by_payout_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True, (:observer)::VARCHAR )"
-        return await execute_tags_query(db, sql, limit)
+        return await execute_tags_query(db, sql)
 
     if sort == 'payout_comments':
         sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_tags_query(db, sql, limit)
+        return await execute_tags_query(db, sql)
 
     if sort == 'muted':
         sql = "SELECT * FROM bridge_get_ranked_post_by_muted_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_tags_query(db, sql, limit)
+        return await execute_tags_query(db, sql)
 
     if sort == 'trending':
         sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_tags_query(db, sql, limit)
+        return await execute_tags_query(db, sql)
 
     if sort == 'created':
         sql = "SELECT * FROM bridge_get_ranked_post_by_created_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_tags_query(db, sql, limit)
+        return await execute_tags_query(db, sql)
 
     assert False, "Unknown sort order"
 
 @return_error_info
-async def _get_ranked_posts_for_all( db, sort:str, start_author:str, start_permlink:str, limit, observer:str=None):
-    async def execute_query(db, sql, limit, observer=None):
+async def _get_ranked_posts_for_all( db, sort:str, start_author:str, start_permlink:str, limit, observer:str ):
+    async def execute_query(db, sql):
         return await db.query_all(sql, author=start_author, permlink=start_permlink, limit=limit, observer=observer )
 
     if sort == 'trending':
         sql = "SELECT * FROM bridge_get_ranked_post_by_trends( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_query(db, sql, limit)
+        return await execute_query(db, sql)
 
     if sort == 'created':
         sql = "SELECT * FROM bridge_get_ranked_post_by_created( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_query(db, sql, limit, observer)
+        return await execute_query(db, sql)
 
     if sort == 'hot':
         sql = "SELECT * FROM bridge_get_ranked_post_by_hot( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_query(db, sql, limit)
+        return await execute_query(db, sql)
 
     if sort == 'promoted':
         sql = "SELECT * FROM bridge_get_ranked_post_by_promoted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_query(db, sql, limit)
+        return await execute_query(db, sql)
 
     if sort == 'payout':
         sql = "SELECT * FROM bridge_get_ranked_post_by_payout( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True, (:observer)::VARCHAR )"
-        return await execute_query(db, sql, limit)
+        return await execute_query(db, sql)
 
     if sort == 'payout_comments':
         sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_query(db, sql, limit)
+        return await execute_query(db, sql)
 
     if sort == 'muted':
         sql = "SELECT * FROM bridge_get_ranked_post_by_muted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-        return await execute_query(db, sql, limit)
+        return await execute_query(db, sql)
 
     assert False, "Unknown sort order"
 
@@ -230,14 +230,14 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
     db = context['db']
 
     async def process_query_results( sql_result ):
-        blacklists_for_user = None
+        blacklisted_for_user = None
         if observer:
-            blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
+            blacklisted_for_user = await Mutes.get_blacklisted_for_observer(observer, context)
         posts = []
         for row in sql_result:
             post = _bridge_post_object(row)
             post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.BridgeApi)
-            post = append_statistics_to_post(post, row, row['is_pinned'], blacklists_for_user)
+            post = append_statistics_to_post(post, row, row['is_pinned'], blacklisted_for_user)
             posts.append(post)
         return posts
 
@@ -295,12 +295,12 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
 
     sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit )
     posts = []
-    blacklists_for_user = None
+    blacklisted_for_user = None
     if observer and account_posts:
         # it looks like the opposite would make more sense, that is, to handle observer for 'blog', 'feed' and 'replies',
         # since that's when posts can come from various authors, some blacklisted and some not, but original version
         # ignored it (only) in those cases
-        blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
+        blacklisted_for_user = await Mutes.get_blacklisted_for_observer(observer, context)
 
     for row in sql_result:
         post = _bridge_post_object(row)
@@ -316,7 +316,7 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
                 reblogged_by_list.sort()
                 post['reblogged_by'] = reblogged_by_list
 
-        post = append_statistics_to_post(post, row, False if account_posts else row['is_pinned'], blacklists_for_user, not account_posts)
+        post = append_statistics_to_post(post, row, False if account_posts else row['is_pinned'], blacklisted_for_user)
         posts.append(post)
     return posts
 
@@ -334,8 +334,9 @@ async def get_relationship_between_accounts(context, account1, account2, observe
     result = {
         'follows': False,
         'ignores': False,
-        'is_blacklisted': False,
-        'follows_blacklists': False
+        'blacklists': False,
+        'follows_blacklists': False,
+        'follows_muted': False
     }
 
     for row in sql_result:
@@ -346,63 +347,45 @@ async def get_relationship_between_accounts(context, account1, account2, observe
             result['ignores'] = True
 
         if row['blacklisted']:
-            result['is_blacklisted'] = True
+            result['blacklists'] = True
         if row['follow_blacklists']:
             result['follows_blacklists'] = True
+        if row['follow_muted']:
+            result['follows_muted'] = True
 
     return result
 
 @return_error_info
 async def does_user_follow_any_lists(context, observer):
-    follows_blacklists = await get_follow_list(context, observer, 'follow_blacklist')
-    follows_muted = await get_follow_list(context, observer, 'follow_muted')
+    """ Tells if given observer follows any blacklist or mute list """
+    blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
 
-    if len(follows_blacklists) == 0 and len(follows_muted) == 0:
+    if len(blacklists_for_user) == 0:
         return False
     else:
         return True
 
 @return_error_info
 async def get_follow_list(context, observer, follow_type='blacklisted'):
-    db = context['db']
-    valid_account(observer)
-
-    valid_types = ['blacklisted', 'follow_blacklist', 'muted', 'follow_muted']
-    assert follow_type in valid_types, 'invalid follow_type'
-
-    account_data = await get_profile(context, observer)
-    metadata = account_data["metadata"]["profile"]
-    blacklist_description = metadata["blacklist_description"] if "blacklist_description" in metadata else ''
-    muted_list_description = metadata["muted_list_description"] if "muted_list_description" in metadata else ''
+    """ For given observer gives directly blacklisted/muted accounts or
+        list of blacklists/mute lists followed by observer
+    """
+    observer = valid_account(observer)
+    valid_types = dict(blacklisted=1, follow_blacklist=2, muted=4, follow_muted=8)
+    assert follow_type in valid_types, "Unsupported follow_type, valid values: {}".format(", ".join(valid_types.keys()))
 
     results = []
-    if follow_type == 'follow_blacklist':
-        sql = """select hive_accounts.name
-                 from hive_accounts join hive_follows on (hive_accounts.id = hive_follows.following) where
-                 hive_follows.follower = (select id from hive_accounts where name = :observer) and follow_blacklists"""
-        sql_result = await db.query_all(sql, observer=observer)
-        for row in sql_result:
-            row_result = {'name': row['name'], 'blacklist_description': blacklist_description, 'muted_list_description': muted_list_description}
-            results.append(row_result)
-        return results
+    if follow_type == 'follow_blacklist' or follow_type == 'follow_muted':
+        blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context, follow_type == 'follow_blacklist', follow_type == 'follow_muted')
+        for row in blacklists_for_user:
+            list_data = await get_profile(context, row['list'])
+            metadata = list_data["metadata"]["profile"]
+            blacklist_description = metadata["blacklist_description"] if "blacklist_description" in metadata else ''
+            muted_list_description = metadata["muted_list_description"] if "muted_list_description" in metadata else ''
+            results.append({'name': row['list'], 'blacklist_description': blacklist_description, 'muted_list_description': muted_list_description})
+    else: # blacklisted or muted
+        blacklisted_for_user = await Mutes.get_blacklisted_for_observer(observer, context, valid_types[follow_type])
+        for account in blacklisted_for_user.keys():
+            results.append({'name': account, 'blacklist_description': '', 'muted_list_description': ''})
 
-    elif follow_type == 'follow_muted':
-        sql = """select hive_accounts.name,
-                 from hive_accounts join hive_follows on (hive_accounts.id = hive_follows.following) where
-                 hive_follows.follower = (select id from hive_accounts where name = :observer) and follow_muted"""
-        sql_result = await db.query_all(sql, observer=observer)
-        for row in sql_result:
-            row_result = {'name': row['name'], 'blacklist_description': blacklist_description, 'muted_list_description': muted_list_description}
-            results.append(row_result)
-        return results
-
-    blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
-    if follow_type == 'blacklisted':
-        results.extend([{'name': account, 'blacklist_description':'', 'muted_list_description':''} for account, sources in blacklists_for_user.items() if 'my_blacklist' in sources])
-    elif follow_type == 'follow_blacklist':
-        results.extend([{'name': account, 'blacklist_description':'', 'muted_list_description':''} for account, sources in blacklists_for_user.items() if 'my_followed_blacklists' in sources])
-    elif follow_type == 'muted':
-        results.extend([{'name': account, 'blacklist_description':'', 'muted_list_description':''} for account, sources in blacklists_for_user.items() if 'my_muted' in sources])
-    elif follow_type == 'follow_muted':
-        results.extend([{'name': account, 'blacklist_description':'', 'muted_list_description':''} for account, sources in blacklists_for_user.items() if 'my_followed_mutes' in sources])
     return results
