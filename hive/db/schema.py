@@ -457,6 +457,10 @@ def create_fk(db):
 
 def setup(db):
     """Creates all tables and seed data"""
+
+    sql = """SELECT * FROM pg_extension WHERE extname='pgstattuple;'"""
+    assert db.query_row( sql ), "The database requires created 'pgstattuple' extension"
+
     # initialize schema
     build_metadata().create_all(db.engine())
 
@@ -609,14 +613,15 @@ def setup(db):
       "condenser_get_names_by_reblogged.sql",
       "condenser_get_discussions_by_comments.sql",
       "condenser_get_account_reputations.sql",
-      "update_follow_count.sql"
+      "update_follow_count.sql",
+      "vacuum.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
     for script in sql_scripts:
         execute_sql_script(db.query_no_return, "{}/sql_scripts/{}".format(dir_path, script))
-    
-    
+
+
 
 
 

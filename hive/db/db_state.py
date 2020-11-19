@@ -155,6 +155,10 @@ class DbState:
         return to_return
 
     @classmethod
+    def _reduce_dead_tuples(cls):
+        cls.db().query_row( "SELECT vacuum_hive_posts()" )
+
+    @classmethod
     def has_index(cls, idx_name):
         sql = "SELECT count(*) FROM pg_class WHERE relname = :relname"
         count = cls.db().query_one(sql, relname=idx_name)
@@ -258,6 +262,7 @@ class DbState:
 
         time_start = perf_counter()
 
+        cls._reduce_dead_tuples()
         if massive_sync_preconditions:
             # Update count of all child posts (what was hold during initial sync)
             sql = """
@@ -276,6 +281,7 @@ class DbState:
 
             time_end = perf_counter()
             log.info("[INIT] update_hive_posts_children_count executed in %.4fs", time_end - time_start)
+        cls._reduce_dead_tuples()
 
         time_start = perf_counter()
 
@@ -349,6 +355,7 @@ class DbState:
         DbState.db().query_no_return(sql)
         time_end = perf_counter()
         log.info("[INIT] update_posts_rshares executed in %.4fs", time_end - time_start)
+        cls._reduce_dead_tuples()
 
         time_start = perf_counter()
         sql = """

@@ -150,6 +150,8 @@ checkpoint_timeout = 30min
 max_wal_size = 4GB
 ```
 
+ It is required to load 'pgstattuple' extension. The postgresql user who is a member of pg_stat_scan_tables role can load the module with command `CREATE EXTENSION pgstattuple`
+
 ## JSON-RPC API
 
 The minimum viable API is to remove the requirement for the `follow` and `tags` plugins (now rolled into [`condenser_api`](https://gitlab.syncad.com/hive/hive/-/tree/master/libraries/plugins/apis/condenser_api/condenser_api.cpp)) from the backend node while still being able to power condenser's non-wallet features. Thus, this is the core API set:
