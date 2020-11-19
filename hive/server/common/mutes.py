@@ -56,8 +56,15 @@ class Mutes:
         return cls.instance().accounts
 
     @classmethod
-    async def get_blacklists_for_observer(cls, observer=None, context=None):
-        """ fetch the list of users that the observer has blacklisted """
+    async def get_blacklists_for_observer(cls, observer, context, flags=1+2+4+8):
+        """ fetch the list of users that the observer has blacklisted
+            flags allow filtering the query:
+            1 - accounts blacklisted by observer
+            2 - accounts blacklisted by observer's follow_blacklist lists
+            4 - accounts muted by observer
+            8 - accounts muted by observer's follow_mutes lists
+            by default all flags are set
+        """
         if not observer or not context:
             return {}
 
@@ -67,13 +74,16 @@ class Mutes:
         blacklisted_users = {}
 
         db = context['db']
-        sql = "SELECT * FROM mutes_get_blacklists_for_observer( (:observer)::VARCHAR )"
-        sql_result = await db.query_all(sql, observer=observer)
+        sql = "SELECT * FROM mutes_get_blacklists_for_observer( (:observer)::VARCHAR, (:flags)::INTEGER )"
+        sql_result = await db.query_all(sql, observer=observer, flags=flags)
         for row in sql_result:
             account_name = row['account']
             if account_name not in blacklisted_users:
-                blacklisted_users[account_name] = []
-            blacklisted_users[account_name].append(row['source'])
+                blacklisted_users[account_name] = ([], [])
+            if row['is_blacklisted']:
+                blacklisted_users[account_name][0].append(row['source'])
+            else:
+                blacklisted_users[account_name][1].append(row['source'])
         return blacklisted_users
 
     @classmethod

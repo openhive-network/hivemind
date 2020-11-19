@@ -21,8 +21,9 @@ def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=[]):
     post['blacklists'] = []
     if blacklists_for_user and row['author'] in blacklists_for_user:
         blacklists = blacklists_for_user[row['author']]
-        for blacklist in blacklists:
-            post['blacklists'].append(blacklist)
+        post['blacklists'].extend(blacklists[0])
+        for mute_source in blacklists[1]:
+            post['blacklists'].append(mute_source + ' (mute list)')
     reputation = post['author_reputation']
     if reputation < 1:
         post['blacklists'].append('reputation-0')
