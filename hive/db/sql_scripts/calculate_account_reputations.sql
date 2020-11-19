@@ -130,6 +130,14 @@ DECLARE
   __traced_author int;
   __account_name varchar;
 BEGIN
+  CREATE UNLOGGED TABLE IF NOT EXISTS __new_reputation_data
+  (
+      id integer,
+      author_id integer,
+      voter_id integer,
+      rshares bigint,
+      prev_rshares bigint
+  );
 
   TRUNCATE TABLE __new_reputation_data;
   INSERT INTO __new_reputation_data 
@@ -143,6 +151,14 @@ BEGIN
     WHERE rd.block_num = _block_num
     ORDER BY rd.id
     ;
+
+  CREATE UNLOGGED TABLE IF NOT EXISTS __tmp_accounts
+  (
+      id integer,
+      reputation bigint,
+      is_implicit boolean,
+      changed boolean
+  );
 
   TRUNCATE TABLE __tmp_accounts;
   INSERT INTO __tmp_accounts
