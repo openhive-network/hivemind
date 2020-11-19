@@ -4,7 +4,8 @@ CREATE FUNCTION bridge_get_relationship_between_accounts( in _account1 VARCHAR, 
 RETURNS TABLE(
     state hive_follows.state%TYPE,
     blacklisted hive_follows.blacklisted%TYPE,
-    follow_blacklists hive_follows.follow_blacklists%TYPE
+    follow_blacklists hive_follows.follow_blacklists%TYPE,
+    follow_muted hive_follows.follow_muted%TYPE
 )
 AS
 $function$
@@ -17,7 +18,8 @@ BEGIN
   RETURN QUERY SELECT
       hf.state,
       hf.blacklisted,
-      hf.follow_blacklists
+      hf.follow_blacklists,
+      hf.follow_muted
   FROM
       hive_follows hf
   WHERE

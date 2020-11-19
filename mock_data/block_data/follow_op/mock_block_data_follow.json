@@ -211,6 +211,206 @@
               "json_metadata": "",
               "extensions": []
             }
+          },
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "spaminator",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "hivewatchers",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "buildawhale",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "redeemer",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "ignoreall",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "{\"profile\":{\"blacklist_description\":\"People I don't like\",\"muted_list_description\":\"People that need to STFU\"}}",
+              "extensions": []
+            }
           }
         ],
         "extensions": [],
@@ -484,6 +684,72 @@
               "id": "follow",
               "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"ignore\"]}]"
             }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "spaminator"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"spaminator\",\"following\":[\"lyubovbar\",\"zaitsevalesyaa\",\"kingscrown\",\"trevonjb\",\"craig-grant\",\"ned\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hivewatchers"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"hivewatchers\",\"following\":[\"lyubovbar\",\"rkpl\",\"blendplayz\",\"renzoarg\",\"kingscrown\",\"forevergala\",\"machinelearning\",\"ola1\",\"steembeast\",\"ekremi12\",\"steem4lyf\",\"caitlinm\",\"bruno1122\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "buildawhale"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"buildawhale\",\"following\":[\"zaitsevalesyaa\",\"trevonjb\",\"earnest\",\"wildchild\",\"craig-grant\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "redeemer"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"redeemer\",\"following\":[\"zaitsevalesyaa\",\"trevonjb\",\"craig-grant\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignoreall"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignoreall\",\"following\":[\"gtg\",\"alice\",\"davr86\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignoreall"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignoreall\",\"following\":[\"gtg\",\"alice\",\"davr86\"],\"what\":[\"ignore\"]}]"
+            }
           }
         ]
       }
@@ -545,6 +811,28 @@
               ],
               "id": "follow",
               "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "alice"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"alice\",\"following\":[\"spaminator\",\"hivewatchers\",\"buildawhale\",\"redeemer\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "alice"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"alice\",\"following\":\"ignoreall\",\"what\":[\"follow_muted\"]}]"
             }
           }
         ]

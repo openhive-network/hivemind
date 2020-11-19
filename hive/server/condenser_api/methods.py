@@ -170,8 +170,6 @@ def nested_query_compat(function):
         return function(*args, **kwargs)
     return wrapper
 
-@return_error_info
-@nested_query_compat
 async def get_posts_by_given_sort(context, sort: str, start_author: str = '', start_permlink: str = '',
                                      limit: int = 20, tag: str = None,
                                      truncate_body: int = 0, filter_tags: list = None, observer:str=None):

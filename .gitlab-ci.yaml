@@ -242,7 +242,7 @@ dk-follow_api_smoketest:
   artifacts:
     when: always
     reports:
-      junit: api_smoketest.xml
+      junit: api_smoketest_follow_api.xml
 
 dk-follow_api_smoketest_negative:
   stage: e2e-test
@@ -258,21 +258,21 @@ dk-follow_api_smoketest_negative:
     reports:
       junit: api_smoketest_follow_api_negative.xml
 
-dk-tags_api_smoketest:
+dk-hive_api_smoketest:
   stage: e2e-test
   extends: .dk-test-common
   script:
     - |
       ./scripts/ci/start-api-smoketest.sh \
           localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
-          tags_api_negative/ api_smoketest_tags_api_negative.xml \
+          hive_api_patterns/ api_smoketest_hive_api.xml \
           $RUNNER_TEST_JOBS
   artifacts:
     when: always
     reports:
-      junit: api_smoketest_tags_api_negative.xml
+      junit: api_smoketest_hive_api.xml
 
-dk-tags_api_smoketest_negative:
+dk-tags_api_smoketest:
   stage: e2e-test
   extends: .dk-test-common
   script:
@@ -286,15 +286,33 @@ dk-tags_api_smoketest_negative:
     reports:
       junit: api_smoketest_tags_api.xml
 
+dk-tags_api_smoketest_negative:
+  stage: e2e-test
+  extends: .dk-test-common
+  script:
+    - |
+      ./scripts/ci/start-api-smoketest.sh \
+          localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
+          tags_api_negative/ api_smoketest_tags_api_negative.xml \
+          $RUNNER_TEST_JOBS
+  artifacts:
+    when: always
+    reports:
+      junit: api_smoketest_tags_api_negative.xml
+
 dk-mock_tests:
   stage: e2e-test
   extends: .dk-test-common
   script:
     - |
-      scripts/ci/start-api-smoketest.sh \
-      localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
-      mock_tests/ api_smoketest_mock_tests.xml \
-      $RUNNER_TEST_JOBS
+      ./scripts/ci/start-api-smoketest.sh \
+          localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
+          mock_tests/ api_smoketest_mock_tests.xml \
+          $RUNNER_TEST_JOBS
+  artifacts:
+    when: always
+    reports:
+      junit: api_smoketest_mock_tests.xml
 
 dk-api-smoketest-benchmark:
   stage: benchmark-tests

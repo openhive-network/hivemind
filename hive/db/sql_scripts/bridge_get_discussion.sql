@@ -5,20 +5,7 @@ CREATE OR REPLACE FUNCTION get_discussion(
     in _permlink hive_permlink_data.permlink%TYPE,
     in _observer VARCHAR
 )
-RETURNS TABLE
-(
-    id hive_posts.id%TYPE, parent_id hive_posts.parent_id%TYPE, author hive_accounts.name%TYPE, permlink hive_permlink_data.permlink%TYPE,
-    title hive_post_data.title%TYPE, body hive_post_data.body%TYPE, category hive_category_data.category%TYPE, depth hive_posts.depth%TYPE,
-    promoted hive_posts.promoted%TYPE, payout hive_posts.payout%TYPE, pending_payout hive_posts.pending_payout%TYPE, payout_at hive_posts.payout_at%TYPE,
-    is_paidout hive_posts.is_paidout%TYPE, children hive_posts.children%TYPE, created_at hive_posts.created_at%TYPE, updated_at hive_posts.updated_at%TYPE,
-    rshares hive_posts_view.rshares%TYPE, abs_rshares hive_posts_view.abs_rshares%TYPE, json hive_post_data.json%TYPE, author_rep hive_accounts.reputation%TYPE,
-    is_hidden hive_posts.is_hidden%TYPE, is_grayed BOOLEAN, total_votes BIGINT, sc_trend hive_posts.sc_trend%TYPE,
-    acct_author_id hive_posts.author_id%TYPE, root_author hive_accounts.name%TYPE, root_permlink hive_permlink_data.permlink%TYPE,
-    parent_author hive_accounts.name%TYPE, parent_permlink_or_category hive_permlink_data.permlink%TYPE, allow_replies BOOLEAN,
-    allow_votes hive_posts.allow_votes%TYPE, allow_curation_rewards hive_posts.allow_curation_rewards%TYPE, url TEXT, root_title hive_post_data.title%TYPE,
-    beneficiaries hive_posts.beneficiaries%TYPE, max_accepted_payout hive_posts.max_accepted_payout%TYPE, percent_hbd hive_posts.percent_hbd%TYPE,
-    curator_payout_value hive_posts.curator_payout_value%TYPE
-)
+RETURNS SETOF bridge_api_post_discussion
 LANGUAGE plpgsql
 AS
 $function$
@@ -29,9 +16,16 @@ BEGIN
     RETURN QUERY
     SELECT
         hpv.id,
-        hpv.parent_id,
         hpv.author,
+        hpv.parent_author,
+        hpv.author_rep,
+        hpv.root_title,
+        hpv.beneficiaries,
+        hpv.max_accepted_payout,
+        hpv.percent_hbd,
+        hpv.url,
         hpv.permlink,
+        hpv.parent_permlink_or_category,
         hpv.title,
         hpv.body,
         hpv.category,
@@ -42,30 +36,23 @@ BEGIN
         hpv.payout_at,
         hpv.is_paidout,
         hpv.children,
+        hpv.votes,
         hpv.created_at,
         hpv.updated_at,
         hpv.rshares,
         hpv.abs_rshares,
         hpv.json,
-        hpv.author_rep,
         hpv.is_hidden,
         hpv.is_grayed,
         hpv.total_votes,
         hpv.sc_trend,
-        hpv.author_id AS acct_author_id,
-        hpv.root_author,
-        hpv.root_permlink,
-        hpv.parent_author,
-        hpv.parent_permlink_or_category,
-        hpv.allow_replies,
-        hpv.allow_votes,
-        hpv.allow_curation_rewards,
-        hpv.url,
-        hpv.root_title,
-        hpv.beneficiaries,
-        hpv.max_accepted_payout,
-        hpv.percent_hbd,
-        hpv.curator_payout_value
+        hpv.role_title,
+        hpv.community_title,
+        hpv.role_id,
+        hpv.is_pinned,
+        hpv.curator_payout_value,
+        hpv.is_muted,
+        hpv.parent_id
     FROM
     (
         WITH RECURSIVE child_posts (id, parent_id) AS
