@@ -210,14 +210,14 @@ class Posts(DbAdapterHolder):
               WHERE ihp.permlink_id = data_source.permlink_id and ihp.author_id = data_source.author_id
         """
 
-        for chunk in chunks(cls._comment_payout_ops, 1000):
-            cls.beginTx()
-
-            values_str = ','.join(chunk)
-            actual_query = sql.format(values_str)
-            cls.db.query(actual_query)
-
-            cls.commitTx()
+        #for chunk in chunks(cls._comment_payout_ops, 1000):
+        #    cls.beginTx()
+#
+#            values_str = ','.join(chunk)
+#            actual_query = sql.format(values_str)
+#            cls.db.query(actual_query)
+#
+#            cls.commitTx()
 
         n = len(cls._comment_payout_ops)
         cls._comment_payout_ops.clear()
