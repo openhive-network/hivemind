@@ -362,7 +362,6 @@ class Posts(DbAdapterHolder):
     @classmethod
     def comment_options_op(cls, op):
         """ Process comment_options_operation """
-        log.info( "[MI] comment_options_op: {}".format(op) )
         max_accepted_payout = legacy_amount(op['max_accepted_payout']) if 'max_accepted_payout' in op else '1000000.000 HBD'
         allow_votes = op['allow_votes'] if 'allow_votes' in op else True
         allow_curation_rewards = op['allow_curation_rewards'] if 'allow_curation_rewards' in op else True
