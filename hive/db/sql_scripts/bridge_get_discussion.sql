@@ -11,8 +11,10 @@ AS
 $function$
 DECLARE
     __post_id INT;
+    __observer_id INT;
 BEGIN
     __post_id = find_comment_id( _author, _permlink, True );
+    __observer_id = find_account_id(_observer, False);
     RETURN QUERY
     SELECT
         hpv.id,
@@ -60,13 +62,14 @@ BEGIN
             SELECT hp.id, hp.parent_id
             FROM hive_posts hp
             WHERE hp.id = __post_id
+            AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp.author_id))
             UNION ALL
             SELECT children.id, children.parent_id
             FROM hive_posts children
             JOIN child_posts ON children.parent_id = child_posts.id
             JOIN hive_accounts ON children.author_id = hive_accounts.id
-            WHERE children.counter_deleted = 0 AND
-            (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hive_accounts.name) ELSE True END)
+            WHERE children.counter_deleted = 0
+            AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = children.author_id))
         )
         SELECT hp2.id
         FROM hive_posts hp2

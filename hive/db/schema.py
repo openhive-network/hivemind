@@ -564,6 +564,7 @@ def setup(db):
       "hive_posts_view.sql",
       "hive_votes_view.sql",
       "hive_muted_accounts_view.sql",
+      "hive_muted_accounts_by_id_view.sql",
       "hive_post_operations.sql",
       "head_block_time.sql",
       "update_feed_cache.sql",
