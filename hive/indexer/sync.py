@@ -140,7 +140,8 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
             log.info("[INITIAL SYNC] Time elapsed: %fs", time_current - time_start)
             log.info("[INITIAL SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
             rate = minmax(rate, len(blocks), time_current - wait_time_1, lbound)
-
+            tuples_report = DbState.db().query_row( "SELECT * FROM pgstattuple('hive_posts')" )
+            log.info("[INITIAL SYNC] hive_posts tuples: {}".format(tuples_report))
             if block_end - block_start > 1.0 or is_debug:
                 otm = OPSM.log_current("Operations present in the processed blocks")
                 ftm = FSM.log_current("Flushing times")
