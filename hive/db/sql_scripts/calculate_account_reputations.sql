@@ -2,18 +2,16 @@ DROP TYPE IF EXISTS AccountReputation CASCADE;
 
 CREATE TYPE AccountReputation AS (id int, reputation bigint, is_implicit boolean, changed boolean);
 
-DROP FUNCTION IF EXISTS public.calculate_account_reputations;
+DROP FUNCTION IF EXISTS calculate_account_reputations;
 
-CREATE OR REPLACE FUNCTION public.calculate_account_reputations(
+--- Massive version of account reputation calculation.
+CREATE OR REPLACE FUNCTION calculate_account_reputations(
   _first_block_num integer,
   _last_block_num integer,
   _tracked_account character varying DEFAULT NULL::character varying)
     RETURNS SETOF accountreputation 
     LANGUAGE 'plpgsql'
-
-    COST 100
     STABLE 
-    ROWS 1000
 AS $BODY$
 DECLARE
   __vote_data RECORD;
@@ -110,6 +108,144 @@ END
 $BODY$
 ;
 
+DROP FUNCTION IF EXISTS calculate_account_reputations_for_block;
+
+CREATE OR REPLACE FUNCTION calculate_account_reputations_for_block(_block_num INT, _tracked_account VARCHAR DEFAULT NULL::VARCHAR)
+  RETURNS SETOF accountreputation 
+  LANGUAGE 'plpgsql'
+  VOLATILE
+AS $BODY$
+DECLARE
+  __vote_data RECORD;
+  __author_rep bigint;
+  __new_author_rep bigint;
+  __voter_rep bigint;
+  __implicit_voter_rep boolean;
+  __implicit_author_rep boolean;
+  __author_rep_changed boolean := false;
+  __rshares bigint;
+  __prev_rshares bigint;
+  __rep_delta bigint;
+  __prev_rep_delta bigint;
+  __traced_author int;
+  __account_name varchar;
+BEGIN
+  CREATE UNLOGGED TABLE IF NOT EXISTS __new_reputation_data
+  (
+      id integer,
+      author_id integer,
+      voter_id integer,
+      rshares bigint,
+      prev_rshares bigint
+  );
+
+  TRUNCATE TABLE __new_reputation_data;
+  INSERT INTO __new_reputation_data 
+    SELECT rd.id, rd.author_id, rd.voter_id, rd.rshares,
+      COALESCE((SELECT prd.rshares
+               FROM hive_reputation_data prd
+               WHERE prd.author_id = rd.author_id AND prd.voter_id = rd.voter_id
+                     AND prd.permlink = rd.permlink AND prd.id < rd.id
+                      ORDER BY prd.id DESC LIMIT 1), 0) AS prev_rshares
+    FROM hive_reputation_data rd 
+    WHERE rd.block_num = _block_num
+    ORDER BY rd.id
+    ;
+
+  CREATE UNLOGGED TABLE IF NOT EXISTS __tmp_accounts
+  (
+      id integer,
+      reputation bigint,
+      is_implicit boolean,
+      changed boolean
+  );
+
+  TRUNCATE TABLE __tmp_accounts;
+  INSERT INTO __tmp_accounts
+  SELECT ha.id, ha.reputation, ha.is_implicit, false AS changed
+  FROM __new_reputation_data rd
+  JOIN hive_accounts ha on rd.author_id = ha.id
+  UNION
+  SELECT hv.id, hv.reputation, hv.is_implicit, false as changed
+  FROM __new_reputation_data rd
+  JOIN hive_accounts hv on rd.voter_id = hv.id
+  ;
+
+--  SELECT COALESCE((SELECT ha.id FROM hive_accounts ha WHERE ha.name = _tracked_account), 0) INTO __traced_author;
+
+  FOR __vote_data IN
+      SELECT rd.id, rd.author_id, rd.voter_id, rd.rshares, rd.prev_rshares
+      FROM __new_reputation_data rd 
+      ORDER BY rd.id
+    LOOP
+      SELECT INTO __voter_rep, __implicit_voter_rep ha.reputation, ha.is_implicit 
+      FROM __tmp_accounts ha where ha.id = __vote_data.voter_id;
+      SELECT INTO __author_rep, __implicit_author_rep ha.reputation, ha.is_implicit 
+      FROM __tmp_accounts ha where ha.id = __vote_data.author_id;
+
+/*      IF __vote_data.author_id = __traced_author THEN
+           raise notice 'Processing vote <%> rshares: %, prev_rshares: %', __vote_data.id, __vote_data.rshares, __vote_data.prev_rshares;
+       select ha.name into __account_name from hive_accounts ha where ha.id = __vote_data.voter_id;
+       raise notice 'Voter `%` (%) reputation: %', __account_name, __vote_data.voter_id,  __voter_rep;
+      END IF;
+*/
+      CONTINUE WHEN __voter_rep < 0;
+    
+      __rshares := __vote_data.rshares;
+      __prev_rshares := __vote_data.prev_rshares;
+      __prev_rep_delta := (__prev_rshares >> 6)::bigint;
+
+      IF NOT __implicit_author_rep AND --- Author must have set explicit reputation to allow its correction
+         (__prev_rshares > 0 OR
+          --- Voter must have explicitly set reputation to match hived old conditions
+         (__prev_rshares < 0 AND NOT __implicit_voter_rep AND __voter_rep > __author_rep - __prev_rep_delta)) THEN
+            __author_rep := __author_rep - __prev_rep_delta;
+            __implicit_author_rep := __author_rep = 0;
+            __author_rep_changed = true;
+            if __vote_data.author_id = __vote_data.voter_id THEN
+              __implicit_voter_rep := __implicit_author_rep;
+              __voter_rep := __author_rep;
+            end if;
+
+ /*           IF __vote_data.author_id = __traced_author THEN
+             raise notice 'Corrected author_rep by prev_rep_delta: % to have reputation: %', __prev_rep_delta, __author_rep;
+            END IF;
+*/
+      END IF;
+    
+      IF __rshares > 0 OR
+         (__rshares < 0 AND NOT __implicit_voter_rep AND __voter_rep > __author_rep) THEN
+
+        __rep_delta := (__rshares >> 6)::bigint;
+        __new_author_rep = __author_rep + __rep_delta;
+        __author_rep_changed = true;
+
+        UPDATE __tmp_accounts
+        SET reputation = __new_author_rep,
+            is_implicit = False,
+            changed = true
+        WHERE id = __vote_data.author_id;
+
+/*        IF __vote_data.author_id = __traced_author THEN
+          raise notice 'Changing account: <%> reputation from % to %', __vote_data.author_id, __author_rep, __new_author_rep;
+        END IF;
+*/
+      ELSE
+/*        IF __vote_data.author_id = __traced_author THEN
+            raise notice 'Ignoring reputation change due to unmet conditions... Author_rep: %, Voter_rep: %', __author_rep, __voter_rep;
+        END IF;
+*/
+      END IF;
+    END LOOP;
+
+    RETURN QUERY SELECT id, reputation, is_implicit, Changed
+    FROM __tmp_accounts
+    WHERE Reputation IS NOT NULL AND Changed 
+    ;
+END
+$BODY$
+;
+
 DROP FUNCTION IF EXISTS public.update_account_reputations;
 
 CREATE OR REPLACE FUNCTION public.update_account_reputations(
@@ -127,6 +263,14 @@ BEGIN
   (
     SELECT p.id as account_id, p.reputation, p.is_implicit
     FROM calculate_account_reputations(_first_block_num, _last_block_num) p
+    WHERE _first_block_num IS NULL OR _last_block_num IS NULL OR _first_block_num != _last_block_num
+
+    UNION ALL
+
+    SELECT p.id as account_id, p.reputation, p.is_implicit
+    FROM calculate_account_reputations_for_block(_first_block_num) p
+    WHERE _first_block_num IS NOT NULL AND _last_block_num IS NOT NULL AND _first_block_num = _last_block_num
+
   ) ds
   WHERE urs.id = ds.account_id AND (urs.reputation != ds.reputation OR urs.is_implicit != ds.is_implicit)
   ;

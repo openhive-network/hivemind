@@ -125,6 +125,26 @@ END
 $BODY$;
 COMMIT;
 
+
+START TRANSACTION;
+
+DO
+$BODY$
+BEGIN
+SET work_mem='2GB';
+IF NOT EXISTS(SELECT * FROM hive_db_patch_level WHERE patched_to_revision = 'cce7fe54a2242b7a80354ee7e50e5b3275a2b039') THEN
+  RAISE NOTICE 'Performing reputation livesync recalculation...';
+  --- reputations have to be recalculated from scratch.
+  UPDATE hive_accounts SET reputation = 0, is_implicit = True;
+  PERFORM update_account_reputations(NULL, NULL);
+ELSE
+  RAISE NOTICE 'Skipping reputation livesync recalculation...';
+END IF;
+END
+$BODY$;
+
+COMMIT;
+
 START TRANSACTION;
 
 TRUNCATE TABLE hive_db_data_migration;
@@ -167,6 +187,7 @@ values
 ,(now(), '2a274e586454968a4f298a855a7e60394ed90bde') -- get_number_of_unread_notifications speedup https://gitlab.syncad.com/hive/hivemind/-/merge_requests/348/diffs
 ,(now(), '431fdaead7dcd69e4d2a45e7ce8a3186b8075515') -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/367
 ,(now(), 'cc7bb174d40fe1a0e2221d5d7e1c332c344dca34') -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/372
+,(now(), 'cce7fe54a2242b7a80354ee7e50e5b3275a2b039') -- reputation calc at LIVE sync.
 ) ds (patch_date, patch_revision)
 where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
 
