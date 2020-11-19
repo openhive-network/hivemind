@@ -33,8 +33,8 @@ class Payments:
         new_amount = curr_amount + record['amount']
 
         # update post record
-        sql = "UPDATE hive_posts SET promoted = :val WHERE id = :id"
-        DB.query(sql, val=new_amount, id=record['post_id'])
+        #sql = "UPDATE hive_posts SET promoted = :val WHERE id = :id"
+        #DB.query(sql, val=new_amount, id=record['post_id'])
 
     @classmethod
     def _validated(cls, op, tx_idx, num, date):
