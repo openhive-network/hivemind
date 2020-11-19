@@ -15,15 +15,15 @@ log = logging.getLogger(__name__)
 
 # pylint: disable=too-many-lines
 
-def append_statistics_to_post(post, row, is_pinned, blacklists_for_user=[]):
+def append_statistics_to_post(post, row, is_pinned, blacklisted_for_user={}):
     """ apply information such as blacklists and community names/roles to a given post """
     
     post['blacklists'] = []
-    if blacklists_for_user and row['author'] in blacklists_for_user:
-        blacklists = blacklists_for_user[row['author']]
+    if blacklisted_for_user and row['author'] in blacklisted_for_user:
+        blacklists = blacklisted_for_user[row['author']]
         post['blacklists'].extend(blacklists[0])
-        for mute_source in blacklists[1]:
-            post['blacklists'].append(mute_source + ' (mute list)')
+        for mute_list in blacklists[1]:
+            post['blacklists'].append(mute_list + ' (mute list)')
     reputation = post['author_reputation']
     if reputation < 1:
         post['blacklists'].append('reputation-0')

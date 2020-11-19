@@ -55,16 +55,16 @@ async def get_post(context, author, permlink, observer=None):
     valid_account(observer, allow_empty=True)
     valid_permlink(permlink)
 
-    blacklists_for_user = None
+    blacklisted_for_user = None
     if observer:
-        blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
+        blacklisted_for_user = await Mutes.get_blacklisted_for_observer(observer, context)
 
     sql = "SELECT * FROM bridge_get_post( (:author)::VARCHAR, (:permlink)::VARCHAR )"
     result = await db.query_all(sql, author=author, permlink=permlink)
 
     post = _bridge_post_object(result[0])
     post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.BridgeApi)
-    post = append_statistics_to_post(post, result[0], False, blacklists_for_user)
+    post = append_statistics_to_post(post, result[0], False, blacklisted_for_user)
     return post
 
 @return_error_info
@@ -230,14 +230,14 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
     db = context['db']
 
     async def process_query_results( sql_result ):
-        blacklists_for_user = None
+        blacklisted_for_user = None
         if observer:
-            blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
+            blacklisted_for_user = await Mutes.get_blacklisted_for_observer(observer, context)
         posts = []
         for row in sql_result:
             post = _bridge_post_object(row)
             post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.BridgeApi)
-            post = append_statistics_to_post(post, row, row['is_pinned'], blacklists_for_user)
+            post = append_statistics_to_post(post, row, row['is_pinned'], blacklisted_for_user)
             posts.append(post)
         return posts
 
@@ -295,12 +295,12 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
 
     sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit )
     posts = []
-    blacklists_for_user = None
+    blacklisted_for_user = None
     if observer and account_posts:
         # it looks like the opposite would make more sense, that is, to handle observer for 'blog', 'feed' and 'replies',
         # since that's when posts can come from various authors, some blacklisted and some not, but original version
         # ignored it (only) in those cases
-        blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
+        blacklisted_for_user = await Mutes.get_blacklisted_for_observer(observer, context)
 
     for row in sql_result:
         post = _bridge_post_object(row)
@@ -316,7 +316,7 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
                 reblogged_by_list.sort()
                 post['reblogged_by'] = reblogged_by_list
 
-        post = append_statistics_to_post(post, row, False if account_posts else row['is_pinned'], blacklists_for_user)
+        post = append_statistics_to_post(post, row, False if account_posts else row['is_pinned'], blacklisted_for_user)
         posts.append(post)
     return posts
 
@@ -335,7 +335,8 @@ async def get_relationship_between_accounts(context, account1, account2, observe
         'follows': False,
         'ignores': False,
         'blacklists': False,
-        'follows_blacklists': False
+        'follows_blacklists': False,
+        'follows_muted': False
     }
 
     for row in sql_result:
@@ -349,13 +350,15 @@ async def get_relationship_between_accounts(context, account1, account2, observe
             result['blacklists'] = True
         if row['follow_blacklists']:
             result['follows_blacklists'] = True
+        if row['follow_muted']:
+            result['follows_muted'] = True
 
     return result
 
 @return_error_info
 async def does_user_follow_any_lists(context, observer):
-    """ Tells if given observer follows any nonempty blacklist or mute list """
-    blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context, 2+8)
+    """ Tells if given observer follows any blacklist or mute list """
+    blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
 
     if len(blacklists_for_user) == 0:
         return False
@@ -364,25 +367,25 @@ async def does_user_follow_any_lists(context, observer):
 
 @return_error_info
 async def get_follow_list(context, observer, follow_type='blacklisted'):
-    """ Gives blacklisted/muted accounts for given observer limited to chosen type of list """
+    """ For given observer gives directly blacklisted/muted accounts or
+        list of blacklists/mute lists followed by observer
+    """
     observer = valid_account(observer)
     valid_types = dict(blacklisted=1, follow_blacklist=2, muted=4, follow_muted=8)
     assert follow_type in valid_types, "Unsupported follow_type, valid values: {}".format(", ".join(valid_types.keys()))
 
-    blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context, valid_types[follow_type])
-
-    blacklist_description = ''
-    muted_list_description = ''
-
-    if follow_type == 'follow_blacklist' or follow_type == 'follow_muted':
-        account_data = await get_profile(context, observer)
-        metadata = account_data["metadata"]["profile"]
-        if "blacklist_description" in metadata:
-            blacklist_description = metadata["blacklist_description"]
-        if "muted_list_description" in metadata:
-            muted_list_description = metadata["muted_list_description"]
-
     results = []
-    for account, sources in blacklists_for_user.items():
-        results.append({'name': account, 'blacklist_description': blacklist_description, 'muted_list_description': muted_list_description})
+    if follow_type == 'follow_blacklist' or follow_type == 'follow_muted':
+        blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context, follow_type == 'follow_blacklist', follow_type == 'follow_muted')
+        for row in blacklists_for_user:
+            list_data = await get_profile(context, row['list'])
+            metadata = list_data["metadata"]["profile"]
+            blacklist_description = metadata["blacklist_description"] if "blacklist_description" in metadata else ''
+            muted_list_description = metadata["muted_list_description"] if "muted_list_description" in metadata else ''
+            results.append({'name': row['list'], 'blacklist_description': blacklist_description, 'muted_list_description': muted_list_description})
+    else: # blacklisted or muted
+        blacklisted_for_user = await Mutes.get_blacklisted_for_observer(observer, context, valid_types[follow_type])
+        for account in blacklisted_for_user.keys():
+            results.append({'name': account, 'blacklist_description': '', 'muted_list_description': ''})
+
     return results
