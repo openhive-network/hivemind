@@ -278,15 +278,23 @@ class DbState:
             log.info("[INIT] update_hive_posts_children_count executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
+        DbState.db().query_no_return( "VACUUM ANALYZE hive_posts" )
+        time_end = perf_counter()
+        log.info("[INIT] VACUUM ANALYZE hive_posts executed in %.4fs", time_end - time_start)
 
+        time_start = perf_counter()
         # Update root_id all root posts
         sql = """
               select update_hive_posts_root_id({}, {})
               """.format(last_imported_block, current_imported_block)
         row = DbState.db().query_row(sql)
-
         time_end = perf_counter()
         log.info("[INIT] update_hive_posts_root_id executed in %.4fs", time_end - time_start)
+
+        time_start = perf_counter()
+        DbState.db().query_no_return( "VACUUM ANALYZE hive_posts" )
+        time_end = perf_counter()
+        log.info("[INIT] VACUUM ANALYZE hive_posts executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
 
@@ -307,6 +315,12 @@ class DbState:
         log.info("[INIT] update_all_posts_active executed in %.4fs", time_end - time_start)
 
         time_start = perf_counter()
+        DbState.db().query_no_return( "VACUUM ANALYZE hive_posts" )
+        time_end = perf_counter()
+        log.info("[INIT] VACUUM ANALYZE hive_posts executed in %.4fs", time_end - time_start)
+
+        time_start = perf_counter()
+
 
         sql = """
             SELECT update_feed_cache({}, {});
@@ -349,6 +363,7 @@ class DbState:
         DbState.db().query_no_return(sql)
         time_end = perf_counter()
         log.info("[INIT] update_posts_rshares executed in %.4fs", time_end - time_start)
+        # add here 'vacuum analyze hive_posts' when You want to add below more actions which update hive_posts table
 
         time_start = perf_counter()
         sql = """
@@ -378,6 +393,11 @@ class DbState:
 
             log.info("Recreating FKs")
             create_fk(cls.db())
+
+        time_start = perf_counter()
+        DbState.db().query_no_return( "VACUUM ANALYZE" )
+        time_end = perf_counter()
+        log.info("[INIT] VACUUM ANALYZE executed in %.4fs", time_end - time_start)
 
 
     @staticmethod
