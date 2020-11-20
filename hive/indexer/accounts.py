@@ -125,7 +125,7 @@ class Accounts(DbAdapterHolder):
 
         # post-insert: pass to communities to check for new registrations
         from hive.indexer.community import Community
-        if block_date > Community.start_date:
+        if block_num > Community.start_block:
             Community.register(name, block_date, block_num)
 
     @classmethod

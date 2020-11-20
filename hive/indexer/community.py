@@ -100,7 +100,6 @@ class Community:
     _names = {}
 
     start_block = 37500000
-    start_date = '2019-10-22T07:12:36' # effectively 2019-10-22 12:00:00
 
     @classmethod
     def register(cls, name, block_date, block_num):

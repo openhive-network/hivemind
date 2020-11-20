@@ -213,8 +213,7 @@ class Sync:
 
         self._steem = conf.steem()
 
-    def load_mock_data(self,path):
-        mock_block_data_path = self._conf.get(path)
+    def load_mock_data(self,mock_block_data_path):
         if mock_block_data_path:
             MockBlockProvider.load_block_data(mock_block_data_path)
             MockBlockProvider.print_data()
@@ -229,10 +228,10 @@ class Sync:
         log.info("database_schema_version : %s", SCHEMA_DB_VERSION)
 
         Community.start_block = self._conf.get("community_start_block")
-        Community.start_date = self._conf.get("community_start_date")
 
-        self.load_mock_data("mock_follow_block_data_path")
-        self.load_mock_data("mock_community_block_data_path")
+        paths = self._conf.get("mock_block_data_path")
+        for path in paths:
+          self.load_mock_data(path)
 
         mock_vops_data_path = self._conf.get("mock_vops_data_path")
         if mock_vops_data_path:
