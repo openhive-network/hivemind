@@ -78,6 +78,7 @@ drop index if exists hive_posts_community_id_idx;
 CREATE INDEX IF NOT EXISTS hive_posts_cashout_time_id_idx ON hive_posts (cashout_time, id);
 CREATE INDEX IF NOT EXISTS hive_posts_updated_at_idx ON hive_posts (updated_at DESC);
 CREATE INDEX IF NOT EXISTS hive_votes_block_num_idx ON hive_votes (block_num);
+CREATE INDEX IF NOT EXISTS hive_posts_community_id_id_idx ON hive_posts (community_id, id DESC);
 
 DO
 $BODY$
