@@ -9,52 +9,64 @@ DECLARE
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __account_id = find_account_id( _observer, True );
-  RETURN QUERY SELECT
-      hp.id,
-      hp.author,
-      hp.parent_author,
-      hp.author_rep,
-      hp.root_title,
-      hp.beneficiaries,
-      hp.max_accepted_payout,
-      hp.percent_hbd,
-      hp.url,
-      hp.permlink,
-      hp.parent_permlink_or_category,
-      hp.title,
-      hp.body,
-      hp.category,
-      hp.depth,
-      hp.promoted,
-      hp.payout,
-      hp.pending_payout,
-      hp.payout_at,
-      hp.is_paidout,
-      hp.children,
-      hp.votes,
-      hp.created_at,
-      hp.updated_at,
-      hp.rshares,
-      hp.abs_rshares,
-      hp.json,
-      hp.is_hidden,
-      hp.is_grayed,
-      hp.total_votes,
-      hp.sc_trend,
-      hp.role_title,
-      hp.community_title,
-      hp.role_id,
-      hp.is_pinned,
-      hp.curator_payout_value,
-      hp.is_muted
-  FROM
-      hive_posts_view hp
-      JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
-      JOIN hive_accounts_view ha ON ha.id = hp.author_id
-  WHERE hs.account_id = __account_id AND hp.depth = 0 AND NOT ha.is_grayed AND ( __post_id = 0 OR hp.id < __post_id )
-  AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp.author_id))
-  ORDER BY hp.id DESC
-  LIMIT _limit;
+  RETURN QUERY
+    with post_ids as (select posts.id
+                      from (select community_id
+                            from hive_subscriptions
+                            where account_id = __account_id) communities
+                      cross join lateral (select hive_posts.id
+                                          from hive_posts
+                                          join hive_accounts on (hive_posts.author_id = hive_accounts.id)
+                                          where hive_posts.community_id = communities.community_id
+                                            and hive_posts.depth = 0
+                                            and hive_posts.counter_deleted = 0
+                                            and (__post_id = 0 OR hive_posts.id < __post_id)
+                                            and hive_accounts.reputation > '-464800000000'::bigint
+                                          order by id desc
+                                          limit _limit) posts
+                      order by id desc
+                      limit _limit)
+      SELECT
+          hp.id,
+          hp.author,
+          hp.parent_author,
+          hp.author_rep,
+          hp.root_title,
+          hp.beneficiaries,
+          hp.max_accepted_payout,
+          hp.percent_hbd,
+          hp.url,
+          hp.permlink,
+          hp.parent_permlink_or_category,
+          hp.title,
+          hp.body,
+          hp.category,
+          hp.depth,
+          hp.promoted,
+          hp.payout,
+          hp.pending_payout,
+          hp.payout_at,
+          hp.is_paidout,
+          hp.children,
+          hp.votes,
+          hp.created_at,
+          hp.updated_at,
+          hp.rshares,
+          hp.abs_rshares,
+          hp.json,
+          hp.is_hidden,
+          hp.is_grayed,
+          hp.total_votes,
+          hp.sc_trend,
+          hp.role_title,
+          hp.community_title,
+          hp.role_id,
+          hp.is_pinned,
+          hp.curator_payout_value,
+          hp.is_muted
+      from post_ids
+      join hive_posts_view hp using (id)
+      order by id desc;
 END
 $function$
 language plpgsql STABLE;

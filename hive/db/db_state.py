@@ -107,7 +107,7 @@ class DbState:
             'hive_posts_author_id_created_at_idx',
             'hive_posts_root_id_id_idx',
 
-            'hive_posts_community_id_idx',
+            'hive_posts_community_id_id_idx',
             'hive_posts_payout_at_idx',
             'hive_posts_payout_idx',
             'hive_posts_promoted_id_idx',
