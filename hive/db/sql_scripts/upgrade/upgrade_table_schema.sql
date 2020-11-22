@@ -73,6 +73,7 @@ drop index if exists hive_subscriptions_community_idx;
 drop index if exists hive_votes_post_id_idx;
 drop index if exists hive_votes_voter_id_idx;
 drop index if exists hive_votes_last_update_idx;
+drop index if exists hive_posts_community_id_idx;
 
 CREATE INDEX IF NOT EXISTS hive_posts_cashout_time_id_idx ON hive_posts (cashout_time, id);
 CREATE INDEX IF NOT EXISTS hive_posts_updated_at_idx ON hive_posts (updated_at DESC);
