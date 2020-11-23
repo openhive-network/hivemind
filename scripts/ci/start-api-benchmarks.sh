@@ -6,7 +6,7 @@ pip install tox
 
 export HIVEMIND_ADDRESS=$1
 export HIVEMIND_PORT=$2
-ITERATIONS=$3
+ITERATIONS=${3:-5}
 JOBS=${4:-auto}
 export TAVERN_DISABLE_COMPARATOR=true
 

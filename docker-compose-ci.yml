@@ -4,6 +4,10 @@ services:
 
 
   python-3.6-dev:
+    # Run container this way:
+    # docker-compose -f docker-compose-ci.yml run --rm python-3.6-dev bash
+    # This opens terminal inside container. Project directory is mounted
+    # into container.
     image: hivemind/python:3.6-dev
     build:
       context: .
@@ -18,7 +22,6 @@ services:
     #   # See https://docs.docker.com/engine/security/seccomp/
     #   - seccomp:unconfined
     shm_size: 2g
-    # command: ["tail", "-f", "/dev/null"]
     volumes:
       # Sockets of postgres servers on dockers.
       - "postgres-10-run:/var/run/postgres-10"

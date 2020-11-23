@@ -1,13 +1,14 @@
 stages:
   - build
   - test
+  - sync-e2e-benchmark
   - data-supply
   - deploy
   - e2e-test
   - benchmark-tests
   - post-deploy
 
-.dk-setup-pip: &dk-setup-pip
+.setup-pip: &setup-pip
   - python -m venv .venv
   - source .venv/bin/activate
   - time pip install --upgrade pip setuptools wheel
@@ -18,12 +19,12 @@ stages:
   - poetry --version
   - time pip install --editable .[dev]
 
-.dk-setup-runner-env: &dk-setup-runner-env
+.setup-runner-env: &setup-runner-env
   # Setup runner environment (to connect to correct postgres server, mainly).
   - TMP_VAR=$(cat hive-sync-runner-id.txt 2>/dev/null || true); export HIVE_SYNC_RUNNER_ID=${TMP_VAR:-0}
   - eval $(cat "$RUNNER_CONF" | ./scripts/ci/setup_env.py --current-runner-id=${CI_RUNNER_ID} --hive-sync-runner-id=${HIVE_SYNC_RUNNER_ID})
 
-.dk-set-variables: &dk-set-variables
+.set-variables: &set-variables
   # - export # List all variables and its values set by Gitlab CI.
   - whoami
   - echo "CI_RUNNER_ID is $CI_RUNNER_ID"
@@ -34,17 +35,17 @@ stages:
   - export HIVEMIND_DB_NAME=${HIVEMIND_DB_NAME//[^a-zA-Z0-9_]/_}
   - echo "HIVEMIND_DB_NAME is $HIVEMIND_DB_NAME"
 
-.dk-fetch-git-tags: &dk-fetch-git-tags
+.fetch-git-tags: &fetch-git-tags
   # - git fetch --tags # Looks to be unnecessary.
   - git tag -f ci_implicit_tag # Needed to build python package
 
-.dk-start-timer: &dk-start-timer
+.start-timer: &start-timer
   - ./scripts/ci/timer.sh start
 
-.dk-stop-timer: &dk-stop-timer
+.stop-timer: &stop-timer
   - ./scripts/ci/timer.sh check
 
-.dk-hive-sync-script-common: &dk-hive-sync-script-common
+.hive-sync-script-common: &hive-sync-script-common
   - echo "${CI_RUNNER_ID}" > hive-sync-runner-id.txt
   - ./scripts/ci/wait-for-postgres.sh "$RUNNER_POSTGRES_HOST" "$RUNNER_POSTGRES_PORT"
   - export POSTGRES_MAJOR_VERSION=$(./scripts/ci/get-postgres-version.sh)
@@ -52,7 +53,7 @@ stages:
   - ./scripts/ci/hive-sync.sh
   - ./scripts/ci/collect-db-stats.sh
 
-.dk-rules-for-sync: &dk-rules-for-sync
+.rules-for-sync: &rules-for-sync
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: always
@@ -64,7 +65,7 @@ stages:
       when: manual
     - when: manual
 
-.dk-rules-for-test: &dk-rules-for-test
+.rules-for-test: &rules-for-test
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
@@ -72,7 +73,7 @@ stages:
       when: on_success
     - when: on_success
 
-.dk-default:
+.default:
   image: hivemind/python:3.6
   interruptible: true
   inherit:
@@ -87,7 +88,7 @@ stages:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
     POSTGRES_CLIENT_TOOLS_PATH: /usr/lib/postgresql
     HIVEMIND_DB_NAME: "hive_${CI_COMMIT_REF_SLUG}"
-  cache: &dk-global-cache
+  cache: &global-cache
     # Per-branch caching. CI_COMMIT_REF_SLUG is the same thing.
     # key: "$CI_COMMIT_REF_NAME"
     # Per project caching – use any key.
@@ -98,24 +99,24 @@ stages:
       - .venv/
       - .tox/
   before_script:
-    - *dk-start-timer
-    - *dk-fetch-git-tags
-    - *dk-set-variables
-    - *dk-setup-pip
-    - *dk-setup-runner-env
+    - *start-timer
+    - *fetch-git-tags
+    - *set-variables
+    - *setup-pip
+    - *setup-runner-env
   after_script:
-    - *dk-stop-timer
+    - *stop-timer
 
 ##### Jobs #####
 
-dk-hivemind-sync:
+.hivemind-sync:
   # Postgres shared on host.
-  extends: .dk-default
-  <<: *dk-rules-for-sync
+  extends: .default
+  <<: *rules-for-sync
   stage: data-supply
   needs: []
   script:
-    - *dk-hive-sync-script-common
+    - *hive-sync-script-common
   artifacts:
     paths:
       - hivemind-sync.log
@@ -125,207 +126,294 @@ dk-hivemind-sync:
   tags:
     - hivemind-heavy-job
 
-.dk-test-common:
-  extends: .dk-default
-  <<: *dk-rules-for-test
+.test-common:
+  extends: .default
+  <<: *rules-for-test
   needs:
-    - job: dk-hivemind-sync
+    - job: hivemind-sync
       artifacts: true
   allow_failure: false
   before_script:
-    - *dk-start-timer
-    - *dk-fetch-git-tags
-    - *dk-set-variables
-    - *dk-setup-pip
-    - *dk-setup-runner-env
+    - *start-timer
+    - *fetch-git-tags
+    - *set-variables
+    - *setup-pip
+    - *setup-runner-env
     - ./scripts/ci/wait-for-postgres.sh "$RUNNER_POSTGRES_HOST" "$RUNNER_POSTGRES_PORT"
     - ./scripts/ci/hive-server.sh start
   after_script:
-    - *dk-stop-timer
+    - *stop-timer
   tags:
     - hivemind-light-job
 
 
-dk-bridge_api_smoketest:
+.bridge_api_smoketest-script: &bridge_api_smoketest-script
+  - |
+    ./scripts/ci/start-api-smoketest.sh \
+        localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
+        bridge_api_patterns/ api_smoketest_bridge.xml \
+        $RUNNER_TEST_JOBS
+
+.bridge_api_smoketest:
   stage: e2e-test
-  extends: .dk-test-common
+  extends: .test-common
   script:
-    - |
-      ./scripts/ci/start-api-smoketest.sh \
-          localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
-          bridge_api_patterns/ api_smoketest_bridge.xml \
-          $RUNNER_TEST_JOBS
+    - *bridge_api_smoketest-script
   artifacts:
     when: always
     reports:
       junit: api_smoketest_bridge.xml
 
-dk-bridge_api_smoketest_negative:
+
+.bridge_api_smoketest_negative-script: &bridge_api_smoketest_negative-script
+  - |
+    ./scripts/ci/start-api-smoketest.sh \
+        localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
+        bridge_api_negative/ api_smoketest_bridge_negative.xml \
+        $RUNNER_TEST_JOBS
+
+.bridge_api_smoketest_negative:
   stage: e2e-test
-  extends: .dk-test-common
+  extends: .test-common
   script:
-    - |
-      ./scripts/ci/start-api-smoketest.sh \
-          localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
-          bridge_api_negative/ api_smoketest_bridge_negative.xml \
-          $RUNNER_TEST_JOBS
+    - *bridge_api_smoketest_negative-script
   artifacts:
     when: always
     reports:
       junit: api_smoketest_bridge_negative.xml
 
-dk-condenser_api_smoketest:
+
+.condenser_api_smoketest-script: &condenser_api_smoketest-script
+  - |
+    ./scripts/ci/start-api-smoketest.sh \
+        localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
+        condenser_api_patterns/ api_smoketest_condenser_api.xml \
+        $RUNNER_TEST_JOBS
+
+.condenser_api_smoketest:
   stage: e2e-test
-  extends: .dk-test-common
+  extends: .test-common
   script:
-    - |
-      ./scripts/ci/start-api-smoketest.sh \
-          localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
-          condenser_api_patterns/ api_smoketest_condenser_api.xml \
-          $RUNNER_TEST_JOBS
+    - *condenser_api_smoketest-script
   artifacts:
     when: always
     reports:
       junit: api_smoketest_condenser_api.xml
 
-dk-condenser_api_smoketest_negative:
+
+.condenser_api_smoketest_negative-script: &condenser_api_smoketest_negative-script
+  - |
+    ./scripts/ci/start-api-smoketest.sh \
+        localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
+        condenser_api_negative/ api_smoketest_condenser_api_negative.xml \
+        $RUNNER_TEST_JOBS
+
+.condenser_api_smoketest_negative:
   stage: e2e-test
-  extends: .dk-test-common
+  extends: .test-common
   script:
-    - |
-      ./scripts/ci/start-api-smoketest.sh \
-          localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
-          condenser_api_negative/ api_smoketest_condenser_api_negative.xml \
-          $RUNNER_TEST_JOBS
+    - *condenser_api_smoketest_negative-script
   artifacts:
     when: always
     reports:
       junit: api_smoketest_condenser_api_negative.xml
 
-dk-database_api_smoketest:
+
+.database_api_smoketest-script: &database_api_smoketest-script
+  - |
+    ./scripts/ci/start-api-smoketest.sh \
+        localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
+        database_api_patterns/ api_smoketest_database_api.xml \
+        $RUNNER_TEST_JOBS
+
+.database_api_smoketest:
   stage: e2e-test
-  extends: .dk-test-common
+  extends: .test-common
   script:
-    - |
-      ./scripts/ci/start-api-smoketest.sh \
-          localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
-          database_api_patterns/ api_smoketest_database_api.xml \
-          $RUNNER_TEST_JOBS
+    - *database_api_smoketest-script
   artifacts:
     when: always
     reports:
       junit: api_smoketest_database_api.xml
 
-dk-database_api_smoketest_negative:
+
+.database_api_smoketest_negative-script: &database_api_smoketest_negative-script
+  - |
+    ./scripts/ci/start-api-smoketest.sh \
+        localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
+        database_api_negative/ api_smoketest_database_api_negative.xml \
+        $RUNNER_TEST_JOBS
+
+.database_api_smoketest_negative:
   stage: e2e-test
-  extends: .dk-test-common
+  extends: .test-common
   script:
-    - |
-      ./scripts/ci/start-api-smoketest.sh \
-          localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
-          database_api_negative/ api_smoketest_database_api_negative.xml \
-          $RUNNER_TEST_JOBS
+    - *database_api_smoketest_negative-script
   artifacts:
     when: always
     reports:
       junit: api_smoketest_database_api_negative.xml
 
-dk-follow_api_smoketest:
+.follow_api_smoketest-script: &follow_api_smoketest-script
+  - |
+    ./scripts/ci/start-api-smoketest.sh \
+        localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
+        follow_api_patterns/ api_smoketest_follow_api.xml \
+        $RUNNER_TEST_JOBS
+
+.follow_api_smoketest:
   stage: e2e-test
-  extends: .dk-test-common
+  extends: .test-common
   script:
-    - |
-      ./scripts/ci/start-api-smoketest.sh \
-          localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
-          follow_api_patterns/ api_smoketest_follow_api.xml \
-          $RUNNER_TEST_JOBS
+    - *follow_api_smoketest-script
   artifacts:
     when: always
     reports:
-      junit: api_smoketest_follow_api.xml
+      junit: api_smoketest.xml
 
-dk-follow_api_smoketest_negative:
+
+.follow_api_smoketest_negative-script: &follow_api_smoketest_negative-script
+  - |
+    ./scripts/ci/start-api-smoketest.sh \
+        localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
+        follow_api_negative/ api_smoketest_follow_api_negative.xml \
+        $RUNNER_TEST_JOBS
+
+.follow_api_smoketest_negative:
   stage: e2e-test
-  extends: .dk-test-common
+  extends: .test-common
   script:
-    - |
-      ./scripts/ci/start-api-smoketest.sh \
-          localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
-          follow_api_negative/ api_smoketest_follow_api_negative.xml \
-          $RUNNER_TEST_JOBS
+    - *follow_api_smoketest_negative-script
   artifacts:
     when: always
     reports:
       junit: api_smoketest_follow_api_negative.xml
 
-dk-hive_api_smoketest:
-  stage: e2e-test
-  extends: .dk-test-common
-  script:
-    - |
-      ./scripts/ci/start-api-smoketest.sh \
-          localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
-          hive_api_patterns/ api_smoketest_hive_api.xml \
-          $RUNNER_TEST_JOBS
-  artifacts:
-    when: always
-    reports:
-      junit: api_smoketest_hive_api.xml
 
-dk-tags_api_smoketest:
-  stage: e2e-test
-  extends: .dk-test-common
-  script:
-    - |
-      ./scripts/ci/start-api-smoketest.sh \
-          localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
-          tags_api_patterns/ api_smoketest_tags_api.xml \
-          $RUNNER_TEST_JOBS
-  artifacts:
-    when: always
-    reports:
-      junit: api_smoketest_tags_api.xml
+.tags_api_smoketest-script: &tags_api_smoketest-script
+  - |
+    ./scripts/ci/start-api-smoketest.sh \
+        localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
+        tags_api_negative/ api_smoketest_tags_api_negative.xml \
+        $RUNNER_TEST_JOBS
 
-dk-tags_api_smoketest_negative:
+.tags_api_smoketest:
   stage: e2e-test
-  extends: .dk-test-common
+  extends: .test-common
   script:
-    - |
-      ./scripts/ci/start-api-smoketest.sh \
-          localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
-          tags_api_negative/ api_smoketest_tags_api_negative.xml \
-          $RUNNER_TEST_JOBS
+    - *tags_api_smoketest-script
   artifacts:
     when: always
     reports:
       junit: api_smoketest_tags_api_negative.xml
 
-dk-mock_tests:
+
+.tags_api_smoketest_negative-script: &tags_api_smoketest_negative-script
+  - |
+    ./scripts/ci/start-api-smoketest.sh \
+        localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
+        tags_api_patterns/ api_smoketest_tags_api.xml \
+        $RUNNER_TEST_JOBS
+
+.tags_api_smoketest_negative:
   stage: e2e-test
-  extends: .dk-test-common
+  extends: .test-common
   script:
-    - |
-      ./scripts/ci/start-api-smoketest.sh \
-          localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
-          mock_tests/ api_smoketest_mock_tests.xml \
-          $RUNNER_TEST_JOBS
+    - *tags_api_smoketest_negative-script
   artifacts:
     when: always
     reports:
+      junit: api_smoketest_tags_api.xml
+
+
+.mock_tests-script: &mock_tests-script
+  - |
+    scripts/ci/start-api-smoketest.sh \
+    localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
+    mock_tests/ api_smoketest_mock_tests.xml \
+    $RUNNER_TEST_JOBS
+
+.mock_tests:
+  stage: e2e-test
+  extends: .test-common
+  script:
+    - *mock_tests-script
+  artifacts:
+    reports:
       junit: api_smoketest_mock_tests.xml
 
-dk-api-smoketest-benchmark:
+
+.hive_api_smoketest-script: &hive_api_smoketest-script
+  - |
+    scripts/ci/start-api-smoketest.sh \
+    localhost "$RUNNER_HIVEMIND_SERVER_HTTP_PORT" \
+    hive_api_patterns/ api_smoketest_hive_api.xml \
+    $RUNNER_TEST_JOBS
+
+.hive_api_smoketest:
+  stage: e2e-test
+  extends: .test-common
+  script:
+    - *hive_api_smoketest-script
+  artifacts:
+    reports:
+      junit: api_smoketest_hive_api.xml
+
+
+.api-smoketest-benchmark-script: &api-smoketest-benchmark-script
+  - |
+    ./scripts/ci/start-api-benchmarks.sh \
+        localhost $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
+        $RUNNER_BENCHMARK_ITERATIONS \
+        $RUNNER_BENCHMARK_JOBS
+  - ./scripts/xml_report_parser.py . ./tests/tests_api/hivemind/tavern
+
+.api-smoketest-benchmark:
   stage: benchmark-tests
-  extends: .dk-test-common
+  extends: .test-common
   # Temporary failure (when any call is longer than 1s is allowed)
   allow_failure: true
   script:
-    - |
-      ./scripts/ci/start-api-benchmarks.sh \
-          localhost $RUNNER_HIVEMIND_SERVER_HTTP_PORT 5 \
-          $RUNNER_TEST_JOBS
-    - ./scripts/xml_report_parser.py . ./tests/tests_api/hivemind/tavern
+    - *api-smoketest-benchmark-script
   artifacts:
     when: always
     paths:
       - tavern_benchmarks_report.html
+
+
+sync-e2e-benchmark:
+  extends: .default
+  <<: *rules-for-sync
+  stage: sync-e2e-benchmark
+  needs: []
+  script:
+    - *hive-sync-script-common
+    - ./scripts/ci/hive-server.sh start
+    - pip install tox
+    - touch tox-installed
+    - *bridge_api_smoketest-script
+    - *bridge_api_smoketest_negative-script
+    - *condenser_api_smoketest-script
+    - *condenser_api_smoketest_negative-script
+    - *database_api_smoketest-script
+    - *database_api_smoketest_negative-script
+    - *follow_api_smoketest-script
+    - *follow_api_smoketest_negative-script
+    - *tags_api_smoketest-script
+    - *tags_api_smoketest_negative-script
+    - *mock_tests-script
+    - *hive_api_smoketest-script
+    - *api-smoketest-benchmark-script
+  artifacts:
+    when: always
+    paths:
+      - hivemind-sync.log
+      - pg-stats
+      - hive-sync-runner-id.txt
+      - tavern_benchmarks_report.html
+      - tests/tests_api/hivemind/tavern/**/*.out.json
+    reports:
+      junit: "*.xml"
+    expire_in: 7 days
+  tags:
+    - hivemind-heavy-job
