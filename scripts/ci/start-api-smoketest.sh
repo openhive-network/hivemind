@@ -2,7 +2,11 @@
 
 set -e
 
-pip install tox
+# Existence of file `tox-installed` means that a preceding script
+# has installed tox already.
+if [ ! -f "tox-installed" ]; then
+    pip install tox
+fi
 
 export HIVEMIND_ADDRESS=$1
 export HIVEMIND_PORT=$2
