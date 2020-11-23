@@ -46,8 +46,27 @@ class Follow(DbAdapterHolder):
         for following in op['flg']:
             k = '{}/{}'.format(op['flr'], following)
             if k in cls.follow_items_to_flush:
-                cls.follow_items_to_flush[k]['state'] = state
                 cls.follow_items_to_flush[k]['idx'] = cls.idx
+                cls.follow_items_to_flush[k]['state'] = state
+                if state == 3:
+                    cls.follow_items_to_flush[k]['blacklisted'] = True
+
+                if state == 5:
+                    cls.follow_items_to_flush[k]['blacklisted'] = False
+
+                if state == 4:
+                    cls.follow_items_to_flush[k]['follow_blacklists'] = True
+
+                if state == 6:
+                    cls.follow_items_to_flush[k]['follow_blacklists'] = False
+
+                if state == 7:
+                    cls.follow_items_to_flush[k]['follow_muted'] = True
+
+                if state == 8:
+                    cls.follow_items_to_flush[k]['follow_muted'] = False
+
+                cls.follow_items_to_flush[k]['at'] = op['at']
                 cls.follow_items_to_flush[k]['block_num'] = block_num
             else:
                 cls.follow_items_to_flush[k] = dict(
@@ -55,6 +74,9 @@ class Follow(DbAdapterHolder):
                     flr=op['flr'],
                     flg=following,
                     state=state,
+                    blacklisted=(state == 3),
+                    follow_blacklists=(state == 4),
+                    follow_muted=(state == 7),
                     at=op['at'],
                     block_num=block_num)
             cls.idx += 1
@@ -113,7 +135,7 @@ class Follow(DbAdapterHolder):
     def flush(cls):
         n = 0
         if cls.follow_items_to_flush:
-            sql_prefix = """
+            sql = """
                 INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
                 SELECT ds.follower_id, ds.following_id, ds.created_at, ds.state, ds.blacklisted, ds.follow_blacklists, ds.follow_muted, ds.block_num
                 FROM
@@ -138,29 +160,16 @@ class Follow(DbAdapterHolder):
                     ORDER BY T.block_num ASC, T.id ASC
                 ) AS ds(id, follower_id, following_id, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
                 ORDER BY ds.block_num ASC, ds.id ASC
-            """
-            sql_postfix = """
                 ON CONFLICT ON CONSTRAINT hive_follows_ux1 DO UPDATE
                     SET
+                        created_at = EXCLUDED.created_at,
                         state = (CASE EXCLUDED.state
                                     WHEN 0 THEN 0 -- 0 blocks possibility to update state
                                     ELSE EXCLUDED.state
                                 END),
-                        blacklisted = (CASE EXCLUDED.state
-                                        WHEN 3 THEN TRUE
-                                        WHEN 5 THEN FALSE
-                                        ELSE EXCLUDED.blacklisted
-                                    END),
-                        follow_blacklists = (CASE EXCLUDED.state
-                                                WHEN 4 THEN TRUE
-                                                WHEN 6 THEN FALSE
-                                                ELSE EXCLUDED.follow_blacklists
-                                            END),
-                        follow_muted = (CASE EXCLUDED.state
-                                           WHEN 7 THEN TRUE
-                                           WHEN 8 THEN FALSE
-                                           ELSE EXCLUDED.follow_muted
-                                        END),
+                        blacklisted = EXCLUDED.blacklisted,
+                        follow_blacklists = EXCLUDED.follow_blacklists,
+                        follow_muted = EXCLUDED.follow_muted,
                         block_num = EXCLUDED.block_num
                 WHERE hf.following = EXCLUDED.following AND hf.follower = EXCLUDED.follower
                 """
@@ -176,14 +185,13 @@ class Follow(DbAdapterHolder):
                                                                           follow_item['flg'],
                                                                           follow_item['at'],
                                                                           follow_item['state'],
-                                                                          follow_item['state'] == 3,
-                                                                          follow_item['state'] == 4,
-                                                                          follow_item['state'] == 7,
+                                                                          follow_item['blacklisted'],
+                                                                          follow_item['follow_blacklists'],
+                                                                          follow_item['follow_muted'],
                                                                           follow_item['block_num']))
                     count = count + 1
                 else:
-                    query = str(sql_prefix).format(",".join(values))
-                    query += sql_postfix
+                    query = str(sql).format(",".join(values))
                     cls.db.query(query)
                     values.clear()
                     values.append("({}, {}, {}, '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['idx'],
@@ -191,16 +199,15 @@ class Follow(DbAdapterHolder):
                                                                           follow_item['flg'],
                                                                           follow_item['at'],
                                                                           follow_item['state'],
-                                                                          follow_item['state'] == 3,
-                                                                          follow_item['state'] == 4,
-                                                                          follow_item['state'] == 7,
+                                                                          follow_item['blacklisted'],
+                                                                          follow_item['follow_blacklists'],
+                                                                          follow_item['follow_muted'],
                                                                           follow_item['block_num']))
                     count = 1
                 n += 1
 
             if len(values) > 0:
-                query = str(sql_prefix).format(",".join(values))
-                query += sql_postfix
+                query = str(sql).format(",".join(values))
                 cls.db.query(query)
             cls.commitTx()
             cls.follow_items_to_flush.clear()
