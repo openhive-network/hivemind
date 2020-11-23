@@ -18,12 +18,6 @@ class MockDataProvider():
         print(dumps(cls.block_data, indent=4, sort_keys=True))
 
     @classmethod
-    def is_data(cls):
-        if cls.block_data:
-            return True
-        return False
-
-    @classmethod
     def add_block_data_from_directory(cls, dir_name):
         from fnmatch import fnmatch
         pattern = "*.json"

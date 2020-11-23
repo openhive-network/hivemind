@@ -54,7 +54,7 @@ class SteemClient:
         """Fetch multiple comment objects."""
         raise NotImplementedError("get_content is not implemented in hived")
 
-    def get_block(self, num, strict=True):
+    def get_block(self, num):
         """Fetches a single block.
 
         If the result does not contain a `block` key, it's assumed
@@ -63,6 +63,7 @@ class SteemClient:
         result = self.__exec('get_block', {'block_num': num})
         if 'block' in result:
             ret = result['block']
+            MockBlockProvider.set_last_real_block_num_date(num, ret['timestamp'])
             data = MockBlockProvider.get_block_data(num)
             if data is not None:
                 ret["transactions"].extend(data["transactions"])
@@ -71,12 +72,7 @@ class SteemClient:
         else:
             # if block does not exist in hived but exist in Mock Provider
             # return block from block provider
-            data = MockBlockProvider.get_block_data(num)
-            if data is None:
-                data = MockBlockProvider.make_empty_block(num)
-            if strict and data is None:
-                raise MockDataProviderException("No more blocks to serve")
-            return data
+            return MockBlockProvider.get_block_data(num, True)
 
     def stream_blocks(self, start_from, trail_blocks=0, max_gap=100, do_stale_block_check=True):
         """Stream blocks. Returns a generator."""
@@ -161,17 +157,13 @@ class SteemClient:
                 num = int(block['block_id'][:8], base=16)
                 assert block_num == num, "Reference block number and block number from result does not match"
                 blocks[num] = block
+                MockBlockProvider.set_last_real_block_num_date(num, block['timestamp'])
                 data = MockBlockProvider.get_block_data(num)
                 if data is not None:
                     blocks[num]["transactions"].extend(data["transactions"])
                     blocks[num]["transaction_ids"].extend(data["transaction_ids"])
             else:
-                data = MockBlockProvider.get_block_data(block_num)
-                if data is None:
-                    data = MockBlockProvider.make_empty_block(block_num)
-                if data is None:
-                    raise MockDataProviderException("No more blocks to serve")
-                blocks[block_num] = data
+                blocks[block_num] = MockBlockProvider.get_block_data(block_num, True)
             idx += 1
 
         return [blocks[x] for x in block_nums]
@@ -234,13 +226,11 @@ class SteemClient:
             next_block = call_result['next_block_range_begin']
 
             if next_block == 0:
-                MockVopsProvider.add_mock_vops(ret, from_block, end_block)
-                return ret
+                break
 
             if next_block < begin_block:
                 logger.error( "Next next block nr {} returned by enum_virtual_ops is smaller than begin block {}.".format( next_block, begin_block ) )
-                MockVopsProvider.add_mock_vops(ret, from_block, end_block)
-                return ret
+                break
 
             # Move to next block only if operations from current one have been processed completely.
             from_block = next_block

@@ -1,23 +1,22 @@
 """ Data provider for test operations """
 import datetime
 import dateutil.parser
-from hive.db.adapter import Db
 
-from hive.indexer.mock_data_provider import MockDataProvider
-
-def get_head_num_and_timestamp():
-    db = Db.instance()
-    sql = "SELECT num, created_at FROM hive_blocks ORDER BY num DESC LIMIT 1"
-    ret = db.query_row(sql)
-    if ret:
-        return (ret["num"], ret["created_at"])
-    return (1, dateutil.parser.isoparse("2016-03-24T16:05:00"))
+from hive.indexer.mock_data_provider import MockDataProvider, MockDataProviderException
 
 class MockBlockProvider(MockDataProvider):
     """ Data provider for test ops """
 
     min_block = 0
     max_block = 0
+
+    last_real_block_num = 1
+    last_real_block_time = dateutil.parser.isoparse("2016-03-24T16:05:00")
+
+    @classmethod
+    def set_last_real_block_num_date(cls, block_num, block_date):
+        cls.last_real_block_num = int(block_num)
+        cls.last_real_block_time = dateutil.parser.isoparse(block_date)
 
     @classmethod
     def load_block_data(cls, data_path):
@@ -56,8 +55,13 @@ class MockBlockProvider(MockDataProvider):
             cls.block_data[block_num] = block_data
 
     @classmethod
-    def get_block_data(cls, block_num):
-        return cls.block_data.get(block_num, None)
+    def get_block_data(cls, block_num, make_on_empty=False):
+        data = cls.block_data.get(block_num, None)
+        if make_on_empty and data is None:
+            data = cls.make_empty_block(block_num)
+            if data is None:
+                raise MockDataProviderException("No more blocks to serve")
+        return data
 
     @classmethod
     def get_max_block_number(cls):
@@ -69,10 +73,9 @@ class MockBlockProvider(MockDataProvider):
 
     @classmethod
     def make_block_timestamp(cls, block_num):
-        ref_num, ref_time = get_head_num_and_timestamp()
-        block_delta = block_num - ref_num
+        block_delta = block_num - cls.last_real_block_num
         time_delta = datetime.timedelta(days=0, seconds=block_delta*3, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
-        ret_time = ref_time + time_delta
+        ret_time = cls.last_real_block_time + time_delta
         return ret_time.replace(microsecond=0).isoformat()
 
     @classmethod
