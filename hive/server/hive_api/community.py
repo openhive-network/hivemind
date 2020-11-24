@@ -311,7 +311,7 @@ async def _append_admins(db, communities):
     ids = communities.keys()
     sql = """SELECT community_id, ha.name FROM hive_roles hr
                JOIN hive_accounts ha ON hr.account_id = ha.id
-              WHERE role_id = 6 AND community_id IN :ids"""
+              WHERE role_id = 6 AND community_id IN :ids ORDER BY ha.name"""
     for row in await db.query_all(sql, ids=tuple(ids)):
         _id = row[0]
         if 'admins' not in communities[_id]:
@@ -368,5 +368,5 @@ async def _top_community_posts(db, community, limit=50):
     WHERE hcd.category = :community AND hp.counter_deleted = 0 AND NOT hp.is_paidout
         AND post_id IN (SELECT id FROM hive_posts WHERE is_muted = '0')
     ORDER BY ( hp.payout + hp.pending_payout ) DESC LIMIT :limit"""
-    
+
     return await db.query_all(sql, community=community, limit=limit)
