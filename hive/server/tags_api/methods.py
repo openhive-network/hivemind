@@ -3,7 +3,6 @@ from hive.server.common.helpers import (
     return_error_info,
     valid_account,
     valid_permlink)
-from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 
 @return_error_info
 async def get_discussion(context, author: str, permlink: str, observer=None):

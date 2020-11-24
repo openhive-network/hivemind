@@ -1,0 +1,4 @@
+***block 4999999***
+custom_json_operation("[\"reblog\",{\"account\":\"funny\",\"author\":\"steemit\",\"permlink\":\"firstpost\"}]") - very old post
+custom_json_operation("[\"reblog\",{\"account\":\"funny\",\"author\":\"steak\",\"permlink\":\"streak-test\"}]") - deleted post (should not be reblogged)
+custom_json_operation("[\"reblog\",{\"account\":\"funny\",\"author\":\"dollarvigilante\",\"permlink\":\"another-billionaire-warns-of-catastrophic-depths-not-seen-in-5-000-years-and-emphasizes-gold\"}]") - fresh post

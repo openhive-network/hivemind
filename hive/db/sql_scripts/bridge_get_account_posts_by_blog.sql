@@ -4,19 +4,20 @@ CREATE OR REPLACE FUNCTION bridge_get_account_posts_by_blog(
   in _account VARCHAR,
   in _author VARCHAR,
   in _permlink VARCHAR,
-  in _limit INTEGER
+  in _limit INTEGER,
+  in _bridge_api BOOLEAN
 )
 RETURNS SETOF bridge_api_post
 AS
 $function$
 DECLARE
-  __post_id INTEGER := 0;
-  __account_id INTEGER := find_account_id( _account, True );
+  __post_id INTEGER;
+  __account_id INTEGER;
   __created_at TIMESTAMP;
 BEGIN
-
-  IF _permlink <> '' THEN
-    __post_id = find_comment_id( _author, _permlink, True );
+  __account_id = find_account_id( _account, True );
+  __post_id = find_comment_id( _author, _permlink, True );
+  IF __post_id <> 0 THEN
     SELECT hfc.created_at INTO __created_at
     FROM hive_feed_cache hfc
     WHERE hfc.account_id = __account_id AND hfc.post_id = __post_id;
@@ -65,16 +66,18 @@ BEGIN
     (
       SELECT hfc.post_id, hfc.created_at
       FROM hive_feed_cache hfc
-      WHERE hfc.account_id = __account_id AND (__post_id = 0 OR hfc.created_at <= __created_at)
-        AND NOT EXISTS (SELECT NULL FROM hive_posts hp
-                        WHERE hp.id = hfc.post_id AND hp.counter_deleted = 0 AND hp.depth = 0 AND hp.community_id IS NOT NULL
-                              AND NOT EXISTS (SELECT NULL FROM hive_reblogs hr WHERE hr.blogger_id = __account_id AND hr.post_id = hp.id)
+      WHERE hfc.account_id = __account_id AND ( __post_id = 0 OR hfc.created_at < __created_at OR ( hfc.created_at = __created_at AND hfc.post_id < __post_id ) )
+        AND ( NOT _bridge_api OR
+              NOT EXISTS (SELECT NULL FROM hive_posts hp1
+                          WHERE hp1.id = hfc.post_id AND hp1.counter_deleted = 0 AND hp1.depth = 0 AND hp1.community_id IS NOT NULL
+                          AND NOT EXISTS (SELECT NULL FROM hive_reblogs hr WHERE hr.blogger_id = __account_id AND hr.post_id = hp1.id)
+                         )
             )
-      ORDER BY created_at DESC
+      ORDER BY hfc.created_at DESC, hfc.post_id DESC
       LIMIT _limit
-    )T ON hp.id = T.post_id
-    ORDER BY T.created_at DESC
-    ;
+    ) blog ON hp.id = blog.post_id
+    ORDER BY blog.created_at DESC, blog.post_id DESC
+    LIMIT _limit;
 END
 $function$
 language plpgsql STABLE;
