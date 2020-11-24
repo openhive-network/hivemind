@@ -593,7 +593,6 @@ def setup(db):
       "condenser_api_post_ex_type.sql",
       "condenser_get_blog.sql",
       "condenser_get_content.sql",
-      "condenser_get_discussions_by_blog.sql",
       "condenser_tags.sql",
       "condenser_follows.sql",
       "hot_and_trends.sql",
