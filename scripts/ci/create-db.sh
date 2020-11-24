@@ -28,10 +28,6 @@ BEGIN
 END
 \$$;
 
--- We drop database to enable retry of CI job.
-\echo Dropping database ${HIVEMIND_DB_NAME}
-DROP DATABASE IF EXISTS ${HIVEMIND_DB_NAME};
-
 \echo Creating database ${HIVEMIND_DB_NAME}
 CREATE DATABASE ${HIVEMIND_DB_NAME} TEMPLATE ${TEMPLATE}
     OWNER ${RUNNER_POSTGRES_APP_USER};
