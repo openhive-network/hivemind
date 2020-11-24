@@ -70,10 +70,10 @@ BEGIN
                         WHERE hp.id = hfc.post_id AND hp.counter_deleted = 0 AND hp.depth = 0 AND hp.community_id IS NOT NULL
                               AND NOT EXISTS (SELECT NULL FROM hive_reblogs hr WHERE hr.blogger_id = __account_id AND hr.post_id = hp.id)
             )
-      ORDER BY created_at DESC
+      ORDER BY created_at DESC, post_id DESC
       LIMIT _limit
     )T ON hp.id = T.post_id
-    ORDER BY T.created_at DESC
+    ORDER BY T.created_at DESC, T.post_id DESC
     ;
 END
 $function$

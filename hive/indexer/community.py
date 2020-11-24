@@ -28,9 +28,6 @@ TYPE_TOPIC = 1
 TYPE_JOURNAL = 2
 TYPE_COUNCIL = 3
 
-START_BLOCK = 37500000
-START_DATE = '2019-10-22T07:12:36' # effectively 2019-10-22 12:00:00
-
 # https://en.wikipedia.org/wiki/ISO_639-1
 LANGS = ("ab,aa,af,ak,sq,am,ar,an,hy,as,av,ae,ay,az,bm,ba,eu,be,bn,bh,bi,"
          "bs,br,bg,my,ca,ch,ce,ny,zh,cv,kw,co,cr,hr,cs,da,dv,nl,dz,en,eo,"
@@ -101,6 +98,8 @@ class Community:
 
     # id -> name map
     _names = {}
+
+    start_block = 37500000
 
     @classmethod
     def register(cls, name, block_date, block_num):
@@ -292,6 +291,7 @@ class CommunityOp:
 
         except AssertionError as e:
             payload = str(e)
+            log.info("validation failed with message: '%s'", payload)
             Notify(block_num=self.block_num, type_id='error', dst_id=self.actor_id,
                    when=self.date, payload=payload)
 

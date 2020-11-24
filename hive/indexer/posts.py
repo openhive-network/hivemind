@@ -11,7 +11,7 @@ from hive.db.adapter import Db
 from hive.db.db_state import DbState
 
 from hive.indexer.feed_cache import FeedCache
-from hive.indexer.community import Community, START_DATE
+from hive.indexer.community import Community
 from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.tags import Tags
@@ -92,11 +92,11 @@ class Posts(DbAdapterHolder):
 
         sql = """
             SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, community_id, is_valid, is_muted, depth
-            FROM process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_date)::timestamp, (:block_num)::integer);
+            FROM process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_block)::integer, (:block_num)::integer);
             """
 
         row = DB.query_row(sql, author=op['author'], permlink=op['permlink'], parent_author=op['parent_author'],
-                   parent_permlink=op['parent_permlink'], date=block_date, community_support_start_date=START_DATE, block_num=op['block_num'])
+                   parent_permlink=op['parent_permlink'], date=block_date, community_support_start_block=Community.start_block, block_num=op['block_num'])
 
         result = dict(row)
 

@@ -1,4 +1,4 @@
-DROP FUNCTION if exists process_hive_post_operation(character varying,character varying,character varying,character varying,timestamp without time zone,timestamp without time zone)
+DROP FUNCTION if exists process_hive_post_operation(character varying,character varying,character varying,character varying,timestamp without time zone,integer,integer)
 ;
 CREATE OR REPLACE FUNCTION process_hive_post_operation(
   in _author hive_accounts.name%TYPE,
@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION process_hive_post_operation(
   in _parent_author hive_accounts.name%TYPE,
   in _parent_permlink hive_permlink_data.permlink%TYPE,
   in _date hive_posts.created_at%TYPE,
-  in _community_support_start_date hive_posts.created_at%TYPE,
+  in _community_support_start_block hive_posts.block_num%TYPE,
   in _block_num hive_posts.block_num%TYPE)
 RETURNS TABLE (is_new_post boolean, id hive_posts.id%TYPE, author_id hive_posts.author_id%TYPE, permlink_id hive_posts.permlink_id%TYPE,
                 post_category hive_category_data.category%TYPE, parent_id hive_posts.parent_id%TYPE, community_id hive_posts.community_id%TYPE,
@@ -31,7 +31,7 @@ if _parent_author != '' THEN
     author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted, block_num, block_num_created)
   SELECT php.id AS parent_id, php.depth + 1 AS depth,
       (CASE
-          WHEN _date > _community_support_start_date THEN
+          WHEN _block_num > _community_support_start_block THEN
             COALESCE(php.community_id, (select hc.id from hive_communities hc where hc.name = _parent_permlink))
           ELSE NULL
       END) AS community_id,
@@ -77,7 +77,7 @@ ELSE
     author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted, block_num, block_num_created)
   SELECT 0 AS parent_id, 0 AS depth,
       (CASE
-        WHEN _date > _community_support_start_date THEN
+        WHEN _block_num > _community_support_start_block THEN
           (select hc.id FROM hive_communities hc WHERE hc.name = _parent_permlink)
         ELSE NULL
       END) AS community_id,
