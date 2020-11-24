@@ -49,6 +49,7 @@ stages:
   - echo "${CI_RUNNER_ID}" > hive-sync-runner-id.txt
   - ./scripts/ci/wait-for-postgres.sh "$RUNNER_POSTGRES_HOST" "$RUNNER_POSTGRES_PORT"
   - export POSTGRES_MAJOR_VERSION=$(./scripts/ci/get-postgres-version.sh)
+  - ./scripts/ci/drop-db.sh
   - ./scripts/ci/create-db.sh
   - ./scripts/ci/hive-sync.sh
   - ./scripts/ci/collect-db-stats.sh
