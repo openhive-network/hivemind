@@ -311,15 +311,12 @@ async def _append_admins(db, communities):
     ids = communities.keys()
     sql = """SELECT community_id, ha.name FROM hive_roles hr
                JOIN hive_accounts ha ON hr.account_id = ha.id
-              WHERE role_id = 6 AND community_id IN :ids"""
+              WHERE role_id = 6 AND community_id IN :ids ORDER BY ha.name"""
     for row in await db.query_all(sql, ids=tuple(ids)):
         _id = row[0]
         if 'admins' not in communities[_id]:
             communities[_id]['admins'] = list()
         communities[_id]['admins'].append(row[1])
-    # sort admin fields
-    for _id in ids:
-        communities[_id]['admins'].sort()
 
 
 # Stats
