@@ -291,12 +291,10 @@ async def get_discussions_by_blog(context, tag: str = None, start_author: str = 
     valid_permlink(start_permlink, allow_empty=True)
     valid_limit(limit, 100, 20)
 
-    sql = """
-        SELECT * FROM get_discussions_by_blog(:author, :start_author, :start_permlink, :limit)
-    """
+    sql = "SELECT * FROM bridge_get_account_posts_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, False )"
 
     db = context['db']
-    result = await db.query_all(sql, author=tag, start_author=start_author, start_permlink=start_permlink, limit=limit)
+    result = await db.query_all(sql, account=tag, author=start_author, permlink=start_permlink, limit=limit)
     posts_by_id = []
 
     for row in result:

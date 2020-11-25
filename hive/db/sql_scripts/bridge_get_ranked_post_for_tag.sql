@@ -514,7 +514,6 @@ BEGIN
       LIMIT _limit
   ) as trends
   JOIN hive_posts_view hp ON hp.id = trends.id
-  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE true END)
   ORDER BY trends.trend DESC, trends.id DESC
   LIMIT _limit;
 END
