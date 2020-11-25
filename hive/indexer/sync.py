@@ -280,7 +280,7 @@ class Sync:
 
         Community.start_block = self._conf.get("community_start_block")
 
-        paths = self._conf.get("mock_block_data_path")
+        paths = self._conf.get("mock_block_data_path") or []
         for path in paths:
           self.load_mock_data(path)
 
