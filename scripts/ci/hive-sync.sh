@@ -23,12 +23,12 @@ EOF
         --log-mask-sensitive-data \
         --pid-file hive_sync.pid \
         --test-max-block=${RUNNER_HIVEMIND_SYNC_MAX_BLOCK} \
-        --exit-after-sync \
         --test-profile=False \
         --steemd-url "${RUNNER_HIVED_URL}" \
         --prometheus-port 11011 \
         --database-url "${DATABASE_URL}" \
-        --mock-block-data-path mock_data/block_data/follow_op/mock_block_data_follow.json mock_data/block_data/community_op/mock_block_data_community.json \
+        --mock-block-data-path mock_data/block_data/ \
+        --mock-vops-data-path mock_data/vops_data/ \
         --community-start-block 4999998 \
         2>&1 | tee -i hivemind-sync.log
 
