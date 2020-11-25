@@ -187,9 +187,6 @@ async def list_communities(context, last='', limit=100, query=None, sort='rank',
         await _append_observer_subs(db, communities, observer_id)
         await _append_observer_roles(db, communities, observer_id)
     await _append_admins(db, communities)
-    # sort admin fields
-    for _id in ids:
-        communities[_id]['admins'].sort()
 
     return [communities[_id] for _id in ids]
 
@@ -320,6 +317,9 @@ async def _append_admins(db, communities):
         if 'admins' not in communities[_id]:
             communities[_id]['admins'] = list()
         communities[_id]['admins'].append(row[1])
+    # sort admin fields
+    for _id in ids:
+        communities[_id]['admins'].sort()
 
 
 # Stats
