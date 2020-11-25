@@ -225,6 +225,20 @@ IF NOT EXISTS(SELECT data_type FROM information_schema.columns
           WHERE table_name = 'hive_posts' AND column_name = 'tags_ids') THEN
     ALTER TABLE ONLY hive_posts
             ADD COLUMN tags_ids INTEGER[];
+
+    UPDATE hive_posts hp
+    SET
+    	tags_ids = tags.tags
+    FROM
+    (
+      SELECT
+          post_id as post_id,
+          array_agg( hpt.tag_id ) as tags
+      FROM
+        hive_post_tags hpt
+      GROUP BY post_id
+    	) as tags
+    WHERE hp.id = tags.post_id;
 ELSE
     RAISE NOTICE 'SKIPPING hive_posts upgrade - adding a tags_ids column';
 END IF;
@@ -408,4 +422,4 @@ CREATE INDEX IF NOT EXISTS hive_posts_promoted_id_idx ON hive_posts (promoted, i
 
  CREATE INDEX IF NOT EXISTS hive_posts_tags_ids_idx ON hive_posts USING gin(tags_ids gin__int_ops);
 
- DROP TABLE IF EXISTS hive_post_tags;
+ --DROP TABLE IF EXISTS hive_post_tags;
