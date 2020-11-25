@@ -92,6 +92,7 @@ if __name__ == "__main__":
             'diff-match-patch',
             'prometheus-client',
             'psutil',
+            'atomic',
         ],
         extras_require={
             'dev': [
