@@ -228,7 +228,7 @@ IF NOT EXISTS(SELECT data_type FROM information_schema.columns
 
     UPDATE hive_posts hp
     SET
-    	tags_id = tags.tags
+    	tags_ids = tags.tags
     FROM
     (
       SELECT
@@ -422,4 +422,4 @@ CREATE INDEX IF NOT EXISTS hive_posts_promoted_id_idx ON hive_posts (promoted, i
 
  CREATE INDEX IF NOT EXISTS hive_posts_tags_ids_idx ON hive_posts USING gin(tags_ids gin__int_ops);
 
- DROP TABLE IF EXISTS hive_post_tags;
+ --DROP TABLE IF EXISTS hive_post_tags;
