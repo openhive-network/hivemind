@@ -88,9 +88,9 @@ class Follow(DbAdapterHolder):
             # if exists add follower to a list for a given state
             # if not exists create list and set that list for given state
             if state in cls.follow_update_items_to_flush:
-                cls.follow_update_items_to_flush[state].append((op['flr'], block_num, op['at']))
+                cls.follow_update_items_to_flush[state].append((op['flr'], block_num))
             else:
-                cls.follow_update_items_to_flush[state] = [(op['flr'], block_num, op['at'])]
+                cls.follow_update_items_to_flush[state] = [(op['flr'], block_num)]
 
     @classmethod
     def _validated_op(cls, account, op, date):
