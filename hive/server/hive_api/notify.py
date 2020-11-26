@@ -22,7 +22,7 @@ STRINGS = {
 
     # personal
     NotifyType.error:          'error: <payload>',
-    NotifyType.reblog:         '<src> resteemed your post',
+    NotifyType.reblog:         '<src> reblogged your post',
     NotifyType.follow:         '<src> followed you',
     NotifyType.reply:          '<src> replied to your post',
     NotifyType.reply_comment:  '<src> replied to your comment',
