@@ -10,6 +10,8 @@ from hive.utils.stats import Stats
 from hive.utils.normalize import parse_amount, steem_amount, vests_amount
 from hive.steem.http_client import HttpClient
 from hive.steem.block.stream import BlockStream
+from hive.steem.blocks_provider import BlocksProvider
+from hive.steem.vops_provider import VopsProvider
 from hive.indexer.mock_block_provider import MockBlockProvider
 from hive.indexer.mock_vops_provider import MockVopsProvider
 
@@ -78,6 +80,41 @@ class SteemClient:
             mocked_block = MockBlockProvider.get_block_data(num, True)
             #logger.info("Found real block %d with timestamp: %s", num, mocked_block['timestamp'])
             return mocked_block
+
+    def get_blocks_provider( cls, lbound, ubound, breaker ):
+        """create and returns blocks provider
+            lbound - start block
+            ubound - end block
+            breaker - callable, returns false when processing must be stopped
+        """
+        new_blocks_provider = BlocksProvider(
+              cls._client["get_block"] if "get_block" in cls._client else cls._client["default"]
+            , cls._max_workers
+            , cls._max_batch
+            , lbound
+            , ubound
+            , breaker
+        )
+        return new_blocks_provider
+
+    def get_vops_provider( cls, conf, lbound, ubound, breaker ):
+        """create and returns blocks provider
+            conf - configuration
+            lbound - start block
+            ubound - end block
+            breaker - callable, returns false when processing must be stopped
+        """
+        new_vops_provider = VopsProvider(
+              conf
+            , cls
+            , cls._max_workers
+            , cls._max_batch
+            , lbound
+            , ubound
+            , breaker
+        )
+        return new_vops_provider
+
 
     def stream_blocks(self, start_from, trail_blocks=0, max_gap=100, do_stale_block_check=True):
         """Stream blocks. Returns a generator."""
@@ -186,7 +223,7 @@ class SteemClient:
 
     def enum_virtual_ops(self, conf, begin_block, end_block):
         """ Get virtual ops for range of blocks """
-        
+
         ret = {}
 
         from_block = begin_block
