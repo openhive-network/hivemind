@@ -693,7 +693,7 @@
                 "spaminator"
               ],
               "id": "follow",
-              "json": "[\"follow\",{\"follower\":\"spaminator\",\"following\":[\"lyubovbar\",\"zaitsevalesyaa\",\"kingscrown\",\"trevonjb\",\"craig-grant\",\"ned\"],\"what\":[\"blacklist\"]}]"
+              "json": "[\"follow\",{\"follower\":\"spaminator\",\"following\":[\"lyubovbar\",\"zaitsevalesyaa\",\"kingscrown\",\"trevonjb\",\"craig-grant\",\"ned\",\"mindhunter\"],\"what\":[\"blacklist\"]}]"
             }
           },
           {

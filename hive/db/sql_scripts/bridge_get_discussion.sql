@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS get_discussion
+DROP FUNCTION IF EXISTS bridge_get_discussion
 ;
-CREATE OR REPLACE FUNCTION get_discussion(
+CREATE OR REPLACE FUNCTION bridge_get_discussion(
     in _author hive_accounts.name%TYPE,
     in _permlink hive_permlink_data.permlink%TYPE,
     in _observer VARCHAR
@@ -14,9 +14,9 @@ DECLARE
     __observer_id INT;
 BEGIN
     __post_id = find_comment_id( _author, _permlink, True );
-    __observer_id = find_account_id(_observer, False);
+    __observer_id = find_account_id( _observer, True );
     RETURN QUERY
-    SELECT
+    SELECT -- bridge_get_discussion
         hpv.id,
         hpv.author,
         hpv.parent_author,

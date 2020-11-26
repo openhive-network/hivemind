@@ -64,13 +64,15 @@ LANGUAGE 'plpgsql'
 AS
 $function$
 DECLARE
-  account_id INT;
+  __account_id INT = 0;
 BEGIN
-  SELECT INTO account_id COALESCE( ( SELECT id FROM hive_accounts WHERE name=_account ), 0 );
-  IF _check AND account_id = 0 THEN
-    RAISE EXCEPTION 'Account % does not exist', _account;
+  IF (_account <> '') THEN
+    SELECT INTO __account_id COALESCE( ( SELECT id FROM hive_accounts WHERE name=_account ), 0 );
+    IF _check AND __account_id = 0 THEN
+      RAISE EXCEPTION 'Account % does not exist', _account;
+    END IF;
   END IF;
-  RETURN account_id;
+  RETURN __account_id;
 END
 $function$
 ;
