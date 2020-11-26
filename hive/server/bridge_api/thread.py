@@ -13,20 +13,19 @@ from hive.server.common.mutes import Mutes
 log = logging.getLogger(__name__)
 
 @return_error_info
-async def get_discussion(context, author, permlink, observer=None):
+async def get_discussion(context, author:str, permlink:str, observer:str=''):
     """Modified `get_state` thread implementation."""
-    # New index was created: hive_posts_parent_id_btree (CREATE INDEX "hive_posts_parent_id_btree" ON hive_posts btree(parent_id)
-    # We thougth this would be covered by "hive_posts_ix4" btree (parent_id, id) WHERE counter_deleted = 0 but it was not
     db = context['db']
 
     author = valid_account(author)
     permlink = valid_permlink(permlink)
+    observer = valid_account(observer, allow_empty=True)
 
     blacklisted_for_user = None
     if observer:
         blacklisted_for_user = await Mutes.get_blacklisted_for_observer(observer, context)
 
-    sql = "SELECT * FROM get_discussion(:author,:permlink,:observer)"
+    sql = "SELECT * FROM bridge_get_discussion(:author,:permlink,:observer)"
     rows = await db.query_all(sql, author=author, permlink=permlink, observer=observer)
     if not rows or len(rows) == 0:
         return {}

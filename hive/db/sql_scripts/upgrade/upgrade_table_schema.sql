@@ -228,7 +228,7 @@ IF NOT EXISTS(SELECT data_type FROM information_schema.columns
 
     UPDATE hive_posts hp
     SET
-    	tags_ids = tags.tags
+        tags_ids = tags.tags
     FROM
     (
       SELECT
@@ -237,7 +237,7 @@ IF NOT EXISTS(SELECT data_type FROM information_schema.columns
       FROM
         hive_post_tags hpt
       GROUP BY post_id
-    	) as tags
+    ) as tags
     WHERE hp.id = tags.post_id;
 ELSE
     RAISE NOTICE 'SKIPPING hive_posts upgrade - adding a tags_ids column';

@@ -117,7 +117,7 @@ DECLARE __voter_id INT;
 DECLARE __post_id INT;
 BEGIN
 
-__voter_id = find_account_id( _VOTER, _VOTER != '' ); -- voter is optional
+__voter_id = find_account_id( _VOTER, True );
 __post_id = find_comment_id( _AUTHOR, _PERMLINK, True );
 
 RETURN QUERY

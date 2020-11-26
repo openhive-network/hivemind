@@ -237,7 +237,7 @@ async def _child_ids(db, parent_ids):
 async def _load_discussion(db, author, permlink, observer=None):
     """Load a full discussion thread."""
 
-    sql = "SELECT * FROM get_discussion(:author,:permlink,:observer)"
+    sql = "SELECT * FROM bridge_get_discussion(:author,:permlink,:observer)"
     sql_result = await db.query_all(sql, author=author, permlink=permlink, observer=observer)
 
     muted_accounts = Mutes.all()
