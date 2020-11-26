@@ -17,7 +17,7 @@ do
   echo About to run iteration $i
   tox -e tavern-benchmark -- \
       -W ignore::pytest.PytestDeprecationWarning \
-      -n $JOBS \
+      --workers $JOBS \
       --junitxml=../../../../benchmarks-$i.xml
   echo Done!
 done
