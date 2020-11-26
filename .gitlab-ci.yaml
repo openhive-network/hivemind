@@ -409,6 +409,7 @@ sync-e2e-benchmark:
     when: always
     paths:
       - hivemind-sync.log
+      - hivemind-server.log
       - pg-stats
       - hive-sync-runner-id.txt
       - tavern_benchmarks_report.html

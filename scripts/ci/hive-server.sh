@@ -65,8 +65,8 @@ start() {
       --pid-file hive_server.pid \
       --http-server-port ${RUNNER_HIVEMIND_SERVER_HTTP_PORT} \
       --steemd-url "${RUNNER_HIVED_URL}" \
-      --database-url "${DATABASE_URL}" 2>&1 \
-      | tee -ia hivemind-server.log &
+      --database-url "${DATABASE_URL}" \
+      > hivemind-server.log 2>&1 &
 
   HIVEMIND_PID=$!
 
