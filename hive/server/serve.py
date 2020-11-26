@@ -282,11 +282,16 @@ def run_server(conf):
 
     async def jsonrpc_handler(request):
         """Handles all hive jsonrpc API requests."""
+        total_start = time.perf_counter()
+        t_start = time.perf_counter()
         request = await request.text()
+        log.info("{} request in {:4f}s".format(__name__, time.perf_counter() - t_start))
         # debug=True refs https://github.com/bcb/jsonrpcserver/issues/71
         response = None
         try:
+            t_start = time.perf_counter()
             response = await dispatch(request, methods=methods, debug=True, context=app, serialize=decimal_serialize, deserialize=decimal_deserialize)
+            log.info("{} response in {:4f}s".format(__name__, time.perf_counter() - t_start))
         except simplejson.errors.JSONDecodeError as ex:
             # first log exception
             # TODO: consider removing this log - potential log spam
@@ -302,11 +307,19 @@ def run_server(conf):
                 },
                 "id" : -1
             }
+            t_start = time.perf_counter()
             headers = {'Access-Control-Allow-Origin': '*'}
-            return web.json_response(error_response, status=200, headers=headers, dumps=decimal_serialize)
+            ret = web.json_response(error_response, status=200, headers=headers, dumps=decimal_serialize)
+            log.info("{} json_response in {:4f}s".format(__name__, time.perf_counter() - t_start))
+            log.info("{} total in {:4f}s".format(__name__, time.perf_counter() - total_start))
+            return ret
         if response is not None and response.wanted:
+            t_start = time.perf_counter()
             headers = {'Access-Control-Allow-Origin': '*'}
-            return web.json_response(response.deserialized(), status=200, headers=headers, dumps=decimal_serialize)
+            ret = web.json_response(response.deserialized(), status=200, headers=headers, dumps=decimal_serialize)
+            log.info("{} json_response in {:4f}s".format(__name__, time.perf_counter() - t_start))
+            log.info("{} total in {:4f}s".format(__name__, time.perf_counter() - total_start))
+            return ret
         return web.Response()
 
     if conf.get('sync_to_s3'):
