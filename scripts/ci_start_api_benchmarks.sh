@@ -17,4 +17,4 @@ do
   tox -e tavern-benchmark -- -W ignore::pytest.PytestDeprecationWarning --workers auto
   echo Done!
 done
-./scripts/csv_report_parser.py ./tests/tests_api/hivemind/tavern ./tests/tests_api/hivemind/tavern
+./scripts/csv_report_parser.py http://$HIVEMIND_ADDRESS $HIVEMIND_PORT./tests/tests_api/hivemind/tavern ./tests/tests_api/hivemind/tavern

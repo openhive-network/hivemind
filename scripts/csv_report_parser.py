@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 import os
 import csv
+import requests
+import json
+from time import perf_counter
+
 
 def process_file_name(file_name, tavern_root_dir):
     return file_name.replace(tavern_root_dir, "").lstrip("/")
@@ -45,6 +49,8 @@ if __name__ == "__main__":
     from statistics import mean
 
     parser = argparse.ArgumentParser()
+    parser.add_argument("address", type=str)
+    parser.add_argument("port", type=int)
     parser.add_argument("csv_report_dir", type=str, help="Path to benchmark csv reports")
     parser.add_argument("tavern_root_dir", type=str, help="Path to tavern tests root dir")
     parser.add_argument("--time-threshold", dest="time_threshold", type=float, default=1.0, help="Time threshold for test execution time, tests with execution time greater than threshold will be marked on red.")
@@ -73,16 +79,19 @@ if __name__ == "__main__":
         ofile.write("  </head>\n")
         ofile.write("  <body>\n")
         ofile.write("    <table>\n")
-        ofile.write("      <tr><th>Test name</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th></tr>\n")
+        ofile.write("      <tr><th>Test name</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th><th>Reference [ms]</th></tr>\n")
         for name, data in report_data.items():
             dmin = min(data)
             dmax = max(data)
             dmean = mean(data)
+            t_start = perf_counter()
+            ret = requests.post("{}:{}".format(args.address, args.port), request_data[name])
+            ref_time = perf_counter() - t_start
             if dmean > args.time_threshold:
-                ofile.write("      <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td></tr>\n".format(name, request_data[name], dmin * 1000, dmax * 1000, dmean * 1000))
+                ofile.write("      <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:4f}</td></tr>\n".format(name, request_data[name], dmin * 1000, dmax * 1000, dmean * 1000, ref_time * 1000))
                 above_treshold.append((name, "{:.4f}".format(dmean), request_data[name]))
             else:
-                ofile.write("      <tr><td>{}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, dmin * 1000, dmax * 1000, dmean * 1000))
+                ofile.write("      <tr><td>{}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:4f}</td></tr>\n".format(name, dmin * 1000, dmax * 1000, dmean * 1000, ref_time * 1000))
         ofile.write("    </table>\n")
         ofile.write("  </body>\n")
         ofile.write("</html>\n")
