@@ -3,6 +3,7 @@
 set -e
 
 pip install tox
+pip install requests
 
 export HIVEMIND_ADDRESS=$1
 export HIVEMIND_PORT=$2
@@ -20,3 +21,4 @@ do
       --workers $JOBS
   echo Done!
 done
+./scripts/csv_report_parser.py http://$HIVEMIND_ADDRESS $HIVEMIND_PORT ./tests/tests_api/hivemind/tavern ./tests/tests_api/hivemind/tavern
