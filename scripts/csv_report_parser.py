@@ -79,7 +79,7 @@ if __name__ == "__main__":
         ofile.write("  </head>\n")
         ofile.write("  <body>\n")
         ofile.write("    <table>\n")
-        ofile.write("      <tr><th>Test name</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th><th>Reference [ms]</th></tr>\n")
+        ofile.write("      <tr><th>Test name</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th><th>Reference (pure requests call) [ms]</th></tr>\n")
         for name, data in report_data.items():
             dmin = min(data)
             dmax = max(data)
@@ -88,10 +88,10 @@ if __name__ == "__main__":
             ret = requests.post("{}:{}".format(args.address, args.port), request_data[name])
             ref_time = perf_counter() - t_start
             if dmean > args.time_threshold:
-                ofile.write("      <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:4f}</td></tr>\n".format(name, request_data[name], dmin * 1000, dmax * 1000, dmean * 1000, ref_time * 1000))
+                ofile.write("      <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, request_data[name], dmin * 1000, dmax * 1000, dmean * 1000, ref_time * 1000))
                 above_treshold.append((name, "{:.4f}".format(dmean), request_data[name]))
             else:
-                ofile.write("      <tr><td>{}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:4f}</td></tr>\n".format(name, dmin * 1000, dmax * 1000, dmean * 1000, ref_time * 1000))
+                ofile.write("      <tr><td>{}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, dmin * 1000, dmax * 1000, dmean * 1000, ref_time * 1000))
         ofile.write("    </table>\n")
         ofile.write("  </body>\n")
         ofile.write("</html>\n")
