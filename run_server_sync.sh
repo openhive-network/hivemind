@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# RUNNER_HIVEMIND_SYNC_MAX_BLOCK=5000017
+# RUNNER_HIVED_URL='{"default" : "192.168.6.136:8091"}''
+# RUNNER_POSTGRES_APP_USER=user
+# RUNNER_POSTGRES_APP_USER_PASSWORD=password
+# RUNNER_POSTGRES_HOST=localhost
+# RUNNER_POSTGRES_PORT=5432
+# HIVEMIND_DB_NAME=hivemind
+
+# ./run_server_sync.sh 5000017 '{"default" : "192.168.6.136:8091"}' mario_user mario_password localhost 5432 hivemind
+
+export RUNNER_HIVEMIND_SYNC_MAX_BLOCK=$1
+export RUNNER_HIVED_URL=$2
+export RUNNER_POSTGRES_APP_USER=$3
+export RUNNER_POSTGRES_APP_USER_PASSWORD=$4
+export RUNNER_POSTGRES_HOST=$5
+export RUNNER_POSTGRES_PORT=$6
+export HIVEMIND_DB_NAME=$7
+
+HIVE_SYNC_PATH="./scripts/ci/hive-sync.sh"
+
+"$HIVE_SYNC_PATH"

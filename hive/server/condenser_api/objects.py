@@ -44,15 +44,15 @@ def _condenser_post_object(row, truncate_body=0, get_content_additions=False):
     """Given a hive_posts row, create a legacy-style post object."""
     paid = row['is_paidout']
 
-    # condenser#3424 mitigation
-    if not row['category']:
-        row['category'] = 'undefined'
-
     full_payout = row['pending_payout'] + row['payout'];
     post = {}
     post['author'] = row['author']
     post['permlink'] = row['permlink']
-    post['category'] = row['category']
+
+    if not row['category']:
+      post['category'] = 'undefined' # condenser#3424 mitigation
+    else:
+      post['category'] = row['category']
 
     post['title'] = row['title']
     post['body'] = row['body'][0:truncate_body] if truncate_body else row['body']

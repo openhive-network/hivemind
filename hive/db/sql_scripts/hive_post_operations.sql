@@ -144,32 +144,47 @@ END
 $function$
 ;
 
-DROP FUNCTION if exists delete_hive_post(character varying,character varying,character varying, integer)
+DROP FUNCTION if exists delete_hive_post(character varying,character varying,character varying, integer, BOOLEAN)
 ;
 CREATE OR REPLACE FUNCTION delete_hive_post(
   in _author hive_accounts.name%TYPE,
   in _permlink hive_permlink_data.permlink%TYPE,
-  in _block_num hive_blocks.num%TYPE)
-RETURNS TABLE (id hive_posts.id%TYPE, depth hive_posts.depth%TYPE)
+  in _block_num hive_blocks.num%TYPE,
+  in _delete_feed_cache BOOLEAN)
+RETURNS VOID
 LANGUAGE plpgsql
 AS
 $function$
+DECLARE
+  __post_id INT;
 BEGIN
-  RETURN QUERY UPDATE hive_posts AS hp
-    SET counter_deleted =
-    (
+
+  __post_id = find_comment_id( _author, _permlink, False );
+
+  IF __post_id = 0 THEN
+    RETURN;
+  END IF;
+
+  UPDATE hive_posts
+  SET counter_deleted =
+  (
       SELECT max( hps.counter_deleted ) + 1
       FROM hive_posts hps
       INNER JOIN hive_accounts ha ON hps.author_id = ha.id
       INNER JOIN hive_permlink_data hpd ON hps.permlink_id = hpd.id
       WHERE ha.name = _author AND hpd.permlink = _permlink
-    )
-    , block_num = _block_num
-  FROM hive_posts hp1
-  INNER JOIN hive_accounts ha ON hp1.author_id = ha.id
-  INNER JOIN hive_permlink_data hpd ON hp1.permlink_id = hpd.id
-  WHERE hp.id = hp1.id AND ha.name = _author AND hpd.permlink = _permlink AND hp1.counter_deleted = 0
-  RETURNING hp.id, hp.depth;
+  )
+  ,block_num = _block_num
+  WHERE id = __post_id;
+
+  DELETE FROM hive_reblogs
+  WHERE post_id = __post_id;
+
+  IF _delete_feed_cache THEN
+    DELETE FROM hive_feed_cache
+    WHERE post_id = __post_id;
+  END IF;
+
 END
 $function$
 ;

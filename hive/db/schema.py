@@ -602,7 +602,8 @@ def setup(db):
       "condenser_get_names_by_reblogged.sql",
       "condenser_get_discussions_by_comments.sql",
       "condenser_get_account_reputations.sql",
-      "update_follow_count.sql"
+      "update_follow_count.sql",
+      "delete_reblog_feed_cache.sql"
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
