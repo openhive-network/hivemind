@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 import os
-
-from xml.dom import minidom
+import csv
 
 def process_file_name(file_name, tavern_root_dir):
-    tavern_root_dir_dot = tavern_root_dir.replace("/", ".")
-    file_name_dot = file_name.replace("/", ".")
-    return file_name_dot.replace(tavern_root_dir_dot, "").lstrip(".")
+    return file_name.replace(tavern_root_dir, "").lstrip("/")
 
 def get_requests_from_yaml(tavern_root_dir):
     from fnmatch import fnmatch
@@ -30,20 +27,17 @@ def get_requests_from_yaml(tavern_root_dir):
 
 def parse_xml_files(root_dir):
     ret = {}
-    print("Scanning path: {}".format(root_dir))
-    for name in os.listdir(root_dir):
-        file_path = os.path.join(root_dir, name)
-        if os.path.isfile(file_path) and name.startswith("benchmarks") and file_path.endswith(".xml"):
-            print("Processing file: {}".format(file_path))
-            xmldoc = minidom.parse(file_path)
-            test_cases = xmldoc.getElementsByTagName('testcase')
-            for test_case in test_cases:
-                test_name = test_case.attributes['classname'].value
-                test_time = float(test_case.attributes['time'].value)
-                if test_name in ret:
-                    ret[test_name].append(test_time)
-                else:
-                    ret[test_name] = [test_time]
+    file_path = os.path.join(root_dir, "benchmark.csv")
+    print("Processing file: {}".format(file_path))
+    with open(file_path, 'r') as csv_file:
+        reader = csv.reader(csv_file)
+        for row in reader:
+            test_name = row[0] + ".tavern.yaml"
+            test_time = float(row[1])
+            if test_name in ret:
+                ret[test_name].append(test_time)
+            else:
+                ret[test_name] = [test_time]
     return ret
 
 if __name__ == "__main__":
@@ -51,15 +45,15 @@ if __name__ == "__main__":
     from statistics import mean
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("xml_report_dir", type=str, help="Path to benchmark xml reports")
+    parser.add_argument("csv_report_dir", type=str, help="Path to benchmark csv reports")
     parser.add_argument("tavern_root_dir", type=str, help="Path to tavern tests root dir")
     parser.add_argument("--time-threshold", dest="time_threshold", type=float, default=1.0, help="Time threshold for test execution time, tests with execution time greater than threshold will be marked on red.")
     args = parser.parse_args()
 
-    assert os.path.exists(args.xml_report_dir), "Please provide valid xml report path"
+    assert os.path.exists(args.csv_report_dir), "Please provide valid xml report path"
     assert os.path.exists(args.tavern_root_dir), "Please provide valid tavern path"
 
-    report_data = parse_xml_files(args.xml_report_dir)
+    report_data = parse_xml_files(args.csv_report_dir)
     request_data = get_requests_from_yaml(args.tavern_root_dir)
 
     html_file = "tavern_benchmarks_report.html"

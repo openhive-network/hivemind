@@ -309,7 +309,10 @@ def run_server(conf):
                 "id" : -1
             }
             t_start = time.perf_counter()
-            headers = {'Access-Control-Allow-Origin': '*'}
+            headers = {
+                'Access-Control-Allow-Origin': '*',
+                'Sent-At' : '{}'.format(datetime.now())
+            }
             ret = web.json_response(error_response, status=200, headers=headers, dumps=decimal_serialize)
             log.info("{} prepared json_response in {:4f}s".format(__name__, time.perf_counter() - t_start))
             log.info("{} jsonrpc_handler total in {:4f}s".format(__name__, time.perf_counter() - total_start))
@@ -317,7 +320,10 @@ def run_server(conf):
             return ret
         if response is not None and response.wanted:
             t_start = time.perf_counter()
-            headers = {'Access-Control-Allow-Origin': '*'}
+            headers = {
+                'Access-Control-Allow-Origin': '*',
+                'Sent-At' : '{}'.format(datetime.now())
+            }
             ret = web.json_response(response.deserialized(), status=200, headers=headers, dumps=decimal_serialize)
             log.info("{} prepared json_response in {:4f}s".format(__name__, time.perf_counter() - t_start))
             log.info("{} jsonrpc_handler total in {:4f}s".format(__name__, time.perf_counter() - total_start))

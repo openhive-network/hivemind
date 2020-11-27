@@ -17,8 +17,6 @@ do
   echo About to run iteration $i
   tox -e tavern-benchmark -- \
       -W ignore::pytest.PytestDeprecationWarning \
-      --workers $JOBS \
-      --junitxml=../../../../benchmarks-$i.xml \
-      database_api_negative/find_comments/too_many_requested.tavern.yaml
+      --workers $JOBS
   echo Done!
 done
