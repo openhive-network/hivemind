@@ -283,7 +283,7 @@ def run_server(conf):
 
     async def jsonrpc_handler(request):
         """Handles all hive jsonrpc API requests."""
-        received = perf_counter()
+        sent_at = request.headers.get('Sent-At', str(perf_counter()))
         request = await request.text()
         # debug=True refs https://github.com/bcb/jsonrpcserver/issues/71
         response = None
@@ -306,13 +306,13 @@ def run_server(conf):
             }
             headers = {
                 'Access-Control-Allow-Origin': '*',
-                'Received-At' : '{}'.format(received)
+                'Sent-At' : '{}'.format(sent_at)
             }
             return web.json_response(error_response, status=200, headers=headers, dumps=decimal_serialize)
         if response is not None and response.wanted:
             headers = {
                 'Access-Control-Allow-Origin': '*',
-                'Received-At' : '{}'.format(received)
+                'Sent-At' : '{}'.format(sent_at)
             }
             return web.json_response(response.deserialized(), status=200, headers=headers, dumps=decimal_serialize)
         return web.Response()
