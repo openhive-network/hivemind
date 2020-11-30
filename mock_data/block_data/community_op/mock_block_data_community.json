@@ -437,6 +437,15 @@
             }
           },
           {
+            "type": "transfer_operation",
+            "value": {
+              "from": "test-safari",
+              "to": "null",
+              "amount": "0.010666 HBD",
+              "memo": "@test-safari/secrets2"
+            }
+          },
+          {
             "type": "comment_operation",
             "value": {
               "parent_author": "",

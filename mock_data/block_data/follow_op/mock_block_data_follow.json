@@ -748,7 +748,7 @@
                 "ignoreall"
               ],
               "id": "follow",
-              "json": "[\"follow\",{\"follower\":\"ignoreall\",\"following\":[\"gtg\",\"alice\",\"davr86\"],\"what\":[\"ignore\"]}]"
+              "json": "[\"follow\",{\"follower\":\"ignoreall\",\"following\":[\"gtg\",\"alice\",\"davr86\",\"fyrstikken\",\"gavvet\",\"ooak\",\"kental\",\"r4fken\",\"roland.haynes\",\"agartha\",\"feline1991\"],\"what\":[\"ignore\"]}]"
             }
           }
         ]

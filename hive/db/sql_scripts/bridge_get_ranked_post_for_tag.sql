@@ -10,7 +10,7 @@ DECLARE
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __hive_tag = ARRAY_APPEND( __hive_tag, find_tag_id( _tag, True ));
-  __observer_id = find_account_id(_observer, False);
+  __observer_id = find_account_id( _observer, True );
   RETURN QUERY SELECT
       hp.id,
       hp.author,
@@ -85,7 +85,7 @@ BEGIN
       SELECT hp.sc_hot INTO __hot_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   __hive_tag = ARRAY_APPEND( __hive_tag, find_tag_id( _tag, True ));
-  __observer_id = find_account_id(_observer, False);
+  __observer_id = find_account_id( _observer, True );
   RETURN QUERY SELECT
       hp.id,
       hp.author,
@@ -233,7 +233,7 @@ BEGIN
       SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   __hive_category = find_category_id( _category, True );
-  __observer_id = find_account_id(_observer, False);
+  __observer_id = find_account_id( _observer, True );
   RETURN QUERY SELECT
       hp.id,
       hp.author,
@@ -310,7 +310,7 @@ BEGIN
   END IF;
   __hive_category = find_category_id( _category, True );
   __head_block_time = head_block_time();
-  __observer_id = find_account_id(_observer, False);
+  __observer_id = find_account_id( _observer, True );
   RETURN QUERY SELECT
       hp.id,
       hp.author,
@@ -386,7 +386,7 @@ BEGIN
       SELECT hp.promoted INTO __promoted_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   __hive_tag = ARRAY_APPEND( __hive_tag,  find_tag_id( _tag, True ) );
-  __observer_id = find_account_id(_observer, False);
+  __observer_id = find_account_id( _observer, True );
   RETURN QUERY SELECT
       hp.id,
       hp.author,
@@ -461,7 +461,7 @@ BEGIN
       SELECT hp.sc_trend INTO __trending_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   __hive_tag = ARRAY_APPEND( __hive_tag, find_tag_id( _tag, True ));
-  __observer_id = find_account_id(_observer, False);
+  __observer_id = find_account_id( _observer, True );
   RETURN QUERY SELECT
       hp.id,
       hp.author,

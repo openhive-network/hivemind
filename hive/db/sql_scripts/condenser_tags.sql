@@ -26,7 +26,7 @@ DECLARE
   __category_id INT;
   __payout_limit hive_posts.payout%TYPE;
 BEGIN
-  __category_id = find_category_id( _category, _category <> '' );
+  __category_id = find_category_id( _category, True );
   IF __category_id <> 0 THEN
       SELECT SUM(hp.payout + hp.pending_payout) INTO __payout_limit
       FROM hive_posts hp

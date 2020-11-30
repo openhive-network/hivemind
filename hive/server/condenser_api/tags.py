@@ -16,7 +16,7 @@ async def get_trending_tags(context, start_tag: str = '', limit: int = 250):
     """Get top 250 trending tags among pending posts, with stats."""
 
     limit = valid_limit(limit, 250, 250)
-    start_tag = valid_tag(start_tag or '', allow_empty=True)
+    start_tag = valid_tag(start_tag, allow_empty=True)
 
     sql = "SELECT * FROM condenser_get_trending_tags( (:tag)::VARCHAR, :limit )"
 
