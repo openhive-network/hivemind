@@ -390,11 +390,8 @@ class Posts(DbAdapterHolder):
     @classmethod
     def delete(cls, op):
         """Marks a post record as being deleted."""
-
-        delete_feed_cache = not DbState.is_initial_sync()
-
-        sql = "SELECT delete_hive_post((:author)::varchar, (:permlink)::varchar, (:block_num)::int, (:delete_feed_cache)::BOOLEAN );"
-        DB.query_no_return(sql, author=op['author'], permlink = op['permlink'], block_num=op['block_num'], delete_feed_cache=delete_feed_cache)
+        sql = "SELECT delete_hive_post((:author)::varchar, (:permlink)::varchar, (:block_num)::int );"
+        DB.query_no_return(sql, author=op['author'], permlink = op['permlink'], block_num=op['block_num'])
 
     @classmethod
     def _verify_post_against_community(cls, op, community_id, is_valid, is_muted):

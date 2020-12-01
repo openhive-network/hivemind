@@ -20,6 +20,17 @@
                 "funny"
               ],
               "id": "follow",
+              "json": "[\"reblog\",{\"account\":\"funny\",\"author\":\"steemit\",\"permlink\":\"fi\nrst'%@post\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "funny"
+              ],
+              "id": "follow",
               "json": "[\"reblog\",{\"account\":\"funny\",\"author\":\"steemit\",\"permlink\":\"firstpost\"}]"
             }
           },

@@ -144,13 +144,12 @@ END
 $function$
 ;
 
-DROP FUNCTION if exists delete_hive_post(character varying,character varying,character varying, integer, BOOLEAN)
+DROP FUNCTION if exists delete_hive_post(character varying,character varying,character varying, integer)
 ;
 CREATE OR REPLACE FUNCTION delete_hive_post(
   in _author hive_accounts.name%TYPE,
   in _permlink hive_permlink_data.permlink%TYPE,
-  in _block_num hive_blocks.num%TYPE,
-  in _delete_feed_cache BOOLEAN)
+  in _block_num hive_blocks.num%TYPE)
 RETURNS VOID
 LANGUAGE plpgsql
 AS
@@ -180,10 +179,8 @@ BEGIN
   DELETE FROM hive_reblogs
   WHERE post_id = __post_id;
 
-  IF _delete_feed_cache THEN
-    DELETE FROM hive_feed_cache
-    WHERE post_id = __post_id;
-  END IF;
+  DELETE FROM hive_feed_cache
+  WHERE post_id = __post_id;
 
 END
 $function$

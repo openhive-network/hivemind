@@ -60,11 +60,8 @@ class Reblog(DbAdapterHolder):
     def delete(cls, author, permlink, account ):
         """Remove a reblog from hive_reblogs + feed from hive_feed_cache.
         """
-        delete_feed_cache = not DbState.is_initial_sync()
-
-        sql = "SELECT delete_reblog_feed_cache( (:author)::VARCHAR, (:permlink)::VARCHAR, (:account)::VARCHAR, (:delete_feed_cache)::BOOLEAN );"
-        status = DB.query_col(sql, author=author, permlink=permlink, account=account, delete_feed_cache=delete_feed_cache);
-        log.info( "mario: author: %s, permlink: %s, account: %s status: %s", author, permlink, account, status )
+        sql = "SELECT delete_reblog_feed_cache( (:author)::VARCHAR, (:permlink)::VARCHAR, (:account)::VARCHAR );"
+        status = DB.query_col(sql, author=author, permlink=permlink, account=account);
         assert status is not None
         if status == 0:
           log.debug("reblog: post not found: %s/%s", author, permlink)
@@ -103,9 +100,9 @@ class Reblog(DbAdapterHolder):
                   continue
                 reblog_item = v['op']
                 if count < limit:
-                    values.append("('{}', '{}', '{}', '{}'::timestamp, {})".format(reblog_item['account'],
-                                                                                reblog_item['author'],
-                                                                                reblog_item['permlink'],
+                    values.append("({}, {}, {}, '{}'::timestamp, {})".format(escape_characters(reblog_item['account']),
+                                                                                escape_characters(reblog_item['author']),
+                                                                                escape_characters(reblog_item['permlink']),
                                                                                 reblog_item['block_date'],
                                                                                 reblog_item['block_num']))
                     count = count + 1
@@ -114,9 +111,9 @@ class Reblog(DbAdapterHolder):
                     query = sql_prefix.format(values_str, values_str)
                     cls.db.query(query)
                     values.clear()
-                    values.append("('{}', '{}', '{}', '{}'::timestamp, {})".format(reblog_item['account'],
-                                                                                reblog_item['author'],
-                                                                                reblog_item['permlink'],
+                    values.append("({}, {}, {}, '{}'::timestamp, {})".format(escape_characters(reblog_item['account']),
+                                                                                escape_characters(reblog_item['author']),
+                                                                                escape_characters(reblog_item['permlink']),
                                                                                 reblog_item['block_date'],
                                                                                 reblog_item['block_num']))
                     count = 1
