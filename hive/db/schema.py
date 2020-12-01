@@ -563,7 +563,6 @@ def setup(db):
       "update_feed_cache.sql",
       "payout_stats_view.sql",
       "update_hive_posts_mentions.sql",
-      "find_tag_id.sql",
       "mutes.sql",
       "bridge_get_ranked_post_type.sql",
       "bridge_get_ranked_post_for_communities.sql",

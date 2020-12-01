@@ -222,7 +222,7 @@ async def _get_ranked_posts_for_all( db, sort:str, start_author:str, start_perml
 
 @return_error_info
 async def get_ranked_posts(context, sort:str, start_author:str='', start_permlink:str='',
-                           limit:int=20, tag:str=None, observer:str=None):
+                           limit:int=20, tag:str='', observer:str=''):
     """Query posts, sorted by given method."""
     supported_sort_list = ['trending', 'hot', 'created', 'promoted', 'payout', 'payout_comments', 'muted']
     assert sort in supported_sort_list, "Unsupported sort, valid sorts: {}".format(", ".join(supported_sort_list))
@@ -241,11 +241,11 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
             posts.append(post)
         return posts
 
-    valid_account(start_author, allow_empty=True)
-    valid_permlink(start_permlink, allow_empty=True)
-    valid_limit(limit, 100, 20)
-    valid_tag(tag, allow_empty=True)
-    valid_account(observer, allow_empty=(tag != "my"))
+    start_author = valid_account(start_author, allow_empty=True)
+    start_permlink = valid_permlink(start_permlink, allow_empty=True)
+    limit = valid_limit(limit, 100, 20)
+    tag = valid_tag(tag, allow_empty=True)
+    observer = valid_account(observer, allow_empty=(tag != "my"))
 
     if tag == "my":
         result = await _get_ranked_posts_for_observer_communities(db, sort, start_author, start_permlink, limit, observer)
