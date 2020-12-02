@@ -29,6 +29,8 @@ from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import BroadcastObject
 from hive.utils.communities_rank import update_communities_posts_and_rank
 
+from hive.indexer.mock_block_provider import MockBlockProvider
+
 from datetime import datetime
 
 log = logging.getLogger(__name__)
