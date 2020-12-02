@@ -14,15 +14,11 @@ def __used_refs():
 
 async def get_community_id(db, name):
     """Get community id from db."""
-    return await db.query_one("SELECT id FROM hive_communities WHERE name = :name",
-                              name=name)
+    return await db.query_one("SELECT find_community_id( (:name)::VARCHAR, True )", name=name)
 
 async def get_account_id(db, name):
     """Get account id from account name."""
-    assert name, 'no account name specified'
-    _id = await db.query_one("SELECT id FROM hive_accounts WHERE name = :n", n=name)
-    assert _id, "account not found: `%s`" % name
-    return _id
+    return await db.query_one("SELECT find_account_id( (:name)::VARCHAR, True )", name=name)
 
 def estimated_sp(vests):
     """Convert VESTS to SP units for display."""

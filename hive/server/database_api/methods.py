@@ -4,6 +4,7 @@ from enum import Enum
 from hive.server.common.helpers import return_error_info, valid_limit, valid_account, valid_permlink, valid_date
 from hive.server.database_api.objects import database_post_object
 from hive.server.common.helpers import json_date
+from hive.utils.normalize import escape_characters
 
 @return_error_info
 async def list_comments(context, start: list, limit: int = 1000, order: str = None):
@@ -140,9 +141,10 @@ async def find_comments(context, comments: list):
             hp.author_rewards
         FROM
             hive_posts_view hp
-        JOIN (VALUES {}) AS t (author, permlink) ON hp.author = t.author AND hp.permlink = t.permlink
+        JOIN (VALUES {}) AS t (author, permlink, number) ON hp.author = t.author AND hp.permlink = t.permlink
         WHERE
             NOT hp.is_muted
+        ORDER BY t.number
     """
 
     idx = 0
@@ -156,7 +158,7 @@ async def find_comments(context, comments: list):
             continue
         if idx > 0:
             values += ","
-        values += "('{}','{}')".format(author, permlink) # escaping most likely needed
+        values += "({},{},{})".format(escape_characters(author), escape_characters(permlink), idx)
         idx += 1
     sql = SQL_TEMPLATE.format(values)
 
