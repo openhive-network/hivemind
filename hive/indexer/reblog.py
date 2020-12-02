@@ -2,59 +2,69 @@
 
 import logging
 
+from hive.db.adapter import Db
 from hive.db.db_state import DbState
 
 from hive.indexer.accounts import Accounts
-from hive.indexer.feed_cache import FeedCache
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
-
-DELETE_SQL = """
-    WITH processing_set AS (
-        SELECT hp.id as post_id, ha.id as account_id
-        FROM hive_posts hp
-        INNER JOIN hive_accounts ha ON hp.author_id = ha.id
-        INNER JOIN hive_permlink_data hpd ON hp.permlink_id = hpd.id
-        WHERE ha.name = :a AND hpd.permlink = :permlink AND hp.depth = 0 AND hp.counter_deleted = 0
-    )
-    DELETE FROM hive_reblogs AS hr
-    WHERE hr.account = :a AND hr.post_id IN (SELECT ps.post_id FROM processing_set ps)
-    RETURNING hr.post_id, (SELECT ps.account_id FROM processing_set ps) AS account_id
-"""
+DB = Db.instance()
 
 class Reblog(DbAdapterHolder):
     """ Class for reblog operations """
-    reblog_items_to_flush = []
+    deleted_reblog_items = {}
+    reblog_items_to_flush = {}
 
     @classmethod
-    def reblog_op(cls, account, op_json, block_date, block_num):
+    def _validated_op(cls, actor, op, block_date, block_num):
+        if 'account' not in op or \
+            'author' not in op or \
+            'permlink' not in op:
+            return None
+
+        if op['account'] != actor:
+            return None # impersonation
+
+        if not Accounts.exists(op['account']):
+            return None
+        if not Accounts.exists(op['author']):
+            return None
+
+        _delete = True if ('delete' in op and op['delete'] == 'delete') else False
+
+        return dict(author = op['author'],
+                    permlink = op['permlink'],
+                    account = op['account'],
+                    block_date = block_date,
+                    block_num = block_num,
+                    delete = _delete )
+
+    @classmethod
+    def reblog_op(cls, actor, op, block_date, block_num):
         """ Process reblog operation """
-        if 'account' not in op_json or \
-            'author' not in op_json or \
-            'permlink' not in op_json:
+        op = cls._validated_op(actor, op, block_date, block_num)
+        if not op:
             return
 
-        blogger = op_json['account']
-        author = op_json['author']
-        permlink = escape_characters(op_json['permlink'])
+        key = "{}/{}/{}".format(op['author'], op['permlink'], op['account'])
 
-        if blogger != account:
-            return  # impersonation
-        if not all(map(Accounts.exists, [author, blogger])):
-            return
-
-        if 'delete' in op_json and op_json['delete'] == 'delete':
-            row = cls.db.query_row(DELETE_SQL, a=blogger, permlink=permlink)
-            if row is None:
-                log.debug("reblog: post not found: %s/%s", author, op_json['permlink'])
-                return
-            if not DbState.is_initial_sync():
-                result = dict(row)
-                FeedCache.delete(result['post_id'], result['account_id'])
+        if op['delete']:
+            cls.deleted_reblog_items[key] = {}
+            cls.delete( op['author'], op['permlink'], op['account'] )
         else:
-            cls.reblog_items_to_flush.append((blogger, author, permlink, block_date, block_num))
+            cls.reblog_items_to_flush[key] = { 'op': op }
+
+    @classmethod
+    def delete(cls, author, permlink, account ):
+        """Remove a reblog from hive_reblogs + feed from hive_feed_cache.
+        """
+        sql = "SELECT delete_reblog_feed_cache( (:author)::VARCHAR, (:permlink)::VARCHAR, (:account)::VARCHAR );"
+        status = DB.query_col(sql, author=author, permlink=permlink, account=account);
+        assert status is not None
+        if status == 0:
+          log.debug("reblog: post not found: %s/%s", author, permlink)
 
     @classmethod
     def flush(cls):
@@ -74,7 +84,7 @@ class Reblog(DbAdapterHolder):
                     INNER JOIN hive_accounts ha ON ha.name = t.author
                     INNER JOIN hive_accounts ha_b ON ha_b.name = t.blogger
                     INNER JOIN hive_permlink_data hpd ON hpd.permlink = t.permlink
-                    INNER JOIN hive_posts hp ON hp.author_id = ha.id AND hp.permlink_id = hpd.id
+                    INNER JOIN hive_posts hp ON hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
             ) AS data_source (blogger_id, post_id, created_at, block_num)
             ON CONFLICT ON CONSTRAINT hive_reblogs_ux1 DO NOTHING
         """
@@ -85,24 +95,27 @@ class Reblog(DbAdapterHolder):
             limit = 1000
             count = 0
             cls.beginTx()
-            for reblog_item in cls.reblog_items_to_flush:
+            for k, v in cls.reblog_items_to_flush.items():
+                if k in cls.deleted_reblog_items:
+                  continue
+                reblog_item = v['op']
                 if count < limit:
-                    values.append("('{}', '{}', {}, '{}'::timestamp, {})".format(reblog_item[0],
-                                                                                   reblog_item[1],
-                                                                                   reblog_item[2],
-                                                                                   reblog_item[3],
-                                                                                   reblog_item[4]))
+                    values.append("({}, {}, {}, '{}'::timestamp, {})".format(escape_characters(reblog_item['account']),
+                                                                                escape_characters(reblog_item['author']),
+                                                                                escape_characters(reblog_item['permlink']),
+                                                                                reblog_item['block_date'],
+                                                                                reblog_item['block_num']))
                     count = count + 1
                 else:
                     values_str = ",".join(values)
                     query = sql_prefix.format(values_str, values_str)
                     cls.db.query(query)
                     values.clear()
-                    values.append("('{}', '{}', {}, '{}'::timestamp, {})".format(reblog_item[0],
-                                                                                   reblog_item[1],
-                                                                                   reblog_item[2],
-                                                                                   reblog_item[3],
-                                                                                   reblog_item[4]))
+                    values.append("({}, {}, {}, '{}'::timestamp, {})".format(escape_characters(reblog_item['account']),
+                                                                                escape_characters(reblog_item['author']),
+                                                                                escape_characters(reblog_item['permlink']),
+                                                                                reblog_item['block_date'],
+                                                                                reblog_item['block_num']))
                     count = 1
 
             if len(values) > 0:
@@ -111,5 +124,7 @@ class Reblog(DbAdapterHolder):
                 cls.db.query(query)
             cls.commitTx()
             cls.reblog_items_to_flush.clear()
+
+        cls.deleted_reblog_items.clear();
 
         return item_count

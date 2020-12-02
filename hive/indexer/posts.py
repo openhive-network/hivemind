@@ -10,7 +10,7 @@ from diff_match_patch import diff_match_patch
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 
-from hive.indexer.feed_cache import FeedCache
+from hive.indexer.reblog import Reblog
 from hive.indexer.community import Community
 from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
@@ -390,22 +390,8 @@ class Posts(DbAdapterHolder):
     @classmethod
     def delete(cls, op):
         """Marks a post record as being deleted."""
-
-        sql = """
-              SELECT id, depth
-              FROM delete_hive_post((:author)::varchar, (:permlink)::varchar, (:block_num)::int);
-              """
-        row = DB.query_row(sql, author=op['author'], permlink = op['permlink'], block_num=op['block_num'])
-
-        result = dict(row)
-        pid = result['id']
-
-        depth = result['depth']
-
-        if depth == 0 and not DbState.is_initial_sync():
-            # TODO: delete from hive_reblogs -- otherwise feed cache gets
-            # populated with deleted posts somwrimas
-            FeedCache.delete(pid)
+        sql = "SELECT delete_hive_post((:author)::varchar, (:permlink)::varchar, (:block_num)::int );"
+        DB.query_no_return(sql, author=op['author'], permlink = op['permlink'], block_num=op['block_num'])
 
     @classmethod
     def _verify_post_against_community(cls, op, community_id, is_valid, is_muted):

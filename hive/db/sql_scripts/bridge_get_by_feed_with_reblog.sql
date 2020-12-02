@@ -72,10 +72,10 @@ BEGIN
       WHERE hfc.block_num > __cutoff AND hf.state = 1 AND hf.follower = __account_id
       GROUP BY hfc.post_id
       HAVING __post_id = 0 OR MIN(hfc.created_at) <= __min_date 
-      ORDER BY min_created DESC
+      ORDER BY min_created DESC, hfc.post_id DESC
       LIMIT _limit
     ) T ON hp.id =  T.post_id
-    ORDER BY T.min_created DESC;
+    ORDER BY T.min_created DESC, T.post_id DESC;
 END
 $BODY$
 ;
