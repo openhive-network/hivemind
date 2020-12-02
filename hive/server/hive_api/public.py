@@ -58,6 +58,7 @@ async def list_following(context, account:str, start:str='', limit:int=50, obser
 async def list_all_muted(context, account):
     """Get a list of all account names muted by `account`."""
     db = context['db']
+    account = valid_account(account)
     sql = """SELECT a.name FROM hive_follows f
                JOIN hive_accounts a ON f.following_id = a.id
               WHERE follower = :follower AND state = 2"""

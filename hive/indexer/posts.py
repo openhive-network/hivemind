@@ -78,12 +78,12 @@ class Posts(DbAdapterHolder):
         cls._ids[url] = pid
 
     @classmethod
-    def delete_op(cls, op):
+    def delete_op(cls, op, block_date):
         """Given a delete_comment op, mark the post as deleted.
 
         Also remove it from post-cache and feed-cache.
         """
-        cls.delete(op)
+        cls.delete(op, block_date)
 
     @classmethod
     def comment_op(cls, op, block_date):
@@ -388,14 +388,14 @@ class Posts(DbAdapterHolder):
                  beneficiaries=dumps(beneficiaries))
 
     @classmethod
-    def delete(cls, op):
+    def delete(cls, op, block_date):
         """Marks a post record as being deleted."""
 
         sql = """
               SELECT id, depth
-              FROM delete_hive_post((:author)::varchar, (:permlink)::varchar, (:block_num)::int);
+              FROM delete_hive_post((:author)::varchar, (:permlink)::varchar, (:block_num)::int, (:date)::timestamp);
               """
-        row = DB.query_row(sql, author=op['author'], permlink = op['permlink'], block_num=op['block_num'])
+        row = DB.query_row(sql, author=op['author'], permlink = op['permlink'], block_num=op['block_num'], date=block_date)
 
         result = dict(row)
         pid = result['id']

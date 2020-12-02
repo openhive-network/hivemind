@@ -124,3 +124,27 @@ BEGIN
 END
 $function$
 ;
+
+DROP FUNCTION IF EXISTS public.find_community_id CASCADE
+;
+CREATE OR REPLACE FUNCTION public.find_community_id(
+    in _community_name hive_communities.name%TYPE,
+    in _check BOOLEAN
+)
+RETURNS INTEGER
+LANGUAGE 'plpgsql' STABLE
+AS
+$function$
+DECLARE
+  __community_id INT = 0;
+BEGIN
+  IF (_community_name <> '') THEN
+    SELECT INTO __community_id COALESCE( ( SELECT id FROM hive_communities WHERE name=_community_name ), 0 );
+    IF _check AND __community_id = 0 THEN
+      RAISE EXCEPTION 'Community % does not exist', _community_name;
+    END IF;
+  END IF;
+  RETURN __community_id;
+END
+$function$
+;

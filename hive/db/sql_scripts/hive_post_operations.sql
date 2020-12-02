@@ -144,12 +144,13 @@ END
 $function$
 ;
 
-DROP FUNCTION if exists delete_hive_post(character varying,character varying,character varying, integer)
+DROP FUNCTION if exists delete_hive_post(character varying,character varying,character varying, integer, timestamp)
 ;
 CREATE OR REPLACE FUNCTION delete_hive_post(
   in _author hive_accounts.name%TYPE,
   in _permlink hive_permlink_data.permlink%TYPE,
-  in _block_num hive_blocks.num%TYPE)
+  in _block_num hive_blocks.num%TYPE,
+  in _date hive_posts.active%TYPE)
 RETURNS TABLE (id hive_posts.id%TYPE, depth hive_posts.depth%TYPE)
 LANGUAGE plpgsql
 AS
@@ -165,6 +166,7 @@ BEGIN
       WHERE ha.name = _author AND hpd.permlink = _permlink
     )
     , block_num = _block_num
+    , active = _date
   FROM hive_posts hp1
   INNER JOIN hive_accounts ha ON hp1.author_id = ha.id
   INNER JOIN hive_permlink_data hpd ON hp1.permlink_id = hpd.id

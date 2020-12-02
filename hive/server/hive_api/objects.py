@@ -36,6 +36,7 @@ async def accounts_by_name(db, names, observer=None, lite=True):
         accounts[account['id']] = account
 
     if observer:
+        observer = valid_account(observer)
         await _follow_contexts(db, accounts,
                                observer_id=await get_account_id(db, observer),
                                include_mute=not lite)

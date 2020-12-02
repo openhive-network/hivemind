@@ -19,8 +19,11 @@ from hive.server.common.mutes import Mutes
 async def get_profile(context, account, observer=None):
     """Load account/profile data."""
     db = context['db']
+    account = valid_account(account)
+    observer = valid_account(observer, allow_empty=True)
+
     ret = await load_profiles(db, [valid_account(account)])
-    assert ret, 'Account \'{}\' does not exist'.format(account)
+    assert ret, 'Account \'{}\' does not exist'.format(account) # should not be needed
 
     observer_id = await get_account_id(db, observer) if observer else None
     if observer_id:
