@@ -107,9 +107,6 @@ class Follow(DbAdapterHolder):
             cls.follow_items_to_flush[k]['block_num'] = block_num
             cls.idx += 1
 
-            if k == "E'tester5'/E'tester4'":
-                print(cls.follow_items_to_flush[k])
-
         if state > 8:
             # check if given state exists in dict
             # if exists add follower to a list for a given state
