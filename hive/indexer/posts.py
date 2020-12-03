@@ -78,12 +78,12 @@ class Posts(DbAdapterHolder):
         cls._ids[url] = pid
 
     @classmethod
-    def delete_op(cls, op):
+    def delete_op(cls, op, block_date):
         """Given a delete_comment op, mark the post as deleted.
 
         Also remove it from post-cache and feed-cache.
         """
-        cls.delete(op)
+        cls.delete(op, block_date)
 
     @classmethod
     def comment_op(cls, op, block_date):
@@ -388,10 +388,10 @@ class Posts(DbAdapterHolder):
                  beneficiaries=dumps(beneficiaries))
 
     @classmethod
-    def delete(cls, op):
+    def delete(cls, op, block_date):
         """Marks a post record as being deleted."""
-        sql = "SELECT delete_hive_post((:author)::varchar, (:permlink)::varchar, (:block_num)::int );"
-        DB.query_no_return(sql, author=op['author'], permlink = op['permlink'], block_num=op['block_num'])
+        sql = "SELECT delete_hive_post((:author)::varchar, (:permlink)::varchar, (:block_num)::int, (:date)::timestamp);"
+        DB.query_no_return(sql, author=op['author'], permlink = op['permlink'], block_num=op['block_num'], date=block_date)
 
     @classmethod
     def _verify_post_against_community(cls, op, community_id, is_valid, is_muted):

@@ -266,7 +266,7 @@ class Blocks:
                 elif op_type == 'delete_comment_operation':
                     key = "{}/{}".format(op['author'], op['permlink'])
                     if ( ineffective_deleted_ops is None ) or ( key not in ineffective_deleted_ops ):
-                        Posts.delete_op(op)
+                        Posts.delete_op(op, cls._head_block_date)
                 elif op_type == 'comment_options_operation':
                     Posts.comment_options_op(op)
                 elif op_type == 'vote_operation':
