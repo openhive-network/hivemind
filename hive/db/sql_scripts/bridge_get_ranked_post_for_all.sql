@@ -154,7 +154,7 @@ DECLARE
   __observer_id INT;
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
-  __observer_id = find_account_id(_observer, False);
+  __observer_id = find_account_id(_observer, True);
   IF __post_id <> 0 THEN
       SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;

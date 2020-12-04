@@ -166,7 +166,7 @@ BEGIN
       SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   __hive_tag = ARRAY_APPEND( __hive_tag, find_tag_id( _tag, True ) );
-  __observer_id = find_account_id(_observer, False);
+  __observer_id = find_account_id(_observer, True);
   RETURN QUERY SELECT
       hp.id,
       hp.author,
