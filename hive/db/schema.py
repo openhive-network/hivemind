@@ -545,73 +545,10 @@ def setup(db):
     from hive.version import GIT_REVISION
     db.query_no_return(sql.format(GIT_REVISION))
 
-    # max_time_stamp definition moved into utility_functions.sql
-
-    # get_discussion definition moved to bridge_get_discussion.sql
-
-    sql_scripts = [
-      "utility_functions.sql",
-      "hive_accounts_view.sql",
-      "hive_accounts_info_view.sql",
-      "hive_posts_base_view.sql",
-      "hive_posts_view.sql",
-      "hive_votes_view.sql",
-      "hive_muted_accounts_view.sql",
-      "hive_muted_accounts_by_id_view.sql",
-      "hive_post_operations.sql",
-      "head_block_time.sql",
-      "update_feed_cache.sql",
-      "payout_stats_view.sql",
-      "update_hive_posts_mentions.sql",
-      "mutes.sql",
-      "bridge_get_ranked_post_type.sql",
-      "bridge_get_ranked_post_for_communities.sql",
-      "bridge_get_ranked_post_for_observer_communities.sql",
-      "bridge_get_ranked_post_for_tag.sql",
-      "bridge_get_ranked_post_for_all.sql",
-      "calculate_account_reputations.sql",
-      "update_communities_rank.sql",
-      "delete_hive_posts_mentions.sql",
-      "notifications_view.sql",
-      "notifications_api.sql",
-      "bridge_get_account_posts_by_comments.sql",
-      "bridge_get_account_posts_by_payout.sql",
-      "bridge_get_account_posts_by_posts.sql",
-      "bridge_get_account_posts_by_replies.sql",
-      "bridge_get_relationship_between_accounts.sql",
-      "bridge_get_post.sql",
-      "bridge_get_discussion.sql",
-      "condenser_api_post_type.sql",
-      "condenser_api_post_ex_type.sql",
-      "condenser_get_blog.sql",
-      "condenser_get_content.sql",
-      "condenser_tags.sql",
-      "condenser_follows.sql",
-      "hot_and_trends.sql",
-      "update_hive_posts_children_count.sql",
-      "update_hive_posts_api_helper.sql",
-      "database_api_list_comments.sql",
-      "database_api_list_votes.sql",
-      "update_posts_rshares.sql",
-      "update_hive_post_root_id.sql",
-      "condenser_get_by_account_comments.sql",
-      "condenser_get_by_blog_without_reblog.sql",
-      "bridge_get_by_feed_with_reblog.sql",
-      "condenser_get_by_blog.sql",
-      "bridge_get_account_posts_by_blog.sql",
-      "condenser_get_names_by_reblogged.sql",
-      "condenser_get_discussions_by_comments.sql",
-      "condenser_get_account_reputations.sql",
-      "update_follow_count.sql",
-      "delete_reblog_feed_cache.sql"
-    ]
-    from os.path import dirname, realpath
-    dir_path = dirname(realpath(__file__))
-    for script in sql_scripts:
-        execute_sql_script(db.query_no_return, "{}/sql_scripts/{}".format(dir_path, script))
-
-
-
+    ############################################################################
+    #       PLEASE ADD SQL SCRIPT NAMES TO THE file_order_list.txt FILE        #
+    ############################################################################
+    execute_sql_script_from_list(db)
 
 
 def reset_autovac(db):
@@ -692,3 +629,16 @@ def execute_sql_script(query_executor, path_to_script):
         log.exception("Error running sql script: {}".format(ex))
         raise ex
     return None
+
+def execute_sql_script_from_list(db):
+    from os.path import dirname, realpath, join
+    dir_path = dirname(realpath(__file__))
+    dir_path = join(dir_path, "sql_scripts")
+
+    file_list = []
+    with open(join(dir_path, "file_order_list.txt"), "r") as f:
+        file_list = f.readlines()
+    file_list = [file.strip() for file in file_list]
+
+    for script in file_list:
+        execute_sql_script(db.query_no_return, join(dir_path, script))
