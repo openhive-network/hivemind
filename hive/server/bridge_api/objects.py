@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 
 # pylint: disable=too-many-lines
 
-def append_statistics_to_post(post, row, is_pinned, blacklisted_for_user={}):
+def append_statistics_to_post(post, row, is_pinned):
     """ apply information such as blacklists and community names/roles to a given post """
     
     post['blacklists'] = []

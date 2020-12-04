@@ -21,10 +21,6 @@ async def get_discussion(context, author:str, permlink:str, observer:str=''):
     permlink = valid_permlink(permlink)
     observer = valid_account(observer, allow_empty=True)
 
-    blacklisted_for_user = None
-    if observer:
-        blacklisted_for_user = await Mutes.get_blacklisted_for_observer(observer, context)
-
     sql = "SELECT * FROM bridge_get_discussion(:author,:permlink,:observer)"
     rows = await db.query_all(sql, author=author, permlink=permlink, observer=observer)
     if not rows or len(rows) == 0:
@@ -33,7 +29,7 @@ async def get_discussion(context, author:str, permlink:str, observer:str=''):
     all_posts = {}
     root_post = _bridge_post_object(rows[0])
     root_post['active_votes'] = await find_votes_impl(db, rows[0]['author'], rows[0]['permlink'], VotesPresentation.BridgeApi)
-    root_post = append_statistics_to_post(root_post, rows[0], False, blacklisted_for_user)
+    root_post = append_statistics_to_post(root_post, rows[0], False)
     root_post['replies'] = []
     all_posts[root_id] = root_post
 
@@ -46,7 +42,7 @@ async def get_discussion(context, author:str, permlink:str, observer:str=''):
         parent_to_children_id_map[parent_id].append(rows[index]['id'])
         post = _bridge_post_object(rows[index])
         post['active_votes'] = await find_votes_impl(db, rows[index]['author'], rows[index]['permlink'], VotesPresentation.BridgeApi)
-        post = append_statistics_to_post(post, rows[index], False, blacklisted_for_user)
+        post = append_statistics_to_post(post, rows[index], False)
         post['replies'] = []
         all_posts[post['post_id']] = post
 

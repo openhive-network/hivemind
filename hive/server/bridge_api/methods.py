@@ -58,16 +58,12 @@ async def get_post(context, author, permlink, observer=None):
     valid_account(observer, allow_empty=True)
     valid_permlink(permlink)
 
-    blacklisted_for_user = None
-    if observer:
-        blacklisted_for_user = await Mutes.get_blacklisted_for_observer(observer, context)
-
     sql = "SELECT * FROM bridge_get_post( (:author)::VARCHAR, (:permlink)::VARCHAR )"
     result = await db.query_all(sql, author=author, permlink=permlink)
 
     post = _bridge_post_object(result[0])
     post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.BridgeApi)
-    post = append_statistics_to_post(post, result[0], False, blacklisted_for_user)
+    post = append_statistics_to_post(post, result[0], False)
     return post
 
 @return_error_info
@@ -233,14 +229,11 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
     db = context['db']
 
     async def process_query_results( sql_result ):
-        blacklisted_for_user = None
-        if observer:
-            blacklisted_for_user = await Mutes.get_blacklisted_for_observer(observer, context)
         posts = []
         for row in sql_result:
             post = _bridge_post_object(row)
             post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.BridgeApi)
-            post = append_statistics_to_post(post, row, row['is_pinned'], blacklisted_for_user)
+            post = append_statistics_to_post(post, row, row['is_pinned'])
             posts.append(post)
         return posts
 
@@ -298,12 +291,6 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
 
     sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit )
     posts = []
-    blacklisted_for_user = None
-    if observer and account_posts:
-        # it looks like the opposite would make more sense, that is, to handle observer for 'blog', 'feed' and 'replies',
-        # since that's when posts can come from various authors, some blacklisted and some not, but original version
-        # ignored it (only) in those cases
-        blacklisted_for_user = await Mutes.get_blacklisted_for_observer(observer, context)
 
     for row in sql_result:
         post = _bridge_post_object(row)
@@ -319,7 +306,7 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
                 reblogged_by_list.sort()
                 post['reblogged_by'] = reblogged_by_list
 
-        post = append_statistics_to_post(post, row, False if account_posts else row['is_pinned'], blacklisted_for_user)
+        post = append_statistics_to_post(post, row, False if account_posts else row['is_pinned'])
         posts.append(post)
     return posts
 
