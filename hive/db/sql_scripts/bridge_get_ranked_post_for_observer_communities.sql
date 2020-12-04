@@ -22,6 +22,7 @@ BEGIN
                                             and hive_posts.counter_deleted = 0
                                             and (__post_id = 0 OR hive_posts.id < __post_id)
                                             and hive_accounts.reputation > '-464800000000'::bigint
+                                            and (not exists (select 1 from muted_accounts_by_id_view where observer_id = __account_id and muted_id = hive_posts.author_id))
                                           order by id desc
                                           limit _limit) posts
                       order by id desc
