@@ -57,7 +57,8 @@ BEGIN
       hp.role_id,
       hp.is_pinned,
       hp.curator_payout_value,
-      hp.is_muted
+      hp.is_muted,
+      NULL
   FROM
   (
       SELECT

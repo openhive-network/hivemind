@@ -63,7 +63,8 @@ BEGIN
       hp.role_id,
       hp.is_pinned,
       hp.curator_payout_value,
-      hp.is_muted
+      hp.is_muted,
+      NULL
     FROM hive_posts_view hp
     JOIN hive_feed_cache hfc ON hp.id = hfc.post_id
     WHERE hfc.account_id = __account_id AND ( ( __post_id = 0 ) OR ( hfc.created_at <= __created_at ) )

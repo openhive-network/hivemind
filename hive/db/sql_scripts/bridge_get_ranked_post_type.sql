@@ -36,7 +36,8 @@ CREATE TYPE bridge_api_post AS (
     role_id SMALLINT,
     is_pinned BOOLEAN,
     curator_payout_value VARCHAR,
-    is_muted BOOLEAN
+    is_muted BOOLEAN,
+    blacklists TEXT
 );
 
 DROP TYPE IF EXISTS bridge_api_post_reblogs CASCADE;
@@ -122,5 +123,6 @@ CREATE TYPE bridge_api_post_discussion AS (
     is_pinned BOOLEAN,
     curator_payout_value VARCHAR,
     is_muted BOOLEAN,
-    parent_id INTEGER
+    parent_id INTEGER,
+    blacklists TEXT
 );

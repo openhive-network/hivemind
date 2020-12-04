@@ -6,6 +6,7 @@ $function$
 DECLARE
   __post_id INT;
   __account_id INT;
+  __subscription_count INT;
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __account_id = find_account_id( _observer, True );
@@ -64,9 +65,11 @@ BEGIN
           hp.role_id,
           hp.is_pinned,
           hp.curator_payout_value,
-          hp.is_muted
+          hp.is_muted,
+          blacklisted_by_observer_view.source
       from post_ids
       join hive_posts_view hp using (id)
+      LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __account_id AND blacklisted_by_observer_view.blacklisted_id = hp.author_id)
       order by id desc;
 END
 $function$
@@ -124,10 +127,12 @@ BEGIN
       hp.role_id,
       hp.is_pinned,
       hp.curator_payout_value,
-      hp.is_muted
+      hp.is_muted,
+      blacklisted_by_observer_view.source
   FROM
       hive_posts_view hp
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
+      LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __account_id AND blacklisted_by_observer_view.blacklisted_id = hp.author_id)
   WHERE hs.account_id = __account_id AND NOT hp.is_paidout AND hp.depth = 0
       AND ( __post_id = 0 OR hp.sc_hot < __hot_limit OR ( hp.sc_hot = __hot_limit AND hp.id < __post_id ) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp.author_id))
@@ -189,15 +194,18 @@ BEGIN
       hp.role_id,
       hp.is_pinned,
       hp.curator_payout_value,
-      hp.is_muted
+      hp.is_muted,
+      payout.blacklist_source
   FROM
   (
       SELECT
           hp1.id
-        , ( hp1.payout + hp1.pending_payout ) as all_payout
+        , ( hp1.payout + hp1.pending_payout ) as all_payout,
+        blacklisted_by_observer_view.source as blacklist_source
       FROM
           hive_posts hp1
           JOIN hive_subscriptions hs ON hp1.community_id = hs.community_id
+          LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __account_id AND blacklisted_by_observer_view.blacklisted_id = hp1.author_id)
       WHERE hs.account_id = __account_id AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth > 0
           AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
           AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp1.author_id))
@@ -265,10 +273,12 @@ BEGIN
       hp.role_id,
       hp.is_pinned,
       hp.curator_payout_value,
-      hp.is_muted
+      hp.is_muted,
+      blacklisted_by_observer_view.source
   FROM
       hive_posts_view hp
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
+      LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __account_id AND blacklisted_by_observer_view.blacklisted_id = hp.author_id)
   WHERE hs.account_id = __account_id AND NOT hp.is_paidout AND hp.payout_at BETWEEN __head_block_time + interval '12 hours' AND __head_block_time + interval '36 hours'
       AND ( __post_id = 0 OR ( hp.payout + hp.pending_payout ) < __payout_limit OR ( ( hp.payout + hp.pending_payout ) = __payout_limit AND hp.id < __post_id ) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp.author_id))
@@ -330,10 +340,12 @@ BEGIN
       hp.role_id,
       hp.is_pinned,
       hp.curator_payout_value,
-      hp.is_muted
+      hp.is_muted,
+      blacklisted_by_observer_view.source
   FROM
       hive_posts_view hp
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
+      LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __account_id AND blacklisted_by_observer_view.blacklisted_id = hp.author_id)
   WHERE hs.account_id = __account_id AND NOT hp.is_paidout AND hp.promoted > 0
       AND ( __post_id = 0 OR hp.promoted < __promoted_limit OR ( hp.promoted = __promoted_limit AND hp.id < __post_id ) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp.author_id))
@@ -396,15 +408,18 @@ BEGIN
       hp.role_id,
       hp.is_pinned,
       hp.curator_payout_value,
-      hp.is_muted
+      hp.is_muted,
+      trending.source
   FROM
   (
       SELECT
           hp1.id
-        , hp1.sc_trend
+        , hp1.sc_trend,
+        blacklisted_by_observer_view.source as source
       FROM
           hive_posts hp1
           JOIN hive_subscriptions hs ON hp1.community_id = hs.community_id
+          LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __account_id AND blacklisted_by_observer_view.blacklisted_id = hp1.author_id)
       WHERE
           hs.account_id = __account_id AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth = 0
           AND ( __post_id = 0 OR hp1.sc_trend < __trending_limit OR ( hp1.sc_trend = __trending_limit AND hp1.id < __post_id ) )
@@ -471,11 +486,13 @@ BEGIN
       hp.role_id,
       hp.is_pinned,
       hp.curator_payout_value,
-      hp.is_muted
+      hp.is_muted,
+      blacklisted_by_observer_view.source
   FROM
       hive_posts_view hp
       JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
       JOIN hive_accounts_view ha ON ha.id = hp.author_id
+      LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __account_id AND blacklisted_by_observer_view.blacklisted_id = hp.author_id)
   WHERE hs.account_id = __account_id AND NOT hp.is_paidout AND ha.is_grayed AND ( hp.payout + hp.pending_payout ) > 0
       AND ( __post_id = 0 OR ( hp.payout + hp.pending_payout ) < __payout_limit OR ( ( hp.payout + hp.pending_payout ) = __payout_limit AND hp.id < __post_id ) )
   ORDER BY ( hp.payout + hp.pending_payout ) DESC, hp.id DESC
