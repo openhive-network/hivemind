@@ -5,8 +5,8 @@
 import os
 import logging
 import time
-from hive.db.adapter import Db
 from hive.conf import Conf
+from hive.db.adapter import Db
 from hive.utils.stats import PrometheusClient
 
 

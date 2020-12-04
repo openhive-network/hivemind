@@ -27,8 +27,9 @@ EOF
         --steemd-url "${RUNNER_HIVED_URL}" \
         --prometheus-port 11011 \
         --database-url "${DATABASE_URL}" \
-        --mock-block-data-path mock_data/block_data/ \
-        --mock-vops-data-path mock_data/vops_data/ \
+        --mock-block-data-path mock_data/block_data/follow_op/mock_block_data_follow.json \
+          mock_data/block_data/community_op/mock_block_data_community.json \
+          mock_data/block_data/reblog_op/mock_block_data_reblog.json \
         --community-start-block 4999998 \
         2>&1 | tee -i hivemind-sync.log
 

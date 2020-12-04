@@ -30,6 +30,7 @@ from hive.utils.stats import BroadcastObject
 from hive.utils.communities_rank import update_communities_posts_and_rank
 
 from hive.indexer.mock_block_provider import MockBlockProvider
+from hive.indexer.mock_vops_provider import MockVopsProvider
 
 from datetime import datetime
 
@@ -136,6 +137,8 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
     num = 0
     time_start = OPSM.start()
     rate = {}
+
+    rate = minmax(rate, 0, 1.0, 0)
 
     def print_summary():
         stop = OPSM.stop(time_start)
@@ -300,11 +303,6 @@ class Sync:
         # ensure db schema up to date, check app status
         DbState.initialize()
         Blocks.setup_own_db_access(self._db)
-
-        # initialize mock data
-        paths = self._conf.get("mock_block_data_path")
-        for path in paths:
-          self.load_mock_data(path)
 
         # prefetch id->name and id->rank memory maps
         Accounts.load_ids()
