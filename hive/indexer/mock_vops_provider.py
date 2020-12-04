@@ -9,15 +9,6 @@ class MockVopsProvider(MockDataProvider):
     }
 
     @classmethod
-    def load_block_data(cls, data_path):
-        #clear old data and prepare container
-        cls.block_data.clear()
-        cls.block_data['ops'] = {}
-        cls.block_data['ops_by_block'] = {}
-
-        super().load_block_data(data_path)
-
-    @classmethod
     def add_block_data_from_file(cls, file_name):
         from json import load
         data = {}

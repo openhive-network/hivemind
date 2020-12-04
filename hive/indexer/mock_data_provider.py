@@ -33,8 +33,8 @@ class MockDataProvider():
     @classmethod
     def load_block_data(cls, data_path):
         if os.path.isdir(data_path):
-            log.warning("Loading mock virtual ops data from directory: {}".format(data_path))
+            log.warning("Loading mock ops data from directory: {}".format(data_path))
             cls.add_block_data_from_directory(data_path)
         else:
-            log.warning("Loading mock virtual ops data from file: {}".format(data_path))
+            log.warning("Loading mock ops data from file: {}".format(data_path))
             cls.add_block_data_from_file(data_path)

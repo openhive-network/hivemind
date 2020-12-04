@@ -19,14 +19,6 @@ class MockBlockProvider(MockDataProvider):
         cls.last_real_block_time = dateutil.parser.isoparse(block_date)
 
     @classmethod
-    def load_block_data(cls, data_path):
-        cls.block_data.clear()
-        cls.min_block = 0
-        cls.max_block = 0
-
-        super().load_block_data(data_path)
-
-    @classmethod
     def add_block_data_from_file(cls, file_name):
         from json import load
         data = {}
