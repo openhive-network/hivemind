@@ -86,6 +86,10 @@ class BlockStream:
         while self._gap_ok(curr, head):
             head = schedule.wait_for_block(curr)
             block = self._client.get_block(curr)
+
+            block_num = int(block['block_id'][:8], base=16)
+            #log.info("stream is processing a block %d with timestamp: %s", block_num, block['timestamp'])
+
             schedule.check_block(curr, block)
 
             if not block:

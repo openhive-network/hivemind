@@ -63,6 +63,9 @@ class SteemClient:
         result = self.__exec('get_block', {'block_num': num})
         if 'block' in result:
             ret = result['block']
+
+            #logger.info("Found real block %d with timestamp: %s", num, ret['timestamp'])
+
             MockBlockProvider.set_last_real_block_num_date(num, ret['timestamp'])
             data = MockBlockProvider.get_block_data(num)
             if data is not None:
@@ -72,7 +75,9 @@ class SteemClient:
         else:
             # if block does not exist in hived but exist in Mock Provider
             # return block from block provider
-            return MockBlockProvider.get_block_data(num, True)
+            mocked_block = MockBlockProvider.get_block_data(num, True)
+            #logger.info("Found real block %d with timestamp: %s", num, mocked_block['timestamp'])
+            return mocked_block
 
     def stream_blocks(self, start_from, trail_blocks=0, max_gap=100, do_stale_block_check=True):
         """Stream blocks. Returns a generator."""

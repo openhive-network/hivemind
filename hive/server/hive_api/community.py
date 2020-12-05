@@ -134,7 +134,7 @@ async def list_subscribers(context, community):
                                  AND hs.community_id = hr.community_id
                JOIN hive_accounts ha ON hs.account_id = ha.id
               WHERE hs.community_id = :cid
-           ORDER BY hs.created_at DESC
+           ORDER BY hs.created_at DESC, hs.id DESC
               LIMIT 250"""
     rows = await db.query_all(sql, cid=cid)
     return [(r['name'], ROLES[r['role_id'] or 0], r['title'],

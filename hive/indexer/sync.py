@@ -454,7 +454,7 @@ class Sync:
         for block in steemd.stream_blocks(hive_head + 1, trail_blocks, max_gap, do_stale_block_check):
 
             num = int(block['block_id'][:8], base=16)
-            log.info("[LIVE SYNC] =====> About to process block %d", num)
+            log.info("[LIVE SYNC] =====> About to process block %d with timestamp %s", num, block['timestamp'])
 
             start_time = perf()
 

@@ -1,8 +1,11 @@
 """ Data provider for test operations """
 import datetime
 import dateutil.parser
+import logging
 
 from hive.indexer.mock_data_provider import MockDataProvider, MockDataProviderException
+
+log = logging.getLogger(__name__)
 
 class MockBlockProvider(MockDataProvider):
     """ Data provider for test ops """
@@ -36,16 +39,22 @@ class MockBlockProvider(MockDataProvider):
         if block_num < cls.min_block:
             cls.min_block = block_num
 
+        #log.info("Loading mock data for block {} with timestamp: {}".format(block_num, block_content['timestamp']))
+
         if block_num in cls.block_data:
             assert 'transactions' in cls.block_data[block_num]
             assert 'transactions' in block_content
             cls.block_data[block_num]['transactions'] = cls.block_data[block_num]['transactions'] + block_content['transactions']
         else:
-            cls.block_data[block_num] = block_content
+            cls.block_data[block_num] = dict(block_content)
 
     @classmethod
     def get_block_data(cls, block_num, make_on_empty=False):
         data = cls.block_data.get(block_num, None)
+
+        #if data is not None:
+            #log.info("Block {} has timestamp: {}".format(block_num, data['timestamp']))
+
         if make_on_empty and data is None:
             data = cls.make_empty_block(block_num)
             if data is None:
@@ -69,7 +78,7 @@ class MockBlockProvider(MockDataProvider):
 
     @classmethod
     def make_empty_block(cls, block_num, witness="initminer"):
-        block_data = {
+        fake_block = dict({
             "previous": cls.make_block_id(block_num - 1),
             "timestamp": cls.make_block_timestamp(block_num),
             "witness": witness,
@@ -80,9 +89,9 @@ class MockBlockProvider(MockDataProvider):
             "block_id": cls.make_block_id(block_num),
             "signing_key": "",
             "transaction_ids": []
-            }
+            })
         # supply enough blocks to fill block queue with empty blocks only
         # throw exception if there is no more data to serve
         if cls.min_block < block_num < cls.max_block + 3:
-            return block_data
+            return fake_block
         return None
