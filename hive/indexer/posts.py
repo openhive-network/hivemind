@@ -100,8 +100,11 @@ class Posts(DbAdapterHolder):
             pass
 
         tags = []
+
         if md and 'tags' in md and isinstance(md['tags'], list):
-            tags = md['tags']
+            for tag in md['tags']:
+                if tag and isinstance(tag, str):
+                    tags.append(tag) # No escaping needed due to used sqlalchemy formatting features
 
         sql = """
             SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, community_id, is_valid, is_muted, depth
