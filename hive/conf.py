@@ -50,7 +50,6 @@ class Conf():
         add('--log-level', env_var='LOG_LEVEL', default='INFO')
         add('--test-disable-sync', type=strtobool, env_var='TEST_DISABLE_SYNC', help='(debug) skip sync and sweep; jump to block streaming', default=False)
         add('--test-max-block', type=int, env_var='TEST_MAX_BLOCK', help='(debug) only sync to given block, for running sync test', default=None)
-        add('--exit-after-sync', help='exit when sync is completed', action='store_true')
         add('--test-profile', type=strtobool, env_var='TEST_PROFILE', help='(debug) profile execution', default=False)
         add('--log-virtual-op-calls', type=strtobool, env_var='LOG_VIRTUAL_OP_CALLS', help='(debug) log virtual op calls and responses', default=False)
         add('--mock-block-data-path', type=str, nargs='+', env_var='MOCK_BLOCK_DATA_PATH', help='(debug/testing) load additional data from block data file')
