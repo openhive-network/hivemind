@@ -1,0 +1,68 @@
+{
+  "ops": [],
+  "ops_by_block": [
+    {
+      "block": 5000015,
+      "irreversible": true,
+      "timestamp": "2016-09-15T19:48:06",
+      "ops": [
+        {
+          "trx_id": "0000000000000000000000000000000000000000",
+          "block": 5000015,
+          "trx_in_block": 4294967295,
+          "op_in_trx": 0,
+          "virtual_op": 1,
+          "timestamp": "2016-09-15T19:48:06",
+          "op": {
+            "type": "author_reward_operation",
+            "value": {
+              "author": "tester1",
+              "permlink": "tester1-post",
+
+              "hbd_payout": {
+                "amount": "123321",
+                "nai": "@@000000013",
+                "precision": 3
+              },
+              "hive_payout": {
+                "amount": "123321",
+                "nai": "@@000000021",
+                "precision": 3
+              },
+              "vesting_payout": {
+                "amount": "123321",
+                "nai": "@@000000037",
+                "precision": 6
+              }
+            }
+          },
+          "operation_id": "9223372036854776508"
+        },
+        {
+          "trx_id": "0000000000000000000000000000000000000000",
+          "block": 5000015,
+          "trx_in_block": 4294967295,
+          "op_in_trx": 0,
+          "virtual_op": 1,
+          "timestamp": "2016-09-15T19:48:06",
+          "op": {
+            "type": "comment_reward_operation",
+            "value": {
+              "author": "tester1",
+              "permlink": "tester1-post",
+
+              "payout": "123321",
+              "author_rewards": "123321",
+              "total_payout_value": "123321 HBD",
+              "curator_payout_value": "123321 HBD",
+              "beneficiary_payout_value": "123321"
+            }
+          },
+          "operation_id": "9223372036854776508"
+        }
+      ]
+    }
+  ],
+  "next_block_range_begin": 1,
+  "next_operation_begin": 0
+}
