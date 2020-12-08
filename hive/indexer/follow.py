@@ -3,7 +3,6 @@
 import logging
 
 from funcy.seqs import first
-from hive.db.adapter import Db
 from hive.utils.misc import chunks
 from hive.indexer.accounts import Accounts
 
@@ -12,9 +11,6 @@ from hive.utils.normalize import escape_characters
 
 
 log = logging.getLogger(__name__)
-
-
-DB = Db.instance()
 
 class Follow(DbAdapterHolder):
     """Handles processing of incoming follow ups and flushing to db."""
@@ -466,7 +462,7 @@ class Follow(DbAdapterHolder):
                         """.format(query_values)
                     if sql is not None:
                         cls.beginTx()
-                        DB.query(sql)
+                        cls.db.query(sql)
                         cls.commitTx()
                     n += len(chunk)
             cls.follow_update_items_to_flush.clear()
