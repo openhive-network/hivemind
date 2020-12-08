@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import os
+import csv
+import requests
+import json
+from time import perf_counter
 
-from xml.dom import minidom
 
 def process_file_name(file_name, tavern_root_dir):
-    tavern_root_dir_dot = tavern_root_dir.replace("/", ".")
-    file_name_dot = file_name.replace("/", ".")
-    return file_name_dot.replace(tavern_root_dir_dot, "").lstrip(".")
+    return file_name.replace(tavern_root_dir, "").lstrip("/")
 
 def get_requests_from_yaml(tavern_root_dir):
     from fnmatch import fnmatch
@@ -28,22 +29,19 @@ def get_requests_from_yaml(tavern_root_dir):
                         ret[process_file_name(test_file, tavern_root_dir)] = dumps(json_parameters)
     return ret
 
-def parse_xml_files(root_dir):
+def parse_csv_files(root_dir):
     ret = {}
-    print("Scanning path: {}".format(root_dir))
-    for name in os.listdir(root_dir):
-        file_path = os.path.join(root_dir, name)
-        if os.path.isfile(file_path) and name.startswith("benchmarks") and file_path.endswith(".xml"):
-            print("Processing file: {}".format(file_path))
-            xmldoc = minidom.parse(file_path)
-            test_cases = xmldoc.getElementsByTagName('testcase')
-            for test_case in test_cases:
-                test_name = test_case.attributes['classname'].value
-                test_time = float(test_case.attributes['time'].value)
-                if test_name in ret:
-                    ret[test_name].append(test_time)
-                else:
-                    ret[test_name] = [test_time]
+    file_path = os.path.join(root_dir, "benchmark.csv")
+    print("Processing file: {}".format(file_path))
+    with open(file_path, 'r') as csv_file:
+        reader = csv.reader(csv_file)
+        for row in reader:
+            test_name = row[0] + ".tavern.yaml"
+            test_time = float(row[1])
+            if test_name in ret:
+                ret[test_name].append(test_time)
+            else:
+                ret[test_name] = [test_time]
     return ret
 
 if __name__ == "__main__":
@@ -51,15 +49,17 @@ if __name__ == "__main__":
     from statistics import mean
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("xml_report_dir", type=str, help="Path to benchmark xml reports")
+    parser.add_argument("address", type=str)
+    parser.add_argument("port", type=int)
+    parser.add_argument("csv_report_dir", type=str, help="Path to benchmark csv reports")
     parser.add_argument("tavern_root_dir", type=str, help="Path to tavern tests root dir")
     parser.add_argument("--time-threshold", dest="time_threshold", type=float, default=1.0, help="Time threshold for test execution time, tests with execution time greater than threshold will be marked on red.")
     args = parser.parse_args()
 
-    assert os.path.exists(args.xml_report_dir), "Please provide valid xml report path"
+    assert os.path.exists(args.csv_report_dir), "Please provide valid csv report path"
     assert os.path.exists(args.tavern_root_dir), "Please provide valid tavern path"
 
-    report_data = parse_xml_files(args.xml_report_dir)
+    report_data = parse_csv_files(args.csv_report_dir)
     request_data = get_requests_from_yaml(args.tavern_root_dir)
 
     html_file = "tavern_benchmarks_report.html"
@@ -79,16 +79,19 @@ if __name__ == "__main__":
         ofile.write("  </head>\n")
         ofile.write("  <body>\n")
         ofile.write("    <table>\n")
-        ofile.write("      <tr><th>Test name</th><th>Min time [s]</th><th>Max time [s]</th><th>Mean time [s]</th></tr>\n")
+        ofile.write("      <tr><th>Test name</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th><th>Reference (pure requests call) [ms]</th></tr>\n")
         for name, data in report_data.items():
             dmin = min(data)
             dmax = max(data)
             dmean = mean(data)
+            t_start = perf_counter()
+            ret = requests.post("{}:{}".format(args.address, args.port), request_data[name])
+            ref_time = perf_counter() - t_start
             if dmean > args.time_threshold:
-                ofile.write("      <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td></tr>\n".format(name, request_data[name], dmin, dmax, dmean))
+                ofile.write("      <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, request_data[name], dmin * 1000, dmax * 1000, dmean * 1000, ref_time * 1000))
                 above_treshold.append((name, "{:.4f}".format(dmean), request_data[name]))
             else:
-                ofile.write("      <tr><td>{}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, dmin, dmax, dmean))
+                ofile.write("      <tr><td>{}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, dmin * 1000, dmax * 1000, dmean * 1000, ref_time * 1000))
         ofile.write("    </table>\n")
         ofile.write("  </body>\n")
         ofile.write("</html>\n")
@@ -96,8 +99,8 @@ if __name__ == "__main__":
     if above_treshold:
         from prettytable import PrettyTable
         summary = PrettyTable()
-        print("########## Test failed with following tests above {}s threshold ##########".format(args.time_threshold))
-        summary.field_names = ['Test name', 'Mean time [s]', 'Call parameters']
+        print("########## Test failed with following tests above {}s threshold ##########".format(args.time_threshold * 1000))
+        summary.field_names = ['Test name', 'Mean time [ms]', 'Call parameters']
         for entry in above_treshold:
             summary.add_row(entry)
         print(summary)
