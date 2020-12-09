@@ -50,6 +50,9 @@ class MockBlockProvider(MockDataProvider):
 
     @classmethod
     def get_block_data(cls, block_num, make_on_empty=False):
+        if len(cls.block_data) == 0:
+            return None
+
         data = cls.block_data.get(block_num, None)
 
         #if data is not None:
@@ -57,8 +60,7 @@ class MockBlockProvider(MockDataProvider):
 
         if make_on_empty and data is None:
             data = cls.make_empty_block(block_num)
-            if data is None:
-                raise MockDataProviderException("No more blocks to serve")
+
         return data
 
     @classmethod
