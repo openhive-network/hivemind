@@ -1153,6 +1153,28 @@
                 "tester1"
               ],
               "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester3\",\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"reset_all_lists\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
               "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"blog\"]}]"
             }
           },
