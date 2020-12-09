@@ -93,7 +93,7 @@ if __name__ == "__main__":
             'prometheus-client',
             'psutil',
             'atomic',
-            'python-dateutil'
+            'python-dateutil>=2.8.1'
         ],
         extras_require={
             'dev': [
