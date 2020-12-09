@@ -330,11 +330,10 @@ async def get_discussions_by_feed_impl(db, account: str, start_author: str = '',
 
 @return_error_info
 @nested_query_compat
-async def get_discussions_by_feed(context, tag: str = None, start_author: str = '',
+async def get_discussions_by_feed(context, tag: str, start_author: str = '',
                                   start_permlink: str = '', limit: int = 20,
                                   truncate_body: int = 0, filter_tags: list = None, observer:str=None):
     """Retrieve account's personalized feed."""
-    assert tag, '`tag` cannot be blank'
     assert not filter_tags, 'filter_tags not supported'
     return await get_discussions_by_feed_impl(
         context['db'],
@@ -346,21 +345,20 @@ async def get_discussions_by_feed(context, tag: str = None, start_author: str = 
 
 @return_error_info
 @nested_query_compat
-async def get_discussions_by_comments(context, start_author: str = None, start_permlink: str = '',
+async def get_discussions_by_comments(context, start_author: str, start_permlink: str = '',
                                       limit: int = 20, truncate_body: int = 0,
                                       filter_tags: list = None):
     """Get comments by made by author."""
-    assert start_author, '`start_author` cannot be blank'
     assert not filter_tags, 'filter_tags not supported'
-    valid_account(start_author)
-    valid_permlink(start_permlink, allow_empty=True)
-    valid_limit(limit, 100, 20)
+    start_author = valid_account(start_author)
+    start_permlink = valid_permlink(start_permlink, allow_empty=True)
+    limit = valid_limit(limit, 100, 20)
 
     posts = []
     db = context['db']
 
-    sql = " SELECT * FROM condenser_get_discussions_by_comments( '{}', '{}', {} ) ".format( start_author, start_permlink, limit )
-    result = await db.query_all(sql)
+    sql = "SELECT * FROM bridge_get_account_posts_by_comments( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+    result = await db.query_all(sql, account=start_author, author=start_author if start_permlink else '', permlink=start_permlink, limit=limit)
 
     for row in result:
         row = dict(row)
@@ -372,7 +370,7 @@ async def get_discussions_by_comments(context, start_author: str = None, start_p
 
 @return_error_info
 @nested_query_compat
-async def get_replies_by_last_update(context, start_author: str = None, start_permlink: str = '',
+async def get_replies_by_last_update(context, start_author: str, start_permlink: str = '',
                                      limit: int = 20, truncate_body: int = 0):
     """Get all replies made to any of author's posts."""
     # despite the name time of last edit is not used, posts ranked by creation time (that is, their id)
@@ -390,7 +388,7 @@ async def get_replies_by_last_update(context, start_author: str = None, start_pe
 
 @return_error_info
 @nested_query_compat
-async def get_discussions_by_author_before_date(context, author: str = None, start_permlink: str = '',
+async def get_discussions_by_author_before_date(context, author: str, start_permlink: str = '',
                                                 before_date: str = '', limit: int = 10):
     """Retrieve account's blog posts, without reblogs.
 
@@ -399,7 +397,6 @@ async def get_discussions_by_author_before_date(context, author: str = None, sta
     get_discussions_by_blog but does NOT serve reblogs.
     """
     # pylint: disable=invalid-name,unused-argument
-    assert author, '`author` cannot be blank'
     return await cursor.get_by_blog_without_reblog(
         context['db'],
         valid_account(author),
