@@ -278,7 +278,7 @@ CREATE OR REPLACE FUNCTION update_account_reputations(
 AS $BODY$
 DECLARE
   __truncate_interval interval := '30 days'::interval;
-  __truncate_block_count INT := 30*24*1200*3; --- 30 days
+  __truncate_block_count INT := 1*24*1200*3; --- 1day
 
 BEGIN
   UPDATE hive_accounts urs
