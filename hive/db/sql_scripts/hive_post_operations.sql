@@ -156,9 +156,11 @@ LANGUAGE plpgsql
 AS
 $function$
 DECLARE
+  __account_id INT;
   __post_id INT;
 BEGIN
 
+  __account_id = find_account_id( _author, False );
   __post_id = find_comment_id( _author, _permlink, False );
 
   IF __post_id = 0 THEN
@@ -170,9 +172,8 @@ BEGIN
   (
       SELECT max( hps.counter_deleted ) + 1
       FROM hive_posts hps
-      INNER JOIN hive_accounts ha ON hps.author_id = ha.id
       INNER JOIN hive_permlink_data hpd ON hps.permlink_id = hpd.id
-      WHERE ha.name = _author AND hpd.permlink = _permlink
+      WHERE hps.author_id = __account_id AND hpd.permlink = _permlink
   )
   ,block_num = _block_num
   ,active = _date
@@ -182,7 +183,7 @@ BEGIN
   WHERE post_id = __post_id;
 
   DELETE FROM hive_feed_cache
-  WHERE post_id = __post_id;
+  WHERE post_id = __post_id AND account_id = __account_id;
 
 END
 $function$
