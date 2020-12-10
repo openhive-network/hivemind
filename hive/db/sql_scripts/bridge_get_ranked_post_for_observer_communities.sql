@@ -6,7 +6,6 @@ $function$
 DECLARE
   __post_id INT;
   __account_id INT;
-  __subscription_count INT;
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __account_id = find_account_id( _observer, True );
@@ -199,9 +198,9 @@ BEGIN
   FROM
   (
       SELECT
-          hp1.id
-        , ( hp1.payout + hp1.pending_payout ) as all_payout,
-        blacklisted_by_observer_view.source as blacklist_source
+          hp1.id,
+          ( hp1.payout + hp1.pending_payout ) as all_payout,
+          blacklisted_by_observer_view.source as blacklist_source
       FROM
           hive_posts hp1
           JOIN hive_subscriptions hs ON hp1.community_id = hs.community_id
@@ -413,9 +412,9 @@ BEGIN
   FROM
   (
       SELECT
-          hp1.id
-        , hp1.sc_trend,
-        blacklisted_by_observer_view.source as source
+          hp1.id,
+          hp1.sc_trend,
+          blacklisted_by_observer_view.source as source
       FROM
           hive_posts hp1
           JOIN hive_subscriptions hs ON hp1.community_id = hs.community_id
