@@ -131,9 +131,9 @@ BEGIN
   FROM
   (
       SELECT
-          hp1.id
-        , hp1.sc_hot as hot,
-        blacklisted_by_observer_view.source as source
+          hp1.id,
+          hp1.sc_hot as hot,
+          blacklisted_by_observer_view.source as source
       FROM
           hive_posts hp1
           LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp1.author_id)
@@ -209,9 +209,9 @@ BEGIN
   FROM
   (
       SELECT
-          hp1.id
-        , ( hp1.payout + hp1.pending_payout ) as all_payout,
-        blacklisted_by_observer_view.source as source
+          hp1.id,
+          ( hp1.payout + hp1.pending_payout ) as all_payout,
+          blacklisted_by_observer_view.source as source
       FROM
           hive_posts hp1
           JOIN hive_accounts_view ha ON hp1.author_id = ha.id
@@ -287,9 +287,9 @@ BEGIN
   FROM
   (
       SELECT
-          hp1.id
-        , ( hp1.payout + hp1.pending_payout ) as all_payout,
-        blacklisted_by_observer_view.source as source
+          hp1.id,
+          ( hp1.payout + hp1.pending_payout ) as all_payout,
+          blacklisted_by_observer_view.source as source
       FROM
           hive_posts hp1
           LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp1.author_id)
@@ -367,9 +367,9 @@ BEGIN
   FROM
   (
       SELECT
-          hp1.id
-        , ( hp1.payout + hp1.pending_payout ) as all_payout,
-        blacklisted_by_observer_view.source as source
+          hp1.id,
+          ( hp1.payout + hp1.pending_payout ) as all_payout,
+          blacklisted_by_observer_view.source as source
       FROM
           hive_posts hp1
           LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp1.author_id)
@@ -446,9 +446,9 @@ BEGIN
   FROM
   (
       SELECT
-          hp1.id
-        , hp1.promoted as promoted,
-        blacklisted_by_observer_view.source as source
+          hp1.id,
+          hp1.promoted as promoted,
+          blacklisted_by_observer_view.source as source
       FROM
           hive_posts hp1
           LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp1.author_id)
@@ -524,9 +524,9 @@ BEGIN
   FROM
   (
       SELECT
-          hp1.id
-        , hp1.sc_trend as trend,
-        blacklisted_by_observer_view.source as source
+          hp1.id,
+          hp1.sc_trend as trend,
+          blacklisted_by_observer_view.source as source
       FROM
          hive_posts hp1
          LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp1.author_id)
@@ -537,7 +537,6 @@ BEGIN
       LIMIT _limit
   ) as trends
   JOIN hive_posts_view hp ON hp.id = trends.id
-  WHERE (CASE WHEN _observer IS NOT NULL THEN NOT EXISTS (SELECT 1 FROM muted_accounts_view WHERE observer = _observer AND muted = hp.author) ELSE true END)
   ORDER BY trends.trend DESC, trends.id DESC
   LIMIT _limit;
 END
