@@ -143,7 +143,7 @@ class Follow(DbAdapterHolder):
                 INNER JOIN hive_accounts ha_flg ON hf.following = ha_flg.id
                 WHERE
                     ha_flr.name = {}
-                    AND hf.following = (SELECT id FROM hive_accounts WHERE name = 'null')
+                    AND ha_flg.name = 'null'
             """.format(follower)
             data = cls.db.query_all(sql)
             for row in data:
