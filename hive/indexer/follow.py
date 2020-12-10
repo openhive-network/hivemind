@@ -33,7 +33,31 @@ class Follow(DbAdapterHolder):
 
     @classmethod
     def get_mass_data_for_follower(cls, follower, state, block_num):
-        def sql_to_dict(sql):
+        def make_query(follower, additional_condition = None):
+            """ Construct query for mass data operations for given follower """
+            sql = """
+                SELECT
+                    ha_flr.name as follower,
+                    ha_flg.name as following,
+                    hf.created_at,
+                    hf.state,
+                    hf.blacklisted,
+                    hf.follow_blacklists,
+                    hf.follow_muted,
+                    hf.block_num
+                FROM
+                    hive_follows hf
+                INNER JOIN hive_accounts ha_flr ON hf.follower = ha_flr.id
+                INNER JOIN hive_accounts ha_flg ON hf.following = ha_flg.id
+                WHERE
+                    ha_flr.name = {}
+            """.format(follower)
+            if additional_condition is not None and isinstance(additional_condition, str):
+                sql += " " + additional_condition
+            return sql
+
+        def sql_to_follow_items_to_flush(sql, process_following_null = False):
+            """ Convert data from sql query to follow_items_to_flush items """
             data = cls.db.query_all(sql)
             for row in data:
                 flr = escape_characters(row['follower'])
@@ -41,135 +65,41 @@ class Follow(DbAdapterHolder):
                 k = '{}/{}'.format(flr, flg)
                 if k in cls.follow_items_to_flush:
                     cls.follow_items_to_flush[k]['idx'] = cls.idx
-                    if state in (10, 11, 14):
+                    if state in (10, 11, 14) and not process_following_null:
                         cls.follow_items_to_flush[k]['state'] = 0
-
-                    if state in (9, 14):
+                    if state in (9, 14) and not process_following_null:
                         cls.follow_items_to_flush[k]['blacklisted'] = False
-
                     if state in (12, 14):
-                        cls.follow_items_to_flush[k]['follow_blacklists'] = False
-
+                        cls.follow_items_to_flush[k]['follow_blacklists'] = process_following_null
                     if state in (13, 14):
-                        cls.follow_items_to_flush[k]['follow_muted'] = False
+                        cls.follow_items_to_flush[k]['follow_muted'] = process_following_null
                     cls.follow_items_to_flush[k]['block_num'] = block_num
                 else:
                     cls.follow_items_to_flush[k] = dict(
                         idx=cls.idx,
                         flr=flr,
                         flg=flg,
-                        state=0 if state in (10, 11, 14) else row['state'],
-                        blacklisted=False if state in (9, 14) else row['blacklisted'],
-                        follow_blacklists=False if state in (12, 14) else row['follow_blacklists'],
-                        follow_muted=False if state in (13, 14) else row['follow_muted'],
+                        state=0 if state in (10, 11, 14) and not process_following_null else row['state'],
+                        blacklisted=False if state in (9, 14) and not process_following_null else row['blacklisted'],
+                        follow_blacklists=process_following_null if state in (12, 14) else row['follow_blacklists'],
+                        follow_muted=process_following_null if state in (13, 14) else row['follow_muted'],
                         at=row['created_at'],
                         block_num=block_num
                     )
                 cls.idx += 1
 
         if state in (9, 12, 13, 14):
-            sql = """
-                SELECT
-                    ha_flr.name as follower,
-                    ha_flg.name as following,
-                    hf.created_at,
-                    hf.state,
-                    hf.blacklisted,
-                    hf.follow_blacklists,
-                    hf.follow_muted,
-                    hf.block_num
-                FROM
-                    hive_follows hf
-                INNER JOIN hive_accounts ha_flr ON hf.follower = ha_flr.id
-                INNER JOIN hive_accounts ha_flg ON hf.following = ha_flg.id
-                WHERE
-                    ha_flr.name = {}
-            """.format(follower)
-            sql_to_dict(sql)
+            sql = make_query(follower)
+            sql_to_follow_items_to_flush(sql)
         if state == 10:
-            sql = """
-                SELECT
-                    ha_flr.name as follower,
-                    ha_flg.name as following,
-                    hf.created_at,
-                    hf.state,
-                    hf.blacklisted,
-                    hf.follow_blacklists,
-                    hf.follow_muted,
-                    hf.block_num
-                FROM
-                    hive_follows hf
-                INNER JOIN hive_accounts ha_flr ON hf.follower = ha_flr.id
-                INNER JOIN hive_accounts ha_flg ON hf.following = ha_flg.id
-                WHERE
-                    ha_flr.name = {}
-                    AND hf.state = 1
-            """.format(follower)
-            sql_to_dict(sql)
+            sql = make_query(follower, "AND hf.state = 1")
+            sql_to_follow_items_to_flush(sql)
         if state == 11:
-            sql = """
-                SELECT
-                    ha_flr.name as follower,
-                    ha_flg.name as following,
-                    hf.created_at,
-                    hf.state,
-                    hf.blacklisted,
-                    hf.follow_blacklists,
-                    hf.follow_muted,
-                    hf.block_num
-                FROM
-                    hive_follows hf
-                INNER JOIN hive_accounts ha_flr ON hf.follower = ha_flr.id
-                INNER JOIN hive_accounts ha_flg ON hf.following = ha_flg.id
-                WHERE
-                    ha_flr.name = {}
-                    AND hf.state = 2
-            """.format(follower)
-            sql_to_dict(sql)
+            sql = make_query(follower, "AND hf.state = 2")
+            sql_to_follow_items_to_flush(sql)
         if state in (12, 13, 14):
-            sql = """
-                SELECT
-                    ha_flr.name as follower,
-                    ha_flg.name as following,
-                    hf.created_at,
-                    hf.state,
-                    hf.blacklisted,
-                    hf.follow_blacklists,
-                    hf.follow_muted,
-                    hf.block_num
-                FROM
-                    hive_follows hf
-                INNER JOIN hive_accounts ha_flr ON hf.follower = ha_flr.id
-                INNER JOIN hive_accounts ha_flg ON hf.following = ha_flg.id
-                WHERE
-                    ha_flr.name = {}
-                    AND ha_flg.name = 'null'
-            """.format(follower)
-            data = cls.db.query_all(sql)
-            for row in data:
-                flr = escape_characters(row['follower'])
-                flg = escape_characters(row['following'])
-                k = '{}/{}'.format(flr, flg)
-                if k in cls.follow_items_to_flush:
-                    cls.follow_items_to_flush[k]['idx'] = cls.idx
-                    if state in (12, 14):
-                        cls.follow_items_to_flush[k]['follow_blacklists'] = True
-                    if state in (13, 14):
-                        cls.follow_items_to_flush[k]['follow_muted'] = True
-                    cls.follow_items_to_flush[k]['block_num'] = block_num
-                else:
-                    cls.follow_items_to_flush[k] = dict(
-                        idx=cls.idx,
-                        flr=flr,
-                        flg=flg,
-                        state=row['state'],
-                        blacklisted=row['blacklisted'],
-                        follow_blacklists=True if state in (12, 14) else row['follow_blacklists'],
-                        follow_muted=True if state in (13, 14) else row['follow_muted'],
-                        at=row['created_at'],
-                        block_num=block_num
-                    )
-                cls.idx += 1
+            sql = make_query(follower, "AND ha_flg.name = 'null'")
+            sql_to_follow_items_to_flush(sql, True)
 
     @classmethod
     def follow_op(cls, account, op_json, date, block_num):
