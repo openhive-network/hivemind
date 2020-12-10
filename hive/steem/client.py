@@ -116,9 +116,9 @@ class SteemClient:
         return new_vops_provider
 
 
-    def stream_blocks(self, start_from, trail_blocks=0, max_gap=100, do_stale_block_check=True):
+    def stream_blocks(self, start_from, breaker, trail_blocks=0, max_gap=100, do_stale_block_check=True):
         """Stream blocks. Returns a generator."""
-        return BlockStream.stream(self, start_from, trail_blocks, max_gap, do_stale_block_check)
+        return BlockStream.stream(self, start_from, breaker, trail_blocks, max_gap, do_stale_block_check)
 
     def _gdgp(self):
         ret = self.__exec('get_dynamic_global_properties')
@@ -185,7 +185,7 @@ class SteemClient:
             return "%.6f" % price
         return "0"
 
-    def get_blocks_range(self, lbound, ubound):
+    def get_blocks_range(self, lbound, ubound, breaker):
         """Retrieves blocks in the range of [lbound, ubound)."""
         block_nums = range(lbound, ubound)
         blocks = {}
@@ -193,6 +193,8 @@ class SteemClient:
         batch_params = [{'block_num': i} for i in block_nums]
         idx = 0
         for result in self.__exec_batch('get_block', batch_params):
+            if not breaker():
+                return []
             block_num = batch_params[idx]['block_num']
             if 'block' in result:
                 block = result['block']
