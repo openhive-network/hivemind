@@ -54,16 +54,37 @@ class GitRevisionProvider(object):
 GIT_REVISION = GitRevisionProvider.provide_git_revision()
 SQL_SCRIPTS_PATH = 'hive/db/sql_scripts/'
 
+def list_diff(list1, list2):
+    """ Compare two lists passed as arguments and return diff """
+    assert isinstance(list1, list), "First argument is not a list"
+    assert isinstance(list2, list), "Second argument is not a list"
+    diff = [i for i in list1 + list2 if i not in list1 or i not in list2]
+    return diff
+
 def get_sql_scripts():
     from os import listdir
     from os.path import isfile, join
-    return [join(SQL_SCRIPTS_PATH, f) for f in listdir(SQL_SCRIPTS_PATH) if isfile(join(SQL_SCRIPTS_PATH, f))]
+    files = [join(SQL_SCRIPTS_PATH, f) for f in listdir(SQL_SCRIPTS_PATH) if isfile(join(SQL_SCRIPTS_PATH, f))]
+    # to count sql files in SQL_SCRIPTS_PATH and compare with list provided in file_order_list.txt
+    sql_files = [f for f in files if f.endswith(".sql")]
+    # read file_order_list.txt
+    file_list = []
+    with open(join(SQL_SCRIPTS_PATH, "file_order_list.txt"), "r") as file_list_file:
+        file_list = file_list_file.readlines()
+    file_list = [join(SQL_SCRIPTS_PATH, file_name.strip()) for file_name in file_list]
+    # check if sql count in SQL_SCRIPTS_PATH match count from file_order_list.txt
+    if len(sql_files) != len(file_list):
+        print("WARNING: File count in `file_order_list.txt` is different than sql file count in {}".format(SQL_SCRIPTS_PATH))
+        print("Detected differences:")
+        print(list_diff(sql_files, file_list))
+
+    return files
 
 if __name__ == "__main__":
     setup(
         name='hivemind',
         version=VERSION + "+" + GIT_REVISION,
-        description='Developer-friendly microservice powering social networks on the Steem blockchain.',
+        description='Developer-friendly microservice powering social networks on the Hive blockchain.',
         long_description=open('README.md').read(),
         packages=find_packages(exclude=['scripts']),
         data_files=[(SQL_SCRIPTS_PATH, get_sql_scripts())],
