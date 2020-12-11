@@ -65,4 +65,3 @@ class Reputations(DbAdapterHolder):
         log.info("Written total reputation data records: {}".format(self._total_values))
 
         return n
-

@@ -41,8 +41,8 @@ class Conf():
         add('--prometheus-port', type=int, env_var='PROMETHEUS_PORT', required=False, help='if specified, runs prometheus deamon on specified port, which provide statistic and performance data')
 
         # sync
-        add('--max-workers', type=int, env_var='MAX_WORKERS', help='max workers for batch requests', default=4)
-        add('--max-batch', type=int, env_var='MAX_BATCH', help='max chunk size for batch requests', default=50)
+        add('--max-workers', type=int, env_var='MAX_WORKERS', help='max workers for batch requests', default=6)
+        add('--max-batch', type=int, env_var='MAX_BATCH', help='max chunk size for batch requests', default=35)
         add('--trail-blocks', type=int, env_var='TRAIL_BLOCKS', help='number of blocks to trail head by', default=2)
         add('--sync-to-s3', type=strtobool, env_var='SYNC_TO_S3', help='alternative healthcheck for background sync service', default=False)
 

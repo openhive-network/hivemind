@@ -11,6 +11,7 @@ from hive.db.db_state import DbState
 
 from hive.utils.timer import Timer
 from hive.steem.block.stream import MicroForkException
+from hive.steem.massive_blocks_data_provider import MassiveBlocksDataProvider
 
 from hive.indexer.blocks import Blocks
 from hive.indexer.accounts import Accounts
@@ -36,6 +37,9 @@ from datetime import datetime
 
 from signal import signal, SIGINT, SIGTERM
 from atomic import AtomicLong
+from threading import Thread
+from collections import deque
+
 
 log = logging.getLogger(__name__)
 
@@ -43,6 +47,7 @@ CONTINUE_PROCESSING = True
 
 EXCEPTION_THROWN = AtomicLong(0)
 FINISH_SIGNAL_DURING_SYNC = AtomicLong(0)
+
 
 def finish_signals_handler(signal, frame):
     global FINISH_SIGNAL_DURING_SYNC
@@ -70,73 +75,25 @@ def prepare_vops(vops_by_block):
 
     return preparedVops
 
-def put_to_queue( data_queue, value ):
-    while can_continue_thread():
-        try:
-            data_queue.put( value, True, 1)
-            return
-        except queue.Full:
-            continue
-
-def _block_provider(node, queue, lbound, ubound, chunk_size):
+def _blocks_data_provider(blocks_data_provider):
     try:
-        num = 0
-        count = ubound - lbound
-        log.info("[SYNC] start block %d, +%d to sync", lbound, count)
-        timer = Timer(count, entity='block', laps=['rps', 'wps'])
-        while can_continue_thread() and lbound < ubound:
-            to = min(lbound + chunk_size, ubound)
-            timer.batch_start()
-            blocks = node.get_blocks_range(lbound, to)
-            lbound = to
-            timer.batch_lap()
-            put_to_queue( queue, blocks )
-            num = num + 1
-        return num
-    except Exception:
-        log.exception("Exception caught during fetching blocks")
-        set_exception_thrown()
+        futures = blocks_data_provider.start()
+
+        for future in futures:
+            exception = future.exception()
+            if exception:
+                raise exception
+    except:
+        log.exception("Exception caught during fetching blocks data")
         raise
 
-def _vops_provider(conf, node, queue, lbound, ubound, chunk_size):
-    try:
-        num = 0
-        count = ubound - lbound
-        log.info("[SYNC] start vops %d, +%d to sync", lbound, count)
-        timer = Timer(count, entity='vops-chunk', laps=['rps', 'wps'])
-
-        while can_continue_thread() and lbound < ubound:
-            to = min(lbound + chunk_size, ubound)
-            timer.batch_start()
-            vops = node.enum_virtual_ops(conf, lbound, to)
-            preparedVops = prepare_vops(vops)
-
-            lbound = to
-            timer.batch_lap()
-            put_to_queue( queue, preparedVops )
-            num = num + 1
-        return num
-    except Exception:
-        log.exception("Exception caught during fetching vops...")
-        set_exception_thrown()
-        raise
-
-def get_from_queue( data_queue ):
-    while can_continue_thread():
-        try:
-            ret =  data_queue.get(True, 1)
-            data_queue.task_done()
-        except queue.Empty:
-            continue
-        return ret
-    return []
-
-def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size):
+def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
     from hive.utils.stats import minmax
     is_debug = log.isEnabledFor(10)
     num = 0
     time_start = OPSM.start()
     rate = {}
+    LIMIT_FOR_PROCESSED_BLOCKS = 1000;
 
     rate = minmax(rate, 0, 1.0, 0)
 
@@ -148,8 +105,9 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
         otm = OPSM.log_global("All operations present in the processed blocks")
         ttm = ftm + otm + wtm
         log.info(f"Elapsed time: {stop :.4f}s. Calculated elapsed time: {ttm :.4f}s. Difference: {stop - ttm :.4f}s")
-        log.info(f"Highest block processing rate: {rate['max'] :.4f} bps. From: {rate['max_from']} To: {rate['max_to']}")
-        log.info(f"Lowest block processing rate: {rate['min'] :.4f} bps. From: {rate['min_from']} To: {rate['min_to']}")
+        if rate:
+            log.info(f"Highest block processing rate: {rate['max'] :.4f} bps. From: {rate['max_from']} To: {rate['max_to']}")
+            log.info(f"Lowest block processing rate: {rate['min'] :.4f} bps. From: {rate['min_from']} To: {rate['min_to']}")
         log.info("=== TOTAL STATS ===")
 
     try:
@@ -157,45 +115,37 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
 
         while lbound < ubound:
-            wait_time_1 = WSM.start()
-            if blocksQueue.empty() and can_continue_thread():
-                log.info("Awaiting any block to process...")
-
-            blocks = []
-            if not blocksQueue.empty() or can_continue_thread():
-                blocks = get_from_queue( blocksQueue )
-            WSM.wait_stat('block_consumer_block', WSM.stop(wait_time_1))
-
-            wait_time_2 = WSM.start()
-            if vopsQueue.empty() and can_continue_thread():
-                log.info("Awaiting any vops to process...")
-
-            preparedVops = []
-            if not vopsQueue.empty() or can_continue_thread():
-                preparedVops = get_from_queue(vopsQueue)
-            WSM.wait_stat('block_consumer_vop', WSM.stop(wait_time_2))
-
-            to = min(lbound + chunk_size, ubound)
-
-            timer.batch_start()
+            preparedVops = {}
+            number_of_blocks_to_proceed = min( [ LIMIT_FOR_PROCESSED_BLOCKS, ubound - lbound  ] )
+            time_before_waiting_for_data = perf()
+            vops_and_blocks = blocks_data_provider.get( number_of_blocks_to_proceed )
 
             if not can_continue_thread():
                 break;
 
+            assert len(vops_and_blocks[ 'vops' ]) == number_of_blocks_to_proceed
+            assert len(vops_and_blocks[ 'blocks' ]) == number_of_blocks_to_proceed
+
+            to = min(lbound + number_of_blocks_to_proceed, ubound)
+            timer.batch_start()
+
+            for vop_nr in range( number_of_blocks_to_proceed):
+                preparedVops[ vop_nr + lbound ] = vops_and_blocks[ 'vops' ][ vop_nr ]
+
             block_start = perf()
-            Blocks.process_multi(blocks, preparedVops, is_initial_sync)
+            Blocks.process_multi(vops_and_blocks['blocks'], preparedVops, is_initial_sync)
             block_end = perf()
 
             timer.batch_lap()
-            timer.batch_finish(len(blocks))
+            timer.batch_finish(len(vops_and_blocks[ 'blocks' ]))
             time_current = perf()
 
             prefix = ("[INITIAL SYNC] Got block %d @ %s" % (
-                to - 1, blocks[-1]['timestamp']))
+                to - 1, vops_and_blocks['blocks'][-1]['timestamp']))
             log.info(timer.batch_status(prefix))
             log.info("[INITIAL SYNC] Time elapsed: %fs", time_current - time_start)
             log.info("[INITIAL SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
-            rate = minmax(rate, len(blocks), time_current - wait_time_1, lbound)
+            rate = minmax(rate, len(vops_and_blocks['blocks']), time_current - time_before_waiting_for_data, lbound)
 
             if block_end - block_start > 1.0 or is_debug:
                 otm = OPSM.log_current("Operations present in the processed blocks")
@@ -212,7 +162,7 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
 
             num = num + 1
 
-            if not can_continue_thread() and blocksQueue.empty() and vopsQueue.empty():
+            if not can_continue_thread():
                 break
     except Exception:
         log.exception("Exception caught during processing blocks...")
@@ -224,28 +174,33 @@ def _block_consumer(node, blocksQueue, vopsQueue, is_initial_sync, lbound, uboun
     return num
 
 def _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size):
-    blocksQueue = queue.Queue(maxsize=10)
-    vopsQueue = queue.Queue(maxsize=10)
+    blocksQueue = queue.Queue(maxsize=10000)
+    vopsQueue = queue.Queue(maxsize=10000)
     old_sig_int_handler = signal(SIGINT, finish_signals_handler)
     old_sig_term_handler = signal(SIGTERM, finish_signals_handler)
 
+    massive_blocks_data_provier = MassiveBlocksDataProvider(
+          self._conf
+        , self._steem
+        , self._conf.get( 'max_workers' )
+        , self._conf.get( 'max_workers' )
+        , self._conf.get( 'max_batch' )
+        , lbound
+        , ubound
+        , can_continue_thread
+    )
     with ThreadPoolExecutor(max_workers = 4) as pool:
-        block_provider_future = pool.submit(_block_provider, self._steem, blocksQueue, lbound, ubound, chunk_size)
-        vops_provider_future = pool.submit(_vops_provider, self._conf, self._steem, vopsQueue, lbound, ubound, chunk_size)
-        blockConsumerFuture = pool.submit(_block_consumer, self._steem, blocksQueue, vopsQueue, is_initial_sync, lbound, ubound, chunk_size)
+        block_data_provider_future = pool.submit(_blocks_data_provider, massive_blocks_data_provier)
+        blockConsumerFuture = pool.submit(_block_consumer, massive_blocks_data_provier, is_initial_sync, lbound, ubound)
 
         consumer_exception = blockConsumerFuture.exception()
-        block_exception = block_provider_future.exception()
-        vops_exception = vops_provider_future.exception()
+        block_data_provider_future = block_data_provider_future.exception()
 
         if consumer_exception:
             raise consumer_exception
 
-        if block_exception:
+        if block_data_provider_future:
             raise block_exception
-
-        if vops_exception:
-            raise vops_exception
 
     signal(SIGINT, old_sig_int_handler)
     signal(SIGTERM, old_sig_term_handler)
@@ -346,7 +301,7 @@ class Sync:
         if self._conf.get('test_max_block'):
             max_block_limit = self._conf.get('test_max_block')
             do_stale_block_check = False
-            # Correct max_block_limit by trail_blocks 
+            # Correct max_block_limit by trail_blocks
             max_block_limit = max_block_limit - trail_blocks
             log.info("max_block_limit corrected by specified trail_blocks number: %d is: %d", trail_blocks, max_block_limit)
 
@@ -403,7 +358,7 @@ class Sync:
             return
 
         if is_initial_sync:
-            _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size)
+            _node_data_provider(self, is_initial_sync, lbound, ubound, self._conf.get("max_batch") )
             return
 
         log.info("[FAST SYNC] start block %d, +%d to sync", lbound, count)
