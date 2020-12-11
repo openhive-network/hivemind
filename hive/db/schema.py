@@ -7,6 +7,7 @@ from sqlalchemy.types import CHAR
 from sqlalchemy.types import VARCHAR
 from sqlalchemy.types import TEXT
 from sqlalchemy.types import BOOLEAN
+from hive.db.constants import SQL_FILE_ORDER_LIST
 
 import logging
 log = logging.getLogger(__name__)
@@ -15,7 +16,6 @@ log = logging.getLogger(__name__)
 
 # [DK] we changed and removed some tables so i upgraded DB_VERSION to 18
 DB_VERSION = 18
-SQL_FILE_ORDER_LIST = "file_order_list.txt"
 
 def build_metadata():
     """Build schema def with SqlAlchemy"""
