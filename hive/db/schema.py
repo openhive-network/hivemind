@@ -15,6 +15,7 @@ log = logging.getLogger(__name__)
 
 # [DK] we changed and removed some tables so i upgraded DB_VERSION to 18
 DB_VERSION = 18
+SQL_FILE_ORDER_LIST = "file_order_list.txt"
 
 def build_metadata():
     """Build schema def with SqlAlchemy"""
@@ -636,7 +637,7 @@ def execute_sql_script_from_list(db):
     dir_path = join(dir_path, "sql_scripts")
 
     file_list = []
-    with open(join(dir_path, "file_order_list.txt"), "r") as f:
+    with open(join(dir_path, SQL_FILE_ORDER_LIST), "r") as f:
         file_list = f.readlines()
     file_list = [file.strip() for file in file_list]
 

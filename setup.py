@@ -5,6 +5,8 @@ import os
 from setuptools import find_packages
 from setuptools import setup
 
+from hive.db.schema import SQL_FILE_ORDER_LIST
+
 assert sys.version_info[0] == 3 and sys.version_info[1] >= 6, "hive requires Python 3.6 or newer"
 
 VERSION = '0.0.1'
@@ -62,23 +64,30 @@ def list_diff(list1, list2):
     return diff
 
 def get_sql_scripts():
-    from os import listdir
-    from os.path import isfile, join
-    files = [join(SQL_SCRIPTS_PATH, f) for f in listdir(SQL_SCRIPTS_PATH) if isfile(join(SQL_SCRIPTS_PATH, f))]
+    files = {}
+    for path, _, file_names in os.walk(SQL_SCRIPTS_PATH):
+        for file_name in file_names:
+            if path in files:
+                files[path].append(os.path.join(path, file_name))
+            else:
+                files[path] = [os.path.join(path, file_name)]
     # to count sql files in SQL_SCRIPTS_PATH and compare with list provided in file_order_list.txt
-    sql_files = [f for f in files if f.endswith(".sql")]
+    sql_files = []
+    for _, sql_files_paths in files.items():
+        for sql_files_path in sql_files_paths:
+            if sql_files_path.endswith(".sql"):
+                sql_files.append(sql_files_path)
     # read file_order_list.txt
     file_list = []
-    with open(join(SQL_SCRIPTS_PATH, "file_order_list.txt"), "r") as file_list_file:
+    with open(os.path.join(SQL_SCRIPTS_PATH, SQL_FILE_ORDER_LIST), "r") as file_list_file:
         file_list = file_list_file.readlines()
-    file_list = [join(SQL_SCRIPTS_PATH, file_name.strip()) for file_name in file_list]
+    file_list = [os.path.join(SQL_SCRIPTS_PATH, file_name.strip()) for file_name in file_list]
     # check if sql count in SQL_SCRIPTS_PATH match count from file_order_list.txt
     if len(sql_files) != len(file_list):
-        print("WARNING: File count in `file_order_list.txt` is different than sql file count in {}".format(SQL_SCRIPTS_PATH))
+        print("WARNING: File count in `{}` is different than sql file count in {}".format(SQL_FILE_ORDER_LIST, SQL_SCRIPTS_PATH))
         print("Detected differences:")
         print(list_diff(sql_files, file_list))
-
-    return files
+    return [(k, v) for k,v in files.items()]
 
 if __name__ == "__main__":
     setup(
@@ -87,7 +96,7 @@ if __name__ == "__main__":
         description='Developer-friendly microservice powering social networks on the Hive blockchain.',
         long_description=open('README.md').read(),
         packages=find_packages(exclude=['scripts']),
-        data_files=[(SQL_SCRIPTS_PATH, get_sql_scripts())],
+        data_files=get_sql_scripts(),
         setup_requires=[
             'pytest-runner',
         ],
