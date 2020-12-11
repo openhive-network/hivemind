@@ -246,15 +246,40 @@ END
 $BODY$
 ;
 
-DROP FUNCTION IF EXISTS public.update_account_reputations;
+DROP FUNCTION IF EXISTS truncate_account_reputation_data;
 
-CREATE OR REPLACE FUNCTION public.update_account_reputations(
+CREATE OR REPLACE FUNCTION truncate_account_reputation_data(
+  in _day_limit INTERVAL)
+  RETURNS VOID 
+  LANGUAGE 'plpgsql'
+  VOLATILE 
+AS $BODY$
+DECLARE
+  __block_num_limit INT;
+
+BEGIN
+  __block_num_limit = block_before_head(_day_limit);
+  DELETE FROM hive_reputation_data hpd
+  WHERE hpd.block_num < __block_num_limit
+  ;
+END
+$BODY$
+;
+
+
+DROP FUNCTION IF EXISTS update_account_reputations;
+
+CREATE OR REPLACE FUNCTION update_account_reputations(
   in _first_block_num INTEGER,
   in _last_block_num INTEGER)
   RETURNS VOID 
   LANGUAGE 'plpgsql'
   VOLATILE 
 AS $BODY$
+DECLARE
+  __truncate_interval interval := '30 days'::interval;
+  __truncate_block_count INT := 1*24*1200*3; --- 1day
+
 BEGIN
   UPDATE hive_accounts urs
   SET reputation = ds.reputation,
@@ -274,6 +299,12 @@ BEGIN
   ) ds
   WHERE urs.id = ds.account_id AND (urs.reputation != ds.reputation OR urs.is_implicit != ds.is_implicit)
   ;
+
+  IF _last_block_num IS NULL OR MOD(_last_block_num, __truncate_block_count) = 0 THEN
+    PERFORM truncate_account_reputation_data(__truncate_interval);
+  END IF
+  ;
 END
 $BODY$
 ;
+
