@@ -5,8 +5,6 @@ import os
 from setuptools import find_packages
 from setuptools import setup
 
-from hive.db.schema import SQL_FILE_ORDER_LIST
-
 assert sys.version_info[0] == 3 and sys.version_info[1] >= 6, "hive requires Python 3.6 or newer"
 
 VERSION = '0.0.1'
@@ -55,6 +53,7 @@ class GitRevisionProvider(object):
 
 GIT_REVISION = GitRevisionProvider.provide_git_revision()
 SQL_SCRIPTS_PATH = 'hive/db/sql_scripts/'
+SQL_FILE_ORDER_LIST = "file_order_list.txt"
 
 def list_diff(list1, list2):
     """ Compare two lists passed as arguments and return diff """
