@@ -126,7 +126,7 @@ def valid_tag(tag, allow_empty=False):
     assert re.match('^[a-z0-9-_]+$', tag), 'invalid tag `%s`' % tag
     return tag
 
-def valid_number(num, lbound, ubound, default, name):
+def valid_number(num, default=None, name='integer value', lbound=None, ubound=None):
     """Given a user-provided number, return a valid int, or raise."""
     if not num and num != 0:
       assert default is not None, "%s must be provided" % name
@@ -140,10 +140,13 @@ def valid_number(num, lbound, ubound, default, name):
     return num
 
 def valid_limit(limit, ubound, default):
-    return valid_number(limit, 1, ubound, default, "limit")
+    return valid_number(limit, default, "limit", 1, ubound)
 
 def valid_score(score, ubound, default):
-    return valid_number(score, 0, ubound, default, "score")
+    return valid_number(score, default, "score", 0, ubound)
+
+def valid_truncate(truncate_body):
+    return valid_number(truncate_body, 0, "truncate_body")
 
 def valid_offset(offset, ubound=None):
     """Given a user-provided offset, return a valid int, or raise."""

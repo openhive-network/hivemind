@@ -9,13 +9,11 @@ RETURNS SETOF bridge_api_post
 AS
 $function$
 DECLARE
-  __post_id INTEGER := 0;
+  __author_id INT;
+  __post_id INT;
 BEGIN
-
-  IF _permlink <> '' THEN
-    __post_id = find_comment_id( _author, _permlink, True );
-  END IF;
-
+  __author_id = find_account_id( _author, True );
+  __post_id = find_comment_id( _author, _permlink, _permlink <> '' );
   RETURN QUERY SELECT
       hp.id,
       hp.author,
@@ -56,7 +54,7 @@ BEGIN
       hp.is_muted,
       NULL
     FROM hive_posts_view hp
-    WHERE ( hp.author = _author ) AND ( ( __post_id = 0 ) OR ( hp.id <= __post_id ) ) AND hp.depth = 0
+    WHERE hp.author_id = __author_id AND hp.depth = 0 AND ( ( __post_id = 0 ) OR ( hp.id < __post_id ) )
     ORDER BY hp.id DESC
     LIMIT _limit;
 END

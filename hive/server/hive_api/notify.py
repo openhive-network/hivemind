@@ -56,7 +56,7 @@ async def account_notifications(context, account, min_score=25, last_id=None, li
     db = context['db']
     valid_account(account)
     min_score = valid_score(min_score, 100, 25)
-    last_id = valid_number(last_id, None, None, 0, "last_id")
+    last_id = valid_number(last_id, 0, "last_id")
     limit = valid_limit(limit, 100, 100)
 
     sql_query = "SELECT * FROM account_notifications( (:account)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::BIGINT, (:limit)::SMALLINT )"
@@ -73,7 +73,7 @@ async def post_notifications(context, author:str, permlink:str, min_score:int=25
     valid_account(author)
     valid_permlink(permlink)
     min_score = valid_score(min_score, 100, 25)
-    last_id = valid_number(last_id, None, None, 0, "last_id")
+    last_id = valid_number(last_id, 0, "last_id")
     limit = valid_limit(limit, 100, 100)
 
     sql_query = "SELECT * FROM post_notifications( (:author)::VARCHAR, (:permlink)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::BIGINT, (:limit)::SMALLINT )"
