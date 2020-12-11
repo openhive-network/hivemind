@@ -12,6 +12,7 @@ from hive.server.common.helpers import (
     valid_tag,
     valid_offset,
     valid_limit,
+    valid_truncate,
     valid_follow_type)
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 
@@ -183,6 +184,7 @@ async def get_posts_by_given_sort(context, sort: str, start_author: str = '', st
     limit           = valid_limit(limit, 100, 20),
     tag             = valid_tag(tag, allow_empty=True)
     observer        = valid_account(observer, allow_empty=True)
+    truncate_body   = valid_truncate(truncate_body)
 
     posts = []
     is_community = tag[:5] == 'hive-'
@@ -280,16 +282,16 @@ async def get_comment_discussions_by_payout(context, start_author: str = '', sta
 
 @return_error_info
 @nested_query_compat
-async def get_discussions_by_blog(context, tag: str = None, start_author: str = '',
+async def get_discussions_by_blog(context, tag: str, start_author: str = '',
                                   start_permlink: str = '', limit: int = 20,
                                   truncate_body: int = 0, filter_tags: list = None):
     """Retrieve account's blog posts, including reblogs."""
-    assert tag, '`tag` cannot be blank'
     assert not filter_tags, 'filter_tags not supported'
-    valid_account(tag)
-    valid_account(start_author, allow_empty=True)
-    valid_permlink(start_permlink, allow_empty=True)
-    valid_limit(limit, 100, 20)
+    tag = valid_account(tag)
+    start_author = valid_account(start_author, allow_empty=True)
+    start_permlink = valid_permlink(start_permlink, allow_empty=True)
+    limit = valid_limit(limit, 100, 20)
+    truncate_body = valid_truncate(truncate_body)
 
     sql = "SELECT * FROM bridge_get_account_posts_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, False )"
 
@@ -341,7 +343,7 @@ async def get_discussions_by_feed(context, tag: str, start_author: str = '',
         valid_account(start_author, allow_empty=True),
         valid_permlink(start_permlink, allow_empty=True),
         valid_limit(limit, 100, 20),
-        truncate_body, observer)
+        valid_truncate(truncate_body), observer)
 
 @return_error_info
 @nested_query_compat
@@ -353,6 +355,7 @@ async def get_discussions_by_comments(context, start_author: str, start_permlink
     start_author = valid_account(start_author)
     start_permlink = valid_permlink(start_permlink, allow_empty=True)
     limit = valid_limit(limit, 100, 20)
+    truncate_body = valid_truncate(truncate_body)
 
     posts = []
     db = context['db']
@@ -384,12 +387,12 @@ async def get_replies_by_last_update(context, start_author: str, start_permlink:
         valid_account(start_author),
         valid_permlink(start_permlink, allow_empty=True),
         valid_limit(limit, 100, 20),
-        truncate_body)
+        valid_truncate(truncate_body))
 
 @return_error_info
 @nested_query_compat
 async def get_discussions_by_author_before_date(context, author: str, start_permlink: str = '',
-                                                before_date: str = '', limit: int = 10):
+                                                before_date: str = '', limit: int = 10, truncate_body: int = 0):
     """Retrieve account's blog posts, without reblogs.
 
     NOTE: before_date is completely ignored, and it appears to be broken and/or
@@ -401,7 +404,8 @@ async def get_discussions_by_author_before_date(context, author: str, start_perm
         context['db'],
         valid_account(author),
         valid_permlink(start_permlink, allow_empty=True),
-        valid_limit(limit, 100, 10))
+        valid_limit(limit, 100, 10),
+        valid_truncate(truncate_body))
 
 @return_error_info
 @nested_query_compat
