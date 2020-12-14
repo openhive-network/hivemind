@@ -67,6 +67,7 @@ if __name__ == "__main__":
     with open(html_file, "w") as ofile:
         ofile.write("<html>\n")
         ofile.write("  <head>\n")
+        ofile.write("  <meta charset=\"UTF-8\">\n")
         ofile.write("    <style>\n")
         ofile.write("      table, th, td {\n")
         ofile.write("        border: 1px solid black;\n")
@@ -76,22 +77,37 @@ if __name__ == "__main__":
         ofile.write("        padding: 15px;\n")
         ofile.write("      }\n")
         ofile.write("    </style>\n")
+        ofile.write("    <link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css\">\n")
+        ofile.write("    <script src=\"https://code.jquery.com/jquery-3.5.1.js\" integrity=\"sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=\" crossorigin=\"anonymous\"></script>\n")
+        ofile.write("    <script type=\"text/javascript\" charset=\"utf8\" src=\"https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js\"></script>\n")
+        ofile.write("    <script type=\"text/javascript\" charset=\"utf8\">\n")
+        ofile.write("      $(document).ready( function () {\n")
+        ofile.write("        $('#benchmarks').DataTable();\n")
+        ofile.write("      } );\n")
+        ofile.write("    </script>\n")
         ofile.write("  </head>\n")
         ofile.write("  <body>\n")
-        ofile.write("    <table>\n")
-        ofile.write("      <tr><th>Test name</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th><th>Reference (pure requests call) [ms]</th></tr>\n")
+        ofile.write("    <table id=\"benchmarks\">\n")
+        ofile.write("      <thead>\n")
+        ofile.write("        <tr><th>Test name</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th><th>Reference (pure requests call) [ms]</th></tr>\n")
+        ofile.write("      </thead>\n")
+        ofile.write("      <tbody>\n")
         for name, data in report_data.items():
             dmin = min(data)
             dmax = max(data)
             dmean = mean(data)
             t_start = perf_counter()
             ret = requests.post("{}:{}".format(args.address, args.port), request_data[name])
-            ref_time = perf_counter() - t_start
+            if ret.status_code == 200:
+                ref_time = perf_counter() - t_start
+            else:
+                ref_time = 0.
             if dmean > args.time_threshold:
-                ofile.write("      <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, request_data[name], dmin * 1000, dmax * 1000, dmean * 1000, ref_time * 1000))
+                ofile.write("        <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, request_data[name], dmin * 1000, dmax * 1000, dmean * 1000, ref_time * 1000))
                 above_treshold.append((name, "{:.4f}".format(dmean), request_data[name]))
             else:
-                ofile.write("      <tr><td>{}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, dmin * 1000, dmax * 1000, dmean * 1000, ref_time * 1000))
+                ofile.write("        <tr><td>{}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, dmin * 1000, dmax * 1000, dmean * 1000, ref_time * 1000))
+        ofile.write("      </tbody>\n")
         ofile.write("    </table>\n")
         ofile.write("  </body>\n")
         ofile.write("</html>\n")
