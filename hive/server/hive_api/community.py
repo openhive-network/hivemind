@@ -198,11 +198,11 @@ async def list_community_roles(context, community, last='', limit=50):
     seek = ''
     lrole = None
     if last:
-        sql = "SELECT role_id FROM hive_roles WHERE name = :name"
+        sql = "SELECT role_id FROM hive_roles WHERE account_id = (SELECT id from hive_accounts WHERE name = :name)"
         lrole = await db.query_one(sql, name=last)
         assert lrole is not None, 'invalid start'
-        seek = """AND (a.role_id < :lrole OR
-                      (a.role_id = :lrole AND a.name > :last))"""
+        seek = """AND (r.role_id < :lrole OR
+                      (r.role_id = :lrole AND a.name > :last))"""
 
     sql = """SELECT a.name, r.role_id, r.title FROM hive_roles r
                JOIN hive_accounts a ON r.account_id = a.id
