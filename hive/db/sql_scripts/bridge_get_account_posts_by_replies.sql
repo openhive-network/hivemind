@@ -1,6 +1,4 @@
-DROP FUNCTION IF EXISTS bridge_get_account_posts_by_replies;
-
-CREATE FUNCTION bridge_get_account_posts_by_replies( in _account VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN )
+CREATE OR REPLACE FUNCTION bridge_get_account_posts_by_replies( in _account VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN )
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -61,15 +59,13 @@ BEGIN
       NULL
   FROM
   (
-      SELECT
-          hpr.id as id
-      FROM
-          hive_posts hpr
-          JOIN hive_posts hp1 ON hp1.id = hpr.parent_id
-      WHERE hp1.author_id = __account_id AND hpr.counter_deleted = 0 AND ( __post_id = 0 OR hpr.id < __post_id )
-      --ORDER BY hpr.id + 0 DESC -- commenting out original hack which prevent PSQL from using only PK and scann for matching posts to given author. Seems it changed its "mind"
-      ORDER BY hpr.id DESC
-      LIMIT _limit
+      WITH ar as (SELECT hpr.id as id          
+      FROM hive_posts hpr
+      JOIN hive_posts hp1 ON hp1.id = hpr.parent_id
+      WHERE hp1.author_id = __account_id AND hpr.counter_deleted = 0 AND ( __post_id = 0 OR hpr.id < __post_id ))
+	  SELECT * from ar
+	  ORDER BY ar.id DESC 
+	  LIMIT _limit
   ) as replies
   JOIN hive_posts_view hp ON hp.id = replies.id
   ORDER BY replies.id DESC
