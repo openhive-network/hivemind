@@ -59,11 +59,13 @@ BEGIN
       NULL
   FROM
   (
-      WITH ar as (SELECT hpr.id as id          
+    WITH ar as (SELECT hpr.id as id          
       FROM hive_posts hpr
-      JOIN hive_posts hp1 ON hp1.id = hpr.parent_id
-      WHERE hp1.author_id = __account_id AND hpr.counter_deleted = 0 AND ( __post_id = 0 OR hpr.id < __post_id ))
-	  SELECT * from ar
+      WHERE hpr.parent_id in (select id from hive_posts WHERE hive_posts.author_id = __account_id )
+	        AND (hpr.counter_deleted = 0)
+		    AND (__post_id = 0 OR hpr.id < __post_id )
+	  )	  
+	SELECT * FROM ar	
 	  ORDER BY ar.id DESC 
 	  LIMIT _limit
   ) as replies
