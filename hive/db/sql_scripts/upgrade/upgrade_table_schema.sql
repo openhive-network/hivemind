@@ -15,6 +15,13 @@ CREATE TABLE IF NOT EXISTS hive_db_data_migration
   migration varchar(128) not null
 );
 
+CREATE TABLE IF NOT EXISTS hive_db_vacuum_needed
+(
+  vacuum_needed BOOLEAN NOT NULL
+);
+
+TRUNCATE TABLE hive_db_vacuum_needed;
+
 DO $$
 BEGIN
   EXECUTE 'ALTER DATABASE '||current_database()||' SET join_collapse_limit TO 16';

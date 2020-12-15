@@ -271,7 +271,8 @@ DROP FUNCTION IF EXISTS update_account_reputations;
 
 CREATE OR REPLACE FUNCTION update_account_reputations(
   in _first_block_num INTEGER,
-  in _last_block_num INTEGER)
+  in _last_block_num INTEGER,
+  in _force_data_truncate BOOLEAN)
   RETURNS VOID 
   LANGUAGE 'plpgsql'
   VOLATILE 
@@ -300,7 +301,7 @@ BEGIN
   WHERE urs.id = ds.account_id AND (urs.reputation != ds.reputation OR urs.is_implicit != ds.is_implicit)
   ;
 
-  IF _last_block_num IS NULL OR MOD(_last_block_num, __truncate_block_count) = 0 THEN
+  IF _force_data_truncate or _last_block_num IS NULL OR MOD(_last_block_num, __truncate_block_count) = 0 THEN
     PERFORM truncate_account_reputation_data(__truncate_interval);
   END IF
   ;
