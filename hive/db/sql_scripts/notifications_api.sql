@@ -81,13 +81,13 @@ BEGIN
     , CAST( hnv.score as SMALLINT) as score
   FROM
   (
-    select nv.id, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.score, nv.community, nv.community_title, nv.payload
+    select nv.id, nv.type_id, nv.created_at, nv.src, nv.dst, nv.post_id, nv.score, nv.community, nv.community_title, nv.payload
       from hive_notification_cache nv
   WHERE nv.dst = __account_id  AND nv.block_num > __limit_block AND nv.score >= _min_score AND ( _last_id = 0 OR nv.id < _last_id )
   ORDER BY nv.id DESC
   LIMIT _limit
   ) hnv
-  join hive_posts hp on hnv.dst_post_id = hp.id
+  join hive_posts hp on hnv.post_id = hp.id
   join hive_accounts ha on hp.author_id = ha.id
   join hive_accounts hs on hs.id = hnv.src
   join hive_accounts hd on hd.id = hnv.dst
@@ -122,13 +122,13 @@ BEGIN
     , CAST( hnv.score as SMALLINT) as score
   FROM
   (
-    SELECT nv.id, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.score, nv.community, nv.community_title, nv.payload
+    SELECT nv.id, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.score, nv.community, nv.community_title, nv.payload, nv.post_id
     FROM hive_notification_cache nv
-    WHERE nv.post_id = __post_id AND nv.block_num > __limit_block AND nv.score >= _min_score AND ( _last_id = 0 OR nv.id < _last_id )
+    WHERE nv.dst_post_id = __post_id AND nv.block_num > __limit_block AND nv.score >= _min_score AND ( _last_id = 0 OR nv.id < _last_id )
     ORDER BY nv.id DESC
     LIMIT _limit
   ) hnv
-  JOIN hive_posts hp ON hnv.dst_post_id = hp.id
+  JOIN hive_posts hp ON hnv.post_id = hp.id
   JOIN hive_accounts ha ON hp.author_id = ha.id
   JOIN hive_accounts hs ON hs.id = hnv.src
   JOIN hive_accounts hd ON hd.id = hnv.dst
