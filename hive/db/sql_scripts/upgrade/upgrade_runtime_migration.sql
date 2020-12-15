@@ -156,7 +156,7 @@ DO
 $BODY$
 BEGIN
 SET work_mem='2GB';
-IF NOT EXISTS(SELECT * FROM hive_db_patch_level WHERE patched_to_revision = '3cb920ec2a3a83911d31d8dd2ec647e2258a19e0') THEN
+IF NOT EXISTS(SELECT * FROM hive_db_patch_level WHERE patched_to_revision = '33dd5e52673335284c6aa28ee89a069f83bd2dc6') THEN
   RAISE NOTICE 'Performing reputation data cleanup...';
   PERFORM truncate_account_reputation_data('30 days'::interval);
   INSERT INTO hive_db_vacuum_needed
@@ -216,6 +216,8 @@ values
 ,(now(), 'cc7bb174d40fe1a0e2221d5d7e1c332c344dca34') -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/372
 ,(now(), 'cce7fe54a2242b7a80354ee7e50e5b3275a2b039') -- reputation calc at LIVE sync.
 ,(now(), '3cb920ec2a3a83911d31d8dd2ec647e2258a19e0') -- Reputation data cleanup https://gitlab.syncad.com/hive/hivemind/-/merge_requests/425
+,(now(), '33dd5e52673335284c6aa28ee89a069f83bd2dc6') -- Post initial sync fixes https://gitlab.syncad.com/hive/hivemind/-/merge_requests/439
+
 ) ds (patch_date, patch_revision)
 where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
 
