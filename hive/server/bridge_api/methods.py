@@ -9,7 +9,6 @@ from hive.server.common.helpers import (
     valid_tag,
     valid_limit)
 from hive.server.hive_api.common import get_account_id
-from hive.server.hive_api.objects import _follow_contexts
 from hive.server.hive_api.community import list_top_communities
 from hive.server.common.mutes import Mutes
 
@@ -379,3 +378,21 @@ async def get_follow_list(context, observer, follow_type='blacklisted'):
             results.append({'name': account, 'blacklist_description': '', 'muted_list_description': ''})
 
     return results
+
+async def _follow_contexts(db, accounts, observer_id, include_mute=False):
+    sql = """SELECT following, state FROM hive_follows
+              WHERE follower = :account_id AND following IN :ids"""
+    rows = await db.query_all(sql,
+                              account_id=observer_id,
+                              ids=tuple(accounts.keys()))
+    for row in rows:
+        following_id = row[0]
+        state = row[1]
+        context = {'followed': state == 1}
+        if include_mute and state == 2:
+            context['muted'] = True
+        accounts[following_id]['context'] = context
+
+    for account in accounts.values():
+        if 'context' not in account:
+            account['context'] = {'followed': False}
