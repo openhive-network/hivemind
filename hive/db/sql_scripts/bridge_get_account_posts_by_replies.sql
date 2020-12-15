@@ -18,7 +18,7 @@ BEGIN
       __account_id = find_account_id( _account, True );
       __post_id = find_comment_id( _author, _permlink, True );
   END IF;
-  RETURN QUERY SELECT
+  RETURN QUERY SELECT --bridge_get_account_posts_by_replies
       hp.id,
       hp.author,
       hp.parent_author,
