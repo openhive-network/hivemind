@@ -69,5 +69,6 @@ do
 done
 
 time psql -a -v "ON_ERROR_STOP=1" -U $1 -d $2  -c '\timing' -f upgrade/upgrade_runtime_migration.sql 2>&1 | tee -a -i upgrade.log
-          
+
+time psql -a -v "ON_ERROR_STOP=1" -U $1 -d $2  -c '\timing' -f upgrade/do_conditional_vacuum.sql 2>&1 | tee -a -i upgrade.log
 

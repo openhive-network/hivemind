@@ -7,7 +7,7 @@ BEGIN
 SET work_mem='2GB';
 IF EXISTS(SELECT * FROM hive_db_data_migration WHERE migration = 'Reputation calculation') THEN
   RAISE NOTICE 'Performing initial account reputation calculation...';
-  PERFORM update_account_reputations(NULL, NULL);
+  PERFORM update_account_reputations(NULL, NULL, True);
 ELSE
   RAISE NOTICE 'Skipping initial account reputation calculation...';
 END IF;
@@ -136,7 +136,12 @@ IF NOT EXISTS(SELECT * FROM hive_db_patch_level WHERE patched_to_revision = 'cce
   RAISE NOTICE 'Performing reputation livesync recalculation...';
   --- reputations have to be recalculated from scratch.
   UPDATE hive_accounts SET reputation = 0, is_implicit = True;
-  PERFORM update_account_reputations(NULL, NULL);
+  PERFORM update_account_reputations(NULL, NULL, True);
+  INSERT INTO hive_db_vacuum_needed
+  (vacuum_needed)
+  values
+  (True)
+  ;
 ELSE
   RAISE NOTICE 'Skipping reputation livesync recalculation...';
 END IF;
@@ -154,6 +159,11 @@ SET work_mem='2GB';
 IF NOT EXISTS(SELECT * FROM hive_db_patch_level WHERE patched_to_revision = '3cb920ec2a3a83911d31d8dd2ec647e2258a19e0') THEN
   RAISE NOTICE 'Performing reputation data cleanup...';
   PERFORM truncate_account_reputation_data('30 days'::interval);
+  INSERT INTO hive_db_vacuum_needed
+    (vacuum_needed)
+  values
+    (True)
+  ;
 ELSE
   RAISE NOTICE 'Skipping reputation data cleanup...';
 END IF;
