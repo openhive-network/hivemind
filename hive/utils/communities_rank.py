@@ -1,7 +1,4 @@
-from hive.db.adapter import Db
 
-DB = Db.instance()
-
-def update_communities_posts_and_rank():
+def update_communities_posts_and_rank( db ):
     sql = "SELECT update_communities_posts_data_and_rank()"
-    DB.query_no_return(sql)
+    db.query_no_return(sql)
