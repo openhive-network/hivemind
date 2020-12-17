@@ -150,7 +150,7 @@ DECLARE
   __limit_block hive_blocks.num%TYPE = block_before_head( '90 days' );
 BEGIN
   IF _first_block_num IS NULL THEN
-    TRUNCATE TABLE hive_notification_cache;
+    TRUNCATE TABLE hive_notification_cache RESTART IDENTITY;
   ELSE
     DELETE FROM hive_notification_cache nc WHERE _prune_old AND nc.block_num <= __limit_block;
   END IF;
