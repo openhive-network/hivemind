@@ -20,7 +20,7 @@ ENV HTTP_SERVER_PORT 8080
 
 RUN \
     apt-get update && \
-    apt-get install -y \
+    apt-get install --reinstall -y \
         awscli \
         build-essential \
         daemontools \
@@ -31,15 +31,21 @@ RUN \
         liblz4-tool \
         postgresql \
         postgresql-contrib \
+        python-dev \
         python3 \
         python3-dev \
+        python3.6-dev \
+        python3.8-dev \
         python3-pip \
         libxml2-dev \
         libxslt-dev \
         runit \
         s3cmd \
         libpcre3 \
+        linux-libc-dev \
         libpcre3-dev \
+        libpython3-dev \
+        libpython3.6-dev \
         git
 
 #RUN \
@@ -55,6 +61,8 @@ ADD scripts/hivesynccontinue.sh /usr/local/bin/hivesynccontinue.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/hivesync.sh
 RUN chmod +x /usr/local/bin/hivesynccontinue.sh
+RUN ln -sv /usr/include/python3.6/* /usr/include/
+
 
 RUN \
     python3 setup.py build && python3 setup.py install && \
@@ -69,8 +77,6 @@ RUN \
         /tmp/* \
         /var/tmp/* \
         /var/cache/* \
-        /usr/include \
-        /usr/local/include
 
 EXPOSE ${HTTP_SERVER_PORT}
 
