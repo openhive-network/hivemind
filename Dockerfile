@@ -20,7 +20,7 @@ ENV HTTP_SERVER_PORT 8080
 
 RUN \
     apt-get update && \
-    apt-get install --reinstall -y \
+    apt-get install -y \
         awscli \
         build-essential \
         daemontools \
@@ -31,11 +31,9 @@ RUN \
         liblz4-tool \
         postgresql \
         postgresql-contrib \
-        python-dev \
         python3 \
         python3-dev \
         python3.6-dev \
-        python3.8-dev \
         python3-pip \
         libxml2-dev \
         libxslt-dev \
