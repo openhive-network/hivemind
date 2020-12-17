@@ -112,7 +112,8 @@ START TRANSACTION;
 DO
 $BODY$
 BEGIN
-IF EXISTS (SELECT * FROM hive_db_data_migration WHERE migration = 'Notification cache initial fill') THEN
+IF EXISTS (SELECT * FROM hive_db_patch_level WHERE patched_to_revision = 'a80c7642a1f3b08997af7e8a9915c13d34b7f0e0')
+THEN
   RAISE NOTICE 'Performing notification cache initial fill...';
   SET work_mem='2GB';
   PERFORM update_notification_cache(NULL, NULL, False);
@@ -217,7 +218,7 @@ values
 ,(now(), 'cce7fe54a2242b7a80354ee7e50e5b3275a2b039') -- reputation calc at LIVE sync.
 ,(now(), '3cb920ec2a3a83911d31d8dd2ec647e2258a19e0') -- Reputation data cleanup https://gitlab.syncad.com/hive/hivemind/-/merge_requests/425
 ,(now(), '33dd5e52673335284c6aa28ee89a069f83bd2dc6') -- Post initial sync fixes https://gitlab.syncad.com/hive/hivemind/-/merge_requests/439
-
+,(now(), 'a80c7642a1f3b08997af7e8a9915c13d34b7f0e0') -- Notification IDs https://gitlab.syncad.com/hive/hivemind/-/merge_requests/445
 ) ds (patch_date, patch_revision)
 where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
 
