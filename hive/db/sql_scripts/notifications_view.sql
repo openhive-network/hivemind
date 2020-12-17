@@ -54,8 +54,8 @@ AS
 $function$
 BEGIN
 RETURN CAST( _block_number as BIGINT ) << 32
-       | ( _notifyType << 16 )
-       | ( _id & CAST( x'0000FFFF' as INTEGER) );
+       | ( _notifyType << 24 )
+       | ( _id & CAST( x'00FFFFFF' as BIGINT) );
 END
 $function$
 LANGUAGE plpgsql IMMUTABLE
