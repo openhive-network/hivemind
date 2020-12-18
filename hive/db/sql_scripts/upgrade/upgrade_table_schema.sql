@@ -373,7 +373,7 @@ CREATE INDEX IF NOT EXISTS hive_blocks_created_at_idx ON hive_blocks (created_at
 --- Notification cache to significantly speedup notification APIs.
 CREATE TABLE IF NOT EXISTS hive_notification_cache
 (
-  id BIGINT NOT NULL,
+  id BIGINT NOT NULL DEFAULT nextval('hive_notification_cache_id_seq'::regclass),
   block_num INT NOT NULL,
   type_id INT NOT NULL,
   dst INT NULL,
@@ -430,3 +430,15 @@ CREATE INDEX IF NOT EXISTS hive_posts_promoted_id_idx ON hive_posts (promoted, i
  CREATE INDEX IF NOT EXISTS hive_posts_tags_ids_idx ON hive_posts USING gin(tags_ids gin__int_ops);
 
  --DROP TABLE IF EXISTS hive_post_tags;
+
+
+CREATE SEQUENCE IF NOT EXISTS hive_notification_cache_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    CACHE 1
+    ;
+
+ALTER TABLE hive_notification_cache
+  ALTER COLUMN id SET DEFAULT nextval('hive_notification_cache_id_seq'::regclass);
