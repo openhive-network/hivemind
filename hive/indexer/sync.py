@@ -262,12 +262,6 @@ class Sync:
         # prefetch id->name and id->rank memory maps
         Accounts.load_ids()
 
-        # load irredeemables
-        mutes = Mutes(
-            self._conf.get('muted_accounts_url'),
-            self._conf.get('blacklist_api_url'))
-        Mutes.set_shared_instance(mutes)
-
         # community stats
         update_communities_posts_and_rank()
 

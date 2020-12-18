@@ -194,9 +194,6 @@ def run_server(conf):
     log = logging.getLogger(__name__)
     methods = build_methods()
 
-    mutes = Mutes(conf.get('muted_accounts_url'), conf.get('blacklist_api_url'))
-    Mutes.set_shared_instance(mutes)
-
     app = web.Application()
     app['config'] = dict()
     app['config']['args'] = conf.args()

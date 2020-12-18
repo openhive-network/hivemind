@@ -53,8 +53,6 @@ async def load_profiles(db, names):
 def _bridge_profile_object(row):
     """Convert an internal account record into legacy-steemd style."""
 
-    blacklists = Mutes.lists(row['name'], row['reputation'])
-
     #Important. The member `sp` in `stats` is removed, because currently the hivemind doesn't hold any balances.
     # The member `vote_weight` from `hive_accounts` is removed as well.
     profile = safe_db_profile_metadata(row['posting_json_metadata'], row['json_metadata'])
@@ -66,7 +64,7 @@ def _bridge_profile_object(row):
         'active': json_date(row['active_at']),
         'post_count': row['post_count'],
         'reputation': rep_log10(row['reputation']),
-        'blacklists': blacklists,
+        'blacklists': [],
         'stats': {
             'rank': row['rank'],
             'following': row['following'],
