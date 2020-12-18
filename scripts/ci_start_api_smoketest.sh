@@ -11,4 +11,4 @@ echo Attempting to start tests on hivemind instance listeing on: $HIVEMIND_ADDRE
 
 echo "Selected test group (if empty all will be executed): $3"
 
-tox -e tavern -- -W ignore::pytest.PytestDeprecationWarning -n auto --junitxml=../../../../$4 $3
+tox -e tavern -- -W ignore::pytest.PytestDeprecationWarning --workers auto --tests-per-worker auto --junitxml=../../../../$4 $3
