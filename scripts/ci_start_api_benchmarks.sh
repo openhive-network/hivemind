@@ -8,6 +8,11 @@ export HIVEMIND_ADDRESS=$1
 export HIVEMIND_PORT=$2
 export TAVERN_DISABLE_COMPARATOR=true
 
+echo Removing old files
+
+rm -f ./tavern_benchmarks_report.html
+rm -f ./tests/tests_api/hivemind/tavern/benchmark.csv
+
 echo Attempting to start benchmarks on hivemind instance listeing on: $HIVEMIND_ADDRESS port: $HIVEMIND_PORT
 
 ITERATIONS=$3
@@ -15,7 +20,7 @@ ITERATIONS=$3
 for (( i=0; i<$ITERATIONS; i++ ))
 do
   echo About to run iteration $i
-  rm /tmp/test_ids.csv
+  rm -f /tmp/test_ids.csv
   tox -e tavern-benchmark -- -W ignore::pytest.PytestDeprecationWarning --workers auto
   echo Done!
 done
