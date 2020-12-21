@@ -16,6 +16,7 @@ echo Attempting to start benchmarks on hivemind instance listening on: $HIVEMIND
 for (( i=0; i<$ITERATIONS; i++ ))
 do
   echo About to run iteration $i
+  rm /tmp/test_ids.csv
   tox -e tavern-benchmark -- \
       -W ignore::pytest.PytestDeprecationWarning \
       --workers $JOBS

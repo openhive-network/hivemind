@@ -15,6 +15,7 @@ ITERATIONS=$3
 for (( i=0; i<$ITERATIONS; i++ ))
 do
   echo About to run iteration $i
+  rm /tmp/test_ids.csv
   tox -e tavern-benchmark -- -W ignore::pytest.PytestDeprecationWarning --workers auto
   echo Done!
 done
