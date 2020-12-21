@@ -402,7 +402,7 @@ def build_metadata_community(metadata=None):
     )
 
     sa.Table('hive_notification_cache', metadata,
-        sa.Column('id', sa.BigInteger, primary_key=True),
+        sa.Column('id', sa.types.DECIMAL(40, 0), primary_key=True),
         sa.Column('block_num', sa.Integer, nullable = False),
         sa.Column('type_id', sa.Integer, nullable = False),
         sa.Column('dst', sa.Integer, nullable=True), # dst account id except persistent notifs from hive_notifs
@@ -452,6 +452,15 @@ def setup(db):
     assert db.query_row( sql ), "The database requires created 'intarray' extension"
     # initialize schema
     build_metadata().create_all(db.engine())
+
+    sql = """CREATE SEQUENCE hive_notification_cache_id_seq
+        INCREMENT 1
+        START 1
+        MINVALUE 1
+        MAXVALUE 9223372036854775807
+        CACHE 1
+        """
+    db.query( sql )
 
     # tune auto vacuum/analyze
     reset_autovac(db)

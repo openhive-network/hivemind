@@ -59,7 +59,7 @@ async def account_notifications(context, account, min_score=25, last_id=None, li
     last_id = valid_number(last_id, 0, "last_id")
     limit = valid_limit(limit, 100, 100)
 
-    sql_query = "SELECT * FROM account_notifications( (:account)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::BIGINT, (:limit)::SMALLINT )"
+    sql_query = "SELECT * FROM account_notifications( (:account)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::NUMERIC(40,0), (:limit)::SMALLINT )"
 
     rows = await db.query_all(sql_query, account=account, min_score=min_score, last_id=last_id, limit=limit)
     return [_render(row) for row in rows]
@@ -75,7 +75,7 @@ async def post_notifications(context, author:str, permlink:str, min_score:int=25
     last_id = valid_number(last_id, 0, "last_id")
     limit = valid_limit(limit, 100, 100)
 
-    sql_query = "SELECT * FROM post_notifications( (:author)::VARCHAR, (:permlink)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::BIGINT, (:limit)::SMALLINT )"
+    sql_query = "SELECT * FROM post_notifications( (:author)::VARCHAR, (:permlink)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::NUMERIC(40,0), (:limit)::SMALLINT )"
 
     rows = await db.query_all(sql_query, author=author, permlink=permlink, min_score=min_score, last_id=last_id, limit=limit)
     return [_render(row) for row in rows]

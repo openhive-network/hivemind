@@ -2,7 +2,7 @@ DROP TYPE IF EXISTS notification CASCADE
 ;
 CREATE TYPE notification AS
 (
-  id BIGINT
+  id NUMERIC(40,0)
 , type_id SMALLINT
 , created_at TIMESTAMP
 , src VARCHAR
@@ -56,7 +56,7 @@ DROP FUNCTION IF EXISTS account_notifications;
 CREATE OR REPLACE FUNCTION public.account_notifications(
   _account character varying,
   _min_score smallint,
-  _last_id bigint,
+  _last_id NUMERIC(40,0),
   _limit smallint)
     RETURNS SETOF notification
     LANGUAGE 'plpgsql'
@@ -83,7 +83,7 @@ BEGIN
   (
     select nv.id, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.score, nv.community, nv.community_title, nv.payload
       from hive_notification_cache nv
-  WHERE nv.dst = __account_id  AND nv.block_num > __limit_block AND nv.score >= _min_score AND ( _last_id = 0 OR nv.id < _last_id )
+  WHERE nv.dst = __account_id  AND nv.block_num > __limit_block AND nv.score >= _min_score AND ( _last_id = 0::NUMERIC(40,0) OR nv.id < _last_id )
   ORDER BY nv.id DESC
   LIMIT _limit
   ) hnv
@@ -99,7 +99,7 @@ $BODY$;
 
 DROP FUNCTION IF EXISTS post_notifications
 ;
-CREATE OR REPLACE FUNCTION post_notifications(in _author VARCHAR, in _permlink VARCHAR, in _min_score SMALLINT, in _last_id BIGINT, in _limit SMALLINT)
+CREATE OR REPLACE FUNCTION post_notifications(in _author VARCHAR, in _permlink VARCHAR, in _min_score SMALLINT, in _last_id NUMERIC(40,0), in _limit SMALLINT)
 RETURNS SETOF notification
 AS
 $function$
@@ -148,21 +148,74 @@ AS
 $function$
 DECLARE
   __limit_block hive_blocks.num%TYPE = block_before_head( '90 days' );
+  __posts_to_refresh_votes INTEGER[];
+  __accounts_to_refresh INTEGER[];
 BEGIN
+  SET LOCAL work_mem='4GB';
   IF _first_block_num IS NULL THEN
     TRUNCATE TABLE hive_notification_cache;
   	ALTER SEQUENCE hive_notification_cache_id_seq RESTART WITH 1;
   ELSE
-    DELETE FROM hive_notification_cache nc WHERE _prune_old AND nc.block_num <= __limit_block;
-  END IF;
+	SELECT ARRAY_AGG( DISTINCT reps.author_id ) INTO __accounts_to_refresh
+	FROM
+	(
+		SELECT hrd.author_id FROM hive_reputation_data hrd WHERE hrd.block_num BETWEEN _first_block_num AND _last_block_num
+		UNION
+		SELECT hrd1.voter_id FROM hive_reputation_data hrd1 WHERE hrd1.block_num BETWEEN _first_block_num AND _last_block_num
+	) as reps;
 
+	RAISE NOTICE 'accounts=%',__accounts_to_refresh;
+
+	SELECT ARRAY_AGG( DISTINCT hv.post_id ) INTO __posts_to_refresh_votes FROM hive_votes hv WHERE hv.block_num BETWEEN _first_block_num AND _last_block_num;
+
+	DELETE FROM hive_notification_cache nc
+	WHERE
+	   (_prune_old AND nc.block_num <= __limit_block)
+	OR (nc.type_id = 17 AND nc.dst_post_id = ANY(__posts_to_refresh_votes) ) -- only votes notifs
+	OR (nc.type_id BETWEEN 11 AND 16 AND nc.src = ANY(__accounts_to_refresh) ) --only notificaton which dependends on account score
+	;
+  END IF;
+  --the id: notification id | id from sequence
+  --	          64b       |       64b
   INSERT INTO hive_notification_cache
-  (block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
-  SELECT nv.block_num, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.post_id, nv.score, nv.payload, nv.community, nv.community_title
+  (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+  SELECT CAST( nv.id * 2^64 as NUMERIC(40,0) ) + nextval('hive_notification_cache_id_seq') , nv.block_num, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.post_id, nv.score, nv.payload, nv.community, nv.community_title
   FROM hive_raw_notifications_view nv
-  WHERE nv.block_num > __limit_block AND (_first_block_num IS NULL OR nv.block_num BETWEEN _first_block_num AND _last_block_num)
+  WHERE (_first_block_num IS NULL OR nv.block_num BETWEEN _first_block_num AND _last_block_num)
+  AND nv.block_num > __limit_block
   ORDER BY nv.block_num, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.post_id
   ;
+
+  -- insert vote notifications which were changed their score and value
+  INSERT INTO hive_notification_cache
+  (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+  SELECT CAST( nv.id * 2^64 as NUMERIC(40,0) ) + nextval('hive_notification_cache_id_seq'), nv.block_num, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.post_id, nv.score, nv.payload, nv.community, nv.community_title
+  FROM hive_raw_notifications_view_noas nv
+  WHERE
+  _first_block_num IS NOT NULL
+  AND nv.type_id = 17
+  AND nv.score > 0
+  AND nv.block_num > __limit_block
+  AND  nv.block_num NOT BETWEEN _first_block_num AND _last_block_num
+  AND nv.dst_post_id = ANY (__posts_to_refresh_votes)
+  ORDER BY nv.block_num, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.post_id
+  ;
+
+--   --insert notification which score was changed becuase of src reputations
+  INSERT INTO hive_notification_cache
+  (id, block_num, type_id, created_at, src, dst, dst_post_id, post_id, score, payload, community, community_title)
+  SELECT CAST( nv.id * 2^64 as NUMERIC(40,0) ) + nextval('hive_notification_cache_id_seq'), nv.block_num, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.post_id, nv.score, nv.payload, nv.community, nv.community_title
+  FROM hive_raw_notifications_as_view nv
+  WHERE
+  _first_block_num IS NOT NULL
+  AND nv.block_num > __limit_block
+  AND nv.block_num NOT BETWEEN _first_block_num AND _last_block_num
+  AND nv.score > 0
+  AND nv.src = ANY(__accounts_to_refresh)
+  ORDER BY nv.block_num, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.post_id
+  ;
+
+  RESET work_mem;
 END
 $function$
 LANGUAGE plpgsql VOLATILE
