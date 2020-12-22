@@ -94,7 +94,7 @@ if __name__ == "__main__":
         ofile.write("  <body>\n")
         ofile.write("    <table id=\"benchmarks\">\n")
         ofile.write("      <thead>\n")
-        ofile.write("        <tr><th>Test name</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th><th>Median time [ms]</th><th>Reference (pure requests call) [ms]</th><th>Elapsed</th><th>\[ {\\vert} {T_{mean} - T_{ref} \over T_{ref}} {\lvert} \cdot 100 \] [%]</th><th>\[ {\\vert} {T_{median} - T_{ref} \over T_{ref}} {\lvert} \cdot 100 \] [%]</th></tr>\n")
+        ofile.write("        <tr><th>Test name</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th><th>Median time [ms]</th><th>Reference (pure requests call) [ms]</th><th>\[ {\\vert} {T_{mean} - T_{ref} \over T_{ref}} {\lvert} \cdot 100 \] [%]</th><th>\[ {\\vert} {T_{median} - T_{ref} \over T_{ref}} {\lvert} \cdot 100 \] [%]</th></tr>\n")
         ofile.write("      </thead>\n")
         ofile.write("      <tbody>\n")
         for name, data in report_data.items():
@@ -104,16 +104,15 @@ if __name__ == "__main__":
             dmedian = median(data)
             t_start = perf_counter()
             ret = requests.post("{}:{}".format(args.address, args.port), request_data[name])
-            ret.json()
             if ret.status_code == 200:
                 ref_time = perf_counter() - t_start
             else:
                 ref_time = 0.
             if dmean > args.time_threshold:
-                ofile.write("        <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, request_data[name], dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, ret.elapsed, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
+                ofile.write("        <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, request_data[name], dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
                 above_treshold.append((name, "{:.4f}".format(dmean), request_data[name]))
             else:
-                ofile.write("        <tr><td>{}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, ret.elapsed, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
+                ofile.write("        <tr><td>{}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
         ofile.write("      </tbody>\n")
         ofile.write("    </table>\n")
         ofile.write("  </body>\n")
