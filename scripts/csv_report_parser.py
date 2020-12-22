@@ -29,6 +29,9 @@ def get_requests_from_yaml(tavern_root_dir):
                         ret[process_file_name(test_file, tavern_root_dir)] = dumps(json_parameters)
     return ret
 
+def abs_rel_diff(a, b):
+    return abs((a - b) / float(b)) * 100.
+
 def parse_csv_files(root_dir):
     ret = {}
     file_path = os.path.join(root_dir, "benchmark.csv")
@@ -85,11 +88,13 @@ if __name__ == "__main__":
         ofile.write("        $('#benchmarks').DataTable();\n")
         ofile.write("      } );\n")
         ofile.write("    </script>\n")
+        ofile.write("    <script src=\"https://polyfill.io/v3/polyfill.min.js?features=es6\"></script>\n")
+        ofile.write("    <script id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js\"></script>\n")
         ofile.write("  </head>\n")
         ofile.write("  <body>\n")
         ofile.write("    <table id=\"benchmarks\">\n")
         ofile.write("      <thead>\n")
-        ofile.write("        <tr><th>Test name</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th><th>Median time [ms]</th><th>Reference (pure requests call) [ms]</th></tr>\n")
+        ofile.write("        <tr><th>Test name</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th><th>Median time [ms]</th><th>Reference (pure requests call) [ms]</th><th>\[ {\\vert} {T_{mean} - T_{ref} \over T_{ref}} {\lvert} \cdot 100 \] [%]</th><th>\[ {\\vert} {T_{median} - T_{ref} \over T_{ref}} {\lvert} \cdot 100 \] [%]</th></tr>\n")
         ofile.write("      </thead>\n")
         ofile.write("      <tbody>\n")
         for name, data in report_data.items():
@@ -104,10 +109,10 @@ if __name__ == "__main__":
             else:
                 ref_time = 0.
             if dmean > args.time_threshold:
-                ofile.write("        <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, request_data[name], dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000))
+                ofile.write("        <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, request_data[name], dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
                 above_treshold.append((name, "{:.4f}".format(dmean), request_data[name]))
             else:
-                ofile.write("        <tr><td>{}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000))
+                ofile.write("        <tr><td>{}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
         ofile.write("      </tbody>\n")
         ofile.write("    </table>\n")
         ofile.write("  </body>\n")
