@@ -131,7 +131,7 @@ UNION ALL
     ''::character varying AS community_title,
     ''::character varying AS payload
    FROM hive_follows hf
-   JOIN hive_blocks hb ON hf.block_num = hb.num
+   JOIN hive_blocks hb ON hb.num = hf.block_num - 1 -- use time of previous block to match head_block_time behavior at given block
    WHERE hf.state = 1 --only follow blog
 
 UNION ALL
