@@ -56,6 +56,7 @@ if __name__ == "__main__":
     parser.add_argument("port", type=int)
     parser.add_argument("csv_report_dir", type=str, help="Path to benchmark csv reports")
     parser.add_argument("tavern_root_dir", type=str, help="Path to tavern tests root dir")
+    parser.add_argument("--median-cutoff-time", dest="cutoff_time", type=float, default=0.3, help="Tests with median time below cutoff will not be shown")
     parser.add_argument("--time-threshold", dest="time_threshold", type=float, default=1.0, help="Time threshold for test execution time, tests with execution time greater than threshold will be marked on red.")
     args = parser.parse_args()
 
@@ -102,17 +103,18 @@ if __name__ == "__main__":
             dmax = max(data)
             dmean = mean(data)
             dmedian = median(data)
-            t_start = perf_counter()
-            ret = requests.post("{}:{}".format(args.address, args.port), request_data[name])
-            if ret.status_code == 200:
-                ref_time = perf_counter() - t_start
-            else:
-                ref_time = 0.
-            if dmean > args.time_threshold:
-                ofile.write("        <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, request_data[name], dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
-                above_treshold.append((name, "{:.4f}".format(dmean), request_data[name]))
-            else:
-                ofile.write("        <tr><td>{}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
+            if dmedian >= args.cutoff_time:
+                t_start = perf_counter()
+                ret = requests.post("{}:{}".format(args.address, args.port), request_data[name])
+                if ret.status_code == 200:
+                    ref_time = perf_counter() - t_start
+                else:
+                    ref_time = 0.
+                if dmean > args.time_threshold:
+                    ofile.write("        <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, request_data[name], dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
+                    above_treshold.append((name, "{:.4f}".format(dmean), request_data[name]))
+                else:
+                    ofile.write("        <tr><td>{}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
         ofile.write("      </tbody>\n")
         ofile.write("    </table>\n")
         ofile.write("  </body>\n")
