@@ -113,7 +113,8 @@ DO
 $BODY$
 BEGIN
 -- Also covers previous changes at a80c7642a1f3b08997af7e8a9915c13d34b7f0e0
-IF EXISTS (SELECT * FROM hive_db_patch_level WHERE patched_to_revision = 'b100db27f37dda3c869c2756d99ab2856f7da9f9')
+-- Also covers previous changes at b100db27f37dda3c869c2756d99ab2856f7da9f9
+IF NOT EXISTS (SELECT * FROM hive_db_patch_level WHERE patched_to_revision = 'bd83414409b7624e2413b97a62fa7d97d83edd86')
 THEN
   RAISE NOTICE 'Performing notification cache initial fill...';
   SET work_mem='2GB';
@@ -221,6 +222,7 @@ values
 ,(now(), '33dd5e52673335284c6aa28ee89a069f83bd2dc6') -- Post initial sync fixes https://gitlab.syncad.com/hive/hivemind/-/merge_requests/439
 ,(now(), 'a80c7642a1f3b08997af7e8a9915c13d34b7f0e0') -- Notification IDs https://gitlab.syncad.com/hive/hivemind/-/merge_requests/445
 ,(now(), 'b100db27f37dda3c869c2756d99ab2856f7da9f9') -- hive_notification_cache table supplement https://gitlab.syncad.com/hive/hivemind/-/merge_requests/447
+,(now(), 'bd83414409b7624e2413b97a62fa7d97d83edd86') -- follow notification time is taken from block affecting it  https://gitlab.syncad.com/hive/hivemind/-/merge_requests/449
 
 ) ds (patch_date, patch_revision)
 where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);

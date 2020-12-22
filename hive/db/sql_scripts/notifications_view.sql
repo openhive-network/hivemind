@@ -123,14 +123,17 @@ UNION ALL
     notification_id(hf.block_num, 15, hf.id) AS id,
     0 AS post_id,
     15 AS type_id,
-    hf.created_at,
+    hb.created_at,
     hf.follower AS src,
     hf.following AS dst,
     0 as dst_post_id,
     ''::character varying(16) AS community,
     ''::character varying AS community_title,
     ''::character varying AS payload
-   FROM hive_follows hf WHERE hf.state = 1 --only follow blog
+   FROM hive_follows hf
+   JOIN hive_blocks hb ON hb.num = hf.block_num - 1 -- use time of previous block to match head_block_time behavior at given block
+   WHERE hf.state = 1 --only follow blog
+
 UNION ALL
  SELECT hr.block_num,
     notification_id(hr.block_num, 14, hr.id) AS id,
