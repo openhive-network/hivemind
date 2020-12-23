@@ -1,7 +1,5 @@
 """Cursor-based pagination queries, mostly supporting condenser_api."""
 
-from hive.server.common.helpers import last_month
-
 from hive.server.condenser_api.objects import _condenser_post_object
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 
