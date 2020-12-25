@@ -62,7 +62,7 @@ BEGIN
     WITH ar as (SELECT hpr.id as id
       FROM hive_posts hpr
       JOIN hive_posts hp1 on hp1.id = hpr.parent_id
-      WHERE hpr.author_id = __account_id
+      WHERE hp1.author_id = __account_id
         AND (hpr.counter_deleted = 0)
         AND (__post_id = 0 OR hpr.id < __post_id )
     )
