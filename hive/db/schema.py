@@ -139,7 +139,7 @@ def build_metadata():
 
         sa.Index('hive_posts_root_id_id_idx', 'root_id','id'),
 
-        sa.Index('hive_posts_parent_id_idx', 'parent_id'),
+        sa.Index('hive_posts_parent_id_counter_deleted_id_idx', 'parent_id', 'counter_deleted', 'id'),
         sa.Index('hive_posts_community_id_id_idx', 'community_id', sa.text('id DESC')),
 
         sa.Index('hive_posts_payout_at_idx', 'payout_at'),
@@ -147,7 +147,8 @@ def build_metadata():
         sa.Index('hive_posts_promoted_id_idx', 'promoted', 'id', postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0")),
         sa.Index('hive_posts_sc_trend_id_idx', 'sc_trend', 'id', postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0 AND depth = 0")),
         sa.Index('hive_posts_sc_hot_id_idx', 'sc_hot', 'id', postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0 AND depth = 0")),
-        sa.Index('hive_posts_author_id_created_at_idx', sa.text('author_id DESC, created_at DESC')),
+        sa.Index('hive_posts_author_id_created_at_id_idx', sa.text('author_id DESC, created_at DESC, id')),
+        sa.Index('hive_posts_author_id_id_idx', 'author_id', 'id', postgresql_where=sql_text('depth = 0')),
         sa.Index('hive_posts_block_num_idx', 'block_num'),
         sa.Index('hive_posts_block_num_created_idx', 'block_num_created'),
         sa.Index('hive_posts_cashout_time_id_idx', 'cashout_time', 'id'),
@@ -283,7 +284,8 @@ def build_metadata():
         sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_feed_cache_fk1'),
 
         sa.Index('hive_feed_cache_block_num_idx', 'block_num'),
-        sa.Index('hive_feed_cache_created_at_idx', 'created_at')
+        sa.Index('hive_feed_cache_created_at_idx', 'created_at'),
+        sa.Index('hive_feed_cache_post_id_idx', 'post_id')
     )
 
     sa.Table(
