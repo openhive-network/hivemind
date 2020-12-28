@@ -285,7 +285,7 @@ def build_metadata():
 
         sa.Index('hive_feed_cache_block_num_idx', 'block_num'),
         sa.Index('hive_feed_cache_created_at_idx', 'created_at'),
-        sa.Index('hive_feed_cache_post_id_idx', 'post__id')
+        sa.Index('hive_feed_cache_post_id_idx', 'post_id')
     )
 
     sa.Table(
