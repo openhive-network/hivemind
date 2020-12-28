@@ -442,3 +442,20 @@ CREATE SEQUENCE IF NOT EXISTS hive_notification_cache_id_seq
 
 ALTER TABLE hive_notification_cache
   ALTER COLUMN id SET DEFAULT nextval('hive_notification_cache_id_seq'::regclass);
+
+ -- Changes done in https://gitlab.syncad.com/hive/hivemind/-/merge_requests/452
+ DROP INDEX IF EXISTS hive_posts_parent_id_idx;
+
+ CREATE INDEX IF NOT EXISTS hive_posts_parent_id_counter_deleted_id_idx ON hive_posts (parent_id, counter_deleted, id);
+
+ DROP INDEX IF EXISTS hive_posts_author_id_created_at_idx;
+
+ CREATE INDEX IF NOT EXISTS hive_posts_author_id_created_at_id_idx ON hive_posts (author_id DESC, created_at DESC, id);
+
+ DROP INDEX IF EXISTS hive_posts_author_posts_idx;
+
+ CREATE INDEX IF NOT EXISTS hive_posts_author_id_id_idx ON hive_posts (author_id, id)
+ WHERE depth = 0;
+
+ CREATE INDEX IF NOT EXISTS hive_feed_cache_post_id_idx ON hive_feed_cache (post_id);
+

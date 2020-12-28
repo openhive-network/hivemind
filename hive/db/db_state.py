@@ -96,15 +96,15 @@ class DbState:
 
             'hive_feed_cache_block_num_idx',
             'hive_feed_cache_created_at_idx',
+            'hive_feed_cache_post_id_idx',
 
             'hive_follows_ix5a', # (following, state, created_at, follower)
             'hive_follows_ix5b', # (follower, state, created_at, following)
             'hive_follows_block_num_idx',
             'hive_follows_created_at_idx',
 
-            'hive_posts_parent_id_idx',
+            'hive_posts_parent_id_counter_deleted_id_idx',
             'hive_posts_depth_idx',
-            'hive_posts_author_id_created_at_idx',
             'hive_posts_root_id_id_idx',
 
             'hive_posts_community_id_id_idx',
@@ -120,6 +120,9 @@ class DbState:
             'hive_posts_payout_plus_pending_payout_id_idx',
             'hive_posts_category_id_payout_plus_pending_payout_depth_idx',
             'hive_posts_tags_ids_idx',
+            'hive_posts_author_id_created_at_id_idx',
+            'hive_posts_author_id_id_idx',
+
 
             'hive_posts_api_helper_author_s_permlink_idx',
 

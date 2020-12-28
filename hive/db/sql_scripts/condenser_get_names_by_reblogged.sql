@@ -12,10 +12,12 @@ BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
 
   RETURN QUERY SELECT
-    name
+    ha.name
   FROM hive_accounts ha
   JOIN hive_feed_cache hfc ON ha.id = hfc.account_id
-  WHERE hfc.post_id = __post_id;
+  WHERE hfc.post_id = __post_id
+  ORDER BY ha.name
+  ;
 
 END
 $function$
