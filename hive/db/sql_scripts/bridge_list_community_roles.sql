@@ -1,6 +1,13 @@
 DROP TYPE IF EXISTS bridge_api_list_community_roles CASCADE;
 CREATE TYPE bridge_api_list_community_roles AS (
     name VARCHAR(16),
+    role VARCHAR,
+    title VARCHAR
+);
+
+DROP TYPE IF EXISTS bridge_api_community_team CASCADE;
+CREATE TYPE bridge_api_community_team AS (
+    name VARCHAR,
     role_id SMALLINT,
     title VARCHAR
 );
@@ -36,7 +43,7 @@ BEGIN
         END IF;
 
         RETURN QUERY
-        SELECT a.name, r.role_id, r.title
+        SELECT a.name, get_role_name(r.role_id), r.title
         FROM hive_roles r
         JOIN hive_accounts a ON r.account_id = a.id
         WHERE r.community_id = __community_id
@@ -45,7 +52,7 @@ BEGIN
         ORDER BY r.role_id DESC, name LIMIT _limit;
     ELSE
         RETURN QUERY
-        SELECT a.name, r.role_id, r.title
+        SELECT a.name, get_role_name(r.role_id), r.title
         FROM hive_roles r
         JOIN hive_accounts a ON r.account_id = a.id
         WHERE r.community_id = __community_id

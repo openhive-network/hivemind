@@ -13,7 +13,7 @@ CREATE TYPE bridge_api_list_communities AS (
     num_authors INTEGER,
     created_at VARCHAR(19),
     avatar_url VARCHAR(1024),
-    context bridge_api_community_context,
+    context JSON,
     admins VARCHAR ARRAY
 );
 
@@ -31,7 +31,7 @@ LANGUAGE plpgsql
 AS
 $function$
 DECLARE
-    __context bridge_api_community_context;
+    __context JSON;
 BEGIN
 
     RETURN QUERY SELECT
@@ -78,7 +78,7 @@ LANGUAGE plpgsql
 AS
 $function$
 DECLARE
-    __context bridge_api_community_context;
+    __context JSON;
 BEGIN
     RETURN QUERY SELECT
         hc.id,
@@ -123,7 +123,7 @@ LANGUAGE plpgsql
 AS
 $function$
 DECLARE
-    __context bridge_api_community_context;
+    __context JSON;
 BEGIN
     RETURN QUERY SELECT
         hc.id,

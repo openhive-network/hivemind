@@ -593,6 +593,13 @@ def setup(db):
       "bridge_get_account_posts_by_blog.sql",
       "condenser_get_names_by_reblogged.sql",
       "condenser_get_account_reputations.sql",
+      "bridge_get_community.sql",
+      "bridge_get_community_context.sql",
+      "bridge_list_all_subscriptions.sql",
+      "bridge_list_communities.sql",
+      "bridge_list_community_roles.sql",
+      "bridge_list_pop_communities.sql",
+      "bridge_list_subscribers.sql",
       "update_follow_count.sql",
       "delete_reblog_feed_cache.sql",
       "upgrade/update_db_patchlevel.sql" #Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.

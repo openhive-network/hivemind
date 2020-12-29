@@ -1,7 +1,7 @@
 DROP TYPE IF EXISTS bridge_api_list_subscribers CASCADE;
 CREATE TYPE bridge_api_list_subscribers AS (
     name VARCHAR,
-    role_id SMALLINT,
+    role VARCHAR,
     title VARCHAR,
     created_at VARCHAR(19)
 );
@@ -20,7 +20,7 @@ DECLARE
 BEGIN
 
     RETURN QUERY
-    SELECT ha.name, hr.role_id, hr.title, hs.created_at::VARCHAR(19)
+    SELECT ha.name, get_role_name(COALESCE(hr.role_id,0)), hr.title, hs.created_at::VARCHAR(19)
     FROM hive_subscriptions hs
     LEFT JOIN hive_roles hr ON hs.account_id = hr.account_id
     AND hs.community_id = hr.community_id

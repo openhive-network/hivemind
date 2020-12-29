@@ -4,23 +4,12 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import ujson as json
 
-from hive.server.hive_api.common import (get_account_id, get_community_id, valid_account, valid_limit)
+from hive.server.hive_api.common import (get_community_id, valid_account, valid_limit)
 from hive.server.common.helpers import return_error_info
 
 # pylint: disable=too-many-lines
 
 log = logging.getLogger(__name__)
-
-ROLES = {-2: 'muted', 0: 'guest', 2: 'member', 4: 'mod', 6: 'admin', 8: 'owner'}
-
-async def if_tag_community(context, tag, observer=None):
-    """Attempt to load community if tag is proper format."""
-    if tag[:5] == 'hive-':
-        db = context['db']
-        cid = await get_community_id(db, tag)
-        if cid:
-            return await get_community(context, tag, observer)
-    return None
 
 @return_error_info
 async def get_community(context, name, observer=None):
@@ -32,26 +21,10 @@ async def get_community(context, name, observer=None):
     observer = valid_account(observer, allow_empty=True)
 
     sql = "SELECT * FROM bridge_get_community( (:name)::VARCHAR, (:observer)::VARCHAR )"
-    sql_result = await db.query_all(sql, name=name, observer=observer)
-
-    result = dict(sql_result[0])
-
-    result['context'] = convert_context(result['context'], observer)
-    sql = "SELECT * FROM bridge_get_community_team( (:name)::VARCHAR)"
-    sql_result = await db.query_all(sql, name=name)
-    result['team'] = get_teams(sql_result)
+    sql_result = await db.query_row(sql, name=name, observer=observer)
+    result = dict(sql_result)
 
     return result
-
-    # communities = await load_communities(db, [cid], lite=False)
-
-    # if observer:
-    #
-    #     observer_id = await get_account_id(db, observer)
-    #     await _append_observer_roles(db, communities, observer_id)
-    #     await _append_observer_subs(db, communities, observer_id)
-    #
-    # return communities[cid]
 
 @return_error_info
 async def get_community_context(context, name, account):
@@ -62,7 +35,7 @@ async def get_community_context(context, name, account):
     sql = "SELECT * FROM bridge_get_community_context( (:account)::VARCHAR, (:name)::VARCHAR )"
     row = await db.query_row(sql, account=account, name=name)
 
-    return dict(role=ROLES[row['role_id']], title=row['title'], subscribed=row['subscribed'])
+    return dict(row['bridge_get_community_context'])
 
 @return_error_info
 async def list_top_communities(context, limit=25):
@@ -98,8 +71,8 @@ async def list_all_subscriptions(context, account):
     account = valid_account(account)
 
     sql = "SELECT * FROM bridge_list_all_subscriptions( (:account)::VARCHAR )"
-    out = await db.query_all(sql, account=account)
-    return [(r[0], r[1], ROLES[r[2]], r[3]) for r in out]
+    rows = await db.query_all(sql, account=account)
+    return [(r[0], r[1], r[2], r[3]) for r in rows]
 
 @return_error_info
 async def list_subscribers(context, community):
@@ -107,7 +80,7 @@ async def list_subscribers(context, community):
     db = context['db']
     sql = "SELECT * FROM bridge_list_subscribers( (:community)::VARCHAR )"
     rows = await db.query_all(sql, community=community)
-    return [(r['name'], ROLES[r['role_id'] or 0], r['title'], str(r['created_at'])) for r in rows]
+    return [(r[0], r[1], r[2], r[3]) for r in rows]
 
 @return_error_info
 async def list_communities(context, last='', limit=100, query=None, sort='rank', observer=None):
@@ -116,10 +89,8 @@ async def list_communities(context, last='', limit=100, query=None, sort='rank',
     limit = valid_limit(limit, 100, 100)
     observer = valid_account(observer, True)
     assert sort in ('rank', 'new', 'subs'), 'invalid sort'
-
-    db = context['db']
-
     search = query
+    db = context['db']
 
     sql = "SELECT * FROM bridge_list_communities_by_" + \
           sort + \
@@ -127,15 +98,7 @@ async def list_communities(context, last='', limit=100, query=None, sort='rank',
 
     rows = await db.query_all(sql, observer=observer, last=last, search=search, sort=sort, limit=limit)
 
-    result = []
-    for r in rows:
-        new = dict(r)
-        new['context'] = convert_context(new['context'], observer)
-        if new['admins'][0] is None:
-            del new['admins']
-        result.append(new)
-
-    return result
+    return remove_empty_admins_field(rows)
 
 
 @return_error_info
@@ -146,29 +109,18 @@ async def list_community_roles(context, community, last='', limit=50):
     sql = "SELECT * FROM bridge_list_community_roles( (:community)::VARCHAR, (:last)::VARCHAR, (:limit)::INT )"
     rows = await db.query_all(sql, community=community, last=last, limit=limit)
 
-    return [(r['name'], ROLES[r['role_id']], r['title']) for r in rows]
+    return [(r['name'], r['role'], r['title']) for r in rows]
 
 # Communities - internal
 # ----------------------
-def convert_context(context, observer):
-    """Convert context data"""
-    if observer:
-        context = context[1:-1].replace('"', '').split(',')
-        return dict(
-            role=ROLES[int(context[0])],
-            title=context[1],
-            subscribed=(context[2] == 't')
-        )
-    else:
-        return {}
-
-def get_teams(sql_result):
-
-    teams = []
-    for row in sql_result:
-        teams.append([row['name'], ROLES[row['role_id']], row['title']])
-
-    return teams
+def remove_empty_admins_field(rows):
+    result = []
+    for r in rows:
+        new = dict(r)
+        if new['admins'][0] is None:
+            del new['admins']
+        result.append(new)
+    return result
 
 # Stats
 # -----

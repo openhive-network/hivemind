@@ -16,8 +16,8 @@ CREATE TYPE bridge_api_community AS (
     description VARCHAR(5000),
     flag_text VARCHAR(5000),
     settings JSON,
-    context bridge_api_community_context,
-    team bridge_api_community_team
+    context JSON,
+    team JSON
 );
 
 DROP FUNCTION IF EXISTS bridge_get_community
@@ -33,44 +33,40 @@ $function$
 DECLARE
     __observer_id INT;
     __community_id INT := find_community_id( _name, True );
-    __context bridge_api_community_context;
-    __team bridge_api_community_team;
+    __context JSON := '{}'::json;
 BEGIN
     IF _observer <> '' THEN
         __observer_id = find_account_id( _observer, True );
         __context= bridge_get_community_context(_observer, _name);
     END IF;
 
-    SELECT a.name as name, r.role_id, r.title
-    INTO __team
-    FROM hive_roles r
-    JOIN hive_accounts a ON r.account_id = a.id
-    WHERE r.community_id = __community_id
-    AND r.role_id BETWEEN 4 AND 8
-    ORDER BY r.role_id DESC, r.account_id DESC
-    ;
-
     RETURN QUERY SELECT
-        id,
-        name,
-        COALESCE(NULLIF(title,''),CONCAT('@',name))::VARCHAR(32),
-        about,
-        lang,
-        type_id,
-        is_nsfw,
-        subscribers,
-        created_at::VARCHAR(19),
-        sum_pending,
-        num_pending,
-        num_authors,
-        avatar_url,
-        description,
-        flag_text,
-        settings::JSON,
+        hc.id,
+        hc.name,
+        COALESCE(NULLIF(hc.title,''),CONCAT('@',hc.name))::VARCHAR(32),
+        hc.about,
+        hc.lang,
+        hc.type_id,
+        hc.is_nsfw,
+        hc.subscribers,
+        hc.created_at::VARCHAR(19),
+        hc.sum_pending,
+        hc.num_pending,
+        hc.num_authors,
+        hc.avatar_url,
+        hc.description,
+        hc.flag_text,
+        hc.settings::JSON,
         __context,
-        __team
-    FROM hive_communities
-    WHERE id = __community_id
+        (SELECT json_agg(json_build_array(a.name, get_role_name(r.role_id), r.title) ORDER BY r.role_id DESC, r.account_id DESC)
+            FROM hive_roles r
+            JOIN hive_accounts a ON r.account_id = a.id
+            WHERE r.community_id = __community_id
+            AND r.role_id BETWEEN 4 AND 8
+        )
+    FROM hive_communities hc
+    WHERE hc.id = __community_id
+    GROUP BY hc.id
     ;
 
 END
