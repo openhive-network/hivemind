@@ -86,7 +86,7 @@ class PrometheusClient:
         elif type(obj) == type(BroadcastObject('', '', '')):
             PrometheusClient.logs_to_broadcast.put(obj)
         else:
-            raise Exception(f"Not expexcted type. Should be list or BroadcastObject, but: {type(obj)} given")
+            raise Exception(f"Not expected type. Should be list or BroadcastObject, but: {type(obj)} given")
 
 class Stat:
     def __init__(self, time):
