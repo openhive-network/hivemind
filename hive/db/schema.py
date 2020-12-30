@@ -139,7 +139,7 @@ def build_metadata():
 
         sa.Index('hive_posts_root_id_id_idx', 'root_id','id'),
 
-        sa.Index('hive_posts_parent_id_counter_deleted_id_idx', 'parent_id', 'counter_deleted', 'id'),
+        sa.Index('hive_posts_parent_id_id_idx', 'parent_id', 'id DESC', postgresql_where=sql_text("counter_deleted = 0")),
         sa.Index('hive_posts_community_id_id_idx', 'community_id', sa.text('id DESC')),
 
         sa.Index('hive_posts_payout_at_idx', 'payout_at'),
