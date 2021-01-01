@@ -1,14 +1,8 @@
-DROP FUNCTION IF EXISTS bridge_get_discussion
-;
-CREATE OR REPLACE FUNCTION bridge_get_discussion(
-    in _author hive_accounts.name%TYPE,
-    in _permlink hive_permlink_data.permlink%TYPE,
-    in _observer VARCHAR
-)
-RETURNS SETOF bridge_api_post_discussion
-LANGUAGE plpgsql
-AS
-$function$
+DROP FUNCTION IF EXISTS bridge_get_discussion;
+
+CREATE OR REPLACE 
+FUNCTION bridge_get_discussion(_author hive_accounts.name%TYPE, _permlink hive_permlink_data.permlink%TYPE, _observer VARCHAR) RETURNS SETOF bridge_api_post_discussion
+AS $function$
 DECLARE
     __post_id INT;
     __observer_id INT;
@@ -76,11 +70,9 @@ BEGIN
         FROM hive_posts hp2
         JOIN child_posts cp ON cp.id = hp2.id
         ORDER BY hp2.id
-    ) ds
-    JOIN hive_posts_view hpv ON ds.id = hpv.id
+    ) ds,
+	LATERAL get_post_view_by_id(ds.id) hpv
     ORDER BY ds.id
-    LIMIT 2000
-    ;
+    LIMIT 2000;
 END
-$function$
-;
+$function$ LANGUAGE plpgsql STABLE;

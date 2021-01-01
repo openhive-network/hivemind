@@ -129,7 +129,7 @@ BEGIN
       ORDER BY hp1.sc_trend DESC, hp1.id DESC
       LIMIT _limit
   ) as trends
-  JOIN hive_posts_view hp ON hp.id = trends.id
+  LATERAL get_post_view_by_id(trends.id) hp
   ORDER BY trends.trend DESC, trends.id DESC
   LIMIT _limit;
 END
@@ -206,7 +206,7 @@ BEGIN
       ORDER BY hp1.promoted DESC, hp1.id DESC
       LIMIT _limit
   ) as promoted
-  JOIN hive_posts_view hp ON hp.id = promoted.id
+  LATERAL get_post_view_by_id(promoted.id) hp
   ORDER BY promoted.promoted DESC, promoted.id DESC
   LIMIT _limit;
 END
@@ -285,7 +285,7 @@ BEGIN
       ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
       LIMIT _limit
   ) as payout
-  JOIN hive_posts_view hp ON hp.id = payout.id
+  LATERAL get_post_view_by_id(payout.id) hp
   ORDER BY payout.all_payout DESC, payout.id DESC
   LIMIT _limit;
 END
@@ -362,7 +362,7 @@ BEGIN
       ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
       LIMIT _limit
   ) as payout
-  JOIN hive_posts_view hp ON hp.id = payout.id
+  LATERAL get_post_view_by_id(payout.id) hp
   ORDER BY payout.all_payout DESC, payout.id DESC
   LIMIT _limit;
 END
@@ -439,7 +439,7 @@ BEGIN
       ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
       LIMIT _limit
   ) as payout
-  JOIN hive_posts_view hp ON hp.id = payout.id
+  LATERAL get_post_view_by_id(payout.id) hp
   ORDER BY payout.all_payout DESC, payout.id DESC
   LIMIT _limit;
 END
@@ -516,7 +516,7 @@ BEGIN
       ORDER BY hp1.sc_hot DESC, hp1.id DESC
       LIMIT _limit
   ) as hot
-  JOIN hive_posts_view hp ON hp.id = hot.id
+  LATERAL get_post_view_by_id(hot.id) hp
   ORDER BY hot.hot DESC, hot.id DESC
   LIMIT _limit;
 END
@@ -589,7 +589,7 @@ BEGIN
       ORDER BY hp1.id DESC
       LIMIT _limit
   ) as created
-  JOIN hive_posts_view hp ON hp.id = created.id
+  LATERAL get_hive_post_by_id(created.id) hp
   ORDER BY created.id DESC
   LIMIT _limit;
 END

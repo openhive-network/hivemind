@@ -1,7 +1,5 @@
-CREATE OR REPLACE FUNCTION bridge_get_account_posts_by_replies( in _account VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN )
-RETURNS SETOF bridge_api_post
-AS
-$function$
+CREATE OR REPLACE FUNCTION public.bridge_get_account_posts_by_replies(_account VARCHAR, _author VARCHAR, _permlink VARCHAR, _limit SMALLINT, _bridge_api BOOLEAN) RETURNS SETOF bridge_api_post
+AS $function$
 DECLARE
   __account_id INT;
   __post_id INT;
@@ -69,10 +67,9 @@ BEGIN
     SELECT * FROM ar
     ORDER BY ar.id DESC
     LIMIT _limit
-  ) as replies
-  JOIN hive_posts_view hp ON hp.id = replies.id
+  ) as replies,
+  LATERAL get_post_view_by_id(replies.id) hp
   ORDER BY replies.id DESC
   LIMIT _limit;
 END
-$function$
-language plpgsql STABLE;
+$function$ LANGUAGE plpgsql STABLE;

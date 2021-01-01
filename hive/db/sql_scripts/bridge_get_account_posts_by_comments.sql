@@ -57,7 +57,7 @@ BEGIN
     ORDER BY hp1.id DESC
     LIMIT _limit
   ) ds
-  JOIN hive_posts_view hp ON ds.id = hp.id
+  LATERAL get_post_view_by_id(ds.id) hp
   ORDER BY hp.id DESC
   LIMIT _limit;
 END

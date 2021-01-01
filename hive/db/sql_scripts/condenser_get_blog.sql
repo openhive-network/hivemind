@@ -80,7 +80,7 @@ BEGIN
       LIMIT _limit
       OFFSET __offset
   ) as blog
-  JOIN hive_posts_view hp ON hp.id = blog.post_id
+  LATERAL get_post_view_by_id(blog.post_id) hp
   ORDER BY blog.created_at ASC, blog.post_id ASC;
 END
 $function$

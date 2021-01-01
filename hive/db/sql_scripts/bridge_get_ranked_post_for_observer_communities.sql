@@ -67,9 +67,9 @@ BEGIN
           hp.is_muted,
           blacklisted_by_observer_view.source
       from post_ids
-      join hive_posts_view hp using (id)
+      LATERAL get_post_view_by_id(post_ids.id) hp
       LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __account_id AND blacklisted_by_observer_view.blacklisted_id = hp.author_id)
-      order by id desc;
+      order by post_ids.id desc;
 END
 $function$
 language plpgsql STABLE;
@@ -211,7 +211,7 @@ BEGIN
       ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
       LIMIT _limit
   ) as payout
-  JOIN hive_posts_view hp ON hp.id = payout.id
+  LATERAL get_post_view_by_id(payout.id) hp
   ORDER BY payout.all_payout DESC, payout.id DESC
   LIMIT _limit;
 END
@@ -426,7 +426,7 @@ BEGIN
       ORDER BY hp1.sc_trend DESC, hp1.id DESC
       LIMIT _limit
   ) trending
-  JOIN hive_posts_view hp ON trending.id = hp.id
+  LATERAL get_hive_post_by_id(trending.id) hp
   ORDER BY trending.sc_trend DESC, trending.id DESC
   LIMIT _limit;
 END
