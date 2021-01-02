@@ -103,7 +103,7 @@ class DbState:
             'hive_follows_block_num_idx',
             'hive_follows_created_at_idx',
 
-            'hive_posts_parent_id_id__idx',
+            'hive_posts_parent_id_id_idx',
             'hive_posts_depth_idx',
             'hive_posts_root_id_id_idx',
 
