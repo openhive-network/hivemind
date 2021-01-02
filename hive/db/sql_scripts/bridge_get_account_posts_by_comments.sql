@@ -56,7 +56,7 @@ BEGIN
     WHERE hp1.author_id = __account_id AND hp1.counter_deleted = 0 AND hp1.depth > 0 AND ( __post_id = 0 OR hp1.id < __post_id )
     ORDER BY hp1.id DESC
     LIMIT _limit
-  ) ds
+  ) ds,
   LATERAL get_post_view_by_id(ds.id) hp
   ORDER BY hp.id DESC
   LIMIT _limit;

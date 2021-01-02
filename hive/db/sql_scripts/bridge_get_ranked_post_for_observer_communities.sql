@@ -66,7 +66,7 @@ BEGIN
           hp.curator_payout_value,
           hp.is_muted,
           blacklisted_by_observer_view.source
-      from post_ids
+      from post_ids,
       LATERAL get_post_view_by_id(post_ids.id) hp
       LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __account_id AND blacklisted_by_observer_view.blacklisted_id = hp.author_id)
       order by post_ids.id desc;
@@ -210,7 +210,7 @@ BEGIN
           AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp1.author_id))
       ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
       LIMIT _limit
-  ) as payout
+  ) as payout,
   LATERAL get_post_view_by_id(payout.id) hp
   ORDER BY payout.all_payout DESC, payout.id DESC
   LIMIT _limit;
@@ -425,7 +425,7 @@ BEGIN
           AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp1.author_id))
       ORDER BY hp1.sc_trend DESC, hp1.id DESC
       LIMIT _limit
-  ) trending
+  ) trending,
   LATERAL get_post_view_by_id(trending.id) hp
   ORDER BY trending.sc_trend DESC, trending.id DESC
   LIMIT _limit;

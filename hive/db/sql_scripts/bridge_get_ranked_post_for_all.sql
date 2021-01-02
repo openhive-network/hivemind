@@ -60,7 +60,7 @@ BEGIN
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
       ORDER BY hp1.id DESC
       LIMIT _limit
-  ) as created
+  ) as created,
   LATERAL get_post_view_by_id(created.id) hp
   ORDER BY created.id DESC
   LIMIT _limit;
@@ -136,7 +136,7 @@ BEGIN
           AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
       ORDER BY hp1.sc_hot DESC, hp1.id DESC
       LIMIT _limit
-  ) as hot
+  ) as hot,
   LATERAL get_post_view_by_id(hot.id) hp
   ORDER BY hot.hot DESC, hot.id DESC
   LIMIT _limit;
@@ -212,7 +212,7 @@ BEGIN
           AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
       ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
       LIMIT _limit
-  ) as payout
+  ) as payout,
   LATERAL get_post_view_by_id(payout.id) hp
   ORDER BY payout.all_payout DESC, payout.id DESC
   LIMIT _limit;
@@ -288,7 +288,7 @@ BEGIN
           AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
       ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
       LIMIT _limit
-  ) as payout
+  ) as payout,
   LATERAL get_post_view_by_id(payout.id) hp
   ORDER BY payout.all_payout DESC, payout.id DESC
   LIMIT _limit;
@@ -367,7 +367,7 @@ BEGIN
           AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
       ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
       LIMIT _limit
-  ) as payout
+  ) as payout,
   LATERAL get_post_view_by_id(payout.id) hp
   ORDER BY payout.all_payout DESC, payout.id DESC
   LIMIT _limit;
@@ -443,7 +443,7 @@ BEGIN
           AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
       ORDER BY hp1.promoted DESC, hp1.id DESC
       LIMIT _limit
-  ) as promoted
+  ) as promoted,
   LATERAL get_post_view_by_id(promoted.id) hp
   ORDER BY promoted.promoted DESC, promoted.id DESC
   LIMIT _limit;
@@ -519,7 +519,7 @@ BEGIN
           AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
       ORDER BY hp1.sc_trend DESC, hp1.id DESC
       LIMIT _limit
-  ) as trends
+  ) as trends,
   LATERAL get_post_view_by_id(trends.id) hp
   ORDER BY trends.trend DESC, trends.id DESC
   LIMIT _limit;

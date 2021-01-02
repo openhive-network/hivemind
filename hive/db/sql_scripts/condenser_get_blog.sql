@@ -79,7 +79,7 @@ BEGIN
       ORDER BY hfc.created_at ASC, hfc.post_id ASC
       LIMIT _limit
       OFFSET __offset
-  ) as blog
+  ) as blog,
   LATERAL get_post_view_by_id(blog.post_id) hp
   ORDER BY blog.created_at ASC, blog.post_id ASC;
 END
