@@ -11,7 +11,24 @@ BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __hive_tag = ARRAY_APPEND( __hive_tag, find_tag_id( _tag, True ));
   __observer_id = find_account_id(_observer, True);
-  RETURN QUERY SELECT
+  RETURN QUERY
+  with created as
+  (
+    SELECT
+      hp1.id as id,
+      blacklisted_by_observer_view.source as source
+    FROM
+      hive_posts hp1
+      JOIN hive_accounts_view ha ON hp1.author_id = ha.id
+      LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp1.author_id)
+    WHERE hp1.tags_ids @> __hive_tag
+      AND hp1.counter_deleted = 0 AND hp1.depth = 0
+      AND ( __post_id = 0 OR hp1.id < __post_id )
+      AND NOT ha.is_grayed AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
+    ORDER BY hp1.id DESC
+    LIMIT _limit
+  )
+  SELECT
       hp.id,
       hp.author,
       hp.parent_author,
@@ -50,21 +67,7 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       created.source
-  FROM
-  (
-      SELECT
-          hp1.id,
-          blacklisted_by_observer_view.source as source
-      FROM
-          hive_posts hp1
-          JOIN hive_accounts_view ha ON hp1.author_id = ha.id
-          LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp1.author_id)
-      WHERE hp1.tags_ids @> __hive_tag AND hp1.counter_deleted = 0 AND hp1.depth = 0 AND NOT ha.is_grayed AND ( __post_id = 0 OR hp1.id < __post_id )
-      --ORDER BY hp1.id + 0 DESC -- this workaround helped the query to better choose indexes, but after some time it started to significally slow down
-      AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
-      ORDER BY hp1.id DESC
-      LIMIT _limit
-  ) as created,
+  FROM created,
   LATERAL get_post_view_by_id(created.id) hp
   ORDER BY created.id DESC
   LIMIT _limit;
