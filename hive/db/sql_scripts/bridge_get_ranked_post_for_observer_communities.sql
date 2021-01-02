@@ -426,7 +426,7 @@ BEGIN
       ORDER BY hp1.sc_trend DESC, hp1.id DESC
       LIMIT _limit
   ) trending
-  LATERAL get_hive_post_by_id(trending.id) hp
+  LATERAL get_post_view_by_id(trending.id) hp
   ORDER BY trending.sc_trend DESC, trending.id DESC
   LIMIT _limit;
 END

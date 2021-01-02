@@ -589,7 +589,7 @@ BEGIN
       ORDER BY hp1.id DESC
       LIMIT _limit
   ) as created
-  LATERAL get_hive_post_by_id(created.id) hp
+  LATERAL get_post_view_by_id(created.id) hp
   ORDER BY created.id DESC
   LIMIT _limit;
 END
