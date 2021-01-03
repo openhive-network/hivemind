@@ -19,7 +19,7 @@ BEGIN
     WHERE hc.name = _community AND hp.is_pinned
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp.author_id))
     ORDER BY hp.id DESC
-    LIMIT _limit;
+    LIMIT _limit
   )
   SELECT
       hp.id,

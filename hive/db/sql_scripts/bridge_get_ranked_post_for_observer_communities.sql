@@ -273,7 +273,7 @@ BEGIN
 	                  OR ((hp.payout + hp.pending_payout) = __payout_limit AND hp.id < __post_id) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp.author_id))
     ORDER BY (hp.payout + hp.pending_payout) DESC, hp.id DESC
-    LIMIT _limit;
+    LIMIT _limit
   )
   SELECT
       hp.id,
@@ -350,7 +350,7 @@ BEGIN
       AND ( __post_id = 0 OR hp.promoted < __promoted_limit OR ( hp.promoted = __promoted_limit AND hp.id < __post_id ) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp.author_id))
     ORDER BY hp.promoted DESC, hp.id DESC
-    LIMIT _limit;
+    LIMIT _limit
   )
   SELECT
       hp.id,

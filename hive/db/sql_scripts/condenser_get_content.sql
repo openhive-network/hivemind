@@ -7,7 +7,8 @@ DECLARE
   __post_id INT;
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
-  RETURN QUERY SELECT
+  RETURN QUERY 
+  SELECT
       hp.id,
       hp.author,
       hp.permlink,
@@ -54,6 +55,7 @@ $function$
 language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS condenser_get_content_replies;
+-- This currently doesn't have a limit on direct replies, is it possible one is needed?
 CREATE FUNCTION condenser_get_content_replies( in _author VARCHAR, in _permlink VARCHAR )
 RETURNS SETOF condenser_api_post_ex
 AS
@@ -65,7 +67,7 @@ BEGIN
   RETURN QUERY 
   WITH replies AS
   (
-    SELECT id FROM hive_posts hp where hp.parent_id = __post_id ORDER BY hp.id;
+    SELECT id FROM hive_posts hp where hp.parent_id = __post_id ORDER BY hp.id
   )
   SELECT
       hp.id,

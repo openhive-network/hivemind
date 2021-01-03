@@ -1,10 +1,6 @@
 DROP FUNCTION IF EXISTS condenser_get_by_blog_without_reblog;
 
-CREATE OR REPLACE FUNCTION condenser_get_by_blog_without_reblog(
-  in _author VARCHAR,
-  in _permlink VARCHAR,
-  in _limit INTEGER
-)
+CREATE OR REPLACE FUNCTION condenser_get_by_blog_without_reblog( in _author VARCHAR, in _permlink VARCHAR, in _limit INTEGER)
 RETURNS SETOF bridge_api_post
 AS
 $function$
@@ -15,15 +11,16 @@ BEGIN
   __author_id = find_account_id( _author, True );
   __post_id = find_comment_id( _author, _permlink, _permlink <> '' );
   RETURN QUERY 
-  WITH blog_posts
+  WITH blog_posts AS
   (
-    SELECT id
+    SELECT 
+      hp.id
     FROM hive_posts hp
     WHERE hp.author_id = __author_id 
       AND hp.depth = 0 
-      AND ( ( __post_id = 0 ) OR ( hp.id < __post_id ) )
+      AND ((__post_id = 0) OR (hp.id < __post_id))
     ORDER BY hp.id DESC
-    LIMIT _limit;
+    LIMIT _limit
   )
   SELECT
       hp.id,
@@ -70,4 +67,4 @@ BEGIN
     LIMIT _limit;
 END
 $function$
-language plpgsql STABLE;
+LANGUAGE plpgsql STABLE;

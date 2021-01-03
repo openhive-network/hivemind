@@ -35,7 +35,7 @@ BEGIN
     WHERE hfc.account_id = __account_id 
       AND ( ( __post_id = 0 ) OR ( hfc.created_at <= __created_at ) )
     ORDER BY hp.created_at DESC, hp.id DESC
-    LIMIT _limit;
+    LIMIT _limit
   )
   SELECT
       hp.id,

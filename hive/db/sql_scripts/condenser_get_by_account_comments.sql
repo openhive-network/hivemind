@@ -21,7 +21,7 @@ BEGIN
       AND hp.depth > 0
       AND ( ( __post_id = 0 ) OR ( hp.id <= __post_id ) ) 
     ORDER BY hp.id DESC
-    LIMIT _limit;
+    LIMIT _limit
   )
   SELECT
       hp.id,
