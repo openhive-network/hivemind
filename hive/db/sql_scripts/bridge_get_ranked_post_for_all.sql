@@ -9,7 +9,23 @@ DECLARE
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __observer_id = find_account_id( _observer, True );
-  RETURN QUERY SELECT
+  RETURN QUERY 
+  WITH created AS
+  (
+    SELECT
+      hp1.id,
+      blacklist.source as blacklist_source
+    FROM hive_posts hp1
+    JOIN hive_accounts_view ha ON hp1.author_id = ha.id
+    LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
+    WHERE hp1.counter_deleted = 0 AND hp1.depth = 0 
+      AND NOT ha.is_grayed 
+      AND ( __post_id = 0 OR hp1.id < __post_id )
+      AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
+    ORDER BY hp1.id DESC
+    LIMIT _limit
+  )
+  SELECT
       hp.id,
       hp.author,
       hp.parent_author,
@@ -47,20 +63,8 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      created.source
-  FROM
-  (
-      SELECT
-          hp1.id,
-          blacklisted_by_observer_view.source as source
-      FROM hive_posts hp1
-          JOIN hive_accounts_view ha ON hp1.author_id = ha.id
-          LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp1.author_id)
-      WHERE hp1.counter_deleted = 0 AND hp1.depth = 0 AND NOT ha.is_grayed AND ( __post_id = 0 OR hp1.id < __post_id )
-      AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
-      ORDER BY hp1.id DESC
-      LIMIT _limit
-  ) as created,
+      created.blacklist_source
+  FROM created,
   LATERAL get_post_view_by_id(created.id) hp
   ORDER BY created.id DESC
   LIMIT _limit;

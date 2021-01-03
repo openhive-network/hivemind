@@ -16,7 +16,7 @@ BEGIN
   (
     SELECT
       hp1.id AS id,
-      blacklist.source AS source
+      blacklist.source AS blacklist_source
     FROM
       hive_posts hp1
       JOIN hive_accounts_view ha ON hp1.author_id = ha.id
@@ -66,7 +66,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      created.source
+      created.blacklist_source
   FROM created,
   LATERAL get_post_view_by_id(created.id) hp
   ORDER BY created.id DESC

@@ -564,7 +564,7 @@ BEGIN
   (
     SELECT
       hp1.id,
-      blacklist.source as source
+      blacklist.source as blacklist_source
     FROM
       hive_posts hp1
       JOIN hive_communities hc ON hp1.community_id = hc.id
@@ -615,7 +615,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      created.source
+      created.blacklist_source
   FROM created,
   LATERAL get_post_view_by_id(created.id) hp
   ORDER BY created.id DESC
