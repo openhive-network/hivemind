@@ -153,7 +153,7 @@ BEGIN
       hp.is_muted,
       hot.blacklist_source
   FROM hot,
-  LATERAL get_post_view_by_id(payout.id) hp
+  LATERAL get_post_view_by_id(hot.id) hp
   ORDER BY hp.sc_hot DESC, hp.id DESC
   LIMIT _limit;
 END
