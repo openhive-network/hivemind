@@ -77,7 +77,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      T.reblogged_by
+      feed.reblogged_by
   FROM feed,
   LATERAL get_post_view_by_id(feed.post_id) hp
   ORDER BY feed.min_created DESC, feed.post_id DESC
