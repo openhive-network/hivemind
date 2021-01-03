@@ -55,7 +55,6 @@ $function$
 language plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS condenser_get_content_replies;
--- This currently doesn't have a limit on direct replies, is it possible one is needed?
 CREATE FUNCTION condenser_get_content_replies( in _author VARCHAR, in _permlink VARCHAR )
 RETURNS SETOF condenser_api_post_ex
 AS
@@ -67,7 +66,12 @@ BEGIN
   RETURN QUERY 
   WITH replies AS
   (
-    SELECT id FROM hive_posts hp where hp.parent_id = __post_id ORDER BY hp.id
+    SELECT id 
+    FROM hive_posts hp 
+    WHERE hp.parent_id = __post_id 
+      AND hp.counter_deleted = 0
+    ORDER BY hp.id
+    LIMIT 5000
   )
   SELECT
       hp.id,
