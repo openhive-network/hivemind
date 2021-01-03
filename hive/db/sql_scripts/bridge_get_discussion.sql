@@ -15,7 +15,7 @@ BEGIN
       WITH RECURSIVE child_posts (id, parent_id) AS
       (
         SELECT hp.id, hp.parent_id, blacklist.source as blacklist_source
-        FROM hive_posts hp i
+        FROM hive_posts hp
 	LEFT OUTER JOIN blacklisted_by_observer_view blacklist on (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE hp.id = __post_id
           AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp.author_id))
