@@ -500,7 +500,7 @@ BEGIN
   (
     SELECT
       hp.id AS id,
-      blacklist AS blacklist_source,
+      blacklist.source AS blacklist_source,
       (hp.payout + hp.pending_payout) as total_payout
     FROM hive_posts hp
     JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
