@@ -246,7 +246,8 @@ BEGIN
   IF __post_id <> 0 THEN
       SELECT (hp.payout + hp.pending_payout) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
-  RETURN QUERY 
+  RETURN QUERY
+  WITH payout AS
   (
     SELECT
       hp1.id,
