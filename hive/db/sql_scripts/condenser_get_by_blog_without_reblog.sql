@@ -14,7 +14,18 @@ DECLARE
 BEGIN
   __author_id = find_account_id( _author, True );
   __post_id = find_comment_id( _author, _permlink, _permlink <> '' );
-  RETURN QUERY SELECT
+  RETURN QUERY 
+  WITH blog_posts
+  (
+    SELECT id
+    FROM hive_posts hp
+    WHERE hp.author_id = __author_id 
+      AND hp.depth = 0 
+      AND ( ( __post_id = 0 ) OR ( hp.id < __post_id ) )
+    ORDER BY hp.id DESC
+    LIMIT _limit;
+  )
+  SELECT
       hp.id,
       hp.author,
       hp.parent_author,
@@ -53,8 +64,8 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       NULL
-    FROM hive_posts_view hp
-    WHERE hp.author_id = __author_id AND hp.depth = 0 AND ( ( __post_id = 0 ) OR ( hp.id < __post_id ) )
+    FROM blog_posts,
+    LATERAL get_post_view_by_id(blog_posts.id) hp
     ORDER BY hp.id DESC
     LIMIT _limit;
 END

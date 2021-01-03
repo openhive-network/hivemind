@@ -48,8 +48,7 @@ BEGIN
       hp.root_title,
       hp.active,
       hp.author_rewards
-    FROM hive_posts_view hp
-    WHERE hp.id = __post_id;
+    FROM get_post_view_by_id(__post_id) hp;
 END
 $function$
 language plpgsql STABLE;
@@ -63,7 +62,12 @@ DECLARE
   __post_id INT;
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
-  RETURN QUERY SELECT
+  RETURN QUERY 
+  WITH replies AS
+  (
+    SELECT id FROM hive_posts hp where hp.parent_id = __post_id ORDER BY hp.id;
+  )
+  SELECT
       hp.id,
       hp.author,
       hp.permlink,
@@ -104,10 +108,9 @@ BEGIN
       hp.root_title,
       hp.active,
       hp.author_rewards
-    FROM hive_posts_view hp
-    WHERE hp.parent_id = __post_id
+    FROM replies,
+    LATERAL get_post_view_by_id(replies.id) hp
     ORDER BY hp.id;
 END
 $function$
 language plpgsql STABLE;
-

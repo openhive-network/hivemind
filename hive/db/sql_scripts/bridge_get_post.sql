@@ -47,10 +47,7 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       NULL
-  FROM
-      hive_posts_view hp
-  WHERE
-      hp.id = __post_id;
+  FROM get_post_view_by_id(__post_id) hp;
 END
 $function$
 language plpgsql STABLE;
