@@ -79,7 +79,7 @@ BEGIN
       hp.is_muted,
       T.reblogged_by
   FROM feed,
-  LATERAL get_hive_post_by_id(feed.post_id) hp
+  LATERAL get_post_view_by_id(feed.post_id) hp
   ORDER BY feed.min_created DESC, feed.post_id DESC
   LIMIT _limit;
 END
