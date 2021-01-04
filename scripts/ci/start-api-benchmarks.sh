@@ -10,6 +10,7 @@ export HIVEMIND_PORT=$2
 ITERATIONS=${3:-5}
 JOBS=${4:-auto}
 export TAVERN_DISABLE_COMPARATOR=true
+export HIVEMIND_BENCHMARKS_IDS_FILE=$5
 
 echo Removing old files
 
@@ -21,7 +22,7 @@ echo Attempting to start benchmarks on hivemind instance listening on: $HIVEMIND
 for (( i=0; i<$ITERATIONS; i++ ))
 do
   echo About to run iteration $i
-  rm -f /tmp/test_ids.csv
+  rm -f HIVEMIND_BENCHMARKS_IDS_FILE
   tox -e tavern-benchmark -- \
       -W ignore::pytest.PytestDeprecationWarning \
       --workers $JOBS

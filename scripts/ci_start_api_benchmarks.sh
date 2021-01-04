@@ -7,6 +7,7 @@ pip3 install requests --user
 export HIVEMIND_ADDRESS=$1
 export HIVEMIND_PORT=$2
 export TAVERN_DISABLE_COMPARATOR=true
+export HIVEMIND_BENCHMARKS_IDS_FILE=$3
 
 echo Removing old files
 
@@ -20,7 +21,7 @@ ITERATIONS=$3
 for (( i=0; i<$ITERATIONS; i++ ))
 do
   echo About to run iteration $i
-  rm -f /tmp/test_ids.csv
+  rm -f HIVEMIND_BENCHMARKS_IDS_FILE
   tox -e tavern-benchmark -- -W ignore::pytest.PytestDeprecationWarning --workers auto
   echo Done!
 done
