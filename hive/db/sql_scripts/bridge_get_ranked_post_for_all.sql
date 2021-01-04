@@ -92,7 +92,7 @@ BEGIN
   (
     SELECT
       hp1.id,
-      hp1.sc_hot
+      hp1.sc_hot,
       blacklist.source
     FROM hive_posts hp1
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
@@ -412,7 +412,7 @@ BEGIN
   (
     SELECT
       hp1.id,
-      hp1.promoted as promoted,
+      hp1.promoted,
       blacklist.source
     FROM hive_posts hp1
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
