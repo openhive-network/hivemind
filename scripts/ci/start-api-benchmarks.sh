@@ -3,21 +3,29 @@
 set -e
 
 pip install tox
+pip install requests
 
 export HIVEMIND_ADDRESS=$1
 export HIVEMIND_PORT=$2
 ITERATIONS=${3:-5}
 JOBS=${4:-auto}
 export TAVERN_DISABLE_COMPARATOR=true
+export HIVEMIND_BENCHMARKS_IDS_FILE=$5
+
+echo Removing old files
+
+rm -f ./tavern_benchmarks_report.html
+rm -f ./tests/tests_api/hivemind/tavern/benchmark.csv
 
 echo Attempting to start benchmarks on hivemind instance listening on: $HIVEMIND_ADDRESS port: $HIVEMIND_PORT
 
 for (( i=0; i<$ITERATIONS; i++ ))
 do
   echo About to run iteration $i
+  rm -f HIVEMIND_BENCHMARKS_IDS_FILE
   tox -e tavern-benchmark -- \
       -W ignore::pytest.PytestDeprecationWarning \
-      -n $JOBS \
-      --junitxml=../../../../benchmarks-$i.xml
+      --workers $JOBS
   echo Done!
 done
+./scripts/csv_report_parser.py http://$HIVEMIND_ADDRESS $HIVEMIND_PORT ./tests/tests_api/hivemind/tavern ./tests/tests_api/hivemind/tavern

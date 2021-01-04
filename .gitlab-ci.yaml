@@ -366,8 +366,8 @@ stages:
     ./scripts/ci/start-api-benchmarks.sh \
         localhost $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
         $RUNNER_BENCHMARK_ITERATIONS \
-        $RUNNER_BENCHMARK_JOBS
-  - ./scripts/xml_report_parser.py --time-threshold=1.5 . ./tests/tests_api/hivemind/tavern
+        $RUNNER_BENCHMARK_JOBS \
+        $CI_PROJECT_DIR/tests_ids.csv
 
 .api-smoketest-benchmark:
   stage: benchmark-tests
