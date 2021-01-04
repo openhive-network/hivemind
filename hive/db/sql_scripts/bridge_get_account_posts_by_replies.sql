@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.bridge_get_account_posts_by_replies(_account VARCHAR, _author VARCHAR, _permlink VARCHAR, _limit SMALLINT, _bridge_api BOOLEAN) RETURNS SETOF bridge_api_post
+CREATE OR REPLACE FUNCTION bridge_get_account_posts_by_replies(_account VARCHAR, _author VARCHAR, _permlink VARCHAR, _limit SMALLINT, _bridge_api BOOLEAN) RETURNS SETOF bridge_api_post
 AS $function$
 DECLARE
   __account_id INT;
@@ -16,7 +16,19 @@ BEGIN
       __account_id = find_account_id( _account, True );
       __post_id = find_comment_id( _author, _permlink, True );
   END IF;
-  RETURN QUERY SELECT --bridge_get_account_posts_by_replies
+  RETURN QUERY
+  WITH replies AS --bridge_get_account_posts_by_replies
+  (
+    SELECT hpr.id
+    FROM hive_posts hpr
+    JOIN hive_posts hp1 ON hp1.id = hpr.parent_id
+    WHERE hp1.author_id = __account_id
+      AND hpr.counter_deleted = 0
+      AND (__post_id = 0 OR hpr.id < __post_id )
+    ORDER BY hpr.id DESC
+    LIMIT _limit
+  )
+  SELECT
       hp.id,
       hp.author,
       hp.parent_author,
@@ -55,19 +67,7 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       NULL
-  FROM
-  (
-    WITH ar as (SELECT hpr.id as id
-      FROM hive_posts hpr
-      JOIN hive_posts hp1 on hp1.id = hpr.parent_id
-      WHERE hp1.author_id = __account_id
-        AND (hpr.counter_deleted = 0)
-        AND (__post_id = 0 OR hpr.id < __post_id )
-    )
-    SELECT * FROM ar
-    ORDER BY ar.id DESC
-    LIMIT _limit
-  ) as replies,
+  FROM replies,
   LATERAL get_post_view_by_id(replies.id) hp
   ORDER BY replies.id DESC
   LIMIT _limit;

@@ -15,8 +15,8 @@ BEGIN
   WITH created AS
   (
     SELECT
-      hp1.id AS id,
-      blacklist.source AS blacklist_source
+      hp1.id,
+      blacklist.source
     FROM
       hive_posts hp1
       JOIN hive_accounts_view ha ON hp1.author_id = ha.id
@@ -66,7 +66,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      created.blacklist_source
+      created.source
   FROM created,
   LATERAL get_post_view_by_id(created.id) hp
   ORDER BY created.id DESC
@@ -96,12 +96,12 @@ BEGIN
   WITH hot AS 
   (
       SELECT
-          hp1.id as id,
+          hp1.id,
           hp1.sc_hot as hot,
-          blacklisted_by_observer_view.source as source
+          blacklist.source
       FROM
           hive_posts hp1
-          LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp1.author_id)
+          LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
       WHERE hp1.tags_ids @> __hive_tag AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth = 0
           AND ( __post_id = 0 OR hp1.sc_hot < __hot_limit OR ( hp1.sc_hot = __hot_limit AND hp1.id < __post_id ) )
           AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
@@ -178,7 +178,7 @@ BEGIN
     SELECT
         hp1.id,
         (hp1.payout + hp1.pending_payout) as total_payout,
-        blacklist.source as blacklist_source
+        blacklist.source
     FROM hive_posts hp1
     JOIN hive_accounts_view ha ON hp1.author_id = ha.id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
@@ -229,7 +229,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      payout.blacklist_source
+      payout.source
   FROM payout,
   LATERAL get_post_view_by_id(payout.id) hp
   ORDER BY payout.total_payout DESC, payout.id DESC
@@ -261,7 +261,7 @@ BEGIN
     SELECT
         hp1.id,
         (hp1.payout + hp1.pending_payout) as total_payout,
-        blacklist.source as blacklist_source
+        blacklist.source
     FROM
         hive_posts hp1
         LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
@@ -311,7 +311,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      payout.blaclist_source
+      payout.source
   FROM payout,
   LATERAL get_post_view_by_id(payout.id) hp
   ORDER BY payout.total_payout DESC, payout.id DESC
@@ -345,7 +345,7 @@ BEGIN
     SELECT
       hp1.id,
       (hp1.payout + hp1.pending_payout) as total_payout,
-      blacklist.source as blacklist_source
+      blacklist.source
     FROM hive_posts hp1
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE hp1.category_id = __hive_category 
@@ -396,7 +396,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      payout.blacklist_source
+      payout.source
   FROM payout,
   LATERAL get_post_view_by_id(payout.id) hp
   ORDER BY payout.total_payout DESC, payout.id DESC
@@ -427,8 +427,8 @@ BEGIN
   (
     SELECT
       hp1.id,
-      hp1.promoted as promoted,
-      blacklist.source as blacklist_source
+      hp1.promoted,
+      blacklist.source
     FROM hive_posts hp1
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE hp1.tags_ids @> __hive_tag
@@ -479,7 +479,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      promoted.blacklist_source
+      promoted.source
   FROM promoted,
   LATERAL get_post_view_by_id(promoted.id) hp
   ORDER BY promoted.promoted DESC, promoted.id DESC
@@ -511,7 +511,7 @@ BEGIN
     SELECT
       hp1.id,
       hp1.sc_trend as trend,
-      blacklist.source as blacklist_source
+      blacklist.source
     FROM hive_posts hp1
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE hp1.tags_ids @> __hive_tag 
@@ -562,7 +562,7 @@ SELECT
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      trends.blacklist_source
+      trends.source
   FROM trends,
   LATERAL get_post_view_by_id(trends.id) hp
   ORDER BY trends.trend DESC, trends.id DESC

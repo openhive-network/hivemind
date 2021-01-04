@@ -10,11 +10,11 @@ BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __observer_id = find_account_id( _observer, True );
   RETURN QUERY 
-  WITH created AS
+  WITH created AS -- bridge_get_ranked_post_by_created
   (
     SELECT
       hp1.id,
-      blacklist.source as blacklist_source
+      blacklist.source
     FROM hive_posts hp1
     JOIN hive_accounts_view ha ON hp1.author_id = ha.id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
@@ -63,7 +63,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      created.blacklist_source
+      created.source
   FROM created,
   LATERAL get_post_view_by_id(created.id) hp
   ORDER BY created.id DESC
@@ -88,12 +88,12 @@ BEGIN
       SELECT hp.sc_hot INTO __hot_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY
-  WITH hot AS
+  WITH hot AS -- bridge_get_ranked_post_by_hot
   (
     SELECT
       hp1.id,
-      hp1.sc_hot as hot,
-      blacklist.source as blacklist_source
+      hp1.sc_hot
+      blacklist.source
     FROM hive_posts hp1
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE hp1.counter_deleted = 0
@@ -142,10 +142,10 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      hot.blacklist_source
+      hot.source
   FROM hot,
   LATERAL get_post_view_by_id(hot.id) hp
-  ORDER BY hot.hot DESC, hot.id DESC
+  ORDER BY hot.sc_hot DESC, hot.id DESC
   LIMIT _limit;
 END
 $function$
@@ -171,17 +171,17 @@ BEGIN
   (
     SELECT
       hp1.id,
-      ( hp1.payout + hp1.pending_payout ) as total_payout,
-      blacklist.source as blacklist_source
+      (hp1.payout + hp1.pending_payout) as total_payout,
+      blacklist.source
     FROM hive_posts hp1
     JOIN hive_accounts_view ha ON hp1.author_id = ha.id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE hp1.counter_deleted = 0
       AND NOT hp1.is_paidout
       AND ha.is_grayed
-      AND ( hp1.payout + hp1.pending_payout ) > 0
+      AND (hp1.payout + hp1.pending_payout) > 0
       AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
-    ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
+    ORDER BY (hp1.payout + hp1.pending_payout) DESC, hp1.id DESC
     LIMIT _limit
   )
   SELECT
@@ -222,7 +222,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      payout.blacklist_source
+      payout.source
   FROM payout,
   LATERAL get_post_view_by_id(payout.id) hp
   ORDER BY payout.total_payout DESC, payout.id DESC
@@ -247,12 +247,12 @@ BEGIN
       SELECT (hp.payout + hp.pending_payout) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY
-  WITH payout AS
+  WITH payout AS -- bridge_get_ranked_post_by_payout_comments
   (
     SELECT
       hp1.id,
       (hp1.payout + hp1.pending_payout) as total_payout,
-      blacklist.source as blacklist_source
+      blacklist.source
     FROM hive_posts hp1
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE hp1.counter_deleted = 0
@@ -302,7 +302,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      payout.blacklist_source
+      payout.source
   FROM payout,
   LATERAL get_post_view_by_id(payout.id) hp
   ORDER BY payout.total_payout DESC, payout.id DESC
@@ -329,12 +329,12 @@ BEGIN
   END IF;
   __head_block_time = head_block_time();
   RETURN QUERY
-  WITH payout AS
+  WITH payout AS -- bridge_get_ranked_post_by_payout
   (
     SELECT
       hp1.id,
       (hp1.payout + hp1.pending_payout) as total_payout,
-      blacklist.source as blacklist_source
+      blacklist.source
     FROM hive_posts hp1
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE hp1.counter_deleted = 0
@@ -383,7 +383,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      payout.blacklist_source
+      payout.source
   FROM payout,
   LATERAL get_post_view_by_id(payout.id) hp
   ORDER BY payout.total_payout DESC, payout.id DESC
@@ -408,16 +408,16 @@ BEGIN
       SELECT hp.promoted INTO __promoted_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY
-  WITH promoted AS
+  WITH promoted AS -- bridge_get_ranked_post_by_promoted
   (
     SELECT
       hp1.id,
       hp1.promoted as promoted,
-      blacklist.source as blacklist_source
+      blacklist.source
     FROM hive_posts hp1
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE hp1.counter_deleted = 0
-      --  should we add this? AND hp1.depth = 0
+      AND hp1.depth = 0 -- require this to be a post
       AND NOT hp1.is_paidout
       AND hp1.promoted > 0
       AND ( __post_id = 0 OR hp1.promoted < __promoted_limit OR ( hp1.promoted = __promoted_limit AND hp1.id < __post_id ) )
@@ -463,7 +463,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      promoted.blacklist_source
+      promoted.source
   FROM promoted,
   LATERAL get_post_view_by_id(promoted.id) hp
   ORDER BY promoted.promoted DESC, promoted.id DESC
@@ -488,12 +488,12 @@ BEGIN
       SELECT hp.sc_trend INTO __trending_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY 
-  WITH trends AS
+  WITH trends AS -- bridge_get_ranked_post_by_trends
   (
     SELECT
       hp1.id,
       hp1.sc_trend as trend,
-      blacklist.source as blacklist_source
+      blacklist.source
     FROM
       hive_posts hp1
       LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
@@ -543,7 +543,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      trends.blacklist_source
+      trends.source
   FROM trends,
   LATERAL get_post_view_by_id(trends.id) hp
   ORDER BY trends.trend DESC, trends.id DESC

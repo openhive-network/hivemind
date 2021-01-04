@@ -10,17 +10,23 @@ BEGIN
     __post_id = find_comment_id( _author, _permlink, True );
     __observer_id = find_account_id( _observer, True );
     RETURN QUERY
-    WITH ds AS
+    WITH ds AS --bridge_get_discussion
     (
       WITH RECURSIVE child_posts (id, parent_id) AS
       (
-        SELECT hp.id, hp.parent_id, blacklist.source as blacklist_source
+        SELECT
+	  hp.id,
+	  hp.parent_id,
+          blacklist.source
         FROM hive_posts hp
 	LEFT OUTER JOIN blacklisted_by_observer_view blacklist on (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp.author_id)
         WHERE hp.id = __post_id
           AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp.author_id))
         UNION ALL
-        SELECT children.id, children.parent_id, blacklist.source as blacklist_source
+        SELECT
+          children.id,
+          children.parent_id,
+          blacklist.source
         FROM hive_posts children 
         LEFT OUTER JOIN blacklisted_by_observer_view blacklist on (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = children.author_id)
         JOIN child_posts ON children.parent_id = child_posts.id
@@ -28,12 +34,15 @@ BEGIN
         WHERE children.counter_deleted = 0
           AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = children.author_id))
       )
-      SELECT hp2.id, cp.source
+      SELECT
+        hp2.id,
+        cp.source
       FROM hive_posts hp2
       JOIN child_posts cp ON cp.id = hp2.id
       ORDER BY hp2.id
+      LIMIT 2000
     )
-    SELECT -- bridge_get_discussion
+    SELECT
         hp.id,
         hp.author,
         hp.parent_author,
@@ -72,7 +81,7 @@ BEGIN
         hp.curator_payout_value,
         hp.is_muted,
         hp.parent_id,
-        ds.blacklist_source
+        ds.source
     FROM ds,
     LATERAL get_post_view_by_id(ds.id) hp
     ORDER BY ds.id

@@ -102,7 +102,7 @@ BEGIN
   (
     SELECT 
       hp.id,
-      blacklist.source AS blacklist_source
+      blacklist.source
     FROM hive_posts hp
     JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __account_id AND blacklist.blacklisted_id = hp.author_id)
@@ -151,7 +151,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      hot.blacklist_source
+      hot.source
   FROM hot,
   LATERAL get_post_view_by_id(hot.id) hp
   ORDER BY hp.sc_hot DESC, hp.id DESC
@@ -181,7 +181,7 @@ BEGIN
     SELECT
       hp1.id,
       (hp1.payout + hp1.pending_payout) as total_payout,
-      blacklist.source as blacklist_source
+      blacklist.source
     FROM hive_posts hp1
     JOIN hive_subscriptions hs ON hp1.community_id = hs.community_id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __account_id AND blacklist.blacklisted_id = hp1.author_id)
@@ -230,7 +230,7 @@ SELECT
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      payout.blacklist_source
+      payout.source
   FROM payout,
   LATERAL get_post_view_by_id(payout.id) hp
   ORDER BY payout.total_payout DESC, payout.id DESC
@@ -262,7 +262,7 @@ BEGIN
     SELECT
       hp.id,
       (hp.payout + hp.pending_payout) as total_payout,
-      blacklist.source as blacklist_source
+      blacklist.source
     FROM hive_posts hp
     JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __account_id AND blacklist.blacklisted_id = hp.author_id)
@@ -313,7 +313,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      payout.blacklist_source
+      payout.source
   FROM payout,
   LATERAL get_post_view_by_id(payout.id) hp
   ORDER BY payout.total_payout DESC, payout.id DESC
@@ -341,8 +341,8 @@ BEGIN
   WITH promoted AS
   (
     SELECT
-      hp.id AS id,
-      blacklist.source AS blacklist_source
+      hp.id,
+      blacklist.source
     FROM hive_posts hp
     JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __account_id AND blacklist.blacklisted_id = hp.author_id)
@@ -390,7 +390,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      promoted.blacklist_source
+      promoted.source
   FROM promoted,
   LATERAL get_post_view_by_id(promoted.id) hp
   ORDER BY hp.promoted DESC, hp.id DESC
@@ -421,7 +421,7 @@ BEGIN
     SELECT
       hp1.id,
       hp1.sc_trend,
-      blacklist.source AS blacklist_source
+      blacklist.source
     FROM hive_posts hp1
     JOIN hive_subscriptions hs ON hp1.community_id = hs.community_id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __account_id AND blacklist.blacklisted_id = hp1.author_id)
@@ -471,7 +471,7 @@ SELECT
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      trending.blacklist_source
+      trending.source
   FROM trending,
   LATERAL get_post_view_by_id(trending.id) hp
   ORDER BY trending.sc_trend DESC, trending.id DESC
@@ -499,8 +499,8 @@ BEGIN
   WITH muted AS
   (
     SELECT
-      hp.id AS id,
-      blacklist.source AS blacklist_source,
+      hp.id,
+      blacklist.source,
       (hp.payout + hp.pending_payout) as total_payout
     FROM hive_posts hp
     JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
@@ -553,7 +553,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      muted.blacklist_source
+      muted.source
   FROM muted,
   LATERAL get_post_view_by_id(muted.id) hp
   ORDER BY muted.total_payout DESC, hp.id DESC
