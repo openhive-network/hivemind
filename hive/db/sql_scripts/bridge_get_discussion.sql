@@ -1,8 +1,6 @@
 DROP FUNCTION IF EXISTS bridge_get_discussion;
 CREATE OR REPLACE FUNCTION public.bridge_get_discussion(_author character varying, _permlink character varying, _observer character varying)
  RETURNS SETOF bridge_api_post_discussion
- LANGUAGE plpgsql
- STABLE
 AS $function$
 DECLARE
     __post_id INT;
