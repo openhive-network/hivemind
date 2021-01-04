@@ -1,0 +1,62 @@
+version: '3'
+
+services:
+
+  pgwatch2:
+    # Docs: https://pgwatch2.readthedocs.io/en/latest/index.html
+    image: cybertec/pgwatch2-nonroot:1.8.0
+    restart: unless-stopped
+    ports:
+      # Grafana dashboarding
+      - "${PGWATCH2_GRAFANA_PUBLISHED_PORT}:3000"
+      # Management Web UI (monitored hosts, metrics, metrics configurations)
+      - "${PGWATCH2_WEBUI_PUBLISHED_PORT}:8080"
+      # Gatherer healthcheck / statistics on number of gathered metrics (JSON)
+      - "${PGWATCH2_DAEMON_PUBLISHED_PORT}:8081"
+      # Postgres configuration (or metrics storage DB, when using the cybertec/pgwatch2-postgres image)
+      - "${PGWATCH2_POSTGRES_PUBLISHED_PORT}:5432"
+      # InfluxDB API (when using the InfluxDB version)
+      - "${PGWATCH2_INFLUXDB_API_PUBLISHED_PORT}:8086"
+      # InfluxDB Backup port (when using the InfluxDB version)
+      - "${PGWATCH2_INFLUXDB_BACKUP_PUBLISHED_PORT}:8088"
+    volumes:
+      - pgwatch2-postgresql:/var/lib/postgresql
+      - pgwatch2-grafana:/var/lib/grafana
+      - pgwatch2-influxdb:/var/lib/influxdb
+      - pgwatch2-pgwatch2:/pgwatch2/persistent-config
+
+  pghero:
+    # Docs: https://github.com/ankane/pghero
+    image: ankane/pghero:v2.7.2
+    environment:
+      DATABASE_URL: ${PGHERO_DATABASE_URL}
+    restart: unless-stopped
+    ports:
+      - "${PGHERO_PUBLISHED_PORT}:8080"
+    volumes:
+      - $PWD/scripts/db-monitoring/pghero.yml:/app/config/pghero.yml
+
+  pgadmin4:
+    # Docs: https://www.pgadmin.org/docs/pgadmin4/latest/container_deployment.html
+    image: dpage/pgadmin4:4.26
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+      - PGADMIN_LISTEN_ADDRESS=${PGADMIN_LISTEN_ADDRESS}
+      - PGADMIN_LISTEN_PORT=${PGADMIN_LISTEN_PORT}
+    restart: unless-stopped
+    ports:
+      - "${PGADMIN_PUBLISHED_PORT}:${PGADMIN_LISTEN_PORT}"
+    volumes:
+      - pgadmin4-pgadmin4:/pgadmin4
+      - pgadmin4-certs:/certs
+      - pgadmin4-lib:/var/lib/pgadmin
+
+volumes:
+  pgwatch2-postgresql:
+  pgwatch2-grafana:
+  pgwatch2-influxdb:
+  pgwatch2-pgwatch2:
+  pgadmin4-pgadmin4:
+  pgadmin4-certs:
+  pgadmin4-lib:

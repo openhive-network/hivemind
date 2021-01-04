@@ -11,9 +11,7 @@ from hive.server.common.mutes import Mutes
 
 from hive.server.condenser_api.objects import (
     load_accounts,
-    load_posts,
-    load_posts_keyed,
-    load_posts_reblogs)
+    _condenser_post_object)
 from hive.server.common.helpers import (
     ApiError,
     return_error_info,
@@ -26,6 +24,9 @@ from hive.server.condenser_api.tags import (
     get_top_trending_tags_summary)
 
 import hive.server.condenser_api.cursor as cursor
+
+from hive.server.condenser_api.methods import get_posts_by_given_sort, get_discussions_by_feed_impl
+from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 
 log = logging.getLogger(__name__)
 
@@ -128,15 +129,15 @@ async def get_state(context, path: str):
         author = valid_account(part[1][1:])
         permlink = valid_permlink(part[2])
         state['content'] = await _load_discussion(db, author, permlink)
-        state['accounts'] = await _load_content_accounts(db, state['content'])
+        state['accounts'] = await _load_content_accounts(db, state['content'], True)
 
     # ranked posts - `/sort/category`
     elif part[0] in POST_LIST_SORTS:
         assert not part[2], "unexpected discussion path part[2] %s" % path
         sort = valid_sort(part[0])
         tag = valid_tag(part[1].lower(), allow_empty=True)
-        pids = await cursor.pids_by_query(db, sort, '', '', 20, tag)
-        state['content'] = _keyed_posts(await load_posts(db, pids))
+        pids = await get_posts_by_given_sort(context, sort, '', '', 20, tag)
+        state['content'] = _keyed_posts(pids)
         state['discussion_idx'] = {tag: {sort: list(state['content'].keys())}}
         state['tag_idx'] = {'trending': await get_top_trending_tags_summary(context)}
 
@@ -160,17 +161,13 @@ async def _get_account_discussion_by_key(db, account, key):
     assert key, 'discussion key must be specified'
 
     if key == 'recent_replies':
-        pids = await cursor.pids_by_replies_to_account(db, account, '', 20)
-        posts = await load_posts(db, pids)
+        posts = await cursor.get_by_replies_to_account(db, account, '', 20)
     elif key == 'comments':
-        pids = await cursor.pids_by_account_comments(db, account, '', 20)
-        posts = await load_posts(db, pids)
+        posts = await cursor.get_by_account_comments(db, account, '', 20)
     elif key == 'blog':
-        pids = await cursor.pids_by_blog(db, account, '', '', 20)
-        posts = await load_posts(db, pids)
+        posts = await cursor.get_by_blog(db, account, '', '', 20)
     elif key == 'feed':
-        res = await cursor.pids_by_feed_with_reblog(db, account, '', '', 20)
-        posts = await load_posts_reblogs(db, res)
+        posts = await get_discussions_by_feed_impl(db, account, '', '', 20)
     else:
         raise ApiError("unknown account discussion key %s" % key)
 
@@ -206,12 +203,15 @@ def _keyed_posts(posts):
 def _ref(post):
     return post['author'] + '/' + post['permlink']
 
-async def _load_content_accounts(db, content):
+def _ref_parent(post):
+    return post['parent_author'] + '/' + post['parent_permlink']
+
+async def _load_content_accounts(db, content, lite = False):
     if not content:
         return {}
     posts = content.values()
     names = set(map(lambda p: p['author'], posts))
-    accounts = await load_accounts(db, names)
+    accounts = await load_accounts(db, names, lite)
     return {a['name']: a for a in accounts}
 
 async def _load_account(db, name):
@@ -228,55 +228,44 @@ async def _child_ids(db, parent_ids):
              SELECT parent_id, array_agg(id)
                FROM hive_posts
               WHERE parent_id IN :ids
-                AND is_deleted = '0'
+                AND counter_deleted = 0
            GROUP BY parent_id
     """
     rows = await db.query_all(sql, ids=tuple(parent_ids))
     return [[row[0], row[1]] for row in rows]
 
-async def _load_discussion(db, author, permlink):
+async def _load_discussion(db, author, permlink, observer=None):
     """Load a full discussion thread."""
-    root_id = await cursor.get_post_id(db, author, permlink)
-    if not root_id:
-        return {}
 
-    # build `ids` list and `tree` map
-    ids = []
-    tree = {}
-    todo = [root_id]
-    while todo:
-        ids.extend(todo)
-        rows = await _child_ids(db, todo)
-        todo = []
-        for pid, cids in rows:
-            tree[pid] = cids
-            todo.extend(cids)
+    sql = "SELECT * FROM bridge_get_discussion(:author,:permlink,:observer)"
+    sql_result = await db.query_all(sql, author=author, permlink=permlink, observer=observer)
 
-    # load all post objects, build ref-map
-    posts = await load_posts_keyed(db, ids)
+    posts = []
+    posts_by_id = {}
+    replies = {}
 
-    # remove posts/comments from muted accounts
-    muted_accounts = Mutes.all()
-    rem_pids = []
-    for pid, post in posts.items():
-        if post['author'] in muted_accounts:
-            rem_pids.append(pid)
-    for pid in rem_pids:
-        if pid in posts:
-            del posts[pid]
-        if pid in tree:
-            rem_pids.extend(tree[pid])
+    for row in sql_result:
+      post = _condenser_post_object(row)
 
-    refs = {pid: _ref(post) for pid, post in posts.items()}
+      post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
+      posts.append(post)
 
-    # add child refs to parent posts
-    for pid, post in posts.items():
-        if pid in tree:
-            post['replies'] = [refs[cid] for cid in tree[pid]
-                               if cid in refs]
+      parent_key = _ref_parent(post)
+      _key = _ref(post)
+      if parent_key not in replies:
+        replies[parent_key] = []
+      replies[parent_key].append(_key)
 
-    # return all nodes keyed by ref
-    return {refs[pid]: post for pid, post in posts.items()}
+    for post in posts:
+      _key = _ref(post)
+      if _key in replies:
+        replies[_key].sort()
+        post['replies'] = replies[_key]
+
+    for post in posts:
+      posts_by_id[_ref(post)] = post
+
+    return posts_by_id
 
 @cached(ttl=1800, timeout=1200)
 async def _get_feed_price(db):
@@ -291,18 +280,18 @@ async def _get_props_lite(db):
 
     # convert NAI amounts to legacy
     nais = ['virtual_supply', 'current_supply', 'current_sbd_supply',
-            'pending_rewarded_vesting_steem', 'pending_rewarded_vesting_shares',
-            'total_vesting_fund_steem', 'total_vesting_shares']
+            'pending_rewarded_vesting_hive', 'pending_rewarded_vesting_shares',
+            'total_vesting_fund_hive', 'total_vesting_shares']
     for k in nais:
         if k in raw:
             raw[k] = legacy_amount(raw[k])
 
     return dict(
         time=raw['time'], #*
-        sbd_print_rate=raw['sbd_print_rate'],
-        sbd_interest_rate=raw['sbd_interest_rate'],
+        hbd_print_rate=raw['hbd_print_rate'],
+        hbd_interest_rate=raw['hbd_interest_rate'],
         head_block_number=raw['head_block_number'], #*
         total_vesting_shares=raw['total_vesting_shares'],
-        total_vesting_fund_steem=raw['total_vesting_fund_steem'],
+        total_vesting_fund_hive=raw['total_vesting_fund_hive'],
         last_irreversible_block_num=raw['last_irreversible_block_num'], #*
     )

@@ -1,5 +1,8 @@
 """Tight and reliable steem API client for hive indexer."""
 
+from hive.indexer.mock_data_provider import MockDataProviderException
+import logging
+
 from time import perf_counter as perf
 from decimal import Decimal
 
@@ -7,6 +10,12 @@ from hive.utils.stats import Stats
 from hive.utils.normalize import parse_amount, steem_amount, vests_amount
 from hive.steem.http_client import HttpClient
 from hive.steem.block.stream import BlockStream
+from hive.steem.blocks_provider import BlocksProvider
+from hive.steem.vops_provider import VopsProvider
+from hive.indexer.mock_block_provider import MockBlockProvider
+from hive.indexer.mock_vops_provider import MockVopsProvider
+
+logger = logging.getLogger(__name__)
 
 class SteemClient:
     """Handles upstream calls to jussi/steemd, with batching and retrying."""
@@ -21,10 +30,11 @@ class SteemClient:
         self._max_workers = max_workers
         self._client = dict()
         for endpoint, endpoint_url in url.items():
-            print("Endpoint {} will be routed to node {}".format(endpoint, endpoint_url))
+            logger.info("Endpoint %s will be routed to node %s" % (endpoint, endpoint_url))
             self._client[endpoint] = HttpClient(nodes=[endpoint_url])
 
-    def get_accounts(self, accounts):
+    def get_accounts(self, acc):
+        accounts = [v for v in acc if v != '']
         """Fetch multiple accounts by name."""
         assert accounts, "no accounts passed to get_accounts"
         assert len(accounts) <= 1000, "max 1000 accounts"
@@ -44,13 +54,9 @@ class SteemClient:
 
     def get_content_batch(self, tuples):
         """Fetch multiple comment objects."""
-        posts = self.__exec_batch('get_content', tuples)
-        # TODO: how are we ensuring sequential results? need to set and sort id.
-        for post in posts: # sanity-checking jussi responses
-            assert 'author' in post, "invalid post: %s" % post
-        return posts
+        raise NotImplementedError("get_content is not implemented in hived")
 
-    def get_block(self, num, strict=True):
+    def get_block(self, num):
         """Fetches a single block.
 
         If the result does not contain a `block` key, it's assumed
@@ -58,19 +64,70 @@ class SteemClient:
         """
         result = self.__exec('get_block', {'block_num': num})
         if 'block' in result:
-            return result['block']
-        elif strict:
-            raise Exception('block %d not available' % num)
-        else:
-            return None
+            ret = result['block']
 
-    def stream_blocks(self, start_from, trail_blocks=0, max_gap=100):
+            #logger.info("Found real block %d with timestamp: %s", num, ret['timestamp'])
+
+            MockBlockProvider.set_last_real_block_num_date(num, ret['timestamp'])
+            data = MockBlockProvider.get_block_data(num)
+            if data is not None:
+                ret["transactions"].extend(data["transactions"])
+                ret["transaction_ids"].extend(data["transaction_ids"])
+            return ret
+        else:
+            # if block does not exist in hived but exist in Mock Provider
+            # return block from block provider
+            mocked_block = MockBlockProvider.get_block_data(num, True)
+            #logger.info("Found real block %d with timestamp: %s", num, mocked_block['timestamp'])
+            return mocked_block
+
+    def get_blocks_provider( cls, lbound, ubound, breaker ):
+        """create and returns blocks provider
+            lbound - start block
+            ubound - end block
+            breaker - callable, returns false when processing must be stopped
+        """
+        new_blocks_provider = BlocksProvider(
+              cls._client["get_block"] if "get_block" in cls._client else cls._client["default"]
+            , cls._max_workers
+            , cls._max_batch
+            , lbound
+            , ubound
+            , breaker
+        )
+        return new_blocks_provider
+
+    def get_vops_provider( cls, conf, lbound, ubound, breaker ):
+        """create and returns blocks provider
+            conf - configuration
+            lbound - start block
+            ubound - end block
+            breaker - callable, returns false when processing must be stopped
+        """
+        new_vops_provider = VopsProvider(
+              conf
+            , cls
+            , cls._max_workers
+            , cls._max_batch
+            , lbound
+            , ubound
+            , breaker
+        )
+        return new_vops_provider
+
+
+    def stream_blocks(self, start_from, trail_blocks=0, max_gap=100, do_stale_block_check=True):
         """Stream blocks. Returns a generator."""
-        return BlockStream.stream(self, start_from, trail_blocks, max_gap)
+        return BlockStream.stream(self, start_from, trail_blocks, max_gap, do_stale_block_check)
 
     def _gdgp(self):
         ret = self.__exec('get_dynamic_global_properties')
         assert 'time' in ret, "gdgp invalid resp: %s" % ret
+        mock_max_block_number = MockBlockProvider.get_max_block_number()
+        if mock_max_block_number > ret['head_block_number']:
+            ret['time'] = MockBlockProvider.get_block_data(mock_max_block_number)['timestamp']
+        ret['head_block_number'] = max([int(ret['head_block_number']), mock_max_block_number])
+        #ret['last_irreversible_block_num'] = max([int(ret['last_irreversible_block_num']), mock_max_block_number])
         return ret
 
     def head_time(self):
@@ -94,7 +151,8 @@ class SteemClient:
                   'confidential_sbd_supply', 'total_reward_fund_steem',
                   'total_reward_shares2']
         for key in unused:
-            del dgpo[key]
+            if key in dgpo:
+                del dgpo[key]
 
         return {
             'dgpo': dgpo,
@@ -104,7 +162,7 @@ class SteemClient:
 
     @staticmethod
     def _get_steem_per_mvest(dgpo):
-        steem = steem_amount(dgpo['total_vesting_fund_steem'])
+        steem = steem_amount(dgpo['total_vesting_fund_hive'])
         mvests = vests_amount(dgpo['total_vesting_shares']) / Decimal(1e6)
         return "%.6f" % (steem / mvests)
 
@@ -112,15 +170,20 @@ class SteemClient:
         # TODO: add latest feed price: get_feed_history.price_history[0]
         feed = self.__exec('get_feed_history')['current_median_history']
         units = dict([parse_amount(feed[k])[::-1] for k in ['base', 'quote']])
-        price = units['HBD'] / units['HIVE']
+        if 'TBD' in units and 'TESTS' in units:
+            price = units['TBD'] / units['TESTS']
+        else:
+            price = units['HBD'] / units['HIVE']
         return "%.6f" % price
 
     def _get_steem_price(self):
         orders = self.__exec('get_order_book', [1])
-        ask = Decimal(orders['asks'][0]['real_price'])
-        bid = Decimal(orders['bids'][0]['real_price'])
-        price = (ask + bid) / 2
-        return "%.6f" % price
+        if orders['asks'] and orders['bids']:
+            ask = Decimal(orders['asks'][0]['real_price'])
+            bid = Decimal(orders['bids'][0]['real_price'])
+            price = (ask + bid) / 2
+            return "%.6f" % price
+        return "0"
 
     def get_blocks_range(self, lbound, ubound):
         """Retrieves blocks in the range of [lbound, ubound)."""
@@ -128,13 +191,100 @@ class SteemClient:
         blocks = {}
 
         batch_params = [{'block_num': i} for i in block_nums]
+        idx = 0
         for result in self.__exec_batch('get_block', batch_params):
-            assert 'block' in result, "result w/o block key: %s" % result
-            block = result['block']
-            num = int(block['block_id'][:8], base=16)
-            blocks[num] = block
+            block_num = batch_params[idx]['block_num']
+            if 'block' in result:
+                block = result['block']
+                num = int(block['block_id'][:8], base=16)
+                assert block_num == num, "Reference block number and block number from result does not match"
+                blocks[num] = block
+                MockBlockProvider.set_last_real_block_num_date(num, block['timestamp'])
+                data = MockBlockProvider.get_block_data(num)
+                if data is not None:
+                    blocks[num]["transactions"].extend(data["transactions"])
+                    blocks[num]["transaction_ids"].extend(data["transaction_ids"])
+            else:
+                blocks[block_num] = MockBlockProvider.get_block_data(block_num, True)
+            idx += 1
 
         return [blocks[x] for x in block_nums]
+
+    def get_virtual_operations(self, block):
+        """ Get virtual ops from block """
+        result = self.__exec('get_ops_in_block', {"block_num":block, "only_virtual":True})
+        tracked_ops = ['author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation', 'comment_payout_update_operation', 'ineffective_delete_comment_operation']
+        ret = []
+        result = result['ops'] if 'ops' in result else []
+        for vop in result:
+            if vop['op']['type'] in tracked_ops:
+                ret.append(vop['op'])
+        return ret
+
+    def enum_virtual_ops(self, conf, begin_block, end_block):
+        """ Get virtual ops for range of blocks """
+
+        ret = {}
+
+        from_block = begin_block
+
+        #According to definition of hive::plugins::acount_history::enum_vops_filter:
+
+        author_reward_operation                 = 0x000002
+        comment_reward_operation                = 0x000008
+        effective_comment_vote_operation        = 0x400000
+        comment_payout_update_operation         = 0x000800
+        ineffective_delete_comment_operation    = 0x800000
+
+        tracked_ops_filter = author_reward_operation | comment_reward_operation | effective_comment_vote_operation | comment_payout_update_operation | ineffective_delete_comment_operation
+
+        resume_on_operation = 0
+
+        while from_block < end_block:
+            call_result = self.__exec('enum_virtual_ops', {"block_range_begin":from_block, "block_range_end":end_block
+                , "group_by_block": True, "include_reversible": True, "operation_begin": resume_on_operation, "limit": 1000, "filter": tracked_ops_filter
+            })
+
+            if conf.get('log_virtual_op_calls'):
+                call = """
+                Call enum_virtual_ops:
+                Query: {{"block_range_begin":{}, "block_range_end":{}, "group_by_block": True, "operation_begin": {}, "limit": 1000, "filter": {} }}
+                Response: {}""".format ( from_block, end_block, resume_on_operation, tracked_ops_filter, call_result )
+                logger.info( call )
+
+
+            one_block_ops = {opb["block"] : {"timestamp":opb["timestamp"], "ops":[op["op"] for op in opb["ops"]]} for opb in call_result["ops_by_block"]}
+
+            if one_block_ops:
+                first_block = list(one_block_ops.keys())[0]
+                # if we continue collecting ops from previous iteration
+                if first_block in ret:
+                    ret.update( { first_block : { "timestamp":ret[ first_block ]["timestamp"], "ops":ret[ first_block ]["ops"] + one_block_ops[ first_block ]["ops"]} } )
+                    one_block_ops.pop( first_block, None )
+            ret.update( one_block_ops )
+
+            resume_on_operation = call_result['next_operation_begin'] if 'next_operation_begin' in call_result else 0
+
+            next_block = call_result['next_block_range_begin']
+
+            if next_block == 0:
+                break
+
+            if next_block < begin_block:
+                logger.error( "Next next block nr {} returned by enum_virtual_ops is smaller than begin block {}.".format( next_block, begin_block ) )
+                break
+
+            # Move to next block only if operations from current one have been processed completely.
+            from_block = next_block
+
+        MockVopsProvider.add_mock_vops(ret, begin_block, end_block)
+
+        return ret
+
+    def get_comment_pending_payouts(self, comments):
+        """ Get comment pending payout data """
+        ret = self.__exec('get_comment_pending_payouts', {'comments':comments})
+        return ret['cashout_infos']
 
     def __exec(self, method, params=None):
         """Perform a single steemd call."""

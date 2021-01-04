@@ -11,12 +11,13 @@ from aiohttp import web
 from jsonrpcserver.methods import Methods
 from jsonrpcserver import async_dispatch as dispatch
 
+import simplejson
+
 from hive.server.condenser_api import methods as condenser_api
 from hive.server.condenser_api.tags import get_trending_tags as condenser_api_get_trending_tags
 from hive.server.condenser_api.get_state import get_state as condenser_api_get_state
 from hive.server.condenser_api.call import call as condenser_api_call
 from hive.server.common.mutes import Mutes
-from hive.server.common.payout_stats import PayoutStats
 
 from hive.server.bridge_api import methods as bridge_api
 from hive.server.bridge_api.thread import get_discussion as bridge_api_get_discussion
@@ -25,10 +26,22 @@ from hive.server.bridge_api.support import get_post_header as bridge_api_get_pos
 from hive.server.hive_api import community as hive_api_community
 from hive.server.hive_api import notify as hive_api_notify
 from hive.server.hive_api import stats as hive_api_stats
+from hive.server.hive_api.public import get_info as hive_api_get_info
+
+from hive.server.follow_api import methods as follow_api
+from hive.server.tags_api import methods as tags_api
+
+from hive.server.database_api import methods as database_api
 
 from hive.server.db import Db
 
 # pylint: disable=too-many-lines
+
+def decimal_serialize(obj):
+    return simplejson.dumps(obj=obj, use_decimal=True)
+
+def decimal_deserialize(s):
+    return simplejson.loads(s=s, use_decimal=True)
 
 async def db_head_state(context):
     """Status/health check."""
@@ -48,6 +61,8 @@ def build_methods():
     methods.add(**{'hive.' + method.__name__: method for method in (
         db_head_state,
     )})
+
+    methods.add(**{'hive.get_info' : hive_api_get_info})
 
     methods.add(**{'condenser_api.' + method.__name__: method for method in (
         condenser_api.get_followers,
@@ -73,6 +88,7 @@ def build_methods():
         condenser_api.get_blog_entries,
         condenser_api.get_account_reputations,
         condenser_api.get_reblogged_by,
+        condenser_api.get_active_votes
     )})
 
     # dummy methods -- serve informational error
@@ -86,16 +102,16 @@ def build_methods():
         'follow_api.get_followers': condenser_api.get_followers,
         'follow_api.get_following': condenser_api.get_following,
         'follow_api.get_follow_count': condenser_api.get_follow_count,
-        'follow_api.get_account_reputations': condenser_api.get_account_reputations,
+        'follow_api.get_account_reputations': follow_api.get_account_reputations,
         'follow_api.get_blog': condenser_api.get_blog,
         'follow_api.get_blog_entries': condenser_api.get_blog_entries,
-        'follow_api.get_reblogged_by': condenser_api.get_reblogged_by,
+        'follow_api.get_reblogged_by': condenser_api.get_reblogged_by
     })
 
     # tags_api aliases
     methods.add(**{
-        'tags_api.get_discussion': condenser_api.get_content,
-        'tags_api.get_content_replies': condenser_api.get_content_replies,
+        'tags_api.get_discussion': tags_api.get_discussion,
+        'tags_api.get_content_replies': tags_api.get_content_replies,
         'tags_api.get_discussions_by_trending': condenser_api.get_discussions_by_trending,
         'tags_api.get_discussions_by_hot': condenser_api.get_discussions_by_hot,
         'tags_api.get_discussions_by_promoted': condenser_api.get_discussions_by_promoted,
@@ -104,7 +120,7 @@ def build_methods():
         'tags_api.get_discussions_by_comments': condenser_api.get_discussions_by_comments,
         'tags_api.get_discussions_by_author_before_date': condenser_api.get_discussions_by_author_before_date,
         'tags_api.get_post_discussions_by_payout': condenser_api.get_post_discussions_by_payout,
-        'tags_api.get_comment_discussions_by_payout': condenser_api.get_comment_discussions_by_payout,
+        'tags_api.get_comment_discussions_by_payout': condenser_api.get_comment_discussions_by_payout
     })
 
     # legacy `call` style adapter
@@ -123,6 +139,8 @@ def build_methods():
         bridge_api.get_profile,
         bridge_api.get_trending_topics,
         bridge_api.get_relationship_between_accounts,
+        bridge_api.get_follow_list,
+        bridge_api.does_user_follow_any_lists,
         hive_api_notify.post_notifications,
         hive_api_notify.account_notifications,
         hive_api_notify.unread_notifications,
@@ -135,6 +153,14 @@ def build_methods():
         hive_api_community.list_subscribers,
         hive_api_community.list_all_subscriptions,
     )})
+
+    # database_api methods
+    methods.add(**{
+        'database_api.list_comments' : database_api.list_comments,
+        'database_api.find_comments' : database_api.find_comments,
+        'database_api.list_votes' : database_api.list_votes,
+        'database_api.find_votes' : database_api.find_votes
+    })
 
     return methods
 
@@ -168,9 +194,6 @@ def run_server(conf):
     log = logging.getLogger(__name__)
     methods = build_methods()
 
-    mutes = Mutes(conf.get('muted_accounts_url'), conf.get('blacklist_api_url'))
-    Mutes.set_shared_instance(mutes)
-
     app = web.Application()
     app['config'] = dict()
     app['config']['args'] = conf.args()
@@ -182,15 +205,26 @@ def run_server(conf):
         args = app['config']['args']
         app['db'] = await Db.create(args['database_url'])
 
-        stats = PayoutStats(app['db'])
-        stats.set_shared_instance(stats)
-
     async def close_db(app):
         """Teardown db adapter."""
         app['db'].close()
         await app['db'].wait_closed()
 
+    async def show_info(app):
+        sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
+        database_head_block = await app['db'].query_one(sql)
+
+        from hive.version import VERSION, GIT_REVISION
+        log.info("hivemind_version : %s", VERSION)
+        log.info("hivemind_git_rev : %s", GIT_REVISION)
+
+        from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
+        log.info("database_schema_version : %s", SCHEMA_DB_VERSION)
+        
+        log.info("database_head_block : %s", database_head_block)
+
     app.on_startup.append(init_db)
+    app.on_startup.append(show_info)
     app.on_cleanup.append(close_db)
 
     async def head_age(request):
@@ -247,10 +281,29 @@ def run_server(conf):
         """Handles all hive jsonrpc API requests."""
         request = await request.text()
         # debug=True refs https://github.com/bcb/jsonrpcserver/issues/71
-        response = await dispatch(request, methods=methods, debug=True, context=app)
-        if response.wanted:
+        response = None
+        try:
+            response = await dispatch(request, methods=methods, debug=True, context=app, serialize=decimal_serialize, deserialize=decimal_deserialize)
+        except simplejson.errors.JSONDecodeError as ex:
+            # first log exception
+            # TODO: consider removing this log - potential log spam
+            log.exception(ex)
+
+            # create and send error response
+            error_response = {
+                "jsonrpc":"2.0",
+                "error" : {
+                    "code": -32602,
+                    "data": "Invalid JSON in request: " + str(ex),
+                    "message": "Invalid parameters"
+                },
+                "id" : -1
+            }
             headers = {'Access-Control-Allow-Origin': '*'}
-            return web.json_response(response.deserialized(), status=200, headers=headers)
+            return web.json_response(error_response, status=200, headers=headers, dumps=decimal_serialize)
+        if response is not None and response.wanted:
+            headers = {'Access-Control-Allow-Origin': '*'}
+            return web.json_response(response.deserialized(), status=200, headers=headers, dumps=decimal_serialize)
         return web.Response()
 
     if conf.get('sync_to_s3'):
@@ -258,5 +311,36 @@ def run_server(conf):
     app.router.add_get('/.well-known/healthcheck.json', health)
     app.router.add_get('/health', health)
     app.router.add_post('/', jsonrpc_handler)
+    if 'auto_http_server_port' in app['config']['args'] and app['config']['args']['auto_http_server_port'] is not None:
+        log.debug("auto-http-server-port detected in program arguments, http_server_port will be overriden with port from given range")
+        port_range = app['config']['args']['auto_http_server_port']
+        port_range_len = len(port_range)
+        port_from = port_range[0]
+        port_to = port_range[1] if port_range_len == 2 else 65535
+        if port_to > 65535:
+            port_to = 65535
+        if port_from < 1024:
+            port_from = 1024
 
-    web.run_app(app, port=app['config']['args']['http_server_port'])
+        import socket
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        while port_from <= port_to:
+            try:
+                log.debug("Trying port: {}".format(port_from))
+                sock.bind(('', port_from))
+            except OSError as ex:
+                log.debug("Exception: {}".format(ex))
+                port_from += 1
+            except Exception as ex:
+                # log and rethrow exception
+                log.exception("Exception: {}".format(ex))
+                raise ex
+            else:
+                with open('hivemind.port', 'w') as port_file:
+                    port_file.write("{}\n".format(port_from))
+                web.run_app(app, sock=sock)
+                break
+        if port_from == port_to:
+            raise IOError('No free ports in given range')
+    else:
+        web.run_app(app, port=app['config']['args']['http_server_port'])

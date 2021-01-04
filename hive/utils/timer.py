@@ -2,6 +2,21 @@
 
 from time import perf_counter as perf
 from hive.utils.normalize import secs_to_str
+from functools import wraps
+
+import logging
+log = logging.getLogger(__name__)
+
+#timeit decorator for measuring method execution time
+def time_it(method):
+    @wraps(method)
+    def time_method(*args, **kwargs):
+        start_time = perf()
+        result = method(*args, **kwargs)
+        log.info("%s executed in %.4f s", method.__name__, perf() - start_time)
+        return result
+    return time_method
+
 
 class Timer:
     """Times long routines, printing status and ETA.

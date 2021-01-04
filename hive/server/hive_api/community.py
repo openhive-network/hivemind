@@ -4,8 +4,8 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import ujson as json
 
-from hive.server.hive_api.common import (get_account_id, get_community_id, valid_limit)
-from hive.server.common.helpers import return_error_info
+from hive.server.hive_api.common import (get_account_id, get_community_id, valid_account, valid_limit)
+from hive.server.common.helpers import return_error_info, last_month
 
 def days_ago(days):
     """Get the date `n` days ago."""
@@ -35,10 +35,10 @@ async def get_community(context, name, observer=None):
     """
     db = context['db']
     cid = await get_community_id(db, name)
-    assert cid, 'community not found'
     communities = await load_communities(db, [cid], lite=False)
 
     if observer:
+        observer = valid_account(observer)
         observer_id = await get_account_id(db, observer)
         await _append_observer_roles(db, communities, observer_id)
         await _append_observer_subs(db, communities, observer_id)
@@ -49,8 +49,9 @@ async def get_community(context, name, observer=None):
 async def get_community_context(context, name, account):
     """For a community/account: returns role, title, subscribed state"""
     db = context['db']
+    account = valid_account(account)
     cid = await get_community_id(db, name)
-    assert cid, 'community not found'
+
     aid = await get_account_id(db, account)
     assert aid, 'account not found'
 
@@ -70,13 +71,14 @@ async def get_community_context(context, name, account):
 @return_error_info
 async def list_top_communities(context, limit=25):
     """List top communities. Returns lite community list."""
-    assert limit < 100
-    #sql = """SELECT name, title FROM hive_communities
-    #          WHERE rank > 0 ORDER BY rank LIMIT :limit"""
+    limit = valid_limit(limit, 100, 25)
     sql = """SELECT name, title FROM hive_communities
-              WHERE id = 1344247 OR rank > 0
-           ORDER BY (CASE WHEN id = 1344247 THEN 0 ELSE rank END)
-              LIMIT :limit"""
+              WHERE rank > 0 ORDER BY rank LIMIT :limit"""
+    #ABW: restored older version since hardcoded id is out of the question
+    #sql = """SELECT name, title FROM hive_communities
+    #          WHERE id = 1344247 OR rank > 0
+    #       ORDER BY (CASE WHEN id = 1344247 THEN 0 ELSE rank END)
+    #          LIMIT :limit"""
 
     out = await context['db'].query_all(sql, limit=limit)
 
@@ -84,9 +86,9 @@ async def list_top_communities(context, limit=25):
 
 
 @return_error_info
-async def list_pop_communities(context, limit=25):
+async def list_pop_communities(context, limit:int=25):
     """List communities by new subscriber count. Returns lite community list."""
-    limit = valid_limit(limit, 25)
+    limit = valid_limit(limit, 25, 25)
     sql = """SELECT name, title
                FROM hive_communities
                JOIN (
@@ -98,7 +100,7 @@ async def list_pop_communities(context, limit=25):
                  ON stats.community_id = id
            ORDER BY newsubs DESC
               LIMIT :limit"""
-    out = await context['db'].query_all(sql, limit=limit)
+    out = await context['db'].query_all(sql, limit=limit, cutoff=last_month())
 
     return [(r[0], r[1]) for r in out]
 
@@ -107,6 +109,7 @@ async def list_pop_communities(context, limit=25):
 async def list_all_subscriptions(context, account):
     """Lists all communities `account` subscribes to, plus role and title in each."""
     db = context['db']
+    account = valid_account(account)
     account_id = await get_account_id(db, account)
 
     sql = """SELECT c.name, c.title, COALESCE(r.role_id, 0), COALESCE(r.title, '')
@@ -122,7 +125,6 @@ async def list_all_subscriptions(context, account):
 @return_error_info
 async def list_subscribers(context, community):
     """Lists subscribers of `community`."""
-    #limit = valid_limit(limit, 100)
     db = context['db']
     cid = await get_community_id(db, community)
 
@@ -132,7 +134,7 @@ async def list_subscribers(context, community):
                                  AND hs.community_id = hr.community_id
                JOIN hive_accounts ha ON hs.account_id = ha.id
               WHERE hs.community_id = :cid
-           ORDER BY hs.created_at DESC
+           ORDER BY hs.created_at DESC, hs.id ASC
               LIMIT 250"""
     rows = await db.query_all(sql, cid=cid)
     return [(r['name'], ROLES[r['role_id'] or 0], r['title'],
@@ -142,7 +144,7 @@ async def list_subscribers(context, community):
 async def list_communities(context, last='', limit=100, query=None, sort='rank', observer=None):
     """List all communities, paginated. Returns lite community list."""
     # pylint: disable=too-many-arguments, too-many-locals
-    limit = valid_limit(limit, 100)
+    limit = valid_limit(limit, 100, 100)
 
     db = context['db']
     assert sort in ('rank', 'new', 'subs'), 'invalid sort'
@@ -179,6 +181,7 @@ async def list_communities(context, last='', limit=100, query=None, sort='rank',
     # append observer context, leadership data
     communities = await load_communities(db, ids, lite=True)
     if observer:
+        observer = valid_account(observer)
         observer_id = await get_account_id(db, observer)
         await _append_observer_subs(db, communities, observer_id)
         await _append_observer_roles(db, communities, observer_id)
@@ -274,7 +277,7 @@ async def _community_team(db, community_id):
                JOIN hive_accounts a ON r.account_id = a.id
               WHERE r.community_id = :community_id
                 AND r.role_id BETWEEN 4 AND 8
-           ORDER BY r.role_id DESC"""
+           ORDER BY r.role_id DESC, r.account_id DESC"""
     rows = await db.query_all(sql, community_id=community_id)
     return [(r['name'], ROLES[r['role_id']], r['title']) for r in rows]
 
@@ -307,7 +310,7 @@ async def _append_admins(db, communities):
     ids = communities.keys()
     sql = """SELECT community_id, ha.name FROM hive_roles hr
                JOIN hive_accounts ha ON hr.account_id = ha.id
-              WHERE role_id = 6 AND community_id IN :ids"""
+              WHERE role_id = 6 AND community_id IN :ids ORDER BY ha.name"""
     for row in await db.query_all(sql, ids=tuple(ids)):
         _id = row[0]
         if 'admins' not in communities[_id]:
@@ -345,16 +348,25 @@ async def top_community_authors(context, community):
 async def top_community_muted(context, community):
     """Get top authors (by SP) who are muted in a community."""
     db = context['db']
+    cid = await get_community_id(db, community)
     sql = """SELECT a.name, a.voting_weight, r.title FROM hive_accounts a
                JOIN hive_roles r ON a.id = r.account_id
               WHERE r.community_id = :community_id AND r.role_id < 0
            ORDER BY voting_weight DESC LIMIT 5"""
-    return await db.query(sql, community_id=await get_community_id(db, community))
+    return await db.query(sql, community_id=cid)
 
 async def _top_community_posts(db, community, limit=50):
     # TODO: muted equivalent
-    sql = """SELECT author, votes, payout FROM hive_posts_cache
-              WHERE category = :community AND is_paidout = '0'
-                AND post_id IN (SELECT id FROM hive_posts WHERE is_muted = '0')
-           ORDER BY payout DESC LIMIT :limit"""
+    sql = """
+    SELECT ha_a.name as author,
+        0 as votes,
+        ( hp.payout + hp.pending_payout ) as payout
+    FROM hive_posts hp
+    INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+    LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
+    LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+    WHERE hcd.category = :community AND hp.counter_deleted = 0 AND NOT hp.is_paidout
+        AND post_id IN (SELECT id FROM hive_posts WHERE is_muted = '0')
+    ORDER BY ( hp.payout + hp.pending_payout ) DESC LIMIT :limit"""
+
     return await db.query_all(sql, community=community, limit=limit)
