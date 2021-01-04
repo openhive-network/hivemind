@@ -228,27 +228,17 @@ def build_metadata():
         sa.Column('following', sa.Integer, nullable=False),
         sa.Column('state', SMALLINT, nullable=False, server_default='1'),
         sa.Column('created_at', sa.DateTime, nullable=False),
-<<<<<<< HEAD
-        sa.Column('blacklisted', BOOLEAN, nullable=False, server_default='0'),
-        sa.Column('follow_blacklists', BOOLEAN, nullable=False, server_default='0'),
-        sa.Column('follow_muted', BOOLEAN, nullable=False, server_default='0'),
-=======
         sa.Column('blacklisted', sa.Boolean, nullable=False, server_default='0'),
         sa.Column('follow_blacklists', sa.Boolean, nullable=False, server_default='0'),
         sa.Column('follow_muted', BOOLEAN, nullable=False, server_default='0'),
         sa.Column('block_num', sa.Integer,  nullable=False ),
->>>>>>> 221dd70b14e35c9e2082ec0b7f38da1b5995d3dc
 
         sa.UniqueConstraint('following', 'follower', name='hive_follows_ux1'), # core
         sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_follows_fk1'),
         sa.Index('hive_follows_ix5a', 'following', 'state', 'created_at', 'follower'),
         sa.Index('hive_follows_ix5b', 'follower', 'state', 'created_at', 'following'),
-<<<<<<< HEAD
-        sa.Index('hive_follows_all_columns', 'follower', 'following', 'state', 'created_at', 'blacklisted', 'follow_blacklists', 'follow_muted')
-=======
         sa.Index('hive_follows_block_num_idx', 'block_num'),
         sa.Index('hive_follows_created_at_idx', 'created_at'),
->>>>>>> 221dd70b14e35c9e2082ec0b7f38da1b5995d3dc
     )
 
     sa.Table(
@@ -366,11 +356,7 @@ def build_metadata_community(metadata=None):
 
         sa.UniqueConstraint('name', name='hive_communities_ux1'),
         sa.Index('hive_communities_ix1', 'rank', 'id'),
-<<<<<<< HEAD
-        sa.Index('hive_communities_id_name', 'id', 'name')
-=======
         sa.Index('hive_communities_block_num_idx', 'block_num')
->>>>>>> 221dd70b14e35c9e2082ec0b7f38da1b5995d3dc
     )
 
     sa.Table(
