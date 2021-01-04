@@ -21,18 +21,19 @@ BEGIN
     ) communities
     CROSS JOIN LATERAL 
     (
-      SELECT hive_posts.id
-      FROM hive_posts
-      JOIN hive_accounts on (hive_posts.author_id = hive_accounts.id)
-      WHERE hive_posts.community_id = communities.community_id
-        AND hive_posts.depth = 0 AND hive_posts.counter_deleted = 0
-        AND (__post_id = 0 OR hive_posts.id < __post_id)
+      SELECT hp.id
+      FROM hive_posts hp
+      JOIN hive_accounts on (hp.author_id = hive_accounts.id)
+      WHERE hp.community_id = communities.community_id
+        AND hp.depth = 0
+        AND hp.counter_deleted = 0
+        AND (__post_id = 0 OR hp.id < __post_id)
         AND hive_accounts.reputation > '-464800000000'::bigint
-        AND (not exists (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hive_posts.author_id))
+        AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp.author_id))
       ORDER BY id DESC
       LIMIT _limit
     ) posts
-    ORDER BY id DESC
+    ORDER BY posts.id DESC
     LIMIT _limit
   )
   SELECT
@@ -415,7 +416,7 @@ BEGIN
       SELECT hp.sc_trend INTO __trending_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   __account_id = find_account_id( _observer, True );
-  RETURN QUERY 
+  RETURN QUERY
   WITH trending AS
   (
     SELECT
@@ -427,13 +428,15 @@ BEGIN
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __account_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE
       hs.account_id = __account_id 
-      AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth = 0
+      AND hp1.counter_deleted = 0
+      AND NOT hp1.is_paidout
+      AND hp1.depth = 0
       AND ( __post_id = 0 OR hp1.sc_trend < __trending_limit OR ( hp1.sc_trend = __trending_limit AND hp1.id < __post_id ) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp1.author_id))
     ORDER BY hp1.sc_trend DESC, hp1.id DESC
     LIMIT _limit
   )
-SELECT
+  SELECT
       hp.id,
       hp.author,
       hp.parent_author,
