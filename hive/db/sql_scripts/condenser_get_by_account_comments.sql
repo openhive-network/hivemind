@@ -6,8 +6,9 @@ AS
 $function$
 DECLARE
   __post_id INTEGER := 0;
+  __author_id INTEGER := 0;
 BEGIN
-
+  __author_id = find_account_id(_author, True);
   IF _permlink <> '' THEN
     __post_id = find_comment_id( _author, _permlink, True );
   END IF;
@@ -17,7 +18,7 @@ BEGIN
   (
     SELECT id
     FROM live_comments_view hp
-    WHERE hp.author = _author
+    WHERE hp.author_id = __author_id
       AND ( ( __post_id = 0 ) OR ( hp.id <= __post_id ) ) 
     ORDER BY hp.id DESC
     LIMIT _limit
