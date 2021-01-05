@@ -1,0 +1,3 @@
+[submodule "tests/tests_api"]
+	path = tests/tests_api
+	url = ../../hive/tests_api.git

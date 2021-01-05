@@ -10,24 +10,31 @@ from hive.server.condenser_api.methods import (
     get_followers,
     get_following,
     get_follow_count,
+
+    get_reblogged_by,
+    get_account_reputations,
+
     get_content,
     get_content_replies,
+    
     get_discussions_by_trending,
     get_discussions_by_hot,
     get_discussions_by_promoted,
     get_discussions_by_created,
+    get_post_discussions_by_payout,
+    get_comment_discussions_by_payout,
+
     get_discussions_by_blog,
     get_discussions_by_feed,
     get_discussions_by_comments,
     get_replies_by_last_update,
 
-    get_post_discussions_by_payout,
-    get_comment_discussions_by_payout,
-
     get_discussions_by_author_before_date,
     get_blog,
     get_blog_entries,
+
     get_account_votes,
+    get_active_votes
 )
 
 def _strict_list(params, expected_len, min_len=None):
@@ -92,6 +99,11 @@ async def call(context, api, method, params):
     elif method == 'get_follow_count':
         return await get_follow_count(context, *_strict_list(params, 1))
 
+    elif method == 'get_reblogged_by':
+        return await get_reblogged_by(context, *_strict_list(params, 2))
+    elif method == 'get_account_reputations':
+        return await get_account_reputations(context, *_strict_list(params, 2))
+
     # Content primitives
     elif method == 'get_content':
         return await get_content(context, *_strict_list(params, 3, 2))
@@ -141,5 +153,7 @@ async def call(context, api, method, params):
     # Misc/dummy
     elif method == 'get_account_votes':
         return await get_account_votes(context, *_strict_list(params, 1))
+    elif method == 'get_active_votes':
+        return await get_active_votes(context, *_strict_list(params, 2))
 
-    raise ApiError("unknown method: %s.%s" % (api, method))
+    assert False, "unknown method: %s.%s" % (api, method)

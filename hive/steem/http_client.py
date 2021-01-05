@@ -84,11 +84,12 @@ class HttpClient(object):
     METHOD_API = dict(
         lookup_accounts='condenser_api',
         get_block='block_api',
-        get_content='condenser_api',
-        get_accounts='condenser_api',
         get_order_book='condenser_api',
-        get_feed_history='condenser_api',
+        get_feed_history='database_api',
         get_dynamic_global_properties='database_api',
+        get_comment_pending_payouts='database_api',
+        get_ops_in_block='account_history_api',
+        enum_virtual_ops='account_history_api'
     )
 
     def __init__(self, nodes, **kwargs):
@@ -145,7 +146,8 @@ class HttpClient(object):
         body_data = json.dumps(body, ensure_ascii=False).encode('utf8')
 
         tries = 0
-        while tries < 100:
+        # changed number of tries to 25
+        while tries < 25:
             tries += 1
             secs = -1
             info = None

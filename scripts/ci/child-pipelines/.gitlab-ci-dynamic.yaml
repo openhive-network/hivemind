@@ -1,0 +1,33 @@
+# See https://gitlab.com/fgrimshaw/dynamic-ci
+# See https://gitlab.com/gitlab-org/gitlab/-/issues/212373
+
+# I tested this feature, but our current version of Gitlab 13.2.2
+# doesn't support it well. Child pipelines run with no problem,
+# but UI displays wrong badges, for instance job was marked as
+# still running, though it was finished. Also jobs with rule
+# "when: manual" where started without user's permission.
+# We need to wait for better support in Gitlab UI.
+
+stages:
+  - run
+
+variables:
+  GIT_STRATEGY: none
+
+trigger-child-1:
+  stage: run
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ /child-1/'
+      when: always
+  trigger:
+    include: .gitlab-ci-child-pipeline-1.yaml
+    strategy: depend
+
+trigger-child-2:
+  stage: run
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ /child-2/'
+      when: always
+  trigger:
+    include: .gitlab-ci-child-pipeline-2.yaml
+    strategy: depend

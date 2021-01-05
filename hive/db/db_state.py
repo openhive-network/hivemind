@@ -3,13 +3,24 @@
 #pylint: disable=too-many-lines
 
 import time
-import logging
+from time import perf_counter
 
-from hive.db.schema import (setup, reset_autovac, build_metadata,
+import logging
+import sqlalchemy
+
+
+from hive.db.schema import (setup, reset_autovac, set_logged_table_attribute, build_metadata,
                             build_metadata_community, teardown, DB_VERSION)
 from hive.db.adapter import Db
 
+from hive.utils.post_active import update_active_starting_from_posts_on_block
+from hive.utils.communities_rank import update_communities_posts_and_rank
+
+from hive.server.common.payout_stats import PayoutStats
+
 log = logging.getLogger(__name__)
+
+SYNCED_BLOCK_LIMIT = 7*24*1200 # 7 days
 
 class DbState:
     """Manages database state: sync status, migrations, etc."""
@@ -37,17 +48,13 @@ class DbState:
         if not cls._is_schema_loaded():
             log.info("[INIT] Create db schema...")
             setup(cls.db())
-            cls._before_initial_sync()
 
         # perform db migrations
         cls._check_migrations()
 
         # check if initial sync complete
-        cls._is_initial_sync = cls._is_feed_cache_empty()
-        if cls._is_initial_sync:
-            log.info("[INIT] Continue with initial sync...")
-        else:
-            log.info("[INIT] Hive initialized.")
+        cls._is_initial_sync = True
+        log.info("[INIT] Continue with initial sync...")
 
     @classmethod
     def teardown(cls):
@@ -62,10 +69,10 @@ class DbState:
         return cls._db
 
     @classmethod
-    def finish_initial_sync(cls):
+    def finish_initial_sync(cls, current_imported_block):
         """Set status to initial sync complete."""
         assert cls._is_initial_sync, "initial sync was not started."
-        cls._after_initial_sync()
+        cls._after_initial_sync(current_imported_block)
         cls._is_initial_sync = False
         log.info("[INIT] Initial sync complete!")
 
@@ -85,28 +92,55 @@ class DbState:
     @classmethod
     def _disableable_indexes(cls):
         to_locate = [
-            'hive_posts_ix3', # (author, depth, id)
-            'hive_posts_ix4', # (parent_id, id, is_deleted=0)
-            'hive_posts_ix5', # (community_id>0, is_pinned=1)
+            'hive_blocks_created_at_idx',
+
+            'hive_feed_cache_block_num_idx',
+            'hive_feed_cache_created_at_idx',
+            'hive_feed_cache_post_id_idx',
+
             'hive_follows_ix5a', # (following, state, created_at, follower)
             'hive_follows_ix5b', # (follower, state, created_at, following)
-            'hive_reblogs_ix1', # (post_id, account, created_at)
-            'hive_posts_cache_ix6a', # (sc_trend, post_id, paidout=0)
-            'hive_posts_cache_ix6b', # (post_id, sc_trend, paidout=0)
-            'hive_posts_cache_ix7a', # (sc_hot, post_id, paidout=0)
-            'hive_posts_cache_ix7b', # (post_id, sc_hot, paidout=0)
-            'hive_posts_cache_ix8', # (category, payout, depth, paidout=0)
-            'hive_posts_cache_ix9a', # (depth, payout, post_id, paidout=0)
-            'hive_posts_cache_ix9b', # (category, depth, payout, post_id, paidout=0)
-            'hive_posts_cache_ix10', # (post_id, payout, gray=1, payout>0)
-            'hive_posts_cache_ix30', # API: community trend
-            'hive_posts_cache_ix31', # API: community hot
-            'hive_posts_cache_ix32', # API: community created
-            'hive_posts_cache_ix33', # API: community payout
-            'hive_posts_cache_ix34', # API: community muted
-            'hive_accounts_ix3', # (vote_weight, name VPO)
-            'hive_accounts_ix4', # (id, name)
-            'hive_accounts_ix5', # (cached_at, name)
+            'hive_follows_block_num_idx',
+            'hive_follows_created_at_idx',
+
+            'hive_posts_parent_id_counter_deleted_id_idx',
+            'hive_posts_depth_idx',
+            'hive_posts_root_id_id_idx',
+
+            'hive_posts_community_id_id_idx',
+            'hive_posts_payout_at_idx',
+            'hive_posts_payout_idx',
+            'hive_posts_promoted_id_idx',
+            'hive_posts_sc_trend_id_idx',
+            'hive_posts_sc_hot_id_idx',
+            'hive_posts_block_num_idx',
+            'hive_posts_block_num_created_idx',
+            'hive_posts_cashout_time_id_idx',
+            'hive_posts_updated_at_idx',
+            'hive_posts_payout_plus_pending_payout_id_idx',
+            'hive_posts_category_id_payout_plus_pending_payout_depth_idx',
+            'hive_posts_tags_ids_idx',
+            'hive_posts_author_id_created_at_id_idx',
+            'hive_posts_author_id_id_idx',
+
+
+            'hive_posts_api_helper_author_s_permlink_idx',
+
+            'hive_votes_voter_id_last_update_idx',
+            'hive_votes_block_num_idx',
+
+            'hive_subscriptions_block_num_idx',
+            'hive_subscriptions_community_idx',
+            'hive_communities_block_num_idx',
+            'hive_reblogs_created_at_idx',
+
+            'hive_votes_voter_id_post_id_idx',
+            'hive_votes_post_id_voter_id_idx',
+
+            'hive_reputation_data_block_num_idx',
+
+            'hive_notification_cache_block_num_idx',
+            'hive_notification_cache_dst_score_idx'
         ]
 
         to_return = []
@@ -123,46 +157,223 @@ class DbState:
         return to_return
 
     @classmethod
-    def _before_initial_sync(cls):
+    def has_index(cls, idx_name):
+        sql = "SELECT count(*) FROM pg_class WHERE relname = :relname"
+        count = cls.db().query_one(sql, relname=idx_name)
+        if count == 1:
+            return True
+        else:
+            return False
+
+    @classmethod
+    def _execute_query(cls, query):
+        time_start = perf_counter()
+   
+        current_work_mem = cls.update_work_mem('2GB')
+        log.info("[INIT] Attempting to execute query: `%s'...", query)
+
+        row = cls.db().query_no_return(query)
+
+        cls.update_work_mem(current_work_mem)
+
+        time_end = perf_counter()
+        log.info("[INIT] Query `%s' done in %.4fs", query, time_end - time_start)
+
+
+    @classmethod
+    def processing_indexes(cls, is_pre_process, drop, create):
+        DB = cls.db()
+        engine = DB.engine()
+        log.info("[INIT] Begin %s-initial sync hooks", "pre" if is_pre_process else "post")
+
+        any_index_created = False
+
+        for index in cls._disableable_indexes():
+            log.info("%s index %s.%s", ("Drop" if is_pre_process else "Recreate"), index.table, index.name)
+            try:
+                if drop:
+                    if cls.has_index(index.name):
+                        time_start = perf_counter()
+                        index.drop(engine)
+                        end_time = perf_counter()
+                        elapsed_time = end_time - time_start
+                        log.info("Index %s dropped in time %.4f s", index.name, elapsed_time)
+            except sqlalchemy.exc.ProgrammingError as ex:
+                log.warning("Ignoring ex: {}".format(ex))
+
+            if create:
+                if cls.has_index(index.name):
+                    log.info("Index %s already exists... Creation skipped.", index.name)
+                else:
+                    time_start = perf_counter()
+                    index.create(engine)
+                    end_time = perf_counter()
+                    elapsed_time = end_time - time_start
+                    log.info("Index %s created in time %.4f s", index.name, elapsed_time)
+                    any_index_created = True
+        if any_index_created:
+            cls._execute_query("ANALYZE")
+
+    @classmethod
+    def before_initial_sync(cls, last_imported_block, hived_head_block):
         """Routine which runs *once* after db setup.
 
         Disables non-critical indexes for faster initial sync, as well
         as foreign key constraints."""
 
-        engine = cls.db().engine()
-        log.info("[INIT] Begin pre-initial sync hooks")
+        to_sync = hived_head_block - last_imported_block
 
-        for index in cls._disableable_indexes():
-            log.info("Drop index %s.%s", index.table, index.name)
-            index.drop(engine)
+        if to_sync < SYNCED_BLOCK_LIMIT:
+            log.info("[INIT] Skipping pre-initial sync hooks")
+            return
 
-        # TODO: #111
-        #for key in cls._all_foreign_keys():
-        #    log.info("Drop fk %s", key.name)
-        #    key.drop(engine)
+        #is_pre_process, drop, create
+        cls.processing_indexes( True, True, False )
+
+        from hive.db.schema import drop_fk, set_logged_table_attribute
+        log.info("Dropping FKs")
+        drop_fk(cls.db())
+
+        # intentionally disabled since it needs a lot of WAL disk space when switching back to LOGGED
+        #set_logged_table_attribute(cls.db(), False)
 
         log.info("[INIT] Finish pre-initial sync hooks")
 
     @classmethod
-    def _after_initial_sync(cls):
+    def update_work_mem(cls, workmem_value):
+        row = cls.db().query_row("SHOW work_mem")
+        current_work_mem = row['work_mem']
+
+        sql = """
+              DO $$
+              BEGIN
+                EXECUTE 'ALTER DATABASE '||current_database()||' SET work_mem TO "{}"';
+              END
+              $$;
+              """
+        cls.db().query_no_return(sql.format(workmem_value))
+
+        return current_work_mem
+
+    @classmethod
+    def _after_initial_sync(cls, current_imported_block):
         """Routine which runs *once* after initial sync.
 
         Re-creates non-core indexes for serving APIs after init sync,
         as well as all foreign keys."""
 
-        engine = cls.db().engine()
-        log.info("[INIT] Begin post-initial sync hooks")
+        last_imported_block = DbState.db().query_one("SELECT block_num FROM hive_state LIMIT 1")
 
-        for index in cls._disableable_indexes():
-            log.info("Create index %s.%s", index.table, index.name)
-            index.create(engine)
+        log.info("[INIT] Current imported block: %s. Last imported block: %s.", current_imported_block, last_imported_block)
+        if last_imported_block > current_imported_block:
+          last_imported_block = current_imported_block
 
-        # TODO: #111
-        #for key in cls._all_foreign_keys():
-        #    log.info("Create fk %s", key.name)
-        #    key.create(engine)
+        synced_blocks = current_imported_block - last_imported_block
 
-        log.info("[INIT] Finish post-initial sync hooks")
+        force_index_rebuild = False
+        massive_sync_preconditions = False
+        if synced_blocks >= SYNCED_BLOCK_LIMIT:
+            force_index_rebuild = True
+            massive_sync_preconditions = True
+
+        def vacuum_hive_posts(cls):
+            if massive_sync_preconditions:
+                cls._execute_query("VACUUM ANALYZE hive_posts")
+
+        #is_pre_process, drop, create
+        cls.processing_indexes( False, force_index_rebuild, True )
+   
+        if massive_sync_preconditions:
+            # Update count of all child posts (what was hold during initial sync)
+            cls._execute_query("select update_all_hive_posts_children_count()")
+        else:
+            # Update count of child posts processed during partial sync (what was hold during initial sync)
+            sql = "select update_hive_posts_children_count({}, {})".format(last_imported_block, current_imported_block)
+            cls._execute_query(sql)
+
+        vacuum_hive_posts(cls)
+
+        time_start = perf_counter()
+        # Update root_id all root posts
+        sql = """
+              select update_hive_posts_root_id({}, {})
+              """.format(last_imported_block, current_imported_block)
+        cls._execute_query(sql)
+
+        vacuum_hive_posts(cls)
+
+        # Update root_id all root posts
+        sql = """
+              select update_hive_posts_api_helper({}, {})
+              """.format(last_imported_block, current_imported_block)
+        cls._execute_query(sql)
+
+        time_start = perf_counter()
+
+        log.info("[INIT] Attempting to execute update_all_posts_active...")
+        update_active_starting_from_posts_on_block(last_imported_block, current_imported_block)
+
+        time_end = perf_counter()
+        log.info("[INIT] update_all_posts_active executed in %.4fs", time_end - time_start)
+
+        vacuum_hive_posts(cls)
+
+        sql = """
+            SELECT update_feed_cache({}, {});
+        """.format(last_imported_block, current_imported_block)
+        cls._execute_query(sql)
+
+        sql = """
+            SELECT update_hive_posts_mentions({}, {});
+        """.format(last_imported_block, current_imported_block)
+        cls._execute_query(sql)
+
+        time_start = perf_counter()
+        PayoutStats.generate()
+        time_end = perf_counter()
+        log.info("[INIT] filling payout_stats_view executed in %.4fs", time_end - time_start)
+
+        sql = """
+              SELECT update_account_reputations({}, {}, True);
+              """.format(last_imported_block, current_imported_block)
+        cls._execute_query(sql)
+
+        log.info("[INIT] Attempting to execute update_communities_posts_and_rank...")
+        time_start = perf_counter()
+        update_communities_posts_and_rank()
+        time_end = perf_counter()
+        log.info("[INIT] update_communities_posts_and_rank executed in %.4fs", time_end - time_start)
+
+        sql = """
+              SELECT update_posts_rshares({}, {});
+              """.format(last_imported_block, current_imported_block)
+        cls._execute_query(sql)
+
+        vacuum_hive_posts(cls)
+
+        sql = """
+              SELECT update_notification_cache(NULL, NULL, False);
+              """
+        cls._execute_query(sql)
+
+        sql = """
+              SELECT update_follow_count({}, {});
+              """.format(last_imported_block, current_imported_block)
+        cls._execute_query(sql)
+
+        # Update a block num immediately
+        cls.db().query_no_return("UPDATE hive_state SET block_num = :block_num", block_num = current_imported_block)
+
+        if massive_sync_preconditions:
+            from hive.db.schema import create_fk, set_logged_table_attribute
+            # intentionally disabled since it needs a lot of WAL disk space when switching back to LOGGED
+            #set_logged_table_attribute(cls.db(), True)
+
+            log.info("Recreating FKs")
+            create_fk(cls.db())
+
+            cls._execute_query("VACUUM ANALYZE")
+
 
     @staticmethod
     def status():
@@ -212,7 +423,6 @@ class DbState:
             cls._set_ver(3)
 
         if cls._ver == 3:
-            cls.db().query("CREATE INDEX hive_accounts_ix3 ON hive_accounts (vote_weight, name varchar_pattern_ops)")
             cls._set_ver(4)
 
         if cls._ver == 4:
@@ -225,22 +435,21 @@ class DbState:
             from hive.indexer.accounts import Accounts
             names = SteemClient().get_all_account_names()
             Accounts.load_ids()
-            Accounts.register(names, '1970-01-01T00:00:00')
+            Accounts.register(names, None, '1970-01-01T00:00:00', 0)
             Accounts.clear_ids()
             cls._set_ver(6)
 
         if cls._ver == 6:
             cls.db().query("DROP INDEX hive_posts_cache_ix6")
-            cls.db().query("CREATE INDEX hive_posts_cache_ix6a ON hive_posts_cache (sc_trend, post_id) WHERE is_paidout = '0'")
-            cls.db().query("CREATE INDEX hive_posts_cache_ix6b ON hive_posts_cache (post_id, sc_trend) WHERE is_paidout = '0'")
-            cls.db().query("DROP INDEX hive_posts_cache_ix7")
-            cls.db().query("CREATE INDEX hive_posts_cache_ix7a ON hive_posts_cache (sc_hot, post_id) WHERE is_paidout = '0'")
-            cls.db().query("CREATE INDEX hive_posts_cache_ix7b ON hive_posts_cache (post_id, sc_hot) WHERE is_paidout = '0'")
+            #cls.db().query("CREATE INDEX hive_posts_cache_ix6a ON hive_posts_cache (sc_trend, post_id) WHERE is_paidout = '0'")
+            #cls.db().query("CREATE INDEX hive_posts_cache_ix6b ON hive_posts_cache (post_id, sc_trend) WHERE is_paidout = '0'")
+            #cls.db().query("DROP INDEX hive_posts_cache_ix7")
+            #cls.db().query("CREATE INDEX hive_posts_cache_ix7a ON hive_posts_cache (sc_hot, post_id) WHERE is_paidout = '0'")
+            #cls.db().query("CREATE INDEX hive_posts_cache_ix7b ON hive_posts_cache (post_id, sc_hot) WHERE is_paidout = '0'")
             cls._set_ver(7)
 
         if cls._ver == 7:
-            cls.db().query("CREATE INDEX hive_accounts_ix4 ON hive_accounts (id, name)")
-            cls.db().query("CREATE INDEX hive_accounts_ix5 ON hive_accounts (cached_at, name)")
+            cls.db().query("DROP INDEX IF EXISTS hive_accounts_ix4; CREATE INDEX hive_accounts_ix4 ON hive_accounts (id, name)")
             cls._set_ver(8)
 
         if cls._ver == 8:
@@ -252,21 +461,21 @@ class DbState:
             cls._set_ver(9)
 
         if cls._ver == 9:
-            from hive.indexer.follow import Follow
-            Follow.force_recount()
+            #from hive.indexer.follow import Follow
+            #Follow.force_recount()
             cls._set_ver(10)
 
         if cls._ver == 10:
-            cls.db().query("CREATE INDEX hive_posts_cache_ix8 ON hive_posts_cache (category, payout, depth) WHERE is_paidout = '0'")
-            cls.db().query("CREATE INDEX hive_posts_cache_ix9a ON hive_posts_cache (depth, payout, post_id) WHERE is_paidout = '0'")
-            cls.db().query("CREATE INDEX hive_posts_cache_ix9b ON hive_posts_cache (category, depth, payout, post_id) WHERE is_paidout = '0'")
+            #cls.db().query("CREATE INDEX hive_posts_cache_ix8 ON hive_posts_cache (category, payout, depth) WHERE is_paidout = '0'")
+            #cls.db().query("CREATE INDEX hive_posts_cache_ix9a ON hive_posts_cache (depth, payout, post_id) WHERE is_paidout = '0'")
+            #cls.db().query("CREATE INDEX hive_posts_cache_ix9b ON hive_posts_cache (category, depth, payout, post_id) WHERE is_paidout = '0'")
             cls._set_ver(11)
 
         if cls._ver == 11:
             cls.db().query("DROP INDEX hive_posts_ix1")
             cls.db().query("DROP INDEX hive_posts_ix2")
-            cls.db().query("CREATE INDEX hive_posts_ix3 ON hive_posts (author, depth, id) WHERE is_deleted = '0'")
-            cls.db().query("CREATE INDEX hive_posts_ix4 ON hive_posts (parent_id, id) WHERE is_deleted = '0'")
+            cls.db().query("CREATE INDEX hive_posts_ix3 ON hive_posts (author, depth, id) WHERE counter_deleted = 0")
+            cls.db().query("CREATE INDEX hive_posts_ix4 ON hive_posts (parent_id, id) WHERE counter_deleted = 0")
             cls._set_ver(12)
 
         if cls._ver == 12: # community schema
@@ -285,14 +494,8 @@ class DbState:
             cls._set_ver(13)
 
         if cls._ver == 13:
-            sqls = ("CREATE INDEX hive_posts_ix5 ON hive_posts (id) WHERE is_pinned = '1' AND is_deleted = '0'",
-                    "CREATE INDEX hive_posts_ix6 ON hive_posts (community_id, id) WHERE community_id IS NOT NULL AND is_pinned = '1' AND is_deleted = '0'",
-                    "CREATE INDEX hive_posts_cache_ix10 ON hive_posts_cache (post_id, payout) WHERE is_grayed = '1' AND payout > 0",
-                    "CREATE INDEX hive_posts_cache_ix30 ON hive_posts_cache (community_id, sc_trend,   post_id) WHERE community_id IS NOT NULL AND is_grayed = '0' AND depth = 0",
-                    "CREATE INDEX hive_posts_cache_ix31 ON hive_posts_cache (community_id, sc_hot,     post_id) WHERE community_id IS NOT NULL AND is_grayed = '0' AND depth = 0",
-                    "CREATE INDEX hive_posts_cache_ix32 ON hive_posts_cache (community_id, created_at, post_id) WHERE community_id IS NOT NULL AND is_grayed = '0' AND depth = 0",
-                    "CREATE INDEX hive_posts_cache_ix33 ON hive_posts_cache (community_id, payout,     post_id) WHERE community_id IS NOT NULL AND is_grayed = '0' AND is_paidout = '0'",
-                    "CREATE INDEX hive_posts_cache_ix34 ON hive_posts_cache (community_id, payout,     post_id) WHERE community_id IS NOT NULL AND is_grayed = '1' AND is_paidout = '0'")
+            sqls = ("CREATE INDEX hive_posts_ix5 ON hive_posts (id) WHERE is_pinned = '1' AND counter_deleted = 0",
+                    "CREATE INDEX hive_posts_ix6 ON hive_posts (community_id, id) WHERE community_id IS NOT NULL AND is_pinned = '1' AND counter_deleted = 0",)
             for sql in sqls:
                 cls.db().query(sql)
             cls._set_ver(14)
@@ -302,7 +505,7 @@ class DbState:
             cls.db().query("ALTER TABLE hive_communities ADD COLUMN category    VARCHAR(32)   NOT NULL DEFAULT ''")
             cls.db().query("ALTER TABLE hive_communities ADD COLUMN avatar_url  VARCHAR(1024) NOT NULL DEFAULT ''")
             cls.db().query("ALTER TABLE hive_communities ADD COLUMN num_authors INTEGER       NOT NULL DEFAULT 0")
-            cls.db().query("CREATE INDEX hive_posts_cache_ix20 ON hive_posts_cache (community_id, author, payout, post_id) WHERE is_paidout = '0'")
+            #cls.db().query("CREATE INDEX hive_posts_cache_ix20 ON hive_posts_cache (community_id, author, payout, post_id) WHERE is_paidout = '0'")
             cls._set_ver(15)
 
         if cls._ver == 15:
@@ -314,6 +517,12 @@ class DbState:
         if cls._ver == 16:
             cls.db().query("CREATE INDEX hive_communities_ft1 ON hive_communities USING GIN (to_tsvector('english', title || ' ' || about))")
             cls._set_ver(17)
+
+        if cls._ver == 17:
+            cls.db().query("INSERT INTO hive_accounts (name, created_at) VALUES ('', '1970-01-01T00:00:00') ON CONFLICT (name) DO NOTHING")
+            cls.db().query("INSERT INTO hive_permlink_data (permlink) VALUES ('') ON CONFLICT (permlink) DO NOTHING")
+            cls.db().query("INSERT INTO hive_category_data (category) VALUES ('') ON CONFLICT (category) DO NOTHING")
+            cls._set_ver(18)
 
         reset_autovac(cls.db())
 

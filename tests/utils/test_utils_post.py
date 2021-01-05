@@ -3,10 +3,6 @@ from decimal import Decimal
 
 from hive.utils.post import (
     mentions,
-    post_basic,
-    post_legacy,
-    post_payout,
-    post_stats,
 )
 
 POST_1 = {
@@ -73,7 +69,7 @@ POST_1 = {
     "parent_author": "",
     "parent_permlink": "spam",
     "pending_payout_value": "0.000 HBD",
-    "percent_steem_dollars": 10000,
+    "percent_hbd": 10000,
     "permlink": "june-spam",
     "promoted": "0.000 HBD",
     "reblogged_by": [],
@@ -121,7 +117,7 @@ POST_2 = {
     "parent_author": "",
     "parent_permlink": "spam",
     "pending_payout_value": "0.000 HBD",
-    "percent_steem_dollars": 10000,
+    "percent_hbd": 10000,
     "permlink": "june-spam",
     "promoted": "0.000 HBD",
     "reblogged_by": [],
@@ -151,59 +147,3 @@ def test_mentions():
     assert not m('@longestokaccountx')
     assert m('@abc- @-foo @bar.') == {'abc', 'bar'}
     assert m('_[@foo](https://steemit.com/@foo)_') == {'foo'}
-
-def test_post_basic():
-    ret = post_basic(POST_1)
-    expect = {'json_metadata': {'tags': ['spam'], 'image': ['https://pbs.twimg.com/media/DBgNm3jXoAAioyE.jpg', 'https://example.com/image.jpg'], 'app': 'steemit/0.1', 'format': 'markdown'},
-              'image': 'https://pbs.twimg.com/media/DBgNm3jXoAAioyE.jpg',
-              'tags': ['spam'],
-              'is_nsfw': False,
-              'body': 'https://pbs.twimg.com/media/DBgNm3jXoAAioyE.jpg',
-              'preview': 'https://pbs.twimg.com/media/DBgNm3jXoAAioyE.jpg',
-              'payout_at': '2017-06-27T15:53:51',
-              'is_paidout': True,
-              'is_payout_declined': False,
-              'is_full_power': False}
-    assert ret == expect
-
-def test_post_basic_tags():
-    tags = post_basic(POST_2)['tags']
-    expected = ['steemit', 'steem', 'abc', 'bcd', 'cde']
-    assert tags == expected, "got %s" % tags
-
-def test_post_legacy():
-    ret = post_legacy(POST_1)
-    expect = {'allow_curation_rewards': True,
-              'allow_replies': True,
-              'allow_votes': True,
-              'beneficiaries': [],
-              'curator_payout_value': '0.000 HBD',
-              'id': 4437869,
-              'max_accepted_payout': '1000000.000 HBD',
-              'parent_author': '',
-              'parent_permlink': 'spam',
-              'percent_steem_dollars': 10000,
-              'root_author': 'test-safari',
-              'root_permlink': 'june-spam',
-              'root_title': 'June Spam',
-              'url': '/spam/@test-safari/june-spam'}
-    assert ret == expect
-
-def test_post_payout():
-    ret = post_payout(POST_1)
-    expect = {'payout': Decimal('0.044'),
-              'rshares': 2731865444,
-              'csvotes': 'test-safari,1506388632,10000,49.03\ndarth-cryptic,110837437,200,49.23\ntest25,621340000,10000,25\nmysqlthrashmetal,493299375,10000,41.02',
-              'sc_trend': 6243.994921804685,
-              'sc_hot': 149799.83955930467}
-    assert ret == expect
-
-def test_post_stats():
-    ret = post_stats(POST_1)
-    expect = {'hide': False,
-              'gray': False,
-              'author_rep': 49.03,
-              'flag_weight': 0,
-              'total_votes': 4,
-              'up_votes': 4}
-    assert ret == expect

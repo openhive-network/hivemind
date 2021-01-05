@@ -3,19 +3,26 @@
 import logging
 import collections
 
+from ujson import dumps, loads
+
+from diff_match_patch import diff_match_patch
+
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 
-from hive.indexer.accounts import Accounts
-from hive.indexer.cached_post import CachedPost
-from hive.indexer.feed_cache import FeedCache
-from hive.indexer.community import Community, START_DATE
+from hive.indexer.reblog import Reblog
+from hive.indexer.community import Community
 from hive.indexer.notify import Notify
+from hive.indexer.post_data_cache import PostDataCache
+from hive.indexer.db_adapter_holder import DbAdapterHolder
+from hive.utils.misc import chunks
+
+from hive.utils.normalize import sbd_amount, legacy_amount, safe_img_url, escape_characters
 
 log = logging.getLogger(__name__)
 DB = Db.instance()
 
-class Posts:
+class Posts(DbAdapterHolder):
     """Handles critical/core post ops and data."""
 
     # LRU cache for (author-permlink -> id) lookup (~400mb per 1M entries)
@@ -24,10 +31,13 @@ class Posts:
     _hits = 0
     _miss = 0
 
+    comment_payout_ops = {}
+    _comment_payout_ops = []
+
     @classmethod
     def last_id(cls):
         """Get the last indexed post id."""
-        sql = "SELECT MAX(id) FROM hive_posts WHERE is_deleted = '0'"
+        sql = "SELECT MAX(id) FROM hive_posts WHERE counter_deleted = 0"
         return DB.query_one(sql) or 0
 
     @classmethod
@@ -40,8 +50,13 @@ class Posts:
             cls._ids[url] = _id
         else:
             cls._miss += 1
-            sql = """SELECT id FROM hive_posts WHERE
-                     author = :a AND permlink = :p"""
+            sql = """
+                SELECT hp.id
+                FROM hive_posts hp
+                INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+                INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+                WHERE ha_a.name = :a AND hpd_p.permlink = :p
+            """
             _id = DB.query_one(sql, a=author, p=permlink)
             if _id:
                 cls._set_id(url, _id)
@@ -63,186 +78,362 @@ class Posts:
         cls._ids[url] = pid
 
     @classmethod
-    def save_ids_from_tuples(cls, tuples):
-        """Skim & cache `author/permlink -> id` from external queries."""
-        for tup in tuples:
-            pid, author, permlink = (tup[0], tup[1], tup[2])
-            url = author+'/'+permlink
-            if not url in cls._ids:
-                cls._set_id(url, pid)
-        return tuples
-
-    @classmethod
-    def get_id_and_depth(cls, author, permlink):
-        """Get the id and depth of @author/permlink post."""
-        _id = cls.get_id(author, permlink)
-        if not _id:
-            return (None, -1)
-        depth = DB.query_one("SELECT depth FROM hive_posts WHERE id = :id", id=_id)
-        return (_id, depth)
-
-    @classmethod
-    def is_pid_deleted(cls, pid):
-        """Check if the state of post is deleted."""
-        sql = "SELECT is_deleted FROM hive_posts WHERE id = :id"
-        return DB.query_one(sql, id=pid)
-
-    @classmethod
-    def delete_op(cls, op):
+    def delete_op(cls, op, block_date):
         """Given a delete_comment op, mark the post as deleted.
 
         Also remove it from post-cache and feed-cache.
         """
-        cls.delete(op)
+        cls.delete(op, block_date)
 
     @classmethod
     def comment_op(cls, op, block_date):
         """Register new/edited/undeleted posts; insert into feed cache."""
-        pid = cls.get_id(op['author'], op['permlink'])
-        if not pid:
-            # post does not exist, go ahead and process it.
-            cls.insert(op, block_date)
-        elif not cls.is_pid_deleted(pid):
-            # post exists, not deleted, thus an edit. ignore.
-            cls.update(op, block_date, pid)
+
+        md = {}
+        # At least one case where jsonMetadata was double-encoded: condenser#895
+        # jsonMetadata = JSON.parse(jsonMetadata);
+        try:
+            md = loads(op['json_metadata'])
+            if not isinstance(md, dict):
+                md = {}
+        except Exception:
+            pass
+
+        tags = []
+
+        if md and 'tags' in md and isinstance(md['tags'], list):
+            for tag in md['tags']:
+                if tag and isinstance(tag, str):
+                    tags.append(tag) # No escaping needed due to used sqlalchemy formatting features
+
+        sql = """
+            SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, community_id, is_valid, is_muted, depth
+            FROM process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_block)::integer, (:block_num)::integer, (:tags)::VARCHAR[]);
+            """
+
+        row = DB.query_row(sql, author=op['author'], permlink=op['permlink'], parent_author=op['parent_author'],
+                   parent_permlink=op['parent_permlink'], date=block_date, community_support_start_block=Community.start_block, block_num=op['block_num'], tags=tags)
+
+        result = dict(row)
+
+        # TODO we need to enhance checking related community post validation and honor is_muted.
+        error = cls._verify_post_against_community(op, result['community_id'], result['is_valid'], result['is_muted'])
+
+        cls._set_id(op['author']+'/'+op['permlink'], result['id'])
+
+        img_url = None
+        if 'image' in md:
+            img_url = md['image']
+            if isinstance(img_url, list) and img_url:
+                img_url = img_url[0]
+        if img_url:
+            img_url = safe_img_url(img_url)
+
+        is_new_post = result['is_new_post']
+        if is_new_post:
+            # add content data to hive_post_data
+            post_data = dict(title=op['title'] if op['title'] else '',
+                             img_url=img_url if img_url else '',
+                             body=op['body'] if op['body'] else '',
+                             json=op['json_metadata'] if op['json_metadata'] else '')
         else:
-            # post exists but was deleted. time to reinstate.
-            cls.undelete(op, block_date, pid)
+            # edit case. Now we need to (potentially) apply patch to the post body.
+            # empty new body means no body edit, not clear (same with other data)
+            new_body = cls._merge_post_body(id=result['id'], new_body_def=op['body']) if op['body'] else None
+            new_title = op['title'] if op['title'] else None
+            new_json = op['json_metadata'] if op['json_metadata'] else None
+            # when 'new_json' is not empty, 'img_url' should be overwritten even if it is itself empty
+            new_img = img_url if img_url else '' if new_json else None
+            post_data = dict(title=new_title, img_url=new_img, body=new_body, json=new_json)
 
-    @classmethod
-    def insert(cls, op, date):
-        """Inserts new post records."""
-        sql = """INSERT INTO hive_posts (is_valid, is_muted, parent_id, author,
-                             permlink, category, community_id, depth, created_at)
-                      VALUES (:is_valid, :is_muted, :parent_id, :author,
-                             :permlink, :category, :community_id, :depth, :date)"""
-        sql += ";SELECT currval(pg_get_serial_sequence('hive_posts','id'))"
-        post = cls._build_post(op, date)
-        result = DB.query(sql, **post)
-        post['id'] = int(list(result)[0][0])
-        cls._set_id(op['author']+'/'+op['permlink'], post['id'])
+#        log.info("Adding author: {}  permlink: {}".format(op['author'], op['permlink']))
+        PostDataCache.add_data(result['id'], post_data, is_new_post)
 
         if not DbState.is_initial_sync():
-            if post['error']:
-                author_id = Accounts.get_id(post['author'])
-                Notify('error', dst_id=author_id, when=date,
-                       post_id=post['id'], payload=post['error']).write()
-            CachedPost.insert(op['author'], op['permlink'], post['id'])
-            if op['parent_author']: # update parent's child count
-                CachedPost.recount(op['parent_author'],
-                                   op['parent_permlink'], post['parent_id'])
-            cls._insert_feed_cache(post)
+            if error:
+                author_id = result['author_id']
+                Notify(block_num=op['block_num'], type_id='error', dst_id=author_id, when=block_date,
+                       post_id=result['id'], payload=error)
 
     @classmethod
-    def undelete(cls, op, date, pid):
-        """Re-allocates an existing record flagged as deleted."""
-        sql = """UPDATE hive_posts SET is_valid = :is_valid,
-                   is_muted = :is_muted, is_deleted = '0', is_pinned = '0',
-                   parent_id = :parent_id, category = :category,
-                   community_id = :community_id, depth = :depth
-                 WHERE id = :id"""
-        post = cls._build_post(op, date, pid)
-        DB.query(sql, **post)
+    def flush_into_db(cls):
+        sql = """
+              UPDATE hive_posts AS ihp SET
+                  total_payout_value    = COALESCE( data_source.total_payout_value,                     ihp.total_payout_value ),
+                  curator_payout_value  = COALESCE( data_source.curator_payout_value,                   ihp.curator_payout_value ),
+                  author_rewards        = CAST( data_source.author_rewards as BIGINT ) + ihp.author_rewards,
+                  author_rewards_hive   = COALESCE( CAST( data_source.author_rewards_hive as BIGINT ),  ihp.author_rewards_hive ),
+                  author_rewards_hbd    = COALESCE( CAST( data_source.author_rewards_hbd as BIGINT ),   ihp.author_rewards_hbd ),
+                  author_rewards_vests  = COALESCE( CAST( data_source.author_rewards_vests as BIGINT ), ihp.author_rewards_vests ),
+                  payout                = COALESCE( CAST( data_source.payout as DECIMAL ),              ihp.payout ),
+                  pending_payout        = COALESCE( CAST( data_source.pending_payout as DECIMAL ),      ihp.pending_payout ),
+                  payout_at             = COALESCE( CAST( data_source.payout_at as TIMESTAMP ),         ihp.payout_at ),
+                  last_payout_at        = COALESCE( CAST( data_source.last_payout_at as TIMESTAMP ),    ihp.last_payout_at ),
+                  cashout_time          = COALESCE( CAST( data_source.cashout_time as TIMESTAMP ),      ihp.cashout_time ),
+                  is_paidout            = COALESCE( CAST( data_source.is_paidout as BOOLEAN ),          ihp.is_paidout ),
+                  total_vote_weight     = COALESCE( CAST( data_source.total_vote_weight as NUMERIC ),   ihp.total_vote_weight )
+              FROM
+              (
+              SELECT  ha_a.id as author_id, hpd_p.id as permlink_id,
+                      t.total_payout_value,
+                      t.curator_payout_value,
+                      t.author_rewards,
+                      t.author_rewards_hive,
+                      t.author_rewards_hbd,
+                      t.author_rewards_vests,
+                      t.payout,
+                      t.pending_payout,
+                      t.payout_at,
+                      t.last_payout_at,
+                      t.cashout_time,
+                      t.is_paidout,
+                      t.total_vote_weight
+              from
+              (
+              VALUES
+                --- put all constant values here
+                {}
+              ) AS T(author, permlink,
+                      total_payout_value,
+                      curator_payout_value,
+                      author_rewards,
+                      author_rewards_hive,
+                      author_rewards_hbd,
+                      author_rewards_vests,
+                      payout,
+                      pending_payout,
+                      payout_at,
+                      last_payout_at,
+                      cashout_time,
+                      is_paidout,
+                      total_vote_weight)
+              INNER JOIN hive_accounts ha_a ON ha_a.name = t.author
+              INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
+              ) as data_source
+              WHERE ihp.permlink_id = data_source.permlink_id and ihp.author_id = data_source.author_id
+        """
 
-        if not DbState.is_initial_sync():
-            if post['error']:
-                author_id = Accounts.get_id(post['author'])
-                Notify('error', dst_id=author_id, when=date,
-                       post_id=post['id'], payload=post['error']).write()
+        for chunk in chunks(cls._comment_payout_ops, 1000):
+            cls.beginTx()
 
-            CachedPost.undelete(pid, post['author'], post['permlink'],
-                                post['category'])
-            cls._insert_feed_cache(post)
+            values_str = ','.join(chunk)
+            actual_query = sql.format(values_str)
+            cls.db.query(actual_query)
+
+            cls.commitTx()
+
+        n = len(cls._comment_payout_ops)
+        cls._comment_payout_ops.clear()
+        return n
 
     @classmethod
-    def delete(cls, op):
+    def comment_payout_op(cls):
+        values_limit = 1000
+
+        """ Process comment payment operations """
+        for k, v in cls.comment_payout_ops.items():
+            author                    = None
+            permlink                  = None
+
+            # author payouts
+            author_rewards            = 0
+            author_rewards_hive       = None
+            author_rewards_hbd        = None
+            author_rewards_vests      = None
+
+            # total payout for comment
+            #comment_author_reward     = None
+            #curators_vesting_payout   = None
+            total_payout_value        = None;
+            curator_payout_value      = None;
+            #beneficiary_payout_value  = None;
+
+            payout                    = None
+            pending_payout            = None
+
+            payout_at                 = None
+            last_payout_at            = None
+            cashout_time              = None
+
+            is_paidout                = None
+
+            total_vote_weight         = None
+
+            # final payout indicator - by default all rewards are zero, but might be overwritten by other operations
+            if v[ 'comment_payout_update_operation' ] is not None:
+              value, date = v[ 'comment_payout_update_operation' ]
+              if author is None:
+                author = value['author']
+                permlink = value['permlink']
+              is_paidout              = True
+              payout_at               = date
+              last_payout_at          = date
+              cashout_time            = "infinity"
+
+              pending_payout          = 0
+
+            # author rewards in current (final or nonfinal) payout (always comes with comment_reward_operation)
+            if v[ 'author_reward_operation' ] is not None:
+              value, date = v[ 'author_reward_operation' ]
+              if author is None:
+                author = value['author']
+                permlink = value['permlink']
+              author_rewards_hive     = value['hive_payout']['amount']
+              author_rewards_hbd      = value['hbd_payout']['amount']
+              author_rewards_vests    = value['vesting_payout']['amount']
+              #curators_vesting_payout = value['curators_vesting_payout']['amount']
+
+            # summary of comment rewards in current (final or nonfinal) payout (always comes with author_reward_operation)
+            if v[ 'comment_reward_operation' ] is not None:
+              value, date = v[ 'comment_reward_operation' ]
+              if author is None:
+                author = value['author']
+                permlink = value['permlink']
+              #comment_author_reward   = value['payout']
+              author_rewards          = value['author_rewards']
+              total_payout_value      = value['total_payout_value']
+              curator_payout_value    = value['curator_payout_value']
+              #beneficiary_payout_value = value['beneficiary_payout_value']
+
+              payout = sum([ sbd_amount(total_payout_value), sbd_amount(curator_payout_value) ])
+              pending_payout = 0
+              last_payout_at = date
+
+            # estimated pending_payout from vote (if exists with actual payout the value comes from vote cast after payout)
+            if v[ 'effective_comment_vote_operation' ] is not None:
+              value, date = v[ 'effective_comment_vote_operation' ]
+              if author is None:
+                author = value['author']
+                permlink = value['permlink']
+              pending_payout          = sbd_amount( value['pending_payout'] )
+              total_vote_weight       = value['total_vote_weight']
+
+
+            cls._comment_payout_ops.append("('{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(
+              author,
+              escape_characters(permlink),
+              "NULL" if ( total_payout_value is None ) else ( "'{}'".format( legacy_amount(total_payout_value) ) ),
+              "NULL" if ( curator_payout_value is None ) else ( "'{}'".format( legacy_amount(curator_payout_value) ) ),
+              author_rewards,
+              "NULL" if ( author_rewards_hive is None ) else author_rewards_hive,
+              "NULL" if ( author_rewards_hbd is None ) else author_rewards_hbd,
+              "NULL" if ( author_rewards_vests is None ) else author_rewards_vests,
+              "NULL" if ( payout is None ) else payout,
+              "NULL" if ( pending_payout is None ) else pending_payout,
+
+              "NULL" if ( payout_at is None ) else ( "'{}'::timestamp".format( payout_at ) ),
+              "NULL" if ( last_payout_at is None ) else ( "'{}'::timestamp".format( last_payout_at ) ),
+              "NULL" if ( cashout_time is None ) else ( "'{}'::timestamp".format( cashout_time ) ),
+
+              "NULL" if ( is_paidout is None ) else is_paidout,
+
+              "NULL" if ( total_vote_weight is None ) else total_vote_weight ))
+
+
+        n = len(cls.comment_payout_ops)
+        cls.comment_payout_ops.clear()
+        return n
+
+    @classmethod
+    def update_child_count(cls, child_id, op='+'):
+        """ Increase/decrease child count by 1 """
+        sql = """
+            UPDATE
+                hive_posts
+            SET
+                children = GREATEST(0, (
+                    SELECT
+                        CASE
+                            WHEN children is NULL THEN 0
+                            WHEN children=32762 THEN 0
+                            ELSE children
+                        END
+                    FROM
+                        hive_posts
+                    WHERE id = (SELECT parent_id FROM hive_posts WHERE id = :child_id)
+                )::int
+        """
+        if op == '+':
+            sql += """ + 1)"""
+        else:
+            sql += """ - 1)"""
+        sql += """ WHERE id = (SELECT parent_id FROM hive_posts WHERE id = :child_id)"""
+
+        DB.query(sql, child_id=child_id)
+
+    @classmethod
+    def comment_options_op(cls, op):
+        """ Process comment_options_operation """
+        max_accepted_payout = legacy_amount(op['max_accepted_payout']) if 'max_accepted_payout' in op else '1000000.000 HBD'
+        allow_votes = op['allow_votes'] if 'allow_votes' in op else True
+        allow_curation_rewards = op['allow_curation_rewards'] if 'allow_curation_rewards' in op else True
+        percent_hbd = op['percent_hbd'] if 'percent_hbd' in op else 10000
+        extensions = op['extensions'] if 'extensions' in op else []
+        beneficiaries = []
+        for ex in extensions:
+            if 'type' in ex and ex['type'] == 'comment_payout_beneficiaries' and 'beneficiaries' in ex['value']:
+                beneficiaries = ex['value']['beneficiaries']
+        sql = """
+            UPDATE
+                hive_posts hp
+            SET
+                max_accepted_payout = :max_accepted_payout,
+                percent_hbd = :percent_hbd,
+                allow_votes = :allow_votes,
+                allow_curation_rewards = :allow_curation_rewards,
+                beneficiaries = :beneficiaries
+            WHERE
+            hp.author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND
+            hp.permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)
+        """
+        DB.query(sql, author=op['author'], permlink=op['permlink'], max_accepted_payout=max_accepted_payout,
+                 percent_hbd=percent_hbd, allow_votes=allow_votes, allow_curation_rewards=allow_curation_rewards,
+                 beneficiaries=dumps(beneficiaries))
+
+    @classmethod
+    def delete(cls, op, block_date):
         """Marks a post record as being deleted."""
-        pid, depth = cls.get_id_and_depth(op['author'], op['permlink'])
-        DB.query("UPDATE hive_posts SET is_deleted = '1' WHERE id = :id", id=pid)
-
-        if not DbState.is_initial_sync():
-            CachedPost.delete(pid, op['author'], op['permlink'])
-            if depth == 0:
-                # TODO: delete from hive_reblogs -- otherwise feed cache gets populated with deleted posts somwrimas
-                FeedCache.delete(pid)
-            else:
-                # force parent child recount when child is deleted
-                prnt = cls._get_parent_by_child_id(pid)
-                CachedPost.recount(prnt['author'], prnt['permlink'], prnt['id'])
-
+        sql = "SELECT delete_hive_post((:author)::varchar, (:permlink)::varchar, (:block_num)::int, (:date)::timestamp);"
+        DB.query_no_return(sql, author=op['author'], permlink = op['permlink'], block_num=op['block_num'], date=block_date)
 
     @classmethod
-    def update(cls, op, date, pid):
-        """Handle post updates.
-
-        Here we could also build content diffs, but for now just used
-        a signal to update cache record.
-        """
-        # pylint: disable=unused-argument
-        if not DbState.is_initial_sync():
-            CachedPost.update(op['author'], op['permlink'], pid)
-
-    @classmethod
-    def _get_parent_by_child_id(cls, child_id):
-        """Get parent's `id`, `author`, `permlink` by child id."""
-        sql = """SELECT id, author, permlink FROM hive_posts
-                  WHERE id = (SELECT parent_id FROM hive_posts
-                               WHERE id = :child_id)"""
-        result = DB.query_row(sql, child_id=child_id)
-        assert result, "parent of %d not found" % child_id
-        return result
-
-    @classmethod
-    def _insert_feed_cache(cls, post):
-        """Insert the new post into feed cache if it's not a comment."""
-        if not post['depth']:
-            account_id = Accounts.get_id(post['author'])
-            FeedCache.insert(post['id'], account_id, post['date'])
-
-    @classmethod
-    def _build_post(cls, op, date, pid=None):
-        """Validate and normalize a post operation.
-
-        Post is muted if:
-         - parent was muted
-         - author unauthorized
-
-        Post is invalid if:
-         - parent is invalid
-         - author unauthorized
-        """
-        # TODO: non-nsfw post in nsfw community is `invalid`
-
-        # if this is a top-level post:
-        if not op['parent_author']:
-            parent_id = None
-            depth = 0
-            category = op['parent_permlink']
-            community_id = None
-            if date > START_DATE:
-                community_id = Community.validated_id(category)
-            is_valid = True
-            is_muted = False
-
-        # this is a comment; inherit parent props.
-        else:
-            parent_id = cls.get_id(op['parent_author'], op['parent_permlink'])
-            sql = """SELECT depth, category, community_id, is_valid, is_muted
-                       FROM hive_posts WHERE id = :id"""
-            (parent_depth, category, community_id, is_valid,
-             is_muted) = DB.query_row(sql, id=parent_id)
-            depth = parent_depth + 1
-            if not is_valid: error = 'replying to invalid post'
-            elif is_muted: error = 'replying to muted post'
-
-        # check post validity in specified context
+    def _verify_post_against_community(cls, op, community_id, is_valid, is_muted):
         error = None
         if community_id and is_valid and not Community.is_post_valid(community_id, op):
             error = 'not authorized'
             #is_valid = False # TODO: reserved for future blacklist status?
             is_muted = True
+        return error
 
-        return dict(author=op['author'], permlink=op['permlink'], id=pid,
-                    is_valid=is_valid, is_muted=is_muted, parent_id=parent_id,
-                    depth=depth, category=category, community_id=community_id,
-                    date=date, error=error)
+    @classmethod
+    def _merge_post_body(cls, id, new_body_def):
+        new_body = ''
+        old_body = ''
+
+        try:
+            dmp = diff_match_patch()
+            patch = dmp.patch_fromText(new_body_def)
+            if patch is not None and len(patch):
+                old_body = PostDataCache.get_post_body(id)
+                new_body, _ = dmp.patch_apply(patch, old_body)
+                #new_utf8_body = new_body.decode('utf-8')
+                #new_body = new_utf8_body
+            else:
+                new_body = new_body_def
+        except ValueError as e:
+#            log.info("Merging a body post id: {} caused an ValueError exception {}".format(id, e))
+#            log.info("New body definition: {}".format(new_body_def))
+#            log.info("Old body definition: {}".format(old_body))
+            new_body = new_body_def
+        except Exception as ex:
+            log.info("Merging a body post id: {} caused an unknown exception {}".format(id, ex))
+            log.info("New body definition: {}".format(new_body_def))
+            log.info("Old body definition: {}".format(old_body))
+            new_body = new_body_def
+
+        return new_body
+
+
+    @classmethod
+    def flush(cls):
+      return cls.comment_payout_op() + cls.flush_into_db()

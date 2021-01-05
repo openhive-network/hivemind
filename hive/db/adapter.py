@@ -5,6 +5,7 @@ from time import perf_counter as perf
 from collections import OrderedDict
 from funcy.seqs import first
 import sqlalchemy
+import os
 
 from hive.utils.stats import Stats
 
@@ -50,12 +51,21 @@ class Db:
         self._exec = self._conn.execute
         self._exec(sqlalchemy.text("COMMIT"))
 
+    def clone(self):
+        return Db(self._url)
+
     def engine(self):
         """Lazy-loaded SQLAlchemy engine."""
         if not self._engine:
+            pool_size = os.cpu_count()
+            if pool_size > 5:
+                pool_size = pool_size - 1
+            else:
+                pool_size = 5
             self._engine = sqlalchemy.create_engine(
                 self._url,
                 isolation_level="READ UNCOMMITTED", # only supported in mysql
+                pool_size=pool_size,
                 pool_recycle=3600,
                 echo=False)
         return self._engine
@@ -77,6 +87,9 @@ class Db:
         # this method is reserved for anything but SELECT
         assert self._is_write_query(sql), sql
         return self._query(sql, **kwargs)
+
+    def query_no_return(self, sql, **kwargs):
+        self._query(sql, **kwargs)
 
     def query_all(self, sql, **kwargs):
         """Perform a `SELECT n*m`"""
@@ -154,11 +167,12 @@ class Db:
         return (sql, values)
 
     def _sql_text(self, sql):
-        if sql in self._prep_sql:
-            query = self._prep_sql[sql]
-        else:
-            query = sqlalchemy.text(sql).execution_options(autocommit=False)
-            self._prep_sql[sql] = query
+#        if sql in self._prep_sql:
+#            query = self._prep_sql[sql]
+#        else:
+#            query = sqlalchemy.text(sql).execution_options(autocommit=False)
+#            self._prep_sql[sql] = query
+        query = sqlalchemy.text(sql).execution_options(autocommit=False)
         return query
 
     def _query(self, sql, **kwargs):
@@ -173,7 +187,11 @@ class Db:
         try:
             start = perf()
             query = self._sql_text(sql)
+            if 'log_query' in kwargs and kwargs['log_query']:
+                log.info("QUERY: {}".format(query))
             result = self._exec(query, **kwargs)
+            if 'log_result' in kwargs and kwargs['log_result']:
+                log.info("RESULT: {}".format(result))
             Stats.log_db(sql, perf() - start)
             return result
         except Exception as e:

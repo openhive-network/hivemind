@@ -7,9 +7,8 @@ from hive.server.hive_api.common import (
     get_account_id, split_url,
     valid_account, valid_permlink, valid_limit)
 from hive.server.condenser_api.cursor import get_followers, get_following
-from hive.server.bridge_api.cursor import (
-    pids_by_blog, pids_by_comments, pids_by_feed_with_reblog)
 
+from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
 
 log = logging.getLogger(__name__)
 
@@ -36,75 +35,48 @@ async def get_accounts(context, names, observer=None):
 
 # Follows/mute
 
-async def list_followers(context, account, start='', limit=50, observer=None):
+async def list_followers(context, account:str, start:str='', limit:int=50, observer:str=None):
     """Get a list of all accounts following `account`."""
     followers = await get_followers(
         context['db'],
         valid_account(account),
         valid_account(start, allow_empty=True),
-        'blog', valid_limit(limit, 100))
+        1, # blog
+        valid_limit(limit, 100, 50))
     return await accounts_by_name(context['db'], followers, observer, lite=True)
 
-async def list_following(context, account, start='', limit=50, observer=None):
+async def list_following(context, account:str, start:str='', limit:int=50, observer:str=None):
     """Get a list of all accounts `account` follows."""
     following = await get_following(
         context['db'],
         valid_account(account),
         valid_account(start, allow_empty=True),
-        'blog', valid_limit(limit, 100))
+        1, # blog
+        valid_limit(limit, 100, 50))
     return await accounts_by_name(context['db'], following, observer, lite=True)
 
 async def list_all_muted(context, account):
     """Get a list of all account names muted by `account`."""
     db = context['db']
+    account = valid_account(account)
     sql = """SELECT a.name FROM hive_follows f
                JOIN hive_accounts a ON f.following_id = a.id
               WHERE follower = :follower AND state = 2"""
     return await db.query_col(sql, follower=get_account_id(db, account))
 
-
-# Account post lists
-
-async def list_account_blog(context, account, limit=10, observer=None, last_post=None):
-    """Get a blog feed (posts and reblogs from the specified account)"""
+async def get_info(context):
     db = context['db']
 
-    post_ids = await pids_by_blog(
-        db,
-        valid_account(account),
-        *split_url(last_post, allow_empty=True),
-        valid_limit(limit, 50))
-    return await posts_by_id(db, post_ids, observer)
+    sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
+    database_head_block = await db.query_one(sql)
 
-async def list_account_posts(context, account, limit=10, observer=None, last_post=None):
-    """Get an account's posts and comments"""
-    db = context['db']
-    start_author, start_permlink = split_url(last_post, allow_empty=True)
-    assert not start_author or (start_author == account)
-    post_ids = await pids_by_comments(
-        db,
-        valid_account(account),
-        valid_permlink(start_permlink),
-        valid_limit(limit, 50))
-    return await posts_by_id(db, post_ids, observer)
+    from hive.version import VERSION, GIT_REVISION
 
-async def list_account_feed(context, account, limit=10, observer=None, last_post=None):
-    """Get all posts (blogs and resteems) from `account`'s follows."""
-    db = context['db']
-    ids_with_reblogs = await pids_by_feed_with_reblog(
-        context['db'],
-        valid_account(account),
-        *split_url(last_post, allow_empty=True),
-        valid_limit(limit, 50))
+    ret = {
+        "hivemind_version" : VERSION,
+        "hivemind_git_rev" : GIT_REVISION,
+        "database_schema_version" : SCHEMA_DB_VERSION,
+        "database_head_block" : database_head_block
+    }
 
-    reblog_by = dict(ids_with_reblogs)
-    post_ids = [r[0] for r in ids_with_reblogs]
-    posts = await posts_by_id(db, post_ids, observer)
-
-    # Merge reblogged_by data into result set
-    for post in posts:
-        rby = set(reblog_by[post['post_id']].split(','))
-        rby.discard(post['author'])
-        if rby: post['reblogged_by'] = list(rby)
-
-    return posts
+    return ret

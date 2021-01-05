@@ -37,6 +37,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+pip-wheel-metadata
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -124,3 +125,24 @@ tests/failed_blocks/
 /tests/envdir-to-envfile.sh
 /deploy/
 /scripts/hive.sqlite
+
+# vscode
+.vscode/*
+
+# pyrest tests
+*.out.json
+
+# version.py
+hive/version.py
+
+hivemind.port
+hive_server.pid
+hivemind-server.pid
+
+Pipfile.lock
+
+pghero.yml
+*~
+.tmp
+
+.private

@@ -3,6 +3,7 @@
 import logging
 import math
 import decimal
+
 from datetime import datetime
 from pytz import utc
 import ujson as json
@@ -12,6 +13,91 @@ NAI_MAP = {
     '@@000000021': 'HIVE',
     '@@000000037': 'VESTS',
 }
+
+NAI_PRECISION = {
+    '@@000000013': 3,
+    '@@000000021': 3,
+    '@@000000037': 6,
+}
+
+UNIT_NAI = {
+    'HBD' : '@@000000013',
+    'HIVE' : '@@000000021',
+    'VESTS' : '@@000000037'
+}
+
+# convert special chars into their octal formats recognized by sql
+SPECIAL_CHARS = {
+    "\x00" : " ", # nul char cannot be stored in string column (ABW: if we ever find the need to store nul chars we'll need bytea, not text)
+    "\r" : "\\015",
+    "\n" : "\\012",
+    "\v" : "\\013",
+    "\f" : "\\014",
+    "\\" : "\\134",
+    "'" : "\\047",
+    "%" : "\\045",
+    "_" : "\\137",
+    ":" : "\\072"
+}
+
+def to_nai(value):
+    """ Convert various amount notation to nai notation """
+    ret = None
+    if isinstance(value, dict):
+        assert 'amount' in value, "amount not found in dict"
+        assert 'precision' in value, "precision not found in dict"
+        assert 'nai' in value, "nai not found in dict"
+        ret = value
+
+    elif isinstance(value, str):
+        raw_amount, unit = value.split(' ')
+        assert unit in UNIT_NAI, "Unknown unit {}".format(unit)
+        nai = UNIT_NAI[unit]
+        precision = NAI_PRECISION[nai]
+        satoshis = int(decimal.Decimal(raw_amount) * (10**precision))
+        ret = {'amount' : str(satoshis), 'nai' : nai, 'precision' : precision}
+
+    elif isinstance(value, list):
+        satoshis, precision, nai = value
+        assert nai in NAI_MAP, "Unknown NAI {}".format(nai)
+
+    else:
+        raise Exception("Invalid input amount %s" % repr(value))
+    return ret
+
+
+def escape_characters(text):
+    """ Escape special charactes """
+    assert isinstance(text, str), "Expected string got: {}".format(type(text))
+    if len(text.strip()) == 0:
+        return "'" + text + "'"
+
+    ret = "E'"
+
+    for ch in text:
+        if ch in SPECIAL_CHARS:
+            dw = SPECIAL_CHARS[ch]
+            ret = ret + dw
+        else:
+            ordinal = ord(ch)
+            if ordinal <= 0x80 and ch.isprintable():
+                ret = ret + ch
+            else:
+                hexstr = hex(ordinal)[2:]
+                i = len(hexstr)
+                max = 4
+                escaped_value = '\\u'
+                if i > max:
+                    max = 8
+                    escaped_value = '\\U'
+                while i < max:
+                    escaped_value += '0'
+                    i += 1
+                escaped_value += hexstr
+                ret = ret + escaped_value
+
+    ret = ret + "'"
+    return ret
 
 def vests_amount(value):
     """Returns a decimal amount, asserting units are VESTS"""
@@ -49,7 +135,8 @@ def parse_amount(value, expected_unit=None):
         raise Exception("invalid input amount %s" % repr(value))
 
     if expected_unit:
-        assert unit == expected_unit
+# FIXME to be uncommented when payout collection will be corrected
+#        assert unit == expected_unit, "Unexpected unit: %s" % unit
         return dec_amount
 
     return (dec_amount, unit)
@@ -135,7 +222,7 @@ def rep_log10(rep):
     out = _log10(rep)
     out = max(out - 9, 0) * sign  # @ -9, $1 earned is approx magnitude 1
     out = (out * 9) + 25          # 9 points per magnitude. center at 25
-    return round(out, 2)
+    return float(round(out, 2))
 
 def rep_to_raw(rep):
     """Convert a UI-ready rep score back into its approx raw value."""
@@ -180,3 +267,21 @@ def int_log_level(str_log_level):
     if not isinstance(log_level, int):
         raise ValueError('Invalid log level: %s' % str_log_level)
     return log_level
+
+def asset_to_hbd_hive(price, asset):
+    """ Converts hive to hbd and hbd to hive based on price """
+    if asset['nai'] == price['base']['nai']:
+        result = int(asset['amount']) * int(price['quote']['amount']) / int(price['base']['amount'])
+        return {'amount' : result, 'nai' : price['quote']['nai'], 'precision' : price['quote']['precision']}
+    elif asset['nai'] == price['quote']['nai']:
+        result = int(asset['amount']) * int(price['base']['amount']) / int(price['quote']['amount'])
+        return {'amount' : result, 'nai' : price['base']['nai'], 'precision' : price['base']['precision']}
+    raise ValueError("Asset not supported")
+
+def time_string_with_t(time_iso8601):
+    """ Ensures that time in format ISO8601 use 'T' as a data time separator
+
+    Hived serialzie time wit 'T' as a separator. ISO allows for space as a separator
+    and SQL queries may return it.
+    """
+    return str(time_iso8601).replace(" ", "T")

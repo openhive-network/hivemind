@@ -1,6 +1,7 @@
 """Hive API: account, post, and comment object retrieval"""
 import logging
-from hive.server.hive_api.common import get_account_id, estimated_sp
+from hive.server.hive_api.common import get_account_id
+from hive.utils.account import safe_db_profile_metadata
 log = logging.getLogger(__name__)
 
 # Account objects
@@ -9,33 +10,33 @@ log = logging.getLogger(__name__)
 async def accounts_by_name(db, names, observer=None, lite=True):
     """Find and return accounts by `name`."""
 
-    sql = """SELECT id, name, display_name, about, created_at,
-                    vote_weight, rank, followers, following %s
+    sql = """SELECT id, name, created_at,
+                    rank, followers, following, posting_json_metadata, json_metadata
                FROM hive_accounts WHERE name IN :names"""
-    fields = '' if lite else ', location, website, profile_image, cover_image'
-    rows = await db.query_all(sql % fields, names=tuple(names))
+    rows = await db.query_all(sql, names=tuple(names))
 
     accounts = {}
     for row in rows:
+        profile = safe_db_profile_metadata(row['posting_json_metadata'], row['json_metadata'])
         account = {
             'id': row['id'],
             'name': row['name'],
             'created': str(row['created_at']).split(' ')[0],
-            'sp': int(estimated_sp(row['vote_weight'])),
             'rank': row['rank'],
             'followers': row['followers'],
             'following': row['following'],
-            'display_name': row['display_name'],
-            'about': row['about'],
+            'display_name': profile['name'],
+            'about': profile['about'],
         }
         if not lite:
-            account['location'] = row['location']
-            account['website'] = row['website']
-            account['profile_image'] = row['profile_image']
-            account['cover_image'] = row['cover_image']
+            account['location'] = profile['location']
+            account['website'] = profile['website']
+            account['profile_image'] = profile['profile_image']
+            account['cover_image'] = profile['cover_image']
         accounts[account['id']] = account
 
     if observer:
+        observer = valid_account(observer)
         await _follow_contexts(db, accounts,
                                observer_id=await get_account_id(db, observer),
                                include_mute=not lite)
@@ -68,10 +69,24 @@ async def comments_by_id(db, ids, observer=None):
     """Given an array of post ids, returns comment objects keyed by id."""
     assert ids, 'no ids passed to comments_by_id'
 
-    sql = """SELECT post_id, author, permlink, body, depth,
-                    payout, payout_at, is_paidout, created_at, updated_at,
-                    rshares, is_hidden, is_grayed, votes
-               FROM hive_posts_cache WHERE post_id IN :ids""" #votes
+    sql = """
+      SELECT
+        hp.id,
+        hp.author,
+        hp.permlink,
+        hp.body,
+        hp.depth,
+        hp.payout,
+        hp.payout_at,
+        hp.is_paidout,
+        hp.created_at,
+        hp.updated_at,
+        hp.rshares,
+        hp.is_hidden,
+        hp.is_grayed,
+        hp.votes
+      FROM hive_posts_view hp
+      WHERE hp.id IN :ids""" #votes
     result = await db.query_all(sql, ids=tuple(ids))
 
     authors = set()
@@ -79,7 +94,7 @@ async def comments_by_id(db, ids, observer=None):
     for row in result:
         top_votes, observer_vote = _top_votes(row, 5, observer)
         post = {
-            'id': row['post_id'],
+            'id': row['id'],
             'author': row['author'],
             'url': row['author'] + '/' + row['permlink'],
             'depth': row['depth'],
@@ -108,11 +123,26 @@ async def posts_by_id(db, ids, observer=None, lite=True):
     """Given a list of post ids, returns lite post objects in the same order."""
 
     # pylint: disable=too-many-locals
-    sql = """SELECT post_id, author, permlink, title, img_url, payout, promoted,
-                    created_at, payout_at, is_nsfw, rshares, votes,
-                    is_muted, is_invalid, %s
-               FROM hive_posts_cache WHERE post_id IN :ids"""
-    fields = ['preview'] if lite else ['body', 'updated_at', 'json']
+    sql = """
+        SELECT 
+          hp.id,
+          hp.author,
+          hp.permlink,
+          hp.title, 
+          hp.img_url,
+          hp.payout,
+          hp.promoted,
+          hp.created_at,
+          hp.payout_at,
+          hp.is_nsfw,
+          hp.rshares,
+          hp.votes,
+          hp.is_muted,
+          hp.is_valid,
+          %s
+        FROM hive_posts_view hp 
+        WHERE id IN :ids"""
+    fields = ['hp.preview'] if lite else ['hp.body', 'hp.updated_at', 'hp.json']
     sql = sql % (', '.join(fields))
 
     reblogged_ids = await _reblogged_ids(db, observer, ids) if observer else []
@@ -124,8 +154,8 @@ async def posts_by_id(db, ids, observer=None, lite=True):
     by_id = {}
     for row in await db.query_all(sql, ids=tuple(ids)):
         assert not row['is_muted']
-        assert not row['is_invalid']
-        pid = row['post_id']
+        assert row['is_valid']
+        pid = row['id']
         top_votes, observer_vote = _top_votes(row, 5, observer)
 
         obj = {
@@ -158,7 +188,7 @@ async def posts_by_id(db, ids, observer=None, lite=True):
             }
 
         authors.add(obj['author'])
-        by_id[row['post_id']] = obj
+        by_id[row['id']] = obj
 
     # in rare cases of cache inconsistency, recover and warn
     missed = set(ids) - by_id.keys()
@@ -172,8 +202,12 @@ async def posts_by_id(db, ids, observer=None, lite=True):
             'accounts': await accounts_by_name(db, authors, observer, lite=True)}
 
 async def _append_flags(db, posts):
-    sql = """SELECT id, parent_id, community_id, category, is_muted, is_valid
-               FROM hive_posts WHERE id IN :ids"""
+    sql = """
+        SELECT 
+            id, parent_id, community_id,  hcd.category as category, is_muted, is_valid
+        FROM hive_posts hp
+        LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+        WHERE id IN :ids"""
     for row in await db.query_all(sql, ids=tuple(posts.keys())):
         post = posts[row['id']]
         post['parent_id'] = row['parent_id']
@@ -184,9 +218,16 @@ async def _append_flags(db, posts):
     return posts
 
 async def _reblogged_ids(db, observer, post_ids):
-    sql = """SELECT post_id FROM hive_reblogs
-              WHERE account = :observer
-                AND post_id IN :ids"""
+    sql = """
+        SELECT
+            hr.post_id
+        FROM 
+            hive_reblogs hr
+        INNER JOIN hive_accounts ha ON ha.id = hr.blogger_id
+        WHERE
+            ha.name = :observer
+            AND hr.post_id IN :ids
+    """
     return  await db.query_col(sql, observer=observer, ids=tuple(post_ids))
 
 def _top_votes(obj, limit, observer):

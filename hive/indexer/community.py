@@ -10,7 +10,6 @@ import ujson as json
 from hive.db.adapter import Db
 from hive.indexer.accounts import Accounts
 from hive.indexer.notify import Notify
-from hive.db.db_state import DbState
 
 log = logging.getLogger(__name__)
 
@@ -28,9 +27,6 @@ class Role(IntEnum):
 TYPE_TOPIC = 1
 TYPE_JOURNAL = 2
 TYPE_COUNCIL = 3
-
-START_BLOCK = 37500000
-START_DATE = '2019-10-22T07:12:36' # effectively 2019-10-22 12:00:00
 
 # https://en.wikipedia.org/wiki/ISO_639-1
 LANGS = ("ab,aa,af,ak,sq,am,ar,an,hy,as,av,ae,ay,az,bm,ba,eu,be,bn,bh,bi,"
@@ -57,9 +53,9 @@ def assert_keys_match(keys, expected, allow_missing=True):
     extra = keys - expected
     assert not extra, 'extraneous keys: %s' % extra
 
-def process_json_community_op(actor, op_json, date):
+def process_json_community_op(actor, op_json, date, block_num):
     """Validates community op and apply state changes to db."""
-    CommunityOp.process_if_valid(actor, op_json, date)
+    CommunityOp.process_if_valid(actor, op_json, date, block_num)
 
 def read_key_bool(op, key):
     """Reads a key from dict, ensuring valid bool if present."""
@@ -103,34 +99,32 @@ class Community:
     # id -> name map
     _names = {}
 
+    start_block = 37500000
+
     @classmethod
-    def register(cls, names, block_date):
+    def register(cls, name, block_date, block_num):
         """Block processing: hooks into new account registration.
 
         `Accounts` calls this method with any newly registered names.
         This method checks for any valid community names and inserts them.
         """
 
-        for name in names:
-            #if not re.match(r'^hive-[123]\d{4,6}$', name):
-            if not re.match(r'^hive-[1]\d{4,6}$', name):
-                continue
-            type_id = int(name[5])
-            _id = Accounts.get_id(name)
+        #if not re.match(r'^hive-[123]\d{4,6}$', name):
+        if not re.match(r'^hive-[1]\d{4,6}$', name):
+            return
+        type_id = int(name[5])
+        _id = Accounts.get_id(name)
 
-            # insert community
-            sql = """INSERT INTO hive_communities (id, name, type_id, created_at)
-                          VALUES (:id, :name, :type_id, :date)"""
-            DB.query(sql, id=_id, name=name, type_id=type_id, date=block_date)
+        # insert community
+        sql = """INSERT INTO hive_communities (id, name, type_id, created_at, block_num)
+                        VALUES (:id, :name, :type_id, :date, :block_num)"""
+        DB.query(sql, id=_id, name=name, type_id=type_id, date=block_date, block_num=block_num)
 
-            # insert owner
-            sql = """INSERT INTO hive_roles (community_id, account_id, role_id, created_at)
-                         VALUES (:community_id, :account_id, :role_id, :date)"""
-            DB.query(sql, community_id=_id, account_id=_id,
-                     role_id=Role.owner.value, date=block_date)
-
-            Notify('new_community', src_id=None, dst_id=_id,
-                   when=block_date, community_id=_id).write()
+        # insert owner
+        sql = """INSERT INTO hive_roles (community_id, account_id, role_id, created_at)
+                        VALUES (:community_id, :account_id, :role_id, :date)"""
+        DB.query(sql, community_id=_id, account_id=_id,
+                    role_id=Role.owner.value, date=block_date)
 
     @classmethod
     def validated_id(cls, name):
@@ -223,41 +217,6 @@ class Community:
             return role >= Role.member
         return role >= Role.guest # or at least not muted
 
-    @classmethod
-    def recalc_pending_payouts(cls):
-        """Update all pending payout and rank fields."""
-        sql = """SELECT id,
-                        COALESCE(posts, 0),
-                        COALESCE(payouts, 0),
-                        COALESCE(authors, 0)
-                   FROM hive_communities c
-              LEFT JOIN (
-                             SELECT community_id,
-                                    COUNT(*) posts,
-                                    ROUND(SUM(payout)) payouts,
-                                    COUNT(DISTINCT author) authors
-                               FROM hive_posts_cache
-                              WHERE community_id IS NOT NULL
-                                AND is_paidout = '0'
-                           GROUP BY community_id
-                        ) p
-                     ON community_id = id
-               ORDER BY COALESCE(payouts, 0) DESC,
-                        COALESCE(authors, 0) DESC,
-                        COALESCE(posts, 0) DESC,
-                        subscribers DESC,
-                        (CASE WHEN c.title = '' THEN 1 ELSE 0 END)
-        """
-
-        for rank, row in enumerate(DB.query_all(sql)):
-            cid, posts, payouts, authors = row
-            sql = """UPDATE hive_communities
-                        SET sum_pending = :payouts, num_pending = :posts,
-                            num_authors = :authors, rank = :rank
-                      WHERE id = :id"""
-            DB.query(sql, id=cid, payouts=payouts, posts=posts,
-                     authors=authors, rank=rank+1)
-
 class CommunityOp:
     """Handles validating and processing of community custom_json ops."""
     #pylint: disable=too-many-instance-attributes
@@ -275,9 +234,10 @@ class CommunityOp:
         'unsubscribe':    ['community'],
     }
 
-    def __init__(self, actor, date):
+    def __init__(self, actor, date, block_num):
         """Inits a community op for validation and processing."""
         self.date = date
+        self.block_num = block_num
         self.valid = False
         self.action = None
         self.op = None
@@ -302,9 +262,9 @@ class CommunityOp:
         self.props = None
 
     @classmethod
-    def process_if_valid(cls, actor, op_json, date):
+    def process_if_valid(cls, actor, op_json, date, block_num):
         """Helper to instantiate, validate, process an op."""
-        op = CommunityOp(actor, date)
+        op = CommunityOp(actor, date, block_num)
         if op.validate(op_json):
             op.process()
             return True
@@ -331,15 +291,15 @@ class CommunityOp:
 
         except AssertionError as e:
             payload = str(e)
-            Notify('error', dst_id=self.actor_id,
-                   when=self.date, payload=payload).write()
+            log.info("validation failed with message: '%s'", payload)
+            Notify(block_num=self.block_num, type_id='error', dst_id=self.actor_id,
+                   when=self.date, payload=payload)
 
         return self.valid
 
     def process(self):
         """Applies a validated operation."""
         assert self.valid, 'cannot apply invalid op'
-        from hive.indexer.cached_post import CachedPost
 
         action = self.action
         params = dict(
@@ -354,6 +314,7 @@ class CommunityOp:
             role_id=self.role_id,
             notes=self.notes,
             title=self.title,
+            block_num=self.block_num
         )
 
         # Community-level commands
@@ -365,12 +326,11 @@ class CommunityOp:
 
         elif action == 'subscribe':
             DB.query("""INSERT INTO hive_subscriptions
-                               (account_id, community_id, created_at)
-                        VALUES (:actor_id, :community_id, :date)""", **params)
+                               (account_id, community_id, created_at, block_num)
+                        VALUES (:actor_id, :community_id, :date, :block_num)""", **params)
             DB.query("""UPDATE hive_communities
                            SET subscribers = subscribers + 1
                          WHERE id = :community_id""", **params)
-            self._notify('subscribe')
         elif action == 'unsubscribe':
             DB.query("""DELETE FROM hive_subscriptions
                          WHERE account_id = :actor_id
@@ -385,7 +345,7 @@ class CommunityOp:
                                (account_id, community_id, role_id, created_at)
                         VALUES (:account_id, :community_id, :role_id, :date)
                             ON CONFLICT (account_id, community_id)
-                            DO UPDATE SET role_id = :role_id""", **params)
+                            DO UPDATE SET role_id = :role_id """, **params)
             self._notify('set_role', payload=Role(self.role_id).name)
         elif action == 'setUserTitle':
             DB.query("""INSERT INTO hive_roles
@@ -400,15 +360,11 @@ class CommunityOp:
             DB.query("""UPDATE hive_posts SET is_muted = '1'
                          WHERE id = :post_id""", **params)
             self._notify('mute_post', payload=self.notes)
-            if not DbState.is_initial_sync():
-                CachedPost.update(self.account, self.permlink, self.post_id)
 
         elif action == 'unmutePost':
             DB.query("""UPDATE hive_posts SET is_muted = '0'
                          WHERE id = :post_id""", **params)
             self._notify('unmute_post', payload=self.notes)
-            if not DbState.is_initial_sync():
-                CachedPost.update(self.account, self.permlink, self.post_id)
 
         elif action == 'pinPost':
             DB.query("""UPDATE hive_posts SET is_pinned = '1'
@@ -424,11 +380,6 @@ class CommunityOp:
         return True
 
     def _notify(self, op, **kwargs):
-        if DbState.is_initial_sync():
-            # TODO: set start date for notifs?
-            # TODO: address other callers
-            return
-
         dst_id = None
         score = 35
 
@@ -437,10 +388,10 @@ class CommunityOp:
             if not self._subscribed(self.account_id):
                 score = 15
 
-        Notify(op, src_id=self.actor_id, dst_id=dst_id,
+        Notify(block_num=self.block_num, type_id=op, src_id=self.actor_id, dst_id=dst_id,
                post_id=self.post_id, when=self.date,
                community_id=self.community_id,
-               score=score, **kwargs).write()
+               score=score, **kwargs)
 
     def _validate_raw_op(self, raw_op):
         assert isinstance(raw_op, list), 'op json must be list'
@@ -466,7 +417,7 @@ class CommunityOp:
         _name = read_key_str(self.op, 'community', 16)
         assert _name, 'must name a community'
         _id = Community.validated_id(_name)
-        assert _id, 'community `%s` does not exist' % _name
+        assert _id, 'Community \'%s\' does not exist' % _name
 
         self.community = _name
         self.community_id = _id

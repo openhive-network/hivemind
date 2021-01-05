@@ -38,13 +38,20 @@ class Db:
     async def init(self, url):
         """Initialize the aiopg.sa engine."""
         conf = make_url(url)
-        self.db = await create_engine(user=conf.username,
-                                      database=conf.database,
-                                      password=conf.password,
-                                      host=conf.host,
-                                      port=conf.port,
-                                      maxsize=20,
-                                      **conf.query)
+        dsn = {}
+        if conf.username:
+            dsn['user'] = conf.username
+        if conf.database:
+            dsn['database'] = conf.database
+        if conf.password:
+            dsn['password'] = conf.password
+        if conf.host:
+            dsn['host'] = conf.host
+        if conf.port:
+            dsn['port'] = conf.port
+        if 'application_name' not in conf.query:
+            dsn['application_name'] = 'hive_server'
+        self.db = await create_engine(**dsn, maxsize=20, **conf.query)
 
     def close(self):
         """Close pool."""

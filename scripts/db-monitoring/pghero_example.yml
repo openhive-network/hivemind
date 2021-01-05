@@ -1,0 +1,7 @@
+databases:
+  pghero:
+    url: postgres://pghero:pghero@example-1.com:5432/pghero
+  hive_test:
+    url: postgres://pghero:pghero@example-2.com:5432/hive_test
+  bamboo:
+    url: postgres://pghero:pghero@example-3.com:5432/bamboo

@@ -1,30 +1,211 @@
 """Hive sync manager."""
 
 import logging
-import glob
 from time import perf_counter as perf
-import os
 import ujson as json
 
-from funcy.seqs import drop
-from toolz import partition_all
+import queue
+from concurrent.futures import ThreadPoolExecutor
 
 from hive.db.db_state import DbState
 
 from hive.utils.timer import Timer
 from hive.steem.block.stream import MicroForkException
+from hive.steem.massive_blocks_data_provider import MassiveBlocksDataProvider
 
 from hive.indexer.blocks import Blocks
 from hive.indexer.accounts import Accounts
-from hive.indexer.cached_post import CachedPost
-from hive.indexer.feed_cache import FeedCache
 from hive.indexer.follow import Follow
 from hive.indexer.community import Community
+
+from hive.server.common.payout_stats import PayoutStats
+from hive.server.common.mentions import Mentions
+
 from hive.server.common.mutes import Mutes
 
-#from hive.indexer.jobs import audit_cache_missing, audit_cache_deleted
+from hive.utils.stats import OPStatusManager as OPSM
+from hive.utils.stats import FlushStatusManager as FSM
+from hive.utils.stats import WaitingStatusManager as WSM
+from hive.utils.stats import PrometheusClient as PC
+from hive.utils.stats import BroadcastObject
+from hive.utils.communities_rank import update_communities_posts_and_rank
+
+from hive.indexer.mock_block_provider import MockBlockProvider
+from hive.indexer.mock_vops_provider import MockVopsProvider
+
+from datetime import datetime
+
+from signal import signal, SIGINT, SIGTERM
+from atomic import AtomicLong
+from threading import Thread
+from collections import deque
+
 
 log = logging.getLogger(__name__)
+
+CONTINUE_PROCESSING = True
+
+EXCEPTION_THROWN = AtomicLong(0)
+FINISH_SIGNAL_DURING_SYNC = AtomicLong(0)
+
+
+def finish_signals_handler(signal, frame):
+    global FINISH_SIGNAL_DURING_SYNC
+    FINISH_SIGNAL_DURING_SYNC += 1
+    log.info("""
+                  **********************************************************
+                  CAUGHT {}. PLEASE WAIT... PROCESSING DATA IN QUEUES...
+                  **********************************************************
+    """.format( "SIGINT" if signal == SIGINT else "SIGTERM" ) )
+
+def set_exception_thrown():
+    global EXCEPTION_THROWN
+    EXCEPTION_THROWN += 1
+
+def can_continue_thread():
+    return EXCEPTION_THROWN.value == 0 and FINISH_SIGNAL_DURING_SYNC.value == 0
+
+
+def prepare_vops(vops_by_block):
+    preparedVops = {}
+
+    for blockNum, blockDict in vops_by_block.items():
+        vopsList = blockDict['ops']
+        preparedVops[blockNum] = vopsList
+
+    return preparedVops
+
+def _blocks_data_provider(blocks_data_provider):
+    try:
+        futures = blocks_data_provider.start()
+
+        for future in futures:
+            exception = future.exception()
+            if exception:
+                raise exception
+    except:
+        log.exception("Exception caught during fetching blocks data")
+        raise
+
+def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
+    from hive.utils.stats import minmax
+    is_debug = log.isEnabledFor(10)
+    num = 0
+    time_start = OPSM.start()
+    rate = {}
+    LIMIT_FOR_PROCESSED_BLOCKS = 1000;
+
+    rate = minmax(rate, 0, 1.0, 0)
+
+    def print_summary():
+        stop = OPSM.stop(time_start)
+        log.info("=== TOTAL STATS ===")
+        wtm = WSM.log_global("Total waiting times")
+        ftm = FSM.log_global("Total flush times")
+        otm = OPSM.log_global("All operations present in the processed blocks")
+        ttm = ftm + otm + wtm
+        log.info(f"Elapsed time: {stop :.4f}s. Calculated elapsed time: {ttm :.4f}s. Difference: {stop - ttm :.4f}s")
+        if rate:
+            log.info(f"Highest block processing rate: {rate['max'] :.4f} bps. From: {rate['max_from']} To: {rate['max_to']}")
+            log.info(f"Lowest block processing rate: {rate['min'] :.4f} bps. From: {rate['min_from']} To: {rate['min_to']}")
+        log.info("=== TOTAL STATS ===")
+
+    try:
+        count = ubound - lbound
+        timer = Timer(count, entity='block', laps=['rps', 'wps'])
+
+        while lbound < ubound:
+            preparedVops = {}
+            number_of_blocks_to_proceed = min( [ LIMIT_FOR_PROCESSED_BLOCKS, ubound - lbound  ] )
+            time_before_waiting_for_data = perf()
+            vops_and_blocks = blocks_data_provider.get( number_of_blocks_to_proceed )
+
+            if not can_continue_thread():
+                break;
+
+            assert len(vops_and_blocks[ 'vops' ]) == number_of_blocks_to_proceed
+            assert len(vops_and_blocks[ 'blocks' ]) == number_of_blocks_to_proceed
+
+            to = min(lbound + number_of_blocks_to_proceed, ubound)
+            timer.batch_start()
+
+            for vop_nr in range( number_of_blocks_to_proceed):
+                preparedVops[ vop_nr + lbound ] = vops_and_blocks[ 'vops' ][ vop_nr ]
+
+            block_start = perf()
+            Blocks.process_multi(vops_and_blocks['blocks'], preparedVops, is_initial_sync)
+            block_end = perf()
+
+            timer.batch_lap()
+            timer.batch_finish(len(vops_and_blocks[ 'blocks' ]))
+            time_current = perf()
+
+            prefix = ("[INITIAL SYNC] Got block %d @ %s" % (
+                to - 1, vops_and_blocks['blocks'][-1]['timestamp']))
+            log.info(timer.batch_status(prefix))
+            log.info("[INITIAL SYNC] Time elapsed: %fs", time_current - time_start)
+            log.info("[INITIAL SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
+            rate = minmax(rate, len(vops_and_blocks['blocks']), time_current - time_before_waiting_for_data, lbound)
+
+            if block_end - block_start > 1.0 or is_debug:
+                otm = OPSM.log_current("Operations present in the processed blocks")
+                ftm = FSM.log_current("Flushing times")
+                wtm = WSM.log_current("Waiting times")
+                log.info(f"Calculated time: {otm+ftm+wtm :.4f} s.")
+
+            OPSM.next_blocks()
+            FSM.next_blocks()
+            WSM.next_blocks()
+
+            lbound = to
+            PC.broadcast(BroadcastObject('sync_current_block', lbound, 'blocks'))
+
+            num = num + 1
+
+            if not can_continue_thread():
+                break
+    except Exception:
+        log.exception("Exception caught during processing blocks...")
+        set_exception_thrown()
+        print_summary()
+        raise
+
+    print_summary()
+    return num
+
+def _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size):
+    blocksQueue = queue.Queue(maxsize=10000)
+    vopsQueue = queue.Queue(maxsize=10000)
+    old_sig_int_handler = signal(SIGINT, finish_signals_handler)
+    old_sig_term_handler = signal(SIGTERM, finish_signals_handler)
+
+    massive_blocks_data_provier = MassiveBlocksDataProvider(
+          self._conf
+        , self._steem
+        , self._conf.get( 'max_workers' )
+        , self._conf.get( 'max_workers' )
+        , self._conf.get( 'max_batch' )
+        , lbound
+        , ubound
+        , can_continue_thread
+    )
+    with ThreadPoolExecutor(max_workers = 4) as pool:
+        block_data_provider_future = pool.submit(_blocks_data_provider, massive_blocks_data_provier)
+        blockConsumerFuture = pool.submit(_block_consumer, massive_blocks_data_provier, is_initial_sync, lbound, ubound)
+
+        consumer_exception = blockConsumerFuture.exception()
+        block_data_provider_future = block_data_provider_future.exception()
+
+        if consumer_exception:
+            raise consumer_exception
+
+        if block_data_provider_future:
+            raise block_exception
+
+    signal(SIGINT, old_sig_int_handler)
+    signal(SIGTERM, old_sig_term_handler)
+    blocksQueue.queue.clear()
+    vopsQueue.queue.clear()
 
 class Sync:
     """Manages the sync/index process.
@@ -35,119 +216,146 @@ class Sync:
     def __init__(self, conf):
         self._conf = conf
         self._db = conf.db()
+
+        log.info("Using hived url: `%s'", self._conf.get('steemd_url'))
+
         self._steem = conf.steem()
+
+    def load_mock_data(self,mock_block_data_path):
+        if mock_block_data_path:
+            MockBlockProvider.load_block_data(mock_block_data_path)
+            MockBlockProvider.print_data()
+
+    def refresh_sparse_stats(self):
+        # normally it should be refreshed in various time windows
+        # but we need the ability to do it all at the same time
+        self._update_chain_state()
+        update_communities_posts_and_rank()
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            executor.submit(PayoutStats.generate)
+            executor.submit(Mentions.refresh)
 
     def run(self):
         """Initialize state; setup/recovery checks; sync and runloop."""
+        from hive.version import VERSION, GIT_REVISION
+        log.info("hivemind_version : %s", VERSION)
+        log.info("hivemind_git_rev : %s", GIT_REVISION)
+
+        from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
+        log.info("database_schema_version : %s", SCHEMA_DB_VERSION)
+
+        Community.start_block = self._conf.get("community_start_block")
+
+        paths = self._conf.get("mock_block_data_path") or []
+        for path in paths:
+          self.load_mock_data(path)
+
+        mock_vops_data_path = self._conf.get("mock_vops_data_path")
+        if mock_vops_data_path:
+            MockVopsProvider.load_block_data(mock_vops_data_path)
+            MockVopsProvider.print_data()
 
         # ensure db schema up to date, check app status
         DbState.initialize()
+        Blocks.setup_own_db_access(self._db)
 
         # prefetch id->name and id->rank memory maps
         Accounts.load_ids()
-        Accounts.fetch_ranks()
-
-        # load irredeemables
-        mutes = Mutes(
-            self._conf.get('muted_accounts_url'),
-            self._conf.get('blacklist_api_url'))
-        Mutes.set_shared_instance(mutes)
 
         # community stats
-        Community.recalc_pending_payouts()
+        update_communities_posts_and_rank()
+
+        last_imported_block = Blocks.head_num()
+        hived_head_block = self._conf.get('test_max_block') or self._steem.last_irreversible()
+
+        log.info("database_head_block : %s", last_imported_block)
+        log.info("target_head_block : %s", hived_head_block)
 
         if DbState.is_initial_sync():
+            DbState.before_initial_sync(last_imported_block, hived_head_block)
             # resume initial sync
             self.initial()
-            DbState.finish_initial_sync()
-
+            if not can_continue_thread():
+                return
+            current_imported_block = Blocks.head_num()
+            DbState.finish_initial_sync(current_imported_block)
         else:
             # recover from fork
             Blocks.verify_head(self._steem)
 
-            # perform cleanup if process did not exit cleanly
-            CachedPost.recover_missing_posts(self._steem)
-
-        #audit_cache_missing(self._db, self._steem)
-        #audit_cache_deleted(self._db)
-
         self._update_chain_state()
 
+        trail_blocks = self._conf.get('trail_blocks')
+        assert trail_blocks >= 0
+        assert trail_blocks <= 100
+
+        import sys
+        max_block_limit = sys.maxsize
+        do_stale_block_check = True
         if self._conf.get('test_max_block'):
-            # debug mode: partial sync
-            return self.from_steemd()
+            max_block_limit = self._conf.get('test_max_block')
+            do_stale_block_check = False
+            # Correct max_block_limit by trail_blocks
+            max_block_limit = max_block_limit - trail_blocks
+            log.info("max_block_limit corrected by specified trail_blocks number: %d is: %d", trail_blocks, max_block_limit)
+
         if self._conf.get('test_disable_sync'):
             # debug mode: no sync, just stream
-            return self.listen()
+            return self.listen(trail_blocks, max_block_limit, do_stale_block_check)
 
         while True:
             # sync up to irreversible block
             self.from_steemd()
+            if not can_continue_thread():
+                return
 
-            # take care of payout backlog
-            CachedPost.dirty_paidouts(Blocks.head_date())
-            CachedPost.flush(self._steem, trx=True)
+            head = Blocks.head_num()
+            if head >= max_block_limit:
+                self.refresh_sparse_stats()
+                log.info("Exiting [LIVE SYNC] because irreversible block sync reached specified block limit: %d", max_block_limit)
+                break;
 
             try:
                 # listen for new blocks
-                self.listen()
+                self.listen(trail_blocks, max_block_limit, do_stale_block_check)
             except MicroForkException as e:
                 # attempt to recover by restarting stream
                 log.error("microfork: %s", repr(e))
+
+            head = Blocks.head_num()
+            if head >= max_block_limit:
+                self.refresh_sparse_stats()
+                log.info("Exiting [LIVE SYNC] because of specified block limit: %d", max_block_limit)
+                break;
 
     def initial(self):
         """Initial sync routine."""
         assert DbState.is_initial_sync(), "already synced"
 
         log.info("[INIT] *** Initial fast sync ***")
-        self.from_checkpoints()
         self.from_steemd(is_initial_sync=True)
-
-        log.info("[INIT] *** Initial cache build ***")
-        CachedPost.recover_missing_posts(self._steem)
-        FeedCache.rebuild()
-        Follow.force_recount()
-
-    def from_checkpoints(self, chunk_size=1000):
-        """Initial sync strategy: read from blocks on disk.
-
-        This methods scans for files matching ./checkpoints/*.json.lst
-        and uses them for hive's initial sync. Each line must contain
-        exactly one block in JSON format.
-        """
-        # pylint: disable=no-self-use
-        last_block = Blocks.head_num()
-
-        tuplize = lambda path: [int(path.split('/')[-1].split('.')[0]), path]
-        basedir = os.path.dirname(os.path.realpath(__file__ + "/../.."))
-        files = glob.glob(basedir + "/checkpoints/*.json.lst")
-        tuples = sorted(map(tuplize, files), key=lambda f: f[0])
-
-        last_read = 0
-        for (num, path) in tuples:
-            if last_block < num:
-                log.info("[SYNC] Load %s. Last block: %d", path, last_block)
-                with open(path) as f:
-                    # each line in file represents one block
-                    # we can skip the blocks we already have
-                    skip_lines = last_block - last_read
-                    remaining = drop(skip_lines, f)
-                    for lines in partition_all(chunk_size, remaining):
-                        Blocks.process_multi(map(json.loads, lines), True)
-                last_block = num
-            last_read = num
+        if not can_continue_thread():
+            return
 
     def from_steemd(self, is_initial_sync=False, chunk_size=1000):
         """Fast sync strategy: read/process blocks in batches."""
         steemd = self._steem
+
         lbound = Blocks.head_num() + 1
-        ubound = self._conf.get('test_max_block') or steemd.last_irreversible()
+        ubound = steemd.last_irreversible()
+
+        if self._conf.get('test_max_block') and self._conf.get('test_max_block') < ubound:
+            ubound = self._conf.get('test_max_block')
 
         count = ubound - lbound
         if count < 1:
             return
 
-        log.info("[SYNC] start block %d, +%d to sync", lbound, count)
+        if is_initial_sync:
+            _node_data_provider(self, is_initial_sync, lbound, ubound, self._conf.get("max_batch") )
+            return
+
+        log.info("[FAST SYNC] start block %d, +%d to sync", lbound, count)
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
         while lbound < ubound:
             timer.batch_start()
@@ -155,32 +363,29 @@ class Sync:
             # fetch blocks
             to = min(lbound + chunk_size, ubound)
             blocks = steemd.get_blocks_range(lbound, to)
+            vops = steemd.enum_virtual_ops(self._conf, lbound, to)
+            prepared_vops = prepare_vops(vops)
             lbound = to
             timer.batch_lap()
 
             # process blocks
-            Blocks.process_multi(blocks, is_initial_sync)
+            Blocks.process_multi(blocks, prepared_vops, is_initial_sync)
             timer.batch_finish(len(blocks))
 
-            _prefix = ("[SYNC] Got block %d @ %s" % (
+            otm = OPSM.log_current("Operations present in the processed blocks")
+            ftm = FSM.log_current("Flushing times")
+
+            _prefix = ("[FAST SYNC] Got block %d @ %s" % (
                 to - 1, blocks[-1]['timestamp']))
             log.info(timer.batch_status(_prefix))
 
-        if not is_initial_sync:
-            # This flush is low importance; accounts are swept regularly.
-            Accounts.flush(steemd, trx=True)
+            OPSM.next_blocks()
+            FSM.next_blocks()
 
-            # If this flush fails, all that could potentially be lost here is
-            # edits and pre-payout votes. If the post has not been paid out yet,
-            # then the worst case is it will be synced upon payout. If the post
-            # is already paid out, worst case is to lose an edit.
-            CachedPost.flush(steemd, trx=True)
+            PC.broadcast(BroadcastObject('sync_current_block', to, 'blocks'))
 
-    def listen(self):
+    def listen(self, trail_blocks, max_sync_block, do_stale_block_check):
         """Live (block following) mode."""
-        trail_blocks = self._conf.get('trail_blocks')
-        assert trail_blocks >= 0
-        assert trail_blocks <= 100
 
         # debug: no max gap if disable_sync in effect
         max_gap = None if self._conf.get('test_disable_sync') else 100
@@ -188,36 +393,53 @@ class Sync:
         steemd = self._steem
         hive_head = Blocks.head_num()
 
-        for block in steemd.stream_blocks(hive_head + 1, trail_blocks, max_gap):
+        log.info("[LIVE SYNC] Entering listen with HM head: %d", hive_head)
+
+        if hive_head >= max_sync_block:
+            self.refresh_sparse_stats()
+            log.info("[LIVE SYNC] Exiting due to block limit exceeded: synced block number: %d, max_sync_block: %d", hive_head, max_sync_block)
+            return
+
+        for block in steemd.stream_blocks(hive_head + 1, trail_blocks, max_gap, do_stale_block_check):
+
+            num = int(block['block_id'][:8], base=16)
+            log.info("[LIVE SYNC] =====> About to process block %d with timestamp %s", num, block['timestamp'])
+
             start_time = perf()
 
-            self._db.query("START TRANSACTION")
-            num = Blocks.process(block)
-            follows = Follow.flush(trx=False)
-            accts = Accounts.flush(steemd, trx=False, spread=8)
-            CachedPost.dirty_paidouts(block['timestamp'])
-            cnt = CachedPost.flush(steemd, trx=False)
-            self._db.query("COMMIT")
+            vops = steemd.enum_virtual_ops(self._conf, num, num + 1)
+            prepared_vops = prepare_vops(vops)
+
+            Blocks.process_multi([block], prepared_vops, False)
+            otm = OPSM.log_current("Operations present in the processed blocks")
+            ftm = FSM.log_current("Flushing times")
 
             ms = (perf() - start_time) * 1000
-            log.info("[LIVE] Got block %d at %s --% 4d txs,% 3d posts,% 3d edits,"
-                     "% 3d payouts,% 3d votes,% 3d counts,% 3d accts,% 3d follows"
+            log.info("[LIVE SYNC] <===== Processed block %d at %s --% 4d txs"
                      " --% 5dms%s", num, block['timestamp'], len(block['transactions']),
-                     cnt['insert'], cnt['update'], cnt['payout'], cnt['upvote'],
-                     cnt['recount'], accts, follows, ms, ' SLOW' if ms > 1000 else '')
+                     ms, ' SLOW' if ms > 1000 else '')
+            log.info("[LIVE SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
 
-            if num % 1200 == 0: #1hr
+            if num % 1200 == 0: #1hour
                 log.warning("head block %d @ %s", num, block['timestamp'])
-                log.info("[LIVE] hourly stats")
-                Accounts.fetch_ranks()
-                #Community.recalc_pending_payouts()
+                log.info("[LIVE SYNC] hourly stats")
+
+                log.info("[LIVE SYNC] filling payout_stats_view executed")
+                with ThreadPoolExecutor(max_workers=2) as executor:
+                    executor.submit(PayoutStats.generate)
+                    executor.submit(Mentions.refresh)
             if num % 200 == 0: #10min
-                Community.recalc_pending_payouts()
-            if num % 100 == 0: #5min
-                log.info("[LIVE] 5-min stats")
-                Accounts.dirty_oldest(500)
+                update_communities_posts_and_rank()
             if num % 20 == 0: #1min
                 self._update_chain_state()
+
+            PC.broadcast(BroadcastObject('sync_current_block', num, 'blocks'))
+            FSM.next_blocks()
+            OPSM.next_blocks()
+
+            if num >= max_sync_block:
+                log.info("Stopping [LIVE SYNC] because of specified block limit: %d", max_sync_block)
+                break
 
     # refetch dynamic_global_properties, feed price, etc
     def _update_chain_state(self):
@@ -226,7 +448,7 @@ class Sync:
         self._db.query("""UPDATE hive_state SET block_num = :block_num,
                        steem_per_mvest = :spm, usd_per_steem = :ups,
                        sbd_per_steem = :sps, dgpo = :dgpo""",
-                       block_num=state['dgpo']['head_block_number'],
+                       block_num=Blocks.head_num(),
                        spm=state['steem_per_mvest'],
                        ups=state['usd_per_steem'],
                        sps=state['sbd_per_steem'],

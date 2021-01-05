@@ -1,0 +1,19 @@
+# Cron tasks for pghero historical data collector.
+# Install with `crontab -e`
+
+# Explanation
+# postgres://pghero:pghero@hive-4.pl.syncad.com:5432/pghero
+# is a connection string to the database in which pghero collects
+# historical data.
+
+# dbmonitoring_pghero_1 is a docker container name with running pghero
+# instance
+
+# Pghero collect query stats.
+*/5 * * * * docker exec -e DATABASE_URL=postgres://pghero:pghero@hive-4.pl.syncad.com:5432/pghero dbmonitoring_pghero_1 bin/rake pghero:capture_query_stats > /dev/null 2>&1
+
+# Pghero collect disk space stats.
+*/5 * * * * docker exec -e DATABASE_URL=postgres://pghero:pghero@hive-4.pl.syncad.com:5432/pghero dbmonitoring_pghero_1 bin/rake pghero:capture_space_stats > /dev/null 2>&1
+
+# Pghero collect query stats.
+@monthly docker exec -e DATABASE_URL=postgres://pghero:pghero@hive-4.pl.syncad.com:5432/pghero dbmonitoring_pghero_1 bin/rake pghero:clean_query_stats > /dev/null 2>&1
