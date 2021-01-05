@@ -139,7 +139,7 @@ def build_metadata():
 
         sa.Index('hive_posts_root_id_id_idx', 'root_id','id'),
 
-        sa.Index('hive_posts_parent_id_counter_deleted_id_idx', 'parent_id', 'counter_deleted', 'id'),
+        sa.Index('hive_posts_parent_id_id_idx', sa.text('parent_id, id DESC'), postgresql_where=sql_text("counter_deleted = 0")),
         sa.Index('hive_posts_community_id_id_idx', 'community_id', sa.text('id DESC')),
 
         sa.Index('hive_posts_payout_at_idx', 'payout_at'),
@@ -561,6 +561,7 @@ def setup(db):
       "hive_muted_accounts_view.sql",
       "hive_muted_accounts_by_id_view.sql",
       "hive_blacklisted_accounts_by_observer_view.sql",
+      "get_post_view_by_id.sql",
       "hive_post_operations.sql",
       "head_block_time.sql",
       "update_feed_cache.sql",

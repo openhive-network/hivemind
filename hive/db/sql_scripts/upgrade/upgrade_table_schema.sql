@@ -459,3 +459,8 @@ ALTER TABLE hive_notification_cache
 
  CREATE INDEX IF NOT EXISTS hive_feed_cache_post_id_idx ON hive_feed_cache (post_id);
 
+-- Changes made in https://gitlab.syncad.com/hive/hivemind/-/merge_requests/454
+DROP INDEX IF EXISTS hive_posts_parent_id_counter_deleted_id_idx;
+
+CREATE INDEX IF NOT EXISTS hive_posts_parent_id_id_idx ON hive_posts (parent_id, id DESC) where counter_deleted = 0;
+

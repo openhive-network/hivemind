@@ -23,7 +23,23 @@ BEGIN
 
   __cutoff = block_before_head( '1 month' );
 
-  RETURN QUERY SELECT -- bridge_get_by_feed_with_reblog
+  RETURN QUERY 
+  WITH feed AS -- bridge_get_by_feed_with_reblog
+  (
+    SELECT 
+      hfc.post_id, 
+      MIN(hfc.created_at) as min_created, 
+      array_agg(ha.name) AS reblogged_by
+    FROM hive_feed_cache hfc
+    JOIN hive_follows hf ON hfc.account_id = hf.following
+    JOIN hive_accounts ha ON ha.id = hf.following
+    WHERE hfc.block_num > __cutoff AND hf.state = 1 AND hf.follower = __account_id
+    GROUP BY hfc.post_id
+    HAVING __post_id = 0 OR MIN(hfc.created_at) < __min_date OR ( MIN(hfc.created_at) = __min_date AND hfc.post_id < __post_id )
+    ORDER BY min_created DESC, hfc.post_id DESC
+    LIMIT _limit
+  )
+  SELECT
       hp.id,
       hp.author,
       hp.parent_author,
@@ -61,21 +77,11 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      T.reblogged_by
-    FROM hive_posts_view hp
-    JOIN
-    (
-      SELECT hfc.post_id, MIN(hfc.created_at) as min_created, array_agg(ha.name) AS reblogged_by
-      FROM hive_feed_cache hfc
-      JOIN hive_follows hf ON hfc.account_id = hf.following
-      JOIN hive_accounts ha ON ha.id = hf.following
-      WHERE hfc.block_num > __cutoff AND hf.state = 1 AND hf.follower = __account_id
-      GROUP BY hfc.post_id
-      HAVING __post_id = 0 OR MIN(hfc.created_at) < __min_date OR ( MIN(hfc.created_at) = __min_date AND hfc.post_id < __post_id )
-      ORDER BY min_created DESC, hfc.post_id DESC
-      LIMIT _limit
-    ) T ON hp.id =  T.post_id
-    ORDER BY T.min_created DESC, T.post_id DESC;
+      feed.reblogged_by
+  FROM feed,
+  LATERAL get_post_view_by_id(feed.post_id) hp
+  ORDER BY feed.min_created DESC, feed.post_id DESC
+  LIMIT _limit;
 END
 $BODY$
 ;
