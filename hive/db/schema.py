@@ -68,7 +68,7 @@ def build_metadata():
         sa.Index('hive_reputation_data_block_num_idx', 'block_num')
     )
 
-    hive_posts = sa.Table(
+    sa.Table(
         'hive_posts', metadata,
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('root_id', sa.Integer, nullable=False), # records having initially set 0 will be updated to their id
@@ -167,9 +167,6 @@ def build_metadata():
         sa.Column('body', TEXT, nullable=False, server_default=''),
         sa.Column('json', TEXT, nullable=False, server_default='')
     )
-
-    sa.Index('hive_posts_ix4', hive_posts.c.parent_id.desc().nullslast(), hive_posts.c.id)
-    sa.Index('hive_posts_id_parent_id_created_at', hive_posts.c.id, hive_posts.c.parent_id.desc().nullslast(), hive_posts.c.created_at)
 
     sa.Table(
         'hive_permlink_data', metadata,
