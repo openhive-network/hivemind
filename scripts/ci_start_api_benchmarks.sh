@@ -8,11 +8,12 @@ export HIVEMIND_ADDRESS=$1
 export HIVEMIND_PORT=$2
 export TAVERN_DISABLE_COMPARATOR=true
 export HIVEMIND_BENCHMARKS_IDS_FILE=$3
+export TAVERN_DIR=$4
 
 echo Removing old files
 
 rm -f ./tavern_benchmarks_report.html
-rm -f ./tests/tests_api/hivemind/tavern/benchmark.csv
+rm -f $TAVERN_DIR/benchmark.csv
 
 echo Attempting to start benchmarks on hivemind instance listeing on: $HIVEMIND_ADDRESS port: $HIVEMIND_PORT
 
@@ -25,4 +26,4 @@ do
   tox -e tavern-benchmark -- -W ignore::pytest.PytestDeprecationWarning --workers auto
   echo Done!
 done
-./scripts/csv_report_parser.py http://$HIVEMIND_ADDRESS $HIVEMIND_PORT./tests/tests_api/hivemind/tavern ./tests/tests_api/hivemind/tavern
+./scripts/csv_report_parser.py http://$HIVEMIND_ADDRESS $HIVEMIND_PORT $TAVERN_DIR $TAVERN_DIR

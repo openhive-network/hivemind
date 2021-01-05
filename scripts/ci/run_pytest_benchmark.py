@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+# THIS SCRIPT WILL RUN BENCHMARKS USING pytest-benchmark plugin. IT TAKES A LOT OF TIME BUT IS MOST ACCURATE BENCHMARK.
+
 import os
 import subprocess
 from json import load, dump

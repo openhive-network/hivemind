@@ -9,13 +9,16 @@ export HIVEMIND_ADDRESS=$1
 export HIVEMIND_PORT=$2
 ITERATIONS=${3:-5}
 JOBS=${4:-auto}
-export TAVERN_DISABLE_COMPARATOR=true
+
 export HIVEMIND_BENCHMARKS_IDS_FILE=$5
+export TAVERN_DIR=$6
+
+export TAVERN_DISABLE_COMPARATOR=true
 
 echo Removing old files
 
 rm -f ./tavern_benchmarks_report.html
-rm -f ./tests/tests_api/hivemind/tavern/benchmark.csv
+rm -f $TAVERN_DIR/benchmark.csv
 
 echo Attempting to start benchmarks on hivemind instance listening on: $HIVEMIND_ADDRESS port: $HIVEMIND_PORT
 
@@ -28,4 +31,4 @@ do
       --workers $JOBS
   echo Done!
 done
-./scripts/csv_report_parser.py http://$HIVEMIND_ADDRESS $HIVEMIND_PORT ./tests/tests_api/hivemind/tavern ./tests/tests_api/hivemind/tavern
+./scripts/csv_report_parser.py http://$HIVEMIND_ADDRESS $HIVEMIND_PORT $TAVERN_DIR $TAVERN_DIR
