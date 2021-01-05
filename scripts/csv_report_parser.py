@@ -33,7 +33,8 @@ def abs_rel_diff(a, b):
     return abs((a - b) / float(b)) * 100.
 
 def parse_csv_files(root_dir):
-    ret = {}
+    ret_times = {}
+    ret_sizes = {}
     file_path = os.path.join(root_dir, "benchmark.csv")
     print("Processing file: {}".format(file_path))
     with open(file_path, 'r') as csv_file:
@@ -41,11 +42,17 @@ def parse_csv_files(root_dir):
         for row in reader:
             test_name = row[0] + ".tavern.yaml"
             test_time = float(row[1])
-            if test_name in ret:
-                ret[test_name].append(test_time)
+            test_response_size = float(row[2])
+            if test_name in ret_times:
+                ret_times[test_name].append(test_time)
             else:
-                ret[test_name] = [test_time]
-    return ret
+                ret_times[test_name] = [test_time]
+
+            if test_name in ret_sizes:
+                ret_sizes[test_name].append(test_response_size)
+            else:
+                ret_sizes[test_name] = [test_response_size]
+    return ret_times, ret_sizes
 
 if __name__ == "__main__":
     import argparse
@@ -63,7 +70,7 @@ if __name__ == "__main__":
     assert os.path.exists(args.csv_report_dir), "Please provide valid csv report path"
     assert os.path.exists(args.tavern_root_dir), "Please provide valid tavern path"
 
-    report_data = parse_csv_files(args.csv_report_dir)
+    report_data, report_data_sizes = parse_csv_files(args.csv_report_dir)
     request_data = get_requests_from_yaml(args.tavern_root_dir)
 
     html_file = "tavern_benchmarks_report.html"
@@ -95,7 +102,7 @@ if __name__ == "__main__":
         ofile.write("  <body>\n")
         ofile.write("    <table id=\"benchmarks\">\n")
         ofile.write("      <thead>\n")
-        ofile.write("        <tr><th>Test name</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th><th>Median time [ms]</th><th>Reference (pure requests call) [ms]</th><th>\[ {\\vert} {T_{mean} - T_{ref} \over T_{ref}} {\lvert} \cdot 100 \] [%]</th><th>\[ {\\vert} {T_{median} - T_{ref} \over T_{ref}} {\lvert} \cdot 100 \] [%]</th></tr>\n")
+        ofile.write("        <tr><th>Test name</th><th>Response mean size [kB]</th><th>Response ref size [kB]</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th><th>Median time [ms]</th><th>Reference (pure requests call) [ms]</th><th>\[ {\\vert} {T_{mean} - T_{ref} \over T_{ref}} {\lvert} \cdot 100 \] [%]</th><th>\[ {\\vert} {T_{median} - T_{ref} \over T_{ref}} {\lvert} \cdot 100 \] [%]</th></tr>\n")
         ofile.write("      </thead>\n")
         ofile.write("      <tbody>\n")
         for name, data in report_data.items():
@@ -103,6 +110,7 @@ if __name__ == "__main__":
             dmax = max(data)
             dmean = mean(data)
             dmedian = median(data)
+            dmean_size = mean(report_data_sizes[name])
             if dmedian >= args.cutoff_time:
                 t_start = perf_counter()
                 ret = requests.post("{}:{}".format(args.address, args.port), request_data[name])
@@ -110,11 +118,12 @@ if __name__ == "__main__":
                     ref_time = perf_counter() - t_start
                 else:
                     ref_time = 0.
+                ref_size = int(ret.headers.get("Content-Length", 0))
                 if dmean > args.time_threshold:
-                    ofile.write("        <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, request_data[name], dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
+                    ofile.write("        <tr><td>{}<br/>Parameters: {}</td><td>{:.1f}</td><td>{:.1f}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, request_data[name], dmean_size / 1000., ref_size / 1000., dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
                     above_treshold.append((name, "{:.4f}".format(dmean), request_data[name]))
                 else:
-                    ofile.write("        <tr><td>{}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
+                    ofile.write("        <tr><td>{}</td><td>{:.1f}</td><td>{:.1f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, dmean_size / 1000., ref_size / 1000., dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
         ofile.write("      </tbody>\n")
         ofile.write("    </table>\n")
         ofile.write("  </body>\n")
