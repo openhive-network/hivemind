@@ -6,9 +6,10 @@ pip3 install requests --user
 
 export HIVEMIND_ADDRESS=$1
 export HIVEMIND_PORT=$2
+export TAVERN_DIR=$3
+
 export TAVERN_DISABLE_COMPARATOR=true
-export HIVEMIND_BENCHMARKS_IDS_FILE=$3
-export TAVERN_DIR=$4
+export HIVEMIND_BENCHMARKS_IDS_FILE=/tmp/test_ids.csv
 
 echo Removing old files
 

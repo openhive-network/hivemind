@@ -9,10 +9,10 @@ export HIVEMIND_ADDRESS=$1
 export HIVEMIND_PORT=$2
 ITERATIONS=${3:-5}
 JOBS=${4:-auto}
+export TAVERN_DIR=$5
 
-export HIVEMIND_BENCHMARKS_IDS_FILE=$5
-export TAVERN_DIR=$6
-
+# since it working inside docker it shoud be fine to hardcode it to tmp
+export HIVEMIND_BENCHMARKS_IDS_FILE=/tmp/test_ids.csv
 export TAVERN_DISABLE_COMPARATOR=true
 
 echo Removing old files
