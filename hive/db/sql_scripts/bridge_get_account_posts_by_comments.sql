@@ -14,10 +14,8 @@ BEGIN
   WITH ds AS --bridge_get_account_posts_by_comments
   (
     SELECT hp1.id
-    FROM hive_posts hp1
+    FROM live_comments_view hp1
     WHERE hp1.author_id = __account_id
-      AND hp1.counter_deleted = 0
-      AND hp1.depth > 0
       AND (__post_id = 0 OR hp1.id < __post_id)
     ORDER BY hp1.id DESC
     LIMIT _limit

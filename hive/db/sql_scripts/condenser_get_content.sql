@@ -67,9 +67,8 @@ BEGIN
   WITH replies AS
   (
     SELECT id 
-    FROM hive_posts hp 
+    FROM live_posts_comments_view hp 
     WHERE hp.parent_id = __post_id 
-      AND hp.counter_deleted = 0
     ORDER BY hp.id
     LIMIT 5000
   )

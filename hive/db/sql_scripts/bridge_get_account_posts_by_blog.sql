@@ -34,8 +34,8 @@ BEGIN
       AND ( __post_id = 0 OR hfc.created_at < __created_at 
 	                  OR (hfc.created_at = __created_at AND hfc.post_id < __post_id) )
       AND ( NOT _bridge_api OR
-            NOT EXISTS (SELECT NULL FROM hive_posts hp1
-                        WHERE hp1.id = hfc.post_id AND hp1.counter_deleted = 0 AND hp1.depth = 0 AND hp1.community_id IS NOT NULL
+            NOT EXISTS (SELECT NULL FROM live_posts_comments_view hp1 --should this just be live_posts_view?
+                        WHERE hp1.id = hfc.post_id AND hp1.community_id IS NOT NULL
                         AND NOT EXISTS (SELECT NULL FROM hive_reblogs hr WHERE hr.blogger_id = __account_id AND hr.post_id = hp1.id)
                        )
           )

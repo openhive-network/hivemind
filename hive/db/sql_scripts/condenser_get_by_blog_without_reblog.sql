@@ -15,9 +15,8 @@ BEGIN
   (
     SELECT 
       hp.id
-    FROM hive_posts hp
+    FROM live_posts_view hp
     WHERE hp.author_id = __author_id 
-      AND hp.depth = 0 
       AND ((__post_id = 0) OR (hp.id < __post_id))
     ORDER BY hp.id DESC
     LIMIT _limit

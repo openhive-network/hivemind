@@ -20,10 +20,9 @@ BEGIN
   WITH replies AS --bridge_get_account_posts_by_replies
   (
     SELECT hpr.id
-    FROM hive_posts hpr
+    FROM live_posts_comments_view hpr
     JOIN hive_posts hp1 ON hp1.id = hpr.parent_id
     WHERE hp1.author_id = __account_id
-      AND hpr.counter_deleted = 0
       AND (__post_id = 0 OR hpr.id < __post_id )
     ORDER BY hpr.id DESC
     LIMIT _limit

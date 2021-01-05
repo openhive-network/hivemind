@@ -16,9 +16,8 @@ BEGIN
   WITH comments AS
   (
     SELECT id
-    FROM hive_posts hp
+    FROM live_comments_view hp
     WHERE hp.author = _author
-      AND hp.depth > 0
       AND ( ( __post_id = 0 ) OR ( hp.id <= __post_id ) ) 
     ORDER BY hp.id DESC
     LIMIT _limit

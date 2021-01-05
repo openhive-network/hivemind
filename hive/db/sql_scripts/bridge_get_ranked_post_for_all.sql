@@ -15,11 +15,10 @@ BEGIN
     SELECT
       hp1.id,
       blacklist.source
-    FROM hive_posts hp1
+    FROM live_posts_view hp1
     JOIN hive_accounts_view ha ON hp1.author_id = ha.id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
-    WHERE hp1.counter_deleted = 0 AND hp1.depth = 0
-      AND NOT ha.is_grayed
+    WHERE NOT ha.is_grayed
       AND ( __post_id = 0 OR hp1.id < __post_id )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
     ORDER BY hp1.id DESC
@@ -94,11 +93,9 @@ BEGIN
       hp1.id,
       hp1.sc_hot,
       blacklist.source
-    FROM hive_posts hp1
+    FROM live_posts_view hp1
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
-    WHERE hp1.counter_deleted = 0
-      AND NOT hp1.is_paidout
-      AND hp1.depth = 0
+    WHERE NOT hp1.is_paidout
       AND ( __post_id = 0 OR hp1.sc_hot < __hot_limit OR ( hp1.sc_hot = __hot_limit AND hp1.id < __post_id ) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
     ORDER BY hp1.sc_hot DESC, hp1.id DESC
@@ -173,11 +170,10 @@ BEGIN
       hp1.id,
       (hp1.payout + hp1.pending_payout) as total_payout,
       blacklist.source
-    FROM hive_posts hp1
+    FROM live_posts_comments_view hp1
     JOIN hive_accounts_view ha ON hp1.author_id = ha.id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
-    WHERE hp1.counter_deleted = 0
-      AND NOT hp1.is_paidout
+    WHERE NOT hp1.is_paidout
       AND ha.is_grayed
       AND (hp1.payout + hp1.pending_payout) > 0
       AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
@@ -253,11 +249,9 @@ BEGIN
       hp1.id,
       (hp1.payout + hp1.pending_payout) as total_payout,
       blacklist.source
-    FROM hive_posts hp1
+    FROM live_comments_view hp1
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
-    WHERE hp1.counter_deleted = 0
-      AND NOT hp1.is_paidout
-      AND hp1.depth > 0
+    WHERE NOT hp1.is_paidout
       AND ( __post_id = 0 OR (hp1.payout + hp1.pending_payout) < __payout_limit
 	                  OR ((hp1.payout + hp1.pending_payout) = __payout_limit AND hp1.id < __post_id) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
@@ -335,10 +329,9 @@ BEGIN
       hp1.id,
       (hp1.payout + hp1.pending_payout) as total_payout,
       blacklist.source
-    FROM hive_posts hp1
+    FROM live_posts_comments_view hp1
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
-    WHERE hp1.counter_deleted = 0
-      AND NOT hp1.is_paidout
+    WHERE NOT hp1.is_paidout
       AND ( ( NOT _bridge_api AND hp1.depth = 0 ) OR ( _bridge_api AND hp1.payout_at BETWEEN __head_block_time + interval '12 hours' AND __head_block_time + interval '36 hours' ) )
       AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
@@ -414,11 +407,9 @@ BEGIN
       hp1.id,
       hp1.promoted,
       blacklist.source
-    FROM hive_posts hp1
+    FROM live_posts_view hp1
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
-    WHERE hp1.counter_deleted = 0
-      AND hp1.depth = 0 -- require this to be a post
-      AND NOT hp1.is_paidout
+    WHERE NOT hp1.is_paidout
       AND hp1.promoted > 0
       AND ( __post_id = 0 OR hp1.promoted < __promoted_limit OR ( hp1.promoted = __promoted_limit AND hp1.id < __post_id ) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
@@ -495,11 +486,9 @@ BEGIN
       hp1.sc_trend as trend,
       blacklist.source
     FROM
-      hive_posts hp1
+      live_posts_view hp1
       LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
-    WHERE hp1.counter_deleted = 0
-      AND NOT hp1.is_paidout
-      AND hp1.depth = 0
+    WHERE NOT hp1.is_paidout
       AND ( __post_id = 0 OR hp1.sc_trend < __trending_limit OR ( hp1.sc_trend = __trending_limit AND hp1.id < __post_id ) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
     ORDER BY hp1.sc_trend DESC, hp1.id DESC

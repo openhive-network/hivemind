@@ -30,7 +30,7 @@ BEGIN
   WITH blog_posts AS
   (
     SELECT hp.id
-    FROM hive_posts hp
+    FROM live_posts_comments_view hp
     JOIN hive_feed_cache hfc ON hp.id = hfc.post_id
     WHERE hfc.account_id = __account_id 
       AND ( ( __post_id = 0 ) OR ( hfc.created_at <= __created_at ) )
