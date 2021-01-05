@@ -407,7 +407,7 @@ BEGIN
       hp1.id,
       hp1.promoted,
       blacklist.source
-    FROM live_posts_view hp1
+    FROM live_posts_comments_view hp1
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE NOT hp1.is_paidout
       AND hp1.promoted > 0
