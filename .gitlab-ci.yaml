@@ -414,6 +414,7 @@ sync-e2e-benchmark:
       - hive-sync-runner-id.txt
       - tavern_benchmarks_report.html
       - tests/tests_api/hivemind/tavern/**/*.out.json
+      - request_process_times.log
     reports:
       junit: "*.xml"
     expire_in: 7 days

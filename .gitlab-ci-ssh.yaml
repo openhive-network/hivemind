@@ -263,3 +263,4 @@ api_smoketest_benchmark:
     when: always
     paths:
       - tavern_benchmarks_report.html
+      - request_process_times.log
