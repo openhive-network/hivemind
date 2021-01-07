@@ -101,7 +101,7 @@ CREATE OR REPLACE VIEW public.hive_raw_notifications_as_view
                     WHEN 1 THEN 12
                     ELSE 13
                 END, hpv.id) AS id,
-            hpv.parent_id AS post_id,
+            hpv.id AS post_id,
                 CASE hpv.depth
                     WHEN 1 THEN 12
                     ELSE 13
