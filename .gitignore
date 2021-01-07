@@ -146,3 +146,6 @@ pghero.yml
 .tmp
 
 .private
+
+# report file
+tavern_benchmarks_report.html
