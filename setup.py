@@ -53,11 +53,12 @@ class GitRevisionProvider(object):
 
 GIT_REVISION = GitRevisionProvider.provide_git_revision()
 SQL_SCRIPTS_PATH = 'hive/db/sql_scripts/'
+SQL_UPGRADE_PATH = 'hive/db/sql_scripts/upgrade/'
 
-def get_sql_scripts():
+def get_sql_scripts(dir):
     from os import listdir
     from os.path import isfile, join
-    return [join(SQL_SCRIPTS_PATH, f) for f in listdir(SQL_SCRIPTS_PATH) if isfile(join(SQL_SCRIPTS_PATH, f))]
+    return [join(dir, f) for f in listdir(dir) if isfile(join(dir, f))]
 
 if __name__ == "__main__":
     setup(
@@ -66,7 +67,7 @@ if __name__ == "__main__":
         description='Developer-friendly microservice powering social networks on the Steem blockchain.',
         long_description=open('README.md').read(),
         packages=find_packages(exclude=['scripts']),
-        data_files=[(SQL_SCRIPTS_PATH, get_sql_scripts())],
+        data_files=[(SQL_SCRIPTS_PATH, get_sql_scripts(SQL_SCRIPTS_PATH)), (SQL_UPGRADE_PATH, get_sql_scripts(SQL_UPGRADE_PATH))],
         setup_requires=[
             'pytest-runner',
         ],
