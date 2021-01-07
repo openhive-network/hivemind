@@ -35,7 +35,7 @@ from hive.indexer.mock_vops_provider import MockVopsProvider
 
 from datetime import datetime
 
-from signal import signal, SIGINT, SIGTERM
+from signal import signal, SIGINT, SIGTERM, getsignal
 from atomic import AtomicLong
 from threading import Thread
 from collections import deque
@@ -176,8 +176,6 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
 def _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size):
     blocksQueue = queue.Queue(maxsize=10000)
     vopsQueue = queue.Queue(maxsize=10000)
-    old_sig_int_handler = signal(SIGINT, finish_signals_handler)
-    old_sig_term_handler = signal(SIGTERM, finish_signals_handler)
 
     massive_blocks_data_provier = MassiveBlocksDataProvider(
           self._conf
@@ -202,8 +200,6 @@ def _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size):
         if block_data_provider_future:
             raise block_exception
 
-    signal(SIGINT, old_sig_int_handler)
-    signal(SIGTERM, old_sig_term_handler)
     blocksQueue.queue.clear()
     vopsQueue.queue.clear()
 
@@ -237,6 +233,21 @@ class Sync:
 
     def run(self):
         """Initialize state; setup/recovery checks; sync and runloop."""
+        old_sig_int_handler = getsignal(SIGINT)
+        old_sig_term_handler = getsignal(SIGTERM)
+
+        def set_handlers():
+            global old_sig_int_handler
+            global old_sig_term_handler
+            old_sig_int_handler = signal(SIGINT, finish_signals_handler)
+            old_sig_term_handler = signal(SIGTERM, finish_signals_handler)
+
+        def restore_handlers():
+            signal(SIGINT, old_sig_int_handler)
+            signal(SIGTERM, old_sig_term_handler)
+
+        set_handlers()
+
         from hive.version import VERSION, GIT_REVISION
         log.info("hivemind_version : %s", VERSION)
         log.info("hivemind_git_rev : %s", GIT_REVISION)
@@ -276,9 +287,19 @@ class Sync:
             # resume initial sync
             self.initial()
             if not can_continue_thread():
+                restore_handlers()
                 return
             current_imported_block = Blocks.head_num()
-            DbState.finish_initial_sync(current_imported_block)
+            # beacuse we cannot break long sql operations, then we back default CTRL+C
+            # behavior for the time of post initial actions
+            restore_handlers()
+            try:
+                DbState.finish_initial_sync(current_imported_block)
+            except KeyboardInterrupt:
+                log.info("Break finish initial sync")
+                set_exception_thrown()
+                return
+            set_handlers()
         else:
             # recover from fork
             Blocks.verify_head(self._steem)
@@ -301,13 +322,15 @@ class Sync:
 
         if self._conf.get('test_disable_sync'):
             # debug mode: no sync, just stream
-            return self.listen(trail_blocks, max_block_limit, do_stale_block_check)
+            result =  self.listen(trail_blocks, max_block_limit, do_stale_block_check)
+            restore_handlers()
+            return result
 
         while True:
             # sync up to irreversible block
             self.from_steemd()
             if not can_continue_thread():
-                return
+                break
 
             head = Blocks.head_num()
             if head >= max_block_limit:
@@ -327,6 +350,10 @@ class Sync:
                 self.refresh_sparse_stats()
                 log.info("Exiting [LIVE SYNC] because of specified block limit: %d", max_block_limit)
                 break;
+
+            if not can_continue_thread():
+                break
+        restore_handlers()
 
     def initial(self):
         """Initial sync routine."""
@@ -358,16 +385,20 @@ class Sync:
         log.info("[FAST SYNC] start block %d, +%d to sync", lbound, count)
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
         while lbound < ubound:
+            if not can_continue_thread():
+                break;
             timer.batch_start()
 
             # fetch blocks
             to = min(lbound + chunk_size, ubound)
-            blocks = steemd.get_blocks_range(lbound, to)
+            blocks = steemd.get_blocks_range(lbound, to, can_continue_thread)
             vops = steemd.enum_virtual_ops(self._conf, lbound, to)
             prepared_vops = prepare_vops(vops)
             lbound = to
             timer.batch_lap()
 
+            if not can_continue_thread():
+                break;
             # process blocks
             Blocks.process_multi(blocks, prepared_vops, is_initial_sync)
             timer.batch_finish(len(blocks))
@@ -400,8 +431,9 @@ class Sync:
             log.info("[LIVE SYNC] Exiting due to block limit exceeded: synced block number: %d, max_sync_block: %d", hive_head, max_sync_block)
             return
 
-        for block in steemd.stream_blocks(hive_head + 1, trail_blocks, max_gap, do_stale_block_check):
-
+        for block in steemd.stream_blocks(hive_head + 1, can_continue_thread, trail_blocks, max_gap, do_stale_block_check):
+            if not can_continue_thread():
+                break;
             num = int(block['block_id'][:8], base=16)
             log.info("[LIVE SYNC] =====> About to process block %d with timestamp %s", num, block['timestamp'])
 

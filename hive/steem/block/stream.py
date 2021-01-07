@@ -55,10 +55,10 @@ class BlockStream:
     """ETA-based block streamer."""
 
     @classmethod
-    def stream(cls, client, start_block, min_gap=0, max_gap=100, do_stale_block_check=True):
+    def stream(cls, client, start_block, breaker, min_gap=0, max_gap=100, do_stale_block_check=True):
         """Instantiates a BlockStream and returns a generator."""
         streamer = BlockStream(client, min_gap, max_gap)
-        return streamer.start(start_block, do_stale_block_check)
+        return streamer.start(start_block, do_stale_block_check, breaker)
 
     def __init__(self, client, min_gap=0, max_gap=100):
         assert not (min_gap < 0 or min_gap > 100)
@@ -70,7 +70,7 @@ class BlockStream:
         """Ensures gap between curr and head is within limits (max_gap)."""
         return not self._max_gap or head - curr < self._max_gap
 
-    def start(self, start_block, do_stale_block_check):
+    def start(self, start_block, do_stale_block_check, breaker):
         """Stream blocks starting from `start_block`.
 
         Will run forever unless `max_gap` is specified and exceeded.
@@ -84,6 +84,8 @@ class BlockStream:
         schedule = BlockSchedule(head, do_stale_block_check)
 
         while self._gap_ok(curr, head):
+            if not breaker():
+                return
             head = schedule.wait_for_block(curr)
             block = self._client.get_block(curr)
 
