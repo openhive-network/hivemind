@@ -1,0 +1,16 @@
+I propose the following tests:
+
+*1. reblog followed at some distance by reblog-delete, but in the same pack of blocks during initial sync
+*2. like above but both in the same block, preferably during live sync
+*3. like 1. followed by renewed reblog of the same post, still in the same pack of blocks
+*4. like 2. followed by renewed reblog of the same post, still in the same live block
+*5. reblog then reblog-delete during initial sync but in separate packs of blocks
+*6. reblog during initial sync, reblog-delete during live sync
+*7. both reblog and reblog-delete in separate live blocks
+*8. reblog/reblog-delete authorized by someone other than blogger (two versions: unrelated account or post author that is not the same account as blogger)
+*9. reblog-delete of post that never existed
+10. reblog-delete of post that was deleted in the same pack of initial sync blocks, 
+*11. reblog-delete of post that was deleted in different packs, 
+*12. reblog-delete of post that was deleted operation in live block while delete in initial sync, 
+*13. reblog-delete of post that was deleted both in live blocks - same
+*14. reblog-delete of post that was deleted both in live blocks - different
