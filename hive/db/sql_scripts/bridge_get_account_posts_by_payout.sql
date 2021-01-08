@@ -20,7 +20,7 @@ BEGIN
     SELECT 
       id,
       (hp.payout + hp.pending_payout) as total_payout
-    FROM live_posts_view hp
+    FROM live_posts_comments_view hp
     WHERE
       hp.author_id = __account_id
       AND NOT hp.is_paidout
