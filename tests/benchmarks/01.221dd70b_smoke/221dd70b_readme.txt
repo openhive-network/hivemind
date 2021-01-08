@@ -1,0 +1,20 @@
+
+[according to params from `csv_report_parser.py`]
+median-cutoff-time = 0.3s
+time-threshold = 1.0s
+
+[according to params from `start-api-benchmarks.sh`]
+./scripts/ci/start-api-benchmarks.sh hive-2.pl.syncad.com 8080 10 5 ./tests/tests_api/hivemind/tavern
+
+
+curl -s --data '{"jsonrpc":"2.0", "method":"hive.get_info", "params":{}, "id":1}' hive-2.pl.syncad.com:8080
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "hivemind_version": "0.0.1",
+    "hivemind_git_rev": "221dd70b",
+    "database_schema_version": 18,
+    "database_head_block": 50230814
+  },
+  "id": 1
+}
