@@ -1,8 +1,5 @@
 """Hive API: Community methods"""
 import logging
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
-import ujson as json
 
 from hive.server.hive_api.common import (get_community_id, valid_account, valid_limit)
 from hive.server.common.helpers import return_error_info
@@ -93,10 +90,9 @@ async def list_communities(context, last='', limit=100, query=None, sort='rank',
     db = context['db']
 
     sql = "SELECT * FROM bridge_list_communities_by_" + \
-          sort + \
-          "( (:observer)::VARCHAR, (:last)::VARCHAR, (:search)::VARCHAR, (:sort)::VARCHAR, (:limit)::INT )"
+          sort + "( (:observer)::VARCHAR, (:last)::VARCHAR, (:search)::VARCHAR, (:limit)::INT )"
 
-    rows = await db.query_all(sql, observer=observer, last=last, search=search, sort=sort, limit=limit)
+    rows = await db.query_all(sql, observer=observer, last=last, search=search, limit=limit)
 
     return remove_empty_admins_field(rows)
 
@@ -105,6 +101,7 @@ async def list_communities(context, last='', limit=100, query=None, sort='rank',
 async def list_community_roles(context, community, last='', limit=50):
     """List community account-roles (anyone with non-guest status)."""
     db = context['db']
+    limit = valid_limit(limit, 1000, 50)
 
     sql = "SELECT * FROM bridge_list_community_roles( (:community)::VARCHAR, (:last)::VARCHAR, (:limit)::INT )"
     rows = await db.query_all(sql, community=community, last=last, limit=limit)

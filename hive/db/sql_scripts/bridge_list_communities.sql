@@ -23,7 +23,6 @@ CREATE OR REPLACE FUNCTION bridge_list_communities_by_rank(
     in _observer hive_accounts.name%TYPE,
     in _last hive_accounts.name%TYPE,
     in _search VARCHAR,
-    in _sort VARCHAR,
     in _limit INT
 )
 RETURNS SETOF bridge_api_list_communities
@@ -70,7 +69,6 @@ CREATE OR REPLACE FUNCTION bridge_list_communities_by_new(
     in _observer hive_accounts.name%TYPE,
     in _last hive_accounts.name%TYPE,
     in _search VARCHAR,
-    in _sort VARCHAR,
     in _limit INT
 )
 RETURNS SETOF bridge_api_list_communities
@@ -115,7 +113,6 @@ CREATE OR REPLACE FUNCTION bridge_list_communities_by_subs(
     in _observer hive_accounts.name%TYPE,
     in _last hive_accounts.name%TYPE,
     in _search VARCHAR,
-    in _sort VARCHAR,
     in _limit INT
 )
 RETURNS SETOF bridge_api_list_communities
