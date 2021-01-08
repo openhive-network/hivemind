@@ -10,7 +10,18 @@ DECLARE
 BEGIN
   __account_id = find_account_id( _account, True );
   __post_id = find_comment_id( _author, _permlink, True );
-  RETURN QUERY SELECT
+  RETURN QUERY
+  WITH posts AS
+  (
+    SELECT id
+    FROM live_posts_view hp
+    WHERE
+      hp.author_id = __account_id
+      AND ( __post_id = 0 OR hp.id < __post_id )
+    ORDER BY hp.id DESC
+    LIMIT _limit
+  )
+  SELECT
       hp.id,
       hp.author,
       hp.parent_author,
@@ -49,11 +60,9 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       NULL
-  FROM
-      hive_posts_view hp
-  WHERE
-      hp.author_id = __account_id AND hp.depth = 0 AND ( __post_id = 0 OR hp.id < __post_id )
-  ORDER BY hp.id DESC
+  FROM posts,
+  LATERAL get_post_view_by_id(posts.id)
+  ORDER BY posts.id DESC
   LIMIT _limit;
 END
 $function$

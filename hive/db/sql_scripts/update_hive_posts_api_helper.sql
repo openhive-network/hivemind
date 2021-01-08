@@ -11,16 +11,19 @@ IF _first_block_num IS NULL OR _last_block_num IS NULL THEN
   INSERT INTO hive_posts_api_helper
   (id, author_s_permlink)
   SELECT hp.id, hp.author || '/' || hp.permlink
-  FROM hive_posts_view hp
+  FROM hive_posts hp
+  JOIN hive_accounts ha ON (ha.id = hp.author_id)
+  JOIN hive_permlink_data hpd_p ON (hpd_p.id = hp.permlink_id)
   ;
 ELSE
   -- Regular incremental update.
-  INSERT INTO hive_posts_api_helper
-  (id, author_s_permlink)
-  SELECT hp.id, hp.author || '/' || hp.permlink
-  FROM hive_posts_view hp
-  WHERE hp.block_num BETWEEN _first_block_num AND _last_block_num AND
-          NOT EXISTS (SELECT NULL FROM hive_posts_api_helper h WHERE h.id = hp.id)
+  INSERT INTO hive_posts_api_helper (id, author_s_permlink)
+  SELECT hp.id, hp_a.author || '/' || hpd_p.permlink
+  FROM hive_posts hp
+  JOIN hive_accounts ha ON (ha.id = hp.author_id)
+  JOIN hive_permlink_data hpd_p ON (hpd_p.id = hp.permlink_id)
+  WHERE hp.block_num BETWEEN _first_block_num AND _last_block_num
+  ON CONFLICT (id) DO NOTHING
   ;
 END IF;
 
