@@ -72,11 +72,13 @@ async def list_all_subscriptions(context, account):
     return [(r[0], r[1], r[2], r[3]) for r in rows]
 
 @return_error_info
-async def list_subscribers(context, community):
+async def list_subscribers(context, community, last='', limit=100):
     """Lists subscribers of `community`."""
+    limit = valid_limit(limit, 100, 100)
+    last = valid_account(last, True)
     db = context['db']
-    sql = "SELECT * FROM bridge_list_subscribers( (:community)::VARCHAR )"
-    rows = await db.query_all(sql, community=community)
+    sql = "SELECT * FROM bridge_list_subscribers( (:community)::VARCHAR, (:last)::VARCHAR, (:limit)::INT )"
+    rows = await db.query_all(sql, community=community, last=last, limit=limit)
     return [(r[0], r[1], r[2], r[3]) for r in rows]
 
 @return_error_info
