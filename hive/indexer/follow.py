@@ -152,7 +152,10 @@ class Follow(DbAdapterHolder):
                             block_num=block_num
                         )
                 cls.follow_items_to_flush[k]['idx'] = cls.idx
-                cls.follow_items_to_flush[k]['state'] = state
+
+                if state in (0, 1, 2):
+                    cls.follow_items_to_flush[k]['state'] = state
+
                 if state in (3, 5):
                     cls.follow_items_to_flush[k]['blacklisted'] = cls.is_blacklisted(state)
 
@@ -195,7 +198,7 @@ class Follow(DbAdapterHolder):
         what = first(op['what']) or ''
         if not isinstance(what, str):
             return None
-        defs = {'': 0, 'blog': 1, 'ignore': 2, 'blacklist': 3, 'follow_blacklist': 4, 'unblacklist': 5, 'unfollow_blacklist': 6,
+        defs = {'': 0, 'blog': 1, 'follow': 1, 'ignore': 2, 'blacklist': 3, 'follow_blacklist': 4, 'unblacklist': 5, 'unfollow_blacklist': 6,
                 'follow_muted': 7, 'unfollow_muted': 8, 'reset_blacklist' : 9, 'reset_following_list': 10, 'reset_muted_list': 11,
                 'reset_follow_blacklist': 12, 'reset_follow_muted_list': 13, 'reset_all_lists': 14}
         if what not in defs:
