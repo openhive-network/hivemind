@@ -7,8 +7,7 @@ from hive.server.common.helpers import (
     valid_account,
     valid_permlink,
     valid_tag,
-    valid_limit,
-    get_hive_accounts_info_view_query_string)
+    valid_limit)
 
 from hive.utils.account import safe_db_profile_metadata
 
@@ -374,11 +373,7 @@ async def get_follow_list(context, observer, follow_type='blacklisted'):
     if follow_type == 'follow_blacklist' or follow_type == 'follow_muted':
         blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context, follow_type == 'follow_blacklist', follow_type == 'follow_muted')
         for row in blacklists_for_user:
-            names = [row['list']]
-            sql = get_hive_accounts_info_view_query_string(names, True)
-            profile_resultset = await db.query_all(sql, names=tuple(names))
-            profile_row = profile_resultset[0]
-            metadata = safe_db_profile_metadata(profile_row['posting_json_metadata'], profile_row['json_metadata'])
+            metadata = safe_db_profile_metadata(row['posting_json_metadata'], row['json_metadata'])
 
             #list_data = await get_profile(context, row['list'])
             #metadata = list_data["metadata"]["profile"]
