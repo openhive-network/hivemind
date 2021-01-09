@@ -61,7 +61,7 @@ BEGIN
       hp.is_muted,
       NULL
   FROM posts,
-  LATERAL get_post_view_by_id(posts.id)
+  LATERAL get_post_view_by_id(posts.id) hp
   ORDER BY posts.id DESC
   LIMIT _limit;
 END
