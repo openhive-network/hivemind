@@ -283,7 +283,7 @@ BEGIN
   (
     SELECT
       hp1.id
-    FROM live_comments_view
+    FROM live_comments_view hp1
     WHERE hp1.author_id = __author_id
       AND NOT hp1.is_muted
       AND hp1.updated_at <= _updated_at 
@@ -301,7 +301,7 @@ BEGIN
       hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
       hp.active, hp.author_rewards
   FROM comments,
-  LATERAL get_post_view_by_id(comments.id)
+  LATERAL get_post_view_by_id(comments.id) hp
   ORDER BY comments.updated_at DESC, comments.id ASC
   LIMIT _limit;
 END
