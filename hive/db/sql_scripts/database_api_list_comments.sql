@@ -76,7 +76,7 @@ BEGIN
         hp.active, hp.author_rewards
   FROM comments,
   LATERAL get_post_view_by_id(comments.id) hp
-  ORDER BY comments.author_s_permlink
+  ORDER BY hp.author, hp.permlink
   LIMIT _limit;
 END;
 $function$
