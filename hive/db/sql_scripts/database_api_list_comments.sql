@@ -76,7 +76,7 @@ BEGIN
         hp.active, hp.author_rewards
   FROM comments,
   LATERAL get_post_view_by_id(comments.id) hp
-  ORDER BY comments.authors_s_permlink
+  ORDER BY comments.author_s_permlink
   LIMIT _limit;
 END;
 $function$
@@ -98,7 +98,9 @@ BEGIN
   RETURN QUERY
   WITH comments AS
   (
-    SELECT hp1.id
+    SELECT
+      hp1.id,
+      hp1.cashout_time
     FROM live_comments_view hp1
     WHERE NOT hp1.is_muted
       AND hp1.cashout_time >= _cashout_time
@@ -235,7 +237,8 @@ BEGIN
   WITH comments AS
   (
     SELECT
-      hp1.id
+      hp1.id,
+      hp1.updated_at
     FROM live_comments_view hp1
     JOIN hive_posts hp2 ON hp1.parent_id = hp2.id
     WHERE hp2.author_id = __parent_author_id
@@ -282,7 +285,8 @@ BEGIN
   WITH comments AS
   (
     SELECT
-      hp1.id
+      hp1.id,
+      hp1.updated_at
     FROM live_comments_view hp1
     WHERE hp1.author_id = __author_id
       AND NOT hp1.is_muted
