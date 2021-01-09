@@ -18,7 +18,7 @@ IF _first_block_num IS NULL OR _last_block_num IS NULL THEN
 ELSE
   -- Regular incremental update.
   INSERT INTO hive_posts_api_helper (id, author_s_permlink)
-  SELECT hp.id, hp_a.author || '/' || hpd_p.permlink
+  SELECT hp.id, ha.author || '/' || hpd_p.permlink
   FROM live_posts_comments_view hp
   JOIN hive_accounts ha ON (ha.id = hp.author_id)
   JOIN hive_permlink_data hpd_p ON (hpd_p.id = hp.permlink_id)
