@@ -83,4 +83,4 @@ BEGIN
 
 END
 $function$
-language plpgsql STABLE;
+language plpgsql STABLE PARALLEL SAFE;

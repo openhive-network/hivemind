@@ -22,7 +22,7 @@ CREATE OR REPLACE FUNCTION public.find_votes
   in _LIMIT INT
 )
 RETURNS SETOF database_api_vote
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql' STABLE PARALLEL SAFE
 AS
 $function$
 DECLARE _POST_ID INT;
@@ -64,7 +64,7 @@ CREATE OR REPLACE FUNCTION public.list_votes_by_voter_comment
   in _LIMIT INT
 )
 RETURNS SETOF database_api_vote
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql' STABLE PARALLEL SAFE
 AS
 $function$
 DECLARE __voter_id INT;
@@ -110,7 +110,7 @@ CREATE OR REPLACE FUNCTION public.list_votes_by_comment_voter
   in _LIMIT INT
 )
 RETURNS SETOF database_api_vote
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql' STABLE PARALLEL SAFE
 AS
 $function$
 DECLARE __voter_id INT;

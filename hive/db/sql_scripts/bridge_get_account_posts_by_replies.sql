@@ -71,4 +71,4 @@ BEGIN
   ORDER BY replies.id DESC
   LIMIT _limit;
 END
-$function$ LANGUAGE plpgsql STABLE;
+$function$ LANGUAGE plpgsql STABLE PARALLEL SAFE;

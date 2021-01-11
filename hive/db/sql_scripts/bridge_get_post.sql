@@ -50,4 +50,4 @@ BEGIN
   FROM get_post_view_by_id(__post_id) hp;
 END
 $function$
-language plpgsql STABLE;
+language plpgsql STABLE PARALLEL SAFE;

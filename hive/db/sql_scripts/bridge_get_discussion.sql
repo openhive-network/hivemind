@@ -73,4 +73,4 @@ BEGIN
     ORDER BY ds.id
     LIMIT 2000;
 END
-$function$ LANGUAGE plpgsql STABLE;
+$function$ LANGUAGE plpgsql STABLE PARALLEL SAFE;

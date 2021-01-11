@@ -26,4 +26,4 @@ BEGIN
       hf.follower = __account1_id AND hf.following = __account2_id;
 END
 $function$
-language plpgsql STABLE;
+LANGUAGE plpgsql STABLE PARALLEL SAFE;

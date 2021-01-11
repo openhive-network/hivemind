@@ -94,4 +94,4 @@ BEGIN
      JOIN hive_post_data hpd ON hpd.id = hp.id 
   WHERE hp.id = _id AND hp.counter_deleted = 0;   
 END;
-$function$ LANGUAGE plpgsql STABLE SET join_collapse_limit = 1;
+$function$ LANGUAGE plpgsql STABLE PARALLEL SAFE SET join_collapse_limit = 1;

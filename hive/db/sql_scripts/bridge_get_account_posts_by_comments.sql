@@ -65,4 +65,4 @@ BEGIN
   LIMIT _limit;
 END
 $function$
-language plpgsql STABLE;
+LANGUAGE plpgsql STABLE PARALLEL SAFE;

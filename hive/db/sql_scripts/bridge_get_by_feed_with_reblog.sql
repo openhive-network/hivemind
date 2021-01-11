@@ -2,8 +2,7 @@ DROP FUNCTION IF EXISTS bridge_get_by_feed_with_reblog;
 
 CREATE OR REPLACE FUNCTION bridge_get_by_feed_with_reblog( IN _account VARCHAR, IN _author VARCHAR, IN _permlink VARCHAR, IN _limit INTEGER)
     RETURNS SETOF bridge_api_post_reblogs
-    LANGUAGE 'plpgsql'
-    STABLE 
+    LANGUAGE 'plpgsql' STABLE PARALLEL SAFE
     ROWS 1000
 AS $BODY$
 DECLARE

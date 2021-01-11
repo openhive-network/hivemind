@@ -69,7 +69,7 @@ BEGIN
   LIMIT _limit;
 END
 $function$
-language plpgsql STABLE;
+LANGUAGE plpgsql STABLE PARALLEL SAFE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_hot;
 CREATE FUNCTION bridge_get_ranked_post_by_hot( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
@@ -146,7 +146,7 @@ BEGIN
   LIMIT _limit;
 END
 $function$
-language plpgsql STABLE;
+LANGUAGE plpgsql STABLE PARALLEL SAFE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_muted;
 CREATE FUNCTION bridge_get_ranked_post_by_muted( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
@@ -225,7 +225,7 @@ BEGIN
   LIMIT _limit;
 END
 $function$
-language plpgsql STABLE;
+LANGUAGE plpgsql STABLE PARALLEL SAFE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_payout_comments;
 CREATE FUNCTION bridge_get_ranked_post_by_payout_comments( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
@@ -303,7 +303,7 @@ BEGIN
   LIMIT _limit;
 END
 $function$
-language plpgsql STABLE;
+LANGUAGE plpgsql STABLE PARALLEL SAFE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_payout;
 CREATE FUNCTION bridge_get_ranked_post_by_payout( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN, in _observer VARCHAR )
@@ -383,7 +383,7 @@ BEGIN
   LIMIT _limit;
 END
 $function$
-language plpgsql STABLE;
+LANGUAGE plpgsql STABLE PARALLEL SAFE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_promoted;
 CREATE FUNCTION bridge_get_ranked_post_by_promoted( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
@@ -461,7 +461,7 @@ BEGIN
   LIMIT _limit;
 END
 $function$
-language plpgsql STABLE;
+LANGUAGE plpgsql STABLE PARALLEL SAFE;
 
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_trends;
 CREATE FUNCTION bridge_get_ranked_post_by_trends( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
@@ -539,4 +539,4 @@ BEGIN
   LIMIT _limit;
 END
 $function$
-language plpgsql STABLE;
+LANGUAGE plpgsql STABLE PARALLEL SAFE;

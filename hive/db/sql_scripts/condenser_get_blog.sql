@@ -21,7 +21,7 @@ BEGIN
   END IF;
 END
 $function$
-language plpgsql STABLE;
+LANGUAGE plpgsql STABLE PARALLEL SAFE;
 
 DROP FUNCTION IF EXISTS condenser_get_blog;
 -- blog posts [ _last - _limit + 1, _last ] oldest first (reverted by caller)
@@ -84,7 +84,7 @@ BEGIN
   ORDER BY blog.created_at ASC, blog.post_id ASC;
 END
 $function$
-language plpgsql STABLE;
+LANGUAGE plpgsql STABLE PARALLEL SAFE;
 
 DROP FUNCTION IF EXISTS condenser_get_blog_entries;
 -- blog entries [ _last - _limit + 1, _last ] oldest first (reverted by caller)
@@ -125,5 +125,5 @@ BEGIN
   ORDER BY blog.created_at ASC, blog.post_id ASC;
 END
 $function$
-language plpgsql STABLE;
+LANGUAGE plpgsql STABLE PARALLEL SAFE;
 
