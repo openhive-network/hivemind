@@ -6,6 +6,7 @@ import logging
 import time
 
 from datetime import datetime
+from time import perf_counter
 from sqlalchemy.exc import OperationalError
 from aiohttp import web
 from jsonrpcserver.methods import Methods
@@ -179,6 +180,13 @@ def truncate_response_log(logger):
     logger.propagate = False
     logger.addHandler(handler)
 
+def conf_stdout_custom_file_logger(logger, file_name):
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    file_handler = logging.FileHandler(file_name, 'a', 'utf-8')
+
+    logger.addHandler(stdout_handler)
+    logger.addHandler(file_handler)
+
 def run_server(conf):
     """Configure and launch the API server."""
     #pylint: disable=too-many-statements
@@ -192,6 +200,11 @@ def run_server(conf):
 
     # init
     log = logging.getLogger(__name__)
+
+    # logger for storing Request processing times 
+    req_res_log = logging.getLogger("Request-Process-Time-Logger")
+    conf_stdout_custom_file_logger(req_res_log, "./request_process_times.log")
+
     methods = build_methods()
 
     app = web.Application()
@@ -279,6 +292,7 @@ def run_server(conf):
 
     async def jsonrpc_handler(request):
         """Handles all hive jsonrpc API requests."""
+        t_start = perf_counter()
         request = await request.text()
         # debug=True refs https://github.com/bcb/jsonrpcserver/issues/71
         response = None
@@ -299,12 +313,22 @@ def run_server(conf):
                 },
                 "id" : -1
             }
-            headers = {'Access-Control-Allow-Origin': '*'}
-            return web.json_response(error_response, status=200, headers=headers, dumps=decimal_serialize)
+            headers = {
+                'Access-Control-Allow-Origin': '*'
+            }
+            ret = web.json_response(error_response, status=200, headers=headers, dumps=decimal_serialize)
+            req_res_log.info("Request: {} processed in {:.4f}s".format(request, perf_counter() - t_start))
+            return ret
         if response is not None and response.wanted:
-            headers = {'Access-Control-Allow-Origin': '*'}
-            return web.json_response(response.deserialized(), status=200, headers=headers, dumps=decimal_serialize)
-        return web.Response()
+            headers = {
+                'Access-Control-Allow-Origin': '*'
+            }
+            ret = web.json_response(response.deserialized(), status=200, headers=headers, dumps=decimal_serialize)
+            req_res_log.info("Request: {} processed in {:.4f}s".format(request, perf_counter() - t_start))
+            return ret
+        ret = web.Response()
+        req_res_log.info("Request: {} processed in {:.4f}s".format(request, perf_counter() - t_start))
+        return ret
 
     if conf.get('sync_to_s3'):
         app.router.add_get('/head_age', head_age)
