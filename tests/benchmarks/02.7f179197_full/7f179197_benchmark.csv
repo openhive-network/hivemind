@@ -24,7 +24,7 @@ bridge_api_patterns/get_account_posts/blog/icon123456,0.06830927007831633,75666
 bridge_api_patterns/get_account_posts/blog/iliyan90,0.08441239292733371,232916
 bridge_api_patterns/get_account_posts/blog/kochoa,0.08482281200122088,64662
 bridge_api_patterns/get_account_posts/blog/markkujantunen,0.38629957009106874,338172
-bridge_api_negative/get_account_posts/blog/minnowsupport,0.10168875602539629,408482
+bridge_api_patterns/get_account_posts/blog/minnowsupport,0.10168875602539629,408482
 bridge_api_patterns/get_account_posts/blog/moderndayhippie,0.33598757593426853,245071
 bridge_api_patterns/get_account_posts/blog/peakd,0.47151586203835905,557772
 bridge_api_patterns/get_account_posts/blog/road2horizon,0.1438803169876337,268185
@@ -39,8 +39,8 @@ bridge_api_patterns/get_account_posts/blog/suzn.poudel,0.21632362506352365,95723
 bridge_api_patterns/get_account_posts/blog/steemitboard,0.5141865629702806,380700
 bridge_api_patterns/get_account_posts/blog/tormenta,0.20000619895290583,518580
 bridge_api_patterns/get_account_posts/blog/steem-bounty,0.8099086970323697,457974
-bridge_api_patterns/get_account_posts/blog/toushika,0.19798330392222852,121770
-bridge_api_patterns/get_account_posts/blog/toushika2,0.044028937933035195,121770
+bridge_api_patterns/get_account_posts/blog/toushik,0.19798330392222852,121770
+bridge_api_patterns/get_account_posts/blog/toushik2,0.044028937933035195,121770
 bridge_api_patterns/get_account_posts/blog/winniex,0.20549764903262258,227559
 bridge_api_patterns/get_account_posts/comments/antoniarhuiz,0.04653934796806425,26148
 bridge_api_patterns/get_account_posts/comments/asterkame,0.05668275698553771,26407
@@ -188,7 +188,7 @@ bridge_api_patterns/get_discussion/ennosan,0.038088139961473644,26930
 bridge_api_patterns/get_discussion/equipodelta,0.08547303802333772,104327
 bridge_api_patterns/get_discussion/erarium,0.00991707609500736,4729
 bridge_api_patterns/get_discussion/exyle,0.06521264696493745,62409
-bridge_api_patterns/get_discussion/felt.buzz,0.08281411498319358,125548
+bridge_api_patterns/get_discussion/felt_buzz,0.08281411498319358,125548
 bridge_api_patterns/get_discussion/francesleader_no_one,0.2731736140558496,488819
 bridge_api_patterns/get_discussion/futuremind,0.06353946402668953,67354
 bridge_api_patterns/get_discussion/genesishealthy,0.03488796099554747,33039
@@ -440,7 +440,7 @@ bridge_api_patterns/get_account_posts/blog/icon123456,0.024067634949460626,75666
 bridge_api_patterns/get_account_posts/blog/hiveio,0.0887295730644837,321050
 bridge_api_patterns/get_account_posts/blog/kochoa,0.023391191032715142,64662
 bridge_api_patterns/get_account_posts/blog/iliyan90,0.05837401305325329,232916
-bridge_api_negative/get_account_posts/blog/minnowsupport,0.09855173202231526,408482
+bridge_api_patterns/get_account_posts/blog/minnowsupport,0.09855173202231526,408482
 bridge_api_patterns/get_account_posts/blog/markkujantunen,0.1193695180118084,338172
 bridge_api_patterns/get_account_posts/blog/moderndayhippie,0.07682436890900135,245071
 bridge_api_patterns/get_account_posts/blog/most_posts,0.1620300600770861,59493
@@ -456,8 +456,8 @@ bridge_api_patterns/get_account_posts/blog/steem-bounty,0.19062979600857943,4579
 bridge_api_patterns/get_account_posts/blog/suzn.poudel,0.0687813350232318,95723
 bridge_api_patterns/get_account_posts/blog/shady,0.18089750898070633,421527
 bridge_api_patterns/get_account_posts/blog/tormenta,0.13524883694481105,518580
-bridge_api_patterns/get_account_posts/blog/toushika,0.046362344990484416,121770
-bridge_api_patterns/get_account_posts/blog/toushika2,0.04963210702408105,121770
+bridge_api_patterns/get_account_posts/blog/toushik,0.046362344990484416,121770
+bridge_api_patterns/get_account_posts/blog/toushik2,0.04963210702408105,121770
 bridge_api_patterns/get_account_posts/blog/winniex,0.06322144297882915,227559
 bridge_api_patterns/get_account_posts/comments/antoniarhuiz,0.026319984928704798,26148
 bridge_api_patterns/get_account_posts/comments/asterkame,0.026156716980040073,26407
@@ -605,7 +605,7 @@ bridge_api_patterns/get_discussion/ennosan,0.01845513202715665,26930
 bridge_api_patterns/get_discussion/erarium,0.012800371972844005,4729
 bridge_api_patterns/get_discussion/equipodelta,0.05186684406362474,104327
 bridge_api_patterns/get_discussion/exyle,0.031224883045069873,62409
-bridge_api_patterns/get_discussion/felt.buzz,0.0541969679761678,125548
+bridge_api_patterns/get_discussion/felt_buzz,0.0541969679761678,125548
 bridge_api_patterns/get_discussion/francesleader_no_one,0.20525975001510233,488819
 bridge_api_patterns/get_discussion/francesleader_plague,0.11798826698213816,259326
 bridge_api_patterns/get_discussion/futuremind,0.03308393189217895,67354
@@ -858,7 +858,7 @@ bridge_api_patterns/get_account_posts/blog/helcim,0.034503175993449986,69959
 bridge_api_patterns/get_account_posts/blog/kochoa,0.020553977927193046,64662
 bridge_api_patterns/get_account_posts/blog/iliyan90,0.054916809080168605,232916
 bridge_api_patterns/get_account_posts/blog/markkujantunen,0.10941609600558877,338172
-bridge_api_negative/get_account_posts/blog/minnowsupport,0.11133946001064032,408482
+bridge_api_patterns/get_account_posts/blog/minnowsupport,0.11133946001064032,408482
 bridge_api_patterns/get_account_posts/blog/moderndayhippie,0.10782555595505983,245071
 bridge_api_patterns/get_account_posts/blog/most_posts,0.14756464399397373,59493
 bridge_api_patterns/get_account_posts/blog/peakd,0.17820911796297878,557772
@@ -873,8 +873,8 @@ bridge_api_patterns/get_account_posts/blog/steem-bounty,0.13136750599369407,4579
 bridge_api_patterns/get_account_posts/blog/suzn.poudel,0.03620251500979066,95723
 bridge_api_patterns/get_account_posts/blog/steemitboard,0.1115453050006181,380700
 bridge_api_patterns/get_account_posts/blog/tormenta,0.1367984899552539,518580
-bridge_api_patterns/get_account_posts/blog/toushika,0.07123248500283808,121770
-bridge_api_patterns/get_account_posts/blog/toushika2,0.07058095908723772,121770
+bridge_api_patterns/get_account_posts/blog/toushik,0.07123248500283808,121770
+bridge_api_patterns/get_account_posts/blog/toushik2,0.07058095908723772,121770
 bridge_api_patterns/get_account_posts/blog/winniex,0.07108912395779043,227559
 bridge_api_patterns/get_account_posts/comments/antoniarhuiz,0.028586157015524805,26148
 bridge_api_patterns/get_account_posts/comments/carlgnash,0.027164757950231433,25042
@@ -1022,7 +1022,7 @@ bridge_api_patterns/get_discussion/ennosan,0.019030092982575297,26930
 bridge_api_patterns/get_discussion/erarium,0.008475447073578835,4729
 bridge_api_patterns/get_discussion/equipodelta,0.04588378791231662,104327
 bridge_api_patterns/get_discussion/exyle,0.0285389160271734,62409
-bridge_api_patterns/get_discussion/felt.buzz,0.05401351605542004,125548
+bridge_api_patterns/get_discussion/felt_buzz,0.05401351605542004,125548
 bridge_api_patterns/get_discussion/francesleader_no_one,0.2011952690081671,488819
 bridge_api_patterns/get_discussion/futuremind,0.03077188297174871,67354
 bridge_api_patterns/get_discussion/francesleader_plague,0.119218391017057,259326
@@ -1276,7 +1276,7 @@ bridge_api_patterns/get_account_posts/blog/icon123456,0.045453652972355485,75666
 bridge_api_patterns/get_account_posts/blog/iliyan90,0.06199424306396395,232916
 bridge_api_patterns/get_account_posts/blog/markkujantunen,0.1427746140398085,338172
 bridge_api_patterns/get_account_posts/blog/moderndayhippie,0.1113615200156346,245071
-bridge_api_negative/get_account_posts/blog/minnowsupport,0.14163893403019756,408482
+bridge_api_patterns/get_account_posts/blog/minnowsupport,0.14163893403019756,408482
 bridge_api_patterns/get_account_posts/blog/peakd,0.20571374497376382,557772
 bridge_api_patterns/get_account_posts/blog/most_posts,0.15683401504065841,59493
 bridge_api_patterns/get_account_posts/blog/road2horizon2,0.06704386998899281,268185
@@ -1289,8 +1289,8 @@ bridge_api_patterns/get_account_posts/blog/steem-bounty,0.13450747600290924,4579
 bridge_api_patterns/get_account_posts/blog/suzn.poudel,0.03699472500011325,95723
 bridge_api_patterns/get_account_posts/blog/shady,0.10270714294165373,421527
 bridge_api_patterns/get_account_posts/blog/steemitboard,0.13713548192754388,380700
-bridge_api_patterns/get_account_posts/blog/toushika,0.04961737594567239,121770
-bridge_api_patterns/get_account_posts/blog/toushika2,0.053665537969209254,121770
+bridge_api_patterns/get_account_posts/blog/toushik,0.04961737594567239,121770
+bridge_api_patterns/get_account_posts/blog/toushik2,0.053665537969209254,121770
 bridge_api_patterns/get_account_posts/blog/winniex,0.0693111460423097,227559
 bridge_api_patterns/get_account_posts/blog/tormenta,0.1520912169944495,518580
 bridge_api_patterns/get_account_posts/comments/antoniarhuiz,0.02434487291611731,26148
@@ -1439,7 +1439,7 @@ bridge_api_patterns/get_discussion/ennosan,0.01850770297460258,26930
 bridge_api_patterns/get_discussion/equipodelta,0.04910270206164569,104327
 bridge_api_patterns/get_discussion/erarium,0.016246997052803636,4729
 bridge_api_patterns/get_discussion/exyle,0.028498629108071327,62409
-bridge_api_patterns/get_discussion/felt.buzz,0.05471729801502079,125548
+bridge_api_patterns/get_discussion/felt_buzz,0.05471729801502079,125548
 bridge_api_patterns/get_discussion/futuremind,0.03050718898884952,67354
 bridge_api_patterns/get_discussion/francesleader_no_one,0.20180965296458453,488819
 bridge_api_patterns/get_discussion/francesleader_plague,0.11007747589610517,259326
@@ -1692,7 +1692,7 @@ bridge_api_patterns/get_account_posts/blog/icon123456,0.027348679024726152,75666
 bridge_api_patterns/get_account_posts/blog/kochoa,0.02702226594556123,64662
 bridge_api_patterns/get_account_posts/blog/iliyan90,0.05785237799864262,232915
 bridge_api_patterns/get_account_posts/blog/markkujantunen,0.10276383499149233,338172
-bridge_api_negative/get_account_posts/blog/minnowsupport,0.08420494198799133,408482
+bridge_api_patterns/get_account_posts/blog/minnowsupport,0.08420494198799133,408482
 bridge_api_patterns/get_account_posts/blog/moderndayhippie,0.08007594908121973,245071
 bridge_api_patterns/get_account_posts/blog/most_posts,0.14026150293648243,59493
 bridge_api_patterns/get_account_posts/blog/peakd,0.17145776201505214,557772
@@ -1706,8 +1706,8 @@ bridge_api_patterns/get_account_posts/blog/schamangerbert,0.09593377402052283,32
 bridge_api_patterns/get_account_posts/blog/steem-bounty,0.18624271405860782,457974
 bridge_api_patterns/get_account_posts/blog/shady,0.12458517297636718,421527
 bridge_api_patterns/get_account_posts/blog/steemitboard,0.17389877990353853,380700
-bridge_api_patterns/get_account_posts/blog/toushika,0.05168656399473548,121770
-bridge_api_patterns/get_account_posts/blog/toushika2,0.057623452972620726,121770
+bridge_api_patterns/get_account_posts/blog/toushik,0.05168656399473548,121770
+bridge_api_patterns/get_account_posts/blog/toushik2,0.057623452972620726,121770
 bridge_api_patterns/get_account_posts/blog/winniex,0.0812459159642458,227559
 bridge_api_patterns/get_account_posts/blog/tormenta,0.1577149109216407,518580
 bridge_api_patterns/get_account_posts/comments/antoniarhuiz,0.02414777292869985,26148
@@ -1856,7 +1856,7 @@ bridge_api_patterns/get_discussion/enginewitty,0.030809850082732737,63816
 bridge_api_patterns/get_discussion/equipodelta,0.04722031799610704,104327
 bridge_api_patterns/get_discussion/erarium,0.011782697052694857,4729
 bridge_api_patterns/get_discussion/exyle,0.02666748990304768,62409
-bridge_api_patterns/get_discussion/felt.buzz,0.061782935983501375,125548
+bridge_api_patterns/get_discussion/felt_buzz,0.061782935983501375,125548
 bridge_api_patterns/get_discussion/francesleader_no_one,0.20312578999437392,488819
 bridge_api_patterns/get_discussion/genesishealthy,0.022353398031555116,33039
 bridge_api_patterns/get_discussion/futuremind,0.03801492101047188,67354
@@ -2109,7 +2109,7 @@ bridge_api_patterns/get_account_posts/blog/hiveio,0.07500552898272872,321050
 bridge_api_patterns/get_account_posts/blog/kochoa,0.02386654808651656,64662
 bridge_api_patterns/get_account_posts/blog/iliyan90,0.058862215955741704,232915
 bridge_api_patterns/get_account_posts/blog/markkujantunen,0.11329741298686713,338172
-bridge_api_negative/get_account_posts/blog/minnowsupport,0.12360126699786633,408482
+bridge_api_patterns/get_account_posts/blog/minnowsupport,0.12360126699786633,408482
 bridge_api_patterns/get_account_posts/blog/most_posts,0.15251408505719155,59493
 bridge_api_patterns/get_account_posts/blog/moderndayhippie,0.11620956100523472,245071
 bridge_api_patterns/get_account_posts/blog/peakd,0.19603146996814758,557772
@@ -2124,9 +2124,9 @@ bridge_api_patterns/get_account_posts/blog/shady,0.1087791119934991,421527
 bridge_api_patterns/get_account_posts/blog/steem-bounty,0.13805538101587445,457974
 bridge_api_patterns/get_account_posts/blog/steemitboard,0.14331762096844614,380700
 bridge_api_patterns/get_account_posts/blog/tormenta,0.13626906799618155,518580
-bridge_api_patterns/get_account_posts/blog/toushika,0.07011488289572299,121770
+bridge_api_patterns/get_account_posts/blog/toushik,0.07011488289572299,121770
 bridge_api_patterns/get_account_posts/blog/winniex,0.07634014799259603,227559
-bridge_api_patterns/get_account_posts/blog/toushika2,0.07130152801983058,121770
+bridge_api_patterns/get_account_posts/blog/toushik2,0.07130152801983058,121770
 bridge_api_patterns/get_account_posts/comments/antoniarhuiz,0.026478957966901362,26148
 bridge_api_patterns/get_account_posts/comments/asterkame,0.027772155939601362,26407
 bridge_api_patterns/get_account_posts/comments/carlgnash,0.030312370043247938,25042
@@ -2273,7 +2273,7 @@ bridge_api_patterns/get_discussion/ennosan,0.019912391086108983,26930
 bridge_api_patterns/get_discussion/equipodelta,0.04665690008550882,104327
 bridge_api_patterns/get_discussion/erarium,0.00880398997105658,4729
 bridge_api_patterns/get_discussion/exyle,0.028444540919736028,62409
-bridge_api_patterns/get_discussion/felt.buzz,0.055661633028648794,125548
+bridge_api_patterns/get_discussion/felt_buzz,0.055661633028648794,125548
 bridge_api_patterns/get_discussion/francesleader_no_one,0.20377271401230246,488819
 bridge_api_patterns/get_discussion/futuremind,0.03146705206017941,67354
 bridge_api_patterns/get_discussion/francesleader_plague,0.11383781593758613,259326
@@ -2525,7 +2525,7 @@ bridge_api_patterns/get_account_posts/blog/hiveio,0.06789641501381993,321050
 bridge_api_patterns/get_account_posts/blog/icon123456,0.02387133298907429,75666
 bridge_api_patterns/get_account_posts/blog/kochoa,0.021264228969812393,64662
 bridge_api_patterns/get_account_posts/blog/iliyan90,0.0528662190772593,232915
-bridge_api_negative/get_account_posts/blog/minnowsupport,0.08840933803003281,408482
+bridge_api_patterns/get_account_posts/blog/minnowsupport,0.08840933803003281,408482
 bridge_api_patterns/get_account_posts/blog/markkujantunen,0.1124850690830499,338172
 bridge_api_patterns/get_account_posts/blog/moderndayhippie,0.07870094897225499,245071
 bridge_api_patterns/get_account_posts/blog/peakd,0.16825552098453045,557772
@@ -2540,8 +2540,8 @@ bridge_api_patterns/get_account_posts/blog/shady,0.09523441700730473,421527
 bridge_api_patterns/get_account_posts/blog/suzn.poudel,0.04243828903418034,95724
 bridge_api_patterns/get_account_posts/blog/steem-bounty,0.1259996029548347,457974
 bridge_api_patterns/get_account_posts/blog/steemitboard,0.12888108799234033,380700
-bridge_api_patterns/get_account_posts/blog/toushika,0.05419106094632298,121770
-bridge_api_patterns/get_account_posts/blog/toushika2,0.04061556002125144,121770
+bridge_api_patterns/get_account_posts/blog/toushik,0.05419106094632298,121770
+bridge_api_patterns/get_account_posts/blog/toushik2,0.04061556002125144,121770
 bridge_api_patterns/get_account_posts/blog/tormenta,0.14015059603843838,518580
 bridge_api_patterns/get_account_posts/blog/winniex,0.053756271954625845,227559
 bridge_api_patterns/get_account_posts/comments/antoniarhuiz,0.02443095901980996,26148
@@ -2690,7 +2690,7 @@ bridge_api_patterns/get_discussion/ennosan,0.019194086897186935,26930
 bridge_api_patterns/get_discussion/erarium,0.008456105017103255,4729
 bridge_api_patterns/get_discussion/equipodelta,0.04475174506660551,104327
 bridge_api_patterns/get_discussion/exyle,0.03227418602909893,62409
-bridge_api_patterns/get_discussion/felt.buzz,0.05875018995720893,125548
+bridge_api_patterns/get_discussion/felt_buzz,0.05875018995720893,125548
 bridge_api_patterns/get_discussion/francesleader_no_one,0.20543302001897246,488819
 bridge_api_patterns/get_discussion/futuremind,0.030789996962994337,67357
 bridge_api_patterns/get_discussion/genesishealthy,0.01996175094973296,33039
@@ -2944,7 +2944,7 @@ bridge_api_patterns/get_account_posts/blog/iliyan90,0.053385733044706285,232915
 bridge_api_patterns/get_account_posts/blog/kochoa,0.020381301059387624,64662
 bridge_api_patterns/get_account_posts/blog/markkujantunen,0.10391599300783128,338172
 bridge_api_patterns/get_account_posts/blog/moderndayhippie,0.10485005402006209,245071
-bridge_api_negative/get_account_posts/blog/minnowsupport,0.12381878599990159,408482
+bridge_api_patterns/get_account_posts/blog/minnowsupport,0.12381878599990159,408482
 bridge_api_patterns/get_account_posts/blog/most_posts,0.14359366905409843,59493
 bridge_api_patterns/get_account_posts/blog/peakd,0.18077793100383133,557772
 bridge_api_patterns/get_account_posts/blog/road2horizon,0.05498745199292898,268185
@@ -2957,8 +2957,8 @@ bridge_api_patterns/get_account_posts/blog/shady,0.12041455204598606,421527
 bridge_api_patterns/get_account_posts/blog/suzn.poudel,0.03838846797589213,95724
 bridge_api_patterns/get_account_posts/blog/steem-bounty,0.14605933905113488,457974
 bridge_api_patterns/get_account_posts/blog/steemitboard,0.11420199403073639,380700
-bridge_api_patterns/get_account_posts/blog/toushika,0.05501360399648547,121770
-bridge_api_patterns/get_account_posts/blog/toushika2,0.06016561493743211,121770
+bridge_api_patterns/get_account_posts/blog/toushik,0.05501360399648547,121770
+bridge_api_patterns/get_account_posts/blog/toushik2,0.06016561493743211,121770
 bridge_api_patterns/get_account_posts/blog/winniex,0.07375731703359634,227559
 bridge_api_patterns/get_account_posts/blog/tormenta,0.1668784130597487,518580
 bridge_api_patterns/get_account_posts/comments/antoniarhuiz,0.034530604956671596,26148
@@ -3107,7 +3107,7 @@ bridge_api_patterns/get_discussion/ennosan,0.020385459065437317,26930
 bridge_api_patterns/get_discussion/equipodelta,0.04869255796074867,104327
 bridge_api_patterns/get_discussion/erarium,0.016274338006041944,4729
 bridge_api_patterns/get_discussion/exyle,0.029464473947882652,62409
-bridge_api_patterns/get_discussion/felt.buzz,0.07019591296557337,125548
+bridge_api_patterns/get_discussion/felt_buzz,0.07019591296557337,125548
 bridge_api_patterns/get_discussion/futuremind,0.04203491995576769,67357
 bridge_api_patterns/get_discussion/genesishealthy,0.020877241040579975,33039
 bridge_api_patterns/get_discussion/francesleader_no_one,0.25124596105888486,488819
@@ -3360,7 +3360,7 @@ bridge_api_patterns/get_account_posts/blog/icon123456,0.024914909969083965,75666
 bridge_api_patterns/get_account_posts/blog/iliyan90,0.05722874298226088,232915
 bridge_api_patterns/get_account_posts/blog/kochoa,0.02199380600359291,64662
 bridge_api_patterns/get_account_posts/blog/markkujantunen,0.114850735059008,338172
-bridge_api_negative/get_account_posts/blog/minnowsupport,0.09093751106411219,408482
+bridge_api_patterns/get_account_posts/blog/minnowsupport,0.09093751106411219,408482
 bridge_api_patterns/get_account_posts/blog/moderndayhippie,0.075110814999789,245071
 bridge_api_patterns/get_account_posts/blog/most_posts,0.14037438097875565,59493
 bridge_api_patterns/get_account_posts/blog/peakd,0.1512351839337498,557772
@@ -3374,9 +3374,9 @@ bridge_api_patterns/get_account_posts/blog/shady,0.0985154319787398,421527
 bridge_api_patterns/get_account_posts/blog/suzn.poudel,0.04570682696066797,95724
 bridge_api_patterns/get_account_posts/blog/steemitboard,0.16019084898289293,380700
 bridge_api_patterns/get_account_posts/blog/steem-bounty,0.16769239003770053,457974
-bridge_api_patterns/get_account_posts/blog/toushika,0.0486731770215556,121770
+bridge_api_patterns/get_account_posts/blog/toushik,0.0486731770215556,121770
 bridge_api_patterns/get_account_posts/blog/tormenta,0.13698192499578,518580
-bridge_api_patterns/get_account_posts/blog/toushika2,0.042295945109799504,121770
+bridge_api_patterns/get_account_posts/blog/toushik2,0.042295945109799504,121770
 bridge_api_patterns/get_account_posts/blog/winniex,0.05471208901144564,227559
 bridge_api_patterns/get_account_posts/comments/antoniarhuiz,0.02560947195161134,26148
 bridge_api_patterns/get_account_posts/comments/asterkame,0.024325998034328222,26407
@@ -3524,7 +3524,7 @@ bridge_api_patterns/get_discussion/ennosan,0.018614756991155446,26930
 bridge_api_patterns/get_discussion/equipodelta,0.04670547496061772,104327
 bridge_api_patterns/get_discussion/erarium,0.009673632914200425,4729
 bridge_api_patterns/get_discussion/exyle,0.03116464300546795,62409
-bridge_api_patterns/get_discussion/felt.buzz,0.07009862700942904,125548
+bridge_api_patterns/get_discussion/felt_buzz,0.07009862700942904,125548
 bridge_api_patterns/get_discussion/francesleader_no_one,0.19741196499671787,488819
 bridge_api_patterns/get_discussion/francesleader_plague,0.11323363403789699,259326
 bridge_api_patterns/get_discussion/futuremind,0.03129260602872819,67357
@@ -3776,7 +3776,7 @@ bridge_api_patterns/get_account_posts/blog/hiveio,0.0782902620267123,321050
 bridge_api_patterns/get_account_posts/blog/helcim,0.05460597004275769,69959
 bridge_api_patterns/get_account_posts/blog/iliyan90,0.06991417799144983,232915
 bridge_api_patterns/get_account_posts/blog/kochoa,0.023548688972368836,64662
-bridge_api_negative/get_account_posts/blog/minnowsupport,0.10336506902240217,408482
+bridge_api_patterns/get_account_posts/blog/minnowsupport,0.10336506902240217,408482
 bridge_api_patterns/get_account_posts/blog/markkujantunen,0.12184270203579217,338172
 bridge_api_patterns/get_account_posts/blog/moderndayhippie,0.10756248701363802,245071
 bridge_api_patterns/get_account_posts/blog/most_posts,0.1470073329983279,59493
@@ -3791,9 +3791,9 @@ bridge_api_patterns/get_account_posts/blog/shady,0.15101564500946552,421527
 bridge_api_patterns/get_account_posts/blog/steem-bounty,0.15105617605149746,457974
 bridge_api_patterns/get_account_posts/blog/suzn.poudel,0.03624241694342345,95724
 bridge_api_patterns/get_account_posts/blog/steemitboard,0.1445864790584892,380700
-bridge_api_patterns/get_account_posts/blog/toushika,0.04701251594815403,121770
+bridge_api_patterns/get_account_posts/blog/toushik,0.04701251594815403,121770
 bridge_api_patterns/get_account_posts/blog/winniex,0.08386379689909518,227559
-bridge_api_patterns/get_account_posts/blog/toushika2,0.07451918197330087,121770
+bridge_api_patterns/get_account_posts/blog/toushik2,0.07451918197330087,121770
 bridge_api_patterns/get_account_posts/blog/tormenta,0.14399226603563875,518580
 bridge_api_patterns/get_account_posts/comments/antoniarhuiz,0.02493775705806911,26148
 bridge_api_patterns/get_account_posts/comments/asterkame,0.02385364193469286,26407
@@ -3941,7 +3941,7 @@ bridge_api_patterns/get_discussion/ennosan,0.018202448030933738,26930
 bridge_api_patterns/get_discussion/erarium,0.008887772914022207,4729
 bridge_api_patterns/get_discussion/equipodelta,0.04627642501145601,104327
 bridge_api_patterns/get_discussion/exyle,0.030769247910939157,62409
-bridge_api_patterns/get_discussion/felt.buzz,0.05467296997085214,125548
+bridge_api_patterns/get_discussion/felt_buzz,0.05467296997085214,125548
 bridge_api_patterns/get_discussion/futuremind,0.03982985601760447,67357
 bridge_api_patterns/get_discussion/francesleader_plague,0.15460362599696964,259326
 bridge_api_patterns/get_discussion/francesleader_no_one,0.25248225405812263,488819
