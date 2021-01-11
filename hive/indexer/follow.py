@@ -20,16 +20,24 @@ class Follow(DbAdapterHolder):
     idx = 0
 
     @classmethod
+    def true_false_null(cls, state, to_true, to_false):
+        if state == to_true:
+            return True
+        if state == to_false:
+            return False
+        return 'NULL'
+
+    @classmethod
     def is_blacklisted(cls, state):
-        return state == 3
+        return cls.true_false_null(state, 3, 5)
 
     @classmethod
     def is_follow_blacklists(cls, state):
-        return state == 4
+        return cls.true_false_null(state, 4, 6)
 
     @classmethod
     def is_follow_muted(cls, state):
-        return state == 7
+        return cls.true_false_null(state, 7, 8)
 
     @classmethod
     def get_mass_data_for_follower(cls, follower, state, block_num):
@@ -117,55 +125,33 @@ class Follow(DbAdapterHolder):
                 k = '{}/{}'.format(op['flr'], following)
                 # no k in cls.follow_items_to_flush but we have data in db
                 if k not in cls.follow_items_to_flush:
-                    sql = """
-                        SELECT
-                            *
-                        FROM
-                            hive_follows
-                        WHERE 
-                            follower = (SELECT id FROM hive_accounts WHERE name = {})
-                            AND following = (SELECT id FROM hive_accounts WHERE name = {})
-                    """
-                    row = cls.db.query_row(sql.format(op['flr'], following))
-                    if row is not None:
-                        cls.follow_items_to_flush[k] = dict(
-                            idx=cls.idx,
-                            flr=op['flr'],
-                            flg=following,
-                            state=row[3],
-                            blacklisted=row[5],
-                            follow_blacklists=row[6],
-                            follow_muted=row[7],
-                            at=row[4],
-                            block_num=row[8]
-                        )
-                    else:
-                        cls.follow_items_to_flush[k] = dict(
-                            idx=cls.idx,
-                            flr=op['flr'],
-                            flg=following,
-                            state=state if state in (0, 1, 2) else 0,
-                            blacklisted=cls.is_blacklisted(state),
-                            follow_blacklists=cls.is_follow_blacklists(state),
-                            follow_muted=cls.is_follow_muted(state),
-                            at=op['at'],
-                            block_num=block_num
-                        )
-                cls.follow_items_to_flush[k]['idx'] = cls.idx
+                    cls.follow_items_to_flush[k] = dict(
+                        idx=cls.idx,
+                        flr=op['flr'],
+                        flg=following,
+                        state=state if state in (0, 1, 2) else 'NULL',
+                        blacklisted=cls.is_blacklisted(state),
+                        follow_blacklists=cls.is_follow_blacklists(state),
+                        follow_muted=cls.is_follow_muted(state),
+                        at=op['at'],
+                        block_num=block_num
+                    )
+                else:
+                    cls.follow_items_to_flush[k]['idx'] = cls.idx
 
-                if state in (0, 1, 2):
-                    cls.follow_items_to_flush[k]['state'] = state
+                    if state in (0, 1, 2):
+                        cls.follow_items_to_flush[k]['state'] = state
 
-                if state in (3, 5):
-                    cls.follow_items_to_flush[k]['blacklisted'] = cls.is_blacklisted(state)
+                    if state in (3, 5):
+                        cls.follow_items_to_flush[k]['blacklisted'] = cls.is_blacklisted(state)
 
-                if state in (4, 6):
-                    cls.follow_items_to_flush[k]['follow_blacklists'] = cls.is_follow_blacklists(state)
+                    if state in (4, 6):
+                        cls.follow_items_to_flush[k]['follow_blacklists'] = cls.is_follow_blacklists(state)
 
-                if state in (7, 8):
-                    cls.follow_items_to_flush[k]['follow_muted'] = cls.is_follow_muted(state)
+                    if state in (7, 8):
+                        cls.follow_items_to_flush[k]['follow_muted'] = cls.is_follow_muted(state)
 
-                cls.follow_items_to_flush[k]['block_num'] = block_num
+                    cls.follow_items_to_flush[k]['block_num'] = block_num
                 cls.idx += 1
 
     @classmethod
@@ -219,10 +205,10 @@ class Follow(DbAdapterHolder):
                     ds.follower_id,
                     ds.following_id,
                     ds.created_at,
-                    ds.state,
-                    ds.blacklisted,
-                    ds.follow_blacklists,
-                    ds.follow_muted,
+                    COALESCE(ds.state, (SELECT state FROM hive_follows hfs WHERE hfs.follower = ds.follower_id AND hfs.following = ds.following_id), 0),
+                    COALESCE(ds.blacklisted, (SELECT blacklisted FROM hive_follows hfs WHERE hfs.follower = ds.follower_id AND hfs.following = ds.following_id), FALSE),
+                    COALESCE(ds.follow_blacklists, (SELECT follow_blacklists FROM hive_follows hfs WHERE hfs.follower = ds.follower_id AND hfs.following = ds.following_id), FALSE),
+                    COALESCE(ds.follow_muted, (SELECT follow_muted FROM hive_follows hfs WHERE hfs.follower = ds.follower_id AND hfs.following = ds.following_id), FALSE),
                     ds.block_num
                 FROM
                 (
@@ -265,7 +251,7 @@ class Follow(DbAdapterHolder):
             cls.beginTx()
             for _, follow_item in cls.follow_items_to_flush.items():
                 if count < limit:
-                    values.append("({}, {}, {}, '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['idx'],
+                    values.append("({}, {}, {}, '{}'::timestamp, {}::smallint, {}::boolean, {}::boolean, {}::boolean, {})".format(follow_item['idx'],
                                                                           follow_item['flr'],
                                                                           follow_item['flg'],
                                                                           follow_item['at'],
