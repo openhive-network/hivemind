@@ -58,7 +58,7 @@ BEGIN
       hph.id,
       hph.author_s_permlink
     FROM hive_posts_api_helper hph
-    JOIN live_comments_view hp ON hp.id = hph.id
+    JOIN live_posts_comments_view hp ON hp.id = hph.id
     WHERE hph.author_s_permlink  >= _author || '/' || _permlink
       AND NOT hp.is_muted -- all the mute checks in this file look insufficient, but maybe no one uses these API calls?
       AND hph.id != 0 -- what does this do?
@@ -101,7 +101,7 @@ BEGIN
     SELECT
       hp1.id,
       hp1.cashout_time
-    FROM live_comments_view hp1
+    FROM live_posts_comments_view hp1
     WHERE NOT hp1.is_muted
       AND hp1.cashout_time >= _cashout_time
       AND (__post_id = 0 OR hp1.id >= __post_id)
@@ -148,7 +148,7 @@ BEGIN
   WITH comments AS
   (
     SELECT hp.id
-    FROM live_comments_view hp
+    FROM live_posts_comments_view hp
     WHERE hp.root_id = __root_id
       AND NOT hp.is_muted
       AND (__post_id = 0 OR hp.id >= __post_id)
@@ -192,7 +192,7 @@ BEGIN
   WITH comments AS
   (
     SELECT hp.id
-    FROM live_comments_view hp
+    FROM live_posts_comments_view hp
     WHERE hp.parent_id = __parent_id
       AND NOT hp.is_muted
       AND (__post_id = 0 OR hp.id >= __post_id)
@@ -239,7 +239,7 @@ BEGIN
     SELECT
       hp1.id,
       hp1.updated_at
-    FROM live_comments_view hp1
+    FROM live_posts_comments_view hp1
     JOIN hive_posts hp2 ON hp1.parent_id = hp2.id
     WHERE hp2.author_id = __parent_author_id
         AND NOT hp1.is_muted
@@ -287,7 +287,7 @@ BEGIN
     SELECT
       hp1.id,
       hp1.updated_at
-    FROM live_comments_view hp1
+    FROM live_posts_comments_view hp1
     WHERE hp1.author_id = __author_id
       AND NOT hp1.is_muted
       AND hp1.updated_at <= _updated_at 
