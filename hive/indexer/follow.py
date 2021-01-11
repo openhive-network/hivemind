@@ -144,7 +144,7 @@ class Follow(DbAdapterHolder):
                             idx=cls.idx,
                             flr=op['flr'],
                             flg=following,
-                            state=state,
+                            state=state if state in (0, 1, 2) else 0,
                             blacklisted=cls.is_blacklisted(state),
                             follow_blacklists=cls.is_follow_blacklists(state),
                             follow_muted=cls.is_follow_muted(state),
