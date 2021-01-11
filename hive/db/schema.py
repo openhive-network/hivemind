@@ -437,7 +437,7 @@ def drop_fk(db):
 def create_fk(db):
     from sqlalchemy.schema import AddConstraint
     from sqlalchemy import text
-    connection = db.engine().connect()
+    connection = db.get_new_connection('create_fk')
     connection.execute(text("START TRANSACTION"))
     for table in build_metadata().sorted_tables:
         for fk in table.foreign_keys:

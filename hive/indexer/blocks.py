@@ -64,16 +64,29 @@ class Blocks:
 
     @classmethod
     def setup_own_db_access(cls, sharedDbAdapter):
-        PostDataCache.setup_own_db_access(sharedDbAdapter)
-        Reputations.setup_own_db_access(sharedDbAdapter)
-        Votes.setup_own_db_access(sharedDbAdapter)
-        Follow.setup_own_db_access(sharedDbAdapter)
-        Posts.setup_own_db_access(sharedDbAdapter)
-        Reblog.setup_own_db_access(sharedDbAdapter)
-        Notify.setup_own_db_access(sharedDbAdapter)
-        Accounts.setup_own_db_access(sharedDbAdapter)
-        PayoutStats.setup_own_db_access(sharedDbAdapter)
-        Mentions.setup_own_db_access(sharedDbAdapter)
+        PostDataCache.setup_own_db_access(sharedDbAdapter, "PostDataCache")
+        Reputations.setup_own_db_access(sharedDbAdapter, "Reputations")
+        Votes.setup_own_db_access(sharedDbAdapter, "Votes")
+        Follow.setup_own_db_access(sharedDbAdapter, "Follow")
+        Posts.setup_own_db_access(sharedDbAdapter, "Posts")
+        Reblog.setup_own_db_access(sharedDbAdapter, "Reblog")
+        Notify.setup_own_db_access(sharedDbAdapter, "Notify")
+        Accounts.setup_own_db_access(sharedDbAdapter, "Accounts")
+        PayoutStats.setup_own_db_access(sharedDbAdapter, "PayoutStats")
+        Mentions.setup_own_db_access(sharedDbAdapter, "Mentions")
+
+    @classmethod
+    def close_own_db_access(cls):
+        PostDataCache.close_own_db_access()
+        Reputations.close_own_db_access()
+        Votes.close_own_db_access()
+        Follow.close_own_db_access()
+        Posts.close_own_db_access()
+        Reblog.close_own_db_access()
+        Notify.close_own_db_access()
+        Accounts.close_own_db_access()
+        PayoutStats.close_own_db_access()
+        Mentions.close_own_db_access()
 
     @classmethod
     def head_num(cls):

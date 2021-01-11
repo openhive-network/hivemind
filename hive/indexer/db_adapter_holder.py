@@ -7,8 +7,13 @@ class DbAdapterHolder(object):
     _inside_tx = False
 
     @classmethod
-    def setup_own_db_access(cls, sharedDb):
-        cls.db = sharedDb.clone()
+    def setup_own_db_access(cls, sharedDb, name):
+        cls.db = sharedDb.clone(name)
+
+    @classmethod
+    def close_own_db_access(cls):
+        if cls.db is not None:
+          cls.db.close()
 
     @classmethod
     def tx_active(cls):

@@ -37,36 +37,41 @@ def setup_logging(conf):
 
 def run():
     """Run the service specified in the `--mode` argument."""
+    with Conf() as conf:
+      conf.init_argparse()
+      mode = conf.mode()
+      PrometheusClient( conf.get('prometheus_port') )
 
-    conf = Conf.init_argparse()
-    mode = conf.mode()
-    PrometheusClient( conf.get('prometheus_port') )
+      setup_logging(conf)
 
-    setup_logging(conf)
+      if mode == 'completion':
+          conf.generate_completion()
+          return
 
-    if mode == 'completion':
-        conf.generate_completion()
-        return
+      #Calculation of number of maximum connection and closing a database
+      #In next step the database will be opened with correct number of connections
+      Db.set_max_connections(conf.db())
+      conf.disconnect()
 
-    Db.set_shared_instance(conf.db())
+      Db.set_shared_instance(conf.db())
 
-    pid_file_name = conf.pid_file()
-    if pid_file_name is not None:
-        fh = open(pid_file_name, 'w')
-        if fh is None:
-          print("Cannot write into specified pid_file: %s", pid_file_name)
-        else:
-            pid = os.getpid()
-            fh.write(str(pid))
-            fh.close()
+      pid_file_name = conf.pid_file()
+      if pid_file_name is not None:
+          fh = open(pid_file_name, 'w')
+          if fh is None:
+            print("Cannot write into specified pid_file: %s", pid_file_name)
+          else:
+              pid = os.getpid()
+              fh.write(str(pid))
+              fh.close()
 
 
-    if conf.get('test_profile'):
-        from hive.utils.profiler import Profiler
-        with Profiler():
-            launch_mode(mode, conf)
-    else:
-        launch_mode(mode, conf)
+      if conf.get('test_profile'):
+          from hive.utils.profiler import Profiler
+          with Profiler():
+              launch_mode(mode, conf)
+      else:
+          launch_mode(mode, conf)
 
 def launch_mode(mode, conf):
     """Launch a routine as indicated by `mode`."""
@@ -76,7 +81,8 @@ def launch_mode(mode, conf):
 
     elif mode == 'sync':
         from hive.indexer.sync import Sync
-        Sync(conf=conf).run()
+        with Sync(conf=conf) as sync:
+          sync.run()
 
     elif mode == 'status':
         from hive.db.db_state import DbState

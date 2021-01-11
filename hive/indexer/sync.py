@@ -217,6 +217,14 @@ class Sync:
 
         self._steem = conf.steem()
 
+    def __enter__(self):
+        assert self._db, "The database must exist"
+        Blocks.setup_own_db_access(self._db)
+        return self
+
+    def __exit__(self, exc_type, value, traceback):
+        Blocks.close_own_db_access()
+
     def load_mock_data(self,mock_block_data_path):
         if mock_block_data_path:
             MockBlockProvider.load_block_data(mock_block_data_path)
@@ -261,7 +269,6 @@ class Sync:
 
         # ensure db schema up to date, check app status
         DbState.initialize()
-        Blocks.setup_own_db_access(self._db)
 
         show_info(self)
 
