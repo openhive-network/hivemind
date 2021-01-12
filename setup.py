@@ -19,28 +19,47 @@ class GitRevisionProvider(object):
             .git directory is present in tree.
             In case when .git is not available version and git_revision is taken
             from get_distribution call
+
         """
         if os.path.exists(".git"):
             from subprocess import check_output
             command = 'git describe --tags --long --dirty'
             version = check_output(command.split()).decode('utf-8').strip()
+            # git describe -> tag-commits-sha-dirty
+            version = version.rstrip('-dirty')
+            version = version.lstrip('v')   
             parts = version.split('-')
-            if parts[-1] == 'dirty':
-                sha = parts[-2]
-            else:
-                sha = parts[-1]
-            git_revision = sha.lstrip('g')
-            GitRevisionProvider._save_version_file(VERSION, git_revision)
-            return git_revision
+            # git revision
+            git_revision = parts[-1]
+            git_revision = git_revision.lstrip('g')
+
+            # commits after given tag
+            commits = None
+            try:
+                commits = int(parts[-2])
+            except:
+                pass
+            
+            # version based on tag
+            version = ''.join(parts[:-1])
+            if commits is not None:
+                version = ''.join(parts[:-2])
+            # normalize rc to rcN for PEP 440 comp
+            version = version.lower()
+            if version.endswith('rc'):
+                version += '0'
+
+            GitRevisionProvider._save_version_file(version, git_revision)
+            return version, git_revision
         else:
             from pkg_resources import get_distribution
             try:
                 version, git_revision = get_distribution("hivemind").version.split("+")
                 GitRevisionProvider._save_version_file(version, git_revision)
-                return git_revision
+                return version, git_revision
             except:
-                GitRevisionProvider._save_version_file(VERSION, "")
-        return ""
+                GitRevisionProvider._save_version_file(VERSION, "nogitrev")
+        return VERSION, "nogitrev"
 
     @staticmethod
     def _save_version_file(hivemind_version, git_revision):
@@ -51,7 +70,7 @@ class GitRevisionProvider(object):
             version_file.write("VERSION = '{}'\n".format(hivemind_version))
             version_file.write("GIT_REVISION = '{}'".format(git_revision))
 
-GIT_REVISION = GitRevisionProvider.provide_git_revision()
+VERSION, GIT_REVISION = GitRevisionProvider.provide_git_revision()
 SQL_SCRIPTS_PATH = 'hive/db/sql_scripts/'
 SQL_UPGRADE_PATH = 'hive/db/sql_scripts/upgrade/'
 
