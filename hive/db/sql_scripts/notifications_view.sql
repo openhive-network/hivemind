@@ -167,7 +167,7 @@ UNION ALL
     notification_id(hm.block_num, 16, hm.id) AS id,
     hm.post_id,
     16 AS type_id,
-    hp.created_at,
+    hb.created_at,
     hp.author_id AS src,
     hm.account_id AS dst,
     hm.post_id as dst_post_id,
@@ -176,6 +176,7 @@ UNION ALL
     ''::character varying AS payload
    FROM hive_mentions hm
    JOIN hive_posts hp ON hm.post_id = hp.id
+   JOIN hive_blocks hb ON hb.num = hm.block_num - 1 -- use time of previous block to match head_block_time behavior at given block
 ) notifs
 JOIN hive_accounts_rank_view harv ON harv.id = notifs.src
 ;

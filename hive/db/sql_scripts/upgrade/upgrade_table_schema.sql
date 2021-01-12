@@ -145,6 +145,11 @@ IF NOT EXISTS(SELECT data_type
   perform deps_restore_dependencies('public', 'hive_mentions');
 
   INSERT INTO hive_db_data_migration VALUES ('hive_mentions fill');
+ELSE
+  ALTER TABLE public.hive_mentions
+    DROP CONSTRAINT hive_mentions_ux1;
+  ALTER TABLE public.hive_mentions
+    ADD CONSTRAINT hive_mentions_ux1 UNIQUE (post_id, account_id);
 END IF;
 END
 $BODY$
@@ -463,4 +468,3 @@ ALTER TABLE hive_notification_cache
 DROP INDEX IF EXISTS hive_posts_parent_id_counter_deleted_id_idx;
 
 CREATE INDEX IF NOT EXISTS hive_posts_parent_id_id_idx ON hive_posts (parent_id, id DESC) where counter_deleted = 0;
-
