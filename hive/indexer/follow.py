@@ -265,7 +265,7 @@ class Follow(DbAdapterHolder):
                     query = str(sql).format(",".join(values))
                     cls.db.query(query)
                     values.clear()
-                    values.append("({}, {}, {}, '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['idx'],
+                    values.append("({}, {}, {}, '{}'::timestamp, {}::smallint, {}::boolean, {}::boolean, {}::boolean, {})".format(follow_item['idx'],
                                                                           follow_item['flr'],
                                                                           follow_item['flg'],
                                                                           follow_item['at'],
