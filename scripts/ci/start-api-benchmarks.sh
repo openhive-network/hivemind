@@ -28,7 +28,8 @@ do
   rm -f HIVEMIND_BENCHMARKS_IDS_FILE
   tox -e tavern-benchmark -- \
       -W ignore::pytest.PytestDeprecationWarning \
-      --workers $JOBS
+      --workers $JOBS \
+      "${@:6}"
   echo Done!
 done
 ./scripts/csv_report_parser.py http://$HIVEMIND_ADDRESS $HIVEMIND_PORT $TAVERN_DIR $TAVERN_DIR

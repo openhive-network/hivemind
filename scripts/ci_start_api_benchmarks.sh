@@ -24,7 +24,7 @@ for (( i=0; i<$ITERATIONS; i++ ))
 do
   echo About to run iteration $i
   rm -f HIVEMIND_BENCHMARKS_IDS_FILE
-  tox -e tavern-benchmark -- -W ignore::pytest.PytestDeprecationWarning --workers auto
+  tox -e tavern-benchmark -- -W ignore::pytest.PytestDeprecationWarning --workers auto "${@:4}"
   echo Done!
 done
 ./scripts/csv_report_parser.py http://$HIVEMIND_ADDRESS $HIVEMIND_PORT $TAVERN_DIR $TAVERN_DIR
