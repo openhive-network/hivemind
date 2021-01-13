@@ -275,4 +275,4 @@ FROM
   UNION ALL
   SELECT * FROM hive_raw_notifications_view_noas
   ) as notifs
-WHERE notifs.score >= 0;
+WHERE notifs.score >= 0 AND notifs.src IS DISTINCT FROM notifs.dst;
