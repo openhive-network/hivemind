@@ -44,7 +44,7 @@ values
 ,(now(), 'a80c7642a1f3b08997af7e8a9915c13d34b7f0e0') -- Notification IDs https://gitlab.syncad.com/hive/hivemind/-/merge_requests/445
 ,(now(), 'b100db27f37dda3c869c2756d99ab2856f7da9f9') -- hive_notification_cache table supplement https://gitlab.syncad.com/hive/hivemind/-/merge_requests/447
 ,(now(), 'bd83414409b7624e2413b97a62fa7d97d83edd86') -- follow notification time is taken from block affecting it  https://gitlab.syncad.com/hive/hivemind/-/merge_requests/449
-,(now(), 'd64c73792175b12684ec74691297782cf67a2093') -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/452
+,(now(), '1cc9981679157e4e54e5e4a74cca1feb5d49296d') -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/452
 ) ds (patch_date, patch_revision)
 where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
 

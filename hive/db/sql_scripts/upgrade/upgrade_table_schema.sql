@@ -315,9 +315,10 @@ $BODY$;
 
 --- 4cdf5d19f6cfcb73d3fa504cac9467c4df31c02e - https://gitlab.syncad.com/hive/hivemind/-/merge_requests/295
 --- 9e126e9d762755f2b9a0fd68f076c9af6bb73b76 - https://gitlab.syncad.com/hive/hivemind/-/merge_requests/314 mentions fix
+--- 1cc9981679157e4e54e5e4a74cca1feb5d49296d - fix for mentions notifications time value
 INSERT INTO hive_db_data_migration
 select 'update_hive_post_mentions refill execution'
-where not exists (select null from hive_db_patch_level where patched_to_revision = '9e126e9d762755f2b9a0fd68f076c9af6bb73b76' )
+where not exists (select null from hive_db_patch_level where patched_to_revision = '1cc9981679157e4e54e5e4a74cca1feb5d49296d' )
 ;
 
 --- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/298
