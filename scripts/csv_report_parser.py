@@ -4,18 +4,19 @@ import csv
 import requests
 import json
 from time import perf_counter
+from difflib import SequenceMatcher
 
 
-def process_file_name(file_name, tavern_root_dir):
-    return file_name.replace(tavern_root_dir, "").lstrip("/")
+def process_file_name(file_name, tavern_tests_dir):
+    return file_name.replace(tavern_tests_dir, "").lstrip("/")
 
-def get_requests_from_yaml(tavern_root_dir):
+def get_requests_from_yaml(tavern_tests_dir):
     from fnmatch import fnmatch
     import yaml
     from json import dumps
     ret = {}
     pattern = "*.tavern.yaml"
-    for path, subdirs, files in os.walk(tavern_root_dir):
+    for path, subdirs, files in os.walk(tavern_tests_dir):
         for name in files:
             if fnmatch(name, pattern):
                 test_file = os.path.join(path, name)
@@ -26,7 +27,7 @@ def get_requests_from_yaml(tavern_root_dir):
                     if "request" in yaml_document["stages"][0]:
                         json_parameters = yaml_document["stages"][0]["request"].get("json", None)
                         assert json_parameters is not None, "Unable to find json parameters in request"
-                        ret[process_file_name(test_file, tavern_root_dir)] = dumps(json_parameters)
+                        ret[process_file_name(test_file, tavern_tests_dir)] = dumps(json_parameters)
     return ret
 
 def abs_rel_diff(a, b):
@@ -54,6 +55,11 @@ def parse_csv_files(root_dir):
                 ret_sizes[test_name] = [test_response_size]
     return ret_times, ret_sizes
 
+def get_overlap(s1, s2):
+    s = SequenceMatcher(None, s1, s2)
+    pos_a, pos_b, size = s.find_longest_match(0, len(s1), 0, len(s2)) 
+    return s1[pos_a:pos_a+size] if pos_b == 0 else ""
+
 if __name__ == "__main__":
     import argparse
     from statistics import mean, median
@@ -62,16 +68,16 @@ if __name__ == "__main__":
     parser.add_argument("address", type=str)
     parser.add_argument("port", type=int)
     parser.add_argument("csv_report_dir", type=str, help="Path to benchmark csv reports")
-    parser.add_argument("tavern_root_dir", type=str, help="Path to tavern tests root dir")
+    parser.add_argument("tavern_tests_dir", type=str, help="Path to tavern tests dir")
     parser.add_argument("--median-cutoff-time", dest="cutoff_time", type=float, default=0.3, help="Tests with median time below cutoff will not be shown")
     parser.add_argument("--time-threshold", dest="time_threshold", type=float, default=1.0, help="Time threshold for test execution time, tests with execution time greater than threshold will be marked on red.")
     args = parser.parse_args()
 
     assert os.path.exists(args.csv_report_dir), "Please provide valid csv report path"
-    assert os.path.exists(args.tavern_root_dir), "Please provide valid tavern path"
+    assert os.path.exists(args.tavern_tests_dir), "Please provide valid tavern path"
 
     report_data, report_data_sizes = parse_csv_files(args.csv_report_dir)
-    request_data = get_requests_from_yaml(args.tavern_root_dir)
+    request_data = get_requests_from_yaml(args.tavern_tests_dir)
 
     html_file = "tavern_benchmarks_report.html"
     above_treshold = []
@@ -113,7 +119,8 @@ if __name__ == "__main__":
             dmean_size = mean(report_data_sizes[name])
             if dmedian >= args.cutoff_time:
                 t_start = perf_counter()
-                ret = requests.post("{}:{}".format(args.address, args.port), request_data[name])
+                overlap = get_overlap(args.tavern_tests_dir, name)
+                ret = requests.post("{}:{}".format(args.address, args.port), request_data[name.replace(overlap, "")])
                 if ret.status_code == 200:
                     ref_time = perf_counter() - t_start
                 else:
@@ -121,7 +128,7 @@ if __name__ == "__main__":
                 ref_size = int(ret.headers.get("Content-Length", 0))
                 if dmean > args.time_threshold:
                     ofile.write("        <tr><td>{}<br/>Parameters: {}</td><td>{:.1f}</td><td>{:.1f}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, request_data[name], dmean_size / 1000., ref_size / 1000., dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
-                    above_treshold.append((name, "{:.4f}".format(dmean), request_data[name]))
+                    above_treshold.append((name, "{:.4f}".format(dmean)))
                 else:
                     ofile.write("        <tr><td>{}</td><td>{:.1f}</td><td>{:.1f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, dmean_size / 1000., ref_size / 1000., dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
         ofile.write("      </tbody>\n")
@@ -133,7 +140,7 @@ if __name__ == "__main__":
         from prettytable import PrettyTable
         summary = PrettyTable()
         print("########## Test failed with following tests above {}s threshold ##########".format(args.time_threshold * 1000))
-        summary.field_names = ['Test name', 'Mean time [ms]', 'Call parameters']
+        summary.field_names = ['Test name', 'Mean time [ms]']
         for entry in above_treshold:
             summary.add_row(entry)
         print(summary)
