@@ -16,7 +16,7 @@ class GitRevisionProvider(object):
 
     @classmethod
     def is_git_sha(cls, s):
-        from regex import fullmatch
+        from re import fullmatch
         return fullmatch('^g[0-9a-f]{8}$', s) is not None
 
     @classmethod
@@ -117,8 +117,7 @@ if __name__ == "__main__":
         packages=find_packages(exclude=['scripts']),
         data_files=[(SQL_SCRIPTS_PATH, get_sql_scripts(SQL_SCRIPTS_PATH)), (SQL_UPGRADE_PATH, get_sql_scripts(SQL_UPGRADE_PATH))],
         setup_requires=[
-            'pytest-runner',
-            'regex'
+            'pytest-runner'
         ],
         dependency_links=[
             'https://github.com/bcb/jsonrpcserver/tarball/8f3437a19b6d1a8f600ee2c9b112116c85f17827#egg=jsonrpcserver-4.1.3+8f3437a'
@@ -143,12 +142,13 @@ if __name__ == "__main__":
             'prometheus-client',
             'psutil',
             'atomic',
-            'python-dateutil>=2.8.1'
+            'python-dateutil>=2.8.1',
+            'regex'
         ],
         extras_require={
             'dev': [
                 'pyYAML',
-                'prettytable',
+                'prettytable'
             ]
         },
         entry_points={
