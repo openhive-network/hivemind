@@ -118,6 +118,7 @@ if __name__ == "__main__":
         data_files=[(SQL_SCRIPTS_PATH, get_sql_scripts(SQL_SCRIPTS_PATH)), (SQL_UPGRADE_PATH, get_sql_scripts(SQL_UPGRADE_PATH))],
         setup_requires=[
             'pytest-runner',
+            'regex'
         ],
         dependency_links=[
             'https://github.com/bcb/jsonrpcserver/tarball/8f3437a19b6d1a8f600ee2c9b112116c85f17827#egg=jsonrpcserver-4.1.3+8f3437a'
