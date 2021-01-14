@@ -120,7 +120,7 @@ if __name__ == "__main__":
             if dmedian >= args.cutoff_time:
                 t_start = perf_counter()
                 overlap = get_overlap(args.tavern_tests_dir, name)
-                ret = requests.post("{}:{}".format(args.address, args.port), request_data[name.replace(overlap, "")])
+                ret = requests.post("{}:{}".format(args.address, args.port), request_data[name.replace(overlap, "").lstrip("/")])
                 if ret.status_code == 200:
                     ref_time = perf_counter() - t_start
                 else:
