@@ -2,8 +2,8 @@
 
 set -e
 
-pip install tox
-pip install requests
+pip3 install tox
+pip3 install requests
 
 export HIVEMIND_ADDRESS=$1
 export HIVEMIND_PORT=$2
