@@ -214,12 +214,20 @@ def run_server(conf):
         sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
         database_head_block = await app['db'].query_one(sql)
 
-        from hive.version import VERSION, GIT_REVISION
+        sql = "SELECT level, patch_date, patched_to_revision FROM hive_db_patch_level ORDER BY level DESC LIMIT 1"
+        patch_level_data = await app['db'].query_row(sql)
+
+        from hive.version import VERSION, GIT_REVISION, GIT_DATE
         log.info("hivemind_version : %s", VERSION)
         log.info("hivemind_git_rev : %s", GIT_REVISION)
+        log.info("hivemind_git_date : %s", GIT_DATE)
 
         from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
         log.info("database_schema_version : %s", SCHEMA_DB_VERSION)
+
+        log.info("database_patch_level : %s", patch_level_data['level'])
+        log.info("database_patch_date : %s", patch_level_data['patch_date'])
+        log.info("database_patched_to_revision : %s", patch_level_data['patched_to_revision'])
         
         log.info("database_head_block : %s", database_head_block)
 

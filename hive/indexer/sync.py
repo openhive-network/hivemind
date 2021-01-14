@@ -248,9 +248,10 @@ class Sync:
 
         set_handlers()
 
-        from hive.version import VERSION, GIT_REVISION
+        from hive.version import VERSION, GIT_REVISION, GIT_DATE
         log.info("hivemind_version : %s", VERSION)
         log.info("hivemind_git_rev : %s", GIT_REVISION)
+        log.info("hivemind_git_date : %s", GIT_DATE)
 
         from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
         log.info("database_schema_version : %s", SCHEMA_DB_VERSION)
