@@ -127,7 +127,7 @@ if __name__ == "__main__":
                     ref_time = 0.
                 ref_size = int(ret.headers.get("Content-Length", 0))
                 if dmean > args.time_threshold:
-                    ofile.write("        <tr><td>{}<br/>Parameters: {}</td><td>{:.1f}</td><td>{:.1f}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, request_data[name], dmean_size / 1000., ref_size / 1000., dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
+                    ofile.write("        <tr><td>{}<br/>Parameters: {}</td><td>{:.1f}</td><td>{:.1f}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, request_data[name.replace(overlap, "").lstrip("/")], dmean_size / 1000., ref_size / 1000., dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
                     above_treshold.append((name, "{:.4f}".format(dmean)))
                 else:
                     ofile.write("        <tr><td>{}</td><td>{:.1f}</td><td>{:.1f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, dmean_size / 1000., ref_size / 1000., dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
