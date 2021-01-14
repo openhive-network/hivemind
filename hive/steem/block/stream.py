@@ -3,6 +3,8 @@
 import logging
 from time import sleep
 from hive.steem.block.schedule import BlockSchedule
+from hive.steem.block.one_block_provider import OneBlockProviderBase, OneBlockProviderFactory
+from hive.indexer.block import Block
 
 log = logging.getLogger(__name__)
 
@@ -22,9 +24,9 @@ class BlockQueue:
 
     Throws ForkException; or MicroForkException if the fork seems to be
     confined to the buffer (ie easily recoverable by restarting stream)."""
-    def __init__(self, max_size, prev_hash):
+    def __init__(self, max_size, prev_block):
         self._max_size = max_size
-        self._prev = prev_hash
+        self._prev = prev_block
         self._queue = []
 
     def push(self, block):
@@ -32,17 +34,15 @@ class BlockQueue:
 
         If a fork is encountered and there are blocks in the queue, a
         MicroForkException is thrown; otherwise, ForkException."""
-        next_hash = block['block_id']
-        next_prev = block['previous']
-        if self._prev != next_prev:
-            fork = "%s--> %s->%s" % (self._prev, next_prev, next_hash)
+        if self._prev.get_hash() != block.get_previous_block_hash():
+            fork = "%s--> %s->%s" % (self._prev, block.get_previous_block_hash(), block.get_hash())
             if self._queue: # if using max_size>0, fork might be in buffer only
                 buff = self.size()
                 alert = "NOTIFYALERT " if buff < self._max_size else ""
                 raise MicroForkException("%squeue:%d %s" % (alert, buff, fork))
             raise ForkException("NOTIFYALERT fork " + fork)
 
-        self._prev = next_hash
+        self._prev = block
         self._queue.append(block)
         if self.size() > self._max_size:
             return self._queue.pop(0)
@@ -55,53 +55,55 @@ class BlockStream:
     """ETA-based block streamer."""
 
     @classmethod
-    def stream(cls, client, start_block, breaker, min_gap=0, max_gap=100, do_stale_block_check=True):
+    def stream(cls, conf, client, start_block, breaker, exception_reporter, min_gap=0, max_gap=100, do_stale_block_check=True):
         """Instantiates a BlockStream and returns a generator."""
-        streamer = BlockStream(client, min_gap, max_gap)
-        return streamer.start(start_block, do_stale_block_check, breaker)
+        streamer = BlockStream(conf, client, min_gap, max_gap)
+        return streamer.start(start_block, do_stale_block_check, breaker, exception_reporter)
 
-    def __init__(self, client, min_gap=0, max_gap=100):
+    def __init__(self, conf, client, min_gap=0, max_gap=100):
         assert not (min_gap < 0 or min_gap > 100)
         self._client = client
         self._min_gap = min_gap
         self._max_gap = max_gap
+        self._conf = conf
 
     def _gap_ok(self, curr, head):
         """Ensures gap between curr and head is within limits (max_gap)."""
         return not self._max_gap or head - curr < self._max_gap
 
-    def start(self, start_block, do_stale_block_check, breaker):
+    def start(self, start_block, do_stale_block_check, breaker, exception_reporter):
         """Stream blocks starting from `start_block`.
 
         Will run forever unless `max_gap` is specified and exceeded.
         """
-        curr = start_block
-        head = self._client.head_block()
-        prev = self._client.get_block(curr - 1)['block_id']
 
-        queue = BlockQueue(self._min_gap, prev)
+        with OneBlockProviderFactory( self._conf, self._client, breaker, exception_reporter ) as one_block_provider:
+            curr = start_block
+            head = self._client.head_block()
+            prev = one_block_provider.get_block( curr - 1 )
 
-        schedule = BlockSchedule(head, do_stale_block_check)
+            assert prev
 
-        while self._gap_ok(curr, head):
-            if not breaker():
-                return
-            head = schedule.wait_for_block(curr)
-            block = self._client.get_block(curr)
+            queue = BlockQueue(self._min_gap, prev)
 
-            #block_num = int(block['block_id'][:8], base=16)
-            #log.info("stream is processing a block %d with timestamp: %s", block_num, block['timestamp'])
+            schedule = BlockSchedule(head, do_stale_block_check)
 
-            schedule.check_block(curr, block)
+            while self._gap_ok(curr, head):
+                if not breaker():
+                    return
+                head = schedule.wait_for_block(curr)
+                block = one_block_provider.get_block(curr)
 
-            if not block:
-                sleep(0.5)
-                continue
+                schedule.check_block(curr, block)
 
-            popped = queue.push(block)
-            if popped:
-                yield popped
+                if not block:
+                    sleep(0.5)
+                    continue
 
-            curr += 1
+                popped = queue.push(block)
+                if popped:
+                    yield popped
 
-        log.warning("gap exceeds %d", self._max_gap)
+                curr += 1
+
+            log.warning("gap exceeds %d", self._max_gap)

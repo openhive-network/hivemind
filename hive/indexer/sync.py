@@ -11,12 +11,15 @@ from hive.db.db_state import DbState
 
 from hive.utils.timer import Timer
 from hive.steem.block.stream import MicroForkException
-from hive.steem.massive_blocks_data_provider import MassiveBlocksDataProvider
+from hive.indexer.hive_rpc.massive_blocks_data_provider_hive_rpc import MassiveBlocksDataProviderHiveRpc
+from hive.steem.block.stream import BlockStream
 
 from hive.indexer.blocks import Blocks
 from hive.indexer.accounts import Accounts
 from hive.indexer.follow import Follow
 from hive.indexer.community import Community
+from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
+from hive.indexer.block import Block, BlocksProviderBase
 
 from hive.server.common.payout_stats import PayoutStats
 from hive.server.common.mentions import Mentions
@@ -65,16 +68,6 @@ def set_exception_thrown():
 def can_continue_thread():
     return EXCEPTION_THROWN.value == 0 and FINISH_SIGNAL_DURING_SYNC.value == 0
 
-
-def prepare_vops(vops_by_block):
-    preparedVops = {}
-
-    for blockNum, blockDict in vops_by_block.items():
-        vopsList = blockDict['ops']
-        preparedVops[blockNum] = vopsList
-
-    return preparedVops
-
 def _blocks_data_provider(blocks_data_provider):
     try:
         futures = blocks_data_provider.start()
@@ -96,6 +89,7 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
     LIMIT_FOR_PROCESSED_BLOCKS = 1000;
 
     rate = minmax(rate, 0, 1.0, 0)
+    sync_type_prefix = "[INITIAL SYNC]" if is_initial_sync else "[FAST SYNC]"
 
     def print_summary():
         stop = OPSM.stop(time_start)
@@ -115,37 +109,33 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
 
         while lbound < ubound:
-            preparedVops = {}
             number_of_blocks_to_proceed = min( [ LIMIT_FOR_PROCESSED_BLOCKS, ubound - lbound  ] )
             time_before_waiting_for_data = perf()
-            vops_and_blocks = blocks_data_provider.get( number_of_blocks_to_proceed )
+
+            blocks = blocks_data_provider.get( number_of_blocks_to_proceed )
 
             if not can_continue_thread():
                 break;
 
-            assert len(vops_and_blocks[ 'vops' ]) == number_of_blocks_to_proceed
-            assert len(vops_and_blocks[ 'blocks' ]) == number_of_blocks_to_proceed
+            assert len(blocks) == number_of_blocks_to_proceed
 
             to = min(lbound + number_of_blocks_to_proceed, ubound)
             timer.batch_start()
 
-            for vop_nr in range( number_of_blocks_to_proceed):
-                preparedVops[ vop_nr + lbound ] = vops_and_blocks[ 'vops' ][ vop_nr ]
-
             block_start = perf()
-            Blocks.process_multi(vops_and_blocks['blocks'], preparedVops, is_initial_sync)
+            Blocks.process_multi(blocks, is_initial_sync)
             block_end = perf()
 
             timer.batch_lap()
-            timer.batch_finish(len(vops_and_blocks[ 'blocks' ]))
+            timer.batch_finish(len(blocks))
             time_current = perf()
 
-            prefix = ("[INITIAL SYNC] Got block %d @ %s" % (
-                to - 1, vops_and_blocks['blocks'][-1]['timestamp']))
+            prefix = ("%s Got block %d @ %s" % (
+                sync_type_prefix, to - 1, blocks[-1].get_date()))
             log.info(timer.batch_status(prefix))
-            log.info("[INITIAL SYNC] Time elapsed: %fs", time_current - time_start)
-            log.info("[INITIAL SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
-            rate = minmax(rate, len(vops_and_blocks['blocks']), time_current - time_before_waiting_for_data, lbound)
+            log.info("%s Time elapsed: %fs", sync_type_prefix, time_current - time_start)
+            log.info("%s Current system time: %s", sync_type_prefix, datetime.now().strftime("%H:%M:%S"))
+            rate = minmax(rate, len(blocks), time_current - time_before_waiting_for_data, lbound)
 
             if block_end - block_start > 1.0 or is_debug:
                 otm = OPSM.log_current("Operations present in the processed blocks")
@@ -173,35 +163,21 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
     print_summary()
     return num
 
-def _node_data_provider(self, is_initial_sync, lbound, ubound, chunk_size):
-    blocksQueue = queue.Queue(maxsize=10000)
-    vopsQueue = queue.Queue(maxsize=10000)
+def _process_blocks_from_provider(self, massive_block_provider, is_initial_sync, lbound, ubound):
+    assert issubclass( type(massive_block_provider), BlocksProviderBase )
 
-    massive_blocks_data_provier = MassiveBlocksDataProvider(
-          self._conf
-        , self._steem
-        , self._conf.get( 'max_workers' )
-        , self._conf.get( 'max_workers' )
-        , self._conf.get( 'max_batch' )
-        , lbound
-        , ubound
-        , can_continue_thread
-    )
-    with ThreadPoolExecutor(max_workers = 4) as pool:
-        block_data_provider_future = pool.submit(_blocks_data_provider, massive_blocks_data_provier)
-        blockConsumerFuture = pool.submit(_block_consumer, massive_blocks_data_provier, is_initial_sync, lbound, ubound)
+    with ThreadPoolExecutor(max_workers = 2) as pool:
+        block_data_provider_future = pool.submit(_blocks_data_provider, massive_block_provider)
+        blockConsumerFuture = pool.submit(_block_consumer, massive_block_provider, is_initial_sync, lbound, ubound)
 
         consumer_exception = blockConsumerFuture.exception()
-        block_data_provider_future = block_data_provider_future.exception()
+        block_data_provider_exception = block_data_provider_future.exception()
 
         if consumer_exception:
             raise consumer_exception
 
-        if block_data_provider_future:
-            raise block_exception
-
-    blocksQueue.queue.clear()
-    vopsQueue.queue.clear()
+        if block_data_provider_exception:
+            raise block_data_provider_exception
 
 class Sync:
     """Manages the sync/index process.
@@ -388,45 +364,45 @@ class Sync:
         if count < 1:
             return
 
-        if is_initial_sync:
-            _node_data_provider(self, is_initial_sync, lbound, ubound, self._conf.get("max_batch") )
-            return
+        massive_blocks_data_provider = None
+        databases = None
+        if self._conf.get('hived_database_url'):
+            databases = MassiveBlocksDataProviderHiveDb.Databases( self._conf )
+            massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
+                  databases
+                , self._conf.get( 'max_batch' )
+                , lbound
+                , ubound
+                , can_continue_thread
+                , set_exception_thrown
+            )
+        else:
+            massive_blocks_data_provider = MassiveBlocksDataProviderHiveRpc(
+                  self._conf
+                , self._steem
+                , self._conf.get( 'max_workers' )
+                , self._conf.get( 'max_workers' )
+                , self._conf.get( 'max_batch' )
+                , lbound
+                , ubound
+                , can_continue_thread
+                , set_exception_thrown
+            )
+        _process_blocks_from_provider( self, massive_blocks_data_provider, is_initial_sync, lbound, ubound )
 
-        log.info("[FAST SYNC] start block %d, +%d to sync", lbound, count)
-        timer = Timer(count, entity='block', laps=['rps', 'wps'])
-        while lbound < ubound:
-            if not can_continue_thread():
-                break;
-            timer.batch_start()
+        if databases:
+            databases.close()
 
-            # fetch blocks
-            to = min(lbound + chunk_size, ubound)
-            blocks = steemd.get_blocks_range(lbound, to, can_continue_thread)
-            vops = steemd.enum_virtual_ops(self._conf, lbound, to)
-            prepared_vops = prepare_vops(vops)
-            lbound = to
-            timer.batch_lap()
-
-            if not can_continue_thread():
-                break;
-            # process blocks
-            Blocks.process_multi(blocks, prepared_vops, is_initial_sync)
-            timer.batch_finish(len(blocks))
-
-            otm = OPSM.log_current("Operations present in the processed blocks")
-            ftm = FSM.log_current("Flushing times")
-
-            _prefix = ("[FAST SYNC] Got block %d @ %s" % (
-                to - 1, blocks[-1]['timestamp']))
-            log.info(timer.batch_status(_prefix))
-
-            OPSM.next_blocks()
-            FSM.next_blocks()
-
-            PC.broadcast(BroadcastObject('sync_current_block', to, 'blocks'))
+    def _stream_blocks(self, start_from, breaker, exception_reporter, trail_blocks=0, max_gap=100, do_stale_block_check=True):
+        """Stream blocks. Returns a generator."""
+        return BlockStream.stream(self._conf, self._steem, start_from, breaker, exception_reporter, trail_blocks, max_gap, do_stale_block_check)
 
     def listen(self, trail_blocks, max_sync_block, do_stale_block_check):
-        """Live (block following) mode."""
+        """Live (block following) mode.
+            trail_blocks - how many blocks need to be collected to start processed the oldest ( delay in blocks processing against blocks collecting )
+            max_sync_block - limit of blocks to sync, the function will return if it is reached
+            do_stale_block_check - check if the last collected block is not older than 60s
+        """
 
         # debug: no max gap if disable_sync in effect
         max_gap = None if self._conf.get('test_disable_sync') else 100
@@ -441,29 +417,26 @@ class Sync:
             log.info("[LIVE SYNC] Exiting due to block limit exceeded: synced block number: %d, max_sync_block: %d", hive_head, max_sync_block)
             return
 
-        for block in steemd.stream_blocks(hive_head + 1, can_continue_thread, trail_blocks, max_gap, do_stale_block_check):
+        for block in self._stream_blocks(hive_head + 1, can_continue_thread, set_exception_thrown, trail_blocks, max_gap, do_stale_block_check):
             if not can_continue_thread():
                 break;
-            num = int(block['block_id'][:8], base=16)
-            log.info("[LIVE SYNC] =====> About to process block %d with timestamp %s", num, block['timestamp'])
+            num = block.get_num()
+            log.info("[LIVE SYNC] =====> About to process block %d with timestamp %s", num, block.get_date())
 
             start_time = perf()
 
-            vops = steemd.enum_virtual_ops(self._conf, num, num + 1)
-            prepared_vops = prepare_vops(vops)
-
-            Blocks.process_multi([block], prepared_vops, False)
+            Blocks.process_multi([block], False)
             otm = OPSM.log_current("Operations present in the processed blocks")
             ftm = FSM.log_current("Flushing times")
 
             ms = (perf() - start_time) * 1000
             log.info("[LIVE SYNC] <===== Processed block %d at %s --% 4d txs"
-                     " --% 5dms%s", num, block['timestamp'], len(block['transactions']),
+                     " --% 5dms%s", num, block.get_date(), block.get_number_of_transactions(),
                      ms, ' SLOW' if ms > 1000 else '')
             log.info("[LIVE SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
 
             if num % 1200 == 0: #1hour
-                log.warning("head block %d @ %s", num, block['timestamp'])
+                log.warning("head block %d @ %s", num, block.get_date())
                 log.info("[LIVE SYNC] hourly stats")
 
                 log.info("[LIVE SYNC] filling payout_stats_view executed")

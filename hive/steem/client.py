@@ -9,9 +9,6 @@ from decimal import Decimal
 from hive.utils.stats import Stats
 from hive.utils.normalize import parse_amount, steem_amount, vests_amount
 from hive.steem.http_client import HttpClient
-from hive.steem.block.stream import BlockStream
-from hive.steem.blocks_provider import BlocksProvider
-from hive.steem.vops_provider import VopsProvider
 from hive.indexer.mock_block_provider import MockBlockProvider
 from hive.indexer.mock_vops_provider import MockVopsProvider
 
@@ -81,44 +78,9 @@ class SteemClient:
             #logger.info("Found real block %d with timestamp: %s", num, mocked_block['timestamp'])
             return mocked_block
 
-    def get_blocks_provider( cls, lbound, ubound, breaker ):
-        """create and returns blocks provider
-            lbound - start block
-            ubound - end block
-            breaker - callable, returns false when processing must be stopped
-        """
-        new_blocks_provider = BlocksProvider(
-              cls._client["get_block"] if "get_block" in cls._client else cls._client["default"]
-            , cls._max_workers
-            , cls._max_batch
-            , lbound
-            , ubound
-            , breaker
-        )
-        return new_blocks_provider
-
-    def get_vops_provider( cls, conf, lbound, ubound, breaker ):
-        """create and returns blocks provider
-            conf - configuration
-            lbound - start block
-            ubound - end block
-            breaker - callable, returns false when processing must be stopped
-        """
-        new_vops_provider = VopsProvider(
-              conf
-            , cls
-            , cls._max_workers
-            , cls._max_batch
-            , lbound
-            , ubound
-            , breaker
-        )
-        return new_vops_provider
-
-
-    def stream_blocks(self, start_from, breaker, trail_blocks=0, max_gap=100, do_stale_block_check=True):
+    def stream_blocks(self, conf, start_from, breaker, exception_reporter, trail_blocks=0, max_gap=100, do_stale_block_check=True):
         """Stream blocks. Returns a generator."""
-        return BlockStream.stream(self, start_from, breaker, trail_blocks, max_gap, do_stale_block_check)
+        return BlockStream.stream(conself, start_from, breaker, exception_reporter, trail_blocks, max_gap, do_stale_block_check)
 
     def _gdgp(self):
         ret = self.__exec('get_dynamic_global_properties')

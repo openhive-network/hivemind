@@ -56,7 +56,7 @@ class BlockSchedule:
         to account for them."""
         if block:
             self._drift_forward()
-            date = block_date(block)
+            date = block_date(dict(timestamp=str(block.get_date())))
             self._check_missing(num, self._last_date, date)
             self._check_head_date(num, date)
             self._last_date = date
