@@ -96,15 +96,16 @@ docker logs -f hivemind
 
 ## Configuration
 
-| Environment              | CLI argument         | Default |
-| ------------------------ | -------------------- | ------- |
-| `LOG_LEVEL`              | `--log-level`        | INFO    |
-| `HTTP_SERVER_PORT`       | `--http-server-port` | 8080    |
-| `DATABASE_URL`           | `--database-url`     | postgresql://user:pass@localhost:5432/hive |
-| `STEEMD_URL`             | `--steemd-url`       | '{"default":"https://yourhivenode"}' |
-| `MAX_BATCH`              | `--max-batch`        | 50      |
-| `MAX_WORKERS`            | `--max-workers`      | 4       |
-| `TRAIL_BLOCKS`           | `--trail-blocks`     | 2       |
+| Environment              | CLI argument          | Default |
+| ------------------------ | --------------------- | ------- |
+| `LOG_LEVEL`              | `--log-level`         | INFO    |
+| `HTTP_SERVER_PORT`       | `--http-server-port`  | 8080    |
+| `DATABASE_URL`           | `--database-url`      | postgresql://user:pass@localhost:5432/hive |
+| `STEEMD_URL`             | `--steemd-url`        | '{"default":"https://yourhivenode"}' |
+| `MAX_BATCH`              | `--max-batch`         | 35      |
+| `MAX_WORKERS`            | `--max-workers`       | 4       |
+| `TRAIL_BLOCKS`           | `--trail-blocks`      | 2       |
+| `HIVED_DATABASE_URL`     | `--hived-database-url`|         |
 
 Precedence: CLI over ENV over hive.conf. Check `hive --help` for details.
 
