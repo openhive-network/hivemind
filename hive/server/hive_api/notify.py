@@ -26,7 +26,7 @@ STRINGS = {
     NotifyType.follow:         '<src> followed you',
     NotifyType.reply:          '<src> replied to your post',
     NotifyType.reply_comment:  '<src> replied to your comment',
-    NotifyType.mention:        '<src> mentioned you',
+    NotifyType.mention:        '<src> mentioned you and <other_mentions> others',
     NotifyType.vote:           '<src> voted on your post',
 
     #NotifyType.update_account: '<dst> updated account',
@@ -126,6 +126,7 @@ def _render_msg(row):
     if '<post>' in msg: msg = msg.replace('<post>', _post_url(row))
     if '<payload>' in msg: msg = msg.replace('<payload>', payload or 'null')
     if '<comm>' in msg: msg = msg.replace('<comm>', row['community_title'])
+    if '<other_mentions>' in msg: msg = msg.replace('<other_mentions>', str( row['number_of_mentions'] - 1 ) )
     return msg
 
 def _post_url(row):
