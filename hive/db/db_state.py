@@ -255,6 +255,8 @@ class DbState:
         Re-creates non-core indexes for serving APIs after init sync,
         as well as all foreign keys."""
 
+        start_time = perf_counter()
+
         last_imported_block = DbState.db().query_one("SELECT block_num FROM hive_state LIMIT 1")
 
         log.info("[INIT] Current imported block: %s. Last imported block: %s.", current_imported_block, last_imported_block)
@@ -366,6 +368,9 @@ class DbState:
             create_fk(cls.db())
 
             cls._execute_query("VACUUM ANALYZE")
+
+        end_time = perf_counter()
+        log.info("[INIT] After initial sync actions done in %.4fs", end_time - start_time)
 
 
     @staticmethod
