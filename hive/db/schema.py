@@ -13,9 +13,6 @@ log = logging.getLogger(__name__)
 
 #pylint: disable=line-too-long, too-many-lines, bad-whitespace
 
-# [DK] we changed and removed some tables so i upgraded DB_VERSION to 18
-DB_VERSION = 18
-
 def build_metadata():
     """Build schema def with SqlAlchemy"""
     metadata = sa.MetaData()
@@ -463,7 +460,7 @@ def setup(db):
 
     # default rows
     sqls = [
-        "INSERT INTO hive_state (block_num, db_version, steem_per_mvest, usd_per_steem, sbd_per_steem, dgpo) VALUES (0, %d, 0, 0, 0, '')" % DB_VERSION,
+        "INSERT INTO hive_state (block_num, db_version, steem_per_mvest, usd_per_steem, sbd_per_steem, dgpo) VALUES (0, 0, 0, 0, 0, '')",
         "INSERT INTO hive_blocks (num, hash, created_at) VALUES (0, '0000000000000000000000000000000000000000', '2016-03-24 16:04:57')",
 
         "INSERT INTO hive_permlink_data (id, permlink) VALUES (0, '')",
@@ -537,15 +534,6 @@ def setup(db):
           );
     """
     db.query_no_return(sql)
-    sql = """
-          INSERT INTO hive_db_patch_level
-          (patch_date, patched_to_revision)
-          values
-          (now(), '{}');
-          """
-
-    from hive.version import GIT_REVISION
-    db.query_no_return(sql.format(GIT_REVISION))
 
     # max_time_stamp definition moved into utility_functions.sql
 
@@ -614,7 +602,16 @@ def setup(db):
     for script in sql_scripts:
         execute_sql_script(db.query_no_return, "{}/sql_scripts/{}".format(dir_path, script))
 
+    # Move this part here, to mark latest db patch level as current Hivemind revision (which just created schema).
+    sql = """
+          INSERT INTO hive_db_patch_level
+          (patch_date, patched_to_revision)
+          values
+          (now(), '{}');
+          """
 
+    from hive.version import GIT_REVISION
+    db.query_no_return(sql.format(GIT_REVISION))
 
 
 

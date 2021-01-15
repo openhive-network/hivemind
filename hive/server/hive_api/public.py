@@ -8,8 +8,6 @@ from hive.server.hive_api.common import (
     valid_account, valid_permlink, valid_limit)
 from hive.server.condenser_api.cursor import get_followers, get_following
 
-from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
-
 log = logging.getLogger(__name__)
 
 # Accounts
@@ -79,8 +77,7 @@ async def get_info(context):
         "hivemind_version" : VERSION,
         "hivemind_git_rev" : GIT_REVISION,
         "hivemind_git_date" : GIT_DATE,
-        "database_schema_version" : SCHEMA_DB_VERSION,
-        "database_patch_level" : patch_level_data['level'],
+        "database_schema_version" : patch_level_data['level'],
         "database_patch_date" : str(patch_level_data['patch_date']),
         "database_patched_to_revision" : patch_level_data['patched_to_revision'],
         "database_head_block" : database_head_block
