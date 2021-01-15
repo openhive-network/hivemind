@@ -8,9 +8,8 @@ from time import perf_counter
 import logging
 import sqlalchemy
 
-
 from hive.db.schema import (setup, set_logged_table_attribute, build_metadata,
-                            build_metadata_community, teardown, DB_VERSION)
+                            build_metadata_community, teardown)
 from hive.db.adapter import Db
 
 from hive.utils.post_active import update_active_starting_from_posts_on_block
