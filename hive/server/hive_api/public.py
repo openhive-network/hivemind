@@ -8,8 +8,6 @@ from hive.server.hive_api.common import (
     valid_account, valid_permlink, valid_limit)
 from hive.server.condenser_api.cursor import get_followers, get_following
 
-from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
-
 log = logging.getLogger(__name__)
 
 # Accounts
@@ -70,12 +68,18 @@ async def get_info(context):
     sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
     database_head_block = await db.query_one(sql)
 
-    from hive.version import VERSION, GIT_REVISION
+    sql = "SELECT level, patch_date, patched_to_revision FROM hive_db_patch_level ORDER BY level DESC LIMIT 1"
+    patch_level_data = await db.query_row(sql)
+
+    from hive.version import VERSION, GIT_REVISION, GIT_DATE
 
     ret = {
         "hivemind_version" : VERSION,
         "hivemind_git_rev" : GIT_REVISION,
-        "database_schema_version" : SCHEMA_DB_VERSION,
+        "hivemind_git_date" : GIT_DATE,
+        "database_schema_version" : patch_level_data['level'],
+        "database_patch_date" : str(patch_level_data['patch_date']),
+        "database_patched_to_revision" : patch_level_data['patched_to_revision'],
         "database_head_block" : database_head_block
     }
 

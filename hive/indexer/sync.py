@@ -246,16 +246,24 @@ class Sync:
             signal(SIGINT, old_sig_int_handler)
             signal(SIGTERM, old_sig_term_handler)
 
+        def show_info(self):
+            database_head_block = Blocks.head_num()
+
+            sql = "SELECT level, patch_date, patched_to_revision FROM hive_db_patch_level ORDER BY level DESC LIMIT 1"
+            patch_level_data = self._db.query_row(sql)
+
+            from hive.utils.misc import show_app_version;
+            show_app_version(log, database_head_block, patch_level_data)
+
         set_handlers()
 
-        from hive.version import VERSION, GIT_REVISION
-        log.info("hivemind_version : %s", VERSION)
-        log.info("hivemind_git_rev : %s", GIT_REVISION)
-
-        from hive.db.schema import DB_VERSION as SCHEMA_DB_VERSION
-        log.info("database_schema_version : %s", SCHEMA_DB_VERSION)
-
         Community.start_block = self._conf.get("community_start_block")
+
+        # ensure db schema up to date, check app status
+        DbState.initialize()
+        Blocks.setup_own_db_access(self._db)
+
+        show_info(self)
 
         paths = self._conf.get("mock_block_data_path") or []
         for path in paths:
@@ -266,10 +274,6 @@ class Sync:
             MockVopsProvider.load_block_data(mock_vops_data_path)
             MockVopsProvider.print_data()
 
-        # ensure db schema up to date, check app status
-        DbState.initialize()
-        Blocks.setup_own_db_access(self._db)
-
         # prefetch id->name and id->rank memory maps
         Accounts.load_ids()
 
@@ -279,7 +283,6 @@ class Sync:
         last_imported_block = Blocks.head_num()
         hived_head_block = self._conf.get('test_max_block') or self._steem.last_irreversible()
 
-        log.info("database_head_block : %s", last_imported_block)
         log.info("target_head_block : %s", hived_head_block)
 
         if DbState.is_initial_sync():
