@@ -114,7 +114,8 @@ $BODY$
 BEGIN
 -- Also covers previous changes at a80c7642a1f3b08997af7e8a9915c13d34b7f0e0
 -- Also covers previous changes at b100db27f37dda3c869c2756d99ab2856f7da9f9
-IF NOT EXISTS (SELECT * FROM hive_db_patch_level WHERE patched_to_revision = 'bd83414409b7624e2413b97a62fa7d97d83edd86')
+-- Also covers previous changes at bd83414409b7624e2413b97a62fa7d97d83edd86
+IF NOT EXISTS (SELECT * FROM hive_db_patch_level WHERE patched_to_revision = '1cc9981679157e4e54e5e4a74cca1feb5d49296d')
 THEN
   RAISE NOTICE 'Performing notification cache initial fill...';
   SET work_mem='2GB';
@@ -176,4 +177,3 @@ $BODY$;
 COMMIT;
 
 TRUNCATE TABLE hive_db_data_migration;
-
