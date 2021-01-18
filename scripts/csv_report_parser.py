@@ -69,8 +69,8 @@ if __name__ == "__main__":
     parser.add_argument("port", type=int)
     parser.add_argument("csv_report_dir", type=str, help="Path to benchmark csv reports")
     parser.add_argument("tavern_tests_dir", type=str, help="Path to tavern tests dir")
-    parser.add_argument("--median-cutoff-time", dest="cutoff_time", type=float, default=0.3, help="Tests with median time below cutoff will not be shown")
-    parser.add_argument("--time-threshold", dest="time_threshold", type=float, default=1.0, help="Time threshold for test execution time, tests with execution time greater than threshold will be marked on red.")
+    parser.add_argument("--median-cutoff-time", dest="cutoff_time", type=float, default=0.3, help="Tests with median time (in seconds) below cutoff will not be shown")
+    parser.add_argument("--time-threshold", dest="time_threshold", type=float, default=1.0, help="Time (in seconds) threshold for test execution time, tests with execution time greater than threshold will be marked on red.")
     args = parser.parse_args()
 
     assert os.path.exists(args.csv_report_dir), "Please provide valid csv report path"
@@ -139,7 +139,7 @@ if __name__ == "__main__":
     if above_treshold:
         from prettytable import PrettyTable
         summary = PrettyTable()
-        print("########## Test failed with following tests above {}s threshold ##########".format(args.time_threshold * 1000))
+        print("########## Test failed with following tests above {}s threshold ##########".format(args.time_threshold))
         summary.field_names = ['Test name', 'Mean time [ms]']
         for entry in above_treshold:
             summary.add_row(entry)
