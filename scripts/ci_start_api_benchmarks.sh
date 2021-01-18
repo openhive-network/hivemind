@@ -3,6 +3,7 @@
 set -e
 pip3 install tox --user
 pip3 install requests --user
+pip3 install prettytable --user
 
 export HIVEMIND_ADDRESS=$1
 export HIVEMIND_PORT=$2
