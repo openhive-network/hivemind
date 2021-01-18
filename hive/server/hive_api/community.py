@@ -1,8 +1,8 @@
 """Hive API: Community methods"""
 import logging
 
-from hive.server.hive_api.common import (get_community_id, valid_account, valid_limit)
-from hive.server.common.helpers import return_error_info
+from hive.server.hive_api.common import (get_community_id)
+from hive.server.common.helpers import (return_error_info, valid_account, valid_limit)
 
 # pylint: disable=too-many-lines
 
