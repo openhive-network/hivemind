@@ -413,6 +413,46 @@
             }
           },
           {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "hive-186713",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
             "type": "comment_operation",
             "value": {
               "parent_author": "",
@@ -636,6 +676,37 @@
               ],
               "id": "community",
               "json": "[\"flagPost\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"permlink\":\"secrets1\",\"notes\":\"This is not a kitten..\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-186713"
+              ],
+              "id": "community",
+              "json": "[\"updateProps\",{\"community\":\"hive-186713\",\"props\":{\"title\":\"Test group\",\"about\":\"this is about field\",\"description\":\"this is description\nsecond line of description\",\"lang\":\"pl\",\"flag_text\":\"first rule\nsecond rule\nthird rule\nand the last rule\",\"is_nsfw\":true}}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-186713"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-186713\",\"account\":\"steemit\",\"role\":\"muted\"}]"
+            }
+          },
+          {
+            "type": "account_update2_operation",
+            "value": {
+              "account": "hive-186713",
+              "json_metadata": "{\"profile\":{\"name\":\"from account\",\"about\":\"about from account\",\"cover_image\":\"\",\"profile_image\":\"https://images.ecency.com/DQmRmugfsA3arLWs2Fh3VncMo4VPsmWUWY9r5GaWKA2k1XN/images.jpeg\",\"website\":\"\",\"location\":\"\",\"version\":2}}",
+              "posting_json_metadata": "test-safari",
+              "extensions": []
             }
           }
         ]

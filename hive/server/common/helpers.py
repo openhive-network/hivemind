@@ -80,10 +80,6 @@ def get_hive_accounts_info_view_query_string(names, lite = False):
                 )T( _name ) ON v.name = T._name
           """.format( ( 'hive_accounts_info_view_lite' if lite else 'hive_accounts_info_view' ), values_str )
     return sql
-   
-def last_month():
-    """Get the date 1 month ago."""
-    return datetime.datetime.now() + relativedelta(months=-1)
 
 def valid_account(name, allow_empty=False):
     """Returns validated account name or throws Assert."""
