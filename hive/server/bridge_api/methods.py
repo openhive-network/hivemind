@@ -8,6 +8,9 @@ from hive.server.common.helpers import (
     valid_permlink,
     valid_tag,
     valid_limit)
+
+from hive.utils.account import safe_db_profile_metadata
+
 from hive.server.hive_api.common import get_account_id
 from hive.server.hive_api.community import list_top_communities
 from hive.server.common.mutes import Mutes
@@ -363,12 +366,16 @@ async def get_follow_list(context, observer, follow_type='blacklisted'):
     valid_types = dict(blacklisted=1, follow_blacklist=2, muted=4, follow_muted=8)
     assert follow_type in valid_types, "Unsupported follow_type, valid values: {}".format(", ".join(valid_types.keys()))
 
+    db = context['db']
+
     results = []
     if follow_type == 'follow_blacklist' or follow_type == 'follow_muted':
         blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context, follow_type == 'follow_blacklist', follow_type == 'follow_muted')
         for row in blacklists_for_user:
-            list_data = await get_profile(context, row['list'])
-            metadata = list_data["metadata"]["profile"]
+            metadata = safe_db_profile_metadata(row['posting_json_metadata'], row['json_metadata'])
+
+            #list_data = await get_profile(context, row['list'])
+            #metadata = list_data["metadata"]["profile"]
             blacklist_description = metadata["blacklist_description"] if "blacklist_description" in metadata else ''
             muted_list_description = metadata["muted_list_description"] if "muted_list_description" in metadata else ''
             results.append({'name': row['list'], 'blacklist_description': blacklist_description, 'muted_list_description': muted_list_description})

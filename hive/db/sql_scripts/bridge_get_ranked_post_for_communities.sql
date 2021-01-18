@@ -7,7 +7,21 @@ DECLARE
   __observer_id INT;
 BEGIN
   __observer_id = find_account_id( _observer, True );
-  RETURN QUERY SELECT
+  RETURN QUERY 
+  WITH pinned AS
+  (
+    SELECT 
+      hp.id, 
+      blacklist.source
+    FROM live_posts_comments_view hp -- is this really supported for comments (maybe pinning is prevented?)?
+    JOIN hive_communities hc ON hc.id = hp.community_id
+    LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp.author_id)
+    WHERE hc.name = _community AND hp.is_pinned
+      AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp.author_id))
+    ORDER BY hp.id DESC
+    LIMIT _limit
+  )
+  SELECT
       hp.id,
       hp.author,
       hp.parent_author,
@@ -45,13 +59,9 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      blacklisted_by_observer_view.source
-  FROM
-      hive_posts_view hp
-      JOIN hive_communities hc ON hc.id = hp.community_id
-      LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp.author_id)
-  WHERE hc.name = _community AND hp.is_pinned
-  AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp.author_id))
+      pinned.source
+  FROM pinned,
+  LATERAL get_post_view_by_id(pinned.id) hp
   ORDER BY hp.id DESC
   LIMIT _limit;
 END
@@ -73,7 +83,25 @@ BEGIN
   IF __post_id <> 0 THEN
       SELECT hp.sc_trend INTO __trending_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
-  RETURN QUERY SELECT
+  RETURN QUERY
+  WITH trends as
+  (
+    SELECT
+      hp1.id,
+      hp1.sc_trend as trend,
+      blacklist.source
+    FROM live_posts_view hp1
+    JOIN hive_communities hc ON hp1.community_id = hc.id
+    LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
+    WHERE hc.name = _community 
+       AND NOT hp1.is_paidout 
+       AND ( NOT _bridge_api OR NOT hp1.is_pinned ) -- concatenated with bridge_get_ranked_post_pinned_for_community when called for bridge_api
+       AND ( __post_id = 0 OR hp1.sc_trend < __trending_limit OR ( hp1.sc_trend = __trending_limit AND hp1.id < __post_id ) )
+       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
+    ORDER BY hp1.sc_trend DESC, hp1.id DESC
+    LIMIT _limit
+  )
+SELECT
       hp.id,
       hp.author,
       hp.parent_author,
@@ -112,24 +140,8 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       trends.source
-  FROM
-  (
-      SELECT
-          hp1.id,
-          hp1.sc_trend as trend,
-          blacklisted_by_observer_view.source as source
-      FROM
-         hive_posts hp1
-         JOIN hive_communities hc ON hp1.community_id = hc.id
-         LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp1.author_id)
-      WHERE hc.name = _community AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth = 0
-         AND ( NOT _bridge_api OR NOT hp1.is_pinned ) -- concatenated with bridge_get_ranked_post_pinned_for_community when called for bridge_api
-         AND ( __post_id = 0 OR hp1.sc_trend < __trending_limit OR ( hp1.sc_trend = __trending_limit AND hp1.id < __post_id ) )
-         AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
-      ORDER BY hp1.sc_trend DESC, hp1.id DESC
-      LIMIT _limit
-  ) as trends
-  JOIN hive_posts_view hp ON hp.id = trends.id
+  FROM trends,
+  LATERAL get_post_view_by_id(trends.id) hp
   ORDER BY trends.trend DESC, trends.id DESC
   LIMIT _limit;
 END
@@ -151,7 +163,25 @@ BEGIN
   IF __post_id <> 0 THEN
       SELECT hp.promoted INTO __promoted_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
-  RETURN QUERY SELECT
+  RETURN QUERY 
+  WITH promoted as
+  (
+    SELECT
+      hp1.id,
+      hp1.promoted as promoted,
+      blacklist.source
+    FROM live_posts_comments_view hp1 -- maybe this should be live_posts_view?
+    JOIN hive_communities hc ON hp1.community_id = hc.id
+    LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
+    WHERE hc.name = _community
+      AND hp1.promoted > 0
+      AND NOT hp1.is_paidout
+      AND ( __post_id = 0 OR hp1.promoted < __promoted_limit OR ( hp1.promoted = __promoted_limit AND hp1.id < __post_id ) )
+      AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
+    ORDER BY hp1.promoted DESC, hp1.id DESC
+    LIMIT _limit
+  )
+  SELECT
       hp.id,
       hp.author,
       hp.parent_author,
@@ -190,23 +220,8 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       promoted.source
-  FROM
-  (
-      SELECT
-          hp1.id,
-          hp1.promoted as promoted,
-          blacklisted_by_observer_view.source as source
-      FROM
-          hive_posts hp1
-          JOIN hive_communities hc ON hp1.community_id = hc.id
-          LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp1.author_id)
-      WHERE hc.name = _community AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.promoted > 0
-          AND ( __post_id = 0 OR hp1.promoted < __promoted_limit OR ( hp1.promoted = __promoted_limit AND hp1.id < __post_id ) )
-          AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
-      ORDER BY hp1.promoted DESC, hp1.id DESC
-      LIMIT _limit
-  ) as promoted
-  JOIN hive_posts_view hp ON hp.id = promoted.id
+  FROM promoted,
+  LATERAL get_post_view_by_id(promoted.id) hp
   ORDER BY promoted.promoted DESC, promoted.id DESC
   LIMIT _limit;
 END
@@ -230,7 +245,25 @@ BEGIN
       SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   __head_block_time = head_block_time();
-  RETURN QUERY SELECT
+  RETURN QUERY 
+  WITH payout as
+  (
+    SELECT
+      hp1.id,
+      (hp1.payout + hp1.pending_payout) as total_payout,
+      blacklist.source
+    FROM live_posts_comments_view hp1
+      JOIN hive_communities hc ON hp1.community_id = hc.id
+      LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
+    WHERE hc.name = _community
+      AND NOT hp1.is_paidout 
+      AND hp1.payout_at BETWEEN __head_block_time + interval '12 hours' AND __head_block_time + interval '36 hours'
+      AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
+      AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
+    ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
+    LIMIT _limit
+  )
+  SELECT
       hp.id,
       hp.author,
       hp.parent_author,
@@ -269,24 +302,9 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       payout.source
-  FROM
-  (
-      SELECT
-          hp1.id,
-          ( hp1.payout + hp1.pending_payout ) as all_payout,
-          blacklisted_by_observer_view.source as source
-      FROM
-          hive_posts hp1
-          JOIN hive_communities hc ON hp1.community_id = hc.id
-          LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp1.author_id)
-      WHERE hc.name = _community AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.payout_at BETWEEN __head_block_time + interval '12 hours' AND __head_block_time + interval '36 hours'
-          AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
-          AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
-      ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
-      LIMIT _limit
-  ) as payout
-  JOIN hive_posts_view hp ON hp.id = payout.id
-  ORDER BY payout.all_payout DESC, payout.id DESC
+  FROM payout,
+  LATERAL get_post_view_by_id(payout.id) hp
+  ORDER BY payout.total_payout DESC, payout.id DESC
   LIMIT _limit;
 END
 $function$
@@ -307,7 +325,25 @@ BEGIN
   IF __post_id <> 0 THEN
       SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
-  RETURN QUERY SELECT
+  RETURN QUERY
+  WITH payout as
+  (
+    SELECT
+      hp1.id,
+      (hp1.payout + hp1.pending_payout) as total_payout,
+      blacklist.source
+    FROM live_comments_view hp1
+    JOIN hive_communities hc ON hp1.community_id = hc.id
+    LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
+    WHERE hc.name = _community 
+      AND NOT hp1.is_paidout
+      AND ( __post_id = 0 OR (hp1.payout + hp1.pending_payout) < __payout_limit
+	                  OR ((hp1.payout + hp1.pending_payout) = __payout_limit AND hp1.id < __post_id) )
+      AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
+    ORDER BY (hp1.payout + hp1.pending_payout) DESC, hp1.id DESC
+    LIMIT _limit
+  )
+  SELECT
       hp.id,
       hp.author,
       hp.parent_author,
@@ -346,24 +382,9 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       payout.source
-  FROM
-  (
-      SELECT
-          hp1.id,
-          ( hp1.payout + hp1.pending_payout ) as all_payout,
-          blacklisted_by_observer_view.source as source
-      FROM
-          hive_posts hp1
-          JOIN hive_communities hc ON hp1.community_id = hc.id
-          LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp1.author_id)
-      WHERE hc.name = _community AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth > 0
-          AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
-          AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
-      ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
-      LIMIT _limit
-  ) as payout
-  JOIN hive_posts_view hp ON hp.id = payout.id
-  ORDER BY payout.all_payout DESC, payout.id DESC
+  FROM payout,
+  LATERAL get_post_view_by_id(payout.id) hp
+  ORDER BY payout.total_payout DESC, payout.id DESC
   LIMIT _limit;
 END
 $function$
@@ -381,10 +402,30 @@ DECLARE
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
-      SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
+      SELECT (hp.payout + hp.pending_payout) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   __observer_id = find_account_id(_observer, True);
-  RETURN QUERY SELECT
+  RETURN QUERY
+  WITH payout as
+  (
+    SELECT
+      hp1.id,
+      (hp1.payout + hp1.pending_payout) as total_payout,
+      blacklist.source
+    FROM live_posts_comments_view hp1
+    JOIN hive_communities hc ON hp1.community_id = hc.id
+    JOIN hive_accounts_view ha ON hp1.author_id = ha.id
+    LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
+    WHERE hc.name = _community
+      AND NOT hp1.is_paidout 
+      AND ha.is_grayed 
+      AND (hp1.payout + hp1.pending_payout) > 0
+      AND ( __post_id = 0 OR (hp1.payout + hp1.pending_payout) < __payout_limit 
+	                  OR ((hp1.payout + hp1.pending_payout) = __payout_limit AND hp1.id < __post_id) )
+    ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
+    LIMIT _limit
+  )
+  SELECT
       hp.id,
       hp.author,
       hp.parent_author,
@@ -423,24 +464,9 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       payout.source
-  FROM
-  (
-      SELECT
-          hp1.id,
-          ( hp1.payout + hp1.pending_payout ) as all_payout,
-          blacklisted_by_observer_view.source as source
-      FROM
-          hive_posts hp1
-          JOIN hive_communities hc ON hp1.community_id = hc.id
-          JOIN hive_accounts_view ha ON hp1.author_id = ha.id
-          LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp1.author_id)
-      WHERE hc.name = _community AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND ha.is_grayed AND ( hp1.payout + hp1.pending_payout ) > 0
-          AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
-      ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
-      LIMIT _limit
-  ) as payout
-  JOIN hive_posts_view hp ON hp.id = payout.id
-  ORDER BY payout.all_payout DESC, payout.id DESC
+  FROM payout,
+  LATERAL get_post_view_by_id(payout.id) hp
+  ORDER BY payout.total_payout DESC, payout.id DESC
   LIMIT _limit;
 END
 $function$
@@ -461,7 +487,24 @@ BEGIN
   IF __post_id <> 0 THEN
       SELECT hp.sc_hot INTO __hot_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
-  RETURN QUERY SELECT
+  RETURN QUERY 
+  WITH hot AS -- bridge_get_ranked_post_by_hot_for_community
+  (
+    SELECT
+      hp1.id,
+      hp1.sc_hot AS hot,
+      blacklist.source
+    FROM live_posts_view hp1
+    JOIN hive_communities hc ON hp1.community_id = hc.id
+    LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
+    WHERE hc.name = _community 
+      AND NOT hp1.is_paidout
+      AND ( __post_id = 0 OR hp1.sc_hot < __hot_limit OR (hp1.sc_hot = __hot_limit AND hp1.id < __post_id) )
+      AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
+    ORDER BY hp1.sc_hot DESC, hp1.id DESC
+    LIMIT _limit
+  )
+  SELECT
       hp.id,
       hp.author,
       hp.parent_author,
@@ -500,23 +543,8 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       hot.source
-  FROM
-  (
-      SELECT
-          hp1.id,
-          hp1.sc_hot as hot,
-          blacklisted_by_observer_view.source as source
-      FROM
-          hive_posts hp1
-          JOIN hive_communities hc ON hp1.community_id = hc.id
-          LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp1.author_id)
-      WHERE hc.name = _community AND hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.depth = 0
-          AND ( __post_id = 0 OR hp1.sc_hot < __hot_limit OR ( hp1.sc_hot = __hot_limit AND hp1.id < __post_id ) )
-          AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
-      ORDER BY hp1.sc_hot DESC, hp1.id DESC
-      LIMIT _limit
-  ) as hot
-  JOIN hive_posts_view hp ON hp.id = hot.id
+  FROM hot,
+  LATERAL get_post_view_by_id(hot.id) hp
   ORDER BY hot.hot DESC, hot.id DESC
   LIMIT _limit;
 END
@@ -534,7 +562,23 @@ DECLARE
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __observer_id = find_account_id( _observer, True );
-  RETURN QUERY SELECT
+  RETURN QUERY
+  WITH created as -- bridge_get_ranked_post_by_created_for_community
+  (
+    SELECT
+      hp1.id,
+      blacklist.source
+    FROM live_posts_view hp1
+    JOIN hive_communities hc ON hp1.community_id = hc.id
+    LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
+    WHERE hc.name = _community 
+      AND ( NOT _bridge_api OR NOT hp1.is_pinned ) -- concatenated with bridge_get_ranked_post_pinned_for_community when called for bridge_api
+      AND ( __post_id = 0 OR hp1.id < __post_id )
+      AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
+    ORDER BY hp1.id DESC
+    LIMIT _limit
+  )
+  SELECT
       hp.id,
       hp.author,
       hp.parent_author,
@@ -573,23 +617,8 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       created.source
-  FROM
-  (
-      SELECT
-          hp1.id,
-          blacklisted_by_observer_view.source as source
-      FROM
-          hive_posts hp1
-          JOIN hive_communities hc ON hp1.community_id = hc.id
-          LEFT OUTER JOIN blacklisted_by_observer_view ON (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp1.author_id)
-      WHERE hc.name = _community AND hp1.counter_deleted = 0 AND hp1.depth = 0
-          AND ( NOT _bridge_api OR NOT hp1.is_pinned ) -- concatenated with bridge_get_ranked_post_pinned_for_community when called for bridge_api
-          AND ( __post_id = 0 OR hp1.id < __post_id )
-          AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
-      ORDER BY hp1.id DESC
-      LIMIT _limit
-  ) as created
-  JOIN hive_posts_view hp ON hp.id = created.id
+  FROM created,
+  LATERAL get_post_view_by_id(created.id) hp
   ORDER BY created.id DESC
   LIMIT _limit;
 END

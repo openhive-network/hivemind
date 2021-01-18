@@ -71,6 +71,8 @@ DROP FUNCTION IF EXISTS mutes_get_blacklists_for_observer;
 CREATE FUNCTION mutes_get_blacklists_for_observer( in _observer VARCHAR, in _follow_blacklist BOOLEAN, in _follow_muted BOOLEAN )
 RETURNS TABLE(
     list hive_accounts.name%TYPE,
+    posting_json_metadata hive_accounts.name%TYPE,
+    json_metadata hive_accounts.name%TYPE,
     is_blacklist BOOLEAN -- False means mute list
 )
 AS
@@ -82,7 +84,9 @@ BEGIN
   IF _follow_blacklist THEN
     RETURN QUERY SELECT -- mutes_get_blacklists_for_observer (observer blacklists)
         ha.name AS list,
-        True
+        ha.posting_json_metadata::varchar AS posting_json_metadata,
+        ha.json_metadata::varchar AS json_metadata,
+        True as is_blacklist
     FROM
         hive_follows hf
         JOIN hive_accounts ha ON ha.id = hf.following
@@ -93,7 +97,9 @@ BEGIN
   IF _follow_muted THEN
     RETURN QUERY SELECT -- mutes_get_blacklists_for_observer (observer mute lists)
         ha.name AS list,
-        False
+        ha.posting_json_metadata::VARCHAR AS posting_json_metadata,
+        ha.json_metadata::VARCHAR AS json_metadata,
+        False AS is_blacklist
     FROM
         hive_follows hf
         JOIN hive_accounts ha ON ha.id = hf.following

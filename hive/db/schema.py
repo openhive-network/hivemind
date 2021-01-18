@@ -13,9 +13,6 @@ log = logging.getLogger(__name__)
 
 #pylint: disable=line-too-long, too-many-lines, bad-whitespace
 
-# [DK] we changed and removed some tables so i upgraded DB_VERSION to 18
-DB_VERSION = 18
-
 def build_metadata():
     """Build schema def with SqlAlchemy"""
     metadata = sa.MetaData()
@@ -139,7 +136,7 @@ def build_metadata():
 
         sa.Index('hive_posts_root_id_id_idx', 'root_id','id'),
 
-        sa.Index('hive_posts_parent_id_idx', 'parent_id'),
+        sa.Index('hive_posts_parent_id_id_idx', sa.text('parent_id, id DESC'), postgresql_where=sql_text("counter_deleted = 0")),
         sa.Index('hive_posts_community_id_id_idx', 'community_id', sa.text('id DESC')),
 
         sa.Index('hive_posts_payout_at_idx', 'payout_at'),
@@ -147,7 +144,8 @@ def build_metadata():
         sa.Index('hive_posts_promoted_id_idx', 'promoted', 'id', postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0")),
         sa.Index('hive_posts_sc_trend_id_idx', 'sc_trend', 'id', postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0 AND depth = 0")),
         sa.Index('hive_posts_sc_hot_id_idx', 'sc_hot', 'id', postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0 AND depth = 0")),
-        sa.Index('hive_posts_author_id_created_at_idx', sa.text('author_id DESC, created_at DESC')),
+        sa.Index('hive_posts_author_id_created_at_id_idx', sa.text('author_id DESC, created_at DESC, id')),
+        sa.Index('hive_posts_author_id_id_idx', 'author_id', 'id', postgresql_where=sql_text('depth = 0')),
         sa.Index('hive_posts_block_num_idx', 'block_num'),
         sa.Index('hive_posts_block_num_created_idx', 'block_num_created'),
         sa.Index('hive_posts_cashout_time_id_idx', 'cashout_time', 'id'),
@@ -283,7 +281,8 @@ def build_metadata():
         sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_feed_cache_fk1'),
 
         sa.Index('hive_feed_cache_block_num_idx', 'block_num'),
-        sa.Index('hive_feed_cache_created_at_idx', 'created_at')
+        sa.Index('hive_feed_cache_created_at_idx', 'created_at'),
+        sa.Index('hive_feed_cache_post_id_idx', 'post_id')
     )
 
     sa.Table(
@@ -461,7 +460,7 @@ def setup(db):
 
     # default rows
     sqls = [
-        "INSERT INTO hive_state (block_num, db_version, steem_per_mvest, usd_per_steem, sbd_per_steem, dgpo) VALUES (0, %d, 0, 0, 0, '')" % DB_VERSION,
+        "INSERT INTO hive_state (block_num, db_version, steem_per_mvest, usd_per_steem, sbd_per_steem, dgpo) VALUES (0, 0, 0, 0, 0, '')",
         "INSERT INTO hive_blocks (num, hash, created_at) VALUES (0, '0000000000000000000000000000000000000000', '2016-03-24 16:04:57')",
 
         "INSERT INTO hive_permlink_data (id, permlink) VALUES (0, '')",
@@ -535,15 +534,6 @@ def setup(db):
           );
     """
     db.query_no_return(sql)
-    sql = """
-          INSERT INTO hive_db_patch_level
-          (patch_date, patched_to_revision)
-          values
-          (now(), '{}');
-          """
-
-    from hive.version import GIT_REVISION
-    db.query_no_return(sql.format(GIT_REVISION))
 
     # max_time_stamp definition moved into utility_functions.sql
 
@@ -559,6 +549,7 @@ def setup(db):
       "hive_muted_accounts_view.sql",
       "hive_muted_accounts_by_id_view.sql",
       "hive_blacklisted_accounts_by_observer_view.sql",
+      "get_post_view_by_id.sql",
       "hive_post_operations.sql",
       "head_block_time.sql",
       "update_feed_cache.sql",
@@ -603,14 +594,24 @@ def setup(db):
       "condenser_get_names_by_reblogged.sql",
       "condenser_get_account_reputations.sql",
       "update_follow_count.sql",
-      "delete_reblog_feed_cache.sql"
+      "delete_reblog_feed_cache.sql",
+      "upgrade/update_db_patchlevel.sql" #Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
     ]
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
     for script in sql_scripts:
         execute_sql_script(db.query_no_return, "{}/sql_scripts/{}".format(dir_path, script))
 
+    # Move this part here, to mark latest db patch level as current Hivemind revision (which just created schema).
+    sql = """
+          INSERT INTO hive_db_patch_level
+          (patch_date, patched_to_revision)
+          values
+          (now(), '{}');
+          """
 
+    from hive.version import GIT_REVISION
+    db.query_no_return(sql.format(GIT_REVISION))
 
 
 

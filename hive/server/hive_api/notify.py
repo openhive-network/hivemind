@@ -26,7 +26,7 @@ STRINGS = {
     NotifyType.follow:         '<src> followed you',
     NotifyType.reply:          '<src> replied to your post',
     NotifyType.reply_comment:  '<src> replied to your comment',
-    NotifyType.mention:        '<src> mentioned you',
+    NotifyType.mention:        '<src> mentioned you and <other_mentions> others',
     NotifyType.vote:           '<src> voted on your post',
 
     #NotifyType.update_account: '<dst> updated account',
@@ -62,7 +62,6 @@ async def account_notifications(context, account, min_score=25, last_id=None, li
     sql_query = "SELECT * FROM account_notifications( (:account)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::BIGINT, (:limit)::SMALLINT )"
 
     rows = await db.query_all(sql_query, account=account, min_score=min_score, last_id=last_id, limit=limit)
-    rows = [row for row in rows if row['author'] not in Mutes.all()]
     return [_render(row) for row in rows]
 
 @return_error_info
@@ -79,7 +78,6 @@ async def post_notifications(context, author:str, permlink:str, min_score:int=25
     sql_query = "SELECT * FROM post_notifications( (:author)::VARCHAR, (:permlink)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::BIGINT, (:limit)::SMALLINT )"
 
     rows = await db.query_all(sql_query, author=author, permlink=permlink, min_score=min_score, last_id=last_id, limit=limit)
-    rows = [row for row in rows if row['author'] not in Mutes.all()]
     return [_render(row) for row in rows]
 
 def _notifs_sql(where):
@@ -128,6 +126,7 @@ def _render_msg(row):
     if '<post>' in msg: msg = msg.replace('<post>', _post_url(row))
     if '<payload>' in msg: msg = msg.replace('<payload>', payload or 'null')
     if '<comm>' in msg: msg = msg.replace('<comm>', row['community_title'])
+    if '<other_mentions>' in msg: msg = msg.replace('<other_mentions>', str( row['number_of_mentions'] - 1 ) )
     return msg
 
 def _post_url(row):

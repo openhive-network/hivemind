@@ -53,9 +53,9 @@ RETURNS BIGINT
 AS
 $function$
 BEGIN
-RETURN CAST( _block_number as BIGINT ) << 32
-       | ( _notifyType << 16 )
-       | ( _id & CAST( x'0000FFFF' as INTEGER) );
+RETURN CAST( _block_number as BIGINT ) << 36
+       | ( _notifyType << 28 )
+       | ( _id & CAST( x'0FFFFFFF' as BIGINT) );
 END
 $function$
 LANGUAGE plpgsql IMMUTABLE
@@ -101,7 +101,7 @@ CREATE OR REPLACE VIEW public.hive_raw_notifications_as_view
                     WHEN 1 THEN 12
                     ELSE 13
                 END, hpv.id) AS id,
-            hpv.parent_id AS post_id,
+            hpv.id AS post_id,
                 CASE hpv.depth
                     WHEN 1 THEN 12
                     ELSE 13
@@ -123,14 +123,17 @@ UNION ALL
     notification_id(hf.block_num, 15, hf.id) AS id,
     0 AS post_id,
     15 AS type_id,
-    hf.created_at,
+    hb.created_at,
     hf.follower AS src,
     hf.following AS dst,
     0 as dst_post_id,
     ''::character varying(16) AS community,
     ''::character varying AS community_title,
     ''::character varying AS payload
-   FROM hive_follows hf WHERE hf.state = 1 --only follow blog
+   FROM hive_follows hf
+   JOIN hive_blocks hb ON hb.num = hf.block_num - 1 -- use time of previous block to match head_block_time behavior at given block
+   WHERE hf.state = 1 --only follow blog
+
 UNION ALL
  SELECT hr.block_num,
     notification_id(hr.block_num, 14, hr.id) AS id,
@@ -164,7 +167,7 @@ UNION ALL
     notification_id(hm.block_num, 16, hm.id) AS id,
     hm.post_id,
     16 AS type_id,
-    hp.created_at,
+    hb.created_at,
     hp.author_id AS src,
     hm.account_id AS dst,
     hm.post_id as dst_post_id,
@@ -173,6 +176,7 @@ UNION ALL
     ''::character varying AS payload
    FROM hive_mentions hm
    JOIN hive_posts hp ON hm.post_id = hp.id
+   JOIN hive_blocks hb ON hb.num = hm.block_num - 1 -- use time of previous block to match head_block_time behavior at given block
 ) notifs
 JOIN hive_accounts_rank_view harv ON harv.id = notifs.src
 ;
@@ -271,4 +275,4 @@ FROM
   UNION ALL
   SELECT * FROM hive_raw_notifications_view_noas
   ) as notifs
-WHERE notifs.score >= 0;
+WHERE notifs.score >= 0 AND notifs.src IS DISTINCT FROM notifs.dst;

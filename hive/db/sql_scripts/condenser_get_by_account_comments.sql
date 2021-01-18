@@ -1,22 +1,29 @@
 DROP FUNCTION IF EXISTS condenser_get_by_account_comments;
 
-CREATE OR REPLACE FUNCTION condenser_get_by_account_comments(
-  in _author VARCHAR,
-  in _permlink VARCHAR,
-  in _limit INTEGER
-)
+CREATE OR REPLACE FUNCTION condenser_get_by_account_comments( in _author VARCHAR, in _permlink VARCHAR, in _limit INTEGER)
 RETURNS SETOF bridge_api_post
 AS
 $function$
 DECLARE
   __post_id INTEGER := 0;
+  __author_id INTEGER := 0;
 BEGIN
-
+  __author_id = find_account_id(_author, True);
   IF _permlink <> '' THEN
     __post_id = find_comment_id( _author, _permlink, True );
   END IF;
 
-  RETURN QUERY SELECT
+  RETURN QUERY 
+  WITH comments AS
+  (
+    SELECT id
+    FROM live_comments_view hp
+    WHERE hp.author_id = __author_id
+      AND ( ( __post_id = 0 ) OR ( hp.id <= __post_id ) ) 
+    ORDER BY hp.id DESC
+    LIMIT _limit
+  )
+  SELECT
       hp.id,
       hp.author,
       hp.parent_author,
@@ -55,8 +62,8 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       NULL
-    FROM hive_posts_view hp
-    WHERE ( hp.author = _author ) AND ( ( __post_id = 0 ) OR ( hp.id <= __post_id ) ) AND hp.depth > 0
+    FROM comments,
+    LATERAL get_post_view_by_id(comments.id) hp
     ORDER BY hp.id DESC
     LIMIT _limit;
 END

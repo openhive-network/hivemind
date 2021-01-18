@@ -8,9 +8,8 @@ from time import perf_counter
 import logging
 import sqlalchemy
 
-
-from hive.db.schema import (setup, reset_autovac, set_logged_table_attribute, build_metadata,
-                            build_metadata_community, teardown, DB_VERSION)
+from hive.db.schema import (setup, set_logged_table_attribute, build_metadata,
+                            build_metadata_community, teardown)
 from hive.db.adapter import Db
 
 from hive.utils.post_active import update_active_starting_from_posts_on_block
@@ -30,9 +29,6 @@ class DbState:
     # prop is true until initial sync complete
     _is_initial_sync = True
 
-    # db schema version
-    _ver = None
-
     @classmethod
     def initialize(cls):
         """Perform startup database checks.
@@ -48,9 +44,6 @@ class DbState:
         if not cls._is_schema_loaded():
             log.info("[INIT] Create db schema...")
             setup(cls.db())
-
-        # perform db migrations
-        cls._check_migrations()
 
         # check if initial sync complete
         cls._is_initial_sync = True
@@ -96,15 +89,15 @@ class DbState:
 
             'hive_feed_cache_block_num_idx',
             'hive_feed_cache_created_at_idx',
+            'hive_feed_cache_post_id_idx',
 
             'hive_follows_ix5a', # (following, state, created_at, follower)
             'hive_follows_ix5b', # (follower, state, created_at, following)
             'hive_follows_block_num_idx',
             'hive_follows_created_at_idx',
 
-            'hive_posts_parent_id_idx',
+            'hive_posts_parent_id_id_idx',
             'hive_posts_depth_idx',
-            'hive_posts_author_id_created_at_idx',
             'hive_posts_root_id_id_idx',
 
             'hive_posts_community_id_id_idx',
@@ -120,6 +113,9 @@ class DbState:
             'hive_posts_payout_plus_pending_payout_id_idx',
             'hive_posts_category_id_payout_plus_pending_payout_depth_idx',
             'hive_posts_tags_ids_idx',
+            'hive_posts_author_id_created_at_id_idx',
+            'hive_posts_author_id_id_idx',
+
 
             'hive_posts_api_helper_author_s_permlink_idx',
 
@@ -163,10 +159,27 @@ class DbState:
             return False
 
     @classmethod
+    def _execute_query(cls, query):
+        time_start = perf_counter()
+   
+        current_work_mem = cls.update_work_mem('2GB')
+        log.info("[INIT] Attempting to execute query: `%s'...", query)
+
+        row = cls.db().query_no_return(query)
+
+        cls.update_work_mem(current_work_mem)
+
+        time_end = perf_counter()
+        log.info("[INIT] Query `%s' done in %.4fs", query, time_end - time_start)
+
+
+    @classmethod
     def processing_indexes(cls, is_pre_process, drop, create):
         DB = cls.db()
         engine = DB.engine()
         log.info("[INIT] Begin %s-initial sync hooks", "pre" if is_pre_process else "post")
+
+        any_index_created = False
 
         for index in cls._disableable_indexes():
             log.info("%s index %s.%s", ("Drop" if is_pre_process else "Recreate"), index.table, index.name)
@@ -181,12 +194,18 @@ class DbState:
             except sqlalchemy.exc.ProgrammingError as ex:
                 log.warning("Ignoring ex: {}".format(ex))
 
-            if create and cls.has_index(index.name) == False:
-                time_start = perf_counter()
-                index.create(engine)
-                end_time = perf_counter()
-                elapsed_time = end_time - time_start
-                log.info("Index %s created in time %.4f s", index.name, elapsed_time)
+            if create:
+                if cls.has_index(index.name):
+                    log.info("Index %s already exists... Creation skipped.", index.name)
+                else:
+                    time_start = perf_counter()
+                    index.create(engine)
+                    end_time = perf_counter()
+                    elapsed_time = end_time - time_start
+                    log.info("Index %s created in time %.4f s", index.name, elapsed_time)
+                    any_index_created = True
+        if any_index_created:
+            cls._execute_query("ANALYZE")
 
     @classmethod
     def before_initial_sync(cls, last_imported_block, hived_head_block):
@@ -236,9 +255,11 @@ class DbState:
         Re-creates non-core indexes for serving APIs after init sync,
         as well as all foreign keys."""
 
+        start_time = perf_counter()
+
         last_imported_block = DbState.db().query_one("SELECT block_num FROM hive_state LIMIT 1")
 
-        log.info("[INIT] Current imported block: %s Last imported block: %s", current_imported_block, last_imported_block)
+        log.info("[INIT] Current imported block: %s. Last imported block: %s.", current_imported_block, last_imported_block)
         if last_imported_block > current_imported_block:
           last_imported_block = current_imported_block
 
@@ -250,138 +271,93 @@ class DbState:
             force_index_rebuild = True
             massive_sync_preconditions = True
 
-        def vacuum_hive_posts():
+        def vacuum_hive_posts(cls):
             if massive_sync_preconditions:
-                time_start = perf_counter()
-                DbState.db().query_no_return( "VACUUM ANALYZE hive_posts" )
-                time_end = perf_counter()
-                log.info("[INIT] VACUUM ANALYZE hive_posts executed in %.4fs", time_end - time_start)
+                cls._execute_query("VACUUM ANALYZE hive_posts")
 
         #is_pre_process, drop, create
         cls.processing_indexes( False, force_index_rebuild, True )
-
-        current_work_mem = cls.update_work_mem('2GB')
-
-        time_start = perf_counter()
-
+   
         if massive_sync_preconditions:
             # Update count of all child posts (what was hold during initial sync)
-            sql = """
-                  select update_all_hive_posts_children_count()
-                  """
-            row = DbState.db().query_row(sql)
-
-            time_end = perf_counter()
-            log.info("[INIT] update_all_hive_posts_children_count executed in %.4fs", time_end - time_start)
+            cls._execute_query("select update_all_hive_posts_children_count()")
         else:
             # Update count of child posts processed during partial sync (what was hold during initial sync)
-            sql = """
-                  select update_hive_posts_children_count({}, {})
-                  """.format(last_imported_block, current_imported_block)
-            row = DbState.db().query_row(sql)
+            sql = "select update_hive_posts_children_count({}, {})".format(last_imported_block, current_imported_block)
+            cls._execute_query(sql)
 
-            time_end = perf_counter()
-            log.info("[INIT] update_hive_posts_children_count executed in %.4fs", time_end - time_start)
-
-        vacuum_hive_posts()
+        vacuum_hive_posts(cls)
 
         time_start = perf_counter()
         # Update root_id all root posts
         sql = """
               select update_hive_posts_root_id({}, {})
               """.format(last_imported_block, current_imported_block)
-        row = DbState.db().query_row(sql)
-        time_end = perf_counter()
-        log.info("[INIT] update_hive_posts_root_id executed in %.4fs", time_end - time_start)
+        cls._execute_query(sql)
 
-        vacuum_hive_posts()
-
-        time_start = perf_counter()
+        vacuum_hive_posts(cls)
 
         # Update root_id all root posts
         sql = """
               select update_hive_posts_api_helper({}, {})
               """.format(last_imported_block, current_imported_block)
-        row = DbState.db().query_row(sql)
-
-        time_end = perf_counter()
-        log.info("[INIT] update_hive_posts_api_helper executed in %.4fs", time_end - time_start)
+        cls._execute_query(sql)
 
         time_start = perf_counter()
 
+        log.info("[INIT] Attempting to execute update_all_posts_active...")
         update_active_starting_from_posts_on_block(last_imported_block, current_imported_block)
 
         time_end = perf_counter()
         log.info("[INIT] update_all_posts_active executed in %.4fs", time_end - time_start)
 
-        vacuum_hive_posts()
-
-        time_start = perf_counter()
+        vacuum_hive_posts(cls)
 
         sql = """
             SELECT update_feed_cache({}, {});
         """.format(last_imported_block, current_imported_block)
-        DbState.db().query_no_return(sql)
+        cls._execute_query(sql)
 
-        time_end = perf_counter()
-        log.info("[INIT] update_feed_cache executed in %.4fs", time_end - time_start)
-
-        time_start = perf_counter()
         sql = """
             SELECT update_hive_posts_mentions({}, {});
         """.format(last_imported_block, current_imported_block)
-        DbState.db().query_no_return(sql)
-        time_end = perf_counter()
-        log.info("[INIT] update_hive_posts_mentions executed in %.4fs", time_end - time_start)
+        cls._execute_query(sql)
 
         time_start = perf_counter()
         PayoutStats.generate()
         time_end = perf_counter()
         log.info("[INIT] filling payout_stats_view executed in %.4fs", time_end - time_start)
 
-        time_start = perf_counter()
         sql = """
-            SELECT update_account_reputations({}, {});
-        """.format(last_imported_block, current_imported_block)
-        DbState.db().query_no_return(sql)
-        time_end = perf_counter()
-        log.info("[INIT] update_account_reputations executed in %.4fs", time_end - time_start)
+              SELECT update_account_reputations({}, {}, True);
+              """.format(last_imported_block, current_imported_block)
+        cls._execute_query(sql)
 
+        log.info("[INIT] Attempting to execute update_communities_posts_and_rank...")
         time_start = perf_counter()
         update_communities_posts_and_rank()
         time_end = perf_counter()
         log.info("[INIT] update_communities_posts_and_rank executed in %.4fs", time_end - time_start)
 
-        time_start = perf_counter()
         sql = """
-            SELECT update_posts_rshares({}, {});
-        """.format(last_imported_block, current_imported_block)
-        DbState.db().query_no_return(sql)
-        time_end = perf_counter()
-        log.info("[INIT] update_posts_rshares executed in %.4fs", time_end - time_start)
+              SELECT update_posts_rshares({}, {});
+              """.format(last_imported_block, current_imported_block)
+        cls._execute_query(sql)
 
-        vacuum_hive_posts()
+        vacuum_hive_posts(cls)
 
-        time_start = perf_counter()
         sql = """
               SELECT update_notification_cache(NULL, NULL, False);
               """
-        DbState.db().query_no_return(sql)
-        time_end = perf_counter()
-        log.info("[INIT] update_notification_cache executed in %.4fs", time_end - time_start)
+        cls._execute_query(sql)
 
-        time_start = perf_counter()
         sql = """
-            SELECT update_follow_count({}, {});
-        """.format(last_imported_block, current_imported_block)
-        DbState.db().query_no_return(sql)
-        time_end = perf_counter()
-        log.info("[INIT] update_follow_count executed in %.4fs", time_end - time_start)
+              SELECT update_follow_count({}, {});
+              """.format(last_imported_block, current_imported_block)
+        cls._execute_query(sql)
 
         # Update a block num immediately
-        DbState.db().query_no_return("UPDATE hive_state SET block_num = :block_num", block_num = current_imported_block)
-
-        cls.update_work_mem(current_work_mem)
+        cls.db().query_no_return("UPDATE hive_state SET block_num = :block_num", block_num = current_imported_block)
 
         if massive_sync_preconditions:
             from hive.db.schema import create_fk, set_logged_table_attribute
@@ -391,11 +367,10 @@ class DbState:
             log.info("Recreating FKs")
             create_fk(cls.db())
 
-            time_start = perf_counter()
-            DbState.db().query_no_return( "VACUUM ANALYZE" )
-            time_end = perf_counter()
-            log.info("[INIT] VACUUM ANALYZE executed in %.4fs", time_end - time_start)
+            cls._execute_query("VACUUM ANALYZE")
 
+        end_time = perf_counter()
+        log.info("[INIT] After initial sync actions done in %.4fs", end_time - start_time)
 
 
     @staticmethod
@@ -429,139 +404,3 @@ class DbState:
         """
         return not cls.db().query_one("SELECT 1 FROM hive_feed_cache LIMIT 1")
 
-    @classmethod
-    def _check_migrations(cls):
-        """Check current migration version and perform updates as needed."""
-        #pylint: disable=line-too-long,too-many-branches,too-many-statements
-        cls._ver = cls.db().query_one("SELECT db_version FROM hive_state LIMIT 1")
-        assert cls._ver is not None, 'could not load state record'
-
-        if cls._ver == 0:
-            raise Exception("dbv cannot be 0; reindex required")
-
-        if cls._ver == 1:
-            cls._set_ver(2)
-
-        if cls._ver == 2:
-            cls._set_ver(3)
-
-        if cls._ver == 3:
-            cls._set_ver(4)
-
-        if cls._ver == 4:
-            cls.db().query("CREATE INDEX hive_follows_ix4 ON hive_follows (follower, following) WHERE state = 2")
-            cls._set_ver(5)
-
-        if cls._ver == 5:
-            # recover acct names lost to issue #151
-            from hive.steem.client import SteemClient
-            from hive.indexer.accounts import Accounts
-            names = SteemClient().get_all_account_names()
-            Accounts.load_ids()
-            Accounts.register(names, None, '1970-01-01T00:00:00', 0)
-            Accounts.clear_ids()
-            cls._set_ver(6)
-
-        if cls._ver == 6:
-            cls.db().query("DROP INDEX hive_posts_cache_ix6")
-            #cls.db().query("CREATE INDEX hive_posts_cache_ix6a ON hive_posts_cache (sc_trend, post_id) WHERE is_paidout = '0'")
-            #cls.db().query("CREATE INDEX hive_posts_cache_ix6b ON hive_posts_cache (post_id, sc_trend) WHERE is_paidout = '0'")
-            #cls.db().query("DROP INDEX hive_posts_cache_ix7")
-            #cls.db().query("CREATE INDEX hive_posts_cache_ix7a ON hive_posts_cache (sc_hot, post_id) WHERE is_paidout = '0'")
-            #cls.db().query("CREATE INDEX hive_posts_cache_ix7b ON hive_posts_cache (post_id, sc_hot) WHERE is_paidout = '0'")
-            cls._set_ver(7)
-
-        if cls._ver == 7:
-            cls.db().query("DROP INDEX IF EXISTS hive_accounts_ix4; CREATE INDEX hive_accounts_ix4 ON hive_accounts (id, name)")
-            cls._set_ver(8)
-
-        if cls._ver == 8:
-            cls.db().query("DROP INDEX hive_follows_ix2")
-            cls.db().query("DROP INDEX hive_follows_ix3")
-            cls.db().query("DROP INDEX hive_follows_ix4")
-            cls.db().query("CREATE INDEX hive_follows_5a ON hive_follows (following, state, created_at, follower)")
-            cls.db().query("CREATE INDEX hive_follows_5b ON hive_follows (follower, state, created_at, following)")
-            cls._set_ver(9)
-
-        if cls._ver == 9:
-            #from hive.indexer.follow import Follow
-            #Follow.force_recount()
-            cls._set_ver(10)
-
-        if cls._ver == 10:
-            #cls.db().query("CREATE INDEX hive_posts_cache_ix8 ON hive_posts_cache (category, payout, depth) WHERE is_paidout = '0'")
-            #cls.db().query("CREATE INDEX hive_posts_cache_ix9a ON hive_posts_cache (depth, payout, post_id) WHERE is_paidout = '0'")
-            #cls.db().query("CREATE INDEX hive_posts_cache_ix9b ON hive_posts_cache (category, depth, payout, post_id) WHERE is_paidout = '0'")
-            cls._set_ver(11)
-
-        if cls._ver == 11:
-            cls.db().query("DROP INDEX hive_posts_ix1")
-            cls.db().query("DROP INDEX hive_posts_ix2")
-            cls.db().query("CREATE INDEX hive_posts_ix3 ON hive_posts (author, depth, id) WHERE counter_deleted = 0")
-            cls.db().query("CREATE INDEX hive_posts_ix4 ON hive_posts (parent_id, id) WHERE counter_deleted = 0")
-            cls._set_ver(12)
-
-        if cls._ver == 12: # community schema
-            assert False, 'not finalized'
-            for table in ['hive_members', 'hive_flags', 'hive_modlog',
-                          'hive_communities', 'hive_subscriptions',
-                          'hive_roles', 'hive_notifs']:
-                cls.db().query("DROP TABLE IF EXISTS %s" % table)
-            build_metadata_community().create_all(cls.db().engine())
-
-            cls.db().query("ALTER TABLE hive_accounts ADD COLUMN lr_notif_id integer")
-            cls.db().query("ALTER TABLE hive_posts DROP CONSTRAINT hive_posts_fk2")
-            cls.db().query("ALTER TABLE hive_posts DROP COLUMN community")
-            cls.db().query("ALTER TABLE hive_posts ADD COLUMN community_id integer")
-            cls.db().query("ALTER TABLE hive_posts_cache ADD COLUMN community_id integer")
-            cls._set_ver(13)
-
-        if cls._ver == 13:
-            sqls = ("CREATE INDEX hive_posts_ix5 ON hive_posts (id) WHERE is_pinned = '1' AND counter_deleted = 0",
-                    "CREATE INDEX hive_posts_ix6 ON hive_posts (community_id, id) WHERE community_id IS NOT NULL AND is_pinned = '1' AND counter_deleted = 0",)
-            for sql in sqls:
-                cls.db().query(sql)
-            cls._set_ver(14)
-
-        if cls._ver == 14:
-            cls.db().query("ALTER TABLE hive_communities ADD COLUMN primary_tag VARCHAR(32)   NOT NULL DEFAULT ''")
-            cls.db().query("ALTER TABLE hive_communities ADD COLUMN category    VARCHAR(32)   NOT NULL DEFAULT ''")
-            cls.db().query("ALTER TABLE hive_communities ADD COLUMN avatar_url  VARCHAR(1024) NOT NULL DEFAULT ''")
-            cls.db().query("ALTER TABLE hive_communities ADD COLUMN num_authors INTEGER       NOT NULL DEFAULT 0")
-            #cls.db().query("CREATE INDEX hive_posts_cache_ix20 ON hive_posts_cache (community_id, author, payout, post_id) WHERE is_paidout = '0'")
-            cls._set_ver(15)
-
-        if cls._ver == 15:
-            cls.db().query("ALTER TABLE hive_accounts DROP COLUMN lr_notif_id")
-            cls.db().query("ALTER TABLE hive_accounts ADD COLUMN lastread_at TIMESTAMP WITHOUT TIME ZONE DEFAULT '1970-01-01 00:00:00' NOT NULL")
-            cls.db().query("CREATE INDEX hive_notifs_ix6 ON hive_notifs (dst_id, created_at, score, id) WHERE dst_id IS NOT NULL")
-            cls._set_ver(16)
-
-        if cls._ver == 16:
-            cls.db().query("CREATE INDEX hive_communities_ft1 ON hive_communities USING GIN (to_tsvector('english', title || ' ' || about))")
-            cls._set_ver(17)
-
-        if cls._ver == 17:
-            cls.db().query("INSERT INTO hive_accounts (name, created_at) VALUES ('', '1970-01-01T00:00:00') ON CONFLICT (name) DO NOTHING")
-            cls.db().query("INSERT INTO hive_permlink_data (permlink) VALUES ('') ON CONFLICT (permlink) DO NOTHING")
-            cls.db().query("INSERT INTO hive_category_data (category) VALUES ('') ON CONFLICT (category) DO NOTHING")
-            cls._set_ver(18)
-
-        reset_autovac(cls.db())
-
-        log.info("[HIVE] db version: %d", cls._ver)
-        assert cls._ver == DB_VERSION, "migration missing or invalid DB_VERSION"
-        # Example migration:
-        #if cls._ver == 1:
-        #    cls.db().query("ALTER TABLE hive_posts ALTER COLUMN author SET DEFAULT ''")
-        #    cls._set_ver(2)
-
-
-    @classmethod
-    def _set_ver(cls, ver):
-        """Sets the db/schema version number. Enforce sequential."""
-        assert cls._ver is not None, 'version needs to be read before updating'
-        assert ver == cls._ver + 1, 'version must follow previous'
-        cls.db().query("UPDATE hive_state SET db_version = %d" % ver)
-        cls._ver = ver
-        log.info("[HIVE] db migrated to version: %d", ver)

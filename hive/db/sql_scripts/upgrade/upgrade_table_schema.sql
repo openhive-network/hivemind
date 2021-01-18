@@ -15,6 +15,13 @@ CREATE TABLE IF NOT EXISTS hive_db_data_migration
   migration varchar(128) not null
 );
 
+CREATE TABLE IF NOT EXISTS hive_db_vacuum_needed
+(
+  vacuum_needed BOOLEAN NOT NULL
+);
+
+TRUNCATE TABLE hive_db_vacuum_needed;
+
 DO $$
 BEGIN
   EXECUTE 'ALTER DATABASE '||current_database()||' SET join_collapse_limit TO 16';
@@ -138,6 +145,11 @@ IF NOT EXISTS(SELECT data_type
   perform deps_restore_dependencies('public', 'hive_mentions');
 
   INSERT INTO hive_db_data_migration VALUES ('hive_mentions fill');
+ELSE
+  ALTER TABLE public.hive_mentions
+    DROP CONSTRAINT hive_mentions_ux1;
+  ALTER TABLE public.hive_mentions
+    ADD CONSTRAINT hive_mentions_ux1 UNIQUE (post_id, account_id);
 END IF;
 END
 $BODY$
@@ -303,9 +315,10 @@ $BODY$;
 
 --- 4cdf5d19f6cfcb73d3fa504cac9467c4df31c02e - https://gitlab.syncad.com/hive/hivemind/-/merge_requests/295
 --- 9e126e9d762755f2b9a0fd68f076c9af6bb73b76 - https://gitlab.syncad.com/hive/hivemind/-/merge_requests/314 mentions fix
+--- 1cc9981679157e4e54e5e4a74cca1feb5d49296d - fix for mentions notifications time value
 INSERT INTO hive_db_data_migration
 select 'update_hive_post_mentions refill execution'
-where not exists (select null from hive_db_patch_level where patched_to_revision = '9e126e9d762755f2b9a0fd68f076c9af6bb73b76' )
+where not exists (select null from hive_db_patch_level where patched_to_revision = '1cc9981679157e4e54e5e4a74cca1feb5d49296d' )
 ;
 
 --- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/298
@@ -366,7 +379,7 @@ CREATE INDEX IF NOT EXISTS hive_blocks_created_at_idx ON hive_blocks (created_at
 --- Notification cache to significantly speedup notification APIs.
 CREATE TABLE IF NOT EXISTS hive_notification_cache
 (
-  id BIGINT NOT NULL,
+  id BIGINT NOT NULL DEFAULT nextval('hive_notification_cache_id_seq'::regclass),
   block_num INT NOT NULL,
   type_id INT NOT NULL,
   dst INT NULL,
@@ -423,3 +436,36 @@ CREATE INDEX IF NOT EXISTS hive_posts_promoted_id_idx ON hive_posts (promoted, i
  CREATE INDEX IF NOT EXISTS hive_posts_tags_ids_idx ON hive_posts USING gin(tags_ids gin__int_ops);
 
  --DROP TABLE IF EXISTS hive_post_tags;
+
+
+CREATE SEQUENCE IF NOT EXISTS hive_notification_cache_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    CACHE 1
+    ;
+
+ALTER TABLE hive_notification_cache
+  ALTER COLUMN id SET DEFAULT nextval('hive_notification_cache_id_seq'::regclass);
+
+ -- Changes done in https://gitlab.syncad.com/hive/hivemind/-/merge_requests/452
+ DROP INDEX IF EXISTS hive_posts_parent_id_idx;
+
+ CREATE INDEX IF NOT EXISTS hive_posts_parent_id_counter_deleted_id_idx ON hive_posts (parent_id, counter_deleted, id);
+
+ DROP INDEX IF EXISTS hive_posts_author_id_created_at_idx;
+
+ CREATE INDEX IF NOT EXISTS hive_posts_author_id_created_at_id_idx ON hive_posts (author_id DESC, created_at DESC, id);
+
+ DROP INDEX IF EXISTS hive_posts_author_posts_idx;
+
+ CREATE INDEX IF NOT EXISTS hive_posts_author_id_id_idx ON hive_posts (author_id, id)
+ WHERE depth = 0;
+
+ CREATE INDEX IF NOT EXISTS hive_feed_cache_post_id_idx ON hive_feed_cache (post_id);
+
+-- Changes made in https://gitlab.syncad.com/hive/hivemind/-/merge_requests/454
+DROP INDEX IF EXISTS hive_posts_parent_id_counter_deleted_id_idx;
+
+CREATE INDEX IF NOT EXISTS hive_posts_parent_id_id_idx ON hive_posts (parent_id, id DESC) where counter_deleted = 0;

@@ -26,7 +26,18 @@ BEGIN
     );
   END IF;
 
-  RETURN QUERY SELECT
+  RETURN QUERY 
+  WITH blog_posts AS
+  (
+    SELECT hp.id
+    FROM live_posts_comments_view hp
+    JOIN hive_feed_cache hfc ON hp.id = hfc.post_id
+    WHERE hfc.account_id = __account_id 
+      AND ( ( __post_id = 0 ) OR ( hfc.created_at <= __created_at ) )
+    ORDER BY hp.created_at DESC, hp.id DESC
+    LIMIT _limit
+  )
+  SELECT
       hp.id,
       hp.author,
       hp.parent_author,
@@ -65,10 +76,9 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       NULL
-    FROM hive_posts_view hp
-    JOIN hive_feed_cache hfc ON hp.id = hfc.post_id
-    WHERE hfc.account_id = __account_id AND ( ( __post_id = 0 ) OR ( hfc.created_at <= __created_at ) )
-    ORDER BY created_at DESC, hp.id DESC
+    FROM blog_posts,
+    LATERAL get_post_view_by_id(blog_posts.id) hp
+    ORDER BY hp.created_at DESC, hp.id DESC
     LIMIT _limit;
 
 END

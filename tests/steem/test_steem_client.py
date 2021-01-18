@@ -33,8 +33,12 @@ def test_stream_blocks(client):
     start_at = client.last_irreversible()
     stop_at = client.head_block() + 2
     streamed = 0
+
+    def breaker():
+        return True
+
     with pytest.raises(KeyboardInterrupt):
-        for block in client.stream_blocks(start_at, trail_blocks=0, max_gap=100):
+        for block in client.stream_blocks(start_at, trail_blocks=0, max_gap=100, breaker=breaker):
             assert 'block_id' in block
             num = int(block['block_id'][:8], base=16)
             assert num == start_at + streamed
@@ -61,6 +65,8 @@ def test_gdgp_extended(client):
     assert 'usd_per_steem' in ret
 
 def test_get_blocks_range(client):
+    def breaker():
+        return True
     lbound = 23000000
-    blocks = client.get_blocks_range(lbound, lbound + 5)
+    blocks = client.get_blocks_range(lbound, lbound + 5, breaker)
     assert len(blocks) == 5

@@ -240,7 +240,6 @@ async def _load_discussion(db, author, permlink, observer=None):
     sql = "SELECT * FROM bridge_get_discussion(:author,:permlink,:observer)"
     sql_result = await db.query_all(sql, author=author, permlink=permlink, observer=observer)
 
-    muted_accounts = Mutes.all()
     posts = []
     posts_by_id = {}
     replies = {}
@@ -248,15 +247,14 @@ async def _load_discussion(db, author, permlink, observer=None):
     for row in sql_result:
       post = _condenser_post_object(row)
 
-      if post['author'] not in muted_accounts:
-        post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
-        posts.append(post)
+      post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
+      posts.append(post)
 
-        parent_key = _ref_parent(post)
-        _key = _ref(post)
-        if parent_key not in replies:
-          replies[parent_key] = []
-        replies[parent_key].append(_key)
+      parent_key = _ref_parent(post)
+      _key = _ref(post)
+      if parent_key not in replies:
+        replies[parent_key] = []
+      replies[parent_key].append(_key)
 
     for post in posts:
       _key = _ref(post)

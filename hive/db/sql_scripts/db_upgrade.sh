@@ -17,6 +17,7 @@ for sql in postgres_handle_view_changes.sql \
           hive_muted_accounts_view.sql \
           hive_muted_accounts_by_id_view.sql \
           hive_blacklisted_accounts_by_observer_view.sql \
+	  get_post_view_by_id.sql \
           hive_post_operations.sql \
           head_block_time.sql \
           update_feed_cache.sql \
@@ -69,5 +70,6 @@ do
 done
 
 time psql -a -v "ON_ERROR_STOP=1" -U $1 -d $2  -c '\timing' -f upgrade/upgrade_runtime_migration.sql 2>&1 | tee -a -i upgrade.log
-          
+
+time psql -a -v "ON_ERROR_STOP=1" -U $1 -d $2  -c '\timing' -f upgrade/do_conditional_vacuum.sql 2>&1 | tee -a -i upgrade.log
 
