@@ -3,8 +3,6 @@
 set -e
 
 pip3 install tox
-pip3 install requests
-pip3 install prettytable
 
 export HIVEMIND_ADDRESS=$1
 export HIVEMIND_PORT=$2
@@ -33,4 +31,4 @@ do
       "${@:6}"
   echo Done!
 done
-./scripts/csv_report_parser.py http://$HIVEMIND_ADDRESS $HIVEMIND_PORT $TAVERN_DIR $TAVERN_DIR
+tox -e csv-report-parser -- http://$HIVEMIND_ADDRESS $HIVEMIND_PORT $TAVERN_DIR $TAVERN_DIR

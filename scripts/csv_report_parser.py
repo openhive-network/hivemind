@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 import os
 import csv
-import requests
-import json
 from time import perf_counter
 from difflib import SequenceMatcher
-
+import requests
 
 def process_file_name(file_name, tavern_tests_dir):
     return file_name.replace(tavern_tests_dir, "").lstrip("/")
@@ -76,7 +74,9 @@ if __name__ == "__main__":
     assert os.path.exists(args.csv_report_dir), "Please provide valid csv report path"
     assert os.path.exists(args.tavern_tests_dir), "Please provide valid tavern path"
 
+    print("Parsing csv file...")
     report_data, report_data_sizes = parse_csv_files(args.csv_report_dir)
+    print("Parsing yaml test files for request data...")
     request_data = get_requests_from_yaml(args.tavern_tests_dir)
 
     html_file = "tavern_benchmarks_report.html"
@@ -120,14 +120,17 @@ if __name__ == "__main__":
             if dmedian >= args.cutoff_time:
                 t_start = perf_counter()
                 overlap = get_overlap(args.tavern_tests_dir, name)
-                ret = requests.post("{}:{}".format(args.address, args.port), request_data[name.replace(overlap, "").lstrip("/")])
+                req_data = request_data[name.replace(overlap, "").lstrip("/")]
+                print("Sending {} for reference time measurement".format(req_data))
+                ret = requests.post("{}:{}".format(args.address, args.port), req_data)
                 if ret.status_code == 200:
                     ref_time = perf_counter() - t_start
                 else:
                     ref_time = 0.
+                print("Got response in {:.4f}s".format(ref_time))
                 ref_size = int(ret.headers.get("Content-Length", 0))
                 if dmean > args.time_threshold:
-                    ofile.write("        <tr><td>{}<br/>Parameters: {}</td><td>{:.1f}</td><td>{:.1f}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, request_data[name.replace(overlap, "").lstrip("/")], dmean_size / 1000., ref_size / 1000., dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
+                    ofile.write("        <tr><td>{}<br/>Parameters: {}</td><td>{:.1f}</td><td>{:.1f}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, req_data, dmean_size / 1000., ref_size / 1000., dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
                     above_treshold.append((name, "{:.4f}".format(dmean)))
                 else:
                     ofile.write("        <tr><td>{}</td><td>{:.1f}</td><td>{:.1f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, dmean_size / 1000., ref_size / 1000., dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))

@@ -2,8 +2,6 @@
 
 set -e
 pip3 install tox --user
-pip3 install requests --user
-pip3 install prettytable --user
 
 export HIVEMIND_ADDRESS=$1
 export HIVEMIND_PORT=$2
@@ -28,4 +26,4 @@ do
   tox -e tavern-benchmark -- -W ignore::pytest.PytestDeprecationWarning --workers auto "${@:4}"
   echo Done!
 done
-./scripts/csv_report_parser.py http://$HIVEMIND_ADDRESS $HIVEMIND_PORT $TAVERN_DIR $TAVERN_DIR
+tox -e csv-report-parser -- http://$HIVEMIND_ADDRESS $HIVEMIND_PORT $TAVERN_DIR $TAVERN_DIR
