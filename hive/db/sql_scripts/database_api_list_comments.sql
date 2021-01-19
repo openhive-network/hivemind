@@ -103,8 +103,9 @@ BEGIN
       hp1.cashout_time
     FROM live_posts_comments_view hp1
     WHERE NOT hp1.is_muted
-      AND hp1.cashout_time >= _cashout_time
-      AND (__post_id = 0 OR hp1.id >= __post_id)
+      AND hp1.cashout_time > _cashout_time
+            OR hp1.cashout_time = _cashout_time
+            AND hp1.id >= __post_id AND hp1.id != 0
     ORDER BY
       hp1.cashout_time ASC,
       hp1.id ASC
@@ -243,7 +244,10 @@ BEGIN
     JOIN hive_posts hp2 ON hp1.parent_id = hp2.id
     WHERE hp2.author_id = __parent_author_id
         AND NOT hp1.is_muted
-        AND (__post_id = 0 OR ( hp1.updated_at <= _updated_at AND hp1.id >= __post_id))
+        AND (
+            hp1.updated_at < _updated_at
+            OR hp1.updated_at = _updated_at AND hp1.id >= __post_id AND hp1.id != 0
+            )
     ORDER BY hp1.updated_at DESC, hp1.id ASC
     LIMIT _limit
   )
@@ -290,8 +294,11 @@ BEGIN
     FROM live_posts_comments_view hp1
     WHERE hp1.author_id = __author_id
       AND NOT hp1.is_muted
-      AND hp1.updated_at <= _updated_at 
-      AND (__post_id = 0 OR hp1.id >= __post_id)
+      AND (
+          hp1.updated_at < _updated_at
+          OR hp1.updated_at = _updated_at
+          AND hp1.id >= __post_id AND hp1.id != 0
+          )
     ORDER BY hp1.updated_at DESC, hp1.id ASC
     LIMIT _limit
   )
