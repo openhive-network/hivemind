@@ -22,10 +22,13 @@ def get_requests_from_yaml(tavern_tests_dir):
                 with open(test_file, "r") as yaml_file:
                     yaml_document = yaml.load(yaml_file, Loader=yaml.BaseLoader)
                 if "stages" in yaml_document:
+                    benchmark_time_threshold = None
+                    if "benchmark_time_threshold" in yaml_document["stages"][0]:
+                        benchmark_time_threshold = float(yaml_document["stages"][0]["benchmark_time_threshold"])
                     if "request" in yaml_document["stages"][0]:
                         json_parameters = yaml_document["stages"][0]["request"].get("json", None)
                         assert json_parameters is not None, "Unable to find json parameters in request"
-                        ret[process_file_name(test_file, tavern_tests_dir)] = dumps(json_parameters)
+                        ret[process_file_name(test_file, tavern_tests_dir)] = (dumps(json_parameters), benchmark_time_threshold)
     return ret
 
 def abs_rel_diff(a, b):
@@ -34,6 +37,7 @@ def abs_rel_diff(a, b):
 def parse_csv_files(root_dir):
     ret_times = {}
     ret_sizes = {}
+    ret_benchmark_time_threshold = {}
     file_path = os.path.join(root_dir, "benchmark.csv")
     print("Processing file: {}".format(file_path))
     with open(file_path, 'r') as csv_file:
@@ -42,6 +46,13 @@ def parse_csv_files(root_dir):
             test_name = row[0] + ".tavern.yaml"
             test_time = float(row[1])
             test_response_size = float(row[2])
+            
+            test_benchmark_time_threshold = None
+            try:
+                test_benchmark_time_threshold = float(row[3])
+            except:
+                pass
+            
             if test_name in ret_times:
                 ret_times[test_name].append(test_time)
             else:
@@ -51,7 +62,10 @@ def parse_csv_files(root_dir):
                 ret_sizes[test_name].append(test_response_size)
             else:
                 ret_sizes[test_name] = [test_response_size]
-    return ret_times, ret_sizes
+
+            if test_benchmark_time_threshold is not None:
+                ret_benchmark_time_threshold[test_name] = test_benchmark_time_threshold
+    return ret_times, ret_sizes, ret_benchmark_time_threshold
 
 def get_overlap(s1, s2):
     s = SequenceMatcher(None, s1, s2)
@@ -75,7 +89,7 @@ if __name__ == "__main__":
     assert os.path.exists(args.tavern_tests_dir), "Please provide valid tavern path"
 
     print("Parsing csv file...")
-    report_data, report_data_sizes = parse_csv_files(args.csv_report_dir)
+    report_data, report_data_sizes, report_data_time_threshold = parse_csv_files(args.csv_report_dir)
     print("Parsing yaml test files for request data...")
     request_data = get_requests_from_yaml(args.tavern_tests_dir)
 
@@ -120,7 +134,8 @@ if __name__ == "__main__":
             if dmedian >= args.cutoff_time:
                 t_start = perf_counter()
                 overlap = get_overlap(args.tavern_tests_dir, name)
-                req_data = request_data[name.replace(overlap, "").lstrip("/")]
+                req_data = request_data[name.replace(overlap, "").lstrip("/")][0]
+                req_data_benchmark_time_threshold = report_data_time_threshold.get(name, None)
                 print("Sending {} for reference time measurement".format(req_data))
                 ret = requests.post("{}:{}".format(args.address, args.port), req_data)
                 if ret.status_code == 200:
@@ -129,7 +144,7 @@ if __name__ == "__main__":
                     ref_time = 0.
                 print("Got response in {:.4f}s".format(ref_time))
                 ref_size = int(ret.headers.get("Content-Length", 0))
-                if dmean > args.time_threshold:
+                if (req_data_benchmark_time_threshold is None and dmean > args.time_threshold) or (req_data_benchmark_time_threshold is not None and dmean > req_data_benchmark_time_threshold):
                     ofile.write("        <tr><td>{}<br/>Parameters: {}</td><td>{:.1f}</td><td>{:.1f}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, req_data, dmean_size / 1000., ref_size / 1000., dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
                     above_treshold.append((name, "{:.4f}".format(dmean)))
                 else:

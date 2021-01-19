@@ -31,4 +31,4 @@ do
       "${@:6}"
   echo Done!
 done
-tox -e csv-report-parser -- http://$HIVEMIND_ADDRESS $HIVEMIND_PORT $TAVERN_DIR $TAVERN_DIR --time-threshold=2.2
+tox -e csv-report-parser -- http://$HIVEMIND_ADDRESS $HIVEMIND_PORT $TAVERN_DIR $TAVERN_DIR --time-threshold=2.0
