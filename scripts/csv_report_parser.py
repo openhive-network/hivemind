@@ -153,6 +153,15 @@ if __name__ == "__main__":
         ofile.write("    </table>\n")
         ofile.write("  </body>\n")
         ofile.write("</html>\n")
+    
+    if report_data_time_threshold:
+        print("Tests with defined custom benchmark time threshold")
+        from prettytable import PrettyTable
+        summary = PrettyTable()
+        summary.field_names = ['Test name', 'Custom time value [s]']
+        for name, threshold in report_data_time_threshold.items():
+            summary.add_row((name, "{:.4f}".format(threshold)))
+        print(summary)
 
     if above_treshold:
         from prettytable import PrettyTable
