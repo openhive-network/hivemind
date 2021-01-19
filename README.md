@@ -70,7 +70,7 @@ $ export HIVEMIND_ADDRESS=127.0.0.1
 ```
 5. Run tests using tox:
 ```bash
-$ tox -- -v -n auto --durations=0
+$ tox -e tavern -- --workers auto --tests-per-worker auto --durations=0
 ```
 
 ## Production Environment
