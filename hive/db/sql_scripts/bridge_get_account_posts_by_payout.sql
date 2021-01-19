@@ -14,7 +14,22 @@ BEGIN
   IF __post_id <> 0 THEN
       SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
-  RETURN QUERY SELECT
+  RETURN QUERY
+  WITH payouts AS
+  (  
+    SELECT 
+      id,
+      (hp.payout + hp.pending_payout) as total_payout
+    FROM live_posts_comments_view hp
+    WHERE
+      hp.author_id = __account_id
+      AND NOT hp.is_paidout
+      AND ( __post_id = 0 OR (hp.payout + hp.pending_payout) < __payout_limit OR
+                             ((hp.payout + hp.pending_payout) = __payout_limit AND hp.id < __post_id) )
+    ORDER BY (hp.payout + hp.pending_payout) DESC, hp.id DESC
+    LIMIT _limit
+  )
+  SELECT
       hp.id,
       hp.author,
       hp.parent_author,
@@ -53,12 +68,9 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       NULL
-  FROM
-      hive_posts_view hp
-  WHERE
-      hp.author_id = __account_id AND NOT hp.is_paidout
-      AND ( __post_id = 0 OR ( hp.payout + hp.pending_payout ) < __payout_limit OR ( ( hp.payout + hp.pending_payout ) = __payout_limit AND hp.id < __post_id ) )
-  ORDER BY ( hp.payout + hp.pending_payout ) DESC, hp.id DESC
+  FROM payouts,
+  LATERAL get_post_view_by_id(payouts.id) hp
+  ORDER BY payouts.total_payout DESC, payouts.id DESC
   LIMIT _limit;
 END
 $function$
