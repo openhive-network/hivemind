@@ -167,7 +167,7 @@ if __name__ == "__main__":
         from prettytable import PrettyTable
         summary = PrettyTable()
         print("########## Test failed with following tests above {}s threshold ##########".format(args.time_threshold))
-        summary.field_names = ['Test name', 'Mean time [ms]']
+        summary.field_names = ['Test name', 'Mean time [s]']
         for entry in above_treshold:
             summary.add_row(entry)
         print(summary)
