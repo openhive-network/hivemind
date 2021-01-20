@@ -51,8 +51,7 @@ class Reblog(DbAdapterHolder):
         if op['delete']:
             if key in cls.reblog_items_to_flush:
                 del cls.reblog_items_to_flush[key]
-            else:
-                cls.delete( op['author'], op['permlink'], op['account'] )
+            cls.delete( op['author'], op['permlink'], op['account'] )
         else:
             cls.reblog_items_to_flush[key] = { 'op': op }
 

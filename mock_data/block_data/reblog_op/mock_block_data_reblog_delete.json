@@ -677,6 +677,17 @@
                             "id": "reblog",
                             "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-d\"}"
                         }
+                    },
+                    {
+                        "type": "custom_json_operation",
+                        "value": {
+                            "required_auths": [],
+                            "required_posting_auths": [
+                                "test-116-04"
+                            ],
+                            "id": "reblog",
+                            "json": "{\"account\":\"test-116-04\",\"author\":\"test-116-02\",\"permlink\":\"test-116-02\"}"
+                        }
                     }
                 ]
             }
@@ -703,6 +714,17 @@
                         "value": {
                             "author": "test-116-05",
                             "permlink": "test-116-05-e"
+                        }
+                    },
+                    {
+                        "type": "custom_json_operation",
+                        "value": {
+                            "required_auths": [],
+                            "required_posting_auths": [
+                                "test-116-04"
+                            ],
+                            "id": "reblog",
+                            "json": "{\"account\":\"test-116-04\",\"author\":\"test-116-02\",\"permlink\":\"test-116-02\"}"
                         }
                     }
                 ]
@@ -745,6 +767,17 @@
                             ],
                             "id": "reblog",
                             "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-e\"}"
+                        }
+                    },
+                    {
+                        "type": "custom_json_operation",
+                        "value": {
+                            "required_auths": [],
+                            "required_posting_auths": [
+                                "test-116-04"
+                            ],
+                            "id": "reblog",
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-04\",\"author\":\"test-116-02\",\"permlink\":\"test-116-02\"}"
                         }
                     }
                 ]
