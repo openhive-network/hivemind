@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 import os
 import csv
 from time import perf_counter
@@ -8,29 +9,6 @@ import requests
 def process_file_name(file_name, tavern_tests_dir):
     return file_name.replace(tavern_tests_dir, "").lstrip("/")
 
-def get_requests_from_yaml(tavern_tests_dir):
-    from fnmatch import fnmatch
-    import yaml
-    from json import dumps
-    ret = {}
-    pattern = "*.tavern.yaml"
-    for path, subdirs, files in os.walk(tavern_tests_dir):
-        for name in files:
-            if fnmatch(name, pattern):
-                test_file = os.path.join(path, name)
-                yaml_document = None
-                with open(test_file, "r") as yaml_file:
-                    yaml_document = yaml.load(yaml_file, Loader=yaml.BaseLoader)
-                if "stages" in yaml_document:
-                    benchmark_time_threshold = None
-                    if "benchmark_time_threshold" in yaml_document["stages"][0]:
-                        benchmark_time_threshold = float(yaml_document["stages"][0]["benchmark_time_threshold"])
-                    if "request" in yaml_document["stages"][0]:
-                        json_parameters = yaml_document["stages"][0]["request"].get("json", None)
-                        assert json_parameters is not None, "Unable to find json parameters in request"
-                        ret[process_file_name(test_file, tavern_tests_dir)] = (dumps(json_parameters), benchmark_time_threshold)
-    return ret
-
 def abs_rel_diff(a, b):
     return abs((a - b) / float(b)) * 100.
 
@@ -38,6 +16,7 @@ def parse_csv_files(root_dir):
     ret_times = {}
     ret_sizes = {}
     ret_benchmark_time_threshold = {}
+    ret_benchmark_request_params = {}
     file_path = os.path.join(root_dir, "benchmark.csv")
     print("Processing file: {}".format(file_path))
     with open(file_path, 'r') as csv_file:
@@ -46,6 +25,7 @@ def parse_csv_files(root_dir):
             test_name = row[0] + ".tavern.yaml"
             test_time = float(row[1])
             test_response_size = float(row[2])
+            ret_benchmark_request_params[test_name] = json.loads(row[4])
             
             test_benchmark_time_threshold = None
             try:
@@ -65,7 +45,7 @@ def parse_csv_files(root_dir):
 
             if test_benchmark_time_threshold is not None:
                 ret_benchmark_time_threshold[test_name] = test_benchmark_time_threshold
-    return ret_times, ret_sizes, ret_benchmark_time_threshold
+    return ret_times, ret_sizes, ret_benchmark_time_threshold, ret_benchmark_request_params
 
 def get_overlap(s1, s2):
     s = SequenceMatcher(None, s1, s2)
@@ -89,9 +69,8 @@ if __name__ == "__main__":
     assert os.path.exists(args.tavern_tests_dir), "Please provide valid tavern path"
 
     print("Parsing csv file...")
-    report_data, report_data_sizes, report_data_time_threshold = parse_csv_files(args.csv_report_dir)
+    report_data, report_data_sizes, report_data_time_threshold, request_data = parse_csv_files(args.csv_report_dir)
     print("Parsing yaml test files for request data...")
-    request_data = get_requests_from_yaml(args.tavern_tests_dir)
 
     html_file = "tavern_benchmarks_report.html"
     above_treshold = []
@@ -134,7 +113,7 @@ if __name__ == "__main__":
             if dmedian >= args.cutoff_time:
                 t_start = perf_counter()
                 overlap = get_overlap(args.tavern_tests_dir, name)
-                req_data = request_data[name.replace(overlap, "").lstrip("/")][0]
+                req_data = request_data[name]
                 req_data_benchmark_time_threshold = report_data_time_threshold.get(name, None)
                 print("Sending {} for reference time measurement".format(req_data))
                 ret = requests.post("{}:{}".format(args.address, args.port), req_data)
