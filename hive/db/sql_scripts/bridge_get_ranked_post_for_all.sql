@@ -253,7 +253,7 @@ BEGIN
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE NOT hp1.is_paidout
       AND ( __post_id = 0 OR (hp1.payout + hp1.pending_payout) < __payout_limit
-	                  OR ((hp1.payout + hp1.pending_payout) = __payout_limit AND hp1.id < __post_id) )
+                          OR ((hp1.payout + hp1.pending_payout) = __payout_limit AND hp1.id < __post_id) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
     ORDER BY (hp1.payout + hp1.pending_payout) DESC, hp1.id DESC
     LIMIT _limit

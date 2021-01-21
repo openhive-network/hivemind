@@ -184,7 +184,7 @@ BEGIN
       AND NOT hp1.is_paidout 
       AND ha.is_grayed AND (hp1.payout + hp1.pending_payout) > 0
       AND ( __post_id = 0 OR (hp1.payout + hp1.pending_payout) < __payout_limit 
-	                  OR ((hp1.payout + hp1.pending_payout) = __payout_limit AND hp1.id < __post_id) )
+                          OR ((hp1.payout + hp1.pending_payout) = __payout_limit AND hp1.id < __post_id) )
     ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
     LIMIT _limit
   )
@@ -348,7 +348,7 @@ BEGIN
       AND NOT hp1.is_paidout
       AND ( ( NOT _bridge_api AND hp1.depth = 0 ) OR ( _bridge_api AND hp1.payout_at BETWEEN __head_block_time + interval '12 hours' AND __head_block_time + interval '36 hours' ) )
       AND ( __post_id = 0 OR (hp1.payout + hp1.pending_payout) < __payout_limit 
-	                  OR ((hp1.payout + hp1.pending_payout) = __payout_limit AND hp1.id < __post_id) )
+                          OR ((hp1.payout + hp1.pending_payout) = __payout_limit AND hp1.id < __post_id) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
     ORDER BY (hp1.payout + hp1.pending_payout) DESC, hp1.id DESC
     LIMIT _limit
@@ -424,13 +424,13 @@ BEGIN
       hp1.id,
       hp1.promoted,
       blacklist.source
-    FROM live_posts_comments_view hp1 -- maybe should be live_posts_view?
+    FROM live_posts_comments_view hp1 -- maybe should be live_posts_view? no, you can promote replies too (probably no one uses it nowadays anyway)
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE hp1.tags_ids @> __hive_tag
       AND NOT hp1.is_paidout
       AND hp1.promoted > 0
       AND ( __post_id = 0 OR hp1.promoted < __promoted_limit
-	                  OR (hp1.promoted = __promoted_limit AND hp1.id < __post_id) )
+                          OR (hp1.promoted = __promoted_limit AND hp1.id < __post_id) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
     ORDER BY hp1.promoted DESC, hp1.id DESC
     LIMIT _limit
@@ -511,7 +511,7 @@ BEGIN
     WHERE hp1.tags_ids @> __hive_tag 
       AND NOT hp1.is_paidout
       AND ( __post_id = 0 OR hp1.sc_trend < __trending_limit
-	                  OR (hp1.sc_trend = __trending_limit AND hp1.id < __post_id) )
+                          OR (hp1.sc_trend = __trending_limit AND hp1.id < __post_id) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
     ORDER BY hp1.sc_trend DESC, hp1.id DESC
     LIMIT _limit

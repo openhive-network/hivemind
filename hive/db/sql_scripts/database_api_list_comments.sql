@@ -59,7 +59,7 @@ BEGIN
       hph.author_s_permlink
     FROM hive_posts_api_helper hph
     JOIN live_posts_comments_view hp ON hp.id = hph.id
-    WHERE hph.author_s_permlink  >= _author || '/' || _permlink
+    WHERE hph.author_s_permlink >= _author || '/' || _permlink
       AND NOT hp.is_muted -- all the mute checks in this file look insufficient, but maybe no one uses these API calls?
       AND hph.id != 0 -- what does this do?
     ORDER BY hph.author_s_permlink
@@ -104,8 +104,8 @@ BEGIN
     FROM live_posts_comments_view hp1
     WHERE NOT hp1.is_muted
       AND hp1.cashout_time > _cashout_time
-            OR hp1.cashout_time = _cashout_time
-            AND hp1.id >= __post_id AND hp1.id != 0
+       OR hp1.cashout_time = _cashout_time
+      AND hp1.id >= __post_id AND hp1.id != 0
     ORDER BY
       hp1.cashout_time ASC,
       hp1.id ASC

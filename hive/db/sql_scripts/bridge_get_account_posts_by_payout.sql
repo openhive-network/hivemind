@@ -24,8 +24,8 @@ BEGIN
     WHERE
       hp.author_id = __account_id
       AND NOT hp.is_paidout
-      AND ( __post_id = 0 OR (hp.payout + hp.pending_payout) < __payout_limit OR
-                             ((hp.payout + hp.pending_payout) = __payout_limit AND hp.id < __post_id) )
+      AND ( __post_id = 0 OR (hp.payout + hp.pending_payout) < __payout_limit
+                          OR ((hp.payout + hp.pending_payout) = __payout_limit AND hp.id < __post_id) )
     ORDER BY (hp.payout + hp.pending_payout) DESC, hp.id DESC
     LIMIT _limit
   )
