@@ -27,12 +27,12 @@ BEGIN
   WITH blog AS -- bridge_get_account_posts_by_blog
   (
     SELECT 
-      hfc.post_id, 
+      hfc.post_id,
       hfc.created_at
     FROM hive_feed_cache hfc
-    WHERE hfc.account_id = __account_id 
-      AND ( __post_id = 0 OR hfc.created_at < __created_at 
-	                  OR (hfc.created_at = __created_at AND hfc.post_id < __post_id) )
+    WHERE hfc.account_id = __account_id
+      AND ( __post_id = 0 OR hfc.created_at < __created_at
+                          OR (hfc.created_at = __created_at AND hfc.post_id < __post_id) )
       AND ( NOT _bridge_api OR
             NOT EXISTS (SELECT NULL FROM live_posts_comments_view hp1 --should this just be live_posts_view?
                         WHERE hp1.id = hfc.post_id AND hp1.community_id IS NOT NULL
