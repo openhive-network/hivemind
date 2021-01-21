@@ -13,7 +13,7 @@ export HIVEMIND_PORT=$2
 TEST_GROUP=$3
 JUNITXML=$4
 JOBS=${5:-auto}
-export TAVERN_DIR="tests/tests_api/hivemind/tavern"
+export TAVERN_DIR="$(realpath ./tests/tests_api/hivemind/tavern)"
 
 echo "Starting tests on hivemind server running on ${HIVEMIND_ADDRESS}:${HIVEMIND_PORT}"
 
