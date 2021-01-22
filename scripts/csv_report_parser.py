@@ -3,7 +3,6 @@ import json
 import os
 import csv
 from time import perf_counter
-from difflib import SequenceMatcher
 import requests
 
 def process_file_name(file_name, tavern_tests_dir):
@@ -46,11 +45,6 @@ def parse_csv_files(root_dir):
             if test_benchmark_time_threshold is not None:
                 ret_benchmark_time_threshold[test_name] = test_benchmark_time_threshold
     return ret_times, ret_sizes, ret_benchmark_time_threshold, ret_benchmark_request_params
-
-def get_overlap(s1, s2):
-    s = SequenceMatcher(None, s1, s2)
-    pos_a, pos_b, size = s.find_longest_match(0, len(s1), 0, len(s2)) 
-    return s1[pos_a:pos_a+size] if pos_b == 0 else ""
 
 if __name__ == "__main__":
     import argparse
@@ -112,15 +106,13 @@ if __name__ == "__main__":
             dmean_size = mean(report_data_sizes[name])
             if dmedian >= args.cutoff_time:
                 t_start = perf_counter()
-                overlap = get_overlap(args.tavern_tests_dir, name)
                 req_data = request_data[name]
                 req_data_benchmark_time_threshold = report_data_time_threshold.get(name, None)
                 print("Sending {} for reference time measurement".format(req_data))
                 ret = requests.post("{}:{}".format(args.address, args.port), req_data)
+                ref_time = 0.
                 if ret.status_code == 200:
                     ref_time = perf_counter() - t_start
-                else:
-                    ref_time = 0.
                 print("Got response in {:.4f}s".format(ref_time))
                 ref_size = int(ret.headers.get("Content-Length", 0))
                 if (req_data_benchmark_time_threshold is None and dmean > args.time_threshold) or (req_data_benchmark_time_threshold is not None and dmean > req_data_benchmark_time_threshold):
