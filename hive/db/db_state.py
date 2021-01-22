@@ -217,16 +217,22 @@ class DbState:
 
     @classmethod
     def processing_indexes(cls, is_pre_process, drop, create):
+        start_time = FOSM.start()
         _indexes = cls._disableable_indexes()
-        futures = []
-        with ThreadPoolExecutor(max_workers=len(_indexes)) as executor:
-            for _key_table, indexes in _indexes.items():
-              futures.append( executor.submit(cls.processing_indexes_per_table, cls.db(), _key_table.name, indexes, is_pre_process, drop, create) )
 
-            completedThreads = 0
-            for future in as_completed(futures):
-              completedThreads = completedThreads + 1
-            log.info("[INIT] Completed threads during indexes processing: %i", completedThreads)
+        methods = []
+        for _key_table, indexes in _indexes.items():
+          methods.append( (_key_table.name, cls.processing_indexes_per_table, [cls.db(), _key_table.name, indexes, is_pre_process, drop, create]) )
+
+        cls.process_tasks_in_threads("[INIT] %i threads finished creating indexes.", methods)
+
+        real_time = FOSM.stop(start_time)
+
+        log.info("=== CREATING INDEXES ===")
+        threads_time = FOSM.log_current("Total creating indexes time")
+        log.info(f"Elapsed time: {real_time :.4f}s. Calculated elapsed time: {threads_time :.4f}s. Difference: {real_time - threads_time :.4f}s")
+        FOSM.clear()
+        log.info("=== CREATING INDEXES ===")
 
     @classmethod
     def before_initial_sync(cls, last_imported_block, hived_head_block):
@@ -268,29 +274,6 @@ class DbState:
         cls.db().query_no_return(sql.format(workmem_value))
 
         return current_work_mem
-
-    @classmethod
-    def _after_initial_sync(cls, current_imported_block):
-        """Routine which runs *once* after initial sync.
-
-        Re-creates non-core indexes for serving APIs after init sync,
-        as well as all foreign keys."""
-
-        start_time = perf_counter()
-
-        last_imported_block = DbState.db().query_one("SELECT block_num FROM hive_state LIMIT 1")
-
-        log.info("[INIT] Current imported block: %s. Last imported block: %s.", current_imported_block, last_imported_block)
-        if last_imported_block > current_imported_block:
-          last_imported_block = current_imported_block
-
-        synced_blocks = current_imported_block - last_imported_block
-
-        force_index_rebuild = False
-        massive_sync_preconditions = False
-        if synced_blocks >= SYNCED_BLOCK_LIMIT:
-            force_index_rebuild = True
-            massive_sync_preconditions = True
 
     @classmethod
     def _finish_hive_posts(cls, db, massive_sync_preconditions, last_imported_block, current_imported_block):
@@ -428,7 +411,7 @@ class DbState:
         return FOSM.stop(startTime)
 
     @classmethod
-    def _finish_all_tables_in_threads(cls, part, methods):
+    def process_tasks_in_threads(cls, info, methods):
         futures = []
         pool = ThreadPoolExecutor(max_workers=Db.max_connections)
         futures = {pool.submit(cls.time_collector, method, args): (description) for (description, method, args) in methods}
@@ -445,7 +428,7 @@ class DbState:
               raise exc
 
         pool.shutdown()
-        log.info("[INIT] %i threads finished filling tables. Part %i.", completedThreads, part)
+        log.info(info, completedThreads)
 
     @classmethod
     def _finish_all_tables(cls, massive_sync_preconditions, last_imported_block, current_imported_block):
@@ -461,14 +444,14 @@ class DbState:
         methods.append( ('account_reputations', cls._finish_account_reputations, [cls.db(), last_imported_block, current_imported_block]) )
         methods.append( ('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]) )
         methods.append( ('follow_count', cls._finish_follow_count, [cls.db(), last_imported_block, current_imported_block]) )
-        cls._finish_all_tables_in_threads(0, methods)
+        cls.process_tasks_in_threads("[INIT] %i threads finished filling tables. Part nr 0", methods)
 
         methods = []
         #Notifications are dependent on many tables, therefore it's necessary to calculate it at the end
         methods.append( ('notification_cache', cls._finish_notification_cache, [cls.db()]) )
         #hive_posts_api_helper is dependent on `hive_posts/root_id` filling
         methods.append( ('hive_posts_api_helper', cls._finish_hive_posts_api_helper, [cls.db(), last_imported_block, current_imported_block]) )
-        cls._finish_all_tables_in_threads(1, methods)
+        cls.process_tasks_in_threads("[INIT] %i threads finished filling tables. Part nr 1", methods)
 
         real_time = FOSM.stop(start_time)
 
@@ -502,12 +485,14 @@ class DbState:
             massive_sync_preconditions = True
 
         #is_pre_process, drop, create
+        log.info("Creating indexes: started")
         cls.processing_indexes( False, force_index_rebuild, True )
+        log.info("Creating indexes: finished")
 
         #all post-updates are executed in different threads: one thread per one table
-        log.info("Filling tables with final values started")
+        log.info("Filling tables with final values: started")
         cls._finish_all_tables(massive_sync_preconditions, last_imported_block, current_imported_block)
-        log.info("Filling tables with final values finished")
+        log.info("Filling tables with final values: finished")
 
         # Update a block num immediately
         cls.db().query_no_return("UPDATE hive_state SET block_num = :block_num", block_num = current_imported_block)
