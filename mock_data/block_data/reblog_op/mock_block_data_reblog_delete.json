@@ -230,9 +230,21 @@
                             "parent_author": "",
                             "parent_permlink": "",
                             "author": "test-116-02",
-                            "permlink": "test-116-02",
+                            "permlink": "test-116-02-1",
                             "title": "Test post from test-116-02",
-                            "body": "Test body from test-116-02",
+                            "body": "Test body from test-116-02 scenario 1",
+                            "json_metadata": "{}"
+                        }
+                    },
+                    {
+                        "type": "comment_operation",
+                        "value": {
+                            "parent_author": "",
+                            "parent_permlink": "",
+                            "author": "test-116-02",
+                            "permlink": "test-116-02-F",
+                            "title": "Test post from test-116-02",
+                            "body": "Test body from test-116-02 scenario F",
                             "json_metadata": "{}"
                         }
                     },
@@ -242,9 +254,33 @@
                             "parent_author": "",
                             "parent_permlink": "",
                             "author": "test-116-03",
-                            "permlink": "test-116-03",
+                            "permlink": "test-116-03-2a",
                             "title": "Test post from test-116-03",
-                            "body": "Test body from test-116-03",
+                            "body": "Test body from test-116-03 scenario 2a",
+                            "json_metadata": "{}"
+                        }
+                    },
+                    {
+                        "type": "comment_operation",
+                        "value": {
+                            "parent_author": "",
+                            "parent_permlink": "",
+                            "author": "test-116-03",
+                            "permlink": "test-116-03-3",
+                            "title": "Test post from test-116-03",
+                            "body": "Test body from test-116-03 scenario 3",
+                            "json_metadata": "{}"
+                        }
+                    },
+                    {
+                        "type": "comment_operation",
+                        "value": {
+                            "parent_author": "",
+                            "parent_permlink": "",
+                            "author": "test-116-03",
+                            "permlink": "test-116-03-5",
+                            "title": "Test post from test-116-03",
+                            "body": "Test body from test-116-03 scenario 5",
                             "json_metadata": "{}"
                         }
                     },
@@ -254,9 +290,21 @@
                             "parent_author": "",
                             "parent_permlink": "",
                             "author": "test-116-04",
-                            "permlink": "test-116-04",
+                            "permlink": "test-116-04-2b",
                             "title": "Test post from test-116-04",
-                            "body": "Test body from test-116-04",
+                            "body": "Test body from test-116-04 scenario 2b",
+                            "json_metadata": "{}"
+                        }
+                    },
+                    {
+                        "type": "comment_operation",
+                        "value": {
+                            "parent_author": "",
+                            "parent_permlink": "",
+                            "author": "test-116-04",
+                            "permlink": "test-116-04-6",
+                            "title": "Test post from test-116-04",
+                            "body": "Test body from test-116-04 scenario 6",
                             "json_metadata": "{}"
                         }
                     },
@@ -266,9 +314,9 @@
                             "parent_author": "",
                             "parent_permlink": "",
                             "author": "test-116-05",
-                            "permlink": "test-116-05",
+                            "permlink": "test-116-05-4",
                             "title": "Test post from test-116-05",
-                            "body": "Test body from test-116-05",
+                            "body": "Test body from test-116-05 scenario 4",
                             "json_metadata": "{}"
                         }
                     },
@@ -278,9 +326,9 @@
                             "parent_author": "",
                             "parent_permlink": "",
                             "author": "test-116-05",
-                            "permlink": "test-116-05-a",
-                            "title": "Test post from test-116-05-a",
-                            "body": "Test body from test-116-05-a",
+                            "permlink": "test-116-05-7",
+                            "title": "Test post from test-116-05",
+                            "body": "Test body from test-116-05 scenario 7",
                             "json_metadata": "{}"
                         }
                     },
@@ -290,9 +338,9 @@
                             "parent_author": "",
                             "parent_permlink": "",
                             "author": "test-116-05",
-                            "permlink": "test-116-05-b",
-                            "title": "Test post from test-116-05-b",
-                            "body": "Test body from test-116-05-b",
+                            "permlink": "test-116-05-8a",
+                            "title": "Test post from test-116-05",
+                            "body": "Test body from test-116-05 scenario 8a",
                             "json_metadata": "{}"
                         }
                     },
@@ -302,9 +350,9 @@
                             "parent_author": "",
                             "parent_permlink": "",
                             "author": "test-116-05",
-                            "permlink": "test-116-05-c",
-                            "title": "Test post from test-116-05-c",
-                            "body": "Test body from test-116-05-c",
+                            "permlink": "test-116-05-8b",
+                            "title": "Test post from test-116-05",
+                            "body": "Test body from test-116-05 scenario 8b",
                             "json_metadata": "{}"
                         }
                     },
@@ -314,9 +362,9 @@
                             "parent_author": "",
                             "parent_permlink": "",
                             "author": "test-116-05",
-                            "permlink": "test-116-05-d",
-                            "title": "Test post from test-116-05-d",
-                            "body": "Test body from test-116-05-d",
+                            "permlink": "test-116-05-8c",
+                            "title": "Test post from test-116-05",
+                            "body": "Test body from test-116-05 scenario 8c",
                             "json_metadata": "{}"
                         }
                     },
@@ -326,9 +374,129 @@
                             "parent_author": "",
                             "parent_permlink": "",
                             "author": "test-116-05",
-                            "permlink": "test-116-05-e",
-                            "title": "Test post from test-116-05-e",
-                            "body": "Test body from test-116-05-e",
+                            "permlink": "test-116-05-8d",
+                            "title": "Test post from test-116-05",
+                            "body": "Test body from test-116-05 scenario 8d",
+                            "json_metadata": "{}"
+                        }
+                    },
+                    {
+                        "type": "comment_operation",
+                        "value": {
+                            "parent_author": "",
+                            "parent_permlink": "",
+                            "author": "test-116-05",
+                            "permlink": "test-116-05-Aa",
+                            "title": "Test post from test-116-05",
+                            "body": "Test body from test-116-05 scenario Aa",
+                            "json_metadata": "{}"
+                        }
+                    },
+                    {
+                        "type": "comment_operation",
+                        "value": {
+                            "parent_author": "",
+                            "parent_permlink": "",
+                            "author": "test-116-05",
+                            "permlink": "test-116-05-Ab",
+                            "title": "Test post from test-116-05",
+                            "body": "Test body from test-116-05 scenario Ab",
+                            "json_metadata": "{}"
+                        }
+                    },
+                    {
+                        "type": "comment_operation",
+                        "value": {
+                            "parent_author": "",
+                            "parent_permlink": "",
+                            "author": "test-116-05",
+                            "permlink": "test-116-05-Ba",
+                            "title": "Test post from test-116-05",
+                            "body": "Test body from test-116-05 scenario Ba",
+                            "json_metadata": "{}"
+                        }
+                    },
+                    {
+                        "type": "comment_operation",
+                        "value": {
+                            "parent_author": "",
+                            "parent_permlink": "",
+                            "author": "test-116-05",
+                            "permlink": "test-116-05-Bb",
+                            "title": "Test post from test-116-05",
+                            "body": "Test body from test-116-05 scenario Bb",
+                            "json_metadata": "{}"
+                        }
+                    },
+                    {
+                        "type": "comment_operation",
+                        "value": {
+                            "parent_author": "",
+                            "parent_permlink": "",
+                            "author": "test-116-05",
+                            "permlink": "test-116-05-Ca",
+                            "title": "Test post from test-116-05",
+                            "body": "Test body from test-116-05 scenario Ca",
+                            "json_metadata": "{}"
+                        }
+                    },
+                    {
+                        "type": "comment_operation",
+                        "value": {
+                            "parent_author": "",
+                            "parent_permlink": "",
+                            "author": "test-116-05",
+                            "permlink": "test-116-05-Cb",
+                            "title": "Test post from test-116-05",
+                            "body": "Test body from test-116-05 scenario Cb",
+                            "json_metadata": "{}"
+                        }
+                    },
+                    {
+                        "type": "comment_operation",
+                        "value": {
+                            "parent_author": "",
+                            "parent_permlink": "",
+                            "author": "test-116-05",
+                            "permlink": "test-116-05-Da",
+                            "title": "Test post from test-116-05",
+                            "body": "Test body from test-116-05 scenario Da",
+                            "json_metadata": "{}"
+                        }
+                    },
+                    {
+                        "type": "comment_operation",
+                        "value": {
+                            "parent_author": "",
+                            "parent_permlink": "",
+                            "author": "test-116-05",
+                            "permlink": "test-116-05-Db",
+                            "title": "Test post from test-116-05",
+                            "body": "Test body from test-116-05 scenario Db",
+                            "json_metadata": "{}"
+                        }
+                    },
+                    {
+                        "type": "comment_operation",
+                        "value": {
+                            "parent_author": "",
+                            "parent_permlink": "",
+                            "author": "test-116-05",
+                            "permlink": "test-116-05-Ea",
+                            "title": "Test post from test-116-05",
+                            "body": "Test body from test-116-05 scenario Ea",
+                            "json_metadata": "{}"
+                        }
+                    },
+                    {
+                        "type": "comment_operation",
+                        "value": {
+                            "parent_author": "",
+                            "parent_permlink": "",
+                            "author": "test-116-05",
+                            "permlink": "test-116-05-Eb",
+                            "title": "Test post from test-116-05",
+                            "body": "Test body from test-116-05 scenario Eb",
                             "json_metadata": "{}"
                         }
                     }
@@ -360,21 +528,35 @@
                                 "test-116-01"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-01\",\"author\":\"test-116-02\",\"permlink\":\"test-116-02\"}"
+                            "json": "{\"account\":\"test-116-01\",\"author\":\"test-116-02\",\"permlink\":\"test-116-02-1\"}"
                         }
                     },
                     {
                         "type": "delete_comment_operation",
                         "value": {
                             "author": "test-116-05",
-                            "permlink": "test-116-05-c"
+                            "permlink": "test-116-05-Ba"
                         }
                     },
                     {
                         "type": "delete_comment_operation",
                         "value": {
                             "author": "test-116-05",
-                            "permlink": "test-116-05-d"
+                            "permlink": "test-116-05-Bb"
+                        }
+                    },
+                    {
+                        "type": "delete_comment_operation",
+                        "value": {
+                            "author": "test-116-05",
+                            "permlink": "test-116-05-Ca"
+                        }
+                    },
+                    {
+                        "type": "delete_comment_operation",
+                        "value": {
+                            "author": "test-116-05",
+                            "permlink": "test-116-05-Cb"
                         }
                     }
                 ]
@@ -405,7 +587,7 @@
                                 "test-116-01"
                             ],
                             "id": "reblog",
-                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-01\",\"author\":\"test-116-02\",\"permlink\":\"test-116-02\"}"
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-01\",\"author\":\"test-116-02\",\"permlink\":\"test-116-02-1\"}"
                         }
                     }
                 ]
@@ -436,7 +618,7 @@
                                 "test-116-02"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-02\",\"author\":\"test-116-03\",\"permlink\":\"test-116-03\"}"
+                            "json": "{\"account\":\"test-116-02\",\"author\":\"test-116-03\",\"permlink\":\"test-116-03-2a\"}"
                         }
                     },
                     {
@@ -447,7 +629,7 @@
                                 "test-116-02"
                             ],
                             "id": "reblog",
-                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-03\",\"permlink\":\"test-116-03\"}"
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-03\",\"permlink\":\"test-116-03-2a\"}"
                         }
                     }
                 ]
@@ -478,7 +660,7 @@
                                 "test-116-01"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-01\",\"author\":\"test-116-03\",\"permlink\":\"test-116-03\"}"
+                            "json": "{\"account\":\"test-116-01\",\"author\":\"test-116-03\",\"permlink\":\"test-116-03-3\"}"
                         }
                     }
                 ]
@@ -509,7 +691,7 @@
                                 "test-116-01"
                             ],
                             "id": "reblog",
-                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-01\",\"author\":\"test-116-03\",\"permlink\":\"test-116-03\"}"
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-01\",\"author\":\"test-116-03\",\"permlink\":\"test-116-03-3\"}"
                         }
                     }
                 ]
@@ -540,7 +722,7 @@
                                 "test-116-01"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-01\",\"author\":\"test-116-03\",\"permlink\":\"test-116-03\"}"
+                            "json": "{\"account\":\"test-116-01\",\"author\":\"test-116-03\",\"permlink\":\"test-116-03-3\"}"
                         }
                     }
                 ]
@@ -571,7 +753,7 @@
                                 "test-116-02"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-02\",\"author\":\"test-116-03\",\"permlink\":\"test-116-03\"}"
+                            "json": "{\"account\":\"test-116-02\",\"author\":\"test-116-03\",\"permlink\":\"test-116-03-5\"}"
                         }
                     }
                 ]
@@ -602,7 +784,7 @@
                                 "test-116-02"
                             ],
                             "id": "reblog",
-                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-03\",\"permlink\":\"test-116-03\"}"
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-03\",\"permlink\":\"test-116-03-5\"}"
                         }
                     }
                 ]
@@ -633,7 +815,7 @@
                                 "test-116-02"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-02\",\"author\":\"test-116-04\",\"permlink\":\"test-116-04\"}"
+                            "json": "{\"account\":\"test-116-02\",\"author\":\"test-116-04\",\"permlink\":\"test-116-04-6\"}"
                         }
                     }
                 ]
@@ -664,7 +846,7 @@
                                 "test-116-02"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-d\"}"
+                            "json": "{\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-Ba\"}"
                         }
                     },
                     {
@@ -675,7 +857,18 @@
                                 "test-116-02"
                             ],
                             "id": "reblog",
-                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-d\"}"
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-Ba\"}"
+                        }
+                    },
+                    {
+                        "type": "custom_json_operation",
+                        "value": {
+                            "required_auths": [],
+                            "required_posting_auths": [
+                                "test-116-02"
+                            ],
+                            "id": "reblog",
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-Bb\"}"
                         }
                     },
                     {
@@ -686,7 +879,7 @@
                                 "test-116-04"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-04\",\"author\":\"test-116-02\",\"permlink\":\"test-116-02\"}"
+                            "json": "{\"account\":\"test-116-04\",\"author\":\"test-116-02\",\"permlink\":\"test-116-02-F\"}"
                         }
                     }
                 ]
@@ -713,7 +906,14 @@
                         "type": "delete_comment_operation",
                         "value": {
                             "author": "test-116-05",
-                            "permlink": "test-116-05-e"
+                            "permlink": "test-116-05-Aa"
+                        }
+                    },
+                    {
+                        "type": "delete_comment_operation",
+                        "value": {
+                            "author": "test-116-05",
+                            "permlink": "test-116-05-Ab"
                         }
                     },
                     {
@@ -724,7 +924,7 @@
                                 "test-116-04"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-04\",\"author\":\"test-116-02\",\"permlink\":\"test-116-02\"}"
+                            "json": "{\"account\":\"test-116-04\",\"author\":\"test-116-02\",\"permlink\":\"test-116-02-F\"}"
                         }
                     }
                 ]
@@ -755,7 +955,7 @@
                                 "test-116-02"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-e\"}"
+                            "json": "{\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-Aa\"}"
                         }
                     },
                     {
@@ -766,7 +966,18 @@
                                 "test-116-02"
                             ],
                             "id": "reblog",
-                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-e\"}"
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-Aa\"}"
+                        }
+                    },
+                    {
+                        "type": "custom_json_operation",
+                        "value": {
+                            "required_auths": [],
+                            "required_posting_auths": [
+                                "test-116-02"
+                            ],
+                            "id": "reblog",
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-Ab\"}"
                         }
                     },
                     {
@@ -777,7 +988,7 @@
                                 "test-116-04"
                             ],
                             "id": "reblog",
-                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-04\",\"author\":\"test-116-02\",\"permlink\":\"test-116-02\"}"
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-04\",\"author\":\"test-116-02\",\"permlink\":\"test-116-02-F\"}"
                         }
                     }
                 ]
@@ -808,7 +1019,7 @@
                                 "test-116-03"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-03\",\"author\":\"test-116-04\",\"permlink\":\"test-116-04\"}"
+                            "json": "{\"account\":\"test-116-03\",\"author\":\"test-116-04\",\"permlink\":\"test-116-04-2b\"}"
                         }
                     },
                     {
@@ -819,7 +1030,7 @@
                                 "test-116-03"
                             ],
                             "id": "reblog",
-                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-03\",\"author\":\"test-116-04\",\"permlink\":\"test-116-04\"}"
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-03\",\"author\":\"test-116-04\",\"permlink\":\"test-116-04-2b\"}"
                         }
                     }
                 ]
@@ -850,7 +1061,7 @@
                                 "test-116-03"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05\"}"
+                            "json": "{\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-4\"}"
                         }
                     },
                     {
@@ -861,7 +1072,7 @@
                                 "test-116-03"
                             ],
                             "id": "reblog",
-                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05\"}"
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-4\"}"
                         }
                     },
                     {
@@ -872,7 +1083,7 @@
                                 "test-116-03"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05\"}"
+                            "json": "{\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-4\"}"
                         }
                     }
                 ]
@@ -903,7 +1114,7 @@
                                 "test-116-02"
                             ],
                             "id": "reblog",
-                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-04\",\"permlink\":\"test-116-04\"}"
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-04\",\"permlink\":\"test-116-04-6\"}"
                         }
                     }
                 ]
@@ -934,7 +1145,7 @@
                                 "test-116-02"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05\"}"
+                            "json": "{\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-7\"}"
                         }
                     }
                 ]
@@ -965,7 +1176,7 @@
                                 "test-116-02"
                             ],
                             "id": "reblog",
-                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05\"}"
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-7\"}"
                         }
                     }
                 ]
@@ -996,7 +1207,7 @@
                                 "test-116-03"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05\"}"
+                            "json": "{\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-8a\"}"
                         }
                     },
                     {
@@ -1007,7 +1218,7 @@
                                 "test-116-05"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05\"}"
+                            "json": "{\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-8b\"}"
                         }
                     }
                 ]
@@ -1038,7 +1249,18 @@
                                 "test-116-04"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-04\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05\"}"
+                            "json": "{\"account\":\"test-116-04\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-8c\"}"
+                        }
+                    },
+                    {
+                        "type": "custom_json_operation",
+                        "value": {
+                            "required_auths": [],
+                            "required_posting_auths": [
+                                "test-116-04"
+                            ],
+                            "id": "reblog",
+                            "json": "{\"account\":\"test-116-04\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-8d\"}"
                         }
                     }
                 ]
@@ -1069,7 +1291,7 @@
                                 "test-116-02"
                             ],
                             "id": "reblog",
-                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-04\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05\"}"
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-04\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-8c\"}"
                         }
                     },
                     {
@@ -1080,7 +1302,7 @@
                                 "test-116-05"
                             ],
                             "id": "reblog",
-                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-04\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05\"}"
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-04\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-8d\"}"
                         }
                     }
                 ]
@@ -1111,7 +1333,7 @@
                                 "test-116-02"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-66\"}"
+                            "json": "{\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-9a\"}"
                         }
                     }
                 ]
@@ -1142,7 +1364,18 @@
                                 "test-116-02"
                             ],
                             "id": "reblog",
-                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-66\"}"
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-9a\"}"
+                        }
+                    },
+                    {
+                        "type": "custom_json_operation",
+                        "value": {
+                            "required_auths": [],
+                            "required_posting_auths": [
+                                "test-116-02"
+                            ],
+                            "id": "reblog",
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-02\",\"author\":\"test-116-05\",\"permlink\":\"test-116-9b\"}"
                         }
                     }
                 ]
@@ -1169,7 +1402,14 @@
                         "type": "delete_comment_operation",
                         "value": {
                             "author": "test-116-05",
-                            "permlink": "test-116-05-a"
+                            "permlink": "test-116-05-Da"
+                        }
+                    },
+                    {
+                        "type": "delete_comment_operation",
+                        "value": {
+                            "author": "test-116-05",
+                            "permlink": "test-116-05-Db"
                         }
                     },
                     {
@@ -1180,7 +1420,7 @@
                                 "test-116-03"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-a\"}"
+                            "json": "{\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-Da\"}"
                         }
                     },
                     {
@@ -1191,7 +1431,18 @@
                                 "test-116-03"
                             ],
                             "id": "reblog",
-                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-a\"}"
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-Da\"}"
+                        }
+                    },
+                    {
+                        "type": "custom_json_operation",
+                        "value": {
+                            "required_auths": [],
+                            "required_posting_auths": [
+                                "test-116-03"
+                            ],
+                            "id": "reblog",
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-Db\"}"
                         }
                     }
                 ]
@@ -1218,7 +1469,14 @@
                         "type": "delete_comment_operation",
                         "value": {
                             "author": "test-116-05",
-                            "permlink": "test-116-05-b"
+                            "permlink": "test-116-05-Ea"
+                        }
+                    },
+                    {
+                        "type": "delete_comment_operation",
+                        "value": {
+                            "author": "test-116-05",
+                            "permlink": "test-116-05-Eb"
                         }
                     }
                 ]
@@ -1249,7 +1507,7 @@
                                 "test-116-03"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-b\"}"
+                            "json": "{\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-Ea\"}"
                         }
                     },
                     {
@@ -1260,7 +1518,18 @@
                                 "test-116-03"
                             ],
                             "id": "reblog",
-                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-b\"}"
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-Ea\"}"
+                        }
+                    },
+                    {
+                        "type": "custom_json_operation",
+                        "value": {
+                            "required_auths": [],
+                            "required_posting_auths": [
+                                "test-116-03"
+                            ],
+                            "id": "reblog",
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-Eb\"}"
                         }
                     }
                 ]
@@ -1291,7 +1560,7 @@
                                 "test-116-03"
                             ],
                             "id": "reblog",
-                            "json": "{\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-c\"}"
+                            "json": "{\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-Ca\"}"
                         }
                     },
                     {
@@ -1302,7 +1571,18 @@
                                 "test-116-03"
                             ],
                             "id": "reblog",
-                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-c\"}"
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-Ca\"}"
+                        }
+                    },
+                    {
+                        "type": "custom_json_operation",
+                        "value": {
+                            "required_auths": [],
+                            "required_posting_auths": [
+                                "test-116-03"
+                            ],
+                            "id": "reblog",
+                            "json": "{\"delete\":\"delete\",\"account\":\"test-116-03\",\"author\":\"test-116-05\",\"permlink\":\"test-116-05-Cb\"}"
                         }
                     }
                 ]
