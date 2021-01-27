@@ -41,6 +41,25 @@ class Follow(DbAdapterHolder):
 
     @classmethod
     def get_mass_data_for_follower(cls, follower, state, block_num):
+        # we need a method to also touch all data for given follower present 
+        # in the follow_items_to_flush in case when we have following scenario:
+        # 1. data for mass action exists in DB
+        # 2. data for mass action exists in follow_items_to_flush
+        # 3. mass action is received when 1 and 2 or 2 are true
+        def process_follow_items_to_flush(process_following_null = False):
+            for k, data in cls.follow_items_to_flush:
+                if data['flr'] == follower:
+                    cls.follow_items_to_flush[k]['idx'] = cls.idx
+                    if state in (10, 11, 14) and not process_following_null:
+                        cls.follow_items_to_flush[k]['state'] = 0
+                    if state in (9, 14) and not process_following_null:
+                        cls.follow_items_to_flush[k]['blacklisted'] = False
+                    if state in (12, 14):
+                        cls.follow_items_to_flush[k]['follow_blacklists'] = process_following_null
+                    if state in (13, 14):
+                        cls.follow_items_to_flush[k]['follow_muted'] = process_following_null
+                    cls.follow_items_to_flush[k]['block_num'] = block_num
+
         def make_query(follower, additional_condition = None):
             """ Construct query for mass data operations for given follower """
             sql = """
@@ -97,15 +116,19 @@ class Follow(DbAdapterHolder):
                 cls.idx += 1
 
         if state in (9, 12, 13, 14):
+            process_follow_items_to_flush()
             sql = make_query(follower)
             sql_to_follow_items_to_flush(sql)
         if state == 10:
+            process_follow_items_to_flush()
             sql = make_query(follower, "AND hf.state = 1")
             sql_to_follow_items_to_flush(sql)
         if state == 11:
+            process_follow_items_to_flush()
             sql = make_query(follower, "AND hf.state = 2")
             sql_to_follow_items_to_flush(sql)
         if state in (12, 13, 14):
+            process_follow_items_to_flush(True)
             sql = make_query(follower, "AND ha_flg.name = 'null'")
             sql_to_follow_items_to_flush(sql, True)
 
