@@ -1290,6 +1290,124 @@
               "id": "community",
               "json": "[\"subscribe\",{\"community\":\"hive-104647\"}]"
             }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "",
+              "author": "test-creator",
+              "permlink": "introduce",
+              "title": "My introduce post",
+              "body": "This is my introduce post to be crossposted in hive-135485 community",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "introduce",
+              "title": "My introduce post",
+              "body": "This is a cross post of [@test-creator/introduce](/introduceyourself/@test-creator/introduce) by @test-creator.<br><br>crosspost test",
+              "json_metadata": "{\"app\":\"peakd/2021.01.3\",\"tags\":[\"cross-post\"],\"image\":[],\"original_author\":\"test-creator\",\"original_permlink\":\"introduce\"}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "first-post",
+              "title": "My first post",
+              "body": "This is my first post in hive-135485 community",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "reblogged-post",
+              "title": "My first post",
+              "body": "This is my post in hive-135485 community reblogged by test-reblog-03",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "muted-post",
+              "title": "My muted post",
+              "body": "This is my muted post in hive-135485 community",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "pinned-post",
+              "title": "My pinned post",
+              "body": "This is my pinned post in hive-135485 community",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "test-safari",
+              "parent_permlink": "secrets1",
+              "author": "test-creator",
+              "permlink": "re-community-135485-comment",
+              "title": "",
+              "body": "this is my comment for secret post",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "test-creator",
+              "parent_permlink": "re-community-135485-comment",
+              "author": "test-creator",
+              "permlink": "re-re-community-135485-comment",
+              "title": "",
+              "body": "this is my comment for comment for secret post",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"mutePost\",{\"community\":\"hive-135485\",\"account\":\"test-creator\",\"permlink\":\"muted-post\",\"notes\":\"nothing special\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"test-creator\",\"permlink\":\"pinned-post\"}]"
+            }
           }
         ]
       }

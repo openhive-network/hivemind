@@ -297,6 +297,126 @@
             }
           },
           {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "test-creator",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "test-follower",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "test-muter",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
             "type": "comment_operation",
             "value": {
               "parent_author": "",
@@ -543,6 +663,41 @@
               "id": "reblog",
               "json": "{\"account\":\"test-reblog-03\",\"author\":\"test-reblog-04\",\"permlink\":\"parrot-04\"}"
             }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "test-reblog-01",
+              "parent_permlink": "parrot-01",
+              "author": "test-creator",
+              "permlink": "re-parrot-reblog-01",
+              "title": "",
+              "body": "comment for parrot-01",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "test-reblog-02",
+              "parent_permlink": "parrot-02",
+              "author": "test-creator",
+              "permlink": "re-parrot-reblog-02",
+              "title": "",
+              "body": "comment for parrot-02",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-03"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-03\",\"author\":\"test-creator\",\"permlink\":\"reblogged-post\"}"
+            }
           }
         ]
       }
@@ -786,6 +941,30 @@
               "permlink": "monkey-01",
               "title": "I love monkeys 01",
               "body": "tell me about monkeys 01",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "test-reblog-01",
+              "parent_permlink": "monkey-01",
+              "author": "test-creator",
+              "permlink": "re-monkey-01",
+              "title": "",
+              "body": "this is my comment for monkey-01 post",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "test-creator",
+              "parent_permlink": "re-monkey-01",
+              "author": "test-creator",
+              "permlink": "re-re-monkey-01",
+              "title": "",
+              "body": "this is my comment for comment for monkey-01 post",
               "json_metadata": "{}"
             }
           },
@@ -1085,6 +1264,17 @@
               ],
               "id": "reblog",
               "json": "{\"delete\":\"delete\",\"account\":\"test-reblog-05\",\"author\":\"test-reblog-01\",\"permlink\":\"monkey-04\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-05"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-05\",\"author\":\"test-creator\",\"permlink\":\"reblogged-post\"}"
             }
           }
         ]
