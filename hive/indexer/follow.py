@@ -3,7 +3,6 @@
 import logging
 
 from funcy.seqs import first
-from hive.utils.misc import chunks
 from hive.indexer.accounts import Accounts
 
 from hive.indexer.db_adapter_holder import DbAdapterHolder
@@ -40,7 +39,7 @@ class Follow(DbAdapterHolder):
         return cls.true_false_null(state, 7, 8)
 
     @classmethod
-    def get_mass_data_for_follower(cls, follower, state, block_num):
+    def process_data_for_follower(cls, follower, state, block_num):
         def alter_follow_item_to_flush(k, process_following_null):
             cls.follow_items_to_flush[k]['idx'] = cls.idx
             if state in (10, 11, 14) and not process_following_null:
@@ -72,8 +71,8 @@ class Follow(DbAdapterHolder):
                     if data['flr'] == follower and data['flg'] == process_for_name:
                         alter_follow_item_to_flush(k, process_following_null)
                     
-        def make_query(follower, additional_condition = None):
-            """ Construct query for mass data operations for given follower """
+        def database_to_follow_items_to_flush(follower, additional_condition = None, process_following_null = False):
+            """ Read all existing data from database for given follower and convert data from sql query to follow_items_to_flush items """
             sql = """
                 SELECT
                     ha_flr.name as follower,
@@ -93,10 +92,6 @@ class Follow(DbAdapterHolder):
             """.format(follower)
             if additional_condition is not None and isinstance(additional_condition, str):
                 sql += " " + additional_condition
-            return sql
-
-        def sql_to_follow_items_to_flush(sql, process_following_null = False):
-            """ Convert data from sql query to follow_items_to_flush items """
             data = cls.db.query_all(sql)
             for row in data:
                 flr = escape_characters(row['follower'])
@@ -120,20 +115,16 @@ class Follow(DbAdapterHolder):
 
         if state in (9, 12, 13, 14):
             process_follow_items_to_flush(True, None, None, False)
-            sql = make_query(follower)
-            sql_to_follow_items_to_flush(sql)
+            database_to_follow_items_to_flush(follower)
         if state == 10:
             process_follow_items_to_flush(False, 1, None, False)
-            sql = make_query(follower, "AND hf.state = 1")
-            sql_to_follow_items_to_flush(sql)
+            database_to_follow_items_to_flush(follower, "AND hf.state = 1")
         if state == 11:
             process_follow_items_to_flush(False, 2, None, False)
-            sql = make_query(follower, "AND hf.state = 2")
-            sql_to_follow_items_to_flush(sql)
+            database_to_follow_items_to_flush(follower, "AND hf.state = 2")
         if state in (12, 13, 14):
             process_follow_items_to_flush(False, None, 'null', True)
-            sql = make_query(follower, "AND ha_flg.name = 'null'")
-            sql_to_follow_items_to_flush(sql, True)
+            database_to_follow_items_to_flush(follower, "AND ha_flg.name = 'null'", True)
 
     @classmethod
     def follow_op(cls, account, op_json, date, block_num):
@@ -145,7 +136,7 @@ class Follow(DbAdapterHolder):
         state = int(op['state'])
 
         if state > 8:
-            cls.get_mass_data_for_follower(op['flr'], state, block_num)
+            cls.process_data_for_follower(op['flr'], state, block_num)
         else:
             for following in op['flg']:
                 k = '{}/{}'.format(op['flr'], following)
@@ -164,19 +155,14 @@ class Follow(DbAdapterHolder):
                     )
                 else:
                     cls.follow_items_to_flush[k]['idx'] = cls.idx
-
                     if state in (0, 1, 2):
                         cls.follow_items_to_flush[k]['state'] = state
-
                     if state in (3, 5):
                         cls.follow_items_to_flush[k]['blacklisted'] = cls.is_blacklisted(state)
-
                     if state in (4, 6):
                         cls.follow_items_to_flush[k]['follow_blacklists'] = cls.is_follow_blacklists(state)
-
                     if state in (7, 8):
                         cls.follow_items_to_flush[k]['follow_muted'] = cls.is_follow_muted(state)
-
                     cls.follow_items_to_flush[k]['block_num'] = block_num
                 cls.idx += 1
 
