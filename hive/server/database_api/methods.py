@@ -98,53 +98,60 @@ async def find_comments(context, comments: list):
     db = context['db']
 
     SQL_TEMPLATE = """
+      SELECT
+        pv.id,
+        pv.community_id,
+        pv.author,
+        pv.permlink,
+        pv.title,
+        pv.body,
+        pv.category,
+        pv.depth,
+        pv.promoted,
+        pv.payout,
+        pv.last_payout_at,
+        pv.cashout_time,
+        pv.is_paidout,
+        pv.children,
+        pv.votes,
+        pv.created_at,
+        pv.updated_at,
+        pv.rshares,
+        pv.json,
+        pv.is_hidden,
+        pv.is_grayed,
+        pv.total_votes,
+        pv.net_votes,
+        pv.total_vote_weight,
+        pv.parent_permlink_or_category,
+        pv.curator_payout_value,
+        pv.root_author,
+        pv.root_permlink,
+        pv.max_accepted_payout,
+        pv.percent_hbd,
+        pv.allow_replies,
+        pv.allow_votes,
+        pv.allow_curation_rewards,
+        pv.beneficiaries,
+        pv.url,
+        pv.root_title,
+        pv.abs_rshares,
+        pv.active,
+        pv.author_rewards
+      FROM (
         SELECT
-            hp.id,
-            hp.community_id,
-            hp.author,
-            hp.permlink,
-            hp.title,
-            hp.body,
-            hp.category,
-            hp.depth,
-            hp.promoted,
-            hp.payout,
-            hp.last_payout_at,
-            hp.cashout_time,
-            hp.is_paidout,
-            hp.children,
-            hp.votes,
-            hp.created_at,
-            hp.updated_at,
-            hp.rshares,
-            hp.json,
-            hp.is_hidden,
-            hp.is_grayed,
-            hp.total_votes,
-            hp.net_votes,
-            hp.total_vote_weight,
-            hp.parent_author,
-            hp.parent_permlink_or_category,
-            hp.curator_payout_value,
-            hp.root_author,
-            hp.root_permlink,
-            hp.max_accepted_payout,
-            hp.percent_hbd,
-            hp.allow_replies,
-            hp.allow_votes,
-            hp.allow_curation_rewards,
-            hp.beneficiaries,
-            hp.url,
-            hp.root_title,
-            hp.abs_rshares,
-            hp.active,
-            hp.author_rewards
+          hp.id
         FROM
-            hive_posts_view hp
-        JOIN (VALUES {}) AS t (author, permlink, number) ON hp.author = t.author AND hp.permlink = t.permlink
+          hive_posts hp
+        JOIN hive_accounts_view ha_a ON ha_a.id = hp.author_id
+        JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        JOIN (VALUES {}) AS t (author, permlink, number) ON ha_a.name = t.author AND hpd_p.permlink = t.permlink
         WHERE
-            NOT hp.is_muted
+          hp.counter_deleted = 0 AND
+          NOT hp.is_muted
         ORDER BY t.number
+      ) ds,
+      LATERAL get_post_view_by_id (ds.id) pv
     """
 
     idx = 0
