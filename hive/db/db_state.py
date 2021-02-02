@@ -443,7 +443,6 @@ class DbState:
         methods.append( ('payout_stats_view', cls._finish_payout_stats_view, []) )
         methods.append( ('account_reputations', cls._finish_account_reputations, [cls.db(), last_imported_block, current_imported_block]) )
         methods.append( ('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]) )
-        methods.append( ('follow_count', cls._finish_follow_count, [cls.db(), last_imported_block, current_imported_block]) )
         cls.process_tasks_in_threads("[INIT] %i threads finished filling tables. Part nr 0", methods)
 
         methods = []
@@ -451,6 +450,9 @@ class DbState:
         methods.append( ('notification_cache', cls._finish_notification_cache, [cls.db()]) )
         #hive_posts_api_helper is dependent on `hive_posts/root_id` filling
         methods.append( ('hive_posts_api_helper', cls._finish_hive_posts_api_helper, [cls.db(), last_imported_block, current_imported_block]) )
+        #methods `_finish_follow_count` and `_finish_account_reputations` update the same table: `hive_accounts`.
+        #It can cause deadlock, therefore these functions can't be processed concurrently
+        methods.append( ('follow_count', cls._finish_follow_count, [cls.db(), last_imported_block, current_imported_block]) )
         cls.process_tasks_in_threads("[INIT] %i threads finished filling tables. Part nr 1", methods)
 
         real_time = FOSM.stop(start_time)
