@@ -121,7 +121,8 @@ def build_methods():
         'tags_api.get_discussions_by_comments': condenser_api.get_discussions_by_comments,
         'tags_api.get_discussions_by_author_before_date': condenser_api.get_discussions_by_author_before_date,
         'tags_api.get_post_discussions_by_payout': condenser_api.get_post_discussions_by_payout,
-        'tags_api.get_comment_discussions_by_payout': condenser_api.get_comment_discussions_by_payout
+        'tags_api.get_comment_discussions_by_payout': condenser_api.get_comment_discussions_by_payout,
+        'tags_api.get_trending_tags': condenser_api_get_trending_tags,
     })
 
     # legacy `call` style adapter
