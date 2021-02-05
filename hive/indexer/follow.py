@@ -123,6 +123,7 @@ class Follow(DbAdapterHolder):
         op['block_num'] = block_num
         state = int(op['state'])
         follower = op['follower']
+        # log.info("follow_op accepted as %s", op)
 
         if state >= Action.Reset_blacklist:
             # choose action specific to requested list resetting
@@ -162,7 +163,7 @@ class Follow(DbAdapterHolder):
                 # since 'null' account can't have its blacklist/mute list, following such list is only used
                 # as an indicator for frontend to no longer bother user with proposition of following predefined
                 # lists (since that user is already choosing his own lists)
-                cls._follow_single(follower, 'null', op['at'], op['block_num'], None, None, add_null_blacklist, add_null_muted)
+                cls._follow_single(follower, escape_characters('null'), op['at'], op['block_num'], None, None, add_null_blacklist, add_null_muted)
         else:
             # set new state/flags to be applied to each pair with changing 'following'
             new_state = state if state in (Action.Nothing, Action.Blog, Action.Ignore) else None
@@ -181,11 +182,10 @@ class Follow(DbAdapterHolder):
             or not isinstance(op['what'], list)
             or not 'follower' in op
             or not 'following' in op):
+            log.info("follow_op %s ignored due to basic errors", op)
             return None
 
         what = first(op['what']) or ''
-        if not isinstance(what, str):
-            return None
         # ABW: the empty 'what' is used to clear existing 'blog' or 'ignore' state, however it can also be used to
         # introduce new empty relation record in hive_follows adding unnecessary data (it might become a problem
         # only if we wanted to immediately remove empty records)
@@ -198,26 +198,31 @@ class Follow(DbAdapterHolder):
                 'reset_blacklist' : Action.Reset_blacklist, 'reset_following_list': Action.Reset_following_list,
                 'reset_muted_list': Action.Reset_muted_list, 'reset_follow_blacklist': Action.Reset_follow_blacklist,
                 'reset_follow_muted_list': Action.Reset_follow_muted_list, 'reset_all_lists': Action.Reset_all_lists}
-        if what not in defs:
+        if not isinstance(what, str) or what not in defs:
+            log.info("follow_op %s ignored due to unknown type of follow", op)
             return None
 
-        # follower/following is empty (ABW: following should be allowed empty for state > 8 since it is ignored then)
-        if not op['follower'] or not op['following']:
+        # follower is empty or follower account does not exist, or it wasn't that account that authorized operation
+        if not op['follower'] or not Accounts.exists(op['follower']) or op['follower'] != account:
+            log.info("follow_op %s ignored due to invalid follower", op)
             return None
 
-        # if follower name does not exist or it wasn't that account that authorized operation drop op
-        if not Accounts.exists(op['follower']) or op['follower'] != account:
-            return None
-
+        # normalize following to list
         op['following'] = op['following'] if isinstance(op['following'], list) else [op['following']]
 
-        # mimic original behaviour
         # if following name does not exist do not process it: basically equal to drop op for single following entry
-        op['following'] = [following for following in op['following'] if Accounts.exists(following) and following != op['follower']]
+        op['following'] = [following for following in op['following'] if following and Accounts.exists(following) and following != op['follower']]
+        # ABW: note that since you could make 'following' list empty anyway by supplying nonexisting account
+        # there was no point in excluding follow_op with provided empty list/empty string - such call actually
+        # makes sense for state > 8 when 'following' is ignored
+        state = defs[what]
+        if not op['following'] and state < Action.Reset_blacklist:
+            log.info("follow_op %s is void due to effectively empty list of following", op)
+            return None
 
         return dict(follower=escape_characters(op['follower']),
                     following=[escape_characters(following) for following in op['following']],
-                    state=defs[what],
+                    state=state,
                     at=date)
 
     @classmethod
@@ -228,7 +233,8 @@ class Follow(DbAdapterHolder):
             
             sql = "SELECT {}({}::VARCHAR, {}::INT)"
             for reset_list in cls.list_resets_to_flush:
-                cls.db.query_no_return(sql.format(reset_list['reset_call'], reset_list['follower'], reset_list['block_num']))
+                query = sql.format(reset_list['reset_call'], reset_list['follower'], reset_list['block_num'])
+                cls.db.query_no_return(query)
 
             cls.list_resets_to_flush.clear()
 
