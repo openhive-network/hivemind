@@ -68,7 +68,8 @@ for sql in postgres_handle_view_changes.sql \
           bridge_list_communities.sql \
           bridge_list_community_roles.sql \
           bridge_list_pop_communities.sql \
-          bridge_list_subscribers.sql
+          bridge_list_subscribers.sql \
+          follows.sql
 
 do
     echo Executing psql -U $1 -d $2 -f $sql

@@ -7,7 +7,8 @@ from hive.server.common.helpers import (
     valid_account,
     valid_permlink,
     valid_tag,
-    valid_limit)
+    valid_limit,
+    json_date)
 
 from hive.utils.account import safe_db_profile_metadata
 
@@ -314,14 +315,14 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
 
 
 @return_error_info
-async def get_relationship_between_accounts(context, account1, account2, observer=None):
+async def get_relationship_between_accounts(context, account1, account2, observer=None, debug=None):
     valid_account(account1)
     valid_account(account2)
 
     db = context['db']
 
     sql = "SELECT * FROM bridge_get_relationship_between_accounts( (:account1)::VARCHAR, (:account2)::VARCHAR )"
-    sql_result = await db.query_all(sql, account1=account1, account2=account2)
+    sql_result = await db.query_row(sql, account1=account1, account2=account2)
 
     result = {
         'follows': False,
@@ -331,19 +332,26 @@ async def get_relationship_between_accounts(context, account1, account2, observe
         'follows_muted': False
     }
 
-    for row in sql_result:
-        state = row['state']
-        if state == 1:
-            result['follows'] = True
-        elif state == 2:
-            result['ignores'] = True
+    row = dict(sql_result)
+    state = row['state']
+    if state == 1:
+        result['follows'] = True
+    elif state == 2:
+        result['ignores'] = True
 
-        if row['blacklisted']:
-            result['blacklists'] = True
-        if row['follow_blacklists']:
-            result['follows_blacklists'] = True
-        if row['follow_muted']:
-            result['follows_muted'] = True
+    if row['blacklisted']:
+        result['blacklists'] = True
+    if row['follow_blacklists']:
+        result['follows_blacklists'] = True
+    if row['follow_muted']:
+        result['follows_muted'] = True
+
+    if isinstance(debug, bool) and debug:
+        # result['id'] = row['id']
+        # ABW: it just made tests harder as any change could trigger id changes
+        # data below is sufficient to see when record was created and updated
+        result['created_at'] = json_date(row['created_at']) if row['created_at'] else None
+        result['block_num'] = row['block_num']
 
     return result
 
