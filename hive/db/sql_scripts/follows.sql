@@ -11,7 +11,7 @@ BEGIN
   __account_id = find_account_id( _follower, False );
   UPDATE hive_follows hf -- follow_reset_blacklist
   SET blacklisted = false, block_num = _block_num
-  WHERE hf.follower = __account_id;
+  WHERE hf.follower = __account_id AND hf.blacklisted;
 END
 $function$
 ;
@@ -65,7 +65,7 @@ BEGIN
   __account_id = find_account_id( _follower, False );
   UPDATE hive_follows hf -- follow_reset_follow_blacklist
   SET follow_blacklists = false, block_num = _block_num
-  WHERE hf.follower = __account_id;
+  WHERE hf.follower = __account_id AND hf.follow_blacklists;
 END
 $function$
 ;
@@ -83,7 +83,7 @@ BEGIN
   __account_id = find_account_id( _follower, False );
   UPDATE hive_follows hf -- follow_reset_follow_muted_list
   SET follow_muted = false, block_num = _block_num
-  WHERE hf.follower = __account_id;
+  WHERE hf.follower = __account_id AND hf.follow_muted;
 END
 $function$
 ;
