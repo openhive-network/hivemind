@@ -69,6 +69,85 @@ components:
         type_id:
           type: integer
 
+    'Profile':
+      type: object
+      required:
+        - id
+        - active
+        - blacklists
+        - created
+        - metadata
+        - name
+        - post_count
+        - reputation
+        - stats
+      properties:
+        id:
+          type: integer
+        active:
+          type: string
+          format: date-time
+          description: date of last activity
+        blacklists:
+          type: array
+          items:
+            type: string
+        created:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          required:
+            - profile
+          properties:
+            profile:
+              type: object
+              required:
+                - about
+                - blacklist_description
+                - cover_image
+                - location
+                - muted_list_description
+                - name
+                - profile_image
+                - website
+              properties:
+                about:
+                  type: string
+                blacklist_description:
+                  type: string
+                cover_image:
+                  type: string
+                location:
+                  type: string
+                muted_list_description:
+                  type: string
+                name:
+                  type: string
+                profile_image:
+                  type: string
+                website:
+                  type: string
+        name:
+          type: string
+        post_count:
+          type: integer
+        reputation:
+          type: integer
+        stats:
+          type: object
+          required:
+            - followers
+            - following
+            - rank
+          properties:
+            followers:
+              type: integer
+            following:
+              type: integer
+            rank:
+              type: integer
+
     'ListCommunity':
       type: object
       required:
@@ -442,6 +521,38 @@ components:
           type: integer
           default: 1
 
+    'GetProfileRequest':
+      type: object
+      required:
+        - jsonrpc
+        - method
+        - params
+        - id
+      properties:
+        jsonrpc:
+          type: string
+          default: "2.0"
+        method:
+          type: string
+          enum:
+            - bridge.list_pop_communitites
+        params:
+          type: object
+          required:
+            - account
+          properties:
+            account:
+              type: string
+              description: 'account name'
+              example: 'blocktrades'
+            observer:
+              type: string
+              description: 'account name of observer, used to add information about relationship of observer with given profile account'
+              example: 'gtg'
+        id:
+          type: integer
+          default: 1  
+
 paths:
   /#bridge.get_community:
     post:
@@ -588,4 +699,25 @@ paths:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ListSubscribers'
+                  - $ref: '#/components/schemas/ErrorMessage'
+
+  /#bridge.get_profile:
+    post:
+      description: Gets profile
+      operationId: bridge.get_profile
+      requestBody:
+        description: 'required account, optional: observer'
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/GetProfileRequest'
+        required: true
+      responses:
+        '200':
+          description: profile information
+          content:
+            'application/json':
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Profile'
                   - $ref: '#/components/schemas/ErrorMessage'
