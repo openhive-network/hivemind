@@ -13,10 +13,10 @@ BEGIN
   RETURN QUERY 
   WITH blog_posts AS
   (
-    SELECT 
+    SELECT
       hp.id
     FROM live_posts_view hp
-    WHERE hp.author_id = __author_id 
+    WHERE hp.author_id = __author_id
       AND ((__post_id = 0) OR (hp.id < __post_id))
     ORDER BY hp.id DESC
     LIMIT _limit

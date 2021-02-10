@@ -149,7 +149,7 @@ ELSE
   ALTER TABLE public.hive_mentions
     DROP CONSTRAINT hive_mentions_ux1;
   ALTER TABLE public.hive_mentions
-    ADD CONSTRAINT hive_mentions_ux1 UNIQUE (post_id, account_id);
+    ADD CONSTRAINT hive_mentions_ux1 UNIQUE (post_id, account_id, block_num);
 END IF;
 END
 $BODY$

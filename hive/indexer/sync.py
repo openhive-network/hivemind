@@ -217,6 +217,14 @@ class Sync:
 
         self._steem = conf.steem()
 
+    def __enter__(self):
+        assert self._db, "The database must exist"
+        Blocks.setup_own_db_access(self._db)
+        return self
+
+    def __exit__(self, exc_type, value, traceback):
+        Blocks.close_own_db_access()
+
     def load_mock_data(self,mock_block_data_path):
         if mock_block_data_path:
             MockBlockProvider.load_block_data(mock_block_data_path)
@@ -226,7 +234,7 @@ class Sync:
         # normally it should be refreshed in various time windows
         # but we need the ability to do it all at the same time
         self._update_chain_state()
-        update_communities_posts_and_rank()
+        update_communities_posts_and_rank(self._db)
         with ThreadPoolExecutor(max_workers=2) as executor:
             executor.submit(PayoutStats.generate)
             executor.submit(Mentions.refresh)
@@ -261,7 +269,6 @@ class Sync:
 
         # ensure db schema up to date, check app status
         DbState.initialize()
-        Blocks.setup_own_db_access(self._db)
 
         show_info(self)
 
@@ -278,7 +285,7 @@ class Sync:
         Accounts.load_ids()
 
         # community stats
-        update_communities_posts_and_rank()
+        update_communities_posts_and_rank(self._db)
 
         last_imported_block = Blocks.head_num()
         hived_head_block = self._conf.get('test_max_block') or self._steem.last_irreversible()
@@ -464,7 +471,7 @@ class Sync:
                     executor.submit(PayoutStats.generate)
                     executor.submit(Mentions.refresh)
             if num % 200 == 0: #10min
-                update_communities_posts_and_rank()
+                update_communities_posts_and_rank(self._db)
             if num % 20 == 0: #1min
                 self._update_chain_state()
 

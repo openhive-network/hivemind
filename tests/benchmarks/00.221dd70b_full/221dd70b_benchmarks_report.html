@@ -1,0 +1,69 @@
+<html>
+  <head>
+  <meta charset="UTF-8">
+    <style>
+      table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+      }
+      th, td {
+        padding: 15px;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8">
+      $(document).ready( function () {
+        $('#benchmarks').DataTable({"aLengthMenu": [[10, 25, 50, 100, 1000, 10000, -1], [10, 25, 50, 100, 1000, 10000, "All"]]});
+      } );
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  </head>
+  <body>
+    <table id="benchmarks">
+      <thead>
+        <tr><th>Test name</th><th>Response mean size [kB]</th><th>Response ref size [kB]</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th><th>Median time [ms]</th><th>Reference (pure requests call) [ms]</th><th>\[ {\vert} {T_{mean} - T_{ref} \over T_{ref}} {\lvert} \cdot 100 \] [%]</th><th>\[ {\vert} {T_{median} - T_{ref} \over T_{ref}} {\lvert} \cdot 100 \] [%]</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>bridge_api_patterns/get_account_posts/blog/pixresteemer.tavern.yaml</td><td>209.7</td><td>209.7</td><td>305.2349</td><td>377.8495</td><td>324.7736</td><td>320.4742</td><td>302.2329</td><td>7.4580</td><td>6.0355</td></tr>
+        <tr><td>bridge_api_patterns/get_account_posts/blog/pixresteemer2.tavern.yaml</td><td>211.5</td><td>211.5</td><td>306.8894</td><td>328.6545</td><td>317.5760</td><td>317.1135</td><td>305.9849</td><td>3.7881</td><td>3.6370</td></tr>
+        <tr><td>bridge_api_patterns/get_account_posts/comments/animalcontrol.tavern.yaml<br/>Parameters: {"jsonrpc": "2.0", "id": "1", "method": "bridge.get_account_posts", "params": {"sort": "comments", "account": "animalcontrol"}}</td><td>21.4</td><td>21.3</td><td>828.8224</td><td>4463.0636</td><td bgcolor="red">2220.2999</td><td>976.6824</td><td>836.8398</td><td>165.3196</td><td>16.7108</td></tr>
+        <tr><td>bridge_api_patterns/get_account_posts/comments/most_comments.tavern.yaml<br/>Parameters: {"jsonrpc": "2.0", "id": "1", "method": "bridge.get_account_posts", "params": {"sort": "comments", "account": "steemitboard"}}</td><td>32.6</td><td>32.6</td><td>1332.9056</td><td>2921.0129</td><td bgcolor="red">1902.7060</td><td>2001.2837</td><td>1337.8956</td><td>42.2163</td><td>49.5844</td></tr>
+        <tr><td>bridge_api_patterns/get_account_posts/posts/blocktrades.tavern.yaml</td><td>839.7</td><td>839.6</td><td>340.9965</td><td>409.9738</td><td>359.1698</td><td>348.8176</td><td>312.8102</td><td>14.8204</td><td>11.5109</td></tr>
+        <tr><td>bridge_api_patterns/get_account_posts/replies/steemitboard.tavern.yaml<br/>Parameters: {"jsonrpc": "2.0", "id": "1", "method": "bridge.get_account_posts", "params": {"sort": "replies", "account": "steemitboard"}}</td><td>23.1</td><td>23.1</td><td>3314.4806</td><td>3373.1661</td><td bgcolor="red">3347.7390</td><td>3352.9347</td><td>3349.7423</td><td>0.0598</td><td>0.0953</td></tr>
+        <tr><td>bridge_api_patterns/get_discussion/chbartist.tavern.yaml</td><td>1481.9</td><td>1481.9</td><td>724.2578</td><td>871.5839</td><td>815.2445</td><td>831.4373</td><td>600.0579</td><td>35.8610</td><td>38.5595</td></tr>
+        <tr><td>bridge_api_patterns/get_discussion/biophil.tavern.yaml<br/>Parameters: {"jsonrpc": "2.0", "id": "1", "method": "bridge.get_discussion", "params": {"author": "biophil", "permlink": "genesis-pocket"}}</td><td>2796.3</td><td>2796.2</td><td>1251.8835</td><td>1457.8038</td><td bgcolor="red">1349.0794</td><td>1350.4899</td><td>1118.1202</td><td>20.6560</td><td>20.7822</td></tr>
+        <tr><td>bridge_api_patterns/get_discussion/most_discussed.tavern.yaml<br/>Parameters: {"jsonrpc": "2.0", "id": "1", "method": "bridge.get_discussion", "params": {"author": "et42k", "permlink": "iqx-hashtag"}}</td><td>2497.4</td><td>2497.4</td><td>3638.5912</td><td>4035.0745</td><td bgcolor="red">3838.4037</td><td>3811.4777</td><td>3504.1394</td><td>9.5391</td><td>8.7707</td></tr>
+        <tr><td>bridge_api_patterns/get_discussion/steemcleaners.tavern.yaml<br/>Parameters: {"jsonrpc": "2.0", "id": "1", "method": "bridge.get_discussion", "params": {"author": "steemcleaners", "permlink": "qfs8c-steemcleaners-report-for-19-april-2019"}}</td><td>2524.3</td><td>2524.3</td><td>1160.3030</td><td>1467.4510</td><td bgcolor="red">1275.2801</td><td>1233.3037</td><td>950.5534</td><td>34.1619</td><td>29.7459</td></tr>
+        <tr><td>bridge_api_patterns/get_profile/steemitboard.tavern.yaml</td><td>0.7</td><td>0.7</td><td>297.9752</td><td>305.2803</td><td>300.6621</td><td>300.1221</td><td>302.2565</td><td>0.5275</td><td>0.7061</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/created/observer_ggerartd08_tag_hive-133872.tavern.yaml</td><td>208.2</td><td>196.5</td><td>253.0485</td><td>404.5096</td><td>374.6349</td><td>382.7741</td><td>374.3188</td><td>0.0845</td><td>2.2588</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/created/observer_tasri_tag_hive-190212.tavern.yaml</td><td>170.4</td><td>170.3</td><td>263.6085</td><td>392.5629</td><td>358.3499</td><td>363.6619</td><td>358.4184</td><td>0.0191</td><td>1.4630</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/created/tag_hive-156509.tavern.yaml</td><td>283.8</td><td>283.8</td><td>320.1600</td><td>480.1276</td><td>441.6152</td><td>450.8463</td><td>430.8090</td><td>2.5083</td><td>4.6511</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/trending/max_limit.tavern.yaml</td><td>1975.7</td><td>1986.1</td><td>609.8256</td><td>764.3927</td><td>650.0688</td><td>632.7934</td><td>489.8348</td><td>32.7119</td><td>29.1851</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/trending/observer_beatriche_tag_hive-148441.tavern.yaml</td><td>286.4</td><td>286.3</td><td>327.9815</td><td>360.7486</td><td>335.9949</td><td>332.4290</td><td>334.6476</td><td>0.4026</td><td>0.6630</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/trending/observer_beatriche_tag_hive-189306.tavern.yaml</td><td>286.4</td><td>286.3</td><td>326.9223</td><td>364.2680</td><td>341.5880</td><td>339.8497</td><td>332.8181</td><td>2.6351</td><td>2.1128</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/trending/observer_jennyzer_tag_hive-103678.tavern.yaml</td><td>225.2</td><td>225.1</td><td>327.1451</td><td>360.7113</td><td>341.3526</td><td>340.5343</td><td>331.5106</td><td>2.9688</td><td>2.7220</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/trending/observer_lighteye_tag_hive-148441.tavern.yaml</td><td>236.3</td><td>236.2</td><td>589.0983</td><td>683.6979</td><td>608.5280</td><td>601.6576</td><td>590.5714</td><td>3.0405</td><td>1.8772</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/trending/observer_peakd_tag_hive-156509.tavern.yaml</td><td>283.8</td><td>283.8</td><td>340.2468</td><td>477.4211</td><td>435.5371</td><td>444.6597</td><td>430.6049</td><td>1.1454</td><td>3.2640</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/trending/observer_schamangerbert_tag_hive-194913.tavern.yaml</td><td>369.6</td><td>369.6</td><td>399.2445</td><td>450.5127</td><td>416.8576</td><td>411.1084</td><td>396.4799</td><td>5.1397</td><td>3.6896</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/trending/observer_tasri_tag_hive-190212.tavern.yaml</td><td>239.8</td><td>239.7</td><td>342.5193</td><td>355.4743</td><td>349.8018</td><td>351.2349</td><td>346.1796</td><td>1.0464</td><td>1.4603</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/trending/observer_tormenta_tag_hive-174695.tavern.yaml</td><td>123.5</td><td>123.4</td><td>321.3673</td><td>346.5519</td><td>332.4345</td><td>329.9774</td><td>323.2605</td><td>2.8380</td><td>2.0779</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/trending/observer_zpzn_tag_hive-148441.tavern.yaml</td><td>236.3</td><td>236.2</td><td>589.2472</td><td>636.3099</td><td>605.2643</td><td>601.2303</td><td>588.1396</td><td>2.9117</td><td>2.2258</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/trending/tag_hive-194913.tavern.yaml</td><td>369.6</td><td>369.6</td><td>390.6489</td><td>437.4521</td><td>407.1415</td><td>404.4914</td><td>383.7700</td><td>6.0900</td><td>5.3994</td></tr>
+        <tr><td>bridge_api_patterns/post_notifications/aggroed.tavern.yaml</td><td>21.8</td><td>21.7</td><td>307.1933</td><td>520.5498</td><td>492.2690</td><td>512.1857</td><td>509.4584</td><td>3.3741</td><td>0.5353</td></tr>
+        <tr><td>bridge_api_patterns/post_notifications/aggroed_page_2.tavern.yaml</td><td>21.8</td><td>21.7</td><td>326.9153</td><td>516.5301</td><td>492.1979</td><td>511.8366</td><td>515.3064</td><td>4.4844</td><td>0.6734</td></tr>
+        <tr><td>condenser_api_patterns/get_content_replies/get_most_replies.tavern.yaml<br/>Parameters: {"jsonrpc": "2.0", "id": "1", "method": "condenser_api.get_content_replies", "params": ["et42k", "iqx-hashtag"]}</td><td>7944.7</td><td>7944.6</td><td>2518.3924</td><td>2645.0923</td><td bgcolor="red">2569.3465</td><td>2570.1391</td><td>2083.2498</td><td>23.3336</td><td>23.3716</td></tr>
+        <tr><td>condenser_api_patterns/get_discussions_by_created/tag_hive-148441.tavern.yaml</td><td>933.2</td><td>933.2</td><td>421.6973</td><td>574.3630</td><td>545.8642</td><td>556.5132</td><td>506.3323</td><td>7.8075</td><td>9.9107</td></tr>
+        <tr><td>condenser_api_patterns/get_following/maxer27.tavern.yaml</td><td>69.4</td><td>69.4</td><td>691.5533</td><td>958.7078</td><td>730.5785</td><td>703.7079</td><td>648.1644</td><td>12.7150</td><td>8.5693</td></tr>
+        <tr><td>condenser_api_patterns/get_following/most_blog_following.tavern.yaml<br/>Parameters: {"jsonrpc": "2.0", "id": "1", "method": "condenser_api.get_following", "params": ["marcusmalone", "null", "blog", "1000"]}</td><td>74.5</td><td>73.6</td><td>2396.4365</td><td>2516.7026</td><td bgcolor="red">2436.5629</td><td>2422.0530</td><td>1303.3750</td><td>86.9426</td><td>85.8293</td></tr>
+        <tr><td>condenser_api_patterns/get_following/most_blog_following_page_2.tavern.yaml<br/>Parameters: {"jsonrpc": "2.0", "id": "1", "method": "condenser_api.get_following", "params": ["marcusmalone", "arynews236", "blog", "1000"]}</td><td>74.5</td><td>74.4</td><td>2394.4552</td><td>2497.1264</td><td bgcolor="red">2431.6207</td><td>2417.9007</td><td>2241.9145</td><td>8.4618</td><td>7.8498</td></tr>
+        <tr><td>condenser_api_patterns/get_state/aojetmsl.tavern.yaml</td><td>136.9</td><td>136.9</td><td>515.3683</td><td>597.9754</td><td>544.5592</td><td>535.1843</td><td>505.3866</td><td>7.7510</td><td>5.8960</td></tr>
+        <tr><td>condenser_api_patterns/get_state/eat6tm6o.tavern.yaml</td><td>101.5</td><td>101.5</td><td>468.9032</td><td>524.5606</td><td>491.8126</td><td>490.5766</td><td>455.3930</td><td>7.9974</td><td>7.7260</td></tr>
+        <tr><td>condenser_api_patterns/get_state/steemitboard.tavern.yaml</td><td>628.4</td><td>628.4</td><td>440.1858</td><td>643.7952</td><td>486.3238</td><td>474.0727</td><td>411.6849</td><td>18.1301</td><td>15.1543</td></tr>
+        <tr><td>condenser_api_patterns/get_state/et42k.tavern.yaml<br/>Parameters: {"jsonrpc": "2.0", "id": "1", "method": "condenser_api.get_state", "params": ["/waivio-object-type/@et42k/iqx-hashtag"]}</td><td>2444.7</td><td>2444.6</td><td>3586.8200</td><td>3709.1804</td><td bgcolor="red">3646.9010</td><td>3654.1079</td><td>3475.4448</td><td>4.9334</td><td>5.1407</td></tr>
+      </tbody>
+    </table>
+  </body>
+</html>
