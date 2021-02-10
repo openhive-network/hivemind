@@ -602,6 +602,7 @@ def setup(db):
       "bridge_list_subscribers.sql",
       "update_follow_count.sql",
       "delete_reblog_feed_cache.sql",
+      "follows.sql",
       "upgrade/update_db_patchlevel.sql" #Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
     ]
     from os.path import dirname, realpath

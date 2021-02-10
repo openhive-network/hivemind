@@ -1,10 +1,9 @@
 """Handles follow operations."""
 
 import logging
+import enum
 
 from funcy.seqs import first
-from hive.db.adapter import Db
-from hive.utils.misc import chunks
 from hive.indexer.accounts import Accounts
 
 from hive.indexer.db_adapter_holder import DbAdapterHolder
@@ -13,109 +12,243 @@ from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
 
-
-DB = Db.instance()
+class Action(enum.IntEnum):
+    Nothing = 0 # cancel existing Blog/Ignore
+    Blog = 1 # follow
+    Ignore = 2 # mute
+    Blacklist = 3
+    Follow_blacklist = 4
+    Unblacklist = 5 # cancel existing Blacklist
+    Unfollow_blacklist = 6 # cancel existing Follow_blacklist
+    Follow_muted = 7
+    Unfollow_muted = 8 # cancel existing Follow_muted
+    Reset_blacklist = 9 # cancel all existing records of Blacklist type
+    Reset_following_list = 10 # cancel all existing records of Blog type
+    Reset_muted_list = 11 # cancel all existing records of Ignore type
+    Reset_follow_blacklist = 12 # cancel all existing records of Follow_blacklist type
+    Reset_follow_muted_list = 13 # cancel all existing records of Follow_muted type
+    Reset_all_lists = 14 # cancel all existing records of ??? types
 
 class Follow(DbAdapterHolder):
     """Handles processing of incoming follow ups and flushing to db."""
-
+    
     follow_items_to_flush = dict()
-
-    # [DK] this dictionary will hold data for table update operations
-    # since for each status update query is different we will group
-    # follower id per status:
-    # {
-    #   state_number_1 : [follower_id_1, follower_id_2, ...]
-    #   state_number_2 : [follower_id_3, follower_id_4, ...]
-    # }
-    # we will use this dict later to perform batch updates
-    follow_update_items_to_flush = dict()
+    list_resets_to_flush = []
 
     idx = 0
 
     @classmethod
+    def _reset_blacklist(cls, data, op):
+        data['idx'] = cls.idx
+        data['blacklisted'] = False
+        data['block_num'] = op['block_num']
+    @classmethod
+    def _reset_following_list(cls, data, op):
+        if data['state'] == 1:
+            data['idx'] = cls.idx
+            data['state'] = 0
+            data['block_num'] = op['block_num']
+    @classmethod
+    def _reset_muted_list(cls, data, op):
+        if data['state'] == 2:
+            data['idx'] = cls.idx
+            data['state'] = 0
+            data['block_num'] = op['block_num']
+    @classmethod
+    def _reset_follow_blacklist(cls, data, op):
+        data['idx'] = cls.idx
+        data['follow_blacklists'] = False
+        data['block_num'] = op['block_num']
+    @classmethod
+    def _reset_follow_muted_list(cls, data, op):
+        data['idx'] = cls.idx
+        data['follow_muted'] = False
+        data['block_num'] = op['block_num']
+    @classmethod
+    def _reset_all_lists(cls, data, op):
+        data['idx'] = cls.idx
+        data['state'] = 0
+        data['blacklisted'] = False
+        data['follow_blacklists'] = False
+        data['follow_muted'] = False
+        data['block_num'] = op['block_num']
+
+    @classmethod
+    def _follow_single(cls, follower, following, at, block_num,
+                       new_state=None, new_blacklisted=None, new_follow_blacklists=None, new_follow_muted=None):
+        # add or update single record in flush cache
+        k = '{}/{}'.format(follower, following)
+        if k not in cls.follow_items_to_flush:
+            # fresh follow item (note that db might have that pair already)
+            cls.follow_items_to_flush[k] = dict(
+                idx=cls.idx,
+                follower=follower,
+                following=following,
+                state=new_state if new_state is not None else 'NULL',
+                blacklisted=new_blacklisted if new_blacklisted is not None else 'NULL',
+                follow_blacklists=new_follow_blacklists if new_follow_blacklists is not None else 'NULL',
+                follow_muted=new_follow_muted if new_follow_muted is not None else 'NULL',
+                at=at,
+                block_num=block_num
+            )
+        else:
+            # follow item already in cache - just overwrite previous value where applicable
+            cls.follow_items_to_flush[k]['idx'] = cls.idx
+            if new_state is not None:
+                cls.follow_items_to_flush[k]['state'] = new_state
+            if new_blacklisted is not None:
+                cls.follow_items_to_flush[k]['blacklisted'] = new_blacklisted
+            if new_follow_blacklists is not None:
+                cls.follow_items_to_flush[k]['follow_blacklists'] = new_follow_blacklists
+            if new_follow_muted is not None:
+                cls.follow_items_to_flush[k]['follow_muted'] = new_follow_muted
+            # ABW: at not updated for some reason - will therefore always point at time of first relation between accounts
+            cls.follow_items_to_flush[k]['block_num'] = block_num
+        cls.idx += 1
+
+    @classmethod
     def follow_op(cls, account, op_json, date, block_num):
         """Process an incoming follow op."""
+
+        def true_false_none(state, to_true, to_false):
+            if state == to_true:
+                return True
+            if state == to_false:
+                return False
+            return None
+
         op = cls._validated_op(account, op_json, date)
         if not op:
             return
         op['block_num'] = block_num
+        state = int(op['state'])
+        follower = op['follower']
+        # log.info("follow_op accepted as %s", op)
 
-        state = op['state']
-
-        for following in op['flg']:
-            k = '{}/{}'.format(op['flr'], following)
-            if k in cls.follow_items_to_flush:
-                cls.follow_items_to_flush[k]['state'] = state
-                cls.follow_items_to_flush[k]['idx'] = cls.idx
-                cls.follow_items_to_flush[k]['block_num'] = block_num
+        if state >= Action.Reset_blacklist:
+            # choose action specific to requested list resetting
+            add_null_blacklist = False
+            add_null_muted = False
+            if state == Action.Reset_blacklist:
+                reset_list = Follow._reset_blacklist
+                cls.list_resets_to_flush.append(dict(follower=follower, reset_call='follow_reset_blacklist', block_num=block_num))
+            elif state == Action.Reset_following_list:
+                reset_list = Follow._reset_following_list
+                cls.list_resets_to_flush.append(dict(follower=follower, reset_call='follow_reset_following_list', block_num=block_num))
+            elif state == Action.Reset_muted_list:
+                reset_list = Follow._reset_muted_list
+                cls.list_resets_to_flush.append(dict(follower=follower, reset_call='follow_reset_muted_list', block_num=block_num))
+            elif state == Action.Reset_follow_blacklist:
+                reset_list = Follow._reset_follow_blacklist
+                cls.list_resets_to_flush.append(dict(follower=follower, reset_call='follow_reset_follow_blacklist', block_num=block_num))
+                add_null_blacklist = True
+            elif state == Action.Reset_follow_muted_list:
+                reset_list = Follow._reset_follow_muted_list
+                cls.list_resets_to_flush.append(dict(follower=follower, reset_call='follow_reset_follow_muted_list', block_num=block_num))
+                add_null_muted = True
+            elif state == Action.Reset_all_lists:
+                reset_list = Follow._reset_all_lists
+                cls.list_resets_to_flush.append(dict(follower=follower, reset_call='follow_reset_all_lists', block_num=block_num))
+                add_null_blacklist = True
+                add_null_muted = True
             else:
-                cls.follow_items_to_flush[k] = dict(
-                    idx=cls.idx,
-                    flr=op['flr'],
-                    flg=following,
-                    state=state,
-                    at=op['at'],
-                    block_num=block_num)
-            cls.idx += 1
-
-        if state > 8:
-            # check if given state exists in dict
-            # if exists add follower to a list for a given state
-            # if not exists create list and set that list for given state
-            if state in cls.follow_update_items_to_flush:
-                cls.follow_update_items_to_flush[state].append((op['flr'], block_num))
-            else:
-                cls.follow_update_items_to_flush[state] = [(op['flr'], block_num)]
+                assert False, 'Unhandled follow state'
+            # apply action to existing cached data as well as to database (ABW: with expected frequency of list resetting
+            # there is no point in grouping such operations from group of blocks - we can just execute them one by one
+            # in order of appearance)
+            for k, data in cls.follow_items_to_flush.items():
+                if data['follower'] == follower:
+                    reset_list(data, op)
+            if add_null_blacklist or add_null_muted:
+                # since 'null' account can't have its blacklist/mute list, following such list is only used
+                # as an indicator for frontend to no longer bother user with proposition of following predefined
+                # lists (since that user is already choosing his own lists)
+                cls._follow_single(follower, escape_characters('null'), op['at'], op['block_num'], None, None, add_null_blacklist, add_null_muted)
+        else:
+            # set new state/flags to be applied to each pair with changing 'following'
+            new_state = state if state in (Action.Nothing, Action.Blog, Action.Ignore) else None
+            new_blacklisted = true_false_none(state, Action.Blacklist, Action.Unblacklist)
+            new_follow_blacklists = true_false_none(state, Action.Follow_blacklist, Action.Unfollow_blacklist)
+            new_follow_muted = true_false_none(state, Action.Follow_muted, Action.Unfollow_muted)
+            
+            for following in op['following']:
+                cls._follow_single(follower, following, op['at'], block_num,
+                                   new_state, new_blacklisted, new_follow_blacklists, new_follow_muted)
 
     @classmethod
     def _validated_op(cls, account, op, date):
         """Validate and normalize the operation."""
         if (not 'what' in op
-           or not isinstance(op['what'], list)
-           or not 'follower' in op
-           or not 'following' in op):
-            return None
-
-                # follower/following is empty
-        if not op['follower'] or not op['following']:
-            return None
-
-        op['following'] = op['following'] if isinstance(op['following'], list) else [op['following']]
-
-        # mimic original behaviour
-        # if following name does not exist do not process it: basically equal to drop op for single following entry
-
-        op['following'] = [op for op in op['following'] if Accounts.exists(op)]
-
-        # if follower name does not exist drop op
-        if not Accounts.exists(op['follower']):
-            return None
-
-        if op['follower'] in op['following'] or op['follower'] != account:
+            or not isinstance(op['what'], list)
+            or not 'follower' in op
+            or not 'following' in op):
+            log.info("follow_op %s ignored due to basic errors", op)
             return None
 
         what = first(op['what']) or ''
-        if not isinstance(what, str):
-            return None
-        defs = {'': 0, 'blog': 1, 'ignore': 2, 'blacklist': 3, 'follow_blacklist': 4, 'unblacklist': 5, 'unfollow_blacklist': 6,
-                'follow_muted': 7, 'unfollow_muted': 8, 'reset_blacklist' : 9, 'reset_following_list': 10, 'reset_muted_list': 11,
-                'reset_follow_blacklist': 12, 'reset_follow_muted_list': 13, 'reset_all_lists': 14}
-        if what not in defs:
+        # ABW: the empty 'what' is used to clear existing 'blog' or 'ignore' state, however it can also be used to
+        # introduce new empty relation record in hive_follows adding unnecessary data (it might become a problem
+        # only if we wanted to immediately remove empty records)
+        # we could add aliases for '' - 'unfollow' and 'unignore'/'unmute'
+        # we could add alias for 'ignore' - 'mute'
+        defs = {'': Action.Nothing, 'blog': Action.Blog, 'follow': Action.Blog, 'ignore': Action.Ignore,
+                'blacklist': Action.Blacklist, 'follow_blacklist': Action.Follow_blacklist,
+                'unblacklist': Action.Unblacklist, 'unfollow_blacklist': Action.Unfollow_blacklist,
+                'follow_muted': Action.Follow_muted, 'unfollow_muted': Action.Unfollow_muted,
+                'reset_blacklist' : Action.Reset_blacklist, 'reset_following_list': Action.Reset_following_list,
+                'reset_muted_list': Action.Reset_muted_list, 'reset_follow_blacklist': Action.Reset_follow_blacklist,
+                'reset_follow_muted_list': Action.Reset_follow_muted_list, 'reset_all_lists': Action.Reset_all_lists}
+        if not isinstance(what, str) or what not in defs:
+            log.info("follow_op %s ignored due to unknown type of follow", op)
             return None
 
-        return dict(flr=escape_characters(op['follower']),
-                    flg=[escape_characters(following) for following in op['following']],
-                    state=defs[what],
+        # follower is empty or follower account does not exist, or it wasn't that account that authorized operation
+        if not op['follower'] or not Accounts.exists(op['follower']) or op['follower'] != account:
+            log.info("follow_op %s ignored due to invalid follower", op)
+            return None
+
+        # normalize following to list
+        op['following'] = op['following'] if isinstance(op['following'], list) else [op['following']]
+
+        # if following name does not exist do not process it: basically equal to drop op for single following entry
+        op['following'] = [following for following in op['following'] if following and Accounts.exists(following) and following != op['follower']]
+        # ABW: note that since you could make 'following' list empty anyway by supplying nonexisting account
+        # there was no point in excluding follow_op with provided empty list/empty string - such call actually
+        # makes sense for state > 8 when 'following' is ignored
+        state = defs[what]
+        if not op['following'] and state < Action.Reset_blacklist:
+            log.info("follow_op %s is void due to effectively empty list of following", op)
+            return None
+
+        return dict(follower=escape_characters(op['follower']),
+                    following=[escape_characters(following) for following in op['following']],
+                    state=state,
                     at=date)
 
     @classmethod
     def flush(cls):
         n = 0
-        if cls.follow_items_to_flush:
-            sql_prefix = """
+        if cls.follow_items_to_flush or cls.list_resets_to_flush:
+            cls.beginTx()
+            
+            sql = "SELECT {}({}::VARCHAR, {}::INT)"
+            for reset_list in cls.list_resets_to_flush:
+                query = sql.format(reset_list['reset_call'], reset_list['follower'], reset_list['block_num'])
+                cls.db.query_no_return(query)
+
+            cls.list_resets_to_flush.clear()
+
+            sql = """
                 INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
-                SELECT ds.follower_id, ds.following_id, ds.created_at, ds.state, ds.blacklisted, ds.follow_blacklists, ds.follow_muted, ds.block_num
+                SELECT
+                    ds.follower_id,
+                    ds.following_id,
+                    ds.created_at,
+                    COALESCE(ds.state, hfs.state, 0),
+                    COALESCE(ds.blacklisted, hfs.blacklisted, FALSE),
+                    COALESCE(ds.follow_blacklists, hfs.follow_blacklists, FALSE),
+                    COALESCE(ds.follow_muted, hfs.follow_muted, FALSE),
+                    ds.block_num
                 FROM
                 (
                     SELECT
@@ -135,32 +268,15 @@ class Follow(DbAdapterHolder):
                         ) as T (id, follower, following, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
                     INNER JOIN hive_accounts ha_flr ON ha_flr.name = T.follower
                     INNER JOIN hive_accounts ha_flg ON ha_flg.name = T.following
-                    ORDER BY T.block_num ASC, T.id ASC
                 ) AS ds(id, follower_id, following_id, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
-                ORDER BY ds.block_num ASC, ds.id ASC
-            """
-            sql_postfix = """
+                LEFT JOIN hive_follows hfs ON hfs.follower = ds.follower_id AND hfs.following = ds.following_id
+                ORDER BY ds.id ASC 
                 ON CONFLICT ON CONSTRAINT hive_follows_ux1 DO UPDATE
                     SET
-                        state = (CASE EXCLUDED.state
-                                    WHEN 0 THEN 0 -- 0 blocks possibility to update state
-                                    ELSE EXCLUDED.state
-                                END),
-                        blacklisted = (CASE EXCLUDED.state
-                                        WHEN 3 THEN TRUE
-                                        WHEN 5 THEN FALSE
-                                        ELSE EXCLUDED.blacklisted
-                                    END),
-                        follow_blacklists = (CASE EXCLUDED.state
-                                                WHEN 4 THEN TRUE
-                                                WHEN 6 THEN FALSE
-                                                ELSE EXCLUDED.follow_blacklists
-                                            END),
-                        follow_muted = (CASE EXCLUDED.state
-                                           WHEN 7 THEN TRUE
-                                           WHEN 8 THEN FALSE
-                                           ELSE EXCLUDED.follow_muted
-                                        END),
+                        state = EXCLUDED.state,
+                        blacklisted = EXCLUDED.blacklisted,
+                        follow_blacklists = EXCLUDED.follow_blacklists,
+                        follow_muted = EXCLUDED.follow_muted,
                         block_num = EXCLUDED.block_num
                 WHERE hf.following = EXCLUDED.following AND hf.follower = EXCLUDED.follower
                 """
@@ -168,267 +284,31 @@ class Follow(DbAdapterHolder):
             limit = 1000
             count = 0
 
-            cls.beginTx()
             for _, follow_item in cls.follow_items_to_flush.items():
-                if count < limit:
-                    values.append("({}, {}, {}, '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['idx'],
-                                                                          follow_item['flr'],
-                                                                          follow_item['flg'],
-                                                                          follow_item['at'],
-                                                                          follow_item['state'],
-                                                                          follow_item['state'] == 3,
-                                                                          follow_item['state'] == 4,
-                                                                          follow_item['state'] == 7,
-                                                                          follow_item['block_num']))
-                    count = count + 1
-                else:
-                    query = str(sql_prefix).format(",".join(values))
-                    query += sql_postfix
+                values.append("({}, {}, {}, '{}'::timestamp, {}::smallint, {}::boolean, {}::boolean, {}::boolean, {})".format(
+                    follow_item['idx'],
+                    follow_item['follower'],
+                    follow_item['following'],
+                    follow_item['at'],
+                    follow_item['state'],
+                    follow_item['blacklisted'],
+                    follow_item['follow_blacklists'],
+                    follow_item['follow_muted'],
+                    follow_item['block_num']))
+                count = count + 1
+                if count >= limit:
+                    query = str(sql).format(",".join(values))
                     cls.db.query(query)
                     values.clear()
-                    values.append("({}, {}, {}, '{}'::timestamp, {}, {}, {}, {}, {})".format(follow_item['idx'],
-                                                                          follow_item['flr'],
-                                                                          follow_item['flg'],
-                                                                          follow_item['at'],
-                                                                          follow_item['state'],
-                                                                          follow_item['state'] == 3,
-                                                                          follow_item['state'] == 4,
-                                                                          follow_item['state'] == 7,
-                                                                          follow_item['block_num']))
-                    count = 1
+                    count = 0
                 n += 1
 
             if len(values) > 0:
-                query = str(sql_prefix).format(",".join(values))
-                query += sql_postfix
+                query = str(sql).format(",".join(values))
                 cls.db.query(query)
-            cls.commitTx()
+
             cls.follow_items_to_flush.clear()
 
-            # process follow_update_items_to_flush dictionary
-            # .items() will return list of tuples: [(state_number, [list of follower ids]), ...]
-            # for each state get list of follower_id and make update query
-            # for that list, if list size is greater than 1000 it will be divided
-            # to chunks of 1000
-            #
-            for state, update_flush_items in cls.follow_update_items_to_flush.items():
-                for chunk in chunks(update_flush_items, 1000):
-                    sql = None
-                    query_values = ','.join(["({}, {})".format(account[0], account[1]) for account in chunk])
-                    # [DK] probaly not a bad idea to move that logic to SQL function
-                    if state == 9:
-                        #reset blacklists for follower
-                        sql = """
-                            UPDATE
-                                hive_follows hf
-                            SET
-                                blacklisted = false,
-                                block_num = ds.block_num
-                            FROM
-                            (
-                                SELECT
-                                    ha.id as follower_id,
-                                    block_num
-                                FROM
-                                    (
-                                        VALUES
-                                        {}
-                                    ) AS T(name, block_num)
-                                INNER JOIN hive_accounts ha ON ha.name = T.name
-                            ) AS ds (follower_id, block_num)
-                            WHERE
-                                hf.follower = ds.follower_id
-                        """.format(query_values)
-                    elif state == 10:
-                        #reset following list for follower
-                        sql = """
-                            UPDATE
-                                hive_follows hf
-                            SET
-                                state = 0,
-                                block_num = ds.block_num
-                            FROM
-                            (
-                                SELECT
-                                    ha.id as follower_id,
-                                    block_num
-                                FROM
-                                    (
-                                        VALUES
-                                        {}
-                                    ) AS T(name, block_num)
-                                INNER JOIN hive_accounts ha ON ha.name = T.name
-                            ) AS ds (follower_id, block_num)
-                            WHERE
-                                hf.follower = ds.follower_id
-                                AND hf.state = 1
-                        """.format(query_values)
-                    elif state == 11:
-                        #reset all muted list for follower
-                        sql = """
-                            UPDATE
-                                hive_follows hf
-                            SET
-                                state = 0,
-                                block_num = ds.block_num
-                            FROM
-                            (
-                                SELECT
-                                    ha.id as follower_id,
-                                    block_num
-                                FROM
-                                    (
-                                        VALUES
-                                        {}
-                                    ) AS T(name, block_num)
-                                INNER JOIN hive_accounts ha ON ha.name = T.name
-                            ) AS ds (follower_id, block_num)
-                            WHERE
-                                hf.follower = ds.follower_id
-                                AND hf.state = 2
-                        """.format(query_values)
-                    elif state == 12:
-                        #reset followed blacklists
-                        sql = """
-                            UPDATE
-                                hive_follows hf
-                            SET
-                                follow_blacklists = false,
-                                block_num = ds.block_num
-                            FROM
-                            (
-                                SELECT
-                                    ha.id as follower_id,
-                                    block_num
-                                FROM
-                                    (
-                                        VALUES
-                                        {0}
-                                    ) AS T(name, block_num)
-                                INNER JOIN hive_accounts ha ON ha.name = T.name
-                            ) AS ds (follower_id, block_num)
-                            WHERE
-                                hf.follower = ds.follower_id;
-
-                            UPDATE
-                                hive_follows hf
-                            SET
-                                follow_blacklists = true,
-                                block_num = ds.block_num
-                            FROM
-                            (
-                                SELECT
-                                    ha.id as follower_id,
-                                    block_num
-                                FROM
-                                    (
-                                        VALUES
-                                        {0}
-                                    ) AS T(name, block_num)
-                                INNER JOIN hive_accounts ha ON ha.name = T.name
-                            ) AS ds (follower_id, block_num)
-                            WHERE
-                                hf.follower = ds.follower_id
-                                AND following = (SELECT id FROM hive_accounts WHERE name = 'null')
-                        """.format(query_values)
-
-                    elif state == 13:
-                        #reset followed mute lists
-                        sql = """
-                            UPDATE
-                                hive_follows hf
-                            SET
-                                follow_muted = false,
-                                block_num = ds.block_num
-                            FROM
-                            (
-                                SELECT
-                                    ha.id as follower_id,
-                                    block_num
-                                FROM
-                                    (
-                                        VALUES
-                                        {0}
-                                    ) AS T(name, block_num)
-                                INNER JOIN hive_accounts ha ON ha.name = T.name
-                            ) AS ds (follower_id, block_num)
-                            WHERE
-                                hf.follower = ds.follower_id;
-
-                            UPDATE
-                                hive_follows hf
-                            SET
-                                follow_muted = true,
-                                block_num = ds.block_num
-                            FROM
-                            (
-                                SELECT
-                                    ha.id as follower_id,
-                                    block_num
-                                FROM
-                                    (
-                                        VALUES
-                                        {0}
-                                    ) AS T(name, block_num)
-                                INNER JOIN hive_accounts ha ON ha.name = T.name
-                            ) AS ds (follower_id, block_num)
-                            WHERE
-                                hf.follower = ds.follower_id
-                                AND following = (SELECT id FROM hive_accounts WHERE name = 'null')
-                        """.format(query_values)
-                    elif state == 14:
-                        #reset all lists
-                        sql = """
-                            UPDATE
-                                hive_follows hf
-                            SET
-                                blacklisted = false,
-                                follow_blacklists = false,
-                                follow_muted = false,
-                                state = 0,
-                                block_num = ds.block_num
-                            FROM
-                            (
-                                SELECT
-                                    ha.id as follower_id,
-                                    block_num
-                                FROM
-                                    (
-                                        VALUES
-                                        {0}
-                                    ) AS T(name, block_num)
-                                INNER JOIN hive_accounts ha ON ha.name = T.name
-                            ) AS ds (follower_id, block_num)
-                            WHERE
-                                hf.follower = ds.follower_id;
-
-                            UPDATE
-                                hive_follows hf
-                            SET
-                                follow_blacklists = true,
-                                follow_muted = true,
-                                block_num = ds.block_num
-                            FROM
-                            (
-                                SELECT
-                                    ha.id as follower_id,
-                                    block_num
-                                FROM
-                                    (
-                                        VALUES
-                                        {0}
-                                    ) AS T(name, block_num)
-                                INNER JOIN hive_accounts ha ON ha.name = T.name
-                            ) AS ds (follower_id, block_num)
-                            WHERE
-                                hf.follower = ds.follower_id
-                                AND following = (SELECT id FROM hive_accounts WHERE name = 'null')
-                        """.format(query_values)
-                    if sql is not None:
-                        cls.beginTx()
-                        DB.query(sql)
-                        cls.commitTx()
-                    n += len(chunk)
-            cls.follow_update_items_to_flush.clear()
+            cls.commitTx()
             cls.idx = 0
         return n
