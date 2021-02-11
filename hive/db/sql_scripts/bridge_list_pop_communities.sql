@@ -20,7 +20,7 @@ BEGIN
     JOIN (
         SELECT community_id, COUNT(*) newsubs
         FROM hive_subscriptions
-        WHERE created_at > (SELECT created_at FROM hive_blocks order by created_at desc LIMIT 1) - INTERVAL '1 MONTH'
+        WHERE created_at > head_block_time() - INTERVAL '1 MONTH'
         GROUP BY community_id
     ) stats
     ON stats.community_id = id
