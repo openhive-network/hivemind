@@ -13,22 +13,6 @@ def client():
 def test_instance(client):
     assert isinstance(client, SteemClient)
 
-def test_get_accounts(client):
-    accounts = client.get_accounts(['steemit', 'test-safari'])
-    assert len(accounts) == 2
-    assert accounts[0]['name'] == 'steemit'
-
-def test_get_content_batch(client):
-    tuples = [('test-safari', 'may-spam'), ('test-safari', 'june-spam')]
-    posts = client.get_content_batch(tuples)
-    assert len(posts) == 2
-    assert posts[0]['author'] == 'test-safari'
-    assert posts[1]['author'] == 'test-safari'
-
-def test_get_block(client):
-    block = client.get_block(23494494)
-    assert block['block_id'] == '01667f5e194c421aa00eb02270d3219a5d9bf339'
-
 def test_stream_blocks(client):
      start_at = client.last_irreversible()
      stop_at = client.head_block() + 2

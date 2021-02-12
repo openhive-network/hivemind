@@ -36,6 +36,8 @@ from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.indexer.mock_block_provider import MockBlockProvider
 from hive.indexer.mock_vops_provider import MockVopsProvider
 
+from hive.steem.http_client import BreakHttpRequestOnDemandException
+
 from datetime import datetime
 
 from signal import signal, SIGINT, SIGTERM, getsignal
@@ -206,10 +208,13 @@ class Sync:
             MockBlockProvider.load_block_data(mock_block_data_path)
             MockBlockProvider.print_data()
 
-    def refresh_sparse_stats(self):
+    def _refresh_sparse_stats(self):
         # normally it should be refreshed in various time windows
         # but we need the ability to do it all at the same time
-        self._update_chain_state()
+        try:
+            self._update_chain_state(breaker = can_continue_thread )
+        except BreakHttpRequestOnDemandException:
+            pass
         update_communities_posts_and_rank(self._db)
         with ThreadPoolExecutor(max_workers=2) as executor:
             executor.submit(PayoutStats.generate)
@@ -264,33 +269,36 @@ class Sync:
         update_communities_posts_and_rank(self._db)
 
         last_imported_block = Blocks.head_num()
-        hived_head_block = self._conf.get('test_max_block') or self._steem.last_irreversible()
+        try:
+            hived_head_block = self._conf.get('test_max_block') or self._steem.last_irreversible(breaker=can_continue_thread)
+        except BreakHttpRequestOnDemandException:
+            return
 
         log.info("target_head_block : %s", hived_head_block)
 
-        if DbState.is_initial_sync():
-            DbState.before_initial_sync(last_imported_block, hived_head_block)
-            # resume initial sync
-            self.initial()
-            if not can_continue_thread():
-                restore_handlers()
-                return
-            current_imported_block = Blocks.head_num()
-            # beacuse we cannot break long sql operations, then we back default CTRL+C
-            # behavior for the time of post initial actions
+        DbState.before_initial_sync(last_imported_block, hived_head_block)
+        # resume initial sync
+        self.initial()
+        if not can_continue_thread():
             restore_handlers()
-            try:
-                DbState.finish_initial_sync(current_imported_block)
-            except KeyboardInterrupt:
-                log.info("Break finish initial sync")
-                set_exception_thrown()
-                return
-            set_handlers()
-        else:
-            # recover from fork
-            Blocks.verify_head(self._steem)
+            return
+        current_imported_block = Blocks.head_num()
+        # beacuse we cannot break long sql operations, then we back default CTRL+C
+        # behavior for the time of post initial actions
+        restore_handlers()
+        try:
+            DbState.finish_initial_sync(current_imported_block)
+        except KeyboardInterrupt:
+            log.info("Break finish initial sync")
+            set_exception_thrown()
+            return
+        set_handlers()
 
-        self._update_chain_state()
+        try:
+            self._update_chain_state(breaker = can_continue_thread)
+        except BreakHttpRequestOnDemandException:
+            restore_handlers()
+            return
 
         trail_blocks = self._conf.get('trail_blocks')
         assert trail_blocks >= 0
@@ -320,7 +328,7 @@ class Sync:
 
             head = Blocks.head_num()
             if head >= max_block_limit:
-                self.refresh_sparse_stats()
+                self._refresh_sparse_stats()
                 log.info("Exiting [LIVE SYNC] because irreversible block sync reached specified block limit: %d", max_block_limit)
                 break;
 
@@ -333,7 +341,7 @@ class Sync:
 
             head = Blocks.head_num()
             if head >= max_block_limit:
-                self.refresh_sparse_stats()
+                self._refresh_sparse_stats()
                 log.info("Exiting [LIVE SYNC] because of specified block limit: %d", max_block_limit)
                 break;
 
@@ -355,7 +363,11 @@ class Sync:
         steemd = self._steem
 
         lbound = Blocks.head_num() + 1
-        ubound = steemd.last_irreversible()
+        ubound = None
+        try:
+            ubound = steemd.last_irreversible(breaker=can_continue_thread)
+        except BreakHttpRequestOnDemandException:
+            return
 
         if self._conf.get('test_max_block') and self._conf.get('test_max_block') < ubound:
             ubound = self._conf.get('test_max_block')
@@ -413,7 +425,7 @@ class Sync:
         log.info("[LIVE SYNC] Entering listen with HM head: %d", hive_head)
 
         if hive_head >= max_sync_block:
-            self.refresh_sparse_stats()
+            self._refresh_sparse_stats()
             log.info("[LIVE SYNC] Exiting due to block limit exceeded: synced block number: %d, max_sync_block: %d", hive_head, max_sync_block)
             return
 
@@ -446,7 +458,10 @@ class Sync:
             if num % 200 == 0: #10min
                 update_communities_posts_and_rank(self._db)
             if num % 20 == 0: #1min
-                self._update_chain_state()
+                try:
+                    self._update_chain_state(breaker=can_continue_thread)
+                except BreakHttpRequestOnDemandException:
+                    break
 
             PC.broadcast(BroadcastObject('sync_current_block', num, 'blocks'))
             FSM.next_blocks()
@@ -457,9 +472,16 @@ class Sync:
                 break
 
     # refetch dynamic_global_properties, feed price, etc
-    def _update_chain_state(self):
+    def _update_chain_state(self, breaker):
         """Update basic state props (head block, feed price) in db."""
-        state = self._steem.gdgp_extended()
+        try:
+            state = self._steem.gdgp_extended(breaker = breaker)
+        except:
+            # update things which not depend on gdgp rpc queries
+            self._db.query("""UPDATE hive_state SET block_num = :block_num""", block_num=Blocks.head_num() )
+            log.warning("Dynamic global properites were not updated in 'hive_state' table")
+            raise
+
         self._db.query("""UPDATE hive_state SET block_num = :block_num,
                        steem_per_mvest = :spm, usd_per_steem = :ups,
                        sbd_per_steem = :sps, dgpo = :dgpo""",

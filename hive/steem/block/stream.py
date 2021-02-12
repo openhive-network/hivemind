@@ -79,7 +79,11 @@ class BlockStream:
 
         with OneBlockProviderFactory( self._conf, self._client, breaker, exception_reporter ) as one_block_provider:
             curr = start_block
-            head = self._client.head_block()
+            try:
+                head = self._client.head_block(breaker)
+            except BreakHttpRequestOnDemandException:
+                return
+
             prev = one_block_provider.get_block( curr - 1 )
 
             assert prev

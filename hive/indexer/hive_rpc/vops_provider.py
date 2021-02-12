@@ -7,6 +7,8 @@ from time import sleep
 
 from hive.indexer.mock_block_provider import MockBlockProvider
 
+from hive.steem.http_client import BreakHttpRequestOnDemandException
+
 log = logging.getLogger(__name__)
 
 class VopsProvider:
@@ -64,13 +66,16 @@ class VopsProvider:
                 if not cls._breaker():
                     return;
 
-                results = cls._client.enum_virtual_ops(cls._conf, block, block + cls._blocks_per_request)
+                results = cls._client.enum_virtual_ops(cls._conf, block, block + cls._blocks_per_request, cls._breaker)
                 while cls._breaker():
                     try:
                         cls._responses_queues[ blocks_shift ].put( results, True, 1 )
                         break
                     except queue.Full:
                         continue
+        except BreakHttpRequestOnDemandException:
+            cls._exception_reporter()
+            return
         except:
             cls._exception_reporter()
             raise

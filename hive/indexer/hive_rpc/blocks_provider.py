@@ -7,6 +7,8 @@ import math
 
 from hive.indexer.mock_block_provider import MockBlockProvider
 
+from hive.steem.http_client import BreakHttpRequestOnDemandException
+
 log = logging.getLogger(__name__)
 
 class BlocksProvider:
@@ -65,7 +67,7 @@ class BlocksProvider:
 
                 query_param = [{'block_num': i} for i in range( block, min( [ block + cls._blocks_per_request, cls._max_block ] ))]
                 number_of_expected_blocks = len(query_param)
-                results = cls._http_client.exec( 'get_block', query_param, True )
+                results = cls._http_client.exec( 'get_block', query_param, True, cls._breaker )
 
                 if results:
                     while cls._breaker():
@@ -74,6 +76,9 @@ class BlocksProvider:
                             break
                         except queue.Full:
                             continue
+        except BreakHttpRequestOnDemandException:
+            cls._exception_reporter()
+            return
         except:
             cls._exception_reporter()
             raise

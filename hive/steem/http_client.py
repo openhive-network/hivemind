@@ -21,6 +21,9 @@ from hive.steem.exceptions import RPCError, RPCErrorFatal
 logging.getLogger('urllib3.connectionpool').setLevel(logging.WARNING)
 log = logging.getLogger(__name__)
 
+class BreakHttpRequestOnDemandException(Exception):
+    pass
+
 def validated_json_payload(response):
     """Asserts that the HTTP response was successful and valid JSON."""
     if response.status != 200:
@@ -139,7 +142,7 @@ class HttpClient(object):
 
         return body
 
-    def exec(self, method, args, is_batch=False):
+    def exec(self, method, args, is_batch=False, breaker=None):
         """Execute a steemd RPC method, retrying on failure."""
         what = "%s[%d]" % (method, len(args) if is_batch else 1)
         body = self.rpc_body(method, args, is_batch)
@@ -148,6 +151,8 @@ class HttpClient(object):
         tries = 0
         # changed number of tries to 25
         while tries < 25:
+            if breaker is not None and not breaker():
+                raise BreakHttpRequestOnDemandException()
             tries += 1
             secs = -1
             info = None
@@ -185,16 +190,16 @@ class HttpClient(object):
 
         raise Exception("abort %s after %d tries" % (method, tries))
 
-    def exec_multi(self, name, params, max_workers, batch_size):
+    def exec_multi(self, name, params, max_workers, batch_size, breaker = None):
         """Process a batch as parallel requests."""
-        chunks = [[name, args, True] for args in chunkify(params, batch_size)]
+        chunks = [[name, args, True, breaker] for args in chunkify(params, batch_size)]
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             for items in executor.map(lambda tup: self.exec(*tup), chunks):
                 yield list(items) # (use of `map` preserves request order)
 
-    def exec_multi_as_completed(self, name, params, max_workers, batch_size):
+    def exec_multi_as_completed(self, name, params, max_workers, batch_size, breaker = None):
         """Process a batch as parallel requests; yields unordered."""
-        chunks = [[name, args, True] for args in chunkify(params, batch_size)]
+        chunks = [[name, args, True, breaker] for args in chunkify(params, batch_size)]
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = (executor.submit(self.exec, *tup) for tup in chunks)
             for future in as_completed(futures):
