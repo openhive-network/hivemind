@@ -34,6 +34,8 @@ from hive.server.tags_api import methods as tags_api
 
 from hive.server.database_api import methods as database_api
 
+from hive.server.account_history import methods as account_history_api
+
 from hive.server.db import Db
 
 # pylint: disable=too-many-lines
@@ -163,6 +165,13 @@ def build_methods():
         'database_api.find_votes' : database_api.find_votes
     })
 
+    # account_history_api methods
+    methods.add(**{
+        'account_history_api.get_account_history' : account_history_api.get_account_history,
+        'account_history_api.get_ops_in_block' : account_history_api.get_ops_in_block,
+        'account_history_api.enum_virtual_ops' : account_history_api.enum_virtual_ops,
+    })
+
     return methods
 
 def truncate_response_log(logger):
@@ -217,11 +226,17 @@ def run_server(conf):
         """Initialize db adapter."""
         args = app['config']['args']
         app['db'] = await Db.create(args['database_url'])
+        if args.get('hived_database_url', None) is not None:
+          app['hive_db'] = await Db.create(args['hived_database_url'])
 
     async def close_db(app):
         """Teardown db adapter."""
         app['db'].close()
         await app['db'].wait_closed()
+
+        if args.get('hived_database_url', None) is not None:
+          app['hive_db'].close()
+          await app['hive_db'].wait_closed()
 
     async def show_info(app):
         sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
