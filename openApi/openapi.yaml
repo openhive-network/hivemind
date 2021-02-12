@@ -148,6 +148,37 @@ components:
             rank:
               type: integer
 
+    'AccountNotifications':
+      type: array
+      description: 'array of objects with 6 notification related fields: date, id, msg, score, type and url'
+      items:
+        type: object
+        properties:
+          date:
+            type: string
+            format: date-time
+            description: date of the notification
+          id:
+            type: integer
+            description: notification id
+          msg:
+            type: string
+            description: message of the notification
+          score:
+            type: integer
+            description: notification score
+          type:
+            type: string
+            description: 'type of notification: follow, vote, reply, reply_comment, mention, reblog'
+          url:
+            type: string
+            format: url
+            description: end of notification url
+          
+    'DoesUserFollowAnyLists':
+      type: boolean
+      description: 'answer to a question does user follow any list'
+
     'ListCommunity':
       type: object
       required:
@@ -535,7 +566,7 @@ components:
         method:
           type: string
           enum:
-            - bridge.list_pop_communitites
+            - bridge.get_profile
         params:
           type: object
           required:
@@ -551,7 +582,79 @@ components:
               example: 'gtg'
         id:
           type: integer
-          default: 1  
+          default: 1
+
+    'AccountNotificationsRequest':
+      type: object
+      required:
+        - jsonrpc
+        - method
+        - params
+        - id
+      properties:
+        jsonrpc:
+          type: string
+          default: "2.0"
+        method:
+          type: string
+          enum:
+            - bridge.account_notifications
+        params:
+          type: object
+          required:
+            - account
+          properties:
+            account:
+              type: string
+              description: 'account name'
+              example: 'blocktrades'
+            min_score:
+              type: integer
+              description: 'minimal score of notifications to show'
+              minimum: 0
+              maximum: 100
+              default: 25
+            last_id:
+              type: integer
+              description: 'indicates newest notification to show; paging mechanism'
+              default: null
+            limit:
+              type: integer
+              description: 'limit number of listed notifications'
+              minimum: 1
+              maximum: 100
+              default: 100
+        id:
+          type: integer
+          default: 1
+
+    'DoesUserFollowAnyListsRequest':
+      type: object
+      required:
+        - jsonrpc
+        - method
+        - params
+        - id
+      properties:
+        jsonrpc:
+          type: string
+          default: "2.0"
+        method:
+          type: string
+          enum:
+            - bridge.does_user_follow_any_lists
+        params:
+          type: object
+          required:
+            - observer
+          properties:
+            observer:
+              type: string
+              description: 'account name'
+              example: 'blocktrades'
+        id:
+          type: integer
+          default: 1
 
 paths:
   /#bridge.get_community:
@@ -720,4 +823,46 @@ paths:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Profile'
+                  - $ref: '#/components/schemas/ErrorMessage'
+
+  /#bridge.account_notifications:
+    post:
+      description: Lists notifications for given account
+      operationId: bridge.account_notifications
+      requestBody:
+        description: 'required account, optional: min_score, last_id, limit'
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/AccountNotificationsRequest'
+        required: true
+      responses:
+        '200':
+          description: list of notifications
+          content:
+            'application/json':
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/AccountNotifications'
+                  - $ref: '#/components/schemas/ErrorMessage'
+
+  /#bridge.does_user_follow_any_lists:
+    post:
+      description: Tells if given observer follows any blacklist or mute list
+      operationId: bridge.does_user_follow_any_lists
+      requestBody:
+        description: 'required observer'
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/DoesUserFollowAnyListsRequest'
+        required: true
+      responses:
+        '200':
+          description: Answer whether the observer follow any list
+          content:
+            'application/json':
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/DoesUserFollowAnyLists'
                   - $ref: '#/components/schemas/ErrorMessage'
