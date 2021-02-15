@@ -1,0 +1,684 @@
+openapi: 3.0.2
+info:
+  description: An OpenAPI specification for Hivemind
+  title: Hivemind OpenAPI Specification
+  version: 0.0.1
+servers:
+- description: Hivemind local API Service
+  url: http://localhost:8080/
+paths:
+  /#bridge.get_community:
+    post:
+      description: Gets community
+      operationId: bridge_get_community
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommunityRequest'
+        description: community name and optional observer
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Community'
+                - $ref: '#/components/schemas/ErrorMessage'
+          description: Community result
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+  /#bridge.get_community_context:
+    post:
+      description: Gets community context
+      operationId: bridge_get_community_context
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommunityContextRequest'
+        description: community name and account for context
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/CommunityContext'
+                - $ref: '#/components/schemas/ErrorMessage'
+          description: Community context result
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+  /#bridge.list_all_subscriptions:
+    post:
+      description: Lists all community contexts from communities given account is
+        subscribed to.
+      operationId: bridge_list_all_subscriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListAllSubscriptionsRequest'
+        description: points to valid account (not necessarily subscibed to any community)
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ListAllSubscriptions'
+                - $ref: '#/components/schemas/ErrorMessage'
+          description: all subscriptions list
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+  /#bridge.list_communities:
+    post:
+      description: Gets community
+      operationId: bridge_list_communities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListCommunitesRequest'
+        description: 'optional parameters: last, limit, query, sort, observer'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ListCommunity'
+                - $ref: '#/components/schemas/ErrorMessage'
+          description: list of Communities
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+  /#bridge.list_community_roles:
+    post:
+      description: Gets community
+      operationId: bridge_list_community_roles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListCommunityRolesRequest'
+        description: community name and optional observer
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ListCommunityRoles'
+                - $ref: '#/components/schemas/ErrorMessage'
+          description: list of Community roles
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+  /#bridge.list_pop_communities:
+    post:
+      description: Gets community
+      operationId: bridge_list_pop_communities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListPopCommunitesRequest'
+        description: 'optional parameter: limit'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ListPopCommunities'
+                - $ref: '#/components/schemas/ErrorMessage'
+          description: list of Communities
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+  /#bridge.list_subscribers:
+    post:
+      description: list subscribers
+      operationId: bridge_list_subscribers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListSubscribersRequest'
+        description: 'required community, optional: last, limit'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/ListSubscribers'
+                - $ref: '#/components/schemas/ErrorMessage'
+          description: list of Communities
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+components:
+  schemas:
+    Community:
+      properties:
+        id:
+          type: integer
+        about:
+          type: string
+        admins:
+          items:
+            type: string
+          type: array
+        avatar_url:
+          type: string
+        context:
+          $ref: '#/components/schemas/CommunityContext'
+        created_at:
+          format: date-time
+          type: string
+        flag_text:
+          type: string
+        is_nsfw:
+          type: boolean
+        lang:
+          type: string
+        name:
+          type: string
+        num_authors:
+          type: integer
+        num_pending:
+          type: integer
+        settings:
+          type: object
+        subscribers:
+          type: integer
+        sum_pending:
+          type: integer
+        team:
+          description: 'array of arrays with 3 strings: name, role_name, title'
+          items:
+            items:
+              type: string
+            maxItems: 3
+            minItems: 3
+            type: array
+          type: array
+        title:
+          type: string
+        type_id:
+          type: integer
+      required:
+      - about
+      - avatar_url
+      - context
+      - created_at
+      - flag_text
+      - id
+      - is_nsfw
+      - lang
+      - name
+      - num_authors
+      - num_pending
+      - settings
+      - subscribers
+      - sum_pending
+      - team
+      - title
+      - type_id
+      type: object
+    ListCommunity:
+      properties:
+        id:
+          type: integer
+        about:
+          type: string
+        admins:
+          items:
+            type: string
+          type: array
+        avatar_url:
+          type: string
+        context:
+          $ref: '#/components/schemas/CommunityContext'
+        created_at:
+          format: date-time
+          type: string
+        is_nsfw:
+          type: boolean
+        lang:
+          type: string
+        name:
+          type: string
+        num_authors:
+          type: integer
+        num_pending:
+          type: integer
+        subscribers:
+          type: integer
+        sum_pending:
+          type: integer
+        title:
+          type: string
+        type_id:
+          type: integer
+      required:
+      - about
+      - avatar_url
+      - context
+      - created_at
+      - id
+      - is_nsfw
+      - lang
+      - name
+      - num_authors
+      - num_pending
+      - subscribers
+      - sum_pending
+      - title
+      - type_id
+      type: object
+    CommunityContext:
+      properties:
+        role:
+          type: string
+        subscribed:
+          type: boolean
+        title:
+          maxLength: 140
+          minLength: 0
+          type: string
+      type: object
+    ListAllSubscriptions:
+      items:
+        items:
+          type: string
+        maxItems: 4
+        minItems: 4
+        type: array
+      type: array
+    ListCommunityRoles:
+      description: 'array of arrays with 3 strings: name, role_name, title'
+      items:
+        items:
+          type: string
+        maxItems: 3
+        minItems: 3
+        type: array
+      type: array
+    ListPopCommunities:
+      description: 'array of arrays with 2 strings: community name and title'
+      items:
+        items:
+          type: string
+        maxItems: 2
+        minItems: 2
+        type: array
+      type: array
+    ListSubscribers:
+      description: 'array of arrays with 4 strings: account name, role name, title,
+        created_at'
+      items:
+        items:
+          type: string
+        maxItems: 4
+        minItems: 4
+        type: array
+      type: array
+    ErrorMessage:
+      properties:
+        jsonrpc:
+          type: string
+        error:
+          $ref: '#/components/schemas/ErrorMessage_error'
+        id:
+          type: integer
+      required:
+      - error
+      - id
+      - jsonrpc
+      type: object
+    CommunityContextRequest:
+      example:
+        method: bridge.get_community_context
+        id: 0
+        jsonrpc: "2.0"
+        params:
+          name: hive-189306
+          account: good-karma
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.get_community_context
+          type: string
+        params:
+          $ref: '#/components/schemas/CommunityContextRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    CommunityRequest:
+      example:
+        method: bridge.get_community
+        id: 0
+        jsonrpc: "2.0"
+        params:
+          observer: good-karma
+          name: hive-189306
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.get_community
+          type: string
+        params:
+          $ref: '#/components/schemas/CommunityRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    ListAllSubscriptionsRequest:
+      example:
+        method: bridge.list_all_subscriptions
+        id: 0
+        jsonrpc: "2.0"
+        params:
+          account: good-karma
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.list_all_subscriptions
+          type: string
+        params:
+          $ref: '#/components/schemas/ListAllSubscriptionsRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    ListCommunitesRequest:
+      example:
+        method: bridge.list_communitites
+        id: 6
+        jsonrpc: "2.0"
+        params:
+          observer: good-karma
+          last: hive-189306
+          query: Hive
+          limit: 8
+          sort: rank
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.list_communitites
+          type: string
+        params:
+          $ref: '#/components/schemas/ListCommunitesRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    ListCommunityRolesRequest:
+      example:
+        method: bridge.list_community_roles
+        id: 6
+        jsonrpc: "2.0"
+        params:
+          last: hive-189306
+          limit: 8
+          community: hive-189306
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.list_community_roles
+          type: string
+        params:
+          $ref: '#/components/schemas/ListCommunityRolesRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    ListPopCommunitesRequest:
+      example:
+        method: bridge.list_pop_communitites
+        id: 6
+        jsonrpc: "2.0"
+        params:
+          limit: 2
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.list_pop_communitites
+          type: string
+        params:
+          $ref: '#/components/schemas/ListPopCommunitesRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    ListSubscribersRequest:
+      example:
+        method: bridge.list_pop_communitites
+        id: 6
+        jsonrpc: "2.0"
+        params:
+          last: hive-189306
+          limit: 8
+          community: hive-189306
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.list_pop_communitites
+          type: string
+        params:
+          $ref: '#/components/schemas/ListSubscribersRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    ErrorMessage_error:
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        data:
+          type: string
+      required:
+      - code
+      - data
+      - message
+      type: object
+    CommunityContextRequest_params:
+      example:
+        name: hive-189306
+        account: good-karma
+      properties:
+        name:
+          description: community name
+          example: hive-189306
+          type: string
+        account:
+          description: account name
+          example: good-karma
+          type: string
+      required:
+      - account
+      - name
+      type: object
+    CommunityRequest_params:
+      example:
+        observer: good-karma
+        name: hive-189306
+      properties:
+        name:
+          description: community name
+          example: hive-189306
+          type: string
+        observer:
+          description: account name
+          example: good-karma
+          type: string
+      required:
+      - name
+      type: object
+    ListAllSubscriptionsRequest_params:
+      example:
+        account: good-karma
+      properties:
+        account:
+          description: account name
+          example: good-karma
+          type: string
+      required:
+      - account
+      type: object
+    ListCommunitesRequest_params:
+      example:
+        observer: good-karma
+        last: hive-189306
+        query: Hive
+        limit: 8
+        sort: rank
+      properties:
+        last:
+          description: name of community; paging mechanism (cuts out this and "higher"
+            communities, depends on chosen ranking)
+          example: hive-189306
+          type: string
+        limit:
+          default: 100
+          description: limit number of listed communities
+          maximum: 100
+          minimum: 1
+          type: integer
+        query:
+          description: when given turns on filtering for given set of words - words
+            are looked for in "title" and "about" fields
+          example: Hive
+          type: string
+        sort:
+          default: rank
+          description: ' determines order of returned communities'
+          enum:
+          - rank
+          - new
+          - subs
+          type: string
+        observer:
+          description: (can be skipped or passed empty), when passed has to point
+            to valid account used to show relation between account and community (subscribed,
+            role and title)
+          example: good-karma
+          type: string
+      type: object
+    ListCommunityRolesRequest_params:
+      example:
+        last: hive-189306
+        limit: 8
+        community: hive-189306
+      properties:
+        community:
+          description: community name
+          example: hive-189306
+          type: string
+        last:
+          description: name of community; paging mechanism (cuts out this and "higher"
+            communities, depends on chosen ranking)
+          example: hive-189306
+          type: string
+        limit:
+          default: 100
+          description: limit number of listed communities
+          maximum: 100
+          minimum: 1
+          type: integer
+      required:
+      - community
+      type: object
+    ListPopCommunitesRequest_params:
+      example:
+        limit: 2
+      properties:
+        limit:
+          default: 25
+          description: limit number of listed communities
+          maximum: 25
+          minimum: 1
+          type: integer
+      type: object
+    ListSubscribersRequest_params:
+      example:
+        last: hive-189306
+        limit: 8
+        community: hive-189306
+      properties:
+        community:
+          description: community name
+          example: hive-189306
+          type: string
+        last:
+          description: ' name of subscriber; paging mechanism (cuts out this and "higher"
+            subscribers, depends on created at desc)'
+          example: hive-189306
+          type: string
+        limit:
+          default: 100
+          description: limit number of listed subscribers
+          maximum: 100
+          minimum: 1
+          type: integer
+      required:
+      - community
+      type: object
