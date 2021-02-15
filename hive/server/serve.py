@@ -226,17 +226,17 @@ def run_server(conf):
         """Initialize db adapter."""
         args = app['config']['args']
         app['db'] = await Db.create(args['database_url'])
-        if args.get('hived_database_url', None) is not None:
-          app['hive_db'] = await Db.create(args['hived_database_url'])
+        if conf.get('hived_database_url'):
+          app['ah_db'] = await Db.create(args['hived_database_url'])
 
     async def close_db(app):
-        """Teardown db adapter."""
+        """Teardown db adapter and AH-db adapter."""
         app['db'].close()
         await app['db'].wait_closed()
 
-        if args.get('hived_database_url', None) is not None:
-          app['hive_db'].close()
-          await app['hive_db'].wait_closed()
+        if app['ah_db'] is not None:
+          app['ah_db'].close()
+          await app['ah_db'].wait_closed()
 
     async def show_info(app):
         sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"

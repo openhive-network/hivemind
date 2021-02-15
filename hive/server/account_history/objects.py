@@ -4,25 +4,19 @@ from json import loads
 from collections import OrderedDict
 
 
-
-
-def account_history_object(row, block_num : int = None) -> dict:
+def api_operation_object(row, block_num):
     obj = {}
 
-    obj["trx_id"]        = row['_trx_id']
-    obj["block"]         = block_num if block_num is not None else int(row["_block"])
-    obj["trx_in_block"]  = int(row[ "_trx_in_block" ])
-    obj["op_in_trx"]     = int(row[ "_op_in_trx" ])
-    obj["virtual_op"]    = int(row[ "_virtual_op" ])
-    obj["timestamp"]     = row[ "_timestamp" ]
-    obj["op"]            = loads(row[ "_value" ])
-    obj["operation_id"]  = int(row[ "_operation_id" ])
+    obj['_trx_id']      = row['_trx_id']
+    obj['block']        = block_num
+    obj['trx_in_block'] = row[ '_trx_in_block' ]
+    obj['op_in_trx']    = row[ '_op_in_trx' ]
+    obj['virtual_op']   = row[ '_virtual_op' ]
+    obj['timestamp']    = row[ '_timestamp' ]
+    obj['op']           = loads(row[ '_value' ])
+    obj['operation_id'] = row[ '_operation_id' ]
 
     return obj
-
-def api_operation_object(row) -> dict:
-    return account_history_object(row)
-
 
 def get_enum_virtual_ops( rows, limit : int, group_by_block : bool ) -> dict:
     """creates enum_virtual_ops return"""
@@ -67,10 +61,12 @@ def get_account_history(rows) -> dict:
     return { "history": list(result.items()) }
 
 
-def get_ops_in_block(rows) -> dict:
+def get_ops_in_block(rows, block_num):
     """creates get_ops_in_block return"""
-    result = OrderedDict()
+    ops = []
+
     for row in rows:
-        aoo = api_operation_object(row)
-        result[ ( row[aoo["block"], aoo["trx_in_block"], aoo["op_in_trx"], aoo["virtual_op"]] )] = aoo
-    return { "ops": result.values() }
+      obj = api_operation_object(row, block_num)
+      ops.append(obj)
+
+    return { "ops": ops }
