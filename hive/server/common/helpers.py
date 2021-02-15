@@ -61,6 +61,8 @@ def return_error_info(function):
             #        "trace": traceback.format_exc()}}
     return wrapper
 
+class raw_json(str): pass
+
 def json_date(date=None):
     """Given a db datetime, return a steemd/json-friendly version."""
     if not date or date == datetime.datetime.max: return '1969-12-31T23:59:59'

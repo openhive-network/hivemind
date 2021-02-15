@@ -9,6 +9,12 @@ from hive.conf import Conf
 from hive.db.adapter import Db
 from hive.utils.stats import PrometheusClient
 
+origEnc = None
+
+def rawEnc(obj):
+  if isinstance(obj, raw_json):
+    return obj
+  return origEnc(obj)
 
 def setup_logging(conf):
     """Setup logging with timestamps"""

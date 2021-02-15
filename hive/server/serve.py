@@ -38,7 +38,15 @@ from hive.server.account_history import methods as account_history_api
 
 from hive.server.db import Db
 
+from hive.server.common.helpers import raw_json
+
 # pylint: disable=too-many-lines
+origEnc = None
+
+def rawEnc(obj):
+  if isinstance(obj, raw_json):
+    return obj
+  return origEnc(obj)
 
 def decimal_serialize(obj):
     return simplejson.dumps(obj=obj, use_decimal=True)
@@ -199,6 +207,11 @@ def conf_stdout_custom_file_logger(logger, file_name):
 def run_server(conf):
     """Configure and launch the API server."""
     #pylint: disable=too-many-statements
+
+    global origEnc
+
+    origEnc = simplejson.encoder.encode_basestring_ascii
+    simplejson.encoder.encode_basestring_ascii = rawEnc
 
     # configure jsonrpcserver logging
     log_level = conf.log_level()

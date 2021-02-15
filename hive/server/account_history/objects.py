@@ -1,19 +1,17 @@
-from hive.server.common.helpers import json_date
+from hive.server.common.helpers import json_date, raw_json
 from hive.utils.normalize import sbd_amount, to_nai
-from json import loads
 from collections import OrderedDict
-
 
 def api_operation_object(row, block_num):
     obj = {}
 
-    obj['_trx_id']      = row['_trx_id']
+    obj['trx_id']       = row['_trx_id']
     obj['block']        = block_num
     obj['trx_in_block'] = row[ '_trx_in_block' ]
     obj['op_in_trx']    = row[ '_op_in_trx' ]
-    obj['virtual_op']   = row[ '_virtual_op' ]
+    obj['virtual_op']   = 1 if row[ '_virtual_op' ] else 0
     obj['timestamp']    = row[ '_timestamp' ]
-    obj['op']           = loads(row[ '_value' ])
+    obj['op']           = raw_json(row[ '_value' ])
     obj['operation_id'] = row[ '_operation_id' ]
 
     return obj
