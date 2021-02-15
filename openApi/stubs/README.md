@@ -50,8 +50,11 @@ import time
 import openapi_client
 from pprint import pprint
 from openapi_client.api import default_api
+from openapi_client.model.account_notifications_request import AccountNotificationsRequest
 from openapi_client.model.community_context_request import CommunityContextRequest
 from openapi_client.model.community_request import CommunityRequest
+from openapi_client.model.does_user_follow_any_lists_request import DoesUserFollowAnyListsRequest
+from openapi_client.model.get_profile_request import GetProfileRequest
 from openapi_client.model.list_all_subscriptions_request import ListAllSubscriptionsRequest
 from openapi_client.model.list_communites_request import ListCommunitesRequest
 from openapi_client.model.list_community_roles_request import ListCommunityRolesRequest
@@ -69,21 +72,23 @@ configuration = openapi_client.Configuration(
 with openapi_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = default_api.DefaultApi(api_client)
-    community_request = CommunityRequest(
+    account_notifications_request = AccountNotificationsRequest(
         jsonrpc="2.0",
-        method="bridge.get_community",
-        params=CommunityRequestParams(
-            name="hive-189306",
-            observer="good-karma",
+        method="bridge.account_notifications",
+        params=AccountNotificationsRequestParams(
+            account="blocktrades",
+            min_score=25,
+            last_id=1,
+            limit=100,
         ),
         id=1,
-    ) # CommunityRequest | community name and optional observer
+    ) # AccountNotificationsRequest | required account, optional: min_score, last_id, limit
 
     try:
-        api_response = api_instance.bridge_get_community(community_request)
+        api_response = api_instance.bridge_account_notifications(account_notifications_request)
         pprint(api_response)
     except openapi_client.ApiException as e:
-        print("Exception when calling DefaultApi->bridge_get_community: %s\n" % e)
+        print("Exception when calling DefaultApi->bridge_account_notifications: %s\n" % e)
 ```
 
 ## Documentation for API Endpoints
@@ -92,8 +97,11 @@ All URIs are relative to *http://localhost:8080*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*DefaultApi* | [**bridge_account_notifications**](docs/DefaultApi.md#bridge_account_notifications) | **POST** /#bridge.account_notifications | 
+*DefaultApi* | [**bridge_does_user_follow_any_lists**](docs/DefaultApi.md#bridge_does_user_follow_any_lists) | **POST** /#bridge.does_user_follow_any_lists | 
 *DefaultApi* | [**bridge_get_community**](docs/DefaultApi.md#bridge_get_community) | **POST** /#bridge.get_community | 
 *DefaultApi* | [**bridge_get_community_context**](docs/DefaultApi.md#bridge_get_community_context) | **POST** /#bridge.get_community_context | 
+*DefaultApi* | [**bridge_get_profile**](docs/DefaultApi.md#bridge_get_profile) | **POST** /#bridge.get_profile | 
 *DefaultApi* | [**bridge_list_all_subscriptions**](docs/DefaultApi.md#bridge_list_all_subscriptions) | **POST** /#bridge.list_all_subscriptions | 
 *DefaultApi* | [**bridge_list_communities**](docs/DefaultApi.md#bridge_list_communities) | **POST** /#bridge.list_communities | 
 *DefaultApi* | [**bridge_list_community_roles**](docs/DefaultApi.md#bridge_list_community_roles) | **POST** /#bridge.list_community_roles | 
@@ -103,14 +111,21 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AccountNotifications](docs/AccountNotifications.md)
+ - [AccountNotificationsRequest](docs/AccountNotificationsRequest.md)
+ - [AccountNotificationsRequestParams](docs/AccountNotificationsRequestParams.md)
  - [Community](docs/Community.md)
  - [CommunityContext](docs/CommunityContext.md)
  - [CommunityContextRequest](docs/CommunityContextRequest.md)
  - [CommunityContextRequestParams](docs/CommunityContextRequestParams.md)
  - [CommunityRequest](docs/CommunityRequest.md)
  - [CommunityRequestParams](docs/CommunityRequestParams.md)
+ - [DoesUserFollowAnyListsRequest](docs/DoesUserFollowAnyListsRequest.md)
+ - [DoesUserFollowAnyListsRequestParams](docs/DoesUserFollowAnyListsRequestParams.md)
  - [ErrorMessage](docs/ErrorMessage.md)
  - [ErrorMessageError](docs/ErrorMessageError.md)
+ - [GetProfileRequest](docs/GetProfileRequest.md)
+ - [GetProfileRequestParams](docs/GetProfileRequestParams.md)
  - [ListAllSubscriptions](docs/ListAllSubscriptions.md)
  - [ListAllSubscriptionsRequest](docs/ListAllSubscriptionsRequest.md)
  - [ListAllSubscriptionsRequestParams](docs/ListAllSubscriptionsRequestParams.md)
@@ -126,6 +141,10 @@ Class | Method | HTTP request | Description
  - [ListSubscribers](docs/ListSubscribers.md)
  - [ListSubscribersRequest](docs/ListSubscribersRequest.md)
  - [ListSubscribersRequestParams](docs/ListSubscribersRequestParams.md)
+ - [Profile](docs/Profile.md)
+ - [ProfileMetadata](docs/ProfileMetadata.md)
+ - [ProfileMetadataProfile](docs/ProfileMetadataProfile.md)
+ - [ProfileStats](docs/ProfileStats.md)
 
 
 ## Documentation For Authorization

@@ -153,6 +153,13 @@ components:
       description: 'array of objects with 6 notification related fields: date, id, msg, score, type and url'
       items:
         type: object
+        required:
+        - date
+        - id
+        - msg
+        - score
+        - type
+        - url
         properties:
           date:
             type: string
@@ -178,6 +185,64 @@ components:
     'DoesUserFollowAnyLists':
       type: boolean
       description: 'answer to a question does user follow any list'
+
+    'GetAccountPosts':
+      type: array
+      description: 'array of objects with posts related fields'
+      items:
+        type: object
+        required:
+        - active_votes
+        - author
+        - author_payout_value
+        - author_reputation
+        - beneficiaries
+        - blacklists
+        - body
+        - category
+        - children
+        - created
+        - curator_payout_value
+        - depth
+        - is_paidout
+        - json_metadata
+        - max_accepted_pauout
+        - net_rshares
+        - payout
+        - payout_at
+        - pending_payout_value
+        - percent_hbd
+        - permlink
+        - post_id
+        - promoted
+        - reblogged_by
+        - replies
+        - stats
+        - title
+        - updated
+        - url
+        properties:
+          active_votes:
+            type: array
+            $ref: '#/components/schemas/ActiveVotes'
+          author:
+            type: string
+            description: account name of the post's author
+          author_payout_value:
+            type: string
+            description: HBD paid to the author of the post
+          author_reputation:
+            type: integer
+            description: author's reputation score
+          beneficiaries:
+            type: array
+            $ref: '#/components/schemas/Beneficiares'
+          blacklists:
+            type: array
+            $ref: '#/components/schemas/Blacklists'
+          body:
+            type: string
+            
 
     'ListCommunity':
       type: object
@@ -230,6 +295,35 @@ components:
           type: string
         type_id:
           type: integer
+
+    'Beneficiares':
+      type: object
+      required:
+        - account
+        - weight
+      properties:
+        account:
+          type: string
+          description: account name of the beneficient
+        weight:
+          type: integer
+          description: benefit amount (10000 = 100%)
+
+    'ActiveVotes':
+      type: object
+      required:
+        - rshares
+        - voter
+      properties:
+        rshaers:
+          type: integer
+        voter:
+          type: string
+          description: 'account name of the voter'
+
+    'Blacklists':
+      type: string
+      description: 'account names of blacklisted users'
 
     'CommunityContext':
       type: object
@@ -865,4 +959,25 @@ paths:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/DoesUserFollowAnyLists'
+                  - $ref: '#/components/schemas/ErrorMessage'
+
+  /#bridge.get_account_posts:
+    post:
+      description: Lists posts related to given account in selected way.
+      operationId: bridge.get_account_posts
+      requestBody:
+        description: 'required: sort, account, optional: start_author + start_permlink, limit, observer'
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/GetAccountPostsRequest'
+        required: true
+      responses:
+        '200':
+          description: List of posts
+          content:
+            'application/json':
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/GetAccountPosts'
                   - $ref: '#/components/schemas/ErrorMessage'
