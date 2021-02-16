@@ -20,13 +20,11 @@ async def enum_virtual_ops(
   limit : int = LIMIT_DEFAULT,
   filter : int = None
 ):
-  assert 'hive_db' in context._state.keys(), 'Not supported'
-
   operation_begin = OPERATION_BEGIN_DEFAULT if operation_begin is None else operation_begin
   limit = valid_limit(limit, LIMIT_MAX, LIMIT_DEFAULT)
 
   sql = "SELECT * FROM ah_get_enum_virtual_ops( NULL::INT[], :block_range_begin, :block_range_end, :operation_begin, :limit ) ORDER BY _block, _trx_in_block, _op_in_trx"
-  db = context['hive_db']
+  db = context['ah_db']
 
   rows = await db.query_all(sql, block_range_begin=block_range_begin, block_range_end=block_range_end, operation_begin=operation_begin, limit=limit)
   return objects.get_enum_virtual_ops(rows, limit, group_by_block)
@@ -42,15 +40,13 @@ async def get_account_history(
   operation_filter_low : int = None,
   operation_filter_high : int = None
 ):
-  assert 'hive_db' in context._state.keys(), 'Not supported'
   valid_account(account, True)
   limit = valid_limit(limit, LIMIT_MAX, LIMIT_DEFAULT)
 
-  sql = "select * from ah_get_account_history( [0]::INT[], :account, :start, :limit ) ORDER BY _block, _trx_in_block, _op_in_trx, _virtual_op DESC"
-  db = context['hive_db']
+  sql = "select * from ah_get_account_history( NULL::INT[], :account, :start, :limit ) ORDER BY _block, _trx_in_block, _op_in_trx, _virtual_op DESC"
+  db = context['ah_db']
   rows = await db.query_all(sql, account=account, start=start, limit=limit)
   return objects.get_account_history(rows)
-
 
 @return_error_info
 async def get_ops_in_block(
