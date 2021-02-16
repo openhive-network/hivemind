@@ -5,7 +5,7 @@ from hive.server.common.helpers import return_error_info, valid_limit, valid_acc
 import hive.server.account_history.objects as objects
 from hive.utils.normalize import escape_characters
 
-LIMIT_MAX = 1000
+LIMIT_MAX = 1000000
 LIMIT_DEFAULT = LIMIT_MAX
 OPERATION_BEGIN_DEFAULT = -1
 
