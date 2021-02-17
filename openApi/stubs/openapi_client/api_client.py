@@ -754,10 +754,10 @@ class Endpoint(object):
         Example:
 
         api_instance = DefaultApi()
-        api_instance.bridge_get_community  # this is an instance of the class Endpoint
-        api_instance.bridge_get_community()  # this invokes api_instance.bridge_get_community.__call__()
+        api_instance.bridge_account_notifications  # this is an instance of the class Endpoint
+        api_instance.bridge_account_notifications()  # this invokes api_instance.bridge_account_notifications.__call__()
         which then invokes the callable functions stored in that endpoint at
-        api_instance.bridge_get_community.callable or self.callable in this class
+        api_instance.bridge_account_notifications.callable or self.callable in this class
 
         """
         return self.callable(self, *args, **kwargs)
