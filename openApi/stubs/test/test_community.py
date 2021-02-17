@@ -13,7 +13,9 @@ import unittest
 
 import openapi_client
 from openapi_client.model.community_context import CommunityContext
+from openapi_client.model.list_community_roles import ListCommunityRoles
 globals()['CommunityContext'] = CommunityContext
+globals()['ListCommunityRoles'] = ListCommunityRoles
 from openapi_client.model.community import Community
 
 

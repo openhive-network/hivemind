@@ -54,6 +54,7 @@ from openapi_client.model.account_notifications_request import AccountNotificati
 from openapi_client.model.community_context_request import CommunityContextRequest
 from openapi_client.model.community_request import CommunityRequest
 from openapi_client.model.does_user_follow_any_lists_request import DoesUserFollowAnyListsRequest
+from openapi_client.model.get_account_posts_request import GetAccountPostsRequest
 from openapi_client.model.get_profile_request import GetProfileRequest
 from openapi_client.model.list_all_subscriptions_request import ListAllSubscriptionsRequest
 from openapi_client.model.list_communites_request import ListCommunitesRequest
@@ -99,6 +100,7 @@ Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *DefaultApi* | [**bridge_account_notifications**](docs/DefaultApi.md#bridge_account_notifications) | **POST** /#bridge.account_notifications | 
 *DefaultApi* | [**bridge_does_user_follow_any_lists**](docs/DefaultApi.md#bridge_does_user_follow_any_lists) | **POST** /#bridge.does_user_follow_any_lists | 
+*DefaultApi* | [**bridge_get_account_posts**](docs/DefaultApi.md#bridge_get_account_posts) | **POST** /#bridge.get_account_posts | 
 *DefaultApi* | [**bridge_get_community**](docs/DefaultApi.md#bridge_get_community) | **POST** /#bridge.get_community | 
 *DefaultApi* | [**bridge_get_community_context**](docs/DefaultApi.md#bridge_get_community_context) | **POST** /#bridge.get_community_context | 
 *DefaultApi* | [**bridge_get_profile**](docs/DefaultApi.md#bridge_get_profile) | **POST** /#bridge.get_profile | 
@@ -114,6 +116,8 @@ Class | Method | HTTP request | Description
  - [AccountNotifications](docs/AccountNotifications.md)
  - [AccountNotificationsRequest](docs/AccountNotificationsRequest.md)
  - [AccountNotificationsRequestParams](docs/AccountNotificationsRequestParams.md)
+ - [ActiveVotes](docs/ActiveVotes.md)
+ - [Beneficiares](docs/Beneficiares.md)
  - [Community](docs/Community.md)
  - [CommunityContext](docs/CommunityContext.md)
  - [CommunityContextRequest](docs/CommunityContextRequest.md)
@@ -124,6 +128,9 @@ Class | Method | HTTP request | Description
  - [DoesUserFollowAnyListsRequestParams](docs/DoesUserFollowAnyListsRequestParams.md)
  - [ErrorMessage](docs/ErrorMessage.md)
  - [ErrorMessageError](docs/ErrorMessageError.md)
+ - [GetAccountPosts](docs/GetAccountPosts.md)
+ - [GetAccountPostsRequest](docs/GetAccountPostsRequest.md)
+ - [GetAccountPostsRequestParams](docs/GetAccountPostsRequestParams.md)
  - [GetProfileRequest](docs/GetProfileRequest.md)
  - [GetProfileRequestParams](docs/GetProfileRequestParams.md)
  - [ListAllSubscriptions](docs/ListAllSubscriptions.md)

@@ -1,10 +1,10 @@
-# CommunityContextRequestAllOf
+# Beneficiares
 
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**method** | **str** |  | [optional]  if omitted the server will use the default value of "bridge.get_community_context"
-**params** | [**CommunityContextRequestAllOfParams**](CommunityContextRequestAllOfParams.md) |  | [optional] 
+**account** | **str** | account name of the beneficient | 
+**weight** | **int** | benefit amount (10000 &#x3D; 100%) | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

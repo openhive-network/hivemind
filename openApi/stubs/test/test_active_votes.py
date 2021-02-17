@@ -12,11 +12,11 @@ import sys
 import unittest
 
 import openapi_client
-from openapi_client.model.bridge_get_community_params import BridgeGetCommunityParams
+from openapi_client.model.active_votes import ActiveVotes
 
 
-class TestBridgeGetCommunityParams(unittest.TestCase):
-    """BridgeGetCommunityParams unit test stubs"""
+class TestActiveVotes(unittest.TestCase):
+    """ActiveVotes unit test stubs"""
 
     def setUp(self):
         pass
@@ -24,10 +24,10 @@ class TestBridgeGetCommunityParams(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def testBridgeGetCommunityParams(self):
-        """Test BridgeGetCommunityParams"""
+    def testActiveVotes(self):
+        """Test ActiveVotes"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = BridgeGetCommunityParams()  # noqa: E501
+        # model = ActiveVotes()  # noqa: E501
         pass
 
 

@@ -12,11 +12,11 @@ import sys
 import unittest
 
 import openapi_client
-from openapi_client.model.bridge_list_all_subscriptions_params import BridgeListAllSubscriptionsParams
+from openapi_client.model.get_account_posts_request_params import GetAccountPostsRequestParams
 
 
-class TestBridgeListAllSubscriptionsParams(unittest.TestCase):
-    """BridgeListAllSubscriptionsParams unit test stubs"""
+class TestGetAccountPostsRequestParams(unittest.TestCase):
+    """GetAccountPostsRequestParams unit test stubs"""
 
     def setUp(self):
         pass
@@ -24,10 +24,10 @@ class TestBridgeListAllSubscriptionsParams(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def testBridgeListAllSubscriptionsParams(self):
-        """Test BridgeListAllSubscriptionsParams"""
+    def testGetAccountPostsRequestParams(self):
+        """Test GetAccountPostsRequestParams"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = BridgeListAllSubscriptionsParams()  # noqa: E501
+        # model = GetAccountPostsRequestParams()  # noqa: E501
         pass
 
 

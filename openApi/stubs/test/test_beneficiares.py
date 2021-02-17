@@ -12,13 +12,11 @@ import sys
 import unittest
 
 import openapi_client
-from openapi_client.model.bridge_list_all_subscriptions_params import BridgeListAllSubscriptionsParams
-globals()['BridgeListAllSubscriptionsParams'] = BridgeListAllSubscriptionsParams
-from openapi_client.model.inline_object2 import InlineObject2
+from openapi_client.model.beneficiares import Beneficiares
 
 
-class TestInlineObject2(unittest.TestCase):
-    """InlineObject2 unit test stubs"""
+class TestBeneficiares(unittest.TestCase):
+    """Beneficiares unit test stubs"""
 
     def setUp(self):
         pass
@@ -26,10 +24,10 @@ class TestInlineObject2(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def testInlineObject2(self):
-        """Test InlineObject2"""
+    def testBeneficiares(self):
+        """Test Beneficiares"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = InlineObject2()  # noqa: E501
+        # model = Beneficiares()  # noqa: E501
         pass
 
 

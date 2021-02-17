@@ -12,12 +12,8 @@ import sys
 import unittest
 
 import openapi_client
-from openapi_client.model.basic_request import BasicRequest
-from openapi_client.model.community_context_request_all_of import CommunityContextRequestAllOf
-from openapi_client.model.community_context_request_all_of_params import CommunityContextRequestAllOfParams
-globals()['BasicRequest'] = BasicRequest
-globals()['CommunityContextRequestAllOf'] = CommunityContextRequestAllOf
-globals()['CommunityContextRequestAllOfParams'] = CommunityContextRequestAllOfParams
+from openapi_client.model.community_context_request_params import CommunityContextRequestParams
+globals()['CommunityContextRequestParams'] = CommunityContextRequestParams
 from openapi_client.model.community_context_request import CommunityContextRequest
 
 

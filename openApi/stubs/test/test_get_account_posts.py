@@ -12,11 +12,11 @@ import sys
 import unittest
 
 import openapi_client
-from openapi_client.model.basic_request import BasicRequest
+from openapi_client.model.get_account_posts import GetAccountPosts
 
 
-class TestBasicRequest(unittest.TestCase):
-    """BasicRequest unit test stubs"""
+class TestGetAccountPosts(unittest.TestCase):
+    """GetAccountPosts unit test stubs"""
 
     def setUp(self):
         pass
@@ -24,10 +24,10 @@ class TestBasicRequest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def testBasicRequest(self):
-        """Test BasicRequest"""
+    def testGetAccountPosts(self):
+        """Test GetAccountPosts"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = BasicRequest()  # noqa: E501
+        # model = GetAccountPosts()  # noqa: E501
         pass
 
 
