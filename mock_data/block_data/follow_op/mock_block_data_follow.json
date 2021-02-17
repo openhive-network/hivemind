@@ -1546,6 +1546,28 @@
               "id": "follow",
               "json": "[\"follow\",{\"follower\":\"tester5\",\"following\":[\"tester1\", \"tester2\", \"tester3\"],\"what\":[\"blog\"]}]"
             }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-follower"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"test-follower\",\"following\":\"test-creator\",\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-muter"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"test-muter\",\"following\":\"test-creator\",\"what\":[\"ignore\"]}]"
+            }
           }
         ]
       }
