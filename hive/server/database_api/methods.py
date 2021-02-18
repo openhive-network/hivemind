@@ -137,7 +137,8 @@ async def find_comments(context, comments: list):
         pv.root_title,
         pv.abs_rshares,
         pv.active,
-        pv.author_rewards
+        pv.author_rewards,
+        pv.parent_author
       FROM (
         SELECT
           hp.id
@@ -245,4 +246,3 @@ async def list_votes(context, start: list, limit: int = 1000, order: str = None)
         sql = "SELECT * FROM list_votes_by_comment_voter(:voter,:author,:permlink,:limit)"
         rows = await db.query_all(sql, voter=start_voter, author=author, permlink=permlink, limit=limit)
     return { 'votes': api_vote_info(rows, VotesPresentation.DatabaseApi) }
-
