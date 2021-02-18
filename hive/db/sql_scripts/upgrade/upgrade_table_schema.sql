@@ -469,3 +469,7 @@ ALTER TABLE hive_notification_cache
 DROP INDEX IF EXISTS hive_posts_parent_id_counter_deleted_id_idx;
 
 CREATE INDEX IF NOT EXISTS hive_posts_parent_id_id_idx ON hive_posts (parent_id, id DESC) where counter_deleted = 0;
+
+--- Drop this view as it was eliminated.
+DROP VIEW IF EXISTS hive_posts_view CASCADE;
+
