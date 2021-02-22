@@ -3,7 +3,6 @@
 import logging
 
 from hive.db.adapter import Db
-from hive.db.db_state import DbState
 
 from hive.indexer.accounts import Accounts
 from hive.indexer.db_adapter_holder import DbAdapterHolder
@@ -14,7 +13,6 @@ DB = Db.instance()
 
 class Reblog(DbAdapterHolder):
     """ Class for reblog operations """
-    deleted_reblog_items = {}
     reblog_items_to_flush = {}
 
     @classmethod
@@ -51,7 +49,8 @@ class Reblog(DbAdapterHolder):
         key = "{}/{}/{}".format(op['author'], op['permlink'], op['account'])
 
         if op['delete']:
-            cls.deleted_reblog_items[key] = {}
+            if key in cls.reblog_items_to_flush:
+                del cls.reblog_items_to_flush[key]
             cls.delete( op['author'], op['permlink'], op['account'] )
         else:
             cls.reblog_items_to_flush[key] = { 'op': op }
@@ -61,7 +60,7 @@ class Reblog(DbAdapterHolder):
         """Remove a reblog from hive_reblogs + feed from hive_feed_cache.
         """
         sql = "SELECT delete_reblog_feed_cache( (:author)::VARCHAR, (:permlink)::VARCHAR, (:account)::VARCHAR );"
-        status = DB.query_col(sql, author=author, permlink=permlink, account=account);
+        status = DB.query_col(sql, author=author, permlink=permlink, account=account)
         assert status is not None
         if status == 0:
           log.debug("reblog: post not found: %s/%s", author, permlink)
@@ -96,8 +95,6 @@ class Reblog(DbAdapterHolder):
             count = 0
             cls.beginTx()
             for k, v in cls.reblog_items_to_flush.items():
-                if k in cls.deleted_reblog_items:
-                  continue
                 reblog_item = v['op']
                 if count < limit:
                     values.append("({}, {}, {}, '{}'::timestamp, {})".format(escape_characters(reblog_item['account']),
@@ -124,7 +121,5 @@ class Reblog(DbAdapterHolder):
                 cls.db.query(query)
             cls.commitTx()
             cls.reblog_items_to_flush.clear()
-
-        cls.deleted_reblog_items.clear();
 
         return item_count

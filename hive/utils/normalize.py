@@ -267,21 +267,3 @@ def int_log_level(str_log_level):
     if not isinstance(log_level, int):
         raise ValueError('Invalid log level: %s' % str_log_level)
     return log_level
-
-def asset_to_hbd_hive(price, asset):
-    """ Converts hive to hbd and hbd to hive based on price """
-    if asset['nai'] == price['base']['nai']:
-        result = int(asset['amount']) * int(price['quote']['amount']) / int(price['base']['amount'])
-        return {'amount' : result, 'nai' : price['quote']['nai'], 'precision' : price['quote']['precision']}
-    elif asset['nai'] == price['quote']['nai']:
-        result = int(asset['amount']) * int(price['base']['amount']) / int(price['quote']['amount'])
-        return {'amount' : result, 'nai' : price['base']['nai'], 'precision' : price['base']['precision']}
-    raise ValueError("Asset not supported")
-
-def time_string_with_t(time_iso8601):
-    """ Ensures that time in format ISO8601 use 'T' as a data time separator
-
-    Hived serialzie time wit 'T' as a separator. ISO allows for space as a separator
-    and SQL queries may return it.
-    """
-    return str(time_iso8601).replace(" ", "T")

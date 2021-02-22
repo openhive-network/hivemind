@@ -30,6 +30,10 @@ if __name__ == "__main__":
 
     client = SteemClient({"default":args.hived_url})
     from_block = args.from_block
+
+    def breaker():
+        return True
+
     with open(args.output_file, "w") as output_file:
         if not args.dump_ops_only:
             output_file.write("{\n")
@@ -38,7 +42,7 @@ if __name__ == "__main__":
             if to_block >= args.to_block:
                 to_block = args.to_block + 1
             print("Processing range from: ", from_block, " to: ", to_block)
-            blocks = client.get_blocks_range(from_block, to_block)
+            blocks = client.get_blocks_range(from_block, to_block, breaker)
             for block in blocks:
                 block_num = int(block['block_id'][:8], base=16)
                 block_data = dict(block)

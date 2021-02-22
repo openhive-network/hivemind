@@ -86,7 +86,7 @@ class PrometheusClient:
         elif type(obj) == type(BroadcastObject('', '', '')):
             PrometheusClient.logs_to_broadcast.put(obj)
         else:
-            raise Exception(f"Not expexcted type. Should be list or BroadcastObject, but: {type(obj)} given")
+            raise Exception(f"Not expected type. Should be list or BroadcastObject, but: {type(obj)} given")
 
 class Stat:
     def __init__(self, time):
@@ -259,6 +259,43 @@ class FlushStatusManager(StatusManager):
         tm = StatusManager.log_dict(FlushStatusManager.current_flushes)
         log.info(f"Current flushing time: {tm :.4f}s.")
         return tm
+
+class FinalStat(Stat):
+    def __init__(self, time):
+        super().__init__(time)
+
+    def __str__(self):
+        return f"Processed final operations in {self.time :.4f} seconds"
+
+    def broadcast(self, name : str):
+        n = f"flushing_{name.lower()}"
+        return list([ super().broadcast(n), BroadcastObject(n + "_items", '', 'b') ])
+
+class FinalOperationStatusManager(StatusManager):
+    # Summary for whole sync
+    global_stats = {}
+
+    # Currently processed blocks stats, merged to global stats, after `next_block`
+    current_finals = {}
+
+    @staticmethod
+    def final_stat(name, time):
+        if name in FinalOperationStatusManager.current_finals.keys():
+            FinalOperationStatusManager.current_finals[name].time += time
+        else:
+            FinalOperationStatusManager.current_finals[name] = FinalStat(time)
+
+    @staticmethod
+    def log_current(label : str):
+        StatusManager.print_row()
+        log.info(label)
+        tm = StatusManager.log_dict(FinalOperationStatusManager.current_finals)
+        log.info(f"Current final processing time: {tm :.4f}s.")
+        return tm
+
+    @staticmethod
+    def clear():
+        FinalOperationStatusManager.current_finals.clear()
 
 class WaitStat(Stat):
     def __init__(self, time):

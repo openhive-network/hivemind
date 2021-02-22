@@ -41,7 +41,7 @@ CREATE OR REPLACE VIEW public.hive_accounts_info_view
     ha.posting_json_metadata,
     ha.json_metadata
    FROM hive_accounts_info_view_lite ha
-   LEFT JOIN lateral 
+   LEFT JOIN LATERAL 
    (
       SELECT hp1.created_at AS latest_post
       FROM hive_posts hp1

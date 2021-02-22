@@ -101,7 +101,7 @@ CREATE OR REPLACE VIEW public.hive_raw_notifications_as_view
                     WHEN 1 THEN 12
                     ELSE 13
                 END, hpv.id) AS id,
-            hpv.parent_id AS post_id,
+            hpv.id AS post_id,
                 CASE hpv.depth
                     WHEN 1 THEN 12
                     ELSE 13
@@ -167,7 +167,7 @@ UNION ALL
     notification_id(hm.block_num, 16, hm.id) AS id,
     hm.post_id,
     16 AS type_id,
-    hp.created_at,
+    hb.created_at,
     hp.author_id AS src,
     hm.account_id AS dst,
     hm.post_id as dst_post_id,
@@ -176,6 +176,7 @@ UNION ALL
     ''::character varying AS payload
    FROM hive_mentions hm
    JOIN hive_posts hp ON hm.post_id = hp.id
+   JOIN hive_blocks hb ON hb.num = hm.block_num - 1 -- use time of previous block to match head_block_time behavior at given block
 ) notifs
 JOIN hive_accounts_rank_view harv ON harv.id = notifs.src
 ;
@@ -274,4 +275,4 @@ FROM
   UNION ALL
   SELECT * FROM hive_raw_notifications_view_noas
   ) as notifs
-WHERE notifs.score >= 0;
+WHERE notifs.score >= 0 AND notifs.src IS DISTINCT FROM notifs.dst;

@@ -23,7 +23,26 @@ BEGIN
     WHERE hfc.account_id = __account_id AND hfc.post_id = __post_id;
   END IF;
 
-  RETURN QUERY SELECT -- bridge_get_account_posts_by_blog
+  RETURN QUERY 
+  WITH blog AS -- bridge_get_account_posts_by_blog
+  (
+    SELECT 
+      hfc.post_id,
+      hfc.created_at
+    FROM hive_feed_cache hfc
+    WHERE hfc.account_id = __account_id
+      AND ( __post_id = 0 OR hfc.created_at < __created_at
+                          OR (hfc.created_at = __created_at AND hfc.post_id < __post_id) )
+      AND ( NOT _bridge_api OR
+            NOT EXISTS (SELECT NULL FROM live_posts_comments_view hp1 --should this just be live_posts_view?
+                        WHERE hp1.id = hfc.post_id AND hp1.community_id IS NOT NULL
+                        AND NOT EXISTS (SELECT NULL FROM hive_reblogs hr WHERE hr.blogger_id = __account_id AND hr.post_id = hp1.id)
+                       )
+          )
+    ORDER BY hfc.created_at DESC, hfc.post_id DESC
+    LIMIT _limit
+  )
+  SELECT
       hp.id,
       hp.author,
       hp.parent_author,
@@ -62,21 +81,8 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       NULL
-    FROM hive_posts_view hp
-    JOIN
-    (
-      SELECT hfc.post_id, hfc.created_at
-      FROM hive_feed_cache hfc
-      WHERE hfc.account_id = __account_id AND ( __post_id = 0 OR hfc.created_at < __created_at OR ( hfc.created_at = __created_at AND hfc.post_id < __post_id ) )
-        AND ( NOT _bridge_api OR
-              NOT EXISTS (SELECT NULL FROM hive_posts hp1
-                          WHERE hp1.id = hfc.post_id AND hp1.counter_deleted = 0 AND hp1.depth = 0 AND hp1.community_id IS NOT NULL
-                          AND NOT EXISTS (SELECT NULL FROM hive_reblogs hr WHERE hr.blogger_id = __account_id AND hr.post_id = hp1.id)
-                         )
-            )
-      ORDER BY hfc.created_at DESC, hfc.post_id DESC
-      LIMIT _limit
-    ) blog ON hp.id = blog.post_id
+    FROM blog,
+    LATERAL get_post_view_by_id(blog.post_id) hp
     ORDER BY blog.created_at DESC, blog.post_id DESC
     LIMIT _limit;
 END

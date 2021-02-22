@@ -17,6 +17,7 @@ for sql in postgres_handle_view_changes.sql \
           hive_muted_accounts_view.sql \
           hive_muted_accounts_by_id_view.sql \
           hive_blacklisted_accounts_by_observer_view.sql \
+	  get_post_view_by_id.sql \
           hive_post_operations.sql \
           head_block_time.sql \
           update_feed_cache.sql \
@@ -60,7 +61,15 @@ for sql in postgres_handle_view_changes.sql \
           bridge_get_account_posts_by_blog.sql \
           condenser_get_names_by_reblogged.sql \
           condenser_get_account_reputations.sql \
-          update_follow_count.sql
+          update_follow_count.sql \
+          bridge_get_community.sql \
+          bridge_get_community_context.sql \
+          bridge_list_all_subscriptions.sql \
+          bridge_list_communities.sql \
+          bridge_list_community_roles.sql \
+          bridge_list_pop_communities.sql \
+          bridge_list_subscribers.sql \
+          follows.sql
 
 do
     echo Executing psql -U $1 -d $2 -f $sql

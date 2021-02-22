@@ -148,3 +148,25 @@ BEGIN
 END
 $function$
 ;
+
+--Maybe better to convert roles to ENUM
+DROP FUNCTION IF EXISTS get_role_name
+;
+CREATE OR REPLACE FUNCTION get_role_name(in _role_id INT)
+RETURNS VARCHAR
+LANGUAGE 'plpgsql'
+AS
+$function$
+BEGIN
+    RETURN CASE _role_id
+        WHEN -2 THEN 'muted'
+        WHEN 0 THEN 'guest'
+        WHEN 2 THEN 'member'
+        WHEN 4 THEN 'mod'
+        WHEN 6 THEN 'admin'
+        WHEN 8 THEN 'owner'
+    END;
+    RAISE EXCEPTION 'role id not found';
+END
+$function$
+;

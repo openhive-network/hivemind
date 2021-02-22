@@ -1,5 +1,4 @@
 DROP FUNCTION IF EXISTS update_hive_posts_mentions(INTEGER, INTEGER);
-
 CREATE OR REPLACE FUNCTION update_hive_posts_mentions(in _first_block INTEGER, in _last_block INTEGER)
 RETURNS VOID
 LANGUAGE 'plpgsql'

@@ -1,14 +1,7 @@
-DROP FUNCTION IF EXISTS bridge_get_discussion
-;
-CREATE OR REPLACE FUNCTION bridge_get_discussion(
-    in _author hive_accounts.name%TYPE,
-    in _permlink hive_permlink_data.permlink%TYPE,
-    in _observer VARCHAR
-)
-RETURNS SETOF bridge_api_post_discussion
-LANGUAGE plpgsql
-AS
-$function$
+DROP FUNCTION IF EXISTS bridge_get_discussion;
+CREATE OR REPLACE FUNCTION public.bridge_get_discussion(_author character varying, _permlink character varying, _observer character varying)
+ RETURNS SETOF bridge_api_post_discussion
+AS $function$
 DECLARE
     __post_id INT;
     __observer_id INT;
@@ -61,26 +54,23 @@ BEGIN
         WITH RECURSIVE child_posts (id, parent_id) AS
         (
             SELECT hp.id, hp.parent_id, blacklisted_by_observer_view.source as source
-            FROM hive_posts hp left outer join blacklisted_by_observer_view on (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp.author_id)
+            FROM live_posts_comments_view hp left outer join blacklisted_by_observer_view on (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp.author_id)
             WHERE hp.id = __post_id
             AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp.author_id))
             UNION ALL
             SELECT children.id, children.parent_id, blacklisted_by_observer_view.source as source
-            FROM hive_posts children left outer join blacklisted_by_observer_view on (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = children.author_id)
+            FROM live_posts_comments_view children left outer join blacklisted_by_observer_view on (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = children.author_id)
             JOIN child_posts ON children.parent_id = child_posts.id
             JOIN hive_accounts ON children.author_id = hive_accounts.id
-            WHERE children.counter_deleted = 0
             AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = children.author_id))
         )
         SELECT hp2.id, cp.source
         FROM hive_posts hp2
         JOIN child_posts cp ON cp.id = hp2.id
         ORDER BY hp2.id
-    ) ds
-    JOIN hive_posts_view hpv ON ds.id = hpv.id
+    ) ds,
+ LATERAL get_post_view_by_id(ds.id) hpv
     ORDER BY ds.id
-    LIMIT 2000
-    ;
+    LIMIT 2000;
 END
-$function$
-;
+$function$ LANGUAGE plpgsql STABLE;

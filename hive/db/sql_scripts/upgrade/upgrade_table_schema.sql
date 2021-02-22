@@ -145,6 +145,11 @@ IF NOT EXISTS(SELECT data_type
   perform deps_restore_dependencies('public', 'hive_mentions');
 
   INSERT INTO hive_db_data_migration VALUES ('hive_mentions fill');
+ELSE
+  ALTER TABLE public.hive_mentions
+    DROP CONSTRAINT hive_mentions_ux1;
+  ALTER TABLE public.hive_mentions
+    ADD CONSTRAINT hive_mentions_ux1 UNIQUE (post_id, account_id, block_num);
 END IF;
 END
 $BODY$
@@ -310,9 +315,10 @@ $BODY$;
 
 --- 4cdf5d19f6cfcb73d3fa504cac9467c4df31c02e - https://gitlab.syncad.com/hive/hivemind/-/merge_requests/295
 --- 9e126e9d762755f2b9a0fd68f076c9af6bb73b76 - https://gitlab.syncad.com/hive/hivemind/-/merge_requests/314 mentions fix
+--- 1cc9981679157e4e54e5e4a74cca1feb5d49296d - fix for mentions notifications time value
 INSERT INTO hive_db_data_migration
 select 'update_hive_post_mentions refill execution'
-where not exists (select null from hive_db_patch_level where patched_to_revision = '9e126e9d762755f2b9a0fd68f076c9af6bb73b76' )
+where not exists (select null from hive_db_patch_level where patched_to_revision = '1cc9981679157e4e54e5e4a74cca1feb5d49296d' )
 ;
 
 --- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/298
@@ -459,3 +465,7 @@ ALTER TABLE hive_notification_cache
 
  CREATE INDEX IF NOT EXISTS hive_feed_cache_post_id_idx ON hive_feed_cache (post_id);
 
+-- Changes made in https://gitlab.syncad.com/hive/hivemind/-/merge_requests/454
+DROP INDEX IF EXISTS hive_posts_parent_id_counter_deleted_id_idx;
+
+CREATE INDEX IF NOT EXISTS hive_posts_parent_id_id_idx ON hive_posts (parent_id, id DESC) where counter_deleted = 0;

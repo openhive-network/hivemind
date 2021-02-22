@@ -7,9 +7,12 @@ from hive.server.common.helpers import (
     valid_account,
     valid_permlink,
     valid_tag,
-    valid_limit)
+    valid_limit,
+    json_date)
+
+from hive.utils.account import safe_db_profile_metadata
+
 from hive.server.hive_api.common import get_account_id
-from hive.server.hive_api.objects import _follow_contexts
 from hive.server.hive_api.community import list_top_communities
 from hive.server.common.mutes import Mutes
 
@@ -312,14 +315,14 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
 
 
 @return_error_info
-async def get_relationship_between_accounts(context, account1, account2, observer=None):
+async def get_relationship_between_accounts(context, account1, account2, observer=None, debug=None):
     valid_account(account1)
     valid_account(account2)
 
     db = context['db']
 
     sql = "SELECT * FROM bridge_get_relationship_between_accounts( (:account1)::VARCHAR, (:account2)::VARCHAR )"
-    sql_result = await db.query_all(sql, account1=account1, account2=account2)
+    sql_result = await db.query_row(sql, account1=account1, account2=account2)
 
     result = {
         'follows': False,
@@ -329,19 +332,26 @@ async def get_relationship_between_accounts(context, account1, account2, observe
         'follows_muted': False
     }
 
-    for row in sql_result:
-        state = row['state']
-        if state == 1:
-            result['follows'] = True
-        elif state == 2:
-            result['ignores'] = True
+    row = dict(sql_result)
+    state = row['state']
+    if state == 1:
+        result['follows'] = True
+    elif state == 2:
+        result['ignores'] = True
 
-        if row['blacklisted']:
-            result['blacklists'] = True
-        if row['follow_blacklists']:
-            result['follows_blacklists'] = True
-        if row['follow_muted']:
-            result['follows_muted'] = True
+    if row['blacklisted']:
+        result['blacklists'] = True
+    if row['follow_blacklists']:
+        result['follows_blacklists'] = True
+    if row['follow_muted']:
+        result['follows_muted'] = True
+
+    if isinstance(debug, bool) and debug:
+        # result['id'] = row['id']
+        # ABW: it just made tests harder as any change could trigger id changes
+        # data below is sufficient to see when record was created and updated
+        result['created_at'] = json_date(row['created_at']) if row['created_at'] else None
+        result['block_num'] = row['block_num']
 
     return result
 
@@ -364,12 +374,16 @@ async def get_follow_list(context, observer, follow_type='blacklisted'):
     valid_types = dict(blacklisted=1, follow_blacklist=2, muted=4, follow_muted=8)
     assert follow_type in valid_types, "Unsupported follow_type, valid values: {}".format(", ".join(valid_types.keys()))
 
+    db = context['db']
+
     results = []
     if follow_type == 'follow_blacklist' or follow_type == 'follow_muted':
         blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context, follow_type == 'follow_blacklist', follow_type == 'follow_muted')
         for row in blacklists_for_user:
-            list_data = await get_profile(context, row['list'])
-            metadata = list_data["metadata"]["profile"]
+            metadata = safe_db_profile_metadata(row['posting_json_metadata'], row['json_metadata'])
+
+            #list_data = await get_profile(context, row['list'])
+            #metadata = list_data["metadata"]["profile"]
             blacklist_description = metadata["blacklist_description"] if "blacklist_description" in metadata else ''
             muted_list_description = metadata["muted_list_description"] if "muted_list_description" in metadata else ''
             results.append({'name': row['list'], 'blacklist_description': blacklist_description, 'muted_list_description': muted_list_description})
@@ -379,3 +393,21 @@ async def get_follow_list(context, observer, follow_type='blacklisted'):
             results.append({'name': account, 'blacklist_description': '', 'muted_list_description': ''})
 
     return results
+
+async def _follow_contexts(db, accounts, observer_id, include_mute=False):
+    sql = """SELECT following, state FROM hive_follows
+              WHERE follower = :account_id AND following IN :ids"""
+    rows = await db.query_all(sql,
+                              account_id=observer_id,
+                              ids=tuple(accounts.keys()))
+    for row in rows:
+        following_id = row[0]
+        state = row[1]
+        context = {'followed': state == 1}
+        if include_mute and state == 2:
+            context['muted'] = True
+        accounts[following_id]['context'] = context
+
+    for account in accounts.values():
+        if 'context' not in account:
+            account['context'] = {'followed': False}

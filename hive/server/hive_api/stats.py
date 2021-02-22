@@ -1,8 +1,7 @@
 """Hive API: Stats"""
 import logging
 
-from hive.server.common.helpers import return_error_info
-from hive.server.hive_api.common import valid_limit
+from hive.server.common.helpers import return_error_info, valid_limit
 
 log = logging.getLogger(__name__)
 

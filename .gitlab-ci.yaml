@@ -36,7 +36,7 @@ stages:
   - echo "HIVEMIND_DB_NAME is $HIVEMIND_DB_NAME"
 
 .fetch-git-tags: &fetch-git-tags
-  # - git fetch --tags # Looks to be unnecessary.
+  #- git fetch --tags # Looks to be unnecessary.
   - git tag -f ci_implicit_tag # Needed to build python package
 
 .start-timer: &start-timer
@@ -366,8 +366,8 @@ stages:
     ./scripts/ci/start-api-benchmarks.sh \
         localhost $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
         $RUNNER_BENCHMARK_ITERATIONS \
-        $RUNNER_BENCHMARK_JOBS
-  - ./scripts/xml_report_parser.py --time-threshold=1.5 . ./tests/tests_api/hivemind/tavern
+        $RUNNER_BENCHMARK_JOBS \
+        $CI_PROJECT_DIR/tests/tests_api/hivemind/tavern
 
 .api-smoketest-benchmark:
   stage: benchmark-tests
@@ -414,6 +414,7 @@ sync-e2e-benchmark:
       - hive-sync-runner-id.txt
       - tavern_benchmarks_report.html
       - tests/tests_api/hivemind/tavern/**/*.out.json
+      - request_process_times.log
     reports:
       junit: "*.xml"
     expire_in: 7 days

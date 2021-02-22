@@ -413,6 +413,46 @@
             }
           },
           {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "hive-186713",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
             "type": "comment_operation",
             "value": {
               "parent_author": "",
@@ -636,6 +676,37 @@
               ],
               "id": "community",
               "json": "[\"flagPost\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"permlink\":\"secrets1\",\"notes\":\"This is not a kitten..\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-186713"
+              ],
+              "id": "community",
+              "json": "[\"updateProps\",{\"community\":\"hive-186713\",\"props\":{\"title\":\"Test group\",\"about\":\"this is about field\",\"description\":\"this is description\nsecond line of description\",\"lang\":\"pl\",\"flag_text\":\"first rule\nsecond rule\nthird rule\nand the last rule\",\"is_nsfw\":true}}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-186713"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-186713\",\"account\":\"steemit\",\"role\":\"muted\"}]"
+            }
+          },
+          {
+            "type": "account_update2_operation",
+            "value": {
+              "account": "hive-186713",
+              "json_metadata": "{\"profile\":{\"name\":\"from account\",\"about\":\"about from account\",\"cover_image\":\"\",\"profile_image\":\"https://images.ecency.com/DQmRmugfsA3arLWs2Fh3VncMo4VPsmWUWY9r5GaWKA2k1XN/images.jpeg\",\"website\":\"\",\"location\":\"\",\"version\":2}}",
+              "posting_json_metadata": "test-safari",
+              "extensions": []
             }
           }
         ]
@@ -1218,6 +1289,124 @@
               ],
               "id": "community",
               "json": "[\"subscribe\",{\"community\":\"hive-104647\"}]"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "",
+              "author": "test-creator",
+              "permlink": "introduce",
+              "title": "My introduce post",
+              "body": "This is my introduce post to be crossposted in hive-135485 community",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "introduce",
+              "title": "My introduce post",
+              "body": "This is a cross post of [@test-creator/introduce](/introduceyourself/@test-creator/introduce) by @test-creator.<br><br>crosspost test",
+              "json_metadata": "{\"app\":\"peakd/2021.01.3\",\"tags\":[\"cross-post\"],\"image\":[],\"original_author\":\"test-creator\",\"original_permlink\":\"introduce\"}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "first-post",
+              "title": "My first post",
+              "body": "This is my first post in hive-135485 community",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "reblogged-post",
+              "title": "My first post",
+              "body": "This is my post in hive-135485 community reblogged by test-reblog-03",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "muted-post",
+              "title": "My muted post",
+              "body": "This is my muted post in hive-135485 community",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "pinned-post",
+              "title": "My pinned post",
+              "body": "This is my pinned post in hive-135485 community",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "test-safari",
+              "parent_permlink": "secrets1",
+              "author": "test-creator",
+              "permlink": "re-community-135485-comment",
+              "title": "",
+              "body": "this is my comment for secret post",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "test-creator",
+              "parent_permlink": "re-community-135485-comment",
+              "author": "test-creator",
+              "permlink": "re-re-community-135485-comment",
+              "title": "",
+              "body": "this is my comment for comment for secret post",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"mutePost\",{\"community\":\"hive-135485\",\"account\":\"test-creator\",\"permlink\":\"muted-post\",\"notes\":\"nothing special\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"test-creator\",\"permlink\":\"pinned-post\"}]"
             }
           }
         ]

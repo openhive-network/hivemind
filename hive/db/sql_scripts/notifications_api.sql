@@ -13,6 +13,7 @@ CREATE TYPE notification AS
 , community_title VARCHAR
 , payload VARCHAR
 , score SMALLINT
+, number_of_mentions INTEGER
 );
 
 DROP FUNCTION IF EXISTS get_number_of_unread_notifications;
@@ -51,8 +52,22 @@ END
 $BODY$
 ;
 
-DROP FUNCTION IF EXISTS account_notifications;
+DROP FUNCTION IF EXISTS get_number_of_mentions_in_post;
+CREATE OR REPLACE FUNCTION public.get_number_of_mentions_in_post( _post_id hive_posts.id%TYPE )
+RETURNS INTEGER
+LANGUAGE 'plpgsql'
+STABLE
+AS
+$BODY$
+DECLARE
+    __result INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO __result FROM hive_mentions hm WHERE hm.post_id = _post_id;
+    return __result;
+END
+$BODY$;
 
+DROP FUNCTION IF EXISTS account_notifications;
 CREATE OR REPLACE FUNCTION public.account_notifications(
   _account character varying,
   _min_score smallint,
@@ -78,20 +93,27 @@ BEGIN
     , hnv.community
     , hnv.community_title
     , hnv.payload
-    , CAST( hnv.score as SMALLINT) as score
+    , CAST(hnv.score as SMALLINT) as score
+    , hm.mentions as number_of_mentions
   FROM
   (
-    select nv.id, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.score, nv.community, nv.community_title, nv.payload
+    select nv.id, nv.type_id, nv.created_at, nv.src, nv.dst, nv.post_id, nv.score, nv.community, nv.community_title, nv.payload
       from hive_notification_cache nv
   WHERE nv.dst = __account_id  AND nv.block_num > __limit_block AND nv.score >= _min_score AND ( _last_id = 0 OR nv.id < _last_id )
   ORDER BY nv.id DESC
   LIMIT _limit
   ) hnv
-  join hive_posts hp on hnv.dst_post_id = hp.id
+  join hive_posts hp on hnv.post_id = hp.id
   join hive_accounts ha on hp.author_id = ha.id
   join hive_accounts hs on hs.id = hnv.src
   join hive_accounts hd on hd.id = hnv.dst
-  join hive_permlink_data hpd on hp.permlink_id = hpd.id
+  join hive_permlink_data hpd on hp.permlink_id = hpd.id,
+  lateral ( SELECT
+               CASE
+                   WHEN hnv.type_id != 16 THEN 0 --evrything else than mentions (only optimization)
+                   ELSE get_number_of_mentions_in_post( hnv.post_id )
+               END as mentions
+            ) as hm
   ORDER BY hnv.id DESC
   LIMIT _limit;
 END
@@ -120,19 +142,26 @@ BEGIN
     , hnv.community_title
     , hnv.payload
     , CAST( hnv.score as SMALLINT) as score
+    , hm.mentions as number_of_mentions
   FROM
   (
-    SELECT nv.id, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.score, nv.community, nv.community_title, nv.payload
+    SELECT nv.id, nv.type_id, nv.created_at, nv.src, nv.dst, nv.dst_post_id, nv.score, nv.community, nv.community_title, nv.payload, nv.post_id
     FROM hive_notification_cache nv
-    WHERE nv.post_id = __post_id AND nv.block_num > __limit_block AND nv.score >= _min_score AND ( _last_id = 0 OR nv.id < _last_id )
+    WHERE nv.dst_post_id = __post_id AND nv.block_num > __limit_block AND nv.score >= _min_score AND ( _last_id = 0 OR nv.id < _last_id )
     ORDER BY nv.id DESC
     LIMIT _limit
   ) hnv
-  JOIN hive_posts hp ON hnv.dst_post_id = hp.id
+  JOIN hive_posts hp ON hnv.post_id = hp.id
   JOIN hive_accounts ha ON hp.author_id = ha.id
   JOIN hive_accounts hs ON hs.id = hnv.src
   JOIN hive_accounts hd ON hd.id = hnv.dst
-  JOIN hive_permlink_data hpd ON hp.permlink_id = hpd.id
+  JOIN hive_permlink_data hpd ON hp.permlink_id = hpd.id,
+  lateral ( SELECT
+               CASE
+                   WHEN hnv.type_id != 16 THEN 0 --evrything else than mentions (only optimization)
+                   ELSE get_number_of_mentions_in_post( hnv.post_id )
+               END as mentions
+            ) as hm
   ORDER BY hnv.id DESC
   LIMIT _limit;
 END
@@ -151,7 +180,7 @@ DECLARE
 BEGIN
   IF _first_block_num IS NULL THEN
     TRUNCATE TABLE hive_notification_cache;
-  	ALTER SEQUENCE hive_notification_cache_id_seq RESTART WITH 1;
+      ALTER SEQUENCE hive_notification_cache_id_seq RESTART WITH 1;
   ELSE
     DELETE FROM hive_notification_cache nc WHERE _prune_old AND nc.block_num <= __limit_block;
   END IF;
