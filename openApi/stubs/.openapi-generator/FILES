@@ -5,6 +5,8 @@ README.md
 docs/AccountNotifications.md
 docs/AccountNotificationsRequest.md
 docs/AccountNotificationsRequestParams.md
+docs/ActiveVotes.md
+docs/Beneficiares.md
 docs/Community.md
 docs/CommunityContext.md
 docs/CommunityContextRequest.md
@@ -16,6 +18,9 @@ docs/DoesUserFollowAnyListsRequest.md
 docs/DoesUserFollowAnyListsRequestParams.md
 docs/ErrorMessage.md
 docs/ErrorMessageError.md
+docs/GetAccountPosts.md
+docs/GetAccountPostsRequest.md
+docs/GetAccountPostsRequestParams.md
 docs/GetProfileRequest.md
 docs/GetProfileRequestParams.md
 docs/ListAllSubscriptions.md
@@ -49,6 +54,8 @@ openapi_client/model/__init__.py
 openapi_client/model/account_notifications.py
 openapi_client/model/account_notifications_request.py
 openapi_client/model/account_notifications_request_params.py
+openapi_client/model/active_votes.py
+openapi_client/model/beneficiares.py
 openapi_client/model/community.py
 openapi_client/model/community_context.py
 openapi_client/model/community_context_request.py
@@ -59,6 +66,9 @@ openapi_client/model/does_user_follow_any_lists_request.py
 openapi_client/model/does_user_follow_any_lists_request_params.py
 openapi_client/model/error_message.py
 openapi_client/model/error_message_error.py
+openapi_client/model/get_account_posts.py
+openapi_client/model/get_account_posts_request.py
+openapi_client/model/get_account_posts_request_params.py
 openapi_client/model/get_profile_request.py
 openapi_client/model/get_profile_request_params.py
 openapi_client/model/list_all_subscriptions.py
@@ -89,15 +99,4 @@ setup.cfg
 setup.py
 test-requirements.txt
 test/__init__.py
-test/test_account_notifications.py
-test/test_account_notifications_request.py
-test/test_account_notifications_request_params.py
-test/test_does_user_follow_any_lists_request.py
-test/test_does_user_follow_any_lists_request_params.py
-test/test_get_profile_request.py
-test/test_get_profile_request_params.py
-test/test_profile.py
-test/test_profile_metadata.py
-test/test_profile_metadata_profile.py
-test/test_profile_stats.py
 tox.ini

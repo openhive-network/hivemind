@@ -6,6 +6,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**bridge_account_notifications**](DefaultApi.md#bridge_account_notifications) | **POST** /#bridge.account_notifications | 
 [**bridge_does_user_follow_any_lists**](DefaultApi.md#bridge_does_user_follow_any_lists) | **POST** /#bridge.does_user_follow_any_lists | 
+[**bridge_get_account_posts**](DefaultApi.md#bridge_get_account_posts) | **POST** /#bridge.get_account_posts | 
 [**bridge_get_community**](DefaultApi.md#bridge_get_community) | **POST** /#bridge.get_community | 
 [**bridge_get_community_context**](DefaultApi.md#bridge_get_community_context) | **POST** /#bridge.get_community_context | 
 [**bridge_get_profile**](DefaultApi.md#bridge_get_profile) | **POST** /#bridge.get_profile | 
@@ -154,6 +155,80 @@ No authorization required
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Answer whether the observer follow any list |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **bridge_get_account_posts**
+> object bridge_get_account_posts(get_account_posts_request)
+
+
+
+Lists posts related to given account in selected way.
+
+### Example
+
+```python
+import time
+import openapi_client
+from openapi_client.api import default_api
+from openapi_client.model.get_account_posts_request import GetAccountPostsRequest
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost:8080
+# See configuration.py for a list of all supported configuration parameters.
+configuration = openapi_client.Configuration(
+    host = "http://localhost:8080"
+)
+
+
+# Enter a context with an instance of the API client
+with openapi_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = default_api.DefaultApi(api_client)
+    get_account_posts_request = GetAccountPostsRequest(
+        jsonrpc="2.0",
+        method="bridge.get_account_posts",
+        params=GetAccountPostsRequestParams(
+            sort="blog",
+            account="blocktrades",
+            start_author="start_author_example",
+            start_permlink="start_permlink_example",
+            limit=20,
+            observer="blocktrades",
+        ),
+        id=1,
+    ) # GetAccountPostsRequest | required: sort, account, optional: start_author, start_permlink, limit, observer
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.bridge_get_account_posts(get_account_posts_request)
+        pprint(api_response)
+    except openapi_client.ApiException as e:
+        print("Exception when calling DefaultApi->bridge_get_account_posts: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **get_account_posts_request** | [**GetAccountPostsRequest**](GetAccountPostsRequest.md)| required: sort, account, optional: start_author, start_permlink, limit, observer |
+
+### Return type
+
+**object**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | List of posts |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
