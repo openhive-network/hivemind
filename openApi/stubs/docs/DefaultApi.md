@@ -9,6 +9,7 @@ Method | HTTP request | Description
 [**bridge_get_account_posts**](DefaultApi.md#bridge_get_account_posts) | **POST** /#bridge.get_account_posts | 
 [**bridge_get_community**](DefaultApi.md#bridge_get_community) | **POST** /#bridge.get_community | 
 [**bridge_get_community_context**](DefaultApi.md#bridge_get_community_context) | **POST** /#bridge.get_community_context | 
+[**bridge_get_discussion**](DefaultApi.md#bridge_get_discussion) | **POST** /#bridge.get_discussion | 
 [**bridge_get_profile**](DefaultApi.md#bridge_get_profile) | **POST** /#bridge.get_profile | 
 [**bridge_list_all_subscriptions**](DefaultApi.md#bridge_list_all_subscriptions) | **POST** /#bridge.list_all_subscriptions | 
 [**bridge_list_communities**](DefaultApi.md#bridge_list_communities) | **POST** /#bridge.list_communities | 
@@ -228,7 +229,7 @@ No authorization required
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | List of posts |  -  |
+**200** | List of posts  |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -369,6 +370,77 @@ No authorization required
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Community context result |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **bridge_get_discussion**
+> object bridge_get_discussion(get_discussion_request)
+
+
+
+Gives flattened discussion tree starting at given post.
+
+### Example
+
+```python
+import time
+import openapi_client
+from openapi_client.api import default_api
+from openapi_client.model.get_discussion_request import GetDiscussionRequest
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost:8080
+# See configuration.py for a list of all supported configuration parameters.
+configuration = openapi_client.Configuration(
+    host = "http://localhost:8080"
+)
+
+
+# Enter a context with an instance of the API client
+with openapi_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = default_api.DefaultApi(api_client)
+    get_discussion_request = GetDiscussionRequest(
+        jsonrpc="2.0",
+        method="bridge.get_discussion",
+        params=GetDiscussionRequestParams(
+            author="blocktrades",
+            permlink="4th-update-of-2021-on-our-hive-software-work",
+            observer="gtg",
+        ),
+        id=1,
+    ) # GetDiscussionRequest | required: author, permlink, optional: observer
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.bridge_get_discussion(get_discussion_request)
+        pprint(api_response)
+    except openapi_client.ApiException as e:
+        print("Exception when calling DefaultApi->bridge_get_discussion: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **get_discussion_request** | [**GetDiscussionRequest**](GetDiscussionRequest.md)| required: author, permlink, optional: observer |
+
+### Return type
+
+**object**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | List of discussion post  |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

@@ -27,6 +27,9 @@ from openapi_client.model.error_message_error import ErrorMessageError
 from openapi_client.model.get_account_posts import GetAccountPosts
 from openapi_client.model.get_account_posts_request import GetAccountPostsRequest
 from openapi_client.model.get_account_posts_request_params import GetAccountPostsRequestParams
+from openapi_client.model.get_discussion import GetDiscussion
+from openapi_client.model.get_discussion_request import GetDiscussionRequest
+from openapi_client.model.get_discussion_request_params import GetDiscussionRequestParams
 from openapi_client.model.get_profile_request import GetProfileRequest
 from openapi_client.model.get_profile_request_params import GetProfileRequestParams
 from openapi_client.model.list_all_subscriptions import ListAllSubscriptions

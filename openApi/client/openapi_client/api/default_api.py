@@ -21,8 +21,13 @@ from openapi_client.model_utils import (  # noqa: F401
     none_type,
     validate_and_convert_types
 )
+from openapi_client.model.account_notifications_request import AccountNotificationsRequest
 from openapi_client.model.community_context_request import CommunityContextRequest
 from openapi_client.model.community_request import CommunityRequest
+from openapi_client.model.does_user_follow_any_lists_request import DoesUserFollowAnyListsRequest
+from openapi_client.model.get_account_posts_request import GetAccountPostsRequest
+from openapi_client.model.get_discussion_request import GetDiscussionRequest
+from openapi_client.model.get_profile_request import GetProfileRequest
 from openapi_client.model.list_all_subscriptions_request import ListAllSubscriptionsRequest
 from openapi_client.model.list_communites_request import ListCommunitesRequest
 from openapi_client.model.list_community_roles_request import ListCommunityRolesRequest
@@ -41,6 +46,360 @@ class DefaultApi(object):
         if api_client is None:
             api_client = ApiClient()
         self.api_client = api_client
+
+        def __bridge_account_notifications(
+            self,
+            account_notifications_request,
+            **kwargs
+        ):
+            """bridge_account_notifications  # noqa: E501
+
+            Lists notifications for given account  # noqa: E501
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.bridge_account_notifications(account_notifications_request, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                account_notifications_request (AccountNotificationsRequest): required account, optional: min_score, last_id, limit
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                object
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['account_notifications_request'] = \
+                account_notifications_request
+            return self.call_with_http_info(**kwargs)
+
+        self.bridge_account_notifications = Endpoint(
+            settings={
+                'response_type': (object,),
+                'auth': [],
+                'endpoint_path': '/#bridge.account_notifications',
+                'operation_id': 'bridge_account_notifications',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'account_notifications_request',
+                ],
+                'required': [
+                    'account_notifications_request',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'account_notifications_request':
+                        (AccountNotificationsRequest,),
+                },
+                'attribute_map': {
+                },
+                'location_map': {
+                    'account_notifications_request': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client,
+            callable=__bridge_account_notifications
+        )
+
+        def __bridge_does_user_follow_any_lists(
+            self,
+            does_user_follow_any_lists_request,
+            **kwargs
+        ):
+            """bridge_does_user_follow_any_lists  # noqa: E501
+
+            Tells if given observer follows any blacklist or mute list  # noqa: E501
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.bridge_does_user_follow_any_lists(does_user_follow_any_lists_request, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                does_user_follow_any_lists_request (DoesUserFollowAnyListsRequest): required observer
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                object
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['does_user_follow_any_lists_request'] = \
+                does_user_follow_any_lists_request
+            return self.call_with_http_info(**kwargs)
+
+        self.bridge_does_user_follow_any_lists = Endpoint(
+            settings={
+                'response_type': (object,),
+                'auth': [],
+                'endpoint_path': '/#bridge.does_user_follow_any_lists',
+                'operation_id': 'bridge_does_user_follow_any_lists',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'does_user_follow_any_lists_request',
+                ],
+                'required': [
+                    'does_user_follow_any_lists_request',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'does_user_follow_any_lists_request':
+                        (DoesUserFollowAnyListsRequest,),
+                },
+                'attribute_map': {
+                },
+                'location_map': {
+                    'does_user_follow_any_lists_request': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client,
+            callable=__bridge_does_user_follow_any_lists
+        )
+
+        def __bridge_get_account_posts(
+            self,
+            get_account_posts_request,
+            **kwargs
+        ):
+            """bridge_get_account_posts  # noqa: E501
+
+            Lists posts related to given account in selected way.  # noqa: E501
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.bridge_get_account_posts(get_account_posts_request, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                get_account_posts_request (GetAccountPostsRequest): required: sort, account, optional: start_author, start_permlink, limit, observer
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                object
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['get_account_posts_request'] = \
+                get_account_posts_request
+            return self.call_with_http_info(**kwargs)
+
+        self.bridge_get_account_posts = Endpoint(
+            settings={
+                'response_type': (object,),
+                'auth': [],
+                'endpoint_path': '/#bridge.get_account_posts',
+                'operation_id': 'bridge_get_account_posts',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'get_account_posts_request',
+                ],
+                'required': [
+                    'get_account_posts_request',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'get_account_posts_request':
+                        (GetAccountPostsRequest,),
+                },
+                'attribute_map': {
+                },
+                'location_map': {
+                    'get_account_posts_request': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client,
+            callable=__bridge_get_account_posts
+        )
 
         def __bridge_get_community(
             self,
@@ -276,6 +635,242 @@ class DefaultApi(object):
             },
             api_client=api_client,
             callable=__bridge_get_community_context
+        )
+
+        def __bridge_get_discussion(
+            self,
+            get_discussion_request,
+            **kwargs
+        ):
+            """bridge_get_discussion  # noqa: E501
+
+            Gives flattened discussion tree starting at given post.  # noqa: E501
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.bridge_get_discussion(get_discussion_request, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                get_discussion_request (GetDiscussionRequest): required: author, permlink, optional: observer
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                object
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['get_discussion_request'] = \
+                get_discussion_request
+            return self.call_with_http_info(**kwargs)
+
+        self.bridge_get_discussion = Endpoint(
+            settings={
+                'response_type': (object,),
+                'auth': [],
+                'endpoint_path': '/#bridge.get_discussion',
+                'operation_id': 'bridge_get_discussion',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'get_discussion_request',
+                ],
+                'required': [
+                    'get_discussion_request',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'get_discussion_request':
+                        (GetDiscussionRequest,),
+                },
+                'attribute_map': {
+                },
+                'location_map': {
+                    'get_discussion_request': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client,
+            callable=__bridge_get_discussion
+        )
+
+        def __bridge_get_profile(
+            self,
+            get_profile_request,
+            **kwargs
+        ):
+            """bridge_get_profile  # noqa: E501
+
+            Gets profile  # noqa: E501
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.bridge_get_profile(get_profile_request, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                get_profile_request (GetProfileRequest): required account, optional: observer
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                object
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['get_profile_request'] = \
+                get_profile_request
+            return self.call_with_http_info(**kwargs)
+
+        self.bridge_get_profile = Endpoint(
+            settings={
+                'response_type': (object,),
+                'auth': [],
+                'endpoint_path': '/#bridge.get_profile',
+                'operation_id': 'bridge_get_profile',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'get_profile_request',
+                ],
+                'required': [
+                    'get_profile_request',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'get_profile_request':
+                        (GetProfileRequest,),
+                },
+                'attribute_map': {
+                },
+                'location_map': {
+                    'get_profile_request': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client,
+            callable=__bridge_get_profile
         )
 
         def __bridge_list_all_subscriptions(
