@@ -31,6 +31,7 @@ from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import WaitingStatusManager as WSM
 from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import BroadcastObject
+from hive.utils.profiler import Profiler
 from hive.utils.communities_rank import update_communities_posts_and_rank
 
 from hive.indexer.mock_block_provider import MockBlockProvider
@@ -107,15 +108,24 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
     try:
         count = ubound - lbound
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
+        BLCK = 2889020
+        profi_c = Profiler('block_consumer.prof')
 
         while lbound < ubound:
+            
+            if lbound > BLCK - 1000 and lbound <= BLCK + 50000:
+                profi_c.start()
+            else if profi_c.filepath is not None and lbound > BLCK + 50000:
+                profi_c.stop()
+                profi_c.filepath = None
+            
             number_of_blocks_to_proceed = min( [ LIMIT_FOR_PROCESSED_BLOCKS, ubound - lbound  ] )
             time_before_waiting_for_data = perf()
 
             blocks = blocks_data_provider.get( number_of_blocks_to_proceed )
 
             if not can_continue_thread():
-                break;
+                break
 
             assert len(blocks) == number_of_blocks_to_proceed
 

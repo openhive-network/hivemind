@@ -12,13 +12,19 @@ class Profiler:
         self._profile = cProfile.Profile() if filepath else None
 
     def __enter__(self):
-        if self.filepath:
-            self._profile.enable()
+        self.start()
 
     def __exit__(self, exc_type, value, traceback):
+        self.stop()
+
+    def stop(self):
         if self.filepath:
             self._profile.disable()
             self.save()
+
+    def start(self):
+        if self.filepath:
+            self._profile.enable()
 
     def save(self):
         """Saves profile results to a file."""
