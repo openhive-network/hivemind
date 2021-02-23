@@ -3,8 +3,8 @@
 ## Introduction
 
 > We believe that high-quality content and communities of content producers and their
-audiences are the primary driver of growth of the steemit.com site, and in turn the wider
-adoption of the platform and STEEM. To this end, we wish to enable many users to build
+audiences are the primary driver of growth of the hive.blog site, and in turn the wider
+adoption of the platform and HIVE. To this end, we wish to enable many users to build
 communities in parallel around curating specific types of content valuable to their audiences.
 
 > To enable this, we intend to augment our current tag-based organizational structure for posts
@@ -16,7 +16,7 @@ delegated authors’) posts will appear.
 
 > This system of moderation will function identically to the aforementioned comment
 moderation system, with all content (including hidden or moderated content) published
-permanently in the blockchain to prevent censorship. The steemit.com web site will respect
+permanently in the blockchain to prevent censorship. The hive.blog web site will respect
 the display preferences of the specific community maintainers (within their own community
 namespace only) while simultaneously propagating every participant’s voice throughout the
 blockchain to the entire world (regardless of moderator opinions).
@@ -33,9 +33,9 @@ whilst simultaneously preventing any type of censorship.
 >
 > *[source](https://steem.io/2017roadmap.pdf)*
 
-Today, most Steem frontends rely on the global tags system for organization. In this sense Steem has many "communities" already but they are entirely informal; there is no ownership and no ability to formally organize. Tag usage standards are not possible to enforce, and users have different goals as to what they want to see and what sort of communities they want each tag to embody. 
+Today, most Hive frontends rely on the global tags system for organization. In this sense Hive has many "communities" already but they are entirely informal; there is no ownership and no ability to formally organize. Tag usage standards are not possible to enforce, and users have different goals as to what they want to see and what sort of communities they want each tag to embody. 
 
-Hive communities add a governance layer which allows users to organize around a set of values, and gives them the power to do so effectively. It introduces a new system of moderation which is not dependent on users' steem power. By making it easier to organize, this system can be far more effective at connecting creators and curators. Curators will be attracted to communities which are well-organized: focused, high-quality, low-noise. Making it easier to find the highest quality content will make it easier to reward high quality content.
+Hive communities add a governance layer which allows users to organize around a set of values, and gives them the power to do so effectively. It introduces a new system of moderation which is not dependent on users' hive power. By making it easier to organize, this system can be far more effective at connecting creators and curators. Curators will be attracted to communities which are well-organized: focused, high-quality, low-noise. Making it easier to find the highest quality content will make it easier to reward high quality content.
 
 Many people want to see long-form, original content while many others just want to share links and snippets. The goal of the community feature is to empower users to create tighter groups and focus on what's important to them. Use cases for communities may include:
 
@@ -332,9 +332,9 @@ To mark a post as belonging to a community, set the `community` key in `json_met
 ```
 {
     "community": "hive-192921",
-    "app": "steemit/0.1",
+    "app": "hiveblog/0.1",
     "format": "html",
-    "tags": ["steemit", "steem"],
+    "tags": ["hive"],
     [...]
 }
 ```
