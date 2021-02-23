@@ -110,6 +110,27 @@ $BODY$
 
 DROP FUNCTION IF EXISTS calculate_account_reputations_for_block;
 
+DROP TABLE IF EXISTS __new_reputation_data;
+
+CREATE UNLOGGED TABLE IF NOT EXISTS __new_reputation_data
+(
+    id integer,
+    author_id integer,
+    voter_id integer,
+    rshares bigint,
+    prev_rshares bigint
+);
+
+DROP TABLE IF EXISTS __tmp_accounts;
+
+CREATE UNLOGGED TABLE IF NOT EXISTS __tmp_accounts
+(
+    id integer,
+    reputation bigint,
+    is_implicit boolean,
+    changed boolean
+);
+
 CREATE OR REPLACE FUNCTION calculate_account_reputations_for_block(_block_num INT, _tracked_account VARCHAR DEFAULT NULL::VARCHAR)
   RETURNS SETOF accountreputation 
   LANGUAGE 'plpgsql'
@@ -130,16 +151,9 @@ DECLARE
   __traced_author int;
   __account_name varchar;
 BEGIN
-  CREATE UNLOGGED TABLE IF NOT EXISTS __new_reputation_data
-  (
-      id integer,
-      author_id integer,
-      voter_id integer,
-      rshares bigint,
-      prev_rshares bigint
-  );
 
-  TRUNCATE TABLE __new_reputation_data;
+  DELETE FROM __new_reputation_data;
+
   INSERT INTO __new_reputation_data 
     SELECT rd.id, rd.author_id, rd.voter_id, rd.rshares,
       COALESCE((SELECT prd.rshares
@@ -152,15 +166,9 @@ BEGIN
     ORDER BY rd.id
     ;
 
-  CREATE UNLOGGED TABLE IF NOT EXISTS __tmp_accounts
-  (
-      id integer,
-      reputation bigint,
-      is_implicit boolean,
-      changed boolean
-  );
 
-  TRUNCATE TABLE __tmp_accounts;
+  DELETE FROM __tmp_accounts;
+
   INSERT INTO __tmp_accounts
   SELECT ha.id, ha.reputation, ha.is_implicit, false AS changed
   FROM __new_reputation_data rd
