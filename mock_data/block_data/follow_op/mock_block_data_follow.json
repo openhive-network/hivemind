@@ -804,6 +804,17 @@
               "id": "follow",
               "json": "[\"follow\",{\"follower\":\"te'%@ter1\",\"following\":[\"tester3\", \"tester4\"],\"what\":[\"blog\"]}]"
             }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester5\",\"following\":[\"tester4\"],\"what\":[\"blacklist\"]}]"
+            }
           }
         ]
       }
@@ -1467,6 +1478,28 @@
                 "tester1"
               ],
               "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester3\",\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"reset_all_lists\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
               "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"blog\"]}]"
             }
           },
@@ -1511,7 +1544,29 @@
                 "tester5"
               ],
               "id": "follow",
-              "json": "[\"follow\",{\"follower\":\"tester5\",\"following\":[\"tester1\", \"tester2\"],\"what\":[\"blog\"]}]"
+              "json": "[\"follow\",{\"follower\":\"tester5\",\"following\":[\"tester1\", \"tester2\", \"tester3\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-follower"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"test-follower\",\"following\":\"test-creator\",\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-muter"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"test-muter\",\"following\":\"test-creator\",\"what\":[\"ignore\"]}]"
             }
           }
         ]
@@ -1521,15 +1576,45 @@
     "signing_key": "",
     "transaction_ids": []
   },
-  "5000017": {
-    "previous": "004c4b5000000000000000000000000000000000",
-    "timestamp": "2016-09-15T19:48:12",
+  "5000015": {
+    "previous": "004c4b4e00000000000000000000000000000000",
+    "timestamp": "2016-09-15T19:48:06",
     "witness": "initminer",
     "transaction_merkle_root": "0000000000000000000000000000000000000000",
     "extensions": [],
     "witness_signature": "",
-    "transactions": [],
-    "block_id": "004c4b5100000000000000000000000000000000",
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester5\",\"following\":[\"tester4\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester5\",\"following\":[\"tester4\"],\"what\":[\"follow_muted\"]}]"
+            }
+          }
+        ]
+      }
+    ],
+    "block_id": "004c4b4f00000000000000000000000000000000",
     "signing_key": "",
     "transaction_ids": []
   }
