@@ -329,7 +329,6 @@ async def get_discussions_by_feed_impl(db, account: str, start_author: str = '',
 
     return posts
 
-
 @return_error_info
 @nested_query_compat
 async def get_discussions_by_feed(context, tag: str, start_author: str = '',
