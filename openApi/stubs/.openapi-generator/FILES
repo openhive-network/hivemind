@@ -21,6 +21,9 @@ docs/ErrorMessageError.md
 docs/GetAccountPosts.md
 docs/GetAccountPostsRequest.md
 docs/GetAccountPostsRequestParams.md
+docs/GetDiscussion.md
+docs/GetDiscussionRequest.md
+docs/GetDiscussionRequestParams.md
 docs/GetProfileRequest.md
 docs/GetProfileRequestParams.md
 docs/ListAllSubscriptions.md
@@ -69,6 +72,9 @@ openapi_client/model/error_message_error.py
 openapi_client/model/get_account_posts.py
 openapi_client/model/get_account_posts_request.py
 openapi_client/model/get_account_posts_request_params.py
+openapi_client/model/get_discussion.py
+openapi_client/model/get_discussion_request.py
+openapi_client/model/get_discussion_request_params.py
 openapi_client/model/get_profile_request.py
 openapi_client/model/get_profile_request_params.py
 openapi_client/model/list_all_subscriptions.py

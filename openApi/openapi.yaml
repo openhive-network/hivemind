@@ -1,14 +1,14 @@
 openapi: 3.0.2
 info:
   title: Hivemind OpenAPI Specification
-  description: 'An OpenAPI specification for Hivemind'
+  description: "An OpenAPI specification for Hivemind"
   version: 0.0.1
 servers:
   - url: http://localhost:8080/
     description: Hivemind local API Service
 components:
   schemas:
-    'Community':
+    "Community":
       type: object
       required:
         - id
@@ -40,7 +40,7 @@ components:
         avatar_url:
           type: string
         context:
-          $ref: '#/components/schemas/CommunityContext'
+          $ref: "#/components/schemas/CommunityContext"
         created_at:
           type: string
           format: date-time
@@ -63,13 +63,13 @@ components:
         sum_pending:
           type: integer
         team:
-          $ref: '#/components/schemas/ListCommunityRoles'
+          $ref: "#/components/schemas/ListCommunityRoles"
         title:
           type: string
         type_id:
           type: integer
 
-    'Profile':
+    "Profile":
       type: object
       required:
         - id
@@ -148,18 +148,18 @@ components:
             rank:
               type: integer
 
-    'AccountNotifications':
+    "AccountNotifications":
       type: array
-      description: 'array of objects with 6 notification related fields: date, id, msg, score, type and url'
+      description: "array of objects with 6 notification related fields: date, id, msg, score, type and url"
       items:
         type: object
         required:
-        - date
-        - id
-        - msg
-        - score
-        - type
-        - url
+          - date
+          - id
+          - msg
+          - score
+          - type
+          - url
         properties:
           date:
             type: string
@@ -176,55 +176,55 @@ components:
             description: notification score
           type:
             type: string
-            description: 'type of notification: follow, vote, reply, reply_comment, mention, reblog'
+            description: "type of notification: follow, vote, reply, reply_comment, mention, reblog"
           url:
             type: string
             format: url
             description: end of notification url
-          
-    'DoesUserFollowAnyLists':
-      type: boolean
-      description: 'answer to a question does user follow any list'
 
-    'GetAccountPosts':
+    "DoesUserFollowAnyLists":
+      type: boolean
+      description: "answer to a question does user follow any list"
+
+    "GetAccountPosts":
       type: array
-      description: 'array of objects with posts related fields'
+      description: "array of objects with posts related fields"
       items:
         type: object
         required:
-        - active_votes
-        - author
-        - author_payout_value
-        - author_reputation
-        - beneficiaries
-        - blacklists
-        - body
-        - category
-        - children
-        - created
-        - curator_payout_value
-        - depth
-        - is_paidout
-        - json_metadata
-        - max_accepted_payout
-        - net_rshares
-        - payout
-        - payout_at
-        - pending_payout_value
-        - percent_hbd
-        - permlink
-        - post_id
-        - promoted
-        - reblogged_by
-        - replies
-        - stats
-        - title
-        - updated
-        - url
+          - active_votes
+          - author
+          - author_payout_value
+          - author_reputation
+          - beneficiaries
+          - blacklists
+          - body
+          - category
+          - children
+          - created
+          - curator_payout_value
+          - depth
+          - is_paidout
+          - json_metadata
+          - max_accepted_payout
+          - net_rshares
+          - payout
+          - payout_at
+          - pending_payout_value
+          - percent_hbd
+          - permlink
+          - post_id
+          - promoted
+          - reblogged_by
+          - replies
+          - stats
+          - title
+          - updated
+          - url
         properties:
           active_votes:
             type: array
-            $ref: '#/components/schemas/ActiveVotes'
+            $ref: "#/components/schemas/ActiveVotes"
           author:
             type: string
             description: account name of the post's author
@@ -236,12 +236,12 @@ components:
             description: author's reputation score
           beneficiaries:
             type: array
-            $ref: '#/components/schemas/Beneficiares'
+            $ref: "#/components/schemas/Beneficiares"
           blacklists:
             type: array
             items:
               type: string
-              description: 'account names of blacklisted users'
+              description: "account names of blacklisted users"
           body:
             type: string
             description: post content
@@ -266,20 +266,6 @@ components:
             description: information whether the post has been paid
           json_metadata:
             type: object
-            required:
-              - links
-              - tags
-            properties:
-              links:
-                type: array
-                items:
-                  type: string
-                  description: links used in post
-              tags:
-                type: array
-                items:
-                  type: string
-                  description: tags of the post, first one is category
           max_accepted_payout:
             type: string
             description: maximal possible payout
@@ -346,49 +332,49 @@ components:
             type: string
             description: end of the url to the post, contains category, author and permlink
 
-    'GetDiscussion':
+    "GetDiscussion":
       type: object
-      description: 'object with posts discussion related fields'
+      description: "object with posts discussion related fields"
       items:
         type: string
-        description: 'author/permlink from discussion'
+        description: "author/permlink from discussion"
         items:
           type: object
           required:
-          - active_votes
-          - author
-          - author_payout_value
-          - author_reputation
-          - beneficiaries
-          - blacklists
-          - body
-          - category
-          - children
-          - created
-          - curator_payout_value
-          - depth
-          - is_paidout
-          - json_metadata
-          - max_accepted_payout
-          - net_rshares
-          - parent_author
-          - parent_permlink
-          - payout
-          - payout_at
-          - pending_payout_value
-          - percent_hbd
-          - permlink
-          - post_id
-          - promoted
-          - replies
-          - stats
-          - title
-          - updated
-          - url
+            - active_votes
+            - author
+            - author_payout_value
+            - author_reputation
+            - beneficiaries
+            - blacklists
+            - body
+            - category
+            - children
+            - created
+            - curator_payout_value
+            - depth
+            - is_paidout
+            - json_metadata
+            - max_accepted_payout
+            - net_rshares
+            - parent_author
+            - parent_permlink
+            - payout
+            - payout_at
+            - pending_payout_value
+            - percent_hbd
+            - permlink
+            - post_id
+            - promoted
+            - replies
+            - stats
+            - title
+            - updated
+            - url
           properties:
             active_votes:
               type: array
-              $ref: '#/components/schemas/ActiveVotes'
+              $ref: "#/components/schemas/ActiveVotes"
             author:
               type: string
               description: account name of the post's author
@@ -398,14 +384,20 @@ components:
             author_reputation:
               type: number
               description: author's reputation score
+            author_role:
+              type: string
+              description: author's community role (if post is in community)
+            author_title:
+              type: string
+              description: author's community title (if post is in community)
             beneficiaries:
               type: array
-              $ref: '#/components/schemas/Beneficiares'
+              $ref: "#/components/schemas/Beneficiares"
             blacklists:
               type: array
               items:
                 type: string
-                description: 'account names of blacklisted users'
+                description: "account names of blacklisted users"
             body:
               type: string
               description: post content
@@ -429,27 +421,19 @@ components:
               type: boolean
               description: information whether the post has been paid
             json_metadata:
-            # TODO: possible content
               type: object
-              required:
-                - tags
-              properties:
-                links:
-                  type: array
-                  items:
-                    type: string
-                    description: links used in post
-                tags:
-                  type: array
-                  items:
-                    type: string
-                    description: tags of the post, first one is category
             max_accepted_payout:
               type: string
               description: maximal possible payout
             net_rshares:
               type: integer
               description: netto rshares, result of rshares allocations
+            parent_author:
+              type: string
+              description: account name of parent post author
+            parent_permlink:
+              type: string
+              description: post's permlink of parent post
             payout:
               type: number
               description: amount of payout
@@ -472,17 +456,11 @@ components:
             promoted:
               type: string
               description: amount of HBD if post is promoted # TODO: check if it is true
-            reblogged_by:
-              type: array
-              items:
-                type: string
-                description: account names of reblogers
             replies:
               type: array
-              # TODO: description:
               items:
                 type: string
-                description: replies
+                description: author/permlink replies of the post
             stats:
               type: object
               required:
@@ -510,7 +488,7 @@ components:
               type: string
               description: end of the url to the post, contains category, author and permlink
 
-    'ListCommunity':
+    "ListCommunity":
       type: object
       required:
         - id
@@ -539,7 +517,7 @@ components:
         avatar_url:
           type: string
         context:
-          $ref: '#/components/schemas/CommunityContext'
+          $ref: "#/components/schemas/CommunityContext"
         created_at:
           type: string
           format: date-time
@@ -562,7 +540,7 @@ components:
         type_id:
           type: integer
 
-    'Beneficiares':
+    "Beneficiares":
       type: object
       required:
         - account
@@ -575,7 +553,7 @@ components:
           type: integer
           description: benefit amount (10000 = 100%)
 
-    'ActiveVotes':
+    "ActiveVotes":
       type: object
       required:
         - rshares
@@ -585,9 +563,9 @@ components:
           type: integer
         voter:
           type: string
-          description: 'account name of the voter'
+          description: "account name of the voter"
 
-    'CommunityContext':
+    "CommunityContext":
       type: object
       properties:
         role:
@@ -599,7 +577,7 @@ components:
           maxLength: 140
           minLength: 0
 
-    'ListAllSubscriptions':
+    "ListAllSubscriptions":
       type: array
       items:
         type: array
@@ -608,7 +586,7 @@ components:
         minItems: 4
         maxItems: 4
 
-    'ListCommunityRoles':
+    "ListCommunityRoles":
       type: array
       description: "array of arrays with 3 strings: name, role_name, title"
       items:
@@ -618,7 +596,7 @@ components:
         minItems: 3
         maxItems: 3
 
-    'ListPopCommunities':
+    "ListPopCommunities":
       type: array
       description: "array of arrays with 2 strings: community name and title"
       items:
@@ -628,7 +606,7 @@ components:
         minItems: 2
         maxItems: 2
 
-    'ListSubscribers':
+    "ListSubscribers":
       type: array
       description: "array of arrays with 4 strings: account name, role name, title, created_at"
       items:
@@ -638,7 +616,7 @@ components:
         minItems: 4
         maxItems: 4
 
-    'ErrorMessage':
+    "ErrorMessage":
       type: object
       required:
         - jsonrpc
@@ -663,7 +641,7 @@ components:
         id:
           type: integer
 
-    'CommunityContextRequest':
+    "CommunityContextRequest":
       type: object
       required:
         - jsonrpc
@@ -686,17 +664,17 @@ components:
           properties:
             name:
               type: string
-              description: 'community name'
-              example: 'hive-189306'
+              description: "community name"
+              example: "hive-189306"
             account:
               type: string
-              description: 'account name'
-              example: 'good-karma'
+              description: "account name"
+              example: "good-karma"
         id:
           type: integer
           default: 1
 
-    'CommunityRequest':
+    "CommunityRequest":
       type: object
       required:
         - jsonrpc
@@ -718,17 +696,17 @@ components:
           properties:
             name:
               type: string
-              description: 'community name'
-              example: 'hive-189306'
+              description: "community name"
+              example: "hive-189306"
             observer:
               type: string
-              description: 'account name'
-              example: 'good-karma'
+              description: "account name"
+              example: "good-karma"
         id:
           type: integer
           default: 1
 
-    'ListAllSubscriptionsRequest':
+    "ListAllSubscriptionsRequest":
       required:
         - jsonrpc
         - method
@@ -750,13 +728,13 @@ components:
           properties:
             account:
               type: string
-              description: 'account name'
-              example: 'good-karma'
+              description: "account name"
+              example: "good-karma"
         id:
           type: integer
           default: 1
 
-    'ListCommunitesRequest':
+    "ListCommunitesRequest":
       type: object
       required:
         - jsonrpc
@@ -777,34 +755,34 @@ components:
             last:
               type: string
               description: 'name of community; paging mechanism (cuts out this and "higher" communities, depends on chosen ranking)'
-              example: 'hive-189306'
+              example: "hive-189306"
             limit:
               type: integer
-              description: 'limit number of listed communities'
+              description: "limit number of listed communities"
               minimum: 1
               maximum: 100
               default: 100
             query:
               type: string
               description: 'when given turns on filtering for given set of words - words are looked for in "title" and "about" fields'
-              example: 'Hive'
+              example: "Hive"
             sort:
               type: string
-              description: ' determines order of returned communities'
+              description: " determines order of returned communities"
               enum:
-                - 'rank'
-                - 'new'
-                - 'subs'
-              default: 'rank'
+                - "rank"
+                - "new"
+                - "subs"
+              default: "rank"
             observer:
               type: string
-              description: '(can be skipped or passed empty), when passed has to point to valid account used to show relation between account and community (subscribed, role and title)'
-              example: 'good-karma'
+              description: "(can be skipped or passed empty), when passed has to point to valid account used to show relation between account and community (subscribed, role and title)"
+              example: "good-karma"
         id:
           type: integer
           default: 1
 
-    'ListCommunityRolesRequest':
+    "ListCommunityRolesRequest":
       type: object
       required:
         - jsonrpc
@@ -826,15 +804,15 @@ components:
           properties:
             community:
               type: string
-              description: 'community name'
-              example: 'hive-189306'
+              description: "community name"
+              example: "hive-189306"
             last:
               type: string
               description: 'name of community; paging mechanism (cuts out this and "higher" communities, depends on chosen ranking)'
-              example: 'hive-189306'
+              example: "hive-189306"
             limit:
               type: integer
-              description: 'limit number of listed communities'
+              description: "limit number of listed communities"
               minimum: 1
               maximum: 100
               default: 100
@@ -842,7 +820,7 @@ components:
           type: integer
           default: 1
 
-    'ListPopCommunitesRequest':
+    "ListPopCommunitesRequest":
       type: object
       required:
         - jsonrpc
@@ -862,7 +840,7 @@ components:
           properties:
             limit:
               type: integer
-              description: 'limit number of listed communities'
+              description: "limit number of listed communities"
               minimum: 1
               maximum: 25
               default: 25
@@ -870,7 +848,7 @@ components:
           type: integer
           default: 1
 
-    'ListSubscribersRequest':
+    "ListSubscribersRequest":
       type: object
       required:
         - jsonrpc
@@ -892,15 +870,15 @@ components:
           properties:
             community:
               type: string
-              description: 'community name'
-              example: 'hive-189306'
+              description: "community name"
+              example: "hive-189306"
             last:
               type: string
               description: ' name of subscriber; paging mechanism (cuts out this and "higher" subscribers, depends on created at desc)'
-              example: 'hive-189306'
+              example: "hive-189306"
             limit:
               type: integer
-              description: 'limit number of listed subscribers'
+              description: "limit number of listed subscribers"
               minimum: 1
               maximum: 100
               default: 100
@@ -908,7 +886,7 @@ components:
           type: integer
           default: 1
 
-    'GetProfileRequest':
+    "GetProfileRequest":
       type: object
       required:
         - jsonrpc
@@ -930,17 +908,17 @@ components:
           properties:
             account:
               type: string
-              description: 'account name'
-              example: 'blocktrades'
+              description: "account name"
+              example: "blocktrades"
             observer:
               type: string
-              description: 'account name of observer, used to add information about relationship of observer with given profile account'
-              example: 'gtg'
+              description: "account name of observer, used to add information about relationship of observer with given profile account"
+              example: "gtg"
         id:
           type: integer
           default: 1
 
-    'AccountNotificationsRequest':
+    "AccountNotificationsRequest":
       type: object
       required:
         - jsonrpc
@@ -962,21 +940,21 @@ components:
           properties:
             account:
               type: string
-              description: 'account name'
-              example: 'blocktrades'
+              description: "account name"
+              example: "blocktrades"
             min_score:
               type: integer
-              description: 'minimal score of notifications to show'
+              description: "minimal score of notifications to show"
               minimum: 0
               maximum: 100
               default: 25
             last_id:
               type: integer
-              description: 'indicates newest notification to show; paging mechanism'
+              description: "indicates newest notification to show; paging mechanism"
               default: null
             limit:
               type: integer
-              description: 'limit number of listed notifications'
+              description: "limit number of listed notifications"
               minimum: 1
               maximum: 100
               default: 100
@@ -984,7 +962,7 @@ components:
           type: integer
           default: 1
 
-    'DoesUserFollowAnyListsRequest':
+    "DoesUserFollowAnyListsRequest":
       type: object
       required:
         - jsonrpc
@@ -1006,13 +984,13 @@ components:
           properties:
             observer:
               type: string
-              description: 'account name'
-              example: 'blocktrades'
+              description: "account name"
+              example: "blocktrades"
         id:
           type: integer
           default: 1
 
-    'GetAccountPostsRequest':
+    "GetAccountPostsRequest":
       type: object
       required:
         - jsonrpc
@@ -1043,18 +1021,18 @@ components:
                 posts - op posts authored by given account, newer first  
                 comments - replies authored by given account, newer first  
                 replies - replies to posts of given account, newer first  
-                payout - all posts authored by given account that were not yet cashed out  
-              example: 'blog'
+                payout - all posts authored by given account that were not yet cashed out
+              example: "blog"
             account:
               type: string
               description: account name, points to valid account
-              example: 'blocktrades'
+              example: "blocktrades"
             start_author:
               type: string
               description: author account name, if passed must be passed with start_permlink
             start_permlink:
               type: string
-              description: post permlink of given author, point to valid post, paging mechanism 
+              description: post permlink of given author, point to valid post, paging mechanism
             limit:
               type: integer
               minimum: 1
@@ -1062,14 +1040,14 @@ components:
               default: 20
             observer:
               type: string
-              description:  ignored for blog, feed and replies, otherwise when passed has to point to valid account used to fill blacklist stats and mark posts of authors blacklisted by observer, at this time ignored 
+              description: ignored for blog, feed and replies, otherwise when passed has to point to valid account used to fill blacklist stats and mark posts of authors blacklisted by observer, at this time ignored
               # TODO: observer
-              example: 'blocktrades'
+              example: "blocktrades"
         id:
           type: integer
           default: 1
 
-    'GetDiscussionRequest':
+    "GetDiscussionRequest":
       type: object
       required:
         - jsonrpc
@@ -1093,15 +1071,15 @@ components:
             author:
               type: string
               description: valid account name
-              example: 'blocktrades'
+              example: "blocktrades"
             permlink:
               type: string
-              description: post permlink of given author, with author have to point on valid post
-              example: '4th-update-of-2021-on-our-hive-software-work'
+              description: post permlink of given author, have to point on valid post
+              example: "4th-update-of-2021-on-our-hive-software-work"
             observer:
               type: string
-              description:  account name, used to filter out discussion branches starting at posts authored by accounts ignored directly or indirectly by the observer
-              example: 'gtg'
+              description: account name, used to filter out discussion branches starting at posts authored by accounts ignored directly or indirectly by the observer
+              example: "gtg"
         id:
           type: integer
           default: 1
@@ -1114,19 +1092,19 @@ paths:
       requestBody:
         description: community name and optional observer
         content:
-          'application/json':
+          "application/json":
             schema:
-              $ref: '#/components/schemas/CommunityRequest'
+              $ref: "#/components/schemas/CommunityRequest"
         required: true
       responses:
-        '200':
+        "200":
           description: Community result
           content:
-            'application/json':
+            "application/json":
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Community'
-                  - $ref: '#/components/schemas/ErrorMessage'
+                  - $ref: "#/components/schemas/Community"
+                  - $ref: "#/components/schemas/ErrorMessage"
 
   /#bridge.get_community_context:
     post:
@@ -1135,19 +1113,19 @@ paths:
       requestBody:
         description: community name and account for context
         content:
-          'application/json':
+          "application/json":
             schema:
-              $ref: '#/components/schemas/CommunityContextRequest'
+              $ref: "#/components/schemas/CommunityContextRequest"
         required: true
       responses:
-        '200':
+        "200":
           description: Community context result
           content:
-            'application/json':
+            "application/json":
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/CommunityContext'
-                  - $ref: '#/components/schemas/ErrorMessage'
+                  - $ref: "#/components/schemas/CommunityContext"
+                  - $ref: "#/components/schemas/ErrorMessage"
 
   /#bridge.list_all_subscriptions:
     post:
@@ -1156,40 +1134,40 @@ paths:
       requestBody:
         description: points to valid account (not necessarily subscibed to any community)
         content:
-          'application/json':
+          "application/json":
             schema:
-              $ref: '#/components/schemas/ListAllSubscriptionsRequest'
+              $ref: "#/components/schemas/ListAllSubscriptionsRequest"
         required: true
       responses:
-        '200':
+        "200":
           description: all subscriptions list
           content:
-            'application/json':
+            "application/json":
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/ListAllSubscriptions'
-                  - $ref: '#/components/schemas/ErrorMessage'
+                  - $ref: "#/components/schemas/ListAllSubscriptions"
+                  - $ref: "#/components/schemas/ErrorMessage"
 
   /#bridge.list_communities:
     post:
       description: Gets community
       operationId: bridge.list_communities
       requestBody:
-        description: 'optional parameters: last, limit, query, sort, observer'
+        description: "optional parameters: last, limit, query, sort, observer"
         content:
-          'application/json':
+          "application/json":
             schema:
-              $ref: '#/components/schemas/ListCommunitesRequest'
+              $ref: "#/components/schemas/ListCommunitesRequest"
         required: true
       responses:
-        '200':
+        "200":
           description: list of Communities
           content:
-            'application/json':
+            "application/json":
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/ListCommunity'
-                  - $ref: '#/components/schemas/ErrorMessage'
+                  - $ref: "#/components/schemas/ListCommunity"
+                  - $ref: "#/components/schemas/ErrorMessage"
 
   /#bridge.list_community_roles:
     post:
@@ -1198,165 +1176,165 @@ paths:
       requestBody:
         description: community name and optional observer
         content:
-          'application/json':
+          "application/json":
             schema:
-              $ref: '#/components/schemas/ListCommunityRolesRequest'
+              $ref: "#/components/schemas/ListCommunityRolesRequest"
         required: true
       responses:
-        '200':
+        "200":
           description: list of Community roles
           content:
-            'application/json':
+            "application/json":
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/ListCommunityRoles'
-                  - $ref: '#/components/schemas/ErrorMessage'
+                  - $ref: "#/components/schemas/ListCommunityRoles"
+                  - $ref: "#/components/schemas/ErrorMessage"
 
   /#bridge.list_pop_communities:
     post:
       description: Gets community
       operationId: bridge.list_pop_communities
       requestBody:
-        description: 'optional parameter: limit'
+        description: "optional parameter: limit"
         content:
-          'application/json':
+          "application/json":
             schema:
-              $ref: '#/components/schemas/ListPopCommunitesRequest'
+              $ref: "#/components/schemas/ListPopCommunitesRequest"
         required: true
       responses:
-        '200':
+        "200":
           description: list of Communities
           content:
-            'application/json':
+            "application/json":
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/ListPopCommunities'
-                  - $ref: '#/components/schemas/ErrorMessage'
+                  - $ref: "#/components/schemas/ListPopCommunities"
+                  - $ref: "#/components/schemas/ErrorMessage"
 
   /#bridge.list_subscribers:
     post:
       description: list subscribers
       operationId: bridge.list_subscribers
       requestBody:
-        description: 'required community, optional: last, limit'
+        description: "required community, optional: last, limit"
         content:
-          'application/json':
+          "application/json":
             schema:
-              $ref: '#/components/schemas/ListSubscribersRequest'
+              $ref: "#/components/schemas/ListSubscribersRequest"
         required: true
       responses:
-        '200':
+        "200":
           description: list of Communities
           content:
-            'application/json':
+            "application/json":
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/ListSubscribers'
-                  - $ref: '#/components/schemas/ErrorMessage'
+                  - $ref: "#/components/schemas/ListSubscribers"
+                  - $ref: "#/components/schemas/ErrorMessage"
 
   /#bridge.get_profile:
     post:
       description: Gets profile
       operationId: bridge.get_profile
       requestBody:
-        description: 'required account, optional: observer'
+        description: "required account, optional: observer"
         content:
-          'application/json':
+          "application/json":
             schema:
-              $ref: '#/components/schemas/GetProfileRequest'
+              $ref: "#/components/schemas/GetProfileRequest"
         required: true
       responses:
-        '200':
+        "200":
           description: profile information
           content:
-            'application/json':
+            "application/json":
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Profile'
-                  - $ref: '#/components/schemas/ErrorMessage'
+                  - $ref: "#/components/schemas/Profile"
+                  - $ref: "#/components/schemas/ErrorMessage"
 
   /#bridge.account_notifications:
     post:
       description: Lists notifications for given account
       operationId: bridge.account_notifications
       requestBody:
-        description: 'required account, optional: min_score, last_id, limit'
+        description: "required account, optional: min_score, last_id, limit"
         content:
-          'application/json':
+          "application/json":
             schema:
-              $ref: '#/components/schemas/AccountNotificationsRequest'
+              $ref: "#/components/schemas/AccountNotificationsRequest"
         required: true
       responses:
-        '200':
+        "200":
           description: list of notifications
           content:
-            'application/json':
+            "application/json":
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/AccountNotifications'
-                  - $ref: '#/components/schemas/ErrorMessage'
+                  - $ref: "#/components/schemas/AccountNotifications"
+                  - $ref: "#/components/schemas/ErrorMessage"
 
   /#bridge.does_user_follow_any_lists:
     post:
       description: Tells if given observer follows any blacklist or mute list
       operationId: bridge.does_user_follow_any_lists
       requestBody:
-        description: 'required observer'
+        description: "required observer"
         content:
-          'application/json':
+          "application/json":
             schema:
-              $ref: '#/components/schemas/DoesUserFollowAnyListsRequest'
+              $ref: "#/components/schemas/DoesUserFollowAnyListsRequest"
         required: true
       responses:
-        '200':
+        "200":
           description: Answer whether the observer follow any list
           content:
-            'application/json':
+            "application/json":
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/DoesUserFollowAnyLists'
-                  - $ref: '#/components/schemas/ErrorMessage'
-                  
+                  - $ref: "#/components/schemas/DoesUserFollowAnyLists"
+                  - $ref: "#/components/schemas/ErrorMessage"
+
   /#bridge.get_account_posts:
     post:
       description: Lists posts related to given account in selected way.
       operationId: bridge.get_account_posts
       requestBody:
-        description: 'required: sort, account, optional: start_author, start_permlink, limit, observer'
+        description: "required: sort, account, optional: start_author, start_permlink, limit, observer"
         content:
-          'application/json':
+          "application/json":
             schema:
-              $ref: '#/components/schemas/GetAccountPostsRequest'
+              $ref: "#/components/schemas/GetAccountPostsRequest"
         required: true
       responses:
-        '200':
+        "200":
           description: |
             List of posts
           content:
-            'application/json':
+            "application/json":
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/GetAccountPosts'
-                  - $ref: '#/components/schemas/ErrorMessage'
+                  - $ref: "#/components/schemas/GetAccountPosts"
+                  - $ref: "#/components/schemas/ErrorMessage"
 
   /#bridge.get_discussion:
     post:
-      description: Gives flattened discussion tree starting at given post. 
+      description: Gives flattened discussion tree starting at given post.
       operationId: bridge.get_discussion
       requestBody:
-        description: 'required: author, permlink, optional: observer'
+        description: "required: author, permlink, optional: observer"
         content:
-          'application/json':
+          "application/json":
             schema:
-              $ref: '#/components/schemas/GetDiscussionRequest'
+              $ref: "#/components/schemas/GetDiscussionRequest"
         required: true
       responses:
-        '200':
+        "200":
           description: |
             List of discussion post
           content:
-            'application/json':
+            "application/json":
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/GetDiscussionPosts'
-                  - $ref: '#/components/schemas/ErrorMessage'
+                  - $ref: "#/components/schemas/GetDiscussion"
+                  - $ref: "#/components/schemas/ErrorMessage"

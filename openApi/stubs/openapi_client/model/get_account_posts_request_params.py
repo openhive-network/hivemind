@@ -124,7 +124,7 @@ class GetAccountPostsRequestParams(ModelNormal):
         """GetAccountPostsRequestParams - a model defined in OpenAPI
 
         Args:
-            sort (str): blog - top posts authored by given account (excluding posts to communities - unless explicitely reblogged) plus reblogs ranked by creation/reblog time   feed - top posts from blogs of accounts that given account is following ranked by creation/reblog time, not older than last month   posts - op posts authored by given account, newer first   comments - replies authored by given account, newer first   replies - replies to posts of given account, newer first   payout - all posts authored by given account that were not yet cashed out   
+            sort (str): ### Sort order: blog - top posts authored by given account (excluding posts to communities - unless explicitely reblogged) plus reblogs ranked by creation/reblog time   feed - top posts from blogs of accounts that given account is following ranked by creation/reblog time, not older than last month   posts - op posts authored by given account, newer first   comments - replies authored by given account, newer first   replies - replies to posts of given account, newer first   payout - all posts authored by given account that were not yet cashed out 
             account (str): account name, points to valid account
 
         Keyword Args:

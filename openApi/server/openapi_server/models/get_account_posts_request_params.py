@@ -71,7 +71,7 @@ class GetAccountPostsRequestParams(Model):
     def sort(self):
         """Gets the sort of this GetAccountPostsRequestParams.
 
-        ### Sort order: blog - top posts authored by given account (excluding posts to communities - unless explicitely reblogged) plus reblogs ranked by creation/reblog time   feed - top posts from blogs of accounts that given account is following ranked by creation/reblog time, not older than last month   posts - op posts authored by given account, newer first   comments - replies authored by given account, newer first   replies - replies to posts of given account, newer first   payout - all posts authored by given account that were not yet cashed out     # noqa: E501
+        ### Sort order: blog - top posts authored by given account (excluding posts to communities - unless explicitely reblogged) plus reblogs ranked by creation/reblog time   feed - top posts from blogs of accounts that given account is following ranked by creation/reblog time, not older than last month   posts - op posts authored by given account, newer first   comments - replies authored by given account, newer first   replies - replies to posts of given account, newer first   payout - all posts authored by given account that were not yet cashed out   # noqa: E501
 
         :return: The sort of this GetAccountPostsRequestParams.
         :rtype: str
@@ -82,7 +82,7 @@ class GetAccountPostsRequestParams(Model):
     def sort(self, sort):
         """Sets the sort of this GetAccountPostsRequestParams.
 
-        ### Sort order: blog - top posts authored by given account (excluding posts to communities - unless explicitely reblogged) plus reblogs ranked by creation/reblog time   feed - top posts from blogs of accounts that given account is following ranked by creation/reblog time, not older than last month   posts - op posts authored by given account, newer first   comments - replies authored by given account, newer first   replies - replies to posts of given account, newer first   payout - all posts authored by given account that were not yet cashed out     # noqa: E501
+        ### Sort order: blog - top posts authored by given account (excluding posts to communities - unless explicitely reblogged) plus reblogs ranked by creation/reblog time   feed - top posts from blogs of accounts that given account is following ranked by creation/reblog time, not older than last month   posts - op posts authored by given account, newer first   comments - replies authored by given account, newer first   replies - replies to posts of given account, newer first   payout - all posts authored by given account that were not yet cashed out   # noqa: E501
 
         :param sort: The sort of this GetAccountPostsRequestParams.
         :type sort: str

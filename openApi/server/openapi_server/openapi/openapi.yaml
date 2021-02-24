@@ -7,6 +7,71 @@ servers:
 - description: Hivemind local API Service
   url: http://localhost:8080/
 paths:
+  /#bridge.account_notifications:
+    post:
+      description: Lists notifications for given account
+      operationId: bridge_account_notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountNotificationsRequest'
+        description: 'required account, optional: min_score, last_id, limit'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/AccountNotifications'
+                - $ref: '#/components/schemas/ErrorMessage'
+          description: list of notifications
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+  /#bridge.does_user_follow_any_lists:
+    post:
+      description: Tells if given observer follows any blacklist or mute list
+      operationId: bridge_does_user_follow_any_lists
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoesUserFollowAnyListsRequest'
+        description: required observer
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/DoesUserFollowAnyLists'
+                - $ref: '#/components/schemas/ErrorMessage'
+          description: Answer whether the observer follow any list
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+  /#bridge.get_account_posts:
+    post:
+      description: Lists posts related to given account in selected way.
+      operationId: bridge_get_account_posts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAccountPostsRequest'
+        description: 'required: sort, account, optional: start_author, start_permlink,
+          limit, observer'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/GetAccountPosts'
+                - $ref: '#/components/schemas/ErrorMessage'
+          description: |
+            List of posts
+      x-openapi-router-controller: openapi_server.controllers.default_controller
   /#bridge.get_community:
     post:
       description: Gets community
@@ -48,6 +113,49 @@ paths:
                 - $ref: '#/components/schemas/CommunityContext'
                 - $ref: '#/components/schemas/ErrorMessage'
           description: Community context result
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+  /#bridge.get_discussion:
+    post:
+      description: Gives flattened discussion tree starting at given post.
+      operationId: bridge_get_discussion
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetDiscussionRequest'
+        description: 'required: author, permlink, optional: observer'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/GetDiscussion'
+                - $ref: '#/components/schemas/ErrorMessage'
+          description: |
+            List of discussion post
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+  /#bridge.get_profile:
+    post:
+      description: Gets profile
+      operationId: bridge_get_profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetProfileRequest'
+        description: 'required account, optional: observer'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Profile'
+                - $ref: '#/components/schemas/ErrorMessage'
+          description: profile information
       x-openapi-router-controller: openapi_server.controllers.default_controller
   /#bridge.list_all_subscriptions:
     post:
@@ -224,6 +332,377 @@ components:
       - title
       - type_id
       type: object
+    Profile:
+      properties:
+        id:
+          type: integer
+        active:
+          description: date of last activity
+          format: date-time
+          type: string
+        blacklists:
+          items:
+            type: string
+          type: array
+        created:
+          format: date-time
+          type: string
+        metadata:
+          $ref: '#/components/schemas/Profile_metadata'
+        name:
+          type: string
+        post_count:
+          type: integer
+        reputation:
+          type: integer
+        stats:
+          $ref: '#/components/schemas/Profile_stats'
+      required:
+      - active
+      - blacklists
+      - created
+      - id
+      - metadata
+      - name
+      - post_count
+      - reputation
+      - stats
+      type: object
+    AccountNotifications:
+      description: 'array of objects with 6 notification related fields: date, id,
+        msg, score, type and url'
+      items:
+        properties:
+          date:
+            description: date of the notification
+            format: date-time
+            type: string
+          id:
+            description: notification id
+            type: integer
+          msg:
+            description: message of the notification
+            type: string
+          score:
+            description: notification score
+            type: integer
+          type:
+            description: 'type of notification: follow, vote, reply, reply_comment,
+              mention, reblog'
+            type: string
+          url:
+            description: end of notification url
+            format: url
+            type: string
+        required:
+        - date
+        - id
+        - msg
+        - score
+        - type
+        - url
+        type: object
+      type: array
+    DoesUserFollowAnyLists:
+      description: answer to a question does user follow any list
+      type: boolean
+    GetAccountPosts:
+      description: array of objects with posts related fields
+      items:
+        properties:
+          active_votes:
+            $ref: '#/components/schemas/ActiveVotes'
+          author:
+            description: account name of the post's author
+            type: string
+          author_payout_value:
+            description: HBD paid to the author of the post
+            type: string
+          author_reputation:
+            description: author's reputation score
+            type: number
+          beneficiaries:
+            $ref: '#/components/schemas/Beneficiares'
+          blacklists:
+            items:
+              description: account names of blacklisted users
+              type: string
+            type: array
+          body:
+            description: post content
+            type: string
+          category:
+            description: post category
+            type: string
+          children:
+            description: number of children comments
+            type: integer
+          created:
+            description: creation date
+            format: date-time
+            type: string
+          curator_payout_value:
+            description: amount of HBD paid to curators
+            type: string
+          depth:
+            description: nesting level
+            type: integer
+          is_paidout:
+            description: information whether the post has been paid
+            type: boolean
+          json_metadata:
+            type: object
+          max_accepted_payout:
+            description: maximal possible payout
+            type: string
+          net_rshares:
+            description: netto rshares, result of rshares allocations
+            type: integer
+          payout:
+            description: amount of payout
+            type: number
+          payout_at:
+            description: date of payout
+            format: date-time
+            type: string
+          pending_payout_value:
+            description: pending or paid amount
+            type: string
+          percent_hbd:
+            description: percent of HBD, 1000 = 100%
+            type: integer
+          permlink:
+            description: post's permlink
+            type: string
+          post_id:
+            description: id of the post, created from the author and the permlink
+            type: integer
+          promoted:
+            description: amount of HBD if post is promoted
+            type: string
+          reblogged_by:
+            items:
+              description: account names of reblogers
+              type: string
+            type: array
+          replies:
+            items:
+              description: replies
+              type: string
+            type: array
+          stats:
+            properties:
+              flag_weight:
+                type: number
+              gray:
+                type: boolean
+              hide:
+                type: boolean
+              total_votes:
+                type: integer
+            required:
+            - flag_weight
+            - gray
+            - hide
+            - total_votes
+            type: object
+          title:
+            description: post title
+            type: string
+          updated:
+            description: date of update
+            format: date-time
+            type: string
+          url:
+            description: end of the url to the post, contains category, author and
+              permlink
+            type: string
+        required:
+        - active_votes
+        - author
+        - author_payout_value
+        - author_reputation
+        - beneficiaries
+        - blacklists
+        - body
+        - category
+        - children
+        - created
+        - curator_payout_value
+        - depth
+        - is_paidout
+        - json_metadata
+        - max_accepted_payout
+        - net_rshares
+        - payout
+        - payout_at
+        - pending_payout_value
+        - percent_hbd
+        - permlink
+        - post_id
+        - promoted
+        - reblogged_by
+        - replies
+        - stats
+        - title
+        - updated
+        - url
+        type: object
+      type: array
+    GetDiscussion:
+      description: object with posts discussion related fields
+      items:
+        description: author/permlink from discussion
+        items:
+          properties:
+            active_votes:
+              $ref: '#/components/schemas/ActiveVotes'
+            author:
+              description: account name of the post's author
+              type: string
+            author_payout_value:
+              description: HBD paid to the author of the post
+              type: string
+            author_reputation:
+              description: author's reputation score
+              type: number
+            author_role:
+              description: author's community role (if post is in community)
+              type: string
+            author_title:
+              description: author's community title (if post is in community)
+              type: string
+            beneficiaries:
+              $ref: '#/components/schemas/Beneficiares'
+            blacklists:
+              items:
+                description: account names of blacklisted users
+                type: string
+              type: array
+            body:
+              description: post content
+              type: string
+            category:
+              description: post category
+              type: string
+            children:
+              description: number of children comments
+              type: integer
+            created:
+              description: creation date
+              format: date-time
+              type: string
+            curator_payout_value:
+              description: amount of HBD paid to curators
+              type: string
+            depth:
+              description: nesting level
+              type: integer
+            is_paidout:
+              description: information whether the post has been paid
+              type: boolean
+            json_metadata:
+              type: object
+            max_accepted_payout:
+              description: maximal possible payout
+              type: string
+            net_rshares:
+              description: netto rshares, result of rshares allocations
+              type: integer
+            parent_author:
+              description: account name of parent post author
+              type: string
+            parent_permlink:
+              description: post's permlink of parent post
+              type: string
+            payout:
+              description: amount of payout
+              type: number
+            payout_at:
+              description: date of payout
+              format: date-time
+              type: string
+            pending_payout_value:
+              description: pending or paid amount
+              type: string
+            percent_hbd:
+              description: percent of HBD, 1000 = 100%
+              type: integer
+            permlink:
+              description: post's permlink
+              type: string
+            post_id:
+              description: id of the post, created from the author and the permlink
+              type: integer
+            promoted:
+              description: amount of HBD if post is promoted
+              type: string
+            replies:
+              items:
+                description: author/permlink replies of the post
+                type: string
+              type: array
+            stats:
+              properties:
+                flag_weight:
+                  type: number
+                gray:
+                  type: boolean
+                hide:
+                  type: boolean
+                total_votes:
+                  type: integer
+              required:
+              - flag_weight
+              - gray
+              - hide
+              - total_votes
+              type: object
+            title:
+              description: post title
+              type: string
+            updated:
+              description: date of update
+              format: date-time
+              type: string
+            url:
+              description: end of the url to the post, contains category, author and
+                permlink
+              type: string
+          required:
+          - active_votes
+          - author
+          - author_payout_value
+          - author_reputation
+          - beneficiaries
+          - blacklists
+          - body
+          - category
+          - children
+          - created
+          - curator_payout_value
+          - depth
+          - is_paidout
+          - json_metadata
+          - max_accepted_payout
+          - net_rshares
+          - parent_author
+          - parent_permlink
+          - payout
+          - payout_at
+          - pending_payout_value
+          - percent_hbd
+          - permlink
+          - post_id
+          - promoted
+          - replies
+          - stats
+          - title
+          - updated
+          - url
+          type: object
+        type: array
+      type: array
     ListCommunity:
       properties:
         id:
@@ -274,6 +753,29 @@ components:
       - sum_pending
       - title
       - type_id
+      type: object
+    Beneficiares:
+      properties:
+        account:
+          description: account name of the beneficient
+          type: string
+        weight:
+          description: benefit amount (10000 = 100%)
+          type: integer
+      required:
+      - account
+      - weight
+      type: object
+    ActiveVotes:
+      properties:
+        rshaers:
+          type: integer
+        voter:
+          description: account name of the voter
+          type: string
+      required:
+      - rshares
+      - voter
       type: object
     CommunityContext:
       properties:
@@ -527,6 +1029,195 @@ components:
       - method
       - params
       type: object
+    GetProfileRequest:
+      example:
+        method: bridge.get_profile
+        id: 0
+        jsonrpc: "2.0"
+        params:
+          observer: gtg
+          account: blocktrades
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.get_profile
+          type: string
+        params:
+          $ref: '#/components/schemas/GetProfileRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    AccountNotificationsRequest:
+      example:
+        method: bridge.account_notifications
+        id: 5
+        jsonrpc: "2.0"
+        params:
+          last_id: 6
+          limit: 15
+          account: blocktrades
+          min_score: 8
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.account_notifications
+          type: string
+        params:
+          $ref: '#/components/schemas/AccountNotificationsRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    DoesUserFollowAnyListsRequest:
+      example:
+        method: bridge.does_user_follow_any_lists
+        id: 0
+        jsonrpc: "2.0"
+        params:
+          observer: blocktrades
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.does_user_follow_any_lists
+          type: string
+        params:
+          $ref: '#/components/schemas/DoesUserFollowAnyListsRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    GetAccountPostsRequest:
+      example:
+        method: bridge.get_account_posts
+        id: 6
+        jsonrpc: "2.0"
+        params:
+          observer: blocktrades
+          limit: 8
+          start_author: start_author
+          sort: blog
+          account: blocktrades
+          start_permlink: start_permlink
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.get_account_posts
+          type: string
+        params:
+          $ref: '#/components/schemas/GetAccountPostsRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    GetDiscussionRequest:
+      example:
+        method: bridge.get_discussion
+        id: 0
+        jsonrpc: "2.0"
+        params:
+          observer: gtg
+          author: blocktrades
+          permlink: 4th-update-of-2021-on-our-hive-software-work
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.get_discussion
+          type: string
+        params:
+          $ref: '#/components/schemas/GetDiscussionRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    Profile_metadata_profile:
+      properties:
+        about:
+          type: string
+        blacklist_description:
+          type: string
+        cover_image:
+          type: string
+        location:
+          type: string
+        muted_list_description:
+          type: string
+        name:
+          type: string
+        profile_image:
+          type: string
+        website:
+          type: string
+      required:
+      - about
+      - blacklist_description
+      - cover_image
+      - location
+      - muted_list_description
+      - name
+      - profile_image
+      - website
+      type: object
+    Profile_metadata:
+      properties:
+        profile:
+          $ref: '#/components/schemas/Profile_metadata_profile'
+      required:
+      - profile
+      type: object
+    Profile_stats:
+      properties:
+        followers:
+          type: integer
+        following:
+          type: integer
+        rank:
+          type: integer
+      required:
+      - followers
+      - following
+      - rank
+      type: object
     ErrorMessage_error:
       properties:
         code:
@@ -681,4 +1372,138 @@ components:
           type: integer
       required:
       - community
+      type: object
+    GetProfileRequest_params:
+      example:
+        observer: gtg
+        account: blocktrades
+      properties:
+        account:
+          description: account name
+          example: blocktrades
+          type: string
+        observer:
+          description: account name of observer, used to add information about relationship
+            of observer with given profile account
+          example: gtg
+          type: string
+      required:
+      - account
+      type: object
+    AccountNotificationsRequest_params:
+      example:
+        last_id: 6
+        limit: 15
+        account: blocktrades
+        min_score: 8
+      properties:
+        account:
+          description: account name
+          example: blocktrades
+          type: string
+        min_score:
+          default: 25
+          description: minimal score of notifications to show
+          maximum: 100
+          minimum: 0
+          type: integer
+        last_id:
+          description: indicates newest notification to show; paging mechanism
+          type: integer
+        limit:
+          default: 100
+          description: limit number of listed notifications
+          maximum: 100
+          minimum: 1
+          type: integer
+      required:
+      - account
+      type: object
+    DoesUserFollowAnyListsRequest_params:
+      example:
+        observer: blocktrades
+      properties:
+        observer:
+          description: account name
+          example: blocktrades
+          type: string
+      required:
+      - observer
+      type: object
+    GetAccountPostsRequest_params:
+      example:
+        observer: blocktrades
+        limit: 8
+        start_author: start_author
+        sort: blog
+        account: blocktrades
+        start_permlink: start_permlink
+      properties:
+        sort:
+          description: "### Sort order:\nblog - top posts authored by given account\
+            \ (excluding posts to communities - unless explicitely reblogged) plus\
+            \ reblogs ranked by creation/reblog time  \nfeed - top posts from blogs\
+            \ of accounts that given account is following ranked by creation/reblog\
+            \ time, not older than last month  \nposts - op posts authored by given\
+            \ account, newer first  \ncomments - replies authored by given account,\
+            \ newer first  \nreplies - replies to posts of given account, newer first\
+            \  \npayout - all posts authored by given account that were not yet cashed\
+            \ out\n"
+          enum:
+          - blog
+          - feed
+          - posts
+          - comments
+          - replies
+          - payout
+          example: blog
+          type: string
+        account:
+          description: account name, points to valid account
+          example: blocktrades
+          type: string
+        start_author:
+          description: author account name, if passed must be passed with start_permlink
+          type: string
+        start_permlink:
+          description: post permlink of given author, point to valid post, paging
+            mechanism
+          type: string
+        limit:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        observer:
+          description: ignored for blog, feed and replies, otherwise when passed has
+            to point to valid account used to fill blacklist stats and mark posts
+            of authors blacklisted by observer, at this time ignored
+          example: blocktrades
+          type: string
+      required:
+      - account
+      - sort
+      type: object
+    GetDiscussionRequest_params:
+      example:
+        observer: gtg
+        author: blocktrades
+        permlink: 4th-update-of-2021-on-our-hive-software-work
+      properties:
+        author:
+          description: valid account name
+          example: blocktrades
+          type: string
+        permlink:
+          description: post permlink of given author, have to point on valid post
+          example: 4th-update-of-2021-on-our-hive-software-work
+          type: string
+        observer:
+          description: account name, used to filter out discussion branches starting
+            at posts authored by accounts ignored directly or indirectly by the observer
+          example: gtg
+          type: string
+      required:
+      - author
+      - permlink
       type: object
