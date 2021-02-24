@@ -27,6 +27,7 @@ from openapi_client.model.community_request import CommunityRequest
 from openapi_client.model.does_user_follow_any_lists_request import DoesUserFollowAnyListsRequest
 from openapi_client.model.get_account_posts_request import GetAccountPostsRequest
 from openapi_client.model.get_discussion_request import GetDiscussionRequest
+from openapi_client.model.get_follow_list_request import GetFollowListRequest
 from openapi_client.model.get_profile_request import GetProfileRequest
 from openapi_client.model.list_all_subscriptions_request import ListAllSubscriptionsRequest
 from openapi_client.model.list_communites_request import ListCommunitesRequest
@@ -753,6 +754,124 @@ class DefaultApi(object):
             },
             api_client=api_client,
             callable=__bridge_get_discussion
+        )
+
+        def __bridge_get_follow_list(
+            self,
+            get_follow_list_request,
+            **kwargs
+        ):
+            """bridge_get_follow_list  # noqa: E501
+
+            For given observer gives directly blacklisted/muted accounts or list of blacklists/mute lists followed by observer  # noqa: E501
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.bridge_get_follow_list(get_follow_list_request, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                get_follow_list_request (GetFollowListRequest): required: observer, optional: follow_type
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                object
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['get_follow_list_request'] = \
+                get_follow_list_request
+            return self.call_with_http_info(**kwargs)
+
+        self.bridge_get_follow_list = Endpoint(
+            settings={
+                'response_type': (object,),
+                'auth': [],
+                'endpoint_path': '/#bridge.get_follow_list',
+                'operation_id': 'bridge_get_follow_list',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'get_follow_list_request',
+                ],
+                'required': [
+                    'get_follow_list_request',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'get_follow_list_request':
+                        (GetFollowListRequest,),
+                },
+                'attribute_map': {
+                },
+                'location_map': {
+                    'get_follow_list_request': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client,
+            callable=__bridge_get_follow_list
         )
 
         def __bridge_get_profile(

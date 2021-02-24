@@ -7,6 +7,7 @@ from openapi_server.models.community_request import CommunityRequest  # noqa: E5
 from openapi_server.models.does_user_follow_any_lists_request import DoesUserFollowAnyListsRequest  # noqa: E501
 from openapi_server.models.get_account_posts_request import GetAccountPostsRequest  # noqa: E501
 from openapi_server.models.get_discussion_request import GetDiscussionRequest  # noqa: E501
+from openapi_server.models.get_follow_list_request import GetFollowListRequest  # noqa: E501
 from openapi_server.models.get_profile_request import GetProfileRequest  # noqa: E501
 from openapi_server.models.list_all_subscriptions_request import ListAllSubscriptionsRequest  # noqa: E501
 from openapi_server.models.list_communites_request import ListCommunitesRequest  # noqa: E501
@@ -109,6 +110,21 @@ def bridge_get_discussion(get_discussion_request):  # noqa: E501
     """
     if connexion.request.is_json:
         get_discussion_request = GetDiscussionRequest.from_dict(connexion.request.get_json())  # noqa: E501
+    return 'do some magic!'
+
+
+def bridge_get_follow_list(get_follow_list_request):  # noqa: E501
+    """bridge_get_follow_list
+
+    For given observer gives directly blacklisted/muted accounts or list of blacklists/mute lists followed by observer # noqa: E501
+
+    :param get_follow_list_request: required: observer, optional: follow_type
+    :type get_follow_list_request: dict | bytes
+
+    :rtype: OneOfarrayErrorMessage
+    """
+    if connexion.request.is_json:
+        get_follow_list_request = GetFollowListRequest.from_dict(connexion.request.get_json())  # noqa: E501
     return 'do some magic!'
 
 

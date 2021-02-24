@@ -30,6 +30,8 @@ openapi_server/models/get_account_posts_request.py
 openapi_server/models/get_account_posts_request_params.py
 openapi_server/models/get_discussion_request.py
 openapi_server/models/get_discussion_request_params.py
+openapi_server/models/get_follow_list_request.py
+openapi_server/models/get_follow_list_request_params.py
 openapi_server/models/get_profile_request.py
 openapi_server/models/get_profile_request_params.py
 openapi_server/models/list_all_subscriptions_request.py

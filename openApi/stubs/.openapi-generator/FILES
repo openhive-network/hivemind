@@ -24,6 +24,9 @@ docs/GetAccountPostsRequestParams.md
 docs/GetDiscussion.md
 docs/GetDiscussionRequest.md
 docs/GetDiscussionRequestParams.md
+docs/GetFollowList.md
+docs/GetFollowListRequest.md
+docs/GetFollowListRequestParams.md
 docs/GetProfileRequest.md
 docs/GetProfileRequestParams.md
 docs/ListAllSubscriptions.md
@@ -75,6 +78,9 @@ openapi_client/model/get_account_posts_request_params.py
 openapi_client/model/get_discussion.py
 openapi_client/model/get_discussion_request.py
 openapi_client/model/get_discussion_request_params.py
+openapi_client/model/get_follow_list.py
+openapi_client/model/get_follow_list_request.py
+openapi_client/model/get_follow_list_request_params.py
 openapi_client/model/get_profile_request.py
 openapi_client/model/get_profile_request_params.py
 openapi_client/model/list_all_subscriptions.py
@@ -105,4 +111,7 @@ setup.cfg
 setup.py
 test-requirements.txt
 test/__init__.py
+test/test_get_follow_list.py
+test/test_get_follow_list_request.py
+test/test_get_follow_list_request_params.py
 tox.ini

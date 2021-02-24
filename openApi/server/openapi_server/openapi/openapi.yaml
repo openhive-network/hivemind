@@ -136,6 +136,28 @@ paths:
           description: |
             List of discussion post
       x-openapi-router-controller: openapi_server.controllers.default_controller
+  /#bridge.get_follow_list:
+    post:
+      description: For given observer gives directly blacklisted/muted accounts or
+        list of blacklists/mute lists followed by observer
+      operationId: bridge_get_follow_list
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetFollowListRequest'
+        description: 'required: observer, optional: follow_type'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/GetFollowList'
+                - $ref: '#/components/schemas/ErrorMessage'
+          description: List of blacklisted/ muted lists
+      x-openapi-router-controller: openapi_server.controllers.default_controller
   /#bridge.get_profile:
     post:
       description: Gets profile
@@ -703,6 +725,23 @@ components:
           type: object
         type: array
       type: array
+    GetFollowList:
+      description: array with objects with follow related fields
+      items:
+        properties:
+          blacklist_description:
+            type: string
+          muted_list_description:
+            type: string
+          name:
+            description: account name
+            type: string
+        required:
+        - blacklist_description
+        - muted_list_description
+        - name
+        type: object
+      type: array
     ListCommunity:
       properties:
         id:
@@ -1170,6 +1209,33 @@ components:
       - method
       - params
       type: object
+    GetFollowListRequest:
+      example:
+        method: bridge.get_follow_list
+        id: 0
+        jsonrpc: "2.0"
+        params:
+          observer: blocktrades
+          follow_type: blacklisted
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.get_follow_list
+          type: string
+        params:
+          $ref: '#/components/schemas/GetFollowListRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
     Profile_metadata_profile:
       properties:
         about:
@@ -1506,4 +1572,25 @@ components:
       required:
       - author
       - permlink
+      type: object
+    GetFollowListRequest_params:
+      example:
+        observer: blocktrades
+        follow_type: blacklisted
+      properties:
+        observer:
+          description: valid account name
+          example: blocktrades
+          type: string
+        follow_type:
+          default: blacklisted
+          description: type of followow
+          enum:
+          - blacklisted
+          - follow_blacklist
+          - muted
+          - follow_muted
+          type: string
+      required:
+      - observer
       type: object

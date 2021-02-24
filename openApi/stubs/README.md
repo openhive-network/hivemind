@@ -56,6 +56,7 @@ from openapi_client.model.community_request import CommunityRequest
 from openapi_client.model.does_user_follow_any_lists_request import DoesUserFollowAnyListsRequest
 from openapi_client.model.get_account_posts_request import GetAccountPostsRequest
 from openapi_client.model.get_discussion_request import GetDiscussionRequest
+from openapi_client.model.get_follow_list_request import GetFollowListRequest
 from openapi_client.model.get_profile_request import GetProfileRequest
 from openapi_client.model.list_all_subscriptions_request import ListAllSubscriptionsRequest
 from openapi_client.model.list_communites_request import ListCommunitesRequest
@@ -105,6 +106,7 @@ Class | Method | HTTP request | Description
 *DefaultApi* | [**bridge_get_community**](docs/DefaultApi.md#bridge_get_community) | **POST** /#bridge.get_community | 
 *DefaultApi* | [**bridge_get_community_context**](docs/DefaultApi.md#bridge_get_community_context) | **POST** /#bridge.get_community_context | 
 *DefaultApi* | [**bridge_get_discussion**](docs/DefaultApi.md#bridge_get_discussion) | **POST** /#bridge.get_discussion | 
+*DefaultApi* | [**bridge_get_follow_list**](docs/DefaultApi.md#bridge_get_follow_list) | **POST** /#bridge.get_follow_list | 
 *DefaultApi* | [**bridge_get_profile**](docs/DefaultApi.md#bridge_get_profile) | **POST** /#bridge.get_profile | 
 *DefaultApi* | [**bridge_list_all_subscriptions**](docs/DefaultApi.md#bridge_list_all_subscriptions) | **POST** /#bridge.list_all_subscriptions | 
 *DefaultApi* | [**bridge_list_communities**](docs/DefaultApi.md#bridge_list_communities) | **POST** /#bridge.list_communities | 
@@ -136,6 +138,9 @@ Class | Method | HTTP request | Description
  - [GetDiscussion](docs/GetDiscussion.md)
  - [GetDiscussionRequest](docs/GetDiscussionRequest.md)
  - [GetDiscussionRequestParams](docs/GetDiscussionRequestParams.md)
+ - [GetFollowList](docs/GetFollowList.md)
+ - [GetFollowListRequest](docs/GetFollowListRequest.md)
+ - [GetFollowListRequestParams](docs/GetFollowListRequestParams.md)
  - [GetProfileRequest](docs/GetProfileRequest.md)
  - [GetProfileRequestParams](docs/GetProfileRequestParams.md)
  - [ListAllSubscriptions](docs/ListAllSubscriptions.md)
