@@ -488,6 +488,24 @@ components:
               type: string
               description: end of the url to the post, contains category, author and permlink
 
+    "GetFollowList":
+      type: array
+      description: "array with objects with follow related fields"
+      items:
+        type: object
+        required:
+          - blacklist_description
+          - muted_list_description
+          - name
+        properties:
+          blacklist_description:
+            type: string
+          muted_list_description:
+            type: string
+          name:
+            type: string
+            description: account name
+
     "ListCommunity":
       type: object
       required:
@@ -1084,6 +1102,40 @@ components:
           type: integer
           default: 1
 
+
+    "GetFollowListRequest":
+      type: object
+      required:
+        - jsonrpc
+        - method
+        - params
+        - id
+      properties:
+        jsonrpc:
+          type: string
+          default: "2.0"
+        method:
+          type: string
+          enum:
+            - bridge.get_follow_list
+        params:
+          type: object
+          required:
+            - observer
+          properties:
+            observer:
+              type: string
+              description: valid account name
+              example: "blocktrades"
+            follow_type:
+              type: string
+              enum: [blacklisted, follow_blacklist, muted, follow_muted]
+              description: type of followow
+              default: 'blacklisted'
+        id:
+          type: integer
+          default: 1
+
 paths:
   /#bridge.get_community:
     post:
@@ -1337,4 +1389,25 @@ paths:
               schema:
                 oneOf:
                   - $ref: "#/components/schemas/GetDiscussion"
+                  - $ref: "#/components/schemas/ErrorMessage"
+
+  /#bridge.get_follow_list:
+    post:
+      description: For given observer gives directly blacklisted/muted accounts or list of blacklists/mute lists followed by observer
+      operationId: bridge.get_follow_list
+      requestBody:
+        description: "required: observer, optional: follow_type"
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/GetFollowListRequest"
+        required: true
+      responses:
+        "200":
+          description: List of blacklisted/ muted lists
+          content:
+            "application/json":
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/GetFollowList"
                   - $ref: "#/components/schemas/ErrorMessage"
