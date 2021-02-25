@@ -506,6 +506,32 @@ components:
             type: string
             description: account name
 
+    "GetPayoutStats":
+      type: object
+      description: "object with payout related fields"
+      items:
+        required:
+          - blogs
+          - items
+          - total
+        properties:
+          blogs:
+            type: number
+          items:
+            type: array
+            items:
+              allOf:
+                - type: string
+                  description: community name
+                - type: string
+                  description: community title
+                - type: number
+                  description: sum
+                - type: integer
+                - type: integer        
+          total:
+            type: number
+
     "ListCommunity":
       type: object
       required:
@@ -1136,6 +1162,33 @@ components:
           type: integer
           default: 1
 
+    "GetPayoutStatsRequest":
+      type: object
+      required:
+        - jsonrpc
+        - method
+        - params
+        - id
+      properties:
+        jsonrpc:
+          type: string
+          default: "2.0"
+        method:
+          type: string
+          enum:
+            - bridge.get_follow_list
+        params:
+          type: object
+          properties:
+            limit:
+              type: integer
+              minimum: 1
+              maximum: 250
+              default: 250
+        id:
+          type: integer
+          default: 1
+
 paths:
   /#bridge.get_community:
     post:
@@ -1410,4 +1463,25 @@ paths:
               schema:
                 oneOf:
                   - $ref: "#/components/schemas/GetFollowList"
+                  - $ref: "#/components/schemas/ErrorMessage"
+
+  /#bridge.get_payout_stats:
+    post:
+      description: Lists communities ordered by payout with stats (total payout, number of posts and authors).
+      operationId: bridge.get_payout_stats
+      requestBody:
+        description: "optional: limit"
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/GetPayoutStatsRequest"
+        required: true
+      responses:
+        "200":
+          description: List of communities with stats.
+          content:
+            "application/json":
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/GetPayoutStats"
                   - $ref: "#/components/schemas/ErrorMessage"

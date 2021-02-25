@@ -158,6 +158,28 @@ paths:
                 - $ref: '#/components/schemas/ErrorMessage'
           description: List of blacklisted/ muted lists
       x-openapi-router-controller: openapi_server.controllers.default_controller
+  /#bridge.get_payout_stats:
+    post:
+      description: Lists communities ordered by payout with stats (total payout, number
+        of posts and authors).
+      operationId: bridge_get_payout_stats
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetPayoutStatsRequest'
+        description: 'optional: limit'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/GetPayoutStats'
+                - $ref: '#/components/schemas/ErrorMessage'
+          description: List of communities with stats.
+      x-openapi-router-controller: openapi_server.controllers.default_controller
   /#bridge.get_profile:
     post:
       description: Gets profile
@@ -742,6 +764,31 @@ components:
         - name
         type: object
       type: array
+    GetPayoutStats:
+      description: object with payout related fields
+      items:
+        properties:
+          blogs:
+            type: number
+          items:
+            items:
+              allOf:
+              - description: community name
+                type: string
+              - description: community title
+                type: string
+              - description: sum
+                type: number
+              - type: integer
+              - type: integer
+            type: array
+          total:
+            type: number
+        required:
+        - blogs
+        - items
+        - total
+      type: array
     ListCommunity:
       properties:
         id:
@@ -1236,6 +1283,32 @@ components:
       - method
       - params
       type: object
+    GetPayoutStatsRequest:
+      example:
+        method: bridge.get_follow_list
+        id: 6
+        jsonrpc: "2.0"
+        params:
+          limit: 20
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.get_follow_list
+          type: string
+        params:
+          $ref: '#/components/schemas/GetPayoutStatsRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
     Profile_metadata_profile:
       properties:
         about:
@@ -1593,4 +1666,14 @@ components:
           type: string
       required:
       - observer
+      type: object
+    GetPayoutStatsRequest_params:
+      example:
+        limit: 20
+      properties:
+        limit:
+          default: 250
+          maximum: 250
+          minimum: 1
+          type: integer
       type: object

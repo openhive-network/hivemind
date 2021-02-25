@@ -8,6 +8,7 @@ from openapi_server.models.does_user_follow_any_lists_request import DoesUserFol
 from openapi_server.models.get_account_posts_request import GetAccountPostsRequest  # noqa: E501
 from openapi_server.models.get_discussion_request import GetDiscussionRequest  # noqa: E501
 from openapi_server.models.get_follow_list_request import GetFollowListRequest  # noqa: E501
+from openapi_server.models.get_payout_stats_request import GetPayoutStatsRequest  # noqa: E501
 from openapi_server.models.get_profile_request import GetProfileRequest  # noqa: E501
 from openapi_server.models.list_all_subscriptions_request import ListAllSubscriptionsRequest  # noqa: E501
 from openapi_server.models.list_communites_request import ListCommunitesRequest  # noqa: E501
@@ -125,6 +126,21 @@ def bridge_get_follow_list(get_follow_list_request):  # noqa: E501
     """
     if connexion.request.is_json:
         get_follow_list_request = GetFollowListRequest.from_dict(connexion.request.get_json())  # noqa: E501
+    return 'do some magic!'
+
+
+def bridge_get_payout_stats(get_payout_stats_request):  # noqa: E501
+    """bridge_get_payout_stats
+
+    Lists communities ordered by payout with stats (total payout, number of posts and authors). # noqa: E501
+
+    :param get_payout_stats_request: optional: limit
+    :type get_payout_stats_request: dict | bytes
+
+    :rtype: OneOfarrayErrorMessage
+    """
+    if connexion.request.is_json:
+        get_payout_stats_request = GetPayoutStatsRequest.from_dict(connexion.request.get_json())  # noqa: E501
     return 'do some magic!'
 
 

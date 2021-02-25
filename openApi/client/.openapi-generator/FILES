@@ -27,6 +27,9 @@ docs/GetDiscussionRequestParams.md
 docs/GetFollowList.md
 docs/GetFollowListRequest.md
 docs/GetFollowListRequestParams.md
+docs/GetPayoutStats.md
+docs/GetPayoutStatsRequest.md
+docs/GetPayoutStatsRequestParams.md
 docs/GetProfileRequest.md
 docs/GetProfileRequestParams.md
 docs/ListAllSubscriptions.md
@@ -81,6 +84,9 @@ openapi_client/model/get_discussion_request_params.py
 openapi_client/model/get_follow_list.py
 openapi_client/model/get_follow_list_request.py
 openapi_client/model/get_follow_list_request_params.py
+openapi_client/model/get_payout_stats.py
+openapi_client/model/get_payout_stats_request.py
+openapi_client/model/get_payout_stats_request_params.py
 openapi_client/model/get_profile_request.py
 openapi_client/model/get_profile_request_params.py
 openapi_client/model/list_all_subscriptions.py
@@ -111,7 +117,7 @@ setup.cfg
 setup.py
 test-requirements.txt
 test/__init__.py
-test/test_get_follow_list.py
-test/test_get_follow_list_request.py
-test/test_get_follow_list_request_params.py
+test/test_get_payout_stats.py
+test/test_get_payout_stats_request.py
+test/test_get_payout_stats_request_params.py
 tox.ini
