@@ -31,6 +31,7 @@ from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import WaitingStatusManager as WSM
 from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import BroadcastObject
+from hive.utils.profiler import Profiler
 from hive.utils.communities_rank import update_communities_posts_and_rank
 
 from hive.indexer.mock_block_provider import MockBlockProvider
@@ -108,52 +109,55 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
         count = ubound - lbound
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
 
-        while lbound < ubound:
-            number_of_blocks_to_proceed = min( [ LIMIT_FOR_PROCESSED_BLOCKS, ubound - lbound  ] )
-            time_before_waiting_for_data = perf()
+        with Profiler('block_consumer.prof'):
+            while lbound < ubound:
+                number_of_blocks_to_proceed = min( [ LIMIT_FOR_PROCESSED_BLOCKS, ubound - lbound  ] )
+                time_before_waiting_for_data = perf()
 
-            blocks = blocks_data_provider.get( number_of_blocks_to_proceed )
+                blocks = blocks_data_provider.get( number_of_blocks_to_proceed )
 
-            if not can_continue_thread():
-                break;
+                if not can_continue_thread():
+                    break;
 
-            assert len(blocks) == number_of_blocks_to_proceed
+                assert len(blocks) == number_of_blocks_to_proceed
 
-            to = min(lbound + number_of_blocks_to_proceed, ubound)
-            timer.batch_start()
+                to = min(lbound + number_of_blocks_to_proceed, ubound)
+                timer.batch_start()
 
-            block_start = perf()
-            Blocks.process_multi(blocks, is_initial_sync)
-            block_end = perf()
+                block_start = perf()
+                Blocks.process_multi(blocks, is_initial_sync)
+                block_end = perf()
 
-            timer.batch_lap()
-            timer.batch_finish(len(blocks))
-            time_current = perf()
+                timer.batch_lap()
+                timer.batch_finish(len(blocks))
+                time_current = perf()
 
-            prefix = ("%s Got block %d @ %s" % (
-                sync_type_prefix, to - 1, blocks[-1].get_date()))
-            log.info(timer.batch_status(prefix))
-            log.info("%s Time elapsed: %fs", sync_type_prefix, time_current - time_start)
-            log.info("%s Current system time: %s", sync_type_prefix, datetime.now().strftime("%H:%M:%S"))
-            rate = minmax(rate, len(blocks), time_current - time_before_waiting_for_data, lbound)
+                prefix = ("%s Got block %d @ %s" % (
+                    sync_type_prefix, to - 1, blocks[-1].get_date()))
+                log.info(timer.batch_status(prefix))
+                log.info("%s Time elapsed: %fs", sync_type_prefix, time_current - time_start)
+                log.info("%s Current system time: %s", sync_type_prefix, datetime.now().strftime("%H:%M:%S"))
+                rate = minmax(rate, len(blocks), time_current - time_before_waiting_for_data, lbound)
 
-            if block_end - block_start > 1.0 or is_debug:
-                otm = OPSM.log_current("Operations present in the processed blocks")
-                ftm = FSM.log_current("Flushing times")
-                wtm = WSM.log_current("Waiting times")
-                log.info(f"Calculated time: {otm+ftm+wtm :.4f} s.")
+                if block_end - block_start > 1.0 or is_debug:
+                    otm = OPSM.log_current("Operations present in the processed blocks")
+                    ftm = FSM.log_current("Flushing times")
+                    wtm = WSM.log_current("Waiting times")
+                    log.info(f"Calculated time: {otm+ftm+wtm :.4f} s.")
 
-            OPSM.next_blocks()
-            FSM.next_blocks()
-            WSM.next_blocks()
+                OPSM.next_blocks()
+                FSM.next_blocks()
+                WSM.next_blocks()
 
-            lbound = to
-            PC.broadcast(BroadcastObject('sync_current_block', lbound, 'blocks'))
+                lbound = to
+                PC.broadcast(BroadcastObject('sync_current_block', lbound, 'blocks'))
 
-            num = num + 1
+                num = num + 1
 
-            if not can_continue_thread():
-                break
+                if not can_continue_thread():
+                    break
+
+
     except Exception:
         log.exception("Exception caught during processing blocks...")
         set_exception_thrown()
