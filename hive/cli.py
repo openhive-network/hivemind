@@ -68,7 +68,7 @@ def run():
 
       if conf.get('test_profile'):
           from hive.utils.profiler import Profiler
-          with Profiler():
+          with Profiler(dump_threads=True, dir_for_grouped_profile='threads'):
               launch_mode(mode, conf)
       else:
           launch_mode(mode, conf)
