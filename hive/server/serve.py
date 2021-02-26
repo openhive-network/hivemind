@@ -205,7 +205,7 @@ def run_server(conf):
 
     req_res_log = None
 
-    if conf.get('LOG_REQUEST_TIMES'):
+    if conf.get('log_request_times'):
       req_res_log = logging.getLogger("Request-Process-Time-Logger")
       conf_stdout_custom_file_logger(req_res_log, "./request_process_times.log")
 
