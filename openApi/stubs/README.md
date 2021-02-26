@@ -58,6 +58,7 @@ from openapi_client.model.get_account_posts_request import GetAccountPostsReques
 from openapi_client.model.get_discussion_request import GetDiscussionRequest
 from openapi_client.model.get_follow_list_request import GetFollowListRequest
 from openapi_client.model.get_payout_stats_request import GetPayoutStatsRequest
+from openapi_client.model.get_post_request import GetPostRequest
 from openapi_client.model.get_profile_request import GetProfileRequest
 from openapi_client.model.list_all_subscriptions_request import ListAllSubscriptionsRequest
 from openapi_client.model.list_communites_request import ListCommunitesRequest
@@ -109,6 +110,7 @@ Class | Method | HTTP request | Description
 *DefaultApi* | [**bridge_get_discussion**](docs/DefaultApi.md#bridge_get_discussion) | **POST** /#bridge.get_discussion | 
 *DefaultApi* | [**bridge_get_follow_list**](docs/DefaultApi.md#bridge_get_follow_list) | **POST** /#bridge.get_follow_list | 
 *DefaultApi* | [**bridge_get_payout_stats**](docs/DefaultApi.md#bridge_get_payout_stats) | **POST** /#bridge.get_payout_stats | 
+*DefaultApi* | [**bridge_get_post**](docs/DefaultApi.md#bridge_get_post) | **POST** /#bridge.get_post | 
 *DefaultApi* | [**bridge_get_profile**](docs/DefaultApi.md#bridge_get_profile) | **POST** /#bridge.get_profile | 
 *DefaultApi* | [**bridge_list_all_subscriptions**](docs/DefaultApi.md#bridge_list_all_subscriptions) | **POST** /#bridge.list_all_subscriptions | 
 *DefaultApi* | [**bridge_list_communities**](docs/DefaultApi.md#bridge_list_communities) | **POST** /#bridge.list_communities | 
@@ -130,6 +132,7 @@ Class | Method | HTTP request | Description
  - [CommunityContextRequestParams](docs/CommunityContextRequestParams.md)
  - [CommunityRequest](docs/CommunityRequest.md)
  - [CommunityRequestParams](docs/CommunityRequestParams.md)
+ - [Discussion](docs/Discussion.md)
  - [DoesUserFollowAnyListsRequest](docs/DoesUserFollowAnyListsRequest.md)
  - [DoesUserFollowAnyListsRequestParams](docs/DoesUserFollowAnyListsRequestParams.md)
  - [ErrorMessage](docs/ErrorMessage.md)
@@ -146,6 +149,10 @@ Class | Method | HTTP request | Description
  - [GetPayoutStats](docs/GetPayoutStats.md)
  - [GetPayoutStatsRequest](docs/GetPayoutStatsRequest.md)
  - [GetPayoutStatsRequestParams](docs/GetPayoutStatsRequestParams.md)
+ - [GetPost](docs/GetPost.md)
+ - [GetPostRequest](docs/GetPostRequest.md)
+ - [GetPostRequestParams](docs/GetPostRequestParams.md)
+ - [GetPostStats](docs/GetPostStats.md)
  - [GetProfileRequest](docs/GetProfileRequest.md)
  - [GetProfileRequestParams](docs/GetProfileRequestParams.md)
  - [ListAllSubscriptions](docs/ListAllSubscriptions.md)
@@ -167,6 +174,7 @@ Class | Method | HTTP request | Description
  - [ProfileMetadata](docs/ProfileMetadata.md)
  - [ProfileMetadataProfile](docs/ProfileMetadataProfile.md)
  - [ProfileStats](docs/ProfileStats.md)
+ - [StringOfDiscussion](docs/StringOfDiscussion.md)
 
 
 ## Documentation For Authorization

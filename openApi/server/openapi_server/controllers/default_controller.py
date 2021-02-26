@@ -9,6 +9,7 @@ from openapi_server.models.get_account_posts_request import GetAccountPostsReque
 from openapi_server.models.get_discussion_request import GetDiscussionRequest  # noqa: E501
 from openapi_server.models.get_follow_list_request import GetFollowListRequest  # noqa: E501
 from openapi_server.models.get_payout_stats_request import GetPayoutStatsRequest  # noqa: E501
+from openapi_server.models.get_post_request import GetPostRequest  # noqa: E501
 from openapi_server.models.get_profile_request import GetProfileRequest  # noqa: E501
 from openapi_server.models.list_all_subscriptions_request import ListAllSubscriptionsRequest  # noqa: E501
 from openapi_server.models.list_communites_request import ListCommunitesRequest  # noqa: E501
@@ -17,6 +18,7 @@ from openapi_server.models.list_pop_communites_request import ListPopCommunitesR
 from openapi_server.models.list_subscribers_request import ListSubscribersRequest  # noqa: E501
 from openapi_server.models.one_of_community_context_error_message import OneOfCommunityContextErrorMessage  # noqa: E501
 from openapi_server.models.one_of_community_error_message import OneOfCommunityErrorMessage  # noqa: E501
+from openapi_server.models.one_of_get_post_error_message import OneOfGetPostErrorMessage  # noqa: E501
 from openapi_server.models.one_of_list_community_error_message import OneOfListCommunityErrorMessage  # noqa: E501
 from openapi_server.models.one_of_profile_error_message import OneOfProfileErrorMessage  # noqa: E501
 from openapi_server.models.one_ofarray_error_message import OneOfarrayErrorMessage  # noqa: E501
@@ -141,6 +143,21 @@ def bridge_get_payout_stats(get_payout_stats_request):  # noqa: E501
     """
     if connexion.request.is_json:
         get_payout_stats_request = GetPayoutStatsRequest.from_dict(connexion.request.get_json())  # noqa: E501
+    return 'do some magic!'
+
+
+def bridge_get_post(get_post_request):  # noqa: E501
+    """bridge_get_post
+
+    Gives single selected post. # noqa: E501
+
+    :param get_post_request: required: author, permlink, optional: observer
+    :type get_post_request: dict | bytes
+
+    :rtype: OneOfGetPostErrorMessage
+    """
+    if connexion.request.is_json:
+        get_post_request = GetPostRequest.from_dict(connexion.request.get_json())  # noqa: E501
     return 'do some magic!'
 
 

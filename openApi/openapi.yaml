@@ -333,160 +333,11 @@ components:
             description: end of the url to the post, contains category, author and permlink
 
     "GetDiscussion":
+    # TODO: repair display OpenAPI SwaggerUI
       type: object
-      description: "object with posts discussion related fields"
+      description: discussion
       items:
-        type: string
-        description: "author/permlink from discussion"
-        items:
-          type: object
-          required:
-            - active_votes
-            - author
-            - author_payout_value
-            - author_reputation
-            - beneficiaries
-            - blacklists
-            - body
-            - category
-            - children
-            - created
-            - curator_payout_value
-            - depth
-            - is_paidout
-            - json_metadata
-            - max_accepted_payout
-            - net_rshares
-            - parent_author
-            - parent_permlink
-            - payout
-            - payout_at
-            - pending_payout_value
-            - percent_hbd
-            - permlink
-            - post_id
-            - promoted
-            - replies
-            - stats
-            - title
-            - updated
-            - url
-          properties:
-            active_votes:
-              type: array
-              $ref: "#/components/schemas/ActiveVotes"
-            author:
-              type: string
-              description: account name of the post's author
-            author_payout_value:
-              type: string
-              description: HBD paid to the author of the post
-            author_reputation:
-              type: number
-              description: author's reputation score
-            author_role:
-              type: string
-              description: author's community role (if post is in community)
-            author_title:
-              type: string
-              description: author's community title (if post is in community)
-            beneficiaries:
-              type: array
-              $ref: "#/components/schemas/Beneficiares"
-            blacklists:
-              type: array
-              items:
-                type: string
-                description: "account names of blacklisted users"
-            body:
-              type: string
-              description: post content
-            category:
-              type: string
-              description: post category
-            children:
-              type: integer
-              description: number of children comments
-            created:
-              type: string
-              format: date-time
-              description: creation date
-            curator_payout_value:
-              type: string
-              description: amount of HBD paid to curators
-            depth:
-              type: integer
-              description: nesting level
-            is_paidout:
-              type: boolean
-              description: information whether the post has been paid
-            json_metadata:
-              type: object
-            max_accepted_payout:
-              type: string
-              description: maximal possible payout
-            net_rshares:
-              type: integer
-              description: netto rshares, result of rshares allocations
-            parent_author:
-              type: string
-              description: account name of parent post author
-            parent_permlink:
-              type: string
-              description: post's permlink of parent post
-            payout:
-              type: number
-              description: amount of payout
-            payout_at:
-              type: string
-              format: date-time
-              description: date of payout
-            pending_payout_value:
-              type: string
-              description: pending or paid amount
-            percent_hbd:
-              type: integer
-              description: percent of HBD, 1000 = 100%
-            permlink:
-              type: string
-              description: post's permlink
-            post_id:
-              type: integer
-              description: id of the post, created from the author and the permlink
-            promoted:
-              type: string
-              description: amount of HBD if post is promoted # TODO: check if it is true
-            replies:
-              type: array
-              items:
-                type: string
-                description: author/permlink replies of the post
-            stats:
-              type: object
-              required:
-                - flag_weight
-                - gray
-                - hide
-                - total_votes
-              properties:
-                flag_weight:
-                  type: number
-                gray:
-                  type: boolean
-                hide:
-                  type: boolean
-                total_votes:
-                  type: integer
-            title:
-              type: string
-              description: post title
-            updated:
-              type: string
-              format: date-time
-              description: date of update
-            url:
-              type: string
-              description: end of the url to the post, contains category, author and permlink
+        $ref: "#/components/schemas/StringOfDiscussion"
 
     "GetFollowList":
       type: array
@@ -531,6 +382,144 @@ components:
                 - type: integer        
           total:
             type: number
+
+    "GetPost":
+      type: object
+      description: "object with payout related fields"
+      required:
+        - active_votes
+        - author
+        - author_payout_value
+        - author_reputation
+        - beneficiaries
+        - blacklists
+        - body
+        - category
+        - children
+        - created
+        - curator_payout_value
+        - depth
+        - is_paidout
+        - json_metadata
+        - max_accepted_payout
+        - net_rshares
+        - payout
+        - payout_at
+        - pending_payout_value
+        - percent_hbd
+        - permlink
+        - post_id
+        - promoted
+        - replies
+        - stats
+        - title
+        - updated
+        - url
+      properties:
+        active_votes:
+          type: array
+          $ref: "#/components/schemas/ActiveVotes"
+        author:
+          type: string
+          description: account name of the post's author
+        author_payout_value:
+          type: string
+          description: HBD paid to the author of the post
+        author_reputation:
+          type: number
+          description: author's reputation score
+        beneficiaries:
+          type: array
+          $ref: "#/components/schemas/Beneficiares"
+        blacklists:
+          type: array
+          items:
+            type: string
+            description: "account names of blacklisted users"
+        body:
+          type: string
+          description: post content
+        category:
+          type: string
+          description: post category
+        children:
+          type: integer
+          description: number of children comments
+        created:
+          type: string
+          format: date-time
+          description: creation date
+        curator_payout_value:
+          type: string
+          description: amount of HBD paid to curators
+        depth:
+          type: integer
+          description: nesting level
+        is_paidout:
+          type: boolean
+          description: information whether the post has been paid
+        json_metadata:
+          type: object
+        max_accepted_payout:
+          type: string
+          description: maximal possible payout
+        net_rshares:
+          type: integer
+          description: netto rshares, result of rshares allocations
+        payout:
+          type: number
+          description: amount of payout
+        payout_at:
+          type: string
+          format: date-time
+          description: date of payout
+        pending_payout_value:
+          type: string
+          description: pending or paid amount
+        percent_hbd:
+          type: integer
+          description: percent of HBD, 1000 = 100%
+        permlink:
+          type: string
+          description: post's permlink
+        post_id:
+          type: integer
+          description: id of the post, created from the author and the permlink
+        promoted:
+          type: string
+          description: amount of HBD if post is promoted # TODO: check if it is true
+        replies:
+          type: array
+          # TODO: description:
+          items:
+            type: string
+            description: replies
+        stats:
+          type: object
+          required:
+            - flag_weight
+            - gray
+            - hide
+            - total_votes
+          properties:
+            flag_weight:
+              type: number
+            gray:
+              type: boolean
+            hide:
+              type: boolean
+            total_votes:
+              type: integer
+        title:
+          type: string
+          description: post title
+        updated:
+          type: string
+          format: date-time
+          description: date of update
+        url:
+          type: string
+          description: end of the url to the post, contains category, author and permlink
 
     "ListCommunity":
       type: object
@@ -659,6 +648,162 @@ components:
           type: string
         minItems: 4
         maxItems: 4
+
+    "StringOfDiscussion":
+      type: string
+      description: "author + permlink"
+      items:
+        $ref: "#/components/schemas/Discussion"
+        
+    "Discussion":
+      type: object
+      required:
+        - active_votes
+        - author
+        - author_payout_value
+        - author_reputation
+        - beneficiaries
+        - blacklists
+        - body
+        - category
+        - children
+        - created
+        - curator_payout_value
+        - depth
+        - is_paidout
+        - json_metadata
+        - max_accepted_payout
+        - net_rshares
+        - parent_author
+        - parent_permlink
+        - payout
+        - payout_at
+        - pending_payout_value
+        - percent_hbd
+        - permlink
+        - post_id
+        - promoted
+        - replies
+        - stats
+        - title
+        - updated
+        - url
+      properties:
+        active_votes:
+          type: array
+          $ref: "#/components/schemas/ActiveVotes"
+        author:
+          type: string
+          description: account name of the post's author
+        author_payout_value:
+          type: string
+          description: HBD paid to the author of the post
+        author_reputation:
+          type: number
+          description: author's reputation score
+        author_role:
+          type: string
+          description: author's community role (if post is in community)
+        author_title:
+          type: string
+          description: author's community title (if post is in community)
+        beneficiaries:
+          type: array
+          $ref: "#/components/schemas/Beneficiares"
+        blacklists:
+          type: array
+          items:
+            type: string
+            description: "account names of blacklisted users"
+        body:
+          type: string
+          description: post content
+        category:
+          type: string
+          description: post category
+        children:
+          type: integer
+          description: number of children comments
+        created:
+          type: string
+          format: date-time
+          description: creation date
+        curator_payout_value:
+          type: string
+          description: amount of HBD paid to curators
+        depth:
+          type: integer
+          description: nesting level
+        is_paidout:
+          type: boolean
+          description: information whether the post has been paid
+        json_metadata:
+          type: object
+        max_accepted_payout:
+          type: string
+          description: maximal possible payout
+        net_rshares:
+          type: integer
+          description: netto rshares, result of rshares allocations
+        parent_author:
+          type: string
+          description: account name of parent post author
+        parent_permlink:
+          type: string
+          description: post's permlink of parent post
+        payout:
+          type: number
+          description: amount of payout
+        payout_at:
+          type: string
+          format: date-time
+          description: date of payout
+        pending_payout_value:
+          type: string
+          description: pending or paid amount
+        percent_hbd:
+          type: integer
+          description: percent of HBD, 1000 = 100%
+        permlink:
+          type: string
+          description: post's permlink
+        post_id:
+          type: integer
+          description: id of the post, created from the author and the permlink
+        promoted:
+          type: string
+          description: amount of HBD if post is promoted # TODO: check if it is true
+        replies:
+          type: array
+          items:
+            type: string
+            description: author/permlink replies of the post
+        stats:
+          type: object
+          required:
+            - flag_weight
+            - gray
+            - hide
+            - total_votes
+          properties:
+            flag_weight:
+              type: number
+            gray:
+              type: boolean
+            hide:
+              type: boolean
+            total_votes:
+              type: integer
+        title:
+          type: string
+          description: post title
+        updated:
+          type: string
+          format: date-time
+          description: date of update
+        url:
+          type: string
+          description: end of the url to the post, contains category, author and permlink
 
     "ErrorMessage":
       type: object
@@ -1189,6 +1334,43 @@ components:
           type: integer
           default: 1
 
+    "GetPostRequest":
+      type: object
+      required:
+        - jsonrpc
+        - method
+        - params
+        - id
+      properties:
+        jsonrpc:
+          type: string
+          default: "2.0"
+        method:
+          type: string
+          enum:
+            - bridge.get_follow_list
+        params:
+          type: object
+          required:
+            - author
+            - permlink
+          properties:
+            author:
+              type: string
+              description: name of the post author's account
+              example: "blocktrades"
+            permlink:
+              type: string
+              description: permlink of the valid author's post
+              example: "witness-report-for-blocktrades-for-last-week-of-august"
+            observer:
+              type: string
+              description: used to add blacklist information to given post
+              example: "gtg"
+        id:
+          type: integer
+          default: 1
+
 paths:
   /#bridge.get_community:
     post:
@@ -1441,7 +1623,8 @@ paths:
             "application/json":
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/GetDiscussion"
+                  - style: deepObject
+                    $ref: "#/components/schemas/GetDiscussion"
                   - $ref: "#/components/schemas/ErrorMessage"
 
   /#bridge.get_follow_list:
@@ -1484,4 +1667,25 @@ paths:
               schema:
                 oneOf:
                   - $ref: "#/components/schemas/GetPayoutStats"
+                  - $ref: "#/components/schemas/ErrorMessage"
+
+  /#bridge.get_post:
+    post:
+      description: Gives single selected post.
+      operationId: bridge.get_post
+      requestBody:
+        description: "required: author, permlink, optional: observer"
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/GetPostRequest"
+        required: true
+      responses:
+        "200":
+          description: Selected post
+          content:
+            "application/json":
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/GetPost"
                   - $ref: "#/components/schemas/ErrorMessage"

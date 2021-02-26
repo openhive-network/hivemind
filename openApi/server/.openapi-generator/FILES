@@ -22,6 +22,7 @@ openapi_server/models/community_context_request.py
 openapi_server/models/community_context_request_params.py
 openapi_server/models/community_request.py
 openapi_server/models/community_request_params.py
+openapi_server/models/discussion.py
 openapi_server/models/does_user_follow_any_lists_request.py
 openapi_server/models/does_user_follow_any_lists_request_params.py
 openapi_server/models/error_message.py
@@ -34,6 +35,10 @@ openapi_server/models/get_follow_list_request.py
 openapi_server/models/get_follow_list_request_params.py
 openapi_server/models/get_payout_stats_request.py
 openapi_server/models/get_payout_stats_request_params.py
+openapi_server/models/get_post.py
+openapi_server/models/get_post_request.py
+openapi_server/models/get_post_request_params.py
+openapi_server/models/get_post_stats.py
 openapi_server/models/get_profile_request.py
 openapi_server/models/get_profile_request_params.py
 openapi_server/models/list_all_subscriptions_request.py

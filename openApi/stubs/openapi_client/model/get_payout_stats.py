@@ -70,7 +70,7 @@ class GetPayoutStats(ModelSimple):
                 and the value is attribute type.
         """
         return {
-            'value': ([{str: (bool, date, datetime, dict, float, int, list, str, none_type)}],),
+            'value': ([object],),
         }
 
     @cached_property
@@ -98,10 +98,10 @@ class GetPayoutStats(ModelSimple):
         Note that value can be passed either in args or in kwargs, but not in both.
 
         Args:
-            args[0] ([{str: (bool, date, datetime, dict, float, int, list, str, none_type)}]): object with payout related fields.  # noqa: E501
+            args[0] ([object]): object with payout related fields.  # noqa: E501
 
         Keyword Args:
-            value ([{str: (bool, date, datetime, dict, float, int, list, str, none_type)}]): object with payout related fields.  # noqa: E501
+            value ([object]): object with payout related fields.  # noqa: E501
             _check_type (bool): if True, values for parameters in openapi_types
                                 will be type checked and a TypeError will be
                                 raised if the wrong type is input.
