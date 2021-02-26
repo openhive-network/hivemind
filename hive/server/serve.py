@@ -202,8 +202,12 @@ def run_server(conf):
     log = logging.getLogger(__name__)
 
     # logger for storing Request processing times 
-    req_res_log = logging.getLogger("Request-Process-Time-Logger")
-    conf_stdout_custom_file_logger(req_res_log, "./request_process_times.log")
+
+    req_res_log = None
+
+    if conf.get('log_request_times'):
+      req_res_log = logging.getLogger("Request-Process-Time-Logger")
+      conf_stdout_custom_file_logger(req_res_log, "./request_process_times.log")
 
     methods = build_methods()
 
@@ -314,17 +318,24 @@ def run_server(conf):
                 'Access-Control-Allow-Origin': '*'
             }
             ret = web.json_response(error_response, status=200, headers=headers, dumps=decimal_serialize)
-            req_res_log.info("Request: {} processed in {:.4f}s".format(request, perf_counter() - t_start))
+            if req_res_log is not None:
+              req_res_log.info("Request: {} processed in {:.4f}s".format(request, perf_counter() - t_start))
+
             return ret
+
         if response is not None and response.wanted:
             headers = {
                 'Access-Control-Allow-Origin': '*'
             }
             ret = web.json_response(response.deserialized(), status=200, headers=headers, dumps=decimal_serialize)
-            req_res_log.info("Request: {} processed in {:.4f}s".format(request, perf_counter() - t_start))
+            if req_res_log is not None:
+              req_res_log.info("Request: {} processed in {:.4f}s".format(request, perf_counter() - t_start))
             return ret
         ret = web.Response()
-        req_res_log.info("Request: {} processed in {:.4f}s".format(request, perf_counter() - t_start))
+
+        if req_res_log is not None:
+          req_res_log.info("Request: {} processed in {:.4f}s".format(request, perf_counter() - t_start))
+
         return ret
 
     if conf.get('sync_to_s3'):
