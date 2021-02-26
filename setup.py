@@ -63,8 +63,8 @@ class GitRevisionProvider(object):
             version_string = check_output(command.split()).decode('utf-8').strip()
             if version_string != 'fatal: No names found, cannot describe anything.':
                 # git describe -> tag-commits-sha-dirty
-                version_string = version_string.rstrip('-dirty')
-                version_string = version_string.lstrip('v')   
+                version_string = version_string.replace('-dirty', '')
+                version_string = version_string.lstrip('v')
                 parts = version_string.split('-')
                 parts_len = len(parts)
                 # only tag or git sha
