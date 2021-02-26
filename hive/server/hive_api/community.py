@@ -38,8 +38,8 @@ async def get_community_context(context, name, account):
 async def list_top_communities(context, limit=25):
     """List top communities. Returns lite community list."""
     limit = valid_limit(limit, 100, 25)
-    sql = """SELECT name, title FROM hive_communities
-              WHERE rank > 0 ORDER BY rank LIMIT :limit"""
+    sql = """SELECT hc.name, hc.title FROM hive_communities hc
+              WHERE hc.rank > 0 ORDER BY hc.rank LIMIT :limit"""
     #ABW: restored older version since hardcoded id is out of the question
     #sql = """SELECT name, title FROM hive_communities
     #          WHERE id = 1344247 OR rank > 0
