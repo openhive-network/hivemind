@@ -166,7 +166,6 @@ class Db:
         """Perform a raw db query"""
         try:
             query = sqlalchemy.text(sql).execution_options(autocommit=False)
-            print(query)
             res = self._exec(query, **kwargs)
             return res
         except Exception as e:
