@@ -162,6 +162,17 @@ class Db:
         row = first(self._query(sql, **kwargs))
         return first(row) if row else None
 
+    def raw_execute(self, sql, **kwargs):
+        """Perform a raw db query"""
+        try:
+            query = sqlalchemy.text(sql).execution_options(autocommit=False)
+            print(query)
+            res = self._exec(query, **kwargs)
+            return res
+        except Exception as e:
+            log.warning("[SQL-ERR] %s in query %s (%s)", e.__class__.__name__, sql, kwargs)
+            raise e
+
     def engine_name(self):
         """Get the name of the engine (e.g. `postgresql`, `mysql`)."""
         _engine_name = self.get_dialect().name

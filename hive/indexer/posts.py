@@ -4,6 +4,7 @@ import logging
 import collections
 
 from ujson import dumps, loads
+from funcy.seqs import first
 
 from diff_match_patch import diff_match_patch
 
@@ -31,6 +32,7 @@ class Posts(DbAdapterHolder):
     _ids = collections.OrderedDict()
     _hits = 0
     _miss = 0
+    _prepared_statement = False
 
     comment_payout_ops = {}
     _comment_payout_ops = []
@@ -90,6 +92,10 @@ class Posts(DbAdapterHolder):
     def comment_op(cls, op, block_date):
         """Register new/edited/undeleted posts; insert into feed cache."""
 
+        if not cls._prepared_statement:
+            DB.raw_execute("PREPARE process_comment(varchar,varchar,varchar,varchar,timestamp,integer,integer,varchar[]) AS SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, community_id, is_valid, is_muted, depth FROM process_hive_post_operation($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::TIMESTAMP, $6::INTEGER, $7::INTEGER, $8::VARCHAR[]);")
+            cls._prepared_statement = True
+
         md = {}
         # At least one case where jsonMetadata was double-encoded: condenser#895
         # jsonMetadata = JSON.parse(jsonMetadata);
@@ -107,13 +113,16 @@ class Posts(DbAdapterHolder):
                 if tag and isinstance(tag, str):
                     tags.append(tag) # No escaping needed due to used sqlalchemy formatting features
 
-        sql = """
-            SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, community_id, is_valid, is_muted, depth
-            FROM process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_block)::integer, (:block_num)::integer, (:tags)::VARCHAR[]);
-            """
+#        sql = """ 
+#            SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, community_id, is_valid, is_muted, depth
+#            FROM process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_block)::integer, (:block_num)::integer, (:tags)::VARCHAR[]);
+#            """
 
-        row = DB.query_row(sql, author=op['author'], permlink=op['permlink'], parent_author=op['parent_author'],
-                   parent_permlink=op['parent_permlink'], date=block_date, community_support_start_block=Community.start_block, block_num=op['block_num'], tags=tags)
+#        row = DB.query_row(sql, author=op['author'], permlink=op['permlink'], parent_author=op['parent_author'],
+#                   parent_permlink=op['parent_permlink'], date=block_date, community_support_start_block=Community.start_block, block_num=op['block_num'], tags=tags)
+
+        sql = "EXECUTE process_comment(:author, :permlink, :parent_author, :parent_permlink, :date, :community_support_start_block, :block_num, :tags);"
+        row = first( DB.raw_execute(sql, author=op['author'], permlink=op['permlink'], parent_author=op['parent_author'], parent_permlink=op['parent_permlink'], date=block_date, community_support_start_block=Community.start_block, block_num=op['block_num'], tags=tags) )
 
         result = dict(row)
 
