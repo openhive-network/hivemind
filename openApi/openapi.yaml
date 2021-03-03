@@ -336,8 +336,7 @@ components:
     # TODO: repair display OpenAPI SwaggerUI
       type: object
       description: discussion
-      items:
-        $ref: "#/components/schemas/StringOfDiscussion"
+      $ref: "#/components/schemas/StringOfDiscussion"
 
     "GetFollowList":
       type: array
@@ -360,28 +359,27 @@ components:
     "GetPayoutStats":
       type: object
       description: "object with payout related fields"
-      items:
-        required:
-          - blogs
-          - items
-          - total
-        properties:
-          blogs:
-            type: number
+      required:
+        - blogs
+        - items
+        - total
+      properties:
+        blogs:
+          type: number
+        items:
+          type: array
           items:
-            type: array
-            items:
-              allOf:
-                - type: string
-                  description: community name
-                - type: string
-                  description: community title
-                - type: number
-                  description: sum
-                - type: integer
-                - type: integer        
-          total:
-            type: number
+            allOf:
+              - type: string
+                description: community name
+              - type: string
+                description: community title
+              - type: number
+                description: sum
+              - type: integer
+              - type: integer        
+        total:
+          type: number
 
     "GetPost":
       type: object
