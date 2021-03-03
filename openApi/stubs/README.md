@@ -58,8 +58,11 @@ from openapi_client.model.get_account_posts_request import GetAccountPostsReques
 from openapi_client.model.get_discussion_request import GetDiscussionRequest
 from openapi_client.model.get_follow_list_request import GetFollowListRequest
 from openapi_client.model.get_payout_stats_request import GetPayoutStatsRequest
+from openapi_client.model.get_post_header_request import GetPostHeaderRequest
 from openapi_client.model.get_post_request import GetPostRequest
 from openapi_client.model.get_profile_request import GetProfileRequest
+from openapi_client.model.get_ranked_posts_request import GetRankedPostsRequest
+from openapi_client.model.get_relationship_between_accounts_request import GetRelationshipBetweenAccountsRequest
 from openapi_client.model.list_all_subscriptions_request import ListAllSubscriptionsRequest
 from openapi_client.model.list_communites_request import ListCommunitesRequest
 from openapi_client.model.list_community_roles_request import ListCommunityRolesRequest
@@ -111,7 +114,10 @@ Class | Method | HTTP request | Description
 *DefaultApi* | [**bridge_get_follow_list**](docs/DefaultApi.md#bridge_get_follow_list) | **POST** /#bridge.get_follow_list | 
 *DefaultApi* | [**bridge_get_payout_stats**](docs/DefaultApi.md#bridge_get_payout_stats) | **POST** /#bridge.get_payout_stats | 
 *DefaultApi* | [**bridge_get_post**](docs/DefaultApi.md#bridge_get_post) | **POST** /#bridge.get_post | 
+*DefaultApi* | [**bridge_get_post_header**](docs/DefaultApi.md#bridge_get_post_header) | **POST** /#bridge.get_post_header | 
 *DefaultApi* | [**bridge_get_profile**](docs/DefaultApi.md#bridge_get_profile) | **POST** /#bridge.get_profile | 
+*DefaultApi* | [**bridge_get_ranked_posts**](docs/DefaultApi.md#bridge_get_ranked_posts) | **POST** /#bridge.get_ranked_posts | 
+*DefaultApi* | [**bridge_get_relationship_between_accounts**](docs/DefaultApi.md#bridge_get_relationship_between_accounts) | **POST** /#bridge.get_relationship_between_accounts | 
 *DefaultApi* | [**bridge_list_all_subscriptions**](docs/DefaultApi.md#bridge_list_all_subscriptions) | **POST** /#bridge.list_all_subscriptions | 
 *DefaultApi* | [**bridge_list_communities**](docs/DefaultApi.md#bridge_list_communities) | **POST** /#bridge.list_communities | 
 *DefaultApi* | [**bridge_list_community_roles**](docs/DefaultApi.md#bridge_list_community_roles) | **POST** /#bridge.list_community_roles | 
@@ -150,11 +156,20 @@ Class | Method | HTTP request | Description
  - [GetPayoutStatsRequest](docs/GetPayoutStatsRequest.md)
  - [GetPayoutStatsRequestParams](docs/GetPayoutStatsRequestParams.md)
  - [GetPost](docs/GetPost.md)
+ - [GetPostHeader](docs/GetPostHeader.md)
+ - [GetPostHeaderRequest](docs/GetPostHeaderRequest.md)
+ - [GetPostHeaderRequestParams](docs/GetPostHeaderRequestParams.md)
  - [GetPostRequest](docs/GetPostRequest.md)
  - [GetPostRequestParams](docs/GetPostRequestParams.md)
  - [GetPostStats](docs/GetPostStats.md)
  - [GetProfileRequest](docs/GetProfileRequest.md)
  - [GetProfileRequestParams](docs/GetProfileRequestParams.md)
+ - [GetRankedPosts](docs/GetRankedPosts.md)
+ - [GetRankedPostsRequest](docs/GetRankedPostsRequest.md)
+ - [GetRankedPostsRequestParams](docs/GetRankedPostsRequestParams.md)
+ - [GetRelationshipBetweenAccounts](docs/GetRelationshipBetweenAccounts.md)
+ - [GetRelationshipBetweenAccountsRequest](docs/GetRelationshipBetweenAccountsRequest.md)
+ - [GetRelationshipBetweenAccountsRequestParams](docs/GetRelationshipBetweenAccountsRequestParams.md)
  - [ListAllSubscriptions](docs/ListAllSubscriptions.md)
  - [ListAllSubscriptionsRequest](docs/ListAllSubscriptionsRequest.md)
  - [ListAllSubscriptionsRequestParams](docs/ListAllSubscriptionsRequestParams.md)

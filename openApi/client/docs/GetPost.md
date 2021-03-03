@@ -1,6 +1,6 @@
 # GetPost
 
-object with payout related fields
+object with post related fields
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------

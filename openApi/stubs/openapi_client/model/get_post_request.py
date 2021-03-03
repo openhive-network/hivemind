@@ -59,7 +59,7 @@ class GetPostRequest(ModelNormal):
 
     allowed_values = {
         ('method',): {
-            'BRIDGE.GET_FOLLOW_LIST': "bridge.get_follow_list",
+            'BRIDGE.GET_POST': "bridge.get_post",
         },
     }
 
@@ -120,7 +120,7 @@ class GetPostRequest(ModelNormal):
 
         Keyword Args:
             jsonrpc (str): defaults to "2.0"  # noqa: E501
-            method (str): defaults to "bridge.get_follow_list", must be one of ["bridge.get_follow_list", ]  # noqa: E501
+            method (str): defaults to "bridge.get_post", must be one of ["bridge.get_post", ]  # noqa: E501
             id (int): defaults to 1  # noqa: E501
             _check_type (bool): if True, values for parameters in openapi_types
                                 will be type checked and a TypeError will be
@@ -155,7 +155,7 @@ class GetPostRequest(ModelNormal):
         """
 
         jsonrpc = kwargs.get('jsonrpc', "2.0")
-        method = kwargs.get('method', "bridge.get_follow_list")
+        method = kwargs.get('method', "bridge.get_post")
         id = kwargs.get('id', 1)
         _check_type = kwargs.pop('_check_type', True)
         _spec_property_naming = kwargs.pop('_spec_property_naming', False)

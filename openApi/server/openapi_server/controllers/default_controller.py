@@ -9,8 +9,11 @@ from openapi_server.models.get_account_posts_request import GetAccountPostsReque
 from openapi_server.models.get_discussion_request import GetDiscussionRequest  # noqa: E501
 from openapi_server.models.get_follow_list_request import GetFollowListRequest  # noqa: E501
 from openapi_server.models.get_payout_stats_request import GetPayoutStatsRequest  # noqa: E501
+from openapi_server.models.get_post_header_request import GetPostHeaderRequest  # noqa: E501
 from openapi_server.models.get_post_request import GetPostRequest  # noqa: E501
 from openapi_server.models.get_profile_request import GetProfileRequest  # noqa: E501
+from openapi_server.models.get_ranked_posts_request import GetRankedPostsRequest  # noqa: E501
+from openapi_server.models.get_relationship_between_accounts_request import GetRelationshipBetweenAccountsRequest  # noqa: E501
 from openapi_server.models.list_all_subscriptions_request import ListAllSubscriptionsRequest  # noqa: E501
 from openapi_server.models.list_communites_request import ListCommunitesRequest  # noqa: E501
 from openapi_server.models.list_community_roles_request import ListCommunityRolesRequest  # noqa: E501
@@ -18,7 +21,10 @@ from openapi_server.models.list_pop_communites_request import ListPopCommunitesR
 from openapi_server.models.list_subscribers_request import ListSubscribersRequest  # noqa: E501
 from openapi_server.models.one_of_community_context_error_message import OneOfCommunityContextErrorMessage  # noqa: E501
 from openapi_server.models.one_of_community_error_message import OneOfCommunityErrorMessage  # noqa: E501
+from openapi_server.models.one_of_get_payout_stats_error_message import OneOfGetPayoutStatsErrorMessage  # noqa: E501
 from openapi_server.models.one_of_get_post_error_message import OneOfGetPostErrorMessage  # noqa: E501
+from openapi_server.models.one_of_get_post_header_error_message import OneOfGetPostHeaderErrorMessage  # noqa: E501
+from openapi_server.models.one_of_get_relationship_between_accounts_error_message import OneOfGetRelationshipBetweenAccountsErrorMessage  # noqa: E501
 from openapi_server.models.one_of_list_community_error_message import OneOfListCommunityErrorMessage  # noqa: E501
 from openapi_server.models.one_of_profile_error_message import OneOfProfileErrorMessage  # noqa: E501
 from openapi_server.models.one_ofarray_error_message import OneOfarrayErrorMessage  # noqa: E501
@@ -139,7 +145,7 @@ def bridge_get_payout_stats(get_payout_stats_request):  # noqa: E501
     :param get_payout_stats_request: optional: limit
     :type get_payout_stats_request: dict | bytes
 
-    :rtype: OneOfarrayErrorMessage
+    :rtype: OneOfGetPayoutStatsErrorMessage
     """
     if connexion.request.is_json:
         get_payout_stats_request = GetPayoutStatsRequest.from_dict(connexion.request.get_json())  # noqa: E501
@@ -161,6 +167,21 @@ def bridge_get_post(get_post_request):  # noqa: E501
     return 'do some magic!'
 
 
+def bridge_get_post_header(get_post_header_request):  # noqa: E501
+    """bridge_get_post_header
+
+    Gives very basic information on given post. # noqa: E501
+
+    :param get_post_header_request: required: author, permlink
+    :type get_post_header_request: dict | bytes
+
+    :rtype: OneOfGetPostHeaderErrorMessage
+    """
+    if connexion.request.is_json:
+        get_post_header_request = GetPostHeaderRequest.from_dict(connexion.request.get_json())  # noqa: E501
+    return 'do some magic!'
+
+
 def bridge_get_profile(get_profile_request):  # noqa: E501
     """bridge_get_profile
 
@@ -173,6 +194,36 @@ def bridge_get_profile(get_profile_request):  # noqa: E501
     """
     if connexion.request.is_json:
         get_profile_request = GetProfileRequest.from_dict(connexion.request.get_json())  # noqa: E501
+    return 'do some magic!'
+
+
+def bridge_get_ranked_posts(get_ranked_posts_request):  # noqa: E501
+    """bridge_get_ranked_posts
+
+    Lists posts depending on given ranking criteria and filters. # noqa: E501
+
+    :param get_ranked_posts_request: required: sort, optional: start_author, start_permlink, limit, tag, observer
+    :type get_ranked_posts_request: dict | bytes
+
+    :rtype: OneOfarrayErrorMessage
+    """
+    if connexion.request.is_json:
+        get_ranked_posts_request = GetRankedPostsRequest.from_dict(connexion.request.get_json())  # noqa: E501
+    return 'do some magic!'
+
+
+def bridge_get_relationship_between_accounts(get_relationship_between_accounts_request):  # noqa: E501
+    """bridge_get_relationship_between_accounts
+
+    Tells what relations connect given accounts from the perspective of first account. # noqa: E501
+
+    :param get_relationship_between_accounts_request: required: account1, account2, optional: observer
+    :type get_relationship_between_accounts_request: dict | bytes
+
+    :rtype: OneOfGetRelationshipBetweenAccountsErrorMessage
+    """
+    if connexion.request.is_json:
+        get_relationship_between_accounts_request = GetRelationshipBetweenAccountsRequest.from_dict(connexion.request.get_json())  # noqa: E501
     return 'do some magic!'
 
 

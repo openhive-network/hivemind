@@ -29,8 +29,11 @@ from openapi_client.model.get_account_posts_request import GetAccountPostsReques
 from openapi_client.model.get_discussion_request import GetDiscussionRequest
 from openapi_client.model.get_follow_list_request import GetFollowListRequest
 from openapi_client.model.get_payout_stats_request import GetPayoutStatsRequest
+from openapi_client.model.get_post_header_request import GetPostHeaderRequest
 from openapi_client.model.get_post_request import GetPostRequest
 from openapi_client.model.get_profile_request import GetProfileRequest
+from openapi_client.model.get_ranked_posts_request import GetRankedPostsRequest
+from openapi_client.model.get_relationship_between_accounts_request import GetRelationshipBetweenAccountsRequest
 from openapi_client.model.list_all_subscriptions_request import ListAllSubscriptionsRequest
 from openapi_client.model.list_communites_request import ListCommunitesRequest
 from openapi_client.model.list_community_roles_request import ListCommunityRolesRequest
@@ -1112,6 +1115,124 @@ class DefaultApi(object):
             callable=__bridge_get_post
         )
 
+        def __bridge_get_post_header(
+            self,
+            get_post_header_request,
+            **kwargs
+        ):
+            """bridge_get_post_header  # noqa: E501
+
+            Gives very basic information on given post.  # noqa: E501
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.bridge_get_post_header(get_post_header_request, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                get_post_header_request (GetPostHeaderRequest): required: author, permlink
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                object
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['get_post_header_request'] = \
+                get_post_header_request
+            return self.call_with_http_info(**kwargs)
+
+        self.bridge_get_post_header = Endpoint(
+            settings={
+                'response_type': (object,),
+                'auth': [],
+                'endpoint_path': '/#bridge.get_post_header',
+                'operation_id': 'bridge_get_post_header',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'get_post_header_request',
+                ],
+                'required': [
+                    'get_post_header_request',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'get_post_header_request':
+                        (GetPostHeaderRequest,),
+                },
+                'attribute_map': {
+                },
+                'location_map': {
+                    'get_post_header_request': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client,
+            callable=__bridge_get_post_header
+        )
+
         def __bridge_get_profile(
             self,
             get_profile_request,
@@ -1228,6 +1349,242 @@ class DefaultApi(object):
             },
             api_client=api_client,
             callable=__bridge_get_profile
+        )
+
+        def __bridge_get_ranked_posts(
+            self,
+            get_ranked_posts_request,
+            **kwargs
+        ):
+            """bridge_get_ranked_posts  # noqa: E501
+
+            Lists posts depending on given ranking criteria and filters.  # noqa: E501
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.bridge_get_ranked_posts(get_ranked_posts_request, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                get_ranked_posts_request (GetRankedPostsRequest): required: sort, optional: start_author, start_permlink, limit, tag, observer
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                object
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['get_ranked_posts_request'] = \
+                get_ranked_posts_request
+            return self.call_with_http_info(**kwargs)
+
+        self.bridge_get_ranked_posts = Endpoint(
+            settings={
+                'response_type': (object,),
+                'auth': [],
+                'endpoint_path': '/#bridge.get_ranked_posts',
+                'operation_id': 'bridge_get_ranked_posts',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'get_ranked_posts_request',
+                ],
+                'required': [
+                    'get_ranked_posts_request',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'get_ranked_posts_request':
+                        (GetRankedPostsRequest,),
+                },
+                'attribute_map': {
+                },
+                'location_map': {
+                    'get_ranked_posts_request': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client,
+            callable=__bridge_get_ranked_posts
+        )
+
+        def __bridge_get_relationship_between_accounts(
+            self,
+            get_relationship_between_accounts_request,
+            **kwargs
+        ):
+            """bridge_get_relationship_between_accounts  # noqa: E501
+
+            Tells what relations connect given accounts from the perspective of first account.  # noqa: E501
+            This method makes a synchronous HTTP request by default. To make an
+            asynchronous HTTP request, please pass async_req=True
+
+            >>> thread = api.bridge_get_relationship_between_accounts(get_relationship_between_accounts_request, async_req=True)
+            >>> result = thread.get()
+
+            Args:
+                get_relationship_between_accounts_request (GetRelationshipBetweenAccountsRequest): required: account1, account2, optional: observer
+
+            Keyword Args:
+                _return_http_data_only (bool): response data without head status
+                    code and headers. Default is True.
+                _preload_content (bool): if False, the urllib3.HTTPResponse object
+                    will be returned without reading/decoding response data.
+                    Default is True.
+                _request_timeout (float/tuple): timeout setting for this request. If one
+                    number provided, it will be total request timeout. It can also
+                    be a pair (tuple) of (connection, read) timeouts.
+                    Default is None.
+                _check_input_type (bool): specifies if type checking
+                    should be done one the data sent to the server.
+                    Default is True.
+                _check_return_type (bool): specifies if type checking
+                    should be done one the data received from the server.
+                    Default is True.
+                _host_index (int/None): specifies the index of the server
+                    that we want to use.
+                    Default is read from the configuration.
+                async_req (bool): execute request asynchronously
+
+            Returns:
+                object
+                    If the method is called asynchronously, returns the request
+                    thread.
+            """
+            kwargs['async_req'] = kwargs.get(
+                'async_req', False
+            )
+            kwargs['_return_http_data_only'] = kwargs.get(
+                '_return_http_data_only', True
+            )
+            kwargs['_preload_content'] = kwargs.get(
+                '_preload_content', True
+            )
+            kwargs['_request_timeout'] = kwargs.get(
+                '_request_timeout', None
+            )
+            kwargs['_check_input_type'] = kwargs.get(
+                '_check_input_type', True
+            )
+            kwargs['_check_return_type'] = kwargs.get(
+                '_check_return_type', True
+            )
+            kwargs['_host_index'] = kwargs.get('_host_index')
+            kwargs['get_relationship_between_accounts_request'] = \
+                get_relationship_between_accounts_request
+            return self.call_with_http_info(**kwargs)
+
+        self.bridge_get_relationship_between_accounts = Endpoint(
+            settings={
+                'response_type': (object,),
+                'auth': [],
+                'endpoint_path': '/#bridge.get_relationship_between_accounts',
+                'operation_id': 'bridge_get_relationship_between_accounts',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'get_relationship_between_accounts_request',
+                ],
+                'required': [
+                    'get_relationship_between_accounts_request',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                ]
+            },
+            root_map={
+                'validations': {
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'get_relationship_between_accounts_request':
+                        (GetRelationshipBetweenAccountsRequest,),
+                },
+                'attribute_map': {
+                },
+                'location_map': {
+                    'get_relationship_between_accounts_request': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client,
+            callable=__bridge_get_relationship_between_accounts
         )
 
         def __bridge_list_all_subscriptions(

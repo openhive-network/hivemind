@@ -201,6 +201,27 @@ paths:
                 - $ref: '#/components/schemas/ErrorMessage'
           description: Selected post
       x-openapi-router-controller: openapi_server.controllers.default_controller
+  /#bridge.get_post_header:
+    post:
+      description: Gives very basic information on given post.
+      operationId: bridge_get_post_header
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetPostHeaderRequest'
+        description: 'required: author, permlink'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/GetPostHeader'
+                - $ref: '#/components/schemas/ErrorMessage'
+          description: Selected post description
+      x-openapi-router-controller: openapi_server.controllers.default_controller
   /#bridge.get_profile:
     post:
       description: Gets profile
@@ -221,6 +242,51 @@ paths:
                 - $ref: '#/components/schemas/Profile'
                 - $ref: '#/components/schemas/ErrorMessage'
           description: profile information
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+  /#bridge.get_ranked_posts:
+    post:
+      description: Lists posts depending on given ranking criteria and filters.
+      operationId: bridge_get_ranked_posts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetRankedPostsRequest'
+        description: 'required: sort, optional: start_author, start_permlink, limit,
+          tag, observer'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/GetRankedPosts'
+                - $ref: '#/components/schemas/ErrorMessage'
+          description: |
+            Selected post
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+  /#bridge.get_relationship_between_accounts:
+    post:
+      description: Tells what relations connect given accounts from the perspective
+        of first account.
+      operationId: bridge_get_relationship_between_accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetRelationshipBetweenAccountsRequest'
+        description: 'required: account1, account2, optional: observer'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/GetRelationshipBetweenAccounts'
+                - $ref: '#/components/schemas/ErrorMessage'
+          description: Account relations
       x-openapi-router-controller: openapi_server.controllers.default_controller
   /#bridge.list_all_subscriptions:
     post:
@@ -615,10 +681,7 @@ components:
         type: object
       type: array
     GetDiscussion:
-      description: discussion
-      items:
-        $ref: '#/components/schemas/StringOfDiscussion'
-      type: array
+      $ref: '#/components/schemas/StringOfDiscussion'
     GetFollowList:
       description: array with objects with follow related fields
       items:
@@ -638,31 +701,30 @@ components:
       type: array
     GetPayoutStats:
       description: object with payout related fields
-      items:
-        properties:
-          blogs:
-            type: number
+      properties:
+        blogs:
+          type: number
+        items:
           items:
-            items:
-              allOf:
-              - description: community name
-                type: string
-              - description: community title
-                type: string
-              - description: sum
-                type: number
-              - type: integer
-              - type: integer
-            type: array
-          total:
-            type: number
-        required:
-        - blogs
-        - items
-        - total
-      type: array
+            allOf:
+            - description: community name
+              type: string
+            - description: community title
+              type: string
+            - description: sum
+              type: number
+            - type: integer
+            - type: integer
+          type: array
+        total:
+          type: number
+      required:
+      - blogs
+      - items
+      - total
+      type: object
     GetPost:
-      description: object with payout related fields
+      description: object with post related fields
       properties:
         active_votes:
           $ref: '#/components/schemas/ActiveVotes'
@@ -780,6 +842,53 @@ components:
       - title
       - updated
       - url
+      type: object
+    GetPostHeader:
+      description: object with basic post description
+      properties:
+        author:
+          description: account name of the post's author
+          type: string
+        category:
+          description: post category
+          type: string
+        depth:
+          description: nesting level
+          type: integer
+        permlink:
+          description: post's permlink
+          type: string
+      required:
+      - author
+      - category
+      - children
+      - depth
+      - permlink
+      type: object
+    GetRankedPosts:
+      description: object with post related fields
+      items:
+        $ref: '#/components/schemas/Discussion'
+      type: array
+    GetRelationshipBetweenAccounts:
+      description: object with relationship description
+      properties:
+        blacklists:
+          type: boolean
+        follows:
+          type: boolean
+        follow_blacklists:
+          type: boolean
+        follow_muted:
+          type: boolean
+        ignores:
+          type: boolean
+      required:
+      - blacklists
+      - follow_blacklists
+      - follow_muted
+      - follows
+      - ignores
       type: object
     ListCommunity:
       properties:
@@ -1441,7 +1550,7 @@ components:
       type: object
     GetPostRequest:
       example:
-        method: bridge.get_follow_list
+        method: bridge.get_post
         id: 0
         jsonrpc: "2.0"
         params:
@@ -1454,10 +1563,96 @@ components:
           type: string
         method:
           enum:
-          - bridge.get_follow_list
+          - bridge.get_post
           type: string
         params:
           $ref: '#/components/schemas/GetPostRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    GetPostHeaderRequest:
+      example:
+        method: bridge.get_post_header
+        id: 0
+        jsonrpc: "2.0"
+        params:
+          author: blocktrades
+          permlink: witness-report-for-blocktrades-for-last-week-of-august
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.get_post_header
+          type: string
+        params:
+          $ref: '#/components/schemas/GetPostHeaderRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    GetRankedPostsRequest:
+      example:
+        method: bridge.get_post
+        id: 6
+        jsonrpc: "2.0"
+        params:
+          observer: blocktrades
+          limit: 8
+          start_author: start_author
+          sort: hot
+          tag: my
+          start_permlink: start_permlink
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.get_post
+          type: string
+        params:
+          $ref: '#/components/schemas/GetRankedPostsRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    GetRelationshipBetweenAccountsRequest:
+      example:
+        method: bridge.get_relationship_between_accounts
+        id: 0
+        jsonrpc: "2.0"
+        params:
+          observer: blocktrades
+          account1: gtg
+          acccount1: blocktrades
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.get_relationship_between_accounts
+          type: string
+        params:
+          $ref: '#/components/schemas/GetRelationshipBetweenAccountsRequest_params'
         id:
           default: 1
           type: integer
@@ -1872,4 +2067,108 @@ components:
       required:
       - author
       - permlink
+      type: object
+    GetPostHeaderRequest_params:
+      example:
+        author: blocktrades
+        permlink: witness-report-for-blocktrades-for-last-week-of-august
+      properties:
+        author:
+          description: name of the post author's account
+          example: blocktrades
+          type: string
+        permlink:
+          description: permlink of the valid author's post
+          example: witness-report-for-blocktrades-for-last-week-of-august
+          type: string
+      required:
+      - author
+      - permlink
+      type: object
+    GetRankedPostsRequest_params:
+      example:
+        observer: blocktrades
+        limit: 8
+        start_author: start_author
+        sort: hot
+        tag: my
+        start_permlink: start_permlink
+      properties:
+        sort:
+          description: "### Sort order:\ntrending - [if tag is community pinned posts\
+            \ first], top posts with highest trending score first; paging cuts out\
+            \ given and more trending posts\nhot - top posts from blogs of accounts\
+            \ that given account is following ranked by creation/reblog time, not\
+            \ older than last month  \ncreated - [if tag is community pinned posts\
+            \ first], newest top posts first (grayed out not considered); paging cuts\
+            \ out given and newer posts\npromoted - promoted posts with highest promotion\
+            \ fund first; paging cuts out given and more promoted posts\npayout -\
+            \ only posts that will cashout between 12 and 36 hours from head block\
+            \ are considered, posts with higher pending payout first; paging cuts\
+            \ out given and higher payout posts\npayout_comments - only replies are\
+            \ considered, posts with higher pending payout first; paging cuts out\
+            \ given and higher payout posts\nmuted - grayed out posts that are to\
+            \ receive nonzero payout are considered, posts with higher pending payout\
+            \ first; paging cuts out given and higher payout posts\n"
+          enum:
+          - trending
+          - hot
+          - created
+          - promoted
+          - payout
+          - payout_comments
+          - muted
+          example: hot
+          type: string
+        start_author:
+          description: author account name, if passed must be passed with start_permlink
+          type: string
+        start_permlink:
+          description: post permlink of given author, point to valid post, paging
+            mechanism
+          type: string
+        limit:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        tag:
+          description: |
+            my (with observer) - turns on filtering for posts within communities subscribed to by observer
+            all - same as default none/blank
+            hive-{number} - has to point to valid community; turns on filtering for posts within given community
+            {tag} - has to point to valid tag; turns on filtering for posts with given tag (given category in case of 'payout' and 'payout_comments')
+          example: my
+          type: string
+        observer:
+          description: mandatory for "my" tag, points to valid account; when given
+            supplements blacklists stats in posts and filters out posts of muted authors
+            (with exception of "muted" sort)
+          example: blocktrades
+          type: string
+      required:
+      - sort
+      type: object
+    GetRelationshipBetweenAccountsRequest_params:
+      example:
+        observer: blocktrades
+        account1: gtg
+        acccount1: blocktrades
+      properties:
+        acccount1:
+          description: valid account name
+          example: blocktrades
+          type: string
+        account1:
+          description: valid account name
+          example: gtg
+          type: string
+        observer:
+          description: ignored (most likely not yet implemented extra for supplementing
+            blacklist information)
+          example: blocktrades
+          type: string
+      required:
+      - acccount1
+      - account2
       type: object

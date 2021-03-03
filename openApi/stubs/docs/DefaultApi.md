@@ -13,7 +13,10 @@ Method | HTTP request | Description
 [**bridge_get_follow_list**](DefaultApi.md#bridge_get_follow_list) | **POST** /#bridge.get_follow_list | 
 [**bridge_get_payout_stats**](DefaultApi.md#bridge_get_payout_stats) | **POST** /#bridge.get_payout_stats | 
 [**bridge_get_post**](DefaultApi.md#bridge_get_post) | **POST** /#bridge.get_post | 
+[**bridge_get_post_header**](DefaultApi.md#bridge_get_post_header) | **POST** /#bridge.get_post_header | 
 [**bridge_get_profile**](DefaultApi.md#bridge_get_profile) | **POST** /#bridge.get_profile | 
+[**bridge_get_ranked_posts**](DefaultApi.md#bridge_get_ranked_posts) | **POST** /#bridge.get_ranked_posts | 
+[**bridge_get_relationship_between_accounts**](DefaultApi.md#bridge_get_relationship_between_accounts) | **POST** /#bridge.get_relationship_between_accounts | 
 [**bridge_list_all_subscriptions**](DefaultApi.md#bridge_list_all_subscriptions) | **POST** /#bridge.list_all_subscriptions | 
 [**bridge_list_communities**](DefaultApi.md#bridge_list_communities) | **POST** /#bridge.list_communities | 
 [**bridge_list_community_roles**](DefaultApi.md#bridge_list_community_roles) | **POST** /#bridge.list_community_roles | 
@@ -614,7 +617,7 @@ with openapi_client.ApiClient() as api_client:
     api_instance = default_api.DefaultApi(api_client)
     get_post_request = GetPostRequest(
         jsonrpc="2.0",
-        method="bridge.get_follow_list",
+        method="bridge.get_post",
         params=GetPostRequestParams(
             author="blocktrades",
             permlink="witness-report-for-blocktrades-for-last-week-of-august",
@@ -654,6 +657,76 @@ No authorization required
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Selected post |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **bridge_get_post_header**
+> object bridge_get_post_header(get_post_header_request)
+
+
+
+Gives very basic information on given post.
+
+### Example
+
+```python
+import time
+import openapi_client
+from openapi_client.api import default_api
+from openapi_client.model.get_post_header_request import GetPostHeaderRequest
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost:8080
+# See configuration.py for a list of all supported configuration parameters.
+configuration = openapi_client.Configuration(
+    host = "http://localhost:8080"
+)
+
+
+# Enter a context with an instance of the API client
+with openapi_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = default_api.DefaultApi(api_client)
+    get_post_header_request = GetPostHeaderRequest(
+        jsonrpc="2.0",
+        method="bridge.get_post_header",
+        params=GetPostHeaderRequestParams(
+            author="blocktrades",
+            permlink="witness-report-for-blocktrades-for-last-week-of-august",
+        ),
+        id=1,
+    ) # GetPostHeaderRequest | required: author, permlink
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.bridge_get_post_header(get_post_header_request)
+        pprint(api_response)
+    except openapi_client.ApiException as e:
+        print("Exception when calling DefaultApi->bridge_get_post_header: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **get_post_header_request** | [**GetPostHeaderRequest**](GetPostHeaderRequest.md)| required: author, permlink |
+
+### Return type
+
+**object**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Selected post description |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -724,6 +797,151 @@ No authorization required
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | profile information |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **bridge_get_ranked_posts**
+> object bridge_get_ranked_posts(get_ranked_posts_request)
+
+
+
+Lists posts depending on given ranking criteria and filters.
+
+### Example
+
+```python
+import time
+import openapi_client
+from openapi_client.api import default_api
+from openapi_client.model.get_ranked_posts_request import GetRankedPostsRequest
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost:8080
+# See configuration.py for a list of all supported configuration parameters.
+configuration = openapi_client.Configuration(
+    host = "http://localhost:8080"
+)
+
+
+# Enter a context with an instance of the API client
+with openapi_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = default_api.DefaultApi(api_client)
+    get_ranked_posts_request = GetRankedPostsRequest(
+        jsonrpc="2.0",
+        method="bridge.get_post",
+        params=GetRankedPostsRequestParams(
+            sort="hot",
+            start_author="start_author_example",
+            start_permlink="start_permlink_example",
+            limit=20,
+            tag="my",
+            observer="blocktrades",
+        ),
+        id=1,
+    ) # GetRankedPostsRequest | required: sort, optional: start_author, start_permlink, limit, tag, observer
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.bridge_get_ranked_posts(get_ranked_posts_request)
+        pprint(api_response)
+    except openapi_client.ApiException as e:
+        print("Exception when calling DefaultApi->bridge_get_ranked_posts: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **get_ranked_posts_request** | [**GetRankedPostsRequest**](GetRankedPostsRequest.md)| required: sort, optional: start_author, start_permlink, limit, tag, observer |
+
+### Return type
+
+**object**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Selected post  |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **bridge_get_relationship_between_accounts**
+> object bridge_get_relationship_between_accounts(get_relationship_between_accounts_request)
+
+
+
+Tells what relations connect given accounts from the perspective of first account.
+
+### Example
+
+```python
+import time
+import openapi_client
+from openapi_client.api import default_api
+from openapi_client.model.get_relationship_between_accounts_request import GetRelationshipBetweenAccountsRequest
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost:8080
+# See configuration.py for a list of all supported configuration parameters.
+configuration = openapi_client.Configuration(
+    host = "http://localhost:8080"
+)
+
+
+# Enter a context with an instance of the API client
+with openapi_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = default_api.DefaultApi(api_client)
+    get_relationship_between_accounts_request = GetRelationshipBetweenAccountsRequest(
+        jsonrpc="2.0",
+        method="bridge.get_relationship_between_accounts",
+        params=GetRelationshipBetweenAccountsRequestParams(
+            acccount1="blocktrades",
+            account1="gtg",
+            observer="blocktrades",
+        ),
+        id=1,
+    ) # GetRelationshipBetweenAccountsRequest | required: account1, account2, optional: observer
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.bridge_get_relationship_between_accounts(get_relationship_between_accounts_request)
+        pprint(api_response)
+    except openapi_client.ApiException as e:
+        print("Exception when calling DefaultApi->bridge_get_relationship_between_accounts: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **get_relationship_between_accounts_request** | [**GetRelationshipBetweenAccountsRequest**](GetRelationshipBetweenAccountsRequest.md)| required: account1, account2, optional: observer |
+
+### Return type
+
+**object**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Account relations |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

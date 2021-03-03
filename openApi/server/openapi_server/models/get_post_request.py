@@ -100,7 +100,7 @@ class GetPostRequest(Model):
         :param method: The method of this GetPostRequest.
         :type method: str
         """
-        allowed_values = ["bridge.get_follow_list"]  # noqa: E501
+        allowed_values = ["bridge.get_post"]  # noqa: E501
         if method not in allowed_values:
             raise ValueError(
                 "Invalid value for `method` ({0}), must be one of {1}"
