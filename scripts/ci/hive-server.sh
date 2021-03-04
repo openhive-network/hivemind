@@ -61,6 +61,7 @@ start() {
   DATABASE_URL="postgresql://${USER}@/${HIVEMIND_DB_NAME}?${OPTIONS}"
 
   hive server \
+      --log-request-times \
       --log-mask-sensitive-data \
       --pid-file hive_server.pid \
       --http-server-port ${RUNNER_HIVEMIND_SERVER_HTTP_PORT} \
