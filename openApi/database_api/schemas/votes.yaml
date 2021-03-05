@@ -1,0 +1,23 @@
+type: object
+additionalProperties: false
+required:
+  - jsonrpc
+  - result
+  - id
+properties:
+  jsonrpc:
+    type: string
+    example: "2.0"
+  id:
+    type: integer
+    example: 1
+  result:
+    type: object
+    required:
+      - votes
+    properties:
+      votes:
+        type: array
+        items:
+          type: object
+          $ref: './vote.yaml'

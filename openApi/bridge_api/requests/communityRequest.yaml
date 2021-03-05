@@ -1,0 +1,30 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - bridge.get_community
+  params:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        description: 'community name'
+        example: 'hive-186713'
+      observer:
+        type: string
+        description: 'account name'
+        example: 'good-karma'
+  id:
+    type: integer
+    default: 1

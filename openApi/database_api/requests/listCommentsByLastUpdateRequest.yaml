@@ -1,0 +1,39 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - database_api.list_comments
+  params:
+    type: object
+    required:
+      - start
+      - order
+    properties:
+      start:
+        description: '["{parent_author}","{update_date}","{start_author}","{start_permlink}"]
+          parent_author : mandatory; points to valid account
+          update_date : mandatory; update date in format "Y-m-d H:M:S" or "Y-m-dTH:M:S"
+          start_author + start_permlink : optional (can be left blank but not skipped), when given have to point to valid post; paging mechanism'
+        example: ["sykochica", "2016-08-24T19:59:42", "williambanks", "re-sykochica-re-williambanks-re-sykochica-what-is-god-as-told-by-a-13-year-old-20160823t021931580z"]
+      limit:
+        type: integer
+        description: "optional 1..1000, default = 1000"
+        default: 1000
+        example: 10
+      order:
+        type: string
+        enum:
+          - by_last_update
+        example: "by_last_update"
+  id:
+    type: integer
+    default: 1

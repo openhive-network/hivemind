@@ -1,0 +1,38 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - database_api.list_comments
+  params:
+    type: object
+    required:
+      - start
+      - order
+    properties:
+      start:
+        description: '["{root_author}","{root_permlink}","{start_author}","{start_permlink}"]
+          root_author + root_permlink : mandatory; points to root post of discussion
+          start_author + start_permlink : optional (can be left blank but not skipped), when given have to point to valid post; paging mechanism'
+        example: ["givemeyoursteem", "winners-of-steemit-food-challenge-3-desserts-to-die-for", "vi1son", "re-givemeyoursteem-winners-of-steemit-food-challenge-3-desserts-to-die-for-20160828t172955785z"]
+      limit:
+        type: integer
+        description: "optional 1..1000, default = 1000"
+        default: 1000
+        example: 10
+      order:
+        type: string
+        enum:
+          - by_root
+        example: "by_root"
+  id:
+    type: integer
+    default: 1

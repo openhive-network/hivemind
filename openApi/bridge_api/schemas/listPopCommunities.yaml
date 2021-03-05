@@ -1,0 +1,8 @@
+type: object
+description: "array of arrays with 2 strings: community name and title"
+items:
+  type: array
+  items:
+    type: string
+  minItems: 2
+  maxItems: 2

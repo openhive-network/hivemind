@@ -1,0 +1,75 @@
+type: object
+required:
+  - jsonrpc
+  - result
+  - id
+properties:
+  jsonrpc:
+    type: string
+    example: "2.0"
+  id:
+    type: integer
+    example: 1
+  result:
+    type: object
+    required:
+      - id
+      - about
+      - description
+      - avatar_url
+      - context
+      - created_at
+      - flag_text
+      - is_nsfw
+      - lang
+      - name
+      - num_authors
+      - num_pending
+      - settings
+      - subscribers
+      - sum_pending
+      - team
+      - title
+      - type_id
+    properties:
+      id:
+        type: integer
+      about:
+        type: string
+      description:
+        type: string
+      admins:
+        type: array
+        items:
+          type: string
+      avatar_url:
+        type: string
+      context:
+        $ref: './communityContext.yaml'
+      created_at:
+        type: string
+        format: date-time
+      flag_text:
+        type: string
+      is_nsfw:
+        type: boolean
+      lang:
+        type: string
+      name:
+        type: string
+      num_authors:
+        type: integer
+      num_pending:
+        type: integer
+      settings:
+        type: object
+      subscribers:
+        type: integer
+      sum_pending:
+        type: integer
+      team:
+        $ref: './listCommunityRoles.yaml'
+      title:
+        type: string
+      type_id:
+        type: integer

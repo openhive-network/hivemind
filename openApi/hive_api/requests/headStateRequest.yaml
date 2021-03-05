@@ -1,0 +1,20 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - hive.db_head_state
+  params:
+    type: object
+    example: {}
+  id:
+    type: integer
+    default: 1

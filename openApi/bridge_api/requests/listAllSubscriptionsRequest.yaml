@@ -1,0 +1,26 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  method:
+    type: string
+    enum:
+      - bridge.list_all_subscriptions
+  params:
+    type: object
+    required:
+      - account
+    properties:
+      account:
+        type: string
+        description: 'account name'
+        example: 'good-karma'
+  jsonrpc:
+    type: string
+    default: "2.0"
+  id:
+    type: integer
+    default: 1

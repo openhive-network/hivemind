@@ -1,0 +1,36 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - database_api.list_comments
+  params:
+    type: object
+    required:
+      - start
+      - order
+    properties:
+      start:
+        description: '"start": ["{author}","{update_date}","{start_author}","{start_permlink}"]'
+        example: ["gtg", "2016-09-06T18:47:33", "gtg", "missing-rewards-while-mining"]
+      limit:
+        type: integer
+        description: "optional 1..1000, default = 1000"
+        default: 1000
+        example: 10
+      order:
+        type: string
+        enum:
+          - by_author_last_update
+        example: "by_author_last_update"
+  id:
+    type: integer
+    default: 1
