@@ -789,7 +789,7 @@
               "extensions": []
             }
           },
-          {
+          {  
             "type": "custom_json_operation",
             "value": {
               "required_auths": [],
@@ -3230,171 +3230,179 @@
     "witness_signature": "",
     "transactions": [
       {
-        "ref_block_num": 100001,
+      "ref_block_num": 100001,
         "ref_block_prefix": 1,
         "expiration": "2020-03-23T12:17:00",
         "operations": [
           {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "test-safari"
-              ],
-              "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive1\",\"notes\":\"I hate first comments!\"}]"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "test-safari"
-              ],
-              "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-271487\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive2\",\"notes\":\"I hate first comments!\"}]"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "test-safari"
-              ],
-              "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-371487\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive3\",\"notes\":\"I hate first comments!\"}]"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "test-safari"
-              ],
-              "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive1-02\",\"notes\":\"I hate second comments too!\"}]"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "test-safari"
-              ],
-              "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-271487\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive2-02\",\"notes\":\"I hate second comments too!\"}]"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "test-safari"
-              ],
-              "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-371487\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive3-02\",\"notes\":\"I hate second comments too!\"}]"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "test-safari"
-              ],
-              "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"First-after-member-post-hive1\",\"notes\":\"I hate first posts!\"}]"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "test-safari"
-              ],
-              "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-271487\",\"account\":\"alice\",\"permlink\":\"First-after-member-post-hive2\",\"notes\":\"I hate first posts!\"}]"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "test-safari"
-              ],
-              "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-371487\",\"account\":\"alice\",\"permlink\":\"First-after-member-post-hive3\",\"notes\":\"I hate first posts!\"}]"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "test-safari"
-              ],
-              "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"Second-after-member-post-hive1\",\"notes\":\"I hate second posts too!\"}]"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "test-safari"
-              ],
-              "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-271487\",\"account\":\"alice\",\"permlink\":\"Second-after-member-post-hive2\",\"notes\":\"I hate second posts too!\"}]"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "test-safari"
-              ],
-              "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-371487\",\"account\":\"alice\",\"permlink\":\"Second-after-member-post-hive3\",\"notes\":\"I hate second posts too!\"}]"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "gtg"
-              ],
-              "id": "community",
-              "json": "[\"unsubscribe\",{\"community\":\"hive-103459\"}]"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "good-karma"
-              ],
-              "id": "community",
-              "json": "[\"unsubscribe\",{\"community\":\"hive-103459\"}]"
-            }
-          },
-          {
-            "type": "delete_comment_operation",
-            "value": {
-              "author": "blocktrades",
-              "permlink": "elephant01"
-            }
+            "ref_block_num": 100001,
+            "ref_block_prefix": 1,
+            "expiration": "2020-03-23T12:17:00",
+            "operations": [
+              {
+                "type": "custom_json_operation",
+                "value": {
+                  "required_auths": [],
+                  "required_posting_auths": [
+                    "test-safari"
+                  ],
+                  "id": "community",
+                  "json": "[\"mutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive1\",\"notes\":\"I hate first comments!\"}]"
+                }
+              },
+              {
+                "type": "custom_json_operation",
+                "value": {
+                  "required_auths": [],
+                  "required_posting_auths": [
+                    "test-safari"
+                  ],
+                  "id": "community",
+                  "json": "[\"mutePost\",{\"community\":\"hive-271487\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive2\",\"notes\":\"I hate first comments!\"}]"
+                }
+              },
+              {
+                "type": "custom_json_operation",
+                "value": {
+                  "required_auths": [],
+                  "required_posting_auths": [
+                    "test-safari"
+                  ],
+                  "id": "community",
+                  "json": "[\"mutePost\",{\"community\":\"hive-371487\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive3\",\"notes\":\"I hate first comments!\"}]"
+                }
+              },
+              {
+                "type": "custom_json_operation",
+                "value": {
+                  "required_auths": [],
+                  "required_posting_auths": [
+                    "test-safari"
+                  ],
+                  "id": "community",
+                  "json": "[\"mutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive1-02\",\"notes\":\"I hate second comments too!\"}]"
+                }
+              },
+              {
+                "type": "custom_json_operation",
+                "value": {
+                  "required_auths": [],
+                  "required_posting_auths": [
+                    "test-safari"
+                  ],
+                  "id": "community",
+                  "json": "[\"mutePost\",{\"community\":\"hive-271487\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive2-02\",\"notes\":\"I hate second comments too!\"}]"
+                }
+              },
+              {
+                "type": "custom_json_operation",
+                "value": {
+                  "required_auths": [],
+                  "required_posting_auths": [
+                    "test-safari"
+                  ],
+                  "id": "community",
+                  "json": "[\"mutePost\",{\"community\":\"hive-371487\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive3-02\",\"notes\":\"I hate second comments too!\"}]"
+                }
+              },
+              {
+                "type": "custom_json_operation",
+                "value": {
+                  "required_auths": [],
+                  "required_posting_auths": [
+                    "test-safari"
+                  ],
+                  "id": "community",
+                  "json": "[\"mutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"First-after-member-post-hive1\",\"notes\":\"I hate first posts!\"}]"
+                }
+              },
+              {
+                "type": "custom_json_operation",
+                "value": {
+                  "required_auths": [],
+                  "required_posting_auths": [
+                    "test-safari"
+                  ],
+                  "id": "community",
+                  "json": "[\"mutePost\",{\"community\":\"hive-271487\",\"account\":\"alice\",\"permlink\":\"First-after-member-post-hive2\",\"notes\":\"I hate first posts!\"}]"
+                }
+              },
+              {
+                "type": "custom_json_operation",
+                "value": {
+                  "required_auths": [],
+                  "required_posting_auths": [
+                    "test-safari"
+                  ],
+                  "id": "community",
+                  "json": "[\"mutePost\",{\"community\":\"hive-371487\",\"account\":\"alice\",\"permlink\":\"First-after-member-post-hive3\",\"notes\":\"I hate first posts!\"}]"
+                }
+              },
+              {
+                "type": "custom_json_operation",
+                "value": {
+                  "required_auths": [],
+                  "required_posting_auths": [
+                    "test-safari"
+                  ],
+                  "id": "community",
+                  "json": "[\"mutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"Second-after-member-post-hive1\",\"notes\":\"I hate second posts too!\"}]"
+                }
+              },
+              {
+                "type": "custom_json_operation",
+                "value": {
+                  "required_auths": [],
+                  "required_posting_auths": [
+                    "test-safari"
+                  ],
+                  "id": "community",
+                  "json": "[\"mutePost\",{\"community\":\"hive-271487\",\"account\":\"alice\",\"permlink\":\"Second-after-member-post-hive2\",\"notes\":\"I hate second posts too!\"}]"
+                }
+              },
+              {
+                "type": "custom_json_operation",
+                "value": {
+                  "required_auths": [],
+                  "required_posting_auths": [
+                    "test-safari"
+                  ],
+                  "id": "community",
+                  "json": "[\"mutePost\",{\"community\":\"hive-371487\",\"account\":\"alice\",\"permlink\":\"Second-after-member-post-hive3\",\"notes\":\"I hate second posts too!\"}]"
+                }
+              },
+              {
+                "type": "custom_json_operation",
+                "value": {
+                  "required_auths": [],
+                  "required_posting_auths": [
+                    "gtg"
+                  ],
+                  "id": "community",
+                  "json": "[\"unsubscribe\",{\"community\":\"hive-103459\"}]"
+                }
+              },
+              {
+                "type": "custom_json_operation",
+                "value": {
+                  "required_auths": [],
+                  "required_posting_auths": [
+                    "good-karma"
+                  ],
+                  "id": "community",
+                  "json": "[\"unsubscribe\",{\"community\":\"hive-103459\"}]"
+                }
+              },
+              {
+                "type": "delete_comment_operation",
+                "value": {
+                  "author": "blocktrades",
+                  "permlink": "elephant01"
+                }
+              }
+            ]
           }
+
         ]
       }
     ],
