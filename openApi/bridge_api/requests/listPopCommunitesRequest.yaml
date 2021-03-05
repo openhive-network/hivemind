@@ -1,0 +1,26 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - bridge.list_pop_communities
+  params:
+    type: object
+    properties:
+      limit:
+        type: integer
+        description: 'limit number of listed communities'
+        minimum: 1
+        maximum: 25
+        default: 25
+  id:
+    type: integer
+    default: 1
