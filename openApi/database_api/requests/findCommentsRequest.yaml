@@ -1,0 +1,28 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - database_api.find_comments
+  params:
+    type: object
+    required:
+      - comments
+    properties:
+      comments:
+        type: array
+        description: '"comments": [["{author}","{permlink}"],*] author + permlink : optional (can be left blank or skipped), but only makes sense when it points to valid post there can be up to 1000 such pairs in single call, duplicates are not squashed, invalid pairs are ignored'
+        example: [["steemit", "firstpost"]]
+        items:
+          type: string
+  id:
+    type: integer
+    default: 1

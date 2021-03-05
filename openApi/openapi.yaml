@@ -1,450 +1,46 @@
+#todo fix not working additionalProperties: false
 openapi: 3.0.2
 info:
   title: Hivemind OpenAPI Specification
   description: 'An OpenAPI specification for Hivemind'
-  version: 0.0.1
+  version: "1.0"
 servers:
-  - url: http://localhost:8080/
+  - url: https://api.hive.blog
+    description: hive.blog API Service
+  - url: https://anyx.io
+    description: anyx.io API Service
+  - url: https://beta.openhive.network
+    description: beta.openhive.network API Service
+  - url: http://localhost:8080
     description: Hivemind local API Service
 components:
   schemas:
-    'Community':
-      type: object
-      required:
-        - id
-        - about
-        - avatar_url
-        - context
-        - created_at
-        - flag_text
-        - is_nsfw
-        - lang
-        - name
-        - num_authors
-        - num_pending
-        - settings
-        - subscribers
-        - sum_pending
-        - team
-        - title
-        - type_id
-      properties:
-        id:
-          type: integer
-        about:
-          type: string
-        admins:
-          type: array
-          items:
-            type: string
-        avatar_url:
-          type: string
-        context:
-          $ref: '#/components/schemas/CommunityContext'
-        created_at:
-          type: string
-          format: date-time
-        flag_text:
-          type: string
-        is_nsfw:
-          type: boolean
-        lang:
-          type: string
-        name:
-          type: string
-        num_authors:
-          type: integer
-        num_pending:
-          type: integer
-        settings:
-          type: object
-        subscribers:
-          type: integer
-        sum_pending:
-          type: integer
-        team:
-          $ref: '#/components/schemas/ListCommunityRoles'
-        title:
-          type: string
-        type_id:
-          type: integer
+    ListCommunityRoles:
+      $ref: './bridge_api/schemas/listCommunityRoles.yaml'
 
-    'ListCommunity':
-      type: object
-      required:
-        - id
-        - about
-        - avatar_url
-        - context
-        - created_at
-        - is_nsfw
-        - lang
-        - name
-        - num_authors
-        - num_pending
-        - subscribers
-        - sum_pending
-        - title
-        - type_id
-      properties:
-        id:
-          type: integer
-        about:
-          type: string
-        admins:
-          type: array
-          items:
-            type: string
-        avatar_url:
-          type: string
-        context:
-          $ref: '#/components/schemas/CommunityContext'
-        created_at:
-          type: string
-          format: date-time
-        is_nsfw:
-          type: boolean
-        lang:
-          type: string
-        name:
-          type: string
-        num_authors:
-          type: integer
-        num_pending:
-          type: integer
-        subscribers:
-          type: integer
-        sum_pending:
-          type: integer
-        title:
-          type: string
-        type_id:
-          type: integer
+    CommunityContext:
+      $ref: './bridge_api/schemas/communityContext.yaml'
 
-    'CommunityContext':
-      type: object
-      properties:
-        role:
-          type: string
-        subscribed:
-          type: boolean
-        title:
-          type: string
-          maxLength: 140
-          minLength: 0
+    ErrorMessage:
+      $ref: './schemas/errorMessage.yaml'
 
-    'ListAllSubscriptions':
-      type: array
-      items:
-        type: array
-        items:
-          type: string
-        minItems: 4
-        maxItems: 4
+    CurrencyValue:
+      $ref: './schemas/currencyValue.yaml'
 
-    'ListCommunityRoles':
-      type: array
-      description: "array of arrays with 3 strings: name, role_name, title"
-      items:
-        type: array
-        items:
-          type: string
-        minItems: 3
-        maxItems: 3
+    Comments:
+      $ref: './database_api/schemas/comments.yaml'
 
-    'ListPopCommunities':
-      type: array
-      description: "array of arrays with 2 strings: community name and title"
-      items:
-        type: array
-        items:
-          type: string
-        minItems: 2
-        maxItems: 2
+    Comment:
+      $ref: './database_api/schemas/comment.yaml'
 
-    'ListSubscribers':
-      type: array
-      description: "array of arrays with 4 strings: account name, role name, title, created_at"
-      items:
-        type: array
-        items:
-          type: string
-        minItems: 4
-        maxItems: 4
-
-    'ErrorMessage':
-      type: object
-      required:
-        - jsonrpc
-        - error
-        - id
-      properties:
-        jsonrpc:
-          type: string
-        error:
-          type: object
-          required:
-            - code
-            - message
-            - data
-          properties:
-            code:
-              type: string
-            message:
-              type: string
-            data:
-              type: string
-        id:
-          type: integer
-
-    'CommunityContextRequest':
-      type: object
-      required:
-        - jsonrpc
-        - method
-        - params
-        - id
-      properties:
-        jsonrpc:
-          type: string
-          default: "2.0"
-        method:
-          type: string
-          enum:
-            - bridge.get_community_context
-        params:
-          type: object
-          required:
-            - name
-            - account
-          properties:
-            name:
-              type: string
-              description: 'community name'
-              example: 'hive-189306'
-            account:
-              type: string
-              description: 'account name'
-              example: 'good-karma'
-        id:
-          type: integer
-          default: 1
-
-    'CommunityRequest':
-      type: object
-      required:
-        - jsonrpc
-        - method
-        - params
-        - id
-      properties:
-        jsonrpc:
-          type: string
-          default: "2.0"
-        method:
-          type: string
-          enum:
-            - bridge.get_community
-        params:
-          type: object
-          required:
-            - name
-          properties:
-            name:
-              type: string
-              description: 'community name'
-              example: 'hive-189306'
-            observer:
-              type: string
-              description: 'account name'
-              example: 'good-karma'
-        id:
-          type: integer
-          default: 1
-
-    'ListAllSubscriptionsRequest':
-      required:
-        - jsonrpc
-        - method
-        - params
-        - id
-      type: object
-      properties:
-        jsonrpc:
-          type: string
-          default: "2.0"
-        method:
-          type: string
-          enum:
-            - bridge.list_all_subscriptions
-        params:
-          type: object
-          required:
-            - account
-          properties:
-            account:
-              type: string
-              description: 'account name'
-              example: 'good-karma'
-        id:
-          type: integer
-          default: 1
-
-    'ListCommunitesRequest':
-      type: object
-      required:
-        - jsonrpc
-        - method
-        - params
-        - id
-      properties:
-        jsonrpc:
-          type: string
-          default: "2.0"
-        method:
-          type: string
-          enum:
-            - bridge.list_communitites
-        params:
-          type: object
-          properties:
-            last:
-              type: string
-              description: 'name of community; paging mechanism (cuts out this and "higher" communities, depends on chosen ranking)'
-              example: 'hive-189306'
-            limit:
-              type: integer
-              description: 'limit number of listed communities'
-              minimum: 1
-              maximum: 100
-              default: 100
-            query:
-              type: string
-              description: 'when given turns on filtering for given set of words - words are looked for in "title" and "about" fields'
-              example: 'Hive'
-            sort:
-              type: string
-              description: ' determines order of returned communities'
-              enum:
-                - 'rank'
-                - 'new'
-                - 'subs'
-              default: 'rank'
-            observer:
-              type: string
-              description: '(can be skipped or passed empty), when passed has to point to valid account used to show relation between account and community (subscribed, role and title)'
-              example: 'good-karma'
-        id:
-          type: integer
-          default: 1
-
-    'ListCommunityRolesRequest':
-      type: object
-      required:
-        - jsonrpc
-        - method
-        - params
-        - id
-      properties:
-        jsonrpc:
-          type: string
-          default: "2.0"
-        method:
-          type: string
-          enum:
-            - bridge.list_community_roles
-        params:
-          type: object
-          required:
-            - community
-          properties:
-            community:
-              type: string
-              description: 'community name'
-              example: 'hive-189306'
-            last:
-              type: string
-              description: 'name of community; paging mechanism (cuts out this and "higher" communities, depends on chosen ranking)'
-              example: 'hive-189306'
-            limit:
-              type: integer
-              description: 'limit number of listed communities'
-              minimum: 1
-              maximum: 100
-              default: 100
-        id:
-          type: integer
-          default: 1
-
-    'ListPopCommunitesRequest':
-      type: object
-      required:
-        - jsonrpc
-        - method
-        - params
-        - id
-      properties:
-        jsonrpc:
-          type: string
-          default: "2.0"
-        method:
-          type: string
-          enum:
-            - bridge.list_pop_communitites
-        params:
-          type: object
-          properties:
-            limit:
-              type: integer
-              description: 'limit number of listed communities'
-              minimum: 1
-              maximum: 25
-              default: 25
-        id:
-          type: integer
-          default: 1
-
-    'ListSubscribersRequest':
-      type: object
-      required:
-        - jsonrpc
-        - method
-        - params
-        - id
-      properties:
-        jsonrpc:
-          type: string
-          default: "2.0"
-        method:
-          type: string
-          enum:
-            - bridge.list_pop_communitites
-        params:
-          type: object
-          required:
-            - community
-          properties:
-            community:
-              type: string
-              description: 'community name'
-              example: 'hive-189306'
-            last:
-              type: string
-              description: ' name of subscriber; paging mechanism (cuts out this and "higher" subscribers, depends on created at desc)'
-              example: 'hive-189306'
-            limit:
-              type: integer
-              description: 'limit number of listed subscribers'
-              minimum: 1
-              maximum: 100
-              default: 100
-        id:
-          type: integer
-          default: 1
+    Votes:
+      $ref: './database_api/schemas/votes.yaml'
 
 paths:
   /#bridge.get_community:
     post:
+      tags:
+        - Community
       description: Gets community
       operationId: bridge.get_community
       requestBody:
@@ -452,20 +48,54 @@ paths:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/CommunityRequest'
+              $ref: './bridge_api/requests/communityRequest.yaml'
         required: true
       responses:
         '200':
           description: Community result
           content:
-            'application/json':
+            'application/json; charset=utf-8':
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/Community'
-                  - $ref: '#/components/schemas/ErrorMessage'
+                $ref: './bridge_api/schemas/community.yaml'
+              example:
+                jsonrpc: '2.0'
+                result:
+                  id: 92511
+                  name: hive-186713
+                  title: Test group
+                  about: this is about field
+                  lang: pl
+                  type_id: 1
+                  is_nsfw: true
+                  subscribers: 0
+                  created_at: '2016-09-15 19:47:15'
+                  sum_pending: 0
+                  num_pending: 0
+                  num_authors: 0
+                  avatar_url: ''
+                  description: |-
+                    this is description
+                    second line of description
+                  flag_text: |-
+                    first rule
+                    second rule
+                    third rule
+                    and the last rule
+                  settings: { }
+                  context:
+                    role: guest
+                    subscribed: false
+                    title: ''
+                  team:
+                    - - hive-186713
+                      - owner
+                      - ''
+                id: 1
 
   /#bridge.get_community_context:
     post:
+      tags:
+        - Community
       description: Gets community context
       operationId: bridge.get_community_context
       requestBody:
@@ -473,20 +103,20 @@ paths:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/CommunityContextRequest'
+              $ref: './bridge_api/requests/communityContextRequest.yaml'
         required: true
       responses:
         '200':
           description: Community context result
           content:
-            'application/json':
+            'application/json; charset=utf-8':
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/CommunityContext'
-                  - $ref: '#/components/schemas/ErrorMessage'
+                $ref: './bridge_api/schemas/communityContextResponse.yaml'
 
   /#bridge.list_all_subscriptions:
     post:
+      tags:
+        - Community
       description: Lists all community contexts from communities given account is subscribed to.
       operationId: bridge.list_all_subscriptions
       requestBody:
@@ -494,20 +124,20 @@ paths:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/ListAllSubscriptionsRequest'
+              $ref: './bridge_api/requests/listAllSubscriptionsRequest.yaml'
         required: true
       responses:
         '200':
           description: all subscriptions list
           content:
-            'application/json':
+            'application/json; charset=utf-8':
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ListAllSubscriptions'
-                  - $ref: '#/components/schemas/ErrorMessage'
+                $ref: './bridge_api/schemas/listAllSubscriptions.yaml'
 
   /#bridge.list_communities:
     post:
+      tags:
+        - Community
       description: Gets community
       operationId: bridge.list_communities
       requestBody:
@@ -515,20 +145,20 @@ paths:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/ListCommunitesRequest'
+              $ref: './bridge_api/requests/listCommunitesRequest.yaml'
         required: true
       responses:
         '200':
           description: list of Communities
           content:
-            'application/json':
+            'application/json; charset=utf-8':
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ListCommunity'
-                  - $ref: '#/components/schemas/ErrorMessage'
+                $ref: './bridge_api/schemas/listCommunity.yaml'
 
   /#bridge.list_community_roles:
     post:
+      tags:
+        - Community
       description: Gets community
       operationId: bridge.list_community_roles
       requestBody:
@@ -536,20 +166,20 @@ paths:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/ListCommunityRolesRequest'
+              $ref: './bridge_api/requests/listCommunityRolesRequest.yaml'
         required: true
       responses:
         '200':
           description: list of Community roles
           content:
-            'application/json':
+            'application/json; charset=utf-8':
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ListCommunityRoles'
-                  - $ref: '#/components/schemas/ErrorMessage'
+                $ref: './bridge_api/schemas/listCommunityRoles.yaml'
 
   /#bridge.list_pop_communities:
     post:
+      tags:
+        - Community
       description: Gets community
       operationId: bridge.list_pop_communities
       requestBody:
@@ -557,20 +187,20 @@ paths:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/ListPopCommunitesRequest'
+              $ref: './bridge_api/requests/listPopCommunitesRequest.yaml'
         required: true
       responses:
         '200':
           description: list of Communities
           content:
-            'application/json':
+            'application/json; charset=utf-8':
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ListPopCommunities'
-                  - $ref: '#/components/schemas/ErrorMessage'
+                $ref: './bridge_api/schemas/listPopCommunities.yaml'
 
   /#bridge.list_subscribers:
     post:
+      tags:
+        - Community
       description: list subscribers
       operationId: bridge.list_subscribers
       requestBody:
@@ -578,14 +208,243 @@ paths:
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/ListSubscribersRequest'
+              $ref: './bridge_api/requests/listSubscribersRequest.yaml'
         required: true
       responses:
         '200':
           description: list of Communities
           content:
-            'application/json':
+            'application/json; charset=utf-8':
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/ListSubscribers'
-                  - $ref: '#/components/schemas/ErrorMessage'
+                $ref: './bridge_api/schemas/listSubscribers.yaml'
+
+  /#database_api.find_comments:
+    post:
+      tags:
+        - Database
+      description: find comments
+      operationId: database_api.find_comments
+      requestBody:
+        description: 'Looks for given comments.'
+        content:
+          'application/json':
+            schema:
+              $ref: './database_api/requests/findCommentsRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: list of Communities
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: '#/components/schemas/Comments'
+
+  /#database_api.list_comments[by_author_last_update]:
+    post:
+      tags:
+        - Database
+      description: list comments
+      operationId: database_api.list_comments[by_author_last_update]
+      requestBody:
+        description: 'Lists posts of given author that are not newer than given date.'
+        content:
+          'application/json':
+            schema:
+              $ref: './database_api/requests/listCommentsByAuthorRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: list of Communities
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: '#/components/schemas/Comments'
+
+  /#database_api.list_comments[by_cashout_time]:
+    post:
+      tags:
+        - Database
+      description: list comments
+      operationId: database_api.list_comments[by_cashout_time]
+      requestBody:
+        description: 'Lists comments with cashout at or later than given date'
+        content:
+          'application/json':
+            schema:
+              $ref: './database_api/requests/listCommentsByCashoutTimeRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: list of Communities
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: '#/components/schemas/Comments'
+
+  /#database_api.list_comments[by_last_update]:
+    post:
+      tags:
+        - Database
+      description: list comments
+      operationId: database_api.list_comments[by_last_update]
+      requestBody:
+        description: 'Lists replies to posts of given author that are not newer than given date.'
+        content:
+          'application/json':
+            schema:
+              $ref: './database_api/requests/listCommentsByLastUpdateRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: list of Communities
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: '#/components/schemas/Comments'
+
+  /#database_api.list_comments[by_parent]:
+    post:
+      tags:
+        - Database
+      description: list comments
+      operationId: database_api.list_comments[by_parent]
+      requestBody:
+        description: 'Lists replies to given post.'
+        content:
+          'application/json':
+            schema:
+              $ref: './database_api/requests/listCommentsByParentRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: list of Communities
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: '#/components/schemas/Comments'
+
+  /#database_api.list_comments[by_permlink]:
+    post:
+      tags:
+        - Database
+      description: list comments
+      operationId: database_api.list_comments[by_permlink]
+      requestBody:
+        description: 'Lists comments sorted by author and later with permlink, starting not earlier than given parameters. Can be used also in situation when only part of author name or permlink is known.'
+        content:
+          'application/json':
+            schema:
+              $ref: './database_api/requests/listCommentsByPermlinkRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: list of Communities
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: '#/components/schemas/Comments'
+
+  /#database_api.list_comments[by_root]:
+    post:
+      tags:
+        - Database
+      description: list comments
+      operationId: database_api.list_comments[by_root]
+      requestBody:
+        description: 'Lists comments from given discussion indicated by root post.'
+        content:
+          'application/json':
+            schema:
+              $ref: './database_api/requests/listCommentsByRootRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: list of Communities
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: '#/components/schemas/Comments'
+
+  /#database_api.find_votes:
+    post:
+      tags:
+        - Database
+      description: find votes
+      operationId: database_api.find_votes
+      requestBody:
+        description: 'Lists votes that were cast on given post. author + permlink : mandatory, points to valid post. Pretty much the same as "list_votes" with "by_comment_voter" order, but without paging and with hardcoded 1000 limit.'
+        content:
+          'application/json':
+            schema:
+              $ref: './database_api/requests/findVotesRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: list of Communities
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: '#/components/schemas/Votes'
+
+  /#database_api.list_votes:
+    post:
+      tags:
+        - Database
+      description: list votes
+      operationId: database_api.list_votes
+      requestBody:
+        description: 'Lists votes that were cast on given post.'
+        content:
+          'application/json':
+            schema:
+              $ref: './database_api/requests/listVotesRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: list of Votes
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: '#/components/schemas/Votes'
+
+  /#hive.db_head_state:
+    post:
+      tags:
+        - Hive
+      description: DB head state
+      operationId: hive.db_head_state
+      requestBody:
+        description: 'Get current head state'
+        content:
+          'application/json':
+            schema:
+              $ref: './hive_api/requests/headStateRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: current head state
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './hive_api/schemas/headState.yaml'
+
+  /#hive.get_info:
+    post:
+      tags:
+        - Hive
+      description: DB head state
+      operationId: hive.get_info
+      requestBody:
+        description: 'Get current database and hivemind state'
+        content:
+          'application/json':
+            schema:
+              $ref: './hive_api/requests/getInfoRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: DB head state
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './hive_api/schemas/getInfo.yaml'

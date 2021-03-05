@@ -1,0 +1,37 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - database_api.list_votes
+  params:
+    type: object
+    required:
+      - start
+      - order
+    properties:
+      start:
+        description: "author + permlink : mandatory, points to valid post, start_voter : optional (can be left blank but not skipped), when given has to point to valid account; paging mechanism"
+        example: ["roelandp", "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours", "winstonwolfe"]
+      limit:
+        type: integer
+        description: 'limit number of listed communities'
+        minimum: 1
+        maximum: 1000
+        default: 1000
+      order:
+        type: string
+        enum:
+          - by_comment_voter
+          - by_voter_comment
+  id:
+    type: integer
+    default: 1

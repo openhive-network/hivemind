@@ -1,0 +1,23 @@
+type: object
+required:
+  - jsonrpc
+  - error
+  - id
+properties:
+  jsonrpc:
+    type: string
+  error:
+    type: object
+    required:
+      - code
+      - message
+      - data
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+      data:
+        type: string
+  id:
+    type: integer
