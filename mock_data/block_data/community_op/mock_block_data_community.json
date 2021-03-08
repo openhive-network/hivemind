@@ -531,6 +531,46 @@
               "json_metadata": "",
               "extensions": []
             }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "hive-167892",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
           },          
           {
             "type": "comment_operation",
@@ -797,7 +837,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"setRole\",{\"community\":\"hive-\",\"account\":\"test-safari\",\"role\":\"admin\"}]"
+              "json": "[\"setRole\",{\"community\":\"hive-157439\",\"account\":\"test-safari\",\"role\":\"admin\"}]"
             }
           },
           {
@@ -816,10 +856,10 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
-                "hive-"
+                "test-safari"
               ],
               "id": "community",
-              "json": "[\"setRole\",{\"community\":\"hive-\",\"account\":\"alice\",\"role\":\"member\"}]"
+              "json": "[\"setRole\",{\"community\":\"hive-167892\",\"account\":\"test-safari\",\"role\":\"admin\"}]"
             }
           },
           {
@@ -838,10 +878,21 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
+                "hive-167892"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-167892\",\"account\":\"alice\",\"role\":\"muted\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
                 "hive-171487"
               ],
               "id": "community",
-              "json": "[\"setRole\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"role\":\"member\"}]"
+              "json": "[\"setRole\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"role\":\"muted\"}]"
             }
           },
           {
@@ -852,7 +903,7 @@
                 "alice"
               ],
               "id": "community",
-              "json": "[\"subscribe\",{\"community\":\"hive-\"}]"
+              "json": "[\"subscribe\",{\"community\":\"hive-157439\"}]"
             }
           },     
           {
@@ -937,7 +988,7 @@
             "type": "comment_operation",
             "value": {
               "parent_author": "",
-              "parent_permlink": "hive-",
+              "parent_permlink": "hive-157439",
               "author": "test-safari",
               "permlink": "please-comment-hive2",
               "title": "Comment my post01",
@@ -949,7 +1000,7 @@
             "type": "comment_operation",
             "value": {
               "parent_author": "",
-              "parent_permlink": "hive-",
+              "parent_permlink": "hive-157439",
               "author": "test-safari",
               "permlink": "please-comment-hive2-02",
               "title": "Comment my post02",
@@ -961,7 +1012,7 @@
             "type": "comment_operation",
             "value": {
               "parent_author": "",
-              "parent_permlink": "hive-",
+              "parent_permlink": "hive-157439",
               "author": "test-safari",
               "permlink": "please-comment-hive2-03",
               "title": "Comment my post03",
@@ -1021,7 +1072,7 @@
             "type": "comment_operation",
             "value": {
               "parent_author": "",
-              "parent_permlink": "hive-",
+              "parent_permlink": "hive-157439",
               "author": "alice",
               "permlink": "My-first-post-hive-2",
               "title": "Hello",
@@ -1262,7 +1313,7 @@
             "type": "comment_operation",
             "value": {
               "parent_author": "",
-              "parent_permlink": "hive-",
+              "parent_permlink": "hive-157439",
               "author": "alice",
               "permlink": "My-second-post-hive2",
               "title": "Hello x2",
@@ -1298,7 +1349,7 @@
             "type": "comment_operation",
             "value": {
               "parent_author": "",
-              "parent_permlink": "hive-",
+              "parent_permlink": "hive-157439",
               "author": "alice",
               "permlink": "My-third-post-hive2",
               "title": "Hello x3",
@@ -1401,7 +1452,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-\", \"account\":\"alice\",\"permlink\":\"comment-to-please-comment-hive2\",\"notes\":\"first muted comment\"}]"
+              "json": "[\"mutePost\",{\"community\":\"hive-157439\", \"account\":\"alice\",\"permlink\":\"comment-to-please-comment-hive2\",\"notes\":\"first muted comment\"}]"
             }
           },
           {
@@ -1434,7 +1485,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-\", \"account\":\"alice\",\"permlink\":\"comment-to-please-comment-hive2-02\",\"notes\":\"first muted comment\"}]"
+              "json": "[\"mutePost\",{\"community\":\"hive-157439\", \"account\":\"alice\",\"permlink\":\"comment-to-please-comment-hive2-02\",\"notes\":\"first muted comment\"}]"
             }
           },
           {
@@ -1467,7 +1518,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-\",\"account\":\"alice\",\"permlink\":\"My-first-post-hive-2\",\"notes\":\"first muted post\"}]"
+              "json": "[\"mutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"My-first-post-hive-2\",\"notes\":\"first muted post\"}]"
             }
           },
           {
@@ -1500,7 +1551,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-\",\"account\":\"alice\",\"permlink\":\"My-second-post-hive-2\",\"notes\":\"second muted post\"}]"
+              "json": "[\"mutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"My-second-post-hive-2\",\"notes\":\"second muted post\"}]"
             }
           },
           {
@@ -1597,7 +1648,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"unmutePost\",{\"community\":\"hive-\", \"account\":\"alice\",\"permlink\":\"comment-to-please-comment-hive2\",\"notes\":\"Unmuted her first comment\"}]"
+              "json": "[\"unmutePost\",{\"community\":\"hive-157439\", \"account\":\"alice\",\"permlink\":\"comment-to-please-comment-hive2\",\"notes\":\"Unmuted her first comment\"}]"
             }
           },
           {
@@ -1630,7 +1681,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"unmutePost\",{\"community\":\"hive-\",\"account\":\"alice\",\"permlink\":\"My-first-post-hive-2\",\"notes\":\"Unmuted her first post\"}]"
+              "json": "[\"unmutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"My-first-post-hive-2\",\"notes\":\"Unmuted her first post\"}]"
             }
           },
           {
@@ -1702,10 +1753,10 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
-                "hive-"
+                "hive-157439"
               ],
               "id": "community",
-              "json": "[\"setRole\",{\"community\":\"hive-\",\"account\":\"alice\",\"role\":\"muted\"}]"
+              "json": "[\"setRole\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"role\":\"muted\"}]"
             }
           },
           {
@@ -1920,7 +1971,7 @@
             "type": "comment_operation",
             "value": {
               "parent_author": "",
-              "parent_permlink": "hive-",
+              "parent_permlink": "hive-157439",
               "author": "alice",
               "permlink": "First-after-muted-post-hive2",
               "title": "Hello x4",
@@ -1956,7 +2007,7 @@
             "type": "comment_operation",
             "value": {
               "parent_author": "",
-              "parent_permlink": "hive-",
+              "parent_permlink": "hive-157439",
               "author": "alice",
               "permlink": "Second-after-muted-post-hive2",
               "title": "Hello x5",
@@ -1992,7 +2043,7 @@
             "type": "comment_operation",
             "value": {
               "parent_author": "",
-              "parent_permlink": "hive-",
+              "parent_permlink": "hive-157439",
               "author": "alice",
               "permlink": "Third-after-muted-post-hive2",
               "title": "Hello x6",
@@ -2387,7 +2438,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-\", \"account\":\"alice\",\"permlink\":\"after-muted-comment-to-please-comment-hive2\",\"notes\":\"I hate first comments!\"}]"
+              "json": "[\"mutePost\",{\"community\":\"hive-157439\", \"account\":\"alice\",\"permlink\":\"after-muted-comment-to-please-comment-hive2\",\"notes\":\"I hate first comments!\"}]"
             }
           },
           {
@@ -2420,7 +2471,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-\", \"account\":\"alice\",\"permlink\":\"after-muted-comment-to-please-comment-hive2-02\",\"notes\":\"I hate second comments too!\"}]"
+              "json": "[\"mutePost\",{\"community\":\"hive-157439\", \"account\":\"alice\",\"permlink\":\"after-muted-comment-to-please-comment-hive2-02\",\"notes\":\"I hate second comments too!\"}]"
             }
           },
           {
@@ -2453,7 +2504,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-\",\"account\":\"alice\",\"permlink\":\"First-after-muted-post-hive2\",\"notes\":\"I hate first posts!\"}]"
+              "json": "[\"mutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"First-after-muted-post-hive2\",\"notes\":\"I hate first posts!\"}]"
             }
           },
           {
@@ -2486,7 +2537,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-\",\"account\":\"alice\",\"permlink\":\"Second-after-muted-post-hive2\",\"notes\":\"I hate second posts too!\"}]"
+              "json": "[\"mutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"Second-after-muted-post-hive2\",\"notes\":\"I hate second posts too!\"}]"
             }
           },
           {
@@ -2607,7 +2658,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"unmutePost\",{\"community\":\"hive-\",\"account\":\"alice\",\"permlink\":\"after-muted-comment-to-please-comment-hive2\",\"notes\":\"Unmute first comment\"}]"
+              "json": "[\"unmutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"after-muted-comment-to-please-comment-hive2\",\"notes\":\"Unmute first comment\"}]"
             }
           },
           {
@@ -2640,7 +2691,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"unmutePost\",{\"community\":\"hive-\",\"account\":\"alice\",\"permlink\":\"First-after-muted-post-hive2\",\"notes\":\"Unmute first post\"}]"
+              "json": "[\"unmutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"First-after-muted-post-hive2\",\"notes\":\"Unmute first post\"}]"
             }
           },
           {
@@ -2772,7 +2823,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"setRole\",{\"community\":\"hive-\",\"account\":\"alice\",\"role\":\"member\"}]"
+              "json": "[\"setRole\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"role\":\"member\"}]"
             }
           },
           {
@@ -2956,7 +3007,7 @@
             "type": "comment_operation",
             "value": {
               "parent_author": "",
-              "parent_permlink": "hive-",
+              "parent_permlink": "hive-157439",
               "author": "alice",
               "permlink": "First-after-member-post-hive2",
               "title": "Hello",
@@ -2992,7 +3043,7 @@
             "type": "comment_operation",
             "value": {
               "parent_author": "",
-              "parent_permlink": "hive-",
+              "parent_permlink": "hive-157439",
               "author": "alice",
               "permlink": "Second-after-member-post-hive2",
               "title": "Hello",
@@ -3028,7 +3079,7 @@
             "type": "comment_operation",
             "value": {
               "parent_author": "",
-              "parent_permlink": "hive-",
+              "parent_permlink": "hive-157439",
               "author": "alice",
               "permlink": "Third-after-member-post-hive2",
               "title": "Hello",
@@ -3253,7 +3304,7 @@
                   "test-safari"
                 ],
                 "id": "community",
-                "json": "[\"mutePost\",{\"community\":\"hive-\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive2\",\"notes\":\"I hate first comments!\"}]"
+                "json": "[\"mutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive2\",\"notes\":\"I hate first comments!\"}]"
               }
             },
             {
@@ -3286,7 +3337,7 @@
                   "test-safari"
                 ],
                 "id": "community",
-                "json": "[\"mutePost\",{\"community\":\"hive-\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive2-02\",\"notes\":\"I hate second comments too!\"}]"
+                "json": "[\"mutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive2-02\",\"notes\":\"I hate second comments too!\"}]"
               }
             },
             {
@@ -3319,7 +3370,7 @@
                   "test-safari"
                 ],
                 "id": "community",
-                "json": "[\"mutePost\",{\"community\":\"hive-\",\"account\":\"alice\",\"permlink\":\"First-after-member-post-hive2\",\"notes\":\"I hate first posts!\"}]"
+                "json": "[\"mutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"First-after-member-post-hive2\",\"notes\":\"I hate first posts!\"}]"
               }
             },
             {
@@ -3352,7 +3403,7 @@
                   "test-safari"
                 ],
                 "id": "community",
-                "json": "[\"mutePost\",{\"community\":\"hive-\",\"account\":\"alice\",\"permlink\":\"Second-after-member-post-hive2\",\"notes\":\"I hate second posts too!\"}]"
+                "json": "[\"mutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"Second-after-member-post-hive2\",\"notes\":\"I hate second posts too!\"}]"
               }
             },
             {
@@ -3434,7 +3485,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"unmutePost\",{\"community\":\"hive-\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive2\",\"notes\":\"Unmute first comment\"}]"
+              "json": "[\"unmutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive2\",\"notes\":\"Unmute first comment\"}]"
             }
           },
           {
@@ -3467,7 +3518,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"unmutePost\",{\"community\":\"hive-\",\"account\":\"alice\",\"permlink\":\"First-after-member-post-hive2\",\"notes\":\"Unmute first post\"}]"
+              "json": "[\"unmutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"First-after-member-post-hive2\",\"notes\":\"Unmute first post\"}]"
             }
           },
           {
