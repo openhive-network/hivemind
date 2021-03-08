@@ -17,7 +17,7 @@ for sql in postgres_handle_view_changes.sql \
           hive_muted_accounts_view.sql \
           hive_muted_accounts_by_id_view.sql \
           hive_blacklisted_accounts_by_observer_view.sql \
-	  get_post_view_by_id.sql \
+	        get_post_view_by_id.sql \
           hive_post_operations.sql \
           head_block_time.sql \
           update_feed_cache.sql \
@@ -69,6 +69,8 @@ for sql in postgres_handle_view_changes.sql \
           bridge_list_community_roles.sql \
           bridge_list_pop_communities.sql \
           bridge_list_subscribers.sql \
+          update_follow_count.sql \
+          delete_reblog_feed_cache.sql \
           follows.sql
 
 do
