@@ -34,7 +34,7 @@ custom_json_operation("[\"flagPost\",{\"community\":\"hive-135485\",\"account\":
 custom_json_operation("[\"setRole\",{\"community\":\"hive-157439\",\"account\":\"test-safari\",\"role\":\"admin\"}]")
 custom_json_operation("[\"setRole\",{\"community\":\"hive-198723\",\"account\":\"test-safari\",\"role\":\"admin\"}]")
 custom_json_operation("[\"setRole\",{\"community\":\"hive-167892\",\"account\":\"test-safari\",\"role\":\"admin\"}]")
-custom_json_operation("[\"setRole\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"role\":\"member\"}]")
+custom_json_operation("[\"setRole\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"role\":\"muted\"}]")
 custom_json_operation("[\"setRole\",{\"community\":\"hive-167892\",\"account\":\"alice\",\"role\":\"muted\"}]")
 custom_json_operation("[\"setRole\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"role\":\"member\"}]")
 custom_json_operation("[\"subscribe\",{\"community\":\"hive-171487\"}]")
