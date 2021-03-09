@@ -13,28 +13,6 @@ servers:
     description: beta.openhive.network API Service
   - url: http://localhost:8080
     description: Hivemind local API Service
-components:
-  schemas:
-    ListCommunityRoles:
-      $ref: './bridge_api/schemas/listCommunityRoles.yaml'
-
-    CommunityContext:
-      $ref: './bridge_api/schemas/communityContext.yaml'
-
-    ErrorMessage:
-      $ref: './schemas/errorMessage.yaml'
-
-    CurrencyValue:
-      $ref: './schemas/currencyValue.yaml'
-
-    Comments:
-      $ref: './database_api/schemas/comments.yaml'
-
-    Comment:
-      $ref: './database_api/schemas/comment.yaml'
-
-    Votes:
-      $ref: './database_api/schemas/votes.yaml'
 
 paths:
   /#bridge.get_community:
@@ -237,7 +215,7 @@ paths:
           content:
             'application/json; charset=utf-8':
               schema:
-                $ref: '#/components/schemas/Comments'
+                $ref: './database_api/schemas/comments.yaml'
 
   /#database_api.list_comments[by_author_last_update]:
     post:
@@ -251,6 +229,15 @@ paths:
           'application/json':
             schema:
               $ref: './database_api/requests/listCommentsByAuthorRequest.yaml'
+              # example added for compatibility with dredd tests
+            example:
+              jsonrpc: '2.0'
+              method: database_api.list_comments
+              params:
+                start: ["gtg", "2016-09-06T18:47:33", "gtg", "missing-rewards-while-mining"]
+                limit: 10
+                order: by_author_last_update
+              id: 1
         required: true
       responses:
         '200':
@@ -258,7 +245,7 @@ paths:
           content:
             'application/json; charset=utf-8':
               schema:
-                $ref: '#/components/schemas/Comments'
+                $ref: './database_api/schemas/comments.yaml'
 
   /#database_api.list_comments[by_cashout_time]:
     post:
@@ -272,6 +259,15 @@ paths:
           'application/json':
             schema:
               $ref: './database_api/requests/listCommentsByCashoutTimeRequest.yaml'
+            # example added for compatibility with dredd tests
+            example:
+              jsonrpc: '2.0'
+              method: database_api.list_comments
+              params:
+                start: ["1969-12-31T23:59:59","proskynneo","steemit-firstpost-1"]
+                limit: 10
+                order: by_cashout_time
+              id: 1
         required: true
       responses:
         '200':
@@ -279,7 +275,7 @@ paths:
           content:
             'application/json; charset=utf-8':
               schema:
-                $ref: '#/components/schemas/Comments'
+                $ref: './database_api/schemas/comments.yaml'
 
   /#database_api.list_comments[by_last_update]:
     post:
@@ -293,6 +289,15 @@ paths:
           'application/json':
             schema:
               $ref: './database_api/requests/listCommentsByLastUpdateRequest.yaml'
+            # example added for compatibility with dredd tests
+            example:
+              jsonrpc: '2.0'
+              method: database_api.list_comments
+              params:
+                start: ["sykochica", "2016-08-24T19:59:42", "williambanks", "re-sykochica-re-williambanks-re-sykochica-what-is-god-as-told-by-a-13-year-old-20160823t021931580z"]
+                limit: 10
+                order: by_last_update
+              id: 1
         required: true
       responses:
         '200':
@@ -300,7 +305,7 @@ paths:
           content:
             'application/json; charset=utf-8':
               schema:
-                $ref: '#/components/schemas/Comments'
+                $ref: './database_api/schemas/comments.yaml'
 
   /#database_api.list_comments[by_parent]:
     post:
@@ -314,6 +319,15 @@ paths:
           'application/json':
             schema:
               $ref: './database_api/requests/listCommentsByParentRequest.yaml'
+            # example added for compatibility with dredd tests
+            example:
+              jsonrpc: '2.0'
+              method: database_api.list_comments
+              params:
+                start: ["allasyummyfood", "re-givemeyoursteem-winners-of-steemit-food-challenge-3-desserts-to-die-for-20160829t004616466z", "vlad", "re-allasyummyfood-re-givemeyoursteem-winners-of-steemit-food-challenge-3-desserts-to-die-for-20160829t011002757z"]
+                limit: 10
+                order: by_parent
+              id: 1
         required: true
       responses:
         '200':
@@ -321,7 +335,7 @@ paths:
           content:
             'application/json; charset=utf-8':
               schema:
-                $ref: '#/components/schemas/Comments'
+                $ref: './database_api/schemas/comments.yaml'
 
   /#database_api.list_comments[by_permlink]:
     post:
@@ -335,6 +349,15 @@ paths:
           'application/json':
             schema:
               $ref: './database_api/requests/listCommentsByPermlinkRequest.yaml'
+            # example added for compatibility with dredd tests
+            example:
+              jsonrpc: '2.0'
+              method: database_api.list_comments
+              params:
+                start: ["skypilot", "an-introduction-to-where-eagles-fly-the-american-wilderness-expedition-by-zedekiah-morse"]
+                limit: 10
+                order: by_permlink
+              id: 1
         required: true
       responses:
         '200':
@@ -342,7 +365,7 @@ paths:
           content:
             'application/json; charset=utf-8':
               schema:
-                $ref: '#/components/schemas/Comments'
+                $ref: './database_api/schemas/comments.yaml'
 
   /#database_api.list_comments[by_root]:
     post:
@@ -356,6 +379,15 @@ paths:
           'application/json':
             schema:
               $ref: './database_api/requests/listCommentsByRootRequest.yaml'
+            # example added for compatibility with dredd tests
+            example:
+              jsonrpc: '2.0'
+              method: database_api.list_comments
+              params:
+                start: ["givemeyoursteem", "winners-of-steemit-food-challenge-3-desserts-to-die-for", "vi1son", "re-givemeyoursteem-winners-of-steemit-food-challenge-3-desserts-to-die-for-20160828t172955785z"]
+                limit: 10
+                order: by_root
+              id: 1
         required: true
       responses:
         '200':
@@ -363,7 +395,7 @@ paths:
           content:
             'application/json; charset=utf-8':
               schema:
-                $ref: '#/components/schemas/Comments'
+                $ref: './database_api/schemas/comments.yaml'
 
   /#database_api.find_votes:
     post:
@@ -384,7 +416,7 @@ paths:
           content:
             'application/json; charset=utf-8':
               schema:
-                $ref: '#/components/schemas/Votes'
+                $ref: './database_api/schemas/votes.yaml'
 
   /#database_api.list_votes:
     post:
@@ -398,6 +430,18 @@ paths:
           'application/json':
             schema:
               $ref: './database_api/requests/listVotesRequest.yaml'
+            # example added for compatibility with dredd tests
+            example:
+              jsonrpc: '2.0'
+              method: database_api.list_votes
+              params:
+                start:
+                - roelandp
+                - tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours
+                - winstonwolfe
+                limit: 1000
+                order: by_comment_voter
+              id: 1
         required: true
       responses:
         '200':
@@ -405,7 +449,7 @@ paths:
           content:
             'application/json; charset=utf-8':
               schema:
-                $ref: '#/components/schemas/Votes'
+                $ref: './database_api/schemas/votes.yaml'
 
   /#hive.db_head_state:
     post:

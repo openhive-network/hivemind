@@ -85,7 +85,7 @@ properties:
     format: date-time
     example: "2016-08-24T09:30:03"
   curator_payout_value:
-    $ref: '#/components/schemas/CurrencyValue'
+    $ref: '../../schemas/currencyValue.yaml'
   depth:
     type: integer
     example: 0
@@ -104,7 +104,7 @@ properties:
     format: date-time
     example: "2016-08-24T09:30:03"
   max_accepted_payout:
-    $ref: '#/components/schemas/CurrencyValue'
+    $ref: '../../schemas/currencyValue.yaml'
   max_cashout_time:
     type: string
     format: date-time
@@ -140,7 +140,7 @@ properties:
     type: string
     example: "Welcome to Hive!"
   total_payout_value:
-    $ref: '#/components/schemas/CurrencyValue'
+    $ref: '../../schemas/currencyValue.yaml'
   total_vote_weight:
     type: integer
     example: 0

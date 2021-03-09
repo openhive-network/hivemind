@@ -19,6 +19,9 @@ properties:
       - order
     properties:
       start:
+        type: array
+        items:
+          type: string
         description: "author + permlink : mandatory, points to valid post, start_voter : optional (can be left blank but not skipped), when given has to point to valid account; paging mechanism"
         example: ["roelandp", "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours", "winstonwolfe"]
       limit:

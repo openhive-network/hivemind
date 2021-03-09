@@ -19,6 +19,9 @@ properties:
       - order
     properties:
       start:
+        type: array
+        items:
+          type: string
         description: '["{root_author}","{root_permlink}","{start_author}","{start_permlink}"]
           root_author + root_permlink : mandatory; points to root post of discussion
           start_author + start_permlink : optional (can be left blank but not skipped), when given have to point to valid post; paging mechanism'

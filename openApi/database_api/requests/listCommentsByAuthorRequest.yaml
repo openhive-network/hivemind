@@ -19,6 +19,9 @@ properties:
       - order
     properties:
       start:
+        type: array
+        items:
+          type: string
         description: '"start": ["{author}","{update_date}","{start_author}","{start_permlink}"]'
         example: ["gtg", "2016-09-06T18:47:33", "gtg", "missing-rewards-while-mining"]
       limit:

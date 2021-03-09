@@ -19,6 +19,9 @@ properties:
       - order
     properties:
       start:
+        type: array
+        items:
+          type: string
         description: '["{parent_author}","{update_date}","{start_author}","{start_permlink}"]
           parent_author : mandatory; points to valid account
           update_date : mandatory; update date in format "Y-m-d H:M:S" or "Y-m-dTH:M:S"
