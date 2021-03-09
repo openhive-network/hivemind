@@ -19,6 +19,9 @@ properties:
       - order
     properties:
       start:
+        type: array
+        items:
+          type: string
         description: '["{cashout_date}","{start_author}","{start_permlink}"] 
           cashout_date : mandatory; cashout date in format "Y-m-d H:M:S" or "Y-m-dTH:M:S", if year 1969 is passed it means paidout posts
           start_author + start_permlink : optional (can be left blank but not skipped), when given have to point to valid post; paging mechanism'
