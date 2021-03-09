@@ -1,0 +1,19 @@
+# to implement as inheritance mechanism when solution for not working dredd will be found https://github.com/apiaryio/dredd/issues/1339
+# or find a way to convert composite schema to simple schema
+type: object
+required:
+  - jsonrpc
+  - id
+  - method
+  - params
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  id:
+    type: integer
+    default: 1
+  method:
+    type: string
+  params:
+    type: object

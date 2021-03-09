@@ -41,7 +41,7 @@ properties:
         avatar_url:
           type: string
         context:
-          $ref: '#/components/schemas/CommunityContext'
+          $ref: './communityContext.yaml'
         created_at:
           type: string
           format: date-time
