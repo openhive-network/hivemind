@@ -32,6 +32,7 @@ EOF
           mock_data/block_data/community_op/mock_block_data_community.json \
           mock_data/block_data/reblog_op/mock_block_data_reblog.json \
           mock_data/block_data/reblog_op/mock_block_data_reblog_delete.json \
+          mock_data/block_data/payments_op/mock_block_data_payments.json \
         --community-start-block 4999998 \
         2>&1 | tee -i hivemind-sync.log
 

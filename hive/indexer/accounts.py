@@ -79,6 +79,13 @@ class Accounts(DbAdapterHolder):
         return cls._ids[name]
 
     @classmethod
+    def get_id_noexept(cls, name):
+        """Get account id by name. Return None if not found."""
+        assert isinstance(name, str), "account name should be string"
+        return cls._ids.get(name, None)
+
+
+    @classmethod
     def exists(cls, names):
         """Check if an account name exists."""
         if isinstance(names, str):
