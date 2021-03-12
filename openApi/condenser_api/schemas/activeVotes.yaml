@@ -1,0 +1,45 @@
+type: object
+additionalProperties: false
+required:
+  - jsonrpc
+  - result
+  - id
+properties:
+  jsonrpc:
+    type: string
+    example: "2.0"
+  id:
+    type: integer
+    example: 1
+  result:
+    type: array
+    items:
+      type: object
+      required:
+        - percent
+        - reputation
+        - rshares
+        - time
+        - voter
+        - weight
+      properties:
+        percent:
+          type: integer
+          example: 10000
+        reputation:
+          type: integer
+          example: 172643285682
+        rshares:
+          type: integer
+          example: 103335387
+        time:
+          type: string
+          format: date-time
+          example: "2016-07-15T16:00:09"
+        voter:
+          type: string
+          example: "creding"
+        weight:
+          type: integer
+          example: 5265425467638
+

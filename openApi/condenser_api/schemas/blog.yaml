@@ -1,0 +1,38 @@
+type: object
+additionalProperties: false
+required:
+  - jsonrpc
+  - result
+  - id
+properties:
+  jsonrpc:
+    type: string
+    example: "2.0"
+  id:
+    type: integer
+    example: 1
+  result:
+    type: array
+    items:
+      type: object
+      required:
+        - blog
+        - entry_id
+        - comment
+        - reblogged_on
+      properties:
+        blog:
+          type: string
+          example: "noodhoog"
+        entry_id:
+          type: integer
+          example: 103
+        comment:
+          type: object
+          $ref: './activeVotesComment.yaml'
+        reblogged_on:
+          type: string
+          format: date-time
+          example: "2016-07-15T16:00:09"
+
+

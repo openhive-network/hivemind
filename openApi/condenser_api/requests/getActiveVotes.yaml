@@ -1,0 +1,30 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - condenser_api.get_active_votes
+  params:
+    type: object
+    required:
+      - author
+      - permlink
+    description: "author + permlink : mandatory, points to valid post"
+    properties:
+      author:
+        type: string
+        example: "noodhoog"
+      permlink:
+        type: string
+        example: "steem-opening-the-forgotten-economy"
+  id:
+    type: integer
+    default: 1
