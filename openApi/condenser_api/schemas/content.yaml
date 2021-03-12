@@ -1,0 +1,146 @@
+type: object
+additionalProperties: false
+required:
+  - author
+  - permlink
+  - category
+  - title
+  - body
+  - json_metadata
+  - created
+  - last_update
+  - depth
+  - children
+  - last_payout
+  - cashout_time
+  - total_payout_value
+  - curator_payout_value
+  - pending_payout_value
+  - promoted
+  - replies
+  - body_length
+  - author_reputation
+  - parent_author
+  - parent_permlink
+  - url
+  - root_title
+  - beneficiaries
+  - max_accepted_payout
+  - percent_hbd
+  - net_rshares
+  - active_votes
+properties:
+  author:
+    type: string
+    example: "steemit"
+  permlink:
+    type: string
+    example: "firstpost"
+  category:
+    type: string
+    example: "meta"
+  title:
+    type: string
+    example: "Welcome to Hive!"
+  body:
+    type: string
+    example: "Steemit is a social media platform where anyone can earn STEEM points by posting. The more people who like a post, the more STEEM the poster earns. Anyone can sell their STEEM for cash or vest it to boost their voting power."
+  json_metadata:
+    type: string
+    example: "{\"tags\":[\"steemit\",\"reddit\",\"stats\",\"theydidthemath\",\"users\"],\"image\":[\"http://www.oerca.com/images/discussion_forum.jpg\"]}"
+  created:
+    type: string
+    format: date-time
+    example: "2016-08-24T09:30:03"
+  last_update:
+    type: string
+    format: date-time
+    example: "2016-08-24T09:30:03"
+  depth:
+    type: integer
+    example: 0
+  children:
+    type: integer
+    example: 7
+  last_payout:
+    type: string
+    format: date-time
+    example: "2016-08-24T09:30:03"
+  cashout_time:
+    type: string
+    format: date-time
+    example: "2016-08-24T09:30:03"
+  total_payout_value:
+    type: string
+    example: "0.763 HBD"
+  curator_payout_value:
+    type: string
+    example: "0.763 HBD"
+  pending_payout_value:
+    type: string
+    example: "0.763 HBD"
+  promoted:
+    type: string
+    example: "0.763 HBD"
+  replies:
+    description: "implemented as empty array"
+    type: array
+    items:
+      example: null
+    example: []
+  body_length:
+    type: integer
+    example: 1529
+  author_reputation:
+    type: integer
+    example: 2644191137390
+  parent_author:
+    type: string
+    example: "steemit"
+  parent_permlink:
+    type: string
+    example: "meta"
+  url:
+    type: string
+    example: "/steemit/@noodhoog/i-was-wrong-steemit-is-actually-beating-reddit-in-deep-user-participation"
+  root_title:
+    type: string
+    example: "I was wrong! Steemit is actually beating Reddit in deep user participation!"
+  beneficiaries:
+    type: array
+    items:
+      type: string
+      example: "steemit"
+  max_accepted_payout:
+    type: string
+    example: "1000000.000 HBD"
+  percent_hbd:
+    type: integer
+    example: 10000
+
+  net_rshares:
+    type: integer
+    example: 1361634219384
+  active_votes:
+    type: array
+    items:
+      type: object
+      required:
+        - percent
+        - reputation
+        - rshares
+        - voter
+      properties:
+        percent:
+          type: integer
+          example: 10000
+        reputation:
+          type: integer
+          example: 172643285682
+        rshares:
+          type: integer
+          example: 103335387
+        voter:
+          type: string
+          example: "creding"
+

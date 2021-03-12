@@ -12,12 +12,6 @@ properties:
     type: integer
     example: 1
   result:
-    type: object
-    required:
-      - comments
-    properties:
-      comments:
-        type: array
-        items:
-          type: object
-          $ref: '../../schemas/comment.yaml'
+    type: array
+    items:
+      $ref: './content.yaml'
