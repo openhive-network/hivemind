@@ -1,0 +1,27 @@
+type: object
+additionalProperties: false
+required:
+  - jsonrpc
+  - result
+  - id
+properties:
+  jsonrpc:
+    type: string
+    example: "2.0"
+  id:
+    type: integer
+    example: 1
+  result:
+    type: array
+    items:
+      type: object
+      required:
+        - account
+        - reputation
+      properties:
+        account:
+          type: string
+          example: "a-1"
+        reputation:
+          type: integer
+          example: 37040190
