@@ -70,6 +70,7 @@ BEGIN
         ORDER BY hp2.id
     ) ds,
  LATERAL get_post_view_by_id(ds.id) hpv
+    WHERE NOT hpv.is_muted
     ORDER BY ds.id
     LIMIT 2000;
 END
