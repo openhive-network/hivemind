@@ -57,6 +57,7 @@ BEGIN
             FROM live_posts_comments_view hp left outer join blacklisted_by_observer_view on (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp.author_id)
             WHERE hp.id = __post_id
             AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp.author_id))
+            AND NOT hp.is_muted
             UNION ALL
             SELECT children.id, children.parent_id, blacklisted_by_observer_view.source as source
             FROM live_posts_comments_view children left outer join blacklisted_by_observer_view on (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = children.author_id)
