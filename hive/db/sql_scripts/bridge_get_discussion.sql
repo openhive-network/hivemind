@@ -69,6 +69,7 @@ BEGIN
         SELECT hp2.id, cp.source
         FROM hive_posts hp2
         JOIN child_posts cp ON cp.id = hp2.id
+        WHERE NOT hp2.is_muted
         ORDER BY hp2.id
     ) ds,
  LATERAL get_post_view_by_id(ds.id) hpv

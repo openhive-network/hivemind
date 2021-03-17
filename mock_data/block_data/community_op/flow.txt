@@ -160,7 +160,7 @@ custom_json_operation("[\"mutePost\",{\"community\":\"hive-157439\",\"account\":
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"permlink\":\"after-muted-comment-to-please-comment-hive3\",\"notes\":\"I hate first comments!\"}]")
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"after-muted-comment-to-please-comment-hive1-02\",\"notes\":\"I hate second comments too!\"}]")
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"after-muted-comment-to-please-comment-hive2-02\",\"notes\":\"I hate second comments too!\"}]")
-custom_json_operation("[\"mutePost\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"permlink\":\"after-muted-comment-to-please-comment-hive2-03\",\"notes\":\"I hate second comments too!\"}]")
+custom_json_operation("[\"mutePost\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"permlink\":\"after-muted-comment-to-please-comment-hive3-03\",\"notes\":\"I hate second comments too!\"}]")
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"First-after-muted-post-hive1\",\"notes\":\"I hate first posts!\"}]")
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"First-after-muted-post-hive2\",\"notes\":\"I hate first posts!\"}]")
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"permlink\":\"First-after-muted-post-hive3\",\"notes\":\"I hate first posts!\"}]")
