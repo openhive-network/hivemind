@@ -23,7 +23,7 @@ properties:
         example: "nkdk"
       start_permlink:
         type: string
-        description:  "optional, when given along with start_author has to point to valid post, paging mechanism"
+        description: "optional, when given along with start_author has to point to valid post, paging mechanism"
         example: "withered--distort-engulf-official-premiere"
       limit:
         type: integer

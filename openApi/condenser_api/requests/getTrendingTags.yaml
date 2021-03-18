@@ -1,0 +1,29 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - condenser_api.get_trending_tags
+  params:
+    type: object
+    properties:
+      start_tag:
+        type: string
+        description: "optional, when given has to point to valid tag; paging mechanism (cuts out this and more paying categories)"
+        example: "poems"
+      limit:
+        type: integer
+        description: "optional, 1..250, default = 250"
+        example: 10
+        default: 250
+  id:
+    type: integer
+    default: 1

@@ -27,7 +27,7 @@ properties:
         example: "nkdk"
       start_permlink:
         type: string
-        description:  "optional, when given have to point to valid start post; paging mechanism (cuts out this and newer posts/reblogs)"
+        description: "optional, when given have to point to valid start post; paging mechanism (cuts out this and newer posts/reblogs)"
         example: "withered--distort-engulf-official-premiere"
       limit:
         type: integer

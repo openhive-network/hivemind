@@ -1,0 +1,31 @@
+type: object
+additionalProperties: false
+required:
+  - jsonrpc
+  - result
+  - id
+properties:
+  jsonrpc:
+    type: string
+    example: "2.0"
+  id:
+    type: integer
+    example: 1
+  result:
+    type: object
+    required:
+      - account
+      - following_count
+      - follower_count
+    properties:
+      account:
+        type: string
+        example: "gtg"
+      following_count:
+        type: integer
+        example: 31
+      follower_count:
+        type: integer
+        example: 80
+
+

@@ -1,0 +1,38 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - condenser_api.get_following
+  params:
+    type: object
+    required:
+      - account
+    properties:
+      account: 
+        description: "mandatory, points to valid account"
+        type: string
+        example: "morganpearl"
+      start: 
+        description: "optional, when provided has to point to valid account, paging mechanism (cuts out this and newer follows)"
+        type: string
+        example: "fyrstikken"
+      follow_type:
+        description: "optional, 'blog'/'ignore', default = 'blog'"
+        type: string
+        example: "ignore"
+      limit:
+        type: integer
+        description: "optional, 1..1000, default = 1000"
+        example: 1000
+  id:
+    type: integer
+    default: 1
