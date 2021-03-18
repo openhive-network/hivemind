@@ -1,0 +1,33 @@
+type: object
+additionalProperties: false
+required:
+  - jsonrpc
+  - result
+  - id
+properties:
+  jsonrpc:
+    type: string
+    example: "2.0"
+  id:
+    type: integer
+    example: 1
+  result:
+    type: array
+    items:
+      type: object
+      required:
+        - follower
+        - following
+        - what
+      properties:
+        follower:
+          type: string
+          example: "gtg"
+        following:
+          type: string
+          example: "blockcodes"
+        what:
+          type: array
+          items:
+            type: string
+            example: "blog"

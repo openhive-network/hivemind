@@ -1,0 +1,26 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - condenser_api.get_follow_count
+  params:
+    type: object
+    required:
+      - account
+    properties:
+      account: 
+        description: "mandatory, points to valid account"
+        type: string
+        example: "gtg"
+  id:
+    type: integer
+    default: 1
