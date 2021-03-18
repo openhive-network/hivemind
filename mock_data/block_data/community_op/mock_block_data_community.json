@@ -966,9 +966,33 @@
               "parent_author": "",
               "parent_permlink": "hive-171487",
               "author": "test-safari",
-              "permlink": "please-comment-hive1-02",
-              "title": "Comment my post02",
-              "body": "Comment my posts in this community.02",
+              "permlink": "please-comment-hive1",
+              "title": "Comment my post01",
+              "body": "Comment my posts in this community.01",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-186713",
+              "author": "steemit",
+              "permlink": "muted-in-this-community",
+              "title": "i am muted in this community",
+              "body": "My role do not change",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-186713",
+              "author": "test-safari",
+              "permlink": "parent-post-for-muted-steemit",
+              "title": "steemit-will-comment-this-post",
+              "body": "testing muted people in community",
               "json_metadata": "{}"
             }
           },
@@ -1198,6 +1222,18 @@
               "permlink": "comment-to-please-comment-hive1",
               "title": "",
               "body": "This is my first comment in this community.01",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "test-safari",
+              "parent_permlink": "parent-post-for-muted-steemit",
+              "author": "steemit",
+              "permlink": "comment-to-post-in-community-muted",
+              "title": "",
+              "body": "Muted in this community forever",
               "json_metadata": "{}"
             }
           },
