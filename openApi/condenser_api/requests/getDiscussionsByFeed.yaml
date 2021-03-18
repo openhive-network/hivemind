@@ -1,0 +1,46 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - condenser_api.get_discussions_by_feed
+  params:
+    type: object
+    required:
+      - tag
+    properties:
+      tag:
+        type: string
+        description: "mandatory, have to point on valid account whose feed we are looking at"
+        example: "good-karma"
+      start_author:
+        type: string
+        description: "optional, when given have to point to valid start post; paging mechanism (cuts out this and newer posts)"
+        example: "jl777"
+      start_permlink:
+        type: string
+        description: "optional, when given have to point to valid start post; paging mechanism (cuts out this and newer posts)"
+        example: "300-btc-open-market-purchase-of-steem-spikes-price-to-00324"
+      truncate_body:
+        type: integer
+        description: "optional, default = 0 (meaning no truncation); reduces maximal size of post body, cutting out all excess"
+        example: 0
+      limit:
+        type: integer
+        description: "optional, 1..100, default = 20"
+        example: 10
+      observer:
+        type: string
+        description: "optional (can be skipped or passed empty), when passed has to point to valid account. Used to filter out posts authored by accounts ignored directly or indirectly by the observer"
+        example: ""
+  id:
+    type: integer
+    default: 1

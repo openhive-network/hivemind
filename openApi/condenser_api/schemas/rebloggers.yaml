@@ -12,12 +12,8 @@ properties:
     type: integer
     example: 1
   result:
-    type: object
-    required:
-      - comments
-    properties:
-      comments:
-        type: array
-        items:
-          type: object
-          $ref: './comment.yaml'
+    type: array
+    description: "Array of users who reblogs."
+    items:
+      type: string
+      example: "jamesc"
