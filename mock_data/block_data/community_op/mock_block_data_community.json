@@ -814,21 +814,10 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
-                "hive-186713"
-              ],
-              "id": "community",
-              "json": "[\"setRole\",{\"community\":\"hive-186713\",\"account\":\"steemit\",\"role\":\"muted\"}]"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
                 "hive-198723"
               ],
               "id": "community",
-              "json": "[\"setRole\",{\"community\":\"hive-186713\",\"account\":\"steemit\",\"role\":\"muted\"}]"
+              "json": "[\"setRole\",{\"community\":\"hive-198723\",\"account\":\"steemit\",\"role\":\"muted\"}]"
             }
           },
           {
@@ -977,7 +966,7 @@
               "parent_author": "",
               "parent_permlink": "hive-171487",
               "author": "test-safari",
-              "permlink": "please-comment-hive1",
+              "permlink": "please-comment-hive1-02",
               "title": "Comment my post01",
               "body": "Comment my posts in this community.01",
               "json_metadata": "{}"
@@ -1237,8 +1226,7 @@
             }
           },
           {
-            "type": "comment_operation",
-            
+            "type": "comment_operation",       
             "value": {
               "parent_author": "test-safari",
               "parent_permlink": "parent-post-for-muted-steemit",
