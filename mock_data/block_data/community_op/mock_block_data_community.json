@@ -1242,18 +1242,6 @@
             "type": "comment_operation",
             "value": {
               "parent_author": "test-safari",
-              "parent_permlink": "parent-post-for-muted-steemit",
-              "author": "steemit",
-              "permlink": "comment-to-post-in-community-muted",
-              "title": "",
-              "body": "Muted in this community forever",
-              "json_metadata": "{}"
-            }
-          },
-          {
-            "type": "comment_operation",
-            "value": {
-              "parent_author": "test-safari",
               "parent_permlink": "please-comment-hive1-02",
               "author": "alice",
               "permlink": "comment-to-please-comment-hive1-02",
