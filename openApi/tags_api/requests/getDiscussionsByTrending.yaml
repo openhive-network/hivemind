@@ -1,0 +1,44 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - tags_api.get_discussions_by_trending
+  params:
+    type: object
+    properties:
+      start_author:
+        type: string
+        description: "optional, when given have to point to valid start post; paging mechanism (cuts out this and more trending)"
+        example: "roelandp"
+      start_permlink:
+        type: string
+        description: "optional, when given have to point to valid start post; paging mechanism (cuts out this and more trending)"
+        example: "save-the-date-steemfest-1-11-12-13-november-2016-amsterdam-nl"
+      limit:
+        type: integer
+        description: "optional, 1..100, default = 20"
+        example: 10
+      tag:
+        type: string
+        description: "optional, turns on filtering for posts with given tag; when community tag is used it filters for community posts"
+        example: "steemit"
+      truncate_body:
+        type: integer
+        description: "optional, default = 0 (meaning no truncation); reduces maximal size of post body, cutting out all excess"
+        example: 200
+      observer:
+        type: string
+        description: "optional (can be skipped or passed empty), when passed has to point to valid account. Used to filter out posts authored by accounts ignored directly or indirectly by the observer"
+        example: "alice"
+  id:
+    type: integer
+    default: 1

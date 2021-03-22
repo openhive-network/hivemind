@@ -1,0 +1,43 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - tags_api.get_discussions_by_author_before_date
+  params:
+    type: object
+    required:
+      - author
+      - start_permlink
+    properties:
+      author:
+        type: string
+        description: "Mandatory, points to valid post"
+        example: "demotruk"
+      start_permlink:
+        type: string
+        description: "Mandatory, points to valid post"
+        example: "re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z"
+      limit:
+        type: integer
+        description: "optional, 1..100, default = 20"
+        example: 10
+      before_date:
+        type: string
+        description: "optional, when given should point on start date; completely ignored"
+      truncate_body:
+        type: integer
+        description: "optional, default = 0 (meaning no truncation); reduces maximal size of post body, cutting out all excess"
+        example: 0
+
+  id:
+    type: integer
+    default: 1
