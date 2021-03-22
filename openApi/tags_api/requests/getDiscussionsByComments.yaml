@@ -1,0 +1,34 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - tags_api.get_discussions_by_comments
+  params:
+    type: object
+    required:
+      - start_author
+    properties:
+      start_author:
+        type: string
+        description: "mandatory, points to valid account"
+        example: "nkdk"
+      start_permlink:
+        type: string
+        description: "optional, when given along with start_author has to point to valid post, paging mechanism"
+        example: "withered--distort-engulf-official-premiere"
+      limit:
+        type: integer
+        description: "optional, 1..100, default = 20"
+        example: 10
+  id:
+    type: integer
+    default: 1

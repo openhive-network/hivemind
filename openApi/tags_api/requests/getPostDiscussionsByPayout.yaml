@@ -1,0 +1,42 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - tags_api.get_post_discussions_by_payout
+  params:
+    type: object
+    properties:
+      start_author:
+        type: string
+        description: "optional, when given have to point to valid start post; paging mechanism (cuts out this and more trending)"
+        example: "ericvancewalton"
+      start_permlink:
+        type: string
+        description: "optional, when given have to point to valid start post; paging mechanism (cuts out this and more trending)"
+        example: "alarm-clock-dawn-an-original-novel-part-5"
+      limit:
+        type: integer
+        description: "optional, 1..100, default = 20"
+        example: 10
+        default: 20
+      truncate_body:
+        type: integer
+        description: "optional, default = 0 (meaning no truncation); reduces maximal size of post body, cutting out all excess"
+        example: 200
+        default: 0
+      observer:
+        type: string
+        description: "optional (can be skipped or passed empty), when passed has to point to valid account. Used to filter out posts authored by accounts ignored directly or indirectly by the observer"
+        example: "ignoreall"
+  id:
+    type: integer
+    default: 1

@@ -595,6 +595,26 @@ paths:
               schema:
                 $ref: './condenser_api/schemas/discussions.yaml'
 
+  /#tags_api.get_comment_discussions_by_payout:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_comment_discussions_by_payout'
+      operationId: tags_api.get_comment_discussions_by_payout
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getCommentDiscussionsByPayout.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
   /#condenser_api.get_content:
     post:
       tags:
@@ -615,6 +635,26 @@ paths:
               schema:
                 $ref: './condenser_api/schemas/contentResult.yaml'
 
+  /#tags_api.get_discussion:
+    post:
+      tags:
+        - Tags
+      description: 'Nearly an alias for condenser_api.get_content, except the results are given in condenser_api style (original condenser_api.get_content implementation), while current condenser_api.get_content uses database_api style (since it was made to match Fat Node implementation)'
+      operationId: tags_api.get_discussion
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getDiscussion.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/contentResult.yaml'
+
   /#condenser_api.get_content_replies:
     post:
       tags:
@@ -626,6 +666,26 @@ paths:
           'application/json':
             schema:
               $ref: './condenser_api/requests/getContentReplies.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/contentReplies.yaml'
+
+  /#tags_api.get_content_replies:
+    post:
+      tags:
+        - Tags
+      description: 'Nearly an alias for condenser_api.get_content_replies, except the results are given in condenser_api style (original condenser_api.get_content_replies implementation), while current condenser_api.get_content_replies uses database_api style (since it was made to match Fat Node implementation)'
+      operationId: tags_api.get_content_replies
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getContentReplies.yaml'
         required: true
       responses:
         '200':
@@ -795,6 +855,146 @@ paths:
               schema:
                 $ref: './condenser_api/schemas/discussions.yaml'
 
+  /#tags_api.get_discussions_by_hot:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_discussions_by_hot'
+      operationId: tags_api.get_discussions_by_hot
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getDiscussionsByHot.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#tags_api.get_discussions_by_promoted:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_discussions_by_promoted'
+      operationId: tags_api.get_discussions_by_promoted
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getDiscussionsByPromoted.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#tags_api.get_discussions_by_trending:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_discussions_by_trending'
+      operationId: tags_api.get_discussions_by_trending
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getDiscussionsByTrending.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#tags_api.get_discussions_by_author_before_date:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_discussions_by_author_before_date'
+      operationId: tags_api.get_discussions_by_author_before_date
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getDiscussionsByAuthorBeforeDate.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#tags_api.get_discussions_by_blog:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_discussions_by_blog'
+      operationId: tags_api.get_discussions_by_blog
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getDiscussionsByBlog.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#tags_api.get_discussions_by_comments:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_discussions_by_comments'
+      operationId: tags_api.get_discussions_by_comments
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getDiscussionsByComments.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#tags_api.get_discussions_by_created:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_discussions_by_created'
+      operationId: tags_api.get_discussions_by_created
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getDiscussionsByCreated.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
   /#condenser_api.get_follow_count:
     post:
       tags:
@@ -906,6 +1106,26 @@ paths:
           'application/json':
             schema:
               $ref: './condenser_api/requests/getPostDiscussionsByPayout.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#tags_api.get_post_discussions_by_payout:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_post_discussions_by_payout'
+      operationId: tags_api.get_post_discussions_by_payout
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getPostDiscussionsByPayout.yaml'
         required: true
       responses:
         '200':
