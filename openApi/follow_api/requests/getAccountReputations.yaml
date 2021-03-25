@@ -1,0 +1,30 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - follow_api.get_account_reputations
+  params:
+    type: object
+    required:
+      - account_lower_bound
+    properties:
+      account_lower_bound:
+        type: string
+        example: "a"
+      limit:
+        type: integer
+        description: "optional 1..1000, default = 1000"
+        default: 1000
+        example: 1000
+  id:
+    type: integer
+    default: 1

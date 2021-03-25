@@ -1,0 +1,5879 @@
+openapi: 3.0.2
+info:
+  description: An OpenAPI specification for Hivemind
+  title: Hivemind OpenAPI Specification
+  version: "1.0"
+servers:
+- description: hive.blog API Service
+  url: https://api.hive.blog
+- description: anyx.io API Service
+  url: https://anyx.io
+- description: beta.openhive.network API Service
+  url: https://beta.openhive.network
+- description: Hivemind local API Service
+  url: http://localhost:8080
+paths:
+  /#bridge.get_community:
+    post:
+      description: Gets community
+      operationId: bridge.get_community
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/communityRequest'
+        description: community name and optional observer
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              example:
+                jsonrpc: "2.0"
+                result:
+                  id: 92511
+                  name: hive-186713
+                  title: Test group
+                  about: this is about field
+                  lang: pl
+                  type_id: 1
+                  is_nsfw: true
+                  subscribers: 0
+                  created_at: 2016-09-15 19:47:15
+                  sum_pending: 0
+                  num_pending: 0
+                  num_authors: 0
+                  avatar_url: ""
+                  description: |-
+                    this is description
+                    second line of description
+                  flag_text: |-
+                    first rule
+                    second rule
+                    third rule
+                    and the last rule
+                  settings: {}
+                  context:
+                    role: guest
+                    subscribed: false
+                    title: ""
+                  team:
+                  - - hive-186713
+                    - owner
+                    - ""
+                id: 1
+              schema:
+                $ref: '#/components/schemas/community'
+          description: Community result
+      tags:
+      - Community
+  /#bridge.get_community_context:
+    post:
+      description: Gets community context
+      operationId: bridge.get_community_context
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/communityContextRequest'
+        description: community name and account for context
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/communityContextResponse'
+          description: Community context result
+      tags:
+      - Community
+  /#bridge.list_all_subscriptions:
+    post:
+      description: Lists all community contexts from communities given account is
+        subscribed to.
+      operationId: bridge.list_all_subscriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/listAllSubscriptionsRequest'
+        description: points to valid account (not necessarily subscibed to any community)
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/listAllSubscriptions'
+          description: all subscriptions list
+      tags:
+      - Community
+  /#bridge.list_communities:
+    post:
+      description: Gets community
+      operationId: bridge.list_communities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/listCommunitesRequest'
+        description: 'optional parameters: last, limit, query, sort, observer'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/listCommunity'
+          description: list of Communities
+      tags:
+      - Community
+  /#bridge.list_community_roles:
+    post:
+      description: Gets community
+      operationId: bridge.list_community_roles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/listCommunityRolesRequest'
+        description: community name and optional observer
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/listCommunityRoles'
+          description: list of Community roles
+      tags:
+      - Community
+  /#bridge.list_pop_communities:
+    post:
+      description: Gets community
+      operationId: bridge.list_pop_communities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/listPopCommunitesRequest'
+        description: 'optional parameter: limit'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/listPopCommunities'
+          description: list of Communities
+      tags:
+      - Community
+  /#bridge.list_subscribers:
+    post:
+      description: list subscribers
+      operationId: bridge.list_subscribers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/listSubscribersRequest'
+        description: 'required community, optional: last, limit'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/listSubscribers'
+          description: list of Communities
+      tags:
+      - Community
+  /#database_api.find_comments:
+    post:
+      description: find comments
+      operationId: database_api.find_comments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/findCommentsRequest'
+        description: Looks for given comments.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/comments'
+          description: list of Communities
+      tags:
+      - Database
+  /#database_api.list_comments[by_author_last_update]:
+    post:
+      description: list comments
+      operationId: database_api.list_comments[by_author_last_update]
+      requestBody:
+        content:
+          application/json:
+            example:
+              jsonrpc: "2.0"
+              method: database_api.list_comments
+              params:
+                start:
+                - gtg
+                - 2016-09-06T18:47:33
+                - gtg
+                - missing-rewards-while-mining
+                limit: 10
+                order: by_author_last_update
+              id: 1
+            schema:
+              $ref: '#/components/schemas/listCommentsByAuthorRequest'
+        description: Lists posts of given author that are not newer than given date.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/comments'
+          description: list of Communities
+      tags:
+      - Database
+  /#database_api.list_comments[by_cashout_time]:
+    post:
+      description: list comments
+      operationId: database_api.list_comments[by_cashout_time]
+      requestBody:
+        content:
+          application/json:
+            example:
+              jsonrpc: "2.0"
+              method: database_api.list_comments
+              params:
+                start:
+                - 1969-12-31T23:59:59
+                - proskynneo
+                - steemit-firstpost-1
+                limit: 10
+                order: by_cashout_time
+              id: 1
+            schema:
+              $ref: '#/components/schemas/listCommentsByCashoutTimeRequest'
+        description: Lists comments with cashout at or later than given date
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/comments'
+          description: list of Communities
+      tags:
+      - Database
+  /#database_api.list_comments[by_last_update]:
+    post:
+      description: list comments
+      operationId: database_api.list_comments[by_last_update]
+      requestBody:
+        content:
+          application/json:
+            example:
+              jsonrpc: "2.0"
+              method: database_api.list_comments
+              params:
+                start:
+                - sykochica
+                - 2016-08-24T19:59:42
+                - williambanks
+                - re-sykochica-re-williambanks-re-sykochica-what-is-god-as-told-by-a-13-year-old-20160823t021931580z
+                limit: 10
+                order: by_last_update
+              id: 1
+            schema:
+              $ref: '#/components/schemas/listCommentsByLastUpdateRequest'
+        description: Lists replies to posts of given author that are not newer than
+          given date.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/comments'
+          description: list of Communities
+      tags:
+      - Database
+  /#database_api.list_comments[by_parent]:
+    post:
+      description: list comments
+      operationId: database_api.list_comments[by_parent]
+      requestBody:
+        content:
+          application/json:
+            example:
+              jsonrpc: "2.0"
+              method: database_api.list_comments
+              params:
+                start:
+                - allasyummyfood
+                - re-givemeyoursteem-winners-of-steemit-food-challenge-3-desserts-to-die-for-20160829t004616466z
+                - vlad
+                - re-allasyummyfood-re-givemeyoursteem-winners-of-steemit-food-challenge-3-desserts-to-die-for-20160829t011002757z
+                limit: 10
+                order: by_parent
+              id: 1
+            schema:
+              $ref: '#/components/schemas/listCommentsByParentRequest'
+        description: Lists replies to given post.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/comments'
+          description: list of Communities
+      tags:
+      - Database
+  /#database_api.list_comments[by_permlink]:
+    post:
+      description: list comments
+      operationId: database_api.list_comments[by_permlink]
+      requestBody:
+        content:
+          application/json:
+            example:
+              jsonrpc: "2.0"
+              method: database_api.list_comments
+              params:
+                start:
+                - skypilot
+                - an-introduction-to-where-eagles-fly-the-american-wilderness-expedition-by-zedekiah-morse
+                limit: 10
+                order: by_permlink
+              id: 1
+            schema:
+              $ref: '#/components/schemas/listCommentsByPermlinkRequest'
+        description: Lists comments sorted by author and later with permlink, starting
+          not earlier than given parameters. Can be used also in situation when only
+          part of author name or permlink is known.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/comments'
+          description: list of Communities
+      tags:
+      - Database
+  /#database_api.list_comments[by_root]:
+    post:
+      description: list comments
+      operationId: database_api.list_comments[by_root]
+      requestBody:
+        content:
+          application/json:
+            example:
+              jsonrpc: "2.0"
+              method: database_api.list_comments
+              params:
+                start:
+                - givemeyoursteem
+                - winners-of-steemit-food-challenge-3-desserts-to-die-for
+                - vi1son
+                - re-givemeyoursteem-winners-of-steemit-food-challenge-3-desserts-to-die-for-20160828t172955785z
+                limit: 10
+                order: by_root
+              id: 1
+            schema:
+              $ref: '#/components/schemas/listCommentsByRootRequest'
+        description: Lists comments from given discussion indicated by root post.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/comments'
+          description: list of Communities
+      tags:
+      - Database
+  /#database_api.find_votes:
+    post:
+      description: find votes
+      operationId: database_api.find_votes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/findVotesRequest'
+        description: 'Lists votes that were cast on given post. author + permlink
+          : mandatory, points to valid post. Pretty much the same as "list_votes"
+          with "by_comment_voter" order, but without paging and with hardcoded 1000
+          limit.'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/votes'
+          description: list of Communities
+      tags:
+      - Database
+  /#database_api.list_votes:
+    post:
+      description: list votes
+      operationId: database_api.list_votes
+      requestBody:
+        content:
+          application/json:
+            example:
+              jsonrpc: "2.0"
+              method: database_api.list_votes
+              params:
+                start:
+                - roelandp
+                - tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours
+                - winstonwolfe
+                limit: 1000
+                order: by_comment_voter
+              id: 1
+            schema:
+              $ref: '#/components/schemas/listVotesRequest'
+        description: Lists votes that were cast on given post.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/votes'
+          description: list of Votes
+      tags:
+      - Database
+  /#hive.db_head_state:
+    post:
+      description: DB head state
+      operationId: hive.db_head_state
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/headStateRequest'
+        description: Get current head state
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/headState'
+          description: current head state
+      tags:
+      - Hive
+  /#hive.get_info:
+    post:
+      description: DB head state
+      operationId: hive.get_info
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getInfoRequest'
+        description: Get current database and hivemind state
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/getInfo'
+          description: DB head state
+      tags:
+      - Hive
+  /#condenser_api.get_account_reputations:
+    post:
+      description: Lists accounts and their raw reputations.
+      operationId: condenser_api.get_account_reputations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getAccountReputations'
+        description: Get current database and hivemind state
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/accountReputations'
+          description: Accounts reputations list
+      tags:
+      - Condenser
+  /#condenser_api.get_active_votes:
+    post:
+      description: Lists votes for given post (slightly less detailed than database_api.find_votes,
+        also with hardcoded limit of 1000 votes).
+      operationId: condenser_api.get_active_votes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getActiveVotes'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/activeVotes'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#condenser_api.get_blog:
+    post:
+      description: 'Lists posts from blog of given account newest first: top posts
+        authored by given account and/or reblogged by it.'''
+      operationId: condenser_api.get_blog
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getBlog'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/blog'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#condenser_api.get_blog_entries:
+    post:
+      description: Basically the same as get_blog, but with no post content, just
+        author+permlink entries.
+      operationId: condenser_api.get_blog_entries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getBlogEntries'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/blogEntries'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#condenser_api.get_comment_discussions_by_payout:
+    post:
+      description: 'Lists not yet paid out replies ranked by pending payout, more
+        paying first (order within the same payout is: newer first). Slightly different
+        post format but otherwise gives the same posts as bridge.get_ranked_posts
+        with payout_comment sort.'
+      operationId: condenser_api.get_comment_discussions_by_payout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getCommentDiscussionsByPayout'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#tags_api.get_comment_discussions_by_payout:
+    post:
+      description: Alias for condenser_api.get_comment_discussions_by_payout
+      operationId: tags_api.get_comment_discussions_by_payout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getCommentDiscussionsByPayout_1'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Tags
+  /#condenser_api.get_content:
+    post:
+      description: Gives content for given post.
+      operationId: condenser_api.get_content
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getContent'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/contentResult'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#tags_api.get_discussion:
+    post:
+      description: Nearly an alias for condenser_api.get_content, except the results
+        are given in condenser_api style (original condenser_api.get_content implementation),
+        while current condenser_api.get_content uses database_api style (since it
+        was made to match Fat Node implementation)
+      operationId: tags_api.get_discussion
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getDiscussion'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/contentResult'
+          description: Active votes list
+      tags:
+      - Tags
+  /#condenser_api.get_content_replies:
+    post:
+      description: Lists replies for given post.
+      operationId: condenser_api.get_content_replies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getContentReplies'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/contentReplies'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#tags_api.get_content_replies:
+    post:
+      description: Nearly an alias for condenser_api.get_content_replies, except the
+        results are given in condenser_api style (original condenser_api.get_content_replies
+        implementation), while current condenser_api.get_content_replies uses database_api
+        style (since it was made to match Fat Node implementation)
+      operationId: tags_api.get_content_replies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getContentReplies_1'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/contentReplies'
+          description: Active votes list
+      tags:
+      - Tags
+  /#condenser_api.get_discussions_by_author_before_date:
+    post:
+      description: Lists replies for given post.
+      operationId: condenser_api.get_discussions_by_author_before_date
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getDiscussionsByAuthorBeforeDate'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#condenser_api.get_discussions_by_blog:
+    post:
+      description: Lists replies for given post.
+      operationId: condenser_api.get_discussions_by_blog
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getDiscussionsByBlog'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#condenser_api.get_discussions_by_comments:
+    post:
+      description: Lists replies for given post.
+      operationId: condenser_api.get_discussions_by_comments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getDiscussionsByComments'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#condenser_api.get_discussions_by_created:
+    post:
+      description: Lists all top posts ordered by creation date (newer first). Aside
+        from different post format routine is the same as bridge.get_ranked_posts
+        with created sort (does not handle community pinned posts in special way though).
+      operationId: condenser_api.get_discussions_by_created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getDiscussionsByCreated'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#condenser_api.get_discussions_by_feed:
+    post:
+      description: Lists posts created/reblogged by those followed by selected account.
+        Gives posts that were created/reblogged within last month.
+      operationId: condenser_api.get_discussions_by_feed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getDiscussionsByFeed'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#condenser_api.get_discussions_by_hot:
+    post:
+      description: Lists not yet paid out posts ranked by hot score (order within
+        the same score is newer first). Aside from different post format routine is
+        very similar to bridge.get_ranked_posts with hot sort.
+      operationId: condenser_api.get_discussions_by_hot
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getDiscussionsByHot'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#condenser_api.get_discussions_by_promoted:
+    post:
+      description: Lists not yet paid out posts ranked by amount spent on promotion
+        (order within the same promotion is newer first). Aside from different post
+        format routine is the same as bridge.get_ranked_posts with promoted sort.
+      operationId: condenser_api.get_discussions_by_promoted
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getDiscussionsByPromoted'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#condenser_api.get_discussions_by_trending:
+    post:
+      description: Lists not yet paid out posts ranked by amount spent on promotion
+        (order within the same promotion is newer first). Aside from different post
+        format routine is the same as bridge.get_ranked_posts with promoted sort.
+      operationId: condenser_api.get_discussions_by_trending
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getDiscussionsByTrending'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#tags_api.get_discussions_by_hot:
+    post:
+      description: Alias for condenser_api.get_discussions_by_hot
+      operationId: tags_api.get_discussions_by_hot
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getDiscussionsByHot_1'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Tags
+  /#tags_api.get_discussions_by_promoted:
+    post:
+      description: Alias for condenser_api.get_discussions_by_promoted
+      operationId: tags_api.get_discussions_by_promoted
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getDiscussionsByPromoted_1'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Tags
+  /#tags_api.get_discussions_by_trending:
+    post:
+      description: Alias for condenser_api.get_discussions_by_trending
+      operationId: tags_api.get_discussions_by_trending
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getDiscussionsByTrending_1'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Tags
+  /#tags_api.get_discussions_by_author_before_date:
+    post:
+      description: Alias for condenser_api.get_discussions_by_author_before_date
+      operationId: tags_api.get_discussions_by_author_before_date
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getDiscussionsByAuthorBeforeDate_1'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Tags
+  /#tags_api.get_discussions_by_blog:
+    post:
+      description: Alias for condenser_api.get_discussions_by_blog
+      operationId: tags_api.get_discussions_by_blog
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getDiscussionsByBlog_1'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Tags
+  /#tags_api.get_discussions_by_comments:
+    post:
+      description: Alias for condenser_api.get_discussions_by_comments
+      operationId: tags_api.get_discussions_by_comments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getDiscussionsByComments_1'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Tags
+  /#tags_api.get_discussions_by_created:
+    post:
+      description: Alias for condenser_api.get_discussions_by_created
+      operationId: tags_api.get_discussions_by_created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getDiscussionsByCreated_1'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Tags
+  /#condenser_api.get_follow_count:
+    post:
+      description: Gives following and followers count for given account.
+      operationId: condenser_api.get_follow_count
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getFollowCount'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/followCount'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#condenser_api.get_followers[blog]:
+    post:
+      description: Gives accounts which follow given account.
+      operationId: condenser_api.get_followers[blog]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getFollowersBlog'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/followers'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#condenser_api.get_followers[ignore]:
+    post:
+      description: Gives accounts which ignore given account.
+      operationId: condenser_api.get_followers[ignore]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getFollowersIgnore'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/followers'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#condenser_api.get_following[blog]:
+    post:
+      description: Gives accounts which given account follows.
+      operationId: condenser_api.get_following[blog]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getFollowingBlog'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/followers'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#condenser_api.get_following[ignore]:
+    post:
+      description: Gives accounts which given account ignores
+      operationId: condenser_api.get_following[ignore]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getFollowingIgnore'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/followers'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#condenser_api.get_post_discussions_by_payout:
+    post:
+      description: 'Lists not yet paid out top posts ranked by pending payout, more
+        paying first (order within the same payout is: newer first). Aside from different
+        post format routine is very similar to bridge.get_ranked_posts with payout
+        sort, except the latter only considers posts in narrow payout window, this
+        one has no such limitation.'
+      operationId: condenser_api.get_post_discussions_by_payout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getPostDiscussionsByPayout'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#tags_api.get_post_discussions_by_payout:
+    post:
+      description: Alias for condenser_api.get_post_discussions_by_payout
+      operationId: tags_api.get_post_discussions_by_payout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getPostDiscussionsByPayout_1'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Tags
+  /#condenser_api.get_reblogged_by:
+    post:
+      description: Lists rebloggers of given post.
+      operationId: condenser_api.get_reblogged_by
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getRebloggedBy'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/rebloggers'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#condenser_api.get_replies_by_last_update:
+    post:
+      description: Lists replies made to posts (both top posts and comments) of given
+        blogger. Contrary to name, time of last update is not considered - posts are
+        ordered by creation time (newer first).
+      operationId: condenser_api.get_replies_by_last_update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getRepliesByLastUpdate'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/discussions'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#condenser_api.get_trending_tags:
+    post:
+      description: Lists categories ordered by sum of pending payouts, with stats
+        summary about comments and top posts.
+      operationId: condenser_api.get_trending_tags
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getTrendingTags'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/trendingTags'
+          description: Active votes list
+      tags:
+      - Condenser
+  /#follow_api.get_followers[blog]:
+    post:
+      description: Alias for condenser_api.get_followers.
+      operationId: follow_api.get_followers[blog]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getFollowersBlog_1'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/followers'
+          description: Active votes list
+      tags:
+      - Follow
+  /#follow_api.get_followers[ignore]:
+    post:
+      description: Alias for condenser_api.get_followers.
+      operationId: follow_api.get_followers[ignore]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getFollowersIgnore_1'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/followers'
+          description: Active votes list
+      tags:
+      - Follow
+  /#follow_api.get_following[blog]:
+    post:
+      description: Alias for condenser_api.get_following.
+      operationId: follow_api.get_following[blog]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getFollowingBlog_1'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/followers'
+          description: Active votes list
+      tags:
+      - Follow
+  /#follow_api.get_following[ignore]:
+    post:
+      description: Alias for condenser_api.get_following.
+      operationId: follow_api.get_following[ignore]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getFollowingIgnore_1'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/followers'
+          description: Active votes list
+      tags:
+      - Follow
+  /#follow_api.get_reblogged_by:
+    post:
+      description: Alias for condenser_api.get_reblogged_by.
+      operationId: follow_api.get_reblogged_by
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getRebloggedBy_1'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/rebloggers'
+          description: Active votes list
+      tags:
+      - Follow
+  /#follow_api.get_follow_count:
+    post:
+      description: Gives following and followers count for given account.
+      operationId: follow_api.get_follow_count
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getFollowCount_1'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/followCount'
+          description: Active votes list
+      tags:
+      - Follow
+  /#follow_api.get_blog:
+    post:
+      description: Alias for condenser_api.get_blog.
+      operationId: follow_api.get_blog
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getBlog_1'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/blog'
+          description: Active votes list
+      tags:
+      - Follow
+  /#follow_api.get_blog_entries:
+    post:
+      description: Alias for condenser_api.get_blog_entries
+      operationId: follow_api.get_blog_entries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getBlogEntries_1'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/blogEntries'
+          description: Active votes list
+      tags:
+      - Follow
+  /#follow_api.get_account_reputations:
+    post:
+      description: Nearly an alias for condenser_api.get_account_reputations, except
+        the results are given in condenser_api style.
+      operationId: follow_api.get_account_reputations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getAccountReputations_1'
+        description: Get current database and hivemind state
+        required: true
+      responses:
+        "200":
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/accountReputations_1'
+          description: Accounts reputations list
+      tags:
+      - Follow
+components:
+  schemas:
+    communityRequest:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.get_community
+          type: string
+        params:
+          $ref: '#/components/schemas/communityRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    community:
+      example:
+        result:
+          settings: '{}'
+          num_pending: 1
+          subscribers: 5
+          type_id: 2
+          about: about
+          description: description
+          created_at: 2000-01-23T04:56:07.000+00:00
+          team: '{}'
+          title: title
+          num_authors: 6
+          is_nsfw: true
+          flag_text: flag_text
+          sum_pending: 5
+          avatar_url: avatar_url
+          context:
+            subscribed: true
+            role: role
+            title: title
+          name: name
+          id: 0
+          lang: lang
+          admins:
+          - admins
+          - admins
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          $ref: '#/components/schemas/community_result'
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    communityContextRequest:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.get_community_context
+          type: string
+        params:
+          $ref: '#/components/schemas/communityContextRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    communityContextResponse:
+      example:
+        result:
+          subscribed: true
+          role: role
+          title: title
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          $ref: '#/components/schemas/communityContext'
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    listAllSubscriptionsRequest:
+      properties:
+        method:
+          enum:
+          - bridge.list_all_subscriptions
+          type: string
+        params:
+          $ref: '#/components/schemas/listAllSubscriptionsRequest_params'
+        jsonrpc:
+          default: "2.0"
+          type: string
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    listAllSubscriptions:
+      type: object
+    listCommunitesRequest:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.list_communities
+          type: string
+        params:
+          $ref: '#/components/schemas/listCommunitesRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    listCommunity:
+      example:
+        result:
+        - num_pending: 1
+          subscribers: 5
+          type_id: 2
+          about: about
+          created_at: 2000-01-23T04:56:07.000+00:00
+          title: title
+          num_authors: 6
+          is_nsfw: true
+          sum_pending: 5
+          avatar_url: avatar_url
+          context:
+            subscribed: true
+            role: role
+            title: title
+          name: name
+          id: 0
+          lang: lang
+          admins:
+          - admins
+          - admins
+        - num_pending: 1
+          subscribers: 5
+          type_id: 2
+          about: about
+          created_at: 2000-01-23T04:56:07.000+00:00
+          title: title
+          num_authors: 6
+          is_nsfw: true
+          sum_pending: 5
+          avatar_url: avatar_url
+          context:
+            subscribed: true
+            role: role
+            title: title
+          name: name
+          id: 0
+          lang: lang
+          admins:
+          - admins
+          - admins
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          items:
+            $ref: '#/components/schemas/listCommunity_result'
+          type: array
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    listCommunityRolesRequest:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.list_community_roles
+          type: string
+        params:
+          $ref: '#/components/schemas/listCommunityRolesRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    listCommunityRoles:
+      description: 'array of arrays with 3 strings: name, role_name, title'
+      type: object
+    listPopCommunitesRequest:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.list_pop_communities
+          type: string
+        params:
+          $ref: '#/components/schemas/listPopCommunitesRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    listPopCommunities:
+      description: 'array of arrays with 2 strings: community name and title'
+      type: object
+    listSubscribersRequest:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - bridge.list_subscribers
+          type: string
+        params:
+          $ref: '#/components/schemas/listSubscribersRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    listSubscribers:
+      description: 'array of arrays with 4 strings: account name, role name, title,
+        created_at'
+      type: object
+    findCommentsRequest:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - database_api.find_comments
+          type: string
+        params:
+          $ref: '#/components/schemas/findCommentsRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    comments:
+      additionalProperties: false
+      example:
+        result:
+          comments:
+          - parent_author: steemit
+            max_accepted_payout:
+              amount: 756
+              nai: '@@000000013'
+              precision: 3
+            total_payout_value:
+              amount: 756
+              nai: '@@000000013'
+              precision: 3
+            net_votes: 0
+            root_author: steemit
+            reward_weight: 10000
+            body: Steemit is a social media platform where anyone can earn STEEM points
+              by posting. The more people who like a post, the more STEEM the poster
+              earns. Anyone can sell their STEEM for cash or vest it to boost their
+              voting power.
+            title: Welcome to Hive!
+            curator_payout_value:
+              amount: 756
+              nai: '@@000000013'
+              precision: 3
+            total_vote_weight: 0
+            allow_curation_rewards: true
+            allow_replies: true
+            children: 3548
+            last_update: 2000-01-23T04:56:07.000+00:00
+            id: 1
+            last_payout: 2000-01-23T04:56:07.000+00:00
+            vote_rshares: 0
+            beneficiaries:
+            - steemit
+            - steemit
+            percent_hbd: 10000
+            parent_permlink: meta
+            abs_rshares: 0
+            author: steemit
+            created: 2000-01-23T04:56:07.000+00:00
+            active: 2000-01-23T04:56:07.000+00:00
+            allow_votes: true
+            children_abs_rshares: 3548
+            root_permlink: firstpost
+            depth: 0
+            max_cashout_time: 2000-01-23T04:56:07.000+00:00
+            cashout_time: 2000-01-23T04:56:07.000+00:00
+            category: meta
+            author_rewards: 3548
+            json_metadata: ""
+            permlink: firstpost
+            net_rshares: 0
+          - parent_author: steemit
+            max_accepted_payout:
+              amount: 756
+              nai: '@@000000013'
+              precision: 3
+            total_payout_value:
+              amount: 756
+              nai: '@@000000013'
+              precision: 3
+            net_votes: 0
+            root_author: steemit
+            reward_weight: 10000
+            body: Steemit is a social media platform where anyone can earn STEEM points
+              by posting. The more people who like a post, the more STEEM the poster
+              earns. Anyone can sell their STEEM for cash or vest it to boost their
+              voting power.
+            title: Welcome to Hive!
+            curator_payout_value:
+              amount: 756
+              nai: '@@000000013'
+              precision: 3
+            total_vote_weight: 0
+            allow_curation_rewards: true
+            allow_replies: true
+            children: 3548
+            last_update: 2000-01-23T04:56:07.000+00:00
+            id: 1
+            last_payout: 2000-01-23T04:56:07.000+00:00
+            vote_rshares: 0
+            beneficiaries:
+            - steemit
+            - steemit
+            percent_hbd: 10000
+            parent_permlink: meta
+            abs_rshares: 0
+            author: steemit
+            created: 2000-01-23T04:56:07.000+00:00
+            active: 2000-01-23T04:56:07.000+00:00
+            allow_votes: true
+            children_abs_rshares: 3548
+            root_permlink: firstpost
+            depth: 0
+            max_cashout_time: 2000-01-23T04:56:07.000+00:00
+            cashout_time: 2000-01-23T04:56:07.000+00:00
+            category: meta
+            author_rewards: 3548
+            json_metadata: ""
+            permlink: firstpost
+            net_rshares: 0
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          $ref: '#/components/schemas/comments_result'
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    listCommentsByAuthorRequest:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - database_api.list_comments
+          type: string
+        params:
+          $ref: '#/components/schemas/listCommentsByAuthorRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    listCommentsByCashoutTimeRequest:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - database_api.list_comments
+          type: string
+        params:
+          $ref: '#/components/schemas/listCommentsByCashoutTimeRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    listCommentsByLastUpdateRequest:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - database_api.list_comments
+          type: string
+        params:
+          $ref: '#/components/schemas/listCommentsByLastUpdateRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    listCommentsByParentRequest:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - database_api.list_comments
+          type: string
+        params:
+          $ref: '#/components/schemas/listCommentsByParentRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    listCommentsByPermlinkRequest:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - database_api.list_comments
+          type: string
+        params:
+          $ref: '#/components/schemas/listCommentsByPermlinkRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    listCommentsByRootRequest:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - database_api.list_comments
+          type: string
+        params:
+          $ref: '#/components/schemas/listCommentsByRootRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    findVotesRequest:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - database_api.find_votes
+          type: string
+        params:
+          $ref: '#/components/schemas/findVotesRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    votes:
+      additionalProperties: false
+      example:
+        result:
+          votes:
+          - author: kental
+            last_update: 2000-01-23T04:56:07.000+00:00
+            num_changes: 1
+            weight: 5725626236557488
+            vote_percent: 10000
+            voter: eduardf
+            id: 1011491
+            rshares: 2329409778
+            permlink: hi-steem-my-russian-trip-on-the-bike-big-party-in-moscow-tour-of-moscow-by-slava
+          - author: kental
+            last_update: 2000-01-23T04:56:07.000+00:00
+            num_changes: 1
+            weight: 5725626236557488
+            vote_percent: 10000
+            voter: eduardf
+            id: 1011491
+            rshares: 2329409778
+            permlink: hi-steem-my-russian-trip-on-the-bike-big-party-in-moscow-tour-of-moscow-by-slava
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          $ref: '#/components/schemas/votes_result'
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    listVotesRequest:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - database_api.list_votes
+          type: string
+        params:
+          $ref: '#/components/schemas/listVotesRequest_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    headStateRequest:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - hive.db_head_state
+          type: string
+        params:
+          example: {}
+          type: object
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    headState:
+      additionalProperties: false
+      example:
+        result:
+          db_head_block: 5000024
+          db_head_time: 2000-01-23T04:56:07.000+00:00
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          $ref: '#/components/schemas/headState_result'
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    getInfoRequest:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - hive.get_info
+          type: string
+        params:
+          example: {}
+          type: object
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getInfo:
+      additionalProperties: false
+      example:
+        result:
+          database_schema_version: 29
+          database_head_block: 5000024
+          database_patch_date: 2000-01-23T04:56:07.000+00:00
+          database_patched_to_revision: 6d58301a
+          hivemind_git_date: 2000-01-23T04:56:07.000+00:00
+          hivemind_version: 1.24rc0
+          hivemind_git_rev: 6d58301a
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          $ref: '#/components/schemas/getInfo_result'
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    getAccountReputations:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_account_reputations
+          type: string
+        params:
+          $ref: '#/components/schemas/getAccountReputations_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    accountReputations:
+      additionalProperties: false
+      example:
+        result:
+        - reputation: 37040190
+          account: a-1
+        - reputation: 37040190
+          account: a-1
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          items:
+            $ref: '#/components/schemas/accountReputations_result'
+          type: array
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    getActiveVotes:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_active_votes
+          type: string
+        params:
+          $ref: '#/components/schemas/getActiveVotes_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    activeVotes:
+      additionalProperties: false
+      example:
+        result:
+        - reputation: 172643285682
+          weight: 5265425467638
+          time: 2000-01-23T04:56:07.000+00:00
+          voter: creding
+          percent: 10000
+          rshares: 103335387
+        - reputation: 172643285682
+          weight: 5265425467638
+          time: 2000-01-23T04:56:07.000+00:00
+          voter: creding
+          percent: 10000
+          rshares: 103335387
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          items:
+            $ref: '#/components/schemas/activeVotes_result'
+          type: array
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    getBlog:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_blog
+          type: string
+        params:
+          $ref: '#/components/schemas/getBlog_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    blog:
+      additionalProperties: false
+      example:
+        result:
+        - comment:
+            parent_author: steemit
+            max_accepted_payout: 1000000.000 HBD
+            total_payout_value: 0.763 HBD
+            title: Welcome to Hive!
+            body: Steemit is a social media platform where anyone can earn STEEM points
+              by posting. The more people who like a post, the more STEEM the poster
+              earns. Anyone can sell their STEEM for cash or vest it to boost their
+              voting power.
+            promoted: 0.763 HBD
+            curator_payout_value: 0.763 HBD
+            pending_payout_value: 0.763 HBD
+            children: 7
+            last_update: 2000-01-23T04:56:07.000+00:00
+            active_votes:
+            - reputation: 172643285682
+              voter: creding
+              percent: 10000
+              rshares: 103335387
+            - reputation: 172643285682
+              voter: creding
+              percent: 10000
+              rshares: 103335387
+            last_payout: 2000-01-23T04:56:07.000+00:00
+            beneficiaries:
+            - steemit
+            - steemit
+            percent_hbd: 10000
+            parent_permlink: meta
+            author: steemit
+            created: 2000-01-23T04:56:07.000+00:00
+            author_reputation: 2644191137390
+            url: /steemit/@noodhoog/i-was-wrong-steemit-is-actually-beating-reddit-in-deep-user-participation
+            body_length: 1529
+            depth: 0
+            replies: []
+            post_id: 1094173
+            cashout_time: 2000-01-23T04:56:07.000+00:00
+            category: meta
+            root_title: I was wrong! Steemit is actually beating Reddit in deep user
+              participation!
+            permlink: firstpost
+            json_metadata: '{"tags":["steemit","reddit","stats","theydidthemath","users"],"image":["http://www.oerca.com/images/discussion_forum.jpg"]}'
+            net_rshares: 1361634219384
+          reblogged_on: 2000-01-23T04:56:07.000+00:00
+          blog: noodhoog
+          entry_id: 103
+        - comment:
+            parent_author: steemit
+            max_accepted_payout: 1000000.000 HBD
+            total_payout_value: 0.763 HBD
+            title: Welcome to Hive!
+            body: Steemit is a social media platform where anyone can earn STEEM points
+              by posting. The more people who like a post, the more STEEM the poster
+              earns. Anyone can sell their STEEM for cash or vest it to boost their
+              voting power.
+            promoted: 0.763 HBD
+            curator_payout_value: 0.763 HBD
+            pending_payout_value: 0.763 HBD
+            children: 7
+            last_update: 2000-01-23T04:56:07.000+00:00
+            active_votes:
+            - reputation: 172643285682
+              voter: creding
+              percent: 10000
+              rshares: 103335387
+            - reputation: 172643285682
+              voter: creding
+              percent: 10000
+              rshares: 103335387
+            last_payout: 2000-01-23T04:56:07.000+00:00
+            beneficiaries:
+            - steemit
+            - steemit
+            percent_hbd: 10000
+            parent_permlink: meta
+            author: steemit
+            created: 2000-01-23T04:56:07.000+00:00
+            author_reputation: 2644191137390
+            url: /steemit/@noodhoog/i-was-wrong-steemit-is-actually-beating-reddit-in-deep-user-participation
+            body_length: 1529
+            depth: 0
+            replies: []
+            post_id: 1094173
+            cashout_time: 2000-01-23T04:56:07.000+00:00
+            category: meta
+            root_title: I was wrong! Steemit is actually beating Reddit in deep user
+              participation!
+            permlink: firstpost
+            json_metadata: '{"tags":["steemit","reddit","stats","theydidthemath","users"],"image":["http://www.oerca.com/images/discussion_forum.jpg"]}'
+            net_rshares: 1361634219384
+          reblogged_on: 2000-01-23T04:56:07.000+00:00
+          blog: noodhoog
+          entry_id: 103
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          items:
+            $ref: '#/components/schemas/blog_result'
+          type: array
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    getBlogEntries:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_blog_entries
+          type: string
+        params:
+          $ref: '#/components/schemas/getBlog_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    blogEntries:
+      additionalProperties: false
+      example:
+        result:
+        - author: noodhoog
+          reblogged_on: 2000-01-23T04:56:07.000+00:00
+          blog: noodhoog
+          entry_id: 103
+          permlink: hello-world
+        - author: noodhoog
+          reblogged_on: 2000-01-23T04:56:07.000+00:00
+          blog: noodhoog
+          entry_id: 103
+          permlink: hello-world
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          items:
+            $ref: '#/components/schemas/blogEntries_result'
+          type: array
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    getCommentDiscussionsByPayout:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_comment_discussions_by_payout
+          type: string
+        params:
+          $ref: '#/components/schemas/getCommentDiscussionsByPayout_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    discussions:
+      additionalProperties: false
+      example:
+        result:
+        - parent_author: trogdor
+          max_accepted_payout: 1000000.000 HBD
+          total_payout_value: 0.000 HBD
+          body: Fail ? No spam bot army...
+          promoted: 0.000 HBD
+          title: ""
+          curator_payout_value: 0.763 HBD
+          pending_payout_value: 0.132 HBD
+          children: 26
+          last_update: 2000-01-23T04:56:07.000+00:00
+          active_votes:
+          - reputation: 12494904871301
+            voter: trogdor
+            percent: "10000"
+            rshares: 211439242838
+          - reputation: 12494904871301
+            voter: trogdor
+            percent: "10000"
+            rshares: 211439242838
+          last_payout: 2000-01-23T04:56:07.000+00:00
+          beneficiaries:
+          - steemit
+          - steemit
+          percent_hbd: 10000
+          parent_permlink: this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army
+          author: noodhoog
+          created: 2000-01-23T04:56:07.000+00:00
+          author_reputation: 10900524985586
+          url: /test/@trogdor/this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army#@royaltiffany/re-trogdor-this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army-20160817t020602907z
+          body_length: 26
+          depth: 1
+          post_id: 845516
+          replies: []
+          cashout_time: 2000-01-23T04:56:07.000+00:00
+          category: test
+          root_title: this is a test to see if i have been targeted by a spam bot
+            army
+          json_metadata: '{"tags":["test"]}'
+          permlink: re-trogdor-this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army-20160817t020602907z
+          net_rshares: 211900981073
+        - parent_author: trogdor
+          max_accepted_payout: 1000000.000 HBD
+          total_payout_value: 0.000 HBD
+          body: Fail ? No spam bot army...
+          promoted: 0.000 HBD
+          title: ""
+          curator_payout_value: 0.763 HBD
+          pending_payout_value: 0.132 HBD
+          children: 26
+          last_update: 2000-01-23T04:56:07.000+00:00
+          active_votes:
+          - reputation: 12494904871301
+            voter: trogdor
+            percent: "10000"
+            rshares: 211439242838
+          - reputation: 12494904871301
+            voter: trogdor
+            percent: "10000"
+            rshares: 211439242838
+          last_payout: 2000-01-23T04:56:07.000+00:00
+          beneficiaries:
+          - steemit
+          - steemit
+          percent_hbd: 10000
+          parent_permlink: this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army
+          author: noodhoog
+          created: 2000-01-23T04:56:07.000+00:00
+          author_reputation: 10900524985586
+          url: /test/@trogdor/this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army#@royaltiffany/re-trogdor-this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army-20160817t020602907z
+          body_length: 26
+          depth: 1
+          post_id: 845516
+          replies: []
+          cashout_time: 2000-01-23T04:56:07.000+00:00
+          category: test
+          root_title: this is a test to see if i have been targeted by a spam bot
+            army
+          json_metadata: '{"tags":["test"]}'
+          permlink: re-trogdor-this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army-20160817t020602907z
+          net_rshares: 211900981073
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          items:
+            $ref: '#/components/schemas/discussions_result'
+          type: array
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    getCommentDiscussionsByPayout_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - tags_api.get_comment_discussions_by_payout
+          type: string
+        params:
+          $ref: '#/components/schemas/getCommentDiscussionsByPayout_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getContent:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_content
+          type: string
+        params:
+          $ref: '#/components/schemas/getContent_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    contentResult:
+      additionalProperties: false
+      example:
+        result:
+          parent_author: steemit
+          max_accepted_payout: 1000000.000 HBD
+          total_payout_value: 0.763 HBD
+          title: Welcome to Hive!
+          body: Steemit is a social media platform where anyone can earn STEEM points
+            by posting. The more people who like a post, the more STEEM the poster
+            earns. Anyone can sell their STEEM for cash or vest it to boost their
+            voting power.
+          promoted: 0.763 HBD
+          curator_payout_value: 0.763 HBD
+          pending_payout_value: 0.763 HBD
+          children: 7
+          last_update: 2000-01-23T04:56:07.000+00:00
+          active_votes:
+          - reputation: 172643285682
+            voter: creding
+            percent: 10000
+            rshares: 103335387
+          - reputation: 172643285682
+            voter: creding
+            percent: 10000
+            rshares: 103335387
+          last_payout: 2000-01-23T04:56:07.000+00:00
+          beneficiaries:
+          - steemit
+          - steemit
+          percent_hbd: 10000
+          parent_permlink: meta
+          author: steemit
+          created: 2000-01-23T04:56:07.000+00:00
+          author_reputation: 2644191137390
+          url: /steemit/@noodhoog/i-was-wrong-steemit-is-actually-beating-reddit-in-deep-user-participation
+          body_length: 1529
+          depth: 0
+          replies: []
+          cashout_time: 2000-01-23T04:56:07.000+00:00
+          category: meta
+          root_title: I was wrong! Steemit is actually beating Reddit in deep user
+            participation!
+          permlink: firstpost
+          json_metadata: '{"tags":["steemit","reddit","stats","theydidthemath","users"],"image":["http://www.oerca.com/images/discussion_forum.jpg"]}'
+          net_rshares: 1361634219384
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          $ref: '#/components/schemas/content'
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    getDiscussion:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - tags_api.get_discussion
+          type: string
+        params:
+          $ref: '#/components/schemas/getContent_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getContentReplies:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_content_replies
+          type: string
+        params:
+          $ref: '#/components/schemas/getContentReplies_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    contentReplies:
+      additionalProperties: false
+      example:
+        result:
+        - parent_author: steemit
+          max_accepted_payout: 1000000.000 HBD
+          total_payout_value: 0.763 HBD
+          title: Welcome to Hive!
+          body: Steemit is a social media platform where anyone can earn STEEM points
+            by posting. The more people who like a post, the more STEEM the poster
+            earns. Anyone can sell their STEEM for cash or vest it to boost their
+            voting power.
+          promoted: 0.763 HBD
+          curator_payout_value: 0.763 HBD
+          pending_payout_value: 0.763 HBD
+          children: 7
+          last_update: 2000-01-23T04:56:07.000+00:00
+          active_votes:
+          - reputation: 172643285682
+            voter: creding
+            percent: 10000
+            rshares: 103335387
+          - reputation: 172643285682
+            voter: creding
+            percent: 10000
+            rshares: 103335387
+          last_payout: 2000-01-23T04:56:07.000+00:00
+          beneficiaries:
+          - steemit
+          - steemit
+          percent_hbd: 10000
+          parent_permlink: meta
+          author: steemit
+          created: 2000-01-23T04:56:07.000+00:00
+          author_reputation: 2644191137390
+          url: /steemit/@noodhoog/i-was-wrong-steemit-is-actually-beating-reddit-in-deep-user-participation
+          body_length: 1529
+          depth: 0
+          replies: []
+          cashout_time: 2000-01-23T04:56:07.000+00:00
+          category: meta
+          root_title: I was wrong! Steemit is actually beating Reddit in deep user
+            participation!
+          permlink: firstpost
+          json_metadata: '{"tags":["steemit","reddit","stats","theydidthemath","users"],"image":["http://www.oerca.com/images/discussion_forum.jpg"]}'
+          net_rshares: 1361634219384
+        - parent_author: steemit
+          max_accepted_payout: 1000000.000 HBD
+          total_payout_value: 0.763 HBD
+          title: Welcome to Hive!
+          body: Steemit is a social media platform where anyone can earn STEEM points
+            by posting. The more people who like a post, the more STEEM the poster
+            earns. Anyone can sell their STEEM for cash or vest it to boost their
+            voting power.
+          promoted: 0.763 HBD
+          curator_payout_value: 0.763 HBD
+          pending_payout_value: 0.763 HBD
+          children: 7
+          last_update: 2000-01-23T04:56:07.000+00:00
+          active_votes:
+          - reputation: 172643285682
+            voter: creding
+            percent: 10000
+            rshares: 103335387
+          - reputation: 172643285682
+            voter: creding
+            percent: 10000
+            rshares: 103335387
+          last_payout: 2000-01-23T04:56:07.000+00:00
+          beneficiaries:
+          - steemit
+          - steemit
+          percent_hbd: 10000
+          parent_permlink: meta
+          author: steemit
+          created: 2000-01-23T04:56:07.000+00:00
+          author_reputation: 2644191137390
+          url: /steemit/@noodhoog/i-was-wrong-steemit-is-actually-beating-reddit-in-deep-user-participation
+          body_length: 1529
+          depth: 0
+          replies: []
+          cashout_time: 2000-01-23T04:56:07.000+00:00
+          category: meta
+          root_title: I was wrong! Steemit is actually beating Reddit in deep user
+            participation!
+          permlink: firstpost
+          json_metadata: '{"tags":["steemit","reddit","stats","theydidthemath","users"],"image":["http://www.oerca.com/images/discussion_forum.jpg"]}'
+          net_rshares: 1361634219384
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          items:
+            $ref: '#/components/schemas/content'
+          type: array
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    getContentReplies_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - tags_api.get_content_replies
+          type: string
+        params:
+          $ref: '#/components/schemas/getContentReplies_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getDiscussionsByAuthorBeforeDate:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_discussions_by_author_before_date
+          type: string
+        params:
+          $ref: '#/components/schemas/getDiscussionsByAuthorBeforeDate_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getDiscussionsByBlog:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_discussions_by_blog
+          type: string
+        params:
+          $ref: '#/components/schemas/getDiscussionsByBlog_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getDiscussionsByComments:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_discussions_by_comments
+          type: string
+        params:
+          $ref: '#/components/schemas/getDiscussionsByComments_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getDiscussionsByCreated:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_discussions_by_created
+          type: string
+        params:
+          $ref: '#/components/schemas/getDiscussionsByCreated_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getDiscussionsByFeed:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_discussions_by_feed
+          type: string
+        params:
+          $ref: '#/components/schemas/getDiscussionsByFeed_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getDiscussionsByHot:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_discussions_by_hot
+          type: string
+        params:
+          $ref: '#/components/schemas/getDiscussionsByHot_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getDiscussionsByPromoted:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_discussions_by_promoted
+          type: string
+        params:
+          $ref: '#/components/schemas/getDiscussionsByPromoted_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getDiscussionsByTrending:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_discussions_by_trending
+          type: string
+        params:
+          $ref: '#/components/schemas/getDiscussionsByTrending_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getDiscussionsByHot_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - tags_api.get_discussions_by_hot
+          type: string
+        params:
+          $ref: '#/components/schemas/getDiscussionsByHot_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getDiscussionsByPromoted_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - tags_api.get_discussions_by_promoted
+          type: string
+        params:
+          $ref: '#/components/schemas/getDiscussionsByPromoted_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getDiscussionsByTrending_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - tags_api.get_discussions_by_trending
+          type: string
+        params:
+          $ref: '#/components/schemas/getDiscussionsByTrending_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getDiscussionsByAuthorBeforeDate_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - tags_api.get_discussions_by_author_before_date
+          type: string
+        params:
+          $ref: '#/components/schemas/getDiscussionsByAuthorBeforeDate_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getDiscussionsByBlog_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - tags_api.get_discussions_by_blog
+          type: string
+        params:
+          $ref: '#/components/schemas/getDiscussionsByBlog_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getDiscussionsByComments_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - tags_api.get_discussions_by_comments
+          type: string
+        params:
+          $ref: '#/components/schemas/getDiscussionsByComments_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getDiscussionsByCreated_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - tags_api.get_discussions_by_created
+          type: string
+        params:
+          $ref: '#/components/schemas/getDiscussionsByCreated_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getFollowCount:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_follow_count
+          type: string
+        params:
+          $ref: '#/components/schemas/getFollowCount_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    followCount:
+      additionalProperties: false
+      example:
+        result:
+          following_count: 31
+          follower_count: 80
+          account: gtg
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          $ref: '#/components/schemas/followCount_result'
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    getFollowersBlog:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_followers
+          type: string
+        params:
+          $ref: '#/components/schemas/getFollowersBlog_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    followers:
+      additionalProperties: false
+      example:
+        result:
+        - follower: gtg
+          what:
+          - blog
+          - blog
+          following: blockcodes
+        - follower: gtg
+          what:
+          - blog
+          - blog
+          following: blockcodes
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          items:
+            $ref: '#/components/schemas/followers_result'
+          type: array
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    getFollowersIgnore:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_followers
+          type: string
+        params:
+          $ref: '#/components/schemas/getFollowersIgnore_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getFollowingBlog:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_following
+          type: string
+        params:
+          $ref: '#/components/schemas/getFollowingBlog_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getFollowingIgnore:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_following
+          type: string
+        params:
+          $ref: '#/components/schemas/getFollowingIgnore_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getPostDiscussionsByPayout:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_post_discussions_by_payout
+          type: string
+        params:
+          $ref: '#/components/schemas/getPostDiscussionsByPayout_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getPostDiscussionsByPayout_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - tags_api.get_post_discussions_by_payout
+          type: string
+        params:
+          $ref: '#/components/schemas/getPostDiscussionsByPayout_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getRebloggedBy:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_reblogged_by
+          type: string
+        params:
+          $ref: '#/components/schemas/getRebloggedBy_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    rebloggers:
+      additionalProperties: false
+      example:
+        result:
+        - jamesc
+        - jamesc
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          description: Array of users who reblogs.
+          items:
+            example: jamesc
+            type: string
+          type: array
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    getRepliesByLastUpdate:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_discussions_by_hot
+          type: string
+        params:
+          $ref: '#/components/schemas/getRepliesByLastUpdate_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getTrendingTags:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - condenser_api.get_trending_tags
+          type: string
+        params:
+          $ref: '#/components/schemas/getTrendingTags_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    trendingTags:
+      additionalProperties: false
+      example:
+        result:
+        - top_posts: 11
+          comments: 16
+          total_payouts: 31.135 HBD
+          name: dream
+        - top_posts: 11
+          comments: 16
+          total_payouts: 31.135 HBD
+          name: dream
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          description: Array of trending Tags.
+          items:
+            $ref: '#/components/schemas/trendingTags_result'
+          type: array
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    getFollowersBlog_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - follow_api.get_followers
+          type: string
+        params:
+          $ref: '#/components/schemas/getFollowersBlog_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getFollowersIgnore_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - follow_api.get_followers
+          type: string
+        params:
+          $ref: '#/components/schemas/getFollowersIgnore_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getFollowingBlog_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - follow_api.get_following
+          type: string
+        params:
+          $ref: '#/components/schemas/getFollowingBlog_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getFollowingIgnore_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - follow_api.get_following
+          type: string
+        params:
+          $ref: '#/components/schemas/getFollowingIgnore_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getRebloggedBy_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - follow_api.get_reblogged_by
+          type: string
+        params:
+          $ref: '#/components/schemas/getRebloggedBy_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getFollowCount_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - follow_api.get_follow_count
+          type: string
+        params:
+          $ref: '#/components/schemas/getFollowCount_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getBlog_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - follow_api.get_blog
+          type: string
+        params:
+          $ref: '#/components/schemas/getBlog_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getBlogEntries_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - follow_api.get_blog_entries
+          type: string
+        params:
+          $ref: '#/components/schemas/getBlog_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    getAccountReputations_1:
+      properties:
+        jsonrpc:
+          default: "2.0"
+          type: string
+        method:
+          enum:
+          - follow_api.get_account_reputations
+          type: string
+        params:
+          $ref: '#/components/schemas/getAccountReputations_params'
+        id:
+          default: 1
+          type: integer
+      required:
+      - id
+      - jsonrpc
+      - method
+      - params
+      type: object
+    accountReputations_1:
+      additionalProperties: false
+      example:
+        result:
+          reputations:
+          - name: a-1
+            reputation: 37040190
+          - name: a-1
+            reputation: 37040190
+        id: 1
+        jsonrpc: "2.0"
+      properties:
+        jsonrpc:
+          example: "2.0"
+          type: string
+        id:
+          example: 1
+          type: integer
+        result:
+          $ref: '#/components/schemas/accountReputations_1_result'
+      required:
+      - id
+      - jsonrpc
+      - result
+      type: object
+    communityContext:
+      example:
+        subscribed: true
+        role: role
+        title: title
+      properties:
+        role:
+          type: string
+        subscribed:
+          type: boolean
+        title:
+          maxLength: 140
+          minLength: 0
+          type: string
+      type: object
+    comment:
+      additionalProperties: false
+      example:
+        parent_author: steemit
+        max_accepted_payout:
+          amount: 756
+          nai: '@@000000013'
+          precision: 3
+        total_payout_value:
+          amount: 756
+          nai: '@@000000013'
+          precision: 3
+        net_votes: 0
+        root_author: steemit
+        reward_weight: 10000
+        body: Steemit is a social media platform where anyone can earn STEEM points
+          by posting. The more people who like a post, the more STEEM the poster earns.
+          Anyone can sell their STEEM for cash or vest it to boost their voting power.
+        title: Welcome to Hive!
+        curator_payout_value:
+          amount: 756
+          nai: '@@000000013'
+          precision: 3
+        total_vote_weight: 0
+        allow_curation_rewards: true
+        allow_replies: true
+        children: 3548
+        last_update: 2000-01-23T04:56:07.000+00:00
+        id: 1
+        last_payout: 2000-01-23T04:56:07.000+00:00
+        vote_rshares: 0
+        beneficiaries:
+        - steemit
+        - steemit
+        percent_hbd: 10000
+        parent_permlink: meta
+        abs_rshares: 0
+        author: steemit
+        created: 2000-01-23T04:56:07.000+00:00
+        active: 2000-01-23T04:56:07.000+00:00
+        allow_votes: true
+        children_abs_rshares: 3548
+        root_permlink: firstpost
+        depth: 0
+        max_cashout_time: 2000-01-23T04:56:07.000+00:00
+        cashout_time: 2000-01-23T04:56:07.000+00:00
+        category: meta
+        author_rewards: 3548
+        json_metadata: ""
+        permlink: firstpost
+        net_rshares: 0
+      properties:
+        abs_rshares:
+          example: 0
+          type: integer
+        active:
+          format: date-time
+          type: string
+        allow_curation_rewards:
+          example: true
+          type: boolean
+        allow_replies:
+          example: true
+          type: boolean
+        allow_votes:
+          example: true
+          type: boolean
+        author:
+          example: steemit
+          type: string
+        author_rewards:
+          example: 3548
+          type: integer
+        beneficiaries:
+          items:
+            example: steemit
+            type: string
+          type: array
+        body:
+          example: Steemit is a social media platform where anyone can earn STEEM
+            points by posting. The more people who like a post, the more STEEM the
+            poster earns. Anyone can sell their STEEM for cash or vest it to boost
+            their voting power.
+          type: string
+        cashout_time:
+          format: date-time
+          type: string
+        category:
+          example: meta
+          type: string
+        children:
+          example: 3548
+          type: integer
+        children_abs_rshares:
+          example: 3548
+          type: integer
+        created:
+          format: date-time
+          type: string
+        curator_payout_value:
+          $ref: '#/components/schemas/currencyValue'
+        depth:
+          example: 0
+          type: integer
+        id:
+          example: 1
+          type: integer
+        json_metadata:
+          example: ""
+          type: string
+        last_payout:
+          format: date-time
+          type: string
+        last_update:
+          format: date-time
+          type: string
+        max_accepted_payout:
+          $ref: '#/components/schemas/currencyValue'
+        max_cashout_time:
+          format: date-time
+          type: string
+        net_rshares:
+          example: 0
+          type: integer
+        net_votes:
+          example: 0
+          type: integer
+        parent_author:
+          example: steemit
+          type: string
+        parent_permlink:
+          example: meta
+          type: string
+        percent_hbd:
+          example: 10000
+          type: integer
+        permlink:
+          example: firstpost
+          type: string
+        reward_weight:
+          example: 10000
+          type: integer
+        root_author:
+          example: steemit
+          type: string
+        root_permlink:
+          example: firstpost
+          type: string
+        title:
+          example: Welcome to Hive!
+          type: string
+        total_payout_value:
+          $ref: '#/components/schemas/currencyValue'
+        total_vote_weight:
+          example: 0
+          type: integer
+        vote_rshares:
+          example: 0
+          type: integer
+      required:
+      - abs_rshares
+      - active
+      - allow_curation_rewards
+      - allow_replies
+      - allow_votes
+      - author
+      - author_rewards
+      - beneficiaries
+      - body
+      - cashout_time
+      - category
+      - children
+      - children_abs_rshares
+      - created
+      - curator_payout_value
+      - depth
+      - id
+      - json_metadata
+      - last_payout
+      - last_update
+      - max_accepted_payout
+      - max_cashout_time
+      - net_rshares
+      - net_votes
+      - parent_author
+      - parent_permlink
+      - percent_hbd
+      - permlink
+      - reward_weight
+      - root_author
+      - root_permlink
+      - title
+      - total_payout_value
+      - total_vote_weight
+      - vote_rshares
+      type: object
+    vote:
+      additionalProperties: false
+      example:
+        author: kental
+        last_update: 2000-01-23T04:56:07.000+00:00
+        num_changes: 1
+        weight: 5725626236557488
+        vote_percent: 10000
+        voter: eduardf
+        id: 1011491
+        rshares: 2329409778
+        permlink: hi-steem-my-russian-trip-on-the-bike-big-party-in-moscow-tour-of-moscow-by-slava
+      properties:
+        author:
+          example: kental
+          type: string
+        voter:
+          example: eduardf
+          type: string
+        id:
+          example: 1011491
+          type: integer
+        last_update:
+          format: date-time
+          type: string
+        num_changes:
+          example: 1
+          type: integer
+        permlink:
+          example: hi-steem-my-russian-trip-on-the-bike-big-party-in-moscow-tour-of-moscow-by-slava
+          type: string
+        rshares:
+          example: 2329409778
+          type: integer
+        vote_percent:
+          example: 10000
+          type: integer
+        weight:
+          example: 5725626236557488
+          type: integer
+      required:
+      - author
+      - id
+      - last_update
+      - num_changes
+      - permlink
+      - rshares
+      - vote_percent
+      - voter
+      - weight
+      type: object
+    activeVotesComment:
+      additionalProperties: false
+      example:
+        parent_author: steemit
+        max_accepted_payout: 1000000.000 HBD
+        total_payout_value: 0.763 HBD
+        title: Welcome to Hive!
+        body: Steemit is a social media platform where anyone can earn STEEM points
+          by posting. The more people who like a post, the more STEEM the poster earns.
+          Anyone can sell their STEEM for cash or vest it to boost their voting power.
+        promoted: 0.763 HBD
+        curator_payout_value: 0.763 HBD
+        pending_payout_value: 0.763 HBD
+        children: 7
+        last_update: 2000-01-23T04:56:07.000+00:00
+        active_votes:
+        - reputation: 172643285682
+          voter: creding
+          percent: 10000
+          rshares: 103335387
+        - reputation: 172643285682
+          voter: creding
+          percent: 10000
+          rshares: 103335387
+        last_payout: 2000-01-23T04:56:07.000+00:00
+        beneficiaries:
+        - steemit
+        - steemit
+        percent_hbd: 10000
+        parent_permlink: meta
+        author: steemit
+        created: 2000-01-23T04:56:07.000+00:00
+        author_reputation: 2644191137390
+        url: /steemit/@noodhoog/i-was-wrong-steemit-is-actually-beating-reddit-in-deep-user-participation
+        body_length: 1529
+        depth: 0
+        replies: []
+        post_id: 1094173
+        cashout_time: 2000-01-23T04:56:07.000+00:00
+        category: meta
+        root_title: I was wrong! Steemit is actually beating Reddit in deep user participation!
+        permlink: firstpost
+        json_metadata: '{"tags":["steemit","reddit","stats","theydidthemath","users"],"image":["http://www.oerca.com/images/discussion_forum.jpg"]}'
+        net_rshares: 1361634219384
+      properties:
+        author:
+          example: steemit
+          type: string
+        permlink:
+          example: firstpost
+          type: string
+        category:
+          example: meta
+          type: string
+        title:
+          example: Welcome to Hive!
+          type: string
+        body:
+          example: Steemit is a social media platform where anyone can earn STEEM
+            points by posting. The more people who like a post, the more STEEM the
+            poster earns. Anyone can sell their STEEM for cash or vest it to boost
+            their voting power.
+          type: string
+        json_metadata:
+          example: '{"tags":["steemit","reddit","stats","theydidthemath","users"],"image":["http://www.oerca.com/images/discussion_forum.jpg"]}'
+          type: string
+        created:
+          format: date-time
+          type: string
+        last_update:
+          format: date-time
+          type: string
+        depth:
+          example: 0
+          type: integer
+        children:
+          example: 7
+          type: integer
+        last_payout:
+          format: date-time
+          type: string
+        cashout_time:
+          format: date-time
+          type: string
+        total_payout_value:
+          example: 0.763 HBD
+          type: string
+        curator_payout_value:
+          example: 0.763 HBD
+          type: string
+        pending_payout_value:
+          example: 0.763 HBD
+          type: string
+        promoted:
+          example: 0.763 HBD
+          type: string
+        replies:
+          description: implemented as empty array
+          example: []
+          items:
+            type: object
+          type: array
+        body_length:
+          example: 1529
+          type: integer
+        author_reputation:
+          example: 2644191137390
+          type: integer
+        parent_author:
+          example: steemit
+          type: string
+        parent_permlink:
+          example: meta
+          type: string
+        url:
+          example: /steemit/@noodhoog/i-was-wrong-steemit-is-actually-beating-reddit-in-deep-user-participation
+          type: string
+        root_title:
+          example: I was wrong! Steemit is actually beating Reddit in deep user participation!
+          type: string
+        beneficiaries:
+          items:
+            example: steemit
+            type: string
+          type: array
+        max_accepted_payout:
+          example: 1000000.000 HBD
+          type: string
+        percent_hbd:
+          example: 10000
+          type: integer
+        post_id:
+          example: 1094173
+          type: integer
+        net_rshares:
+          example: 1361634219384
+          type: integer
+        active_votes:
+          items:
+            $ref: '#/components/schemas/activeVotesComment_active_votes'
+          type: array
+      required:
+      - active_votes
+      - author
+      - author_reputation
+      - beneficiaries
+      - body
+      - body_length
+      - cashout_time
+      - category
+      - children
+      - created
+      - curator_payout_value
+      - depth
+      - json_metadata
+      - last_payout
+      - last_update
+      - max_accepted_payout
+      - net_rshares
+      - parent_author
+      - parent_permlink
+      - pending_payout_value
+      - percent_hbd
+      - permlink
+      - post_id
+      - promoted
+      - replies
+      - root_title
+      - title
+      - total_payout_value
+      - url
+      type: object
+    content:
+      additionalProperties: false
+      example:
+        parent_author: steemit
+        max_accepted_payout: 1000000.000 HBD
+        total_payout_value: 0.763 HBD
+        title: Welcome to Hive!
+        body: Steemit is a social media platform where anyone can earn STEEM points
+          by posting. The more people who like a post, the more STEEM the poster earns.
+          Anyone can sell their STEEM for cash or vest it to boost their voting power.
+        promoted: 0.763 HBD
+        curator_payout_value: 0.763 HBD
+        pending_payout_value: 0.763 HBD
+        children: 7
+        last_update: 2000-01-23T04:56:07.000+00:00
+        active_votes:
+        - reputation: 172643285682
+          voter: creding
+          percent: 10000
+          rshares: 103335387
+        - reputation: 172643285682
+          voter: creding
+          percent: 10000
+          rshares: 103335387
+        last_payout: 2000-01-23T04:56:07.000+00:00
+        beneficiaries:
+        - steemit
+        - steemit
+        percent_hbd: 10000
+        parent_permlink: meta
+        author: steemit
+        created: 2000-01-23T04:56:07.000+00:00
+        author_reputation: 2644191137390
+        url: /steemit/@noodhoog/i-was-wrong-steemit-is-actually-beating-reddit-in-deep-user-participation
+        body_length: 1529
+        depth: 0
+        replies: []
+        cashout_time: 2000-01-23T04:56:07.000+00:00
+        category: meta
+        root_title: I was wrong! Steemit is actually beating Reddit in deep user participation!
+        permlink: firstpost
+        json_metadata: '{"tags":["steemit","reddit","stats","theydidthemath","users"],"image":["http://www.oerca.com/images/discussion_forum.jpg"]}'
+        net_rshares: 1361634219384
+      properties:
+        author:
+          example: steemit
+          type: string
+        permlink:
+          example: firstpost
+          type: string
+        category:
+          example: meta
+          type: string
+        title:
+          example: Welcome to Hive!
+          type: string
+        body:
+          example: Steemit is a social media platform where anyone can earn STEEM
+            points by posting. The more people who like a post, the more STEEM the
+            poster earns. Anyone can sell their STEEM for cash or vest it to boost
+            their voting power.
+          type: string
+        json_metadata:
+          example: '{"tags":["steemit","reddit","stats","theydidthemath","users"],"image":["http://www.oerca.com/images/discussion_forum.jpg"]}'
+          type: string
+        created:
+          format: date-time
+          type: string
+        last_update:
+          format: date-time
+          type: string
+        depth:
+          example: 0
+          type: integer
+        children:
+          example: 7
+          type: integer
+        last_payout:
+          format: date-time
+          type: string
+        cashout_time:
+          format: date-time
+          type: string
+        total_payout_value:
+          example: 0.763 HBD
+          type: string
+        curator_payout_value:
+          example: 0.763 HBD
+          type: string
+        pending_payout_value:
+          example: 0.763 HBD
+          type: string
+        promoted:
+          example: 0.763 HBD
+          type: string
+        replies:
+          description: implemented as empty array
+          example: []
+          items:
+            type: object
+          type: array
+        body_length:
+          example: 1529
+          type: integer
+        author_reputation:
+          example: 2644191137390
+          type: integer
+        parent_author:
+          example: steemit
+          type: string
+        parent_permlink:
+          example: meta
+          type: string
+        url:
+          example: /steemit/@noodhoog/i-was-wrong-steemit-is-actually-beating-reddit-in-deep-user-participation
+          type: string
+        root_title:
+          example: I was wrong! Steemit is actually beating Reddit in deep user participation!
+          type: string
+        beneficiaries:
+          items:
+            example: steemit
+            type: string
+          type: array
+        max_accepted_payout:
+          example: 1000000.000 HBD
+          type: string
+        percent_hbd:
+          example: 10000
+          type: integer
+        net_rshares:
+          example: 1361634219384
+          type: integer
+        active_votes:
+          items:
+            $ref: '#/components/schemas/activeVotesComment_active_votes'
+          type: array
+      required:
+      - active_votes
+      - author
+      - author_reputation
+      - beneficiaries
+      - body
+      - body_length
+      - cashout_time
+      - category
+      - children
+      - created
+      - curator_payout_value
+      - depth
+      - json_metadata
+      - last_payout
+      - last_update
+      - max_accepted_payout
+      - net_rshares
+      - parent_author
+      - parent_permlink
+      - pending_payout_value
+      - percent_hbd
+      - permlink
+      - promoted
+      - replies
+      - root_title
+      - title
+      - total_payout_value
+      - url
+      type: object
+    currencyValue:
+      example:
+        amount: 756
+        nai: '@@000000013'
+        precision: 3
+      properties:
+        amount:
+          example: 756
+          type: integer
+        nai:
+          example: '@@000000013'
+          type: string
+        precision:
+          example: 3
+          type: integer
+      type: object
+    communityRequest_params:
+      properties:
+        name:
+          description: community name
+          example: hive-186713
+          type: string
+        observer:
+          description: account name
+          example: good-karma
+          type: string
+      required:
+      - name
+      type: object
+    community_result:
+      example:
+        settings: '{}'
+        num_pending: 1
+        subscribers: 5
+        type_id: 2
+        about: about
+        description: description
+        created_at: 2000-01-23T04:56:07.000+00:00
+        team: '{}'
+        title: title
+        num_authors: 6
+        is_nsfw: true
+        flag_text: flag_text
+        sum_pending: 5
+        avatar_url: avatar_url
+        context:
+          subscribed: true
+          role: role
+          title: title
+        name: name
+        id: 0
+        lang: lang
+        admins:
+        - admins
+        - admins
+      properties:
+        id:
+          type: integer
+        about:
+          type: string
+        description:
+          type: string
+        admins:
+          items:
+            type: string
+          type: array
+        avatar_url:
+          type: string
+        context:
+          $ref: '#/components/schemas/communityContext'
+        created_at:
+          format: date-time
+          type: string
+        flag_text:
+          type: string
+        is_nsfw:
+          type: boolean
+        lang:
+          type: string
+        name:
+          type: string
+        num_authors:
+          type: integer
+        num_pending:
+          type: integer
+        settings:
+          type: object
+        subscribers:
+          type: integer
+        sum_pending:
+          type: integer
+        team:
+          description: 'array of arrays with 3 strings: name, role_name, title'
+          type: object
+        title:
+          type: string
+        type_id:
+          type: integer
+      required:
+      - about
+      - avatar_url
+      - context
+      - created_at
+      - description
+      - flag_text
+      - id
+      - is_nsfw
+      - lang
+      - name
+      - num_authors
+      - num_pending
+      - settings
+      - subscribers
+      - sum_pending
+      - team
+      - title
+      - type_id
+      type: object
+    communityContextRequest_params:
+      properties:
+        name:
+          description: community name
+          example: hive-186713
+          type: string
+        account:
+          description: account name
+          example: good-karma
+          type: string
+      required:
+      - account
+      - name
+      type: object
+    listAllSubscriptionsRequest_params:
+      properties:
+        account:
+          description: account name
+          example: good-karma
+          type: string
+      required:
+      - account
+      type: object
+    listCommunitesRequest_params:
+      properties:
+        last:
+          description: name of community; paging mechanism (cuts out this and "higher"
+            communities, depends on chosen ranking)
+          example: hive-135485
+          type: string
+        limit:
+          default: 100
+          description: limit number of listed communities
+          maximum: 100
+          minimum: 1
+          type: integer
+        query:
+          description: when given turns on filtering for given set of words - words
+            are looked for in "title" and "about" fields
+          example: World
+          type: string
+        sort:
+          default: rank
+          description: ' determines order of returned communities'
+          enum:
+          - rank
+          - new
+          - subs
+          type: string
+        observer:
+          description: (can be skipped or passed empty), when passed has to point
+            to valid account used to show relation between account and community (subscribed,
+            role and title)
+          example: good-karma
+          type: string
+      type: object
+    listCommunity_result:
+      example:
+        num_pending: 1
+        subscribers: 5
+        type_id: 2
+        about: about
+        created_at: 2000-01-23T04:56:07.000+00:00
+        title: title
+        num_authors: 6
+        is_nsfw: true
+        sum_pending: 5
+        avatar_url: avatar_url
+        context:
+          subscribed: true
+          role: role
+          title: title
+        name: name
+        id: 0
+        lang: lang
+        admins:
+        - admins
+        - admins
+      properties:
+        id:
+          type: integer
+        about:
+          type: string
+        admins:
+          items:
+            type: string
+          type: array
+        avatar_url:
+          type: string
+        context:
+          $ref: '#/components/schemas/communityContext'
+        created_at:
+          format: date-time
+          type: string
+        is_nsfw:
+          type: boolean
+        lang:
+          type: string
+        name:
+          type: string
+        num_authors:
+          type: integer
+        num_pending:
+          type: integer
+        subscribers:
+          type: integer
+        sum_pending:
+          type: integer
+        title:
+          type: string
+        type_id:
+          type: integer
+      required:
+      - about
+      - avatar_url
+      - context
+      - created_at
+      - id
+      - is_nsfw
+      - lang
+      - name
+      - num_authors
+      - num_pending
+      - subscribers
+      - sum_pending
+      - title
+      - type_id
+      type: object
+    listCommunityRolesRequest_params:
+      properties:
+        community:
+          description: community name
+          example: hive-186713
+          type: string
+        last:
+          description: name of community; paging mechanism (cuts out this and "higher"
+            communities, depends on chosen ranking)
+          example: hive-186713
+          type: string
+        limit:
+          default: 100
+          description: limit number of listed communities
+          maximum: 100
+          minimum: 1
+          type: integer
+      required:
+      - community
+      type: object
+    listPopCommunitesRequest_params:
+      properties:
+        limit:
+          default: 25
+          description: limit number of listed communities
+          maximum: 25
+          minimum: 1
+          type: integer
+      type: object
+    listSubscribersRequest_params:
+      properties:
+        community:
+          description: community name
+          example: hive-186713
+          type: string
+        last:
+          description: ' name of subscriber; paging mechanism (cuts out this and "higher"
+            subscribers, depends on created at desc)'
+          example: hive-186713
+          type: string
+        limit:
+          default: 100
+          description: limit number of listed subscribers
+          maximum: 100
+          minimum: 1
+          type: integer
+      required:
+      - community
+      type: object
+    findCommentsRequest_params:
+      properties:
+        comments:
+          description: '"comments": [["{author}","{permlink}"],*] author + permlink
+            : optional (can be left blank or skipped), but only makes sense when it
+            points to valid post there can be up to 1000 such pairs in single call,
+            duplicates are not squashed, invalid pairs are ignored'
+          example:
+          - - steemit
+            - firstpost
+          items:
+            type: string
+          type: array
+      required:
+      - comments
+      type: object
+    comments_result:
+      example:
+        comments:
+        - parent_author: steemit
+          max_accepted_payout:
+            amount: 756
+            nai: '@@000000013'
+            precision: 3
+          total_payout_value:
+            amount: 756
+            nai: '@@000000013'
+            precision: 3
+          net_votes: 0
+          root_author: steemit
+          reward_weight: 10000
+          body: Steemit is a social media platform where anyone can earn STEEM points
+            by posting. The more people who like a post, the more STEEM the poster
+            earns. Anyone can sell their STEEM for cash or vest it to boost their
+            voting power.
+          title: Welcome to Hive!
+          curator_payout_value:
+            amount: 756
+            nai: '@@000000013'
+            precision: 3
+          total_vote_weight: 0
+          allow_curation_rewards: true
+          allow_replies: true
+          children: 3548
+          last_update: 2000-01-23T04:56:07.000+00:00
+          id: 1
+          last_payout: 2000-01-23T04:56:07.000+00:00
+          vote_rshares: 0
+          beneficiaries:
+          - steemit
+          - steemit
+          percent_hbd: 10000
+          parent_permlink: meta
+          abs_rshares: 0
+          author: steemit
+          created: 2000-01-23T04:56:07.000+00:00
+          active: 2000-01-23T04:56:07.000+00:00
+          allow_votes: true
+          children_abs_rshares: 3548
+          root_permlink: firstpost
+          depth: 0
+          max_cashout_time: 2000-01-23T04:56:07.000+00:00
+          cashout_time: 2000-01-23T04:56:07.000+00:00
+          category: meta
+          author_rewards: 3548
+          json_metadata: ""
+          permlink: firstpost
+          net_rshares: 0
+        - parent_author: steemit
+          max_accepted_payout:
+            amount: 756
+            nai: '@@000000013'
+            precision: 3
+          total_payout_value:
+            amount: 756
+            nai: '@@000000013'
+            precision: 3
+          net_votes: 0
+          root_author: steemit
+          reward_weight: 10000
+          body: Steemit is a social media platform where anyone can earn STEEM points
+            by posting. The more people who like a post, the more STEEM the poster
+            earns. Anyone can sell their STEEM for cash or vest it to boost their
+            voting power.
+          title: Welcome to Hive!
+          curator_payout_value:
+            amount: 756
+            nai: '@@000000013'
+            precision: 3
+          total_vote_weight: 0
+          allow_curation_rewards: true
+          allow_replies: true
+          children: 3548
+          last_update: 2000-01-23T04:56:07.000+00:00
+          id: 1
+          last_payout: 2000-01-23T04:56:07.000+00:00
+          vote_rshares: 0
+          beneficiaries:
+          - steemit
+          - steemit
+          percent_hbd: 10000
+          parent_permlink: meta
+          abs_rshares: 0
+          author: steemit
+          created: 2000-01-23T04:56:07.000+00:00
+          active: 2000-01-23T04:56:07.000+00:00
+          allow_votes: true
+          children_abs_rshares: 3548
+          root_permlink: firstpost
+          depth: 0
+          max_cashout_time: 2000-01-23T04:56:07.000+00:00
+          cashout_time: 2000-01-23T04:56:07.000+00:00
+          category: meta
+          author_rewards: 3548
+          json_metadata: ""
+          permlink: firstpost
+          net_rshares: 0
+      properties:
+        comments:
+          items:
+            $ref: '#/components/schemas/comment'
+          type: array
+      required:
+      - comments
+      type: object
+    listCommentsByAuthorRequest_params:
+      properties:
+        start:
+          description: '"start": ["{author}","{update_date}","{start_author}","{start_permlink}"]'
+          example:
+          - gtg
+          - 2016-09-06T18:47:33
+          - gtg
+          - missing-rewards-while-mining
+          items:
+            type: string
+          type: array
+        limit:
+          default: 1000
+          description: optional 1..1000, default = 1000
+          example: 10
+          type: integer
+        order:
+          enum:
+          - by_author_last_update
+          example: by_author_last_update
+          type: string
+      required:
+      - order
+      - start
+      type: object
+    listCommentsByCashoutTimeRequest_params:
+      properties:
+        start:
+          description: '["{cashout_date}","{start_author}","{start_permlink}"] cashout_date
+            : mandatory; cashout date in format "Y-m-d H:M:S" or "Y-m-dTH:M:S", if
+            year 1969 is passed it means paidout posts start_author + start_permlink
+            : optional (can be left blank but not skipped), when given have to point
+            to valid post; paging mechanism'
+          example:
+          - 1969-12-31T23:59:59
+          - proskynneo
+          - steemit-firstpost-1
+          items:
+            type: string
+          type: array
+        limit:
+          default: 1000
+          description: optional 1..1000, default = 1000
+          example: 10
+          type: integer
+        order:
+          enum:
+          - by_cashout_time
+          example: by_cashout_time
+          type: string
+      required:
+      - order
+      - start
+      type: object
+    listCommentsByLastUpdateRequest_params:
+      properties:
+        start:
+          description: '["{parent_author}","{update_date}","{start_author}","{start_permlink}"]
+            parent_author : mandatory; points to valid account update_date : mandatory;
+            update date in format "Y-m-d H:M:S" or "Y-m-dTH:M:S" start_author + start_permlink
+            : optional (can be left blank but not skipped), when given have to point
+            to valid post; paging mechanism'
+          example:
+          - sykochica
+          - 2016-08-24T19:59:42
+          - williambanks
+          - re-sykochica-re-williambanks-re-sykochica-what-is-god-as-told-by-a-13-year-old-20160823t021931580z
+          items:
+            type: string
+          type: array
+        limit:
+          default: 1000
+          description: optional 1..1000, default = 1000
+          example: 10
+          type: integer
+        order:
+          enum:
+          - by_last_update
+          example: by_last_update
+          type: string
+      required:
+      - order
+      - start
+      type: object
+    listCommentsByParentRequest_params:
+      properties:
+        start:
+          description: '["{parent_author}","{parent_permlink}","{start_author}","{start_permlink}"]
+            parent_author + parent_permlink : mandatory; points to valid post start_author
+            + start_permlink : optional (can be left blank but not skipped), when
+            given have to point to valid post; paging mechanism'
+          example:
+          - allasyummyfood
+          - re-givemeyoursteem-winners-of-steemit-food-challenge-3-desserts-to-die-for-20160829t004616466z
+          - vlad
+          - re-allasyummyfood-re-givemeyoursteem-winners-of-steemit-food-challenge-3-desserts-to-die-for-20160829t011002757z
+          items:
+            type: string
+          type: array
+        limit:
+          default: 1000
+          description: optional 1..1000, default = 1000
+          example: 10
+          type: integer
+        order:
+          enum:
+          - by_parent
+          example: by_parent
+          type: string
+      required:
+      - order
+      - start
+      type: object
+    listCommentsByPermlinkRequest_params:
+      properties:
+        start:
+          description: '["{author}","{permlink}"] author : optional (can be left blank
+            but not skipped), can be part of author name permlink : optional (can
+            be left blank but not skipped), can be part of permlink; makes sense to
+            pass it only with valid author, but it is not checked'
+          example:
+          - skypilot
+          - an-introduction-to-where-eagles-fly-the-american-wilderness-expedition-by-zedekiah-morse
+          items:
+            type: string
+          type: array
+        limit:
+          default: 1000
+          description: optional 1..1000, default = 1000
+          example: 10
+          type: integer
+        order:
+          enum:
+          - by_permlink
+          example: by_permlink
+          type: string
+      required:
+      - order
+      - start
+      type: object
+    listCommentsByRootRequest_params:
+      properties:
+        start:
+          description: '["{root_author}","{root_permlink}","{start_author}","{start_permlink}"]
+            root_author + root_permlink : mandatory; points to root post of discussion
+            start_author + start_permlink : optional (can be left blank but not skipped),
+            when given have to point to valid post; paging mechanism'
+          example:
+          - givemeyoursteem
+          - winners-of-steemit-food-challenge-3-desserts-to-die-for
+          - vi1son
+          - re-givemeyoursteem-winners-of-steemit-food-challenge-3-desserts-to-die-for-20160828t172955785z
+          items:
+            type: string
+          type: array
+        limit:
+          default: 1000
+          description: optional 1..1000, default = 1000
+          example: 10
+          type: integer
+        order:
+          enum:
+          - by_root
+          example: by_root
+          type: string
+      required:
+      - order
+      - start
+      type: object
+    findVotesRequest_params:
+      properties:
+        author:
+          description: author of a post to list votes
+          example: kental
+          type: string
+        permlink:
+          description: permlink to a post to link votes
+          example: hi-steem-my-russian-trip-on-the-bike-big-party-in-moscow-tour-of-moscow-by-slava
+          type: string
+      required:
+      - author
+      - permlink
+      type: object
+    votes_result:
+      example:
+        votes:
+        - author: kental
+          last_update: 2000-01-23T04:56:07.000+00:00
+          num_changes: 1
+          weight: 5725626236557488
+          vote_percent: 10000
+          voter: eduardf
+          id: 1011491
+          rshares: 2329409778
+          permlink: hi-steem-my-russian-trip-on-the-bike-big-party-in-moscow-tour-of-moscow-by-slava
+        - author: kental
+          last_update: 2000-01-23T04:56:07.000+00:00
+          num_changes: 1
+          weight: 5725626236557488
+          vote_percent: 10000
+          voter: eduardf
+          id: 1011491
+          rshares: 2329409778
+          permlink: hi-steem-my-russian-trip-on-the-bike-big-party-in-moscow-tour-of-moscow-by-slava
+      properties:
+        votes:
+          items:
+            $ref: '#/components/schemas/vote'
+          type: array
+      required:
+      - votes
+      type: object
+    listVotesRequest_params:
+      properties:
+        start:
+          description: 'author + permlink : mandatory, points to valid post, start_voter
+            : optional (can be left blank but not skipped), when given has to point
+            to valid account; paging mechanism'
+          example:
+          - roelandp
+          - tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours
+          - winstonwolfe
+          items:
+            type: string
+          type: array
+        limit:
+          default: 1000
+          description: limit number of listed communities
+          maximum: 1000
+          minimum: 1
+          type: integer
+        order:
+          enum:
+          - by_comment_voter
+          - by_voter_comment
+          type: string
+      required:
+      - order
+      - start
+      type: object
+    headState_result:
+      example:
+        db_head_block: 5000024
+        db_head_time: 2000-01-23T04:56:07.000+00:00
+      properties:
+        db_head_block:
+          example: 5000024
+          type: integer
+        db_head_time:
+          format: date-time
+          type: string
+      required:
+      - db_head_block
+      - db_head_time
+      type: object
+    getInfo_result:
+      example:
+        database_schema_version: 29
+        database_head_block: 5000024
+        database_patch_date: 2000-01-23T04:56:07.000+00:00
+        database_patched_to_revision: 6d58301a
+        hivemind_git_date: 2000-01-23T04:56:07.000+00:00
+        hivemind_version: 1.24rc0
+        hivemind_git_rev: 6d58301a
+      properties:
+        database_head_block:
+          example: 5000024
+          type: integer
+        database_patch_date:
+          format: date-time
+          type: string
+        database_patched_to_revision:
+          example: 6d58301a
+          type: string
+        database_schema_version:
+          example: 29
+          type: integer
+        hivemind_git_date:
+          format: date-time
+          type: string
+        hivemind_git_rev:
+          example: 6d58301a
+          type: string
+        hivemind_version:
+          example: 1.24rc0
+          type: string
+      required:
+      - database_head_block
+      - database_patch_date
+      - database_patched_to_revision
+      - database_schema_version
+      - hivemind_git_date
+      - hivemind_git_rev
+      - hivemind_version
+      type: object
+    getAccountReputations_params:
+      properties:
+        account_lower_bound:
+          example: a
+          type: string
+        limit:
+          default: 1000
+          description: optional 1..1000, default = 1000
+          example: 1000
+          type: integer
+      required:
+      - account_lower_bound
+      type: object
+    accountReputations_result:
+      example:
+        reputation: 37040190
+        account: a-1
+      properties:
+        account:
+          example: a-1
+          type: string
+        reputation:
+          example: 37040190
+          type: integer
+      required:
+      - account
+      - reputation
+      type: object
+    getActiveVotes_params:
+      description: 'author + permlink : mandatory, points to valid post'
+      properties:
+        author:
+          example: noodhoog
+          type: string
+        permlink:
+          example: steem-opening-the-forgotten-economy
+          type: string
+      required:
+      - author
+      - permlink
+      type: object
+    activeVotes_result:
+      example:
+        reputation: 172643285682
+        weight: 5265425467638
+        time: 2000-01-23T04:56:07.000+00:00
+        voter: creding
+        percent: 10000
+        rshares: 103335387
+      properties:
+        percent:
+          example: 10000
+          type: integer
+        reputation:
+          example: 172643285682
+          type: integer
+        rshares:
+          example: 103335387
+          type: integer
+        time:
+          format: date-time
+          type: string
+        voter:
+          example: creding
+          type: string
+        weight:
+          example: 5265425467638
+          type: integer
+      required:
+      - percent
+      - reputation
+      - rshares
+      - time
+      - voter
+      - weight
+      type: object
+    getBlog_params:
+      description: 'author + permlink : mandatory, points to valid post'
+      properties:
+        account:
+          description: mandatory, points to valid account
+          example: noodhoog
+          type: string
+        start_entry_id:
+          default: 0
+          description: optional, -1..any, default = 0, both -1 and 0 mean = {number
+            of blog entries} - 1; part of paging mechanism
+          example: 0
+          type: integer
+        limit:
+          description: optional, 1..500 (0 functions as skipped), default = {start_entry_id}
+            + 1; part of paging mechanism
+          example: 0
+          type: integer
+      required:
+      - account
+      type: object
+    blog_result:
+      example:
+        comment:
+          parent_author: steemit
+          max_accepted_payout: 1000000.000 HBD
+          total_payout_value: 0.763 HBD
+          title: Welcome to Hive!
+          body: Steemit is a social media platform where anyone can earn STEEM points
+            by posting. The more people who like a post, the more STEEM the poster
+            earns. Anyone can sell their STEEM for cash or vest it to boost their
+            voting power.
+          promoted: 0.763 HBD
+          curator_payout_value: 0.763 HBD
+          pending_payout_value: 0.763 HBD
+          children: 7
+          last_update: 2000-01-23T04:56:07.000+00:00
+          active_votes:
+          - reputation: 172643285682
+            voter: creding
+            percent: 10000
+            rshares: 103335387
+          - reputation: 172643285682
+            voter: creding
+            percent: 10000
+            rshares: 103335387
+          last_payout: 2000-01-23T04:56:07.000+00:00
+          beneficiaries:
+          - steemit
+          - steemit
+          percent_hbd: 10000
+          parent_permlink: meta
+          author: steemit
+          created: 2000-01-23T04:56:07.000+00:00
+          author_reputation: 2644191137390
+          url: /steemit/@noodhoog/i-was-wrong-steemit-is-actually-beating-reddit-in-deep-user-participation
+          body_length: 1529
+          depth: 0
+          replies: []
+          post_id: 1094173
+          cashout_time: 2000-01-23T04:56:07.000+00:00
+          category: meta
+          root_title: I was wrong! Steemit is actually beating Reddit in deep user
+            participation!
+          permlink: firstpost
+          json_metadata: '{"tags":["steemit","reddit","stats","theydidthemath","users"],"image":["http://www.oerca.com/images/discussion_forum.jpg"]}'
+          net_rshares: 1361634219384
+        reblogged_on: 2000-01-23T04:56:07.000+00:00
+        blog: noodhoog
+        entry_id: 103
+      properties:
+        blog:
+          example: noodhoog
+          type: string
+        entry_id:
+          example: 103
+          type: integer
+        comment:
+          $ref: '#/components/schemas/activeVotesComment'
+        reblogged_on:
+          format: date-time
+          type: string
+      required:
+      - blog
+      - comment
+      - entry_id
+      - reblogged_on
+      type: object
+    blogEntries_result:
+      example:
+        author: noodhoog
+        reblogged_on: 2000-01-23T04:56:07.000+00:00
+        blog: noodhoog
+        entry_id: 103
+        permlink: hello-world
+      properties:
+        blog:
+          example: noodhoog
+          type: string
+        entry_id:
+          example: 103
+          type: integer
+        author:
+          example: noodhoog
+          type: string
+        permlink:
+          example: hello-world
+          type: string
+        reblogged_on:
+          format: date-time
+          type: string
+      required:
+      - author
+      - blog
+      - entry_id
+      - permlink
+      - reblogged_on
+      type: object
+    getCommentDiscussionsByPayout_params:
+      properties:
+        start_author:
+          description: optional, when given with start_permlink have to point to valid
+            start post; paging mechanism (cuts out this and more paying replies)
+          example: demotruk
+          type: string
+        start_permlink:
+          description: optional, when given with start_author have to point to valid
+            start post; paging mechanism (cuts out this and more paying replies)
+          example: re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z
+          type: string
+        limit:
+          description: optional, 1..100, default = 20
+          example: 20
+          type: integer
+        tag:
+          description: optional, actually means category, when given have to point
+            to valid category; narrows down results to posts with given category
+          example: steemit
+          type: string
+        truncate_body:
+          default: 0
+          description: optional, default = 0 (meaning no truncation); reduces maximal
+            size of post body, cutting out all excess
+          example: 3
+          type: integer
+        observer:
+          description: optional (can be skipped or passed empty), when passed has
+            to point to valid account. Used to filter out posts authored by accounts
+            ignored directly or indirectly by the observer
+          example: ignoreall
+          type: string
+      type: object
+    discussions_active_votes:
+      example:
+        reputation: 12494904871301
+        voter: trogdor
+        percent: "10000"
+        rshares: 211439242838
+      properties:
+        percent:
+          example: "10000"
+          type: string
+        reputation:
+          example: 12494904871301
+          type: integer
+        rshares:
+          example: 211439242838
+          type: integer
+        voter:
+          example: trogdor
+          type: string
+      required:
+      - percent
+      - reputation
+      - rshares
+      - voter
+      type: object
+    discussions_result:
+      example:
+        parent_author: trogdor
+        max_accepted_payout: 1000000.000 HBD
+        total_payout_value: 0.000 HBD
+        body: Fail ? No spam bot army...
+        promoted: 0.000 HBD
+        title: ""
+        curator_payout_value: 0.763 HBD
+        pending_payout_value: 0.132 HBD
+        children: 26
+        last_update: 2000-01-23T04:56:07.000+00:00
+        active_votes:
+        - reputation: 12494904871301
+          voter: trogdor
+          percent: "10000"
+          rshares: 211439242838
+        - reputation: 12494904871301
+          voter: trogdor
+          percent: "10000"
+          rshares: 211439242838
+        last_payout: 2000-01-23T04:56:07.000+00:00
+        beneficiaries:
+        - steemit
+        - steemit
+        percent_hbd: 10000
+        parent_permlink: this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army
+        author: noodhoog
+        created: 2000-01-23T04:56:07.000+00:00
+        author_reputation: 10900524985586
+        url: /test/@trogdor/this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army#@royaltiffany/re-trogdor-this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army-20160817t020602907z
+        body_length: 26
+        depth: 1
+        post_id: 845516
+        replies: []
+        cashout_time: 2000-01-23T04:56:07.000+00:00
+        category: test
+        root_title: this is a test to see if i have been targeted by a spam bot army
+        json_metadata: '{"tags":["test"]}'
+        permlink: re-trogdor-this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army-20160817t020602907z
+        net_rshares: 211900981073
+      properties:
+        active_votes:
+          items:
+            $ref: '#/components/schemas/discussions_active_votes'
+          type: array
+        author:
+          example: noodhoog
+          type: string
+        author_reputation:
+          example: 10900524985586
+          type: integer
+        beneficiaries:
+          items:
+            example: steemit
+            type: string
+          type: array
+        body:
+          example: Fail ? No spam bot army...
+          type: string
+        body_length:
+          example: 26
+          type: integer
+        cashout_time:
+          format: date-time
+          type: string
+        category:
+          example: test
+          type: string
+        children:
+          example: 26
+          type: integer
+        created:
+          format: date-time
+          type: string
+        curator_payout_value:
+          example: 0.763 HBD
+          type: string
+        depth:
+          example: 1
+          type: integer
+        json_metadata:
+          example: '{"tags":["test"]}'
+          type: string
+        last_payout:
+          format: date-time
+          type: string
+        last_update:
+          format: date-time
+          type: string
+        max_accepted_payout:
+          example: 1000000.000 HBD
+          type: string
+        net_rshares:
+          example: 211900981073
+          type: integer
+        parent_author:
+          example: trogdor
+          type: string
+        parent_permlink:
+          example: this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army
+          type: string
+        pending_payout_value:
+          example: 0.132 HBD
+          type: string
+        percent_hbd:
+          example: 10000
+          type: integer
+        permlink:
+          example: re-trogdor-this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army-20160817t020602907z
+          type: string
+        post_id:
+          example: 845516
+          type: integer
+        promoted:
+          example: 0.000 HBD
+          type: string
+        replies:
+          description: implemented as empty array
+          example: []
+          items:
+            type: object
+          type: array
+        root_title:
+          example: this is a test to see if i have been targeted by a spam bot army
+          type: string
+        title:
+          example: ""
+          type: string
+        total_payout_value:
+          example: 0.000 HBD
+          type: string
+        url:
+          example: /test/@trogdor/this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army#@royaltiffany/re-trogdor-this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army-20160817t020602907z
+          type: string
+      required:
+      - active_votes
+      - author
+      - author_reputation
+      - beneficiaries
+      - body
+      - body_length
+      - cashout_time
+      - category
+      - children
+      - created
+      - curator_payout_value
+      - depth
+      - json_metadata
+      - last_payout
+      - last_update
+      - max_accepted_payout
+      - net_rshares
+      - parent_author
+      - parent_permlink
+      - pending_payout_value
+      - percent_hbd
+      - permlink
+      - post_id
+      - promoted
+      - replies
+      - root_title
+      - title
+      - total_payout_value
+      - url
+      type: object
+    getContent_params:
+      properties:
+        author:
+          description: Mandatory, points to valid post
+          example: demotruk
+          type: string
+        permlink:
+          description: Mandatory, points to valid post
+          example: re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z
+          type: string
+        observer:
+          description: optional, used for muted votes and blacklists (that functionality
+            was removed and now observer is completely ignored - it will most likely
+            stay that way)
+          example: ignoreall
+          type: string
+      required:
+      - author
+      - permlink
+      type: object
+    getContentReplies_params:
+      properties:
+        author:
+          description: Mandatory, points to valid post
+          example: demotruk
+          type: string
+        permlink:
+          description: Mandatory, points to valid post
+          example: re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z
+          type: string
+      required:
+      - author
+      - permlink
+      type: object
+    getDiscussionsByAuthorBeforeDate_params:
+      properties:
+        author:
+          description: Mandatory, points to valid post
+          example: demotruk
+          type: string
+        start_permlink:
+          description: Mandatory, points to valid post
+          example: re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z
+          type: string
+        limit:
+          description: optional, 1..100, default = 20
+          example: 10
+          type: integer
+        before_date:
+          description: optional, when given should point on start date; completely
+            ignored
+          type: string
+        truncate_body:
+          description: optional, default = 0 (meaning no truncation); reduces maximal
+            size of post body, cutting out all excess
+          example: 0
+          type: integer
+      required:
+      - author
+      - start_permlink
+      type: object
+    getDiscussionsByBlog_params:
+      properties:
+        tag:
+          description: mandatory, points to valid account; author of blog
+          example: nkdk
+          type: string
+        start_author:
+          description: optional, when given have to point to valid start post; paging
+            mechanism (cuts out this and newer posts/reblogs)
+          example: nkdk
+          type: string
+        start_permlink:
+          description: optional, when given have to point to valid start post; paging
+            mechanism (cuts out this and newer posts/reblogs)
+          example: withered--distort-engulf-official-premiere
+          type: string
+        limit:
+          description: optional, 1..100, default = 20
+          example: 10
+          type: integer
+        truncate_body:
+          description: optional, default = 0 (meaning no truncation); reduces maximal
+            size of post body, cutting out all excess
+          example: 0
+          type: integer
+      required:
+      - tag
+      type: object
+    getDiscussionsByComments_params:
+      properties:
+        start_author:
+          description: mandatory, points to valid account
+          example: nkdk
+          type: string
+        start_permlink:
+          description: optional, when given along with start_author has to point to
+            valid post, paging mechanism
+          example: withered--distort-engulf-official-premiere
+          type: string
+        limit:
+          description: optional, 1..100, default = 20
+          example: 10
+          type: integer
+      required:
+      - start_author
+      type: object
+    getDiscussionsByCreated_params:
+      properties:
+        start_author:
+          description: optional, when given have to point to valid start post; paging
+            mechanism (cuts out this and newer posts)
+          example: blendplayz
+          type: string
+        start_permlink:
+          description: ' optional, when given have to point to valid start post; paging
+            mechanism (cuts out this and newer posts)'
+          example: 5-tiki-cocktails-you-can-make-at-home
+          type: string
+        tag:
+          description: optional, turns on filtering for posts with given tag; when
+            community tag is used it filters for community posts
+          example: life
+          type: string
+        truncate_body:
+          description: optional, default = 0 (meaning no truncation); reduces maximal
+            size of post body, cutting out all excess
+          example: 0
+          type: integer
+        limit:
+          description: optional, 1..100, default = 20
+          example: 10
+          type: integer
+        observer:
+          description: optional (can be skipped or passed empty), when passed has
+            to point to valid account. Used to filter out posts authored by accounts
+            ignored directly or indirectly by the observer
+          example: alice
+          type: string
+      type: object
+    getDiscussionsByFeed_params:
+      properties:
+        tag:
+          description: mandatory, have to point on valid account whose feed we are
+            looking at
+          example: good-karma
+          type: string
+        start_author:
+          description: optional, when given have to point to valid start post; paging
+            mechanism (cuts out this and newer posts)
+          example: jl777
+          type: string
+        start_permlink:
+          description: optional, when given have to point to valid start post; paging
+            mechanism (cuts out this and newer posts)
+          example: 300-btc-open-market-purchase-of-steem-spikes-price-to-00324
+          type: string
+        truncate_body:
+          description: optional, default = 0 (meaning no truncation); reduces maximal
+            size of post body, cutting out all excess
+          example: 0
+          type: integer
+        limit:
+          description: optional, 1..100, default = 20
+          example: 10
+          type: integer
+        observer:
+          description: optional (can be skipped or passed empty), when passed has
+            to point to valid account. Used to filter out posts authored by accounts
+            ignored directly or indirectly by the observer
+          example: ""
+          type: string
+      required:
+      - tag
+      type: object
+    getDiscussionsByHot_params:
+      properties:
+        start_author:
+          description: optional, when given have to point to valid start post; paging
+            mechanism (cuts out this and hotter)
+          example: steemsmart
+          type: string
+        start_permlink:
+          description: optional, when given have to point to valid start post; paging
+            mechanism (cuts out this and hotter)
+          example: who-needs-steemit-etiquette-steem-smart-podcast-ep-11a
+          type: string
+        tag:
+          description: optional, turns on filtering for posts with given tag; when
+            community tag is used it filters for community posts
+          example: steemit
+          type: string
+        truncate_body:
+          description: optional, default = 0 (meaning no truncation); reduces maximal
+            size of post body, cutting out all excess
+          example: 0
+          type: integer
+        limit:
+          description: optional, 1..100, default = 20
+          example: 10
+          type: integer
+        observer:
+          description: optional (can be skipped or passed empty), when passed has
+            to point to valid account. Used to filter out posts authored by accounts
+            ignored directly or indirectly by the observer
+          example: ignoreall
+          type: string
+      type: object
+    getDiscussionsByPromoted_params:
+      properties:
+        start_author:
+          description: optional, when given have to point to valid start post; paging
+            mechanism (cuts out this and more promoted posts)
+          example: dantheman
+          type: string
+        start_permlink:
+          description: optional, when given have to point to valid start post; paging
+            mechanism (cuts out this and more promoted posts)
+          example: censorship-is-impossible-in-a-free-society
+          type: string
+        limit:
+          description: optional, 1..100, default = 20
+          example: 10
+          type: integer
+        tag:
+          description: optional, turns on filtering for posts with given tag; when
+            community tag is used it filters for community posts
+          example: steemit
+          type: string
+        truncate_body:
+          description: optional, default = 0 (meaning no truncation); reduces maximal
+            size of post body, cutting out all excess
+          example: 0
+          type: integer
+        observer:
+          description: optional (can be skipped or passed empty), when passed has
+            to point to valid account. Used to filter out posts authored by accounts
+            ignored directly or indirectly by the observer
+          example: alice
+          type: string
+      type: object
+    getDiscussionsByTrending_params:
+      properties:
+        start_author:
+          description: optional, when given have to point to valid start post; paging
+            mechanism (cuts out this and more trending)
+          example: roelandp
+          type: string
+        start_permlink:
+          description: optional, when given have to point to valid start post; paging
+            mechanism (cuts out this and more trending)
+          example: save-the-date-steemfest-1-11-12-13-november-2016-amsterdam-nl
+          type: string
+        limit:
+          description: optional, 1..100, default = 20
+          example: 10
+          type: integer
+        tag:
+          description: optional, turns on filtering for posts with given tag; when
+            community tag is used it filters for community posts
+          example: steemit
+          type: string
+        truncate_body:
+          description: optional, default = 0 (meaning no truncation); reduces maximal
+            size of post body, cutting out all excess
+          example: 200
+          type: integer
+        observer:
+          description: optional (can be skipped or passed empty), when passed has
+            to point to valid account. Used to filter out posts authored by accounts
+            ignored directly or indirectly by the observer
+          example: alice
+          type: string
+      type: object
+    getFollowCount_params:
+      properties:
+        account:
+          description: mandatory, points to valid account
+          example: gtg
+          type: string
+      required:
+      - account
+      type: object
+    followCount_result:
+      example:
+        following_count: 31
+        follower_count: 80
+        account: gtg
+      properties:
+        account:
+          example: gtg
+          type: string
+        following_count:
+          example: 31
+          type: integer
+        follower_count:
+          example: 80
+          type: integer
+      required:
+      - account
+      - follower_count
+      - following_count
+      type: object
+    getFollowersBlog_params:
+      properties:
+        account:
+          description: mandatory, points to valid account
+          example: steemit
+          type: string
+        start:
+          description: optional, when provided has to point to valid account, paging
+            mechanism (cuts out this and newer follows)
+          example: good-karma
+          type: string
+        follow_type:
+          description: optional, 'blog'/'ignore', default = 'blog'
+          example: blog
+          type: string
+        limit:
+          description: optional, 1..1000, default = 1000
+          example: 1000
+          type: integer
+      required:
+      - account
+      type: object
+    followers_result:
+      example:
+        follower: gtg
+        what:
+        - blog
+        - blog
+        following: blockcodes
+      properties:
+        follower:
+          example: gtg
+          type: string
+        following:
+          example: blockcodes
+          type: string
+        what:
+          items:
+            example: blog
+            type: string
+          type: array
+      required:
+      - follower
+      - following
+      - what
+      type: object
+    getFollowersIgnore_params:
+      properties:
+        account:
+          description: mandatory, points to valid account
+          example: cheetah
+          type: string
+        start:
+          description: optional, when provided has to point to valid account, paging
+            mechanism (cuts out this and newer follows)
+          example: champ333
+          type: string
+        follow_type:
+          description: optional, 'blog'/'ignore', default = 'blog'
+          example: ignore
+          type: string
+        limit:
+          description: optional, 1..1000, default = 1000
+          example: 1000
+          type: integer
+      required:
+      - account
+      type: object
+    getFollowingBlog_params:
+      properties:
+        account:
+          description: mandatory, points to valid account
+          example: always1success
+          type: string
+        start:
+          description: optional, when provided has to point to valid account, paging
+            mechanism (cuts out this and newer follows)
+          example: bewildered
+          type: string
+        follow_type:
+          description: optional, 'blog'/'ignore', default = 'blog'
+          example: blog
+          type: string
+        limit:
+          description: optional, 1..1000, default = 1000
+          example: 1000
+          type: integer
+      required:
+      - account
+      type: object
+    getFollowingIgnore_params:
+      properties:
+        account:
+          description: mandatory, points to valid account
+          example: morganpearl
+          type: string
+        start:
+          description: optional, when provided has to point to valid account, paging
+            mechanism (cuts out this and newer follows)
+          example: fyrstikken
+          type: string
+        follow_type:
+          description: optional, 'blog'/'ignore', default = 'blog'
+          example: ignore
+          type: string
+        limit:
+          description: optional, 1..1000, default = 1000
+          example: 1000
+          type: integer
+      required:
+      - account
+      type: object
+    getPostDiscussionsByPayout_params:
+      properties:
+        start_author:
+          description: optional, when given have to point to valid start post; paging
+            mechanism (cuts out this and more trending)
+          example: ericvancewalton
+          type: string
+        start_permlink:
+          description: optional, when given have to point to valid start post; paging
+            mechanism (cuts out this and more trending)
+          example: alarm-clock-dawn-an-original-novel-part-5
+          type: string
+        limit:
+          default: 20
+          description: optional, 1..100, default = 20
+          example: 10
+          type: integer
+        truncate_body:
+          default: 0
+          description: optional, default = 0 (meaning no truncation); reduces maximal
+            size of post body, cutting out all excess
+          example: 200
+          type: integer
+        observer:
+          description: optional (can be skipped or passed empty), when passed has
+            to point to valid account. Used to filter out posts authored by accounts
+            ignored directly or indirectly by the observer
+          example: ignoreall
+          type: string
+      type: object
+    getRebloggedBy_params:
+      properties:
+        author:
+          description: mandatory, have to point to valid post
+          example: churdtzu
+          type: string
+        permlink:
+          description: mandatory, have to point to valid post
+          example: impossible-a-conversation-with-a-statist-about-starting-a-business
+          type: string
+      required:
+      - author
+      - permlink
+      type: object
+    getRepliesByLastUpdate_params:
+      properties:
+        start_author:
+          description: mandatory, points to valid account; when start_permlink is
+            omitted the account means blogger, when start_permlink is given it selects
+            post from a result page and author of parent post is the blogger
+          example: bergy
+          type: string
+        start_permlink:
+          description: optional, when passed it has to point to valid post (paired
+            with start_author)
+          example: re-gregory-f-re-owdy-re-donkeypong-still-confused-by-steem-steem-dollars-and-steem-power-the-power-plant-analogy-20160719t124904368z
+          type: string
+        truncate_body:
+          description: optional, default = 0 (meaning no truncation); reduces maximal
+            size of post body, cutting out all excess
+          example: 0
+          type: integer
+        limit:
+          default: 20
+          description: optional, 1..100, default = 20
+          example: 10
+          type: integer
+      required:
+      - start_author
+      type: object
+    getTrendingTags_params:
+      properties:
+        start_tag:
+          description: optional, when given has to point to valid tag; paging mechanism
+            (cuts out this and more paying categories)
+          example: poems
+          type: string
+        limit:
+          default: 250
+          description: optional, 1..250, default = 250
+          example: 10
+          type: integer
+      type: object
+    trendingTags_result:
+      example:
+        top_posts: 11
+        comments: 16
+        total_payouts: 31.135 HBD
+        name: dream
+      properties:
+        comments:
+          description: Number of comments in tag
+          example: 16
+          type: integer
+        name:
+          description: Name of a tag.
+          example: dream
+          type: string
+        top_posts:
+          example: 11
+          type: integer
+        total_payouts:
+          description: total payouts for a given tag
+          example: 31.135 HBD
+          type: string
+      type: object
+    accountReputations_1_result_reputations:
+      example:
+        name: a-1
+        reputation: 37040190
+      properties:
+        name:
+          example: a-1
+          type: string
+        reputation:
+          example: 37040190
+          type: integer
+      required:
+      - name
+      - reputation
+      type: object
+    accountReputations_1_result:
+      example:
+        reputations:
+        - name: a-1
+          reputation: 37040190
+        - name: a-1
+          reputation: 37040190
+      properties:
+        reputations:
+          items:
+            $ref: '#/components/schemas/accountReputations_1_result_reputations'
+          type: array
+      required:
+      - reputations
+      type: object
+    activeVotesComment_active_votes:
+      example:
+        reputation: 172643285682
+        voter: creding
+        percent: 10000
+        rshares: 103335387
+      properties:
+        percent:
+          example: 10000
+          type: integer
+        reputation:
+          example: 172643285682
+          type: integer
+        rshares:
+          example: 103335387
+          type: integer
+        voter:
+          example: creding
+          type: string
+      required:
+      - percent
+      - reputation
+      - rshares
+      - voter
+      type: object

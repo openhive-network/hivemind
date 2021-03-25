@@ -1,0 +1,31 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - follow_api.get_reblogged_by
+  params:
+    type: object
+    required:
+      - author
+      - permlink
+    properties:
+      author:
+        type: string
+        description: "mandatory, have to point to valid post"
+        example: "churdtzu"
+      permlink:
+        type: string
+        description: "mandatory, have to point to valid post"
+        example: "impossible-a-conversation-with-a-statist-about-starting-a-business"
+  id:
+    type: integer
+    default: 1
