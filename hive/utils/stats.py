@@ -49,7 +49,7 @@ class PrometheusClient:
             gauges = {}
 
             while pid_exists(pid):
-                value : BroadcastObject = PrometheusClient.logs_to_broadcast.get()
+                value : BroadcastObject = PrometheusClient.logs_to_broadcast.get(True)
                 value.debug()
                 value_name = value.name()
 
@@ -75,11 +75,13 @@ class PrometheusClient:
                 log.warn("Failed to import prometheus client. Online stats disabled")
                 return
             from threading import Thread
-            deamon = Thread(target=PrometheusClient.work, args=[ port, getpid() ], daemon=True)
-            deamon.start()
+            PrometheusClient.deamon = Thread(target=PrometheusClient.work, args=[ port, getpid() ], daemon=True)
+            PrometheusClient.deamon.start()
 
     @staticmethod
     def broadcast(obj):
+        if PrometheusClient.deamon is None:
+            return
         if type(obj) == type(list()):
             for v in obj:
                 PrometheusClient.broadcast(v)
