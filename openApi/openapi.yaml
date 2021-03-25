@@ -1194,3 +1194,184 @@ paths:
             'application/json; charset=utf-8':
               schema:
                 $ref: './condenser_api/schemas/trendingTags.yaml'
+
+  /#follow_api.get_followers[blog]:
+    post:
+      tags:
+        - Follow
+      description: 'Alias for condenser_api.get_followers.'
+      operationId: follow_api.get_followers[blog]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './follow_api/requests/getFollowersBlog.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followers.yaml'
+
+  /#follow_api.get_followers[ignore]:
+    post:
+      tags:
+        - Follow
+      description: 'Alias for condenser_api.get_followers.'
+      operationId: follow_api.get_followers[ignore]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './follow_api/requests/getFollowersIgnore.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followers.yaml'
+
+  /#follow_api.get_following[blog]:
+    post:
+      tags:
+        - Follow
+      description: 'Alias for condenser_api.get_following.'
+      operationId: follow_api.get_following[blog]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './follow_api/requests/getFollowingBlog.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followers.yaml'
+
+  /#follow_api.get_following[ignore]:
+    post:
+      tags:
+        - Follow
+      description: 'Alias for condenser_api.get_following.'
+      operationId: follow_api.get_following[ignore]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './follow_api/requests/getFollowingIgnore.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followers.yaml'
+
+  /#follow_api.get_reblogged_by:
+    post:
+      tags:
+        - Follow
+      description: 'Alias for condenser_api.get_reblogged_by.'
+      operationId: follow_api.get_reblogged_by
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './follow_api/requests/getRebloggedBy.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/rebloggers.yaml'
+
+  /#follow_api.get_follow_count:
+    post:
+      tags:
+        - Follow
+      description: 'Gives following and followers count for given account.'
+      operationId: follow_api.get_follow_count
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './follow_api/requests/getFollowCount.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followCount.yaml'
+
+  /#follow_api.get_blog:
+    post:
+      tags:
+        - Follow
+      description: "Alias for condenser_api.get_blog."
+      operationId: follow_api.get_blog
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './follow_api/requests/getBlog.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/blog.yaml'
+
+  /#follow_api.get_blog_entries:
+    post:
+      tags:
+        - Follow
+      description: 'Alias for condenser_api.get_blog_entries'
+      operationId: follow_api.get_blog_entries
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './follow_api/requests/getBlogEntries.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/blogEntries.yaml'
+
+  /#follow_api.get_account_reputations:
+    post:
+      tags:
+        - Follow
+      description: "Nearly an alias for condenser_api.get_account_reputations, except the results are given in condenser_api style."
+      operationId: follow_api.get_account_reputations
+      requestBody:
+        description: 'Get current database and hivemind state'
+        content:
+          'application/json':
+            schema:
+              $ref: './follow_api/requests/getAccountReputations.yaml'
+        required: true
+      responses:
+        '200':
+          description: Accounts reputations list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './follow_api/schemas/accountReputations.yaml'
