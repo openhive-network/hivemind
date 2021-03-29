@@ -56,17 +56,15 @@ BEGIN
             SELECT hp.id, hp.parent_id, blacklisted_by_observer_view.source as source
             FROM live_posts_comments_view hp left outer join blacklisted_by_observer_view on (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp.author_id)
             WHERE hp.id = __post_id
-            AND (EXISTS (SELECT 1 FROM hive_roles WHERE account_id = hp.author_id AND NOT role_id = -2))
             AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp.author_id))
             UNION ALL
             SELECT children.id, children.parent_id, blacklisted_by_observer_view.source as source
             FROM live_posts_comments_view children left outer join blacklisted_by_observer_view on (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = children.author_id)
             JOIN child_posts ON children.parent_id = child_posts.id
             JOIN hive_accounts ON children.author_id = hive_accounts.id
-            --LEFT JOIN hive_roles ON children.author_id = hive_roles.account_id AND children.community_id = hive_roles.community_id 
             AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = children.author_id))
-            AND (EXISTS (SELECT 1 FROM hive_roles WHERE account_id = children.author_id AND  children.community_id = community_id AND NOT role_id = -2))
-            --WHERE NOT hive_roles.role_id = -2
+            AND ((NOT EXISTS (SELECT 1 FROM hive_roles WHERE account_id = children.author_id AND children.community_id = community_id)) 
+		        OR EXISTS(SELECT 1 FROM hive_roles WHERE account_id = children.author_id AND children.community_id = community_id AND NOT role_id = -2))
         )
         SELECT hp2.id, cp.source
         FROM hive_posts hp2
