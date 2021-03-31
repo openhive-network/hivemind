@@ -178,6 +178,7 @@ BEGIN
       AND NOT hp1.is_paidout
       AND ( __post_id = 0 OR hp1.promoted < __promoted_limit OR ( hp1.promoted = __promoted_limit AND hp1.id < __post_id ) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
+      AND ((EXISTS (SELECT 1 FROM hive_roles WHERE account_id = hp1.author_id AND hp1.community_id = community_id AND NOT role_id = -2)) 
     ORDER BY hp1.promoted DESC, hp1.id DESC
     LIMIT _limit
   )
@@ -260,6 +261,7 @@ BEGIN
       AND hp1.payout_at BETWEEN __head_block_time + interval '12 hours' AND __head_block_time + interval '36 hours'
       AND ( __post_id = 0 OR ( hp1.payout + hp1.pending_payout ) < __payout_limit OR ( ( hp1.payout + hp1.pending_payout ) = __payout_limit AND hp1.id < __post_id ) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
+      AND ((EXISTS (SELECT 1 FROM hive_roles WHERE account_id = hp1.author_id AND hp1.community_id = community_id AND NOT role_id = -2)) 
     ORDER BY ( hp1.payout + hp1.pending_payout ) DESC, hp1.id DESC
     LIMIT _limit
   )
@@ -340,6 +342,7 @@ BEGIN
       AND ( __post_id = 0 OR (hp1.payout + hp1.pending_payout) < __payout_limit
 	                  OR ((hp1.payout + hp1.pending_payout) = __payout_limit AND hp1.id < __post_id) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
+      AND ((EXISTS (SELECT 1 FROM hive_roles WHERE account_id = hp1.author_id AND hp1.community_id = community_id AND NOT role_id = -2)) 
     ORDER BY (hp1.payout + hp1.pending_payout) DESC, hp1.id DESC
     LIMIT _limit
   )
@@ -501,6 +504,7 @@ BEGIN
       AND NOT hp1.is_paidout
       AND ( __post_id = 0 OR hp1.sc_hot < __hot_limit OR (hp1.sc_hot = __hot_limit AND hp1.id < __post_id) )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
+      AND ((EXISTS (SELECT 1 FROM hive_roles WHERE account_id = hp1.author_id AND hp1.community_id = community_id AND NOT role_id = -2)) 
     ORDER BY hp1.sc_hot DESC, hp1.id DESC
     LIMIT _limit
   )
@@ -575,6 +579,7 @@ BEGIN
       AND ( NOT _bridge_api OR NOT hp1.is_pinned ) -- concatenated with bridge_get_ranked_post_pinned_for_community when called for bridge_api
       AND ( __post_id = 0 OR hp1.id < __post_id )
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
+      AND ((EXISTS (SELECT 1 FROM hive_roles WHERE account_id = hp1.author_id AND hp1.community_id = community_id AND NOT role_id = -2)) 
     ORDER BY hp1.id DESC
     LIMIT _limit
   )
