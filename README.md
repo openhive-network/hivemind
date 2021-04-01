@@ -29,6 +29,14 @@ $ python3 setup.py build
 $ python3 setup.py install --user
 ```
 
+### Prepare the database
+
+*Replace {user} with the PostgreSQL username*
+
+```bash
+$ psql -U {user} -c "CREATE EXTENSION intarray" hive
+```
+
 ### Start the indexer:
 
 ```bash
