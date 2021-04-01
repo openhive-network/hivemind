@@ -8,6 +8,7 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from psycopg2.errors import RaiseException
 from jsonrpcserver.exceptions import ApiError as RPCApiError
+from hive.indexer.community import Community
 
 log = logging.getLogger(__name__)
 
@@ -80,6 +81,14 @@ def get_hive_accounts_info_view_query_string(names, lite = False):
                 )T( _name ) ON v.name = T._name
           """.format( ( 'hive_accounts_info_view_lite' if lite else 'hive_accounts_info_view' ), values_str )
     return sql
+
+def check_community(name) -> bool:
+    return Community.validated_name(name) is not None
+
+def valid_community(name):
+    """Checks is given name of community matches community regex, if not asserts"""
+    assert check_community(name), "given community name is not valid"
+    return name
 
 def valid_account(name, allow_empty=False):
     """Returns validated account name or throws Assert."""
