@@ -35,12 +35,11 @@ def append_statistics_to_post(post, row, is_pinned):
         if row['role_id']:
             post['author_role'] = ROLES[row['role_id']]
             post['author_title'] = row['role_title']
-            post['stats']['gray'] = row['role_id'] < 0 
         else:
             post['author_role'] = 'guest'
             post['author_title'] = ''
 
-    post['stats']['gray'] = row['is_grayed'] or row['is_muted'] 
+    post['stats']['gray'] = row['is_grayed'] or row['is_muted'] or (row['role_id'] == -2)
     if is_pinned:
         post['stats']['is_pinned'] = True
     return post
