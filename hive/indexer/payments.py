@@ -19,22 +19,49 @@ class Payments:
     @classmethod
     def op_transfer(cls, op, tx_idx, num, date):
         """Process raw transfer op; apply balance if valid post promote."""
-        record = cls._validated(op, tx_idx, num, date)
-        if not record:
+        result = cls._validated(op, tx_idx, num, date)
+        if not result:
             return
 
-        # add payment record
-        sql = DB.build_insert('hive_payments', record, pk='id')
-        DB.query(sql)
+        record, author_id, permlink = result
 
-        # read current amount
-        sql = "SELECT promoted FROM hive_posts WHERE id = :id"
-        curr_amount = DB.query_one(sql, id=record['post_id'])
-        new_amount = curr_amount + record['amount']
+        # add payment record and return post id
+        sql = \
+"""
+INSERT INTO hive_payments(block_num, tx_idx, post_id, from_account, to_account, amount, token) SELECT
+  bn, tx, hp.id, fa, ta, am, tkn
+FROM
+( 
+  SELECT bn, tx, hpd.id, auth_id, fa, ta, am, tkn
+  FROM (VALUES (:_block_num, :_tx_idx, :_permlink, :_author_id , :_from_account , :_to_account , :_amount, :_token)) 
+  AS v(bn, tx, perm, auth_id, fa, ta, am, tkn) 
+  JOIN hive_permlink_data hpd
+  ON v.perm = hpd.permlink
+) as vv(bn, tx, hpd_id, auth_id, fa, ta, am, tkn )
+JOIN hive_posts hp
+ON hp.author_id=vv.auth_id AND hp.permlink_id=vv.hpd_id
+RETURNING post_id
+"""
 
-        # update post record
-        sql = "UPDATE hive_posts SET promoted = :val WHERE id = :id"
-        DB.query(sql, val=new_amount, id=record['post_id'])
+        post_id = DB.query_one(sql, 
+          _block_num=record['block_num'], 
+          _tx_idx=record['tx_idx'], 
+          _permlink=permlink, 
+          _author_id=author_id,
+          _from_account=record['from_account'],
+          _to_account=record['to_account'],
+          _amount=record['amount'],
+          _token=record['token']
+        )
+
+        amount = record['amount']
+        if not isinstance(amount, float):
+          amount = float(amount)
+
+        if amount != 0.0 and post_id is not None:
+          # update post record
+          sql = "UPDATE hive_posts SET promoted = promoted + :val WHERE id = :id"
+          DB.query(sql, val=amount, id=post_id)
 
     @classmethod
     def _validated(cls, op, tx_idx, num, date):
@@ -53,22 +80,18 @@ class Payments:
             return # invalid url
 
         author, permlink = cls._split_url(url)
-        if not Accounts.exists(author):
+        author_id = Accounts.get_id_noexept(author)
+        if not author_id:
             return
 
-        post_id = Posts.get_id(author, permlink)
-        if not post_id:
-            log.debug("post does not exist: %s", url)
-            return
 
-        return {'id': None,
+        return [{'id': None,
                 'block_num': num,
                 'tx_idx': tx_idx,
-                'post_id': post_id,
                 'from_account': Accounts.get_id(op['from']),
                 'to_account': Accounts.get_id(op['to']),
                 'amount': amount,
-                'token': token}
+                'token': token}, author_id, permlink]
 
     @staticmethod
     def _validate_url(url):

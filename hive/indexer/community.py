@@ -425,21 +425,29 @@ class CommunityOp:
     def _read_account(self):
         _name = read_key_str(self.op, 'account', 16)
         assert _name, 'must name an account'
-        assert Accounts.exists(_name), 'account `%s` not found' % _name
-        self.account = _name
         self.account_id = Accounts.get_id(_name)
+        self.account = _name
 
     def _read_permlink(self):
         assert self.account, 'permlink requires named account'
         _permlink = read_key_str(self.op, 'permlink', 256)
         assert _permlink, 'must name a permlink'
 
-        from hive.indexer.posts import Posts
-        _pid = Posts.get_id(self.account, _permlink)
-        assert _pid, 'invalid post: %s/%s' % (self.account, _permlink)
+        sql = \
+"""
+SELECT hp.id, community_id 
+FROM hive_posts hp 
+JOIN hive_permlink_data hpd ON hp.permlink_id=hpd.id 
+WHERE author_id=:_author AND hpd.permlink=:_permlink
+"""
+        result = DB.query_row(sql, _author=self.account_id, _permlink=_permlink)
+        assert result, f"post does not exists, query:\t{sql}"
+        result = dict(result)
 
-        sql = """SELECT community_id FROM hive_posts WHERE id = :id LIMIT 1"""
-        _comm = DB.query_one(sql, id=_pid)
+        _pid = result.get('id', None)
+        assert _pid, f'post does not exists {self.account}/{_permlink}'
+
+        _comm = result.get('community_id', None)
         assert self.community_id == _comm, 'post does not belong to community'
 
         self.permlink = _permlink
