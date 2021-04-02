@@ -1366,6 +1366,150 @@
           {
             "type": "comment_operation",
             "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "pinpost1",
+              "title": "Pinpost 1",
+              "body": "hello from pinned post 1",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "pinpost2",
+              "title": "Pinpost 2",
+              "body": "hello from pinned post 2",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "pinpost3",
+              "title": "Pinpost 3",
+              "body": "hello from pinned post 3",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "pinpost4",
+              "title": "Pinpost 4",
+              "body": "hello from pinned post 4",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "pinpost5",
+              "title": "Pinpost 5",
+              "body": "hello from pinned post 5",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "pinpost6",
+              "title": "Pinpost 6",
+              "body": "hello from pinned post 6",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "pinpost7",
+              "title": "Pinpost 7",
+              "body": "hello from pinned post 7",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "pinpost8",
+              "title": "Pinpost 8",
+              "body": "hello from pinned post 8",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "pinpost9",
+              "title": "Pinpost 9",
+              "body": "hello from pinned post 9",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "pinpost10",
+              "title": "Pinpost 10",
+              "body": "hello from pinned post 10",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "pinpost11",
+              "title": "Pinpost 11",
+              "body": "hello from pinned post 11",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "pinpost12",
+              "title": "Pinpost 12",
+              "body": "hello from pinned post 12",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
               "parent_author": "test-safari",
               "parent_permlink": "secrets1",
               "author": "test-creator",
@@ -1407,6 +1551,138 @@
               ],
               "id": "community",
               "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"test-creator\",\"permlink\":\"pinned-post\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"test-creator\",\"permlink\":\"pinpost1\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"test-creator\",\"permlink\":\"pinpost2\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"test-creator\",\"permlink\":\"pinpost3\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"test-creator\",\"permlink\":\"pinpost4\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"test-creator\",\"permlink\":\"pinpost5\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"test-creator\",\"permlink\":\"pinpost6\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"test-creator\",\"permlink\":\"pinpost7\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"test-creator\",\"permlink\":\"pinpost8\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"test-creator\",\"permlink\":\"pinpost9\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"test-creator\",\"permlink\":\"pinpost10\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"test-creator\",\"permlink\":\"pinpost11\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"test-creator\",\"permlink\":\"pinpost12\"}]"
             }
           }
         ]
