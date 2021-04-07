@@ -8,6 +8,7 @@ from hive.server.common.helpers import (
     valid_permlink,
     valid_tag,
     valid_limit,
+    check_community,
     json_date)
 
 from hive.utils.account import safe_db_profile_metadata
@@ -250,7 +251,7 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
         result = await _get_ranked_posts_for_observer_communities(db, sort, start_author, start_permlink, limit, observer)
         return await process_query_results(result)
 
-    if tag and tag[:5] == 'hive-':
+    if tag and check_community(tag):
         result = await _get_ranked_posts_for_communities(db, sort, tag, start_author, start_permlink, limit, observer)
         return await process_query_results(result)
 
