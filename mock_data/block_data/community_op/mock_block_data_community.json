@@ -1576,7 +1576,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"permlink\":\"My-second-post-hive-3\",\"notes\":\"second muted post\"}]"
+              "json": "[\"mutePost\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"permlink\":\"My-second-post-hive3\",\"notes\":\"second muted post\"}]"
             }
           },
           {
@@ -1587,7 +1587,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"My-second-post-hive-2\",\"notes\":\"second muted post\"}]"
+              "json": "[\"mutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"My-second-post-hive2\",\"notes\":\"second muted post\"}]"
             }
           },
           {
@@ -1598,7 +1598,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"mutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"My-second-post-hive-1\",\"notes\":\"second muted post\"}]"
+              "json": "[\"mutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"My-second-post-hive1\",\"notes\":\"second muted post\"}]"
             }
           },
           {
