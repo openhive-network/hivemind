@@ -2338,7 +2338,7 @@
               "permlink": "introduce",
               "title": "My introduce post",
               "body": "This is a cross post of [@test-creator/introduce](/introduceyourself/@test-creator/introduce) by @test-creator.<br><br>crosspost test",
-              "json_metadata": "{\"app\":\"peakd/2021.01.3\",\"tags\":[\"cross-post\"],\"image\":[],\"original_author\":\"test-creator\",\"original_permlink\":\"introduce\"}"
+              "json_metadata": "{\"app\":\"peakd/2021.01.3\",\"tags\":[\"cross-post\", \"hive-engine\"],\"image\":[],\"original_author\":\"test-creator\",\"original_permlink\":\"introduce\"}"
             }
           },
           {
