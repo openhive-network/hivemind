@@ -715,6 +715,39 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
+                "hive-171487"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-171487\",\"account\":\"test-safari\",\"role\":\"mod\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-157439"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-157439\",\"account\":\"test-safari\",\"role\":\"mod\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-198723"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-198723\",\"account\":\"test-safari\",\"role\":\"mod\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
                 "test-safari"
               ],
               "id": "community",
