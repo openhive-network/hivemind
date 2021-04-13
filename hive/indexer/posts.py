@@ -27,6 +27,7 @@ class Posts(DbAdapterHolder):
 
     # LRU cache for (author-permlink -> id) lookup (~400mb per 1M entries)
     CACHE_SIZE = 2000000
+    _ids = collections.OrderedDict()
     _hits = 0
     _miss = 0
 
@@ -38,6 +39,43 @@ class Posts(DbAdapterHolder):
         """Get the last indexed post id."""
         sql = "SELECT MAX(id) FROM hive_posts WHERE counter_deleted = 0"
         return DB.query_one(sql) or 0
+
+    @classmethod
+    def get_id(cls, author, permlink):
+        """Look up id by author/permlink, making use of LRU cache."""
+        url = author+'/'+permlink
+        if url in cls._ids:
+            cls._hits += 1
+            _id = cls._ids.pop(url)
+            cls._ids[url] = _id
+        else:
+            cls._miss += 1
+            sql = """
+                SELECT hp.id
+                FROM hive_posts hp
+                INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
+                INNER JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+                WHERE ha_a.name = :a AND hpd_p.permlink = :p
+            """
+            _id = DB.query_one(sql, a=author, p=permlink)
+            if _id:
+                cls._set_id(url, _id)
+
+        # cache stats (under 10M every 10K else every 100K)
+        total = cls._hits + cls._miss
+        if total % 100000 == 0:
+            log.info("pid lookups: %d, hits: %d (%.1f%%), entries: %d",
+                     total, cls._hits, 100.0*cls._hits/total, len(cls._ids))
+
+        return _id
+
+    @classmethod
+    def _set_id(cls, url, pid):
+        """Add an entry to the LRU, maintaining max size."""
+        assert pid, "no pid provided for %s" % url
+        if len(cls._ids) > cls.CACHE_SIZE:
+            cls._ids.popitem(last=False)
+        cls._ids[url] = pid
 
     @classmethod
     def delete_op(cls, op, block_date):
@@ -80,6 +118,8 @@ class Posts(DbAdapterHolder):
 
         # TODO we need to enhance checking related community post validation and honor is_muted.
         error = cls._verify_post_against_community(op, result['community_id'], result['is_valid'], result['is_muted'])
+
+        cls._set_id(op['author']+'/'+op['permlink'], result['id'])
 
         img_url = None
         if 'image' in md:
