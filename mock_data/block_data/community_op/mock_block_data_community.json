@@ -1807,6 +1807,78 @@
         "expiration": "2020-03-23T12:17:00",
         "operations": [
           {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-171487",
+              "author": "alice",
+              "permlink": "My-first-post-hive-1",
+              "title": "Hello",
+              "body": "EDITED. This is my first post in this community !",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-157439",
+              "author": "alice",
+              "permlink": "My-first-post-hive-2",
+              "title": "Hello",
+              "body": "EDITED. This is my first post in this community !",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-198723",
+              "author": "alice",
+              "permlink": "My-first-post-hive-3",
+              "title": "Hello",
+              "body": "EDITED. This is my first post in this community !",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "alice",
+              "parent_permlink": "My-first-post-hive-1",
+              "author": "test-safari",
+              "permlink": "comment-My-first-post-hive-1",
+              "title": "",
+              "body": "Comment-to-check-notifies-hive1",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "alice",
+              "parent_permlink": "My-first-post-hive-2",
+              "author": "test-safari",
+              "permlink": "comment-My-first-post-hive-2",
+              "title": "",
+              "body": "Comment-to-check-notifies-hive2",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "alice",
+              "parent_permlink": "My-first-post-hive-3",
+              "author": "test-safari",
+              "permlink": "comment-My-first-post-hive-3",
+              "title": "",
+              "body": "Comment-to-check-notifies-hive3",
+              "json_metadata": "{}"
+            }
+          },
+          {
             "type": "custom_json_operation",
             "value": {
               "required_auths": [],
@@ -3535,6 +3607,42 @@
         "ref_block_prefix": 1,
         "expiration": "2020-03-23T12:17:00",
         "operations": [
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-171487",
+              "author": "alice",
+              "permlink": "Second-after-member-post-hive1",
+              "title": "Hello",
+              "body": "EDITED. This is my second post in this community after being member!",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-157439",
+              "author": "alice",
+              "permlink": "Second-after-member-post-hive2",
+              "title": "Hello",
+              "body": "EDITED. This is my second post in this community after being member!",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-198723",
+              "author": "alice",
+              "permlink": "Second-after-member-post-hive3",
+              "title": "Hello",
+              "body": "EDITED. This is my second post in this community after being member!",
+              "json_metadata": "{}"
+            }
+          },
           {
             "type": "custom_json_operation",
             "value": {
