@@ -1405,6 +1405,42 @@
           {
             "type": "comment_operation",
             "value": {
+              "parent_author": "alice",
+              "parent_permlink": "My-second-post-hive1",
+              "author": "test-safari",
+              "permlink": "comment-My-second-post-hive1",
+              "title": "",
+              "body": "Comment to post which stays muted!",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "alice",
+              "parent_permlink": "My-second-post-hive2",
+              "author": "test-safari",
+              "permlink": "comment-My-second-post-hive2",
+              "title": "",
+              "body": "Comment to post which stays muted!!",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "alice",
+              "parent_permlink": "My-second-post-hive3",
+              "author": "test-safari",
+              "permlink": "comment-My-second-post-hive3",
+              "title": "",
+              "body": "Comment to post which stays muted!!",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
               "parent_author": "",
               "parent_permlink": "hive-171487",
               "author": "alice",
