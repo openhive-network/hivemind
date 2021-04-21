@@ -110,9 +110,8 @@ async def _get_ranked_posts_for_communities( db, sort:str, community, start_auth
     async def execute_community_query(db, sql, limit):
         return await db.query_all(sql, community=community, author=start_author, permlink=start_permlink, limit=limit, observer=observer )
 
-    pinned_sql = "SELECT * FROM bridge_get_ranked_post_pinned_for_community( (:community)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
-    # missing paging which results in inability to get all pinned posts
-    # and/or causes the same posts to be on each page (depending on limit and number of pinned)
+    pinned_sql = "SELECT * FROM bridge_get_ranked_post_pinned_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+
     if sort == 'hot':
         sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_community_query(db, sql, limit)
