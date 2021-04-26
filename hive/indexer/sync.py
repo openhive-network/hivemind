@@ -293,6 +293,8 @@ class Sync:
 
         log.info("target_head_block : %s", hived_head_block)
 
+        skip_after_initial_sync = self._conf.get('test_skip_ais_phase')
+
         if DbState.is_initial_sync():
             DbState.before_initial_sync(last_imported_block, hived_head_block)
             # resume initial sync
@@ -305,7 +307,10 @@ class Sync:
             # behavior for the time of post initial actions
             restore_handlers()
             try:
-                DbState.finish_initial_sync(current_imported_block)
+                if skip_after_initial_sync:
+                  log.info("finish initial sync phase skipped due to user request")
+                else:
+                  DbState.finish_initial_sync(current_imported_block)
             except KeyboardInterrupt:
                 log.info("Break finish initial sync")
                 set_exception_thrown()
