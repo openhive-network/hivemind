@@ -14,11 +14,14 @@ properties:
       - bridge.list_communities
   params:
     type: object
+    required:
+
     properties:
       last:
         type: string
         description: 'name of community; paging mechanism (cuts out this and "higher" communities, depends on chosen ranking)'
         example: 'hive-135485'
+        default: ''
       limit:
         type: integer
         description: 'limit number of listed communities'
@@ -29,9 +32,10 @@ properties:
         type: string
         description: 'when given turns on filtering for given set of words - words are looked for in "title" and "about" fields'
         example: 'World'
+        default: null
       sort:
         type: string
-        description: ' determines order of returned communities'
+        description: 'determines order of returned communities'
         enum:
           - 'rank'
           - 'new'
@@ -41,6 +45,7 @@ properties:
         type: string
         description: '(can be skipped or passed empty), when passed has to point to valid account used to show relation between account and community (subscribed, role and title)'
         example: 'good-karma'
+        default: null
   id:
     type: integer
     default: 1

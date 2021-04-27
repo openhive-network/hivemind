@@ -1,0 +1,163 @@
+type: object
+additionalProperties: false
+required:
+  - jsonrpc
+  - result
+  - id
+properties:
+  jsonrpc:
+    type: string
+    example: "2.0"
+  id:
+    type: integer
+    example: 1
+  result:
+    type: array
+    items:
+      type: object
+      required:
+        - active_votes
+        - author
+        - author_reputation
+        - beneficiaries
+        - body
+        - body_length
+        - cashout_time
+        - category
+        - children
+        - created
+        - curator_payout_value
+        - depth
+        - json_metadata
+        - last_payout
+        - last_update
+        - max_accepted_payout
+        - net_rshares
+        - parent_author
+        - parent_permlink
+        - pending_payout_value
+        - percent_hbd
+        - permlink
+        - post_id
+        - promoted
+        - replies
+        - root_title
+        - title
+        - total_payout_value
+        - url
+      properties:
+        active_votes:
+          type: array
+          items:
+            type: object
+            required:
+              - percent
+              - reputation
+              - rshares
+              - voter
+            properties:
+              percent:
+                type: string
+                example: "10000"
+              reputation:
+                type: integer
+                example: 12494904871301
+              rshares:
+                type: integer
+                example: 211439242838
+              voter:
+                type: string
+                example: "trogdor"
+        author:
+          type: string
+          example: "noodhoog"
+        author_reputation:
+          type: integer
+          example: 10900524985586
+        beneficiaries:
+          type: array
+          items:
+            type: string
+            example: "steemit"
+        body:
+          type: string
+          example: "Fail ? No spam bot army..."
+        body_length:
+          type: integer
+          example: 26
+        cashout_time:
+          type: string
+          format: date-time
+          example: "2016-08-24T09:30:03"
+        category:
+          type: string
+          example: "test"
+        children:
+          type: integer
+          example: 26
+        created:
+          type: string
+          format: date-time
+          example: "2016-08-24T09:30:03"
+        curator_payout_value:
+          type: string
+          example: "0.763 HBD"
+        depth:
+          type: integer
+          example: 1
+        json_metadata:
+          type: string
+          example: "{\"tags\":[\"test\"]}"
+        last_payout:
+          type: string
+          format: date-time
+          example: "2016-08-24T09:30:03"
+        last_update:
+          type: string
+          format: date-time
+          example: "2016-08-24T09:30:03"
+        max_accepted_payout:
+          type: string
+          example: "1000000.000 HBD"
+        net_rshares:
+          type: integer
+          example: 211900981073
+        parent_author:
+          type: string
+          example: "trogdor"
+        parent_permlink:
+          type: string
+          example: "this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army"
+        pending_payout_value:
+          type: string
+          example: "0.132 HBD"
+        percent_hbd:
+          type: integer
+          example: 10000
+        permlink:
+          type: string
+          example: "re-trogdor-this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army-20160817t020602907z"
+        post_id:
+          type: integer
+          example: 845516
+        promoted:
+          type: string
+          example: "0.000 HBD"
+        replies:
+          description: "implemented as empty array"
+          type: array
+          items:
+            example: null
+          example: []
+        root_title:
+          type: string
+          example: "this is a test to see if i have been targeted by a spam bot army"
+        title:
+          type: string
+          example: ""
+        total_payout_value:
+          type: string
+          example: "0.000 HBD"
+        url:
+          type: string
+          example: "/test/@trogdor/this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army#@royaltiffany/re-trogdor-this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army-20160817t020602907z"

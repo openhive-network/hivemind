@@ -25,6 +25,7 @@ properties:
         type: string
         description: ' name of subscriber; paging mechanism (cuts out this and "higher" subscribers, depends on created at desc)'
         example: 'hive-186713'
+        default: ''
       limit:
         type: integer
         description: 'limit number of listed subscribers'

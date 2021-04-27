@@ -1,0 +1,18 @@
+type: object
+additionalProperties: false
+required:
+  - jsonrpc
+  - result
+  - id
+properties:
+  jsonrpc:
+    type: string
+    example: "2.0"
+  id:
+    type: integer
+    example: 1
+  result:
+    type: array
+    description: "array of objects with posts related fields"
+    items:
+      $ref: './post.yaml'
