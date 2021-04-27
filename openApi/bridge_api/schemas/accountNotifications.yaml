@@ -1,0 +1,64 @@
+type: object
+additionalProperties: false
+required:
+  - jsonrpc
+  - result
+  - id
+properties:
+  jsonrpc:
+    type: string
+    example: "2.0"
+  id:
+    type: integer
+    example: 1
+  result:
+    type: array
+    items:
+      type: object
+      required:
+        - id
+        - type
+        - score
+        - date
+        - msg
+        - url
+      properties:
+        id:
+          type: integer
+          example: 1210891
+        type:
+          type: string
+          description: 'notification type'
+          enum:
+            - 'new_community'
+            - 'set_role'
+            - 'set_props'
+            - 'set_label'
+            - 'mute_post'
+            - 'unmute_post'
+            - 'pin_post'
+            - 'unpin_post'
+            - 'flag_post'
+            - 'error'
+            - 'subscribe'
+            - 'reply'
+            - 'reply_comment'
+            - 'reblog'
+            - 'follow'
+            - 'mention'
+            - 'vote'
+        score:
+          type: integer
+          example: 75
+        date:
+          type: string
+          format: date-time
+        msg:
+          type: string
+          description: "notification message"
+          example: "@modprobe voted on your post ($4.10)"
+        url:
+          type: string
+          description: "url to thing that notification is about"
+          example: "@gtg/heavy-duty-witness-node-infrastructure"
+

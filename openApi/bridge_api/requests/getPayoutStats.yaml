@@ -1,0 +1,26 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - bridge.get_payout_stats
+  params:
+    type: object
+    properties:
+      limit:
+        type: integer
+        description: 'limit number of payout stats'
+        minimum: 1
+        maximum: 250
+        default: 2
+  id:
+    type: integer
+    default: 1

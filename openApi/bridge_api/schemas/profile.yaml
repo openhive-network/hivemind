@@ -1,0 +1,90 @@
+type: object
+additionalProperties: false
+required:
+  - jsonrpc
+  - result
+  - id
+properties:
+  jsonrpc:
+    type: string
+    example: "2.0"
+  id:
+    type: integer
+    example: 1
+  result:
+    required:
+      - id
+      - active
+      - blacklists
+      - created
+      - metadata
+      - name
+      - post_count
+      - reputation
+      - stats
+    properties:
+      id:
+        type: integer
+      active:
+        type: string
+        format: date-time
+        description: date of last activity
+      blacklists:
+        type: array
+        items:
+          type: string
+      created:
+        type: string
+        format: date-time
+      metadata:
+        type: object
+        required:
+          - profile
+        properties:
+          profile:
+            type: object
+            required:
+              - about
+              - blacklist_description
+              - cover_image
+              - location
+              - muted_list_description
+              - name
+              - profile_image
+              - website
+            properties:
+              about:
+                type: string
+              blacklist_description:
+                type: string
+              cover_image:
+                type: string
+              location:
+                type: string
+              muted_list_description:
+                type: string
+              name:
+                type: string
+              profile_image:
+                type: string
+              website:
+                type: string
+      name:
+        type: string
+      post_count:
+        type: integer
+      reputation:
+        type: integer
+      stats:
+        type: object
+        required:
+          - followers
+          - following
+          - rank
+        properties:
+          followers:
+            type: integer
+          following:
+            type: integer
+          rank:
+            type: integer

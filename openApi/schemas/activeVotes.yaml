@@ -1,0 +1,10 @@
+type: object
+required:
+  - rshares
+  - voter
+properties:
+  rshaers:
+    type: integer
+  voter:
+    type: string
+    description: "account name of the voter"

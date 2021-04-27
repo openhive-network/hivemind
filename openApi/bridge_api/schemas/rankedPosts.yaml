@@ -1,0 +1,157 @@
+type: object
+additionalProperties: false
+required:
+  - jsonrpc
+  - result
+  - id
+properties:
+  jsonrpc:
+    type: string
+    example: "2.0"
+  id:
+    type: integer
+    example: 1
+  result:
+    type: array
+    items:
+      type: object
+      required:
+        - active_votes
+        - author
+        - author_reputation
+        - beneficiaries
+        - body
+        - body_length
+        - cashout_time
+        - category
+        - children
+        - created
+        - curator_payout_value
+        - depth
+        - json_metadata
+        - last_payout
+        - last_update
+        - max_accepted_payout
+        - net_rshares
+        - parent_author
+        - parent_permlink
+        - pending_payout_value
+        - percent_hbd
+        - permlink
+        - post_id
+        - promoted
+        - replies
+        - root_title
+        - title
+        - total_payout_value
+        - url
+      properties:
+        active_votes:
+          type: array
+          items:
+            type: object
+            required:
+              - rshares
+              - voter
+            properties:
+              rshares:
+                type: integer
+                example: 211439242838
+              voter:
+                type: string
+                example: "trogdor"
+        author:
+          type: string
+          example: "noodhoog"
+        author_reputation:
+          type: number
+          example: 57.84
+        beneficiaries:
+          type: array
+          items:
+            type: string
+            example: "steemit"
+        body:
+          type: string
+          example: "https://cdn.pbrd.co/images/3nmmvvHcs.jpg\n\nI've carved these 4 leaves out of an apple today. It's not very hard. Try it yourself.\n\nThe kids will love it! :)\n\nhttps://cdn.pbrd.co/images/kVELQZIU.jpg\n\nhttps://cdn.pbrd.co/images/3nj9R2pM0.jpg\n\nhttps://cdn.pbrd.co/images/3njzVRpjr.jpg\n\nhttps://cdn.pbrd.co/images/3nk5G90H8.jpg\n\nhttps://cdn.pbrd.co/images/3nkztiljI.jpg\n\nhttps://cdn.pbrd.co/images/3nkWK2IET.jpg\n\nhttps://cdn.pbrd.co/images/3nmFQB6Xj.jpg\n\nhttps://cdn.pbrd.co/images/3nlm0Nyi9.jpg\n\nhttps://cdn.pbrd.co/images/3nlNpF4JQ.jpg\n\nhttps://cdn.pbrd.co/images/3nmmvvHcs.jpg\n\n---\n<center>¯\\\\___(ツ)____/¯ *Don't miss out on my next post! ...Follow @penguinpablo*</center>"
+        category:
+          type: string
+          example: "food"
+        children:
+          type: integer
+          example: 26
+        created:
+          type: string
+          format: date-time
+          example: "2016-08-24T09:30:03"
+        curator_payout_value:
+          type: string
+          example: "0.763 HBD"
+        depth:
+          type: integer
+          example: 1
+        json_metadata:
+          type: object
+          properties:
+            tags:
+              type: array
+              items:
+                type: string
+            users:
+              type: array
+              items:
+                type: string
+            image:
+              type: array
+              items:
+                type: string
+        updated:
+          type: string
+          format: date-time
+          example: "2016-08-24T09:30:03"
+        max_accepted_payout:
+          type: string
+          example: "1000000.000 HBD"
+        net_rshares:
+          type: integer
+          example: 211900981073
+        pending_payout_value:
+          type: string
+          example: "0.132 HBD"
+        percent_hbd:
+          type: integer
+          example: 10000
+        permlink:
+          type: string
+          example: "re-trogdor-this-is-a-test-to-see-if-i-have-been-targeted-by-a-spam-bot-army-20160817t020602907z"
+        post_id:
+          type: integer
+          example: 845516
+        promoted:
+          type: string
+          example: "0.000 HBD"
+        replies:
+          description: "implemented as empty array"
+          type: array
+          items:
+            example: null
+          example: []
+        title:
+          type: string
+          example: ""
+        author_payout_value:
+          type: string
+          example: "0.000 HBD"
+        is_paidout:
+          type: boolean
+          example: false
+        payout_at:
+          type: string
+          format: date-time
+          example: "2016-08-24T09:30:03"
+        payout:
+          type: number
+          example: 191.849
+        url:
+          type: string
+          example: "/food/@penguinpablo/how-to-carve-an-apple-leaf"

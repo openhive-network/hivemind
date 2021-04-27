@@ -1,0 +1,30 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - bridge.get_profile
+  params:
+    type: object
+    required:
+      - account
+    properties:
+      account:
+        type: string
+        description: "Mandatory, points to valid account"
+        example: "gtg"
+      observer:
+        type: string
+        description: optional (can be skipped or given empty), when given points to valid account; used to add information about relationship of observer with given profile account
+        example: "ignoreall"
+  id:
+    type: integer
+    default: 1
