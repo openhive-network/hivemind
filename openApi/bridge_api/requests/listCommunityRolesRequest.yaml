@@ -25,12 +25,13 @@ properties:
         type: string
         description: 'name of community; paging mechanism (cuts out this and "higher" communities, depends on chosen ranking)'
         example: 'hive-186713'
+        default: ''
       limit:
         type: integer
         description: 'limit number of listed communities'
         minimum: 1
         maximum: 100
-        default: 100
+        default: 50
   id:
     type: integer
     default: 1

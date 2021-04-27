@@ -1,4 +1,8 @@
 type: object
+required:
+  - amount
+  - nai
+  - precision
 properties:
   amount:
     type: integer

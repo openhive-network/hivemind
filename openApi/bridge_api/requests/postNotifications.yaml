@@ -1,0 +1,47 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - bridge.post_notifications
+  params:
+    type: object
+    required:
+      - author
+      - permlink
+    properties:
+      author:
+        type: string
+        description: "Mandatory, points to valid post"
+        example: "gtg"
+      permlink:
+        type: string
+        description: "Mandatory, points to valid post"
+        example: "heavy-duty-witness-node-infrastructure"
+      min_score:
+        type: integer
+        description: Minimal score of notifications to show
+        minimum: 1
+        maximum: 100
+        default: 25
+      last_id:
+        type: integer
+        description: Optional, indicates newest notification to show; paging mechanism
+        minimum: 0
+        default: null
+      limit:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 1
+  id:
+    type: integer
+    default: 1

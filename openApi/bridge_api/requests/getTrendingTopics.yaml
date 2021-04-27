@@ -11,21 +11,21 @@ properties:
   method:
     type: string
     enum:
-      - bridge.get_community
+      - bridge.get_trending_topics
   params:
     type: object
     required:
-      - name
+      - limit
     properties:
-      name:
-        type: string
-        description: 'community name'
-        example: 'hive-186713'
+      limit:
+        type: integer
+        minimum: 1
+        maximum: 25
+        default: 10
       observer:
         type: string
-        description: 'account name'
-        example: 'good-karma'
-        default: null
+        description: account name, points to valid account
+        example: "gtg"
   id:
     type: integer
     default: 1

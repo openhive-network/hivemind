@@ -1,0 +1,35 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - bridge.get_relationship_between_accounts
+  params:
+    type: object
+    required:
+      - account1
+      - account2
+    properties:
+      account1:
+        type: string
+        description: account name, points to valid account
+        example: "jsc"
+      account2:
+        type: string
+        description: account name, points to valid account
+        example: "max-keiser"
+      observer:
+        type: string
+        description: optional, ignored (most likely not yet implemented extra for supplementing blacklist information)
+        example: "blocktrades"
+  id:
+    type: integer
+    default: 1

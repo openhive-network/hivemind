@@ -1,0 +1,32 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - bridge.unread_notifications
+  params:
+    type: object
+    required:
+      - account
+    properties:
+      account:
+        type: string
+        description: "Mandatory, points to valid account"
+        example: "gtg"
+      min_score:
+        type: integer
+        description: Minimal score of notifications to show
+        minimum: 1
+        maximum: 100
+        default: 25
+  id:
+    type: integer
+    default: 1
