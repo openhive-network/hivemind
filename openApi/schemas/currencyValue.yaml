@@ -1,0 +1,15 @@
+type: object
+required:
+  - amount
+  - nai
+  - precision
+properties:
+  amount:
+    type: integer
+    example: 756
+  nai:
+    type: string
+    example: "@@000000013"
+  precision:
+    type: integer
+    example: 3

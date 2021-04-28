@@ -1,0 +1,41 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - database_api.list_comments
+  params:
+    type: object
+    required:
+      - start
+      - order
+    properties:
+      start:
+        type: array
+        items:
+          type: string
+        description: '["{cashout_date}","{start_author}","{start_permlink}"] 
+          cashout_date : mandatory; cashout date in format "Y-m-d H:M:S" or "Y-m-dTH:M:S", if year 1969 is passed it means paidout posts
+          start_author + start_permlink : optional (can be left blank but not skipped), when given have to point to valid post; paging mechanism'
+        example: ["1969-12-31T23:59:59","proskynneo","steemit-firstpost-1"]
+      limit:
+        type: integer
+        description: "optional 1..1000, default = 1000"
+        default: 1000
+        example: 10
+      order:
+        type: string
+        enum:
+          - by_cashout_time
+        example: "by_cashout_time"
+  id:
+    type: integer
+    default: 1

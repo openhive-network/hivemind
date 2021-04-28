@@ -1,0 +1,42 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - condenser_api.get_discussions_by_blog
+  params:
+    type: object
+    required:
+      - tag
+    properties:
+      tag:
+        type: string
+        description: "mandatory, points to valid account; author of blog"
+        example: "nkdk"
+      start_author:
+        type: string
+        description: "optional, when given have to point to valid start post; paging mechanism (cuts out this and newer posts/reblogs)"
+        example: "nkdk"
+      start_permlink:
+        type: string
+        description: "optional, when given have to point to valid start post; paging mechanism (cuts out this and newer posts/reblogs)"
+        example: "withered--distort-engulf-official-premiere"
+      limit:
+        type: integer
+        description: "optional, 1..100, default = 20"
+        example: 10
+      truncate_body:
+        type: integer
+        description: "optional, default = 0 (meaning no truncation); reduces maximal size of post body, cutting out all excess"
+        example: 0
+  id:
+    type: integer
+    default: 1

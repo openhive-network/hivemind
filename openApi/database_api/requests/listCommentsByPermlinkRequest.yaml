@@ -1,0 +1,41 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - database_api.list_comments
+  params:
+    type: object
+    required:
+      - start
+      - order
+    properties:
+      start:
+        type: array
+        items:
+          type: string
+        description: '["{author}","{permlink}"]
+          author : optional (can be left blank but not skipped), can be part of author name
+          permlink : optional (can be left blank but not skipped), can be part of permlink; makes sense to pass it only with valid author, but it is not checked'
+        example: ["skypilot", "an-introduction-to-where-eagles-fly-the-american-wilderness-expedition-by-zedekiah-morse"]
+      limit:
+        type: integer
+        description: "optional 1..1000, default = 1000"
+        default: 1000
+        example: 10
+      order:
+        type: string
+        enum:
+          - by_permlink
+        example: "by_permlink"
+  id:
+    type: integer
+    default: 1

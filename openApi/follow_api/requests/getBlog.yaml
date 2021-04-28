@@ -1,0 +1,36 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - follow_api.get_blog
+  params:
+    type: object
+    description: "author + permlink : mandatory, points to valid post"
+    required:
+      - account
+    properties:
+      account:
+        type: string
+        description: "mandatory, points to valid account"
+        example: "noodhoog"
+      start_entry_id:
+        type: integer
+        description: "optional, -1..any, default = 0, both -1 and 0 mean = {number of blog entries} - 1; part of paging mechanism"
+        default: 0
+        example: 0
+      limit:
+        type: integer
+        description: "optional, 1..500 (0 functions as skipped), default = {start_entry_id} + 1; part of paging mechanism"
+        example: 0
+  id:
+    type: integer
+    default: 1

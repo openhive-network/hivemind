@@ -1,0 +1,45 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - bridge.account_notifications
+  params:
+    type: object
+    required:
+      - account
+    properties:
+      account:
+        type: string
+        description: 'mandatory, points to valid account'
+        example: 'gtg'
+      min_score:
+        type: integer
+        description: 'optional, 0..100, default = 25, minimal score of notifications to show'
+        minimum: 0
+        maximum: 100
+        default: 25
+        example: 25
+      last_id:
+        type: integer
+        description: 'optional, indicates newest notification to show; paging mechanism'
+        minimum: 0
+        default: null
+        example: 4930326
+      limit:
+        type: integer
+        description: 'limit number of notifications'
+        minimum: 1
+        maximum: 100
+        default: 100
+  id:
+    type: integer
+    default: 1

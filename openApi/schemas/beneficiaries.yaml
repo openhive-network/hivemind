@@ -1,0 +1,11 @@
+type: object
+required:
+  - account
+  - weight
+properties:
+  account:
+    type: string
+    description: account name of the beneficient
+  weight:
+    type: integer
+    description: benefit amount (10000 = 100%)

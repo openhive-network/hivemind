@@ -1,0 +1,1885 @@
+#todo fix not working additionalProperties: false
+openapi: 3.0.2
+info:
+  title: Hivemind OpenAPI Specification
+  description: 'An OpenAPI specification for Hivemind'
+  version: "1.0"
+servers:
+  - url: https://api.hive.blog
+    description: hive.blog API Service
+  - url: https://anyx.io
+    description: anyx.io API Service
+  - url: https://beta.openhive.network
+    description: beta.openhive.network API Service
+  - url: http://localhost:8080
+    description: Hivemind local API Service
+
+paths:
+  /#bridge.get_community:
+    post:
+      tags:
+        - Community
+        - Bridge
+      description: Gets community
+      operationId: bridge.get_community
+      requestBody:
+        description: community name and optional observer
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/communityRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: Community result
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/community.yaml'
+              example:
+                jsonrpc: '2.0'
+                result:
+                  id: 92511
+                  name: hive-186713
+                  title: Test group
+                  about: this is about field
+                  lang: pl
+                  type_id: 1
+                  is_nsfw: true
+                  subscribers: 0
+                  created_at: '2016-09-15 19:47:15'
+                  sum_pending: 0
+                  num_pending: 0
+                  num_authors: 0
+                  avatar_url: ''
+                  description: |-
+                    this is description
+                    second line of description
+                  flag_text: |-
+                    first rule
+                    second rule
+                    third rule
+                    and the last rule
+                  settings: { }
+                  context:
+                    role: guest
+                    subscribed: false
+                    title: ''
+                  team:
+                    - - hive-186713
+                      - owner
+                      - ''
+                id: 1
+
+  /#bridge.get_community_context:
+    post:
+      tags:
+        - Community
+        - Bridge
+      description: Gets community context
+      operationId: bridge.get_community_context
+      requestBody:
+        description: community name and account for context
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/communityContextRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: Community context result
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/communityContextResponse.yaml'
+
+  /#bridge.list_all_subscriptions:
+    post:
+      tags:
+        - Community
+        - Bridge
+      description: Lists all community contexts from communities given account is subscribed to.
+      operationId: bridge.list_all_subscriptions
+      requestBody:
+        description: points to valid account (not necessarily subscibed to any community)
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/listAllSubscriptionsRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: all subscriptions list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/listAllSubscriptions.yaml'
+
+  /#bridge.list_communities:
+    post:
+      tags:
+        - Community
+        - Bridge
+      description: Gets community
+      operationId: bridge.list_communities
+      requestBody:
+        description: 'optional parameters: last, limit, query, sort, observer'
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/listCommunitesRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: list of Communities
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/listCommunity.yaml'
+
+  /#bridge.list_community_roles:
+    post:
+      tags:
+        - Community
+        - Bridge
+      description: Gets community
+      operationId: bridge.list_community_roles
+      requestBody:
+        description: community name and optional observer
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/listCommunityRolesRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: list of Community roles
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/listCommunityRoles.yaml'
+
+  /#bridge.list_pop_communities:
+    post:
+      tags:
+        - Community
+        - Bridge
+      description: Gets community
+      operationId: bridge.list_pop_communities
+      requestBody:
+        description: 'optional parameter: limit'
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/listPopCommunitesRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: list of Communities
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/listPopCommunities.yaml'
+
+  /#bridge.list_subscribers:
+    post:
+      tags:
+        - Community
+        - Bridge
+      description: list subscribers
+      operationId: bridge.list_subscribers
+      requestBody:
+        description: 'required community, optional: last, limit'
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/listSubscribersRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: List of Communities.
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/listSubscribers.yaml'
+
+  /#bridge.account_notifications:
+    post:
+      tags:
+        - Bridge
+      description: Lists notifications for given account. Currently limited to not older than (arbitrary number) 90 days since head block.
+      operationId: bridge.account_notifications
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/accountNotificationsRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: List of notifications.
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/accountNotifications.yaml'
+
+  /#bridge.does_user_follow_any_lists:
+    post:
+      tags:
+        - Bridge
+      description: Lists notifications for given account. Currently limited to not older than (arbitrary number) 90 days since head block.
+      operationId: bridge.does_user_follow_any_lists
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/doesUserFollowAnyListRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: List of notifications.
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/doesUserFollowAnyList.yaml'
+
+  /#bridge.get_account_posts[by_blog]:
+    post:
+      tags:
+        - Bridge
+      description: Lists posts related to given account in selected way.
+      operationId: bridge.get_account_posts[by_blog]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/getAccountPostsByBlogRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: List of notifications.
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/accountPosts.yaml'
+
+  /#bridge.get_account_posts[by_comments]:
+    post:
+      tags:
+        - Bridge
+      description: Lists posts related to given account in selected way.
+      operationId: bridge.get_account_posts[by_comments]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/getAccountPostsByCommentsRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: List of notifications.
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/accountPosts.yaml'
+
+  /#bridge.get_account_posts[by_feed]:
+    post:
+      tags:
+        - Bridge
+      description: Lists posts related to given account in selected way.
+      operationId: bridge.get_account_posts[by_feed]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/getAccountPostsByFeedRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: List of notifications.
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/accountPosts.yaml'
+
+  /#bridge.get_account_posts[by_payout]:
+    post:
+      tags:
+        - Bridge
+      description: Lists posts related to given account in selected way.
+      operationId: bridge.get_account_posts[by_payout]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/getAccountPostsByPayoutRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: List of notifications.
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/accountPosts.yaml'
+
+  /#bridge.get_account_posts[by_posts]:
+    post:
+      tags:
+        - Bridge
+      description: Lists posts related to given account in selected way.
+      operationId: bridge.get_account_posts[by_posts]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/getAccountPostsByPostsRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: List of notifications.
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/accountPosts.yaml'
+
+  /#bridge.get_account_posts[by_replies]:
+    post:
+      tags:
+        - Bridge
+      description: Lists posts related to given account in selected way.
+      operationId: bridge.get_account_posts[by_replies]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/getAccountPostsByRepliesRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: List of notifications.
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/accountPosts.yaml'
+
+  /#bridge.get_follow_list:
+    post:
+      tags:
+        - Bridge
+      description: For given observer gives directly blacklisted/muted accounts or list of blacklists/mute lists followed by observer
+      operationId: bridge.get_follow_list
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/getFollowListRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: List of notifications.
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/followList.yaml'
+
+  /#bridge.get_payout_stats:
+    post:
+      tags:
+        - Bridge
+      description: Lists communities ordered by payout with stats (total payout, number of posts and authors). Similar to condenser_api.get_trending_tags but gives slightly different values and it is limited to communities.
+      operationId: bridge.get_payout_stats
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/getPayoutStats.yaml'
+        required: true
+      responses:
+        '200':
+          description: List of notifications.
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/payoutStats.yaml'
+
+  /#bridge.get_post:
+    post:
+      tags:
+        - Bridge
+      description: Gives single selected post.
+      operationId: bridge.get_post
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/getPost.yaml'
+        required: true
+      responses:
+        '200':
+          description: List of notifications.
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/getPost.yaml'
+
+  /#bridge.get_post_header:
+    post:
+      tags:
+        - Bridge
+      description: Gives very basic information on given post. Can be used to detect if post exists.
+      operationId: bridge.get_post_header
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/getPostHeader.yaml'
+        required: true
+      responses:
+        '200':
+          description: List of notifications.
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/getPostHeader.yaml'
+
+  /#bridge.get_profile:
+    post:
+      tags:
+        - Bridge
+      description: Gives basic information about given account.
+      operationId: bridge.get_profile
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/getProfile.yaml'
+        required: true
+      responses:
+        '200':
+          description: List of notifications.
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/profile.yaml'
+
+  /#bridge.get_ranked_posts:
+    post:
+      tags:
+        - Bridge
+      description: 'Lists posts depending on given ranking criteria and filters.'
+      operationId: bridge.get_ranked_posts
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/getRankedPosts.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/rankedPosts.yaml'
+
+  /#database_api.find_comments:
+    post:
+      tags:
+        - Database
+      description: find comments
+      operationId: database_api.find_comments
+      requestBody:
+        description: 'Looks for given comments.'
+        content:
+          'application/json':
+            schema:
+              $ref: './database_api/requests/findCommentsRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: list of Communities
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './database_api/schemas/comments.yaml'
+
+  /#database_api.list_comments[by_author_last_update]:
+    post:
+      tags:
+        - Database
+      description: list comments
+      operationId: database_api.list_comments[by_author_last_update]
+      requestBody:
+        description: 'Lists posts of given author that are not newer than given date.'
+        content:
+          'application/json':
+            schema:
+              $ref: './database_api/requests/listCommentsByAuthorRequest.yaml'
+              # example added for compatibility with dredd tests
+            example:
+              jsonrpc: '2.0'
+              method: database_api.list_comments
+              params:
+                start: ["gtg", "2016-09-06T18:47:33", "gtg", "missing-rewards-while-mining"]
+                limit: 10
+                order: by_author_last_update
+              id: 1
+        required: true
+      responses:
+        '200':
+          description: list of Communities
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './database_api/schemas/comments.yaml'
+
+  /#database_api.list_comments[by_cashout_time]:
+    post:
+      tags:
+        - Database
+      description: list comments
+      operationId: database_api.list_comments[by_cashout_time]
+      requestBody:
+        description: 'Lists comments with cashout at or later than given date'
+        content:
+          'application/json':
+            schema:
+              $ref: './database_api/requests/listCommentsByCashoutTimeRequest.yaml'
+            # example added for compatibility with dredd tests
+            example:
+              jsonrpc: '2.0'
+              method: database_api.list_comments
+              params:
+                start: ["1969-12-31T23:59:59","proskynneo","steemit-firstpost-1"]
+                limit: 10
+                order: by_cashout_time
+              id: 1
+        required: true
+      responses:
+        '200':
+          description: list of Communities
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './database_api/schemas/comments.yaml'
+
+  /#database_api.list_comments[by_last_update]:
+    post:
+      tags:
+        - Database
+      description: list comments
+      operationId: database_api.list_comments[by_last_update]
+      requestBody:
+        description: 'Lists replies to posts of given author that are not newer than given date.'
+        content:
+          'application/json':
+            schema:
+              $ref: './database_api/requests/listCommentsByLastUpdateRequest.yaml'
+            # example added for compatibility with dredd tests
+            example:
+              jsonrpc: '2.0'
+              method: database_api.list_comments
+              params:
+                start: ["sykochica", "2016-08-24T19:59:42", "williambanks", "re-sykochica-re-williambanks-re-sykochica-what-is-god-as-told-by-a-13-year-old-20160823t021931580z"]
+                limit: 10
+                order: by_last_update
+              id: 1
+        required: true
+      responses:
+        '200':
+          description: list of Communities
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './database_api/schemas/comments.yaml'
+
+  /#database_api.list_comments[by_parent]:
+    post:
+      tags:
+        - Database
+      description: list comments
+      operationId: database_api.list_comments[by_parent]
+      requestBody:
+        description: 'Lists replies to given post.'
+        content:
+          'application/json':
+            schema:
+              $ref: './database_api/requests/listCommentsByParentRequest.yaml'
+            # example added for compatibility with dredd tests
+            example:
+              jsonrpc: '2.0'
+              method: database_api.list_comments
+              params:
+                start: ["allasyummyfood", "re-givemeyoursteem-winners-of-steemit-food-challenge-3-desserts-to-die-for-20160829t004616466z", "vlad", "re-allasyummyfood-re-givemeyoursteem-winners-of-steemit-food-challenge-3-desserts-to-die-for-20160829t011002757z"]
+                limit: 10
+                order: by_parent
+              id: 1
+        required: true
+      responses:
+        '200':
+          description: list of Communities
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './database_api/schemas/comments.yaml'
+
+  /#database_api.list_comments[by_permlink]:
+    post:
+      tags:
+        - Database
+      description: list comments
+      operationId: database_api.list_comments[by_permlink]
+      requestBody:
+        description: 'Lists comments sorted by author and later with permlink, starting not earlier than given parameters. Can be used also in situation when only part of author name or permlink is known.'
+        content:
+          'application/json':
+            schema:
+              $ref: './database_api/requests/listCommentsByPermlinkRequest.yaml'
+            # example added for compatibility with dredd tests
+            example:
+              jsonrpc: '2.0'
+              method: database_api.list_comments
+              params:
+                start: ["skypilot", "an-introduction-to-where-eagles-fly-the-american-wilderness-expedition-by-zedekiah-morse"]
+                limit: 10
+                order: by_permlink
+              id: 1
+        required: true
+      responses:
+        '200':
+          description: list of Communities
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './database_api/schemas/comments.yaml'
+
+  /#database_api.list_comments[by_root]:
+    post:
+      tags:
+        - Database
+      description: list comments
+      operationId: database_api.list_comments[by_root]
+      requestBody:
+        description: 'Lists comments from given discussion indicated by root post.'
+        content:
+          'application/json':
+            schema:
+              $ref: './database_api/requests/listCommentsByRootRequest.yaml'
+            # example added for compatibility with dredd tests
+            example:
+              jsonrpc: '2.0'
+              method: database_api.list_comments
+              params:
+                start: ["givemeyoursteem", "winners-of-steemit-food-challenge-3-desserts-to-die-for", "vi1son", "re-givemeyoursteem-winners-of-steemit-food-challenge-3-desserts-to-die-for-20160828t172955785z"]
+                limit: 10
+                order: by_root
+              id: 1
+        required: true
+      responses:
+        '200':
+          description: list of Communities
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './database_api/schemas/comments.yaml'
+
+  /#database_api.find_votes:
+    post:
+      tags:
+        - Database
+      description: find votes
+      operationId: database_api.find_votes
+      requestBody:
+        description: 'Lists votes that were cast on given post. author + permlink : mandatory, points to valid post. Pretty much the same as "list_votes" with "by_comment_voter" order, but without paging and with hardcoded 1000 limit.'
+        content:
+          'application/json':
+            schema:
+              $ref: './database_api/requests/findVotesRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: list of Communities
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './database_api/schemas/votes.yaml'
+
+  /#database_api.list_votes:
+    post:
+      tags:
+        - Database
+      description: list votes
+      operationId: database_api.list_votes
+      requestBody:
+        description: 'Lists votes that were cast on given post.'
+        content:
+          'application/json':
+            schema:
+              $ref: './database_api/requests/listVotesRequest.yaml'
+            # example added for compatibility with dredd tests
+            example:
+              jsonrpc: '2.0'
+              method: database_api.list_votes
+              params:
+                start:
+                - roelandp
+                - tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours
+                - winstonwolfe
+                limit: 1000
+                order: by_comment_voter
+              id: 1
+        required: true
+      responses:
+        '200':
+          description: list of Votes
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './database_api/schemas/votes.yaml'
+
+  /#hive.db_head_state:
+    post:
+      tags:
+        - Hive
+      description: DB head state
+      operationId: hive.db_head_state
+      requestBody:
+        description: 'Get current head state'
+        content:
+          'application/json':
+            schema:
+              $ref: './hive_api/requests/headStateRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: current head state
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './hive_api/schemas/headState.yaml'
+
+  /#hive.get_info:
+    post:
+      tags:
+        - Hive
+      description: DB head state
+      operationId: hive.get_info
+      requestBody:
+        description: 'Get current database and hivemind state'
+        content:
+          'application/json':
+            schema:
+              $ref: './hive_api/requests/getInfoRequest.yaml'
+        required: true
+      responses:
+        '200':
+          description: DB head state
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './hive_api/schemas/getInfo.yaml'
+
+  /#condenser_api.get_account_reputations:
+    post:
+      tags:
+        - Condenser
+      description: Lists accounts and their raw reputations.
+      operationId: condenser_api.get_account_reputations
+      requestBody:
+        description: 'Get current database and hivemind state'
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getAccountReputations.yaml'
+        required: true
+      responses:
+        '200':
+          description: Accounts reputations list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/accountReputations.yaml'
+
+  /#condenser_api.get_active_votes:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists votes for given post (slightly less detailed than database_api.find_votes, also with hardcoded limit of 1000 votes).'
+      operationId: condenser_api.get_active_votes
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getActiveVotes.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/activeVotes.yaml'
+
+  /#condenser_api.get_blog:
+    post:
+      tags:
+        - Condenser
+      description: "Lists posts from blog of given account newest first: top posts authored by given account and/or reblogged by it.'"
+      operationId: condenser_api.get_blog
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getBlog.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/blog.yaml'
+
+  /#condenser_api.get_blog_entries:
+    post:
+      tags:
+        - Condenser
+      description: 'Basically the same as get_blog, but with no post content, just author+permlink entries.'
+      operationId: condenser_api.get_blog_entries
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getBlogEntries.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/blogEntries.yaml'
+
+  /#condenser_api.get_comment_discussions_by_payout:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists not yet paid out replies ranked by pending payout, more paying first (order within the same payout is: newer first).
+                    Slightly different post format but otherwise gives the same posts as bridge.get_ranked_posts with payout_comment sort.'
+      operationId: condenser_api.get_comment_discussions_by_payout
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getCommentDiscussionsByPayout.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#tags_api.get_comment_discussions_by_payout:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_comment_discussions_by_payout'
+      operationId: tags_api.get_comment_discussions_by_payout
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getCommentDiscussionsByPayout.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#condenser_api.get_content:
+    post:
+      tags:
+        - Condenser
+      description: 'Gives content for given post.'
+      operationId: condenser_api.get_content
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getContent.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/contentResult.yaml'
+
+  /#tags_api.get_discussion:
+    post:
+      tags:
+        - Tags
+      description: 'Nearly an alias for condenser_api.get_content, except the results are given in condenser_api style (original condenser_api.get_content implementation), while current condenser_api.get_content uses database_api style (since it was made to match Fat Node implementation)'
+      operationId: tags_api.get_discussion
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getDiscussion.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/contentResult.yaml'
+
+  /#bridge_api.get_discussion:
+    post:
+      tags:
+        - Bridge
+      description: 'Nearly an alias for condenser_api.get_content, except the results are given in condenser_api style (original condenser_api.get_content implementation), while current condenser_api.get_content uses database_api style (since it was made to match Fat Node implementation)'
+      operationId: bridge.get_discussion
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/getDiscussion.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/contentResult.yaml'
+              example:
+                jsonrpc: '2.0'
+                result:
+                  demotruk/re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z:
+                    post_id: 1139039
+                    author: demotruk
+                    permlink: re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z
+                    category: steemit
+                    title: 'RE: My First Bad Experience with Steemit'
+                    body: |-
+                      "Sounds like a great idea" is not a confirmation. Did she ever confirm the time and place?
+
+                      Edit: What you have proven is that you blew up at @heiditravels over your own misunderstanding of a non-committal reply. An appointment includes a time and date and confirmation of those things. This is fairly basic stuff for someone who organizes things with people. If you don't get those things, you don't have an arrangement. How would she even know when and where to turn up?
+                    json_metadata:
+                      tags:
+                      - steemit
+                      users:
+                      - heiditravels
+                    created: '2016-09-05T20:36:12'
+                    updated: '2016-09-05T20:51:15'
+                    depth: 3
+                    children: 3
+                    net_rshares: 16219911037187
+                    is_paidout: false
+                    payout_at: '2016-09-12T20:36:12'
+                    payout: 30.59
+                    pending_payout_value: 30.590 HBD
+                    author_payout_value: 0.000 HBD
+                    curator_payout_value: 0.000 HBD
+                    promoted: 0.000 HBD
+                    replies:
+                    - sigmajin/re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t204946840z
+                    author_reputation: 56.26
+                    stats:
+                      hide: false
+                      gray: false
+                      total_votes: 23
+                      flag_weight: 0
+                    url: "/steemit/@heiditravels/my-first-bad-experience-with-steemit#@demotruk/re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z"
+                    beneficiaries: []
+                    max_accepted_payout: 1000000.000 HBD
+                    percent_hbd: 10000
+                    parent_author: fyrstikken
+                    parent_permlink: re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t202905580z
+                    active_votes:
+                    - rshares: 433572773241
+                      voter: anonymous
+                    - rshares: 14293082408966
+                      voter: summon
+                    - rshares: 3103012759
+                      voter: boy
+                    - rshares: 3767337211
+                      voter: bue-witness
+                    - rshares: 690899726
+                      voter: bunny
+                    - rshares: 54630385693
+                      voter: bue
+                    - rshares: 1662788865
+                      voter: mini
+                    - rshares: 213777416
+                      voter: moon
+                    - rshares: 624870220
+                      voter: healthcare
+                    - rshares: 1182788827473
+                      voter: tuck-fheman
+                    - rshares: 969741207
+                      voter: daniel.pan
+                    - rshares: 288328206
+                      voter: helen.tan
+                    - rshares: 52309096320
+                      voter: noisy
+                    - rshares: 132872177928
+                      voter: chhayll
+                    - rshares: 13299353870
+                      voter: r4fken
+                    - rshares: 13278882511
+                      voter: senseiteekay
+                    - rshares: 4864580665
+                      voter: condra
+                    - rshares: 6411724227
+                      voter: beanz
+                    - rshares: 3252804327
+                      voter: jrd
+                    - rshares: 3509797589
+                      voter: cmorton
+                    - rshares: 8187684279
+                      voter: theb0red1
+                    - rshares: 3327069227
+                      voter: lorddominik007
+                    - rshares: 3202715261
+                      voter: luminousvisions
+                    blacklists: []
+                  sigmajin/re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t204946840z:
+                    post_id: 1139213
+                    author: sigmajin
+                    permlink: re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t204946840z
+                    category: steemit
+                    title: 'RE: My First Bad Experience with Steemit'
+                    body: so based on "sounds like a great idea" you made a breakfast reservation
+                      on a specific time and date and also hired a TV crew?
+                    json_metadata:
+                      tags:
+                      - steemit
+                    created: '2016-09-05T20:49:45'
+                    updated: '2016-09-05T20:49:45'
+                    depth: 4
+                    children: 2
+                    net_rshares: 1438234889111
+                    is_paidout: false
+                    payout_at: '2016-09-12T20:49:45'
+                    payout: 0.727
+                    pending_payout_value: 0.727 HBD
+                    author_payout_value: 0.000 HBD
+                    curator_payout_value: 0.000 HBD
+                    promoted: 0.000 HBD
+                    replies:
+                    - demotruk/re-sigmajin-re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t213912452z
+                    author_reputation: 61.43
+                    stats:
+                      hide: false
+                      gray: false
+                      total_votes: 10
+                      flag_weight: 0
+                    url: "/steemit/@heiditravels/my-first-bad-experience-with-steemit#@sigmajin/re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t204946840z"
+                    beneficiaries: []
+                    max_accepted_payout: 1000000.000 HBD
+                    percent_hbd: 10000
+                    parent_author: demotruk
+                    parent_permlink: re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z
+                    active_votes:
+                    - rshares: 1182788827473
+                      voter: tuck-fheman
+                    - rshares: 132872177928
+                      voter: chhayll
+                    - rshares: 13299353870
+                      voter: r4fken
+                    - rshares: 82429459718
+                      voter: sigmajin
+                    - rshares: 142482760
+                      voter: beanz
+                    - rshares: 3439601637
+                      voter: cmorton
+                    - rshares: 8187684279
+                      voter: theb0red1
+                    - rshares: 3394968599
+                      voter: lorddominik007
+                    - rshares: 3202715261
+                      voter: luminousvisions
+                    - rshares: 8477617586
+                      voter: dannystravels
+                    blacklists: []
+                  ? demotruk/re-sigmajin-re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t213912452z
+                  : post_id: 1139746
+                    author: demotruk
+                    permlink: re-sigmajin-re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t213912452z
+                    category: steemit
+                    title: 'RE: My First Bad Experience with Steemit'
+                    body: "@fyrstikken Did she confirm a time and place?"
+                    json_metadata:
+                      tags:
+                      - steemit
+                      users:
+                      - fyrstikken
+                    created: '2016-09-05T21:39:12'
+                    updated: '2016-09-05T21:39:12'
+                    depth: 5
+                    children: 0
+                    net_rshares: 1187241967588
+                    is_paidout: false
+                    payout_at: '2016-09-12T21:39:12'
+                    payout: 0.573
+                    pending_payout_value: 0.573 HBD
+                    author_payout_value: 0.000 HBD
+                    curator_payout_value: 0.000 HBD
+                    promoted: 0.000 HBD
+                    replies: []
+                    author_reputation: 56.26
+                    stats:
+                      hide: false
+                      gray: false
+                      total_votes: 5
+                      flag_weight: 0
+                    url: "/steemit/@heiditravels/my-first-bad-experience-with-steemit#@demotruk/re-sigmajin-re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t213912452z"
+                    beneficiaries: []
+                    max_accepted_payout: 1000000.000 HBD
+                    percent_hbd: 10000
+                    parent_author: sigmajin
+                    parent_permlink: re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t204946840z
+                    active_votes:
+                    - rshares: 1159133050923
+                      voter: tuck-fheman
+                    - rshares: 13278882511
+                      voter: senseiteekay
+                    - rshares: 3439601637
+                      voter: cmorton
+                    - rshares: 8187684279
+                      voter: theb0red1
+                    - rshares: 3202748238
+                      voter: luminousvisions
+                    blacklists: []
+                id: 1
+
+  /#condenser_api.get_content_replies:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists replies for given post.'
+      operationId: condenser_api.get_content_replies
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getContentReplies.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/contentReplies.yaml'
+
+  /#tags_api.get_content_replies:
+    post:
+      tags:
+        - Tags
+      description: 'Nearly an alias for condenser_api.get_content_replies, except the results are given in condenser_api style (original condenser_api.get_content_replies implementation), while current condenser_api.get_content_replies uses database_api style (since it was made to match Fat Node implementation)'
+      operationId: tags_api.get_content_replies
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getContentReplies.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/contentReplies.yaml'
+
+  /#condenser_api.get_discussions_by_author_before_date:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists replies for given post.'
+      operationId: condenser_api.get_discussions_by_author_before_date
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getDiscussionsByAuthorBeforeDate.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#condenser_api.get_discussions_by_blog:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists replies for given post.'
+      operationId: condenser_api.get_discussions_by_blog
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getDiscussionsByBlog.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#condenser_api.get_discussions_by_comments:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists replies for given post.'
+      operationId: condenser_api.get_discussions_by_comments
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getDiscussionsByComments.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#condenser_api.get_discussions_by_created:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists all top posts ordered by creation date (newer first). Aside from different post format routine is the same as bridge.get_ranked_posts with created sort (does not handle community pinned posts in special way though).'
+      operationId: condenser_api.get_discussions_by_created
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getDiscussionsByCreated.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#condenser_api.get_discussions_by_feed:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists posts created/reblogged by those followed by selected account. Gives posts that were created/reblogged within last month.'
+      operationId: condenser_api.get_discussions_by_feed
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getDiscussionsByFeed.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#condenser_api.get_discussions_by_hot:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists not yet paid out posts ranked by hot score (order within the same score is newer first). Aside from different post format routine is very similar to bridge.get_ranked_posts with hot sort.'
+      operationId: condenser_api.get_discussions_by_hot
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getDiscussionsByHot.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#condenser_api.get_discussions_by_promoted:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists not yet paid out posts ranked by amount spent on promotion (order within the same promotion is newer first). Aside from different post format routine is the same as bridge.get_ranked_posts with promoted sort.'
+      operationId: condenser_api.get_discussions_by_promoted
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getDiscussionsByPromoted.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#condenser_api.get_discussions_by_trending:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists not yet paid out posts ranked by amount spent on promotion (order within the same promotion is newer first). Aside from different post format routine is the same as bridge.get_ranked_posts with promoted sort.'
+      operationId: condenser_api.get_discussions_by_trending
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getDiscussionsByTrending.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#tags_api.get_discussions_by_hot:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_discussions_by_hot'
+      operationId: tags_api.get_discussions_by_hot
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getDiscussionsByHot.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#tags_api.get_discussions_by_promoted:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_discussions_by_promoted'
+      operationId: tags_api.get_discussions_by_promoted
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getDiscussionsByPromoted.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#tags_api.get_discussions_by_trending:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_discussions_by_trending'
+      operationId: tags_api.get_discussions_by_trending
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getDiscussionsByTrending.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#tags_api.get_discussions_by_author_before_date:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_discussions_by_author_before_date'
+      operationId: tags_api.get_discussions_by_author_before_date
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getDiscussionsByAuthorBeforeDate.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#tags_api.get_discussions_by_blog:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_discussions_by_blog'
+      operationId: tags_api.get_discussions_by_blog
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getDiscussionsByBlog.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#tags_api.get_discussions_by_comments:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_discussions_by_comments'
+      operationId: tags_api.get_discussions_by_comments
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getDiscussionsByComments.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#tags_api.get_discussions_by_created:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_discussions_by_created'
+      operationId: tags_api.get_discussions_by_created
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getDiscussionsByCreated.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#condenser_api.get_follow_count:
+    post:
+      tags:
+        - Condenser
+      description: 'Gives following and followers count for given account.'
+      operationId: condenser_api.get_follow_count
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getFollowCount.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followCount.yaml'
+
+  /#condenser_api.get_followers[blog]:
+    post:
+      tags:
+        - Condenser
+      description: 'Gives accounts which follow given account.'
+      operationId: condenser_api.get_followers[blog]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getFollowersBlog.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followers.yaml'
+
+  /#condenser_api.get_followers[ignore]:
+    post:
+      tags:
+        - Condenser
+      description: 'Gives accounts which ignore given account.'
+      operationId: condenser_api.get_followers[ignore]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getFollowersIgnore.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followers.yaml'
+
+  /#condenser_api.get_following[blog]:
+    post:
+      tags:
+        - Condenser
+      description: 'Gives accounts which given account follows.'
+      operationId: condenser_api.get_following[blog]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getFollowingBlog.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followers.yaml'
+
+  /#condenser_api.get_following[ignore]:
+    post:
+      tags:
+        - Condenser
+      description: 'Gives accounts which given account ignores'
+      operationId: condenser_api.get_following[ignore]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getFollowingIgnore.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followers.yaml'
+
+  /#condenser_api.get_post_discussions_by_payout:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists not yet paid out top posts ranked by pending payout, more paying first (order within the same payout is: newer first). Aside from different post format routine is very similar to bridge.get_ranked_posts with payout sort, except the latter only considers posts in narrow payout window, this one has no such limitation.'
+      operationId: condenser_api.get_post_discussions_by_payout
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getPostDiscussionsByPayout.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#tags_api.get_post_discussions_by_payout:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_post_discussions_by_payout'
+      operationId: tags_api.get_post_discussions_by_payout
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getPostDiscussionsByPayout.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#condenser_api.get_reblogged_by:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists rebloggers of given post.'
+      operationId: condenser_api.get_reblogged_by
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getRebloggedBy.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/rebloggers.yaml'
+
+  /#condenser_api.get_replies_by_last_update:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists replies made to posts (both top posts and comments) of given blogger. Contrary to name, time of last update is not considered - posts are ordered by creation time (newer first).'
+      operationId: condenser_api.get_replies_by_last_update
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getRepliesByLastUpdate.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#condenser_api.get_trending_tags:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists categories ordered by sum of pending payouts, with stats summary about comments and top posts.'
+      operationId: condenser_api.get_trending_tags
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getTrendingTags.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/trendingTags.yaml'
+
+  /#follow_api.get_followers[blog]:
+    post:
+      tags:
+        - Follow
+      description: 'Alias for condenser_api.get_followers.'
+      operationId: follow_api.get_followers[blog]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './follow_api/requests/getFollowersBlog.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followers.yaml'
+
+  /#follow_api.get_followers[ignore]:
+    post:
+      tags:
+        - Follow
+      description: 'Alias for condenser_api.get_followers.'
+      operationId: follow_api.get_followers[ignore]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './follow_api/requests/getFollowersIgnore.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followers.yaml'
+
+  /#follow_api.get_following[blog]:
+    post:
+      tags:
+        - Follow
+      description: 'Alias for condenser_api.get_following.'
+      operationId: follow_api.get_following[blog]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './follow_api/requests/getFollowingBlog.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followers.yaml'
+
+  /#follow_api.get_following[ignore]:
+    post:
+      tags:
+        - Follow
+      description: 'Alias for condenser_api.get_following.'
+      operationId: follow_api.get_following[ignore]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './follow_api/requests/getFollowingIgnore.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followers.yaml'
+
+  /#follow_api.get_reblogged_by:
+    post:
+      tags:
+        - Follow
+      description: 'Alias for condenser_api.get_reblogged_by.'
+      operationId: follow_api.get_reblogged_by
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './follow_api/requests/getRebloggedBy.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/rebloggers.yaml'
+
+  /#follow_api.get_follow_count:
+    post:
+      tags:
+        - Follow
+      description: 'Gives following and followers count for given account.'
+      operationId: follow_api.get_follow_count
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './follow_api/requests/getFollowCount.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followCount.yaml'
+
+  /#follow_api.get_blog:
+    post:
+      tags:
+        - Follow
+      description: "Alias for condenser_api.get_blog."
+      operationId: follow_api.get_blog
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './follow_api/requests/getBlog.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/blog.yaml'
+
+  /#follow_api.get_blog_entries:
+    post:
+      tags:
+        - Follow
+      description: 'Alias for condenser_api.get_blog_entries'
+      operationId: follow_api.get_blog_entries
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './follow_api/requests/getBlogEntries.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/blogEntries.yaml'
+
+  /#follow_api.get_account_reputations:
+    post:
+      tags:
+        - Follow
+      description: "Nearly an alias for condenser_api.get_account_reputations, except the results are given in condenser_api style."
+      operationId: follow_api.get_account_reputations
+      requestBody:
+        description: 'Get current database and hivemind state'
+        content:
+          'application/json':
+            schema:
+              $ref: './follow_api/requests/getAccountReputations.yaml'
+        required: true
+      responses:
+        '200':
+          description: Accounts reputations list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './follow_api/schemas/accountReputations.yaml'

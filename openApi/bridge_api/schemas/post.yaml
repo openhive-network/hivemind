@@ -1,0 +1,148 @@
+type: object
+required:
+  - active_votes
+  - author
+  - author_payout_value
+  - author_reputation
+  - beneficiaries
+  - blacklists
+  - body
+  - category
+  - children
+  - created
+  - curator_payout_value
+  - depth
+  - is_paidout
+  - json_metadata
+  - max_accepted_payout
+  - net_rshares
+  - payout
+  - payout_at
+  - pending_payout_value
+  - percent_hbd
+  - permlink
+  - post_id
+  - promoted
+  - reblogged_by
+  - replies
+  - stats
+  - title
+  - updated
+  - url
+properties:
+  active_votes:
+    type: array
+    $ref: '../../schemas/activeVotes.yaml'
+  author:
+    type: string
+    description: account name of the post's author
+  author_payout_value:
+    type: string
+    description: HBD paid to the author of the post
+  author_reputation:
+    type: number
+    description: author's reputation score
+  beneficiaries:
+    type: array
+    $ref: '../../schemas/beneficiaries.yaml'
+  blacklists:
+    type: array
+    items:
+      type: string
+      description: "account names of blacklisted users"
+  body:
+    type: string
+    description: post content
+  category:
+    type: string
+    description: post category
+  children:
+    type: integer
+    description: number of children comments
+  created:
+    type: string
+    format: date-time
+    description: creation date
+  curator_payout_value:
+    type: string
+    description: amount of HBD paid to curators
+  depth:
+    type: integer
+    description: nesting level
+  is_paidout:
+    type: boolean
+    description: information whether the post has been paid
+  json_metadata:
+    type: object
+    properties:
+      image:
+        type: array
+        items:
+          type: string
+      links:
+        type: array
+        items:
+          type: string
+      tags:
+        type: array
+        items:
+          type: string
+      users:
+        type: array
+        items:
+          type: string
+    example: {}
+  payout:
+    type: number
+    description: amount of payout
+  payout_at:
+    type: string
+    format: date-time
+    description: date of payout
+  pending_payout_value:
+    type: string
+    description: pending or paid amount
+  percent_hbd:
+    type: integer
+    description: percent of HBD, 10000 = 100%
+  permlink:
+    type: string
+    description: post's permlink
+  post_id:
+    type: integer
+    description: id of the post, created from the author and the permlink
+  promoted:
+    type: string
+    description: amount of HBD if post is promoted # TODO: check if it is true
+  replies:
+    type: array
+    # TODO: description:
+    items:
+      type: string
+      description: replies
+  stats:
+    type: object
+    required:
+      - flag_weight
+      - gray
+      - hide
+      - total_votes
+    properties:
+      flag_weight:
+        type: number
+      gray:
+        type: boolean
+      hide:
+        type: boolean
+      total_votes:
+        type: integer
+  title:
+    type: string
+    description: post title
+  updated:
+    type: string
+    format: date-time
+    description: date of update
+  url:
+    type: string
+    description: end of the url to the post, contains category, author and permlink

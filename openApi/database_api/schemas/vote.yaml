@@ -1,0 +1,41 @@
+type: object
+additionalProperties: false
+required:
+  - author
+  - voter
+  - id
+  - last_update
+  - num_changes
+  - permlink
+  - rshares
+  - vote_percent
+  - weight
+properties:
+  author:
+    type: string
+    example: "kental"
+  voter:
+    type: string
+    example: "eduardf"
+  id:
+    type: integer
+    example: 1011491
+  last_update:
+    type: string
+    format: date-time
+    example: "2016-08-24T09:30:03"
+  num_changes:
+    type: integer
+    example: 1
+  permlink:
+    type: string
+    example: "hi-steem-my-russian-trip-on-the-bike-big-party-in-moscow-tour-of-moscow-by-slava"
+  rshares:
+    type: integer
+    example: 2329409778
+  vote_percent:
+    type: integer
+    example: 10000
+  weight:
+    type: integer
+    example: 5725626236557488

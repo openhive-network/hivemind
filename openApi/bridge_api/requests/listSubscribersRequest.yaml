@@ -1,0 +1,37 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - bridge.list_subscribers
+  params:
+    type: object
+    required:
+      - community
+    properties:
+      community:
+        type: string
+        description: 'community name'
+        example: 'hive-186713'
+      last:
+        type: string
+        description: ' name of subscriber; paging mechanism (cuts out this and "higher" subscribers, depends on created at desc)'
+        example: 'hive-186713'
+        default: ''
+      limit:
+        type: integer
+        description: 'limit number of listed subscribers'
+        minimum: 1
+        maximum: 100
+        default: 100
+  id:
+    type: integer
+    default: 1

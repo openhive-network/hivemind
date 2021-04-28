@@ -1,0 +1,8 @@
+type: object
+description: "array of arrays with 4 strings: account name, role name, title, created_at"
+items:
+  type: array
+  items:
+    type: string
+  minItems: 4
+  maxItems: 4

@@ -1,0 +1,149 @@
+type: object
+additionalProperties: false
+required:
+  - abs_rshares
+  - active
+  - allow_curation_rewards
+  - allow_replies
+  - allow_votes
+  - author
+  - author_rewards
+  - beneficiaries
+  - body
+  - cashout_time
+  - category
+  - children
+  - children_abs_rshares
+  - created
+  - curator_payout_value
+  - depth
+  - id
+  - json_metadata
+  - last_payout
+  - last_update
+  - max_accepted_payout
+  - max_cashout_time
+  - net_rshares
+  - net_votes
+  - parent_author
+  - parent_permlink
+  - percent_hbd
+  - permlink
+  - reward_weight
+  - root_author
+  - root_permlink
+  - title
+  - total_payout_value
+  - total_vote_weight
+  - vote_rshares
+properties:
+  abs_rshares:
+    type: integer
+    example: 0
+  active:
+    type: string
+    format: date-time
+    example: "2016-08-24T09:30:03"
+  allow_curation_rewards:
+    type: boolean
+    example: true
+  allow_replies:
+    type: boolean
+    example: true
+  allow_votes:
+    type: boolean
+    example: true
+  author:
+    type: string
+    example: "steemit"
+  author_rewards:
+    type: integer
+    example: 3548
+  beneficiaries:
+    type: array
+    items:
+      type: string
+      example: "steemit"
+  body:
+    type: string
+    example: "Steemit is a social media platform where anyone can earn STEEM points by posting. The more people who like a post, the more STEEM the poster earns. Anyone can sell their STEEM for cash or vest it to boost their voting power."
+  cashout_time:
+    type: string
+    format: date-time
+    example: "2016-08-24T09:30:03"
+  category:
+    type: string
+    example: "meta"
+  children:
+    type: integer
+    example: 3548
+  children_abs_rshares:
+    type: integer
+    example: 3548
+  created:
+    type: string
+    format: date-time
+    example: "2016-08-24T09:30:03"
+  curator_payout_value:
+    $ref: '../../schemas/currencyValue.yaml'
+  depth:
+    type: integer
+    example: 0
+  id:
+    type: integer
+    example: 1
+  json_metadata:
+    type: string
+    example: ""
+  last_payout:
+    type: string
+    format: date-time
+    example: "2016-08-24T09:30:03"
+  last_update:
+    type: string
+    format: date-time
+    example: "2016-08-24T09:30:03"
+  max_accepted_payout:
+    $ref: '../../schemas/currencyValue.yaml'
+  max_cashout_time:
+    type: string
+    format: date-time
+    example: "2016-08-24T09:30:03"
+  net_rshares:
+    type: integer
+    example: 0
+  net_votes:
+    type: integer
+    example: 0
+  parent_author:
+    type: string
+    example: "steemit"
+  parent_permlink:
+    type: string
+    example: "meta"
+  percent_hbd:
+    type: integer
+    example: 10000
+  permlink:
+    type: string
+    example: "firstpost"
+  reward_weight:
+    type: integer
+    example: 10000
+  root_author:
+    type: string
+    example: "steemit"
+  root_permlink:
+    type: string
+    example: "firstpost"
+  title:
+    type: string
+    example: "Welcome to Hive!"
+  total_payout_value:
+    $ref: '../../schemas/currencyValue.yaml'
+  total_vote_weight:
+    type: integer
+    example: 0
+  vote_rshares:
+    type: integer
+    example: 0

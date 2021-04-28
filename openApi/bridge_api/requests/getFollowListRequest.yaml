@@ -1,0 +1,36 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - bridge.get_follow_list
+  params:
+    type: object
+    required:
+      - observer
+    properties:
+      observer:
+        type: string
+        description: 'mandatory, points to valid account'
+        example: 'alice'
+      follow_type:
+        type: string
+        enum: 
+          - blacklisted
+          - follow_blacklist
+          - muted
+          - follow_muted
+        description: type of followed list
+        example: "follow_muted"
+        default: "follow_blacklist"
+  id:
+    type: integer
+    default: 1

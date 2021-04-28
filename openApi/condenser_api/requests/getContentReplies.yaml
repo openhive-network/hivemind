@@ -1,0 +1,31 @@
+type: object
+required:
+  - jsonrpc
+  - method
+  - params
+  - id
+properties:
+  jsonrpc:
+    type: string
+    default: "2.0"
+  method:
+    type: string
+    enum:
+      - condenser_api.get_content_replies
+  params:
+    type: object
+    required:
+      - author
+      - permlink
+    properties:
+      author:
+        type: string
+        description: "Mandatory, points to valid post"
+        example: "demotruk"
+      permlink:
+        type: string
+        description: "Mandatory, points to valid post"
+        example: "re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z"
+  id:
+    type: integer
+    default: 1

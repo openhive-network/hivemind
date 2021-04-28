@@ -1,0 +1,10 @@
+type: object
+properties:
+  role:
+    type: string
+  subscribed:
+    type: boolean
+  title:
+    type: string
+    maxLength: 140
+    minLength: 0
