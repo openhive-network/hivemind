@@ -19,18 +19,23 @@ properties:
         type: string
         description: "optional, when given with start_permlink have to point to valid start post; paging mechanism (cuts out this and more paying replies)"
         example: "demotruk"
+        default: ""
       start_permlink:
         type: string
         description: "optional, when given with start_author have to point to valid start post; paging mechanism (cuts out this and more paying replies)"
         example: "re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z"
+        default: ""
       limit:
         type: integer
-        description: "optional, 1..100, default = 20"
+        minimum: 1
+        maximum: 100
+        default: 20
         example: 20
       tag:
         type: string
         description: "optional, actually means category, when given have to point to valid category; narrows down results to posts with given category"
         example: "steemit"
+        default: null
       truncate_body:
         type: integer
         description: "optional, default = 0 (meaning no truncation); reduces maximal size of post body, cutting out all excess"
@@ -40,6 +45,7 @@ properties:
         type: string
         description: "optional (can be skipped or passed empty), when passed has to point to valid account. Used to filter out posts authored by accounts ignored directly or indirectly by the observer"
         example: "ignoreall"
+        default: null
   id:
     type: integer
     default: 1

@@ -583,6 +583,227 @@ paths:
               schema:
                 $ref: './bridge_api/schemas/unreadNotifications.yaml'
 
+  /#bridge_api.get_discussion:
+    post:
+      tags:
+        - Bridge
+      description: 'Nearly an alias for condenser_api.get_content, except the results are given in condenser_api style (original condenser_api.get_content implementation), while current condenser_api.get_content uses database_api style (since it was made to match Fat Node implementation)'
+      operationId: bridge.get_discussion
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './bridge_api/requests/getDiscussion.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './bridge_api/schemas/contentResult.yaml'
+              example:
+                jsonrpc: '2.0'
+                result:
+                  demotruk/re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z:
+                    post_id: 1139039
+                    author: demotruk
+                    permlink: re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z
+                    category: steemit
+                    title: 'RE: My First Bad Experience with Steemit'
+                    body: |-
+                      "Sounds like a great idea" is not a confirmation. Did she ever confirm the time and place?
+
+                      Edit: What you have proven is that you blew up at @heiditravels over your own misunderstanding of a non-committal reply. An appointment includes a time and date and confirmation of those things. This is fairly basic stuff for someone who organizes things with people. If you don't get those things, you don't have an arrangement. How would she even know when and where to turn up?
+                    json_metadata:
+                      tags:
+                      - steemit
+                      users:
+                      - heiditravels
+                    created: '2016-09-05T20:36:12'
+                    updated: '2016-09-05T20:51:15'
+                    depth: 3
+                    children: 3
+                    net_rshares: 16219911037187
+                    is_paidout: false
+                    payout_at: '2016-09-12T20:36:12'
+                    payout: 30.59
+                    pending_payout_value: 30.590 HBD
+                    author_payout_value: 0.000 HBD
+                    curator_payout_value: 0.000 HBD
+                    promoted: 0.000 HBD
+                    replies:
+                    - sigmajin/re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t204946840z
+                    author_reputation: 56.26
+                    stats:
+                      hide: false
+                      gray: false
+                      total_votes: 23
+                      flag_weight: 0
+                    url: "/steemit/@heiditravels/my-first-bad-experience-with-steemit#@demotruk/re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z"
+                    beneficiaries: []
+                    max_accepted_payout: 1000000.000 HBD
+                    percent_hbd: 10000
+                    parent_author: fyrstikken
+                    parent_permlink: re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t202905580z
+                    active_votes:
+                    - rshares: 433572773241
+                      voter: anonymous
+                    - rshares: 14293082408966
+                      voter: summon
+                    - rshares: 3103012759
+                      voter: boy
+                    - rshares: 3767337211
+                      voter: bue-witness
+                    - rshares: 690899726
+                      voter: bunny
+                    - rshares: 54630385693
+                      voter: bue
+                    - rshares: 1662788865
+                      voter: mini
+                    - rshares: 213777416
+                      voter: moon
+                    - rshares: 624870220
+                      voter: healthcare
+                    - rshares: 1182788827473
+                      voter: tuck-fheman
+                    - rshares: 969741207
+                      voter: daniel.pan
+                    - rshares: 288328206
+                      voter: helen.tan
+                    - rshares: 52309096320
+                      voter: noisy
+                    - rshares: 132872177928
+                      voter: chhayll
+                    - rshares: 13299353870
+                      voter: r4fken
+                    - rshares: 13278882511
+                      voter: senseiteekay
+                    - rshares: 4864580665
+                      voter: condra
+                    - rshares: 6411724227
+                      voter: beanz
+                    - rshares: 3252804327
+                      voter: jrd
+                    - rshares: 3509797589
+                      voter: cmorton
+                    - rshares: 8187684279
+                      voter: theb0red1
+                    - rshares: 3327069227
+                      voter: lorddominik007
+                    - rshares: 3202715261
+                      voter: luminousvisions
+                    blacklists: []
+                  sigmajin/re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t204946840z:
+                    post_id: 1139213
+                    author: sigmajin
+                    permlink: re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t204946840z
+                    category: steemit
+                    title: 'RE: My First Bad Experience with Steemit'
+                    body: so based on "sounds like a great idea" you made a breakfast reservation
+                      on a specific time and date and also hired a TV crew?
+                    json_metadata:
+                      tags:
+                      - steemit
+                    created: '2016-09-05T20:49:45'
+                    updated: '2016-09-05T20:49:45'
+                    depth: 4
+                    children: 2
+                    net_rshares: 1438234889111
+                    is_paidout: false
+                    payout_at: '2016-09-12T20:49:45'
+                    payout: 0.727
+                    pending_payout_value: 0.727 HBD
+                    author_payout_value: 0.000 HBD
+                    curator_payout_value: 0.000 HBD
+                    promoted: 0.000 HBD
+                    replies:
+                    - demotruk/re-sigmajin-re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t213912452z
+                    author_reputation: 61.43
+                    stats:
+                      hide: false
+                      gray: false
+                      total_votes: 10
+                      flag_weight: 0
+                    url: "/steemit/@heiditravels/my-first-bad-experience-with-steemit#@sigmajin/re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t204946840z"
+                    beneficiaries: []
+                    max_accepted_payout: 1000000.000 HBD
+                    percent_hbd: 10000
+                    parent_author: demotruk
+                    parent_permlink: re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z
+                    active_votes:
+                    - rshares: 1182788827473
+                      voter: tuck-fheman
+                    - rshares: 132872177928
+                      voter: chhayll
+                    - rshares: 13299353870
+                      voter: r4fken
+                    - rshares: 82429459718
+                      voter: sigmajin
+                    - rshares: 142482760
+                      voter: beanz
+                    - rshares: 3439601637
+                      voter: cmorton
+                    - rshares: 8187684279
+                      voter: theb0red1
+                    - rshares: 3394968599
+                      voter: lorddominik007
+                    - rshares: 3202715261
+                      voter: luminousvisions
+                    - rshares: 8477617586
+                      voter: dannystravels
+                    blacklists: []
+                  ? demotruk/re-sigmajin-re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t213912452z
+                  : post_id: 1139746
+                    author: demotruk
+                    permlink: re-sigmajin-re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t213912452z
+                    category: steemit
+                    title: 'RE: My First Bad Experience with Steemit'
+                    body: "@fyrstikken Did she confirm a time and place?"
+                    json_metadata:
+                      tags:
+                      - steemit
+                      users:
+                      - fyrstikken
+                    created: '2016-09-05T21:39:12'
+                    updated: '2016-09-05T21:39:12'
+                    depth: 5
+                    children: 0
+                    net_rshares: 1187241967588
+                    is_paidout: false
+                    payout_at: '2016-09-12T21:39:12'
+                    payout: 0.573
+                    pending_payout_value: 0.573 HBD
+                    author_payout_value: 0.000 HBD
+                    curator_payout_value: 0.000 HBD
+                    promoted: 0.000 HBD
+                    replies: []
+                    author_reputation: 56.26
+                    stats:
+                      hide: false
+                      gray: false
+                      total_votes: 5
+                      flag_weight: 0
+                    url: "/steemit/@heiditravels/my-first-bad-experience-with-steemit#@demotruk/re-sigmajin-re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t213912452z"
+                    beneficiaries: []
+                    max_accepted_payout: 1000000.000 HBD
+                    percent_hbd: 10000
+                    parent_author: sigmajin
+                    parent_permlink: re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t204946840z
+                    active_votes:
+                    - rshares: 1159133050923
+                      voter: tuck-fheman
+                    - rshares: 13278882511
+                      voter: senseiteekay
+                    - rshares: 3439601637
+                      voter: cmorton
+                    - rshares: 8187684279
+                      voter: theb0red1
+                    - rshares: 3202748238
+                      voter: luminousvisions
+                    blacklists: []
+                id: 1
+
   /#database_api.find_comments:
     post:
       tags:
@@ -982,26 +1203,6 @@ paths:
               schema:
                 $ref: './condenser_api/schemas/discussions.yaml'
 
-  /#tags_api.get_comment_discussions_by_payout:
-    post:
-      tags:
-        - Tags
-      description: 'Alias for condenser_api.get_comment_discussions_by_payout'
-      operationId: tags_api.get_comment_discussions_by_payout
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: './tags_api/requests/getCommentDiscussionsByPayout.yaml'
-        required: true
-      responses:
-        '200':
-          description: Active votes list
-          content:
-            'application/json; charset=utf-8':
-              schema:
-                $ref: './condenser_api/schemas/discussions.yaml'
-
   /#condenser_api.get_content:
     post:
       tags:
@@ -1022,247 +1223,6 @@ paths:
               schema:
                 $ref: './condenser_api/schemas/contentResult.yaml'
 
-  /#tags_api.get_discussion:
-    post:
-      tags:
-        - Tags
-      description: 'Nearly an alias for condenser_api.get_content, except the results are given in condenser_api style (original condenser_api.get_content implementation), while current condenser_api.get_content uses database_api style (since it was made to match Fat Node implementation)'
-      operationId: tags_api.get_discussion
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: './tags_api/requests/getDiscussion.yaml'
-        required: true
-      responses:
-        '200':
-          description: Active votes list
-          content:
-            'application/json; charset=utf-8':
-              schema:
-                $ref: './condenser_api/schemas/contentResult.yaml'
-
-  /#bridge_api.get_discussion:
-    post:
-      tags:
-        - Bridge
-      description: 'Nearly an alias for condenser_api.get_content, except the results are given in condenser_api style (original condenser_api.get_content implementation), while current condenser_api.get_content uses database_api style (since it was made to match Fat Node implementation)'
-      operationId: bridge.get_discussion
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: './bridge_api/requests/getDiscussion.yaml'
-        required: true
-      responses:
-        '200':
-          description: Active votes list
-          content:
-            'application/json; charset=utf-8':
-              schema:
-                $ref: './bridge_api/schemas/contentResult.yaml'
-              example:
-                jsonrpc: '2.0'
-                result:
-                  demotruk/re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z:
-                    post_id: 1139039
-                    author: demotruk
-                    permlink: re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z
-                    category: steemit
-                    title: 'RE: My First Bad Experience with Steemit'
-                    body: |-
-                      "Sounds like a great idea" is not a confirmation. Did she ever confirm the time and place?
-
-                      Edit: What you have proven is that you blew up at @heiditravels over your own misunderstanding of a non-committal reply. An appointment includes a time and date and confirmation of those things. This is fairly basic stuff for someone who organizes things with people. If you don't get those things, you don't have an arrangement. How would she even know when and where to turn up?
-                    json_metadata:
-                      tags:
-                      - steemit
-                      users:
-                      - heiditravels
-                    created: '2016-09-05T20:36:12'
-                    updated: '2016-09-05T20:51:15'
-                    depth: 3
-                    children: 3
-                    net_rshares: 16219911037187
-                    is_paidout: false
-                    payout_at: '2016-09-12T20:36:12'
-                    payout: 30.59
-                    pending_payout_value: 30.590 HBD
-                    author_payout_value: 0.000 HBD
-                    curator_payout_value: 0.000 HBD
-                    promoted: 0.000 HBD
-                    replies:
-                    - sigmajin/re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t204946840z
-                    author_reputation: 56.26
-                    stats:
-                      hide: false
-                      gray: false
-                      total_votes: 23
-                      flag_weight: 0
-                    url: "/steemit/@heiditravels/my-first-bad-experience-with-steemit#@demotruk/re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z"
-                    beneficiaries: []
-                    max_accepted_payout: 1000000.000 HBD
-                    percent_hbd: 10000
-                    parent_author: fyrstikken
-                    parent_permlink: re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t202905580z
-                    active_votes:
-                    - rshares: 433572773241
-                      voter: anonymous
-                    - rshares: 14293082408966
-                      voter: summon
-                    - rshares: 3103012759
-                      voter: boy
-                    - rshares: 3767337211
-                      voter: bue-witness
-                    - rshares: 690899726
-                      voter: bunny
-                    - rshares: 54630385693
-                      voter: bue
-                    - rshares: 1662788865
-                      voter: mini
-                    - rshares: 213777416
-                      voter: moon
-                    - rshares: 624870220
-                      voter: healthcare
-                    - rshares: 1182788827473
-                      voter: tuck-fheman
-                    - rshares: 969741207
-                      voter: daniel.pan
-                    - rshares: 288328206
-                      voter: helen.tan
-                    - rshares: 52309096320
-                      voter: noisy
-                    - rshares: 132872177928
-                      voter: chhayll
-                    - rshares: 13299353870
-                      voter: r4fken
-                    - rshares: 13278882511
-                      voter: senseiteekay
-                    - rshares: 4864580665
-                      voter: condra
-                    - rshares: 6411724227
-                      voter: beanz
-                    - rshares: 3252804327
-                      voter: jrd
-                    - rshares: 3509797589
-                      voter: cmorton
-                    - rshares: 8187684279
-                      voter: theb0red1
-                    - rshares: 3327069227
-                      voter: lorddominik007
-                    - rshares: 3202715261
-                      voter: luminousvisions
-                    blacklists: []
-                  sigmajin/re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t204946840z:
-                    post_id: 1139213
-                    author: sigmajin
-                    permlink: re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t204946840z
-                    category: steemit
-                    title: 'RE: My First Bad Experience with Steemit'
-                    body: so based on "sounds like a great idea" you made a breakfast reservation
-                      on a specific time and date and also hired a TV crew?
-                    json_metadata:
-                      tags:
-                      - steemit
-                    created: '2016-09-05T20:49:45'
-                    updated: '2016-09-05T20:49:45'
-                    depth: 4
-                    children: 2
-                    net_rshares: 1438234889111
-                    is_paidout: false
-                    payout_at: '2016-09-12T20:49:45'
-                    payout: 0.727
-                    pending_payout_value: 0.727 HBD
-                    author_payout_value: 0.000 HBD
-                    curator_payout_value: 0.000 HBD
-                    promoted: 0.000 HBD
-                    replies:
-                    - demotruk/re-sigmajin-re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t213912452z
-                    author_reputation: 61.43
-                    stats:
-                      hide: false
-                      gray: false
-                      total_votes: 10
-                      flag_weight: 0
-                    url: "/steemit/@heiditravels/my-first-bad-experience-with-steemit#@sigmajin/re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t204946840z"
-                    beneficiaries: []
-                    max_accepted_payout: 1000000.000 HBD
-                    percent_hbd: 10000
-                    parent_author: demotruk
-                    parent_permlink: re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z
-                    active_votes:
-                    - rshares: 1182788827473
-                      voter: tuck-fheman
-                    - rshares: 132872177928
-                      voter: chhayll
-                    - rshares: 13299353870
-                      voter: r4fken
-                    - rshares: 82429459718
-                      voter: sigmajin
-                    - rshares: 142482760
-                      voter: beanz
-                    - rshares: 3439601637
-                      voter: cmorton
-                    - rshares: 8187684279
-                      voter: theb0red1
-                    - rshares: 3394968599
-                      voter: lorddominik007
-                    - rshares: 3202715261
-                      voter: luminousvisions
-                    - rshares: 8477617586
-                      voter: dannystravels
-                    blacklists: []
-                  ? demotruk/re-sigmajin-re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t213912452z
-                  : post_id: 1139746
-                    author: demotruk
-                    permlink: re-sigmajin-re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t213912452z
-                    category: steemit
-                    title: 'RE: My First Bad Experience with Steemit'
-                    body: "@fyrstikken Did she confirm a time and place?"
-                    json_metadata:
-                      tags:
-                      - steemit
-                      users:
-                      - fyrstikken
-                    created: '2016-09-05T21:39:12'
-                    updated: '2016-09-05T21:39:12'
-                    depth: 5
-                    children: 0
-                    net_rshares: 1187241967588
-                    is_paidout: false
-                    payout_at: '2016-09-12T21:39:12'
-                    payout: 0.573
-                    pending_payout_value: 0.573 HBD
-                    author_payout_value: 0.000 HBD
-                    curator_payout_value: 0.000 HBD
-                    promoted: 0.000 HBD
-                    replies: []
-                    author_reputation: 56.26
-                    stats:
-                      hide: false
-                      gray: false
-                      total_votes: 5
-                      flag_weight: 0
-                    url: "/steemit/@heiditravels/my-first-bad-experience-with-steemit#@demotruk/re-sigmajin-re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t213912452z"
-                    beneficiaries: []
-                    max_accepted_payout: 1000000.000 HBD
-                    percent_hbd: 10000
-                    parent_author: sigmajin
-                    parent_permlink: re-demotruk-re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t204946840z
-                    active_votes:
-                    - rshares: 1159133050923
-                      voter: tuck-fheman
-                    - rshares: 13278882511
-                      voter: senseiteekay
-                    - rshares: 3439601637
-                      voter: cmorton
-                    - rshares: 8187684279
-                      voter: theb0red1
-                    - rshares: 3202748238
-                      voter: luminousvisions
-                    blacklists: []
-                id: 1
-
   /#condenser_api.get_content_replies:
     post:
       tags:
@@ -1282,27 +1242,6 @@ paths:
             'application/json; charset=utf-8':
               schema:
                 $ref: './condenser_api/schemas/contentReplies.yaml'
-
-  /#tags_api.get_content_replies:
-    post:
-      tags:
-        - Tags
-      description: 'Nearly an alias for condenser_api.get_content_replies, except the results are given in condenser_api style (original condenser_api.get_content_replies implementation), while current condenser_api.get_content_replies uses database_api style (since it was made to match Fat Node implementation)'
-      operationId: tags_api.get_content_replies
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: './tags_api/requests/getContentReplies.yaml'
-        required: true
-      responses:
-        '200':
-          description: Active votes list
-          content:
-            'application/json; charset=utf-8':
-              schema:
-                $ref: './condenser_api/schemas/contentReplies.yaml'
-
   /#condenser_api.get_discussions_by_author_before_date:
     post:
       tags:
@@ -1463,6 +1402,246 @@ paths:
               schema:
                 $ref: './condenser_api/schemas/discussions.yaml'
 
+  /#condenser_api.get_follow_count:
+    post:
+      tags:
+        - Condenser
+      description: 'Gives following and followers count for given account.'
+      operationId: condenser_api.get_follow_count
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getFollowCount.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followCount.yaml'
+
+  /#condenser_api.get_followers[blog]:
+    post:
+      tags:
+        - Condenser
+      description: 'Gives accounts which follow given account.'
+      operationId: condenser_api.get_followers[blog]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getFollowersBlog.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followers.yaml'
+
+  /#condenser_api.get_followers[ignore]:
+    post:
+      tags:
+        - Condenser
+      description: 'Gives accounts which ignore given account.'
+      operationId: condenser_api.get_followers[ignore]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getFollowersIgnore.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followers.yaml'
+
+  /#condenser_api.get_following[blog]:
+    post:
+      tags:
+        - Condenser
+      description: 'Gives accounts which given account follows.'
+      operationId: condenser_api.get_following[blog]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getFollowingBlog.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followers.yaml'
+
+  /#condenser_api.get_following[ignore]:
+    post:
+      tags:
+        - Condenser
+      description: 'Gives accounts which given account ignores'
+      operationId: condenser_api.get_following[ignore]
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getFollowingIgnore.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/followers.yaml'
+
+  /#condenser_api.get_post_discussions_by_payout:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists not yet paid out top posts ranked by pending payout, more paying first (order within the same payout is: newer first). Aside from different post format routine is very similar to bridge.get_ranked_posts with payout sort, except the latter only considers posts in narrow payout window, this one has no such limitation.'
+      operationId: condenser_api.get_post_discussions_by_payout
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getPostDiscussionsByPayout.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#condenser_api.get_reblogged_by:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists rebloggers of given post.'
+      operationId: condenser_api.get_reblogged_by
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getRebloggedBy.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/rebloggers.yaml'
+
+  /#condenser_api.get_replies_by_last_update:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists replies made to posts (both top posts and comments) of given blogger. Contrary to name, time of last update is not considered - posts are ordered by creation time (newer first).'
+      operationId: condenser_api.get_replies_by_last_update
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getRepliesByLastUpdate.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#condenser_api.get_trending_tags:
+    post:
+      tags:
+        - Condenser
+      description: 'Lists categories ordered by sum of pending payouts, with stats summary about comments and top posts.'
+      operationId: condenser_api.get_trending_tags
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './condenser_api/requests/getTrendingTags.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/trendingTags.yaml'
+
+  /#tags_api.get_comment_discussions_by_payout:
+    post:
+      tags:
+        - Tags
+      description: 'Alias for condenser_api.get_comment_discussions_by_payout'
+      operationId: tags_api.get_comment_discussions_by_payout
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getCommentDiscussionsByPayout.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/discussions.yaml'
+
+  /#tags_api.get_content_replies:
+    post:
+      tags:
+        - Tags
+      description: 'Nearly an alias for condenser_api.get_content_replies, except the results are given in condenser_api style (original condenser_api.get_content_replies implementation), while current condenser_api.get_content_replies uses database_api style (since it was made to match Fat Node implementation)'
+      operationId: tags_api.get_content_replies
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getContentReplies.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/contentReplies.yaml'
+
+  /#tags_api.get_discussion:
+    post:
+      tags:
+        - Tags
+      description: 'Nearly an alias for condenser_api.get_content, except the results are given in condenser_api style (original condenser_api.get_content implementation), while current condenser_api.get_content uses database_api style (since it was made to match Fat Node implementation)'
+      operationId: tags_api.get_discussion
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: './tags_api/requests/getDiscussion.yaml'
+        required: true
+      responses:
+        '200':
+          description: Active votes list
+          content:
+            'application/json; charset=utf-8':
+              schema:
+                $ref: './condenser_api/schemas/contentResult.yaml'
+
   /#tags_api.get_discussions_by_hot:
     post:
       tags:
@@ -1603,126 +1782,6 @@ paths:
               schema:
                 $ref: './condenser_api/schemas/discussions.yaml'
 
-  /#condenser_api.get_follow_count:
-    post:
-      tags:
-        - Condenser
-      description: 'Gives following and followers count for given account.'
-      operationId: condenser_api.get_follow_count
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: './condenser_api/requests/getFollowCount.yaml'
-        required: true
-      responses:
-        '200':
-          description: Active votes list
-          content:
-            'application/json; charset=utf-8':
-              schema:
-                $ref: './condenser_api/schemas/followCount.yaml'
-
-  /#condenser_api.get_followers[blog]:
-    post:
-      tags:
-        - Condenser
-      description: 'Gives accounts which follow given account.'
-      operationId: condenser_api.get_followers[blog]
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: './condenser_api/requests/getFollowersBlog.yaml'
-        required: true
-      responses:
-        '200':
-          description: Active votes list
-          content:
-            'application/json; charset=utf-8':
-              schema:
-                $ref: './condenser_api/schemas/followers.yaml'
-
-  /#condenser_api.get_followers[ignore]:
-    post:
-      tags:
-        - Condenser
-      description: 'Gives accounts which ignore given account.'
-      operationId: condenser_api.get_followers[ignore]
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: './condenser_api/requests/getFollowersIgnore.yaml'
-        required: true
-      responses:
-        '200':
-          description: Active votes list
-          content:
-            'application/json; charset=utf-8':
-              schema:
-                $ref: './condenser_api/schemas/followers.yaml'
-
-  /#condenser_api.get_following[blog]:
-    post:
-      tags:
-        - Condenser
-      description: 'Gives accounts which given account follows.'
-      operationId: condenser_api.get_following[blog]
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: './condenser_api/requests/getFollowingBlog.yaml'
-        required: true
-      responses:
-        '200':
-          description: Active votes list
-          content:
-            'application/json; charset=utf-8':
-              schema:
-                $ref: './condenser_api/schemas/followers.yaml'
-
-  /#condenser_api.get_following[ignore]:
-    post:
-      tags:
-        - Condenser
-      description: 'Gives accounts which given account ignores'
-      operationId: condenser_api.get_following[ignore]
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: './condenser_api/requests/getFollowingIgnore.yaml'
-        required: true
-      responses:
-        '200':
-          description: Active votes list
-          content:
-            'application/json; charset=utf-8':
-              schema:
-                $ref: './condenser_api/schemas/followers.yaml'
-
-  /#condenser_api.get_post_discussions_by_payout:
-    post:
-      tags:
-        - Condenser
-      description: 'Lists not yet paid out top posts ranked by pending payout, more paying first (order within the same payout is: newer first). Aside from different post format routine is very similar to bridge.get_ranked_posts with payout sort, except the latter only considers posts in narrow payout window, this one has no such limitation.'
-      operationId: condenser_api.get_post_discussions_by_payout
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: './condenser_api/requests/getPostDiscussionsByPayout.yaml'
-        required: true
-      responses:
-        '200':
-          description: Active votes list
-          content:
-            'application/json; charset=utf-8':
-              schema:
-                $ref: './condenser_api/schemas/discussions.yaml'
-
   /#tags_api.get_post_discussions_by_payout:
     post:
       tags:
@@ -1742,66 +1801,6 @@ paths:
             'application/json; charset=utf-8':
               schema:
                 $ref: './condenser_api/schemas/discussions.yaml'
-
-  /#condenser_api.get_reblogged_by:
-    post:
-      tags:
-        - Condenser
-      description: 'Lists rebloggers of given post.'
-      operationId: condenser_api.get_reblogged_by
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: './condenser_api/requests/getRebloggedBy.yaml'
-        required: true
-      responses:
-        '200':
-          description: Active votes list
-          content:
-            'application/json; charset=utf-8':
-              schema:
-                $ref: './condenser_api/schemas/rebloggers.yaml'
-
-  /#condenser_api.get_replies_by_last_update:
-    post:
-      tags:
-        - Condenser
-      description: 'Lists replies made to posts (both top posts and comments) of given blogger. Contrary to name, time of last update is not considered - posts are ordered by creation time (newer first).'
-      operationId: condenser_api.get_replies_by_last_update
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: './condenser_api/requests/getRepliesByLastUpdate.yaml'
-        required: true
-      responses:
-        '200':
-          description: Active votes list
-          content:
-            'application/json; charset=utf-8':
-              schema:
-                $ref: './condenser_api/schemas/discussions.yaml'
-
-  /#condenser_api.get_trending_tags:
-    post:
-      tags:
-        - Condenser
-      description: 'Lists categories ordered by sum of pending payouts, with stats summary about comments and top posts.'
-      operationId: condenser_api.get_trending_tags
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              $ref: './condenser_api/requests/getTrendingTags.yaml'
-        required: true
-      responses:
-        '200':
-          description: Active votes list
-          content:
-            'application/json; charset=utf-8':
-              schema:
-                $ref: './condenser_api/schemas/trendingTags.yaml'
 
   /#follow_api.get_followers[blog]:
     post:

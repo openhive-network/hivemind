@@ -29,9 +29,10 @@ properties:
         example: ["sykochica", "2016-08-24T19:59:42", "williambanks", "re-sykochica-re-williambanks-re-sykochica-what-is-god-as-told-by-a-13-year-old-20160823t021931580z"]
       limit:
         type: integer
-        description: "optional 1..1000, default = 1000"
+        minimum: 1
+        maximum: 1000
         default: 1000
-        example: 10
+        example: 20
       order:
         type: string
         enum:

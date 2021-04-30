@@ -25,9 +25,10 @@ properties:
         example: "alarm-clock-dawn-an-original-novel-part-5"
       limit:
         type: integer
-        description: "optional, 1..100, default = 20"
-        example: 10
+        minimum: 1
+        maximum: 100
         default: 20
+        example: 10
       truncate_body:
         type: integer
         description: "optional, default = 0 (meaning no truncation); reduces maximal size of post body, cutting out all excess"

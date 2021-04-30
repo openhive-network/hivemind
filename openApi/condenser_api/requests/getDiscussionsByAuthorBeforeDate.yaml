@@ -28,8 +28,10 @@ properties:
         example: "re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z"
       limit:
         type: integer
-        description: "optional, 1..100, default = 20"
-        example: 10
+        minimum: 1
+        maximum: 100
+        default: 20
+        example: 20
       before_date:
         type: string
         description: "optional, when given should point on start date; completely ignored"
