@@ -28,9 +28,10 @@ properties:
         example: ["1969-12-31T23:59:59","proskynneo","steemit-firstpost-1"]
       limit:
         type: integer
-        description: "optional 1..1000, default = 1000"
+        minimum: 1
+        maximum: 1000
         default: 1000
-        example: 10
+        example: 20
       order:
         type: string
         enum:

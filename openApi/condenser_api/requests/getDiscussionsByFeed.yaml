@@ -35,8 +35,10 @@ properties:
         example: 0
       limit:
         type: integer
-        description: "optional, 1..100, default = 20"
-        example: 10
+        minimum: 1
+        maximum: 100
+        default: 20
+        example: 20
       observer:
         type: string
         description: "optional (can be skipped or passed empty), when passed has to point to valid account. Used to filter out posts authored by accounts ignored directly or indirectly by the observer"

@@ -28,9 +28,10 @@ properties:
         example: ["skypilot", "an-introduction-to-where-eagles-fly-the-american-wilderness-expedition-by-zedekiah-morse"]
       limit:
         type: integer
-        description: "optional 1..1000, default = 1000"
+        minimum: 1
+        maximum: 1000
         default: 1000
-        example: 10
+        example: 20
       order:
         type: string
         enum:

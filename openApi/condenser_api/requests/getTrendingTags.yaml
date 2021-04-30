@@ -21,9 +21,10 @@ properties:
         example: "poems"
       limit:
         type: integer
-        description: "optional, 1..250, default = 250"
-        example: 10
+        minimum: 1
+        maximum: 250
         default: 250
+        example: 250
   id:
     type: integer
     default: 1

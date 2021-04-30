@@ -31,8 +31,10 @@ properties:
         example: "ignore"
       limit:
         type: integer
-        description: "optional, 1..1000, default = 1000"
-        example: 1000
+        minimum: 1
+        maximum: 1000
+        default: 1000
+        example: 20
   id:
     type: integer
     default: 1
