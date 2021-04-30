@@ -5,6 +5,7 @@ import logging
 from hive.db.adapter import Db
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
+from hive.utils.misc import deep_clear
 #pylint: disable=too-many-lines,line-too-long
 
 log = logging.getLogger(__name__)
@@ -104,10 +105,10 @@ class Notify(DbAdapterHolder):
             values_str = ','.join(values)
             actual_query = sql.format(values_str)
             cls.db.query(actual_query)
-            values.clear()
+            values = deep_clear(values)
 
         n = 0
-        if Notify._notifies:
+        if cls._notifies:
             cls.beginTx()
 
             sql = """INSERT INTO hive_notifs (block_num, type_id, score, created_at, src_id,
@@ -120,7 +121,7 @@ class Notify(DbAdapterHolder):
             values = []
             values_limit = 1000
 
-            for notify in Notify._notifies:
+            for notify in cls._notifies:
                 values.append( "{}".format( notify.to_db_values() ) )
 
                 if len(values) >= values_limit:
@@ -129,8 +130,9 @@ class Notify(DbAdapterHolder):
             if len(values) > 0:
                 execute_query(sql, values)
 
-            n = len(Notify._notifies)
-            Notify._notifies.clear()
+            n = len(cls._notifies)
+            cls._notifies = deep_clear(cls._notifies)
+
             cls.commitTx()
 
         return n

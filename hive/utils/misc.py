@@ -1,5 +1,13 @@
 import os, psutil
 from hive.utils.stats import PrometheusClient, BroadcastObject
+from pickle import dumps as serialize
+
+def log_size(obj : any, description : str, broadcast : bool = True):
+  """Handy tool to log size of any data"""
+  size = len( serialize(obj) )
+  if broadcast:
+    PrometheusClient.broadcast( BroadcastObject(f'hived_object_sizeof_{description}', size, 'b') )
+  print(f';SIZE;{description};{size}')
 
 def log_memory_usage(memtypes=["rss", "vms", "shared"], broadcast = True) -> str:
   """
@@ -18,6 +26,15 @@ def log_memory_usage(memtypes=["rss", "vms", "shared"], broadcast = True) -> str
     PrometheusClient.broadcast([ BroadcastObject(f'hivemind_memory_{key}', getattr(stats, key), 'b') for key in stats._fields ]) # broadcast to prometheus
   return f"memory usage report: { ', '.join( [ f'{ human_readable.get(k, k) } = { format_bytes(getattr(stats, k)) }' for k in memtypes ] ) }"
 
+def deep_clear( x, *args, **kwargs ):
+  """
+  Instead of clearing (ex. list().clear()) it deletes object and creates new
+  args and kwargs will be forwarded to constructor
+  """
+  typeof = type(x)
+  del x
+  return typeof(*args, **kwargs)
+
 def chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
@@ -32,5 +49,5 @@ def show_app_version(log, database_head_block, patch_level_data):
     log.info("database_schema_version : %s", patch_level_data['level'])
     log.info("database_patch_date : %s", patch_level_data['patch_date'])
     log.info("database_patched_to_revision : %s", patch_level_data['patched_to_revision'])
-        
+
     log.info("database_head_block : %s", database_head_block)

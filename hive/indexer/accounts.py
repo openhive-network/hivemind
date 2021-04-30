@@ -7,6 +7,7 @@ from hive.utils.account import get_profile_str
 
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
+from hive.utils.misc import deep_clear
 
 log = logging.getLogger(__name__)
 
@@ -187,16 +188,16 @@ class Accounts(DbAdapterHolder):
                     values_str = ','.join(values)
                     actual_query = sql.format(values_str)
                     cls.db.query(actual_query)
-                    values.clear()
+                    values = deep_clear(values)
 
             if len(values) > 0:
                 values_str = ','.join(values)
                 actual_query = sql.format(values_str)
                 cls.db.query(actual_query)
-                values.clear()
+                values = deep_clear(values)
 
             n = len(cls._updates_data)
-            cls._updates_data.clear()
+            cls._updates_data = deep_clear(cls._updates_data)
             cls.commitTx()
 
         cls.inside_flush = False

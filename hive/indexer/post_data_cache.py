@@ -2,6 +2,7 @@ import logging
 from hive.utils.normalize import escape_characters
 
 from hive.indexer.db_adapter_holder import DbAdapterHolder
+from hive.utils.misc import deep_clear
 
 log = logging.getLogger(__name__)
 
@@ -101,5 +102,5 @@ class PostDataCache(DbAdapterHolder):
             cls.commitTx()
 
         n = len(cls._data.keys())
-        cls._data.clear()
+        cls._data = deep_clear(cls._data)
         return n

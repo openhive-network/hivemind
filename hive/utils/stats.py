@@ -90,6 +90,8 @@ class PrometheusClient:
         else:
             raise Exception(f"Not expected type. Should be list or BroadcastObject, but: {type(obj)} given")
 
+from hive.utils.misc import deep_clear
+
 class Stat:
     def __init__(self, time):
         self.time = time
@@ -191,7 +193,7 @@ class OPStatusManager(StatusManager):
             OPStatusManager.cpbs,
             True
         )
-        OPStatusManager.cpbs.clear()
+        OPStatusManager.cpbs = deep_clear(OPStatusManager.cpbs)
 
     @staticmethod
     def log_global(label : str):
@@ -244,7 +246,7 @@ class FlushStatusManager(StatusManager):
             FlushStatusManager.current_flushes,
             True
         )
-        FlushStatusManager.current_flushes.clear()
+        FlushStatusManager.current_flushes = deep_clear(FlushStatusManager.current_flushes)
 
     @staticmethod
     def log_global(label : str):
@@ -297,7 +299,7 @@ class FinalOperationStatusManager(StatusManager):
 
     @staticmethod
     def clear():
-        FinalOperationStatusManager.current_finals.clear()
+        FinalOperationStatusManager.current_finals = deep_clear(FinalOperationStatusManager.current_finals)
 
 class WaitStat(Stat):
     def __init__(self, time):
@@ -327,7 +329,7 @@ class WaitingStatusManager(StatusManager):
             WaitingStatusManager.current_waits,
             True
         )
-        WaitingStatusManager.current_waits.clear()
+        WaitingStatusManager.current_waits = deep_clear(WaitingStatusManager.current_waits)
 
     @staticmethod
     def log_global(label : str):

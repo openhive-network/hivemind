@@ -3,6 +3,7 @@
 import logging
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
+from hive.utils.misc import deep_clear
 
 log = logging.getLogger(__name__)
 
@@ -58,7 +59,8 @@ class Reputations(DbAdapterHolder):
         self.commitTx()
 
         n = len(self._values)
-        self._values.clear()
+        self._values = deep_clear(self._values)
+
 
         self._total_values = self._total_values + n
 

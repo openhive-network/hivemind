@@ -18,6 +18,7 @@ from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.misc import chunks
 
 from hive.utils.normalize import sbd_amount, legacy_amount, safe_img_url, escape_characters
+from hive.utils.misc import deep_clear
 
 log = logging.getLogger(__name__)
 DB = Db.instance()
@@ -183,7 +184,7 @@ class Posts(DbAdapterHolder):
             cls.commitTx()
 
         n = len(cls._comment_payout_ops)
-        cls._comment_payout_ops.clear()
+        cls._comment_payout_ops = deep_clear(cls._comment_payout_ops)
         return n
 
     @classmethod
@@ -291,7 +292,7 @@ class Posts(DbAdapterHolder):
 
 
         n = len(cls.comment_payout_ops)
-        cls.comment_payout_ops.clear()
+        cls.comment_payout_ops = deep_clear(cls.comment_payout_ops)
         return n
 
     @classmethod

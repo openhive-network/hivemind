@@ -114,7 +114,7 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
     try:
         count = ubound - lbound
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
-
+        
         while lbound < ubound:
             preparedVops = {}
             number_of_blocks_to_proceed = min( [ LIMIT_FOR_PROCESSED_BLOCKS, ubound - lbound  ] )

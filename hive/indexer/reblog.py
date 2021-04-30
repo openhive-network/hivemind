@@ -7,6 +7,7 @@ from hive.db.adapter import Db
 from hive.indexer.accounts import Accounts
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
+from hive.utils.misc import deep_clear
 
 log = logging.getLogger(__name__)
 DB = Db.instance()
@@ -107,7 +108,7 @@ class Reblog(DbAdapterHolder):
                     values_str = ",".join(values)
                     query = sql_prefix.format(values_str, values_str)
                     cls.db.query(query)
-                    values.clear()
+                    values = deep_clear(values)
                     values.append("({}, {}, {}, '{}'::timestamp, {})".format(escape_characters(reblog_item['account']),
                                                                                 escape_characters(reblog_item['author']),
                                                                                 escape_characters(reblog_item['permlink']),
@@ -120,6 +121,6 @@ class Reblog(DbAdapterHolder):
                 query = sql_prefix.format(values_str, values_str)
                 cls.db.query(query)
             cls.commitTx()
-            cls.reblog_items_to_flush.clear()
+            cls.reblog_items_to_flush = deep_clear(cls.reblog_items_to_flush)
 
         return item_count
