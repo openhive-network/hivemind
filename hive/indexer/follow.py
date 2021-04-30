@@ -8,7 +8,7 @@ from hive.indexer.accounts import Accounts
 
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
-
+from hive.utils.misc import deep_clear
 
 log = logging.getLogger(__name__)
 
@@ -236,7 +236,7 @@ class Follow(DbAdapterHolder):
                 query = sql.format(reset_list['reset_call'], reset_list['follower'], reset_list['block_num'])
                 cls.db.query_no_return(query)
 
-            cls.list_resets_to_flush.clear()
+            cls.list_resets_to_flush = deep_clear(cls.list_resets_to_flush)
 
             sql = """
                 INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
@@ -299,7 +299,7 @@ class Follow(DbAdapterHolder):
                 if count >= limit:
                     query = str(sql).format(",".join(values))
                     cls.db.query(query)
-                    values.clear()
+                    values = deep_clear(values)
                     count = 0
                 n += 1
 
@@ -307,7 +307,7 @@ class Follow(DbAdapterHolder):
                 query = str(sql).format(",".join(values))
                 cls.db.query(query)
 
-            cls.follow_items_to_flush.clear()
+            cls.follow_items_to_flush = deep_clear(cls.follow_items_to_flush)
 
             cls.commitTx()
             cls.idx = 0

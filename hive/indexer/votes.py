@@ -5,6 +5,7 @@ import collections
 
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
+from hive.utils.misc import deep_clear
 
 log = logging.getLogger(__name__)
 
@@ -121,16 +122,16 @@ class Votes(DbAdapterHolder):
                     values_str = ','.join(values)
                     actual_query = sql.format(values_str)
                     cls.db.query(actual_query)
-                    values.clear()
+                    values = deep_clear(values)
 
             if len(values) > 0:
                 values_str = ','.join(values)
                 actual_query = sql.format(values_str)
                 cls.db.query(actual_query)
-                values.clear()
+                values = deep_clear(values)
 
             n = len(cls._votes_data)
-            cls._votes_data.clear()
+            cls._votes_data = deep_clear(cls._votes_data)
             cls.commitTx()
 
         cls.inside_flush = False

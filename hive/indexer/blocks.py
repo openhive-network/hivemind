@@ -24,6 +24,7 @@ from hive.utils.post_active import update_active_starting_from_posts_on_block
 from hive.server.common.payout_stats import PayoutStats
 from hive.server.common.mentions import Mentions
 from hive.utils.timer import time_it
+from hive.utils.misc import deep_clear
 
 log = logging.getLogger(__name__)
 
@@ -372,7 +373,7 @@ class Blocks:
         query = query + ",".join(values)
         DB.query(query)
         n = len(cls.blocks_to_flush)
-        cls.blocks_to_flush.clear()
+        cls.blocks_to_flush = deep_clear(cls.blocks_to_flush)
         return n
 
     @classmethod
