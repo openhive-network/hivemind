@@ -1,3 +1,5 @@
+DROP TYPE IF EXISTS get_post_view_by_id_return_t;
+
 CREATE TYPE get_post_view_by_id_return_t AS(
   id integer,
   community_id integer,
