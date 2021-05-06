@@ -1,0 +1,36 @@
+type: object
+additionalProperties: false
+required:
+  - jsonrpc
+  - result
+  - id
+properties:
+  jsonrpc:
+    type: string
+    example: "2.0"
+  id:
+    type: integer
+    example: 1
+  result:
+    type: object
+    required:
+      - follows
+      - ignores
+      - follows_blacklists
+      - follows_muted
+    properties:
+      follows:
+        type: boolean
+        example: true
+      ignores:
+        type: boolean
+        example: true
+      blacklists:
+        type: boolean
+        example: true
+      follows_blacklists:
+        type: boolean
+        example: true
+      follows_muted:
+        type: boolean
+        example: true

@@ -1,0 +1,27 @@
+type: object
+additionalProperties: false
+required:
+  - jsonrpc
+  - result
+  - id
+properties:
+  jsonrpc:
+    type: string
+    example: "2.0"
+  id:
+    type: integer
+    example: 1
+  result:
+    type: object
+    required:
+      - lastread
+      - unread
+    properties:
+      lastread:
+        type: string
+        format: date-time
+        description: date of post
+        example: "2016-09-02T05:02:18"
+      unread:
+        type: integer
+        example: 28

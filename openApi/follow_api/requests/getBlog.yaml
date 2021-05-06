@@ -25,11 +25,14 @@ properties:
       start_entry_id:
         type: integer
         description: "optional, -1..any, default = 0, both -1 and 0 mean = {number of blog entries} - 1; part of paging mechanism"
+        minimum: -1
         default: 0
         example: 0
       limit:
         type: integer
         description: "optional, 1..500 (0 functions as skipped), default = {start_entry_id} + 1; part of paging mechanism"
+        minimum: 0
+        maximum: 500
         example: 0
   id:
     type: integer

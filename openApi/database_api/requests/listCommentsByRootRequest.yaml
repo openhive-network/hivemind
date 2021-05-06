@@ -28,9 +28,10 @@ properties:
         example: ["givemeyoursteem", "winners-of-steemit-food-challenge-3-desserts-to-die-for", "vi1son", "re-givemeyoursteem-winners-of-steemit-food-challenge-3-desserts-to-die-for-20160828t172955785z"]
       limit:
         type: integer
-        description: "optional 1..1000, default = 1000"
+        minimum: 1
+        maximum: 1000
         default: 1000
-        example: 10
+        example: 20
       order:
         type: string
         enum:

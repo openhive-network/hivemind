@@ -1,0 +1,43 @@
+type: object
+additionalProperties: false
+required:
+  - jsonrpc
+  - result
+  - id
+properties:
+  jsonrpc:
+    type: string
+    example: "2.0"
+  id:
+    type: integer
+    example: 1
+  result:
+    type: array
+    items:
+      type: object
+      required:
+        - follows
+        - ignores
+        - follows_blacklists
+        - follows_muted
+      properties:
+        id:
+          type: integer
+          example: 1619826
+        type:
+          type: string
+          example: "vote"
+        score:
+          type: boolean
+          example: true
+        date:
+          type: string
+          format: date-time
+          description: date of post
+          example: "2016-09-02T05:02:18"
+        msg:
+          type: string
+          example: "@bonapartist voted on your post ($1.32)"
+        url:
+          type: string
+          example: "@gtg/heavy-duty-witness-no"

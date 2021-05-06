@@ -11,21 +11,21 @@ properties:
   method:
     type: string
     enum:
-      - condenser_api.get_account_reputations
+      - bridge.get_trending_topics
   params:
     type: object
     required:
-      - account_lower_bound
+      - limit
     properties:
-      account_lower_bound:
-        type: string
-        example: "a"
       limit:
         type: integer
         minimum: 1
-        maximum: 1000
-        default: 1000
-        example: 1000
+        maximum: 25
+        default: 10
+      observer:
+        type: string
+        description: account name, points to valid account
+        example: "gtg"
   id:
     type: integer
     default: 1

@@ -26,9 +26,10 @@ properties:
         example: ["gtg", "2016-09-06T18:47:33", "gtg", "missing-rewards-while-mining"]
       limit:
         type: integer
-        description: "optional 1..1000, default = 1000"
+        minimum: 1
+        maximum: 1000
         default: 1000
-        example: 10
+        example: 20
       order:
         type: string
         enum:

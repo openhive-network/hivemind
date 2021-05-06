@@ -11,21 +11,22 @@ properties:
   method:
     type: string
     enum:
-      - condenser_api.get_account_reputations
+      - bridge.unread_notifications
   params:
     type: object
     required:
-      - account_lower_bound
+      - account
     properties:
-      account_lower_bound:
+      account:
         type: string
-        example: "a"
-      limit:
+        description: "Mandatory, points to valid account"
+        example: "gtg"
+      min_score:
         type: integer
+        description: Minimal score of notifications to show
         minimum: 1
-        maximum: 1000
-        default: 1000
-        example: 1000
+        maximum: 100
+        default: 25
   id:
     type: integer
     default: 1
