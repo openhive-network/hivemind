@@ -170,3 +170,17 @@ BEGIN
 END
 $function$
 ;
+
+DROP FUNCTION IF EXISTS is_pinned
+;
+CREATE OR REPLACE FUNCTION is_pinned(in _post_id INT)
+RETURNS boolean
+LANGUAGE 'plpgsql'
+AS
+$function$
+BEGIN
+    RETURN is_pinned FROM hive_posts WHERE id = _post_id LIMIT 1
+    ;
+END
+$function$
+;

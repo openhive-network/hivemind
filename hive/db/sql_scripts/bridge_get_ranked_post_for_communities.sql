@@ -10,6 +10,9 @@ BEGIN
   __observer_id = find_account_id( _observer, True );
   IF _author != '' AND _permlink != '' THEN
     __post_id = find_comment_id( _author, _permlink, True );
+    IF NOT is_pinned(__post_id) THEN
+      RETURN;
+    END IF;
   END IF;
 
   RETURN QUERY
