@@ -1,4 +1,4 @@
-DROP TYPE IF EXISTS get_post_view_by_id_return_t;
+DROP TYPE IF EXISTS get_post_view_by_id_return_t CASCADE;
 
 CREATE TYPE get_post_view_by_id_return_t AS(
   id integer,
