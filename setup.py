@@ -139,7 +139,7 @@ if __name__ == "__main__":
             'aiopg @ https://github.com/aio-libs/aiopg/tarball/862fff97e4ae465333451a4af2a838bfaa3dd0bc',
             'jsonrpcserver @ https://github.com/bcb/jsonrpcserver/tarball/8f3437a19b6d1a8f600ee2c9b112116c85f17827#egg=jsonrpcserver',
             'simplejson==3.13.2',
-            'aiohttp==4.0.0',
+            'aiohttp==4.0.0a1',
             'certifi==2020.12.5',
             'sqlalchemy==1.4.15',
             'funcy==1.16',
