@@ -1,11 +1,12 @@
 aiocache==0.11.1
 aiohttp==4.0.0a1
 aiopg @ https://github.com/aio-libs/aiopg/tarball/862fff97e4ae465333451a4af2a838bfaa3dd0bc
+# aiopg==1.3.0b3 (prod 1.2.0b2)
 apply-defaults==0.1.4
 async-timeout==3.0.1
 atomic==0.7.3
 attrs==21.2.0
-# attrs==17.4.0 
+# prod 17.4.0 
 certifi==2018.1.18
 cffi==1.14.5
 ConfigArgParse==1.3
@@ -14,32 +15,34 @@ diff-match-patch==20200713
 funcy==1.15
 greenlet==1.1.0
 humanize==3.5.0
-# humanize=3.2.0
+# prod humanize=3.2.0
 idna==2.6
 idna-ssl==1.1.0
 importlib-metadata==4.0.1
-# importlib-metadata==3.4.0
+# prod importlib-metadata==3.4.0
 importlib-resources==5.1.2
-# importlib-resources==5.1.0
+# prod importlib-resources==5.1.0
 jsonrpcserver @ https://github.com/bcb/jsonrpcserver/tarball/8f3437a19b6d1a8f600ee2c9b112116c85f17827#egg=jsonrpcserver
+# jsonrpcserver==4.1.3
 jsonschema==3.2.0
-# jsonschema==2.6.0
+# prod jsonschema==2.6.0
 Mako==1.0.7
-# none
+# prod none
 Markdown==2.4.1
-# none
+# prod none
 maya==0.6.1
 multidict==4.7.6
-pdoc==6.3.1
+pdoc==0.3.2
+# prod 6.3.1
 pendulum==2.1.2
 prometheus-client==0.9.0
 psutil==5.8.0
 psycopg2-binary==2.8.6
 pyrsistent==0.17.3
-# none
+# prod none
 python-dateutil==2.8.1
 pytz==2018.3
-# pytz==2021.1
+# prod pytz==2021.1
 pytzdata==2020.1
 regex==2020.11.13
 simplejson==3.17.2
@@ -48,7 +51,7 @@ snaptime==0.2.4
 SQLAlchemy==1.4.0b3
 toolz==0.11.1
 typing-extensions==3.10.0.0
-# typing-extensions==3.7.4.3
+# prod typing-extensions==3.7.4.3
 tzlocal==3.0b1
 ujson==4.0.2
 urllib3==1.22
