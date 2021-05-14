@@ -152,7 +152,7 @@ if __name__ == "__main__":
             'configargparse==1.3',
             'pdoc==6.3.1',
             'diff-match-patch==20200713',
-            'prometheus-client==0.9.0'
+            'prometheus-client==0.9.0',
             'psutil==5.8.0',
             'atomic==0.7.3',
             'python-dateutil>=2.8.1',
