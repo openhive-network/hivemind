@@ -249,22 +249,29 @@ class Blocks:
 
                 account_name = None
                 op_details = None
+                potentially_new_account = False
                 # account ops
                 if op_type == 'pow_operation':
                     account_name = op['worker_account']
+                    potentially_new_account = True
                 elif op_type == 'pow2_operation':
                     account_name = op['work']['value']['input']['worker_account']
+                    potentially_new_account = True
                 elif op_type == 'account_create_operation':
                     account_name = op['new_account_name']
                     op_details = op
+                    potentially_new_account = True
                 elif op_type == 'account_create_with_delegation_operation':
                     account_name = op['new_account_name']
                     op_details = op
+                    potentially_new_account = True
                 elif op_type == 'create_claimed_account_operation':
                     account_name = op['new_account_name']
                     op_details = op
+                    potentially_new_account = True
 
-                Accounts.register(account_name, op_details, cls._head_block_date, num)
+                if potentially_new_account and not Accounts.register(account_name, op_details, cls._head_block_date, num):
+                    log.error("Failed to register account {} from operation: {}".format(account_name, op))
 
                 # account metadata updates
                 if op_type == 'account_update_operation':

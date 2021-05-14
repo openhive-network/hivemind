@@ -76,6 +76,9 @@ class Posts(DbAdapterHolder):
         row = DB.query_row(sql, author=op['author'], permlink=op['permlink'], parent_author=op['parent_author'],
                    parent_permlink=op['parent_permlink'], date=block_date, community_support_start_block=Community.start_block, block_num=op['block_num'], tags=tags)
 
+        if not row:
+            log.error("Failed to process comment_op: {}".format(op))
+            return
         result = dict(row)
 
         # TODO we need to enhance checking related community post validation and honor is_muted.

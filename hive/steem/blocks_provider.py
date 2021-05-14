@@ -71,7 +71,7 @@ class BlocksProvider:
                     return;
                 while cls._breaker():
                     try:
-                        blocks = cls._responses_queues[ blocks_queue ].get( True, 1)
+                        blocks = cls._responses_queues[ blocks_queue ].get( True, 1 )
                         cls._responses_queues[ blocks_queue ].task_done()
                         #split blocks range
                         for block in blocks:
@@ -79,10 +79,11 @@ class BlocksProvider:
                             if block_mock is not None:
                                 if 'block' in block:
                                     block["block"]["transactions"].extend( block_mock["transactions"] )
-                                    block["block"]["transaction_ids"].extend( block_mock["transaction_ids"] )
                                 else:
+                                    log.warning("Pure mock block: id {}, previous {}".format(block_mock["block_id"], block_mock["previous"]))
                                     block["block"] = block_mock
-                            if not 'block' in 'block': # if block not exists in the node nor moc
+                            if not 'block' in block: # if block not exists in the node nor mock
+                                log.warning("Block data is missing for block: {}".format(block))
                                 continue;
 
                             while cls._breaker():
