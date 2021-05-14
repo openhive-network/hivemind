@@ -138,25 +138,25 @@ if __name__ == "__main__":
         install_requires=[
             'aiopg @ https://github.com/aio-libs/aiopg/tarball/862fff97e4ae465333451a4af2a838bfaa3dd0bc',
             'jsonrpcserver @ https://github.com/bcb/jsonrpcserver/tarball/8f3437a19b6d1a8f600ee2c9b112116c85f17827#egg=jsonrpcserver',
-            'simplejson==3.13.2',
+            'simplejson==3.17.2',
             'aiohttp==4.0.0a1',
-            'certifi==2020.12.5',
-            'sqlalchemy==1.4.15',
-            'funcy==1.16',
+            'certifi==2018.1.18',
+            'sqlalchemy==1.4.0b3',
+            'funcy==1.15',
             'toolz==0.11.1',
             'maya==0.6.1',
             'ujson==4.0.2',
-            'urllib3==1.26.2',
+            'urllib3==1.22',
             'psycopg2-binary==2.8.6',
             'aiocache==0.11.1',
-            'configargparse==1.4.1',
-            'pdoc==0.3.2',
+            'configargparse==1.3',
+            'pdoc==6.3.1',
             'diff-match-patch==20200713',
-            'prometheus-client==0.10.1',
+            'prometheus-client==0.9.0'
             'psutil==5.8.0',
             'atomic==0.7.3',
             'python-dateutil>=2.8.1',
-            'regex==2021.4.4'
+            'regex==2020.11.13'
         ],
         extras_require={
             'dev': [
