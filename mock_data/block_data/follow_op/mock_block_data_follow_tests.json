@@ -1,11 +1,5 @@
 {
   "2000000": {
-    "previous": "",
-    "timestamp": "",
-    "witness": "",
-    "transaction_merkle_root": "",
-    "extensions": [],
-    "witness_signature": "",
     "transactions": [
       {
         "ref_block_num": 100000,
@@ -818,18 +812,9 @@
           ""
         ]
       }
-    ],
-    "block_id": "",
-    "signing_key": "",
-    "transaction_ids": []
+    ]
   },
   "2010000": {
-    "previous": "",
-    "timestamp": "",
-    "witness": "",
-    "transaction_merkle_root": "",
-    "extensions": [],
-    "witness_signature": "",
     "transactions": [
       {
         "ref_block_num": 100000,
@@ -1040,18 +1025,9 @@
           ""
         ]
       }
-    ],
-    "block_id": "",
-    "signing_key": "",
-    "transaction_ids": []
+    ]
   },
   "2020000": {
-    "previous": "",
-    "timestamp": "",
-    "witness": "",
-    "transaction_merkle_root": "",
-    "extensions": [],
-    "witness_signature": "",
     "transactions": [
       {
         "ref_block_num": 100000,
@@ -1226,21 +1202,12 @@
         ],
         "extensions": [],
         "signatures": [
-          ""                                 	
+          ""
         ]
       }
-    ],
-    "block_id": "",
-    "signing_key": "",
-    "transaction_ids": []
+    ]
   },
   "2030000": {
-    "previous": "",
-    "timestamp": "",
-    "witness": "",
-    "transaction_merkle_root": "",
-    "extensions": [],
-    "witness_signature": "",
     "transactions": [
       {
         "ref_block_num": 100000,
@@ -1348,18 +1315,9 @@
           }
         ]
       }
-    ],
-    "block_id": "",
-    "signing_key": "",
-    "transaction_ids": []
+    ]
   },
   "2040000": {
-    "previous": "",
-    "timestamp": "",
-    "witness": "",
-    "transaction_merkle_root": "",
-    "extensions": [],
-    "witness_signature": "",
     "transactions": [
       {
         "ref_block_num": 100000,
@@ -1735,18 +1693,9 @@
           ""
         ]
       }
-    ],
-    "block_id": "",
-    "signing_key": "",
-    "transaction_ids": []
+    ]
   },
   "2050000": {
-    "previous": "",
-    "timestamp": "",
-    "witness": "",
-    "transaction_merkle_root": "",
-    "extensions": [],
-    "witness_signature": "",
     "transactions": [
       {
         "ref_block_num": 100000,
@@ -1847,18 +1796,9 @@
           ""
         ]
       }
-    ],
-    "block_id": "",
-    "signing_key": "",
-    "transaction_ids": []
+    ]
   },
   "2050001": {
-    "previous": "",
-    "timestamp": "",
-    "witness": "",
-    "transaction_merkle_root": "",
-    "extensions": [],
-    "witness_signature": "",
     "transactions": [
       {
         "ref_block_num": 100000,
@@ -2256,18 +2196,9 @@
           ""
         ]
       }
-    ],
-    "block_id": "",
-    "signing_key": "",
-    "transaction_ids": []
+    ]
   },
   "2060000": {
-    "previous": "",
-    "timestamp": "",
-    "witness": "",
-    "transaction_merkle_root": "",
-    "extensions": [],
-    "witness_signature": "",
     "transactions": [
       {
         "ref_block_num": 100000,
@@ -2390,18 +2321,9 @@
           ""
         ]
       }
-    ],
-    "block_id": "",
-    "signing_key": "",
-    "transaction_ids": []
+    ]
   },
   "2070000": {
-    "previous": "",
-    "timestamp": "",
-    "witness": "",
-    "transaction_merkle_root": "",
-    "extensions": [],
-    "witness_signature": "",
     "transactions": [
       {
         "ref_block_num": 100000,
@@ -2810,18 +2732,9 @@
           ""
         ]
       }
-    ],
-    "block_id": "",
-    "signing_key": "",
-    "transaction_ids": []
+    ]
   },
   "2080000": {
-    "previous": "",
-    "timestamp": "",
-    "witness": "",
-    "transaction_merkle_root": "",
-    "extensions": [],
-    "witness_signature": "",
     "transactions": [
       {
         "ref_block_num": 100000,
@@ -3934,18 +3847,9 @@
           ""
         ]
       }
-    ],
-    "block_id": "",
-    "signing_key": "",
-    "transaction_ids": []
+    ]
   },
   "2090000": {
-    "previous": "",
-    "timestamp": "",
-    "witness": "",
-    "transaction_merkle_root": "",
-    "extensions": [],
-    "witness_signature": "",
     "transactions": [
       {
         "ref_block_num": 100000,
@@ -4013,18 +3917,9 @@
           ""
         ]
       }
-    ],
-    "block_id": "",
-    "signing_key": "",
-    "transaction_ids": []
+    ]
   },
   "2090001": {
-    "previous": "",
-    "timestamp": "",
-    "witness": "",
-    "transaction_merkle_root": "",
-    "extensions": [],
-    "witness_signature": "",
     "transactions": [
       {
         "ref_block_num": 100000,
@@ -4103,18 +3998,9 @@
           ""
         ]
       }
-    ],
-    "block_id": "",
-    "signing_key": "",
-    "transaction_ids": []
+    ]
   },
   "2090002": {
-    "previous": "",
-    "timestamp": "",
-    "witness": "",
-    "transaction_merkle_root": "",
-    "extensions": [],
-    "witness_signature": "",
     "transactions": [
       {
         "ref_block_num": 100000,
@@ -4182,18 +4068,9 @@
           ""
         ]
       }
-    ],
-    "block_id": "",
-    "signing_key": "",
-    "transaction_ids": []
+    ]
   },
   "5000010": {
-    "previous": "",
-    "timestamp": "",
-    "witness": "",
-    "transaction_merkle_root": "",
-    "extensions": [],
-    "witness_signature": "",
     "transactions": [
       {
         "ref_block_num": 100000,
@@ -4305,9 +4182,6 @@
           ""
         ]
       }
-    ],
-    "block_id": "",
-    "signing_key": "",
-    "transaction_ids": []
+    ]
   }
 }

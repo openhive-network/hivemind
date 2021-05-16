@@ -1,4 +1,4 @@
-***block 4999999***
+***block 4998001***
 account_create_operation( `hive-171487` )
 account_create_operation( `hive-171488` )
 account_create_operation( `hive-135485` )
@@ -20,7 +20,7 @@ comment_operation( `hive-117600`, `test-safari`, `secrets4`)
 comment_operation( `hive-117600`, `test-safari`, `secrets5`)
 comment_operation( `hive-117600`, `test-safari`, `secrets6`)
 custom_json_operation("[\"setRole\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"role\":\"admin\"}]")
-***block 5000000***
+***block 4998002***
 custom_json_operation("[\"updateProps\",{\"community\":\"hive-135485\",\"props\":{\"title\":\"World News\",\"about\":\"A place for major news from around the world.\",\"is_nsfw\":true,\"description\":\"\",\"flag_text\":\"\"}}]")
 custom_json_operation("[\"setRole\",{\"community\":\"hive-135485\",\"account\":\"blocktrades\",\"role\":\"mod\"}]")
 custom_json_operation("[\"setUserTitle\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"title\":\"Bill Gates\"}]")
@@ -41,7 +41,7 @@ custom_json_operation("[\"setRole\",{\"community\":\"hive-198723\",\"account\":\
 custom_json_operation("[\"subscribe\",{\"community\":\"hive-171487\"}]")
 custom_json_operation("[\"subscribe\",{\"community\":\"hive-157439\"}]")
 custom_json_operation("[\"subscribe\",{\"community\":\"hive-198723\"}]")
-***block 5000001***
+***block 4998003***
 custom_json_operation("[\"setRole\",{\"community\":\"hive-171488\",\"account\":\"test-safari\",\"role\":\"admin\"}]")
 custom_json_operation("[\"setRole\",{\"community\":\"hive-171487\",\"account\":\"test-safari\",\"role\":\"admin\"}]")
 custom_json_operation("[\"updateProps\",{\"community\":\"hive-171488\",\"props\":{\"title\":\"Hello\",\"about\":\"Nothing.\",\"is_nsfw\":true,\"description\":\"Nothing\",\"flag_text\":\"Lol\"}}]")
@@ -63,7 +63,7 @@ comment_operation( `hive-198723`, `test-safari`, `please-comment-hive3-03`)
 comment_operation( `hive-171487`, `alice`, `My-first-post-hive-1`)
 comment_operation( `hive-157439`, `alice`, `My-first-post-hive-2`)
 comment_operation( `hive-198723`, `alice`, `My-first-post-hive-3`)
-***block 5000002***
+***block 4998004***
 comment_operation(`steemit`, `comment-to-please-comment-hive1`)
 comment_operation(`alice`, `comment-to-please-comment-hive1`)
 comment_operation(`alice`, `comment-to-please-comment-hive1-02`)
@@ -84,7 +84,7 @@ custom_json_operation("[\"mutePost\",{\"community\":\"hive-135485\",\"account\":
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"permlink\":\"secrets2\",\"notes\":\"secrets2 are a spam\"}]")
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-117600\",\"account\":\"test-safari\",\"permlink\":\"secrets5\",\"notes\":\"secret5 are a spam\"}]")
 custom_json_operation("[\"unmutePost\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"permlink\":\"secrets2\",\"notes\":\"secrets1 are a spam, but I love them\"}]")
-***block 5000003***
+***block 4998005***
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"comment-to-please-comment-hive1\",\"notes\":\"first muted comment\"}]")
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"comment-to-please-comment-hive2\",\"notes\":\"first muted comment\"}]")
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"permlink\":\"comment-to-please-comment-hive3\",\"notes\":\"first muted comment\"}]")
@@ -101,7 +101,7 @@ custom_json_operation("[\"pinPost\",{\"community\":\"hive-117600\",\"account\":\
 custom_json_operation("[\"unpinPost\",{\"community\":\"hive-117600\",\"account\":\"test-safari\",\"permlink\":\"secrets3\"}]")
 custom_json_operation("[\"pinPost\",{\"community\":\"hive-117600\",\"account\":\"test-safari\",\"permlink\":\"secrets4\"}]")
 custom_json_operation("[\"pinPost\",{\"community\":\"hive-117600\",\"account\":\"test-safari\",\"permlink\":\"secrets5\"}]")
-***block 5000004***
+***block 4998006***
 custom_json_operation("[\"unmutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"comment-to-please-comment-hive1\",\"notes\":\"Unmuted her first comment\"}]")
 custom_json_operation("[\"unmutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"comment-to-please-comment-hive2\",\"notes\":\"Unmuted her first comment\"}]")
 custom_json_operation("[\"unmutePost\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"permlink\":\"comment-to-please-comment-hive3\",\"notes\":\"Unmuted her first comment\"}]")
@@ -110,7 +110,7 @@ custom_json_operation("[\"unmutePost\",{\"community\":\"hive-157439\",\"account\
 custom_json_operation("[\"unmutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"My-first-post-hive-1\",\"notes\":\"Unmuted her first post\"}]")
 custom_json_operation("[\"flagPost\",{\"community\":\"hive-117600\",\"account\":\"test-safari\",\"permlink\":\"secrets5\",\"notes\":\"secrets5 are boring\"}]")
 custom_json_operation("[\"flagPost\",{\"community\":\"hive-117600\",\"account\":\"test-safari\",\"permlink\":\"secrets6\",\"notes\":\"secrets5 are stupid\"}]")
-***block 5000005***
+***block 4998007***
 custom_json_operation("[\"setRole\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"role\":\"muted\"}]")
 custom_json_operation("[\"setRole\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"role\":\"muted\"}]")
 custom_json_operation("[\"setRole\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"role\":\"muted\"}]")
@@ -129,7 +129,7 @@ custom_json_operation("roadscape" -> "[\"subscribe\",{\"community\":\"hive-17148
 custom_json_operation("roadscape" -> "[\"subscribe\",{\"community\":\"hive-135485\"}]")
 custom_json_operation("roadscape" -> "[\"subscribe\",{\"community\":\"hive-186669\"}]")
 custom_json_operation("roadscape" -> "[\"subscribe\",{\"community\":\"hive-104647\"}]")
-***block 5000006***
+***block 4998008***
 comment_operation( `hive-171487`, `alice`, `First-after-muted-post-hive1`)
 comment_operation( `hive-157439`, `alice`, `First-after-muted-post-hive2`)
 comment_operation( `hive-198723`, `alice`, `First-after-muted-post-hive3`)
@@ -158,7 +158,7 @@ custom_json_operation("good-karma" -> "[\"subscribe\",{\"community\":\"hive-1034
 custom_json_operation("good-karma" -> "[\"subscribe\",{\"community\":\"hive-188204\"}]")
 custom_json_operation("good-karma" -> "[\"subscribe\",{\"community\":\"hive-149232\"}]")
 custom_json_operation("good-karma" -> "[\"subscribe\",{\"community\":\"hive-104647\"}]")
-***block 5000007***
+***block 4998009***
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"after-muted-comment-to-please-comment-hive1\",\"notes\":\"I hate first comments!\"}]")
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"after-muted-comment-to-please-comment-hive2\",\"notes\":\"I hate first comments!\"}]")
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"permlink\":\"after-muted-comment-to-please-comment-hive3\",\"notes\":\"I hate first comments!\"}]")
@@ -177,7 +177,7 @@ comment_operation( `hive-117600`, `abit`, `anaconda01`)
 custom_json_operation("[\"pinPost\",{\"community\":\"hive-117600\",\"account\":\"abit\",\"permlink\":\"anaconda01\"}]")
 comment_operation( `hive-117600`, `abit`, `anaconda02`)
 custom_json_operation("[\"pinPost\",{\"community\":\"hive-117600\",\"account\":\"abit\",\"permlink\":\"anaconda02\"}]")
-***block 5000008***
+***block 4998010***
 custom_json_operation("[\"unmutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"First-after-muted-post-hive1\",\"notes\":\"Unmute first post\"}]")
 custom_json_operation("[\"unmutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"First-after-muted-post-hive2\",\"notes\":\"Unmute first post\"}]")
 custom_json_operation("[\"unmutePost\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"permlink\":\"First-after-muted-post-hive3\",\"notes\":\"Unmute first post\"}]")
@@ -191,7 +191,7 @@ custom_json_operation("[\"pinPost\",{\"community\":\"hive-117600\",\"account\":\
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-117600\",\"account\":\"good-karma\",\"permlink\":\"spider02\",\"notes\":\"I hate spiders 02\"}]")
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-117600\",\"account\":\"good-karma\",\"permlink\":\"spider01\",\"notes\":\"I hate spiders 01\"}]")
 custom_json_operation("[\"unmutePost\",{\"community\":\"hive-117600\",\"account\":\"good-karma\",\"permlink\":\"spider01\",\"notes\":\"I hate spiders 02, but they are funny\"}]")
-***block 5000009***
+***block 4998011***
 custom_json_operation("[\"setRole\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"role\":\"member\"}]")
 custom_json_operation("[\"setRole\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"role\":\"member\"}]")
 custom_json_operation("[\"setRole\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"role\":\"member\"}]")
@@ -206,7 +206,7 @@ custom_json_operation("[\"unmutePost\",{\"community\":\"hive-135485\",\"account\
 custom_json_operation("[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"blocktrades\",\"permlink\":\"crocodile02\"}]")
 custom_json_operation("[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"blocktrades\",\"permlink\":\"crocodile03\"}]")
 comment_operation( `hive-135485`, `blocktrades`, `elephant01`)
-***block 5000010***
+***block 4998012***
 comment_operation( `hive-171487`, `alice`, `First-after-member-post-hive1`)
 comment_operation( `hive-157439`, `alice`, `First-after-member-post-hive2`)
 comment_operation( `hive-198723`, `alice`, `First-after-member-post-hive3`)
@@ -231,7 +231,7 @@ custom_json_operation("[\"mutePost\",{\"community\":\"hive-117600\",\"account\":
 delete_comment_operation(`test-safari`, `secrets6`)
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-135485\",\"account\":\"blocktrades\",\"permlink\":\"elephant01\",\"notes\":\"I don't like elephants\"}]")
 custom_json_operation("[\"pinPost\",{\"community\":\"hive-135485\",\"account\":\"blocktrades\",\"permlink\":\"elephant01\"}]")
-***block 5000011***
+***block 4998013***
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive1\",\"notes\":\"I hate first comments!\"}]")
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive2\",\"notes\":\"I hate first comments!\"}]")
 custom_json_operation("[\"mutePost\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive3\",\"notes\":\"I hate first comments!\"}]")
@@ -247,7 +247,7 @@ custom_json_operation("[\"mutePost\",{\"community\":\"hive-198723\",\"account\":
 custom_json_operation("gtg" -> "[\"unsubscribe\",{\"community\":\"hive-103459\"}]")
 custom_json_operation("good-karma" -> "[\"unsubscribe\",{\"community\":\"hive-103459\"}]")
 delete_comment_operation(`blocktrades`, `elephant01`)
-***block 5000012***
+***block 4998014***
 custom_json_operation("[\"unmutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive1\",\"notes\":\"Unmute first comment\"}]")
 custom_json_operation("[\"unmutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive2\",\"notes\":\"Unmute first comment\"}]")
 custom_json_operation("[\"unmutePost\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"permlink\":\"after-member-comment-to-please-comment-hive3\",\"notes\":\"Unmute first comment\"}]")

@@ -60,5 +60,5 @@ echo Attempting to starting hive sync using hived node: $HIVEMIND_SOURCE_HIVED_U
 echo Attempting to access database $DB_URL
 ./$HIVE_NAME sync --pid-file hive_sync.pid --test-max-block=$HIVEMIND_MAX_BLOCK --test-profile=False --steemd-url "$HIVEMIND_SOURCE_HIVED_URL" --prometheus-port 11011 \
   --database-url $DB_URL  --mock-block-data-path mock_data/block_data/follow_op/mock_block_data_follow.json mock_data/block_data/community_op/mock_block_data_community.json mock_data/block_data/reblog_op/mock_block_data_reblog.json \
-  --community-start-block 4999998 2>&1 | tee -i hivemind-sync.log
+  --community-start-block 4998000 2>&1 | tee -i hivemind-sync.log
 rm hive_sync.pid

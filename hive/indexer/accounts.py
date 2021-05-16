@@ -114,11 +114,11 @@ class Accounts(DbAdapterHolder):
         """
 
         if name is None:
-            return
+            return False
 
         # filter out names which already registered
         if cls.exists(name):
-            return
+            return True
 
         ( _posting_json_metadata, _json_metadata ) = get_profile_str( op_details )
 
@@ -128,12 +128,17 @@ class Accounts(DbAdapterHolder):
                   RETURNING id
               """.format( name, block_date, cls.get_json_data( _posting_json_metadata ), cls.get_json_data( _json_metadata ) )
 
-        cls._ids[name] = DB.query_one( sql )
+        new_id = DB.query_one( sql )
+        if new_id is None:
+             return False
+        cls._ids[name] = new_id
 
         # post-insert: pass to communities to check for new registrations
         from hive.indexer.community import Community
         if block_num > Community.start_block:
             Community.register(name, block_date, block_num)
+
+        return True
 
     @classmethod
     def flush(cls):

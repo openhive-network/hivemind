@@ -30,9 +30,12 @@ LANGUAGE plpgsql
 AS
 $function$
 DECLARE
-    __context JSON;
+    __last_id INT := find_community_id( _last, True );
+    __rank hive_communities.rank%TYPE = 0;
 BEGIN
-
+    IF ( _last <> '' ) THEN
+        SELECT hc.rank INTO __rank FROM hive_communities hc WHERE hc.id = __last_id;
+    END IF;
     RETURN QUERY SELECT
         hc.id,
         hc.name,
@@ -52,8 +55,7 @@ BEGIN
     FROM hive_communities as hc
     LEFT JOIN hive_roles hr ON hr.community_id = hc.id AND hr.role_id = 6
     LEFT JOIN hive_accounts ha ON hr.account_id = ha.id
-    WHERE (_last = '' OR hc.rank > (SELECT rank FROM hive_communities WHERE name = _last))
-    AND hc.rank > 0
+    WHERE hc.rank > __rank
     AND (_search IS NULL OR to_tsvector('english', hc.title || ' ' || hc.about) @@ plainto_tsquery(_search))
     GROUP BY hc.id
     ORDER BY hc.rank ASC
@@ -76,7 +78,7 @@ LANGUAGE plpgsql
 AS
 $function$
 DECLARE
-    __context JSON;
+    __last_id INT := find_community_id( _last, True );
 BEGIN
     RETURN QUERY SELECT
         hc.id,
@@ -97,10 +99,10 @@ BEGIN
     FROM hive_communities as hc
     LEFT JOIN hive_roles hr ON hr.community_id = hc.id AND hr.role_id = 6
     LEFT JOIN hive_accounts ha ON hr.account_id = ha.id
-    WHERE (_last = '' OR hc.created_at < (SELECT created_at FROM hive_communities WHERE name = _last))
+    WHERE (__last_id = 0 OR hc.id < __last_id)
     AND (_search IS NULL OR to_tsvector('english', hc.title || ' ' || hc.about) @@ plainto_tsquery(_search))
     GROUP BY hc.id
-    ORDER BY hc.created_at DESC
+    ORDER BY hc.id DESC
     LIMIT _limit
     ;
 END
@@ -120,8 +122,12 @@ LANGUAGE plpgsql
 AS
 $function$
 DECLARE
-    __context JSON;
+    __last_id INT := find_community_id( _last, True );
+    __subscribers hive_communities.subscribers%TYPE;
 BEGIN
+    IF ( _last <> '' ) THEN
+        SELECT hc.subscribers INTO __subscribers FROM hive_communities hc WHERE hc.id = __last_id;
+    END IF;
     RETURN QUERY SELECT
         hc.id,
         hc.name,
@@ -141,10 +147,10 @@ BEGIN
     FROM hive_communities as hc
     LEFT JOIN hive_roles hr ON hr.community_id = hc.id AND hr.role_id = 6
     LEFT JOIN hive_accounts ha ON hr.account_id = ha.id
-    WHERE (_last = '' OR hc.subscribers < (SELECT subscribers FROM hive_communities WHERE name = _last))
+    WHERE (__last_id = 0 OR hc.subscribers < __subscribers OR (hc.subscribers = __subscribers AND hc.id < __last_id))
     AND (_search IS NULL OR to_tsvector('english', hc.title || ' ' || hc.about) @@ plainto_tsquery(_search))
     GROUP BY hc.id
-    ORDER BY hc.subscribers DESC
+    ORDER BY hc.subscribers DESC, hc.id DESC
     LIMIT _limit
     ;
 END

@@ -10,6 +10,7 @@ import ujson as json
 from hive.db.adapter import Db
 from hive.indexer.accounts import Accounts
 from hive.indexer.notify import Notify
+from hive.server.common.helpers import check_community
 
 log = logging.getLogger(__name__)
 
@@ -139,10 +140,7 @@ class Community:
 
     @classmethod
     def validated_name(cls, name):
-        """Perform basic validation on community name, then search for id."""
-        if (name[:5] == 'hive-'
-                and len(name) > 5 and name[5] in ['1', '2', '3']
-                and re.match(r'^hive-[123]\d{4,6}$', name)):
+        if (check_community(name)):
             return name
         return None
 
@@ -441,7 +439,7 @@ JOIN hive_permlink_data hpd ON hp.permlink_id=hpd.id
 WHERE author_id=:_author AND hpd.permlink=:_permlink
 """
         result = DB.query_row(sql, _author=self.account_id, _permlink=_permlink)
-        assert result, f"post does not exists, query:\t{sql}"
+        assert result, f'post does not exists {self.account}/{_permlink}'
         result = dict(result)
 
         _pid = result.get('id', None)

@@ -6,9 +6,9 @@ import traceback
 import logging
 import datetime
 from dateutil.relativedelta import relativedelta
-from psycopg2.errors import RaiseException
+from psycopg2.errors import DatabaseError
+from sqlalchemy.exc import DatabaseError as AlchemyDatabaseError
 from jsonrpcserver.exceptions import ApiError as RPCApiError
-from hive.indexer.community import Community
 
 log = logging.getLogger(__name__)
 
@@ -18,7 +18,16 @@ class ApiError(Exception):
     pass
 
 # values -32768..-32000 are reserved
-ACCESS_TO_DELETED_POST_ERROR_CODE = -31999
+ACCESS_TO_DELETED_POST_ERROR_CODE = -31999 # SQLSTATE = 'CEHM3'
+
+def valid_custom_sql_error(exc):
+    """Tests given DatabaseError, rethrows if it is not custom Hivemind error"""
+    e = exc
+    if isinstance(exc, AlchemyDatabaseError):
+        e = exc.orig
+    if not isinstance(e, DatabaseError) or not e.pgcode or len(e.pgcode) != 5 or e.pgcode[:2] != 'CE':
+        raise exc
+    return e
 
 def return_error_info(function):
     """Async API method decorator which catches and formats exceptions."""
@@ -27,9 +36,10 @@ def return_error_info(function):
         """Catch ApiError and AssertionError (always due to user error)."""
         try:
             return await function(*args, **kwargs)
-        except (RaiseException) as e:
+        except DatabaseError as e:
+            e = valid_custom_sql_error(e)
             msg = e.diag.message_primary
-            if 'was deleted' in msg:
+            if e.pgcode == 'CEHM3':
                 raise RPCApiError('Invalid parameters', ACCESS_TO_DELETED_POST_ERROR_CODE, msg)
             else:
                 raise AssertionError(msg)
@@ -83,10 +93,17 @@ def get_hive_accounts_info_view_query_string(names, lite = False):
     return sql
 
 def check_community(name) -> bool:
-    return Community.validated_name(name) is not None
+    """Perform basic validation on community name"""
+    if (name and isinstance(name, str) and len(name) > 5 and name[:5] == 'hive-'
+            and name[5] in ['1', '2', '3'] and re.match(r'^hive-[123]\d{4,6}$', name)):
+        return True
+    return False
 
-def valid_community(name):
+def valid_community(name, allow_empty=False):
     """Checks is given name of community matches community regex, if not asserts"""
+    if not name:
+        assert allow_empty, 'community name cannot be blank'
+        return ""
     assert check_community(name), "given community name is not valid"
     return name
 
