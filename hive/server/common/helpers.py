@@ -144,6 +144,9 @@ def valid_score(score, ubound, default):
 def valid_truncate(truncate_body):
     return valid_number(truncate_body, 0, "truncate_body")
 
+def valid_micro(micro):
+    return valid_number(micro, 0, "micro")
+
 def valid_offset(offset, ubound=None):
     """Given a user-provided offset, return a valid int, or raise."""
     offset = int(offset)

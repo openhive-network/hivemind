@@ -8,6 +8,7 @@ from hive.server.common.helpers import (
     valid_permlink,
     valid_tag,
     valid_limit,
+    valid_micro,
     json_date)
 
 from hive.utils.account import safe_db_profile_metadata
@@ -263,7 +264,7 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
 
 @return_error_info
 async def get_account_posts(context, sort:str, account:str, start_author:str='', start_permlink:str='',
-                            limit:int=20, observer:str=None):
+                            limit:int=20, observer:str=None, micro:bool=false):
     """Get posts for an account -- blog, feed, comments, or replies."""
     supported_sort_list = ['blog', 'feed', 'posts', 'comments', 'replies', 'payout']
     assert sort in supported_sort_list, "Unsupported sort, valid sorts: {}".format(", ".join(supported_sort_list))
@@ -275,13 +276,15 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
     start_permlink =  valid_permlink(start_permlink, allow_empty=True)
     observer =        valid_account(observer, allow_empty=True)
     limit =           valid_limit(limit, 100, 20)
+    micro =           valid_micro(micro)
+
 
     sql = None
     account_posts = True # set when only posts (or reblogs) of given account are supposed to be in results
     if sort == 'blog':
         sql = "SELECT * FROM bridge_get_account_posts_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, True )"
     elif sort == 'feed':
-        sql = "SELECT * FROM bridge_get_by_feed_with_reblog((:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER)"
+        sql = "SELECT * FROM bridge_get_by_feed_with_reblog((:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, (:micro)::BOOLEAN)"
     elif sort == 'posts':
         sql = "SELECT * FROM bridge_get_account_posts_by_posts( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'comments':
