@@ -68,17 +68,17 @@ class SteemClient:
 
             #logger.info("Found real block %d with timestamp: %s", num, ret['timestamp'])
 
-            MockBlockProvider.set_last_real_block_num_date(num, ret['timestamp'])
+            MockBlockProvider.set_last_real_block_num_date(num, ret['timestamp'], ret['block_id'])
             data = MockBlockProvider.get_block_data(num)
             if data is not None:
                 ret["transactions"].extend(data["transactions"])
-                ret["transaction_ids"].extend(data["transaction_ids"])
             return ret
         else:
             # if block does not exist in hived but exist in Mock Provider
             # return block from block provider
             mocked_block = MockBlockProvider.get_block_data(num, True)
             #logger.info("Found real block %d with timestamp: %s", num, mocked_block['timestamp'])
+            logger.warning("Pure mock block: id {}, previous {}".format(mocked_block["block_id"], mocked_block["previous"]))
             return mocked_block
 
     def get_blocks_provider( cls, lbound, ubound, breaker ):
@@ -201,13 +201,14 @@ class SteemClient:
                 num = int(block['block_id'][:8], base=16)
                 assert block_num == num, "Reference block number and block number from result does not match"
                 blocks[num] = block
-                MockBlockProvider.set_last_real_block_num_date(num, block['timestamp'])
+                MockBlockProvider.set_last_real_block_num_date(num, block['timestamp'], block['block_id'])
                 data = MockBlockProvider.get_block_data(num)
                 if data is not None:
                     blocks[num]["transactions"].extend(data["transactions"])
-                    blocks[num]["transaction_ids"].extend(data["transaction_ids"])
             else:
-                blocks[block_num] = MockBlockProvider.get_block_data(block_num, True)
+                block_mock = MockBlockProvider.get_block_data(block_num, True)
+                log.warning("Pure mock block: id {}, previous {}".format(block_mock["block_id"], block_mock["previous"]))
+                blocks[block_num] = block_mock
             idx += 1
 
         return [blocks[x] for x in block_nums]

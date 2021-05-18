@@ -230,7 +230,7 @@ class Sync:
     def load_mock_data(self,mock_block_data_path):
         if mock_block_data_path:
             MockBlockProvider.load_block_data(mock_block_data_path)
-            MockBlockProvider.print_data()
+            # MockBlockProvider.print_data()
 
     def refresh_sparse_stats(self):
         # normally it should be refreshed in various time windows
@@ -280,7 +280,7 @@ class Sync:
         mock_vops_data_path = self._conf.get("mock_vops_data_path")
         if mock_vops_data_path:
             MockVopsProvider.load_block_data(mock_vops_data_path)
-            MockVopsProvider.print_data()
+            # MockVopsProvider.print_data()
 
         # prefetch id->name and id->rank memory maps
         Accounts.load_ids()

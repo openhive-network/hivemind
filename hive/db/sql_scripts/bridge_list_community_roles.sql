@@ -40,7 +40,7 @@ BEGIN
         ),0);
 
         IF __last_role = 0 THEN
-            RAISE EXCEPTION 'invalid last';
+            RAISE EXCEPTION 'invalid last' USING ERRCODE = 'CEHM1';
         END IF;
 
         RETURN QUERY

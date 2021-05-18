@@ -1,11 +1,5 @@
 {
 	"4000001": {
-		"previous": "",
-		"timestamp": "",
-		"witness": "",
-		"transaction_merkle_root": "",
-		"extensions": [],
-		"witness_signature": "",
 		"transactions": [
 			{
 				"ref_block_num": 100000,
@@ -23,18 +17,9 @@
 					}
 				]
 			}
-		],
-		"block_id": "",
-		"signing_key": "",
-		"transaction_ids": []
+		]
 	},
 	"4010001": {
-		"previous": "",
-		"timestamp": "",
-		"witness": "",
-		"transaction_merkle_root": "",
-		"extensions": [],
-		"witness_signature": "",
 		"transactions": [
 			{
 				"ref_block_num": 100001,
@@ -71,18 +56,9 @@
 					}
 				]
 			}
-		],
-		"block_id": "",
-		"signing_key": "",
-		"transaction_ids": []
+		]
 	},
 	"4020001": {
-		"previous": "",
-		"timestamp": "",
-		"witness": "",
-		"transaction_merkle_root": "",
-		"extensions": [],
-		"witness_signature": "",
 		"transactions": [
 			{
 				"ref_block_num": 100003,
@@ -121,9 +97,6 @@
 					}
 				]
 			}
-		],
-		"block_id": "",
-		"signing_key": "",
-		"transaction_ids": []
+		]
 	}
 }
