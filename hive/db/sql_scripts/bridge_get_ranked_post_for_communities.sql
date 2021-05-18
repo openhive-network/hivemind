@@ -568,6 +568,9 @@ DECLARE
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __observer_id = find_account_id( _observer, True );
+  IF __post_id <> 0 AND is_pinned( __post_id ) THEN
+    __post_id = 0;
+  END IF;
   RETURN QUERY
   WITH created as -- bridge_get_ranked_post_by_created_for_community
   (
