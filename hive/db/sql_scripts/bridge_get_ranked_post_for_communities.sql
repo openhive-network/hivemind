@@ -9,7 +9,9 @@ DECLARE
 BEGIN
   __observer_id = find_account_id( _observer, True );
   __post_id = find_comment_id( _author, _permlink, True );
-
+  IF __post_id <> 0 AND NOT is_pinned( __post_id ) THEN
+    RETURN;
+  END IF;
   RETURN QUERY
   WITH pinned AS
   (

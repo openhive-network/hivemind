@@ -2491,6 +2491,18 @@
               "parent_author": "",
               "parent_permlink": "hive-135485",
               "author": "test-creator",
+              "permlink": "nonpinpost1",
+              "title": "Not pinned post 1",
+              "body": "hello from non-pinned post 1",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
               "permlink": "pinpost3",
               "title": "Pinpost 3",
               "body": "hello from pinned post 3",
@@ -2506,6 +2518,18 @@
               "permlink": "pinpost4",
               "title": "Pinpost 4",
               "body": "hello from pinned post 4",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "nonpinpost2",
+              "title": "Not pinned post 2",
+              "body": "hello from non-pinned post 2",
               "json_metadata": "{}"
             }
           },
@@ -2602,6 +2626,18 @@
               "permlink": "pinpost12",
               "title": "Pinpost 12",
               "body": "hello from pinned post 12",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "nonpinpost3",
+              "title": "Not pinned post 3",
+              "body": "hello from non-pinned post 3",
               "json_metadata": "{}"
             }
           },
@@ -3234,6 +3270,18 @@
             "value": {
               "parent_author": "",
               "parent_permlink": "hive-135485",
+              "author": "ignoreall",
+              "permlink": "regular-post",
+              "title": "Regular community post",
+              "body": "I want to write something to the community as well",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
               "author": "blocktrades",
               "permlink": "crocodile03",
               "title": "powerful crocodile 03",
@@ -3339,6 +3387,18 @@
               "permlink": "First-after-member-post-hive1",
               "title": "Hello",
               "body": "This is my first post in this community after being member!",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "agartha",
+              "permlink": "regular-post",
+              "title": "Why am I ignored by ignoreall",
+              "body": "Can someone tell ignoreall to stop muting me?",
               "json_metadata": "{}"
             }
           },
