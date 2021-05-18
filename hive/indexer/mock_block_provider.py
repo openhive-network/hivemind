@@ -58,7 +58,7 @@ class MockBlockProvider(MockDataProvider):
 
     @classmethod
     def get_block_data(cls, block_num, make_on_empty=False):
-        if len(cls.block_data) == 0:
+        if len(cls.block_data) == 0: # this means there are no mocks, so none should be returned (even with make_on_empty)
             return None
 
         data = cls.block_data.get(block_num, None)

@@ -77,8 +77,8 @@ class SteemClient:
             # if block does not exist in hived but exist in Mock Provider
             # return block from block provider
             mocked_block = MockBlockProvider.get_block_data(num, True)
-            #logger.info("Found real block %d with timestamp: %s", num, mocked_block['timestamp'])
-            logger.warning("Pure mock block: id {}, previous {}".format(mocked_block["block_id"], mocked_block["previous"]))
+            if mocked_block is not None: # during regular live sync blocks can be missing and there are no mocks either
+                logger.warning("Pure mock block: id {}, previous {}".format(mocked_block["block_id"], mocked_block["previous"]))
             return mocked_block
 
     def get_blocks_provider( cls, lbound, ubound, breaker ):
