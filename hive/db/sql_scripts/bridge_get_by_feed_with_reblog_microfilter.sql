@@ -92,7 +92,7 @@ BEGIN
   WHERE 
 	CASE
 		WHEN _micro THEN LENGTH(hp.body) <= 280
-		ELSE LENGTH(hp.body) > 0
+		ELSE LENGTH(hp.body) > 280
 	END
   ORDER BY feed.min_created DESC, feed.post_id DESC
   LIMIT _limit;
