@@ -264,7 +264,7 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
 
 @return_error_info
 async def get_account_posts(context, sort:str, account:str, start_author:str='', start_permlink:str='',
-                            limit:int=20, observer:str=None, micro:bool=false):
+                            limit:int=20, observer:str=None, micro:int=3):
     """Get posts for an account -- blog, feed, comments, or replies."""
     supported_sort_list = ['blog', 'feed', 'posts', 'comments', 'replies', 'payout']
     assert sort in supported_sort_list, "Unsupported sort, valid sorts: {}".format(", ".join(supported_sort_list))
@@ -283,6 +283,8 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
     account_posts = True # set when only posts (or reblogs) of given account are supposed to be in results
     if sort == 'blog':
         sql = "SELECT * FROM bridge_get_account_posts_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, True )"
+    elif sort == 'feed' and micro == 3:
+        sql = "SELECT * FROM bridge_get_by_feed_with_reblog((:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER)"
     elif sort == 'feed':
         sql = "SELECT * FROM bridge_get_by_feed_with_reblog((:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, (:micro)::BOOLEAN)"
     elif sort == 'posts':
