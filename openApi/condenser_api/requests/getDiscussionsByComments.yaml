@@ -21,10 +21,14 @@ properties:
         type: string
         description: "mandatory, points to valid account"
         example: "nkdk"
+        minLength: 3
+        maxLength: 16
+        pattern: '^[a-z0-9-\.]+$'
       start_permlink:
         type: string
         description: "optional, when given along with start_author has to point to valid post, paging mechanism"
         example: "withered--distort-engulf-official-premiere"
+        maxLength: 256
       limit:
         type: integer
         minimum: 1

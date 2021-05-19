@@ -26,6 +26,10 @@ properties:
         type: string
         description: account name, points to valid account
         example: "gtg"
+        minLength: 3
+        maxLength: 16
+        pattern: '^[a-z0-9-\.]+$'
+        default: null
   id:
     type: integer
     default: 1

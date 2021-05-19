@@ -23,6 +23,7 @@ properties:
         example: [["steemit", "firstpost"]]
         items:
           type: string
+        maxItems: 1000
   id:
     type: integer
     default: 1

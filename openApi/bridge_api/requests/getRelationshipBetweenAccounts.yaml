@@ -22,14 +22,24 @@ properties:
         type: string
         description: account name, points to valid account
         example: "jsc"
+        minLength: 3
+        maxLength: 16
+        pattern: '^[a-z0-9-\.]+$'
       account2:
         type: string
         description: account name, points to valid account
         example: "max-keiser"
+        minLength: 3
+        maxLength: 16
+        pattern: '^[a-z0-9-\.]+$'
       observer:
         type: string
         description: optional, ignored (most likely not yet implemented extra for supplementing blacklist information)
         example: "blocktrades"
+        minLength: 3
+        maxLength: 16
+        pattern: '^[a-z0-9-\.]+$'
+        default: null
   id:
     type: integer
     default: 1

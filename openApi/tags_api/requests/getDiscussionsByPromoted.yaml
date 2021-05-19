@@ -19,10 +19,14 @@ properties:
         type: string
         description: "optional, when given have to point to valid start post; paging mechanism (cuts out this and more promoted posts)"
         example: "dantheman"
+        minLength: 3
+        maxLength: 16
+        pattern: '^[a-z0-9-\.]+$'
       start_permlink:
         type: string
         description: "optional, when given have to point to valid start post; paging mechanism (cuts out this and more promoted posts)"
         example: "censorship-is-impossible-in-a-free-society"
+        maxLength: 256
       limit:
         type: integer
         minimum: 1
@@ -41,6 +45,9 @@ properties:
         type: string
         description: "optional (can be skipped or passed empty), when passed has to point to valid account. Used to filter out posts authored by accounts ignored directly or indirectly by the observer"
         example: "alice"
+        minLength: 3
+        maxLength: 16
+        pattern: '^[a-z0-9-\.]+$'
   id:
     type: integer
     default: 1

@@ -25,6 +25,10 @@ properties:
         type: string
         description: optional (can be skipped or given empty), when given points to valid account; used to add information about relationship of observer with given profile account
         example: "ignoreall"
+        minLength: 3
+        maxLength: 16
+        pattern: '^[a-z0-9-\.]+$'
+        default: null
   id:
     type: integer
     default: 1

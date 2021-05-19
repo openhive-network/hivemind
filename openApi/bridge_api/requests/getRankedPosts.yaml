@@ -41,10 +41,16 @@ properties:
         type: string
         description: "optional, when given have to point to valid start post; paging mechanism (cuts out this and more trending)"
         example: "terrycraft"
+        minLength: 3
+        maxLength: 16
+        pattern: '^[a-z0-9-\.]+$'
+        default: ""
       start_permlink:
         type: string
         description: "optional, when given have to point to valid start post; paging mechanism (cuts out this and more trending)"
         example: "my-first-trip-to-underwater-world-moe-pervoe-puteshestvie-v-podvodnyi-mir-featuring-papakarlo-as-author"
+        maxLength: 256
+        default: ""
       limit:
         type: integer
         minimum: 1
@@ -60,10 +66,15 @@ properties:
             "hive-{number}" - has to point to valid community; turns on filtering for posts within given community
             "{tag}" - has to point to valid tag; turns on filtering for posts with given tag (given category in case of 'payout' and 'payout_comments')
         example: "life"
+        default: ""
       observer:
         type: string
         description: "mandatory for 'my' tag, points to valid account; when given supplements blacklists stats in posts and filters out posts of muted authors (with exception of 'muted' sort)"
         example: "blocktrades"
+        minLength: 3
+        maxLength: 16
+        pattern: '^[a-z0-9-\.]+$'
+        default: ""
   id:
     type: integer
     default: 1

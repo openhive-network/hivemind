@@ -23,7 +23,7 @@ paths:
       description: Gets community
       operationId: bridge.get_community
       requestBody:
-        description: community name and optional observer
+        description: Community name and optional observer
         content:
           'application/json':
             schema:
@@ -76,7 +76,7 @@ paths:
       tags:
         - Community
         - Bridge
-      description: Gets community context
+      description: Gets community context.
       operationId: bridge.get_community_context
       requestBody:
         description: community name and account for context
@@ -87,7 +87,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Community context result
+          description: Community context.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -109,7 +109,7 @@ paths:
         required: true
       responses:
         '200':
-          description: all subscriptions list
+          description: All subscriptions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -120,7 +120,7 @@ paths:
       tags:
         - Community
         - Bridge
-      description: Gets community
+      description: Lists communities.
       operationId: bridge.list_communities
       requestBody:
         description: 'optional parameters: last, limit, query, sort, observer'
@@ -131,7 +131,7 @@ paths:
         required: true
       responses:
         '200':
-          description: list of Communities
+          description: list of communities.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -142,7 +142,7 @@ paths:
       tags:
         - Community
         - Bridge
-      description: Gets community
+      description: Lists community roles.
       operationId: bridge.list_community_roles
       requestBody:
         description: community name and optional observer
@@ -153,7 +153,7 @@ paths:
         required: true
       responses:
         '200':
-          description: list of Community roles
+          description: list of community roles.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -164,7 +164,7 @@ paths:
       tags:
         - Community
         - Bridge
-      description: Gets community
+      description: Lists pop communities.
       operationId: bridge.list_pop_communities
       requestBody:
         description: 'optional parameter: limit'
@@ -175,7 +175,7 @@ paths:
         required: true
       responses:
         '200':
-          description: list of Communities
+          description: list of pop communities
           content:
             'application/json; charset=utf-8':
               schema:
@@ -186,7 +186,7 @@ paths:
       tags:
         - Community
         - Bridge
-      description: list subscribers
+      description: Lists subscribers
       operationId: bridge.list_subscribers
       requestBody:
         description: 'required community, optional: last, limit'
@@ -197,7 +197,7 @@ paths:
         required: true
       responses:
         '200':
-          description: List of Communities.
+          description: List of Subscribers.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -237,7 +237,7 @@ paths:
         required: true
       responses:
         '200':
-          description: List of notifications.
+          description: Boolean value that describes if user follow any list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -257,7 +257,7 @@ paths:
         required: true
       responses:
         '200':
-          description: List of notifications.
+          description: Account posts related to given account list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -277,7 +277,7 @@ paths:
         required: true
       responses:
         '200':
-          description: List of notifications.
+          description: Account posts related to given account list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -297,7 +297,7 @@ paths:
         required: true
       responses:
         '200':
-          description: List of notifications.
+          description: Account posts related to given account list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -317,7 +317,7 @@ paths:
         required: true
       responses:
         '200':
-          description: List of notifications.
+          description: Account posts related to given account list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -337,7 +337,7 @@ paths:
         required: true
       responses:
         '200':
-          description: List of notifications.
+          description: Account posts related to given account list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -357,7 +357,7 @@ paths:
         required: true
       responses:
         '200':
-          description: List of notifications.
+          description: Account posts related to given account list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -377,7 +377,7 @@ paths:
         required: true
       responses:
         '200':
-          description: List of notifications.
+          description: Follow list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -397,7 +397,7 @@ paths:
         required: true
       responses:
         '200':
-          description: List of notifications.
+          description: Payout stats.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -417,7 +417,7 @@ paths:
         required: true
       responses:
         '200':
-          description: List of notifications.
+          description: Post.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -437,7 +437,7 @@ paths:
         required: true
       responses:
         '200':
-          description: List of notifications.
+          description: Very basic information on given post.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -457,7 +457,7 @@ paths:
         required: true
       responses:
         '200':
-          description: List of notifications.
+          description: Basic information about given account.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -477,7 +477,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Ranked post list
           content:
             'application/json; charset=utf-8':
               schema:
@@ -497,7 +497,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Relationship between accounts.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -517,7 +517,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Trending topics list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -537,7 +537,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Normalized post.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -557,7 +557,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Post notifications list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -577,7 +577,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Unread notifications number and last read date.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -597,7 +597,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Discussion list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -819,7 +819,7 @@ paths:
         required: true
       responses:
         '200':
-          description: list of Communities
+          description: list of comments found.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -849,7 +849,7 @@ paths:
         required: true
       responses:
         '200':
-          description: list of Communities
+          description: list of comments.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -879,7 +879,7 @@ paths:
         required: true
       responses:
         '200':
-          description: list of Communities
+          description: list of comments.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -909,7 +909,7 @@ paths:
         required: true
       responses:
         '200':
-          description: list of Communities
+          description: list of comments.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -939,7 +939,7 @@ paths:
         required: true
       responses:
         '200':
-          description: list of Communities
+          description: list of comments.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -969,7 +969,7 @@ paths:
         required: true
       responses:
         '200':
-          description: list of Communities
+          description: list of comments
           content:
             'application/json; charset=utf-8':
               schema:
@@ -999,7 +999,7 @@ paths:
         required: true
       responses:
         '200':
-          description: list of Communities
+          description: list of comments
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1020,7 +1020,7 @@ paths:
         required: true
       responses:
         '200':
-          description: list of Communities
+          description: list of votes.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1053,7 +1053,7 @@ paths:
         required: true
       responses:
         '200':
-          description: list of Votes
+          description: list of votes.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1156,7 +1156,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: List of posts from blog for given account
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1176,7 +1176,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Blog entries list
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1197,7 +1197,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Comment discussions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1217,7 +1217,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Comment discussions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1237,16 +1237,17 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Content replies list.
           content:
             'application/json; charset=utf-8':
               schema:
                 $ref: './condenser_api/schemas/contentReplies.yaml'
+
   /#condenser_api.get_discussions_by_author_before_date:
     post:
       tags:
         - Condenser
-      description: 'Lists replies for given post.'
+      description: 'Lists posts with votes based on author from the most recent. Similar to get_discussions_by_blog but does NOT serve reblogs.'
       operationId: condenser_api.get_discussions_by_author_before_date
       requestBody:
         content:
@@ -1256,7 +1257,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Lists posts with votes based on author from the most recent.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1266,7 +1267,7 @@ paths:
     post:
       tags:
         - Condenser
-      description: 'Lists replies for given post.'
+      description: 'Lists posts from blog of given account newest first: top posts authored by given account and/or reblogged by it.'
       operationId: condenser_api.get_discussions_by_blog
       requestBody:
         content:
@@ -1276,7 +1277,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Discussions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1286,7 +1287,7 @@ paths:
     post:
       tags:
         - Condenser
-      description: 'Lists replies for given post.'
+      description: "Lists replies to someone else's posts authored by given account, newer first. Aside from different post format routine is pretty much the same as bridge.get_account_posts with comment sort."
       operationId: condenser_api.get_discussions_by_comments
       requestBody:
         content:
@@ -1296,7 +1297,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Discussions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1316,7 +1317,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Discussions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1336,7 +1337,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Discussions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1356,7 +1357,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Discussions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1376,7 +1377,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Discussions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1396,7 +1397,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Discussions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1416,7 +1417,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: following and follorers count for given account.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1436,7 +1437,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Followers list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1456,7 +1457,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Followers list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1476,7 +1477,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Following list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1496,7 +1497,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Following list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1516,7 +1517,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Discussions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1536,7 +1537,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Rebloggers list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1556,7 +1557,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Replies list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1576,7 +1577,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Trending tags list
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1596,7 +1597,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Comment discussions list
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1616,7 +1617,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Content replies list
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1636,7 +1637,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Discussion (condenser_api style).
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1656,7 +1657,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Discussions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1676,7 +1677,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Discussions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1696,7 +1697,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Discussions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1716,7 +1717,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Discussions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1736,7 +1737,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Discussions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1756,7 +1757,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Discussions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1776,7 +1777,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Discussions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1796,7 +1797,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Discussions list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1806,7 +1807,7 @@ paths:
     post:
       tags:
         - Follow
-      description: 'Alias for condenser_api.get_followers.'
+      description: 'Alias for condenser_api.get_followers. Gives accounts which follow given account.'
       operationId: follow_api.get_followers[blog]
       requestBody:
         content:
@@ -1816,7 +1817,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Followers list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1826,7 +1827,7 @@ paths:
     post:
       tags:
         - Follow
-      description: 'Alias for condenser_api.get_followers.'
+      description: 'Alias for condenser_api.get_followers. Gives accounts which ignore given account.'
       operationId: follow_api.get_followers[ignore]
       requestBody:
         content:
@@ -1836,7 +1837,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Followers list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1846,7 +1847,7 @@ paths:
     post:
       tags:
         - Follow
-      description: 'Alias for condenser_api.get_following.'
+      description: 'Alias for condenser_api.get_following. Gives accounts which given account follows.'
       operationId: follow_api.get_following[blog]
       requestBody:
         content:
@@ -1856,7 +1857,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Following list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1866,7 +1867,7 @@ paths:
     post:
       tags:
         - Follow
-      description: 'Alias for condenser_api.get_following.'
+      description: 'Alias for condenser_api.get_following. Gives accounts which given account ignores.'
       operationId: follow_api.get_following[ignore]
       requestBody:
         content:
@@ -1876,7 +1877,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Following list.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1896,7 +1897,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Rebloggers list
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1916,7 +1917,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Follow count.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1936,7 +1937,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: List of posts from blog for given account.
           content:
             'application/json; charset=utf-8':
               schema:
@@ -1956,7 +1957,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Active votes list
+          description: Blog entries list.
           content:
             'application/json; charset=utf-8':
               schema:

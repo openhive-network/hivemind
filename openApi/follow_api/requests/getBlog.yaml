@@ -22,6 +22,9 @@ properties:
         type: string
         description: "mandatory, points to valid account"
         example: "noodhoog"
+        minLength: 3
+        maxLength: 16
+        pattern: '^[a-z0-9-\.]+$'
       start_entry_id:
         type: integer
         description: "optional, -1..any, default = 0, both -1 and 0 mean = {number of blog entries} - 1; part of paging mechanism"

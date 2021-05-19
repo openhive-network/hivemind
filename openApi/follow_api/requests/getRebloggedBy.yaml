@@ -22,10 +22,14 @@ properties:
         type: string
         description: "mandatory, have to point to valid post"
         example: "churdtzu"
+        minLength: 3
+        maxLength: 16
+        pattern: '^[a-z0-9-\.]+$'
       permlink:
         type: string
         description: "mandatory, have to point to valid post"
         example: "impossible-a-conversation-with-a-statist-about-starting-a-business"
+        maxLength: 256
   id:
     type: integer
     default: 1

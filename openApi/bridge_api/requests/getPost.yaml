@@ -22,14 +22,22 @@ properties:
         type: string
         description: "Mandatory, points to valid post author"
         example: "gtg"
+        minLength: 3
+        maxLength: 16
+        pattern: '^[a-z0-9-\.]+$'
       permlink:
         type: string
         description: "Mandatory, points to valid post premlink"
         example: "heavy-duty-witness-node-infrastructure"
+        maxLength: 256
       observer:
         type: string
         description: optional (can be skipped or given empty), used to add blacklist information to given post (currently ignored)
         example: "ignoreall"
+        minLength: 3
+        maxLength: 16
+        pattern: '^[a-z0-9-\.]+$'
+        default: null
   id:
     type: integer
     default: 1

@@ -14,6 +14,7 @@ properties:
       - hive.get_info
   params:
     type: object
+    description: "Empty object, as there is no parameters."
     example: {}
   id:
     type: integer

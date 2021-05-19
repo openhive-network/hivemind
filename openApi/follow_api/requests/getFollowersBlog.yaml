@@ -25,8 +25,9 @@ properties:
         description: "optional, when provided has to point to valid account, paging mechanism (cuts out this and newer follows)"
         type: string
         example: "good-karma"
+        default: ""
       follow_type:
-        description: "optional, 'blog'/'ignore', default = 'blog'"
+        description: "optional, 'blog'/'ignore', default = 'blog', in this request the blog option is described"
         type: string
         example: "blog"
       limit:

@@ -25,10 +25,14 @@ properties:
         type: string
         description: "optional, when given have to point to valid start post; paging mechanism (cuts out this and newer posts/reblogs)"
         example: "nkdk"
+        minLength: 3
+        maxLength: 16
+        pattern: '^[a-z0-9-\.]+$'
       start_permlink:
         type: string
         description: "optional, when given have to point to valid start post; paging mechanism (cuts out this and newer posts/reblogs)"
         example: "withered--distort-engulf-official-premiere"
+        maxLength: 256
       limit:
         type: integer
         minimum: 1

@@ -22,14 +22,21 @@ properties:
         type: string
         description: "Mandatory, points to valid post"
         example: "demotruk"
+        minLength: 3
+        maxLength: 16
+        pattern: '^[a-z0-9-\.]+$'
       permlink:
         type: string
         description: "Mandatory, points to valid post"
         example: "re-fyrstikken-re-vi1son-re-heiditravels-my-first-bad-experience-with-steemit-20160905t203611118z"
+        maxLength: 256
       observer:
         type: string
         description: "optional, used for muted votes and blacklists (that functionality was removed and now observer is completely ignored - it will most likely stay that way)"
         example: "ignoreall"
+        minLength: 3
+        maxLength: 16
+        pattern: '^[a-z0-9-\.]+$'
   id:
     type: integer
     default: 1

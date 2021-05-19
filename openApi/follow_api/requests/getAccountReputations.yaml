@@ -20,6 +20,7 @@ properties:
       account_lower_bound:
         type: string
         example: "a"
+        default: ""
       limit:
         type: integer
         minimum: 1

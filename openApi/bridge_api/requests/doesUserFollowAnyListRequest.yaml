@@ -21,6 +21,9 @@ properties:
         type: string
         description: 'mandatory, points to valid account that is checked if followed any list'
         example: 'alice'
+        minLength: 3
+        maxLength: 16
+        pattern: '^[a-z0-9-\.]+$'
   id:
     type: integer
     default: 1

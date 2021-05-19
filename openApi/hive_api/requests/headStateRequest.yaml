@@ -14,6 +14,7 @@ properties:
       - hive.db_head_state
   params:
     type: object
+    description: "Empty object, as there is no parameters."
     example: {}
   id:
     type: integer
