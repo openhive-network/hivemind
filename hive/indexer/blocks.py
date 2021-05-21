@@ -270,6 +270,7 @@ class Blocks:
                 elif op_type == OperationType.AccountCreate:
                     account_name = op['new_account_name']
                     op_details = op
+                    potentially_new_account = True
                 elif op_type == OperationType.AccountCreateWithDelegation:
                     account_name = op['new_account_name']
                     op_details = op

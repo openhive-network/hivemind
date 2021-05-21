@@ -280,7 +280,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
 
                     mocked_block = self._get_mocked_block( new_block.get_num(), False )
                     # live sync with mocks needs this, otherwise stream will wait almost forever for a block
-                    MockBlockProvider.set_last_real_block_num_date( new_block.get_num(), new_block.get_date() )
+                    MockBlockProvider.set_last_real_block_num_date( new_block.get_num(), new_block.get_date(), new_block.get_hash() )
                     if mocked_block:
                         new_block = ExtendedByMockBlockAdapter( new_block, mocked_block )
 

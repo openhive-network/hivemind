@@ -88,22 +88,22 @@ class BlocksProvider:
                         return;
                     while cls._breaker():
                         try:
-                            blocks = cls._responses_queues[ blocks_queue ].get( True, 1)
+                            blocks = cls._responses_queues[ blocks_queue ].get( True, 1 )
                             cls._responses_queues[ blocks_queue ].task_done()
                             #split blocks range
 
                             for block in blocks:
                                 if 'block' in block:
-                                    MockBlockProvider.set_last_real_block_num_date(currently_received_block+1, block['block']['timestamp']);
+                                    MockBlockProvider.set_last_real_block_num_date(currently_received_block+1, block['block']['timestamp'], block['block']['block_id']);
 
                                 block_mock = MockBlockProvider.get_block_data(currently_received_block+1, True)
 
                                 if block_mock is not None:
                                     if 'block' in block:
                                         block["block"]["transactions"].extend( block_mock["transactions"] )
-                                        log.warning("Pure mock block: id {}, previous {}".format(block_mock["block_id"], block_mock["previous"]))
                                     else:
                                         block["block"] = block_mock
+                                        log.warning("Pure mock block: id {}, previous {}".format(block_mock["block_id"], block_mock["previous"]))
                                 block_for_queue = None if not 'block' in block else block['block']
 
                                 while cls._breaker():
