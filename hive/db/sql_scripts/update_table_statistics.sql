@@ -1,0 +1,2 @@
+ ALTER TABLE hive_posts ALTER COLUMN tags_ids SET STATISTICS 1000;
+
