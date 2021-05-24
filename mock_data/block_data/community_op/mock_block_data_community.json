@@ -2474,6 +2474,15 @@
             }
           },
           {
+            "type": "vote_operation",
+            "value": {
+              "voter": "alice",
+              "author": "test-creator",
+              "permlink": "pinpost1",
+              "weight": 300
+            }
+          },
+          {
             "type": "comment_operation",
             "value": {
               "parent_author": "",
@@ -2495,6 +2504,15 @@
               "title": "Not pinned post 1",
               "body": "hello from non-pinned post 1",
               "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "vote_operation",
+            "value": {
+              "voter": "alice",
+              "author": "test-creator",
+              "permlink": "nonpinpost1",
+              "weight": 400
             }
           },
           {
@@ -2543,6 +2561,15 @@
               "title": "Pinpost 5",
               "body": "hello from pinned post 5",
               "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "vote_operation",
+            "value": {
+              "voter": "alice",
+              "author": "test-creator",
+              "permlink": "pinpost5",
+              "weight": 100
             }
           },
           {
@@ -2618,6 +2645,15 @@
             }
           },
           {
+            "type": "vote_operation",
+            "value": {
+              "voter": "alice",
+              "author": "test-creator",
+              "permlink": "pinpost11",
+              "weight": 500
+            }
+          },
+          {
             "type": "comment_operation",
             "value": {
               "parent_author": "",
@@ -2639,6 +2675,15 @@
               "title": "Not pinned post 3",
               "body": "hello from non-pinned post 3",
               "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "vote_operation",
+            "value": {
+              "voter": "alice",
+              "author": "test-creator",
+              "permlink": "nonpinpost3",
+              "weight": 200
             }
           },
           {
@@ -3254,6 +3299,15 @@
             }
           },
           {
+            "type": "vote_operation",
+            "value": {
+              "voter": "alice",
+              "author": "blocktrades",
+              "permlink": "crocodile01",
+              "weight": 400
+            }
+          },
+          {
             "type": "comment_operation",
             "value": {
               "parent_author": "",
@@ -3275,6 +3329,15 @@
               "title": "Regular community post",
               "body": "I want to write something to the community as well",
               "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "vote_operation",
+            "value": {
+              "voter": "alice",
+              "author": "ignoreall",
+              "permlink": "regular-post",
+              "weight": 100
             }
           },
           {
@@ -3400,6 +3463,15 @@
               "title": "Why am I ignored by ignoreall",
               "body": "Can someone tell ignoreall to stop muting me?",
               "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "vote_operation",
+            "value": {
+              "voter": "ignoreall",
+              "author": "agartha",
+              "permlink": "regular-post",
+              "weight": 200
             }
           },
           {
