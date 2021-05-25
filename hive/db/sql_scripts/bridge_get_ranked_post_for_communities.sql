@@ -9,7 +9,9 @@ DECLARE
 BEGIN
   __observer_id = find_account_id( _observer, True );
   __post_id = find_comment_id( _author, _permlink, True );
-
+  IF __post_id <> 0 AND NOT is_pinned( __post_id ) THEN
+    RETURN;
+  END IF;
   RETURN QUERY
   WITH pinned AS
   (
@@ -84,8 +86,10 @@ DECLARE
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __observer_id = find_account_id( _observer, True );
-  IF __post_id <> 0 THEN
+  IF __post_id <> 0 AND NOT is_pinned( __post_id ) THEN
       SELECT hp.sc_trend INTO __trending_limit FROM hive_posts hp WHERE hp.id = __post_id;
+  ELSE
+      __post_id = 0;
   END IF;
   RETURN QUERY
   WITH trends as
@@ -566,6 +570,9 @@ DECLARE
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __observer_id = find_account_id( _observer, True );
+  IF __post_id <> 0 AND is_pinned( __post_id ) THEN
+    __post_id = 0;
+  END IF;
   RETURN QUERY
   WITH created as -- bridge_get_ranked_post_by_created_for_community
   (
