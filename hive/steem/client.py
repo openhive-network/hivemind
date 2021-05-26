@@ -256,13 +256,13 @@ class SteemClient:
                 logger.info( call )
 
 
-            one_block_ops = {opb["block"] : {"timestamp":opb["timestamp"], "ops":[op["op"] for op in opb["ops"]]} for opb in call_result["ops_by_block"]}
+            one_block_ops = {opb["block"] : {"ops":[op["op"] for op in opb["ops"]]} for opb in call_result["ops_by_block"]}
 
             if one_block_ops:
                 first_block = list(one_block_ops.keys())[0]
                 # if we continue collecting ops from previous iteration
                 if first_block in ret:
-                    ret.update( { first_block : { "timestamp":ret[ first_block ]["timestamp"], "ops":ret[ first_block ]["ops"] + one_block_ops[ first_block ]["ops"]} } )
+                    ret.update( { first_block : { "ops":ret[ first_block ]["ops"] + one_block_ops[ first_block ]["ops"]} } )
                     one_block_ops.pop( first_block, None )
             ret.update( one_block_ops )
 

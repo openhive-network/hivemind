@@ -71,7 +71,8 @@ for sql in postgres_handle_view_changes.sql \
           bridge_list_subscribers.sql \
           update_follow_count.sql \
           delete_reblog_feed_cache.sql \
-          follows.sql
+          follows.sql \
+          update_table_statistics.sql # Must be last
 
 do
     echo Executing psql -U $1 -d $2 -f $sql
