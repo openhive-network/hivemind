@@ -16,6 +16,8 @@ Hivemind is a "consensus interpretation" layer for the Hive blockchain, maintain
 
 ### Installation:
 
+Before creating the hive database, Hivemind requires the postgresql 'intarray' extension. The postgresql user who has CREATE privilege can load the module with the command `CREATE EXTENSION IF NOT EXISTS intarray;`.
+
 ```bash
 $ createdb hive
 $ export DATABASE_URL=postgresql://user:pass@localhost:5432/hive
@@ -142,7 +144,6 @@ checkpoint_timeout = 30min
 max_wal_size = 4GB
 ```
 
-It is required to load 'intarray' extension. The postgresql user who has CREATE privilege can load the module with command `CREATE EXTENSION intarray`.
 
 ## JSON-RPC API
 
