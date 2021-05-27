@@ -6,7 +6,7 @@ Hivemind is a "consensus interpretation" layer for the Hive blockchain, maintain
 
 ## Development Environment
 
- - Python 3.6 required
+ - Python 3.6+ required
  - Postgres 10+ recommended
 
 ### Dependencies:
@@ -14,7 +14,7 @@ Hivemind is a "consensus interpretation" layer for the Hive blockchain, maintain
  - OSX: `$ brew install python3 postgresql`
  - Ubuntu: `$ sudo apt-get install python3 python3-pip`
 
-### Installation (DO NOT USE pip! It will install incorrect versions of some packages):
+### Installation:
 
 ```bash
 $ createdb hive
@@ -25,9 +25,9 @@ $ export DATABASE_URL=postgresql://user:pass@localhost:5432/hive
 $ git clone https://gitlab.syncad.com/hive/hivemind.git
 $ cd hivemind
 $ git submodule update --init --recursive
-$ python3 setup.py build
-$ python3 setup.py install --user
+$ python3.x -m pip install --no-cache-dir --verbose --user -e .[dev] 2>&1 | tee pip_install.log
 ```
+(where python3.x is the version of python installed such as python3.8)
 
 ### Start the indexer:
 
@@ -117,21 +117,15 @@ Precedence: CLI over ENV over hive.conf. Check `hive --help` for details.
 
  - Focus on Postgres performance
  - 2.5GB of memory for `hive sync` process
- - 250GB storage for database
+ - 500GB storage for database
 
 
 ### Hive config
 
-Build flags
-
- - `LOW_MEMORY_NODE=OFF` - need post content
- - `CLEAR_VOTES=OFF` - need all vote data
- - `SKIP_BY_TX=ON` - tx lookup not used
-
 Plugins
 
- - Required: `reputation reputation_api database_api condenser_api block_api`
- - Not required: `follow*`, `tags*`, `market_history`, `account_history`, `witness`
+ - Required: `database_api condenser_api block_api account_history_api account_history_rocksdb`
+ - Not required: `follow*`, `tags*`, `market_history`, `account_history` (obsolete, do not use), `witness`
 
 
 ### Postgres Performance
