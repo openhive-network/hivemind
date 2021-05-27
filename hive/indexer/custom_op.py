@@ -80,10 +80,9 @@ class CustomOp:
                     log.info("setLastRead op: `%s' uses implicit head block time: `%s'", op_json, block_date)
                 else:
                     date = valid_date(explicit_date)
-
-                if date > block_date:
-                    log.warning("setLastRead::date: `%s' exceeds head block time. Correcting to head block time: `%s'", date, block_date)
-                    date = block_date
+                    if date > block_date:
+                        log.warning("setLastRead::date: `%s' exceeds head block time. Correcting to head block time: `%s'", date, block_date)
+                        date = block_date
 
                 Notify.set_lastread(account, date)
         except AssertionError as e:
