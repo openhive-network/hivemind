@@ -1,13 +1,18 @@
 DROP FUNCTION IF EXISTS bridge_get_ranked_post_pinned_for_community;
-CREATE FUNCTION bridge_get_ranked_post_pinned_for_community( in _community VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
+CREATE FUNCTION bridge_get_ranked_post_pinned_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR)
 RETURNS SETOF bridge_api_post
 AS
 $function$
 DECLARE
   __observer_id INT;
+  __post_id INT;
 BEGIN
   __observer_id = find_account_id( _observer, True );
-  RETURN QUERY 
+  __post_id = find_comment_id( _author, _permlink, True );
+  IF __post_id <> 0 AND NOT is_pinned( __post_id ) THEN
+    RETURN;
+  END IF;
+  RETURN QUERY
   WITH pinned AS
   (
     SELECT 
@@ -17,6 +22,7 @@ BEGIN
     JOIN hive_communities hc ON hc.id = hp.community_id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp.author_id)
     WHERE hc.name = _community AND hp.is_pinned
+      AND (__post_id = 0 OR hp.id < __post_id)
       AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp.author_id))
     ORDER BY hp.id DESC
     LIMIT _limit
@@ -80,8 +86,10 @@ DECLARE
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __observer_id = find_account_id( _observer, True );
-  IF __post_id <> 0 THEN
+  IF __post_id <> 0 AND NOT is_pinned( __post_id ) THEN
       SELECT hp.sc_trend INTO __trending_limit FROM hive_posts hp WHERE hp.id = __post_id;
+  ELSE
+      __post_id = 0;
   END IF;
   RETURN QUERY
   WITH trends as
@@ -562,6 +570,9 @@ DECLARE
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __observer_id = find_account_id( _observer, True );
+  IF __post_id <> 0 AND is_pinned( __post_id ) THEN
+    __post_id = 0;
+  END IF;
   RETURN QUERY
   WITH created as -- bridge_get_ranked_post_by_created_for_community
   (

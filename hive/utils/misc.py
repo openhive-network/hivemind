@@ -1,3 +1,23 @@
+import os, psutil
+from hive.utils.stats import PrometheusClient, BroadcastObject
+
+def log_memory_usage(memtypes=["rss", "vms", "shared"], broadcast = True) -> str:
+  """
+  Logs current memory types, additionally broadcast if broadcast set to True (default)
+  
+  Available memtypes: rss, vms, shared, text, lib, data, dirty
+  """
+
+  def format_bytes(val : int):
+    assert isinstance(val, int) or isinstance(val, float), 'invalid data type, required int or float'
+    return f'{ val / 1024.0 / 1024.0 :.2f} MB'
+
+  human_readable = { "rss": "physical_memory", "vms": "virtual_memory", "shared": "shared_memory", "text": "used_by_executable", "lib": "used_by_shared_libraries" }
+  stats = psutil.Process(os.getpid()).memory_info() # docs: https://psutil.readthedocs.io/en/latest/#psutil.Process.memory_info
+  if broadcast:
+    PrometheusClient.broadcast([ BroadcastObject(f'hivemind_memory_{key}', getattr(stats, key), 'b') for key in stats._fields ]) # broadcast to prometheus
+  return f"memory usage report: { ', '.join( [ f'{ human_readable.get(k, k) } = { format_bytes(getattr(stats, k)) }' for k in memtypes ] ) }"
+
 def chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):

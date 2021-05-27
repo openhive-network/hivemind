@@ -2,7 +2,7 @@
 import logging
 
 from hive.server.hive_api.common import (get_community_id)
-from hive.server.common.helpers import (return_error_info, valid_account, valid_limit)
+from hive.server.common.helpers import (return_error_info, valid_community, valid_account, valid_limit)
 
 # pylint: disable=too-many-lines
 
@@ -15,6 +15,7 @@ async def get_community(context, name, observer=None):
     If `observer` is provided, get subcription status, user title, user role.
     """
     db = context['db']
+    name = valid_community(name)
     observer = valid_account(observer, allow_empty=True)
 
     sql = "SELECT * FROM bridge_get_community( (:name)::VARCHAR, (:observer)::VARCHAR )"
@@ -27,6 +28,7 @@ async def get_community(context, name, observer=None):
 async def get_community_context(context, name, account):
     """For a community/account: returns role, title, subscribed state"""
     db = context['db']
+    name = valid_community(name)
     account = valid_account(account)
 
     sql = "SELECT * FROM bridge_get_community_context( (:account)::VARCHAR, (:name)::VARCHAR )"
@@ -38,8 +40,8 @@ async def get_community_context(context, name, account):
 async def list_top_communities(context, limit=25):
     """List top communities. Returns lite community list."""
     limit = valid_limit(limit, 100, 25)
-    sql = """SELECT name, title FROM hive_communities
-              WHERE rank > 0 ORDER BY rank LIMIT :limit"""
+    sql = """SELECT hc.name, hc.title FROM hive_communities hc
+              WHERE hc.rank > 0 ORDER BY hc.rank LIMIT :limit"""
     #ABW: restored older version since hardcoded id is out of the question
     #sql = """SELECT name, title FROM hive_communities
     #          WHERE id = 1344247 OR rank > 0
@@ -74,8 +76,9 @@ async def list_all_subscriptions(context, account):
 @return_error_info
 async def list_subscribers(context, community, last='', limit=100):
     """Lists subscribers of `community`."""
-    limit = valid_limit(limit, 100, 100)
+    community = valid_community(community)
     last = valid_account(last, True)
+    limit = valid_limit(limit, 100, 100)
     db = context['db']
     sql = "SELECT * FROM bridge_list_subscribers( (:community)::VARCHAR, (:last)::VARCHAR, (:limit)::INT )"
     rows = await db.query_all(sql, community=community, last=last, limit=limit)
@@ -85,9 +88,11 @@ async def list_subscribers(context, community, last='', limit=100):
 async def list_communities(context, last='', limit=100, query=None, sort='rank', observer=None):
     """List all communities, paginated. Returns lite community list."""
     # pylint: disable=too-many-arguments, too-many-locals
+    last = valid_community(last, True)
     limit = valid_limit(limit, 100, 100)
+    supported_sort_list = ['rank', 'new', 'subs']
+    assert sort in supported_sort_list, "Unsupported sort, valid sorts: {}".format(", ".join(supported_sort_list))
     observer = valid_account(observer, True)
-    assert sort in ('rank', 'new', 'subs'), 'invalid sort'
     search = query
     db = context['db']
 
@@ -103,6 +108,8 @@ async def list_communities(context, last='', limit=100, query=None, sort='rank',
 async def list_community_roles(context, community, last='', limit=50):
     """List community account-roles (anyone with non-guest status)."""
     db = context['db']
+    community = valid_community(community)
+    last = valid_account(last, True)
     limit = valid_limit(limit, 1000, 50)
 
     sql = "SELECT * FROM bridge_list_community_roles( (:community)::VARCHAR, (:last)::VARCHAR, (:limit)::INT )"
@@ -128,6 +135,7 @@ async def top_community_voters(context, community):
     """Get a list of top 5 (pending) community voters."""
     # TODO: which are voting on muted posts?
     db = context['db']
+    # TODO: missing validation of community parameter
     top = await _top_community_posts(db, community)
     total = {}
     for _, votes, _ in top:
@@ -140,6 +148,7 @@ async def top_community_voters(context, community):
 async def top_community_authors(context, community):
     """Get a list of top 5 (pending) community authors."""
     db = context['db']
+    # TODO: missing validation of community parameter
     top = await _top_community_posts(db, community)
     total = {}
     for author, _, payout in top:

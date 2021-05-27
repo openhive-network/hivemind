@@ -88,7 +88,7 @@ class BlockSchedule:
         missed = (gap_secs / self.BLOCK_INTERVAL) - 1
         if missed:
             self._add_missed(missed)
-            log.warning("%d missed @ block %d", missed, num)
+            log.warning("%d missed @ block %d (prev: %s, next: %s)", missed, num, prev_date, next_date)
 
     def _drift_backward(self, delta=0.1):
         """Delay the schedule by 0.1s when a block fetch failed."""

@@ -1,11 +1,5 @@
 {
     "4990000": {
-        "previous": "",
-        "timestamp": "",
-        "witness": "",
-        "transaction_merkle_root": "",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -502,18 +496,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "4990100": {
-        "previous": "",
-        "timestamp": "",
-        "witness": "",
-        "transaction_merkle_root": "",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -561,18 +546,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "4990200": {
-        "previous": "",
-        "timestamp": "",
-        "witness": "",
-        "transaction_merkle_root": "",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -592,18 +568,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "4991000": {
-        "previous": "",
-        "timestamp": "",
-        "witness": "",
-        "transaction_merkle_root": "",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -634,18 +601,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "4992100": {
-        "previous": "",
-        "timestamp": "",
-        "witness": "",
-        "transaction_merkle_root": "",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -665,18 +623,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "4992200": {
-        "previous": "",
-        "timestamp": "",
-        "witness": "",
-        "transaction_merkle_root": "",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -696,18 +645,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "4992300": {
-        "previous": "",
-        "timestamp": "",
-        "witness": "",
-        "transaction_merkle_root": "",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -727,18 +667,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "4993100": {
-        "previous": "",
-        "timestamp": "",
-        "witness": "",
-        "transaction_merkle_root": "",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -758,18 +689,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "4994200": {
-        "previous": "",
-        "timestamp": "",
-        "witness": "",
-        "transaction_merkle_root": "",
-        "extensions": [],
-        "witness_signature": "2078ea5ce6181f4c6ff1fba879e17261b39ded2a4c628eeba6797c1a6c5e3d78114b8f427a44f9d28da31eb48a6f8f7a8eb8a228bb48e542de0c0e3f40eba0dea3",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -789,18 +711,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "4995100": {
-        "previous": "",
-        "timestamp": "",
-        "witness": "",
-        "transaction_merkle_root": "",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -820,18 +733,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "4996100": {
-        "previous": "",
-        "timestamp": "",
-        "witness": "",
-        "transaction_merkle_root": "",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -884,18 +788,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "4997100": {
-        "previous": "",
-        "timestamp": "",
-        "witness": "",
-        "transaction_merkle_root": "0000000000000000000000000000000000000000",
-        "extensions": [],
-        "witness_signature": "205e8584f2bc1ab070c6c29834bb365c228fd4d86e5bb232c08d555491a247c491270c52043e4e4270ec968b6731fb7a9b910699fccca323f7901235e2838b1180",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -929,18 +824,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "4997200": {
-        "previous": "",
-        "timestamp": "",
-        "witness": "",
-        "transaction_merkle_root": "",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -993,18 +879,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "5000011": {
-        "previous": "004c4b4a00000000000000000000000000000000",
-        "timestamp": "2016-09-15T19:47:54",
-        "witness": "initminer",
-        "transaction_merkle_root": "0000000000000000000000000000000000000000",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -1035,18 +912,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "004c4b4b00000000000000000000000000000000",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "5000012": {
-        "previous": "004c4b4b00000000000000000000000000000000",
-        "timestamp": "2016-09-15T19:47:57",
-        "witness": "initminer",
-        "transaction_merkle_root": "0000000000000000000000000000000000000000",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -1088,18 +956,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "004c4b4c00000000000000000000000000000000",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "5000013": {
-        "previous": "004c4b4c00000000000000000000000000000000",
-        "timestamp": "2016-09-15T19:48:00",
-        "witness": "initminer",
-        "transaction_merkle_root": "0000000000000000000000000000000000000000",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -1119,18 +978,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "004c4b4d00000000000000000000000000000000",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "5000014": {
-        "previous": "004c4b4d00000000000000000000000000000000",
-        "timestamp": "2016-09-15T19:48:03",
-        "witness": "initminer",
-        "transaction_merkle_root": "0000000000000000000000000000000000000000",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -1150,18 +1000,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "004c4b4e00000000000000000000000000000000",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "5000015": {
-        "previous": "004c4b4e00000000000000000000000000000000",
-        "timestamp": "2016-09-15T19:48:06",
-        "witness": "initminer",
-        "transaction_merkle_root": "0000000000000000000000000000000000000000",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -1181,18 +1022,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "004c4b4f00000000000000000000000000000000",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "5000016": {
-        "previous": "004c4b4f00000000000000000000000000000000",
-        "timestamp": "2016-09-15T19:48:09",
-        "witness": "initminer",
-        "transaction_merkle_root": "0000000000000000000000000000000000000000",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -1223,18 +1055,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "004c4b5000000000000000000000000000000000",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "5000017": {
-        "previous": "004c4b5000000000000000000000000000000000",
-        "timestamp": "2016-09-15T19:48:12",
-        "witness": "initminer",
-        "transaction_merkle_root": "0000000000000000000000000000000000000000",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -1265,18 +1088,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "004c4b5100000000000000000000000000000000",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "5000018": {
-        "previous": "004c4b5100000000000000000000000000000000",
-        "timestamp": "2016-09-15T19:48:15",
-        "witness": "initminer",
-        "transaction_merkle_root": "0000000000000000000000000000000000000000",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -1307,18 +1121,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "004c4b5200000000000000000000000000000000",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "5000019": {
-        "previous": "004c4b5200000000000000000000000000000000",
-        "timestamp": "2016-09-15T19:48:18",
-        "witness": "initminer",
-        "transaction_merkle_root": "0000000000000000000000000000000000000000",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -1338,18 +1143,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "004c4b5300000000000000000000000000000000",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "5000020": {
-        "previous": "004c4b5300000000000000000000000000000000",
-        "timestamp": "2016-09-15T19:48:21",
-        "witness": "initminer",
-        "transaction_merkle_root": "0000000000000000000000000000000000000000",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -1380,18 +1176,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "004c4b5400000000000000000000000000000000",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "5000021": {
-        "previous": "004c4b5400000000000000000000000000000000",
-        "timestamp": "2016-09-15T19:48:24",
-        "witness": "initminer",
-        "transaction_merkle_root": "0000000000000000000000000000000000000000",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -1447,18 +1234,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "004c4b5500000000000000000000000000000000",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "5000022": {
-        "previous": "004c4b5500000000000000000000000000000000",
-        "timestamp": "2016-09-15T19:48:27",
-        "witness": "initminer",
-        "transaction_merkle_root": "0000000000000000000000000000000000000000",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -1481,18 +1259,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "004c4b5600000000000000000000000000000000",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "5000023": {
-        "previous": "004c4b5600000000000000000000000000000000",
-        "timestamp": "2016-09-15T19:48:30",
-        "witness": "initminer",
-        "transaction_merkle_root": "0000000000000000000000000000000000000000",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -1534,18 +1303,9 @@
                     }
                 ]
             }
-        ],
-        "block_id": "004c4b5700000000000000000000000000000000",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     },
     "5000024": {
-        "previous": "004c4b5700000000000000000000000000000000",
-        "timestamp": "2016-09-15T19:48:33",
-        "witness": "initminer",
-        "transaction_merkle_root": "0000000000000000000000000000000000000000",
-        "extensions": [],
-        "witness_signature": "",
         "transactions": [
             {
                 "ref_block_num": 100001,
@@ -1587,9 +1347,6 @@
                     }
                 ]
             }
-        ],
-        "block_id": "004c4b5800000000000000000000000000000000",
-        "signing_key": "",
-        "transaction_ids": []
+        ]
     }
 }

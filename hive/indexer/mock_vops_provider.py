@@ -38,7 +38,6 @@ class MockVopsProvider(MockDataProvider):
         if 'ops' in cls.block_data and block_num in cls.block_data['ops']:
             data = cls.block_data['ops'][block_num]
             if data:
-                ret['timestamp'] = data[0]['timestamp']
                 if 'ops' in ret:
                     ret['ops'].extend([op['op'] for op in data])
                 else:
@@ -47,7 +46,6 @@ class MockVopsProvider(MockDataProvider):
         if 'ops_by_block' in cls.block_data and block_num in cls.block_data['ops_by_block']:
             data = cls.block_data['ops_by_block'][block_num]
             if data:
-                ret['timestamp'] = data['timestamp']
                 if 'ops_by_block' in ret:
                     ret['ops_by_block'].extend([ops['op'] for ops in data['ops']])
                 else:
@@ -69,7 +67,7 @@ class MockVopsProvider(MockDataProvider):
                         ret[block_num]['ops'].extend(mock_vops['ops'])
                 else:
                     if 'ops' in mock_vops:
-                        ret[block_num] = {'timestamp':mock_vops['timestamp'], "ops" : mock_vops['ops']}
+                        ret[block_num] = {"ops" : mock_vops['ops']}
                     if 'ops_by_block' in mock_vops:
-                        ret[block_num] = {'timestamp':mock_vops['timestamp'], "ops" : mock_vops['ops_by_block']}
+                        ret[block_num] = {"ops" : mock_vops['ops_by_block']}
 

@@ -43,9 +43,9 @@ BEGIN
         WHERE ha.name = _author AND hpd.permlink = _permlink
       );
       IF __post_id = 0 THEN
-        RAISE EXCEPTION 'Post %/% does not exist', _author, _permlink;
+        RAISE EXCEPTION 'Post %/% does not exist', _author, _permlink USING ERRCODE = 'CEHM2';
       ELSE
-        RAISE EXCEPTION 'Post %/% was deleted % time(s)', _author, _permlink, __post_id;
+        RAISE EXCEPTION 'Post %/% was deleted % time(s)', _author, _permlink, __post_id USING ERRCODE = 'CEHM3';
       END IF;
     END IF;
   END IF;
@@ -69,7 +69,7 @@ BEGIN
   IF (_account <> '') THEN
     SELECT INTO __account_id COALESCE( ( SELECT id FROM hive_accounts WHERE name=_account ), 0 );
     IF _check AND __account_id = 0 THEN
-      RAISE EXCEPTION 'Account % does not exist', _account;
+      RAISE EXCEPTION 'Account % does not exist', _account USING ERRCODE = 'CEHM4';
     END IF;
   END IF;
   RETURN __account_id;
@@ -93,7 +93,7 @@ BEGIN
   IF (_tag_name <> '') THEN
     SELECT INTO __tag_id COALESCE( ( SELECT id FROM hive_tag_data WHERE tag=_tag_name ), 0 );
     IF _check AND __tag_id = 0 THEN
-      RAISE EXCEPTION 'Tag % does not exist', _tag_name;
+      RAISE EXCEPTION 'Tag % does not exist', _tag_name USING ERRCODE = 'CEHM5';
     END IF;
   END IF;
   RETURN __tag_id;
@@ -117,7 +117,7 @@ BEGIN
   IF (_category_name <> '') THEN
     SELECT INTO __category_id COALESCE( ( SELECT id FROM hive_category_data WHERE category=_category_name ), 0 );
     IF _check AND __category_id = 0 THEN
-      RAISE EXCEPTION 'Category % does not exist', _category_name;
+      RAISE EXCEPTION 'Category % does not exist', _category_name USING ERRCODE = 'CEHM6';
     END IF;
   END IF;
   RETURN __category_id;
@@ -141,7 +141,7 @@ BEGIN
   IF (_community_name <> '') THEN
     SELECT INTO __community_id COALESCE( ( SELECT id FROM hive_communities WHERE name=_community_name ), 0 );
     IF _check AND __community_id = 0 THEN
-      RAISE EXCEPTION 'Community % does not exist', _community_name;
+      RAISE EXCEPTION 'Community % does not exist', _community_name USING ERRCODE = 'CEHM7';
     END IF;
   END IF;
   RETURN __community_id;
@@ -166,7 +166,21 @@ BEGIN
         WHEN 6 THEN 'admin'
         WHEN 8 THEN 'owner'
     END;
-    RAISE EXCEPTION 'role id not found';
+    RAISE EXCEPTION 'role id not found' USING ERRCODE = 'CEHM8';
+END
+$function$
+;
+
+DROP FUNCTION IF EXISTS is_pinned
+;
+CREATE OR REPLACE FUNCTION is_pinned(in _post_id INT)
+RETURNS boolean
+LANGUAGE 'plpgsql'
+AS
+$function$
+BEGIN
+    RETURN is_pinned FROM hive_posts WHERE id = _post_id LIMIT 1
+    ;
 END
 $function$
 ;

@@ -33,9 +33,9 @@ FROM
 ) rank
 ;
 
-DROP FUNCTION IF EXISTS public.calculate_notify_vote_score(_payout hive_posts.payout%TYPE, _abs_rshares hive_posts_view.abs_rshares%TYPE, _rshares hive_votes.rshares%TYPE) CASCADE
+DROP FUNCTION IF EXISTS public.calculate_notify_vote_score(_payout hive_posts.payout%TYPE, _abs_rshares hive_posts.abs_rshares%TYPE, _rshares hive_votes.rshares%TYPE) CASCADE
 ;
-CREATE OR REPLACE FUNCTION public.calculate_notify_vote_score(_payout hive_posts.payout%TYPE, _abs_rshares hive_posts_view.abs_rshares%TYPE, _rshares hive_votes.rshares%TYPE)
+CREATE OR REPLACE FUNCTION public.calculate_notify_vote_score(_payout hive_posts.payout%TYPE, _abs_rshares hive_posts.abs_rshares%TYPE, _rshares hive_votes.rshares%TYPE)
 RETURNS INT
 LANGUAGE 'sql'
 IMMUTABLE
@@ -64,7 +64,7 @@ LANGUAGE plpgsql IMMUTABLE
 DROP FUNCTION IF EXISTS public.calculate_value_of_vote_on_post CASCADE;
 CREATE OR REPLACE FUNCTION public.calculate_value_of_vote_on_post(
     _post_payout hive_posts.payout%TYPE
-  , _post_rshares hive_posts_view.rshares%TYPE
+  , _post_rshares hive_posts.vote_rshares%TYPE
   , _vote_rshares hive_votes.rshares%TYPE)
 RETURNS FLOAT
 LANGUAGE 'sql'

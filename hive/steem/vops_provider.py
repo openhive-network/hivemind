@@ -79,7 +79,7 @@ class VopsProvider:
                     return;
                 while cls._breaker():
                     try:
-                        vops = cls._responses_queues[ vops_queue ].get( True, 1)
+                        vops = cls._responses_queues[ vops_queue ].get( True, 1 )
                         cls._responses_queues[ vops_queue ].task_done()
                         #split blocks range
                         if not vops:
