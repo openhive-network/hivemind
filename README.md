@@ -1,4 +1,4 @@
-# Hivemind [BETA]
+# Hivemind
 
 #### Developer-friendly microservice powering social networks on the Hive blockchain.
 
