@@ -29,6 +29,14 @@ $ cd hivemind
 $ python3 -m pip install --no-cache-dir --verbose --user -e .[dev] 2>&1 | tee pip_install.log
 ```
 
+### Updating from an existing hivemind database:
+
+```bash
+$ cd hivemind
+$ python3 -m pip install --no-cache-dir --verbose --user -e .[dev] 2>&1 | tee pip_install.log
+$ ./hive/db/sql_scripts/db_upgrade.sh
+```
+
 ### Start the indexer:
 
 ```bash
