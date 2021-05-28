@@ -35,8 +35,9 @@ $ python3 -m pip install --no-cache-dir --verbose --user -e .[dev] 2>&1 | tee pi
 $ cd hivemind
 $ python3 -m pip install --no-cache-dir --verbose --user -e .[dev] 2>&1 | tee pip_install.log
 $ cd hive/db/sql_scripts
-$ ./db_upgrade.sh
+$ ./db_upgrade.sh <user-name> hive
 ```
+(where user-name is your database login name)
 
 ### Start the indexer:
 
