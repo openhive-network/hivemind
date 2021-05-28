@@ -14,12 +14,19 @@ class MockBlockProvider(MockDataProvider):
     max_block = 0
 
     last_real_block_num = 1
+    last_real_block_id = ""
     last_real_block_time = dateutil.parser.isoparse("2016-03-24T16:05:00")
 
     @classmethod
-    def set_last_real_block_num_date(cls, block_num, block_date):
+    def set_last_real_block_num_date(cls, block_num, block_date, block_id):
+        if cls.last_real_block_num > block_num:
+            log.error( "Incoming block has lower number than previous one: old {}, new {}".format(cls.last_real_block_num, block_num) )
         cls.last_real_block_num = int(block_num)
-        cls.last_real_block_time = dateutil.parser.isoparse(block_date)
+        cls.last_real_block_id = block_id
+        new_date = dateutil.parser.isoparse(block_date)
+        if cls.last_real_block_time > new_date:
+            log.error( "Incoming block has older timestamp than previous one: old {}, new {}".format(cls.last_real_block_time, new_date) )
+        cls.last_real_block_time = new_date
 
     @classmethod
     def add_block_data_from_file(cls, file_name):
@@ -39,9 +46,10 @@ class MockBlockProvider(MockDataProvider):
         if block_num < cls.min_block:
             cls.min_block = block_num
 
-        #log.info("Loading mock data for block {} with timestamp: {}".format(block_num, block_content['timestamp']))
-
         if block_num in cls.block_data:
+            # mocks contain only transactions - rest is taken either from original block
+            # or from default empty mock; see also get_block_data below; note that we can't
+            # supplement data with defaults here because they depend on last_real_block_...
             assert 'transactions' in cls.block_data[block_num]
             assert 'transactions' in block_content
             cls.block_data[block_num]['transactions'] = cls.block_data[block_num]['transactions'] + block_content['transactions']
@@ -50,15 +58,17 @@ class MockBlockProvider(MockDataProvider):
 
     @classmethod
     def get_block_data(cls, block_num, make_on_empty=False):
-        if len(cls.block_data) == 0:
+        if len(cls.block_data) == 0: # this means there are no mocks, so none should be returned (even with make_on_empty)
             return None
 
         data = cls.block_data.get(block_num, None)
 
-        #if data is not None:
-            #log.info("Block {} has timestamp: {}".format(block_num, data['timestamp']))
-
-        if make_on_empty and data is None:
+        if data is not None:
+            # supplement mock data with necessary (default) elements
+            base = cls.make_empty_block(block_num)
+            base['transactions'] = data['transactions']
+            data = base
+        elif make_on_empty:
             data = cls.make_empty_block(block_num)
 
         return data
@@ -69,7 +79,10 @@ class MockBlockProvider(MockDataProvider):
 
     @classmethod
     def make_block_id(cls, block_num):
-        return "{:08x}00000000000000000000000000000000".format(block_num)
+        if block_num == cls.last_real_block_num:
+            return cls.last_real_block_id
+        else:
+            return "{:08x}00000000000000000000000000000000".format(block_num)
 
     @classmethod
     def make_block_timestamp(cls, block_num):

@@ -36,10 +36,11 @@ BEGIN
             SELECT role_id
             FROM hive_roles
             WHERE account_id = (SELECT id from hive_accounts WHERE name = _last)
+            AND hive_roles.community_id = __community_id
         ),0);
 
         IF __last_role = 0 THEN
-            RAISE EXCEPTION 'invalid last';
+            RAISE EXCEPTION 'invalid last' USING ERRCODE = 'CEHM1';
         END IF;
 
         RETURN QUERY

@@ -58,6 +58,7 @@ class Conf():
         add('--log-level', env_var='LOG_LEVEL', default='INFO')
         add('--test-disable-sync', type=strtobool, env_var='TEST_DISABLE_SYNC', help='(debug) skip sync and sweep; jump to block streaming', default=False)
         add('--test-max-block', type=int, env_var='TEST_MAX_BLOCK', help='(debug) only sync to given block, for running sync test', default=None)
+        add('--test-skip-ais-phase', env_var='TEST_SKIP_AIS_PHASE', help='(debug) Allows to skip After-Initial-Sync phase. Useful to go into live sync or exit if TEST_MAX_BLOCK is used', action='store_true')
         add('--test-profile', type=strtobool, env_var='TEST_PROFILE', help='(debug) profile execution', default=False)
         add('--log-request-times', env_var='LOG_REQUEST_TIMES', help='(debug) allows to generate log containing request processing times', action='store_true')
         add('--log-virtual-op-calls', env_var='LOG_VIRTUAL_OP_CALLS', help='(debug) log virtual op calls and responses', default=False)

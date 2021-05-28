@@ -150,7 +150,7 @@ if __name__ == "__main__":
             'psycopg2-binary',
             'aiocache',
             'configargparse',
-            'pdoc',
+            'pdoc==0.3.2',
             'diff-match-patch',
             'prometheus-client',
             'psutil',

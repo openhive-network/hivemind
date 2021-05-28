@@ -29,6 +29,7 @@ from hive.utils.stats import WaitingStatusManager as WSM
 from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import BroadcastObject
 from hive.utils.communities_rank import update_communities_posts_and_rank
+from hive.utils.misc import show_app_version, log_memory_usage
 
 from hive.indexer.mock_block_provider import MockBlockProvider
 from hive.indexer.mock_vops_provider import MockVopsProvider
@@ -145,6 +146,7 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
             log.info(timer.batch_status(prefix))
             log.info("[INITIAL SYNC] Time elapsed: %fs", time_current - time_start)
             log.info("[INITIAL SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
+            log.info(log_memory_usage())
             rate = minmax(rate, len(vops_and_blocks['blocks']), time_current - time_before_waiting_for_data, lbound)
 
             if block_end - block_start > 1.0 or is_debug:
@@ -228,7 +230,7 @@ class Sync:
     def load_mock_data(self,mock_block_data_path):
         if mock_block_data_path:
             MockBlockProvider.load_block_data(mock_block_data_path)
-            MockBlockProvider.print_data()
+            # MockBlockProvider.print_data()
 
     def refresh_sparse_stats(self):
         # normally it should be refreshed in various time windows
@@ -260,7 +262,6 @@ class Sync:
             sql = "SELECT level, patch_date, patched_to_revision FROM hive_db_patch_level ORDER BY level DESC LIMIT 1"
             patch_level_data = self._db.query_row(sql)
 
-            from hive.utils.misc import show_app_version;
             show_app_version(log, database_head_block, patch_level_data)
 
         set_handlers()
@@ -279,7 +280,7 @@ class Sync:
         mock_vops_data_path = self._conf.get("mock_vops_data_path")
         if mock_vops_data_path:
             MockVopsProvider.load_block_data(mock_vops_data_path)
-            MockVopsProvider.print_data()
+            # MockVopsProvider.print_data()
 
         # prefetch id->name and id->rank memory maps
         Accounts.load_ids()
@@ -291,6 +292,8 @@ class Sync:
         hived_head_block = self._conf.get('test_max_block') or self._steem.last_irreversible()
 
         log.info("target_head_block : %s", hived_head_block)
+
+        skip_after_initial_sync = self._conf.get('test_skip_ais_phase')
 
         if DbState.is_initial_sync():
             DbState.before_initial_sync(last_imported_block, hived_head_block)
@@ -304,7 +307,10 @@ class Sync:
             # behavior for the time of post initial actions
             restore_handlers()
             try:
-                DbState.finish_initial_sync(current_imported_block)
+                if skip_after_initial_sync:
+                  log.info("finish initial sync phase skipped due to user request")
+                else:
+                  DbState.finish_initial_sync(current_imported_block)
             except KeyboardInterrupt:
                 log.info("Break finish initial sync")
                 set_exception_thrown()
