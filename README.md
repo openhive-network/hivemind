@@ -37,7 +37,7 @@ $ python3 -m pip install --no-cache-dir --verbose --user -e .[dev] 2>&1 | tee pi
 $ cd hive/db/sql_scripts
 $ ./db_upgrade.sh <user-name> hive
 ```
-(where user-name is your database login name)
+(where <user-name> is your database login name)
 
 ### Start the indexer:
 
