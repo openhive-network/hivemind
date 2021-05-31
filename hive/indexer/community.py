@@ -431,13 +431,12 @@ class CommunityOp:
         _permlink = read_key_str(self.op, 'permlink', 256)
         assert _permlink, 'must name a permlink'
 
-        sql = \
-"""
-SELECT hp.id, community_id 
-FROM hive_posts hp 
-JOIN hive_permlink_data hpd ON hp.permlink_id=hpd.id 
-WHERE author_id=:_author AND hpd.permlink=:_permlink AND hp.counter_deleted = 0
-"""
+        sql = """
+          SELECT hp.id, community_id
+          FROM live_posts_comments_view hp
+          JOIN hive_permlink_data hpd ON hp.permlink_id=hpd.id
+          WHERE author_id=:_author AND hpd.permlink=:_permlink
+        """
         result = DB.query_row(sql, _author=self.account_id, _permlink=_permlink)
         assert result, f'post does not exists {self.account}/{_permlink}'
         result = dict(result)
