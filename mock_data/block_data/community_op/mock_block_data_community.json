@@ -2474,6 +2474,15 @@
             }
           },
           {
+            "type": "vote_operation",
+            "value": {
+              "voter": "alice",
+              "author": "test-creator",
+              "permlink": "pinpost1",
+              "weight": 300
+            }
+          },
+          {
             "type": "comment_operation",
             "value": {
               "parent_author": "",
@@ -2483,6 +2492,27 @@
               "title": "Pinpost 2",
               "body": "hello from pinned post 2",
               "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "nonpinpost1",
+              "title": "Not pinned post 1",
+              "body": "hello from non-pinned post 1",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "vote_operation",
+            "value": {
+              "voter": "alice",
+              "author": "test-creator",
+              "permlink": "nonpinpost1",
+              "weight": 400
             }
           },
           {
@@ -2515,10 +2545,31 @@
               "parent_author": "",
               "parent_permlink": "hive-135485",
               "author": "test-creator",
+              "permlink": "nonpinpost2",
+              "title": "Not pinned post 2",
+              "body": "hello from non-pinned post 2",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
               "permlink": "pinpost5",
               "title": "Pinpost 5",
               "body": "hello from pinned post 5",
               "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "vote_operation",
+            "value": {
+              "voter": "alice",
+              "author": "test-creator",
+              "permlink": "pinpost5",
+              "weight": 100
             }
           },
           {
@@ -2594,6 +2645,15 @@
             }
           },
           {
+            "type": "vote_operation",
+            "value": {
+              "voter": "alice",
+              "author": "test-creator",
+              "permlink": "pinpost11",
+              "weight": 500
+            }
+          },
+          {
             "type": "comment_operation",
             "value": {
               "parent_author": "",
@@ -2603,6 +2663,27 @@
               "title": "Pinpost 12",
               "body": "hello from pinned post 12",
               "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "test-creator",
+              "permlink": "nonpinpost3",
+              "title": "Not pinned post 3",
+              "body": "hello from non-pinned post 3",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "vote_operation",
+            "value": {
+              "voter": "alice",
+              "author": "test-creator",
+              "permlink": "nonpinpost3",
+              "weight": 200
             }
           },
           {
@@ -3218,6 +3299,15 @@
             }
           },
           {
+            "type": "vote_operation",
+            "value": {
+              "voter": "alice",
+              "author": "blocktrades",
+              "permlink": "crocodile01",
+              "weight": 400
+            }
+          },
+          {
             "type": "comment_operation",
             "value": {
               "parent_author": "",
@@ -3227,6 +3317,27 @@
               "title": "powerful crocodile 02",
               "body": "only crocodiles 02",
               "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "ignoreall",
+              "permlink": "regular-post",
+              "title": "Regular community post",
+              "body": "I want to write something to the community as well",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "vote_operation",
+            "value": {
+              "voter": "alice",
+              "author": "ignoreall",
+              "permlink": "regular-post",
+              "weight": 100
             }
           },
           {
@@ -3340,6 +3451,27 @@
               "title": "Hello",
               "body": "This is my first post in this community after being member!",
               "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-135485",
+              "author": "agartha",
+              "permlink": "regular-post",
+              "title": "Why am I ignored by ignoreall",
+              "body": "Can someone tell ignoreall to stop muting me?",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "vote_operation",
+            "value": {
+              "voter": "ignoreall",
+              "author": "agartha",
+              "permlink": "regular-post",
+              "weight": 200
             }
           },
           {

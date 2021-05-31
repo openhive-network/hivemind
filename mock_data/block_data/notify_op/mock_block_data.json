@@ -1,0 +1,46 @@
+{
+  "1000000": {
+    "transactions": [
+      {
+        "ref_block_num": 100000,
+        "ref_block_prefix": 0,
+        "expiration": "2020-03-23T12:08:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "abit"
+              ],
+              "id": "notify",
+              "json": "[\"setLastRead\",{\"date\":\"2021-05-26T14:21:43\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "abit"
+              ],
+              "id": "notify",
+              "json": "[\"setLastRead\",{\"date\":null}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "abit"
+              ],
+              "id": "notify",
+              "json": "[\"setLastRead\",{}]"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
