@@ -301,3 +301,6 @@ custom_json_operation("[\"unmutePost\",{\"community\":\"hive-198723\",\"account\
 custom_json_operation("[\"unmutePost\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"permlink\":\"First-after-member-post-hive1\",\"notes\":\"Unmute first post\"}]")
 custom_json_operation("[\"unmutePost\",{\"community\":\"hive-157439\",\"account\":\"alice\",\"permlink\":\"First-after-member-post-hive2\",\"notes\":\"Unmute first post\"}]")
 custom_json_operation("[\"unmutePost\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"permlink\":\"First-after-member-post-hive3\",\"notes\":\"Unmute first post\"}]")
+***block 5000010***
+custom_json_operation("[\"mutePost\",{\"community\":\"hive-135485\",\"account\":\"blocktrades\",\"permlink\":\"elephant01\",\"notes\":\"Muting deleted post\"}]")
+custom_json_operation("[\"mutePost\",{\"community\":\"hive-198723\",\"account\":\"agartha\",\"permlink\":\"regular-post\",\"notes\":\"Muting community post of different community\"}]")

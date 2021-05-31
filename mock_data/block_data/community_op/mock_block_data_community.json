@@ -4024,5 +4024,38 @@
         ]
       }
     ]
+  },
+  "5000010": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"mutePost\",{\"community\":\"hive-135485\",\"account\":\"blocktrades\",\"permlink\":\"elephant01\",\"notes\":\"Muting deleted post\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"mutePost\",{\"community\":\"hive-198723\",\"account\":\"agartha\",\"permlink\":\"regular-post\",\"notes\":\"Muting community post of different community\"}]"
+            }
+          }
+        ]
+      }
+    ]
   }
 }
