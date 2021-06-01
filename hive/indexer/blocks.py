@@ -294,15 +294,10 @@ class Blocks:
                 # misc ops
                 elif op_type == 'transfer_operation':
                     Payments.op_transfer(op, tx_idx, num, cls._head_block_date)
-                elif op_type == 'custom_json_operation':
-                    json_ops.append(op)
+                elif op_type == 'custom_json_operation': # follow/reblog/community ops
+                    CustomOp.process_op(op, num, cls._head_block_date)
 
-                if op_type != 'custom_json_operation':
-                    OPSM.op_stats(op_type, OPSM.stop(start))
-
-        # follow/reblog/community ops
-        if json_ops:
-            CustomOp.process_ops(json_ops, num, cls._head_block_date)
+                OPSM.op_stats(op_type, OPSM.stop(start))
 
         cls._head_block_date = cls._current_block_date
 
