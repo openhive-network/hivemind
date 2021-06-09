@@ -36,7 +36,7 @@
                 "abit"
               ],
               "id": "notify",
-              "json": "[\"setLastRead\",{}]"
+              "json": "[\"setLastRead\",{}]" 
             }
           }
         ]
