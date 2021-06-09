@@ -38,6 +38,39 @@
               "id": "notify",
               "json": "[\"setLastRead\",{}]" 
             }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "alice"
+              ],
+              "id": "notify",
+              "json": "[\"setLastRead\",{\"date\":\"2016-05-26T14:21:43\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "zus"
+              ],
+              "id": "notify",
+              "json": "[\"setLastRead\",{\"date\":\"2099-02-26T14:21:43\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "alice"
+              ],
+              "id": "notify",
+              "json": "[\"setLastRead\",{\"date\":null}]"
+            }
           }
         ]
       }
