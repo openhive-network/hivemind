@@ -71,6 +71,28 @@
               "id": "notify",
               "json": "[\"setLastRead\",{\"date\":null}]"
             }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "anton333"
+              ],
+              "id": "notify",
+              "json": "[\"setLastRead\"]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "dantheman5"
+              ],
+              "id": "notify",
+              "json": "[\"setLastRead\",{\"date\":\"2015-02-26T14:21:43\"}]"
+            }
           }
         ]
       }
