@@ -657,6 +657,30 @@
               "id": "community",
               "json": "[\"setRole\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"role\":\"admin\"}]"
             }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-117600",
+              "author": "test-safari",
+              "permlink": "muted-and-recreated",
+              "title": "Mute delete recreate",
+              "body": "This test is muted in community after creation, deleted, then recreated - all in the same block for good measure. Test checks if muting survives recreation (it should not).",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-117600",
+              "author": "test-safari",
+              "permlink": "muted-and-edited",
+              "title": "Mute edit",
+              "body": "This test is muted in community after creation, then edited - all in the same block for good measure. Test checks if muting survives edit (it should).",
+              "json_metadata": "{}"
+            }
           }
         ],
         "extensions": [],
@@ -1483,6 +1507,59 @@
               ],
               "id": "community",
               "json": "[\"unmutePost\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"permlink\":\"secrets2\",\"notes\":\"secrets1 are a spam, but I love them\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"mutePost\",{\"community\":\"hive-117600\",\"account\":\"test-safari\",\"permlink\":\"muted-and-recreated\",\"notes\":\"Test\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"mutePost\",{\"community\":\"hive-117600\",\"account\":\"test-safari\",\"permlink\":\"muted-and-edited\",\"notes\":\"Test\"}]"
+            }
+          },
+          {
+            "type": "delete_comment_operation",
+            "value": {
+              "author": "test-safari",
+              "permlink": "muted-and-recreated"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-117600",
+              "author": "test-safari",
+              "permlink": "muted-and-recreated",
+              "title": "The post was deleted and permlink reused",
+              "body": "This post should not be muted because even though it reuses permlink of muted post, it is separate new post.",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-117600",
+              "author": "test-safari",
+              "permlink": "muted-and-edited",
+              "title": "The post was edited",
+              "body": "This post should remain muted even though its content was replaced.",
+              "json_metadata": "{}"
             }
           }
         ]
