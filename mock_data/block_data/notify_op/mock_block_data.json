@@ -93,6 +93,17 @@
               "id": "notify",
               "json": "[\"setLastRead\",{\"date\":\"2015-02-26T14:21:43\"}]"
             }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "larrytom"
+              ],
+              "id": "notify",
+              "json": "[\"setLastRead\",{\"date\":\"1968-02-26T14:21:43\"}]"
+            }
           }
         ]
       }
