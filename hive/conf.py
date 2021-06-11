@@ -53,6 +53,7 @@ class Conf():
         add('--max-batch', type=int, env_var='MAX_BATCH', help='max chunk size for batch requests', default=35)
         add('--trail-blocks', type=int, env_var='TRAIL_BLOCKS', help='number of blocks to trail head by', default=2)
         add('--sync-to-s3', type=strtobool, env_var='SYNC_TO_S3', help='alternative healthcheck for background sync service', default=False)
+        add('--hived-database-url', env_var='HIVED_DATABASE_URL', required=False, help='Hived blocks database connection url', default='')
 
         # test/debug
         add('--log-level', env_var='LOG_LEVEL', default='INFO')

@@ -376,6 +376,8 @@ CREATE INDEX IF NOT EXISTS hive_posts_author_id_created_at_idx ON public.hive_po
 
 CREATE INDEX IF NOT EXISTS hive_blocks_created_at_idx ON hive_blocks (created_at);
 
+ALTER TABLE hive_blocks ALTER COLUMN ops SET DATA TYPE INTEGER;
+
 --- Notification cache to significantly speedup notification APIs.
 CREATE TABLE IF NOT EXISTS hive_notification_cache
 (
