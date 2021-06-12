@@ -30,25 +30,25 @@ def test_get_block(client):
     assert block['block_id'] == '01667f5e194c421aa00eb02270d3219a5d9bf339'
 
 def test_stream_blocks(client):
-     start_at = client.last_irreversible()
-     stop_at = client.head_block() + 2
-     streamed = 0
+    start_at = client.last_irreversible()
+    stop_at = client.head_block() + 2
+    streamed = 0
 
-     def breaker():
-         return True
+    def breaker():
+        return True
 
-     def exception_report():
-         pass
+    def exception_report():
+        pass
 
-     with pytest.raises(KeyboardInterrupt):
-      for block in client.stream_blocks(start_at, trail_blocks=0, max_gap=100, breaker=breaker, exception_reporter = exception_report):
-          num = block.get_num()
-          assert num == start_at + streamed
-          streamed += 1
-          if streamed >= 20 and num >= stop_at:
-              raise KeyboardInterrupt
-     assert streamed >= 20
-     assert num >= stop_at
+    with pytest.raises(KeyboardInterrupt):
+        for block in client.stream_blocks(start_at, trail_blocks=0, max_gap=100, breaker=breaker, exception_reporter = exception_report):
+            num = block.get_num()
+            assert num == start_at + streamed
+            streamed += 1
+            if streamed >= 20 and num >= stop_at:
+                raise KeyboardInterrupt
+    assert streamed >= 20
+    assert num >= stop_at
 
 def test_head_time(client):
     head = parse_time(client.head_time())
