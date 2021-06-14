@@ -498,6 +498,30 @@
         "expiration": "2020-03-23T12:17:00",
         "operations": [
           {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-117600",
+              "author": "test-safari",
+              "permlink": "reblogged-and-recreated",
+              "title": "Reblog delete recreate",
+              "body": "This test is reblogged after creation, deleted, then recreated - all in the same block for good measure. Test checks if reblog survives recreation (it should not).",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-117600",
+              "author": "test-safari",
+              "permlink": "reblogged-and-edited",
+              "title": "Reblog edit",
+              "body": "This test is reblogged after creation, then edited - all in the same block for good measure. Test checks if reblog survives edit (it should).",
+              "json_metadata": "{}"
+            }
+          },
+          {
             "type": "custom_json_operation",
             "value": {
               "required_auths": [],
@@ -763,6 +787,59 @@
         "ref_block_prefix": 1,
         "expiration": "2020-03-23T12:17:00",
         "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "agartha"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"agartha\",\"author\":\"test-safari\",\"permlink\":\"reblogged-and-recreated\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "agartha"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"agartha\",\"author\":\"test-safari\",\"permlink\":\"reblogged-and-edited\"}"
+            }
+          },
+          {
+            "type": "delete_comment_operation",
+            "value": {
+              "author": "test-safari",
+              "permlink": "reblogged-and-recreated"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-117600",
+              "author": "test-safari",
+              "permlink": "reblogged-and-recreated",
+              "title": "The post was deleted and permlink reused",
+              "body": "This post should not be reblogged because even though it reuses permlink of reblogged post, it is separate new post.",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-117600",
+              "author": "test-safari",
+              "permlink": "reblogged-and-edited",
+              "title": "The post was edited",
+              "body": "This post should remain reblogged even though its content was replaced.",
+              "json_metadata": "{}"
+            }
+          },
           {
             "type": "custom_json_operation",
             "value": {
