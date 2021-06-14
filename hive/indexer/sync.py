@@ -280,6 +280,8 @@ class Sync:
         assert trail_blocks >= 0
         assert trail_blocks <= 100
 
+        Blocks.switch_to_live_context(self._db)
+
         import sys
         max_block_limit = sys.maxsize
         do_stale_block_check = True
