@@ -104,6 +104,17 @@
               "id": "notify",
               "json": "[\"setLastRead\",{\"date\":\"1968-02-26T14:21:43\"}]"
             }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "elyaque"
+              ],
+              "id": "notify",
+              "json": "[\"setLastRead\",{}]" 
+            }
           }
         ]
       }
