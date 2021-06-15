@@ -126,6 +126,40 @@ class Blocks:
         log.info( "End-of-sync LIB is set to %d, last block that guarantees cashout at end of sync is %d", lib, cls._last_safe_cashout_block )
 
     @classmethod
+    def flush_data_in_n_threads(cls):
+        completedThreads = 0
+
+        pool = ThreadPoolExecutor(max_workers = len(cls._concurrent_flush))
+        flush_futures = {pool.submit(time_collector, f): (description, c) for (description, f, c) in cls._concurrent_flush}
+        for future in concurrent.futures.as_completed(flush_futures):
+            (description, c) = flush_futures[future]
+            completedThreads = completedThreads + 1
+            try:
+                (n, elapsedTime) = future.result()
+                assert n is not None
+                assert not c.sync_tx_active()
+
+                FSM.flush_stat(description, elapsedTime, n)
+
+#                if n > 0:
+#                    log.info('%r flush generated %d records' % (description, n))
+            except Exception as exc:
+                log.error('%r generated an exception: %s' % (description, exc))
+                raise exc
+        pool.shutdown()
+
+        assert completedThreads == len(cls._concurrent_flush)
+
+    @classmethod
+    def flush_data_in_1_thread(cls):
+        for description, f, c in cls._concurrent_flush:
+          try:
+              f()
+          except Exception as exc:
+              log.error('%r generated an exception: %s' % (description, exc))
+              raise exc
+
+    @classmethod
     def process_multi(cls, blocks, is_initial_sync):
         """Batch-process blocks; wrapped in a transaction."""
 
@@ -159,28 +193,14 @@ class Blocks:
 
         DB.query("COMMIT")
 
-        completedThreads = 0
-
-        pool = ThreadPoolExecutor(max_workers = len(cls._concurrent_flush))
-        flush_futures = {pool.submit(time_collector, f): (description, c) for (description, f, c) in cls._concurrent_flush}
-        for future in concurrent.futures.as_completed(flush_futures):
-            (description, c) = flush_futures[future]
-            completedThreads = completedThreads + 1
-            try:
-                (n, elapsedTime) = future.result()
-                assert n is not None
-                assert not c.tx_active()
-
-                FSM.flush_stat(description, elapsedTime, n)
-
-#                if n > 0:
-#                    log.info('%r flush generated %d records' % (description, n))
-            except Exception as exc:
-                log.error('%r generated an exception: %s' % (description, exc))
-                raise exc
-        pool.shutdown()
-
-        assert completedThreads == len(cls._concurrent_flush)
+        if is_initial_sync:
+          log.info("[PROCESS MULTI] Flushing data in N threads")
+          cls.flush_data_in_n_threads()
+        else:
+          DB.query("START TRANSACTION")
+          log.info("[PROCESS MULTI] Flushing data in 1 thread")
+          cls.flush_data_in_1_thread()
+          DB.query("COMMIT")
 
         if (not is_initial_sync) and (first_block > -1):
             DB.query("START TRANSACTION")

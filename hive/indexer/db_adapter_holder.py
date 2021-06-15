@@ -12,11 +12,14 @@ class DbLiveHolder(object):
 class DbAdapterHolder(object):
     db = None
 
-    _inside_tx = False
+    _inside_sync_tx = False
+    _live_context = False
 
     @classmethod
-    def setup_own_db_access(cls, sharedDb, name, _live_context):
-        if _live_context:
+    def setup_own_db_access(cls, sharedDb, name, live_context):
+        cls._live_context = live_context
+
+        if cls._live_context:
           if DbLiveHolder._live_db is None:
             DbLiveHolder._live_db = sharedDb.clone(name)
           cls.db = DbLiveHolder._live_db
@@ -29,15 +32,17 @@ class DbAdapterHolder(object):
           cls.db.close()
 
     @classmethod
-    def tx_active(cls):
-        return cls._inside_tx
+    def sync_tx_active(cls):
+        return cls._inside_sync_tx
 
     @classmethod
     def beginTx(cls):
-        cls.db.query("START TRANSACTION")
-        cls._inside_tx = True
+        if not cls._live_context:
+          cls.db.query("START TRANSACTION")
+          cls._inside_sync_tx = True
 
     @classmethod
     def commitTx(cls):
-        cls.db.query("COMMIT")
-        cls._inside_tx = False
+        if not cls._live_context:
+          cls.db.query("COMMIT")
+          cls._inside_sync_tx = False
