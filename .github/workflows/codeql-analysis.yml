@@ -45,6 +45,8 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         queries:
+          - name: CodeQL repository
+            uses: github/codeql/python/ql/src/codeql-suites/python-code-scanning.qls@v1.27.0
           - name: Extended Security
             uses: security-extended
           - name: Security and Quality
