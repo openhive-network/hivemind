@@ -1,0 +1,11 @@
+name: "CodeQL config for Hivemind"
+
+languages: python
+
+queries:
+  - name: Extended Security
+    uses: security-extended
+  - name: Security and Quality
+    uses: security-and-quality
+  - name: CodeQL repository
+    uses: github/codeql/python/ql/src/codeql-suites/python-code-scanning.qls@v1.27.0
