@@ -2957,6 +2957,17 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
+                "agartha"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-186669\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
                 "alice"
               ],
               "id": "community",
@@ -3341,6 +3352,17 @@
         "ref_block_prefix": 1,
         "expiration": "2020-03-23T12:17:00",
         "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "abit"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-186669\"}]"
+            }
+          },
           {
             "type": "custom_json_operation",
             "value": {
