@@ -17,7 +17,6 @@ from hive.indexer.reputations import Reputations
 from hive.indexer.reblog import Reblog
 from hive.indexer.notify import Notify
 from hive.indexer.block import Block, Transaction, Operation, VirtualOperationType, OperationType
-from hive.indexer.db_adapter_holder import DbLiveHolder
 
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.stats import FlushStatusManager as FSM
@@ -66,17 +65,17 @@ class Blocks:
             cls._current_block_date = head_date
 
     @classmethod
-    def setup_own_db_access(cls, sharedDbAdapter, live_context = False):
-        PostDataCache.setup_own_db_access(sharedDbAdapter, "PostDataCache", live_context)
-        Reputations.setup_own_db_access(sharedDbAdapter, "Reputations", live_context)
-        Votes.setup_own_db_access(sharedDbAdapter, "Votes", live_context)
-        Follow.setup_own_db_access(sharedDbAdapter, "Follow", live_context)
-        Posts.setup_own_db_access(sharedDbAdapter, "Posts", live_context)
-        Reblog.setup_own_db_access(sharedDbAdapter, "Reblog", live_context)
-        Notify.setup_own_db_access(sharedDbAdapter, "Notify", live_context)
-        Accounts.setup_own_db_access(sharedDbAdapter, "Accounts", live_context)
-        PayoutStats.setup_own_db_access(sharedDbAdapter, "PayoutStats", live_context)
-        Mentions.setup_own_db_access(sharedDbAdapter, "Mentions", live_context)
+    def setup_own_db_access(cls, sharedDbAdapter):
+        PostDataCache.setup_own_db_access(sharedDbAdapter, "PostDataCache")
+        Reputations.setup_own_db_access(sharedDbAdapter, "Reputations")
+        Votes.setup_own_db_access(sharedDbAdapter, "Votes")
+        Follow.setup_own_db_access(sharedDbAdapter, "Follow")
+        Posts.setup_own_db_access(sharedDbAdapter, "Posts")
+        Reblog.setup_own_db_access(sharedDbAdapter, "Reblog")
+        Notify.setup_own_db_access(sharedDbAdapter, "Notify")
+        Accounts.setup_own_db_access(sharedDbAdapter, "Accounts")
+        PayoutStats.setup_own_db_access(sharedDbAdapter, "PayoutStats")
+        Mentions.setup_own_db_access(sharedDbAdapter, "Mentions")
 
     @classmethod
     def close_own_db_access(cls):
@@ -90,16 +89,6 @@ class Blocks:
         Accounts.close_own_db_access()
         PayoutStats.close_own_db_access()
         Mentions.close_own_db_access()
-
-        DbLiveHolder.close_own_db_access()
-
-    @classmethod
-    def switch_to_live_context(cls, sharedDbAdapter):
-      log.info("Closing database connections")
-      cls.close_own_db_access()
-
-      log.info("Switching to live context and restoring database connections")
-      cls.setup_own_db_access(sharedDbAdapter, True)
 
     @classmethod
     def head_num(cls):
