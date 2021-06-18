@@ -2957,6 +2957,17 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
+                "alice"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-165317\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
                 "test-safari"
               ],
               "id": "community",
@@ -3168,6 +3179,17 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
+                "camilla"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-165317\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
                 "test-safari"
               ],
               "id": "community",
@@ -3319,6 +3341,28 @@
         "ref_block_prefix": 1,
         "expiration": "2020-03-23T12:17:00",
         "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "gtg"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-165317\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "abit"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-165317\"}]"
+            }
+          },
           {
             "type": "custom_json_operation",
             "value": {
@@ -3518,6 +3562,17 @@
         "ref_block_prefix": 1,
         "expiration": "2020-03-23T12:17:00",
         "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "agartha"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-165317\"}]"
+            }
+          },
           {
             "type": "comment_operation",
             "value": {
