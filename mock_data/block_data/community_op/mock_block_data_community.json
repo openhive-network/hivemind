@@ -2957,6 +2957,17 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
+                "hive-188204"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-188204\",\"account\":\"gtg\",\"role\":\"muted\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
                 "agartha"
               ],
               "id": "community",
@@ -3190,6 +3201,17 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
+                "hive-188204"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-188204\",\"account\":\"alice\",\"role\":\"mod\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
                 "camilla"
               ],
               "id": "community",
@@ -3352,6 +3374,17 @@
         "ref_block_prefix": 1,
         "expiration": "2020-03-23T12:17:00",
         "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-188204"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-188204\",\"account\":\"agartha\",\"role\":\"admin\"}]"
+            }
+          },
           {
             "type": "custom_json_operation",
             "value": {
@@ -3584,6 +3617,28 @@
         "ref_block_prefix": 1,
         "expiration": "2020-03-23T12:17:00",
         "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-188204"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-188204\",\"account\":\"camilla\",\"role\":\"owner\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "abit"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-188204\"}]"
+            }
+          },
           {
             "type": "custom_json_operation",
             "value": {
