@@ -30,7 +30,7 @@ BEGIN
     WHERE hs.community_id = __community_id
     AND (__last_id = 0 OR (
         hs.created_at <= (SELECT min(created_at) FROM hive_subscriptions WHERE account_id = __last_id AND community_id = __community_id) AND
-        hs.id > (SELECT max(id) FROM hive_subscriptions WHERE account_id = __last_id AND community_id = __community_id)
+        hs.id < (SELECT max(id) FROM hive_subscriptions WHERE account_id = __last_id AND community_id = __community_id)
         )
     )
     ORDER BY hs.created_at DESC, hs.id ASC
