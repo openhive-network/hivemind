@@ -220,7 +220,10 @@ class DBSync:
         return self
 
     def __exit__(self, exc_type, value, traceback):
-        Blocks.close_own_db_access()
+        #During massive-sync every object has own copy of database, as a result all copies have to be closed
+        #During live-sync an original database is used and can't be closed, because it can be used later.
+        if not DbLiveContextHolder.is_live_context():
+            Blocks.close_own_db_access()
 
 class MassiveSync(DBSync):
     def __init__(self, mgr_sync):

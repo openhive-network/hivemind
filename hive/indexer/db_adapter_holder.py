@@ -26,10 +26,9 @@ class DbAdapterHolder(object):
 
     @classmethod
     def close_own_db_access(cls):
-        if not DbLiveContextHolder.is_live_context():
-            if cls.db is not None:
-                cls.db.close()
-                cls.db = None
+        if cls.db is not None:
+            cls.db.close()
+            cls.db = None
 
     @classmethod
     def sync_tx_active(cls):
