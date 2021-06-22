@@ -19,7 +19,7 @@ AS
 $function$
 DECLARE
     __community_id INT := find_community_id( _community, True );
-    __last_id INT := find_account_id(_last, True);
+    __last_id INT := find_subscription_id(_last, _community, True);
 BEGIN
     RETURN QUERY
     SELECT ha.name, get_role_name(COALESCE(hr.role_id,0)), hr.title, hs.created_at::VARCHAR(19)
@@ -29,8 +29,7 @@ BEGIN
     JOIN hive_accounts ha ON hs.account_id = ha.id
     WHERE hs.community_id = __community_id
     AND (__last_id = 0 OR (
-        hs.created_at <= (SELECT min(created_at) FROM hive_subscriptions WHERE account_id = __last_id AND community_id = __community_id) AND
-        hs.id < (SELECT max(id) FROM hive_subscriptions WHERE account_id = __last_id AND community_id = __community_id)
+	hs.id < __last_id
         )
     )
     ORDER BY hs.created_at DESC, hs.id ASC
@@ -38,3 +37,4 @@ BEGIN
 END
 $function$
 ;
+
