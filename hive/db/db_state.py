@@ -277,10 +277,12 @@ class DbState:
 
     @classmethod
     def _finish_hive_posts(cls, db, massive_sync_preconditions, last_imported_block, current_imported_block):
+        logging.getLogger('sqlalchemy.dialects').setLevel(logging.INFO)
+
         with AutoDbDisposer(db, "finish_hive_posts") as db_mgr:
             def vacuum_hive_posts(cls):
               if massive_sync_preconditions:
-                  cls._execute_query(db_mgr.db, "VACUUM ANALYZE hive_posts")
+                  cls._execute_query(db_mgr.db, "VACUUM ANALYZE VERBOSE hive_posts")
 
             #UPDATE: `children`
             time_start = perf_counter()
@@ -291,7 +293,8 @@ class DbState:
                 # Update count of child posts processed during partial sync (what was hold during initial sync)
                 sql = "select update_hive_posts_children_count({}, {})".format(last_imported_block, current_imported_block)
                 cls._execute_query(db_mgr.db, sql)
-            log.info("[INIT] update_hive_posts_children_count executed in %.4fs", perf_counter() - time_start)
+            tx_id = db_mgr.db.query_one( "SELECT txid_current()" )
+            log.info("[INIT] update_hive_posts_children_count executed in %.4fs txid=%s", perf_counter() - time_start, tx_id )
 
             time_start = perf_counter()
             vacuum_hive_posts(cls)
@@ -304,7 +307,8 @@ class DbState:
                   select update_hive_posts_root_id({}, {})
                   """.format(last_imported_block, current_imported_block)
             cls._execute_query(db_mgr.db, sql)
-            log.info("[INIT] update_hive_posts_root_id executed in %.4fs", perf_counter() - time_start)
+            tx_id = db_mgr.db.query_one( "SELECT txid_current()" )
+            log.info("[INIT] update_hive_posts_root_id executed in %.4fs txid=%s", perf_counter() - time_start, tx_id)
 
             time_start = perf_counter()
             vacuum_hive_posts(cls)
@@ -313,7 +317,8 @@ class DbState:
             #UPDATE: `active`
             time_start = perf_counter()
             update_active_starting_from_posts_on_block(last_imported_block, current_imported_block)
-            log.info("[INIT] update_all_posts_active executed in %.4fs", perf_counter() - time_start)
+            tx_id = db_mgr.db.query_one( "SELECT txid_current()" )
+            log.info("[INIT] update_all_posts_active executed in %.4fs txid=%s", perf_counter() - time_start, tx_id)
 
             time_start = perf_counter()
             vacuum_hive_posts(cls)
@@ -325,11 +330,13 @@ class DbState:
                   SELECT update_posts_rshares({}, {});
                   """.format(last_imported_block, current_imported_block)
             cls._execute_query(db_mgr.db, sql)
-            log.info("[INIT] update_posts_rshares executed in %.4fs", perf_counter() - time_start)
+            tx_id = db_mgr.db.query_one( "SELECT txid_current()" )
+            log.info("[INIT] update_posts_rshares executed in %.4fs txid=%s", perf_counter() - time_start, tx_id)
 
             time_start = perf_counter()
             vacuum_hive_posts(cls)
             log.info("[INIT] VACUUM ANALYZE hive_posts executed in %.4fs", perf_counter() - time_start)
+    logging.getLogger('sqlalchemy.dialects').setLevel(logging.WARN)
 
     @classmethod
     def _finish_hive_posts_api_helper(cls, db, last_imported_block, current_imported_block):
