@@ -284,6 +284,7 @@ class DbState:
               if massive_sync_preconditions:
                   cls._execute_query(db_mgr.db, "VACUUM ANALYZE VERBOSE hive_posts")
 
+
             #UPDATE: `children`
             time_start = perf_counter()
             if massive_sync_preconditions:
@@ -326,10 +327,13 @@ class DbState:
 
             #UPDATE: `abs_rshares`, `vote_rshares`, `sc_hot`, ,`sc_trend`, `total_votes`, `net_votes`
             time_start = perf_counter()
-            sql = """
-                  SELECT update_posts_rshares({}, {});
-                  """.format(last_imported_block, current_imported_block)
-            cls._execute_query(db_mgr.db, sql)
+            def update_rshares(cls):
+                with AutoDbDisposer(db, "finish_hive_posts") as db_for_rshares:
+                    sql = """
+                      SELECT update_posts_rshares({}, {});
+                      """.format(last_imported_block, current_imported_block)
+                    cls._execute_query(db_for_rshares.db, sql)
+            update_rshares(cls)
             tx_id = db_mgr.db.query_one( "SELECT txid_current()" )
             log.info("[INIT] update_posts_rshares executed in %.4fs txid=%s", perf_counter() - time_start, tx_id)
 
