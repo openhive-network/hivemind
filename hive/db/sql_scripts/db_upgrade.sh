@@ -57,6 +57,7 @@ for sql in postgres_handle_view_changes.sql \
           condenser_get_by_account_comments.sql \
           condenser_get_by_blog_without_reblog.sql \
           bridge_get_by_feed_with_reblog.sql \
+          bridge_get_by_feed_with_reblog_max_min_overload.sql \
           condenser_get_by_blog.sql \
           bridge_get_account_posts_by_blog.sql \
           condenser_get_names_by_reblogged.sql \
