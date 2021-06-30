@@ -183,7 +183,7 @@ class Posts(DbAdapterHolder):
 
             values_str = ','.join(chunk)
             actual_query = sql.format(values_str)
-            cls.db.query(actual_query)
+            cls.db.query_prepared(actual_query)
 
             cls.commitTx()
 

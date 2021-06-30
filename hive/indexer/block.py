@@ -141,6 +141,11 @@ class BlocksProviderBase(ABC):
         self._breaker = breaker
         self._exception_reporter = exception_reporter
 
+        self._blocks_queue_size       = 1500
+        self._blocks_data_queue_size  = 1500
+
+        self._operations_queue_size   = 1500
+
     def report_exception():
         self._exception_reporter()
 

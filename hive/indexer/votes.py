@@ -146,13 +146,13 @@ class Votes(DbAdapterHolder):
                 if len(values) >= values_limit:
                     values_str = ','.join(values)
                     actual_query = sql.format(values_str)
-                    cls.db.query(actual_query)
+                    cls.db.query_prepared(actual_query)
                     values.clear()
 
             if len(values) > 0:
                 values_str = ','.join(values)
                 actual_query = sql.format(values_str)
-                cls.db.query(actual_query)
+                cls.db.query_prepared(actual_query)
                 values.clear()
 
             n = len(cls._votes_data)
