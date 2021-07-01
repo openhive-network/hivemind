@@ -316,6 +316,10 @@ class MassiveSync(DBSync):
             is_superuser = self._db.query_one( "SELECT is_superuser()" )
             assert is_superuser, 'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
 
+        _is_consistency = Blocks.is_consistency()
+        if not _is_consistency:
+            raise RuntimeError("Fatal error related to `hive_blocks` consistency")
+
         show_info(self._db)
 
         paths = self._conf.get("mock_block_data_path") or []

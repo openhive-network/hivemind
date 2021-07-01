@@ -43,6 +43,7 @@ class Blocks:
     _head_block_date = None
     _current_block_date = None
     _last_safe_cashout_block = 0
+    _is_initial_sync = False
 
     _concurrent_flush = [
       ('Posts', Posts.flush, Posts),
@@ -177,6 +178,8 @@ class Blocks:
     @classmethod
     def process_multi(cls, blocks, is_initial_sync):
         """Batch-process blocks; wrapped in a transaction."""
+
+        cls._is_initial_sync = is_initial_sync
 
         time_start = OPSM.start()
 
@@ -415,14 +418,15 @@ class Blocks:
     def _flush_blocks(cls):
         query = """
             INSERT INTO
-                hive_blocks (num, hash, prev, txs, ops, created_at)
+                hive_blocks (num, hash, prev, txs, ops, created_at, completed)
             VALUES
         """
         values = []
         for block in cls.blocks_to_flush:
-            values.append("({}, '{}', '{}', {}, {}, '{}')".format(block['num'], block['hash'],
+            values.append("({}, '{}', '{}', {}, {}, '{}', {})".format(block['num'], block['hash'],
                                                                   block['prev'], block['txs'],
-                                                                  block['ops'], block['date']))
+                                                                  block['ops'], block['date'],
+                                                                  cls._is_initial_sync))
         query = query + ",".join(values)
         DB.query_prepared(query)
         values.clear()
@@ -506,10 +510,22 @@ class Blocks:
             "SELECT update_hive_posts_mentions({}, {})".format(first_block, last_block),
             "SELECT update_notification_cache({}, {}, {})".format(first_block, last_block, is_hour_action),
             "SELECT update_follow_count({}, {})".format(first_block, last_block),
-            "SELECT update_account_reputations({}, {}, False)".format(first_block, last_block)
+            "SELECT update_account_reputations({}, {}, False)".format(first_block, last_block),
+            "SELECT update_hive_blocks_consistency_flag({}, {})".format(first_block, last_block)
         ]
 
         for query in queries:
             time_start = perf_counter()
             DB.query_no_return(query)
             log.info("%s executed in: %.4f s", query, perf_counter() - time_start)
+
+    @classmethod
+    def is_consistency(cls):
+        """Check if all tuples in `hive_blocks` are written correctly.
+            If any record has `completed` == false, it indicates that the database was closed incorrectly or a rollback failed.
+        """
+        not_completed_blocks = DB.query_one("SELECT count(*) FROM hive_blocks WHERE completed = false LIMIT 1")
+        log.info("[INIT] Number of not completed blocks: %s.", not_completed_blocks)
+        return not_completed_blocks == 0
+
+
