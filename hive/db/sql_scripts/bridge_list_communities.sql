@@ -11,7 +11,7 @@ CREATE TYPE bridge_api_list_communities AS (
     sum_pending INTEGER,
     num_pending INTEGER,
     num_authors INTEGER,
-    created_at VARCHAR(19),
+    created_at TIMESTAMP,
     avatar_url VARCHAR(1024),
     context JSON,
     admins VARCHAR ARRAY
@@ -48,7 +48,7 @@ BEGIN
         hc.sum_pending,
         hc.num_pending,
         hc.num_authors,
-        hc.created_at::VARCHAR(19),
+        hc.created_at,
         hc.avatar_url,
         bridge_get_community_context(_observer, hc.name),
         array_agg(ha.name ORDER BY ha.name)
@@ -92,7 +92,7 @@ BEGIN
         hc.sum_pending,
         hc.num_pending,
         hc.num_authors,
-        hc.created_at::VARCHAR(19),
+        hc.created_at,
         hc.avatar_url,
         bridge_get_community_context(_observer, hc.name),
         array_agg(ha.name ORDER BY ha.name)
@@ -140,7 +140,7 @@ BEGIN
         hc.sum_pending,
         hc.num_pending,
         hc.num_authors,
-        hc.created_at::VARCHAR(19),
+        hc.created_at,
         hc.avatar_url,
         bridge_get_community_context(_observer, hc.name),
         array_agg(ha.name ORDER BY ha.name)
