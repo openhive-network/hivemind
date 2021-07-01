@@ -247,6 +247,10 @@ class Sync:
         # ensure db schema up to date, check app status
         DbState.initialize()
 
+        _is_consistency = Blocks.is_consistency()
+        if not _is_consistency:
+            raise RuntimeError("Fatal error related to `hive_blocks` consistency")
+
         show_info(self)
 
         paths = self._conf.get("mock_block_data_path") or []

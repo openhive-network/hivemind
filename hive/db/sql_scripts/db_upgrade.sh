@@ -72,6 +72,7 @@ for sql in postgres_handle_view_changes.sql \
           update_follow_count.sql \
           delete_reblog_feed_cache.sql \
           follows.sql \
+          update_hive_blocks_consistency_flag.sql \
           update_table_statistics.sql # Must be last
 
 do
