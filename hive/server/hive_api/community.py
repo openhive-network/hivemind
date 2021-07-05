@@ -21,7 +21,7 @@ async def get_community(context, name, observer=None):
     sql = "SELECT * FROM bridge_get_community( (:name)::VARCHAR, (:observer)::VARCHAR )"
     sql_result = await db.query_row(sql, name=name, observer=observer)
     result = dict(sql_result)
-    json_date(result['created_at'])
+    result['created_at'] = json_date(result['created_at'])
 
     return result
 
