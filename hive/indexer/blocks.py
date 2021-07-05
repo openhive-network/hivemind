@@ -149,13 +149,7 @@ class Blocks:
               raise exc
 
     @classmethod
-    def process_multi(cls, blocks, is_initial_sync):
-        """Batch-process blocks; wrapped in a transaction."""
-
-        time_start = OPSM.start()
-
-        DB.query("START TRANSACTION")
-
+    def process_blocks(cls, blocks):
         last_num = 0
         first_block = -1
         try:
@@ -180,21 +174,28 @@ class Blocks:
         log.info("#############################################################################")
         flush_time = register_time(flush_time, "Blocks", cls._flush_blocks())
 
+    @classmethod
+    def process_multi(cls, blocks, is_initial_sync):
+        """Batch-process blocks; wrapped in a transaction."""
+
+        time_start = OPSM.start()
+
+        DB.query("START TRANSACTION")
+
+        cls.process_blocks(blocks)
+
+        if not is_initial_sync:
+            log.info("[PROCESS MULTI] Flushing data in 1 thread")
+            cls.flush_data_in_1_thread()
+            if first_block > -1:
+                log.info("[PROCESS MULTI] Tables updating in live synchronization")
+                cls.on_live_blocks_processed( first_block, last_num )
+
         DB.query("COMMIT")
 
         if is_initial_sync:
           log.info("[PROCESS MULTI] Flushing data in N threads")
           cls.flush_data_in_n_threads()
-        else:
-          DB.query("START TRANSACTION")
-          log.info("[PROCESS MULTI] Flushing data in 1 thread")
-          cls.flush_data_in_1_thread()
-          DB.query("COMMIT")
-
-        if (not is_initial_sync) and (first_block > -1):
-            DB.query("START TRANSACTION")
-            cls.on_live_blocks_processed( first_block, last_num )
-            DB.query("COMMIT")
 
         log.info(f"[PROCESS MULTI] {len(blocks)} blocks in {OPSM.stop(time_start) :.4f}s")
 
