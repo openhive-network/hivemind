@@ -103,8 +103,9 @@ async def list_communities(context, last='', limit=100, query=None, sort='rank',
     rows = await db.query_all(sql, observer=observer, last=last, search=search, limit=limit)
 
     result = remove_empty_admins_field(rows)
-    result['created_at'] = json_date(result['created_at'])
-
+    for r in range(len(result)):
+        result[r]['created_at'] = json_date(result[r]['created_at'])
+           
     return result
 
 
