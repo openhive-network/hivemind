@@ -174,6 +174,7 @@ class Blocks:
 
         log.info("#############################################################################")
         flush_time = register_time(flush_time, "Blocks", cls._flush_blocks())
+        return first_block, last_num
 
     @classmethod
     def process_multi(cls, blocks, is_initial_sync):
@@ -185,7 +186,7 @@ class Blocks:
 
         DB.query("START TRANSACTION")
 
-        cls.process_blocks(blocks)
+        first_block, last_num = cls.process_blocks(blocks)
 
         if not is_initial_sync:
             log.info("[PROCESS MULTI] Flushing data in 1 thread")
