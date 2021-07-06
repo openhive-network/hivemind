@@ -39,7 +39,7 @@ BEGIN
                         AND NOT EXISTS (SELECT NULL FROM hive_reblogs hr WHERE hr.blogger_id = __account_id AND hr.post_id = hp1.id)
                        )
           )
-    ORDER BY hfc.created_at DESC, hfc.post_id DESC
+    ORDER BY hfc.post_id DESC
     LIMIT _limit
   )
   SELECT
@@ -83,7 +83,7 @@ BEGIN
       NULL
     FROM blog,
     LATERAL get_post_view_by_id(blog.post_id) hp
-    ORDER BY blog.created_at DESC, blog.post_id DESC
+    ORDER BY blog.post_id DESC
     LIMIT _limit;
 END
 $function$
