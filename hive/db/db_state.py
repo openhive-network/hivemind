@@ -420,6 +420,16 @@ class DbState:
             log.info("[INIT] update_communities_posts_and_rank executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
+    def _finish_blocks_consistency_flag(cls, db, last_imported_block, current_imported_block):
+        with AutoDbDisposer(db, "finish_blocks_consistency_flag") as db_mgr:
+            time_start = perf_counter()
+            sql = """
+                  SELECT update_hive_blocks_consistency_flag({}, {});
+                  """.format(last_imported_block, current_imported_block)
+            cls._execute_query(db_mgr.db, sql)
+            log.info("[INIT] update_hive_blocks_consistency_flag executed in %.4fs", perf_counter() - time_start)
+
+    @classmethod
     def _finish_notification_cache(cls, db):
         with AutoDbDisposer(db, "finish_notification_cache") as db_mgr:
             time_start = perf_counter()
@@ -478,6 +488,7 @@ class DbState:
         methods.append( ('payout_stats_view', cls._finish_payout_stats_view, []) )
         methods.append( ('account_reputations', cls._finish_account_reputations, [cls.db(), last_imported_block, current_imported_block]) )
         methods.append( ('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]) )
+        methods.append( ('blocks_consistency_flag', cls._finish_blocks_consistency_flag, [cls.db(), last_imported_block, current_imported_block]) )
         cls.process_tasks_in_threads("[INIT] %i threads finished filling tables. Part nr 0", methods)
 
         methods = []

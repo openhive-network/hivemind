@@ -180,8 +180,6 @@ class Blocks:
     def process_multi(cls, blocks, is_initial_sync):
         """Batch-process blocks; wrapped in a transaction."""
 
-        cls._is_initial_sync = is_initial_sync
-
         time_start = OPSM.start()
 
         DB.query("START TRANSACTION")
@@ -427,7 +425,7 @@ class Blocks:
             values.append("({}, '{}', '{}', {}, {}, '{}', {})".format(block['num'], block['hash'],
                                                                   block['prev'], block['txs'],
                                                                   block['ops'], block['date'],
-                                                                  cls._is_initial_sync))
+                                                                  False))
         query = query + ",".join(values)
         DB.query_prepared(query)
         values.clear()
