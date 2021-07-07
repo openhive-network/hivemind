@@ -8,9 +8,14 @@ CREATE OR REPLACE FUNCTION update_hive_blocks_consistency_flag(
   VOLATILE 
 AS $BODY$
 BEGIN
+
+  IF _first_block_num IS NULL OR _last_block_num IS NULL THEN
+    RAISE EXCEPTION 'First/last block number is required' USING ERRCODE = 'CEHMA';
+  END IF;
+
   UPDATE hive_blocks
-  SET completed = true
-  WHERE (_first_block_num IS NULL AND _last_block_num IS NULL) OR (num BETWEEN _first_block_num AND _last_block_num);
+  SET completed = True
+  WHERE num BETWEEN _first_block_num AND _last_block_num;
 END
 $BODY$
 ;
