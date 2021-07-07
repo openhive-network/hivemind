@@ -6,7 +6,8 @@ set -o pipefail
 echo "Usage ./db_upgrade.sh <user-name> <db-name>"
 rm -f ./upgrade.log
 
-for sql in postgres_handle_view_changes.sql \
+for sql in upgrade/assert_public_schema.sql \
+          postgres_handle_view_changes.sql \
           upgrade/upgrade_table_schema.sql \
           utility_functions.sql \
           hive_accounts_view.sql \
