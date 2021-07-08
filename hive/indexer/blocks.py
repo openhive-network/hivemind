@@ -214,7 +214,7 @@ class Blocks:
 
                 # ABW: we could skip effective votes for those posts that we know will become paidout before
                 # massive sync ends (both total_vote_weight and pending_payout carried by this vop become zero
-                # when post is paid)
+                # when post is paid - the first one not in DB though but in API calls)
                 if key not in comment_payout_ops:
                     comment_payout_ops[key] = get_empty_ops()
 

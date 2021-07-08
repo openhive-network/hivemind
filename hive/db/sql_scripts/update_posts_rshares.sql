@@ -41,13 +41,7 @@ FROM
     GROUP BY hv.post_id
   ) as votes_rshares
 WHERE hp.id = votes_rshares.post_id
-AND NOT hp.is_paidout AND hp.counter_deleted = 0
-AND (
-  hp.abs_rshares != votes_rshares.abs_rshares
-  OR hp.vote_rshares != votes_rshares.rshares
-  OR hp.total_votes != votes_rshares.total_votes
-  OR hp.net_votes != votes_rshares.net_votes
-);
+AND NOT hp.is_paidout AND hp.counter_deleted = 0;
 RESET work_mem;
 RESET enable_seqscan;
 END;
