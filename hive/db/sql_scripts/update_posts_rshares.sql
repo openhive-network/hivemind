@@ -15,8 +15,8 @@ UPDATE hive_posts hp
 SET
     abs_rshares = votes_rshares.abs_rshares
   , vote_rshares = votes_rshares.rshares
-  , sc_hot = CASE hp.is_paidout WHEN True Then 0 ELSE calculate_hot( votes_rshares.rshares, hp.created_at) END
-  , sc_trend = CASE hp.is_paidout WHEN True Then 0 ELSE calculate_tranding( votes_rshares.rshares, hp.created_at) END
+  , sc_hot = calculate_hot( votes_rshares.rshares, hp.created_at)
+  , sc_trend = calculate_trending( votes_rshares.rshares, hp.created_at)
   , total_votes = votes_rshares.total_votes
   , net_votes = votes_rshares.net_votes
 FROM
@@ -25,10 +25,10 @@ FROM
         hv.post_id
       , SUM( hv.rshares ) as rshares
       , SUM( ABS( hv.rshares ) ) as abs_rshares
-      , SUM( CASE hv.is_effective WHEN True THEN 1 ELSE 0 END ) as total_votes
+      , SUM( 1 ) as total_votes
       , SUM( CASE
-              WHEN hv.rshares > 0 THEN 1
-              WHEN hv.rshares = 0 THEN 0
+              WHEN hv.vote_percent > 0 THEN 1
+              WHEN hv.vote_percent = 0 THEN 0
               ELSE -1
             END ) as net_votes
     FROM hive_votes hv
@@ -41,6 +41,7 @@ FROM
     GROUP BY hv.post_id
   ) as votes_rshares
 WHERE hp.id = votes_rshares.post_id
+AND NOT hp.is_paidout AND hp.counter_deleted = 0
 AND (
   hp.abs_rshares != votes_rshares.abs_rshares
   OR hp.vote_rshares != votes_rshares.rshares

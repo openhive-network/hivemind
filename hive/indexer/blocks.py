@@ -203,9 +203,18 @@ class Blocks:
                 comment_payout_ops[key][op_type] = ( op_value, date )
 
             elif op_type == VirtualOperationType.EffectiveCommentVote:
-                Votes.effective_comment_vote_op( op_value )
                 Reputations.process_vote(block_num, op_value)
+                # ABW: votes cast before HF1 (block 905693, timestamp 2016-04-25T17:30:00) have to be upscaled
+                # by 1mln - there is no need to scale it anywhere else because first payouts happened only after
+                # HF7; such scaling fixes some discrepancies in vote data of posts created before HF1
+                # (we don't touch reputation - yet - because it affects a lot of test patterns)
+                if block_num < 905693:
+                    op_value["rshares"] *= 1000000
+                Votes.effective_comment_vote_op( op_value )
 
+                # ABW: we could skip effective votes for those posts that we know will become paidout before
+                # massive sync ends (both total_vote_weight and pending_payout carried by this vop become zero
+                # when post is paid)
                 if key not in comment_payout_ops:
                     comment_payout_ops[key] = get_empty_ops()
 
@@ -217,7 +226,7 @@ class Blocks:
 
                 comment_payout_ops[key][op_type] = ( op_value, date )
 
-            elif op_type == VirtualOperationType.InnefectiveDeleteComment:
+            elif op_type == VirtualOperationType.IneffectiveDeleteComment:
                 ineffective_deleted_ops[key] = {}
 
             OPSM.op_stats(str(op_type), OPSM.stop(start))
