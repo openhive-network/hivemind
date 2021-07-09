@@ -282,8 +282,33 @@ class DbState:
               if massive_sync_preconditions:
                   cls._execute_query(db_mgr.db, "VACUUM ANALYZE hive_posts")
 
-            #UPDATE: `children`
             time_start = perf_counter()
+
+            log.info("[INIT] Starting creation of helper index: hive_votes_post_id_rshares_vote_is_effective_idx...")
+
+            cls._execute_query(db_mgr.db, "CREATE INDEX IF NOT EXISTS hive_votes_post_id_rshares_vote_is_effective_idx ON public.hive_votes (post_id ASC NULLS LAST, rshares ASC NULLS LAST, is_effective ASC NULLS LAST);")
+
+            log.info("[INIT] Index hive_votes_post_id_rshares_vote_is_effective_idx created in %.4fs", perf_counter() - time_start)
+
+            #UPDATE: `abs_rshares`, `vote_rshares`, `sc_hot`, ,`sc_trend`, `total_votes`, `net_votes`
+            time_start = perf_counter()
+            sql = """
+                  SELECT update_posts_rshares({}, {});
+                  """.format(last_imported_block, current_imported_block)
+            cls._execute_query(db_mgr.db, sql)
+            log.info("[INIT] update_posts_rshares executed in %.4fs", perf_counter() - time_start)
+
+
+            log.info("[INIT] Dropping a helper index: hive_votes_post_id_rshares_vote_is_effective_idx...")
+            time_start = perf_counter()
+
+            cls._execute_query(db_mgr.db, "DROP INDEX IF EXISTS hive_votes_post_id_rshares_vote_is_effective_idx;")
+
+            log.info("[INIT] Index hive_votes_post_id_rshares_vote_is_effective_idx dropped in %.4fs", perf_counter() - time_start)
+
+            time_start = perf_counter()
+
+            #UPDATE: `children`
             if massive_sync_preconditions:
                 # Update count of all child posts (what was hold during initial sync)
                 cls._execute_query(db_mgr.db, "select update_all_hive_posts_children_count()")
@@ -314,18 +339,6 @@ class DbState:
             time_start = perf_counter()
             update_active_starting_from_posts_on_block(last_imported_block, current_imported_block)
             log.info("[INIT] update_all_posts_active executed in %.4fs", perf_counter() - time_start)
-
-            time_start = perf_counter()
-            vacuum_hive_posts(cls)
-            log.info("[INIT] VACUUM ANALYZE hive_posts executed in %.4fs", perf_counter() - time_start)
-
-            #UPDATE: `abs_rshares`, `vote_rshares`, `sc_hot`, ,`sc_trend`, `total_votes`, `net_votes`
-            time_start = perf_counter()
-            sql = """
-                  SELECT update_posts_rshares({}, {});
-                  """.format(last_imported_block, current_imported_block)
-            cls._execute_query(db_mgr.db, sql)
-            log.info("[INIT] update_posts_rshares executed in %.4fs", perf_counter() - time_start)
 
             time_start = perf_counter()
             vacuum_hive_posts(cls)

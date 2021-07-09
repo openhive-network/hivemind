@@ -10,7 +10,7 @@ AS
 $BODY$
 BEGIN
 SET LOCAL work_mem='2GB';
-SET LOCAL enable_seqscan=False;
+
 UPDATE hive_posts hp
 SET
     abs_rshares = votes_rshares.abs_rshares
@@ -32,12 +32,12 @@ FROM
               ELSE -1
             END ) as net_votes
     FROM hive_votes hv
-    WHERE EXISTS
+    WHERE ((_last_block - _first_block) > 10000) OR ((_last_block - _first_block) <= 10000 AND EXISTS
       (
         SELECT NULL
         FROM hive_votes hv2
         WHERE hv2.post_id = hv.post_id AND hv2.block_num BETWEEN _first_block AND _last_block
-      )
+      ))
     GROUP BY hv.post_id
   ) as votes_rshares
 WHERE hp.id = votes_rshares.post_id
@@ -48,7 +48,7 @@ AND (
   OR hp.net_votes != votes_rshares.net_votes
 );
 RESET work_mem;
-RESET enable_seqscan;
+
 END;
 $BODY$
 ;
