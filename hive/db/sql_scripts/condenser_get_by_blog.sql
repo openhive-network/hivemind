@@ -34,7 +34,7 @@ BEGIN
     JOIN hive_feed_cache hfc ON hp.id = hfc.post_id
     WHERE hfc.account_id = __account_id 
       AND ( ( __post_id = 0 ) OR ( hfc.created_at <= __created_at ) )
-    ORDER BY hp.id DESC
+    ORDER BY hp.created_at DESC, hp.id DESC
     LIMIT _limit
   )
   SELECT
@@ -78,7 +78,7 @@ BEGIN
       NULL
     FROM blog_posts,
     LATERAL get_post_view_by_id(blog_posts.id) hp
-    ORDER BY hp.id DESC
+    ORDER BY hp.created_at DESC, hp.id DESC
     LIMIT _limit;
 
 END

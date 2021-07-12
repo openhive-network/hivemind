@@ -36,7 +36,7 @@ BEGIN
     WHERE hfc.block_num > __cutoff AND hf.state = 1 AND hf.follower = __account_id
     GROUP BY hfc.post_id
     HAVING __post_id = 0 OR MIN(hfc.created_at) < __min_date OR ( MIN(hfc.created_at) = __min_date AND hfc.post_id < __post_id )
-    ORDER BY hfc.post_id DESC
+    ORDER BY min_created DESC, hfc.post_id DESC
     LIMIT _limit
   )
   SELECT
@@ -80,7 +80,7 @@ BEGIN
       feed.reblogged_by
   FROM feed,
   LATERAL get_post_view_by_id(feed.post_id) hp
-  ORDER BY feed.post_id DESC
+  ORDER BY feed.min_created DESC, feed.post_id DESC
   LIMIT _limit;
 END
 $BODY$

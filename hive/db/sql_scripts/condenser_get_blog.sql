@@ -115,14 +115,14 @@ BEGIN
           hive_feed_cache hfc
       WHERE
           hfc.account_id = __account_id
-      ORDER BY hfc.post_id ASC
+      ORDER BY hfc.created_at ASC, hfc.post_id ASC
       LIMIT _limit
       OFFSET __offset
   ) as blog
   JOIN hive_posts hp ON hp.id = blog.post_id
   JOIN hive_accounts ha ON ha.id = hp.author_id
   JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
-  ORDER BY blog.post_id ASC;
+  ORDER BY blog.created_at ASC, blog.post_id ASC;
 END
 $function$
 language plpgsql STABLE;
