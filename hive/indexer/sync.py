@@ -136,6 +136,7 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
             log.info(timer.batch_status(prefix))
             log.info("%s Time elapsed: %fs", sync_type_prefix, time_current - time_start)
             log.info("%s Current system time: %s", sync_type_prefix, datetime.now().strftime("%H:%M:%S"))
+            log.info(log_memory_usage())
             rate = minmax(rate, len(blocks), time_current - time_before_waiting_for_data, lbound)
 
             if block_end - block_start > 1.0 or is_debug:
