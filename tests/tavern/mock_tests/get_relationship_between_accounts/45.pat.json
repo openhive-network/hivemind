@@ -1,0 +1,9 @@
+{
+  "blacklists": true,
+  "block_num": 2040000,
+  "created_at": "2016-06-04T01:04:36",
+  "follows": false,
+  "follows_blacklists": false,
+  "follows_muted": true,
+  "ignores": false
+}

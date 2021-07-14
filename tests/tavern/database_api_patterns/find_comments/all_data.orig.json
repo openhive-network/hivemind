@@ -1,0 +1,53 @@
+{
+  "comments": [
+    {
+      "abs_rshares": 0,
+      "active": "2016-08-03T13:23:48",
+      "allow_curation_rewards": true,
+      "allow_replies": true,
+      "allow_votes": true,
+      "author": "magicmonk",
+      "author_rewards": 831270,
+      "beneficiaries": [],
+      "body": "**Hello everyone on Steem!!**\n![My picture](https://fbcdn-sphotos-e-a.akamaihd.net/hphotos-ak-xfp1/t31.0-8/12698631_1001956866545660_8622549576218702447_o.jpg)\n\n**I am super excited** to finally be part of Steem! I have so much to share with you all and I look forward to learning with and from everyone here.\n\nMy name is Eddie and I'm 33 years old. I immigrated to New Zealand from Taiwan when I was 11 without speaking any English (except how are you). A lot of my childhood consisted of looking up words in the dictionary in order to do homework, but I am glad to have had that experience. After a bit of struggle, I finally graduated from high school and university and now I'm a permanent high school maths teacher, and my English is now the least of my worries. I currently live in my own house on an acreage in Brisbane Australia, and I wouldn't live anywhere else. I still speak fluent Chinese and a while ago, I went on the world's most viewed dating show \"If You Are The One\" in China as an Australian contestant, you can watch my appearance here:\n\nhttps://www.youtube.com/watch?v=OtTAPhJZ5JE\n\n### My interests and hobbies\n\n![My picture](https://scontent-syd1-1.xx.fbcdn.net/v/t1.0-9/12509060_977260735681940_6691008880673566787_n.jpg?oh=9ae2ac2e72e5f28e50de30857ac88b13&oe=57EB824F)\n\nOther than studying hard at mathematics and computers, I'm passionate about exercise. I have won two Brisbane Night Tennis Association competitions. I have competed in swing dance championships around Australia, and I regularly practice Tai Chi, Shaolin and Praying Mantis Kung Fu. I believe exercising improves health and having good health is important to living a good life.\n\n![My picture](https://scontent-syd1-1.xx.fbcdn.net/v/t1.0-9/1394472_553116498096368_370916207_n.jpg?oh=16881a36fb5ae8938a179ad91f197fc7&oe=58151298)\n\n### My history with Youtube\n\nA few years ago I saw Khan Academy on Youtube. He was a great teacher, however, we have a different maths curriculum here in Australia, so I decided to start my own math teaching on Youtube for Australian students. I have 3.5 million views now, and funnily enough most of my viewers are actually from overseas. I still work as a high school teacher full time so I don't have much time for Youtube, but I make videos when I can :) \n\nMy students were so impressed with my Youtube channel that one of my best students made this video about me. \n\nhttps://www.youtube.com/watch?v=wZskm-oETMY\n\nMy goal is to demystify maths and other difficult subjects such as computer programming and make them accessible to everyone. I use basic terms and I explain slowly so anyone can understand. I'm not very smart myself so if I can learn these things then anyone can. My lessons are structured so if you watch my videos from beginning to end on the playlist, you can learn everything from basic algebra to Calculus. \n\nhttps://www.youtube.com/watch?v=rBf1eYwwQFE\n\nI believe Steem will benefit from my participation as I will link my articles to my website http://magicmonk.org and my Youtube channel so they will bring more users to Steem.\n\n**Please feel free to share your ideas, advice, feedback with me. I look forward to hearing from you all!!**",
+      "cashout_time": "1969-12-31T23:59:59",
+      "category": "introduceyourself",
+      "children": 60,
+      "children_abs_rshares": 0,
+      "created": "2016-07-24T04:52:48",
+      "curator_payout_value": {
+        "amount": "248842",
+        "nai": "@@000000013",
+        "precision": 3
+      },
+      "depth": 0,
+      "id": 227413,
+      "json_metadata": "{\"tags\":[\"introduceyourself\"],\"links\":[\"https://www.youtube.com/watch?v=OtTAPhJZ5JE\"]}",
+      "last_payout": "2016-08-24T06:35:09",
+      "last_update": "2016-07-24T09:39:24",
+      "max_accepted_payout": {
+        "amount": "1000000000",
+        "nai": "@@000000013",
+        "precision": 3
+      },
+      "max_cashout_time": "1969-12-31T23:59:59",
+      "net_rshares": 0,
+      "net_votes": 265,
+      "parent_author": "",
+      "parent_permlink": "introduceyourself",
+      "percent_steem_dollars": 10000,
+      "permlink": "hello-steemit-my-name-s-eddie-a-k-a-the-magic-monk-i-am-a-youtuber-and-a-high-school-teacher-let-the-writing-begin",
+      "reward_weight": 10000,
+      "root_author": "magicmonk",
+      "root_permlink": "hello-steemit-my-name-s-eddie-a-k-a-the-magic-monk-i-am-a-youtuber-and-a-high-school-teacher-let-the-writing-begin",
+      "title": "Hello Steemit! My name's Eddie (a.k.a. the Magic Monk), I am a Youtuber and a high school teacher! Let the writing begin!",
+      "total_payout_value": {
+        "amount": "3020002",
+        "nai": "@@000000013",
+        "precision": 3
+      },
+      "total_vote_weight": 0,
+      "vote_rshares": 0
+    }
+  ]
+}

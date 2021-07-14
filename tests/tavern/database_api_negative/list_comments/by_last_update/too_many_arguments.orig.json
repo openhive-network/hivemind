@@ -1,0 +1,23 @@
+{
+  "code": -32003,
+  "data": {
+    "code": 10,
+    "message": "Assert Exception",
+    "name": "assert_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "database_api.cpp",
+          "hostname": "",
+          "level": "error",
+          "line": 1101,
+          "method": "list_comments",
+          "timestamp": "2020-10-12T14:19:52"
+        },
+        "data": {},
+        "format": "key.size() == 4: by_last_update start requires 4 values. (account_name_type, time_point_sec, account_name_type, string)"
+      }
+    ]
+  },
+  "message": "Assert Exception:key.size() == 4: by_last_update start requires 4 values. (account_name_type, time_point_sec, account_name_type, string)"
+}
