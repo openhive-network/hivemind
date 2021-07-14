@@ -1,0 +1,25 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.list_community_roles"
+          params: {"community":"hive-186669"}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern
