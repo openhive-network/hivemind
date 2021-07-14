@@ -6,6 +6,7 @@ set -euo pipefail
 RUNNER_HIVEMIND_SYNC_MAX_BLOCK=5000026
 # RUNNER_HIVED_URL='{"default":"http://hived-node:8091"}'
 # RUNNER_HIVED_URL='{"default":"http://172.17.0.1:8091"}'
+RUNNER_HIVED_URL='{"default":"hive-4.pl.syncad.com:28091"}'
 
 hive_sync() {
     # Start hive sync process
