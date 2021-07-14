@@ -111,8 +111,8 @@ END;
 $BODY$
 ;
 
-DROP FUNCTION IF EXISTS public.calculate_tranding(hive_posts.vote_rshares%TYPE, hive_posts.created_at%TYPE);
-CREATE OR REPLACE FUNCTION public.calculate_tranding(
+DROP FUNCTION IF EXISTS public.calculate_trending(hive_posts.vote_rshares%TYPE, hive_posts.created_at%TYPE);
+CREATE OR REPLACE FUNCTION public.calculate_trending(
     _rshares hive_posts.vote_rshares%TYPE,
     _post_created_at hive_posts.created_at%TYPE)
 RETURNS hive_posts.sc_trend%TYPE

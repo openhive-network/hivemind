@@ -11,6 +11,7 @@ log = logging.getLogger(__name__)
 class Votes(DbAdapterHolder):
     """ Class for managing posts votes """
     _votes_data = collections.OrderedDict()
+    _votes_per_post = {}
 
     inside_flush = False
 
@@ -27,13 +28,18 @@ class Votes(DbAdapterHolder):
             log.exception("Adding new vote-info into '_votes_data' dict")
             raise RuntimeError("Fatal error")
 
-        key = "{}/{}/{}".format(voter, author, permlink)
+        post_key = "{}/{}".format(author, permlink)
+        key = "{}/{}".format(voter, post_key)
 
         if key in cls._votes_data:
-            cls._votes_data[key]["vote_percent"] = weight
-            cls._votes_data[key]["last_update"] = date
+            vote_data = cls._votes_data[key]
+            vote_data["vote_percent"] = weight
+            vote_data["last_update"] = date
             # only effective vote edits increase num_changes counter
         else:
+            if not post_key in cls._votes_per_post:
+                cls._votes_per_post[post_key] = []
+            cls._votes_per_post[post_key].append(voter)
             cls._votes_data[key] = dict(voter=voter,
                                         author=author,
                                         permlink=escape_characters(permlink),
@@ -46,18 +52,38 @@ class Votes(DbAdapterHolder):
                                         block_num=block_num)
 
     @classmethod
+    def drop_votes_of_deleted_comment(cls, comment_delete_operation):
+        """ Remove cached votes for comment that was deleted """
+        # ABW: note that it only makes difference when comment was deleted and its author/permlink
+        # reused in the same pack of blocks - in case of no reuse, votes on deleted comment won't
+        # make it to the DB due to "counter_deleted = 0" condition and "INNER JOIN hive_posts"
+        # while votes from previous packs will remain in DB (they can be accessed with
+        # database_api.list_votes so it is not entirely inconsequential)
+        post_key = "{}/{}".format(comment_delete_operation["author"], comment_delete_operation["permlink"])
+        if post_key in cls._votes_per_post:
+            for voter in cls._votes_per_post[post_key]:
+                key = "{}/{}".format(voter, post_key)
+                del cls._votes_data[key]
+            del cls._votes_per_post[post_key]
+
+    @classmethod
     def effective_comment_vote_op(cls, vop):
         """ Process effective_comment_vote_operation """
 
-        key = "{}/{}/{}".format(vop['voter'], vop['author'], vop['permlink'])
+        post_key = "{}/{}".format(vop['author'], vop['permlink'])
+        key = "{}/{}".format(vop['voter'], post_key)
 
         if key in cls._votes_data:
-            cls._votes_data[key]["weight"]       = vop["weight"]
-            cls._votes_data[key]["rshares"]      = vop["rshares"]
-            cls._votes_data[key]["is_effective"] = True
-            cls._votes_data[key]["num_changes"] += 1
-            cls._votes_data[key]["block_num"]    = vop["block_num"]
+            vote_data = cls._votes_data[key]
+            vote_data["weight"]       = vop["weight"]
+            vote_data["rshares"]      = vop["rshares"]
+            vote_data["is_effective"] = True
+            vote_data["num_changes"] += 1
+            vote_data["block_num"]    = vop["block_num"]
         else:
+            if not post_key in cls._votes_per_post:
+                cls._votes_per_post[post_key] = []
+            cls._votes_per_post[post_key].append(vop['voter'])
             cls._votes_data[key] = dict(voter=vop["voter"],
                                         author=vop["author"],
                                         permlink=escape_characters(vop["permlink"]),
@@ -131,6 +157,7 @@ class Votes(DbAdapterHolder):
 
             n = len(cls._votes_data)
             cls._votes_data.clear()
+            cls._votes_per_post.clear()
             cls.commitTx()
 
         cls.inside_flush = False

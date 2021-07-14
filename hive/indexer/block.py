@@ -11,7 +11,7 @@ class VirtualOperationType(Enum):
     CommentReward = 2
     EffectiveCommentVote = 3
     CommentPayoutUpdate = 4
-    InnefectiveDeleteComment = 5
+    IneffectiveDeleteComment = 5
 
     def from_name( operation_name ):
         if operation_name == 'author_reward_operation':
@@ -21,7 +21,7 @@ class VirtualOperationType(Enum):
         if operation_name == 'effective_comment_vote_operation':
             return VirtualOperationType.EffectiveCommentVote
         if operation_name == 'ineffective_delete_comment_operation':
-            return VirtualOperationType.InnefectiveDeleteComment
+            return VirtualOperationType.IneffectiveDeleteComment
         if operation_name == 'comment_payout_update_operation':
             return VirtualOperationType.CommentPayoutUpdate
 
