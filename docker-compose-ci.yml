@@ -113,8 +113,8 @@ services:
     image: $HIVED_IMAGE
     restart: unless-stopped
     ports:
-      - "$HIVED_PUBLISHED_WS_PORT:8090" # websocket
-      - "$HIVED_PUBLISHED_HTTP_PORT:8091"
+      - "$HIVED_PUBLISHED_WS_PORT:28090" # websocket
+      - "$HIVED_PUBLISHED_HTTP_PORT:28091"
     shm_size: 12g
     entrypoint: /usr/local/hive/consensus/entrypoint.sh
     command: [

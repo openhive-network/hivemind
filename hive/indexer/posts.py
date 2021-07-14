@@ -136,7 +136,11 @@ class Posts(DbAdapterHolder):
                   last_payout_at        = COALESCE( CAST( data_source.last_payout_at as TIMESTAMP ),    ihp.last_payout_at ),
                   cashout_time          = COALESCE( CAST( data_source.cashout_time as TIMESTAMP ),      ihp.cashout_time ),
                   is_paidout            = COALESCE( CAST( data_source.is_paidout as BOOLEAN ),          ihp.is_paidout ),
-                  total_vote_weight     = COALESCE( CAST( data_source.total_vote_weight as NUMERIC ),   ihp.total_vote_weight )
+                  total_vote_weight     = COALESCE( CAST( data_source.total_vote_weight as NUMERIC ),   ihp.total_vote_weight ),
+                  total_votes           = COALESCE( CAST( data_source.total_votes as BIGINT ),          ihp.total_votes ),
+                  net_votes             = COALESCE( CAST( data_source.net_votes as BIGINT ),            ihp.net_votes ),
+                  abs_rshares           = CAST( data_source.abs_rshares as NUMERIC ) + ihp.abs_rshares,
+                  vote_rshares          = CAST( data_source.net_rshares as NUMERIC ) + CASE WHEN ihp.vote_rshares < 0 THEN 0::NUMERIC ELSE ihp.vote_rshares END
               FROM
               (
               SELECT  ha_a.id as author_id, hpd_p.id as permlink_id,
@@ -152,7 +156,11 @@ class Posts(DbAdapterHolder):
                       t.last_payout_at,
                       t.cashout_time,
                       t.is_paidout,
-                      t.total_vote_weight
+                      t.total_vote_weight,
+                      t.total_votes,
+                      t.net_votes,
+                      t.abs_rshares,
+                      t.net_rshares
               from
               (
               VALUES
@@ -171,7 +179,11 @@ class Posts(DbAdapterHolder):
                       last_payout_at,
                       cashout_time,
                       is_paidout,
-                      total_vote_weight)
+                      total_vote_weight,
+                      total_votes,
+                      net_votes,
+                      abs_rshares,
+                      net_rshares)
               INNER JOIN hive_accounts ha_a ON ha_a.name = t.author
               INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
               ) as data_source
@@ -224,6 +236,11 @@ class Posts(DbAdapterHolder):
 
             total_vote_weight         = None
 
+            total_votes               = None
+            net_votes                 = None
+            abs_rshares               = 0
+            net_rshares               = 0
+
             # [final] payout indicator - by default all rewards are zero, but might be overwritten by other operations
             # ABW: prior to some early HF that was not necessarily final payout since those were discussion driven so new comment/vote could trigger new cashout window, see f.e.
             # soulsistashakti/re-emily-cook-let-me-introduce-myself-my-name-is-emily-cook-and-i-m-the-producer-and-presenter-of-a-monthly-film-show-film-focus-20160701t012330329z
@@ -233,12 +250,21 @@ class Posts(DbAdapterHolder):
               if author is None:
                 author = value['author']
                 permlink = value['permlink']
-              is_paidout              = True
-              payout_at               = date
-              last_payout_at          = date
-              cashout_time            = "infinity"
 
-              pending_payout          = 0
+              if value['new_cashout'][0:4] == '1969':
+                is_paidout              = True
+                cashout_time            = "infinity"
+                pending_payout          = 0
+                payout_at               = date
+              #else:
+              # ABW: formally the lines below would be correct but they'd only affect test patterns and nothing else
+              #  cashout_time            = value['new_cashout']
+              #  payout_at               = cashout_time
+              last_payout_at          = date
+              total_votes             = value["total_votes"]
+              net_votes               = value["net_votes"]
+              abs_rshares             = value["abs_rshares"]
+              net_rshares             = value["net_rshares"]
 
             # author rewards in current (final or nonfinal) payout (always comes with comment_reward_operation)
             if v[ VirtualOperationType.AuthorReward ] is not None:
@@ -277,7 +303,7 @@ class Posts(DbAdapterHolder):
               total_vote_weight       = value['total_vote_weight']
 
 
-            cls._comment_payout_ops.append("('{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(
+            cls._comment_payout_ops.append("('{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(
               author,
               escape_characters(permlink),
               "NULL" if ( total_payout_value is None ) else ( "'{}'".format( legacy_amount(total_payout_value) ) ),
@@ -295,7 +321,12 @@ class Posts(DbAdapterHolder):
 
               "NULL" if ( is_paidout is None ) else is_paidout,
 
-              "NULL" if ( total_vote_weight is None ) else total_vote_weight ))
+              "NULL" if ( total_vote_weight is None ) else total_vote_weight,
+
+              "NULL" if ( total_votes is None ) else total_votes,
+              "NULL" if ( net_votes is None ) else net_votes,
+              abs_rshares,
+              net_rshares ))
 
 
         n = len(cls.comment_payout_ops)
