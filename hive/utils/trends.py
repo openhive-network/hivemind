@@ -3,19 +3,21 @@ from hive.utils.timer import time_it
 
 DB = Db.instance()
 
-def update_all_hot_and_tranding():
+def update_all_hot_and_trending():
     """Calculate and set hot and trending values of all posts"""
-    update_hot_and_tranding_for_block_range()
+    # NOT USED!!!
+    update_hot_and_trending_for_block_range()
 
 NO_CONSTRAINT = -1
 
 @time_it
-def update_hot_and_tranding_for_block_range( first_block = NO_CONSTRAINT, last_block = NO_CONSTRAINT):
+def update_hot_and_trending_for_block_range( first_block = NO_CONSTRAINT, last_block = NO_CONSTRAINT):
     """Calculate and set hot and trending values of all posts"""
+    # NOT USED!!!
     hot_and_trend_sql = """
         UPDATE hive_posts ihp
             set sc_hot = calculate_hot(ds.rshares_sum, ihp.created_at),
-            sc_trend = calculate_tranding(ds.rshares_sum, ihp.created_at)
+            sc_trend = calculate_trending(ds.rshares_sum, ihp.created_at)
         FROM
         (
             SELECT hv.post_id as id, CAST(sum(hv.rshares) AS BIGINT) as rshares_sum

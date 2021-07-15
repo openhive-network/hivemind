@@ -150,7 +150,7 @@ def build_metadata():
         sa.Index('hive_posts_block_num_created_idx', 'block_num_created'),
         sa.Index('hive_posts_cashout_time_id_idx', 'cashout_time', 'id'),
         sa.Index('hive_posts_updated_at_idx', sa.text('updated_at DESC')),
-        sa.Index('hive_posts_payout_plus_pending_payout_id_idx', sa.text('(payout+pending_payout), id, is_paidout'), postgresql_where=sql_text("counter_deleted = 0 AND NOT is_paidout")),
+        sa.Index('hive_posts_payout_plus_pending_payout_id_idx', sa.text('(payout+pending_payout), id'), postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0")),
         sa.Index('hive_posts_category_id_payout_plus_pending_payout_depth_idx', sa.text('category_id, (payout+pending_payout), depth'), postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0")),
         sa.Index('hive_posts_tags_ids_idx', 'tags_ids', postgresql_using="gin", postgresql_ops={'tags_ids': 'gin__int_ops'})
         )
