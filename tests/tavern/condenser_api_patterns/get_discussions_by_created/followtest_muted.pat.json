@@ -4,19 +4,19 @@
       {
         "percent": "-100",
         "reputation": 13270505121655,
-        "rshares": -936400,
+        "rshares": -936400000000,
         "voter": "ned"
       },
       {
         "percent": "10000",
         "reputation": 0,
-        "rshares": 555772,
+        "rshares": 555772000000,
         "voter": "gilead"
       },
       {
         "percent": "10000",
         "reputation": 997596889281,
-        "rshares": 1777695,
+        "rshares": 1777695000000,
         "voter": "puppies"
       },
       {
@@ -28,25 +28,25 @@
       {
         "percent": "10000",
         "reputation": 16685610555705,
-        "rshares": 12936224,
+        "rshares": 12936224000000,
         "voter": "tombstone"
       },
       {
         "percent": "100",
         "reputation": 1993860928264,
-        "rshares": 1441,
+        "rshares": 1441000000,
         "voter": "red"
       },
       {
         "percent": "10000",
         "reputation": 6136296747,
-        "rshares": 128626,
+        "rshares": 128626000000,
         "voter": "bastiat"
       },
       {
         "percent": "100",
         "reputation": 75253737,
-        "rshares": 211,
+        "rshares": 211000000,
         "voter": "salvation"
       },
       {
@@ -77,7 +77,7 @@
     "last_payout": "2016-08-03T00:00:06",
     "last_update": "2016-04-11T05:45:30",
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 392722055850,
+    "net_rshares": 14856276592281,
     "parent_author": "",
     "parent_permlink": "quotes",
     "pending_payout_value": "0.000 HBD",
@@ -96,37 +96,37 @@
       {
         "percent": "-100",
         "reputation": 145171381514207,
-        "rshares": -376603,
+        "rshares": -376603000000,
         "voter": "dantheman"
       },
       {
         "percent": "-100",
         "reputation": 8151223409709,
-        "rshares": -325317,
+        "rshares": -325317000000,
         "voter": "rainman"
       },
       {
         "percent": "-10000",
         "reputation": 42786247901122,
-        "rshares": -46820000,
+        "rshares": -46820000000000,
         "voter": "dan"
       },
       {
         "percent": "-100",
         "reputation": 13270505121655,
-        "rshares": -936400,
+        "rshares": -936400000000,
         "voter": "ned"
       },
       {
         "percent": "10000",
         "reputation": 0,
-        "rshares": 555772,
+        "rshares": 555772000000,
         "voter": "gilead"
       },
       {
         "percent": "10000",
         "reputation": 997596889281,
-        "rshares": 1777404,
+        "rshares": 1777404000000,
         "voter": "puppies"
       },
       {
@@ -138,37 +138,37 @@
       {
         "percent": "-100",
         "reputation": 51047995307721,
-        "rshares": -47778,
+        "rshares": -47778000000,
         "voter": "pharesim"
       },
       {
         "percent": "10000",
         "reputation": 0,
-        "rshares": 840919,
+        "rshares": 840919000000,
         "voter": "meow"
       },
       {
         "percent": "10000",
         "reputation": 16685610555705,
-        "rshares": 13193749,
+        "rshares": 13193749000000,
         "voter": "tombstone"
       },
       {
         "percent": "100",
         "reputation": 1993860928264,
-        "rshares": 1441,
+        "rshares": 1441000000,
         "voter": "red"
       },
       {
         "percent": "10000",
         "reputation": 9800209121307,
-        "rshares": 46392,
+        "rshares": 46392000000,
         "voter": "roadscape"
       },
       {
         "percent": "100",
         "reputation": 75253737,
-        "rshares": 211,
+        "rshares": 211000000,
         "voter": "salvation"
       }
     ],
@@ -187,7 +187,7 @@
     "last_payout": "2016-08-03T00:00:06",
     "last_update": "2016-04-11T03:38:06",
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 343908745583,
+    "net_rshares": -31746269164207,
     "parent_author": "",
     "parent_permlink": "quotes",
     "pending_payout_value": "0.000 HBD",

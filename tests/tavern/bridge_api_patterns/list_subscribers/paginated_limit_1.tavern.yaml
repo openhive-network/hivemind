@@ -18,7 +18,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.list_subscribers"
-          params: {"community":"hive-171488", "last": "roadscape"}
+          params: {"community":"hive-171488", "last": "roadscape", "limit": 1}
       response:
         status_code: 200
         verify_response_with:

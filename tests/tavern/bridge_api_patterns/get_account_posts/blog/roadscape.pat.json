@@ -150,19 +150,19 @@
         "voter": "dantheman"
       },
       {
-        "rshares": 2603246,
+        "rshares": 2603246000000,
         "voter": "fminerten"
       },
       {
-        "rshares": 2583596,
+        "rshares": 2583596000000,
         "voter": "steempty"
       },
       {
-        "rshares": 16593109,
+        "rshares": 16593109000000,
         "voter": "rainman"
       },
       {
-        "rshares": 30005989,
+        "rshares": 30005989000000,
         "voter": "berniesanders"
       },
       {
@@ -170,19 +170,19 @@
         "voter": "berkah"
       },
       {
-        "rshares": 170226,
+        "rshares": 170226000000,
         "voter": "dele-puppy"
       },
       {
-        "rshares": 138567,
+        "rshares": 138567000000,
         "voter": "xeldal"
       },
       {
-        "rshares": 79912,
+        "rshares": 79912000000,
         "voter": "adol"
       },
       {
-        "rshares": 5068237,
+        "rshares": 5068237000000,
         "voter": "enki"
       },
       {
@@ -190,7 +190,7 @@
         "voter": "lafona"
       },
       {
-        "rshares": 766236,
+        "rshares": 766236000000,
         "voter": "justin"
       },
       {
@@ -202,7 +202,7 @@
         "voter": "nextgencrypto"
       },
       {
-        "rshares": 477042,
+        "rshares": 477042000000,
         "voter": "roadscape"
       },
       {
@@ -210,11 +210,11 @@
         "voter": "xeroc"
       },
       {
-        "rshares": 15180,
+        "rshares": 15180000000,
         "voter": "steem-id"
       },
       {
-        "rshares": 520816,
+        "rshares": 520816000000,
         "voter": "clayop"
       },
       {
@@ -226,7 +226,7 @@
         "voter": "bhuz"
       },
       {
-        "rshares": 138837,
+        "rshares": 138837000000,
         "voter": "au1nethyb1"
       },
       {
@@ -344,7 +344,7 @@
     "is_paidout": true,
     "json_metadata": {},
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 22810253455193,
+    "net_rshares": 81971187294200,
     "payout": 562.885,
     "payout_at": "2016-08-21T15:28:39",
     "pending_payout_value": "0.000 HBD",
@@ -374,7 +374,7 @@
         "voter": "rainman"
       },
       {
-        "rshares": 14110110,
+        "rshares": 14110110000000,
         "voter": "summon"
       },
       {
@@ -382,15 +382,15 @@
         "voter": "blocktrades"
       },
       {
-        "rshares": 47756400,
+        "rshares": 47756400000000,
         "voter": "ned"
       },
       {
-        "rshares": 435517,
+        "rshares": 435517000000,
         "voter": "riverhead"
       },
       {
-        "rshares": 1853610,
+        "rshares": 1853610000000,
         "voter": "wackou"
       },
       {
@@ -398,11 +398,11 @@
         "voter": "badassmother"
       },
       {
-        "rshares": 43318,
+        "rshares": 43318000000,
         "voter": "xeldal"
       },
       {
-        "rshares": 4968859,
+        "rshares": 4968859000000,
         "voter": "enki"
       },
       {
@@ -422,7 +422,7 @@
         "voter": "roadscape"
       },
       {
-        "rshares": 31848,
+        "rshares": 31848000000,
         "voter": "jabbasteem"
       },
       {
@@ -430,7 +430,7 @@
         "voter": "steemit200"
       },
       {
-        "rshares": 260,
+        "rshares": 260000000,
         "voter": "clayop"
       },
       {
@@ -438,7 +438,7 @@
         "voter": "joseph"
       },
       {
-        "rshares": 1343,
+        "rshares": 1343000000,
         "voter": "steemian"
       },
       {
@@ -482,7 +482,7 @@
         "voter": "esteem"
       },
       {
-        "rshares": 19199,
+        "rshares": 19199000000,
         "voter": "cass"
       },
       {
@@ -712,7 +712,7 @@
     "is_paidout": true,
     "json_metadata": {},
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 55658033056809,
+    "net_rshares": 124878427836345,
     "payout": 1285.247,
     "payout_at": "2016-08-21T15:29:00",
     "pending_payout_value": "0.000 HBD",
@@ -734,55 +734,55 @@
   {
     "active_votes": [
       {
-        "rshares": 5217,
+        "rshares": 5217000000,
         "voter": "fmooo"
       },
       {
-        "rshares": 16265859,
+        "rshares": 16265859000000,
         "voter": "rainman"
       },
       {
-        "rshares": 600119,
+        "rshares": 600119000000,
         "voter": "berniesanders"
       },
       {
-        "rshares": 100,
+        "rshares": 100000000,
         "voter": "donalddrumpf"
       },
       {
-        "rshares": -936400,
+        "rshares": -936400000000,
         "voter": "ned"
       },
       {
-        "rshares": 48857,
+        "rshares": 48857000000,
         "voter": "puppies"
       },
       {
-        "rshares": 5178,
+        "rshares": 5178000000,
         "voter": "nextgenwitness"
       },
       {
-        "rshares": 103341,
+        "rshares": 103341000000,
         "voter": "lafona"
       },
       {
-        "rshares": 319505,
+        "rshares": 319505000000,
         "voter": "lafona5"
       },
       {
-        "rshares": 211,
+        "rshares": 211000000,
         "voter": "salvation"
       },
       {
-        "rshares": 2,
+        "rshares": 2000000,
         "voter": "taylorswift"
       },
       {
-        "rshares": 26,
+        "rshares": 26000000,
         "voter": "steemian"
       },
       {
-        "rshares": 8005,
+        "rshares": 8005000000,
         "voter": "markopaasila"
       },
       {
@@ -844,7 +844,7 @@
     "is_paidout": true,
     "json_metadata": {},
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 59676222329,
+    "net_rshares": 16479679802309,
     "payout": 26.948,
     "payout_at": "2016-08-13T00:29:33",
     "pending_payout_value": "0.000 HBD",
@@ -854,7 +854,7 @@
     "promoted": "0.000 HBD",
     "replies": [],
     "stats": {
-      "flag_weight": 0.0,
+      "flag_weight": 2.0,
       "gray": false,
       "hide": false,
       "total_votes": 21

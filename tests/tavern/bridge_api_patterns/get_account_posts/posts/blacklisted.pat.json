@@ -8333,7 +8333,7 @@
         "voter": "dantheman"
       },
       {
-        "rshares": 38536,
+        "rshares": 38536000000,
         "voter": "fminerten1"
       },
       {
@@ -8341,7 +8341,7 @@
         "voter": "barrie"
       },
       {
-        "rshares": 16267754,
+        "rshares": 16267754000000,
         "voter": "rainman"
       },
       {
@@ -8349,11 +8349,11 @@
         "voter": "berniesanders"
       },
       {
-        "rshares": 47756400,
+        "rshares": 47756400000000,
         "voter": "ned"
       },
       {
-        "rshares": 394924,
+        "rshares": 394924000000,
         "voter": "riverhead"
       },
       {
@@ -8361,19 +8361,19 @@
         "voter": "badassmother"
       },
       {
-        "rshares": 248573,
+        "rshares": 248573000000,
         "voter": "nextgenwitness"
       },
       {
-        "rshares": 43318,
+        "rshares": 43318000000,
         "voter": "xeldal"
       },
       {
-        "rshares": 4968859,
+        "rshares": 4968859000000,
         "voter": "enki"
       },
       {
-        "rshares": 751212,
+        "rshares": 751212000000,
         "voter": "justin"
       },
       {
@@ -8381,11 +8381,11 @@
         "voter": "abit"
       },
       {
-        "rshares": 1008027,
+        "rshares": 1008027000000,
         "voter": "nextgencrypto"
       },
       {
-        "rshares": 31848,
+        "rshares": 31848000000,
         "voter": "jabbasteem"
       },
       {
@@ -8397,7 +8397,7 @@
         "voter": "ozmaster"
       },
       {
-        "rshares": -15642,
+        "rshares": -15642000000,
         "voter": "xeroc"
       },
       {
@@ -8405,11 +8405,11 @@
         "voter": "bunny"
       },
       {
-        "rshares": 135107,
+        "rshares": 135107000000,
         "voter": "clayop"
       },
       {
-        "rshares": 253289,
+        "rshares": 253289000000,
         "voter": "joseph"
       },
       {
@@ -8421,7 +8421,7 @@
         "voter": "au1nethyb1"
       },
       {
-        "rshares": 2095514,
+        "rshares": 2095514000000,
         "voter": "recursive"
       },
       {
@@ -8453,7 +8453,7 @@
         "voter": "boatymcboatface"
       },
       {
-        "rshares": 86,
+        "rshares": 86000000,
         "voter": "officialfuzzy"
       },
       {
@@ -8465,7 +8465,7 @@
         "voter": "esteem"
       },
       {
-        "rshares": 8158,
+        "rshares": 8158000000,
         "voter": "pheonike"
       },
       {
@@ -8623,7 +8623,7 @@
     "is_paidout": true,
     "json_metadata": {},
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": -30846935718161,
+    "net_rshares": 43138953295876,
     "payout": 447.607,
     "payout_at": "2016-08-25T12:57:36",
     "pending_payout_value": "0.000 HBD",
@@ -8645,7 +8645,7 @@
   {
     "active_votes": [
       {
-        "rshares": 5217,
+        "rshares": 5217000000,
         "voter": "fmooo"
       },
       {
@@ -8653,23 +8653,23 @@
         "voter": "barrie"
       },
       {
-        "rshares": 26763,
+        "rshares": 26763000000,
         "voter": "anonymous"
       },
       {
-        "rshares": 936400,
+        "rshares": 936400000000,
         "voter": "ned"
       },
       {
-        "rshares": 849,
+        "rshares": 849000000,
         "voter": "xeldal"
       },
       {
-        "rshares": 19364,
+        "rshares": 19364000000,
         "voter": "samupaha"
       },
       {
-        "rshares": -15642,
+        "rshares": -15642000000,
         "voter": "xeroc"
       },
       {
@@ -8787,7 +8787,7 @@
     "is_paidout": true,
     "json_metadata": {},
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 2168046022580,
+    "net_rshares": 3140996049629,
     "payout": 1.762,
     "payout_at": "2016-08-22T03:25:54",
     "pending_payout_value": "0.000 HBD",
@@ -8809,7 +8809,7 @@
   {
     "active_votes": [
       {
-        "rshares": 936400,
+        "rshares": 936400000000,
         "voter": "ned"
       },
       {
@@ -8943,7 +8943,7 @@
     "is_paidout": true,
     "json_metadata": {},
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 1950300582454,
+    "net_rshares": 2886699646054,
     "payout": 1.571,
     "payout_at": "2016-08-25T13:06:45",
     "pending_payout_value": "0.000 HBD",

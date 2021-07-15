@@ -13,7 +13,7 @@
     {
       "percent": 10000,
       "reputation": 446491524573,
-      "rshares": 38536,
+      "rshares": 38536000000,
       "time": "2016-04-24T05:48:27",
       "voter": "fminerten1",
       "weight": 7650
@@ -29,7 +29,7 @@
     {
       "percent": 10000,
       "reputation": 8151223409709,
-      "rshares": 16267754,
+      "rshares": 16267754000000,
       "time": "2016-04-25T06:31:03",
       "voter": "rainman",
       "weight": 397852479922
@@ -45,7 +45,7 @@
     {
       "percent": 10000,
       "reputation": 13270505121655,
-      "rshares": 47756400,
+      "rshares": 47756400000000,
       "time": "2016-04-22T12:54:24",
       "voter": "ned",
       "weight": 47756400000000
@@ -53,7 +53,7 @@
     {
       "percent": 10000,
       "reputation": 8779714777561,
-      "rshares": 394924,
+      "rshares": 394924000000,
       "time": "2016-04-22T17:48:39",
       "voter": "riverhead",
       "weight": 20038669
@@ -69,7 +69,7 @@
     {
       "percent": 10000,
       "reputation": 9326993992,
-      "rshares": 248573,
+      "rshares": 248573000000,
       "time": "2016-04-22T18:06:03",
       "voter": "nextgenwitness",
       "weight": 4952272
@@ -77,7 +77,7 @@
     {
       "percent": 10000,
       "reputation": 8272495818727,
-      "rshares": 43318,
+      "rshares": 43318000000,
       "time": "2016-04-22T13:34:39",
       "voter": "xeldal",
       "weight": 35575
@@ -85,7 +85,7 @@
     {
       "percent": 10000,
       "reputation": 1049211085828,
-      "rshares": 4968859,
+      "rshares": 4968859000000,
       "time": "2016-04-22T15:48:21",
       "voter": "enki",
       "weight": 43978245909
@@ -93,7 +93,7 @@
     {
       "percent": 10000,
       "reputation": 608057298751,
-      "rshares": 751212,
+      "rshares": 751212000000,
       "time": "2016-04-24T03:55:33",
       "voter": "justin",
       "weight": 56726103
@@ -109,7 +109,7 @@
     {
       "percent": 10000,
       "reputation": 27931460807554,
-      "rshares": 1008027,
+      "rshares": 1008027000000,
       "time": "2016-04-24T07:15:57",
       "voter": "nextgencrypto",
       "weight": 133801075
@@ -117,7 +117,7 @@
     {
       "percent": 10000,
       "reputation": 1357335712177,
-      "rshares": 31848,
+      "rshares": 31848000000,
       "time": "2016-04-22T14:27:24",
       "voter": "jabbasteem",
       "weight": 14119
@@ -141,7 +141,7 @@
     {
       "percent": -100,
       "reputation": 89703349977794,
-      "rshares": -15642,
+      "rshares": -15642000000,
       "time": "2016-04-22T14:52:12",
       "voter": "xeroc",
       "weight": 0
@@ -157,7 +157,7 @@
     {
       "percent": 10000,
       "reputation": 31405352060596,
-      "rshares": 135107,
+      "rshares": 135107000000,
       "time": "2016-04-22T17:48:18",
       "voter": "clayop",
       "weight": 813900
@@ -165,7 +165,7 @@
     {
       "percent": 10000,
       "reputation": 28971806962251,
-      "rshares": 253289,
+      "rshares": 253289000000,
       "time": "2016-04-24T20:57:15",
       "voter": "joseph",
       "weight": 2110479
@@ -189,7 +189,7 @@
     {
       "percent": 10000,
       "reputation": 9028537022578,
-      "rshares": 2095514,
+      "rshares": 2095514000000,
       "time": "2016-04-22T16:30:45",
       "voter": "recursive",
       "weight": 3051713817
@@ -253,7 +253,7 @@
     {
       "percent": 10000,
       "reputation": 68236886814465,
-      "rshares": 86,
+      "rshares": 86000000,
       "time": "2016-04-23T06:31:54",
       "voter": "officialfuzzy",
       "weight": 0
@@ -277,7 +277,7 @@
     {
       "percent": 10000,
       "reputation": 13437403349222,
-      "rshares": 8158,
+      "rshares": 8158000000,
       "time": "2016-04-25T05:18:45",
       "voter": "pheonike",
       "weight": 70

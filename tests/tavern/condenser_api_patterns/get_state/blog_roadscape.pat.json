@@ -226,19 +226,19 @@
         {
           "percent": "-100",
           "reputation": 145171381514207,
-          "rshares": -376603,
+          "rshares": -376603000000,
           "voter": "dantheman"
         },
         {
           "percent": "10000",
           "reputation": 0,
-          "rshares": 566888,
+          "rshares": 566888000000,
           "voter": "gilead"
         },
         {
           "percent": "10000",
           "reputation": 997596889281,
-          "rshares": 1811736,
+          "rshares": 1811736000000,
           "voter": "puppies"
         },
         {
@@ -299,7 +299,7 @@
       "last_payout": "2016-08-20T17:03:00",
       "last_update": "2016-04-11T02:27:48",
       "max_accepted_payout": "1000000.000 HBD",
-      "net_rshares": 93759842798,
+      "net_rshares": 2095778840777,
       "parent_author": "",
       "parent_permlink": "random",
       "pending_payout_value": "0.000 HBD",
@@ -1036,79 +1036,79 @@
         {
           "percent": "100",
           "reputation": 10062655,
-          "rshares": 5217,
+          "rshares": 5217000000,
           "voter": "fmooo"
         },
         {
           "percent": "10000",
           "reputation": 8151223409709,
-          "rshares": 16265859,
+          "rshares": 16265859000000,
           "voter": "rainman"
         },
         {
           "percent": "100",
           "reputation": 14765040488827,
-          "rshares": 600119,
+          "rshares": 600119000000,
           "voter": "berniesanders"
         },
         {
           "percent": "100",
           "reputation": 19903473,
-          "rshares": 100,
+          "rshares": 100000000,
           "voter": "donalddrumpf"
         },
         {
           "percent": "-100",
           "reputation": 13270505121655,
-          "rshares": -936400,
+          "rshares": -936400000000,
           "voter": "ned"
         },
         {
           "percent": "100",
           "reputation": 997596889281,
-          "rshares": 48857,
+          "rshares": 48857000000,
           "voter": "puppies"
         },
         {
           "percent": "100",
           "reputation": 9326993992,
-          "rshares": 5178,
+          "rshares": 5178000000,
           "voter": "nextgenwitness"
         },
         {
           "percent": "10000",
           "reputation": 9111465318256,
-          "rshares": 103341,
+          "rshares": 103341000000,
           "voter": "lafona"
         },
         {
           "percent": "10000",
           "reputation": 0,
-          "rshares": 319505,
+          "rshares": 319505000000,
           "voter": "lafona5"
         },
         {
           "percent": "100",
           "reputation": 75253737,
-          "rshares": 211,
+          "rshares": 211000000,
           "voter": "salvation"
         },
         {
           "percent": "100",
           "reputation": 385282351,
-          "rshares": 2,
+          "rshares": 2000000,
           "voter": "taylorswift"
         },
         {
           "percent": "100",
           "reputation": 35483070303,
-          "rshares": 26,
+          "rshares": 26000000,
           "voter": "steemian"
         },
         {
           "percent": "10000",
           "reputation": 29394786822950,
-          "rshares": 8005,
+          "rshares": 8005000000,
           "voter": "markopaasila"
         },
         {
@@ -1193,7 +1193,7 @@
       "last_payout": "2016-08-13T00:29:33",
       "last_update": "2016-04-12T04:37:42",
       "max_accepted_payout": "1000000.000 HBD",
-      "net_rshares": 59676222329,
+      "net_rshares": 16479679802309,
       "parent_author": "",
       "parent_permlink": "news",
       "pending_payout_value": "0.000 HBD",
@@ -2398,25 +2398,25 @@
         {
           "percent": "10000",
           "reputation": 0,
-          "rshares": 2603246,
+          "rshares": 2603246000000,
           "voter": "fminerten"
         },
         {
           "percent": "10000",
           "reputation": 949715155915,
-          "rshares": 2583596,
+          "rshares": 2583596000000,
           "voter": "steempty"
         },
         {
           "percent": "10000",
           "reputation": 8151223409709,
-          "rshares": 16593109,
+          "rshares": 16593109000000,
           "voter": "rainman"
         },
         {
           "percent": "10000",
           "reputation": 14765040488827,
-          "rshares": 30005989,
+          "rshares": 30005989000000,
           "voter": "berniesanders"
         },
         {
@@ -2428,25 +2428,25 @@
         {
           "percent": "10000",
           "reputation": 1071953838884,
-          "rshares": 170226,
+          "rshares": 170226000000,
           "voter": "dele-puppy"
         },
         {
           "percent": "10000",
           "reputation": 8272495818727,
-          "rshares": 138567,
+          "rshares": 138567000000,
           "voter": "xeldal"
         },
         {
           "percent": "10000",
           "reputation": 1239558617638,
-          "rshares": 79912,
+          "rshares": 79912000000,
           "voter": "adol"
         },
         {
           "percent": "10000",
           "reputation": 1049211085828,
-          "rshares": 5068237,
+          "rshares": 5068237000000,
           "voter": "enki"
         },
         {
@@ -2458,7 +2458,7 @@
         {
           "percent": "10000",
           "reputation": 608057298751,
-          "rshares": 766236,
+          "rshares": 766236000000,
           "voter": "justin"
         },
         {
@@ -2476,7 +2476,7 @@
         {
           "percent": "10000",
           "reputation": 9800209121307,
-          "rshares": 477042,
+          "rshares": 477042000000,
           "voter": "roadscape"
         },
         {
@@ -2488,13 +2488,13 @@
         {
           "percent": "10000",
           "reputation": 1366085197760,
-          "rshares": 15180,
+          "rshares": 15180000000,
           "voter": "steem-id"
         },
         {
           "percent": "10000",
           "reputation": 31405352060596,
-          "rshares": 520816,
+          "rshares": 520816000000,
           "voter": "clayop"
         },
         {
@@ -2512,7 +2512,7 @@
         {
           "percent": "10000",
           "reputation": 13096661187964,
-          "rshares": 138837,
+          "rshares": 138837000000,
           "voter": "au1nethyb1"
         },
         {
@@ -2681,7 +2681,7 @@
       "last_payout": "2016-08-21T15:28:39",
       "last_update": "2016-04-25T00:55:15",
       "max_accepted_payout": "1000000.000 HBD",
-      "net_rshares": 22810253455193,
+      "net_rshares": 81971187294200,
       "parent_author": "",
       "parent_permlink": "steemd",
       "pending_payout_value": "0.000 HBD",
@@ -3244,7 +3244,7 @@
         {
           "percent": "10000",
           "reputation": 13823888326286,
-          "rshares": 14110110,
+          "rshares": 14110110000000,
           "voter": "summon"
         },
         {
@@ -3256,19 +3256,19 @@
         {
           "percent": "10000",
           "reputation": 13270505121655,
-          "rshares": 47756400,
+          "rshares": 47756400000000,
           "voter": "ned"
         },
         {
           "percent": "10000",
           "reputation": 8779714777561,
-          "rshares": 435517,
+          "rshares": 435517000000,
           "voter": "riverhead"
         },
         {
           "percent": "10000",
           "reputation": 3894279128605,
-          "rshares": 1853610,
+          "rshares": 1853610000000,
           "voter": "wackou"
         },
         {
@@ -3280,13 +3280,13 @@
         {
           "percent": "10000",
           "reputation": 8272495818727,
-          "rshares": 43318,
+          "rshares": 43318000000,
           "voter": "xeldal"
         },
         {
           "percent": "10000",
           "reputation": 1049211085828,
-          "rshares": 4968859,
+          "rshares": 4968859000000,
           "voter": "enki"
         },
         {
@@ -3316,7 +3316,7 @@
         {
           "percent": "10000",
           "reputation": 1357335712177,
-          "rshares": 31848,
+          "rshares": 31848000000,
           "voter": "jabbasteem"
         },
         {
@@ -3328,7 +3328,7 @@
         {
           "percent": "10000",
           "reputation": 31405352060596,
-          "rshares": 260,
+          "rshares": 260000000,
           "voter": "clayop"
         },
         {
@@ -3340,7 +3340,7 @@
         {
           "percent": "10000",
           "reputation": 35483070303,
-          "rshares": 1343,
+          "rshares": 1343000000,
           "voter": "steemian"
         },
         {
@@ -3406,7 +3406,7 @@
         {
           "percent": "10000",
           "reputation": 82600290949846,
-          "rshares": 19199,
+          "rshares": 19199000000,
           "voter": "cass"
         },
         {
@@ -3743,7 +3743,7 @@
       "last_payout": "2016-08-21T15:29:00",
       "last_update": "2016-04-21T00:10:24",
       "max_accepted_payout": "1000000.000 HBD",
-      "net_rshares": 55658033056809,
+      "net_rshares": 124878427836345,
       "parent_author": "",
       "parent_permlink": "witness-category",
       "pending_payout_value": "0.000 HBD",

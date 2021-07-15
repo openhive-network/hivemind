@@ -2345,7 +2345,7 @@
     "pending_payout_value": "595.718 HBD",
     "percent_hbd": 10000,
     "permlink": "another-billionaire-warns-of-catastrophic-depths-not-seen-in-5-000-years-and-emphasizes-gold",
-    "post_id": 1257181,
+    "post_id": 1257189,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Another Billionaire Warns of Catastrophic Depths Not Seen in 5,000 Years - and Emphasizes Gold",
@@ -2358,61 +2358,61 @@
       {
         "percent": "100",
         "reputation": 145171381514207,
-        "rshares": 375241,
+        "rshares": 375241000000,
         "voter": "dantheman"
       },
       {
         "percent": "10000",
         "reputation": 190869539046,
-        "rshares": 886132,
+        "rshares": 886132000000,
         "voter": "mr11acdee"
       },
       {
         "percent": "10000",
         "reputation": 0,
-        "rshares": 5100,
+        "rshares": 5100000000,
         "voter": "steemit78"
       },
       {
         "percent": "10000",
         "reputation": 85602977273,
-        "rshares": 1259167,
+        "rshares": 1259167000000,
         "voter": "anonymous"
       },
       {
         "percent": "10000",
         "reputation": 159370,
-        "rshares": 318519,
+        "rshares": 318519000000,
         "voter": "hello"
       },
       {
         "percent": "10000",
         "reputation": 0,
-        "rshares": 153384,
+        "rshares": 153384000000,
         "voter": "world"
       },
       {
         "percent": "-100",
         "reputation": 13270505121655,
-        "rshares": -936400,
+        "rshares": -936400000000,
         "voter": "ned"
       },
       {
         "percent": "10000",
         "reputation": 0,
-        "rshares": 59412,
+        "rshares": 59412000000,
         "voter": "fufubar1"
       },
       {
         "percent": "10000",
         "reputation": 0,
-        "rshares": 14997,
+        "rshares": 14997000000,
         "voter": "anonymous1"
       },
       {
         "percent": "100",
         "reputation": 1993860928264,
-        "rshares": 1441,
+        "rshares": 1441000000,
         "voter": "red"
       },
       {
@@ -2424,13 +2424,13 @@
       {
         "percent": "10000",
         "reputation": 9800209121307,
-        "rshares": 82748,
+        "rshares": 82748000000,
         "voter": "roadscape"
       },
       {
         "percent": "100",
         "reputation": 89703349977794,
-        "rshares": 10772,
+        "rshares": 10772000000,
         "voter": "xeroc"
       },
       {
@@ -2977,7 +2977,7 @@
     "last_payout": "2016-08-24T19:59:42",
     "last_update": "2016-03-30T18:30:18",
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 830053779138,
+    "net_rshares": 3060564548625,
     "parent_author": "",
     "parent_permlink": "meta",
     "pending_payout_value": "0.000 HBD",

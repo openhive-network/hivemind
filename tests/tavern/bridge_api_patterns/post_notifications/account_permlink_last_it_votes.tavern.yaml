@@ -2,7 +2,7 @@
   test_name: Hivemind
 
   marks:
-    - patterntest # show only votes (bc of last_it type - vote)
+    - patterntest # show only votes (bc of last_id type - vote)
 
   includes:
     - !include ../../common.yaml
@@ -18,7 +18,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.post_notifications"
-          params: {"author":"venuspcs","permlink":"re-minion-how-to-summon-one-of-the-biggest-and-most-powerful-steemit-whales-berniesanders-20160812t010731631z","min_score":10, "last_id":887613}
+          params: {"author":"venuspcs","permlink":"re-minion-how-to-summon-one-of-the-biggest-and-most-powerful-steemit-whales-berniesanders-20160812t010731631z","min_score":10, "last_id":887542}
       response:
         status_code: 200
         verify_response_with:

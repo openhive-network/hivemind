@@ -1077,25 +1077,25 @@
       {
         "percent": "-100",
         "reputation": 145171381514207,
-        "rshares": -376603,
+        "rshares": -376603000000,
         "voter": "dantheman"
       },
       {
         "percent": "10000",
         "reputation": 190869539046,
-        "rshares": 903854,
+        "rshares": 903854000000,
         "voter": "mr11acdee"
       },
       {
         "percent": "100",
         "reputation": 1993860928264,
-        "rshares": 1441,
+        "rshares": 1441000000,
         "voter": "red"
       },
       {
         "percent": "10000",
         "reputation": 89703349977794,
-        "rshares": 23446,
+        "rshares": 23446000000,
         "voter": "xeroc"
       },
       {
@@ -1144,7 +1144,7 @@
     "last_payout": "2016-08-24T19:59:42",
     "last_update": "2016-04-06T19:22:42",
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 60946052021,
+    "net_rshares": 613083499883,
     "parent_author": "steemit",
     "parent_permlink": "firstpost",
     "pending_payout_value": "0.000 HBD",
@@ -1163,19 +1163,19 @@
       {
         "percent": "100",
         "reputation": 145171381514207,
-        "rshares": 375241,
+        "rshares": 375241000000,
         "voter": "dantheman"
       },
       {
         "percent": "10000",
         "reputation": 4152367932922,
-        "rshares": 2213400,
+        "rshares": 2213400000000,
         "voter": "proskynneo"
       },
       {
         "percent": "100",
         "reputation": 13270505121655,
-        "rshares": 936400,
+        "rshares": 936400000000,
         "voter": "ned"
       },
       {
@@ -1230,7 +1230,7 @@
     "last_payout": "2016-08-24T19:59:42",
     "last_update": "2016-03-31T13:54:33",
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 59892484261,
+    "net_rshares": 3584929959220,
     "parent_author": "steemit",
     "parent_permlink": "firstpost",
     "pending_payout_value": "0.000 HBD",
@@ -1249,19 +1249,19 @@
       {
         "percent": "-100",
         "reputation": 145171381514207,
-        "rshares": -375241,
+        "rshares": -375241000000,
         "voter": "dantheman"
       },
       {
         "percent": "10000",
         "reputation": 0,
-        "rshares": 5100,
+        "rshares": 5100000000,
         "voter": "steemit46"
       },
       {
         "percent": "10000",
         "reputation": 9800209121307,
-        "rshares": 81125,
+        "rshares": 81125000000,
         "voter": "roadscape"
       },
       {
@@ -1322,7 +1322,7 @@
     "last_payout": "2016-08-24T19:59:42",
     "last_update": "2016-03-30T19:52:30",
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 62423410900,
+    "net_rshares": -226592300084,
     "parent_author": "steemit",
     "parent_permlink": "firstpost",
     "pending_payout_value": "0.000 HBD",

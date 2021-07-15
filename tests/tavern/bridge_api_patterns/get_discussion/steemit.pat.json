@@ -2,15 +2,15 @@
   "admin/firstpost": {
     "active_votes": [
       {
-        "rshares": -375241,
+        "rshares": -375241000000,
         "voter": "dantheman"
       },
       {
-        "rshares": 5100,
+        "rshares": 5100000000,
         "voter": "steemit46"
       },
       {
-        "rshares": 81125,
+        "rshares": 81125000000,
         "voter": "roadscape"
       },
       {
@@ -56,7 +56,7 @@
     "is_paidout": true,
     "json_metadata": {},
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 62423410900,
+    "net_rshares": -226592300084,
     "parent_author": "steemit",
     "parent_permlink": "firstpost",
     "payout": 0.0,
@@ -71,7 +71,7 @@
       "gopher/re-admin-firstpost-20160718t195306992z"
     ],
     "stats": {
-      "flag_weight": 0.0,
+      "flag_weight": 2.0,
       "gray": false,
       "hide": false,
       "total_votes": 10
@@ -1387,15 +1387,15 @@
   "proskynneo/steemit-firstpost-1": {
     "active_votes": [
       {
-        "rshares": 375241,
+        "rshares": 375241000000,
         "voter": "dantheman"
       },
       {
-        "rshares": 2213400,
+        "rshares": 2213400000000,
         "voter": "proskynneo"
       },
       {
-        "rshares": 936400,
+        "rshares": 936400000000,
         "voter": "ned"
       },
       {
@@ -1437,7 +1437,7 @@
     "is_paidout": true,
     "json_metadata": {},
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 59892484261,
+    "net_rshares": 3584929959220,
     "parent_author": "steemit",
     "parent_permlink": "firstpost",
     "payout": 2.117,
@@ -1461,19 +1461,19 @@
   "red/steemit-firstpost-2": {
     "active_votes": [
       {
-        "rshares": -376603,
+        "rshares": -376603000000,
         "voter": "dantheman"
       },
       {
-        "rshares": 903854,
+        "rshares": 903854000000,
         "voter": "mr11acdee"
       },
       {
-        "rshares": 1441,
+        "rshares": 1441000000,
         "voter": "red"
       },
       {
-        "rshares": 23446,
+        "rshares": 23446000000,
         "voter": "xeroc"
       },
       {
@@ -1511,7 +1511,7 @@
     "is_paidout": true,
     "json_metadata": {},
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 60946052021,
+    "net_rshares": 613083499883,
     "parent_author": "steemit",
     "parent_permlink": "firstpost",
     "payout": 0.2,
@@ -1526,7 +1526,7 @@
       "business/re-red-steemit-firstpost-2-20160713t083846149z"
     ],
     "stats": {
-      "flag_weight": 0.0,
+      "flag_weight": 2.0,
       "gray": false,
       "hide": false,
       "total_votes": 9
@@ -1730,43 +1730,43 @@
   "steemit/firstpost": {
     "active_votes": [
       {
-        "rshares": 375241,
+        "rshares": 375241000000,
         "voter": "dantheman"
       },
       {
-        "rshares": 886132,
+        "rshares": 886132000000,
         "voter": "mr11acdee"
       },
       {
-        "rshares": 5100,
+        "rshares": 5100000000,
         "voter": "steemit78"
       },
       {
-        "rshares": 1259167,
+        "rshares": 1259167000000,
         "voter": "anonymous"
       },
       {
-        "rshares": 318519,
+        "rshares": 318519000000,
         "voter": "hello"
       },
       {
-        "rshares": 153384,
+        "rshares": 153384000000,
         "voter": "world"
       },
       {
-        "rshares": -936400,
+        "rshares": -936400000000,
         "voter": "ned"
       },
       {
-        "rshares": 59412,
+        "rshares": 59412000000,
         "voter": "fufubar1"
       },
       {
-        "rshares": 14997,
+        "rshares": 14997000000,
         "voter": "anonymous1"
       },
       {
-        "rshares": 1441,
+        "rshares": 1441000000,
         "voter": "red"
       },
       {
@@ -1774,11 +1774,11 @@
         "voter": "liondani"
       },
       {
-        "rshares": 82748,
+        "rshares": 82748000000,
         "voter": "roadscape"
       },
       {
-        "rshares": 10772,
+        "rshares": 10772000000,
         "voter": "xeroc"
       },
       {
@@ -2148,7 +2148,7 @@
     "is_paidout": true,
     "json_metadata": {},
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 830053779138,
+    "net_rshares": 3060564548625,
     "payout": 1.698,
     "payout_at": "2016-08-24T19:59:42",
     "pending_payout_value": "0.000 HBD",
@@ -2185,7 +2185,7 @@
       "jack8831/re-steemit-firstpost-20160824t093007335z"
     ],
     "stats": {
-      "flag_weight": 0.0,
+      "flag_weight": 2.0,
       "gray": false,
       "hide": false,
       "total_votes": 92

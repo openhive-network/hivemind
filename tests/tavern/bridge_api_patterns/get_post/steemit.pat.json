@@ -1,43 +1,43 @@
 {
   "active_votes": [
     {
-      "rshares": 375241,
+      "rshares": 375241000000,
       "voter": "dantheman"
     },
     {
-      "rshares": 886132,
+      "rshares": 886132000000,
       "voter": "mr11acdee"
     },
     {
-      "rshares": 5100,
+      "rshares": 5100000000,
       "voter": "steemit78"
     },
     {
-      "rshares": 1259167,
+      "rshares": 1259167000000,
       "voter": "anonymous"
     },
     {
-      "rshares": 318519,
+      "rshares": 318519000000,
       "voter": "hello"
     },
     {
-      "rshares": 153384,
+      "rshares": 153384000000,
       "voter": "world"
     },
     {
-      "rshares": -936400,
+      "rshares": -936400000000,
       "voter": "ned"
     },
     {
-      "rshares": 59412,
+      "rshares": 59412000000,
       "voter": "fufubar1"
     },
     {
-      "rshares": 14997,
+      "rshares": 14997000000,
       "voter": "anonymous1"
     },
     {
-      "rshares": 1441,
+      "rshares": 1441000000,
       "voter": "red"
     },
     {
@@ -45,11 +45,11 @@
       "voter": "liondani"
     },
     {
-      "rshares": 82748,
+      "rshares": 82748000000,
       "voter": "roadscape"
     },
     {
-      "rshares": 10772,
+      "rshares": 10772000000,
       "voter": "xeroc"
     },
     {
@@ -419,7 +419,7 @@
   "is_paidout": true,
   "json_metadata": {},
   "max_accepted_payout": "1000000.000 HBD",
-  "net_rshares": 830053779138,
+  "net_rshares": 3060564548625,
   "payout": 1.698,
   "payout_at": "2016-08-24T19:59:42",
   "pending_payout_value": "0.000 HBD",
@@ -429,7 +429,7 @@
   "promoted": "0.000 HBD",
   "replies": [],
   "stats": {
-    "flag_weight": 0.0,
+    "flag_weight": 2.0,
     "gray": false,
     "hide": false,
     "total_votes": 92
