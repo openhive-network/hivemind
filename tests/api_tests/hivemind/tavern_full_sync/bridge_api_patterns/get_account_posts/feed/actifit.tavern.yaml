@@ -5,7 +5,7 @@
     - fullsynctest # slow_calls file - 2.152s
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: get_account_posts actifit
