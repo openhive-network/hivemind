@@ -65,7 +65,7 @@ export HIVEMIND_ADDRESS=$1
 export HIVEMIND_PORT=$2
 if [ -z "$TAVERN_DIR" ]
 then
-  export TAVERN_DIR="$(realpath ./tests/tavern)"
+  export TAVERN_DIR="$(realpath ./tests/api_tests/hivemind/tavern)"
 fi
 echo "Attempting to start tests on hivemind instance listening on: $HIVEMIND_ADDRESS port: $HIVEMIND_PORT"
 

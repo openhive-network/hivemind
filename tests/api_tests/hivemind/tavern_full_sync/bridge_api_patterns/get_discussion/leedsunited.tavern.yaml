@@ -1,0 +1,28 @@
+---
+  test_name: Hivemind bridge_api.get_discussion leedsunited
+
+  marks:
+    - fullsynctest
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: bridge_api.get_discussion leedsunited
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.get_discussion"
+          params: {'author': 'leedsunited', 'permlink': 'quadruple-bonus-game-first-goalscorer-correct-score-comp-92-tottenham-v-burnley-7th-december-1000-2000-tokens'}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:has_valid_response
+          extra_kwargs:
+            method: "leedsunited"
+            directory: "bridge_api_patterns/get_discussion"
