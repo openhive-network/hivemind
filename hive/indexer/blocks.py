@@ -42,6 +42,7 @@ class Blocks:
     blocks_to_flush = []
     _head_block_date = None
     _current_block_date = None
+    _last_safe_cashout_block = 0
 
     _concurrent_flush = [
       ('Posts', Posts.flush, Posts),
@@ -100,6 +101,18 @@ class Blocks:
         """Get hive's head block date."""
         sql = "SELECT head_block_time()"
         return str(DB.query_one(sql) or '')
+
+    @classmethod
+    def set_end_of_sync_lib(cls, lib):
+        """Set last block that guarantees cashout before end of sync based on LIB"""
+        if lib < 10629455:
+            # posts created before HF17 could stay unpaid forever
+            cls._last_safe_cashout_block = 0
+        else:
+            # after HF17 all posts are paid after 7 days which means it is safe to assume that
+            # posts created at or before LIB - 7days will be paidout at the end of massive sync
+            cls._last_safe_cashout_block = lib - 7 * 24 * 1200
+        log.info( "End-of-sync LIB is set to %d, last block that guarantees cashout at end of sync is %d", lib, cls._last_safe_cashout_block )
 
     @classmethod
     def process_multi(cls, blocks, is_initial_sync):
@@ -166,7 +179,7 @@ class Blocks:
         log.info(f"[PROCESS MULTI] {len(blocks)} blocks in {OPSM.stop(time_start) :.4f}s")
 
     @staticmethod
-    def prepare_vops(comment_payout_ops, block, date, block_num):
+    def prepare_vops(comment_payout_ops, block, date, block_num, is_safe_cashout):
         def get_empty_ops():
             return { VirtualOperationType.AuthorReward:None
                 , VirtualOperationType.CommentReward:None
@@ -212,13 +225,14 @@ class Blocks:
                     op_value["rshares"] *= 1000000
                 Votes.effective_comment_vote_op( op_value )
 
-                # ABW: we could skip effective votes for those posts that we know will become paidout before
-                # massive sync ends (both total_vote_weight and pending_payout carried by this vop become zero
-                # when post is paid - the first one not in DB though but in API calls)
-                if key not in comment_payout_ops:
-                    comment_payout_ops[key] = get_empty_ops()
+                # skip effective votes for those posts that will become paidout before massive sync ends (both
+                # total_vote_weight and pending_payout carried by this vop become zero when post is paid) - note
+                # that the earliest we can use that is HF17 (block 10629455) which set cashout time to fixed 7 days
+                if not is_safe_cashout:
+                    if key not in comment_payout_ops:
+                        comment_payout_ops[key] = get_empty_ops()
 
-                comment_payout_ops[key][op_type] = ( op_value, date )
+                    comment_payout_ops[key][op_type] = ( op_value, date )
 
             elif op_type == VirtualOperationType.CommentPayoutUpdate:
                 if key not in comment_payout_ops:
@@ -250,7 +264,7 @@ class Blocks:
         if cls._head_block_date is None:
             cls._head_block_date = cls._current_block_date
 
-        ineffective_deleted_ops = Blocks.prepare_vops(Posts.comment_payout_ops, block, cls._current_block_date, num)
+        ineffective_deleted_ops = Blocks.prepare_vops(Posts.comment_payout_ops, block, cls._current_block_date, num, num <= cls._last_safe_cashout_block)
 
         json_ops = []
         for transaction in block.get_next_transaction():

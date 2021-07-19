@@ -239,6 +239,7 @@ class Posts(DbAdapterHolder):
               cashout_time            = "infinity"
 
               pending_payout          = 0
+              total_vote_weight       = 0
 
             # author rewards in current (final or nonfinal) payout (always comes with comment_reward_operation)
             if v[ VirtualOperationType.AuthorReward ] is not None:
