@@ -168,7 +168,7 @@ class DbState:
     @classmethod
     def _execute_query(cls, db, query):
         time_start = perf_counter()
-   
+
         current_work_mem = cls.update_work_mem('2GB')
         log.info("[INIT] Attempting to execute query: `%s'...", query)
 
@@ -447,8 +447,9 @@ class DbState:
 
         log.info("#############################################################################")
 
+        cls._finish_hive_posts( cls.db(), massive_sync_preconditions, last_imported_block, current_imported_block )
+
         methods = []
-        methods.append( ('hive_posts', cls._finish_hive_posts, [cls.db(), massive_sync_preconditions, last_imported_block, current_imported_block]) )
         methods.append( ('hive_feed_cache', cls._finish_hive_feed_cache, [cls.db(), last_imported_block, current_imported_block]) )
         methods.append( ('hive_mentions', cls._finish_hive_mentions, [cls.db(), last_imported_block, current_imported_block]) )
         methods.append( ('payout_stats_view', cls._finish_payout_stats_view, []) )
@@ -555,4 +556,3 @@ class DbState:
         If empty, it indicates that the initial sync has not finished.
         """
         return not cls.db().query_one("SELECT 1 FROM hive_feed_cache LIMIT 1")
-
