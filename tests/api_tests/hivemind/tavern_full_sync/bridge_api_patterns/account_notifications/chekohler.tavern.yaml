@@ -1,0 +1,28 @@
+---
+  test_name: Hivemind bridge_api.account_notifications
+
+  marks:
+    - fullsynctest
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: account_notifications
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.account_notifications"
+          params: {"account": "chekohler"}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:has_valid_response
+          extra_kwargs:
+            method: "chekohler"
+            directory: "bridge_api_patterns/account_notifications"

@@ -1,0 +1,30 @@
+---
+  test_name: Hivemind condenser_api.get_discussions_by_feed patterns test
+
+  marks:
+    - fullsynctest # tag is not a tag but account whose feed we are looking at (set of posts created/reblogged by those followed by selected account)
+                  # there can be no nonempty results for not-up-to-date HM because it only gives posts that were created/reblogged within last month (no param to change it)
+    #- xfail # This test is dedicated for HEAD-hivemind
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: get_discussions_by_feed
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "condenser_api.get_discussions_by_feed"
+          params: {"tag":"asgarth","start_author":"","start_permlink":"","limit":20}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:has_valid_response
+          extra_kwargs:
+            method: "asgarth"
+            directory: "condenser_api_patterns/get_discussions_by_feed"
