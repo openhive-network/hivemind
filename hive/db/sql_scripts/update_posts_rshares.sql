@@ -16,7 +16,7 @@ SET
     abs_rshares = votes_rshares.abs_rshares
   , vote_rshares = votes_rshares.rshares
   , sc_hot = CASE hp.is_paidout WHEN True Then 0 ELSE calculate_hot( votes_rshares.rshares, hp.created_at) END
-  , sc_trend = CASE hp.is_paidout WHEN True Then 0 ELSE calculate_tranding( votes_rshares.rshares, hp.created_at) END
+  , sc_trend = CASE hp.is_paidout WHEN True Then 0 ELSE calculate_trending( votes_rshares.rshares, hp.created_at) END
   , total_votes = votes_rshares.total_votes
   , net_votes = votes_rshares.net_votes
 FROM
@@ -41,6 +41,7 @@ FROM
     GROUP BY hv.post_id
   ) as votes_rshares
 WHERE hp.id = votes_rshares.post_id
+AND hp.counter_deleted = 0
 AND (
   hp.abs_rshares != votes_rshares.abs_rshares
   OR hp.vote_rshares != votes_rshares.rshares
