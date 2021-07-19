@@ -17,6 +17,7 @@ from urllib3.connection import HTTPConnection
 from urllib3.exceptions import HTTPError
 
 from hive.steem.exceptions import RPCError, RPCErrorFatal
+from hive.steem.signal import can_continue_thread
 
 logging.getLogger('urllib3.connectionpool').setLevel(logging.WARNING)
 log = logging.getLogger(__name__)
@@ -178,6 +179,9 @@ class HttpClient(object):
                     info = {'secs': round(secs, 3), 'try': tries}
                 log.warning('%s failed in %.1fs. try %d. %s - %s',
                             what, secs, tries, info, repr(e))
+
+            if not can_continue_thread():
+                break
 
             if tries % 2 == 0:
                 self.next_node()
