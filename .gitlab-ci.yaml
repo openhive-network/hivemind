@@ -367,7 +367,7 @@ stages:
         localhost $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
         $RUNNER_BENCHMARK_ITERATIONS \
         $RUNNER_BENCHMARK_JOBS \
-        $CI_PROJECT_DIR/tests/api_tests/hivemind/tavern
+        $CI_PROJECT_DIR/tests/tests_api/hivemind/tavern
 
 .api-smoketest-benchmark:
   stage: benchmark-tests
