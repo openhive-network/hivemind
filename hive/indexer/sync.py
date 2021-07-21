@@ -84,6 +84,7 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
         log.info("=== TOTAL STATS ===")
 
     try:
+        Blocks.set_end_of_sync_lib( ubound )
         count = ubound - lbound
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
 
