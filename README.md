@@ -114,7 +114,7 @@ docker logs -f hivemind
 | `STEEMD_URL`             | `--steemd-url`        | '{"default":"https://yourhivenode"}' |
 | `MAX_BATCH`              | `--max-batch`         | 35      |
 | `MAX_WORKERS`            | `--max-workers`       | 6       |
-| `MAX_REQUESTS`           | `--max-requests`      | 0       |
+| `MAX_RETRIES`            | `--max-retries`       | -1      |
 | `TRAIL_BLOCKS`           | `--trail-blocks`      | 2       |
 | `HIVED_DATABASE_URL`     | `--hived-database-url`|         |
 

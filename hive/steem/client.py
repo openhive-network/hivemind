@@ -17,19 +17,19 @@ logger = logging.getLogger(__name__)
 class SteemClient:
     """Handles upstream calls to jussi/steemd, with batching and retrying."""
     # dangerous default value of url but it should be fine since we are not writting to it
-    def __init__(self, url={"default" : 'https://api.hive.blog'}, max_batch=50, max_workers=1, max_requests=0):
+    def __init__(self, url={"default" : 'https://api.hive.blog'}, max_batch=50, max_workers=1, max_retries=-1):
         assert url, 'steem-API endpoints undefined'
         assert "default" in url, "Url should have default endpoint defined"
         assert max_batch > 0 and max_batch <= 5000
         assert max_workers > 0 and max_workers <= 64
-        assert max_requests >= 0
+        assert max_retries >= -1
 
         self._max_batch = max_batch
         self._max_workers = max_workers
         self._client = dict()
         for endpoint, endpoint_url in url.items():
             logger.info("Endpoint %s will be routed to node %s" % (endpoint, endpoint_url))
-            self._client[endpoint] = HttpClient(nodes=[endpoint_url], max_requests=max_requests)
+            self._client[endpoint] = HttpClient(nodes=[endpoint_url], max_retries=max_retries)
 
     def get_accounts(self, acc):
         accounts = [v for v in acc if v != '']

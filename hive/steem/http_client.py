@@ -93,7 +93,7 @@ class HttpClient(object):
         enum_virtual_ops='account_history_api'
     )
 
-    def __init__(self, nodes, max_requests, **kwargs):
+    def __init__(self, nodes, max_retries, **kwargs):
         if kwargs.get('tcp_keepalive', True):
             socket_options = HTTPConnection.default_socket_options + \
                              [(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1), ]
@@ -116,7 +116,7 @@ class HttpClient(object):
         self.nodes = cycle(nodes)
         self.url = ''
         self.request = None
-        self.max_requests = max_requests
+        self.max_retries = max_retries
         self.next_node()
 
     def next_node(self):
@@ -148,7 +148,7 @@ class HttpClient(object):
         body_data = json.dumps(body, ensure_ascii=False).encode('utf8')
 
         tries = 0
-        allowed_tries = self.max_requests
+        allowed_tries = self.max_retries + 1
         while True:
             tries += 1
             secs = -1
