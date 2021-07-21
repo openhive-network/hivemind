@@ -13,6 +13,7 @@ from hive.utils.timer import Timer
 from hive.steem.block.stream import MicroForkException
 from hive.indexer.hive_rpc.massive_blocks_data_provider_hive_rpc import MassiveBlocksDataProviderHiveRpc
 from hive.steem.block.stream import BlockStream
+from hive.steem.signal import finish_signals_handler, set_exception_thrown, can_continue_thread
 
 from hive.indexer.blocks import Blocks
 from hive.indexer.accounts import Accounts
@@ -40,34 +41,11 @@ from hive.indexer.mock_vops_provider import MockVopsProvider
 from datetime import datetime
 
 from signal import signal, SIGINT, SIGTERM, getsignal
-from atomic import AtomicLong
 from threading import Thread
 from collections import deque
 
 
 log = logging.getLogger(__name__)
-
-CONTINUE_PROCESSING = True
-
-EXCEPTION_THROWN = AtomicLong(0)
-FINISH_SIGNAL_DURING_SYNC = AtomicLong(0)
-
-
-def finish_signals_handler(signal, frame):
-    global FINISH_SIGNAL_DURING_SYNC
-    FINISH_SIGNAL_DURING_SYNC += 1
-    log.info("""
-                  **********************************************************
-                  CAUGHT {}. PLEASE WAIT... PROCESSING DATA IN QUEUES...
-                  **********************************************************
-    """.format( "SIGINT" if signal == SIGINT else "SIGTERM" ) )
-
-def set_exception_thrown():
-    global EXCEPTION_THROWN
-    EXCEPTION_THROWN += 1
-
-def can_continue_thread():
-    return EXCEPTION_THROWN.value == 0 and FINISH_SIGNAL_DURING_SYNC.value == 0
 
 def _blocks_data_provider(blocks_data_provider):
     try:
