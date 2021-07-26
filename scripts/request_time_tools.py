@@ -21,22 +21,28 @@ class RequestTimeTools():
             self.response_str_len = len(self.response_str)
             self.measurement_str_list = ["save:", "$ext:", "function: validate_response:measure_request_execution_time\n"]
 
+    def collect_test_paths(self):
+        self.test_paths = [os.path.join(path, name) for path, _, files in os.walk(self.tavern_test_dir) for name in files if "tavern.yaml" in name]
+
+    def collect_timestamp_paths(self):
+        self.timestamp_paths = [os.path.join(os.path.split(test)[0], "%s.timestamp.txt" % os.path.split(test)[1].split(".")[0]) for test in self.test_paths]
+
     def collect_test_dirs(self):
         self.tavern_dir = self.sep.join(os.path.realpath(__file__).split(self.sep)[:-2])
         self.tavern_test_dir = os.path.join(self.tavern_dir, "tests", "tests_api", "hivemind", "tavern")
         self.out_path = os.path.join(self.tavern_test_dir, "request_execution_times.csv")
         self.test_out_stream_path = os.path.join(self.tavern_test_dir, "test_output_stream.txt")
 
-        if self.run_mode != "compare":
-            self.test_paths = [os.path.join(path, name) for path, _, files in os.walk(self.tavern_test_dir) for name in files if "tavern.yaml" in name]
-
         if self.run_mode == "accumulate":
-            self.timestamp_paths = [os.path.join(os.path.split(test)[0], "%s.timestamp.txt" % os.path.split(test)[1].split(".")[0]) for test in self.test_paths]
+            self.collect_test_paths()
+            self.collect_timestamp_paths()
+
+        elif self.run_mode == "update":
+            self.collect_test_paths()
 
     def is_new_results(self):
         if len([self.timestamp_paths for timestamp in self.timestamp_paths if os.path.isfile(timestamp)]) == 0:
-            print("No new request execution time measurements found, keeping old result\n%s" % self.out_path)
-            return False
+            print("No new request execution time measurements found, keeping old result\n%s" % self.out_path) ; return False
         return True
 
     def get_test_name(self, test):
@@ -55,7 +61,7 @@ class RequestTimeTools():
 
             print("Request execution time measurement results saved\n%s" % self.out_path)
 
-    def index_yamls(self, yaml):
+    def index_yaml(self, yaml):
         req_idx = yaml.index(self.request_str[:-1])
         return len(yaml[:req_idx].split("\n")[-1]) // self.tab_width
 
@@ -79,7 +85,7 @@ class RequestTimeTools():
             with open(test, "r") as yaml_f:
                 yaml = yaml_f.read()
             if "measure_request_execution_time" not in yaml:
-                n_tabs = self.index_yamls(yaml)
+                n_tabs = self.index_yaml(yaml)
                 str_list = self.format_strings(n_tabs)
                 yaml = self.update_yaml(yaml, str_list)
                 with open(test, "w") as yaml_f:
@@ -120,15 +126,15 @@ class RequestTimeTools():
             df[col] = [None] * len(df)
 
         for row in stream_data.split("\n"):
-            row = row.split()
-            test_name, test_type, test_duration = row[2].split("::")[0], row[1], float(row[0].strip("s"))
+            split_row = row.split()
+            test_name, test_type, test_duration = split_row[2].split("::")[0], split_row[1], float(split_row[0].strip("s"))
             df.loc[test_name, test_type] = test_duration
 
         df[df_columns[-1]] = df["ext_func"] - df["call"]
         df = df.reset_index()
         df.columns = df_columns
         df.to_csv(self.out_path)
-        print("Result saved to\n%s" % (self.out_path))
+        print("Request execution duration comparison result saved to\n%s" % (self.out_path))
 
     def compare_tox_and_external_func_results(self):
         print("Running comparison tool.")
