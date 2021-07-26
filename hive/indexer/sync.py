@@ -48,11 +48,6 @@ from collections import deque
 
 log = logging.getLogger(__name__)
 
-CONTINUE_PROCESSING = True
-
-EXCEPTION_THROWN = AtomicLong(0)
-FINISH_SIGNAL_DURING_SYNC = AtomicLong(0)
-
 old_sig_int_handler = None
 old_sig_term_handler = None
 trail_blocks = None
@@ -84,13 +79,6 @@ def show_info(_db):
 
     from hive.utils.misc import show_app_version;
     show_app_version(log, database_head_block, patch_level_data)
-
-def set_exception_thrown():
-    global EXCEPTION_THROWN
-    EXCEPTION_THROWN += 1
-
-def can_continue_thread():
-    return EXCEPTION_THROWN.value == 0 and FINISH_SIGNAL_DURING_SYNC.value == 0
 
 def _blocks_data_provider(blocks_data_provider):
     try:
