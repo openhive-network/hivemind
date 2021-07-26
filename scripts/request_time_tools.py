@@ -50,6 +50,11 @@ class RequestTimeTools():
         return self.sep.join(split_test_path[split_test_path.index("tavern") + 1:])
 
     def accumulate_time_measurements(self):
+        """
+        Checks all timestamp paths for saved execution duration,
+        saves result in csv, removes timestamp files.
+        """
+
         self.collect_test_dirs()
         if self.is_new_results():
             with open(self.out_path, "w") as output_f:
@@ -79,6 +84,11 @@ class RequestTimeTools():
         return yaml
 
     def update_test_codes(self):
+        """
+        Inserts external functions into tests' yamls and overwrites the original file.
+        This tool is called from scrips/run_tests.sh before running tests with tox.s
+        """
+
         print("Running test yaml file update tool.")
         self.collect_test_dirs()
         for test in self.test_paths:
@@ -137,6 +147,11 @@ class RequestTimeTools():
         print("Request execution duration comparison result saved to\n%s" % (self.out_path))
 
     def compare_tox_and_external_func_results(self):
+        """
+        Saves stdout from scripts/run_tests.sh to .txt, collects duration data from
+        saved stream and data from timestamps, writes result to single output.
+        """
+        
         print("Running comparison tool.")
         self.collect_test_dirs()
         self.run_tests_stream_stdout()

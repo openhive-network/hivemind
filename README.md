@@ -83,6 +83,14 @@ $ export HIVEMIND_ADDRESS=127.0.0.1
 $ tox -e tavern -- --workers auto --tests-per-worker auto --durations=0
 ```
 
+### Measure request execution time
+
+Checkout to request-execution-time on hivemind and tests_api repositories, then run comparison tool from hivemind directory:
+```bash
+python3 scripts/request_time_tools.py compare
+```
+This will update hivemind tests with external functions, run tests using tox and save execution times from external functions and tox.
+
 ## Production Environment
 
 Hivemind is deployed as a Docker container.
