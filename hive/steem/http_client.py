@@ -17,6 +17,7 @@ from urllib3.connection import HTTPConnection
 from urllib3.exceptions import HTTPError
 
 from hive.steem.exceptions import RPCError, RPCErrorFatal
+from hive.steem.signal import can_continue_thread
 
 logging.getLogger('urllib3.connectionpool').setLevel(logging.WARNING)
 log = logging.getLogger(__name__)
@@ -92,7 +93,7 @@ class HttpClient(object):
         enum_virtual_ops='account_history_api'
     )
 
-    def __init__(self, nodes, **kwargs):
+    def __init__(self, nodes, max_retries, **kwargs):
         if kwargs.get('tcp_keepalive', True):
             socket_options = HTTPConnection.default_socket_options + \
                              [(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1), ]
@@ -115,6 +116,7 @@ class HttpClient(object):
         self.nodes = cycle(nodes)
         self.url = ''
         self.request = None
+        self.max_retries = max_retries
         self.next_node()
 
     def next_node(self):
@@ -146,8 +148,8 @@ class HttpClient(object):
         body_data = json.dumps(body, ensure_ascii=False).encode('utf8')
 
         tries = 0
-        # changed number of tries to 25
-        while tries < 25:
+        allowed_tries = self.max_retries + 1
+        while True:
             tries += 1
             secs = -1
             info = None
@@ -179,9 +181,18 @@ class HttpClient(object):
                 log.warning('%s failed in %.1fs. try %d. %s - %s',
                             what, secs, tries, info, repr(e))
 
+            if not can_continue_thread():
+                break
+
             if tries % 2 == 0:
                 self.next_node()
-            sleep(tries / 5)
+            sleep(min(tries / 5, 5))
+
+            allowed_tries -= 1
+            if allowed_tries == 0:
+                break
+            if allowed_tries < 0: # case of infinite retries
+                allowed_tries = 0
 
         raise Exception("abort %s after %d tries" % (method, tries))
 

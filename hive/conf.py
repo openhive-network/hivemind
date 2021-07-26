@@ -51,6 +51,7 @@ class Conf():
         # sync
         add('--max-workers', type=int, env_var='MAX_WORKERS', help='max workers for batch requests', default=6)
         add('--max-batch', type=int, env_var='MAX_BATCH', help='max chunk size for batch requests', default=35)
+        add('--max-retries', type=int, env_var='MAX_RETRIES', help='max number of retries after request failure is accepted; default -1 means no limit', default=-1)
         add('--trail-blocks', type=int, env_var='TRAIL_BLOCKS', help='number of blocks to trail head by', default=2)
         add('--sync-to-s3', type=strtobool, env_var='SYNC_TO_S3', help='alternative healthcheck for background sync service', default=False)
         add('--hived-database-url', env_var='HIVED_DATABASE_URL', required=False, help='Hived blocks database connection url', default='')
@@ -142,7 +143,8 @@ class Conf():
             self._steem = SteemClient(
                 url=loads(self.get('steemd_url')),
                 max_batch=self.get('max_batch'),
-                max_workers=self.get('max_workers'))
+                max_workers=self.get('max_workers'),
+                max_retries=self.get('max_retries'))
         return self._steem
 
     def db(self):
