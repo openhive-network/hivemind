@@ -283,6 +283,7 @@ class DbState:
             def vacuum_hive_posts(cls):
               if massive_sync_preconditions:
                   cls._execute_query(db_mgr.db, "VACUUM ANALYZE VERBOSE hive_posts")
+                  cls._execute_query(db_mgr.db, "ANALYZE hive_votes")
 
 
             #UPDATE: `children`

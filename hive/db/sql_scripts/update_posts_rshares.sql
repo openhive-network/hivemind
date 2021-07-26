@@ -13,7 +13,7 @@ DECLARE
     __whole_plan TEXT := '';
 BEGIN
 SET LOCAL work_mem='2GB';
-SET LOCAL enable_seqscan=False;
+-- SET LOCAL enable_seqscan=False;
 RAISE INFO '-----------------BEGIN OF update_posts_rshares PLAN-----------------';
 FOR __explain_row IN EXPLAIN (ANALYZE,BUFFERS,VERBOSE) UPDATE hive_posts hp
     SET
