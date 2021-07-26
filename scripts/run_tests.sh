@@ -73,5 +73,4 @@ echo "Additional test options: ${@:3}"
 
 tox -e tavern -- -W ignore::pytest.PytestDeprecationWarning --workers auto --tests-per-worker auto -p no:logging ${@:3}
 
-cd scripts
-python3 accumulate_time_measurements.py
+python3 scripts/request_time_tools.py accumulate
