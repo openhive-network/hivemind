@@ -71,6 +71,8 @@ echo "Attempting to start tests on hivemind instance listening on: $HIVEMIND_ADD
 
 echo "Additional test options: ${@:3}"
 
+python3 scripts/request_time_tools.py update
+
 tox -e tavern -- -W ignore::pytest.PytestDeprecationWarning --workers auto --tests-per-worker auto -p no:logging ${@:3}
 
 python3 scripts/request_time_tools.py accumulate

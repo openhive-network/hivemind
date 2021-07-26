@@ -3,14 +3,14 @@ import sys
 
 
 class RequestTimeTools():
-    def __init__(self, run_mode, out_file_name="request_execution_times.csv"):
+    def __init__(self, run_mode, n_tests_to_compare=999999):
         self.sep = os.path.sep
         self.run_mode = run_mode
 
-        if run_mode == "accumulate":
-            self.out_file_name = out_file_name
+        if run_mode == "compare":
+            self.n_tests_to_compare = n_tests_to_compare
 
-        else:
+        elif run_mode == "update":
             self.tab_width = 2
 
             self.request_str = "request:\n"
@@ -24,16 +24,13 @@ class RequestTimeTools():
     def collect_test_dirs(self):
         self.tavern_dir = self.sep.join(os.path.realpath(__file__).split(self.sep)[:-2])
         self.tavern_test_dir = os.path.join(self.tavern_dir, "tests", "tests_api", "hivemind", "tavern")
+        self.out_path = os.path.join(self.tavern_test_dir, "request_execution_times.csv")
+        self.test_out_stream_path = os.path.join(self.tavern_test_dir, "test_output_stream.txt")
 
-        self.test_categories = [os.path.join(self.tavern_test_dir, test_cat) for test_cat in os.listdir(self.tavern_test_dir) if test_cat != ".pytest_cache"]
-        self.test_categories = [test_cat for test_cat in self.test_categories if os.path.isdir(test_cat)]
-        self.test_directories = [os.path.join(test_cat, test_dir) for test_cat in self.test_categories for test_dir in os.listdir(test_cat)]
-        self.test_directories = [test_dir for test_dir in self.test_directories if os.path.isdir(test_dir)]
-        self.test_paths = [os.path.join(test_dir, test_name) for test_dir in self.test_directories for test_name in os.listdir(test_dir)]
-        self.test_paths = [test for test in self.test_paths if "tavern.yaml" in test]
+        if self.run_mode != "compare":
+            self.test_paths = [os.path.join(path, name) for path, _, files in os.walk(self.tavern_test_dir) for name in files if "tavern.yaml" in name]
 
         if self.run_mode == "accumulate":
-            self.out_path = os.path.join(self.tavern_test_dir, self.out_file_name)
             self.timestamp_paths = [os.path.join(os.path.split(test)[0], "%s.timestamp.txt" % os.path.split(test)[1].split(".")[0]) for test in self.test_paths]
 
     def is_new_results(self):
@@ -72,23 +69,74 @@ class RequestTimeTools():
     def update_yaml(self, yaml, str_list):
         for search_str, search_str_len, input_str in zip([self.request_str, self.response_str], [self.request_str_len, self.response_str_len], str_list):
             idx = yaml.index(search_str) + search_str_len
-            yaml = "%s%s%s" %(yaml[:idx], input_str, yaml[idx:])
+            yaml = "%s%s%s" % (yaml[:idx], input_str, yaml[idx:])
         return yaml
 
-    def update_yamls(self):
+    def update_test_codes(self):
+        print("Running test yaml file update tool.")
         self.collect_test_dirs()
         for test in self.test_paths:
-            # print(test)
             with open(test, "r") as yaml_f:
                 yaml = yaml_f.read()
             if "measure_request_execution_time" not in yaml:
                 n_tabs = self.index_yamls(yaml)
                 str_list = self.format_strings(n_tabs)
                 yaml = self.update_yaml(yaml, str_list)
-                #print(yaml)
                 with open(test, "w") as yaml_f:
                     yaml_f.write(yaml)
-            #break
+
+    def run_tests_stream_stdout(self):
+        print("Running tests and streaming stdout, expected duration ~ 100 sec...")
+        import subprocess
+        cmd = ["./scripts/run_tests.sh", "localhost", "8080", "--durations=%s" % self.n_tests_to_compare]
+        with open(self.test_out_stream_path, 'wb') as f:
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            for c in iter(lambda: process.stdout.read(1), b''):
+                f.write(c)
+
+    def collect_data_from_stream(self):
+        duration_str = "=========================== slowest %s durations ===========================\n"\
+            % self.n_tests_to_compare
+
+        with open(self.test_out_stream_path, "r") as out_f:
+            out = out_f.read()
+        os.remove(self.test_out_stream_path)
+        return out.split(duration_str)[1].split("\n\n")[0]
+
+    def collect_data_from_csv(self):
+        external_func_dict = {}
+        with open(self.out_path, "r") as ext_func_f:
+            for row in ext_func_f.readlines():
+                split_row = row.split(",")
+                test_name, test_duration = split_row[0], float(split_row[1])
+                external_func_dict[test_name] = test_duration
+        return external_func_dict
+
+    def save_comparison(self, stream_data, external_func_dict):
+        import pandas as pd
+        df_columns = ["test_name", "ext_func", "call", "setup", "teardown", "ext_func_vs_call"]
+        df = pd.DataFrame.from_dict(external_func_dict, orient="index", columns=[df_columns[1]])
+        for col in df_columns[2:-1]:
+            df[col] = [None] * len(df)
+
+        for row in stream_data.split("\n"):
+            row = row.split()
+            test_name, test_type, test_duration = row[2].split("::")[0], row[1], float(row[0].strip("s"))
+            df.loc[test_name, test_type] = test_duration
+
+        df[df_columns[-1]] = df["ext_func"] - df["call"]
+        df = df.reset_index()
+        df.columns = df_columns
+        df.to_csv(self.out_path)
+        print("Result saved to\n%s" % (self.out_path))
+
+    def compare_tox_and_external_func_results(self):
+        print("Running comparison tool.")
+        self.collect_test_dirs()
+        self.run_tests_stream_stdout()
+        stream_data = self.collect_data_from_stream()
+        external_func_dict = self.collect_data_from_csv()
+        self.save_comparison(stream_data, external_func_dict)
 
 
 def grab_arg(error):
@@ -99,7 +147,7 @@ def grab_arg(error):
 
 
 if __name__ == "__main__":
-    error = "Must pass 'accumulate' or 'update' as argument\n'python3 scripts/request_time_tools.py update'"
+    error = "Must pass 'accumulate', 'update', 'compare' as argument\n'python3 scripts/request_time_tools.py update'"
     run_mode = grab_arg(error)
 
     request_time_tools = RequestTimeTools(run_mode)
@@ -108,7 +156,10 @@ if __name__ == "__main__":
         request_time_tools.accumulate_time_measurements()
 
     elif run_mode == "update":
-        request_time_tools.update_yamls()
+        request_time_tools.update_test_codes()
+
+    elif run_mode == "compare":
+        request_time_tools.compare_tox_and_external_func_results()
 
     else:
         raise RuntimeError(error)
