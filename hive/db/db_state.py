@@ -179,6 +179,20 @@ class DbState:
         time_end = perf_counter()
         log.info("[INIT] Query `%s' done in %.4fs", query, time_end - time_start)
 
+    @classmethod
+    def _execute_and_explain_query(cls, db, query):
+        time_start = perf_counter()
+
+        current_work_mem = cls.update_work_mem('2GB')
+        log.info("[INIT] Attempting to execute query: `%s'...", query)
+
+        row = db.explain().query_no_return(query)
+
+        cls.update_work_mem(current_work_mem)
+
+        time_end = perf_counter()
+        log.info("[INIT] Query `%s' done in %.4fs", query, time_end - time_start)
+
 
     @classmethod
     def processing_indexes_per_table(cls, db, table_name, indexes, is_pre_process, drop, create):
@@ -307,7 +321,7 @@ class DbState:
             sql = """
                   SELECT update_posts_rshares({}, {});
                   """.format(last_imported_block, current_imported_block)
-            cls._execute_query(db_mgr.db, sql)
+            cls._execute_and_explain_query(db_mgr.db, sql)
             log.info("[INIT] update_posts_rshares executed in %.4fs", perf_counter() - time_start)
 
 
