@@ -133,9 +133,9 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         self._ubound = ubound
         self._blocks_per_query = number_of_blocks_in_batch
         self._first_block_to_get =  lbound
-        self._blocks_queue = queue.Queue( maxsize=10000 )
-        self._operations_queue = queue.Queue( maxsize=10 )
-        self._blocks_data_queue = queue.Queue( maxsize=10 )
+        self._blocks_queue = queue.Queue( maxsize=self._blocks_queue_size )
+        self._operations_queue = queue.Queue( maxsize=self._operations_queue_size )
+        self._blocks_data_queue = queue.Queue( maxsize=self._blocks_data_queue_size )
 
         self._last_block_num_in_db = self._db.query_one( """SELECT num as num FROM hive_blocks ORDER BY num DESC LIMIT 1""" )
         assert self._last_block_num_in_db is not None

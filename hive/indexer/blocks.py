@@ -403,7 +403,8 @@ class Blocks:
                                                                   block['prev'], block['txs'],
                                                                   block['ops'], block['date']))
         query = query + ",".join(values)
-        DB.query(query)
+        DB.query_prepared(query)
+        values.clear()
         n = len(cls.blocks_to_flush)
         cls.blocks_to_flush.clear()
         return n
