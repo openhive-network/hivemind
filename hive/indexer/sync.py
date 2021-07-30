@@ -226,6 +226,9 @@ class Sync:
 
         # ensure db schema up to date, check app status
         DbState.initialize()
+        if self._conf.get("log_explain_queries"):
+            is_superuser = self._db.query_one( "SELECT is_superuser()" )
+            assert is_superuser, 'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
 
         show_info(self)
 

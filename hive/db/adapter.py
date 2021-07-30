@@ -8,6 +8,7 @@ import sqlalchemy
 import os
 
 from hive.utils.stats import Stats
+from hive.db.autoexplain_controller import AutoExplainWrapper
 
 logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 
@@ -43,7 +44,7 @@ class Db:
         else:
           log.info("A database offers maximum connections: {}. Required {} connections.".format(cls.max_connections, cls.necessary_connections))
 
-    def __init__(self, url, name):
+    def __init__(self, url, name, enable_autoexplain):
         """Initialize an instance.
 
         No work is performed here. Some modues might initialize an
@@ -67,9 +68,14 @@ class Db:
         self._basic_connection = self.get_connection(0)
         self._basic_connection.execute(sqlalchemy.text("COMMIT"))
 
+        self.__autoexplain = None;
+        if enable_autoexplain:
+            self.__autoexplain = AutoExplainWrapper( self )
+
     def clone(self, name):
-        cloned = Db(self._url, name)
+        cloned = Db(self._url, name, self.__autoexplain)
         cloned._engine = self._engine
+
         return cloned
 
     def close(self):
@@ -124,6 +130,12 @@ class Db:
     def is_trx_active(self):
         """Check if a transaction is in progress."""
         return self._trx_active
+
+    def explain(self):
+        if self.__autoexplain:
+            return self.__autoexplain;
+
+        return self;
 
     def query(self, sql, **kwargs):
         """Perform a (*non-`SELECT`*) write query."""
