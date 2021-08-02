@@ -1,0 +1,734 @@
+[
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 1915876518994,
+        "rshares": 699945686825,
+        "voter": "erath"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 4762863352086,
+        "voter": "bitcoin2016"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 1911892676725,
+        "voter": "badassmother"
+      },
+      {
+        "percent": "10000",
+        "reputation": 428017035820,
+        "rshares": 82761609942,
+        "voter": "friend5"
+      },
+      {
+        "percent": "10000",
+        "reputation": 358840960832,
+        "rshares": 1337025448249,
+        "voter": "rossco99"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1366085197760,
+        "rshares": 226246467529,
+        "voter": "steem-id"
+      },
+      {
+        "percent": "10000",
+        "reputation": 100108166977919,
+        "rshares": 636514783207,
+        "voter": "masteryoda"
+      },
+      {
+        "percent": "10000",
+        "reputation": 124209883737229,
+        "rshares": 1304773172054,
+        "voter": "steempower"
+      },
+      {
+        "percent": "10000",
+        "reputation": 158487994237,
+        "rshares": 48198377037,
+        "voter": "twiceuponatime"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1082239289637,
+        "rshares": 264069064525,
+        "voter": "indominon"
+      },
+      {
+        "percent": "10000",
+        "reputation": 23744414677575,
+        "rshares": 3188980467001,
+        "voter": "onceuponatime"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1829863145814,
+        "rshares": 700930801654,
+        "voter": "marginal"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2369366055877,
+        "rshares": 73489249804,
+        "voter": "vault"
+      },
+      {
+        "percent": "4000",
+        "reputation": 2165622245848,
+        "rshares": 10884676283,
+        "voter": "yefet"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3444102146490,
+        "rshares": 15004772648,
+        "voter": "gregory-f"
+      },
+      {
+        "percent": "10000",
+        "reputation": 21498120740,
+        "rshares": 9412699804,
+        "voter": "gregory60"
+      },
+      {
+        "percent": "335",
+        "reputation": 12382143533351,
+        "rshares": 29965767422,
+        "voter": "eeks"
+      },
+      {
+        "percent": "1100",
+        "reputation": 4931834878069,
+        "rshares": 3023823526,
+        "voter": "fkn"
+      },
+      {
+        "percent": "1100",
+        "reputation": 5414208804644,
+        "rshares": 3974627163,
+        "voter": "elishagh1"
+      },
+      {
+        "percent": "2900",
+        "reputation": 1663549830469,
+        "rshares": 313689446,
+        "voter": "coar"
+      },
+      {
+        "percent": "5555",
+        "reputation": 2902053059801,
+        "rshares": 1061217841,
+        "voter": "murh"
+      },
+      {
+        "percent": "10000",
+        "reputation": 6960979873594,
+        "rshares": 55384149889,
+        "voter": "aenor"
+      },
+      {
+        "percent": "10000",
+        "reputation": 4509451541223,
+        "rshares": 61711858916,
+        "voter": "theshell"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3906896686802,
+        "rshares": 55957746380,
+        "voter": "thecryptodrive"
+      },
+      {
+        "percent": "10000",
+        "reputation": 46310579884676,
+        "rshares": 138383979780,
+        "voter": "bravenewcoin"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2427142197024,
+        "rshares": 31167150846,
+        "voter": "peter-parker"
+      },
+      {
+        "percent": "10000",
+        "reputation": 14028106211346,
+        "rshares": 55528484241,
+        "voter": "kus-knee"
+      },
+      {
+        "percent": "1100",
+        "reputation": 598181152117,
+        "rshares": 26709353431,
+        "voter": "kimziv"
+      },
+      {
+        "percent": "10000",
+        "reputation": 111391460708814,
+        "rshares": 377133557309,
+        "voter": "fyrstikken"
+      },
+      {
+        "percent": "1100",
+        "reputation": 19111656178138,
+        "rshares": 14760800618,
+        "voter": "furion"
+      },
+      {
+        "percent": "1100",
+        "reputation": 3891722,
+        "rshares": 70822893,
+        "voter": "barbara2"
+      },
+      {
+        "percent": "1100",
+        "reputation": 9142611234,
+        "rshares": 78718732,
+        "voter": "ch0c0latechip"
+      },
+      {
+        "percent": "1100",
+        "reputation": 3871042,
+        "rshares": 72854943,
+        "voter": "doge4lyf"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1220081355,
+        "rshares": 243777568,
+        "voter": "ardina"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1440357780524,
+        "rshares": 1231812238,
+        "voter": "dicov"
+      },
+      {
+        "percent": "4000",
+        "reputation": 2397831198773,
+        "rshares": 4209516603,
+        "voter": "karen13"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1175982316919,
+        "rshares": 251364791827,
+        "voter": "nabilov"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1537463763,
+        "rshares": 34760444705,
+        "voter": "creemej"
+      },
+      {
+        "percent": "1100",
+        "reputation": 782596410473,
+        "rshares": 582629790,
+        "voter": "poseidon"
+      },
+      {
+        "percent": "10000",
+        "reputation": 5883461278385,
+        "rshares": 86528557116,
+        "voter": "rea"
+      },
+      {
+        "percent": "4000",
+        "reputation": 14988694886527,
+        "rshares": 204615752038,
+        "voter": "jl777"
+      },
+      {
+        "percent": "1100",
+        "reputation": 10519849768972,
+        "rshares": 2452241013,
+        "voter": "positive"
+      },
+      {
+        "percent": "10000",
+        "reputation": 82275088768,
+        "rshares": 35105434017,
+        "voter": "paquito"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3076953263936,
+        "rshares": 5172692235,
+        "voter": "gustavopasquini"
+      },
+      {
+        "percent": "10000",
+        "reputation": 686738916191,
+        "rshares": 334846153,
+        "voter": "sergey44"
+      },
+      {
+        "percent": "10000",
+        "reputation": 27988491601746,
+        "rshares": 48043215566,
+        "voter": "marius19"
+      },
+      {
+        "percent": "10000",
+        "reputation": 39913884914319,
+        "rshares": 26521061220,
+        "voter": "papa-pepper"
+      },
+      {
+        "percent": "4000",
+        "reputation": 58190631451,
+        "rshares": 17267164725,
+        "voter": "proto"
+      },
+      {
+        "percent": "1100",
+        "reputation": 17698439393799,
+        "rshares": 4513794924,
+        "voter": "sisterholics"
+      },
+      {
+        "percent": "1100",
+        "reputation": 147425730,
+        "rshares": 82565168,
+        "voter": "fnait"
+      },
+      {
+        "percent": "1100",
+        "reputation": 3720753029,
+        "rshares": 73351025,
+        "voter": "keepcalmand"
+      },
+      {
+        "percent": "10000",
+        "reputation": 106575300404,
+        "rshares": 3353862378,
+        "voter": "glitterpig"
+      },
+      {
+        "percent": "10000",
+        "reputation": 17701690051649,
+        "rshares": 135235064297,
+        "voter": "steemdrive"
+      },
+      {
+        "percent": "4000",
+        "reputation": 1275505236,
+        "rshares": 8734099452,
+        "voter": "taker"
+      },
+      {
+        "percent": "10000",
+        "reputation": 4336038090799,
+        "rshares": 15084691843,
+        "voter": "felixxx"
+      },
+      {
+        "percent": "1100",
+        "reputation": 10771708337101,
+        "rshares": 159616088312,
+        "voter": "laonie"
+      },
+      {
+        "percent": "1100",
+        "reputation": 18027204457681,
+        "rshares": 5329412559,
+        "voter": "myfirst"
+      },
+      {
+        "percent": "1100",
+        "reputation": 5776723480371,
+        "rshares": 32400617559,
+        "voter": "somebody"
+      },
+      {
+        "percent": "10000",
+        "reputation": 16577047541,
+        "rshares": 16605279252,
+        "voter": "sunshine"
+      },
+      {
+        "percent": "1100",
+        "reputation": 206355094166,
+        "rshares": 1211445477,
+        "voter": "flysaga"
+      },
+      {
+        "percent": "335",
+        "reputation": 1751717743,
+        "rshares": 833875930,
+        "voter": "gmurph"
+      },
+      {
+        "percent": "1100",
+        "reputation": 97845484474,
+        "rshares": 7157577424,
+        "voter": "midnightoil"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3271549714172,
+        "rshares": 2527662225,
+        "voter": "andrew0"
+      },
+      {
+        "percent": "1100",
+        "reputation": 3016325652890,
+        "rshares": 17901537959,
+        "voter": "xiaohui"
+      },
+      {
+        "percent": "1100",
+        "reputation": 6111268639849,
+        "rshares": 808464619,
+        "voter": "elfkitchen"
+      },
+      {
+        "percent": "1100",
+        "reputation": 1851205309677,
+        "rshares": 559692138,
+        "voter": "xiaokongcom"
+      },
+      {
+        "percent": "10000",
+        "reputation": 7767180487460,
+        "rshares": 12961700193,
+        "voter": "gargon"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3740136030964,
+        "rshares": 2114128942,
+        "voter": "future24"
+      },
+      {
+        "percent": "1100",
+        "reputation": 4195733833721,
+        "rshares": 1128233694,
+        "voter": "xianjun"
+      },
+      {
+        "percent": "10000",
+        "reputation": 5963920739546,
+        "rshares": 7546646500,
+        "voter": "lgm-1"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 52419023,
+        "voter": "nano2nd"
+      },
+      {
+        "percent": "1100",
+        "reputation": 730408370151,
+        "rshares": 73887203,
+        "voter": "microluck"
+      },
+      {
+        "percent": "10000",
+        "reputation": 203940530117,
+        "rshares": 3286864056,
+        "voter": "macartem"
+      },
+      {
+        "percent": "10000",
+        "reputation": 16426840706,
+        "rshares": 9310407829,
+        "voter": "gvargas123"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2357768295588,
+        "rshares": 3635091595,
+        "voter": "movievertigo"
+      },
+      {
+        "percent": "10000",
+        "reputation": 6300363201553,
+        "rshares": 55367058897,
+        "voter": "mandibil"
+      },
+      {
+        "percent": "2500",
+        "reputation": 6263695706748,
+        "rshares": 4633082667,
+        "voter": "steemitpatina"
+      },
+      {
+        "percent": "10000",
+        "reputation": 49216420678,
+        "rshares": 68464903,
+        "voter": "steembriefing"
+      },
+      {
+        "percent": "10000",
+        "reputation": 291915319,
+        "rshares": 53474677,
+        "voter": "riv"
+      },
+      {
+        "percent": "500",
+        "reputation": 10684992176630,
+        "rshares": 789873411,
+        "voter": "quinneaker"
+      },
+      {
+        "percent": "10000",
+        "reputation": 364872562916,
+        "rshares": 1857878964,
+        "voter": "funkywanderer"
+      },
+      {
+        "percent": "10000",
+        "reputation": 651373865756,
+        "rshares": 180241566,
+        "voter": "team101"
+      },
+      {
+        "percent": "10000",
+        "reputation": 5949422263,
+        "rshares": 201688406600,
+        "voter": "asksisk"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2332975763185,
+        "rshares": 3377754017,
+        "voter": "patelincho"
+      },
+      {
+        "percent": "10000",
+        "reputation": 4069545029880,
+        "rshares": 4412957887,
+        "voter": "funnyman"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1996672246136,
+        "rshares": 339274981,
+        "voter": "anomaly"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1502200909130,
+        "rshares": 123155378,
+        "voter": "ola1"
+      },
+      {
+        "percent": "10000",
+        "reputation": 167085102832,
+        "rshares": 113104192,
+        "voter": "lellabird60"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3256405941440,
+        "rshares": 4647741844,
+        "voter": "michelle.gent"
+      },
+      {
+        "percent": "10000",
+        "reputation": 183135491,
+        "rshares": 51432104,
+        "voter": "cryptofarmer"
+      },
+      {
+        "percent": "10000",
+        "reputation": 10707780055,
+        "rshares": 239963421,
+        "voter": "darkminded153"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 230290004,
+        "voter": "sjamayee"
+      },
+      {
+        "percent": "10000",
+        "reputation": 7037495995,
+        "rshares": 148889617,
+        "voter": "food-creator"
+      }
+    ],
+    "author": "kus-knee",
+    "author_reputation": 14028106211346,
+    "beneficiaries": [],
+    "body": "<html>\n<h1>There are many reasons to grow your own food but for this article I want to focus on one thing.........TASTE!&nbsp;</h1>\n<h1>&nbsp;</h1>\n<p><img src=\"https://s16.postimg.org/if9pm2az9/rsz_img_3568.jpg\" width=\"800\" height=\"600\"/></p>\n<p><em>Sweet tomato juice or acidic tomato-like water. Which one do you want?</em></p>\n<h1>EXPERIMENT</h1>\n<h2><strong>Hypothesis:</strong>&nbsp;</h2>\n<p>Home grown tomatoes will taste better and will produce more juice with a deeper red color than those purchased in the grocery store. In fact my son doesn\u2019t generally like tomatoes but when they\u2019re from the garden\u2026wow <strong>he devours them! </strong>&nbsp;</p>\n<h2><strong>Material:&nbsp;</strong></h2>\n<ul>\n  <li>One store bought tomato weighing in at 128 grams.&nbsp;</li>\n  <li>One home grown tomato weighing in at 115 grams (will the home grown tomato although smaller produce more juice?) &nbsp;&nbsp;&nbsp;</li>\n</ul>\n<h2><strong>Method:</strong>&nbsp;</h2>\n<ul>\n  <li>Purchase store bought tomatoes that are locally grown and then pick some home grown ones from our family garden.&nbsp;</li>\n  <li>The tomatoes that I purchased were grown here in Switzerland and therefore did not have to travel too far. Tomatoes are also now in season and so the experiment should be more than fair.&nbsp;</li>\n  <li>Slice the tomatoes and examine them, then squeeze them for the juice. Strain the tomatoes with a sieve and pour juice into wine glasses. Examine and taste the juice. &nbsp;</li>\n</ul>\n<p><br></p>\n<p><img src=\"https://s18.postimg.org/75ra7cz3t/rsz_img_3555.jpg\" width=\"800\" height=\"600\"/></p>\n<p><em>The store bought tomatoes look \"perfect\" and many might choose them for that reason, especially kids!</em></p>\n<p><br></p>\n<h2><strong>Apparatus:</strong> &nbsp;&nbsp;</h2>\n<ul>\n  <li>Cutting board&nbsp;</li>\n  <li>Note to married men: (<strong>don't cut directly on the kitchen counter</strong> or table. Your wife might kill you!)</li>\n  <li>Knife (always <strong>be careful</strong> when using knives)</li>\n  <li>Cooking spoon to crush tomatoes (<strong>wear safety goggles,</strong> juice form acidic store bought tomatoes can burn eyes!)</li>\n  <li>Sieve&nbsp;</li>\n  <li>Wine glasses (it's just <strong>classier </strong>that's all)&nbsp;</li>\n  <li>Weigh scale &nbsp;</li>\n</ul>\n<p><br></p>\n<p><br></p>\n<p><img src=\"https://s14.postimg.org/npwewfdht/rsz_img_3578.jpg\" width=\"800\" height=\"600\"/></p>\n<p><em>Look how much more juicy flesh the garden tomato has!</em></p>\n<h2>&nbsp;&nbsp;</h2>\n<h2>Observations: &nbsp;&nbsp;</h2>\n<ul>\n  <li>The store bought tomatoes looked better until I cut them open! Then there was no comparison (see photo)</li>\n  <li>The home grown tomato that weighed 115 grams produced 66 grams of juice or <strong>57% it\u2019s weight in juice!&nbsp;</strong></li>\n  <li>The store bought tomato that weighed 128 grams produced only 37 grams of juice or <strong>only 29%</strong> i<strong>t\u2019s weight in juice!</strong> SHOCKING! &nbsp;&nbsp;</li>\n  <li>The juice from the home grown tomato was a <strong>much deeper red</strong> and tasted sweet whereas the store bought tomato was acidic! <strong>UGH! </strong>It actually <strong>gave me a burning </strong>stomach!</li>\n</ul>\n<p><br></p>\n<p><img src=\"https://s11.postimg.org/do7v00slv/rsz_pic_jointer.png\" width=\"800\" height=\"800\"/></p>\n<h3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>A happy juice drinker! &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;An unhappy, disgusted juice drinker!</em></h3>\n<h1><strong>Conclusions:</strong>&nbsp;</h1>\n<ul>\n  <li>Home grown tomatoes are sweeter, juicier and tastier!&nbsp;</li>\n  <li>Grow and eat or drink <strong>home grown </strong>tomatoes whenever possible! &nbsp;&nbsp;&nbsp;</li>\n</ul>\n<p><br></p>\n<h2>&nbsp;Why Are Tomatoes That Are Grown For The Super Market Terrible? &nbsp;</h2>\n<ul>\n  <li>&nbsp;They are grown for storage and shipping, not for taste. This is true for most industrial food.&nbsp;</li>\n  <li>They are also picked unripe which allows them to be stacked (thus round and uniform in size ), and stored (thus pink, hard and tasteless ) &nbsp;</li>\n  <li>They must last for potentially weeks on a store shelf. &nbsp;&nbsp;&nbsp;</li>\n</ul>\n<p><br></p>\n<p><strong>Note: </strong>There were once countless varieties of delicious heirloom tomatoes that have now disappeared because they couldn't take transport. &nbsp;<strong>If you can Start Gardening!</strong></p>\n<p><br></p>\n<p>Until next time, &nbsp;&nbsp;&nbsp;&nbsp;</p>\n<p>@kus-knee (The Old Dog)&nbsp;</p>\n<p><br></p>\n<p><img src=\"https://s9.postimg.io/a7qhh6le7/Official_Blog_Logo_copy.jpg\" width=\"200\" height=\"79\"/></p>\n<p><br></p>\n<p><br></p>\n</html>",
+    "body_length": 4894,
+    "cashout_time": "2016-09-22T15:09:18",
+    "category": "food",
+    "children": 18,
+    "created": "2016-09-15T15:09:18",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"food\",\"steemit\",\"science\",\"gardening\",\"life\"],\"users\":[\"kus-knee\"],\"image\":[\"https://s16.postimg.org/if9pm2az9/rsz_img_3568.jpg\",\"https://s18.postimg.org/75ra7cz3t/rsz_img_3555.jpg\",\"https://s14.postimg.org/npwewfdht/rsz_img_3578.jpg\",\"https://s11.postimg.org/do7v00slv/rsz_pic_jointer.png\",\"https://s9.postimg.io/a7qhh6le7/Official_Blog_Logo_copy.jpg\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-15T15:09:18",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 17577187352269,
+    "parent_author": "",
+    "parent_permlink": "food",
+    "pending_payout_value": "20.756 HBD",
+    "percent_hbd": 10000,
+    "permlink": "the-old-dog-experiments-the-great-tomato-science-challenge-store-bought-vs-garden-grown",
+    "post_id": 1254979,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "The Old Dog Experiments: The Great Tomato Science Challenge. Store Bought Vs Garden Grown!",
+    "title": "The Old Dog Experiments: The Great Tomato Science Challenge. Store Bought Vs Garden Grown!",
+    "total_payout_value": "0.000 HBD",
+    "url": "/food/@kus-knee/the-old-dog-experiments-the-great-tomato-science-challenge-store-bought-vs-garden-grown"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 949715155915,
+        "rshares": 7403146775658,
+        "voter": "steempty"
+      },
+      {
+        "percent": "10000",
+        "reputation": 6030999377480,
+        "rshares": 17572418691,
+        "voter": "sebastien"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2975325915134,
+        "rshares": 23201973467,
+        "voter": "ooak"
+      },
+      {
+        "percent": "10000",
+        "reputation": 790526925913,
+        "rshares": 1349109906,
+        "voter": "dolov"
+      },
+      {
+        "percent": "10000",
+        "reputation": 140342009284,
+        "rshares": 143310179,
+        "voter": "nang1"
+      },
+      {
+        "percent": "10000",
+        "reputation": 227415344771,
+        "rshares": 58224897,
+        "voter": "stephenkendal"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1996672246136,
+        "rshares": 271441624,
+        "voter": "anomaly"
+      },
+      {
+        "percent": "10000",
+        "reputation": 121767758976,
+        "rshares": 50201461,
+        "voter": "mari5555na"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1464766250,
+        "rshares": 136494240,
+        "voter": "bleujay"
+      }
+    ],
+    "author": "ooak",
+    "author_reputation": 2975325915134,
+    "beneficiaries": [],
+    "body": "Eight years have passed since we encountered the severe financial crisis that badly shook our economy. Back in 2008, we witnessed some of the most tiresome times for the financial markets. The last time something close to that had occurred, or even worse, was in the 1930s when the Great Depression had hit our economy. However, the economy has settled now from the adverse effects of the 2008 crisis and is behaving in a more normal manner, but what if those economic nightmares happened again? Are we prepared enough for that? Here are a few important lessons that everyone should learn from the economic crisis of 2008.\n\n1. Prepare yourself for the unexpected\nYou might have heard the saying that you should always expect the unexpected. Surely, you will never know what tomorrow may bring. You should always be ready for the uncertain events that might occur anytime. The financial markets might be stable today, but they can become unstable tomorrow. So it is essential for you to take some steps to prepare yourself.\n\n2. Don\u2019t entirely believe in the good face of the market\nDo you see too much good around you? Is there a constant rise in markets? Are loans available to everyone easily? Are interest rates continually lower than expected? You should watch out if anything like that happens. Always remember that too much good is never good for anyone. These conditions only create a false sense of security. People take more loans because of the lower interest rates and when things get back to normal, it causes a crisis.\n\n3. Always invest for long-term gains\nIf you want to live tension-free when the next financial crisis occurs, it is crucial that you start investing for long-term gains rather than short-term ones. These short-term gains might appear tempting, but they won't help you at all in the long run and not even in an economic crisis. You might not know this, but short-term investments increase the possibility of illiquidity when you need the cash, leaving you empty-handed.\n\n4. Experts know a lot but not everything\nIf you blindly believe what experts say, you might not be able to survive the crisis. We put our trust in the experts whether they were economists, stock analysts, fund managers, accounting firms, the government, industry regulators, CEOs, and what happened? They disappointed us. Not all, but surely some of them lied to us and knowingly deceived us for their personal gain and greed. The crisis of 2008 has clearly demonstrated that even the geniuses of our economy fail too. Undoubtedly, this is the best lesson from the past crises. We should not blindly trust the professionals as their predictions can be wrong and misleading.\n\n5. Make your investment approach flexible\nWhen a crisis hits, opportunities can come in various ways which you might have no idea about. This is why it's important that you have a flexible investment approach. Never get too attached to a single",
+    "body_length": 2920,
+    "cashout_time": "2016-09-22T16:08:21",
+    "category": "steem",
+    "children": 1,
+    "created": "2016-09-15T16:08:21",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"steem\",\"steemit\",\"blog\",\"economy\",\"writing\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-15T16:08:21",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 7445929950123,
+    "parent_author": "",
+    "parent_permlink": "steem",
+    "pending_payout_value": "4.682 HBD",
+    "percent_hbd": 10000,
+    "permlink": "lessons-to-learn-from-the-2008-economic-crisis",
+    "post_id": 1255654,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Lessons to Learn from the 2008 Economic Crisis",
+    "title": "Lessons to Learn from the 2008 Economic Crisis",
+    "total_payout_value": "0.000 HBD",
+    "url": "/steem/@ooak/lessons-to-learn-from-the-2008-economic-crisis"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 949715155915,
+        "rshares": 7557379000151,
+        "voter": "steempty"
+      },
+      {
+        "percent": "10000",
+        "reputation": 686738916191,
+        "rshares": 334846153,
+        "voter": "sergey44"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2975325915134,
+        "rshares": 23666012936,
+        "voter": "ooak"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1502200909130,
+        "rshares": 123155378,
+        "voter": "ola1"
+      }
+    ],
+    "author": "ooak",
+    "author_reputation": 2975325915134,
+    "beneficiaries": [],
+    "body": "Have you ever looked at famous entrepreneurs and wondered about the secret to their success? You might have heard a lot that people who are highly successful are the ones who are extremely motivated. It is true to some extent but not entirely. Motivation is undoubtedly necessary for everything you do, but what play a significant role in being successful are your actions and habits.\nThat's right, your actions can determine your future. If you are a person whose days are dominated by vigorous and productive practices, you are more likely to get successful. Here are some of the habits that you need to adopt to become a great entrepreneur.\n\n1. Wake Up Early in the Morning\nRising early is one of the most crucial practices that you should embrace to become a great entrepreneur. It is the time when you have clarity of mind and are fully recharged and fresh. Are you saying that you already wake up at eight in the morning? Well, when I say early in the morning, I mean way early. Most of the successful entrepreneurs wake up even before 6 a.m. You might not believe it, but Tim Cook (the CEO of Apple) wakes up at 4:30 a.m. whereas Richard Branson (founder of Virgin Group) at 05:45 a.m.\n\n2. Read as Much as You Can\nReading helps you generate new ideas, augments your ability to focus, expands and boosts your memory, improves and broadens your views, makes you more creative, and motivates you in many different ways. All of those qualities are vital for an entrepreneur. That's why you should read for at least 30 to 60 seconds in the morning or before going to bed. Even Bill Gates, a well-known entrepreneur, is a total book lover. He reads a lot every now and then. He even publishes posts on his website about book recommendations.\n\n3. Take Small but Frequent Breaks\nTaking breaks during your work will make you more energetic and involved. Most of the people who work hard day and night are more likely to get stressed and frantic. If you're thinking that an entrepreneur-in-making should stick to what they are doing and shouldn't take breaks at all, you are wrong. Adequate breaks between your work will make you more productive. It is said that most successful people work for about 60 to 90 minutes and then take a 20-minute break.\n\n4. Keep Looking for Inspiration\nNo matter how successful you are in your life, never stop seeking inspiration. Everyone has to deal with some major hindrances in their life. Sometimes, it becomes hard to overcome them as we suffer a mental roadblock. If this happens to you, you should never lose hope and look for inspiration. The best place to get inspired is watching inspirational videos on TED or reading successful entrepreneur stories or biographies. These things will help you remember to stay on track and keep doing your thing even when things appear bleak.\n\n5. Other Habits to Remember\nSome other practices to remember are to always opt for healthy meals, exercise early in the morning to kick-start your brain and body, set daily goals, follow a plan and take action, stay organized, manage your time effectively, be persistent, and always be grateful.",
+    "body_length": 3113,
+    "cashout_time": "2016-09-22T15:46:30",
+    "category": "steemit",
+    "children": 0,
+    "created": "2016-09-15T15:46:30",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"steemit\",\"steem\",\"blog\",\"writing\",\"entrepreneur\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-15T15:46:30",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 7581503014618,
+    "parent_author": "",
+    "parent_permlink": "steemit",
+    "pending_payout_value": "4.875 HBD",
+    "percent_hbd": 10000,
+    "permlink": "productive-habits-that-can-help-you-become-a-successful-entrepreneur",
+    "post_id": 1255400,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Productive Habits That Can Help You Become a Successful Entrepreneur",
+    "title": "Productive Habits That Can Help You Become a Successful Entrepreneur",
+    "total_payout_value": "0.000 HBD",
+    "url": "/steemit/@ooak/productive-habits-that-can-help-you-become-a-successful-entrepreneur"
+  }
+]

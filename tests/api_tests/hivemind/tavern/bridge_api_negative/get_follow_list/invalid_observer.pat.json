@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "invalid account name length: `nonexisting_account`",
+  "message": "Invalid parameters"
+}

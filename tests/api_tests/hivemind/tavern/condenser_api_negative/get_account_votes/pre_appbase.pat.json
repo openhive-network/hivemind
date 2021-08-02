@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "get_account_votes is no longer supported, for details see https://hive.blog/steemit/@steemitdev/additional-public-api-change",
+  "message": "Invalid parameters"
+}

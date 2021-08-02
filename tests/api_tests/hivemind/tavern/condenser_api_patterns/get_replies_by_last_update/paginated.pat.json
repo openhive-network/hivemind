@@ -1,0 +1,150 @@
+[
+  {
+    "active_votes": [],
+    "author": "thecryptofiend",
+    "author_reputation": 16234753830016,
+    "beneficiaries": [],
+    "body": "Thanks for explaining.  You've got my witness vote now.",
+    "body_length": 55,
+    "cashout_time": "2016-08-23T19:31:06",
+    "category": "witness-category",
+    "children": 0,
+    "created": "2016-08-16T19:31:06",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "json_metadata": "{\"tags\":[\"witness-category\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-08-16T19:31:06",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "gtg",
+    "parent_permlink": "heavy-duty-witness-node-infrastructure",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-gtg-heavy-duty-witness-node-infrastructure-20160816t193106395z",
+    "post_id": 839955,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Heavy duty witness node infrastructure",
+    "title": "",
+    "total_payout_value": "0.000 HBD",
+    "url": "/witness-category/@gtg/heavy-duty-witness-node-infrastructure#@thecryptofiend/re-gtg-heavy-duty-witness-node-infrastructure-20160816t193106395z"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 3894279128605,
+        "rshares": 6327910390022,
+        "voter": "wackou"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1444446898291,
+        "rshares": 9559686655,
+        "voter": "johnerfx"
+      },
+      {
+        "percent": "10000",
+        "reputation": 37159422493,
+        "rshares": 829049571,
+        "voter": "johnerminer"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3924899966690,
+        "rshares": 38432804053,
+        "voter": "gtg"
+      },
+      {
+        "percent": "10000",
+        "reputation": 8017093633272,
+        "rshares": 19873104999,
+        "voter": "ausbitbank"
+      },
+      {
+        "percent": "10000",
+        "reputation": 161079803820,
+        "rshares": 44706057470,
+        "voter": "arcurus"
+      },
+      {
+        "percent": "10000",
+        "reputation": 15739430465359,
+        "rshares": 31463628969,
+        "voter": "mibenkito"
+      },
+      {
+        "percent": "10000",
+        "reputation": 18890223518661,
+        "rshares": 14083166401,
+        "voter": "someguy123"
+      },
+      {
+        "percent": "10000",
+        "reputation": 7805684953,
+        "rshares": 52918124,
+        "voter": "xomtux"
+      }
+    ],
+    "author": "jesta",
+    "author_reputation": 38947133984552,
+    "beneficiaries": [],
+    "body": "I love the idea in this, basically setting up a fortress for your witness node to be more resilient. \n\nOne thing you're right about though is it would be a somewhat expensive venture. At the rate I'm witnessing blocks (maybe 3-4 a day?), it's not feasible to sustain itself financially, but I imagine the top 19 could easily go this route.  Maybe even some of the people in the top 30?\n\nI'd be more than willing to help prototype this type of infrastructure. I've been considering how difficult it would be to setup on AWS with a CloudFormation script that spins up seed nodes as ECS Containers, VPCs in every region that all interconnect via private networking, and an EC2 container for your witness node that's not accessible from the internet, but only the seed nodes. \n\nIt really shouldn't be all that hard, and even non-technical witnesses could copy/paste the cloudformation script to get started. Of course with this idea, if AWS is attacked, you're still the mercy of them being able to handle it.",
+    "body_length": 1005,
+    "cashout_time": "2016-08-23T19:11:06",
+    "category": "witness-category",
+    "children": 2,
+    "created": "2016-08-16T19:11:06",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "json_metadata": "{\"tags\":[\"witness-category\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-08-16T19:11:06",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 6486910806264,
+    "parent_author": "gtg",
+    "parent_permlink": "heavy-duty-witness-node-infrastructure",
+    "pending_payout_value": "9.970 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-gtg-heavy-duty-witness-node-infrastructure-20160816t191107309z",
+    "post_id": 839628,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Heavy duty witness node infrastructure",
+    "title": "",
+    "total_payout_value": "0.000 HBD",
+    "url": "/witness-category/@gtg/heavy-duty-witness-node-infrastructure#@jesta/re-gtg-heavy-duty-witness-node-infrastructure-20160816t191107309z"
+  },
+  {
+    "active_votes": [],
+    "author": "thebluepanda",
+    "author_reputation": 7564464865541,
+    "beneficiaries": [],
+    "body": "i was checking if you tagged it in #witness-category ;) \nglad to see steemit has a great team of security devs and glad to have upvoted you as witness.",
+    "body_length": 151,
+    "cashout_time": "2016-08-23T19:08:06",
+    "category": "witness-category",
+    "children": 0,
+    "created": "2016-08-16T19:08:06",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "json_metadata": "{\"tags\":[\"witness-category\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-08-16T19:08:06",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "gtg",
+    "parent_permlink": "heavy-duty-witness-node-infrastructure",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-gtg-heavy-duty-witness-node-infrastructure-20160816t190814180z",
+    "post_id": 839580,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Heavy duty witness node infrastructure",
+    "title": "",
+    "total_payout_value": "0.000 HBD",
+    "url": "/witness-category/@gtg/heavy-duty-witness-node-infrastructure#@thebluepanda/re-gtg-heavy-duty-witness-node-infrastructure-20160816t190814180z"
+  }
+]

@@ -1,0 +1,5 @@
+{
+  "code": -32000,
+  "data": "InvalidTextRepresentation: invalid input syntax for integer: \"abc\"\nLINE 11:             AND score >= 'abc'\n                                  ^\n",
+  "message": "Server error"
+}

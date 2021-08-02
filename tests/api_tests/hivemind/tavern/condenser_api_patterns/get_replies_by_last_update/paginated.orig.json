@@ -1,0 +1,163 @@
+[
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "43533730799",
+        "voter": "brandonp"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "52397603",
+        "voter": "doze49"
+      }
+    ],
+    "author": "brandonp",
+    "author_reputation": 0,
+    "beneficiaries": [],
+    "body": "Reading stuff like this makes me realize just how little I know about this whole thing...",
+    "body_length": 89,
+    "cashout_time": "2016-09-16T20:13:00",
+    "category": "witness-category",
+    "children": 0,
+    "created": "2016-08-16T20:01:27",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "json_metadata": "{\"tags\":[\"witness-category\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-08-16T20:01:27",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 43586128402,
+    "parent_author": "gtg",
+    "parent_permlink": "heavy-duty-witness-node-infrastructure",
+    "pending_payout_value": "0.024 HBD",
+    "percent_steem_dollars": 10000,
+    "permlink": "re-gtg-heavy-duty-witness-node-infrastructure-20160816t200131779z",
+    "post_id": 631654,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Heavy duty witness node infrastructure",
+    "title": "",
+    "total_payout_value": "0.000 HBD",
+    "url": "/witness-category/@gtg/heavy-duty-witness-node-infrastructure#@brandonp/re-gtg-heavy-duty-witness-node-infrastructure-20160816t200131779z"
+  },
+  {
+    "active_votes": [],
+    "author": "thecryptofiend",
+    "author_reputation": 0,
+    "beneficiaries": [],
+    "body": "Thanks for explaining.  You've got my witness vote now.",
+    "body_length": 55,
+    "cashout_time": "2016-09-16T20:13:00",
+    "category": "witness-category",
+    "children": 0,
+    "created": "2016-08-16T19:31:06",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "json_metadata": "{\"tags\":[\"witness-category\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-08-16T19:31:06",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "gtg",
+    "parent_permlink": "heavy-duty-witness-node-infrastructure",
+    "pending_payout_value": "0.000 HBD",
+    "percent_steem_dollars": 10000,
+    "permlink": "re-gtg-heavy-duty-witness-node-infrastructure-20160816t193106395z",
+    "post_id": 631312,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Heavy duty witness node infrastructure",
+    "title": "",
+    "total_payout_value": "0.000 HBD",
+    "url": "/witness-category/@gtg/heavy-duty-witness-node-infrastructure#@thecryptofiend/re-gtg-heavy-duty-witness-node-infrastructure-20160816t193106395z"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "6327910390022",
+        "voter": "wackou"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "9559686655",
+        "voter": "johnerfx"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "829049571",
+        "voter": "johnerminer"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "38432804053",
+        "voter": "gtg"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "19873104999",
+        "voter": "ausbitbank"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "44706057470",
+        "voter": "arcurus"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "31463628969",
+        "voter": "mibenkito"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "14083166401",
+        "voter": "someguy123"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "52918124",
+        "voter": "xomtux"
+      }
+    ],
+    "author": "jesta",
+    "author_reputation": 0,
+    "beneficiaries": [],
+    "body": "I love the idea in this, basically setting up a fortress for your witness node to be more resilient. \n\nOne thing you're right about though is it would be a somewhat expensive venture. At the rate I'm witnessing blocks (maybe 3-4 a day?), it's not feasible to sustain itself financially, but I imagine the top 19 could easily go this route.  Maybe even some of the people in the top 30?\n\nI'd be more than willing to help prototype this type of infrastructure. I've been considering how difficult it would be to setup on AWS with a CloudFormation script that spins up seed nodes as ECS Containers, VPCs in every region that all interconnect via private networking, and an EC2 container for your witness node that's not accessible from the internet, but only the seed nodes. \n\nIt really shouldn't be all that hard, and even non-technical witnesses could copy/paste the cloudformation script to get started. Of course with this idea, if AWS is attacked, you're still the mercy of them being able to handle it.",
+    "body_length": 1005,
+    "cashout_time": "2016-09-16T20:13:00",
+    "category": "witness-category",
+    "children": 2,
+    "created": "2016-08-16T19:11:06",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "json_metadata": "{\"tags\":[\"witness-category\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-08-16T19:11:06",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 6486910806264,
+    "parent_author": "gtg",
+    "parent_permlink": "heavy-duty-witness-node-infrastructure",
+    "pending_payout_value": "9.966 HBD",
+    "percent_steem_dollars": 10000,
+    "permlink": "re-gtg-heavy-duty-witness-node-infrastructure-20160816t191107309z",
+    "post_id": 631058,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Heavy duty witness node infrastructure",
+    "title": "",
+    "total_payout_value": "0.000 HBD",
+    "url": "/witness-category/@gtg/heavy-duty-witness-node-infrastructure#@jesta/re-gtg-heavy-duty-witness-node-infrastructure-20160816t191107309z"
+  }
+]

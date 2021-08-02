@@ -1,0 +1,114 @@
+{
+  "votes": [
+    {
+      "author": "roelandp",
+      "id": 3341364,
+      "last_update": "2016-08-25T21:16:24",
+      "num_changes": -1,
+      "permlink": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours",
+      "rshares": 67807559,
+      "vote_percent": 10000,
+      "voter": "pickoum",
+      "weight": "11168221241042"
+    },
+    {
+      "author": "anxietymaven",
+      "id": 3397159,
+      "last_update": "2016-08-26T22:06:21",
+      "num_changes": 0,
+      "permlink": "re-adm-re-anxietymaven-ask-yourself-one-question-fuck-steemit-or-nah-20160825t211407406z",
+      "rshares": -742966944841,
+      "vote_percent": -10000,
+      "voter": "pfunk",
+      "weight": 0
+    },
+    {
+      "author": "jamielefay",
+      "id": 3344706,
+      "last_update": "2016-08-25T22:28:54",
+      "num_changes": -1,
+      "permlink": "ahe-ey-sky-falling-an-original-novel-part-1-audiobook",
+      "rshares": 2476122539,
+      "vote_percent": 10000,
+      "voter": "boy",
+      "weight": "6006017962432724"
+    },
+    {
+      "author": "jamielefay",
+      "id": 3344694,
+      "last_update": "2016-08-25T22:28:45",
+      "num_changes": -1,
+      "permlink": "ahe-ey-sky-falling-an-original-novel-part-1-audiobook",
+      "rshares": 3005691694,
+      "vote_percent": 10000,
+      "voter": "bue-witness",
+      "weight": "7417167962646132"
+    },
+    {
+      "author": "jamielefay",
+      "id": 3344711,
+      "last_update": "2016-08-25T22:28:57",
+      "num_changes": -1,
+      "permlink": "ahe-ey-sky-falling-an-original-novel-part-1-audiobook",
+      "rshares": 557353091,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": "1350783817158092"
+    },
+    {
+      "author": "jamielefay",
+      "id": 3344696,
+      "last_update": "2016-08-25T22:28:48",
+      "num_changes": -1,
+      "permlink": "ahe-ey-sky-falling-an-original-novel-part-1-audiobook",
+      "rshares": "42722553918",
+      "vote_percent": 10000,
+      "voter": "bue",
+      "weight": "104552198157919482"
+    },
+    {
+      "author": "jamielefay",
+      "id": 3344699,
+      "last_update": "2016-08-25T22:28:48",
+      "num_changes": -1,
+      "permlink": "ahe-ey-sky-falling-an-original-novel-part-1-audiobook",
+      "rshares": 1327119432,
+      "vote_percent": 10000,
+      "voter": "mini",
+      "weight": "3221828527667312"
+    },
+    {
+      "author": "jamielefay",
+      "id": 3344712,
+      "last_update": "2016-08-25T22:29:00",
+      "num_changes": -1,
+      "permlink": "ahe-ey-sky-falling-an-original-novel-part-1-audiobook",
+      "rshares": 170849766,
+      "vote_percent": 10000,
+      "voter": "moon",
+      "weight": "414011598841308"
+    },
+    {
+      "author": "jamielefay",
+      "id": 3344702,
+      "last_update": "2016-08-25T22:28:51",
+      "num_changes": -1,
+      "permlink": "ahe-ey-sky-falling-an-original-novel-part-1-audiobook",
+      "rshares": 497724578,
+      "vote_percent": 10000,
+      "voter": "healthcare",
+      "weight": "1207918840148852"
+    },
+    {
+      "author": "jamielefay",
+      "id": 3344709,
+      "last_update": "2016-08-25T22:28:54",
+      "num_changes": -1,
+      "permlink": "ahe-ey-sky-falling-an-original-novel-part-1-audiobook",
+      "rshares": 763593782,
+      "vote_percent": 10000,
+      "voter": "daniel.pan",
+      "weight": "1851065537354896"
+    }
+  ]
+}
