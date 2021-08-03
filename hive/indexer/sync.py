@@ -37,6 +37,7 @@ from hive.utils.misc import show_app_version, log_memory_usage
 
 from hive.indexer.mock_block_provider import MockBlockProvider
 from hive.indexer.mock_vops_provider import MockVopsProvider
+from hive.indexer.db_adapter_holder import DbLiveContextHolder
 
 from datetime import datetime
 
@@ -46,6 +47,38 @@ from collections import deque
 
 
 log = logging.getLogger(__name__)
+
+old_sig_int_handler = None
+old_sig_term_handler = None
+trail_blocks = None
+
+def set_handlers():
+    global old_sig_int_handler
+    global old_sig_term_handler
+    old_sig_int_handler = signal(SIGINT, finish_signals_handler)
+    old_sig_term_handler = signal(SIGTERM, finish_signals_handler)
+
+def restore_handlers():
+    signal(SIGINT, old_sig_int_handler)
+    signal(SIGTERM, old_sig_term_handler)
+
+def finish_signals_handler(signal, frame):
+    global FINISH_SIGNAL_DURING_SYNC
+    FINISH_SIGNAL_DURING_SYNC += 1
+    log.info("""
+                  **********************************************************
+                  CAUGHT {}. PLEASE WAIT... PROCESSING DATA IN QUEUES...
+                  **********************************************************
+    """.format( "SIGINT" if signal == SIGINT else "SIGTERM" ) )
+
+def show_info(_db):
+    database_head_block = Blocks.head_num()
+
+    sql = "SELECT level, patch_date, patched_to_revision FROM hive_db_patch_level ORDER BY level DESC LIMIT 1"
+    patch_level_data = _db.query_row(sql)
+
+    from hive.utils.misc import show_app_version;
+    show_app_version(log, database_head_block, patch_level_data)
 
 def _blocks_data_provider(blocks_data_provider):
     try:
@@ -160,65 +193,106 @@ def _process_blocks_from_provider(self, massive_block_provider, is_initial_sync,
         if block_data_provider_exception:
             raise block_data_provider_exception
 
-class Sync:
-    """Manages the sync/index process.
-
-    Responsible for initial sync, fast sync, and listen (block-follow).
-    """
-
-    def __init__(self, conf):
+class DBSync:
+    def __init__(self, conf, db, steem, live_context):
         self._conf = conf
-        self._db = conf.db()
-
-        log.info("Using hived url: `%s'", self._conf.get('steemd_url'))
-
-        self._steem = conf.steem()
+        self._db = db
+        self._steem = steem
+        DbLiveContextHolder.set_live_context(live_context)
 
     def __enter__(self):
         assert self._db, "The database must exist"
+
+        log.info("Entering into {} synchronization".format( "LIVE" if DbLiveContextHolder.is_live_context() else "MASSIVE" ))
         Blocks.setup_own_db_access(self._db)
+        log.info("Exiting from {} synchronization".format( "LIVE" if DbLiveContextHolder.is_live_context() else "MASSIVE" ))
+
         return self
 
     def __exit__(self, exc_type, value, traceback):
-        Blocks.close_own_db_access()
+        #During massive-sync every object has own copy of database, as a result all copies have to be closed
+        #During live-sync an original database is used and can't be closed, because it can be used later.
+        if not DbLiveContextHolder.is_live_context():
+            Blocks.close_own_db_access()
+
+    # refetch dynamic_global_properties, feed price, etc
+    def _update_chain_state(self):
+        """Update basic state props (head block, feed price) in db."""
+        state = self._steem.gdgp_extended()
+        self._db.query("""UPDATE hive_state SET block_num = :block_num,
+                       steem_per_mvest = :spm, usd_per_steem = :ups,
+                       sbd_per_steem = :sps, dgpo = :dgpo""",
+                       block_num=Blocks.head_num(),
+                       spm=state['steem_per_mvest'],
+                       ups=state['usd_per_steem'],
+                       sps=state['sbd_per_steem'],
+                       dgpo=json.dumps(state['dgpo']))
+        return state['dgpo']['head_block_number']
+
+    def from_steemd(self, is_initial_sync=False, chunk_size=1000):
+        """Fast sync strategy: read/process blocks in batches."""
+        steemd = self._steem
+
+        lbound = Blocks.head_num() + 1
+        ubound = steemd.last_irreversible()
+
+        if self._conf.get('test_max_block') and self._conf.get('test_max_block') < ubound:
+            ubound = self._conf.get('test_max_block')
+
+        count = ubound - lbound
+        if count < 1:
+            return
+
+        massive_blocks_data_provider = None
+        databases = None
+        if self._conf.get('hived_database_url'):
+            databases = MassiveBlocksDataProviderHiveDb.Databases( self._conf )
+            massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
+                  databases
+                , self._conf.get( 'max_batch' )
+                , lbound
+                , ubound
+                , can_continue_thread
+                , set_exception_thrown
+            )
+        else:
+            massive_blocks_data_provider = MassiveBlocksDataProviderHiveRpc(
+                  self._conf
+                , self._steem
+                , self._conf.get( 'max_workers' )
+                , self._conf.get( 'max_workers' )
+                , self._conf.get( 'max_batch' )
+                , lbound
+                , ubound
+                , can_continue_thread
+                , set_exception_thrown
+            )
+        _process_blocks_from_provider( self, massive_blocks_data_provider, is_initial_sync, lbound, ubound )
+
+        if databases:
+            databases.close()
+
+class MassiveSync(DBSync):
+    def __init__(self, conf, db, steem):
+        super().__init__(conf, db, steem, False)
+
+    def initial(self):
+        """Initial sync routine."""
+        assert DbState.is_initial_sync(), "already synced"
+
+        log.info("[INIT] *** Initial fast sync ***")
+        self.from_steemd(is_initial_sync=True)
+        if not can_continue_thread():
+            return
 
     def load_mock_data(self,mock_block_data_path):
         if mock_block_data_path:
             MockBlockProvider.load_block_data(mock_block_data_path)
             # MockBlockProvider.print_data()
 
-    def refresh_sparse_stats(self):
-        # normally it should be refreshed in various time windows
-        # but we need the ability to do it all at the same time
-        self._update_chain_state()
-        update_communities_posts_and_rank(self._db)
-        with ThreadPoolExecutor(max_workers=2) as executor:
-            executor.submit(PayoutStats.generate)
-            executor.submit(Mentions.refresh)
-
     def run(self):
-        """Initialize state; setup/recovery checks; sync and runloop."""
         old_sig_int_handler = getsignal(SIGINT)
         old_sig_term_handler = getsignal(SIGTERM)
-
-        def set_handlers():
-            global old_sig_int_handler
-            global old_sig_term_handler
-            old_sig_int_handler = signal(SIGINT, finish_signals_handler)
-            old_sig_term_handler = signal(SIGTERM, finish_signals_handler)
-
-        def restore_handlers():
-            signal(SIGINT, old_sig_int_handler)
-            signal(SIGTERM, old_sig_term_handler)
-
-        def show_info(self):
-            database_head_block = Blocks.head_num()
-
-            sql = "SELECT level, patch_date, patched_to_revision FROM hive_db_patch_level ORDER BY level DESC LIMIT 1"
-            patch_level_data = self._db.query_row(sql)
-
-            from hive.utils.misc import show_app_version;
-            show_app_version(log, database_head_block, patch_level_data)
 
         set_handlers()
 
@@ -230,7 +304,11 @@ class Sync:
             is_superuser = self._db.query_one( "SELECT is_superuser()" )
             assert is_superuser, 'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
 
-        show_info(self)
+        _is_consistency = Blocks.is_consistency()
+        if not _is_consistency:
+            raise RuntimeError("Fatal error related to `hive_blocks` consistency")
+
+        show_info(self._db)
 
         paths = self._conf.get("mock_block_data_path") or []
         for path in paths:
@@ -276,106 +354,23 @@ class Sync:
 
         self._update_chain_state()
 
+        global trail_blocks
         trail_blocks = self._conf.get('trail_blocks')
         assert trail_blocks >= 0
         assert trail_blocks <= 100
 
-        import sys
-        max_block_limit = sys.maxsize
-        do_stale_block_check = True
-        if self._conf.get('test_max_block'):
-            max_block_limit = self._conf.get('test_max_block')
-            do_stale_block_check = False
-            # Correct max_block_limit by trail_blocks
-            max_block_limit = max_block_limit - trail_blocks
-            log.info("max_block_limit corrected by specified trail_blocks number: %d is: %d", trail_blocks, max_block_limit)
+class LiveSync(DBSync):
+    def __init__(self, conf, db, steem):
+        super().__init__(conf, db, steem, True)
 
-        if self._conf.get('test_disable_sync'):
-            # debug mode: no sync, just stream
-            result =  self.listen(trail_blocks, max_block_limit, do_stale_block_check)
-            restore_handlers()
-            return result
-
-        while True:
-            # sync up to irreversible block
-            self.from_steemd()
-            if not can_continue_thread():
-                break
-
-            head = Blocks.head_num()
-            if head >= max_block_limit:
-                self.refresh_sparse_stats()
-                log.info("Exiting [LIVE SYNC] because irreversible block sync reached specified block limit: %d", max_block_limit)
-                break;
-
-            try:
-                # listen for new blocks
-                self.listen(trail_blocks, max_block_limit, do_stale_block_check)
-            except MicroForkException as e:
-                # attempt to recover by restarting stream
-                log.error("microfork: %s", repr(e))
-
-            head = Blocks.head_num()
-            if head >= max_block_limit:
-                self.refresh_sparse_stats()
-                log.info("Exiting [LIVE SYNC] because of specified block limit: %d", max_block_limit)
-                break;
-
-            if not can_continue_thread():
-                break
-        restore_handlers()
-
-    def initial(self):
-        """Initial sync routine."""
-        assert DbState.is_initial_sync(), "already synced"
-
-        log.info("[INIT] *** Initial fast sync ***")
-        self.from_steemd(is_initial_sync=True)
-        if not can_continue_thread():
-            return
-
-    def from_steemd(self, is_initial_sync=False, chunk_size=1000):
-        """Fast sync strategy: read/process blocks in batches."""
-        steemd = self._steem
-
-        lbound = Blocks.head_num() + 1
-        ubound = steemd.last_irreversible()
-
-        if self._conf.get('test_max_block') and self._conf.get('test_max_block') < ubound:
-            ubound = self._conf.get('test_max_block')
-
-        count = ubound - lbound
-        if count < 1:
-            return
-
-        massive_blocks_data_provider = None
-        databases = None
-        if self._conf.get('hived_database_url'):
-            databases = MassiveBlocksDataProviderHiveDb.Databases( self._conf )
-            massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
-                  databases
-                , self._conf.get( 'max_batch' )
-                , lbound
-                , ubound
-                , can_continue_thread
-                , set_exception_thrown
-            )
-        else:
-            massive_blocks_data_provider = MassiveBlocksDataProviderHiveRpc(
-                  self._conf
-                , self._steem
-                , self._conf.get( 'max_workers' )
-                , self._conf.get( 'max_workers' )
-                , self._conf.get( 'max_batch' )
-                , lbound
-                , ubound
-                , can_continue_thread
-                , set_exception_thrown
-            )
-        _process_blocks_from_provider( self, massive_blocks_data_provider, is_initial_sync, lbound, ubound )
-
-        if databases:
-            databases.close()
+    def refresh_sparse_stats(self):
+        # normally it should be refreshed in various time windows
+        # but we need the ability to do it all at the same time
+        self._update_chain_state()
+        update_communities_posts_and_rank(self._db)
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            executor.submit(PayoutStats.generate)
+            executor.submit(Mentions.refresh)
 
     def _stream_blocks(self, start_from, breaker, exception_reporter, trail_blocks=0, max_gap=100, do_stale_block_check=True):
         """Stream blocks. Returns a generator."""
@@ -440,16 +435,75 @@ class Sync:
                 log.info("Stopping [LIVE SYNC] because of specified block limit: %d", max_sync_block)
                 break
 
-    # refetch dynamic_global_properties, feed price, etc
-    def _update_chain_state(self):
-        """Update basic state props (head block, feed price) in db."""
-        state = self._steem.gdgp_extended()
-        self._db.query("""UPDATE hive_state SET block_num = :block_num,
-                       steem_per_mvest = :spm, usd_per_steem = :ups,
-                       sbd_per_steem = :sps, dgpo = :dgpo""",
-                       block_num=Blocks.head_num(),
-                       spm=state['steem_per_mvest'],
-                       ups=state['usd_per_steem'],
-                       sps=state['sbd_per_steem'],
-                       dgpo=json.dumps(state['dgpo']))
-        return state['dgpo']['head_block_number']
+    def run(self):
+        import sys
+        max_block_limit = sys.maxsize
+        do_stale_block_check = True
+        if self._conf.get('test_max_block'):
+            max_block_limit = self._conf.get('test_max_block')
+            do_stale_block_check = False
+            # Correct max_block_limit by trail_blocks
+            max_block_limit = max_block_limit - trail_blocks
+            log.info("max_block_limit corrected by specified trail_blocks number: %d is: %d", trail_blocks, max_block_limit)
+
+        if self._conf.get('test_disable_sync'):
+            # debug mode: no sync, just stream
+            result =  self.listen(trail_blocks, max_block_limit, do_stale_block_check)
+            restore_handlers()
+            return result
+
+        while True:
+            # sync up to irreversible block
+            self.from_steemd()
+            if not can_continue_thread():
+                break
+
+            head = Blocks.head_num()
+            if head >= max_block_limit:
+                self.refresh_sparse_stats()
+                log.info("Exiting [LIVE SYNC] because irreversible block sync reached specified block limit: %d", max_block_limit)
+                break;
+
+            try:
+                # listen for new blocks
+                self.listen(trail_blocks, max_block_limit, do_stale_block_check)
+            except MicroForkException as e:
+                # attempt to recover by restarting stream
+                log.error("microfork: %s", repr(e))
+
+            head = Blocks.head_num()
+            if head >= max_block_limit:
+                self.refresh_sparse_stats()
+                log.info("Exiting [LIVE SYNC] because of specified block limit: %d", max_block_limit)
+                break;
+
+            if not can_continue_thread():
+                break
+        restore_handlers()
+
+class Sync:
+    """Manages the sync/index process.
+
+    Responsible for initial sync, fast sync, and listen (block-follow).
+    """
+
+    def __init__(self, conf):
+        self._conf = conf
+        self._db = conf.db()
+
+        log.info("Using hived url: `%s'", self._conf.get('steemd_url'))
+
+        self._steem = conf.steem()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, value, traceback): pass
+
+    def run(self):
+        """Initialize state; setup/recovery checks; sync and runloop."""
+        with MassiveSync(conf=self._conf, db=self._db, steem=self._steem) as massive_sync:
+          massive_sync.run()
+
+        with LiveSync(conf=self._conf, db=self._db, steem=self._steem) as live_sync:
+          live_sync.run()

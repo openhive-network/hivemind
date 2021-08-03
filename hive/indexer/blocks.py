@@ -43,6 +43,7 @@ class Blocks:
     _head_block_date = None
     _current_block_date = None
     _last_safe_cashout_block = 0
+    _is_initial_sync = False
 
     _concurrent_flush = [
       ('Posts', Posts.flush, Posts),
@@ -115,13 +116,41 @@ class Blocks:
         log.info( "End-of-sync LIB is set to %d, last block that guarantees cashout at end of sync is %d", lib, cls._last_safe_cashout_block )
 
     @classmethod
-    def process_multi(cls, blocks, is_initial_sync):
-        """Batch-process blocks; wrapped in a transaction."""
+    def flush_data_in_n_threads(cls):
+        completedThreads = 0
 
-        time_start = OPSM.start()
+        pool = ThreadPoolExecutor(max_workers = len(cls._concurrent_flush))
+        flush_futures = {pool.submit(time_collector, f): (description, c) for (description, f, c) in cls._concurrent_flush}
+        for future in concurrent.futures.as_completed(flush_futures):
+            (description, c) = flush_futures[future]
+            completedThreads = completedThreads + 1
+            try:
+                (n, elapsedTime) = future.result()
+                assert n is not None
+                assert not c.sync_tx_active()
 
-        DB.query("START TRANSACTION")
+                FSM.flush_stat(description, elapsedTime, n)
 
+#                if n > 0:
+#                    log.info('%r flush generated %d records' % (description, n))
+            except Exception as exc:
+                log.error('%r generated an exception: %s' % (description, exc))
+                raise exc
+        pool.shutdown()
+
+        assert completedThreads == len(cls._concurrent_flush)
+
+    @classmethod
+    def flush_data_in_1_thread(cls):
+        for description, f, c in cls._concurrent_flush:
+          try:
+              f()
+          except Exception as exc:
+              log.error('%r generated an exception: %s' % (description, exc))
+              raise exc
+
+    @classmethod
+    def process_blocks(cls, blocks):
         last_num = 0
         first_block = -1
         try:
@@ -145,36 +174,30 @@ class Blocks:
 
         log.info("#############################################################################")
         flush_time = register_time(flush_time, "Blocks", cls._flush_blocks())
+        return first_block, last_num
+
+    @classmethod
+    def process_multi(cls, blocks, is_initial_sync):
+        """Batch-process blocks; wrapped in a transaction."""
+
+        time_start = OPSM.start()
+
+        DB.query("START TRANSACTION")
+
+        first_block, last_num = cls.process_blocks(blocks)
+
+        if not is_initial_sync:
+            log.info("[PROCESS MULTI] Flushing data in 1 thread")
+            cls.flush_data_in_1_thread()
+            if first_block > -1:
+                log.info("[PROCESS MULTI] Tables updating in live synchronization")
+                cls.on_live_blocks_processed( first_block, last_num )
 
         DB.query("COMMIT")
 
-        completedThreads = 0
-
-        pool = ThreadPoolExecutor(max_workers = len(cls._concurrent_flush))
-        flush_futures = {pool.submit(time_collector, f): (description, c) for (description, f, c) in cls._concurrent_flush}
-        for future in concurrent.futures.as_completed(flush_futures):
-            (description, c) = flush_futures[future]
-            completedThreads = completedThreads + 1
-            try:
-                (n, elapsedTime) = future.result()
-                assert n is not None
-                assert not c.tx_active()
-
-                FSM.flush_stat(description, elapsedTime, n)
-
-#                if n > 0:
-#                    log.info('%r flush generated %d records' % (description, n))
-            except Exception as exc:
-                log.error('%r generated an exception: %s' % (description, exc))
-                raise exc
-        pool.shutdown()
-
-        assert completedThreads == len(cls._concurrent_flush)
-
-        if (not is_initial_sync) and (first_block > -1):
-            DB.query("START TRANSACTION")
-            cls.on_live_blocks_processed( first_block, last_num )
-            DB.query("COMMIT")
+        if is_initial_sync:
+          log.info("[PROCESS MULTI] Flushing data in N threads")
+          cls.flush_data_in_n_threads()
 
         log.info(f"[PROCESS MULTI] {len(blocks)} blocks in {OPSM.stop(time_start) :.4f}s")
 
@@ -394,14 +417,15 @@ class Blocks:
     def _flush_blocks(cls):
         query = """
             INSERT INTO
-                hive_blocks (num, hash, prev, txs, ops, created_at)
+                hive_blocks (num, hash, prev, txs, ops, created_at, completed)
             VALUES
         """
         values = []
         for block in cls.blocks_to_flush:
-            values.append("({}, '{}', '{}', {}, {}, '{}')".format(block['num'], block['hash'],
+            values.append("({}, '{}', '{}', {}, {}, '{}', {})".format(block['num'], block['hash'],
                                                                   block['prev'], block['txs'],
-                                                                  block['ops'], block['date']))
+                                                                  block['ops'], block['date'],
+                                                                  False))
         query = query + ",".join(values)
         DB.query_prepared(query)
         values.clear()
@@ -485,10 +509,22 @@ class Blocks:
             "SELECT update_hive_posts_mentions({}, {})".format(first_block, last_block),
             "SELECT update_notification_cache({}, {}, {})".format(first_block, last_block, is_hour_action),
             "SELECT update_follow_count({}, {})".format(first_block, last_block),
-            "SELECT update_account_reputations({}, {}, False)".format(first_block, last_block)
+            "SELECT update_account_reputations({}, {}, False)".format(first_block, last_block),
+            "SELECT update_hive_blocks_consistency_flag({}, {})".format(first_block, last_block)
         ]
 
         for query in queries:
             time_start = perf_counter()
             DB.query_no_return(query)
             log.info("%s executed in: %.4f s", query, perf_counter() - time_start)
+
+    @classmethod
+    def is_consistency(cls):
+        """Check if all tuples in `hive_blocks` are written correctly.
+            If any record has `completed` == false, it indicates that the database was closed incorrectly or a rollback failed.
+        """
+        not_completed_blocks = DB.query_one("SELECT count(*) FROM hive_blocks WHERE completed = false LIMIT 1")
+        log.info("[INIT] Number of not completed blocks: %s.", not_completed_blocks)
+        return not_completed_blocks == 0
+
+
