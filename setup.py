@@ -146,7 +146,7 @@ if __name__ == "__main__":
             'toolz==0.11.1',
             'maya==0.6.1',
             'ujson==4.0.2',
-            'urllib3==1.26.4',
+            'urllib3==1.26.5',
             'psycopg2-binary==2.8.6',
             'aiocache==0.11.1',
             'configargparse==1.4.1',
