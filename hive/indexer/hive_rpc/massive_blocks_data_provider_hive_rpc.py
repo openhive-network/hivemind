@@ -70,8 +70,8 @@ class MassiveBlocksDataProviderHiveRpc(BlocksProviderBase):
             , thread_pool
         )
 
-        self.vops_queue = queue.Queue( maxsize=10000 )
-        self.blocks_queue = queue.Queue( maxsize=10000 )
+        self.vops_queue = queue.Queue( maxsize=self._operations_queue_size )
+        self.blocks_queue = queue.Queue( maxsize=self._blocks_data_queue_size )
 
     def create_thread_pool( threads_for_blocks, threads_for_vops ):
         """Creates initialzied thread pool with number of threads required by the provider.
@@ -87,6 +87,8 @@ class MassiveBlocksDataProviderHiveRpc(BlocksProviderBase):
     def get( self, number_of_blocks ):
         """Returns blocks and vops data for next number_of_blocks"""
         vops_and_blocks = { 'vops': [], 'blocks': [] }
+
+        log.info("vops_queue.qsize: {} blocks_queue.qsize: {}".format(self.vops_queue.qsize(), self.blocks_queue.qsize()))
 
         wait_vops_time = WSM.start()
         if self.vops_queue.qsize() < number_of_blocks and self._breaker():

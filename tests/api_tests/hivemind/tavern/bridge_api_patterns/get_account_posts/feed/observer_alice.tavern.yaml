@@ -1,0 +1,28 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest # see also paginated.tavern.yaml; role of observer is not yet clear (ignored for the time being)
+                  # see issue #162 - test-safari/reblogged-and-recreated reblog should not be there
+
+  includes:
+    - !include ../../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.get_account_posts"
+          params: {"sort":"feed", "account":"always1success", "start_author":"knozaki2015", "start_permlink":"the-strangest-building-in-berlin", "limit":100, "observer":"alice"}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern
+          extra_kwargs:
+            ignore_tags: "<bridge posts>"

@@ -25,10 +25,12 @@ def build_metadata():
         sa.Column('txs', SMALLINT, server_default='0', nullable=False),
         sa.Column('ops', sa.Integer, server_default='0', nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
+        sa.Column('completed', sa.Boolean, nullable=False, server_default='0'),
 
         sa.UniqueConstraint('hash', name='hive_blocks_ux1'),
         sa.ForeignKeyConstraint(['prev'], ['hive_blocks.hash'], name='hive_blocks_fk1'),
-        sa.Index('hive_blocks_created_at_idx', 'created_at')
+        sa.Index('hive_blocks_created_at_idx', 'created_at'),
+        sa.Index('hive_blocks_completed_idx', 'completed')
     )
 
     sa.Table(
@@ -461,7 +463,7 @@ def setup(db):
     # default rows
     sqls = [
         "INSERT INTO hive_state (block_num, db_version, steem_per_mvest, usd_per_steem, sbd_per_steem, dgpo) VALUES (0, 0, 0, 0, 0, '')",
-        "INSERT INTO hive_blocks (num, hash, created_at) VALUES (0, '0000000000000000000000000000000000000000', '2016-03-24 16:04:57')",
+        "INSERT INTO hive_blocks (num, hash, created_at, completed) VALUES (0, '0000000000000000000000000000000000000000', '2016-03-24 16:04:57', true)",
 
         "INSERT INTO hive_permlink_data (id, permlink) VALUES (0, '')",
         "INSERT INTO hive_category_data (id, category) VALUES (0, '')",
@@ -603,6 +605,8 @@ def setup(db):
       "update_follow_count.sql",
       "delete_reblog_feed_cache.sql",
       "follows.sql",
+      "is_superuser.sql",
+      "update_hive_blocks_consistency_flag.sql",
       "update_table_statistics.sql",
       "upgrade/update_db_patchlevel.sql" #Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
     ]

@@ -1,0 +1,33 @@
+---
+test_name: Hivemind
+
+marks:
+  - patterntest # "2038-01-19T03:14:08" is the first timestamp that is "too far" for old fat node, but SQL has normal timestamps so we won't be generating error here
+
+includes:
+  - !include ../../../common.yaml
+
+stages:
+  - name: test
+    request:
+      url: "{service.proto:s}://{service.server:s}:{service.port}/"
+      method: POST
+      headers:
+        content-type: application/json
+      json:
+        jsonrpc: "2.0"
+        id: 1
+        method: "database_api.list_comments"
+        params:
+          {
+            "start": ["admin", "2050-08-24T21:29:42", "", ""],
+            "limit": 10,
+            "order": "by_last_update",
+          }
+    response:
+      status_code: 200
+      verify_response_with:
+        function: validate_response:compare_response_with_pattern
+        extra_kwargs:
+          ignore_tags: "<database posts>"
+

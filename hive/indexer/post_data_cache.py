@@ -52,7 +52,6 @@ class PostDataCache(DbAdapterHolder):
                     hive_post_data (id, title, preview, img_url, body, json) 
                 VALUES 
             """
-            values = []
             for k, data in cls._data.items():
                 title = 'NULL' if data['title'] is None else "{}".format(escape_characters(data['title']))
                 body = 'NULL' if data['body'] is None else "{}".format(escape_characters(data['body']))
@@ -65,7 +64,7 @@ class PostDataCache(DbAdapterHolder):
                 else:
                     values_update.append(value)
 
-            if values_insert:
+            if len(values_insert) > 0:
                 sql = """
                     INSERT INTO 
                         hive_post_data (id, title, preview, img_url, body, json) 
@@ -74,9 +73,10 @@ class PostDataCache(DbAdapterHolder):
                 sql += ','.join(values_insert)
                 if print_query:
                     log.info("Executing query:\n{}".format(sql))
-                cls.db.query(sql)
+                cls.db.query_prepared(sql)
+                values_insert.clear();
 
-            if values_update:
+            if len(values_update) > 0:
                 sql = """
                     UPDATE hive_post_data AS hpd SET 
                         title = COALESCE( data_source.title, hpd.title ),
@@ -96,7 +96,8 @@ class PostDataCache(DbAdapterHolder):
                 """
                 if print_query:
                     log.info("Executing query:\n{}".format(sql))
-                cls.db.query(sql)
+                cls.db.query_prepared(sql)
+                values_update.clear()
 
             cls.commitTx()
 

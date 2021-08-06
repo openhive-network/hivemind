@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "score = -1 outside valid range [0:100]",
+  "message": "Invalid parameters"
+}
