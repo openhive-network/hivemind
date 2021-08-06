@@ -1,0 +1,114 @@
+{
+  "votes": [
+    {
+      "author": "wackou",
+      "id": 4469,
+      "last_update": "2016-05-04T05:20:06",
+      "num_changes": 0,
+      "permlink": "wackou-witness-post",
+      "rshares": 3782373700,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 27
+    },
+    {
+      "author": "bue-witness",
+      "id": 108,
+      "last_update": "2016-04-10T15:31:15",
+      "num_changes": 0,
+      "permlink": "bue-witness-post",
+      "rshares": 206000000,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 5
+    },
+    {
+      "author": "boy",
+      "id": 194,
+      "last_update": "2016-04-13T18:12:15",
+      "num_changes": 0,
+      "permlink": "news",
+      "rshares": 3936000000,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 41823962
+    },
+    {
+      "author": "bue",
+      "id": 170,
+      "last_update": "2016-04-13T12:09:39",
+      "num_changes": 0,
+      "permlink": "news",
+      "rshares": 3936000000,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 13204514
+    },
+    {
+      "author": "pop",
+      "id": 4461,
+      "last_update": "2016-05-04T05:16:42",
+      "num_changes": 0,
+      "permlink": "china",
+      "rshares": 3859565000,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 94422
+    },
+    {
+      "author": "pop",
+      "id": 4460,
+      "last_update": "2016-05-04T05:16:39",
+      "num_changes": 0,
+      "permlink": "taiwanese",
+      "rshares": 3936756300,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 79128
+    },
+    {
+      "author": "ice",
+      "id": 4463,
+      "last_update": "2016-05-04T05:16:48",
+      "num_changes": 0,
+      "permlink": "taiwan",
+      "rshares": 3859565000,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 44360
+    },
+    {
+      "author": "pharesim",
+      "id": 11967,
+      "last_update": "2016-08-27T00:39:00",
+      "num_changes": 1,
+      "permlink": "witness-post",
+      "rshares": 3627991100,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 3
+    },
+    {
+      "author": "silver",
+      "id": 4496,
+      "last_update": "2016-05-04T05:21:57",
+      "num_changes": 0,
+      "permlink": "panama-papers",
+      "rshares": 3319225900,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 6663372
+    },
+    {
+      "author": "dele-puppy",
+      "id": 4481,
+      "last_update": "2016-05-04T05:20:54",
+      "num_changes": 0,
+      "permlink": "dele-puppy-witness-thread",
+      "rshares": 3550799800,
+      "vote_percent": 10000,
+      "voter": "bunny",
+      "weight": 2464
+    }
+  ]
+}

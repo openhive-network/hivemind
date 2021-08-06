@@ -1,0 +1,9 @@
+---
+  name: Common test values
+  description: Common values for tests
+
+  variables:
+    service:
+      proto: http
+      server: "{tavern.env_vars.HIVEMIND_ADDRESS}"
+      port: "{tavern.env_vars.HIVEMIND_PORT}"

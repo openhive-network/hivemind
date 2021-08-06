@@ -1,0 +1,25 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest # there used to be no posts with max score (but since now score is calculated differently...)
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.account_notifications"
+          params: {"account":"ozchartart", "min_score": 100, "limit":20}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern

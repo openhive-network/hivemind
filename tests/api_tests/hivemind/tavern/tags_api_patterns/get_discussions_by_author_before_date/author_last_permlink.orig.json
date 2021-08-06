@@ -1,0 +1,70 @@
+[
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "3196109703901",
+        "voter": "wackou"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "37503630300",
+        "voter": "val"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "73896115956",
+        "voter": "clains"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "569159751",
+        "voter": "gregory-f"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "536057250",
+        "voter": "camilla"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "381265652",
+        "voter": "murh"
+      }
+    ],
+    "author": "camilla",
+    "author_reputation": 0,
+    "beneficiaries": [],
+    "body": "https://i.imgsafe.org/f9e5de3.jpg",
+    "body_length": 33,
+    "cashout_time": "1969-12-31T23:59:59",
+    "category": "cute",
+    "children": 1,
+    "created": "2016-05-11T21:20:24",
+    "curator_payout_value": "0.965 HBD",
+    "depth": 0,
+    "json_metadata": "{}",
+    "last_payout": "2016-08-03T00:00:06",
+    "last_update": "2016-05-23T22:07:18",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 3308995932810,
+    "parent_author": "",
+    "parent_permlink": "cute",
+    "pending_payout_value": "0.000 HBD",
+    "percent_steem_dollars": 10000,
+    "permlink": "ready-for-action",
+    "post_id": 3706,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Ready for Action!",
+    "title": "Ready for Action!",
+    "total_payout_value": "0.966 HBD",
+    "url": "/cute/@camilla/ready-for-action"
+  }
+]

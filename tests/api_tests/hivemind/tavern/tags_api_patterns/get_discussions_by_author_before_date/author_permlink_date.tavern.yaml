@@ -1,0 +1,27 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest # does not use date, only author and permlink;  original produced overlapping pages
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "tags_api.get_discussions_by_author_before_date"
+          params: ["kristylynn", "hot-springs-and-music-festivals-but-now-it-s-time-to-get-back-to-steemit","2016-05-11T21:25:36"]
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern
+          extra_kwargs:
+            ignore_tags: "<tags posts>"

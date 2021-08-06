@@ -1,0 +1,114 @@
+{
+  "votes": [
+    {
+      "author": "steemit",
+      "id": 9,
+      "last_update": "2016-04-07T19:15:36",
+      "num_changes": -1,
+      "permlink": "firstpost",
+      "rshares": 375241,
+      "vote_percent": 100,
+      "voter": "dantheman",
+      "weight": "32866333630"
+    },
+    {
+      "author": "admin",
+      "id": 73,
+      "last_update": "2016-04-08T20:09:33",
+      "num_changes": -1,
+      "permlink": "firstpost",
+      "rshares": -375241,
+      "vote_percent": -100,
+      "voter": "dantheman",
+      "weight": 0
+    },
+    {
+      "author": "proskynneo",
+      "id": 10,
+      "last_update": "2016-04-07T19:55:42",
+      "num_changes": -1,
+      "permlink": "steemit-firstpost-1",
+      "rshares": 375241,
+      "vote_percent": 100,
+      "voter": "dantheman",
+      "weight": "7884736843"
+    },
+    {
+      "author": "red",
+      "id": 278,
+      "last_update": "2016-04-15T18:24:48",
+      "num_changes": -1,
+      "permlink": "steemit-firstpost-2",
+      "rshares": -376603,
+      "vote_percent": -100,
+      "voter": "dantheman",
+      "weight": 0
+    },
+    {
+      "author": "red",
+      "id": 8,
+      "last_update": "2016-04-07T19:15:24",
+      "num_changes": -1,
+      "permlink": "red-dailydecrypt-1",
+      "rshares": 375241,
+      "vote_percent": 100,
+      "voter": "dantheman",
+      "weight": "33132337607"
+    },
+    {
+      "author": "abit",
+      "id": 67,
+      "last_update": "2016-04-08T19:13:21",
+      "num_changes": -1,
+      "permlink": "abit-first-post",
+      "rshares": -375241,
+      "vote_percent": -100,
+      "voter": "dantheman",
+      "weight": 0
+    },
+    {
+      "author": "abit",
+      "id": 279,
+      "last_update": "2016-04-15T18:25:33",
+      "num_changes": -1,
+      "permlink": "witness-category",
+      "rshares": -376603,
+      "vote_percent": -100,
+      "voter": "dantheman",
+      "weight": 0
+    },
+    {
+      "author": "abit",
+      "id": 71,
+      "last_update": "2016-04-08T19:14:27",
+      "num_changes": -1,
+      "permlink": "miner-category",
+      "rshares": -375241,
+      "vote_percent": -100,
+      "voter": "dantheman",
+      "weight": 0
+    },
+    {
+      "author": "abit",
+      "id": 70,
+      "last_update": "2016-04-08T19:14:00",
+      "num_changes": -1,
+      "permlink": "spam",
+      "rshares": -375241,
+      "vote_percent": -100,
+      "voter": "dantheman",
+      "weight": 0
+    },
+    {
+      "author": "abit",
+      "id": 72,
+      "last_update": "2016-04-08T19:14:33",
+      "num_changes": -1,
+      "permlink": "abit-spam-post1",
+      "rshares": -375241,
+      "vote_percent": -100,
+      "voter": "dantheman",
+      "weight": 0
+    }
+  ]
+}

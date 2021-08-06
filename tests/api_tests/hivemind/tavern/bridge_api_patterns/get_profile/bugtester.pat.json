@@ -1,0 +1,26 @@
+{
+  "active": "2016-09-15T18:01:30",
+  "blacklists": [],
+  "created": "2016-09-15T18:01:30",
+  "id": 92454,
+  "metadata": {
+    "profile": {
+      "about": "tester user that test if follow ignore and reset_muted_list in one block has correct results.",
+      "blacklist_description": "",
+      "cover_image": "",
+      "location": "",
+      "muted_list_description": "",
+      "name": "",
+      "profile_image": "",
+      "website": ""
+    }
+  },
+  "name": "bugtester",
+  "post_count": 0,
+  "reputation": 25,
+  "stats": {
+    "followers": 0,
+    "following": 0,
+    "rank": 0
+  }
+}

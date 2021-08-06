@@ -298,14 +298,15 @@ class Follow(DbAdapterHolder):
                 count = count + 1
                 if count >= limit:
                     query = str(sql).format(",".join(values))
-                    cls.db.query(query)
+                    cls.db.query_prepared(query)
                     values.clear()
                     count = 0
                 n += 1
 
             if len(values) > 0:
                 query = str(sql).format(",".join(values))
-                cls.db.query(query)
+                cls.db.query_prepared(query)
+                values.clear()
 
             cls.follow_items_to_flush.clear()
 
