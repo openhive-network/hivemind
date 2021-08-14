@@ -3,11 +3,15 @@ from subprocess import check_output
 import sys
 import os
 import logging
+import site
 
 from setuptools import find_packages
 from setuptools import setup
 
 assert sys.version_info[0] == 3 and sys.version_info[1] >= 6, "hive requires Python 3.6 or newer"
+
+# PEP517 workaround
+site.ENABLE_USER_SITE = True
 
 VERSION = 'notag'
 GIT_REVISION = 'nogitrev'
