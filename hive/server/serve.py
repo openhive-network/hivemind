@@ -319,7 +319,7 @@ def run_server(conf):
             }
             ret = web.json_response(error_response, status=200, headers=headers, dumps=decimal_serialize)
             if req_res_log is not None:
-              req_res_log.info("Request: {} processed in {:.4f}s".format(request, perf_counter() - t_start))
+              req_res_log.info("Request: {} processed in {:.4f}s\ntest".format(request, perf_counter() - t_start))
 
             return ret
 
@@ -329,12 +329,12 @@ def run_server(conf):
             }
             ret = web.json_response(response.deserialized(), status=200, headers=headers, dumps=decimal_serialize)
             if req_res_log is not None:
-              req_res_log.info("Request: {} processed in {:.4f}s".format(request, perf_counter() - t_start))
+              req_res_log.info("Request: {} processed in {:.4f}s\ntest".format(request, perf_counter() - t_start))
             return ret
         ret = web.Response()
 
         if req_res_log is not None:
-          req_res_log.info("Request: {} processed in {:.4f}s".format(request, perf_counter() - t_start))
+          req_res_log.info("Request: {} processed in {:.4f}s\ntest".format(request, perf_counter() - t_start))
 
         return ret
 
