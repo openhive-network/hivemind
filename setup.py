@@ -11,7 +11,7 @@ from setuptools import setup
 assert sys.version_info[0] == 3 and sys.version_info[1] >= 6, "hive requires Python 3.6 or newer"
 
 # PEP517 workaround
-site.ENABLE_USER_SITE = True
+site.ENABLE_USER_SITE = "--user" in sys.argv[1:]
 
 VERSION = 'notag'
 GIT_REVISION = 'nogitrev'
