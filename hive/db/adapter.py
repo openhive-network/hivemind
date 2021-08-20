@@ -44,7 +44,7 @@ class Db:
         else:
           log.info("A database offers maximum connections: {}. Required {} connections.".format(cls.max_connections, cls.necessary_connections))
 
-    def __init__(self, url, name, enable_autoexplain):
+    def __init__(self, url, name, enable_autoexplain = False):
         """Initialize an instance.
 
         No work is performed here. Some modues might initialize an
