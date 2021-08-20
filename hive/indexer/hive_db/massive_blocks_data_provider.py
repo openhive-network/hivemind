@@ -86,9 +86,9 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
 
     class Databases:
         def __init__(self, conf):
-            self._db_root = Db( conf.get('hived_database_url'), "MassiveBlocksProvider.Root" )
-            self._db_operations = Db( conf.get('hived_database_url'), "MassiveBlocksProvider.OperationsData" )
-            self._db_blocks_data = Db( conf.get('hived_database_url'), "MassiveBlocksProvider.BlocksData" )
+            self._db_root = Db( conf.get('hived_database_url'), "MassiveBlocksProvider.Root", conf.get( 'log_explain_queries' )  )
+            self._db_operations = Db( conf.get('hived_database_url'), "MassiveBlocksProvider.OperationsData", conf.get( 'log_explain_queries' ) )
+            self._db_blocks_data = Db( conf.get('hived_database_url'), "MassiveBlocksProvider.BlocksData", conf.get( 'log_explain_queries' ) )
 
             assert self._db_root
             assert self._db_operations
