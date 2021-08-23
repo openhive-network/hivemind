@@ -208,6 +208,8 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         if not block_mock:
             return None
 
+        if vops:
+            vops = vops[block_num][ 'ops' ]
         return BlockFromRpc( block_mock, vops )
 
     def _get_mocks_after_db_blocks(self, first_mock_block_num):
