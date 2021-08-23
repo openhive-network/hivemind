@@ -62,15 +62,6 @@ def restore_handlers():
     signal(SIGINT, old_sig_int_handler)
     signal(SIGTERM, old_sig_term_handler)
 
-def finish_signals_handler(signal, frame):
-    global FINISH_SIGNAL_DURING_SYNC
-    FINISH_SIGNAL_DURING_SYNC += 1
-    log.info("""
-                  **********************************************************
-                  CAUGHT {}. PLEASE WAIT... PROCESSING DATA IN QUEUES...
-                  **********************************************************
-    """.format( "SIGINT" if signal == SIGINT else "SIGTERM" ) )
-
 def show_info(_db):
     database_head_block = Blocks.head_num()
 
@@ -504,6 +495,9 @@ class Sync:
         """Initialize state; setup/recovery checks; sync and runloop."""
         with MassiveSync(conf=self._conf, db=self._db, steem=self._steem) as massive_sync:
           massive_sync.run()
+
+        if not can_continue_thread():
+            return;
 
         with LiveSync(conf=self._conf, db=self._db, steem=self._steem) as live_sync:
           live_sync.run()
