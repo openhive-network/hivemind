@@ -3,11 +3,15 @@ from subprocess import check_output
 import sys
 import os
 import logging
+import site
 
 from setuptools import find_packages
 from setuptools import setup
 
 assert sys.version_info[0] == 3 and sys.version_info[1] >= 6, "hive requires Python 3.6 or newer"
+
+# PEP517 workaround
+site.ENABLE_USER_SITE = "--user" in sys.argv[1:]
 
 VERSION = 'notag'
 GIT_REVISION = 'nogitrev'
@@ -146,7 +150,7 @@ if __name__ == "__main__":
             'toolz==0.11.1',
             'maya==0.6.1',
             'ujson==4.0.2',
-            'urllib3==1.26.4',
+            'urllib3==1.26.5',
             'psycopg2-binary==2.8.6',
             'aiocache==0.11.1',
             'configargparse==1.4.1',
