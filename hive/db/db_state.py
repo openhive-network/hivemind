@@ -292,14 +292,6 @@ class DbState:
     @classmethod
     def _finish_hive_posts(cls, db, massive_sync_preconditions, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_hive_posts") as db_mgr:
-            def vacuum_hive_posts(cls):
-              time_start = perf_counter()
-              if massive_sync_preconditions:
-                  cls._execute_query(db_mgr.db, "VACUUM VERBOSE ANALYZE hive_posts")
-                  log.info("[INIT] VACUUM ANALYZE hive_posts executed in %.4fs", perf_counter() - time_start)
-              else:
-                  log.info("[INIT] VACUUM ANALYZE hive_posts skipped.")
-
             #UPDATE: `abs_rshares`, `vote_rshares`, `sc_hot`, ,`sc_trend`, `total_votes`, `net_votes`
             time_start = perf_counter()
             sql = """
@@ -320,10 +312,6 @@ class DbState:
                 cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_hive_posts_children_count executed in %.4fs", perf_counter() - time_start)
 
-            time_start = perf_counter()
-            vacuum_hive_posts(cls)
-            log.info("[INIT] VACUUM ANALYZE hive_posts executed in %.4fs", perf_counter() - time_start)
-
             #UPDATE: `root_id`
             # Update root_id all root posts
             time_start = perf_counter()
@@ -333,14 +321,10 @@ class DbState:
             cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_hive_posts_root_id executed in %.4fs", perf_counter() - time_start)
 
-            vacuum_hive_posts(cls)
-
             #UPDATE: `active`
             time_start = perf_counter()
             update_active_starting_from_posts_on_block(last_imported_block, current_imported_block)
             log.info("[INIT] update_all_posts_active executed in %.4fs", perf_counter() - time_start)
-
-            vacuum_hive_posts(cls)
 
     @classmethod
     def _finish_hive_posts_api_helper(cls, db, last_imported_block, current_imported_block):
