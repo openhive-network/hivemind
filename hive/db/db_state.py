@@ -295,7 +295,7 @@ class DbState:
             def vacuum_hive_posts(cls):
               time_start = perf_counter()
               if massive_sync_preconditions:
-                  cls._execute_query(db_mgr.db, "VACUUM ANALYZE VERBOSE hive_posts")
+                  cls._execute_query(db_mgr.db, "VACUUM VERBOSE ANALYZE hive_posts")
                   log.info("[INIT] VACUUM ANALYZE hive_posts executed in %.4fs", perf_counter() - time_start)
               else:
                   log.info("[INIT] VACUUM ANALYZE hive_posts skipped.")
@@ -312,7 +312,7 @@ class DbState:
 
             time_start = perf_counter()
 
-            cls._execute_query(db_mgr.db, "VACUUM ANALYZE VERBOSE hive_votes;")
+            cls._execute_query(db_mgr.db, "VACUUM VERBOSE ANALYZE hive_votes;")
 
             log.info("[INIT] VACUUM ANALYZE on hive_votes done in %.4fs", perf_counter() - time_start)
 
