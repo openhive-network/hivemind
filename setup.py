@@ -11,6 +11,7 @@ from setuptools import setup
 assert sys.version_info[0] == 3 and sys.version_info[1] >= 6, "hive requires Python 3.6 or newer"
 
 # PEP517 workaround
+# see https://github.com/pypa/pip/issues/7953#issuecomment-645133255
 site.ENABLE_USER_SITE = "--user" in sys.argv[1:]
 
 VERSION = 'notag'
@@ -136,12 +137,9 @@ if __name__ == "__main__":
         setup_requires=[
             'pytest-runner'
         ],
-        dependency_links=[
-            'https://github.com/bcb/jsonrpcserver/tarball/8f3437a19b6d1a8f600ee2c9b112116c85f17827#egg=jsonrpcserver-4.1.3+8f3437a'
-        ],
         install_requires=[
             'aiopg==1.2.1',
-            'jsonrpcserver @ https://github.com/bcb/jsonrpcserver/tarball/8f3437a19b6d1a8f600ee2c9b112116c85f17827#egg=jsonrpcserver',
+            'jsonrpcserver==4.2.0',
             'simplejson==3.17.2',
             'aiohttp==3.7.4',
             'certifi==2020.12.5',
