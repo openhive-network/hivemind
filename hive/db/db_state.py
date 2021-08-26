@@ -225,8 +225,7 @@ class DbState:
                         elapsed_time = end_time - time_start
                         log.info("Index %s created in time %.4f s", index.name, elapsed_time)
                         any_index_created = True
-            if any_index_created:
-                cls._execute_query(db_mgr.db,"ANALYZE")
+
         log.info("[INIT] End %s-initial sync hooks for table %s", "pre" if is_pre_process else "post", table_name)
 
     @classmethod
@@ -364,6 +363,8 @@ class DbState:
 
     @classmethod
     def _finish_account_reputations(cls, db, last_imported_block, current_imported_block):
+        log.info("Performing update_account_reputations on block rangge: {}:{}".format(last_imported_block, current_imported_block))
+
         with AutoDbDisposer(db, "finish_account_reputations") as db_mgr:
             time_start = perf_counter()
             sql = """
@@ -446,7 +447,6 @@ class DbState:
         methods.append( ('hive_feed_cache', cls._finish_hive_feed_cache, [cls.db(), last_imported_block, current_imported_block]) )
         methods.append( ('hive_mentions', cls._finish_hive_mentions, [cls.db(), last_imported_block, current_imported_block]) )
         methods.append( ('payout_stats_view', cls._finish_payout_stats_view, []) )
-        methods.append( ('account_reputations', cls._finish_account_reputations, [cls.db(), last_imported_block, current_imported_block]) )
         methods.append( ('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]) )
         methods.append( ('blocks_consistency_flag', cls._finish_blocks_consistency_flag, [cls.db(), last_imported_block, current_imported_block]) )
         cls.process_tasks_in_threads("[INIT] %i threads finished filling tables. Part nr 0", methods)
@@ -456,8 +456,6 @@ class DbState:
         methods.append( ('notification_cache', cls._finish_notification_cache, [cls.db()]) )
         #hive_posts_api_helper is dependent on `hive_posts/root_id` filling
         methods.append( ('hive_posts_api_helper', cls._finish_hive_posts_api_helper, [cls.db(), last_imported_block, current_imported_block]) )
-        #methods `_finish_follow_count` and `_finish_account_reputations` update the same table: `hive_accounts`.
-        #It can cause deadlock, therefore these functions can't be processed concurrently
         methods.append( ('follow_count', cls._finish_follow_count, [cls.db(), last_imported_block, current_imported_block]) )
         cls.process_tasks_in_threads("[INIT] %i threads finished filling tables. Part nr 1", methods)
 
@@ -485,6 +483,8 @@ class DbState:
           last_imported_block = current_imported_block
 
         synced_blocks = current_imported_block - last_imported_block
+
+        cls._finish_account_reputations(cls.db(), last_imported_block, current_imported_block)
 
         force_index_rebuild = False
         massive_sync_preconditions = False
@@ -514,7 +514,7 @@ class DbState:
             create_fk(cls.db())
             log.info("Foreign keys were recreated")
 
-            cls._execute_query(cls.db(),"VACUUM ANALYZE")
+            cls._execute_query(cls.db(),"VACUUM (VERBOSE,ANALYZE)")
 
         end_time = perf_counter()
         log.info("[INIT] After initial sync actions done in %.4fs", end_time - start_time)
