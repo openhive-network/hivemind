@@ -12,7 +12,6 @@ def database_post_object(row, truncate_body=0):
     paid = row['is_paidout']
 
     post = {}
-    post['active'] = json_date(row['active'])
     post['author_rewards'] = row['author_rewards']
     post['id'] = row['id']
     post['author'] = row['author']

@@ -15,7 +15,6 @@ from hive.db.adapter import Db
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from hive.indexer.auto_db_disposer import AutoDbDisposer
 
-from hive.utils.post_active import update_active_starting_from_posts_on_block
 from hive.utils.communities_rank import update_communities_posts_and_rank
 
 from hive.server.common.payout_stats import PayoutStats
@@ -319,11 +318,6 @@ class DbState:
                   """.format(last_imported_block, current_imported_block)
             cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_hive_posts_root_id executed in %.4fs", perf_counter() - time_start)
-
-            #UPDATE: `active`
-            time_start = perf_counter()
-            update_active_starting_from_posts_on_block(last_imported_block, current_imported_block)
-            log.info("[INIT] update_all_posts_active executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_hive_posts_api_helper(cls, db, last_imported_block, current_imported_block):

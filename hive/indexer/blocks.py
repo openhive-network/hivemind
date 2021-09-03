@@ -20,7 +20,6 @@ from hive.indexer.block import Block, Transaction, Operation, VirtualOperationTy
 
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.stats import FlushStatusManager as FSM
-from hive.utils.post_active import update_active_starting_from_posts_on_block
 
 from hive.server.common.payout_stats import PayoutStats
 from hive.server.common.mentions import Mentions
@@ -496,8 +495,6 @@ class Blocks:
         """Is invoked when processing of block range is done and received
            informations from hived are already stored in db
         """
-        update_active_starting_from_posts_on_block( first_block, last_block )
-
         is_hour_action = last_block % 1200 == 0
 
         queries = [
