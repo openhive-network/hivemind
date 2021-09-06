@@ -491,6 +491,10 @@ class DbState:
         cls.processing_indexes( False, force_index_rebuild, True )
         log.info("Creating indexes: finished")
 
+        # Update statistics and execution plans after index creation.
+        if massive_sync_preconditions:
+          cls._execute_query(cls.db(),"VACUUM (VERBOSE,ANALYZE)")
+
         #all post-updates are executed in different threads: one thread per one table
         log.info("Filling tables with final values: started")
         cls._finish_all_tables(massive_sync_preconditions, last_imported_block, current_imported_block)
