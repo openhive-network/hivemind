@@ -17,13 +17,15 @@ import queue
 
 log = logging.getLogger(__name__)
 
+HIVEMIND_APP_CONTEXT = 'HivemindApp'
+
 operations_query = """
-    SELECT * FROM enum_operations4hivemind( :first, :last )
+    SELECT * FROM hivemind_app.enum_operations4hivemind( :first, :last )
    """
 
-blocks_query = """SELECT * FROM enum_blocks4hivemind( :first, :last )"""
+blocks_query = """SELECT * FROM hivemind_app.enum_blocks4hivemind( :first, :last )"""
 
-number_of_blocks_query = """SELECT num as num FROM hive_blocks ORDER BY num DESC LIMIT 1"""
+number_of_blocks_query = """SELECT num as num FROM hive.blocks ORDER BY num DESC LIMIT 1"""
 
 class BlocksDataFromDbProvider:
     """Starts threads which takes operations for a range of blocks"""
@@ -137,7 +139,9 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         self._operations_queue = queue.Queue( maxsize=self._operations_queue_size )
         self._blocks_data_queue = queue.Queue( maxsize=self._blocks_data_queue_size )
 
-        self._last_block_num_in_db = self._db.query_one( """SELECT num as num FROM hive_blocks ORDER BY num DESC LIMIT 1""" )
+        self._prepare_app_context()
+
+        self._last_block_num_in_db = self._db.query_one( """SELECT num as num FROM hive.blocks ORDER BY num DESC LIMIT 1""" )
         assert self._last_block_num_in_db is not None
 
         if external_thread_pool:
@@ -170,14 +174,34 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         )
 
         if not MassiveBlocksDataProviderHiveDb._vop_types_dictionary:
-            virtual_operations_types_ids = self._db.query_all( "SELECT id, name FROM hive_operation_types WHERE is_virtual  = true" )
+            virtual_operations_types_ids = self._db.query_all( "SELECT id, name FROM hive.operation_types WHERE is_virtual  = true" )
             for id, name in virtual_operations_types_ids:
                 MassiveBlocksDataProviderHiveDb._vop_types_dictionary[ id ] = VirtualOperationType.from_name( name[len('hive::protocol::'):] )
 
         if not MassiveBlocksDataProviderHiveDb._op_types_dictionary:
-            operations_types_ids = self._db.query_all( "SELECT id, name FROM hive_operation_types WHERE is_virtual  = false" )
+            operations_types_ids = self._db.query_all( "SELECT id, name FROM hive.operation_types WHERE is_virtual  = false" )
             for id, name in operations_types_ids:
                 MassiveBlocksDataProviderHiveDb._op_types_dictionary[ id ] = OperationType.from_name( name[len('hive::protocol::'):] )
+
+    def _prepare_app_context(self):
+        log.info("Looking for `{}' context.".format(HIVEMIND_APP_CONTEXT))
+        ctx_present = self._db.query_one("SELECT hive.app_context_exists('{}') as ctx_present;".format(HIVEMIND_APP_CONTEXT))
+        if not ctx_present:
+            log.info("No application context present. Attempting to create a `{}' context...".format(HIVEMIND_APP_CONTEXT))
+            self._db.query_no_return("SELECT hive.app_create_context('{}');".format(HIVEMIND_APP_CONTEXT))
+            log.info("Application context creation done.")
+            # TODO: probably here is a place when actual HM tables should be also created. Now only functions providing data to hivemind are created here.
+            log.info("Attempting to create application schema...")
+
+            from os.path import dirname, realpath
+            from hive.db.schema import execute_sql_script
+
+            dir_path = dirname(realpath(__file__))
+            script_path = dir_path +"/hafapp_api.sql"
+            log.info("Attempting to execute SQL script: `{}'".format(script_path))
+            execute_sql_script(self._db.query_no_return, script_path)
+
+            log.info("Application schema created.")
 
     def _id_to_virtual_type(id):
         if id in MassiveBlocksDataProviderHiveDb._vop_types_dictionary:
