@@ -25,7 +25,7 @@ BEGIN
 
   RETURN QUERY -- enum_operations4hivemind
     SELECT ho.id, ho.block_num, ho.op_type_id, ho.op_type_id >= 48 AS is_virtual, ho.body::VARCHAR
-    FROM hive.operations ho
+    FROM hive.hivemindapp_operations_view ho
     WHERE ho.block_num between _first_block and _last_block
           AND (ho.op_type_id < 50 
                OR ho.op_type_id in (51, 53, 61, 72, 73)
@@ -60,9 +60,9 @@ SELECT -- hive_api_hivemind_blocks
      , hb.hash
      , hb.prev as prev
      , to_char( created_at,  'YYYY-MM-DDThh24:MI:SS' ) as date
-        , ( SELECT COUNT(1) tx_number  FROM hive.transactions ht WHERE ht.block_num = hb.num ) as tx_number
-        , ( SELECT COUNT(1) op_number  FROM hive.operations ho WHERE ho.block_num = hb.num AND ( ho.op_type_id < 50 OR ho.op_type_id in (51, 53, 61, 72, 73) ) ) as op_number
-FROM hive.blocks hb
+        , ( SELECT COUNT(1) tx_number  FROM hive.hivemindapp_transactions_view ht WHERE ht.block_num = hb.num ) as tx_number
+        , ( SELECT COUNT(1) op_number  FROM hive.hivemindapp_operations_view ho WHERE ho.block_num = hb.num AND ( ho.op_type_id < 50 OR ho.op_type_id in (51, 53, 61, 72, 73) ) ) as op_number
+FROM hive.hivemindapp_blocks_view hb
 WHERE hb.num >= _first_block AND hb.num < _last_block
 ORDER by hb.num
 ;

@@ -1,6 +1,8 @@
+from hive.indexer.blocks import Blocks
 from hive.indexer.block import BlocksProviderBase
 from hive.indexer.hive_rpc.blocks_provider import BlocksProvider
 from hive.indexer.hive_rpc.vops_provider import VopsProvider
+
 from hive.utils.stats import WaitingStatusManager as WSM
 
 from hive.indexer.hive_rpc.block_from_rest import BlockFromRpc
@@ -20,8 +22,7 @@ class MassiveBlocksDataProviderHiveRpc(BlocksProviderBase):
         , blocks_get_threads
         , vops_get_threads
         , number_of_blocks_data_in_one_batch
-        , lbound
-        , ubound
+        , max_block_limit
         , breaker
         , exception_reporter
         , external_thread_pool = None):
@@ -31,14 +32,20 @@ class MassiveBlocksDataProviderHiveRpc(BlocksProviderBase):
             blocks_get_threads - number of threads which get blocks from node
             vops_get_threads - number of threads which get virtual operations from node
             number_of_blocks_data_in_one_batch - number of blocks which will be asked for the node in one HTTP get
-            lbound - first block to get
-            ubound - last block to get
+            max_block_limit - max block limit to query for
             breaker - callable, returns False when processing must be stopped
             exception_reporter - callable, invoke to report an undesire exception in a thread
             external_thread_pool - thread pool controlled outside the class
         """
 
-        BlocksProviderBase.__init__(self, breaker, exception_reporter)
+        BlocksProviderBase.__init__(self, max_block_limit, breaker, exception_reporter)
+
+        self._node_client = node_client
+
+        lbound = Blocks.head_num() + 1
+        ubound = node_client.last_irreversible()
+
+        self._update_sync_block_range(lbound, ubound)
 
         thread_pool = None
         if external_thread_pool:
@@ -51,8 +58,8 @@ class MassiveBlocksDataProviderHiveRpc(BlocksProviderBase):
               node_client._client["get_block"] if "get_block" in node_client._client else node_client._client["default"]
             , blocks_get_threads
             , number_of_blocks_data_in_one_batch
-            , lbound
-            , ubound
+            , self.lbound
+            , self.ubound
             , breaker
             , exception_reporter
             , thread_pool
@@ -63,8 +70,8 @@ class MassiveBlocksDataProviderHiveRpc(BlocksProviderBase):
             , node_client
             , vops_get_threads
             , number_of_blocks_data_in_one_batch
-            , lbound
-            , ubound
+            , self.lbound
+            , self.ubound
             , breaker
             , exception_reporter
             , thread_pool
@@ -83,6 +90,18 @@ class MassiveBlocksDataProviderHiveRpc(BlocksProviderBase):
             +  VopsProvider.get_number_of_threads( threads_for_vops )
             )
 
+    def update_block_sync_range(self):
+        "Allows to query for range of blocks to be processed"
+        lbound = Blocks.head_num() + 1
+        ubound = self._node_client.last_irreversible()
+
+        self._update_sync_block_range(lbound, ubound)
+
+    def on_start_massive_processing(self):
+        pass
+
+    def on_stop_massive_processing(self, block_num):
+        pass
 
     def get( self, number_of_blocks ):
         """Returns blocks and vops data for next number_of_blocks"""

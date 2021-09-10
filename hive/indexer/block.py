@@ -130,7 +130,7 @@ class Transaction(ABC):
 
 
 class BlocksProviderBase(ABC):
-    def __init__(self, breaker, exception_reporter):
+    def __init__(self, max_block_limit, breaker, exception_reporter):
         """
             breaker - callable, returns true when sync can continue, false when break was requested
             exception_reporter - callable, use to inform about undesire exception in a synchronizaton thread
@@ -138,6 +138,7 @@ class BlocksProviderBase(ABC):
         assert breaker
         assert exception_reporter
 
+        self._max_block_limit = max_block_limit
         self._breaker = breaker
         self._exception_reporter = exception_reporter
 
@@ -146,8 +147,35 @@ class BlocksProviderBase(ABC):
 
         self._operations_queue_size   = 1500
 
+        self._lbound = 0
+        self._ubound = 0
+
+    def _update_sync_block_range(self, first, last):
+        self._lbound = first
+        self._ubound = last
+        #warning max_block_limit can be also GREATER than last_block provided by database (since testing MOCKS can add more blocks in fake LIVE SYNC)
+        if self._max_block_limit != 0:
+            self._ubound  = self._max_block_limit
+
+
+    def get_block_range_to_sync(self):
+        return {"first": self._lbound, "last": self._ubound}
+
     def report_exception():
         self._exception_reporter()
+
+    @abstractmethod
+    def on_start_massive_processing(self):
+        pass
+
+    @abstractmethod
+    def on_stop_massive_processing(self, block_num):
+        pass
+
+    @abstractmethod
+    def update_block_sync_range(self):
+        "Allows to query for range of blocks to be processed"
+        pass
 
     @abstractmethod
     def start(self):

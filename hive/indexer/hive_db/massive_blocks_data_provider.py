@@ -58,7 +58,6 @@ class BlocksDataFromDbProvider:
         self._sql_query = sql_query
 
 
-
     def thread_body_get_data( self, queue_for_data ):
         try:
             for block in range ( self._start_block, self._max_block, self._blocks_per_request ):
@@ -115,34 +114,36 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
           self
         , databases
         , number_of_blocks_in_batch
-        , lbound
-        , ubound
+        , max_block_limit
         , breaker
         , exception_reporter
         , external_thread_pool = None ):
         """
             databases - object Databases with opened databases
-            lbound - start blocks
-            ubound - last block
+            number_of_blocks_in_batch - number of block data to be read from database at once
+            max_block_limit - limit of block to be synced. Warning it can be greater than nubmer of blocks held in database, because of testing mocks
         """
-        assert lbound <= ubound
-        assert lbound >= 0
 
-        BlocksProviderBase.__init__(self, breaker, exception_reporter)
+        assert max_block_limit >= 0
+
+        BlocksProviderBase.__init__(self, max_block_limit, breaker, exception_reporter)
 
         self._db = databases.get_root()
-        self._lbound = lbound
-        self._ubound = ubound
         self._blocks_per_query = number_of_blocks_in_batch
-        self._first_block_to_get =  lbound
+
         self._blocks_queue = queue.Queue( maxsize=self._blocks_queue_size )
         self._operations_queue = queue.Queue( maxsize=self._operations_queue_size )
         self._blocks_data_queue = queue.Queue( maxsize=self._blocks_data_queue_size )
 
         self._prepare_app_context()
 
-        self._last_block_num_in_db = self._db.query_one( """SELECT num as num FROM hive.blocks ORDER BY num DESC LIMIT 1""" )
+        lbound, ubound = self._query_for_app_next_block()
+        self._update_sync_block_range(lbound, ubound)
+
+        self._first_block_to_get =  self._lbound
+        self._last_block_num_in_db = self._ubound
         assert self._last_block_num_in_db is not None
+
 
         if external_thread_pool:
             assert type(external_thread_pool) == ThreadPoolExecutor
@@ -328,6 +329,21 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
             self._exception_reporter()
             raise
 
+    def _query_for_app_next_block(self):
+        log.info("Querying for next block for app context...")
+        self._db.query("START TRANSACTION")
+
+        res = self._db.query_row("SELECT * FROM hive.app_next_block('{}')".format(HIVEMIND_APP_CONTEXT))
+
+        lbound = res['first_block']
+        ubound = res['last_block']
+
+        self._db.query("COMMIT")
+
+        log.info("Next block range is: {}:{}".format(lbound, ubound))
+
+        return (lbound, ubound)
+
     def create_thread_pool():
         """Creates initialzied thread pool with number of threads required by the provider.
         You can pass the thread pool to provider during its creation to controll its lifetime
@@ -337,6 +353,33 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
 
     def get_number_of_threads():
         return 3  # block data + operations + collect thread
+
+    def update_block_sync_range(self):
+        "Allows to query for range of blocks to be processed"
+
+        lbound, ubound = self._query_for_app_next_block()
+        self._update_sync_block_range(lbound, ubound)
+
+    def on_start_massive_processing(self):
+        "Dedicated handler called before massive data processing"
+        is_attached = self._db.query_one("SELECT hive.app_context_is_attached('{}')".format(HIVEMIND_APP_CONTEXT))
+        if is_attached:
+            log.info("Trying to detach app context...")
+            self._db.query("START TRANSACTION")
+            self._db.query_no_return("SELECT hive.app_context_detach('{}')".format(HIVEMIND_APP_CONTEXT))
+            self._db.query("COMMIT")
+            log.info("App context detaching done.")
+        else:
+            log.info("No attached context - detach skipped.")
+
+
+    def on_stop_massive_processing(self, block_num):
+        "Dedicated handler called before massive data processing"
+        log.info("Trying to atach app context...")
+        self._db.query("START TRANSACTION")
+        self._db.query_no_return("SELECT hive.app_context_attach('{}', {})".format(HIVEMIND_APP_CONTEXT, block_num))
+        self._db.query("COMMIT")
+        log.info("App context ataching done.")
 
     def start(self):
         futures = []

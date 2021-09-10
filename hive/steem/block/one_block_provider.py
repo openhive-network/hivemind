@@ -46,7 +46,6 @@ class OneBlockProviderFromHivedDb(OneBlockProviderBase):
         blocks_provider = MassiveBlocksDataProviderHiveDb(
               self._databases_for_massive_sync
             , 1
-            , block_num
             , block_num + 1
             , self._breaker
             , self._exception_reporter
@@ -67,7 +66,6 @@ class OneBlockProviderFromNode(OneBlockProviderBase):
             , blocks_get_threads = 1
             , vops_get_threads = 1
             , number_of_blocks_data_in_one_batch = 1
-            , lbound = block_num
             , ubound = block_num + 1
             , breaker = self._breaker
             , exception_reporter = self._exception_reporter

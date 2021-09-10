@@ -185,26 +185,18 @@ def _process_blocks_from_provider(self, massive_block_provider, is_initial_sync,
             raise block_data_provider_exception
 
 class DBSync:
-    def __init__(self, conf, db, steem, live_context):
+    def __init__(self, conf, db, live_context):
         self._conf = conf
         self._db = db
-        self._steem = steem
         DbLiveContextHolder.set_live_context(live_context)
 
     def __enter__(self):
         assert self._db, "The database must exist"
-
-        log.info("Entering into {} synchronization".format( "LIVE" if DbLiveContextHolder.is_live_context() else "MASSIVE" ))
         Blocks.setup_own_db_access(self._db)
-        log.info("Exiting from {} synchronization".format( "LIVE" if DbLiveContextHolder.is_live_context() else "MASSIVE" ))
-
         return self
 
     def __exit__(self, exc_type, value, traceback):
-        #During massive-sync every object has own copy of database, as a result all copies have to be closed
-        #During live-sync an original database is used and can't be closed, because it can be used later.
-        if not DbLiveContextHolder.is_live_context():
-            Blocks.close_own_db_access()
+        pass
 
     # refetch dynamic_global_properties, feed price, etc
     def _update_chain_state(self):
@@ -220,59 +212,33 @@ class DBSync:
                        dgpo=json.dumps(state['dgpo']))
         return state['dgpo']['head_block_number']
 
-    def from_steemd(self, is_initial_sync=False, chunk_size=1000):
-        """Fast sync strategy: read/process blocks in batches."""
-        steemd = self._steem
-
-        lbound = Blocks.head_num() + 1
-        ubound = steemd.last_irreversible()
-
-        if self._conf.get('test_max_block') and self._conf.get('test_max_block') < ubound:
-            ubound = self._conf.get('test_max_block')
-
-        count = ubound - lbound
-        if count < 1:
-            return
-
-        massive_blocks_data_provider = None
-        databases = None
-        if self._conf.get('hived_database_url'):
-            databases = MassiveBlocksDataProviderHiveDb.Databases( self._conf )
-            massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
-                  databases
-                , self._conf.get( 'max_batch' )
-                , lbound
-                , ubound
-                , can_continue_thread
-                , set_exception_thrown
-            )
-        else:
-            massive_blocks_data_provider = MassiveBlocksDataProviderHiveRpc(
-                  self._conf
-                , self._steem
-                , self._conf.get( 'max_workers' )
-                , self._conf.get( 'max_workers' )
-                , self._conf.get( 'max_batch' )
-                , lbound
-                , ubound
-                , can_continue_thread
-                , set_exception_thrown
-            )
-        _process_blocks_from_provider( self, massive_blocks_data_provider, is_initial_sync, lbound, ubound )
-
-        if databases:
-            databases.close()
 
 class MassiveSync(DBSync):
-    def __init__(self, conf, db, steem):
-        super().__init__(conf, db, steem, False)
+    def __init__(self, conf, db):
+        super().__init__(conf, db, False)
+        self._massive_blocks_data_provider = None
+        self._databases = None
+
+    def __enter__(self):
+        super().__enter__()
+        log.info("Entering into MASSIVE synchronization")
+        self._setup_massive_data_provider()
+        return self
+
+    def __exit__(self, exc_type, value, traceback):
+        log.info("Exiting the MASSIVE synchronization")
+        #During massive-sync every object has own copy of database, as a result all copies have to be closed
+        #During live-sync an original database is used and can't be closed, because it can be used later.
+        Blocks.close_own_db_access()
+        self._close_massive_sync_data_provider()
+        super().__exit__(exc_type, value, traceback)
 
     def initial(self):
         """Initial sync routine."""
         assert DbState.is_initial_sync(), "already synced"
 
         log.info("[INIT] *** Initial fast sync ***")
-        self.from_steemd(is_initial_sync=True)
+        self._catchup_irreversible_block(is_initial_sync=True)
         if not can_continue_thread():
             return
 
@@ -317,7 +283,10 @@ class MassiveSync(DBSync):
         update_communities_posts_and_rank(self._db)
 
         last_imported_block = Blocks.head_num()
-        hived_head_block = self._conf.get('test_max_block') or self._steem.last_irreversible()
+
+        blocks_to_sync = self._massive_blocks_data_provider.get_block_range_to_sync()
+
+        hived_head_block = self._conf.get('test_max_block') or blocks_to_sync['last']
 
         log.info("target_head_block : %s", hived_head_block)
 
@@ -339,9 +308,10 @@ class MassiveSync(DBSync):
                 set_exception_thrown()
                 return
             set_handlers()
-        else:
-            # recover from fork
-            Blocks.verify_head(self._steem)
+
+        #We should try to catchup irreversible block again, since finish_initial_sync action is time consuming
+        self._massive_blocks_data_provider.update_block_sync_range()
+        self._catchup_irreversible_block()
 
         self._update_chain_state()
 
@@ -350,9 +320,77 @@ class MassiveSync(DBSync):
         assert trail_blocks >= 0
         assert trail_blocks <= 100
 
+    def _catchup_irreversible_block(self, is_initial_sync=False, chunk_size=1000):
+        """Fast sync strategy: read/process blocks in batches."""
+        assert self._massive_blocks_data_provider is not None
+
+        block_range = self._massive_blocks_data_provider.get_block_range_to_sync()
+        ubound = block_range['last']
+        lbound = block_range['first']
+        count = ubound - lbound
+
+        if count >= 1:
+            log.info("Attempting to process block range: {}:{}".format(lbound, ubound))
+            self._massive_blocks_data_provider.on_start_massive_processing()
+            _process_blocks_from_provider( self, self._massive_blocks_data_provider, is_initial_sync, lbound, ubound )
+            last_processed_block = Blocks.head_num()
+            self._massive_blocks_data_provider.on_stop_massive_processing(last_processed_block)
+            log.info("Block range : {}:{} processing finished".format(lbound, ubound))
+
+    def _setup_massive_data_provider(self):
+        max_block_limit = 0
+
+        if self._conf.get('test_max_block'):
+            max_block_limit = self._conf.get('test_max_block')
+
+        self._massive_blocks_data_provider = None
+        self._databases = None
+
+        if self._conf.get('hived_database_url'):
+            log.info("Using HAF database as block data provider, pointed by url: `%s'", self._conf.get('hived_database_url'))
+
+            self._databases = MassiveBlocksDataProviderHiveDb.Databases( self._conf )
+            self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
+                  self._databases
+                , self._conf.get( 'max_batch' )
+                , max_block_limit
+                , can_continue_thread
+                , set_exception_thrown
+            )
+        else:
+            log.info("Using hived RPC server as block data provider, pointed by url: `%s'", self._conf.get('steemd_url'))
+            steemd = conf.steem()
+
+            self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveRpc(
+                  self._conf
+                , self.steemd
+                , self._conf.get( 'max_workers' )
+                , self._conf.get( 'max_workers' )
+                , self._conf.get( 'max_batch' )
+                , max_block_limit
+                , can_continue_thread
+                , set_exception_thrown
+            )
+
+    def _close_massive_sync_data_provider(self):
+        if self._databases:
+            self._databases.close()
+            self._databases = None
+
 class LiveSync(DBSync):
-    def __init__(self, conf, db, steem):
-        super().__init__(conf, db, steem, True)
+    def __init__(self, conf, db):
+        super().__init__(conf, db, True)
+        self._steem = conf.steem()
+
+    def __enter__(self):
+        log.info("Entering into LIVE synchronization")
+        super().__enter__()
+        return self
+
+    def __exit__(self, exc_type, value, traceback):
+        #During massive-sync every object has own copy of database, as a result all copies have to be closed
+        #During live-sync an original database is used and can't be closed, because it can be used later.
+        pass
 
     def refresh_sparse_stats(self):
         # normally it should be refreshed in various time windows
@@ -444,8 +482,6 @@ class LiveSync(DBSync):
             return result
 
         while True:
-            # sync up to irreversible block
-            self.from_steemd()
             if not can_continue_thread():
                 break
 
@@ -482,10 +518,6 @@ class Sync:
         self._conf = conf
         self._db = conf.db()
 
-        log.info("Using hived url: `%s'", self._conf.get('steemd_url'))
-
-        self._steem = conf.steem()
-
     def __enter__(self):
         return self
 
@@ -493,11 +525,11 @@ class Sync:
 
     def run(self):
         """Initialize state; setup/recovery checks; sync and runloop."""
-        with MassiveSync(conf=self._conf, db=self._db, steem=self._steem) as massive_sync:
+        with MassiveSync(conf=self._conf, db=self._db) as massive_sync:
           massive_sync.run()
 
         if not can_continue_thread():
             return;
 
-        with LiveSync(conf=self._conf, db=self._db, steem=self._steem) as live_sync:
+        with LiveSync(conf=self._conf, db=self._db) as live_sync:
           live_sync.run()
