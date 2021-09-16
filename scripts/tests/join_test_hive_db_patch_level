@@ -1,0 +1,57 @@
+--DROP FUNCTION public_references.join_test_hive_db_patch_level();
+
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_db_patch_level(
+	)
+    RETURNS TABLE(
+		level_t int,
+		patch_date_t timestamp without time zone,
+		patched_to_revision_t text,
+		add_delete_modif text
+	)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+begin
+
+	return query
+	select * from(
+			(select
+				hdpl.level, hdpl.patch_date, hdpl.patched_to_revision, '2' as note
+			from
+				public_references.hive_db_patch_level as hdpl inner join public.hive_db_patch_level as hdplc
+			on hdpl.level = hdplc.level
+			where
+				hdpl.patch_date <> hdplc.patch_date or
+				hdpl.patched_to_revision <> hdplc.patched_to_revision
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_db_patch_level as hdpl
+			 WHERE not EXISTS (
+				select * from public.hive_db_patch_level hdplc where hdpl.level = hdplc.level)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_db_patch_level as hdplc
+			 WHERE not EXISTS (
+				select * from public_references.hive_db_patch_level hdpl where hdpl.level = hdplc.level)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_db_patch_level()
+    OWNER TO hivemind_ci;

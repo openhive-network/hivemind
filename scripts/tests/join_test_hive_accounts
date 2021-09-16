@@ -1,0 +1,74 @@
+--DROP FUNCTION public_references.join_test_hive_accounts();
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_accounts(
+	)
+    RETURNS TABLE(
+		id_t int,
+		id2_t int,
+		name_t character varying,
+		created_at_t timestamp without time zone,
+		reputation_t bigint,
+		is_implicit_t boolean,
+		followers_t int,
+		following_t int,
+		rank_t int,
+		lastread_at_t timestamp without time zone,
+		posting_json_metadata_t text,
+		json_metadata_t text,
+		add_delete_modif text)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+
+begin
+
+	return query
+	select * from(
+			(select
+				ha.id, hac.id, ha.name, ha.created_at, ha.reputation, ha.is_implicit, ha.followers, ha.following, ha.rank, ha.lastread_at, ha.posting_json_metadata,
+				ha.json_metadata, '2' as note
+			from
+				public_references.hive_accounts as ha inner join public.hive_accounts as hac
+			on ha.id = hac.id
+			where
+				ha.name <> hac.name or
+				ha.created_at<>hac.created_at or
+				ha.reputation<>hac.reputation or
+				ha.is_implicit<>hac.is_implicit or
+				ha.followers<>hac.followers or
+				ha.following<>hac.following or
+				ha.rank<>hac.rank or
+				ha.lastread_at<>hac.lastread_at or
+				ha.posting_json_metadata<>hac.posting_json_metadata or
+				ha.json_metadata<>hac.json_metadata
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_accounts as ha
+			 WHERE not EXISTS (
+				select * from public.hive_accounts hac where ha.id = hac.id)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_accounts as hac
+			 WHERE not EXISTS (
+				select * from public_references.hive_accounts ha where ha.id = hac.id)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_accounts()
+    OWNER TO hivemind_ci;

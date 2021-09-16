@@ -1,0 +1,55 @@
+ --DROP FUNCTION public_references.join_test_hive_posts_api_helper();
+
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_posts_api_helper(
+	)
+    RETURNS TABLE(
+		id_t int,
+		author_s_permlink_t character varying,
+		add_delete_modif text
+	)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+begin
+
+	return query
+	select * from(
+			(select
+				hpah.id, hpah.author_s_permlink, '2' as note
+			from
+				public_references.hive_posts_api_helper as hpah inner join public.hive_posts_api_helper as hpahc
+			on hpah.id = hpahc.id
+			where
+				hpah.author_s_permlink>hpahc.author_s_permlink
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_posts_api_helper as hpah
+			 WHERE not EXISTS (
+				select * from public.hive_posts_api_helper hpahc where hpah.id = hpahc.id)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_posts_api_helper as hpahc
+			 WHERE not EXISTS (
+				select * from public_references.hive_posts_api_helper hpah where hpah.id = hpahc.id)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_posts_api_helper()
+    OWNER TO hivemind_ci;

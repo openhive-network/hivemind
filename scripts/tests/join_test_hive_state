@@ -1,0 +1,63 @@
+--DROP FUNCTION public_references.join_test_hive_state();
+
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_state(
+	)
+    RETURNS TABLE(
+		block_num_t int,
+		db_version_t int,
+		steem_per_mvest_t numeric,
+		usd_per_steem_t numeric,
+		sbd_per_steem_t numeric,
+		dgpo_t text,
+		add_delete_modif text
+	)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+begin
+
+	return query
+	select * from(
+			(select
+				hs.block_num, hs.db_version, hs.steem_per_mvest, hs.usd_per_steem, hs.sbd_per_steem, hs.dgpo, '2' as note
+			from
+				public_references.hive_state as hs inner join public.hive_state as hsc
+			on hs.block_num = hsc.block_num
+			where
+				hs.db_version <> hsc.db_version or
+				hs.steem_per_mvest <> hsc.steem_per_mvest or
+				hs.usd_per_steem <> hsc.usd_per_steem or
+				hs.sbd_per_steem <> hsc.sbd_per_steem or
+				hs.dgpo <> hsc.dgpo
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_state as hs
+			 WHERE not EXISTS (
+				select * from public.hive_state hsc where hs.block_num = hsc.block_num)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_state as hsc
+			 WHERE not EXISTS (
+				select * from public_references.hive_state hs where hs.block_num = hsc.block_num)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_state()
+    OWNER TO hivemind_ci;

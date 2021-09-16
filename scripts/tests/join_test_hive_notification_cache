@@ -1,0 +1,75 @@
+--DROP FUNCTION public_references.join_test_hive_notification_cache();
+
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_notification_cache(
+	)
+    RETURNS TABLE(
+		id_t bigint,
+		block_num_t int,
+		type_id_t int,
+		dst_t int,
+		src_t int,
+		dst_post_id_t int,
+		post_id_t int,
+		created_at_t timestamp without time zone,
+		score_t int,
+		community_title_t character varying,
+		community_t character varying,
+		payload_t character varying,
+		add_delete_modif text
+	)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+begin
+
+	return query
+	select * from(
+			(select
+						hnc.id, hnc.block_num, hnc.type_id, hnc.dst, hnc.src, hnc.dst_post_id, hnc.post_id, hnc.created_at, hnc.score, hnc.community_title, hnc.community, hnc.payload, '2' as note
+			from
+				public_references.hive_notification_cache as hnc inner join public.hive_notification_cache as hncc
+			on hnc.id = hncc.id
+			where
+				hnc.block_num <> hncc.block_num or
+				hnc.type_id <> hncc.type_id or
+				hnc.dst <> hncc.dst or
+				hnc.src <> hncc.src or
+				hnc.dst_post_id <> hncc.dst_post_id or
+				hnc.post_id <> hncc.post_id or
+				hnc.created_at <> hncc.created_at or
+				hnc.score <> hncc.score or
+				hnc.community_title <> hncc.community_title or
+				hnc.community <> hncc.community or
+				hnc.payload <> hncc.payload
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_notification_cache as hnc
+			 WHERE not EXISTS (
+				select * from public.hive_notification_cache hncc where hnc.id = hncc.id)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_notification_cache as hncc
+			 WHERE not EXISTS (
+				select * from public_references.hive_notification_cache hnc where hnc.id = hncc.id)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_notification_cache()
+    OWNER TO hivemind_ci;

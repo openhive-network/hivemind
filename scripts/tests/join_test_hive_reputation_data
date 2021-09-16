@@ -1,0 +1,63 @@
+--DROP FUNCTION public_references.join_test_hive_reputation_data();
+
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_reputation_data(
+	)
+    RETURNS TABLE(
+		id_t int,
+		author_id_t int,
+		voter_id_t int,
+		permlink_t character varying,
+		rshares_t bigint,
+		block_num_t int,
+		add_delete_modif text
+	)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+begin
+
+	return query
+	select * from(
+			(select
+				hrd.id, hrd.author_id, hrd.voter_id, hrd.permlink, hrd.rshares, hrd.block_num, '2' as note
+			from
+				public_references.hive_reputation_data as hrd inner join public.hive_reputation_data as hrdc
+			on hrd.id = hrdc.id
+			where
+				hrd.author_id <> hrd.author_id  or
+				hrd.voter_id <> hrd.voter_id  or
+				hrd.permlink <> hrd.permlink  or
+				hrd.rshares <> hrd.rshares  or
+				hrd.block_num <> hrd.block_num
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_reputation_data as hrd
+			 WHERE not EXISTS (
+				select * from public.hive_reputation_data hrdc where hrd.id = hrdc.id)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_reputation_data as hrdc
+			 WHERE not EXISTS (
+				select * from public_references.hive_reputation_data hrd where hrd.id = hrdc.id)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_reputation_data()
+    OWNER TO hivemind_ci;

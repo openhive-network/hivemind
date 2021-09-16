@@ -1,0 +1,152 @@
+--DROP FUNCTION public_references.join_test_hive_posts();
+
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_posts(
+	)
+    RETURNS TABLE(
+		id_t int,
+		root_id_t int,
+		parent_id_t int,
+		author_id_t int,
+		permlink_id_t int,
+		category_id_t int,
+		community_id_t int,
+		created_at_t timestamp without time zone,
+		depth_t smallint,
+		counter_deleted_t int,
+		is_pinned_t boolean,
+		is_muted_t boolean,
+		is_valid_t boolean,
+		promoted_t numeric,
+		children_t int,
+		payout_t numeric,
+		pending_payout_t numeric,
+		payout_at_t timestamp without time zone,
+		last_payout_at_t timestamp without time zone,
+		updated_at_t timestamp without time zone,
+		is_paidout_t boolean,
+		is_nsfw_t boolean,
+		is_declined_t boolean,
+		is_full_power_t boolean,
+		is_hidden_t boolean,
+		sc_trend_t real,
+		sc_hot_t real,
+		total_payout_value_t character varying,
+		author_rewards_t bigint,
+		author_rewards_hive_t bigint,
+		author_rewards_hbd_t bigint,
+		author_rewards_vests_t bigint,
+		abs_rshares_t numeric,
+		vote_rshares_t numeric,
+		total_vote_weight_t numeric,
+		total_votes_t bigint,
+		net_votes_t bigint,
+		active_t timestamp without time zone,
+		cashout_time_t timestamp without time zone,
+		percent_hbd_t int,
+		curator_payout_value_t character varying,
+		max_accepted_payout_t character varying,
+		allow_votes_t boolean,
+		allow_curation_rewards_t boolean,
+		beneficiaries_t json,
+		block_num_t int,
+		block_num__t int,
+		tags_ids_t int[],
+		add_delete_modif text
+	)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+begin
+
+	return query
+	select * from(
+			(select
+				 hp.id, hp.root_id, hp.parent_id, hp.author_id, hp.permlink_id, hp.category_id, hp.community_id, hp.created_at, hp.depth, hp.counter_deleted,
+				 hp.is_pinned, hp.is_muted, hp.is_valid, hp.promoted, hp.children, hp.payout, hp.pending_payout, hp.payout_at, hp.last_payout_at , hp.updated_at ,
+				 hp.is_paidout , hp.is_nsfw, hp.is_declined , hp.is_full_power , hp.is_hidden , hp.sc_trend , hp.sc_hot , hp.total_payout_value, hp.author_rewards,
+				 hp.author_rewards_hive , hp.author_rewards_hbd, hp.author_rewards_vests, hp.abs_rshares , hp.vote_rshares , hp.total_vote_weight, hp.total_votes ,
+				 hp.net_votes, hp.active , hp.cashout_time , hp.percent_hbd , hp.curator_payout_value, hp.max_accepted_payout , hp.allow_votes , hp.allow_curation_rewards,
+				 hp.beneficiaries, hp.block_num , hp.block_num_created, hp.tags_ids, '2' as note
+			from
+				public_references.hive_posts as hp inner join public.hive_posts as hpc
+			on hp.id = hpc.id
+			where
+				hp.root_id <> hpc.root_id or
+				hp.parent_id <> hpc.parent_id  or
+				hp.author_id <> hpc.author_id  or
+				hp.permlink_id <> hpc.permlink_id  or
+				hp.category_id <> hpc.category_id  or
+				hp.community_id <> hpc.community_id  or
+				hp.created_at <> hpc.created_at  or
+				hp.depth <> hpc.depth  or
+				hp.counter_deleted <> hpc.counter_deleted  or
+				hp.is_pinned <> hpc.is_pinned  or
+				hp.is_muted <> hpc.is_muted or
+				hp.is_valid <> hpc.is_valid  or
+				hp.promoted <> hpc.promoted  or
+				hp.children <> hpc.children  or
+				hp.payout <> hpc.payout  or
+				hp.pending_payout <> hpc.pending_payout  or
+				hp.payout_at <> hpc.payout_at  or
+				hp.last_payout_at <> hpc.last_payout_at  or
+				hp.updated_at <> hpc.updated_at  or
+				hp.is_paidout <> hpc.is_paidout  or
+				hp.is_nsfw <> hpc.is_nsfw  or
+				hp.is_declined <> hpc.is_declined  or
+				hp.is_full_power <> hpc.is_full_power  or
+				hp.is_hidden <> hpc.is_hidden  or
+				hp.sc_trend <> hpc.sc_trend  or
+				hp.sc_hot <> hpc.sc_hot  or
+				hp.total_payout_value <> hpc.total_payout_value  or
+				hp.author_rewards <> hpc.author_rewards  or
+				hp.author_rewards_hive <> hpc.author_rewards_hive or
+				hp.author_rewards_hbd <> hpc.author_rewards_hbd  or
+				hp.author_rewards_vests <> hpc.author_rewards_vests or
+				hp.abs_rshares <> hpc.abs_rshares  or
+				hp.vote_rshares <> hpc.vote_rshares  or
+				hp.total_vote_weight <> hpc.total_vote_weight or
+				hp.total_votes <> hpc.total_votes  or
+				hp.net_votes <> hpc.net_votes  or
+				hp.active <> hpc.active  or
+				hp.cashout_time <> hpc.cashout_time  or
+				hp.percent_hbd <> hpc.percent_hbd or
+				hp.curator_payout_value <> hpc.curator_payout_value or
+				hp.max_accepted_payout <> hpc.max_accepted_payout or
+				hp.allow_votes <> hpc.allow_votes or
+				hp.allow_curation_rewards <> hpc.allow_curation_rewards or
+		--		hp.beneficiaries <> hpc.beneficiaries or
+				hp.block_num <> hpc.block_num or
+				hp.block_num_created <> hpc.block_num_created or
+				hp.tags_ids <> hpc.tags_ids
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_posts as hp
+			 WHERE not EXISTS (
+				select * from public.hive_posts hpc where hp.id = hpc.id)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_posts as hpc
+			 WHERE not EXISTS (
+				select * from public_references.hive_posts hp where hp.id = hpc.id)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_posts()
+    OWNER TO hivemind_ci;

@@ -1,0 +1,60 @@
+--DROP FUNCTION public_references.join_test_hive_roles();
+
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_roles(
+	)
+    RETURNS TABLE(
+		account_id_t int,
+		community_id_t int,
+		created_at_t timestamp without time zone,
+		role_id_t smallint,
+		title_t character varying,
+		add_delete_modif text
+	)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+begin
+
+	return query
+	select * from(
+			(select
+			 	hr.account_id, hr.community_id, hr.created_at, hr.role_id, hr.title, '2' as note
+			from
+				public_references.hive_roles as hr inner join public.hive_roles as hrc
+			on hr.account_id = hrc.account_id and hr.community_id = hrc.community_id
+			where
+			hr.created_at <> hrc.created_at OR
+			hr.role_id <> hrc.role_id OR
+			hr.title <> hrc.title
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_roles as hr
+			 WHERE not EXISTS (
+				select * from public.hive_roles hrc where hr.account_id = hrc.account_id and hr.community_id = hrc.community_id)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_roles as hrc
+			 WHERE not EXISTS (
+				select * from public_references.hive_roles hr where hr.account_id = hrc.account_id and hr.community_id = hrc.community_id)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_roles()
+    OWNER TO hivemind_ci;

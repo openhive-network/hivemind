@@ -1,0 +1,64 @@
+--DROP FUNCTION public_references.join_test_hive_blocks();
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_blocks(
+	)
+    RETURNS TABLE(
+		num_t int,
+		hash_t character,
+		prev_t character,
+		txs_t smallint,
+		ops_t int,
+		created_at_t timestamp without time zone,
+		completed_t boolean,
+		add_delete_modif text)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+
+begin
+
+	return query
+	select * from(
+			(select
+				hb.num, hb.hash, hb.prev, hb.txs, hb.ops, hb.created_at, hb.completed, '2' as note
+			from
+				public_references.hive_blocks as hb inner join public.hive_blocksas hbc
+			on hb.num = hbc.num
+			where
+			hb.hash<>hbc.hash or
+			hb.prev<>hbc.prev or
+			hb.txs<>hbc.txs or
+			hb.ops<>hbc.ops or
+			hb.created_at<>hbc.created_at or
+			hb.completed<>hbc.completed
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_blocks as hb
+			 WHERE not EXISTS (
+				select * from public.hive_blocks as hbc where hb.num = hbc.num)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_blocks as hbc
+			 WHERE not EXISTS (
+				select * from public_references.hive_blocks hb where hb.num = hbc.num)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_blocks()
+    OWNER TO hivemind_ci;

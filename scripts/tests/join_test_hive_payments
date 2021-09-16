@@ -1,0 +1,67 @@
+--DROP FUNCTION public_references.join_test_hive_payments();
+
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_payments(
+	)
+    RETURNS TABLE(
+		id_t int,
+		block_num_t int,
+		tx_idx_t smallint,
+		postid_t int,
+		from_account_t int,
+		to_account_t int,
+		amount_t numeric,
+		token_t character varying,
+		add_delete_modif text
+	)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+begin
+
+	return query
+	select * from(
+			(select
+				hp.id, hp.block_num, hp.tx_idx, hp.post_id, hp.from_account, hp.to_account, hp.amount, hp.token, '2' as note
+			from
+				public_references.hive_payments as hp inner join public.hive_payments as hpc
+			on hp.id = hpc.id
+			where
+				hp.block_num <> hpc.block_num or
+				hp.tx_idx <> hpc.tx_idx or
+				hp.post_id <> hpc.post_id or
+				hp.from_account <> hpc.from_account or
+				hp.to_account <> hpc.to_account or
+				hp.amount <> hpc.amount or
+				hp.token <> hpc.token
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_payments as hp
+			 WHERE not EXISTS (
+				select * from public.hive_payments hpc where hp.id = hpc.id)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_payments as hpc
+			 WHERE not EXISTS (
+				select * from public_references.hive_payments hp where hp.id = hpc.id)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_payments()
+    OWNER TO hivemind_ci;

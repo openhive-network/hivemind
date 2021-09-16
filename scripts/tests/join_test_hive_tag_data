@@ -1,0 +1,55 @@
+--DROP FUNCTION public_references.join_test_hive_tag_data();
+
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_tag_data(
+	)
+    RETURNS TABLE(
+		id_t int,
+		tag_t character varying,
+		add_delete_modif text
+	)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+begin
+
+	return query
+	select * from(
+			(select
+				htd.id, htd.tag, '2' as note
+			from
+				public_references.hive_tag_data as htd inner join public.hive_tag_data as htdc
+			on htd.id = htdc.id
+			where
+				htd.tag<>htdc.tag
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_tag_data as htd
+			 WHERE not EXISTS (
+				select * from public.hive_tag_data htdc where htd.id = htdc.id)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_tag_data as htdc
+			 WHERE not EXISTS (
+				select * from public_references.hive_tag_data htd where htd.id = htdc.id)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_tag_data()
+    OWNER TO hivemind_ci;

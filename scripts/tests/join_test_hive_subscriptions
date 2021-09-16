@@ -1,0 +1,61 @@
+--DROP FUNCTION public_references.join_test_hive_subscriptions();
+
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_subscriptions(
+	)
+    RETURNS TABLE(
+		id_t int,
+		account_id_t int,
+		community_id_t int,
+		created_at_t timestamp without time zone,
+		block_num_t int,
+		add_delete_modif text
+	)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+begin
+
+	return query
+	select * from(
+			(select
+				hs.id, hs.account_id, hs.community_id, hs.created_at, hs.block_num, '2' as note
+			from
+				public_references.hive_subscriptions as hs inner join public.hive_subscriptions as hsc
+			on hs.id = hsc.id
+			where
+				hs.account_id <> hsc.account_id or
+				hs.community_id <> hsc.community_id or
+				hs.created_at <> hsc.created_at or
+				hs.block_num <> hsc.block_num
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_subscriptions as hs
+			 WHERE not EXISTS (
+				select * from public.hive_subscriptions hsc where hs.id = hsc.id)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_subscriptions as hsc
+			 WHERE not EXISTS (
+				select * from public_references.hive_subscriptions hs where hs.id = hsc.id)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_subscriptions()
+    OWNER TO hivemind_ci;

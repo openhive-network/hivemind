@@ -1,0 +1,55 @@
+--DROP FUNCTION public_references.join_test_hive_permlink_data();
+
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_permlink_data(
+	)
+    RETURNS TABLE(
+		id_t int,
+		permlink_t character varying,
+		add_delete_modif text
+	)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+begin
+
+	return query
+	select * from(
+			(select
+				hpd.id, hpd.permlink, '2' as note
+			from
+				public_references.hive_permlink_data as hpd inner join public.hive_permlink_data as hpdc
+			on hpd.id = hpdc.id
+			where
+				hpd.permlink <> hpdc.permlink
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_permlink_data as hpd
+			 WHERE not EXISTS (
+				select * from public.hive_permlink_data hpdc where hpd.id = hpdc.id)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_permlink_data as hpdc
+			 WHERE not EXISTS (
+				select * from public_references.hive_permlink_data hpd where hpd.id = hpdc.id)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_permlink_data()
+    OWNER TO hivemind_ci;

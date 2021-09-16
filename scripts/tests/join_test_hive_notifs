@@ -1,0 +1,71 @@
+--DROP FUNCTION public_references.join_test_hive_notifs();
+
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_notifs(
+	)
+    RETURNS TABLE(
+		id_t int,
+		block_num_t int,
+		type_id_t smallint,
+		score_t smallint,
+		created_at_t timestamp without time zone,
+		src_id_t int,
+		dst_id_t int,
+		post_id_t int,
+		community_id_t int,
+		payload_t text,
+		add_delete_modif text
+	)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+begin
+
+	return query
+	select * from(
+			(select
+				hn.id, hn.block_num, hn.type_id, hn.score, hn.created_at, hn.src_id, hn.dst_id, hn.post_id, hn.community_id, hn.payload, '2' as note
+			from
+				public_references.hive_notifs as hn inner join public.hive_notifs as hnc
+			on hn.id = hnc.id
+			where
+				hn.block_num <> hnc.block_num or
+				hn.type_id <> hnc.type_id or
+				hn.score <> hnc.score or
+				hn.created_at <> hnc.created_at or
+				hn.src_id <> hnc.src_id or
+				hn.dst_id <> hnc.dst_id or
+				hn.post_id <> hnc.post_id or
+				hn.community_id <> hnc.community_id or
+				hn.payload  <> hnc.payload
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_notifs as hn
+			 WHERE not EXISTS (
+				select * from public.hive_notifs hnc where hn.id = hnc.id)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_notifs as hnc
+			 WHERE not EXISTS (
+				select * from public_references.hive_notifs hn where hn.id = hnc.id)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_notifs()
+    OWNER TO hivemind_ci;

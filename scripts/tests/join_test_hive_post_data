@@ -1,0 +1,63 @@
+--DROP FUNCTION public_references.join_test_hive_post_data();
+
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_post_data(
+	)
+    RETURNS TABLE(
+		id_t int,
+		title_t character varying,
+		preview_t character varying,
+		img_url_t character varying,
+		body_t text,
+		json_t text,
+		add_delete_modif text
+	)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+begin
+
+	return query
+	select * from(
+			(select
+			 	hpd.id, hpd.title, hpd.preview, hpd.img_url, hpd.body, hpd.json, '2' as note
+			from
+				public_references.hive_post_data as hpd inner join public.hive_post_data as hpdc
+			on hpd.id = hpdc.id
+			where
+				hpd.title <> hpdc.title or
+				hpd.preview <> hpdc.preview or
+				hpd.img_url <> hpdc.img_url or
+				hpd.body <> hpdc.body or
+				hpd.json <> hpdc.json
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_post_data as hpd
+			 WHERE not EXISTS (
+				select * from public.hive_post_data hpdc where hpd.id = hpdc.id)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_post_data as hpdc
+			 WHERE not EXISTS (
+				select * from public_references.hive_post_data hpd where hpd.id = hpdc.id)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_post_data()
+    OWNER TO hivemind_ci;

@@ -1,0 +1,75 @@
+DROP FUNCTION public_references.join_test_hive_votes();
+
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_votes(
+	)
+    RETURNS TABLE(
+		id_t bigint,
+		post_id_t int,
+		voter_id_t int,
+		author_id_t int,
+		permlink_id_t int,
+		weight_t numeric,
+		rshares_t bigint,
+		vote_percent_t int,
+		last_update_t timestamp without time zone,
+		num_changes_t int,
+		block_num_t int,
+		is_effective_t boolean,
+		add_delete_modif text
+	)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+begin
+
+	return query
+	select * from(
+			(select
+				hv.id, hv.post_id, hv.voter_id, hv.author_id, hv.permlink_id, hv.weight, hv.rshares, hv.vote_percent, hv.last_update, hv.num_changes, hv.block_num, hv.is_effective, '2' as note
+			from
+				public_references.hive_votes as hv inner join public.hive_votes as hvc
+			on hv.id = hvc.id
+			where
+				hv.post_id<>hvc.post_id or
+				hv.voter_id<>hvc.voter_id or
+				hv.author_id <>hvc.author_id or
+				hv.permlink_id<>hvc.permlink_id or
+				hv.weight<>hvc.weight or
+				hv.rshares<>hvc.rshares or
+				hv.vote_percent<>hvc.vote_percent or
+				hv.last_update<>hvc.last_update or
+				hv.num_changes<>hvc.num_changes or
+				hv.block_num<>hvc.block_num or
+				hv.is_effective<>hvc.is_effective
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_votes as hv
+			 WHERE not EXISTS (
+				select * from public.hive_votes hvc where hv.id = hvc.id)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_votes as hvc
+			 WHERE not EXISTS (
+				select * from public_references.hive_votes hv where hv.id = hvc.id)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_votes()
+    OWNER TO hivemind_ci;

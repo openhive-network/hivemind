@@ -1,0 +1,61 @@
+--DROP FUNCTION public_references.join_test_hive_reblogs();
+
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_reblogs(
+	)
+    RETURNS TABLE(
+		id_t int,
+		blogger_id_t int,
+		post_id_t int,
+		created_at_t timestamp without time zone,
+		block_num_t int,
+		add_delete_modif text
+	)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+begin
+
+	return query
+	select * from(
+			(select
+				hr.id, hr.blogger_id, hr.post_id, hr.created_at, hr.block_num, '2' as note
+			 from
+				public_references.hive_reblogs as hr inner join public.hive_reblogs as hrc
+			on hr.id = hrc.id
+			where
+			 hr.blogger_id <> hrC.blogger_id or
+			 hr.post_id <> hrC.post_id or
+			 hr.created_at <> hrC.created_at or
+			 hr.block_num <> hrc.block_num
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_reblogs as hr
+			 WHERE not EXISTS (
+				select * from public.hive_reblogs hrc where hr.id = hrc.id)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_reblogs as hrc
+			 WHERE not EXISTS (
+				select * from public_references.hive_reblogs hr where hr.id = hrc.id)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_reblogs()
+    OWNER TO hivemind_ci;

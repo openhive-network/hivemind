@@ -1,0 +1,59 @@
+--DROP FUNCTION public_references.join_test_hive_feed_cache();
+
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_feed_cache(
+	)
+    RETURNS TABLE(
+		post_id_t int,
+		account_id_t int,
+		created_at_t timestamp without time zone,
+		block_num_t int,
+		add_delete_modif text
+	)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+
+DECLARE
+begin
+
+	return query
+	select * from(
+			(select
+			hfc.post_id, hfc.account_id, hfc.created_at, hfc.block_num ,'2' as note
+			from
+				public_references.hive_feed_cache as hfc inner join public.hive_feed_cache as hfcc
+			on hfc.post_id = hfcc.post_id and hfc.account_id = hfcc.account_id
+			where
+			hfc.created_at <> hfcc.created_at or
+			hfc.block_num <> hfcc.block_num
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_feed_cache as hfc
+			 WHERE not EXISTS (
+				select * from public.hive_feed_cache hfcc where hfc.post_id = hfcc.post_id and hfc.account_id = hfcc.account_id)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_feed_cache as hfcc
+			 WHERE not EXISTS (
+				select * from public_references..hive_feed_cache hfc where hfc.post_id= hfcc.post_id and hfc.account_id = hfcc.account_id)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_feed_cache()
+    OWNER TO hivemind_ci;

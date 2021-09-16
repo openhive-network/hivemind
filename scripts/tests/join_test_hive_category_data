@@ -1,0 +1,53 @@
+--DROP FUNCTION public_references.join_test_hive_category_data();
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_category_data(
+	)
+    RETURNS TABLE(
+		id_t int,
+		category_t character varying,
+		add_delete_modif text)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+
+begin
+
+	return query
+	select * from(
+			(select
+				hcd.id, hcd.category, '2' as note
+			from
+				public_references.hive_category_data as hcd inner join public.hive_category_data as hcdc
+			on hcd.id = hcdc.id
+			where
+				hcd.category <> hcdc.category
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_category_data as hcd
+			 WHERE not EXISTS (
+				select * from public.hive_category_data hcdc where hcd.id = hcdc.id)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_category_data as hcdc
+			 WHERE not EXISTS (
+				select * from public_references.hive_category_data hcd where hcd.id = hcdc.id)
+		 )) as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_category_data()
+    OWNER TO hivemind_ci;

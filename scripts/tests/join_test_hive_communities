@@ -1,0 +1,92 @@
+--DROP FUNCTION public_references.join_test_hive_communities;
+
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_communities(
+	)
+    RETURNS TABLE(
+		id_t int,
+		type_id_t smallint,
+		lang_t character,
+		name_t character varying,
+		title_t character varying,
+		created_at_t timestamp without time zone,
+		sum_pending_t int,
+		num_pending_t int,
+		num_authors_t int,
+		rank_t int,
+		subscribers_t int,
+		is_nsfw_t boolean,
+		about_t character varying,
+		primary_tag_t character varying,
+		category_t character varying,
+		avatar_url_t character varying,
+		description character varying,
+		flag_text character varying,
+		settings text,
+		block_num int,
+		add_delete_modif text
+	)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+begin
+
+	return query
+	select * from(
+			(select
+			hc.id, hc.type_id, hc.lang, hc.name, hc.title, hc.created_at, hc.sum_pending, hc.num_pending, hc.num_authors, hc.rank, hc.subscribers, hc.is_nsfw, hc.about,
+			hc.primary_tag, hc.category, hc.avatar_url, hc.description, hc.flag_text, hc.settings, hc.block_num, '2' as note
+			from
+				public_references.hive_communities as hc inner join public.hive_communities as hcc
+			on hc.id = hcc.id
+			where
+			hc.type_id <> hcc.type_id  or
+			hc.lang <> hcc.lang or
+			hc.name <> hcc.name or
+			hc.title <> hcc.title or
+			hc.created_at <> hcc.created_at or
+		 	hc.sum_pending <> hcc.sum_pending or
+			hc.num_pending <> hcc.num_pending or
+			hc.num_authors <> hcc.num_authors or
+			hc.rank <> hcc.rank or
+			hc.subscribers <> hcc.subscribers or
+			hc.is_nsfw <> hcc.is_nsfw or
+			hc.about <> hcc.about or
+			hc.primary_tag <> hcc.primary_tag or
+			hc.category <> hcc.category or
+			hc.avatar_url <> hcc.avatar_url or
+			hc.description <> hcc.description or
+			hc.flag_text <> hcc.flag_text or
+			hc.settings <> hcc.settings or
+			hc.block_num <>hcc.block_num
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_communities as hc
+			 WHERE not EXISTS (
+				select * from public.hive_communities hcc where hc.id = hcc.id)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_communities as hcc
+			 WHERE not EXISTS (
+				select * from public_references..hive_communities hc where hc.id = hcc.id)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_communities()
+    OWNER TO hivemind_ci;

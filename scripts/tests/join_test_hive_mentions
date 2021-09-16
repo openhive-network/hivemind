@@ -1,0 +1,60 @@
+--DROP FUNCTION public_references.join_test_hive_mentions();
+
+CREATE OR REPLACE FUNCTION public_references.join_test_hive_mentions(
+	)
+    RETURNS TABLE(
+		id_t int,
+		post_id_t int,
+		account_id_t int,
+		block_num_t int,
+		add_delete_modif text
+	)
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+begin
+
+	return query
+	select * from(
+			(select
+				hm.id, hm.post_id, hm.account_id, hm.block_num, '2' as note
+			from
+				public_references.hive_mentions as hm inner join public.hive_mentions as hmc
+			on hm.id = hmc.id
+			where
+
+		hm.post_id <> hmc.post_id or
+		hm.account_id <> hmc.account_id or
+		hm.block_num <> hmc.block_num
+			 )
+
+			union all
+
+			(select
+				*, '-1' as note
+ 			 from
+				public_references.hive_mentions as hm
+			 WHERE not EXISTS (
+				select * from public.hive_mentions hmc where hm.id = hmc.id)
+			)
+
+			union all
+
+			(select
+				*, '+1' as note
+ 			 from
+				public.hive_mentions as hmc
+			 WHERE not EXISTS (
+				select * from public_references.hive_mentions hm where hm.id = hmc.id)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION public_references.join_test_hive_mentions()
+    OWNER TO hivemind_ci;
