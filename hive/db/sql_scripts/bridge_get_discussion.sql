@@ -24,7 +24,7 @@ BEGIN
         hpv.title,
         hpv.body,
         hpv.category,
-        hpv.depth,:
+        hpv.depth,
         hpv.promoted,
         hpv.payout,
         hpv.pending_payout,
