@@ -73,6 +73,7 @@ for sql in upgrade/assert_public_schema.sql \
           update_follow_count.sql \
           delete_reblog_feed_cache.sql \
           follows.sql \
+          is_superuser.sql \
           update_hive_blocks_consistency_flag.sql \
           update_table_statistics.sql # Must be last
 

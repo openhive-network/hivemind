@@ -45,6 +45,10 @@ values
 ,(now(), 'b100db27f37dda3c869c2756d99ab2856f7da9f9') -- hive_notification_cache table supplement https://gitlab.syncad.com/hive/hivemind/-/merge_requests/447
 ,(now(), 'bd83414409b7624e2413b97a62fa7d97d83edd86') -- follow notification time is taken from block affecting it  https://gitlab.syncad.com/hive/hivemind/-/merge_requests/449
 ,(now(), '1cc9981679157e4e54e5e4a74cca1feb5d49296d') -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/452
+,(now(), 'c21f03b2d8cfa6af2386a222c7501580d1d1ce05') -- Prerequisites to sync from SQL: https://gitlab.syncad.com/hive/hivemind/-/commit/c21f03b2d8cfa6af2386a222c7501580d1d1ce05
+,(now(), 'd243747e7ff37a6f0bdef88ce5fc3c471b39b238') -- https://gitlab.syncad.com/hive/hivemind/-/commit/d243747e7ff37a6f0bdef88ce5fc3c471b39b238
+,(now(), 'a0dc234dc00d1d3ef821f309ebdf4a1d6a58a4bf') -- Verification of block consistency: https://gitlab.syncad.com/hive/hivemind/-/commit/a0dc234dc00d1d3ef821f309ebdf4a1d6a58a4bf
+,(now(), '02c3c807c1a65635b98b6657196c10af44ec9d92') -- https://gitlab.syncad.com/hive/hivemind/-/merge_requests/507 https://gitlab.syncad.com/hive/hivemind/-/commit/02c3c807c1a65635b98b6657196c10af44ec9d92
 ) ds (patch_date, patch_revision)
 where not exists (select null from hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
 
