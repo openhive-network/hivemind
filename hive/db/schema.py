@@ -454,9 +454,6 @@ def setup(db):
     sql = """SELECT * FROM pg_extension WHERE extname='intarray'"""
     assert db.query_row( sql ), "The database requires created 'intarray' extension"
 
-    # disable jit
-    db.query_no_return("ALTER DATABASE hive SET jit = FALSE")
-
     # initialize schema
     build_metadata().create_all(db.engine())
 
