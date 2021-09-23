@@ -24,7 +24,7 @@ BEGIN
         hpv.title,
         hpv.body,
         hpv.category,
-        hpv.depth,
+        hpv.depth,:
         hpv.promoted,
         hpv.payout,
         hpv.pending_payout,
@@ -51,7 +51,7 @@ BEGIN
         ds.source
     FROM
     (
-        WITH RECURSIVE child_posts (id, parent_id) AS
+        WITH RECURSIVE child_posts (id, parent_id) AS MATERIALIZED
         (
             SELECT hp.id, hp.parent_id, blacklisted_by_observer_view.source as source
             FROM live_posts_comments_view hp left outer join blacklisted_by_observer_view on (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = hp.author_id)
