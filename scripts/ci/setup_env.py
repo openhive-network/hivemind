@@ -88,6 +88,8 @@ def setup_env(current_runner_id, hive_sync_runner_id, infile, outfile, end, **kw
                 if key.startswith('postgres'):
                     if key == 'postgres_host':
                         runner[key] = hive_sync_runner['host']
+                    if key == 'postgres_port': # to be eliminated when CI will be only at psql12
+                        runner[key] = 25432
                     else:
                         runner[key] = hive_sync_runner[key]
                 else:
