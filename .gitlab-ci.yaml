@@ -25,7 +25,7 @@ stages:
   - eval $(cat "$RUNNER_CONF" | ./scripts/ci/setup_env.py --current-runner-id=${CI_RUNNER_ID} --hive-sync-runner-id=${HIVE_SYNC_RUNNER_ID})
   - export RUNNER_POSTGRES_PORT=localhost
   - export RUNNER_POSTGRES_PORT=25432
-  - echo "Postgres host: $RUNNER_POSTGRES_HOST port: $RUNNER_POSTGRES_PORT"
+  - echo "Postgres host $RUNNER_POSTGRES_HOST port $RUNNER_POSTGRES_PORT"
 
 .set-variables: &set-variables
   # - export # List all variables and its values set by Gitlab CI.
