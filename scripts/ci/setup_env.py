@@ -96,6 +96,11 @@ def setup_env(current_runner_id, hive_sync_runner_id, infile, outfile, end, **kw
                     runner[key] = value
 
     for key in runner:
+        if key == 'postgres_host': # to be eliminated when CI will be only at psql12
+            runner[key] = 'localhost'
+        if key == 'postgres_port': # to be eliminated when CI will be only at psql12
+            runner[key] = 25432
+
         output(
             f'export RUNNER_{key.upper()}="{str(runner[key])}"',
             outfile,
