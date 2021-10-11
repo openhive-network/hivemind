@@ -3,11 +3,16 @@ from subprocess import check_output
 import sys
 import os
 import logging
+import site
 
 from setuptools import find_packages
 from setuptools import setup
 
 assert sys.version_info[0] == 3 and sys.version_info[1] >= 6, "hive requires Python 3.6 or newer"
+
+# PEP517 workaround
+# see https://github.com/pypa/pip/issues/7953#issuecomment-645133255
+site.ENABLE_USER_SITE = "--user" in sys.argv[1:]
 
 VERSION = 'notag'
 GIT_REVISION = 'nogitrev'
@@ -132,31 +137,28 @@ if __name__ == "__main__":
         setup_requires=[
             'pytest-runner'
         ],
-        dependency_links=[
-            'https://github.com/bcb/jsonrpcserver/tarball/8f3437a19b6d1a8f600ee2c9b112116c85f17827#egg=jsonrpcserver-4.1.3+8f3437a'
-        ],
         install_requires=[
-            'aiopg @ https://github.com/aio-libs/aiopg/tarball/862fff97e4ae465333451a4af2a838bfaa3dd0bc',
-            'jsonrpcserver @ https://github.com/bcb/jsonrpcserver/tarball/8f3437a19b6d1a8f600ee2c9b112116c85f17827#egg=jsonrpcserver',
-            'simplejson',
-            'aiohttp',
-            'certifi',
-            'sqlalchemy',
-            'funcy',
-            'toolz',
-            'maya',
-            'ujson',
-            'urllib3',
-            'psycopg2-binary',
-            'aiocache',
-            'configargparse',
+            'aiopg==1.2.1',
+            'jsonrpcserver==4.2.0',
+            'simplejson==3.17.2',
+            'aiohttp==3.7.4',
+            'certifi==2020.12.5',
+            'sqlalchemy==1.4.15',
+            'funcy==1.16',
+            'toolz==0.11.1',
+            'maya==0.6.1',
+            'ujson==4.0.2',
+            'urllib3==1.26.5',
+            'psycopg2-binary==2.8.6',
+            'aiocache==0.11.1',
+            'configargparse==1.4.1',
             'pdoc==0.3.2',
-            'diff-match-patch',
-            'prometheus-client',
-            'psutil',
-            'atomic',
-            'python-dateutil>=2.8.1',
-            'regex'
+            'diff-match-patch==20200713',
+            'prometheus-client==0.10.1',
+            'psutil==5.8.0',
+            'atomic==0.7.3',
+            'python-dateutil==2.8.1',
+            'regex==2021.4.4'
         ],
         extras_require={
             'dev': [

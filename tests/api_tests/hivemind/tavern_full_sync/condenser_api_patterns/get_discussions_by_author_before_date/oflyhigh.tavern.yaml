@@ -1,0 +1,29 @@
+---
+  test_name: Hivemind condenser_api.get_discussions_by_author_before_date oflyhigh
+
+  marks:
+    - fullsynctest
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: condenser_api.get_discussions_by_author_before_date oflyhigh
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "condenser_api.get_discussions_by_author_before_date"
+          params: ['oflyhigh', null, '2020-11-09T15:00:21', 1]
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:has_valid_response
+          extra_kwargs:
+            method: "oflyhigh"
+            directory: "condenser_api_patterns/get_discussions_by_author_before_date"
+

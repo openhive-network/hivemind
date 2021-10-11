@@ -1,0 +1,25 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest # previously paging didn't really worked when there was many categories with the same amount of payout (compare .orig here and in no_payout_2)
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "condenser_api.get_trending_tags"
+          params: {"start_tag":"aboutmyself","limit":10}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern

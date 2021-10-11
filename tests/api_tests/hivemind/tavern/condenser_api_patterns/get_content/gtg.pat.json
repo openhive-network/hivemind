@@ -1,0 +1,743 @@
+{
+  "abs_rshares": 0,
+  "active_votes": [
+    {
+      "percent": 10000,
+      "reputation": 949715155915,
+      "rshares": 7498426175709,
+      "time": "2016-08-05T15:25:42",
+      "voter": "steempty",
+      "weight": 11895913786478469768
+    },
+    {
+      "percent": 10000,
+      "reputation": 70486968186347,
+      "rshares": 42312727614219,
+      "time": "2016-08-05T15:27:09",
+      "voter": "blocktrades",
+      "weight": 5027689552576220703
+    },
+    {
+      "percent": 10000,
+      "reputation": 608057298751,
+      "rshares": 305178325808,
+      "time": "2016-08-06T00:15:45",
+      "voter": "justin",
+      "weight": 6462268922609455
+    },
+    {
+      "percent": 10000,
+      "reputation": 138490649,
+      "rshares": 869557685770,
+      "time": "2016-08-06T00:15:06",
+      "voter": "silver",
+      "weight": 18786109503938095
+    },
+    {
+      "percent": 10000,
+      "reputation": 9800209121307,
+      "rshares": 5114872713665,
+      "time": "2016-08-06T02:19:36",
+      "voter": "roadscape",
+      "weight": 97808918485474647
+    },
+    {
+      "percent": 10000,
+      "reputation": 59074616588451,
+      "rshares": 2289539684123,
+      "time": "2016-08-06T00:14:27",
+      "voter": "complexring",
+      "weight": 52268159267844613
+    },
+    {
+      "percent": 10000,
+      "reputation": 0,
+      "rshares": 2180802207,
+      "time": "2016-08-06T00:15:51",
+      "voter": "chloe",
+      "weight": 45939453980921
+    },
+    {
+      "percent": 10000,
+      "reputation": 0,
+      "rshares": 2185117237,
+      "time": "2016-08-06T00:16:00",
+      "voter": "jen",
+      "weight": 45994926291140
+    },
+    {
+      "percent": 10000,
+      "reputation": 5009147934382,
+      "rshares": 14176153154,
+      "time": "2016-08-06T00:15:57",
+      "voter": "danknugs",
+      "weight": 298478881380496
+    },
+    {
+      "percent": 10000,
+      "reputation": 29449063355738,
+      "rshares": 198373663832,
+      "time": "2016-08-06T00:16:03",
+      "voter": "steemservices",
+      "weight": 4161505939241524
+    },
+    {
+      "percent": 10000,
+      "reputation": 12928765689257,
+      "rshares": 30116948361,
+      "time": "2016-08-19T11:40:30",
+      "voter": "aizensou",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 0,
+      "rshares": 46091054,
+      "time": "2016-08-06T00:16:06",
+      "voter": "kelly",
+      "weight": 963674029456
+    },
+    {
+      "percent": 10000,
+      "reputation": 1241362310762,
+      "rshares": 6428425796,
+      "time": "2016-08-06T00:15:54",
+      "voter": "bentley",
+      "weight": 135397615146519
+    },
+    {
+      "percent": 10000,
+      "reputation": 0,
+      "rshares": 91926650,
+      "time": "2016-08-21T12:52:45",
+      "voter": "gandalf",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 49549461527,
+      "rshares": 345893040115,
+      "time": "2016-08-06T05:24:54",
+      "voter": "boatymcboatface",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 2802091583976,
+      "rshares": 27177508174,
+      "time": "2016-08-12T19:15:24",
+      "voter": "proctologic",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 0,
+      "rshares": 316897956,
+      "time": "2016-08-06T00:16:09",
+      "voter": "sophia",
+      "weight": 6625677603349
+    },
+    {
+      "percent": 10000,
+      "reputation": 5992588876858,
+      "rshares": 21914098976,
+      "time": "2016-08-05T15:35:24",
+      "voter": "hcf27",
+      "weight": 557434767737723
+    },
+    {
+      "percent": 10000,
+      "reputation": 1963822010265,
+      "rshares": 7368210672,
+      "time": "2016-08-05T14:22:09",
+      "voter": "modeprator",
+      "weight": 22042702548688931
+    },
+    {
+      "percent": 10000,
+      "reputation": 14073457536993,
+      "rshares": 103782757471,
+      "time": "2016-08-05T18:50:09",
+      "voter": "edgeland",
+      "weight": 2589354462522139
+    },
+    {
+      "percent": 10000,
+      "reputation": 41145563244589,
+      "rshares": 785540122070,
+      "time": "2016-08-06T00:00:39",
+      "voter": "steemship",
+      "weight": 18937057891845807
+    },
+    {
+      "percent": 10000,
+      "reputation": 376960001789,
+      "rshares": 5786912627,
+      "time": "2016-08-08T12:04:45",
+      "voter": "spaninv",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 3750669747284,
+      "rshares": 196850398821,
+      "time": "2016-08-06T03:36:45",
+      "voter": "pal",
+      "weight": 3455311940762984
+    },
+    {
+      "percent": 3301,
+      "reputation": 2902053059801,
+      "rshares": 2792608078,
+      "time": "2016-08-06T02:20:09",
+      "voter": "murh",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 3542054613209,
+      "rshares": 98699236,
+      "time": "2016-08-31T16:59:03",
+      "voter": "itay",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 1444446898291,
+      "rshares": 9975325205,
+      "time": "2016-08-21T17:53:24",
+      "voter": "johnerfx",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 11136252375006,
+      "rshares": 206512826638,
+      "time": "2016-08-06T02:12:18",
+      "voter": "taoteh1221",
+      "weight": 4302768265927178
+    },
+    {
+      "percent": 10000,
+      "reputation": 3804349938696,
+      "rshares": 57136530202,
+      "time": "2016-08-05T16:25:27",
+      "voter": "juanmiguelsalas",
+      "weight": 1431722888826530
+    },
+    {
+      "percent": 10000,
+      "reputation": -453869065378,
+      "rshares": 9128119179,
+      "time": "2016-08-06T03:27:06",
+      "voter": "somedude",
+      "weight": 160735602789673
+    },
+    {
+      "percent": 10000,
+      "reputation": 77590508815145,
+      "rshares": 203906072916,
+      "time": "2016-08-05T16:22:18",
+      "voter": "kaylinart",
+      "weight": 5134148123507099
+    },
+    {
+      "percent": 10000,
+      "reputation": 37159422493,
+      "rshares": 867610016,
+      "time": "2016-08-21T18:57:51",
+      "voter": "johnerminer",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 5886979119053,
+      "rshares": 32485842972,
+      "time": "2016-08-05T19:15:30",
+      "voter": "geoffrey",
+      "weight": 808475146511942
+    },
+    {
+      "percent": 10000,
+      "reputation": 1199373674648,
+      "rshares": 2480411371,
+      "time": "2016-08-21T12:50:48",
+      "voter": "gary-smith",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 2738311095861,
+      "rshares": 23267718250,
+      "time": "2016-08-05T19:55:21",
+      "voter": "jparty",
+      "weight": 571435855372687
+    },
+    {
+      "percent": 10000,
+      "reputation": 5571311902261,
+      "rshares": 1953019618,
+      "time": "2016-08-26T05:26:00",
+      "voter": "mammasitta",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 3924899966690,
+      "rshares": 25911121779,
+      "time": "2016-08-05T14:02:24",
+      "voter": "gtg",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 110873902249,
+      "rshares": 4679981480,
+      "time": "2016-08-05T20:31:48",
+      "voter": "madwallace",
+      "weight": 114850133838481
+    },
+    {
+      "percent": 10000,
+      "reputation": 35050443507276,
+      "rshares": 39716978937,
+      "time": "2016-08-05T15:55:27",
+      "voter": "lauralemons",
+      "weight": 1009126015182935
+    },
+    {
+      "percent": 10000,
+      "reputation": 97622606374,
+      "rshares": 461256359,
+      "time": "2016-08-17T04:56:48",
+      "voter": "chamviet",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": -2499740471746,
+      "rshares": 15413814887,
+      "time": "2016-08-05T21:02:48",
+      "voter": "r4fken",
+      "weight": 378126953577566
+    },
+    {
+      "percent": 10000,
+      "reputation": 997011879274,
+      "rshares": 6283643209,
+      "time": "2016-08-05T17:17:27",
+      "voter": "endaksi1",
+      "weight": 157252136417618
+    },
+    {
+      "percent": 10000,
+      "reputation": 6340616331847,
+      "rshares": 16250564070,
+      "time": "2016-08-31T19:52:15",
+      "voter": "picokernel",
+      "weight": 0
+    },
+    {
+      "percent": 100,
+      "reputation": 19111656178138,
+      "rshares": 702264837,
+      "time": "2016-08-05T18:09:15",
+      "voter": "furion",
+      "weight": 17555032722864
+    },
+    {
+      "percent": 10000,
+      "reputation": 25849925929525,
+      "rshares": 80421874395,
+      "time": "2016-08-05T23:43:36",
+      "voter": "anyx",
+      "weight": 1969341307463557
+    },
+    {
+      "percent": 10000,
+      "reputation": 3740475854096,
+      "rshares": 2241994263,
+      "time": "2016-08-05T17:29:06",
+      "voter": "egjoshslim",
+      "weight": 56056498763241
+    },
+    {
+      "percent": 10000,
+      "reputation": 1563271634183,
+      "rshares": 120632910259,
+      "time": "2016-08-05T16:01:27",
+      "voter": "paco",
+      "weight": 3055935555602067
+    },
+    {
+      "percent": 10000,
+      "reputation": 11644551965460,
+      "rshares": 6621475753,
+      "time": "2016-08-05T20:17:06",
+      "voter": "senseiteekay",
+      "weight": 162529305598547
+    },
+    {
+      "percent": 10000,
+      "reputation": 9836722,
+      "rshares": 226092177,
+      "time": "2016-08-05T19:34:30",
+      "voter": "jesse5th",
+      "weight": 5555057926571
+    },
+    {
+      "percent": 10000,
+      "reputation": 6892424678378,
+      "rshares": 23810445079,
+      "time": "2016-08-05T19:31:42",
+      "voter": "inertia",
+      "weight": 585276517225300
+    },
+    {
+      "percent": 10000,
+      "reputation": 171730563,
+      "rshares": 210829632,
+      "time": "2016-08-05T18:56:00",
+      "voter": "glassice",
+      "weight": 5250098643483
+    },
+    {
+      "percent": 10000,
+      "reputation": -424880418803,
+      "rshares": 203070157,
+      "time": "2016-08-05T19:38:12",
+      "voter": "lenar79",
+      "weight": 4989370557163
+    },
+    {
+      "percent": 10000,
+      "reputation": 161079803820,
+      "rshares": 15277675835,
+      "time": "2016-08-07T19:20:30",
+      "voter": "arcurus",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 6985921192853,
+      "rshares": 101769596658,
+      "time": "2016-08-06T06:01:09",
+      "voter": "johnsmith",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 0,
+      "rshares": 330264489,
+      "time": "2016-08-05T22:23:18",
+      "voter": "steeminer",
+      "weight": 8099591994141
+    },
+    {
+      "percent": 10000,
+      "reputation": 97517122081,
+      "rshares": 55123516,
+      "time": "2016-08-05T15:44:18",
+      "voter": "cire81",
+      "weight": 1401617276346
+    },
+    {
+      "percent": 10000,
+      "reputation": 16914207527051,
+      "rshares": 20346345482,
+      "time": "2016-08-05T17:20:30",
+      "voter": "celebr1ty",
+      "weight": 508930527368140
+    },
+    {
+      "percent": 10000,
+      "reputation": 136260156259,
+      "rshares": 116522786,
+      "time": "2016-08-05T15:50:15",
+      "voter": "kibela",
+      "weight": 2962791381371
+    },
+    {
+      "percent": 10000,
+      "reputation": 2227557428863,
+      "rshares": 4195953733,
+      "time": "2016-08-05T17:59:06",
+      "voter": "sulev",
+      "weight": 104898811278982
+    },
+    {
+      "percent": 10000,
+      "reputation": 106575300404,
+      "rshares": 1863529002,
+      "time": "2016-08-06T05:19:51",
+      "voter": "glitterpig",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 0,
+      "rshares": 88147854,
+      "time": "2016-08-05T17:11:42",
+      "voter": "alrx6918",
+      "weight": 2206214542547
+    },
+    {
+      "percent": 10000,
+      "reputation": -2405411059,
+      "rshares": 156246825,
+      "time": "2016-08-05T19:09:48",
+      "voter": "vitz81",
+      "weight": 3890846388466
+    },
+    {
+      "percent": 10000,
+      "reputation": 90565359983,
+      "rshares": 7842906910,
+      "time": "2016-08-16T19:40:33",
+      "voter": "rawnetics",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 1320262999851,
+      "rshares": 2110595726,
+      "time": "2016-08-05T15:32:54",
+      "voter": "naturalista",
+      "weight": 53711739517451
+    },
+    {
+      "percent": 10000,
+      "reputation": 75109707260,
+      "rshares": 47302483,
+      "time": "2016-08-05T20:42:57",
+      "voter": "persianqueen",
+      "weight": 1160737106715
+    },
+    {
+      "percent": 10000,
+      "reputation": 1653800202958,
+      "rshares": 309993436467,
+      "time": "2016-08-05T19:16:57",
+      "voter": "glitterfart",
+      "weight": 7666571482878691
+    },
+    {
+      "percent": 10000,
+      "reputation": -487137935046,
+      "rshares": 102759457,
+      "time": "2016-08-05T19:25:12",
+      "voter": "caitlinm",
+      "weight": 2526998237821
+    },
+    {
+      "percent": 10000,
+      "reputation": 107551872,
+      "rshares": 71928410,
+      "time": "2016-08-05T23:20:27",
+      "voter": "jellenmark",
+      "weight": 1763941183235
+    },
+    {
+      "percent": 10000,
+      "reputation": 137363191136,
+      "rshares": 151302584,
+      "time": "2016-08-25T05:21:15",
+      "voter": "agussudaryanto",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": -1343370986030,
+      "rshares": 12663424,
+      "time": "2016-08-05T15:40:18",
+      "voter": "ciao",
+      "weight": 321991697138
+    },
+    {
+      "percent": 10000,
+      "reputation": 21756574883,
+      "rshares": 519527818,
+      "time": "2016-08-05T16:10:24",
+      "voter": "iaco",
+      "weight": 13130675424634
+    },
+    {
+      "percent": 10000,
+      "reputation": 485540,
+      "rshares": 14786662,
+      "time": "2016-08-05T15:42:57",
+      "voter": "steemo",
+      "weight": 375978879508
+    },
+    {
+      "percent": 10000,
+      "reputation": 612274223,
+      "rshares": 1568749518,
+      "time": "2016-08-05T16:03:03",
+      "voter": "nixonnox",
+      "weight": 39650498348464
+    },
+    {
+      "percent": 10000,
+      "reputation": 4542627765008,
+      "rshares": 3195610059,
+      "time": "2016-08-05T17:01:30",
+      "voter": "hanshotfirst",
+      "weight": 79986380539852
+    },
+    {
+      "percent": 10000,
+      "reputation": -79575494262,
+      "rshares": 2458086,
+      "time": "2016-08-05T15:38:24",
+      "voter": "steema",
+      "weight": 62501540265
+    },
+    {
+      "percent": 10000,
+      "reputation": -894488087252,
+      "rshares": 12950553,
+      "time": "2016-08-05T15:43:09",
+      "voter": "confucius",
+      "weight": 329292162008
+    },
+    {
+      "percent": 10000,
+      "reputation": 37279727062,
+      "rshares": 911816960,
+      "time": "2016-08-05T23:06:06",
+      "voter": "bledarus",
+      "weight": 22361405364095
+    },
+    {
+      "percent": 10,
+      "reputation": -711516507127,
+      "rshares": 1251336,
+      "time": "2016-08-05T14:03:45",
+      "voter": "softpunk",
+      "weight": 256352564156
+    },
+    {
+      "percent": 10000,
+      "reputation": -789959772758,
+      "rshares": 3742919,
+      "time": "2016-08-05T15:38:18",
+      "voter": "jarvis",
+      "weight": 95170888860
+    },
+    {
+      "percent": 10000,
+      "reputation": 31215012571,
+      "rshares": 37069491,
+      "time": "2016-08-06T00:15:48",
+      "voter": "thecurator",
+      "weight": 780912633093
+    },
+    {
+      "percent": 10000,
+      "reputation": 17071371161,
+      "rshares": 229846452,
+      "time": "2016-08-13T18:01:48",
+      "voter": "mefisto",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 83682643470,
+      "rshares": 104558988,
+      "time": "2016-08-06T02:48:21",
+      "voter": "cinderphoenix",
+      "weight": 1841425254675
+    },
+    {
+      "percent": 10000,
+      "reputation": 0,
+      "rshares": 98540677,
+      "time": "2016-08-05T22:22:27",
+      "voter": "steeminion",
+      "weight": 2416685852204
+    },
+    {
+      "percent": 10000,
+      "reputation": 5861882,
+      "rshares": 57959648,
+      "time": "2016-08-05T15:50:06",
+      "voter": "piezolit",
+      "weight": 1473728080673
+    },
+    {
+      "percent": 10000,
+      "reputation": 9708508,
+      "rshares": 8108416,
+      "time": "2016-08-05T17:31:21",
+      "voter": "brucy",
+      "weight": 202726025147
+    },
+    {
+      "percent": 10000,
+      "reputation": 0,
+      "rshares": 35603456,
+      "time": "2016-08-06T01:01:45",
+      "voter": "shukerona",
+      "weight": 744389847944
+    },
+    {
+      "percent": 10000,
+      "reputation": 13043111,
+      "rshares": 56023735,
+      "time": "2016-08-09T19:18:51",
+      "voter": "leticiapink",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 0,
+      "rshares": 295195987,
+      "time": "2016-08-21T16:14:51",
+      "voter": "steeminnow",
+      "weight": 0
+    }
+  ],
+  "allow_curation_rewards": true,
+  "allow_replies": true,
+  "allow_votes": true,
+  "author": "gtg",
+  "author_reputation": 3924899966690,
+  "author_rewards": 324640,
+  "beneficiaries": [],
+  "body": "Hello, World!\n\nMy intention is not to make it into top 19. I could name many  other candidates (clearly more than 19) with greater commitment to steem(it) who are a lot more appropriate as witnesses, but I'm sure I can be useful as a backup witness.\n\nI introduced myself here:\nhttps://steemit.com/introduceyourself/@gtg/hello-world\nThose of you who use https://steemit.chat know me as **Gandalf**.\nFor some time, I\u2019ve been using my magic powers (mostly those related to security and infrastructure) to improve steemit. For example, I\u2019ve improved our \"Perfect\" Forward Secrecy and made our communication with site more secure.\n\nMy **seed node** (EU based):\n`seed-node = gtg.steem.house:2001`\nYou can also use it to rsync data dir\n`rsync -Pa rsync://gtg.steem.house/witness_node_data_dir .`\n\nMy **witness node** is on a separate data center (an EU-based one as well).\nIf you believe I can be of value to steemit, please vote for me:\n`vote_for_witness YOURACCOUNT gtg true true`\n\n![witness](https://grey.house/img/witness.jpg)",
+  "body_length": 1023,
+  "cashout_time": "1969-12-31T23:59:59",
+  "category": "witness-category",
+  "children": 7,
+  "children_abs_rshares": 0,
+  "created": "2016-08-05T14:02:24",
+  "curator_payout_value": "231.879 HBD",
+  "depth": 0,
+  "id": 624896,
+  "json_metadata": "{\"tags\":[\"witness-category\"],\"links\":[\"https://steemit.com/introduceyourself/@gtg/hello-world\"]}",
+  "last_payout": "2016-09-05T05:17:57",
+  "last_update": "2016-08-05T14:02:24",
+  "max_accepted_payout": "1000000.000 HBD",
+  "max_cashout_time": "1969-12-31T23:59:59",
+  "net_rshares": 0,
+  "net_votes": 87,
+  "parent_author": "",
+  "parent_permlink": "witness-category",
+  "pending_payout_value": "0.000 HBD",
+  "percent_hbd": 10000,
+  "permlink": "witness-gtg",
+  "promoted": "0.000 HBD",
+  "reblogged_by": [],
+  "replies": [],
+  "reward_weight": 10000,
+  "root_author": "gtg",
+  "root_permlink": "witness-gtg",
+  "root_title": "Witness \"gtg\"",
+  "title": "Witness \"gtg\"",
+  "total_payout_value": "703.088 HBD",
+  "total_pending_payout_value": "0.000 HBD",
+  "total_vote_weight": 0,
+  "url": "/witness-category/@gtg/witness-gtg",
+  "vote_rshares": 0
+}

@@ -16,13 +16,14 @@ comment_operation( `test-reblog-04`, `parrot-04`)
 comment_operation( `test-reblog-05`, `parrot-05`)
 comment_operation( `test-reblog-06`, `parrot-06`)
 ***block 4998002***
+comment_operation( `test-safari`, `reblogged-and-recreated`)
+comment_operation( `test-safari`, `reblogged-and-edited`)
 custom_json_operation("{\"account\":\"test-reblog-01\",\"author\":\"test-reblog-02\",\"permlink\":\"parrot-02\"}")
 custom_json_operation("{\"account\":\"test-reblog-01\",\"author\":\"test-reblog-03\",\"permlink\":\"parrot-03\"}")
 custom_json_operation("{\"account\":\"test-reblog-01\",\"author\":\"test-reblog-04\",\"permlink\":\"parrot-04\"}")
 custom_json_operation("{\"delete\":\"delete\",\"account\":\"test-reblog-01\",\"author\":\"test-reblog-04\",\"permlink\":\"parrot-04\"}")
 custom_json_operation("{\"delete\":\"delete\",\"account\":\"test-reblog-01\",\"author\":\"test-reblog-03\",\"permlink\":\"parrot-03\"}")
 custom_json_operation("{\"delete\":\"delete\",\"account\":\"test-reblog-01\",\"author\":\"test-reblog-02\",\"permlink\":\"parrot-02\"}")
-
 ***block 4998003***
 custom_json_operation("{\"account\":\"test-reblog-02\",\"author\":\"test-reblog-01\",\"permlink\":\"parrot-01\"}")
 custom_json_operation("{\"account\":\"test-reblog-02\",\"author\":\"test-reblog-02\",\"permlink\":\"parrot-02\"}")
@@ -38,6 +39,11 @@ custom_json_operation("{\"account\":\"test-reblog-06\",\"author\":\"test-reblog-
 custom_json_operation("{\"delete\":\"delete\",\"account\":\"test-reblog-04\",\"author\":\"test-reblog-04\",\"permlink\":\"parrot-04\"}")
 custom_json_operation("{\"delete\":\"delete\",\"account\":\"test-reblog-06\",\"author\":\"test-reblog-06\",\"permlink\":\"parrot-06\"}")
 ***block 4998005***
+custom_json_operation("[\"reblog\",{\"account\":\"agartha\",\"author\":\"test-safari\",\"permlink\":\"reblogged-and-recreated\"}]")
+custom_json_operation("[\"reblog\",{\"account\":\"agartha\",\"author\":\"test-safari\",\"permlink\":\"reblogged-and-edited\"}]")
+delete_comment_operation(`test-safari`, `reblogged-and-recreated`)
+comment_operation( `hive-117600`, `test-safari`, `reblogged-and-recreated`)
+comment_operation( `hive-117600`, `test-safari`, `reblogged-and-edited`)
 custom_json_operation("{\"delete\":\"delete\",\"account\":\"test-reblog-05\",\"author\":\"test-reblog-05\",\"permlink\":\"parrot-05\"}")
 custom_json_operation("{\"delete\":\"delete\",\"account\":\"test-reblog-06\",\"author\":\"test-reblog-05\",\"permlink\":\"parrot-05\"}")
 ***block 4998006***

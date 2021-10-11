@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "`tag` cannot be blank",
+  "message": "Invalid parameters"
+}

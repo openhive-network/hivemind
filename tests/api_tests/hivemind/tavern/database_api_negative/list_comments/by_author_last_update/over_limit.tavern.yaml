@@ -1,0 +1,33 @@
+---
+test_name: Hivemind
+
+marks:
+  - patterntest
+  - negative
+
+includes:
+  - !include ../../../common.yaml
+
+stages:
+  - name: test
+    request:
+      url: "{service.proto:s}://{service.server:s}:{service.port}/"
+      method: POST
+      headers:
+        content-type: application/json
+      json:
+        jsonrpc: "2.0"
+        id: 1
+        method: "database_api.list_comments"
+        params:
+          {
+            "start": ["gtg", "2016-08-28 17:15:12", "", ""],
+            "limit": 1001,
+            "order": "by_author_last_update",
+          }
+    response:
+      status_code: 200
+      verify_response_with:
+        function: validate_response:compare_response_with_pattern
+        extra_kwargs:
+          error_response: true

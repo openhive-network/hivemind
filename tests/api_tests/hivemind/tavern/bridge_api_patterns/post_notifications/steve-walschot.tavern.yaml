@@ -1,0 +1,27 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest # test to check paging (first 100 results)
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.post_notifications"
+          params: {"author":"steve-walschot",
+                   "permlink": "steeming-around-the-clock-bye-bye-regular-job"
+                   }
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern

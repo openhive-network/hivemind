@@ -1,0 +1,51 @@
+{
+  "code": -32000,
+  "data": {
+    "code": 4,
+    "message": "Parse Error",
+    "name": "parse_error_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "string.cpp",
+          "hostname": "",
+          "level": "error",
+          "line": 113,
+          "method": "to_uint64",
+          "timestamp": "2020-10-05T14:38:50"
+        },
+        "data": {},
+        "format": "Couldn't parse uint64_t"
+      },
+      {
+        "context": {
+          "file": "string.cpp",
+          "hostname": "",
+          "level": "warn",
+          "line": 116,
+          "method": "to_uint64",
+          "timestamp": "2020-10-05T14:38:50"
+        },
+        "data": {
+          "i": "k"
+        },
+        "format": ""
+      },
+      {
+        "context": {
+          "file": "variant.cpp",
+          "hostname": "",
+          "level": "warn",
+          "line": 405,
+          "method": "as_uint64",
+          "timestamp": "2020-10-05T14:38:50"
+        },
+        "data": {
+          "*this": "k"
+        },
+        "format": ""
+      }
+    ]
+  },
+  "message": "Parse Error:Couldn't parse uint64_t"
+}

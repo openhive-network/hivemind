@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "Unsupported order, valid orders: by_comment_voter, by_voter_comment",
+  "message": "Invalid parameters"
+}

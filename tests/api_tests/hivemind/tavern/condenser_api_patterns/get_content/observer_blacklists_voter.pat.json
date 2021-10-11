@@ -1,0 +1,399 @@
+{
+  "abs_rshares": 0,
+  "active_votes": [
+    {
+      "percent": 10000,
+      "reputation": 13270505121655,
+      "rshares": 46820000000000,
+      "time": "2016-04-22T19:18:18",
+      "voter": "ned",
+      "weight": 46820000000000
+    },
+    {
+      "percent": 10000,
+      "reputation": 8779714777561,
+      "rshares": 1308197761714,
+      "time": "2016-05-02T18:04:30",
+      "voter": "riverhead",
+      "weight": 966542615
+    },
+    {
+      "percent": 10000,
+      "reputation": 1214229078,
+      "rshares": 3078392981,
+      "time": "2016-08-10T10:54:00",
+      "voter": "boy",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 4712949449,
+      "rshares": 3735837384,
+      "time": "2016-08-10T10:53:51",
+      "voter": "bue-witness",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 1789951494550,
+      "rshares": 714662785,
+      "time": "2016-08-10T10:54:03",
+      "voter": "bunny",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 103443134841,
+      "rshares": 51463735376,
+      "time": "2016-08-10T10:53:54",
+      "voter": "bue",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 0,
+      "rshares": 1650399621,
+      "time": "2016-08-10T10:53:57",
+      "voter": "mini",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 0,
+      "rshares": 208726843,
+      "time": "2016-08-10T10:54:06",
+      "voter": "moon",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 9028537022578,
+      "rshares": 2196489718740,
+      "time": "2016-08-10T10:53:03",
+      "voter": "recursive",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 101807714979611,
+      "rshares": 27395661465,
+      "time": "2016-05-02T22:11:27",
+      "voter": "pfunk",
+      "weight": 8866
+    },
+    {
+      "percent": 10000,
+      "reputation": 0,
+      "rshares": 612429623,
+      "time": "2016-08-10T10:53:57",
+      "voter": "healthcare",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 443644853163,
+      "rshares": 1939981095,
+      "time": "2016-05-05T01:01:18",
+      "voter": "steempowered",
+      "weight": 3
+    },
+    {
+      "percent": 10000,
+      "reputation": 0,
+      "rshares": 881389709,
+      "time": "2016-08-10T10:54:03",
+      "voter": "daniel.pan",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 0,
+      "rshares": 1238375167,
+      "time": "2016-05-05T00:40:51",
+      "voter": "top",
+      "weight": 0
+    },
+    {
+      "percent": 10000,
+      "reputation": 0,
+      "rshares": 287092036,
+      "time": "2016-08-10T10:54:09",
+      "voter": "helen.tan",
+      "weight": 0
+    },
+    {
+      "percent": 3301,
+      "reputation": 2902053059801,
+      "rshares": 2169898948,
+      "time": "2016-08-10T10:53:39",
+      "voter": "murh",
+      "weight": 0
+    },
+    {
+      "percent": -10000,
+      "reputation": 1945135717715,
+      "rshares": -965663832,
+      "time": "2016-07-11T12:18:42",
+      "voter": "foma17",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": 213668684615,
+      "rshares": 226085432,
+      "time": "2016-08-10T10:53:48",
+      "voter": "soupernerd",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": 150852667243,
+      "rshares": 17025145,
+      "time": "2016-08-10T10:53:57",
+      "voter": "emilyelizabeth",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -4779249072914,
+      "rshares": 166415113,
+      "time": "2016-08-10T10:53:39",
+      "voter": "weenis",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -822344322564,
+      "rshares": 5179895,
+      "time": "2016-08-10T10:53:42",
+      "voter": "steemitlove",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -705106123629,
+      "rshares": 5157062,
+      "time": "2016-08-10T10:54:12",
+      "voter": "steemlove",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -3006894935427,
+      "rshares": 11386634,
+      "time": "2016-08-10T10:53:51",
+      "voter": "steemit.tips",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -1016377321976,
+      "rshares": 4974375,
+      "time": "2016-08-10T10:54:06",
+      "voter": "curls4life",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -395587580242,
+      "rshares": 5070951,
+      "time": "2016-08-10T10:53:39",
+      "voter": "alniskobs",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -436695352849,
+      "rshares": 4974431,
+      "time": "2016-08-10T10:53:45",
+      "voter": "amboyst",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -269345517998,
+      "rshares": 6280720,
+      "time": "2016-08-10T10:53:45",
+      "voter": "cheremet",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -816175808993,
+      "rshares": 5032451,
+      "time": "2016-08-10T10:54:06",
+      "voter": "anarchypory",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -545964216146,
+      "rshares": 6267501,
+      "time": "2016-08-10T10:53:42",
+      "voter": "angevel",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -511794737588,
+      "rshares": 6285864,
+      "time": "2016-08-10T10:54:12",
+      "voter": "backetri",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -632712185740,
+      "rshares": 7870617,
+      "time": "2016-08-10T10:53:57",
+      "voter": "chonesta",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -353287592738,
+      "rshares": 6407987,
+      "time": "2016-08-10T10:54:06",
+      "voter": "countrytalented",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -490879266173,
+      "rshares": 6210808,
+      "time": "2016-08-10T10:53:51",
+      "voter": "cozyone123",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -832613042101,
+      "rshares": 6288404,
+      "time": "2016-08-10T10:54:12",
+      "voter": "crumaner",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -592763794575,
+      "rshares": 6244511,
+      "time": "2016-08-10T10:54:12",
+      "voter": "daysaiyan",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -513060008757,
+      "rshares": 6244144,
+      "time": "2016-08-10T10:54:06",
+      "voter": "daysmega",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -491495881833,
+      "rshares": 6295147,
+      "time": "2016-08-10T10:53:57",
+      "voter": "daysmega1421",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -783147569192,
+      "rshares": 6210403,
+      "time": "2016-08-10T10:53:57",
+      "voter": "dotersvilic",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -922435559398,
+      "rshares": 6170366,
+      "time": "2016-08-10T10:54:06",
+      "voter": "eternalabove",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -412716207122,
+      "rshares": 6167534,
+      "time": "2016-08-10T10:53:36",
+      "voter": "sugarfromhell",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -589856272626,
+      "rshares": 6378767,
+      "time": "2016-08-10T10:53:51",
+      "voter": "gaspot",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -657792246228,
+      "rshares": 6151511,
+      "time": "2016-08-10T10:53:39",
+      "voter": "etccrap",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -858755906570,
+      "rshares": 8206304,
+      "time": "2016-08-10T10:53:42",
+      "voter": "abctrade",
+      "weight": 0
+    },
+    {
+      "percent": 1000,
+      "reputation": -711516507127,
+      "rshares": 6256684,
+      "time": "2016-08-10T10:53:39",
+      "voter": "softpunk",
+      "weight": 0
+    }
+  ],
+  "allow_curation_rewards": true,
+  "allow_replies": true,
+  "allow_votes": true,
+  "author": "recursive",
+  "author_reputation": 9028537022578,
+  "author_rewards": 457325,
+  "beneficiaries": [],
+  "body": "The whole problem with the world is that fools and fanatics are always so certain of themselves, and wiser people so full of doubts.",
+  "body_length": 132,
+  "cashout_time": "1969-12-31T23:59:59",
+  "category": "quotes",
+  "children": 3,
+  "children_abs_rshares": 0,
+  "created": "2016-04-22T16:38:18",
+  "curator_payout_value": "100.326 HBD",
+  "depth": 0,
+  "id": 580,
+  "json_metadata": "{}",
+  "last_payout": "2016-08-11T12:18:42",
+  "last_update": "2016-04-22T16:38:18",
+  "max_accepted_payout": "1000000.000 HBD",
+  "max_cashout_time": "1969-12-31T23:59:59",
+  "net_rshares": 0,
+  "net_votes": 42,
+  "parent_author": "",
+  "parent_permlink": "quotes",
+  "pending_payout_value": "0.000 HBD",
+  "percent_hbd": 10000,
+  "permlink": "bertrand-russell-on-the-paradox-of-fools-and-wise-men",
+  "promoted": "0.000 HBD",
+  "reblogged_by": [],
+  "replies": [],
+  "reward_weight": 10000,
+  "root_author": "recursive",
+  "root_permlink": "bertrand-russell-on-the-paradox-of-fools-and-wise-men",
+  "root_title": "Bertrand Russell on the paradox of fools and wise men",
+  "title": "Bertrand Russell on the paradox of fools and wise men",
+  "total_payout_value": "102.976 HBD",
+  "total_pending_payout_value": "0.000 HBD",
+  "total_vote_weight": 0,
+  "url": "/quotes/@recursive/bertrand-russell-on-the-paradox-of-fools-and-wise-men",
+  "vote_rshares": 0
+}

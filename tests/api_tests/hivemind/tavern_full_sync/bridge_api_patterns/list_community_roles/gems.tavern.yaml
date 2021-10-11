@@ -1,0 +1,28 @@
+---
+  test_name: Hivemind bridge_api.list_community_roles
+
+  marks:
+    - fullsynctest
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: list_community_roles
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.list_community_roles"
+          params: {"community":"hive-148441"}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:has_valid_response
+          extra_kwargs:
+            method: "gems"
+            directory: "bridge_api_patterns/list_community_roles"

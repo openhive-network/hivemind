@@ -1,0 +1,39 @@
+---
+  test_name: Hivemind bridge_api.list_community_roles
+#SELECT count(r.*), c.name FROM hive_roles r
+#JOIN hive_communities c ON r.community_id = c.id
+#WHERE r.role_id != 0
+#GROUP BY r.community_id, c.name
+#ORDER BY count(r.*) DESC LIMIT 10;
+
+  marks:
+    - fullsynctest
+    - parametrize:
+        key: community
+        vals:
+          - hive-136001
+          - hive-187635
+          - hive-142159
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: list_community_roles
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.list_community_roles"
+          params: {"community":"{community}", "limit":1000}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:has_valid_response
+          extra_kwargs:
+            method: "most_roles_{community}"
+            directory: "bridge_api_patterns/list_community_roles"

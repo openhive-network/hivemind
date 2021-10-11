@@ -184,3 +184,33 @@ BEGIN
 END
 $function$
 ;
+
+DROP FUNCTION IF EXISTS public.find_subscription_id CASCADE
+;
+CREATE OR REPLACE FUNCTION public.find_subscription_id(
+    in _account hive_accounts.name%TYPE,
+    in _community_name hive_communities.name%TYPE,
+    in _check BOOLEAN
+)
+RETURNS INTEGER
+LANGUAGE 'plpgsql' STABLE
+AS
+$function$
+DECLARE
+  __subscription_id INT = 0;
+BEGIN
+  IF (_account <> '') THEN
+    SELECT INTO __subscription_id COALESCE( (
+    SELECT hs.id FROM hive_subscriptions hs 
+    JOIN hive_accounts ha ON ha.id = hs.account_id
+    JOIN hive_communities hc ON hc.id = hs.community_id
+    WHERE ha.name = _account AND hc.name = _community_name
+    ), 0 );
+    IF _check AND __subscription_id = 0 THEN
+      RAISE EXCEPTION '% subscription on % does not exist', _account, _community_name USING ERRCODE = 'CEHM9';
+    END IF;
+  END IF;
+  RETURN __subscription_id;
+END
+$function$
+;

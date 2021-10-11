@@ -1,0 +1,26 @@
+{
+  "code": -32000,
+  "data": {
+    "code": 7,
+    "message": "Bad Cast",
+    "name": "bad_cast_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "exception.cpp",
+          "hostname": "",
+          "level": "error",
+          "line": 226,
+          "method": "throw_bad_enum_cast",
+          "timestamp": "2020-09-10T17:35:29"
+        },
+        "data": {
+          "enum": "steem::plugins::database_api::sort_order_type",
+          "key": "by_author"
+        },
+        "format": "invalid name '${key}' in enum '${enum}'"
+      }
+    ]
+  },
+  "message": "Bad Cast:invalid name 'by_author' in enum 'steem::plugins::database_api::sort_order_type'"
+}

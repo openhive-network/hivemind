@@ -103,7 +103,7 @@ class Notify(DbAdapterHolder):
         def execute_query( sql, values ):
             values_str = ','.join(values)
             actual_query = sql.format(values_str)
-            cls.db.query(actual_query)
+            cls.db.query_prepared(actual_query)
             values.clear()
 
         n = 0

@@ -6,7 +6,8 @@ set -o pipefail
 echo "Usage ./db_upgrade.sh <user-name> <db-name>"
 rm -f ./upgrade.log
 
-for sql in postgres_handle_view_changes.sql \
+for sql in upgrade/assert_public_schema.sql \
+          postgres_handle_view_changes.sql \
           upgrade/upgrade_table_schema.sql \
           utility_functions.sql \
           hive_accounts_view.sql \
@@ -72,6 +73,8 @@ for sql in postgres_handle_view_changes.sql \
           update_follow_count.sql \
           delete_reblog_feed_cache.sql \
           follows.sql \
+          is_superuser.sql \
+          update_hive_blocks_consistency_flag.sql \
           update_table_statistics.sql # Must be last
 
 do
