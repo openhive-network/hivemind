@@ -574,6 +574,7 @@ class CommunityOp:
             assert actor_role > new_role, 'cannot promote to or above own rank'
             if self.actor != self.account:
                 account_role = Community.get_user_role(community_id, self.account_id)
+                assert account_role != Role.owner, 'cant modify owner role'
                 assert account_role < actor_role, 'cant modify higher-role user'
                 assert account_role != new_role, 'role would not change'
         elif action == 'updateProps':
