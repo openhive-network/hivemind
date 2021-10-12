@@ -659,6 +659,17 @@
             }
           },
           {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-135485"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-135485\",\"account\":\"hive-135485\",\"role\":\"admin\"}]"
+            }
+          },
+          {
             "type": "comment_operation",
             "value": {
               "parent_author": "",
