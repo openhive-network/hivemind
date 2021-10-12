@@ -17,7 +17,7 @@ BEGIN
       __post_id = find_comment_id( _author, _permlink, True );
   END IF;
   RETURN QUERY
-  WITH replies AS --bridge_get_account_posts_by_replies
+  WITH replies AS MATERIALIZED --bridge_get_account_posts_by_replies
   (
     SELECT hpr.id
     FROM live_posts_comments_view hpr

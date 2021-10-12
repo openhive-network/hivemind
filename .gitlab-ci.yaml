@@ -23,6 +23,9 @@ stages:
   # Setup runner environment (to connect to correct postgres server, mainly).
   - TMP_VAR=$(cat hive-sync-runner-id.txt 2>/dev/null || true); export HIVE_SYNC_RUNNER_ID=${TMP_VAR:-0}
   - eval $(cat "$RUNNER_CONF" | ./scripts/ci/setup_env.py --current-runner-id=${CI_RUNNER_ID} --hive-sync-runner-id=${HIVE_SYNC_RUNNER_ID})
+  - export RUNNER_POSTGRES_HOST=172.17.0.1
+  - export RUNNER_POSTGRES_PORT=25432
+  - echo "Postgres host $RUNNER_POSTGRES_HOST port $RUNNER_POSTGRES_PORT"
 
 .set-variables: &set-variables
   # - export # List all variables and its values set by Gitlab CI.
