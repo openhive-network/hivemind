@@ -20,6 +20,7 @@ comment_operation( `hive-117600`, `test-safari`, `secrets4`)
 comment_operation( `hive-117600`, `test-safari`, `secrets5`)
 comment_operation( `hive-117600`, `test-safari`, `secrets6`)
 custom_json_operation("[\"setRole\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"role\":\"admin\"}]")
+custom_json_operation("[\"setRole\",{\"community\":\"hive-135485\",\"account\":\"hive-135485\",\"role\":\"admin\"}]")
 comment_operation( `test-safari`, `muted-and-recreated`)
 comment_operation( `test-safari`, `muted-and-edited`)
 ***block 4998002***
