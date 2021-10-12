@@ -16,8 +16,7 @@ stages:
   - easy_install --version
   - wheel version
   - pipenv --version
-  - poetry --version
-  - time pip install --editable .[dev]
+  - pip install --editable .[dev]
 
 .setup-runner-env: &setup-runner-env
   # Setup runner environment (to connect to correct postgres server, mainly).
