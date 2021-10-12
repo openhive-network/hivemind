@@ -81,7 +81,6 @@ stages:
     default: false
     variables: false
   variables:
-    GIT_DEPTH: 10
     GIT_STRATEGY: clone
     GIT_SUBMODULE_STRATEGY: recursive
     PIPENV_VENV_IN_PROJECT: 1
