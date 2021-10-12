@@ -81,7 +81,7 @@ stages:
     variables: false
   variables:
     GIT_DEPTH: 10
-    GIT_STRATEGY: fetch
+    GIT_STRATEGY: clone
     GIT_SUBMODULE_STRATEGY: recursive
     PIPENV_VENV_IN_PROJECT: 1
     PIPENV_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pipenv"
