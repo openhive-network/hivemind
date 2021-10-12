@@ -36,7 +36,7 @@ stages:
 
 .fetch-git-tags: &fetch-git-tags
   #- git fetch --tags # Looks to be unnecessary.
-  - git tag -f ci_implicit_tag # Needed to build python package
+  - echo git tag -f ci_implicit_tag # Needed to build python package
 
 .start-timer: &start-timer
   - ./scripts/ci/timer.sh start
