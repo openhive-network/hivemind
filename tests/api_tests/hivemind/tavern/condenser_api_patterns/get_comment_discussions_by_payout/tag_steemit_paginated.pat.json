@@ -1,0 +1,396 @@
+[
+  {
+    "active_votes": [
+      {
+        "percent": "3200",
+        "reputation": 145171381514207,
+        "rshares": 9305098550743,
+        "voter": "dantheman"
+      },
+      {
+        "percent": "10000",
+        "reputation": 36749432321730,
+        "rshares": 857186086307,
+        "voter": "liondani"
+      },
+      {
+        "percent": "0",
+        "reputation": 7404914959204,
+        "rshares": 474106344,
+        "voter": "marketingmonk"
+      },
+      {
+        "percent": "10000",
+        "reputation": 4477492280957,
+        "rshares": 22703855840,
+        "voter": "steampunkpowered"
+      },
+      {
+        "percent": "10000",
+        "reputation": 861106979806,
+        "rshares": 15488518839,
+        "voter": "sandwich"
+      },
+      {
+        "percent": "10000",
+        "reputation": 32983096229,
+        "rshares": 59541191039,
+        "voter": "tosch"
+      },
+      {
+        "percent": "10000",
+        "reputation": 14968641922913,
+        "rshares": 51465833026,
+        "voter": "oaldamster"
+      },
+      {
+        "percent": "10000",
+        "reputation": 10395665548525,
+        "rshares": 198120963204,
+        "voter": "billbutler"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1444446898291,
+        "rshares": 10368505517,
+        "voter": "johnerfx"
+      },
+      {
+        "percent": "10000",
+        "reputation": 37159422493,
+        "rshares": 731063947,
+        "voter": "johnerminer"
+      },
+      {
+        "percent": "10000",
+        "reputation": 908929098218,
+        "rshares": 1442720449,
+        "voter": "dtsddace"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2222945795019,
+        "rshares": 131349861599,
+        "voter": "chhayll"
+      },
+      {
+        "percent": "10000",
+        "reputation": 570848703227,
+        "rshares": 12673818586,
+        "voter": "auxon"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3740475854096,
+        "rshares": 1425146090,
+        "voter": "egjoshslim"
+      },
+      {
+        "percent": "10000",
+        "reputation": 549388274509,
+        "rshares": 2558385878,
+        "voter": "supermeatboy"
+      },
+      {
+        "percent": "10000",
+        "reputation": 41016280414,
+        "rshares": 224702176,
+        "voter": "lazelchaman"
+      },
+      {
+        "percent": "10000",
+        "reputation": 81637934901,
+        "rshares": 111944290,
+        "voter": "jdenismusic"
+      },
+      {
+        "percent": "10000",
+        "reputation": 333988882,
+        "rshares": 116253105,
+        "voter": "darkstar1o9"
+      },
+      {
+        "percent": "10000",
+        "reputation": 164191748705,
+        "rshares": 453895192,
+        "voter": "feedthemachine"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2409896485,
+        "rshares": 3908250284,
+        "voter": "theb0red1"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3135058867066,
+        "rshares": 294948150,
+        "voter": "stillsafe"
+      },
+      {
+        "percent": "10000",
+        "reputation": 263257839975,
+        "rshares": 60982926,
+        "voter": "glezeddy"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3575830946674,
+        "rshares": 8136053037,
+        "voter": "ryan-singer"
+      },
+      {
+        "percent": "10000",
+        "reputation": 378195340228,
+        "rshares": 55119698,
+        "voter": "jdp"
+      },
+      {
+        "percent": "10000",
+        "reputation": 860330,
+        "rshares": 56162395,
+        "voter": "sslstinkypete224"
+      },
+      {
+        "percent": "10000",
+        "reputation": 580482162746,
+        "rshares": 1126663983,
+        "voter": "wulfmeister"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1666032,
+        "rshares": 53615432,
+        "voter": "abdulatif"
+      },
+      {
+        "percent": "10000",
+        "reputation": 511520729,
+        "rshares": 50968607,
+        "voter": "landofcrypto"
+      },
+      {
+        "percent": "10000",
+        "reputation": 75900167,
+        "rshares": 54027130,
+        "voter": "kluse"
+      }
+    ],
+    "author": "shapeshiftio",
+    "author_reputation": 3224894234874,
+    "beneficiaries": [],
+    "body": "We are working on it :) We will continue to update the community on Steemit and the following outlets: \n\nNewsletter Sign-up: http://eepurl.com/bdbzO1\nFacebook: https://www.facebook.com/shapeshiftexchange\nTwitter: https://twitter.com/ShapeShift_io\nPublic Slack: https://shapeshiftcommunity.herokuapp.com/",
+    "body_length": 303,
+    "cashout_time": "2016-08-24T21:01:36",
+    "category": "steemit",
+    "children": 5,
+    "created": "2016-08-17T21:01:36",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "json_metadata": "{\"tags\":[\"steemit\"],\"links\":[\"http://eepurl.com/bdbzO1\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-08-17T21:01:36",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 10685332193813,
+    "parent_author": "someguy123",
+    "parent_permlink": "re-shapeshiftio-official-announcement-shapeshift-has-added-steem-to-the-exchange-20160817t204622283z",
+    "pending_payout_value": "20.584 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-someguy123-re-shapeshiftio-official-announcement-shapeshift-has-added-steem-to-the-exchange-20160817t210137104z",
+    "post_id": 859475,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "OFFICIAL ANNOUNCEMENT: ShapeShift has added Steem to the Exchange",
+    "title": "",
+    "total_payout_value": "0.000 HBD",
+    "url": "/steemit/@shapeshiftio/official-announcement-shapeshift-has-added-steem-to-the-exchange#@shapeshiftio/re-someguy123-re-shapeshiftio-official-announcement-shapeshift-has-added-steem-to-the-exchange-20160817t210137104z"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "2000",
+        "reputation": 32455846463901,
+        "rshares": 6369849234790,
+        "voter": "smooth"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1214229078,
+        "rshares": 3101186370,
+        "voter": "boy"
+      },
+      {
+        "percent": "10000",
+        "reputation": 4712949449,
+        "rshares": 3765012430,
+        "voter": "bue-witness"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1789951494550,
+        "rshares": 690608231,
+        "voter": "bunny"
+      },
+      {
+        "percent": "10000",
+        "reputation": 103443134841,
+        "rshares": 54337627462,
+        "voter": "bue"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 1661905030,
+        "voter": "mini"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 213715284,
+        "voter": "moon"
+      },
+      {
+        "percent": "10000",
+        "reputation": 9028537022578,
+        "rshares": 2651243328828,
+        "voter": "recursive"
+      },
+      {
+        "percent": "2000",
+        "reputation": 83941319998,
+        "rshares": 1150947559725,
+        "voter": "smooth.witness"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 623017822,
+        "voter": "healthcare"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 967695714,
+        "voter": "daniel.pan"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 288232627,
+        "voter": "helen.tan"
+      },
+      {
+        "percent": "10000",
+        "reputation": 15755437221598,
+        "rshares": 16311176121,
+        "voter": "acidyo"
+      },
+      {
+        "percent": "10000",
+        "reputation": 34935156153627,
+        "rshares": 254551668124,
+        "voter": "churdtzu"
+      },
+      {
+        "percent": "10000",
+        "reputation": 20763505296686,
+        "rshares": 233230107272,
+        "voter": "wingz"
+      },
+      {
+        "percent": "4100",
+        "reputation": 8397302485673,
+        "rshares": 86786469044,
+        "voter": "will-zewe"
+      },
+      {
+        "percent": "10000",
+        "reputation": 77590508815145,
+        "rshares": 323509837196,
+        "voter": "kaylinart"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1960155455032,
+        "rshares": 3966354593,
+        "voter": "usefree"
+      },
+      {
+        "percent": "2000",
+        "reputation": 5463774640621,
+        "rshares": 4299908739,
+        "voter": "akareyon"
+      },
+      {
+        "percent": "10000",
+        "reputation": 10077167197115,
+        "rshares": 37017484438,
+        "voter": "biophil"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 150579939,
+        "voter": "apptrade"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2344911104009,
+        "rshares": 10368438493,
+        "voter": "ekitcho"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1896009750059,
+        "rshares": 72946572,
+        "voter": "whatsup"
+      },
+      {
+        "percent": "10000",
+        "reputation": 945836468614,
+        "rshares": 945789959,
+        "voter": "stickman"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1145958608976,
+        "rshares": 119381980,
+        "voter": "everittmickey"
+      },
+      {
+        "percent": "10000",
+        "reputation": 780913278306,
+        "rshares": 202921940,
+        "voter": "stackcats"
+      }
+    ],
+    "author": "recursive",
+    "author_reputation": 9028537022578,
+    "beneficiaries": [],
+    "body": "I think the question isn't whether this was right or wrong, this would be creating a false dichotomy. There are usually as many views of right or wrong as there are people judging a specific case.  Beside OP is arguably FUD so it's not like reducing its visibility was entirely undeserved.\n\nThe real point was that what happened here was extremely manipulative, in the same kind of way we usually reproach to mainstream media and the private interests and powerful bureaucrats that control them. \n\nThe last few years in the crypto world have shown that the exact same crap that happens in the real world economy has happened in crypto markets: pumps and dumps, market manipulation, insider trading, money laundering, cartels, scammy IPOs, large scale ponzi schemes, money supply debasing, attempt at co-opting power by self-appointed influence groups, herding, mass hysteria, panick, fear and greed all around...  Crypto is a fascinating sandbox that helps understanding what's going on in the real economy, how greedy and ignorant economic actors are and how truely clueless economists and central banks really are. \n\nWith the advent of crypto based content publishing and social media platforms like Steem, we are now going to be able to observe all the panel of tactics used by government agencies, large corporates and mainstream media to attempt manipulate the public opinion and their effect. We will also have the opportunity to experiment with counter-tactics like trying to make things backfire for wannabe manipulators.\n\nIt's from that perspective that I find what Ned did here absolutely fascinating. This is the kind of stuff you find in Machiavelli's \"The Prince\" and  Robert Greene's \"48 Laws of Power\". And I expect that we will see more and more of that coming from every directions. This is going to be very interesting, and provide a lot of insight about what's happening in the world at large.",
+    "body_length": 1912,
+    "cashout_time": "2016-09-09T10:35:15",
+    "category": "steemit",
+    "children": 5,
+    "created": "2016-09-02T10:35:15",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 4,
+    "json_metadata": "{\"tags\":[\"steemit\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-02T10:45:15",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 11209222188723,
+    "parent_author": "pfunk",
+    "parent_permlink": "re-recursive-re-snowflake-re-leavemealone-ned-and-dantheman-dump-50-500-steem-on-market-today-wtf-is-going-on-20160902t092831890z",
+    "pending_payout_value": "17.827 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-pfunk-re-recursive-re-snowflake-re-leavemealone-ned-and-dantheman-dump-50-500-steem-on-market-today-wtf-is-going-on-20160902t103626146z",
+    "post_id": 1096812,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "@ned & @dantheman DUMP 50,500 STEEM on Market today!  WTF is going on?!",
+    "title": "",
+    "total_payout_value": "0.000 HBD",
+    "url": "/steemit/@leavemealone/ned-and-dantheman-dump-50-500-steem-on-market-today-wtf-is-going-on#@recursive/re-pfunk-re-recursive-re-snowflake-re-leavemealone-ned-and-dantheman-dump-50-500-steem-on-market-today-wtf-is-going-on-20160902t103626146z"
+  }
+]

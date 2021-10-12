@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "limit = -7 outside valid range [1:25]",
+  "message": "Invalid parameters"
+}

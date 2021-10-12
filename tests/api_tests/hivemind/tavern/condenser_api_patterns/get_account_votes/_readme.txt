@@ -1,0 +1,1 @@
+get_account_votes is no longer supported, for details see https://hive.blog/steemit/@steemitdev/additional-public-api-change

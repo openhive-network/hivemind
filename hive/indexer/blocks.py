@@ -16,10 +16,10 @@ from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.reputations import Reputations
 from hive.indexer.reblog import Reblog
 from hive.indexer.notify import Notify
+from hive.indexer.block import Block, Transaction, Operation, VirtualOperationType, OperationType
 
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.stats import FlushStatusManager as FSM
-from hive.utils.post_active import update_active_starting_from_posts_on_block
 
 from hive.server.common.payout_stats import PayoutStats
 from hive.server.common.mentions import Mentions
@@ -41,6 +41,8 @@ class Blocks:
     blocks_to_flush = []
     _head_block_date = None
     _current_block_date = None
+    _last_safe_cashout_block = 0
+    _is_initial_sync = False
 
     _concurrent_flush = [
       ('Posts', Posts.flush, Posts),
@@ -101,19 +103,60 @@ class Blocks:
         return str(DB.query_one(sql) or '')
 
     @classmethod
-    def process_multi(cls, blocks, vops, is_initial_sync):
-        """Batch-process blocks; wrapped in a transaction."""
-        time_start = OPSM.start()
+    def set_end_of_sync_lib(cls, lib):
+        """Set last block that guarantees cashout before end of sync based on LIB"""
+        if lib < 10629455:
+            # posts created before HF17 could stay unpaid forever
+            cls._last_safe_cashout_block = 0
+        else:
+            # after HF17 all posts are paid after 7 days which means it is safe to assume that
+            # posts created at or before LIB - 7days will be paidout at the end of massive sync
+            cls._last_safe_cashout_block = lib - 7 * 24 * 1200
+        log.info( "End-of-sync LIB is set to %d, last block that guarantees cashout at end of sync is %d", lib, cls._last_safe_cashout_block )
 
-        DB.query("START TRANSACTION")
+    @classmethod
+    def flush_data_in_n_threads(cls):
+        completedThreads = 0
 
+        pool = ThreadPoolExecutor(max_workers = len(cls._concurrent_flush))
+        flush_futures = {pool.submit(time_collector, f): (description, c) for (description, f, c) in cls._concurrent_flush}
+        for future in concurrent.futures.as_completed(flush_futures):
+            (description, c) = flush_futures[future]
+            completedThreads = completedThreads + 1
+            try:
+                (n, elapsedTime) = future.result()
+                assert n is not None
+                assert not c.sync_tx_active()
+
+                FSM.flush_stat(description, elapsedTime, n)
+
+#                if n > 0:
+#                    log.info('%r flush generated %d records' % (description, n))
+            except Exception as exc:
+                log.error('%r generated an exception: %s' % (description, exc))
+                raise exc
+        pool.shutdown()
+
+        assert completedThreads == len(cls._concurrent_flush)
+
+    @classmethod
+    def flush_data_in_1_thread(cls):
+        for description, f, c in cls._concurrent_flush:
+          try:
+              f()
+          except Exception as exc:
+              log.error('%r generated an exception: %s' % (description, exc))
+              raise exc
+
+    @classmethod
+    def process_blocks(cls, blocks):
         last_num = 0
         first_block = -1
         try:
             for block in blocks:
                 if first_block == -1:
-                    first_block = int(block['block_id'][:8], base=16)
-                last_num = cls._process(block, vops)
+                    first_block = block.get_num()
+                last_num = cls._process(block)
         except Exception as e:
             log.error("exception encountered block %d", last_num + 1)
             raise e
@@ -130,99 +173,110 @@ class Blocks:
 
         log.info("#############################################################################")
         flush_time = register_time(flush_time, "Blocks", cls._flush_blocks())
+        return first_block, last_num
+
+    @classmethod
+    def process_multi(cls, blocks, is_initial_sync):
+        """Batch-process blocks; wrapped in a transaction."""
+
+        time_start = OPSM.start()
+
+        DB.query("START TRANSACTION")
+
+        first_block, last_num = cls.process_blocks(blocks)
+
+        if not is_initial_sync:
+            log.info("[PROCESS MULTI] Flushing data in 1 thread")
+            cls.flush_data_in_1_thread()
+            if first_block > -1:
+                log.info("[PROCESS MULTI] Tables updating in live synchronization")
+                cls.on_live_blocks_processed( first_block, last_num )
 
         DB.query("COMMIT")
 
-        completedThreads = 0
-
-        pool = ThreadPoolExecutor(max_workers = len(cls._concurrent_flush))
-        flush_futures = {pool.submit(time_collector, f): (description, c) for (description, f, c) in cls._concurrent_flush}
-        for future in concurrent.futures.as_completed(flush_futures):
-            (description, c) = flush_futures[future]
-            completedThreads = completedThreads + 1
-            try:
-                (n, elapsedTime) = future.result()
-                assert n is not None
-                assert not c.tx_active()
-
-                FSM.flush_stat(description, elapsedTime, n)
-
-#                if n > 0:
-#                    log.info('%r flush generated %d records' % (description, n))
-            except Exception as exc:
-                log.error('%r generated an exception: %s' % (description, exc))
-                raise exc
-        pool.shutdown()
-
-        assert completedThreads == len(cls._concurrent_flush)
-
-        if (not is_initial_sync) and (first_block > -1):
-            DB.query("START TRANSACTION")
-            cls.on_live_blocks_processed( first_block, last_num )
-            DB.query("COMMIT")
+        if is_initial_sync:
+          log.info("[PROCESS MULTI] Flushing data in N threads")
+          cls.flush_data_in_n_threads()
 
         log.info(f"[PROCESS MULTI] {len(blocks)} blocks in {OPSM.stop(time_start) :.4f}s")
 
     @staticmethod
-    def prepare_vops(comment_payout_ops, vopsList, date, block_num):
-        ineffective_deleted_ops = {}
-        registered_ops_stats = [ 'author_reward_operation', 'comment_reward_operation', 'effective_comment_vote_operation', 'comment_payout_update_operation', 'ineffective_delete_comment_operation']
+    def prepare_vops(comment_payout_ops, block, date, block_num, is_safe_cashout):
+        def get_empty_ops():
+            return { VirtualOperationType.AuthorReward:None
+                , VirtualOperationType.CommentReward:None
+                , VirtualOperationType.EffectiveCommentVote:None
+                , VirtualOperationType.CommentPayoutUpdate:None
+            }
 
-        for vop in vopsList:
+        ineffective_deleted_ops = {}
+
+        for vop in block.get_next_vop():
             start = OPSM.start()
             key = None
 
-            op_type = vop['type']
-            if op_type not in registered_ops_stats:
-                continue
-            op_value = vop['value']
+            op_type = vop.get_type()
+            assert op_type
+
+            op_value = vop.get_body()
             op_value['block_num'] = block_num
+
             key = "{}/{}".format(op_value['author'], op_value['permlink'])
 
-            if op_type == 'author_reward_operation':
+            if op_type == VirtualOperationType.AuthorReward:
                 if key not in comment_payout_ops:
-                    comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
+                    comment_payout_ops[key] = get_empty_ops()
 
                 comment_payout_ops[key][op_type] = ( op_value, date )
 
-            elif op_type == 'comment_reward_operation':
+            elif op_type == VirtualOperationType.CommentReward:
                 if key not in comment_payout_ops:
-                    comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
+                    comment_payout_ops[key] = get_empty_ops()
 
-                comment_payout_ops[key]['effective_comment_vote_operation'] = None
+                comment_payout_ops[key][VirtualOperationType.EffectiveCommentVote] = None
 
                 comment_payout_ops[key][op_type] = ( op_value, date )
 
-            elif op_type == 'effective_comment_vote_operation':
-                Votes.effective_comment_vote_op( op_value )
+            elif op_type == VirtualOperationType.EffectiveCommentVote:
                 Reputations.process_vote(block_num, op_value)
+                # ABW: votes cast before HF1 (block 905693, timestamp 2016-04-25T17:30:00) have to be upscaled
+                # by 1mln - there is no need to scale it anywhere else because first payouts happened only after
+                # HF7; such scaling fixes some discrepancies in vote data of posts created before HF1
+                # (we don't touch reputation - yet - because it affects a lot of test patterns)
+                if block_num < 905693:
+                    op_value["rshares"] *= 1000000
+                Votes.effective_comment_vote_op( op_value )
 
+                # skip effective votes for those posts that will become paidout before massive sync ends (both
+                # total_vote_weight and pending_payout carried by this vop become zero when post is paid) - note
+                # that the earliest we can use that is HF17 (block 10629455) which set cashout time to fixed 7 days
+                if not is_safe_cashout:
+                    if key not in comment_payout_ops:
+                        comment_payout_ops[key] = get_empty_ops()
+
+                    comment_payout_ops[key][op_type] = ( op_value, date )
+
+            elif op_type == VirtualOperationType.CommentPayoutUpdate:
                 if key not in comment_payout_ops:
-                    comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
+                    comment_payout_ops[key] = get_empty_ops()
 
                 comment_payout_ops[key][op_type] = ( op_value, date )
 
-            elif op_type == 'comment_payout_update_operation':
-                if key not in comment_payout_ops:
-                    comment_payout_ops[key] = { 'author_reward_operation':None, 'comment_reward_operation':None, 'effective_comment_vote_operation':None, 'comment_payout_update_operation':None }
-
-                comment_payout_ops[key][op_type] = ( op_value, date )
-
-            elif op_type == 'ineffective_delete_comment_operation':
+            elif op_type == VirtualOperationType.IneffectiveDeleteComment:
                 ineffective_deleted_ops[key] = {}
 
-            if op_type in registered_ops_stats:
-                OPSM.op_stats(op_type, OPSM.stop(start))
+            OPSM.op_stats(str(op_type), OPSM.stop(start))
 
         return ineffective_deleted_ops
 
 
     @classmethod
-    def _process(cls, block, virtual_operations):
+    def _process(cls, block):
         """Process a single block. Assumes a trx is open."""
         #pylint: disable=too-many-branches
+        assert issubclass(type(block), Block)
         num = cls._push(block)
-        cls._current_block_date = block['timestamp']
+        cls._current_block_date = block.get_date()
 
         # head block date shall point to last imported block (not yet current one) to conform hived behavior.
         # that's why operations processed by node are included in the block being currently produced, so its processing time is equal to last produced block.
@@ -232,17 +286,18 @@ class Blocks:
         if cls._head_block_date is None:
             cls._head_block_date = cls._current_block_date
 
-        ineffective_deleted_ops = None
-
-        if num in virtual_operations:
-            ineffective_deleted_ops = Blocks.prepare_vops(Posts.comment_payout_ops, virtual_operations[num], cls._current_block_date, num)
+        ineffective_deleted_ops = Blocks.prepare_vops(Posts.comment_payout_ops, block, cls._current_block_date, num, num <= cls._last_safe_cashout_block)
 
         json_ops = []
-        for tx_idx, tx in enumerate(block['transactions']):
-            for operation in tx['operations']:
+        for transaction in block.get_next_transaction():
+            assert issubclass(type(transaction), Transaction)
+            for operation in transaction.get_next_operation():
+                assert issubclass(type(operation), Operation)
+
                 start = OPSM.start()
-                op_type = operation['type']
-                op = operation['value']
+                op_type = operation.get_type()
+                assert op_type, "Only supported types are expected"
+                op = operation.get_body()
 
                 assert 'block_num' not in op
                 op['block_num'] = num
@@ -251,21 +306,21 @@ class Blocks:
                 op_details = None
                 potentially_new_account = False
                 # account ops
-                if op_type == 'pow_operation':
+                if op_type == OperationType.Pow:
                     account_name = op['worker_account']
                     potentially_new_account = True
-                elif op_type == 'pow2_operation':
+                elif op_type == OperationType.Pow2:
                     account_name = op['work']['value']['input']['worker_account']
                     potentially_new_account = True
-                elif op_type == 'account_create_operation':
+                elif op_type == OperationType.AccountCreate:
                     account_name = op['new_account_name']
                     op_details = op
                     potentially_new_account = True
-                elif op_type == 'account_create_with_delegation_operation':
+                elif op_type == OperationType.AccountCreateWithDelegation:
                     account_name = op['new_account_name']
                     op_details = op
                     potentially_new_account = True
-                elif op_type == 'create_claimed_account_operation':
+                elif op_type == OperationType.CreateClaimedAccount:
                     account_name = op['new_account_name']
                     op_details = op
                     potentially_new_account = True
@@ -274,35 +329,30 @@ class Blocks:
                     log.error("Failed to register account {} from operation: {}".format(account_name, op))
 
                 # account metadata updates
-                if op_type == 'account_update_operation':
+                if op_type == OperationType.AccountUpdate:
                     Accounts.update_op( op, False )
-                elif op_type == 'account_update2_operation':
+                elif op_type == OperationType.AccountUpdate2:
                     Accounts.update_op( op, True )
 
                 # post ops
-                elif op_type == 'comment_operation':
+                elif op_type == OperationType.Comment:
                     Posts.comment_op(op, cls._head_block_date)
-                elif op_type == 'delete_comment_operation':
+                elif op_type == OperationType.DeleteComment:
                     key = "{}/{}".format(op['author'], op['permlink'])
-                    if ( ineffective_deleted_ops is None ) or ( key not in ineffective_deleted_ops ):
+                    if key not in ineffective_deleted_ops:
                         Posts.delete_op(op, cls._head_block_date)
-                elif op_type == 'comment_options_operation':
+                elif op_type == OperationType.CommentOption:
                     Posts.comment_options_op(op)
-                elif op_type == 'vote_operation':
+                elif op_type == OperationType.Vote:
                     Votes.vote_op(op, cls._head_block_date)
 
                 # misc ops
-                elif op_type == 'transfer_operation':
-                    Payments.op_transfer(op, tx_idx, num, cls._head_block_date)
-                elif op_type == 'custom_json_operation':
-                    json_ops.append(op)
+                elif op_type == OperationType.Transfer:
+                    Payments.op_transfer(op, transaction.get_id(), num, cls._head_block_date)
+                elif op_type == OperationType.CustomJson: # follow/reblog/community ops
+                    CustomOp.process_op(op, num, cls._head_block_date)
 
-                if op_type != 'custom_json_operation':
-                    OPSM.op_stats(op_type, OPSM.stop(start))
-
-        # follow/reblog/community ops
-        if json_ops:
-            CustomOp.process_ops(json_ops, num, cls._head_block_date)
+                OPSM.op_stats(str(op_type), OPSM.stop(start))
 
         cls._head_block_date = cls._current_block_date
 
@@ -353,31 +403,31 @@ class Blocks:
     @classmethod
     def _push(cls, block):
         """Insert a row in `hive_blocks`."""
-        num = int(block['block_id'][:8], base=16)
-        txs = block['transactions']
         cls.blocks_to_flush.append({
-            'num': num,
-            'hash': block['block_id'],
-            'prev': block['previous'],
-            'txs': len(txs),
-            'ops': sum([len(tx['operations']) for tx in txs]),
-            'date': block['timestamp']})
-        return num
+            'num': block.get_num(),
+            'hash': block.get_hash(),
+            'prev': block.get_previous_block_hash(),
+            'txs': block.get_number_of_transactions(),
+            'ops': block.get_number_of_operations(),
+            'date': block.get_date()})
+        return block.get_num()
 
     @classmethod
     def _flush_blocks(cls):
         query = """
             INSERT INTO
-                hive_blocks (num, hash, prev, txs, ops, created_at)
+                hive_blocks (num, hash, prev, txs, ops, created_at, completed)
             VALUES
         """
         values = []
         for block in cls.blocks_to_flush:
-            values.append("({}, '{}', '{}', {}, {}, '{}')".format(block['num'], block['hash'],
+            values.append("({}, '{}', '{}', {}, {}, '{}', {})".format(block['num'], block['hash'],
                                                                   block['prev'], block['txs'],
-                                                                  block['ops'], block['date']))
+                                                                  block['ops'], block['date'],
+                                                                  False))
         query = query + ",".join(values)
-        DB.query(query)
+        DB.query_prepared(query)
+        values.clear()
         n = len(cls.blocks_to_flush)
         cls.blocks_to_flush.clear()
         return n
@@ -445,8 +495,6 @@ class Blocks:
         """Is invoked when processing of block range is done and received
            informations from hived are already stored in db
         """
-        update_active_starting_from_posts_on_block( first_block, last_block )
-
         is_hour_action = last_block % 1200 == 0
 
         queries = [
@@ -458,10 +506,22 @@ class Blocks:
             "SELECT update_hive_posts_mentions({}, {})".format(first_block, last_block),
             "SELECT update_notification_cache({}, {}, {})".format(first_block, last_block, is_hour_action),
             "SELECT update_follow_count({}, {})".format(first_block, last_block),
-            "SELECT update_account_reputations({}, {}, False)".format(first_block, last_block)
+            "SELECT update_account_reputations({}, {}, False)".format(first_block, last_block),
+            "SELECT update_hive_blocks_consistency_flag({}, {})".format(first_block, last_block)
         ]
 
         for query in queries:
             time_start = perf_counter()
             DB.query_no_return(query)
             log.info("%s executed in: %.4f s", query, perf_counter() - time_start)
+
+    @classmethod
+    def is_consistency(cls):
+        """Check if all tuples in `hive_blocks` are written correctly.
+            If any record has `completed` == false, it indicates that the database was closed incorrectly or a rollback failed.
+        """
+        not_completed_blocks = DB.query_one("SELECT count(*) FROM hive_blocks WHERE completed = false LIMIT 1")
+        log.info("[INIT] Number of not completed blocks: %s.", not_completed_blocks)
+        return not_completed_blocks == 0
+
+

@@ -1,0 +1,29 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest # observer is ignored both by old and new; it is not clear what observer could influence in this call
+    - negative
+    - xfail # it should fail after implementing observer filtering to get_trending_topics
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.get_trending_topics"
+          params: {"limit": 25, "observer":"invalid_account"}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern
+          extra_kwargs:
+            error_response: true

@@ -70,4 +70,3 @@ class MockVopsProvider(MockDataProvider):
                         ret[block_num] = {"ops" : mock_vops['ops']}
                     if 'ops_by_block' in mock_vops:
                         ret[block_num] = {"ops" : mock_vops['ops_by_block']}
-

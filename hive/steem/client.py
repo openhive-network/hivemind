@@ -9,9 +9,6 @@ from decimal import Decimal
 from hive.utils.stats import Stats
 from hive.utils.normalize import parse_amount, steem_amount, vests_amount
 from hive.steem.http_client import HttpClient
-from hive.steem.block.stream import BlockStream
-from hive.steem.blocks_provider import BlocksProvider
-from hive.steem.vops_provider import VopsProvider
 from hive.indexer.mock_block_provider import MockBlockProvider
 from hive.indexer.mock_vops_provider import MockVopsProvider
 
@@ -20,18 +17,19 @@ logger = logging.getLogger(__name__)
 class SteemClient:
     """Handles upstream calls to jussi/steemd, with batching and retrying."""
     # dangerous default value of url but it should be fine since we are not writting to it
-    def __init__(self, url={"default" : 'https://api.hive.blog'}, max_batch=50, max_workers=1):
+    def __init__(self, url={"default" : 'https://api.hive.blog'}, max_batch=50, max_workers=1, max_retries=-1):
         assert url, 'steem-API endpoints undefined'
         assert "default" in url, "Url should have default endpoint defined"
         assert max_batch > 0 and max_batch <= 5000
         assert max_workers > 0 and max_workers <= 64
+        assert max_retries >= -1
 
         self._max_batch = max_batch
         self._max_workers = max_workers
         self._client = dict()
         for endpoint, endpoint_url in url.items():
             logger.info("Endpoint %s will be routed to node %s" % (endpoint, endpoint_url))
-            self._client[endpoint] = HttpClient(nodes=[endpoint_url])
+            self._client[endpoint] = HttpClient(nodes=[endpoint_url], max_retries=max_retries)
 
     def get_accounts(self, acc):
         accounts = [v for v in acc if v != '']
@@ -81,44 +79,9 @@ class SteemClient:
                 logger.warning("Pure mock block: id {}, previous {}".format(mocked_block["block_id"], mocked_block["previous"]))
             return mocked_block
 
-    def get_blocks_provider( cls, lbound, ubound, breaker ):
-        """create and returns blocks provider
-            lbound - start block
-            ubound - end block
-            breaker - callable, returns false when processing must be stopped
-        """
-        new_blocks_provider = BlocksProvider(
-              cls._client["get_block"] if "get_block" in cls._client else cls._client["default"]
-            , cls._max_workers
-            , cls._max_batch
-            , lbound
-            , ubound
-            , breaker
-        )
-        return new_blocks_provider
-
-    def get_vops_provider( cls, conf, lbound, ubound, breaker ):
-        """create and returns blocks provider
-            conf - configuration
-            lbound - start block
-            ubound - end block
-            breaker - callable, returns false when processing must be stopped
-        """
-        new_vops_provider = VopsProvider(
-              conf
-            , cls
-            , cls._max_workers
-            , cls._max_batch
-            , lbound
-            , ubound
-            , breaker
-        )
-        return new_vops_provider
-
-
-    def stream_blocks(self, start_from, breaker, trail_blocks=0, max_gap=100, do_stale_block_check=True):
+    def stream_blocks(self, conf, start_from, breaker, exception_reporter, trail_blocks=0, max_gap=100, do_stale_block_check=True):
         """Stream blocks. Returns a generator."""
-        return BlockStream.stream(self, start_from, breaker, trail_blocks, max_gap, do_stale_block_check)
+        return BlockStream.stream(conself, start_from, breaker, exception_reporter, trail_blocks, max_gap, do_stale_block_check)
 
     def _gdgp(self):
         ret = self.__exec('get_dynamic_global_properties')

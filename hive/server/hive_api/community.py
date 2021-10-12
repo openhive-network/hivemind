@@ -2,7 +2,7 @@
 import logging
 
 from hive.server.hive_api.common import (get_community_id)
-from hive.server.common.helpers import (return_error_info, valid_community, valid_account, valid_limit)
+from hive.server.common.helpers import (return_error_info, valid_community, valid_account, valid_limit, json_date)
 
 # pylint: disable=too-many-lines
 
@@ -82,7 +82,7 @@ async def list_subscribers(context, community, last='', limit=100):
     db = context['db']
     sql = "SELECT * FROM bridge_list_subscribers( (:community)::VARCHAR, (:last)::VARCHAR, (:limit)::INT )"
     rows = await db.query_all(sql, community=community, last=last, limit=limit)
-    return [(r[0], r[1], r[2], r[3]) for r in rows]
+    return [(r[0], r[1], r[2], json_date(r[3])) for r in rows]
 
 @return_error_info
 async def list_communities(context, last='', limit=100, query=None, sort='rank', observer=None):

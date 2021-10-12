@@ -8,6 +8,7 @@ import sqlalchemy
 import os
 
 from hive.utils.stats import Stats
+from hive.db.autoexplain_controller import AutoExplainWrapper
 
 logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 
@@ -43,7 +44,7 @@ class Db:
         else:
           log.info("A database offers maximum connections: {}. Required {} connections.".format(cls.max_connections, cls.necessary_connections))
 
-    def __init__(self, url, name):
+    def __init__(self, url, name, enable_autoexplain = False):
         """Initialize an instance.
 
         No work is performed here. Some modues might initialize an
@@ -64,12 +65,17 @@ class Db:
         # core behavior of DBAPI (per PEP-0249) is that a transaction
         # is always in progress, this COMMIT is a workaround to get
         # back control (and used with autocommit=False query exec).
-        self._exec = self.get_connection(0).execute
-        self._exec(sqlalchemy.text("COMMIT"))
+        self._basic_connection = self.get_connection(0)
+        self._basic_connection.execute(sqlalchemy.text("COMMIT"))
+
+        self.__autoexplain = None;
+        if enable_autoexplain:
+            self.__autoexplain = AutoExplainWrapper( self )
 
     def clone(self, name):
-        cloned = Db(self._url, name)
+        cloned = Db(self._url, name, self.__autoexplain)
         cloned._engine = self._engine
+
         return cloned
 
     def close(self):
@@ -125,6 +131,12 @@ class Db:
         """Check if a transaction is in progress."""
         return self._trx_active
 
+    def explain(self):
+        if self.__autoexplain:
+            return self.__autoexplain;
+
+        return self;
+
     def query(self, sql, **kwargs):
         """Perform a (*non-`SELECT`*) write query."""
 
@@ -137,29 +149,32 @@ class Db:
 
         # this method is reserved for anything but SELECT
         assert self._is_write_query(sql), sql
-        return self._query(sql, **kwargs)
+        return self._query(sql, False, **kwargs)
+
+    def query_prepared(self, sql, **kwargs):
+        self._query(sql, True, **kwargs)
 
     def query_no_return(self, sql, **kwargs):
-        self._query(sql, **kwargs)
+        self._query(sql, False, **kwargs)
 
     def query_all(self, sql, **kwargs):
         """Perform a `SELECT n*m`"""
-        res = self._query(sql, **kwargs)
+        res = self._query(sql, False, **kwargs)
         return res.fetchall()
 
     def query_row(self, sql, **kwargs):
         """Perform a `SELECT 1*m`"""
-        res = self._query(sql, **kwargs)
+        res = self._query(sql, False, **kwargs)
         return first(res)
 
     def query_col(self, sql, **kwargs):
         """Perform a `SELECT n*1`"""
-        res = self._query(sql, **kwargs).fetchall()
+        res = self._query(sql, False, **kwargs).fetchall()
         return [r[0] for r in res]
 
     def query_one(self, sql, **kwargs):
         """Perform a `SELECT 1*1`"""
-        row = first(self._query(sql, **kwargs))
+        row = first(self._query(sql, False, **kwargs))
         return first(row) if row else None
 
     def engine_name(self):
@@ -217,16 +232,19 @@ class Db:
 
         return (sql, values)
 
-    def _sql_text(self, sql):
+    def _sql_text(self, sql, is_prepared):
 #        if sql in self._prep_sql:
 #            query = self._prep_sql[sql]
 #        else:
 #            query = sqlalchemy.text(sql).execution_options(autocommit=False)
 #            self._prep_sql[sql] = query
-        query = sqlalchemy.text(sql).execution_options(autocommit=False)
+        if is_prepared:
+          query = sql
+        else:
+          query = sqlalchemy.text(sql)
         return query
 
-    def _query(self, sql, **kwargs):
+    def _query(self, sql, is_prepared, **kwargs):
         """Send a query off to SQLAlchemy."""
         if sql == 'START TRANSACTION':
             assert not self._trx_active
@@ -237,10 +255,10 @@ class Db:
 
         try:
             start = perf()
-            query = self._sql_text(sql)
+            query = self._sql_text(sql, is_prepared)
             if 'log_query' in kwargs and kwargs['log_query']:
                 log.info("QUERY: {}".format(query))
-            result = self._exec(query, **kwargs)
+            result = self._basic_connection.execution_options(autocommit=False).execute(query, **kwargs)
             if 'log_result' in kwargs and kwargs['log_result']:
                 log.info("RESULT: {}".format(result))
             Stats.log_db(sql, perf() - start)

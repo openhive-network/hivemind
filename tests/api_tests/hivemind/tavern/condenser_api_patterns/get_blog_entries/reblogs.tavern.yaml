@@ -1,0 +1,26 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest # old didn't correct limit when it was too big, also there was less reblogs due to some bug (.orig prepared with max valid limit 4)
+                  # finally time of reblog was incorrectly taken from post, now it is time when reblog happened
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "condenser_api.get_blog_entries"
+          params: {"account":"test-safari","start_entry_id":-1,"limit":500}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern

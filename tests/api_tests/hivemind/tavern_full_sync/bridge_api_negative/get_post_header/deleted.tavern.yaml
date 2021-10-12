@@ -1,0 +1,30 @@
+---
+  test_name: Hivemind bridge_api.get_post_header not existing permlink patterns test
+  # SELECT * FROM hive_posts WHERE counter_deleted > 0 limit 3
+  marks:
+    - fullsynctest
+    - negative
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: get_post_header gtg
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.get_post_header"
+          params: {"author":"steemit1", "permlink":"re-abit-re-nogchompa-is-steemit-hosted-on-the-blockchain-20160622t213543808z"}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:has_valid_response
+          extra_kwargs:
+            method: "deleted"
+            directory: "bridge_api_negative/get_post_header"
+            error_response: true

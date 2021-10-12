@@ -37,31 +37,27 @@ class CustomOp:
     """Processes custom ops and dispatches updates."""
 
     @classmethod
-    def process_ops(cls, ops, block_num, block_date):
-        """Given a list of operation in block, filter and process them."""
-        for op in ops:
-            start = OPSM.start()
-            opName = str(op['id']) + ( '-ignored' if op['id'] not in ['follow', 'community', 'notify', 'reblog'] else '' )
+    def process_op(cls, op, block_num, block_date):
+        opName = str(op['id']) + ( '-ignored' if op['id'] not in ['follow', 'community', 'notify', 'reblog'] else '' )
 
-            account = _get_auth(op)
-            if not account:
-                continue
+        account = _get_auth(op)
+        if not account:
+           return
 
-            op_json = load_json_key(op, 'json')
-            if op['id'] == 'follow':
-                if block_num < 6000000 and not isinstance(op_json, list):
-                    op_json = ['follow', op_json]  # legacy compat
-                cls._process_legacy(account, op_json, block_date, block_num)
-            elif op['id'] == 'reblog':
-                if block_num < 6000000 and not isinstance(op_json, list):
-                    op_json = ['reblog', op_json]  # legacy compat
-                cls._process_legacy(account, op_json, block_date, block_num)
-            elif op['id'] == 'community':
-                if block_num > Community.start_block:
-                    process_json_community_op(account, op_json, block_date, block_num)
-            elif op['id'] == 'notify':
-                cls._process_notify(account, op_json, block_date)
-            OPSM.op_stats(opName, OPSM.stop(start))
+        op_json = load_json_key(op, 'json')
+        if op['id'] == 'follow':
+            if block_num < 6000000 and not isinstance(op_json, list):
+                op_json = ['follow', op_json]  # legacy compat
+            cls._process_legacy(account, op_json, block_date, block_num)
+        elif op['id'] == 'reblog':
+            if block_num < 6000000 and not isinstance(op_json, list):
+                op_json = ['reblog', op_json]  # legacy compat
+            cls._process_legacy(account, op_json, block_date, block_num)
+        elif op['id'] == 'community':
+            if block_num > Community.start_block:
+                process_json_community_op(account, op_json, block_date, block_num)
+        elif op['id'] == 'notify':
+            cls._process_notify(account, op_json, block_date)
 
     @classmethod
     def _process_notify(cls, account, op_json, block_date):

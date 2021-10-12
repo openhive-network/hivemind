@@ -15,7 +15,6 @@ from hive.db.adapter import Db
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from hive.indexer.auto_db_disposer import AutoDbDisposer
 
-from hive.utils.post_active import update_active_starting_from_posts_on_block
 from hive.utils.communities_rank import update_communities_posts_and_rank
 
 from hive.server.common.payout_stats import PayoutStats
@@ -179,6 +178,20 @@ class DbState:
         time_end = perf_counter()
         log.info("[INIT] Query `%s' done in %.4fs", query, time_end - time_start)
 
+    @classmethod
+    def _execute_and_explain_query(cls, db, query):
+        time_start = perf_counter()
+
+        current_work_mem = cls.update_work_mem('2GB')
+        log.info("[INIT] Attempting to execute query: `%s'...", query)
+
+        row = db.explain().query_no_return(query)
+
+        cls.update_work_mem(current_work_mem)
+
+        time_end = perf_counter()
+        log.info("[INIT] Query `%s' done in %.4fs", query, time_end - time_start)
+
 
     @classmethod
     def processing_indexes_per_table(cls, db, table_name, indexes, is_pre_process, drop, create):
@@ -211,8 +224,7 @@ class DbState:
                         elapsed_time = end_time - time_start
                         log.info("Index %s created in time %.4f s", index.name, elapsed_time)
                         any_index_created = True
-            if any_index_created:
-                cls._execute_query(db_mgr.db,"ANALYZE")
+
         log.info("[INIT] End %s-initial sync hooks for table %s", "pre" if is_pre_process else "post", table_name)
 
     @classmethod
@@ -278,12 +290,17 @@ class DbState:
     @classmethod
     def _finish_hive_posts(cls, db, massive_sync_preconditions, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_hive_posts") as db_mgr:
-            def vacuum_hive_posts(cls):
-              if massive_sync_preconditions:
-                  cls._execute_query(db_mgr.db, "VACUUM ANALYZE hive_posts")
+            #UPDATE: `abs_rshares`, `vote_rshares`, `sc_hot`, ,`sc_trend`, `total_votes`, `net_votes`
+            time_start = perf_counter()
+            sql = """
+                  SELECT update_posts_rshares({}, {});
+                  """.format(last_imported_block, current_imported_block)
+            cls._execute_and_explain_query(db_mgr.db, sql)
+            log.info("[INIT] update_posts_rshares executed in %.4fs", perf_counter() - time_start)
+
+            time_start = perf_counter()
 
             #UPDATE: `children`
-            time_start = perf_counter()
             if massive_sync_preconditions:
                 # Update count of all child posts (what was hold during initial sync)
                 cls._execute_query(db_mgr.db, "select update_all_hive_posts_children_count()")
@@ -293,10 +310,6 @@ class DbState:
                 cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_hive_posts_children_count executed in %.4fs", perf_counter() - time_start)
 
-            time_start = perf_counter()
-            vacuum_hive_posts(cls)
-            log.info("[INIT] VACUUM ANALYZE hive_posts executed in %.4fs", perf_counter() - time_start)
-
             #UPDATE: `root_id`
             # Update root_id all root posts
             time_start = perf_counter()
@@ -305,31 +318,6 @@ class DbState:
                   """.format(last_imported_block, current_imported_block)
             cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_hive_posts_root_id executed in %.4fs", perf_counter() - time_start)
-
-            time_start = perf_counter()
-            vacuum_hive_posts(cls)
-            log.info("[INIT] VACUUM ANALYZE hive_posts executed in %.4fs", perf_counter() - time_start)
-
-            #UPDATE: `active`
-            time_start = perf_counter()
-            update_active_starting_from_posts_on_block(last_imported_block, current_imported_block)
-            log.info("[INIT] update_all_posts_active executed in %.4fs", perf_counter() - time_start)
-
-            time_start = perf_counter()
-            vacuum_hive_posts(cls)
-            log.info("[INIT] VACUUM ANALYZE hive_posts executed in %.4fs", perf_counter() - time_start)
-
-            #UPDATE: `abs_rshares`, `vote_rshares`, `sc_hot`, ,`sc_trend`, `total_votes`, `net_votes`
-            time_start = perf_counter()
-            sql = """
-                  SELECT update_posts_rshares({}, {});
-                  """.format(last_imported_block, current_imported_block)
-            cls._execute_query(db_mgr.db, sql)
-            log.info("[INIT] update_posts_rshares executed in %.4fs", perf_counter() - time_start)
-
-            time_start = perf_counter()
-            vacuum_hive_posts(cls)
-            log.info("[INIT] VACUUM ANALYZE hive_posts executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_hive_posts_api_helper(cls, db, last_imported_block, current_imported_block):
@@ -369,6 +357,8 @@ class DbState:
 
     @classmethod
     def _finish_account_reputations(cls, db, last_imported_block, current_imported_block):
+        log.info("Performing update_account_reputations on block rangge: {}:{}".format(last_imported_block, current_imported_block))
+
         with AutoDbDisposer(db, "finish_account_reputations") as db_mgr:
             time_start = perf_counter()
             sql = """
@@ -383,6 +373,16 @@ class DbState:
             time_start = perf_counter()
             update_communities_posts_and_rank(db_mgr.db)
             log.info("[INIT] update_communities_posts_and_rank executed in %.4fs", perf_counter() - time_start)
+
+    @classmethod
+    def _finish_blocks_consistency_flag(cls, db, last_imported_block, current_imported_block):
+        with AutoDbDisposer(db, "finish_blocks_consistency_flag") as db_mgr:
+            time_start = perf_counter()
+            sql = """
+                  SELECT update_hive_blocks_consistency_flag({}, {});
+                  """.format(last_imported_block, current_imported_block)
+            cls._execute_query(db_mgr.db, sql)
+            log.info("[INIT] update_hive_blocks_consistency_flag executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_notification_cache(cls, db):
@@ -441,8 +441,8 @@ class DbState:
         methods.append( ('hive_feed_cache', cls._finish_hive_feed_cache, [cls.db(), last_imported_block, current_imported_block]) )
         methods.append( ('hive_mentions', cls._finish_hive_mentions, [cls.db(), last_imported_block, current_imported_block]) )
         methods.append( ('payout_stats_view', cls._finish_payout_stats_view, []) )
-        methods.append( ('account_reputations', cls._finish_account_reputations, [cls.db(), last_imported_block, current_imported_block]) )
         methods.append( ('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]) )
+        methods.append( ('blocks_consistency_flag', cls._finish_blocks_consistency_flag, [cls.db(), last_imported_block, current_imported_block]) )
         cls.process_tasks_in_threads("[INIT] %i threads finished filling tables. Part nr 0", methods)
 
         methods = []
@@ -450,8 +450,6 @@ class DbState:
         methods.append( ('notification_cache', cls._finish_notification_cache, [cls.db()]) )
         #hive_posts_api_helper is dependent on `hive_posts/root_id` filling
         methods.append( ('hive_posts_api_helper', cls._finish_hive_posts_api_helper, [cls.db(), last_imported_block, current_imported_block]) )
-        #methods `_finish_follow_count` and `_finish_account_reputations` update the same table: `hive_accounts`.
-        #It can cause deadlock, therefore these functions can't be processed concurrently
         methods.append( ('follow_count', cls._finish_follow_count, [cls.db(), last_imported_block, current_imported_block]) )
         cls.process_tasks_in_threads("[INIT] %i threads finished filling tables. Part nr 1", methods)
 
@@ -480,6 +478,8 @@ class DbState:
 
         synced_blocks = current_imported_block - last_imported_block
 
+        cls._finish_account_reputations(cls.db(), last_imported_block, current_imported_block)
+
         force_index_rebuild = False
         massive_sync_preconditions = False
         if synced_blocks >= SYNCED_BLOCK_LIMIT:
@@ -490,6 +490,10 @@ class DbState:
         log.info("Creating indexes: started")
         cls.processing_indexes( False, force_index_rebuild, True )
         log.info("Creating indexes: finished")
+
+        # Update statistics and execution plans after index creation.
+        if massive_sync_preconditions:
+          cls._execute_query(cls.db(),"VACUUM (VERBOSE,ANALYZE)")
 
         #all post-updates are executed in different threads: one thread per one table
         log.info("Filling tables with final values: started")
@@ -508,7 +512,7 @@ class DbState:
             create_fk(cls.db())
             log.info("Foreign keys were recreated")
 
-            cls._execute_query(cls.db(),"VACUUM ANALYZE")
+            cls._execute_query(cls.db(),"VACUUM (VERBOSE,ANALYZE)")
 
         end_time = perf_counter()
         log.info("[INIT] After initial sync actions done in %.4fs", end_time - start_time)

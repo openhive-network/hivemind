@@ -106,7 +106,7 @@ class Reblog(DbAdapterHolder):
                 else:
                     values_str = ",".join(values)
                     query = sql_prefix.format(values_str, values_str)
-                    cls.db.query(query)
+                    cls.db.query_prepared(query)
                     values.clear()
                     values.append("({}, {}, {}, '{}'::timestamp, {})".format(escape_characters(reblog_item['account']),
                                                                                 escape_characters(reblog_item['author']),
@@ -118,7 +118,8 @@ class Reblog(DbAdapterHolder):
             if len(values) > 0:
                 values_str = ",".join(values)
                 query = sql_prefix.format(values_str, values_str)
-                cls.db.query(query)
+                cls.db.query_prepared(query)
+                values.clear()
             cls.commitTx()
             cls.reblog_items_to_flush.clear()
 

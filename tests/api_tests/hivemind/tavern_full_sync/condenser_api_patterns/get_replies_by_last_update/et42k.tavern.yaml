@@ -1,0 +1,28 @@
+---
+  test_name: Hivemind condenser_api.get_replies_by_last_update limit 100 patterns test
+
+  marks:
+    - fullsynctest
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: get_replies_by_last_update
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "condenser_api.get_replies_by_last_update"
+          params: ["et42k","iqx-hashtag",100]
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:has_valid_response
+          extra_kwargs:
+            method: "et42k"
+            directory: "condenser_api_patterns/get_replies_by_last_update"

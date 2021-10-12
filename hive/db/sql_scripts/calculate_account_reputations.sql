@@ -257,7 +257,8 @@ $BODY$
 DROP FUNCTION IF EXISTS truncate_account_reputation_data;
 
 CREATE OR REPLACE FUNCTION truncate_account_reputation_data(
-  in _day_limit INTERVAL)
+  in _day_limit INTERVAL,
+  in _allow_truncate BOOLEAN)
   RETURNS VOID 
   LANGUAGE 'plpgsql'
   VOLATILE 
@@ -267,9 +268,25 @@ DECLARE
 
 BEGIN
   __block_num_limit = block_before_head(_day_limit);
-  DELETE FROM hive_reputation_data hpd
-  WHERE hpd.block_num < __block_num_limit
-  ;
+  
+  IF _allow_truncate THEN
+    DROP TABLE IF EXISTS __actual_reputation_data;
+    CREATE UNLOGGED TABLE IF NOT EXISTS __actual_reputation_data
+    AS
+    SELECT * FROM hive_reputation_data hrd
+    WHERE hrd.block_num >= __block_num_limit;
+
+    TRUNCATE TABLE hive_reputation_data;
+    INSERT INTO hive_reputation_data
+    SELECT * FROM __actual_reputation_data;
+
+    TRUNCATE TABLE __actual_reputation_data;
+    DROP TABLE IF EXISTS __actual_reputation_data;
+  ELSE
+    DELETE FROM hive_reputation_data hpd
+    WHERE hpd.block_num < __block_num_limit
+    ;
+  END IF;
 END
 $BODY$
 ;
@@ -310,7 +327,7 @@ BEGIN
   ;
 
   IF _force_data_truncate or _last_block_num IS NULL OR MOD(_last_block_num, __truncate_block_count) = 0 THEN
-    PERFORM truncate_account_reputation_data(__truncate_interval);
+    PERFORM truncate_account_reputation_data(__truncate_interval, _force_data_truncate);
   END IF
   ;
 END

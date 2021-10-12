@@ -87,7 +87,6 @@ def _condenser_post_object(row, truncate_body=0, get_content_additions=False):
 
     if get_content_additions:
         post['id'] = row['id'] # let's be compatible with old code until this API is supported.
-        post['active'] = json_date(row['active'])
         post['author_rewards'] = row['author_rewards']
         post['max_cashout_time'] = json_date(None) # ABW: only relevant up to HF17, timestamp::max for all posts later (and also all paid) 
         curator_payout = sbd_amount(row['curator_payout_value'])

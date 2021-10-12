@@ -23,12 +23,14 @@ def build_metadata():
         sa.Column('hash', CHAR(40), nullable=False),
         sa.Column('prev', CHAR(40)),
         sa.Column('txs', SMALLINT, server_default='0', nullable=False),
-        sa.Column('ops', SMALLINT, server_default='0', nullable=False),
+        sa.Column('ops', sa.Integer, server_default='0', nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
+        sa.Column('completed', sa.Boolean, nullable=False, server_default='0'),
 
         sa.UniqueConstraint('hash', name='hive_blocks_ux1'),
         sa.ForeignKeyConstraint(['prev'], ['hive_blocks.hash'], name='hive_blocks_fk1'),
-        sa.Index('hive_blocks_created_at_idx', 'created_at')
+        sa.Index('hive_blocks_created_at_idx', 'created_at'),
+        sa.Index('hive_blocks_completed_idx', 'completed')
     )
 
     sa.Table(
@@ -150,7 +152,7 @@ def build_metadata():
         sa.Index('hive_posts_block_num_created_idx', 'block_num_created'),
         sa.Index('hive_posts_cashout_time_id_idx', 'cashout_time', 'id'),
         sa.Index('hive_posts_updated_at_idx', sa.text('updated_at DESC')),
-        sa.Index('hive_posts_payout_plus_pending_payout_id_idx', sa.text('(payout+pending_payout), id, is_paidout'), postgresql_where=sql_text("counter_deleted = 0 AND NOT is_paidout")),
+        sa.Index('hive_posts_payout_plus_pending_payout_id_idx', sa.text('(payout+pending_payout), id'), postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0")),
         sa.Index('hive_posts_category_id_payout_plus_pending_payout_depth_idx', sa.text('category_id, (payout+pending_payout), depth'), postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0")),
         sa.Index('hive_posts_tags_ids_idx', 'tags_ids', postgresql_using="gin", postgresql_ops={'tags_ids': 'gin__int_ops'})
         )
@@ -205,7 +207,9 @@ def build_metadata():
         sa.Index('hive_votes_voter_id_post_id_idx', 'voter_id', 'post_id'), # probably this index is redundant to hive_votes_voter_id_last_update_idx because of starting voter_id.
         sa.Index('hive_votes_voter_id_last_update_idx', 'voter_id', 'last_update'), # this index is critical for hive_accounts_info_view performance
         sa.Index('hive_votes_post_id_voter_id_idx', 'post_id', 'voter_id'),
-        sa.Index('hive_votes_block_num_idx', 'block_num') # this is also important for hive_accounts_info_view
+        sa.Index('hive_votes_block_num_idx', 'block_num'), # this is also important for hive_accounts_info_view
+
+        sa.Index('hive_votes_post_id_block_num_rshares_vote_is_effective_idx', 'post_id', 'block_num', 'rshares', 'is_effective') # this index is needed by update_posts_rshares procedure.
     )
 
     sa.Table(
@@ -461,7 +465,7 @@ def setup(db):
     # default rows
     sqls = [
         "INSERT INTO hive_state (block_num, db_version, steem_per_mvest, usd_per_steem, sbd_per_steem, dgpo) VALUES (0, 0, 0, 0, 0, '')",
-        "INSERT INTO hive_blocks (num, hash, created_at) VALUES (0, '0000000000000000000000000000000000000000', '2016-03-24 16:04:57')",
+        "INSERT INTO hive_blocks (num, hash, created_at, completed) VALUES (0, '0000000000000000000000000000000000000000', '2016-03-24 16:04:57', true)",
 
         "INSERT INTO hive_permlink_data (id, permlink) VALUES (0, '')",
         "INSERT INTO hive_category_data (id, category) VALUES (0, '')",
@@ -603,6 +607,8 @@ def setup(db):
       "update_follow_count.sql",
       "delete_reblog_feed_cache.sql",
       "follows.sql",
+      "is_superuser.sql",
+      "update_hive_blocks_consistency_flag.sql",
       "update_table_statistics.sql",
       "upgrade/update_db_patchlevel.sql" #Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
     ]

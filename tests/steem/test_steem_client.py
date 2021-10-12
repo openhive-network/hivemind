@@ -37,10 +37,12 @@ def test_stream_blocks(client):
     def breaker():
         return True
 
+    def exception_report():
+        pass
+
     with pytest.raises(KeyboardInterrupt):
-        for block in client.stream_blocks(start_at, trail_blocks=0, max_gap=100, breaker=breaker):
-            assert 'block_id' in block
-            num = int(block['block_id'][:8], base=16)
+        for block in client.stream_blocks(start_at, trail_blocks=0, max_gap=100, breaker=breaker, exception_reporter = exception_report):
+            num = block.get_num()
             assert num == start_at + streamed
             streamed += 1
             if streamed >= 20 and num >= stop_at:

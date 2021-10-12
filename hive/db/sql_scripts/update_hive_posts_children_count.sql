@@ -106,6 +106,8 @@ BEGIN
   __post_children s 
   WHERE s.id = uhp.id and s.child_count != uhp.children
   ;
+  
+  TRUNCATE TABLE __post_children;
 
 END
 $BODY$;

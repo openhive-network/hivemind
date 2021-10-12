@@ -1,0 +1,37 @@
+---
+  test_name: Hivemind bridge_api.list_all_subscriptions
+  #SELECT count(hs.id), ha.name FROM hive_subscriptions hs
+  #JOIN hive_accounts ha ON ha.id= hs.account_id
+  #GROUP BY hs.account_id, ha.name ORDER BY count(hs.id) DESC LIMIT 10;
+
+  marks:
+    - fullsynctest
+    - parametrize:
+        key: account
+        vals:
+          - joeyarnoldvn
+          - sudutpandang
+          - globetrottergcc
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: bridge_api.list_all_subscriptions
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.list_all_subscriptions"
+          params: {"account":"{account}"}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:has_valid_response
+          extra_kwargs:
+            method: "most_subscriptions_{account}"
+            directory: "bridge_api_patterns/list_all_subscriptions"

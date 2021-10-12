@@ -51,8 +51,10 @@ class Conf():
         # sync
         add('--max-workers', type=int, env_var='MAX_WORKERS', help='max workers for batch requests', default=6)
         add('--max-batch', type=int, env_var='MAX_BATCH', help='max chunk size for batch requests', default=35)
+        add('--max-retries', type=int, env_var='MAX_RETRIES', help='max number of retries after request failure is accepted; default -1 means no limit', default=-1)
         add('--trail-blocks', type=int, env_var='TRAIL_BLOCKS', help='number of blocks to trail head by', default=2)
         add('--sync-to-s3', type=strtobool, env_var='SYNC_TO_S3', help='alternative healthcheck for background sync service', default=False)
+        add('--hived-database-url', env_var='HIVED_DATABASE_URL', required=False, help='Hived blocks database connection url', default='')
 
         # test/debug
         add('--log-level', env_var='LOG_LEVEL', default='INFO')
@@ -65,6 +67,7 @@ class Conf():
         add('--mock-block-data-path', type=str, nargs='+', env_var='MOCK_BLOCK_DATA_PATH', help='(debug/testing) load additional data from block data file')
         add('--mock-vops-data-path', type=str, env_var='MOCK_VOPS_DATA_PATH', help='(debug/testing) load additional data from virtual operations data file')
         add('--community-start-block', type=int, env_var='COMMUNITY_START_BLOCK', default=37500000)
+        add('--log_explain_queries', type=strtobool, env_var='LOG_EXPLAIN_QUERIES', help='(debug) Adds to log output of EXPLAIN ANALYZE for specific queries - only for db super user', default=False)
 
         # logging
         add('--log-timestamp', help='Output timestamp in log', action='store_true')
@@ -141,17 +144,20 @@ class Conf():
             self._steem = SteemClient(
                 url=loads(self.get('steemd_url')),
                 max_batch=self.get('max_batch'),
-                max_workers=self.get('max_workers'))
+                max_workers=self.get('max_workers'),
+                max_retries=self.get('max_retries'))
         return self._steem
 
     def db(self):
         """Get a configured instance of Db."""
         if self._db is None:
             url = self.get('database_url')
+            enable_autoexplain = self.get( 'log_explain_queries' )
             assert url, ('--database-url (or DATABASE_URL env) not specified; '
                          'e.g. postgresql://user:pass@localhost:5432/hive')
-            self._db = Db(url, "root db creation")
+            self._db = Db(url, "root db creation", enable_autoexplain )
             log.info("The database created...")
+
         return self._db
 
     def get(self, param):

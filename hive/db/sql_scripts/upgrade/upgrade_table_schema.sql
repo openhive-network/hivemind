@@ -376,6 +376,9 @@ CREATE INDEX IF NOT EXISTS hive_posts_author_id_created_at_idx ON public.hive_po
 
 CREATE INDEX IF NOT EXISTS hive_blocks_created_at_idx ON hive_blocks (created_at);
 
+-- Change done at https://gitlab.syncad.com/hive/hivemind/-/commit/c21f03b2d8cfa6af2386a222c7501580d1d1ce05
+ALTER TABLE hive_blocks ALTER COLUMN ops SET DATA TYPE INTEGER;
+
 --- Notification cache to significantly speedup notification APIs.
 CREATE TABLE IF NOT EXISTS hive_notification_cache
 (
@@ -473,3 +476,50 @@ CREATE INDEX IF NOT EXISTS hive_posts_parent_id_id_idx ON hive_posts (parent_id,
 --- Drop this view as it was eliminated.
 DROP VIEW IF EXISTS hive_posts_view CASCADE;
 
+DO
+$BODY$
+BEGIN
+--- Changes done at commit https://gitlab.syncad.com/hive/hivemind/-/commit/d243747e7ff37a6f0bdef88ce5fc3c471b39b238
+IF NOT EXISTS (SELECT NULL FROM hive_db_patch_level where patched_to_revision = 'd243747e7ff37a6f0bdef88ce5fc3c471b39b238'))
+  DROP INDEX IF EXISTS hive_posts_payout_plus_pending_payout_id_idx;
+  CREATE INDEX hive_posts_payout_plus_pending_payout_id_idx
+    ON hive_posts USING btree
+    ((payout + pending_payout) ASC NULLS LAST, id ASC NULLS LAST)
+    WHERE NOT is_paidout AND counter_deleted = 0;
+END IF;
+END
+$$;
+
+DO
+$BODY$
+BEGIN
+IF NOT EXISTS(SELECT data_type
+              FROM information_schema.columns
+              WHERE table_name = 'hive_blocks' AND column_name = 'completed') THEN
+    RAISE NOTICE 'Performing hive_blocks upgrade - adding new column: `completed`';
+    PERFORM deps_save_and_drop_dependencies('public', 'hive_blocks', true);
+    ALTER TABLE ONlY hive_blocks
+      ADD COLUMN completed BOOLEAN,
+      ALTER COLUMN completed SET DEFAULT False;
+
+    UPDATE hive_blocks SET completed = True;
+
+    ALTER TABLE ONlY hive_blocks
+      ALTER COLUMN completed SET NOT NULL;
+
+    perform deps_restore_dependencies('public', 'hive_blocks');
+
+    CREATE INDEX hive_blocks_completed_idx ON hive_blocks USING btree
+      (completed ASC NULLS LAST);
+ELSE
+  RAISE NOTICE 'hive_blocks::completed migration skipped';
+END IF;
+END
+$BODY$
+
+--- Changes done in https://gitlab.syncad.com/hive/hivemind/-/commit/02c3c807c1a65635b98b6657196c10af44ec9d92
+
+CREATE INDEX IF NOT EXISTS hive_votes_post_id_block_num_rshares_vote_is_effective_idx
+  ON hive_votes USING btree
+  (post_id ASC NULLS LAST, block_num ASC NULLS LAST, rshares ASC NULLS LAST, is_effective ASC NULLS LAST)
+;
