@@ -13,11 +13,7 @@ stages:
   - source .venv/bin/activate
   - time pip install --upgrade pip setuptools wheel
   - source .venv/bin/activate
-  - pip --version
-  - easy_install --version
-  - wheel version
-  - pipenv --version
-  - time pip install --editable .[dev]
+  - pip install --editable .[dev]
 
 .setup-runner-env: &setup-runner-env
   # Setup runner environment (to connect to correct postgres server, mainly).
