@@ -11,7 +11,7 @@ stages:
 .setup-pip: &setup-pip
   - python -m venv .venv
   - source .venv/bin/activate
-  - time pip install --upgrade pip setuptools wheel
+  - time pip install --upgrade pip=21.2.4 setuptools wheel
   - pip --version
   - easy_install --version
   - wheel version
