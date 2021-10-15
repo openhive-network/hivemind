@@ -7,6 +7,7 @@ Hivemind is a "consensus interpretation" layer for the Hive blockchain, maintain
 ## Development Environment
 
  - Python 3.6+ required
+ - Python setuptools in version >= 57.0, like also pip tool in version >= 21.0
  - Postgres 10+ recommended
 
 ### Dependencies:
@@ -15,6 +16,19 @@ Hivemind is a "consensus interpretation" layer for the Hive blockchain, maintain
  - Ubuntu: `$ sudo apt-get install python3 python3-pip`
 
 ### Installation:
+
+Try to update Python installation tools first, by specifying:
+```bash
+$ python3 -m pip install --upgrade pip setuptools wheel
+```
+
+If you have too old setup tools, pip spawn will fail with error similar to:
+```
+Complete output from command python setup.py egg_info:
+    Traceback (most recent call last):
+      File "<string>", line 1, in <module>
+    ModuleNotFoundError: No module named 'setuptools'
+```
 
 Before creating the hive database, Hivemind requires the postgresql 'intarray' extension. The postgresql user who has CREATE privilege can load the module with the command `CREATE EXTENSION IF NOT EXISTS intarray;`.
 

@@ -157,7 +157,6 @@ if __name__ == "__main__":
         long_description=open('README.md').read(),
         packages=found_packages,
         package_data=package_resources,
-        #data_files=[(SQL_SCRIPTS_PATH, get_sql_scripts(SQL_SCRIPTS_PATH)), (SQL_UPGRADE_PATH, get_sql_scripts(SQL_UPGRADE_PATH))],
         setup_requires=[
             'pytest-runner'
         ],
