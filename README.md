@@ -26,14 +26,14 @@ $ export DATABASE_URL=postgresql://user:pass@localhost:5432/hive
 ```bash
 $ git clone --recurse-submodules https://gitlab.syncad.com/hive/hivemind.git
 $ cd hivemind
-$ python3 -m pip install --no-cache-dir --verbose --user -e .[dev] 2>&1 | tee pip_install.log
+$ python3 -m pip install --no-cache-dir --verbose --user . 2>&1 | tee pip_install.log
 ```
 
 ### Updating from an existing hivemind database:
 
 ```bash
 $ cd hivemind
-$ python3 -m pip install --no-cache-dir --verbose --user -e .[dev] 2>&1 | tee pip_install.log
+$ python3 -m pip install --no-cache-dir --verbose --user . 2>&1 | tee pip_install.log
 $ cd hive/db/sql_scripts
 $ ./db_upgrade.sh <user-name> hive
 ```
