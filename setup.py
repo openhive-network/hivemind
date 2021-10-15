@@ -121,19 +121,43 @@ VERSION, GIT_REVISION = GitRevisionProvider.provide_git_revision()
 SQL_SCRIPTS_PATH = 'hive/db/sql_scripts/'
 SQL_UPGRADE_PATH = 'hive/db/sql_scripts/upgrade/'
 
-def get_sql_scripts(dir):
+def get_sql_scripts(dir, base_dir):
     from os import listdir
-    from os.path import isfile, join
-    return [join(dir, f) for f in listdir(dir) if isfile(join(dir, f))]
+    from os.path import isfile, join, relpath
+    if base_dir is None:
+        return [join(dir, f) for f in listdir(dir) if isfile(join(dir, f))]
+    else:
+        return [relpath(join(dir, f), base_dir) for f in listdir(dir) if isfile(join(dir, f))]
 
 if __name__ == "__main__":
+
+    sql_scripts = get_sql_scripts(SQL_SCRIPTS_PATH, "hive/db/")
+    sql_upgrade_scripts = get_sql_scripts(SQL_UPGRADE_PATH, "hive/db/")
+    
+    print('Found {} SQL scripts to be installed.'.format(len(sql_scripts)))
+    print('Found {} upgrade SQL scripts to be installed.'.format(len(sql_upgrade_scripts)))
+
+    for s in sql_scripts:
+        print("Found SQL script: {}".format(s))
+
+    for s in sql_upgrade_scripts:
+        print("Found SQL upgrade script: {}".format(s))
+
+    package_resources = {"hive.db": sql_scripts + sql_upgrade_scripts}
+    found_packages = find_packages(exclude=['scripts'])
+
+    for p in found_packages:
+        print("Found Python package: {}".format(p))
+
+
     setup(
         name='hivemind',
         version=VERSION + "+" + GIT_REVISION,
-        description='Developer-friendly microservice powering social networks on the Steem blockchain.',
+        description='Developer-friendly microservice powering social networks on the Hive blockchain.',
         long_description=open('README.md').read(),
-        packages=find_packages(exclude=['scripts']),
-        data_files=[(SQL_SCRIPTS_PATH, get_sql_scripts(SQL_SCRIPTS_PATH)), (SQL_UPGRADE_PATH, get_sql_scripts(SQL_UPGRADE_PATH))],
+        packages=found_packages,
+        package_data=package_resources,
+        #data_files=[(SQL_SCRIPTS_PATH, get_sql_scripts(SQL_SCRIPTS_PATH)), (SQL_UPGRADE_PATH, get_sql_scripts(SQL_UPGRADE_PATH))],
         setup_requires=[
             'pytest-runner'
         ],
