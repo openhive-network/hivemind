@@ -12,12 +12,7 @@ stages:
   - python -m venv .venv
   - source .venv/bin/activate
   - time pip install --upgrade pip setuptools wheel
-  - pip --version
-  - easy_install --version
-  - wheel version
-  - pipenv --version
-  - poetry --version
-  - time pip install --editable .[dev]
+  - pip install .
 
 .setup-runner-env: &setup-runner-env
   # Setup runner environment (to connect to correct postgres server, mainly).
@@ -36,8 +31,9 @@ stages:
   - echo "HIVEMIND_DB_NAME is $HIVEMIND_DB_NAME"
 
 .fetch-git-tags: &fetch-git-tags
-  #- git fetch --tags # Looks to be unnecessary.
-  - git tag -f ci_implicit_tag # Needed to build python package
+  - git fetch --tags # Looks to be unnecessary.
+  - git describe --tags --long --dirty
+  #- echo git tag -f ci_implicit_tag # Needed to build python package
 
 .start-timer: &start-timer
   - ./scripts/ci/timer.sh start
@@ -81,8 +77,7 @@ stages:
     default: false
     variables: false
   variables:
-    GIT_DEPTH: 10
-    GIT_STRATEGY: fetch
+    GIT_STRATEGY: clone
     GIT_SUBMODULE_STRATEGY: recursive
     PIPENV_VENV_IN_PROJECT: 1
     PIPENV_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pipenv"
