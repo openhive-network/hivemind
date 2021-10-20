@@ -1,8 +1,8 @@
 --TODO set names tested and reference schemas; set schema, where you want to have a function and set owner 
 
-DROP FUNCTION hive_restore.join_test_accounts();
+DROP FUNCTION public_reference.join_test_accounts();
 
-CREATE OR REPLACE FUNCTION hive_restore.join_test_accounts(
+CREATE OR REPLACE FUNCTION public_reference.join_test_accounts(
 	)
     RETURNS TABLE(
 		hive_rowid_t bigint,
@@ -25,7 +25,7 @@ begin
 			(select 
 						ao.hive_rowid, ao.id, ao.name, '2' as note
 			from 
-				reference_schema.accounts as ao inner join testing_schema.accounts as aoc
+				public_reference.accounts as ao inner join public.accounts as aoc
 			on ao.id = aoc.id
 			where 
 				ao.hive_rowid<>aoc.hive_rowid or 
@@ -37,9 +37,9 @@ begin
 			(select 
 				*, '-1' as note
  			 from 
-				reference_schema.accounts as ao
+				public_reference.accounts as ao
 			 WHERE not EXISTS (
-				select * from testing_schema.accounts as aoc where ao.id = aoc.id)
+				select * from public.accounts as aoc where ao.id = aoc.id)
 			)
 
 			union all
@@ -47,14 +47,14 @@ begin
 			(select 
 				*, '+1' as note
  			 from 
-				testing_schema.accounts as aoc
+				public.accounts as aoc
 			 WHERE not EXISTS (
-				select * from reference_schema.accounts ao where ao.id = aoc.id)
+				select * from public_reference.accounts ao where ao.id = aoc.id)
 			)
 	)as x order by note ;
 
 end;
 $BODY$;
 
-ALTER FUNCTION hive_restore.join_test_accounts()
-    OWNER TO radek;
+ALTER FUNCTION public_reference.join_test_accounts()
+    OWNER TO hivemind_ci;
