@@ -69,3 +69,9 @@ psql -U $USER -d $DATABASE -c 'select*from public_references.join_test_hive_tag_
 echo ”votes”
 psql -U $USER -d $DATABASE -c 'select*from public_references.join_test_hive_votes()' | tee hive_votes_res.txt;
 
+echo ”accounts_HAF”
+psql -U $USER -d $DATABASE -c 'select*from public_references.join_test_accounts()' | tee accounts_res.txt;
+
+echo ”accounts_operations_HAF”
+psql -U $USER -d $DATABASE -c 'select*from public_references.join_test_account_operation()' | tee accounts_operations_res.txt;
+

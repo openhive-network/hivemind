@@ -32,6 +32,8 @@ psql -U $USER -d $DATABASE -c 'drop table public.test_state_resoults';
 psql -U $USER -d $DATABASE -c 'drop table public.test_subscriptions_resoults';
 psql -U $USER -d $DATABASE -c 'drop table public.test_tag_data_resoults';
 psql -U $USER -d $DATABASE -c 'drop table public.test_votes_resoults';
+psql -U $USER -d $DATABASE -c 'drop table public.test_accounts';
+psql -U $USER -d $DATABASE -c 'drop table public.test_account_operations';
 
 
 #SAVE A RESOULTS TO TABLES
@@ -100,4 +102,10 @@ psql -U $USER -d $DATABASE -c 'create table public.test_tag_data_resoults as( se
 
 echo ”votes”
 psql -U $USER -d $DATABASE -c 'create table public.test_votes_resoults as( select*from public_references.join_test_hive_votes())';
+
+echo ”accounts_HAF”
+psql -U $USER -d $DATABASE -c 'create table public.test_accounts_resoults as( select*from public_references.join_test_accounts())';
+
+echo ”accounts_operations_HAF”
+psql -U $USER -d $DATABASE -c 'create table public.test_accounts_operation_resoults as( select*from public_references.join_test_account_operations())';
 
