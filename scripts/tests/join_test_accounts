@@ -1,0 +1,60 @@
+--TODO set names tested and reference schemas; set schema, where you want to have a function and set owner 
+
+DROP FUNCTION hive_restore.join_test_accounts();
+
+CREATE OR REPLACE FUNCTION hive_restore.join_test_accounts(
+	)
+    RETURNS TABLE(
+		hive_rowid_t bigint,
+		id_t int,
+		name_t character varying,
+		add_delete_modif text
+
+	) 
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+DECLARE
+begin
+
+	return query 
+	select * from(
+			(select 
+						ao.hive_rowid, ao.id, ao.name, '2' as note
+			from 
+				reference_schema.accounts as ao inner join testing_schema.accounts as aoc
+			on ao.id = aoc.id
+			where 
+				ao.hive_rowid<>aoc.hive_rowid or 
+				ao.name<>aoc.name
+			 )
+
+			union all
+
+			(select 
+				*, '-1' as note
+ 			 from 
+				reference_schema.accounts as ao
+			 WHERE not EXISTS (
+				select * from testing_schema.accounts as aoc where ao.id = aoc.id)
+			)
+
+			union all
+
+			(select 
+				*, '+1' as note
+ 			 from 
+				testing_schema.accounts as aoc
+			 WHERE not EXISTS (
+				select * from reference_schema.accounts ao where ao.id = aoc.id)
+			)
+	)as x order by note ;
+
+end;
+$BODY$;
+
+ALTER FUNCTION hive_restore.join_test_accounts()
+    OWNER TO radek;
