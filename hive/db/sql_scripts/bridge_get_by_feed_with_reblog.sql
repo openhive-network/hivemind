@@ -24,7 +24,7 @@ BEGIN
   __cutoff = block_before_head( '1 month' );
 
   RETURN QUERY 
-  WITH feed AS -- bridge_get_by_feed_with_reblog
+  WITH feed AS MATERIALIZED -- bridge_get_by_feed_with_reblog
   (
     SELECT 
       hfc.post_id, 

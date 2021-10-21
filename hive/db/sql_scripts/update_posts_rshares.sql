@@ -8,18 +8,8 @@ LANGUAGE 'plpgsql'
 VOLATILE
 AS
 $BODY$
-DECLARE
-  __version INT;
 BEGIN
 SET LOCAL work_mem='2GB';
-
-SELECT current_setting('server_version_num')::INT INTO __version;
-
-IF __version >= 120000 THEN
-  SET LOCAL jit_above_cost = -1;
-  SET LOCAL jit_inline_above_cost = -1;
-  SET LOCAL jit_optimize_above_cost = -1;
-END IF;
 
 IF (_last_block - _first_block) > 10000 THEN
   UPDATE hive_posts hp
@@ -94,11 +84,6 @@ ELSE
 END IF;
 
 RESET work_mem;
-IF __version >= 120000 THEN
-  RESET jit_above_cost;
-  RESET jit_inline_above_cost;
-  RESET jit_optimize_above_cost;
-END IF;
 
 END;
 
