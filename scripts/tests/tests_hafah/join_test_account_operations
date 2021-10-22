@@ -20,7 +20,7 @@ AS $BODY$
 DECLARE
 begin
 
-	return query ao.hive_rowid = aoc.hive_rowid
+	return query 
 	select * from(
 			(select 
 						ao.hive_rowid, ao.account_id, ao.account_op_seq_no, ao.operation_id, '2' as note
