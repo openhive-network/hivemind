@@ -51,7 +51,7 @@ def build_metadata():
         sa.Column('json_metadata', sa.Text),
 
         sa.UniqueConstraint('name', name='hive_accounts_ux1'),
-        sa.Index('hive_accounts_ix6', 'reputation')
+        sa.Index('hive_accounts_reputation_id_idx', sa.text('reputation DESC, id'))
     )
 
     sa.Table(
