@@ -523,3 +523,10 @@ CREATE INDEX IF NOT EXISTS hive_votes_post_id_block_num_rshares_vote_is_effectiv
   ON hive_votes USING btree
   (post_id ASC NULLS LAST, block_num ASC NULLS LAST, rshares ASC NULLS LAST, is_effective ASC NULLS LAST)
 ;
+
+DROP INDEX IF EXISTS hive_accounts_ix6;
+
+CREATE INDEX IF NOT EXISTS hive_accounts_reputation_id
+  ON public.hive_accounts USING btree
+  (reputation desc, id asc)
+  ;
