@@ -477,10 +477,10 @@ CREATE INDEX IF NOT EXISTS hive_posts_parent_id_id_idx ON hive_posts (parent_id,
 DROP VIEW IF EXISTS hive_posts_view CASCADE;
 
 DO
-$BODY$
+$$
 BEGIN
 --- Changes done at commit https://gitlab.syncad.com/hive/hivemind/-/commit/d243747e7ff37a6f0bdef88ce5fc3c471b39b238
-IF NOT EXISTS (SELECT NULL FROM hive_db_patch_level where patched_to_revision = 'd243747e7ff37a6f0bdef88ce5fc3c471b39b238'))
+IF NOT EXISTS (SELECT NULL FROM hive_db_patch_level where patched_to_revision = 'd243747e7ff37a6f0bdef88ce5fc3c471b39b238') THEN
   DROP INDEX IF EXISTS hive_posts_payout_plus_pending_payout_id_idx;
   CREATE INDEX hive_posts_payout_plus_pending_payout_id_idx
     ON hive_posts USING btree
@@ -491,14 +491,14 @@ END
 $$;
 
 DO
-$BODY$
+$$
 BEGIN
 IF NOT EXISTS(SELECT data_type
               FROM information_schema.columns
               WHERE table_name = 'hive_blocks' AND column_name = 'completed') THEN
     RAISE NOTICE 'Performing hive_blocks upgrade - adding new column: `completed`';
     PERFORM deps_save_and_drop_dependencies('public', 'hive_blocks', true);
-    ALTER TABLE ONlY hive_blocks
+    ALTER TABLE ONLY hive_blocks
       ADD COLUMN completed BOOLEAN,
       ALTER COLUMN completed SET DEFAULT False;
 
@@ -515,7 +515,8 @@ ELSE
   RAISE NOTICE 'hive_blocks::completed migration skipped';
 END IF;
 END
-$BODY$
+$$
+;
 
 --- Changes done in https://gitlab.syncad.com/hive/hivemind/-/commit/02c3c807c1a65635b98b6657196c10af44ec9d92
 
