@@ -1,37 +1,30 @@
 DROP VIEW IF EXISTS public.hive_accounts_rank_view CASCADE;
 
 CREATE OR REPLACE VIEW public.hive_accounts_rank_view
-AS
-SELECT rank.id,
-CASE
-  WHEN rank."position" < 200 THEN 70
-  WHEN rank."position" < 1000 THEN 60
-  WHEN rank."position" < 6500 THEN 50
-  WHEN rank."position" < 25000 THEN 40
-  WHEN rank."position" < 100000 THEN 30
-  ELSE 20
-END AS score
-FROM
+ AS
+select ha.id, 
+	  case
+            WHEN ds.account_rank < 200 THEN 70
+            WHEN ds.account_rank < 1000 THEN 60
+            WHEN ds.account_rank < 6500 THEN 50
+            WHEN ds.account_rank < 25000 THEN 40
+            WHEN ds.account_rank < 100000 THEN 30
+            ELSE 20
+	  end AS score
+from hive_accounts ha 
+left join 
 (
-  SELECT
-    ha.id as id
-    , CASE WHEN ha2.rank ISNULL THEN 10e6 ELSE ha2.rank END AS "position"
-  FROM
-   hive_accounts ha
-  LEFT JOIN
-  (
-    SELECT
-      ha3.id
-    , rank() OVER(order by ha3.reputation DESC) as rank
-    FROM  hive_accounts ha3
-    ORDER BY ha3.reputation DESC LIMIT 150000
-    -- Conditions above (related to rank.position) eliminates all records having rank > 100k. So with inclding some
-    -- additional space for redundant accounts (having same reputation) lets assume we're limiting it to 150k
-    -- As another reason, it can be pointed that only 2% of account has the same reputations, it means only 2000
-    -- in 100000, but we get 150000 as 50% would repeat
-  ) as ha2 ON ha2.id = ha.id
-) rank
-;
+	SELECT ha3.id, rank() OVER (ORDER BY ha3.reputation DESC) as account_rank
+    FROM hive_accounts ha3
+	order by ha3.reputation desc
+	limit 150000
+  -- Conditions above (related to rank.position) eliminates all records having rank > 100k. So with inclding some
+  -- additional space for redundant accounts (having same reputation) lets assume we're limiting it to 150k
+  -- As another reason, it can be pointed that only 2% of account has the same reputations, it means only 2000
+  -- in 100000, but we get 150000 as 50% would repeat
+
+) ds on ds.id = ha.id
+; 
 
 DROP FUNCTION IF EXISTS public.calculate_notify_vote_score(_payout hive_posts.payout%TYPE, _abs_rshares hive_posts.abs_rshares%TYPE, _rshares hive_votes.rshares%TYPE) CASCADE
 ;
