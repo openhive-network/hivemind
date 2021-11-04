@@ -65,7 +65,14 @@ class LiveSyncBlockFromRpc(BlockWrapper):
         self._client = client
 
     def get_next_vop(self):
-        virtual_operations = VopsProvider.get_virtual_operation_for_blocks( self._client, self._conf, self.wrapped_block.get_num(), 1 )
+        block_num = self.wrapped_block.get_num()
+        result = VopsProvider.get_virtual_operation_for_blocks( self._client, self._conf, self.wrapped_block.get_num(), 1 )
+
+        virtual_operations = []
+
+        if block_num in result:
+            virtual_operations = result[block_num]['ops']
+
         for vop in virtual_operations:
             vop_object = VirtualOperationFromRpc( vop[ 'type' ], vop[ 'value' ] )
             if not vop_object.get_type():
