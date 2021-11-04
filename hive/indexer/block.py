@@ -128,6 +128,37 @@ class Transaction(ABC):
     def get_next_operation(self):
         pass
 
+class BlockWrapper( Block ):
+    def __init__(self, wrapped_block ):
+        """
+            wrapped_block - block which is wrapped
+        """
+        assert wrapped_block
+        self.wrapped_block = wrapped_block
+
+    def get_num(self):
+        return self.wrapped_block.get_num()
+
+    def get_next_vop(self):
+        return self.wrapped_block.get_next_vop()
+
+    def get_date(self):
+        return self.wrapped_block.get_date()
+
+    def get_hash(self):
+        return self.wrapped_block.get_hash()
+
+    def get_previous_block_hash(self):
+        return self.wrapped_block.get_previous_block_hash()
+
+    def get_number_of_transactions(self):
+        return self.wrapped_block.get_number_of_transactions()
+
+    def get_number_of_operations(self):
+        return self.wrapped_block.get_number_of_operations()
+
+    def get_next_transaction(self):
+        return self.wrapped_block.get_next_transaction()
 
 class BlocksProviderBase(ABC):
     def __init__(self, breaker, exception_reporter):

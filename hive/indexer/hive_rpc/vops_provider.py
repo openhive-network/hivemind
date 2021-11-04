@@ -58,13 +58,17 @@ class VopsProvider:
         """
         return number_of_threads + 1 # +1 because of a thread for collecting blocks from threads
 
+    @staticmethod
+    def get_virtual_operation_for_blocks(client, conf, start_block_num, number_of_blocks):
+        return client.enum_virtual_ops(conf, start_block_num, start_block_num + number_of_blocks)
+
     def thread_body_get_block( cls, blocks_shift ):
         try:
             for block in range ( cls._start_block + blocks_shift * cls._blocks_per_request, cls._max_block + cls._blocks_per_request, cls._number_of_threads * cls._blocks_per_request ):
                 if not cls._breaker():
                     return;
 
-                results = cls._client.enum_virtual_ops(cls._conf, block, block + cls._blocks_per_request)
+                results = VopsProvider.get_virtual_operation_for_blocks(cls._client, cls._conf, block, cls._blocks_per_request)
                 while cls._breaker():
                     try:
                         cls._responses_queues[ blocks_shift ].put( results, True, 1 )
