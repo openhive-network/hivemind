@@ -1,6 +1,8 @@
 from hive.indexer.hive_rpc.massive_blocks_data_provider_hive_rpc import MassiveBlocksDataProviderHiveRpc
+from hive.indexer.hive_rpc.block_from_rest import VirtualOperationFromRpc
+from hive.indexer.hive_rpc.vops_provider import VopsProvider
 from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
-from hive.indexer.block import Block
+from hive.indexer.block import Block, BlockWrapper
 
 
 from abc import ABC, abstractmethod
@@ -55,6 +57,28 @@ class OneBlockProviderFromHivedDb(OneBlockProviderBase):
 
         return self._get_block_from_provider(blocks_provider, block_num)
 
+class LiveSyncBlockFromRpc(BlockWrapper):
+    def __init__(self, wrapped_block, conf, client ):
+        BlockWrapper.__init__(self, wrapped_block)
+        assert conf
+        self._conf = conf
+        self._client = client
+
+    def get_next_vop(self):
+        block_num = self.wrapped_block.get_num()
+        result = VopsProvider.get_virtual_operation_for_blocks( self._client, self._conf, self.wrapped_block.get_num(), 1 )
+
+        virtual_operations = []
+
+        if block_num in result:
+            virtual_operations = result[block_num]['ops']
+
+        for vop in virtual_operations:
+            vop_object = VirtualOperationFromRpc( vop[ 'type' ], vop[ 'value' ] )
+            if not vop_object.get_type():
+                continue
+            yield vop_object
+
 class OneBlockProviderFromNode(OneBlockProviderBase):
 
     def __init__(self, conf, node, breaker, exception_reporter, thread_pool ):
@@ -73,7 +97,12 @@ class OneBlockProviderFromNode(OneBlockProviderBase):
             , exception_reporter = self._exception_reporter
             , external_thread_pool = self._thread_pool
         )
-        return self._get_block_from_provider(blocks_provider, block_num)
+        block = self._get_block_from_provider(blocks_provider, block_num)
+
+        if block == None:
+            return None
+
+        return LiveSyncBlockFromRpc(block, self._conf, self._node)
 
 class OneBlockProviderFactory:
     def __init__( self, conf, node, breaker, exception_reporter ):
