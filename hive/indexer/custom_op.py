@@ -43,19 +43,22 @@ class CustomOp:
         if not account:
             return
 
-        op_json = load_json_key(op, 'json')
         if op['id'] == 'follow':
+            op_json = load_json_key(op, 'json')
             if block_num < 6000000 and not isinstance(op_json, list):
                 op_json = ['follow', op_json]  # legacy compat
             cls._process_legacy(account, op_json, block_date, block_num)
         elif op['id'] == 'reblog':
+            op_json = load_json_key(op, 'json')
             if block_num < 6000000 and not isinstance(op_json, list):
                 op_json = ['reblog', op_json]  # legacy compat
             cls._process_legacy(account, op_json, block_date, block_num)
         elif op['id'] == 'community':
             if block_num > Community.start_block:
+                op_json = load_json_key(op, 'json')
                 process_json_community_op(account, op_json, block_date, block_num)
         elif op['id'] == 'notify':
+            op_json = load_json_key(op, 'json')
             cls._process_notify(account, op_json, block_date)
 
     @classmethod
