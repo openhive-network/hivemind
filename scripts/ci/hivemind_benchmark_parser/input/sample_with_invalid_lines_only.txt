@@ -1,0 +1,15 @@
+INFO - Request-Process-Time-Logger - Request: {"jsonrpc": "2.0", "id": 1, "method": "bridge.unread_notifications", "params": {"account": "blocktrades", "min_score": 100}} processed in 0.0079s
+INFO:jsonrpcserver.dispatcher.request:{"jsonrpc": "2.0", "id": 1, "method": "bridge.get_account_posts", "params": {"sort": "feed", "account": "blocktrades", "limit": 101}}
+ERROR - hive.server.common.helpers - ERR2: AssertionError('limit = 101 outside valid range [1:100]',)
+Traceback (most recent call last):
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/hive/server/common/helpers.py", line 38, in wrapper
+    return await function(*args, **kwargs)
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/hive/server/bridge_api/methods.py", line 277, in get_account_posts
+    limit =           valid_limit(limit, 100, 20)
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/hive/server/common/helpers.py", line 165, in valid_limit
+    return valid_number(limit, default, "limit", 1, ubound)
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/hive/server/common/helpers.py", line 161, in valid_number
+    assert lbound <= num and num <= ubound, "%s = %d outside valid range [%d:%d]" % (name, num, lbound, ubound)
+AssertionError: limit = 101 outside valid range [1:100]
+
+INFO:jsonrpcserver.dispatcher.response:{"jsonrpc": "2.0", "error": {"code": -32602, "message": "Invalid parameters", "data": "limit = 101 outside valid range [1:100]"}, "id": 1}

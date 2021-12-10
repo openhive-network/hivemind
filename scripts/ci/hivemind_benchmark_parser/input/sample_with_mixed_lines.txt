@@ -1,0 +1,92 @@
+INFO - hive.conf - The database created...
+INFO - hive.db.adapter - A database offers maximum connections: 100. Required 15 connections.
+INFO - hive.db.adapter - Closing database connection: 'root db creation'
+INFO - hive.db.adapter - Disposing SQL engine
+INFO - hive.conf - The database is disconnected...
+INFO - hive.conf - The database created...
+WARNING - aiocache.serializers.serializers - msgpack not installed, MsgPackSerializer unavailable
+INFO - aiocache - aioredis not installed, RedisCache unavailable
+INFO - aiocache - aiomcache not installed, Memcached unavailable
+INFO - hive.server.serve - hivemind_version : 1.25.2rc0
+INFO - hive.server.serve - hivemind_git_rev : bfb465fc
+INFO - hive.server.serve - hivemind_git_date : 2021-11-24 16:02:28 +0100
+INFO - hive.server.serve - database_schema_version : 33
+INFO - hive.server.serve - database_patch_date : 2021-11-24 15:06:49.458015
+INFO - hive.server.serve - database_patched_to_revision : bfb465fc
+INFO - hive.server.serve - database_head_block : 5000024
+======== Running on http://0.0.0.0:18080 ========
+Request: {"jsonrpc": "2.0", "id": 1, "method": "bridge.get_account_posts", "params": {"sort": "replies", "account": "gtg", "observer": "gtg"}} processed in 0.0740s
+Request: {"jsonrpc": "2.0", "id": 1, "method": "bridge.get_account_posts", "params": {"sort": "replies", "account": "gtg", "observer": "gtg"}} processed in 0.0740s
+Request: {"jsonrpc": "2.0", "id": 1, "method": "bridge.get_account_posts", "params": {"sort": "replies", "account": "gtg", "observer": "gtg"}} processed in 0.0740s
+INFO - Request-Process-Time-Logger - Request: {"jsonrpc": "2.0", "id": 1, "method": "bridge.get_account_posts", "params": {"sort": "replies", "account": "gtg", "observer": "gtg"}} processed in 0.0740s
+INFO:jsonrpcserver.dispatcher.request:{"jsonrpc": "2.0", "id": 1, "method": "bridge.get_account_posts", "params": {"sort": "payout", "account": "ned", "observer": "spaminator"}}
+INFO:jsonrpcserver.dispatcher.request:{"jsonrpc": "2.0", "id": 1, "method": "bridge.get_account_posts", "params": {"sort": "blog", "account": "gtg", "limit": 1}}
+INFO:jsonrpcserver.dispatcher.request:{"jsonrpc": "2.0", "id": 1, "method": "bridge.get_account_posts", "params": {"sort": "blog", "account": "steemit"}}
+INFO:jsonrpcserver.dispatcher.request:{"jsonrpc": "2.0", "id": 1, "method": "bridge.get_account_posts", "params": {"sort": "payout", "account": "test-reblog-03"}}
+INFO:jsonrpcserver.dispatcher.request:{"jsonrpc": "2.0", "id": 1, "method": "bridge.get_community", "params": {"name": "hive-135485"}}
+INFO:jsonrpcserver.dispatcher.request:{"jsonrpc": "2.0", "id": 1, "method": "bridge.get_account_posts", "params": {"sort": "feed", "account": "test-follower"}}
+INFO:jsonrpcserver.dispatcher.response:{"jsonrpc": "2.0", "result": {"id": 92457, "name": "hive-135485", "title": "World News", "about": "A place for major news from around the world.", "lang": "en", "type_id": 1, "is_nsfw": true, "subscribers": 4, "created_at": "2016-09-15 18:01:30", "sum_pending": 0, "num_pending": 28, "num_authors": 5, "avatar_url": "", "description": "", "flag_text": "", "settings": {}, "context": {}, "team": [["hive-135485", "owner", ""], ["test-safari", "admin", "Bill Gates"], ["blocktrades", "admin", ""]]}, "id": 1}
+Request: {"jsonrpc": "2.0", "id": 1, "method": "bridge.get_community", "params": {"name": "hive-135485"}} processed in 0.0154s
+INFO - Request-Process-Time-Logger - Request: {"jsonrpc": "2.0", "id": 1, "method": "bridge.get_community", "params": {"name": "hive-135485"}} processed in 0.0154s
+INFO:jsonrpcserver.dispatcher.response:{"jsonrpc": "2.0", "result": [{"post_id": 1, "author": "steemit", "permlink": "firstpost", "category": "meta", "title": "Welcome to Steem!", "body": "Steemit is a social media platform where anyone can earn STEEM points by posting. The more people who like a post, the more STEEM the poster earns. Anyone can sell their STEEM for cash or vest it to boost their voting power.", "json_metadata": {}, "created": "2016-03-30T18:30:18", "updated": "2016-03-30T18:30:18", "depth": 0, "children": 36, "net_rshares": 3060564548625, "is_paidout": true, "payout_at": "2016-08-24T19:59:42", "payout": 1.698, "pending_payout_value": "0.000 HBD", "author_payout_value": "0.942 HBD", "curator_payout_value": "0.756 HBD", "promoted": "0.000 HBD", "replies": [], "author_reputation": 35.01, "stats": {"hide": false, "gray": false, "total_votes": 92, "flag_weight": 2.0}, "url": "/meta/@steemit/firstpost", "beneficiaries": [], "max_accepted_payout": "1000000.000 HBD", "percent_hbd": 10000, "active_votes": [{"rshares": 375241000000, "voter
+Request: {"jsonrpc": "2.0", "id": 1, "method": "bridge.get_account_posts", "params": {"sort": "blog", "account": "steemit"}} processed in 0.0255s
+Request: jsonrpc=2.0&id=0ac40f83-cac0-425d-857e-926edf1a92f4&method=database_api.list_votes&params=start&params=limit&params=order processed in 0.0003s
+INFO - Request-Process-Time-Logger - Request: jsonrpc=2.0&id=0ac40f83-cac0-425d-857e-926edf1a92f4&method=database_api.list_votes&params=start&params=limit&params=order processed in 0.0003s
+INFO:jsonrpcserver.dispatcher.request:jsonrpc=2.0&id=21751799-c9c6-4057-8c79-4d5f682ffd73&method=database_api.find_comments&params=comments
+ERROR - hive.server.serve - Expecting value: line 1 column 1 (char 0)
+Traceback (most recent call last):
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/hive/server/serve.py", line 301, in jsonrpc_handler
+    response = await dispatch(request, methods=methods, debug=True, context=app, serialize=decimal_serialize, deserialize=decimal_deserialize)
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/jsonrpcserver/async_dispatcher.py", line 120, in dispatch
+    deserialize=deserialize,
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/jsonrpcserver/async_dispatcher.py", line 78, in dispatch_pure
+    deserialized = validate(deserialize(request), schema)
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/hive/server/serve.py", line 45, in decimal_deserialize
+    return simplejson.loads(s=s, use_decimal=True)
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/simplejson/__init__.py", line 542, in loads
+    return cls(encoding=encoding, **kw).decode(s)
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/simplejson/decoder.py", line 370, in decode
+    obj, end = self.raw_decode(s)
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/simplejson/decoder.py", line 400, in raw_decode
+    return self.scan_once(s, idx=_w(s, idx).end())
+simplejson.errors.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+Request: jsonrpc=2.0&id=21751799-c9c6-4057-8c79-4d5f682ffd73&method=database_api.find_comments&params=comments processed in 0.0003s
+INFO - Request-Process-Time-Logger - Request: jsonrpc=2.0&id=21751799-c9c6-4057-8c79-4d5f682ffd73&method=database_api.find_comments&params=comments processed in 0.0003s
+INFO:jsonrpcserver.dispatcher.request:jsonrpc=2.0&id=cbd1b60f-863a-4530-93a5-1c79bef93c21&method=tags_api.get_comment_discussions_by_payout&params=&params=&params=
+ERROR - hive.server.serve - Expecting value: line 1 column 1 (char 0)
+Traceback (most recent call last):
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/hive/server/serve.py", line 301, in jsonrpc_handler
+    response = await dispatch(request, methods=methods, debug=True, context=app, serialize=decimal_serialize, deserialize=decimal_deserialize)
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/jsonrpcserver/async_dispatcher.py", line 120, in dispatch
+    deserialize=deserialize,
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/jsonrpcserver/async_dispatcher.py", line 78, in dispatch_pure
+    deserialized = validate(deserialize(request), schema)
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/hive/server/serve.py", line 45, in decimal_deserialize
+    return simplejson.loads(s=s, use_decimal=True)
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/simplejson/__init__.py", line 542, in loads
+    return cls(encoding=encoding, **kw).decode(s)
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/simplejson/decoder.py", line 370, in decode
+    obj, end = self.raw_decode(s)
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/simplejson/decoder.py", line 400, in raw_decode
+    return self.scan_once(s, idx=_w(s, idx).end())
+simplejson.errors.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+Request: jsonrpc=2.0&id=cbd1b60f-863a-4530-93a5-1c79bef93c21&method=tags_api.get_comment_discussions_by_payout&params=&params=&params= processed in 0.0003s
+INFO - Request-Process-Time-Logger - Request: jsonrpc=2.0&id=cbd1b60f-863a-4530-93a5-1c79bef93c21&method=tags_api.get_comment_discussions_by_payout&params=&params=&params= processed in 0.0003s
+INFO:jsonrpcserver.dispatcher.request:jsonrpc=2.0&id=fb5a438d-e2f8-4994-bdfb-159a65ee7426&method=tags_api.get_comment_discussions_by_payout
+ERROR - hive.server.serve - Expecting value: line 1 column 1 (char 0)
+Traceback (most recent call last):
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/hive/server/serve.py", line 301, in jsonrpc_handler
+    response = await dispatch(request, methods=methods, debug=True, context=app, serialize=decimal_serialize, deserialize=decimal_deserialize)
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/jsonrpcserver/async_dispatcher.py", line 120, in dispatch
+    deserialize=deserialize,
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/jsonrpcserver/async_dispatcher.py", line 78, in dispatch_pure
+    deserialized = validate(deserialize(request), schema)
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/hive/server/serve.py", line 45, in decimal_deserialize
+    return simplejson.loads(s=s, use_decimal=True)
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/simplejson/__init__.py", line 542, in loads
+    return cls(encoding=encoding, **kw).decode(s)
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/simplejson/decoder.py", line 370, in decode
+    obj, end = self.raw_decode(s)
+  File "/builds/0/hive/hivemind/.venv/lib/python3.6/site-packages/simplejson/decoder.py", line 400, in raw_decode
+    return self.scan_once(s, idx=_w(s, idx).end())
+simplejson.errors.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
