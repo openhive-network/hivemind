@@ -1,4 +1,4 @@
-from config import ROOT_PATH
+from constants import ROOT_PATH
 import parser
 
 SAMPLE_LOG_WITH_MIXED_LINES = ROOT_PATH / 'input/sample_with_mixed_lines.txt'

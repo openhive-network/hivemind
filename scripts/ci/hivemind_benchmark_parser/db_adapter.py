@@ -56,6 +56,12 @@ class Db:
             row = await cur.first()
         return row[0] if row else None
 
+    async def query_all(self, sql, **kwargs):
+        """Perform a `SELECT n*m`"""
+        async with self.db.acquire() as conn:
+            cur = await self._query(conn, sql, **kwargs)
+            return await cur.fetchall()
+
     async def query(self, sql, **kwargs):
         """Perform a write query"""
         async with self.db.acquire() as conn:
@@ -67,7 +73,7 @@ class Db:
         try:
             sql = str(sqlalchemy.text(sql)
                       .bindparams(**kwargs)
-                      .compile(compile_kwargs={"literal_binds": True})
+                      .compile(compile_kwargs={'literal_binds': True})
                       )
             before = perf()
             result = await conn.execute(sql)
