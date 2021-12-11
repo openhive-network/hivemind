@@ -26,6 +26,7 @@ class ParsedRequest:
         return iter([self.api, self.method, self.parameters, self.total_time])
 
     def hash(self) -> str:
+        # ',' because bridg.emethod != bridge.method
         return calculate_hash(f'{self.api},{self.method},{self.parameters}')
 
 
@@ -46,7 +47,7 @@ def init_argparse(args) -> argparse.Namespace:
     req = p.add_argument_group('required arguments')
     add = req.add_argument
     add('-f', '--file', type=str, required=True, metavar='FILE_PATH', help='Source .log file path.')
-    add('-db', '--database_url', type=str, metavar="URL", help='Database URL.')
+    add('-db', '--database_url', type=str, required=True, metavar='URL', help='Database URL.')
     add('--desc', type=str, required=True, help='Benchmark description.')
     add('--exec-env-desc', type=str, required=True, help='Execution environment description.')
     add('--server-name', type=str, required=True, help='Server name when benchmark has been performed')
@@ -63,6 +64,8 @@ def get_lines_from_log_file(file_path: Path) -> List[str]:
 
 
 def parse_log_line(line: str) -> Optional[ParsedRequest]:
+    """Parses single line into a ParsedRequest object or returns None if it can't be parsed"""
+
     result = re.match(r'Request: (.*) processed in ([\.\d]+)s', line)
     if not result:
         return None
@@ -82,15 +85,22 @@ def parse_log_line(line: str) -> Optional[ParsedRequest]:
     else:
         api, method = request['method'].split('.')
 
-    return ParsedRequest(
-        api=api,
-        method=method,
-        parameters=json.dumps(request['params']),
-        total_time=float(result[2]),
-    )
+    return ParsedRequest(api=api,
+                         method=method,
+                         parameters=json.dumps(request['params']),
+                         total_time=float(result[2]),
+                         )
 
 
 def parse_log_lines(lines: List[str]) -> List[ParsedRequest]:
+    """
+    Calls parse_log_line method on each line from the 'lines' list, and adds a ParsedRequest object to a dictionary
+    where their hashrates are keys and the values are a list of the same ParsedRequest objects.
+
+    After that, increments the id for each object on this list to distinguish them from each other in the database.
+    Returns a list of ParsedRequest ready to be inserted into 'testcase' and 'benchmark_times' tables.
+    """
+
     parsed_list = []
     identical_requests = {}
     for line in lines:
@@ -102,15 +112,20 @@ def parse_log_lines(lines: List[str]) -> List[ParsedRequest]:
 
     for _, lst in identical_requests.items():
         id = 1
-        for response in lst:
-            response.id = id
-            parsed_list.append(response)
+        for parsed in lst:
+            parsed.id = id
+            parsed_list.append(parsed)
             id += 1
 
     return parsed_list
 
 
 def retrieve_cols_and_params(values: dict) -> Tuple[str, str]:
+    """
+    Parse dict of values into a two separated strings formats that are needed when
+    building a SQL for '_query' method of db_adapter.
+    """
+
     fields = list(values.keys())
     cols = ', '.join([k for k in fields])
     params = ', '.join([f':{k}' for k in fields])
@@ -119,34 +134,40 @@ def retrieve_cols_and_params(values: dict) -> Tuple[str, str]:
 
 async def insert_row(_db: Db, table: str, values: dict) -> None:
     cols, params = retrieve_cols_and_params(values)
-    sql = f"INSERT INTO {table} ({cols}) VALUES ({params});"
+    sql = f'INSERT INTO {table} ({cols}) VALUES ({params});'
     await _db.query(sql, **values)
 
 
 async def insert_row_with_returning(_db: Db, table: str, values: dict, additional: str = '') -> int:
     cols, params = retrieve_cols_and_params(values)
-    sql = f"INSERT INTO {table} ({cols}) VALUES ({params}) {additional};"
+    sql = f'INSERT INTO {table} ({cols}) VALUES ({params}) {additional};'
     return await _db.query_one(sql, **values)
 
 
 async def insert_testcases(_db: Db, parsed_list: List[ParsedRequest]) -> List[int]:
-    ids = []
+    """
+    Inserts all the ParsedRequest objects into the 'testcase' table. The primary key is always incremented during
+    insertion (even if there is a conflict) and after the INSERT query, we have to send another query to set the PK
+    value to the last one.
+
+    This function returns the list of inserted testcases primary keys (id column).
+    """
+    testcase_ids = []  # primary keys of 'testcase' table
     for p in parsed_list:
         values = dict(api=p.api,
                       method=p.method,
                       parameters=p.parameters,
-                      # ',' because bridg.emethod != bridge.method
                       hash=calculate_hash(f'{p.api},{p.method},{p.parameters}'),
                       )
-        ids.append(await insert_row_with_returning(_db,
-                                                   table='public.testcase',
-                                                   values=values,
-                                                   additional=' ON CONFLICT (hash) DO UPDATE '
-                                                              'SET api = public.testcase.api RETURNING id;',
-                                                   ))
+        testcase_ids.append(await insert_row_with_returning(_db,
+                                                            table='public.testcase',
+                                                            values=values,
+                                                            additional=' ON CONFLICT (hash) DO UPDATE '
+                                                                       'SET api = public.testcase.api RETURNING id;',
+                                                            ))
         # because the insert above increments public.testcase_id_seq everytime
         await _db.query("SELECT setval('public.testcase_id_seq', MAX(id)) FROM public.testcase;")
-    return ids
+    return testcase_ids
 
 
 def create_benchmark(args: argparse.Namespace) -> Benchmark:
@@ -156,7 +177,8 @@ def create_benchmark(args: argparse.Namespace) -> Benchmark:
                      server_name=args.server_name,
                      app_version=args.app_version,
                      testsuite_version=args.testsuite_version,
-                     runner=socket.gethostname())
+                     runner=socket.gethostname(),
+                     )
 
 
 def calculate_hash(text: str) -> str:
@@ -185,13 +207,12 @@ async def main():
         testcase_ids = await insert_testcases(_db, parsed_list)
 
         for idx, testcase_id in enumerate(testcase_ids):
-            # execution_time in ms
             await insert_row(_db,
                              'public.benchmark_times',
                              dict(benchmark_id=benchmark_id,
                                   testcase_id=testcase_id,
                                   request_id=parsed_list[idx].id,
-                                  execution_time=round(parsed_list[idx].total_time * 10 ** 3),
+                                  execution_time=round(parsed_list[idx].total_time * 10 ** 3),  # execution_time in ms
                                   ))
 
         _db.close()

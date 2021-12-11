@@ -1,5 +1,3 @@
 pytest~=6.2.5
 SQLAlchemy~=1.4.27
-psycopg~=3.0.5
-pytest-postgresql~=4.0.0
-psycopg2-binary~=2.9.2
+aiopg~=1.3.3
