@@ -47,14 +47,14 @@ def test_multiline_parsing():
     with open(SAMPLE_LOG_WITH_MIXED_LINES, 'r') as file:
         log_lines = file.readlines()
 
-    assert parser.parse_log_lines(log_lines) == expected_result
+    assert parser.prepare_db_records_from_log_lines(log_lines) == expected_result
 
 
 def test_empty_lines_parsing():
-    assert parser.parse_log_lines(['', '', '']) == []
+    assert parser.prepare_db_records_from_log_lines(['', '', '']) == []
 
 
 def test_invalid_lines_parsing():
     with open(SAMPLE_LOG_WITH_INVALID_LINES_ONLY, 'r') as file:
         log_lines = file.readlines()
-    assert parser.parse_log_lines(log_lines) == []
+    assert parser.prepare_db_records_from_log_lines(log_lines) == []

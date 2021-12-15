@@ -92,15 +92,7 @@ def parse_log_line(line: str) -> Optional[ParsedRequest]:
                          )
 
 
-def parse_log_lines(lines: List[str]) -> List[ParsedRequest]:
-    """
-    Calls parse_log_line method on each line from the 'lines' list, and adds a ParsedRequest object to a dictionary
-    where their hashrates are keys and the values are a list of the same ParsedRequest objects.
-
-    After that, increments the id for each object on this list to distinguish them from each other in the database.
-    Returns a list of ParsedRequest ready to be inserted into 'testcase' and 'benchmark_times' tables.
-    """
-
+def prepare_db_records_from_log_lines(lines: List[str]) -> List[ParsedRequest]:
     parsed_list = []
     identical_requests = {}
     for line in lines:
@@ -110,41 +102,41 @@ def parse_log_lines(lines: List[str]) -> List[ParsedRequest]:
             else:
                 identical_requests[hash].append(parsed)
 
-    for _, lst in identical_requests.items():
+    for lst in identical_requests.values():
         id = 1
         for parsed in lst:
-            parsed.id = id
+            parsed.id = id  # to distinguish them from each other in the database
             parsed_list.append(parsed)
             id += 1
 
     return parsed_list
 
 
-def retrieve_cols_and_params(values: dict) -> Tuple[str, str]:
+def retrieve_cols_and_params(cols_args: dict) -> Tuple[str, str]:
     """
-    Parse dict of values into a two separated strings formats that are needed when
+    Parse dict of cols_args into a two separated strings formats that are needed when
     building a SQL for '_query' method of db_adapter.
     """
 
-    fields = list(values.keys())
+    fields = list(cols_args.keys())
     cols = ', '.join([k for k in fields])
     params = ', '.join([f':{k}' for k in fields])
     return cols, params
 
 
-async def insert_row(_db: Db, table: str, values: dict) -> None:
-    cols, params = retrieve_cols_and_params(values)
+async def insert_row(db: Db, table: str, cols_args: dict) -> None:
+    cols, params = retrieve_cols_and_params(cols_args)
     sql = f'INSERT INTO {table} ({cols}) VALUES ({params});'
-    await _db.query(sql, **values)
+    await db.query(sql, **cols_args)
 
 
-async def insert_row_with_returning(_db: Db, table: str, values: dict, additional: str = '') -> int:
-    cols, params = retrieve_cols_and_params(values)
+async def insert_row_with_returning(db: Db, table: str, cols_args: dict, additional: str = '') -> int:
+    cols, params = retrieve_cols_and_params(cols_args)
     sql = f'INSERT INTO {table} ({cols}) VALUES ({params}) {additional};'
-    return await _db.query_one(sql, **values)
+    return await db.query_one(sql, **cols_args)
 
 
-async def insert_testcases(_db: Db, parsed_list: List[ParsedRequest]) -> List[int]:
+async def insert_testcases(db: Db, parsed_list: List[ParsedRequest]) -> List[int]:
     """
     Inserts all the ParsedRequest objects into the 'testcase' table. The primary key is always incremented during
     insertion (even if there is a conflict) and after the INSERT query, we have to send another query to set the PK
@@ -154,19 +146,19 @@ async def insert_testcases(_db: Db, parsed_list: List[ParsedRequest]) -> List[in
     """
     testcase_ids = []  # primary keys of 'testcase' table
     for p in parsed_list:
-        values = dict(api=p.api,
-                      method=p.method,
-                      parameters=p.parameters,
-                      hash=calculate_hash(f'{p.api},{p.method},{p.parameters}'),
-                      )
-        testcase_ids.append(await insert_row_with_returning(_db,
+        cols_args = {'api': p.api,
+                     'method': p.method,
+                     'parameters': p.parameters,
+                     'hash': p.hash(),
+                     }
+        testcase_ids.append(await insert_row_with_returning(db,
                                                             table='public.testcase',
-                                                            values=values,
+                                                            cols_args=cols_args,
                                                             additional=' ON CONFLICT (hash) DO UPDATE '
                                                                        'SET api = public.testcase.api RETURNING id;',
                                                             ))
         # because the insert above increments public.testcase_id_seq everytime
-        await _db.query("SELECT setval('public.testcase_id_seq', MAX(id)) FROM public.testcase;")
+        await db.query("SELECT setval('public.testcase_id_seq', MAX(id)) FROM public.testcase;")
     return testcase_ids
 
 
@@ -195,26 +187,26 @@ async def main():
     benchmark = create_benchmark(args)
 
     log_lines = get_lines_from_log_file(Path(args.file))
-    parsed_list = parse_log_lines(log_lines)
+    parsed_list = prepare_db_records_from_log_lines(log_lines)
 
     if db_url := args.database_url:
-        _db = await Db.create(db_url)
-        benchmark_id = await insert_row_with_returning(_db,
+        db = await Db.create(db_url)
+        benchmark_id = await insert_row_with_returning(db,
                                                        table='public.benchmark_description',
-                                                       values=vars(benchmark),
+                                                       cols_args=vars(benchmark),
                                                        additional=' RETURNING id',
                                                        )
-        testcase_ids = await insert_testcases(_db, parsed_list)
+        testcase_ids = await insert_testcases(db, parsed_list)
 
         for idx, testcase_id in enumerate(testcase_ids):
-            await insert_row(_db,
+            await insert_row(db,
                              'public.benchmark_times',
-                             dict(benchmark_id=benchmark_id,
-                                  testcase_id=testcase_id,
-                                  request_id=parsed_list[idx].id,
-                                  execution_time=round(parsed_list[idx].total_time * 10 ** 3),  # execution_time in ms
-                                  ))
+                             {'benchmark_id': benchmark_id,
+                              'testcase_id': testcase_id,
+                              'request_id': parsed_list[idx].id,
+                              'execution_time': round(parsed_list[idx].total_time * 10 ** 3),  # execution_time in ms
+                              })
 
-        _db.close()
-        await _db.wait_closed()
-        log.info(f'Execution time: {perf() - start:.6f}s')
+            db.close()
+            await db.wait_closed()
+            log.info(f'Execution time: {perf() - start:.6f}s')

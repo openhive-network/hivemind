@@ -15,13 +15,12 @@ SAMPLE_LOG_WITH_MIXED_LINES = ROOT_PATH / 'input/sample_with_mixed_lines.txt'
 @pytest.mark.asyncio
 @pytest.fixture
 async def db(postgresql):
-    config = dict(
-        drivername='postgresql',
-        username=postgresql.info.user,
-        host=postgresql.info.host,
-        port=postgresql.info.port,
-        database=postgresql.info.dbname
-    )
+    config = {'drivername': 'postgresql',
+              'username': postgresql.info.user,
+              'host': postgresql.info.host,
+              'port': postgresql.info.port,
+              'database': postgresql.info.dbname,
+              }
     db = await Db.create(URL.create(**config))
     await build_schema(db)
     return db
@@ -63,11 +62,11 @@ async def test_parser(db: Db):
     benchmark = parser.create_benchmark(args)
 
     log_lines = parser.get_lines_from_log_file(args.file)
-    parsed_list = parser.parse_log_lines(log_lines)
+    parsed_list = parser.prepare_db_records_from_log_lines(log_lines)
 
     benchmark_id = await parser.insert_row_with_returning(db,
                                                           table='public.benchmark_description',
-                                                          values=vars(benchmark),
+                                                          cols_args=vars(benchmark),
                                                           additional=' RETURNING id',
                                                           )
 
@@ -76,11 +75,11 @@ async def test_parser(db: Db):
     for idx, testcase_id in enumerate(testcase_ids):
         await parser.insert_row(db,
                                 'public.benchmark_times',
-                                dict(benchmark_id=benchmark_id,
-                                     testcase_id=testcase_id,
-                                     request_id=parsed_list[idx].id,
-                                     execution_time=round(parsed_list[idx].total_time * 10 ** 3),
-                                     ))
+                                {'benchmark_id': benchmark_id,
+                                 'testcase_id': testcase_id,
+                                 'request_id': parsed_list[idx].id,
+                                 'execution_time': round(parsed_list[idx].total_time * 10 ** 3),
+                                 })
 
     benchmark_description = await db.query_all("SELECT * FROM public.benchmark_description;")
     benchmark_times = await db.query_all("SELECT * FROM public.benchmark_times;")
