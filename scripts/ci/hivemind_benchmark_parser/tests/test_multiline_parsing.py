@@ -1,8 +1,10 @@
+from typing import Final
+
 from constants import ROOT_PATH
 import parser
 
-SAMPLE_LOG_WITH_MIXED_LINES = ROOT_PATH / 'input/sample_with_mixed_lines.txt'
-SAMPLE_LOG_WITH_INVALID_LINES_ONLY = ROOT_PATH / 'input/sample_with_invalid_lines_only.txt'
+SAMPLE_LOG_WITH_MIXED_LINES: Final = ROOT_PATH / 'input/sample_with_mixed_lines.txt'
+SAMPLE_LOG_WITH_INVALID_LINES_ONLY: Final = ROOT_PATH / 'input/sample_with_invalid_lines_only.txt'
 
 
 def test_get_lines_from_log_file():
@@ -12,36 +14,36 @@ def test_get_lines_from_log_file():
 
 def test_multiline_parsing():
     api = 'bridge'
-    expected_result = [parser.ParsedRequest(api=api,
-                                            method='get_account_posts',
-                                            parameters='{"sort": "replies", "account": "gtg", "observer": "gtg"}',
-                                            total_time=0.0740,
-                                            id=1,
-                                            ),
-                       parser.ParsedRequest(api=api,
-                                            method='get_account_posts',
-                                            parameters='{"sort": "replies", "account": "gtg", "observer": "gtg"}',
-                                            total_time=0.0740,
-                                            id=2,
-                                            ),
-                       parser.ParsedRequest(api=api,
-                                            method='get_account_posts',
-                                            parameters='{"sort": "replies", "account": "gtg", "observer": "gtg"}',
-                                            total_time=0.0740,
-                                            id=3,
-                                            ),
-                       parser.ParsedRequest(api=api,
-                                            method='get_community',
-                                            parameters='{"name": "hive-135485"}',
-                                            total_time=0.0154,
-                                            id=1,
-                                            ),
-                       parser.ParsedRequest(api=api,
-                                            method='get_account_posts',
-                                            parameters='{"sort": "blog", "account": "steemit"}',
-                                            total_time=0.0255,
-                                            id=1,
-                                            ),
+    expected_result = [parser.ParsedTestcase(api=api,
+                                             method='get_account_posts',
+                                             parameters='{"sort": "replies", "account": "gtg", "observer": "gtg"}',
+                                             total_time=0.0740,
+                                             id=1,
+                                             ),
+                       parser.ParsedTestcase(api=api,
+                                             method='get_account_posts',
+                                             parameters='{"sort": "replies", "account": "gtg", "observer": "gtg"}',
+                                             total_time=0.0740,
+                                             id=2,
+                                             ),
+                       parser.ParsedTestcase(api=api,
+                                             method='get_account_posts',
+                                             parameters='{"sort": "replies", "account": "gtg", "observer": "gtg"}',
+                                             total_time=0.0740,
+                                             id=3,
+                                             ),
+                       parser.ParsedTestcase(api=api,
+                                             method='get_community',
+                                             parameters='{"name": "hive-135485"}',
+                                             total_time=0.0154,
+                                             id=1,
+                                             ),
+                       parser.ParsedTestcase(api=api,
+                                             method='get_account_posts',
+                                             parameters='{"sort": "blog", "account": "steemit"}',
+                                             total_time=0.0255,
+                                             id=1,
+                                             ),
                        ]
 
     with open(SAMPLE_LOG_WITH_MIXED_LINES, 'r') as file:
