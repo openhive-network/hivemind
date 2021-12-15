@@ -9,11 +9,11 @@ import logging
 from pathlib import Path
 import re
 import socket
-import sys
-from time import perf_counter as perf
 from typing import Optional
 
 from db_adapter import Db
+
+log = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
@@ -32,22 +32,6 @@ class ParsedTestcase:
         return iter([self.api, self.method, self.parameters, self.total_time])
 
 
-def init_argparse(args) -> argparse.Namespace:
-    p = argparse.ArgumentParser(description='Parse a benchmark log file.')
-
-    req = p.add_argument_group('required arguments')
-    add = req.add_argument
-    add('-f', '--file', type=str, required=True, metavar='FILE_PATH', help='Source .log file path.')
-    add('-db', '--database_url', type=str, required=True, metavar='URL', help='Database URL.')
-    add('--desc', type=str, required=True, help='Benchmark description.')
-    add('--exec-env-desc', type=str, required=True, help='Execution environment description.')
-    add('--server-name', type=str, required=True, help='Server name when benchmark has been performed')
-    add('--app-version', type=str, required=True)
-    add('--testsuite-version', type=str, required=True)
-
-    return p.parse_args(args)
-
-
 def get_lines_from_log_file(file_path: Path) -> list[str]:
     with open(file_path, 'r') as file:
         log_lines = file.readlines()
@@ -64,7 +48,7 @@ def parse_log_line(line: str) -> Optional[ParsedTestcase]:
     try:
         request = json.loads(result[1])
     except json.JSONDecodeError:
-        logging.warning(f'[Testcase rejected from parsing]: {result[0]}')
+        logging.warning(f'[REJECTED FROM PARSING]: {result[0]}')
         return None
 
     if request['method'] == 'call':
@@ -152,10 +136,10 @@ async def insert_requests(db: Db, parsed_list: list[ParsedTestcase]) -> list[int
     return request_ids
 
 
-def benchmark_description(args: argparse.Namespace) -> dict[str, str]:
+def benchmark_description(args: argparse.Namespace, timestamp: datetime.datetime) -> dict[str, str]:
     return {'description': args.desc,
             'execution_environment_description': args.exec_env_desc,
-            'timestamp': datetime.datetime.now().strftime('%Y/%m/%d, %H:%M:%S'),
+            'timestamp': timestamp.strftime('%Y/%m/%d, %H:%M:%S'),
             'server_name': args.server_name,
             'app_version': args.app_version,
             'testsuite_version': args.testsuite_version,
@@ -167,35 +151,22 @@ def calculate_hash(*args) -> str:
     return sha256(str(args).encode('utf-8')).hexdigest()
 
 
-async def main():
-    start = perf()
-    logging.getLogger().setLevel(logging.INFO)
-    log = logging.getLogger(__name__)
-
-    args = init_argparse(sys.argv[1:])
-    log.info(f'Arguments given:\n{vars(args)}')
-
+async def main(args, db, timestamp):
     log_lines = get_lines_from_log_file(Path(args.file))
     parsed_list = prepare_db_records_from_log_lines(log_lines)
 
-    if db_url := args.database_url:
-        db = await Db.create(db_url)
-        benchmark_id = await insert_row_with_returning(db,
-                                                       table='public.benchmark_description',
-                                                       cols_args=benchmark_description(args),
-                                                       additional=' RETURNING id',
-                                                       )
-        request_ids = await insert_requests(db, parsed_list)
+    benchmark_id = await insert_row_with_returning(db,
+                                                   table='public.benchmark_description',
+                                                   cols_args=benchmark_description(args, timestamp),
+                                                   additional=' RETURNING id',
+                                                   )
+    request_ids = await insert_requests(db, parsed_list)
 
-        for id, request_id in enumerate(request_ids):
-            await insert_row(db,
-                             'public.request_times',
-                             {'benchmark_id': benchmark_id,
-                              'request_id': request_id,
-                              'testcase_id': parsed_list[id].id,
-                              'execution_time': round(parsed_list[id].total_time * 10 ** 3),  # execution_time in ms
-                              })
-
-        db.close()
-        await db.wait_closed()
-        log.info(f'Execution time: {perf() - start:.6f}s')
+    for id, request_id in enumerate(request_ids):
+        await insert_row(db,
+                         'public.request_times',
+                         {'benchmark_id': benchmark_id,
+                          'request_id': request_id,
+                          'testcase_id': parsed_list[id].id,
+                          'execution_time': round(parsed_list[id].total_time * 10 ** 3),  # execution_time in ms
+                          })

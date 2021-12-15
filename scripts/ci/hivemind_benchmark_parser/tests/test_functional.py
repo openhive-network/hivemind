@@ -7,6 +7,7 @@ from sqlalchemy.engine import URL
 
 from constants import ROOT_PATH
 from db_adapter import Db
+import main
 import parser
 
 DB_SCHEMA: Final = ROOT_PATH / 'db/db-schema.sql'
@@ -68,8 +69,9 @@ async def test_creating_tables(db: Db):
 
 
 @pytest.mark.asyncio
-async def test_parser(db: Db):
-    sys_argv = ['-f', str(SAMPLE_LOG_WITH_MIXED_LINES),
+async def test_hivemind_server_mode(db: Db):
+    sys_argv = ['-m', '1',
+                '-f', str(SAMPLE_LOG_WITH_MIXED_LINES),
                 '-db', '',
                 '--desc', 'Test description',
                 '--exec-env-desc', 'Mock database',
@@ -78,35 +80,17 @@ async def test_parser(db: Db):
                 '--testsuite-version', '2.00',
                 ]
 
-    args = parser.init_argparse(sys_argv)
-    benchmark_description = parser.benchmark_description(args)
+    timestamp = datetime.datetime.now()
 
-    log_lines = parser.get_lines_from_log_file(args.file)
-    parsed_list = parser.prepare_db_records_from_log_lines(log_lines)
-
-    benchmark_id = await parser.insert_row_with_returning(db,
-                                                          table='public.benchmark_description',
-                                                          cols_args=benchmark_description,
-                                                          additional=' RETURNING id',
-                                                          )
-
-    request_ids = await parser.insert_requests(db, parsed_list)
-
-    for idx, request_id in enumerate(request_ids):
-        await parser.insert_row(db,
-                                'public.request_times',
-                                {'benchmark_id': benchmark_id,
-                                 'request_id': request_id,
-                                 'testcase_id': parsed_list[idx].id,
-                                 'execution_time': round(parsed_list[idx].total_time * 10 ** 3),
-                                 })
+    args = main.init_argparse(sys_argv)
+    await parser.main(args, db, timestamp)
 
     actual = await db.query_all(select_for_all())
     db.close()
     await db.wait_closed()
 
     benchmark = ('Test description', 'Mock database',
-                 datetime.datetime.strptime(benchmark_description['timestamp'], '%Y/%m/%d, %H:%M:%S'),
+                 timestamp.replace(microsecond=0),
                  'localhost', '1.00', '2.00', socket.gethostname())
 
     request1 = ('bridge', 'get_account_posts', '{"sort": "replies", "account": "gtg", "observer": "gtg"}',
