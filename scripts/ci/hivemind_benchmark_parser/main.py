@@ -2,11 +2,14 @@ import argparse
 import asyncio
 import datetime
 import logging
+from pathlib import Path
 import sys
 from time import perf_counter as perf
 
+import common
 from db_adapter import Db
-import parser
+import hivemind_server_parser
+import hivemind_sync_parser
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -33,18 +36,26 @@ def init_argparse(args) -> argparse.Namespace:
 
 async def main():
     start = perf()
-    timestamp = datetime.datetime.now()
 
     args = init_argparse(sys.argv[1:])
     log.info(f'Arguments given:\n{vars(args)}')
 
+    benchmark_description = common.benchmark_description(args)
+
     db = await Db.create(args.database_url)
+
+    benchmark_id = await common.insert_row_with_returning(db,
+                                                          table='public.benchmark_description',
+                                                          cols_args=benchmark_description,
+                                                          additional=' RETURNING id',
+                                                          )
 
     if args.mode == 1:
         log.info('[MODE]: hivemind-server')
-        await parser.main(args, db, timestamp)
+        await hivemind_server_parser.main(Path(args.file), db, benchmark_id)
     elif args.mode == 2:
         log.info('[MODE]: hivemind-sync')
+        await hivemind_sync_parser.main(Path(args.file), db, benchmark_id)
     elif args.mode == 3:
         log.info('[MODE]: not implemented')
 

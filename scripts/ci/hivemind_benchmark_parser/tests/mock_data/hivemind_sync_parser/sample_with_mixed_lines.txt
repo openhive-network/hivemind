@@ -1,0 +1,63 @@
+INFO - hive.db.adapter - Closing database connection: 'hive_posts'
+INFO - hive.db.db_state - [INIT] End pre-initial sync hooks for table hive_posts
+INFO - hive.db.db_state - [INIT] 11 threads finished creating indexes.
+INFO - hive.db.db_state - === CREATING INDEXES ===
+INFO - hive.utils.stats - ####################
+INFO - hive.utils.stats - Total creating indexes time
+INFO - hive.utils.stats - `hive_posts`: Processed final operations in 0.0853 seconds
+INFO - hive.utils.stats - `hive_votes`: Processed final operations in 0.0396 seconds
+INFO - hive.utils.stats - Current final processing time: 0.3676s.
+INFO - hive.db.db_state - Elapsed time: 0.1003s. Calculated elapsed time: 0.3676s. Difference: -0.2673s
+INFO - hive.db.db_state - === CREATING INDEXES ===
+INFO - hive.db.db_state - Dropping FKs
+INFO - hive.db.db_state - [INIT] Finish pre-initial sync hooks
+INFO - hive.indexer.sync - [INIT] *** Initial fast sync ***
+INFO - hive.indexer.blocks - End-of-sync LIB is set to 4999980, last block that guarantees cashout at end of sync is 0
+INFO - hive.indexer.hive_rpc.massive_blocks_data_provider_hive_rpc - vops_queue.qsize: 0 blocks_queue.qsize: 0
+INFO - hive.indexer.hive_rpc.massive_blocks_data_provider_hive_rpc - Awaiting any vops to process...
+INFO - hive.indexer.hive_rpc.massive_blocks_data_provider_hive_rpc - Awaiting any block to process...
+INFO - hive.indexer.blocks - #############################################################################
+INFO - hive.indexer.blocks - [PROCESS MULTI] Flushing data in N threads
+INFO - hive.indexer.reputations - Written total reputation data records: 0
+INFO - hive.indexer.blocks - [PROCESS MULTI] 1000 blocks in 0.0557s
+INFO - hive.indexer.sync - [INITIAL SYNC] Got block 1000 @ 2016-03-24T16:55:30 (17854/s, 17855rps, 331197354wps) -- eta 04m 39s
+INFO - hive.indexer.sync - [INITIAL SYNC] Time elapsed: 0.169300s
+INFO - hive.indexer.sync - [INITIAL SYNC] Current system time: 15:06:49
+INFO - hive.indexer.sync - memory usage report: physical_memory = 61.69 MB, virtual_memory = 1953.77 MB, shared_memory = 13.53 MB
+INFO - hive.indexer.hive_rpc.massive_blocks_data_provider_hive_rpc - vops_queue.qsize: 1135 blocks_queue.qsize: 855
+INFO - hive.indexer.hive_rpc.massive_blocks_data_provider_hive_rpc - Awaiting any block to process...
+INFO - hive.indexer.blocks - #############################################################################
+INFO - hive.indexer.blocks - [PROCESS MULTI] Flushing data in N threads
+INFO - hive.indexer.reputations - Written total reputation data records: 0
+INFO - hive.indexer.blocks - [PROCESS MULTI] 3000 blocks in 0.31s
+INFO - hive.indexer.sync - [INITIAL SYNC] Got block 4000 @ 2016-03-24T17:45:45 (3980/s, 3980rps, 462819751wps) -- eta 20m 55s
+INFO - hive.indexer.sync - [INITIAL SYNC] Time elapsed: 0.62s
+INFO - hive.indexer.sync - [INITIAL SYNC] Current system time: 15:06:50
+INFO - hive.indexer.sync - memory usage report: physical_memory = 64.82 MB, virtual_memory = 1927.85 MB, shared_memory = 14.53 MB
+INFO - hive.indexer.hive_rpc.massive_blocks_data_provider_hive_rpc - vops_queue.qsize: 1500 blocks_queue.qsize: 1500
+INFO - hive.indexer.blocks - #############################################################################
+INFO - hive.indexer.blocks - [PROCESS MULTI] Flushing data in N threads
+INFO - hive.indexer.reputations - Written total reputation data records: 0
+INFO - hive.indexer.blocks - [PROCESS MULTI] 970 blocks in 0.2507s
+INFO - hive.indexer.sync - [INITIAL SYNC] Got block 4970 @ 2016-03-24T17:45:45 (3980/s, 3980rps, 462819751wps) -- eta 20m 55s
+INFO - hive.indexer.sync - [INITIAL SYNC] Time elapsed: 0.463699s
+INFO - hive.indexer.sync - [INITIAL SYNC] Current system time: 15:06:50
+INFO - hive.indexer.sync - memory usage report: physical_memory = 65.82 MB, virtual_memory = 1957.85 MB, shared_memory = 13.53 MB
+INFO - hive.indexer.hive_rpc.massive_blocks_data_provider_hive_rpc - vops_queue.qsize: 1500 blocks_queue.qsize: 1500
+INFO - hive.indexer.blocks - #############################################################################
+INFO - hive.indexer.hive_rpc.massive_blocks_data_provider_hive_rpc - vops_queue.qsize: 1500 blocks_queue.qsize: 1500
+INFO - hive.db.db_state - === FILLING FINAL DATA INTO TABLES ===
+INFO - hive.utils.stats - ####################
+INFO - hive.utils.stats - Total final operations time
+INFO - hive.utils.stats - `hive_posts`: Processed final operations in 132.9586 seconds
+INFO - hive.utils.stats - `blocks_consistency_flag`: Processed final operations in 125.6784 seconds
+INFO - hive.utils.stats - Current final processing time: 326.9432s.
+INFO - hive.db.db_state - Elapsed time: 164.7935s. Calculated elapsed time: 326.9432s. Difference: -162.1497s
+INFO - hive.db.db_state - === FILLING FINAL DATA INTO TABLES ===
+INFO - hive.db.db_state - Filling tables with final values: finished
+INFO - hive.db.db_state - Recreating foreign keys
+INFO - hive.db.db_state - Foreign keys were recreated
+INFO - hive.db.db_state - [INIT] Attempting to execute query: `VACUUM (VERBOSE,ANALYZE)'...
+INFO - hive.db.db_state - [INIT] Query `VACUUM (VERBOSE,ANALYZE)' done in 89.1560s
+INFO - hive.db.db_state - [INIT] After initial sync actions done in 383.0571s
+INFO - hive.db.db_state - [INIT] Initial sync complete!

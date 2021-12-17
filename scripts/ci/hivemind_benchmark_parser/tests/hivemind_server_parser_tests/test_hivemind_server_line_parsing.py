@@ -1,7 +1,7 @@
-import parser
+import hivemind_server_parser as parser
 
 
-def test_single_log_line_parsing_format1():
+def test_server_log_single_line_parsing_format1():
     line = 'Request: {"jsonrpc": "2.0", "id": 1, "method": "bridge.get_ranked_posts", ' \
            '"params": {"sort": "payout", "tag": "all", "observer": "joeyarnoldvn", "limit": 5}} processed in 0.0058s'
     parse_result = parser.parse_log_line(line)
@@ -13,7 +13,7 @@ def test_single_log_line_parsing_format1():
     assert parse_result.id is None
 
 
-def test_single_log_line_parsing_format2():
+def test_server_log_single_line_parsing_format2():
     line = 'Request: {"jsonrpc": "2.0", "id": "b8d63786-b314-4a36-b5ed-331f75210447", ' \
            '"method": "bridge.get_payout_stats", "params": [10]} processed in 0.0072s'
     parse_result = parser.parse_log_line(line)
@@ -25,35 +25,35 @@ def test_single_log_line_parsing_format2():
     assert parse_result.id is None
 
 
-def test_single_log_line_parsing_format3():
+def test_server_log_single_line_parsing_format3():
     line = 'Request: {"jsonrpc": "2.0", "id": 1, "method": "call", ' \
            '"params": {"api": "condenser_api", "method": "get_account_votes", "params": ["gtg"]}} processed in 0.0012s'
     parse_result = parser.parse_log_line(line)
 
     assert parse_result.api == 'condenser_api'
-    assert parse_result.method == 'call'
-    assert parse_result.parameters == '{"api": "condenser_api", "method": "get_account_votes", "params": ["gtg"]}'
+    assert parse_result.method == 'get_account_votes'
+    assert parse_result.parameters == '["gtg"]'
     assert parse_result.total_time == 0.0012
     assert parse_result.id is None
 
 
-def test_single_log_line_parsing_format4():
+def test_server_log_single_line_parsing_format4():
     line = 'Request: {"jsonrpc": "2.0", "id": 1, "method": "call", ' \
            '"params": ["bridge_api", "account_notifications", ["steemit", 15, 20]]} processed in 0.0015s'
     parse_result = parser.parse_log_line(line)
 
     assert parse_result.api == 'bridge_api'
-    assert parse_result.method == 'call'
-    assert parse_result.parameters == '["bridge_api", "account_notifications", ["steemit", 15, 20]]'
+    assert parse_result.method == 'account_notifications'
+    assert parse_result.parameters == '["steemit", 15, 20]'
     assert parse_result.total_time == 0.0015
     assert parse_result.id is None
 
 
-def test_empty_log_line_parsing():
+def test_empty_server_log_line_parsing():
     assert parser.parse_log_line('') is None
 
 
-def test_wrong_line_parsing():
+def test_wrong_server_log_line_parsing():
     line = 'INFO - Request-Process-Time-Logger - ' \
            'Request: {"jsonrpc": "2.0", "id": 1, "method": "bridge.get_ranked_posts", ' \
            '"params": {"sort": "created", "tag": "hive-135485", "start_author": "", ' \

@@ -1,18 +1,15 @@
 from typing import Final
 
 from constants import ROOT_PATH
-import parser
+import hivemind_server_parser as parser
 
-SAMPLE_LOG_WITH_MIXED_LINES: Final = ROOT_PATH / 'input/sample_with_mixed_lines.txt'
-SAMPLE_LOG_WITH_INVALID_LINES_ONLY: Final = ROOT_PATH / 'input/sample_with_invalid_lines_only.txt'
-
-
-def test_get_lines_from_log_file():
-    log_lines = parser.get_lines_from_log_file(SAMPLE_LOG_WITH_MIXED_LINES)
-    assert len(log_lines) != 0
+SAMPLE_LOG_WITH_MIXED_LINES: Final = ROOT_PATH / 'tests/mock_data/hivemind_server_parser' \
+                                                 '/sample_with_mixed_lines.log'
+SAMPLE_LOG_WITH_INVALID_LINES_ONLY: Final = ROOT_PATH / 'tests/mock_data/hivemind_server_parser' \
+                                                        '/sample_with_invalid_lines_only.log'
 
 
-def test_multiline_parsing():
+def test_preparing_db_records_from_log_lines():
     api = 'bridge'
     expected_result = [parser.ParsedTestcase(api=api,
                                              method='get_account_posts',
@@ -52,11 +49,11 @@ def test_multiline_parsing():
     assert parser.prepare_db_records_from_log_lines(log_lines) == expected_result
 
 
-def test_empty_lines_parsing():
+def test_server_log_empty_lines_parsing():
     assert parser.prepare_db_records_from_log_lines(['', '', '']) == []
 
 
-def test_invalid_lines_parsing():
+def test_server_log_invalid_lines_parsing():
     with open(SAMPLE_LOG_WITH_INVALID_LINES_ONLY, 'r') as file:
         log_lines = file.readlines()
     assert parser.prepare_db_records_from_log_lines(log_lines) == []

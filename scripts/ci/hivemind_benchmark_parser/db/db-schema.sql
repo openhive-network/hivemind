@@ -1,16 +1,6 @@
 BEGIN;
 
 
-CREATE TABLE IF NOT EXISTS public.request
-(
-    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
-    api text NOT NULL,
-    method text NOT NULL,
-    parameters text NOT NULL,
-    hash text NOT NULL,
-    PRIMARY KEY (id)
-);
-
 CREATE TABLE IF NOT EXISTS public.benchmark_description
 (
     id bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
@@ -24,31 +14,41 @@ CREATE TABLE IF NOT EXISTS public.benchmark_description
     PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.request_times
+CREATE TABLE IF NOT EXISTS public.testcase
 (
-    benchmark_id bigint NOT NULL,
-    request_id bigint NOT NULL,
-    testcase_id integer NOT NULL,
-    execution_time bigint NOT NULL,
-    PRIMARY KEY (benchmark_id, request_id, testcase_id)
+    hash text NOT NULL,
+    caller text NOT NULL,
+    method text NOT NULL,
+    params text NOT NULL,
+    PRIMARY KEY (hash)
 );
 
-ALTER TABLE IF EXISTS public.request_times
-    ADD FOREIGN KEY (benchmark_id)
+CREATE TABLE IF NOT EXISTS public.benchmark_values
+(
+    benchmark_description_id bigint NOT NULL,
+    testcase_hash text NOT NULL,
+    occurrence_number integer NOT NULL,
+    value bigint NOT NULL,
+    unit text NOT NULL,
+    PRIMARY KEY (benchmark_description_id, testcase_hash, occurrence_number)
+);
+
+ALTER TABLE IF EXISTS public.benchmark_values
+    ADD FOREIGN KEY (benchmark_description_id)
     REFERENCES public.benchmark_description (id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
 
 
-ALTER TABLE IF EXISTS public.request_times
-    ADD FOREIGN KEY (request_id)
-    REFERENCES public.request (id) MATCH SIMPLE
+ALTER TABLE IF EXISTS public.benchmark_values
+    ADD FOREIGN KEY (testcase_hash)
+    REFERENCES public.testcase (hash) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
 
 
-CREATE UNIQUE INDEX unique_request_idx ON request (hash);
+CREATE UNIQUE INDEX unique_testcase_hash ON testcase (hash);
 
 END;
