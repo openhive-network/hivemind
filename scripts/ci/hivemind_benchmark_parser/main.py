@@ -3,16 +3,17 @@ import asyncio
 import datetime
 import logging
 from pathlib import Path
+import socket
 import sys
 from time import perf_counter as perf
 
 import common
 from db_adapter import Db
-import hivemind_server_parser
-import hivemind_sync_parser
+import server_log_parser
+import sync_log_parser
 
-logging.basicConfig(level=logging.INFO)
-log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+log = logging.getLogger()
 
 
 def init_argparse(args) -> argparse.Namespace:
@@ -22,7 +23,7 @@ def init_argparse(args) -> argparse.Namespace:
     req = p.add_argument_group('required arguments')
     add = req.add_argument
     add('-m', '--mode', type=int, required=True, choices=[1, 2, 3],
-        help='1 - hivemind-server,\n2 - hivemind-sync,\n3 - not implemented')
+        help='1 - server_log_parser,\n2 - sync_log_parser,\n3 - replay_benchmark_parser')
     add('-f', '--file', type=str, required=True, metavar='FILE_PATH', help='Source .log file path.')
     add('-db', '--database_url', type=str, required=True, metavar='URL', help='Database URL.')
     add('--desc', type=str, required=True, help='Benchmark description.')
@@ -34,30 +35,40 @@ def init_argparse(args) -> argparse.Namespace:
     return p.parse_args(args)
 
 
+async def insert_benchmark_description(db: Db, args: argparse.Namespace, timestamp: datetime.datetime) -> int:
+    return await common.insert_row_with_returning(db,
+                                                  table='public.benchmark_description',
+                                                  cols_args={'description': args.desc,
+                                                             'execution_environment_description': args.exec_env_desc,
+                                                             'timestamp': timestamp.strftime('%Y/%m/%d, %H:%M:%S'),
+                                                             'server_name': args.server_name,
+                                                             'app_version': args.app_version,
+                                                             'testsuite_version': args.testsuite_version,
+                                                             'runner': socket.gethostname(),
+                                                             },
+                                                  additional=' RETURNING id',
+                                                  )
+
+
 async def main():
     start = perf()
+    timestamp = datetime.datetime.now()
 
     args = init_argparse(sys.argv[1:])
-    log.info(f'Arguments given:\n{vars(args)}')
-
-    benchmark_description = common.benchmark_description(args)
+    log.info(f' | [START ARGS]={vars(args)}')
 
     db = await Db.create(args.database_url)
 
-    benchmark_id = await common.insert_row_with_returning(db,
-                                                          table='public.benchmark_description',
-                                                          cols_args=benchmark_description,
-                                                          additional=' RETURNING id',
-                                                          )
+    benchmark_id = await insert_benchmark_description(db, args, timestamp)
 
     if args.mode == 1:
-        log.info('[MODE]: hivemind-server')
-        await hivemind_server_parser.main(Path(args.file), db, benchmark_id)
+        log.info(' | [MODE]=server_log_parser')
+        await server_log_parser.main(db, file=Path(args.file), benchmark_id=benchmark_id)
     elif args.mode == 2:
-        log.info('[MODE]: hivemind-sync')
-        await hivemind_sync_parser.main(Path(args.file), db, benchmark_id)
+        log.info(' | [MODE]=sync_log_parser')
+        await sync_log_parser.main(db, file=Path(args.file), benchmark_id=benchmark_id)
     elif args.mode == 3:
-        log.info('[MODE]: not implemented')
+        log.info('[ | [MODE]=replay_benchmark_parser')
 
     db.close()
     await db.wait_closed()

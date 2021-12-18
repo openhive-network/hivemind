@@ -9,6 +9,14 @@ INFO - hive.utils.stats - `hive_votes`: Processed final operations in 0.0396 sec
 INFO - hive.utils.stats - Current final processing time: 0.3676s.
 INFO - hive.db.db_state - Elapsed time: 0.1003s. Calculated elapsed time: 0.3676s. Difference: -0.2673s
 INFO - hive.db.db_state - === CREATING INDEXES ===
+INFO - hive.db.db_state - === CREATING INDEXES ===
+INFO - hive.utils.stats - ####################
+INFO - hive.utils.stats - Total creating indexes time
+INFO - hive.utils.stats - `hive_posts`: Processed final operations in 2.0853 seconds
+INFO - hive.utils.stats - `hive_votes`: Processed final operations in 2.0396 seconds
+INFO - hive.utils.stats - Current final processing time: 0.3676s.
+INFO - hive.db.db_state - Elapsed time: 4.1003s. Calculated elapsed time: 0.3676s. Difference: -0.2673s
+INFO - hive.db.db_state - === CREATING INDEXES ===
 INFO - hive.db.db_state - Dropping FKs
 INFO - hive.db.db_state - [INIT] Finish pre-initial sync hooks
 INFO - hive.indexer.sync - [INIT] *** Initial fast sync ***
