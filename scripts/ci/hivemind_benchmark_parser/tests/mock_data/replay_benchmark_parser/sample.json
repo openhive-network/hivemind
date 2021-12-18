@@ -1,0 +1,93 @@
+{
+  "database_object_sizeofs": [
+    {
+      "object_name": "hive::chain::dynamic_global_property_object",
+      "object_size": 368
+    },
+    {
+      "object_name": "hive::chain::account_object",
+      "object_size": 424
+    },
+    {
+      "object_name": "hive::chain::account_metadata_object",
+      "object_size": 72
+    }
+  ],
+  "measurements": [
+    {
+      "block_number": 5000000,
+      "real_ms": 0,
+      "cpu_ms": 0,
+      "current_mem": 6801740,
+      "peak_mem": 6801740,
+      "index_memory_details_cntr": [
+        {
+          "index_name": "hive::chain::dynamic_global_property_object",
+          "index_size": 1,
+          "item_sizeof": 368,
+          "item_additional_allocation": 0,
+          "additional_container_allocation": 32,
+          "total_index_mem_usage": 400
+        },
+        {
+          "index_name": "hive::chain::account_object",
+          "index_size": 4,
+          "item_sizeof": 424,
+          "item_additional_allocation": 0,
+          "additional_container_allocation": 768,
+          "total_index_mem_usage": 2464
+        }
+      ]
+    },
+    {
+      "block_number": 100000,
+      "real_ms": 1138,
+      "cpu_ms": 1135,
+      "current_mem": 6867456,
+      "peak_mem": 6900240,
+      "index_memory_details_cntr": [
+        {
+          "index_name": "hive::chain::dynamic_global_property_object",
+          "index_size": 1,
+          "item_sizeof": 368,
+          "item_additional_allocation": 0,
+          "additional_container_allocation": 32,
+          "total_index_mem_usage": 400
+        },
+        {
+          "index_name": "hive::chain::account_object",
+          "index_size": 398,
+          "item_sizeof": 424,
+          "item_additional_allocation": 0,
+          "additional_container_allocation": 76416,
+          "total_index_mem_usage": 245168
+        },
+        {
+          "index_name": "hive::chain::account_metadata_object",
+          "index_size": 394,
+          "item_sizeof": 72,
+          "item_additional_allocation": 0,
+          "additional_container_allocation": 25216,
+          "total_index_mem_usage": 53584
+        }
+      ]
+    }
+  ],
+  "total_measurement": {
+    "block_number": 5000000,
+    "real_ms": 877896,
+    "cpu_ms": 560396,
+    "current_mem": 7183280,
+    "peak_mem": 7183280,
+    "index_memory_details_cntr": [
+      {
+        "index_name": "hive::chain::comment_cashout_object",
+        "index_size": 951749,
+        "item_sizeof": 128,
+        "item_additional_allocation": 108402184,
+        "additional_container_allocation": 60911936,
+        "total_index_mem_usage": 291137992
+      }
+    ]
+  }
+}

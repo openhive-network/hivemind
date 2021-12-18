@@ -133,3 +133,15 @@ def sql_select_all() -> str:
 def interesting_sync_log_strings():
     text = common.get_text_from_log_file(SAMPLE_SYNC_LOG_WITH_MIXED_LINES)
     return sync_log_parser.extract_interesting_log_strings(text)
+
+
+@pytest.fixture()
+def sample_measurement():
+    return {
+        "block_number": 5000000,
+        "real_ms": 877896,
+        "cpu_ms": 560396,
+        "current_mem": 7183280,
+        "peak_mem": 7183280,
+        "index_memory_details_cntr": [],
+    }

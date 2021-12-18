@@ -3,15 +3,12 @@ from __future__ import annotations
 import dataclasses
 from enum import Enum
 import json
-import logging
 from pathlib import Path
 import re
 from typing import ClassVar, Final, Optional, Union
 
 import common
 from common import MappedDbData
-
-log = logging.getLogger(__name__)
 
 HIVEMIND_INDEXER: Final = 'hivemind_indexer'
 
@@ -48,7 +45,8 @@ class ParsedBlockIndexerInfo:
                 MappedDbData(**self.processing_blocks_total_elapsed_time()),
                 MappedDbData(**self.memory_usage_physical()),
                 MappedDbData(**self.memory_usage_virtual()),
-                MappedDbData(**self.memory_usage_shared())]
+                MappedDbData(**self.memory_usage_shared()),
+                ]
 
     def processing_blocks_partial_time(self) -> dict:
         return {'caller': self.caller,

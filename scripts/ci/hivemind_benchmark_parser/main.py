@@ -9,6 +9,7 @@ from time import perf_counter as perf
 
 import common
 from db_adapter import Db
+import replay_benchmark_parser
 import server_log_parser
 import sync_log_parser
 
@@ -69,6 +70,7 @@ async def main():
         await sync_log_parser.main(db, file=Path(args.file), benchmark_id=benchmark_id)
     elif args.mode == 3:
         log.info('[ | [MODE]=replay_benchmark_parser')
+        await replay_benchmark_parser.main(db, file=Path(args.file), benchmark_id=benchmark_id)
 
     db.close()
     await db.wait_closed()
