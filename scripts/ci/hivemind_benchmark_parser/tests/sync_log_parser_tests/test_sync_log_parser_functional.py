@@ -16,6 +16,8 @@ SAMPLE_LOG_WITH_MIXED_LINES: Final = ROOT_PATH / 'tests/mock_data/sync_log_parse
 
 @pytest.mark.asyncio
 async def test_sync_log_mode(db: Db, sql_select_all: str):
+    time_unit = 'ms'
+    mem_unit = 'MB'
     sys_argv = ['-m', '2',
                 '-f', str(SAMPLE_LOG_WITH_MIXED_LINES),
                 '-db', '',
@@ -122,33 +124,33 @@ async def test_sync_log_mode(db: Db, sql_select_all: str):
                                        '',
                                        '12774917a0f1b79fced481772cb2797f379d60e80d819dd44b84e0747e0f3f97')
 
-    assert actual == [(*benchmark, *creating_indexes_partial_time1, 85, 'ms'),
-                      (*benchmark, *creating_indexes_partial_time2, 40, 'ms'),
-                      (*benchmark, *creating_indexes_partial_time1, 2085, 'ms'),
-                      (*benchmark, *creating_indexes_partial_time2, 2040, 'ms'),
-                      (*benchmark, *filling_data_partial_time1, 132959, 'ms'),
-                      (*benchmark, *filling_data_partial_time2, 125678, 'ms'),
+    assert actual == [(*benchmark, *creating_indexes_partial_time1, 85, time_unit),
+                      (*benchmark, *creating_indexes_partial_time2, 40, time_unit),
+                      (*benchmark, *creating_indexes_total_elapsed_time, 100, time_unit),
 
-                      (*benchmark, *creating_indexes_total_elapsed_time, 100, 'ms'),
-                      (*benchmark, *creating_indexes_total_elapsed_time, 4100, 'ms'),
+                      (*benchmark, *creating_indexes_partial_time1, 2085, time_unit),
+                      (*benchmark, *creating_indexes_partial_time2, 2040, time_unit),
+                      (*benchmark, *creating_indexes_total_elapsed_time, 4100, time_unit),
 
-                      (*benchmark, *processing_blocks_partial_time1, 56, 'ms'),
-                      (*benchmark, *processing_blocks_total_elapsed_time1, 169, 'ms'),
-                      (*benchmark, *memory_usage_physical1, 62, 'MB'),
-                      (*benchmark, *memory_usage_virtual1, 1954, 'MB'),
-                      (*benchmark, *memory_usage_shared1, 14, 'MB'),
+                      (*benchmark, *processing_blocks_partial_time1, 56, time_unit),
+                      (*benchmark, *processing_blocks_total_elapsed_time1, 169, time_unit),
+                      (*benchmark, *memory_usage_physical1, 62, mem_unit),
+                      (*benchmark, *memory_usage_virtual1, 1954, mem_unit),
+                      (*benchmark, *memory_usage_shared1, 14, mem_unit),
 
-                      (*benchmark, *processing_blocks_partial_time2, 310, 'ms'),
-                      (*benchmark, *processing_blocks_total_elapsed_time2, 620, 'ms'),
-                      (*benchmark, *memory_usage_physical2, 65, 'MB'),
-                      (*benchmark, *memory_usage_virtual2, 1928, 'MB'),
-                      (*benchmark, *memory_usage_shared2, 15, 'MB'),
+                      (*benchmark, *processing_blocks_partial_time2, 310, time_unit),
+                      (*benchmark, *processing_blocks_total_elapsed_time2, 620, time_unit),
+                      (*benchmark, *memory_usage_physical2, 65, mem_unit),
+                      (*benchmark, *memory_usage_virtual2, 1928, mem_unit),
+                      (*benchmark, *memory_usage_shared2, 15, mem_unit),
 
-                      (*benchmark, *processing_blocks_partial_time3, 251, 'ms'),
-                      (*benchmark, *processing_blocks_total_elapsed_time3, 464, 'ms'),
-                      (*benchmark, *memory_usage_physical3, 66, 'MB'),
-                      (*benchmark, *memory_usage_virtual3, 1958, 'MB'),
-                      (*benchmark, *memory_usage_shared3, 14, 'MB'),
+                      (*benchmark, *processing_blocks_partial_time3, 251, time_unit),
+                      (*benchmark, *processing_blocks_total_elapsed_time3, 464, time_unit),
+                      (*benchmark, *memory_usage_physical3, 66, mem_unit),
+                      (*benchmark, *memory_usage_virtual3, 1958, mem_unit),
+                      (*benchmark, *memory_usage_shared3, 14, mem_unit),
 
-                      (*benchmark, *filling_data_total_elapsed_time, 164794, 'ms'),
+                      (*benchmark, *filling_data_partial_time1, 132959, time_unit),
+                      (*benchmark, *filling_data_partial_time2, 125678, time_unit),
+                      (*benchmark, *filling_data_total_elapsed_time, 164794, time_unit),
                       ]

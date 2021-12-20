@@ -31,6 +31,8 @@ class ParsedMeasurement:
     current_mem: int
     peak_mem: int
     caller: str = REPLAY_BENCHMARK
+    time_unit: str = 'ms'
+    mem_unit: str = 'kB'
 
     def to_mapped_db_data_instances(self) -> list[MappedDbData]:
         return [MappedDbData(**self.type_real_time()),
@@ -44,7 +46,7 @@ class ParsedMeasurement:
                 'method': f'{self.measurement_type.value}_real_time',
                 'params': json.dumps({"block": self.block_number}),
                 'value': self.real_ms,
-                'unit': 'ms',
+                'unit': self.time_unit,
                 }
 
     def type_cpu_time(self):
@@ -52,7 +54,7 @@ class ParsedMeasurement:
                 'method': f'{self.measurement_type.value}_cpu_time',
                 'params': json.dumps({"block": self.block_number}),
                 'value': self.cpu_ms,
-                'unit': 'ms',
+                'unit': self.time_unit,
                 }
 
     def type_current_memory_usage(self):
@@ -60,7 +62,7 @@ class ParsedMeasurement:
                 'method': f'{self.measurement_type.value}_current_memory_usage',
                 'params': json.dumps({"block": self.block_number}),
                 'value': self.current_mem,
-                'unit': 'MB',
+                'unit': self.mem_unit,
                 }
 
     def type_peak_memory_usage(self):
@@ -68,7 +70,7 @@ class ParsedMeasurement:
                 'method': f'{self.measurement_type.value}_peak_memory_usage',
                 'params': json.dumps({"block": self.block_number}),
                 'value': self.peak_mem,
-                'unit': 'MB',
+                'unit': self.mem_unit,
                 }
 
 

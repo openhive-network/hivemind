@@ -35,6 +35,7 @@ class ParsedBlockIndexerInfo:
     virtual_memory: float
     shared_memory: float
     mem_unit: str
+    time_unit: str = 'ms'
     caller: str = HIVEMIND_INDEXER
 
     def __post_init__(self):
@@ -53,7 +54,7 @@ class ParsedBlockIndexerInfo:
                 'method': 'processing_blocks_partial_time',
                 'params': json.dumps({"from": self.range_from, "to": self.range_to}),
                 'value': round(self.processing_n_blocks_time * 10 ** 3),
-                'unit': 'ms',
+                'unit': self.time_unit,
                 }
 
     def processing_blocks_total_elapsed_time(self) -> dict:
@@ -61,7 +62,7 @@ class ParsedBlockIndexerInfo:
                 'method': 'processing_blocks_total_elapsed_time',
                 'params': json.dumps({"block": self.range_to}),
                 'value': round(self.processing_total_time * 10 ** 3),
-                'unit': 'ms',
+                'unit': self.time_unit,
                 }
 
     def memory_usage_physical(self) -> dict:
@@ -95,7 +96,7 @@ class ParsedSummaryDbOperation:
     total_time: float
     partials: list[ParsedPartialDbOperation]
     caller: str = HIVEMIND_INDEXER
-    unit: str = 'ms'
+    time_unit: str = 'ms'
 
     def to_mapped_db_data_instances(self) -> list[MappedDbData]:
         return [MappedDbData(**self.type_total_elapsed_time())]
@@ -105,7 +106,7 @@ class ParsedSummaryDbOperation:
                 'method': f'{self.info_type.value}_total_elapsed_time',
                 'params': '',
                 'value': round(self.total_time * 10 ** 3),
-                'unit': self.unit,
+                'unit': self.time_unit,
                 }
 
 
@@ -115,7 +116,7 @@ class ParsedPartialDbOperation:
     table_name: str
     total_time: float
     caller: str = HIVEMIND_INDEXER
-    unit: str = 'ms'
+    time_unit: str = 'ms'
 
     def to_mapped_db_data_instances(self) -> list[MappedDbData]:
         return [MappedDbData(**self.type_partial_time())]
@@ -125,7 +126,7 @@ class ParsedPartialDbOperation:
                 'method': f'{self.info_type.value}_partial_time',
                 'params': json.dumps({"table_name": self.table_name}),
                 'value': round(self.total_time * 10 ** 3),
-                'unit': self.unit,
+                'unit': self.time_unit,
                 }
 
 
@@ -142,6 +143,7 @@ def extract_interesting_log_strings(text: str) -> dict[InfoType, list]:
 
 
 def parse_database_operation(lines: list[str], info_type: InfoType) -> Optional[ParsedSummaryDbOperation]:
+    """Parses lines about `creating indexes` or `filling data`"""
     partial_regex = r'INFO - hive.utils.stats - `(.*)`: Processed final operations in ([\.\d]*) seconds'
     summary_regex = r'INFO - hive.db.db_state - Elapsed time: ([\.\d]*)s. Calculated elapsed time: [\.\d]*s. ' \
                     r'Difference: [-\.\d]*s'
@@ -162,6 +164,7 @@ def parse_database_operation(lines: list[str], info_type: InfoType) -> Optional[
 
 
 def parse_blocks_info(lines: list[str]) -> Optional[ParsedBlockIndexerInfo]:
+    """Parses lines about `blocks info`"""
     current_block = processing_n_blocks_time = processing_total_time = physical_memory = virtual_memory \
         = shared_memory = mem_unit = None
 
@@ -219,13 +222,12 @@ async def main(db, file: Path, benchmark_id: int):
     for info_type, text in list(interesting_log_strings.items()):
         parsed_objects[info_type] = parse_log_strings_to_objects(info_type, text)
 
-    all_parsed_objects: list = []
-    for parsed_list in (parsed_objects[CREATING_INDEXES], parsed_objects[FILLING_DATA]):  # for ParsedPartialDbOperation
+    all_parsed_objects = []
+    for info_type, parsed_list in parsed_objects.items():
         for parsed in parsed_list:
-            all_parsed_objects.extend(parsed.partials)
-
-    for parsed in parsed_objects.values():  # for ParsedSummaryDbOperation and ParsedBlockIndexerInfo
-        all_parsed_objects.extend(parsed)
+            if info_type in (CREATING_INDEXES, FILLING_DATA):
+                all_parsed_objects.extend(parsed.partials)
+            all_parsed_objects.append(parsed)
 
     mapped_instances = []
     for parsed in all_parsed_objects:

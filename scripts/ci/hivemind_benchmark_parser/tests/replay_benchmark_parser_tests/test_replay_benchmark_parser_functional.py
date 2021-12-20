@@ -16,6 +16,8 @@ SAMPLE_JSON: Final = ROOT_PATH / 'tests/mock_data/replay_benchmark_parser' \
 
 @pytest.mark.asyncio
 async def test_replay_benchmark_mode(db: Db, sql_select_all: str):
+    time_unit = 'ms'
+    mem_unit = 'kB'
     sys_argv = ['-m', '1',
                 '-f', str(SAMPLE_JSON),
                 '-db', '',
@@ -86,18 +88,18 @@ async def test_replay_benchmark_mode(db: Db, sql_select_all: str):
                                               '{"block": 5000000}',
                                               '531550150b907e96d74110fb20d23d06eb568b8435cb190e80262544ed9a183e',)
 
-    assert actual == [(*benchmark, *partial_measurement_real_time1, 0, 'ms'),
-                      (*benchmark, *partial_measurement_cpu_time1, 0, 'ms'),
-                      (*benchmark, *partial_measurement_current_memory_usage1, 6801740, 'MB'),
-                      (*benchmark, *partial_measurement_peak_memory_usage1, 6801740, 'MB'),
+    assert actual == [(*benchmark, *partial_measurement_real_time1, 0, time_unit),
+                      (*benchmark, *partial_measurement_cpu_time1, 0, time_unit),
+                      (*benchmark, *partial_measurement_current_memory_usage1, 6801740, mem_unit),
+                      (*benchmark, *partial_measurement_peak_memory_usage1, 6801740, mem_unit),
 
-                      (*benchmark, *partial_measurement_real_time2, 1138, 'ms'),
-                      (*benchmark, *partial_measurement_cpu_time2, 1135, 'ms'),
-                      (*benchmark, *partial_measurement_current_memory_usage2, 6867456, 'MB'),
-                      (*benchmark, *partial_measurement_peak_memory_usage2, 6900240, 'MB'),
+                      (*benchmark, *partial_measurement_real_time2, 1138, time_unit),
+                      (*benchmark, *partial_measurement_cpu_time2, 1135, time_unit),
+                      (*benchmark, *partial_measurement_current_memory_usage2, 6867456, mem_unit),
+                      (*benchmark, *partial_measurement_peak_memory_usage2, 6900240, mem_unit),
 
-                      (*benchmark, *partial_measurement_real_time3, 877896, 'ms'),
-                      (*benchmark, *partial_measurement_cpu_time3, 560396, 'ms'),
-                      (*benchmark, *partial_measurement_current_memory_usage3, 7183280, 'MB'),
-                      (*benchmark, *partial_measurement_peak_memory_usage3, 7183280, 'MB'),
+                      (*benchmark, *partial_measurement_real_time3, 877896, time_unit),
+                      (*benchmark, *partial_measurement_cpu_time3, 560396, time_unit),
+                      (*benchmark, *partial_measurement_current_memory_usage3, 7183280, mem_unit),
+                      (*benchmark, *partial_measurement_peak_memory_usage3, 7183280, mem_unit),
                       ]

@@ -16,6 +16,7 @@ SAMPLE_LOG_WITH_MIXED_LINES: Final = ROOT_PATH / 'tests/mock_data/server_log_par
 
 @pytest.mark.asyncio
 async def test_server_log_mode(db: Db, sql_select_all: str):
+    time_unit = 'ms'
     sys_argv = ['-m', '1',
                 '-f', str(SAMPLE_LOG_WITH_MIXED_LINES),
                 '-db', '',
@@ -47,8 +48,8 @@ async def test_server_log_mode(db: Db, sql_select_all: str):
     testcase3 = ('bridge', 'get_account_posts', '{"sort": "blog", "account": "steemit"}',
                  'e67acec4eef88c4e462efea6846004ad0487d20982f537d4e7bd87da3b50d730')
 
-    assert actual == [(*benchmark, *testcase1, 74, 'ms'),
-                      (*benchmark, *testcase1, 74, 'ms'),
-                      (*benchmark, *testcase1, 74, 'ms'),
-                      (*benchmark, *testcase2, 15, 'ms'),
-                      (*benchmark, *testcase3, 26, 'ms')]
+    assert actual == [(*benchmark, *testcase1, 74, time_unit),
+                      (*benchmark, *testcase1, 74, time_unit),
+                      (*benchmark, *testcase1, 74, time_unit),
+                      (*benchmark, *testcase2, 15, time_unit),
+                      (*benchmark, *testcase3, 26, time_unit)]
