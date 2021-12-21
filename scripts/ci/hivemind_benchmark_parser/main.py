@@ -13,7 +13,7 @@ import replay_benchmark_parser
 import server_log_parser
 import sync_log_parser
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 log = logging.getLogger()
 
 

@@ -380,6 +380,23 @@ stages:
     paths:
       - tavern_benchmarks_report.html
 
+.benchmark_results_collector-script: &benchmark_results_collector-script
+  - MAIN="$(realpath ./scripts/ci/benchmark_results_collector/main.py)"
+  - SERVER_LOG="./request_process_times.log"
+  - SYNC_LOG="hivemind-sync.log"
+  - APP_VERSION=$(git describe --tags)
+  - TEST="test"
+  - echo "STARTING BENCHAMRK RESULTS COLLECTOR"
+  - pwd
+  - ls
+  - pip install -r scripts/ci/benchmark_results_collector/requirements.txt
+  - python $MAIN -m 1 -j $CI_JOB_ID -f $SERVER_LOG -db $BENCHMARK_STATSDB_URL --desc $TEST --exec-env-desc $TEST --server-name $TEST --app-version $APP_VERSION --testsuite-version $TEST
+  - python $MAIN -m 2 -j $CI_JOB_ID -f $SYNC_LOG -db $BENCHMARK_STATSDB_URL --desc $TEST --exec-env-desc $TEST --server-name $TEST --app-version $APP_VERSION --testsuite-version $TEST
+
+.benchmark_results_collector:
+  stage: post-deploy
+  script:
+    - *benchmark_results_collector-script
 
 sync-e2e-benchmark:
   extends: .default
@@ -404,6 +421,7 @@ sync-e2e-benchmark:
     - *mock_tests-script
     - *hive_api_smoketest-script
     - *api-smoketest-benchmark-script
+    - *benchmark_results_collector-script
   artifacts:
     when: always
     paths:
