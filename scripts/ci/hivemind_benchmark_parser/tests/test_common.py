@@ -15,6 +15,7 @@ SAMPLE_LOG_WITH_MIXED_LINES: Final = ROOT_PATH / 'tests/mock_data/server_log_par
 
 def test_args_parsing():
     args = main.init_argparse(['-m', '1',
+                               '-j', '1',
                                '-f', 'input/sample_with_mixed_lines.log',
                                '-db', 'testurl',
                                '--desc', 'Test description',
@@ -25,6 +26,7 @@ def test_args_parsing():
                                ])
 
     assert args.mode == 1
+    assert args.job_id == 1
     assert args.file == 'input/sample_with_mixed_lines.log'
     assert args.database_url == 'testurl'
     assert args.desc == 'Test description'
@@ -74,4 +76,4 @@ async def test_creating_tables(db: Db):
     result_rows = await db.query_all(sql)
     result = [r[0] for r in result_rows]
 
-    assert result == ['benchmark_description', 'benchmark_values', 'testcase']
+    assert result == ['benchmark_description', 'benchmark_results_collector_merged', 'benchmark_values', 'testcase']

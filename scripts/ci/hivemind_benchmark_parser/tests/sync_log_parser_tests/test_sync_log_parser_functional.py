@@ -19,6 +19,7 @@ async def test_sync_log_mode(db: Db, sql_select_all: str):
     time_unit = 'ms'
     mem_unit = 'MB'
     sys_argv = ['-m', '2',
+                '-j', '33',
                 '-f', str(SAMPLE_LOG_WITH_MIXED_LINES),
                 '-db', '',
                 '--desc', 'sync parser functional test',
@@ -31,9 +32,8 @@ async def test_sync_log_mode(db: Db, sql_select_all: str):
     args = main.init_argparse(sys_argv)
     timestamp = datetime.datetime.now()
 
-    benchmark_id = await main.insert_benchmark_description(db, args=args, timestamp=timestamp)
-
-    await parser.main(db, file=Path(args.file), benchmark_id=benchmark_id)
+    await main.insert_benchmark_description(db, args=args, timestamp=timestamp)
+    await parser.main(db, file=Path(args.file), benchmark_id=args.job_id)
     parser.ParsedBlockIndexerInfo.last_block_number = 1  # cleanup
 
     actual = await db.query_all(sql_select_all)

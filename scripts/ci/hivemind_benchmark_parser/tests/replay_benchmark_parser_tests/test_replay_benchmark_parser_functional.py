@@ -19,6 +19,7 @@ async def test_replay_benchmark_mode(db: Db, sql_select_all: str):
     time_unit = 'ms'
     mem_unit = 'kB'
     sys_argv = ['-m', '1',
+                '-j', '11',
                 '-f', str(SAMPLE_JSON),
                 '-db', '',
                 '--desc', 'replay benchmark parser functional test',
@@ -31,9 +32,8 @@ async def test_replay_benchmark_mode(db: Db, sql_select_all: str):
     args = main.init_argparse(sys_argv)
     timestamp = datetime.datetime.now()
 
-    benchmark_id = await main.insert_benchmark_description(db, args=args, timestamp=timestamp)
-
-    await parser.main(db, file=Path(args.file), benchmark_id=benchmark_id)
+    await main.insert_benchmark_description(db, args=args, timestamp=timestamp)
+    await parser.main(db, file=Path(args.file), benchmark_id=args.job_id)
 
     actual = await db.query_all(sql_select_all)
 
