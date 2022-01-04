@@ -74,7 +74,7 @@ stages:
     - when: on_success
 
 .default:
-  image: hivemind/python:3.6
+  image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
   interruptible: true
   inherit:
     default: false
