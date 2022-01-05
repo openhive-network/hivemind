@@ -12,6 +12,7 @@ stages:
   - python -m venv .venv
   - source .venv/bin/activate
   - time pip install --upgrade pip setuptools wheel
+  - pip install pyyaml
   - pip install .
 
 .setup-runner-env: &setup-runner-env
