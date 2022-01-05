@@ -11,7 +11,7 @@ import main
 import sync_log_parser as parser
 
 SAMPLE_LOG_WITH_MIXED_LINES: Final = ROOT_PATH / 'tests/mock_data/sync_log_parser' \
-                                                 '/sample_with_mixed_lines.log'
+                                                 '/sample_with_mixed_lines.txt'
 
 
 @pytest.mark.asyncio

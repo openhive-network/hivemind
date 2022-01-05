@@ -10,13 +10,13 @@ from db_adapter import Db
 import main
 
 SAMPLE_LOG_WITH_MIXED_LINES: Final = ROOT_PATH / 'tests/mock_data/server_log_parser' \
-                                                 '/sample_with_mixed_lines.log'
+                                                 '/sample_with_mixed_lines.txt'
 
 
 def test_args_parsing():
     args = main.init_argparse(['-m', '1',
                                '-j', '1',
-                               '-f', 'input/sample_with_mixed_lines.log',
+                               '-f', 'input/sample_with_mixed_lines.txt',
                                '-db', 'testurl',
                                '--desc', 'Test description',
                                '--exec-env-desc', 'environment',
@@ -27,7 +27,7 @@ def test_args_parsing():
 
     assert args.mode == 1
     assert args.job_id == 1
-    assert args.file == 'input/sample_with_mixed_lines.log'
+    assert args.file == 'input/sample_with_mixed_lines.txt'
     assert args.database_url == 'testurl'
     assert args.desc == 'Test description'
     assert args.exec_env_desc == 'environment'

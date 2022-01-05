@@ -4,9 +4,9 @@ from constants import ROOT_PATH
 import server_log_parser as parser
 
 SAMPLE_LOG_WITH_MIXED_LINES: Final = ROOT_PATH / 'tests/mock_data/server_log_parser' \
-                                                 '/sample_with_mixed_lines.log'
+                                                 '/sample_with_mixed_lines.txt'
 SAMPLE_LOG_WITH_INVALID_LINES_ONLY: Final = ROOT_PATH / 'tests/mock_data/server_log_parser' \
-                                                        '/sample_with_invalid_lines_only.log'
+                                                        '/sample_with_invalid_lines_only.txt'
 
 
 def test_server_log_parsing_and_mapping(mock_mapped_list):
