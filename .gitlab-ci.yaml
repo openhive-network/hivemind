@@ -12,6 +12,7 @@ stages:
   - python -m venv .venv
   - source .venv/bin/activate
   - time pip install --upgrade pip setuptools wheel
+  - pip install pyyaml
   - pip install .
 
 .setup-runner-env: &setup-runner-env
@@ -35,7 +36,6 @@ stages:
 
 .fetch-git-tags: &fetch-git-tags
   - git fetch --tags # Looks to be unnecessary.
-  - git describe --tags --long --dirty
   #- echo git tag -f ci_implicit_tag # Needed to build python package
 
 .start-timer: &start-timer
@@ -74,12 +74,13 @@ stages:
     - when: on_success
 
 .default:
-  image: hivemind/python:3.6
+  image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
   interruptible: true
   inherit:
     default: false
     variables: false
   variables:
+    GIT_DEPTH: 10
     GIT_STRATEGY: clone
     GIT_SUBMODULE_STRATEGY: recursive
     PIPENV_VENV_IN_PROJECT: 1
