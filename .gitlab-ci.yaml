@@ -33,6 +33,11 @@ stages:
   - echo "CI_COMMIT_REF_SLUG is $CI_COMMIT_REF_SLUG"
   - export HIVEMIND_DB_NAME=${HIVEMIND_DB_NAME//[^a-zA-Z0-9_]/_}
   - echo "HIVEMIND_DB_NAME is $HIVEMIND_DB_NAME"
+  - echo "CI_COMMIT_TAG is $CI_COMMIT_TAG"
+  - echo "CI_RUNNER_TAGS  is $CI_RUNNER_TAGS "
+  - echo "CI_RUNNER_DESCRIPTION is $CI_RUNNER_DESCRIPTION"
+  - echo "CI_RUNNER_VERSION is $CI_RUNNER_VERSION"
+  - psql  $BENCHMARK_STATSDB_URL -c "SELECT version()"
 
 .fetch-git-tags: &fetch-git-tags
   - git fetch --tags # Looks to be unnecessary.
@@ -80,7 +85,7 @@ stages:
     default: false
     variables: false
   variables:
-    GIT_DEPTH: 10
+    GIT_DEPTH: 50
     GIT_STRATEGY: clone
     GIT_SUBMODULE_STRATEGY: recursive
     PIPENV_VENV_IN_PROJECT: 1
@@ -125,6 +130,7 @@ stages:
     expire_in: 7 days
   tags:
     - hivemind-heavy-job
+    - hive-4 #temporary
 
 .test-common:
   extends: .default
@@ -381,17 +387,14 @@ stages:
       - tavern_benchmarks_report.html
 
 .benchmark_results_collector-script: &benchmark_results_collector-script
-  - MAIN="$(realpath ./scripts/ci/benchmark_results_collector/main.py)"
+  - MAIN="./scripts/ci/benchmark_results_collector/main.py"
   - SERVER_LOG="./request_process_times.log"
-  - SYNC_LOG="hivemind-sync.log"
-  - APP_VERSION=$(git describe --tags)
-  - TEST="test"
+  - SYNC_LOG="./hivemind-sync.log"
+  - APP_VERSION="$(git describe --tags)"
   - echo "STARTING BENCHAMRK RESULTS COLLECTOR"
-  - pwd
-  - ls
   - pip install -r scripts/ci/benchmark_results_collector/requirements.txt
-  - python $MAIN -m 1 -j $CI_JOB_ID -f $SERVER_LOG -db $BENCHMARK_STATSDB_URL --desc $TEST --exec-env-desc $TEST --server-name $TEST --app-version $APP_VERSION --testsuite-version $TEST
-  - python $MAIN -m 2 -j $CI_JOB_ID -f $SYNC_LOG -db $BENCHMARK_STATSDB_URL --desc $TEST --exec-env-desc $TEST --server-name $TEST --app-version $APP_VERSION --testsuite-version $TEST
+  - python $MAIN -m 1 -j $CI_JOB_ID -f "$SERVER_LOG" -db $BENCHMARK_STATSDB_URL --desc "$DESC" --exec-env-desc "branch=$CI_COMMIT_REF_SLUG" --server-name "$CI_RUNNER_DESCRIPTION" --app-version "$(git describe --tags)" --testsuite-version "short_sha=$CI_COMMIT_SHORT_SHA"
+  - python $MAIN -m 2 -j $CI_JOB_ID -f "$SYNC_LOG" -db $BENCHMARK_STATSDB_URL --desc "$DESC" --exec-env-desc "branch=$CI_COMMIT_REF_SLUG" --server-name "$CI_RUNNER_DESCRIPTION" --app-version "$(git describe --tags)" --testsuite-version "short_sha=$CI_COMMIT_SHORT_SHA"
 
 .benchmark_results_collector:
   stage: post-deploy
@@ -437,3 +440,4 @@ sync-e2e-benchmark:
     expire_in: 7 days
   tags:
     - hivemind-heavy-job
+    - hive-4 #temporary
