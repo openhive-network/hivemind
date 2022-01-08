@@ -5,7 +5,7 @@ from hashlib import sha256
 import logging
 from pathlib import Path
 
-from db_adapter import Db
+from benchmark_results_collector.db_adapter import Db
 
 log = logging.getLogger(__name__)
 

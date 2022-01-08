@@ -5,13 +5,11 @@ from typing import Final
 
 import pytest
 
-from constants import ROOT_PATH
-from db_adapter import Db
-import main
-import server_log_parser as parser
+from benchmark_results_collector import main, server_log_parser
+from benchmark_results_collector.constants import ROOT_PATH
+from benchmark_results_collector.db_adapter import Db
 
-SAMPLE_LOG_WITH_MIXED_LINES: Final = ROOT_PATH / 'tests/mock_data/server_log_parser' \
-                                                 '/sample_with_mixed_lines.txt'
+SAMPLE_LOG_WITH_MIXED_LINES: Final = ROOT_PATH / 'tests/mock_data/server_log_parser/sample_with_mixed_lines.txt'
 
 
 @pytest.mark.asyncio
@@ -32,7 +30,7 @@ async def test_server_log_mode(db: Db, sql_select_all: str):
     timestamp = datetime.datetime.now()
 
     await main.insert_benchmark_description(db, args=args, timestamp=timestamp)
-    await parser.main(db, file=Path(args.file), benchmark_id=args.job_id)
+    await server_log_parser.main(db, file=Path(args.file), benchmark_id=args.job_id)
 
     actual = await db.query_all(sql_select_all)
 

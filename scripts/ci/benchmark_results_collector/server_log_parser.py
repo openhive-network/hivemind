@@ -6,10 +6,10 @@ from pathlib import Path
 import re
 from typing import Optional
 
-import common
-from common import MappedDbData
-from db_adapter import Db
+from benchmark_results_collector import common
+from benchmark_results_collector.db_adapter import Db
 
+MappedDbData = common.MappedDbData
 log = logging.getLogger(__name__)
 
 

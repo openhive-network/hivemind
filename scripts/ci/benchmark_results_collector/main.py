@@ -7,11 +7,8 @@ import socket
 import sys
 from time import perf_counter as perf
 
-import common
-from db_adapter import Db
-import replay_benchmark_parser
-import server_log_parser
-import sync_log_parser
+from benchmark_results_collector import common, replay_benchmark_parser, server_log_parser, sync_log_parser
+from benchmark_results_collector.db_adapter import Db
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger()

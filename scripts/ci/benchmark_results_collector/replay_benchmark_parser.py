@@ -6,9 +6,10 @@ import json
 from pathlib import Path
 from typing import Final, Union
 
-import common
-from common import MappedDbData
-from db_adapter import Db
+from benchmark_results_collector import common
+from benchmark_results_collector.db_adapter import Db
+
+MappedDbData = common.MappedDbData
 
 REPLAY_BENCHMARK: Final = 'replay_benchmark'
 

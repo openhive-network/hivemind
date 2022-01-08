@@ -1,4 +1,4 @@
-import sync_log_parser as p
+import benchmark_results_collector.sync_log_parser as p
 
 CREATING_INDEXES: p.InfoType = p.InfoType.CREATING_INDEXES
 BLOCKS_INFO: p.InfoType = p.InfoType.BLOCKS_INFO

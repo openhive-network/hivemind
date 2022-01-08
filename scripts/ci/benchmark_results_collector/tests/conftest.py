@@ -5,15 +5,14 @@ from typing import Final
 import pytest
 from sqlalchemy.engine import URL
 
-import common
-from common import MappedDbData
-from constants import ROOT_PATH
-from db_adapter import Db
-import sync_log_parser
+from benchmark_results_collector import common, sync_log_parser
+from benchmark_results_collector.constants import ROOT_PATH
+from benchmark_results_collector.db_adapter import Db
+
+MappedDbData = common.MappedDbData
 
 DB_SCHEMA: Final = ROOT_PATH / 'db/db-schema.sql'
-SAMPLE_SYNC_LOG_WITH_MIXED_LINES: Final = ROOT_PATH / 'tests/mock_data/sync_log_parser' \
-                                                      '/sample_with_mixed_lines.txt'
+SAMPLE_SYNC_LOG_WITH_MIXED_LINES: Final = ROOT_PATH / 'tests/mock_data/sync_log_parser/sample_with_mixed_lines.txt'
 
 
 async def build_schema(db: Db):

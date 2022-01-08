@@ -4,13 +4,11 @@ from typing import Final
 
 import pytest
 
-import common
-from constants import ROOT_PATH
-from db_adapter import Db
-import main
+from benchmark_results_collector import common, main
+from benchmark_results_collector.constants import ROOT_PATH
+from benchmark_results_collector.db_adapter import Db
 
-SAMPLE_LOG_WITH_MIXED_LINES: Final = ROOT_PATH / 'tests/mock_data/server_log_parser' \
-                                                 '/sample_with_mixed_lines.txt'
+SAMPLE_LOG_WITH_MIXED_LINES: Final = ROOT_PATH / 'tests/mock_data/server_log_parser/sample_with_mixed_lines.txt'
 
 
 def test_args_parsing():

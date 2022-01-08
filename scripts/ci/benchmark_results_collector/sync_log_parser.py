@@ -7,8 +7,9 @@ from pathlib import Path
 import re
 from typing import ClassVar, Final, Optional, Union
 
-import common
-from common import MappedDbData
+from benchmark_results_collector import common
+
+MappedDbData = common.MappedDbData
 
 HIVEMIND_INDEXER: Final = 'hivemind_indexer'
 
