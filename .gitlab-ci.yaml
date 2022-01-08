@@ -430,17 +430,22 @@ benchmark-results-collector:
     job: sync-e2e-benchmark
   allow_failure: false
   variables:
-    MAIN: "./scripts/ci/benchmark_results_collector/main.py"
+    DB_URL: $BENCHMARK_STATSDB_URL
+    LOC: "./scripts/ci/benchmark_results_collector"
     SERVER_LOG: "./request_process_times.log"
     SYNC_LOG: "./hivemind-sync.log"
+    #info:
+    DESC: "Regular CI spawn"
+    EXEC_ENV_DESC: "branch=$CI_COMMIT_REF_SLUG"
+    SERVER_NAME: "$CI_RUNNER_DESCRIPTION"
     APP_VERSION: "$(git describe --tags)"
+    TESTSUITE_VERSION: "commit_short_sha=$CI_COMMIT_SHORT_SHA"
   script:
     - echo "STARTING BENCHAMRK RESULTS COLLECTOR"
     - psql  $BENCHMARK_STATSDB_URL -c "SELECT version()"
-    - pwd
-    - ls
-    - pip install -r scripts/ci/benchmark_results_collector/requirements.txt
-    - python $MAIN -m 1 -j $CI_JOB_ID -f "$SERVER_LOG" -db $BENCHMARK_STATSDB_URL --desc "$DESC" --exec-env-desc "branch=$CI_COMMIT_REF_SLUG" --server-name "$CI_RUNNER_DESCRIPTION" --app-version "$(git describe --tags)" --testsuite-version "short_sha=$CI_COMMIT_SHORT_SHA"
-    - python $MAIN -m 2 -j $CI_JOB_ID -f "$SYNC_LOG" -db $BENCHMARK_STATSDB_URL --desc "$DESC" --exec-env-desc "branch=$CI_COMMIT_REF_SLUG" --server-name "$CI_RUNNER_DESCRIPTION" --app-version "$(git describe --tags)" --testsuite-version "short_sha=$CI_COMMIT_SHORT_SHA"
+    - pip install -r "$LOC/requirements.txt"
+    - python $LOC/main.py --help
+    - python $LOC/main.py -m 1 -j $CI_JOB_ID -f "$SERVER_LOG" -db $DB_URL --desc "$DESC" --exec-env-desc "$EXEC_ENV_DESC" --server-name "$SERVER_NAME" --app-version "$APP_VERSION" --testsuite-version "$TESTSUITE_VERSION"
+    - python $LOC/main.py -m 2 -j $CI_JOB_ID -f "$SYNC_LOG" -db $DB_URL --desc "$DESC" --exec-env-desc "$EXEC_ENV_DESC" --server-name "$SERVER_NAME" --app-version "$APP_VERSION" --testsuite-version "$TESTSUITE_VERSION"
   tags:
     - hive-4 
