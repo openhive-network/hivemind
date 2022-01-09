@@ -34,6 +34,24 @@ def test_args_parsing():
     assert args.testsuite_version == '2.00'
 
 
+def test_args_parsing_defaults():
+    args = main.init_argparse(['-m', '1',
+                               '-j', '1',
+                               '-f', 'input/sample_with_mixed_lines.txt',
+                               '-db', 'testurl',
+                               ])
+
+    assert args.mode == 1
+    assert args.job_id == 1
+    assert args.file == 'input/sample_with_mixed_lines.txt'
+    assert args.database_url == 'testurl'
+    assert args.desc == ''
+    assert args.exec_env_desc == ''
+    assert args.server_name == ''
+    assert args.app_version == ''
+    assert args.testsuite_version == ''
+
+
 def test_get_lines_from_log_file():
     log_lines = common.get_lines_from_log_file(SAMPLE_LOG_WITH_MIXED_LINES)
     assert len(log_lines) != 0

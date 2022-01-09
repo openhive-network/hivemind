@@ -17,6 +17,12 @@ log = logging.getLogger()
 def init_argparse(args) -> argparse.Namespace:
     p = argparse.ArgumentParser(description='Parse a benchmark log file.',
                                 formatter_class=argparse.RawTextHelpFormatter)
+    add = p.add_argument
+    add('--desc', type=str, default='', help='Benchmark description.')
+    add('--exec-env-desc', type=str, default='', help='Execution environment description.')
+    add('--server-name', type=str, default='', help='Server name when benchmark has been performed')
+    add('--app-version', type=str, default='')
+    add('--testsuite-version', type=str, default='')
 
     req = p.add_argument_group('required arguments')
     add = req.add_argument
@@ -25,11 +31,6 @@ def init_argparse(args) -> argparse.Namespace:
         help='1 - server_log_parser,\n2 - sync_log_parser,\n3 - replay_benchmark_parser')
     add('-f', '--file', type=str, required=True, metavar='FILE_PATH', help='Source .log file path.')
     add('-db', '--database_url', type=str, required=True, metavar='URL', help='Database URL.')
-    add('--desc', type=str, required=True, help='Benchmark description.')
-    add('--exec-env-desc', type=str, required=True, help='Execution environment description.')
-    add('--server-name', type=str, required=True, help='Server name when benchmark has been performed')
-    add('--app-version', type=str, required=True)
-    add('--testsuite-version', type=str, required=True)
 
     return p.parse_args(args)
 
