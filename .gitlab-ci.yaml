@@ -430,6 +430,7 @@ benchmark-results-collector:
     job: sync-e2e-benchmark
   allow_failure: false
   variables:
+    PYTHONPATH: $CI_PROJECT_DIR/scripts/ci
     DB_URL: $BENCHMARK_STATSDB_URL
     LOC: "./scripts/ci/benchmark_results_collector"
     SERVER_LOG: "./request_process_times.log"
@@ -438,14 +439,16 @@ benchmark-results-collector:
     DESC: "Regular CI spawn"
     EXEC_ENV_DESC: "branch=$CI_COMMIT_REF_SLUG"
     SERVER_NAME: "$CI_RUNNER_DESCRIPTION"
-    APP_VERSION: "$(git describe --tags)"
     TESTSUITE_VERSION: "commit_short_sha=$CI_COMMIT_SHORT_SHA"
   script:
     - echo "STARTING BENCHAMRK RESULTS COLLECTOR"
+    - echo $PYTHONPATH
+    - echo $CI_PROJECT_DIR
+    - pwd
     - psql  $BENCHMARK_STATSDB_URL -c "SELECT version()"
     - pip install -r "$LOC/requirements.txt"
     - python $LOC/main.py --help
-    - python $LOC/main.py -m 1 -j $CI_JOB_ID -f "$SERVER_LOG" -db $DB_URL --desc "$DESC" --exec-env-desc "$EXEC_ENV_DESC" --server-name "$SERVER_NAME" --app-version "$APP_VERSION" --testsuite-version "$TESTSUITE_VERSION"
-    - python $LOC/main.py -m 2 -j $CI_JOB_ID -f "$SYNC_LOG" -db $DB_URL --desc "$DESC" --exec-env-desc "$EXEC_ENV_DESC" --server-name "$SERVER_NAME" --app-version "$APP_VERSION" --testsuite-version "$TESTSUITE_VERSION"
+    - python $LOC/main.py -m 1 -j $CI_JOB_ID -f "$SERVER_LOG" -db $DB_URL --desc "$DESC" --exec-env-desc "$EXEC_ENV_DESC" --server-name "$SERVER_NAME" --app-version "$(git describe --tags)" --testsuite-version "$TESTSUITE_VERSION"
+    - python $LOC/main.py -m 2 -j $CI_JOB_ID -f "$SYNC_LOG" -db $DB_URL
   tags:
     - hive-4 
