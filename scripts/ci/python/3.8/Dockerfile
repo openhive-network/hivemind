@@ -27,6 +27,7 @@ RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
                     postgresql-client-12 \
+                    postgresql-12 \
     && rm -rf /var/lib/apt/lists/*
 
 # Upgrade some crucial python packages.

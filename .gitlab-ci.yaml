@@ -447,8 +447,9 @@ benchmark-results-collector:
     - pwd
     - psql  $BENCHMARK_STATSDB_URL -c "SELECT version()"
     - pip install -r "$LOC/requirements.txt"
+    - python -m pytest "$LOC" #postgresql>=10 required
     - python $LOC/main.py --help
     - python $LOC/main.py -m 1 -j $CI_JOB_ID -f "$SERVER_LOG" -db $DB_URL --desc "$DESC" --exec-env-desc "$EXEC_ENV_DESC" --server-name "$SERVER_NAME" --app-version "$(git describe --tags)" --testsuite-version "$TESTSUITE_VERSION"
-    - python $LOC/main.py -m 2 -j $CI_JOB_ID -f "$SYNC_LOG" -db $DB_URL
+    - python $LOC/main.py -m 2 -j $CI_JOB_ID -f "$SYNC_LOG" -db $DB_URL #no additional arguments because of the same id (already inserted)
   tags:
     - hive-4 
