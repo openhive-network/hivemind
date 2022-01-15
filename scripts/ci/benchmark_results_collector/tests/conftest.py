@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Final
 
 import pytest
+from pytest_postgresql import factories
 from sqlalchemy.engine import URL
 
 from benchmark_results_collector import common, sync_log_parser
@@ -14,11 +15,8 @@ MappedDbData = common.MappedDbData
 DB_SCHEMA: Final = ROOT_PATH / 'db/db-schema.sql'
 SAMPLE_SYNC_LOG_WITH_MIXED_LINES: Final = ROOT_PATH / 'tests/mock_data/sync_log_parser/sample_with_mixed_lines.txt'
 
-
-async def build_schema(db: Db):
-    with open(DB_SCHEMA, 'r') as file:
-        create_schema_sql = file.read()
-    await db.query(create_schema_sql)
+postgresql_external = factories.postgresql_noproc()
+postgresql = factories.postgresql("postgresql_external", load=[str(DB_SCHEMA)])
 
 
 def mock_mapped(caller: str, method: str, params: str, value: int, unit: str, id: int = None, hash: str = None) \
@@ -96,12 +94,13 @@ def mock_testcase_row() -> dict[str, str]:
 async def db(postgresql) -> Db:
     config = {'drivername': 'postgresql',
               'username': postgresql.info.user,
+              'password': postgresql.info.password,
               'host': postgresql.info.host,
               'port': postgresql.info.port,
               'database': postgresql.info.dbname,
               }
     db = await Db.create(URL.create(**config))
-    await build_schema(db)
+
     yield db
     db.close()
     await db.wait_closed()

@@ -83,7 +83,7 @@ def test_distinguishing_objects_having_same_hash(mock_mapped_list, mock_mapped_l
 @pytest.mark.asyncio
 async def test_db_connection(db: Db):
     db_name = await db.query_one('SELECT current_database();')
-    assert db_name == 'tests'
+    assert db_name == 'benchmark_results_tests'
 
 
 @pytest.mark.asyncio
@@ -92,4 +92,6 @@ async def test_creating_tables(db: Db):
     result_rows = await db.query_all(sql)
     result = [r[0] for r in result_rows]
 
-    assert result == ['benchmark_description', 'benchmark_results_collector_merged', 'benchmark_values', 'testcase']
+    assert result in (['benchmark_description', 'benchmark_results_collector_merged', 'benchmark_values', 'testcase'],
+                      ['benchmark_description', 'benchmark_results_collector_merged', 'benchmark_values',
+                       'pg_stat_statements', 'testcase'])
