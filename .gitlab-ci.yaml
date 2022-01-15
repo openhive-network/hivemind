@@ -430,8 +430,14 @@ benchmark-results-collector:
     job: sync-e2e-benchmark
   allow_failure: false
   variables:
+    #db:
+    HOST: $BENCHMARK_STATSDB_HOST
+    PORT: $BENCHMARK_STATSDB_PORT
+    USER: $BENCHMARK_STATSDB_USER
+    PASS: $BENCHMARK_STATSDB_PASS
+    NAME: $BENCHMARK_STATSDB_NAME
+    #paths:
     PYTHONPATH: $CI_PROJECT_DIR/scripts/ci
-    DB_URL: $BENCHMARK_STATSDB_URL
     LOC: "./scripts/ci/benchmark_results_collector"
     SERVER_LOG: "./request_process_times.log"
     SYNC_LOG: "./hivemind-sync.log"
@@ -442,14 +448,10 @@ benchmark-results-collector:
     TESTSUITE_VERSION: "commit_short_sha=$CI_COMMIT_SHORT_SHA"
   script:
     - echo "STARTING BENCHAMRK RESULTS COLLECTOR"
-    - echo $PYTHONPATH
-    - echo $CI_PROJECT_DIR
-    - pwd
-    - psql  $BENCHMARK_STATSDB_URL -c "SELECT version()"
     - pip install -r "$LOC/requirements.txt"
-    - python -m pytest "$LOC" #postgresql>=10 required
+    - python -m pytest $LOC --postgresql-host=$HOST --postgresql-port=$PORT --postgresql-user=$USER --postgresql-password=$PASS
     - python $LOC/main.py --help
-    - python $LOC/main.py -m 1 -j $CI_JOB_ID -f "$SERVER_LOG" -db $DB_URL --desc "$DESC" --exec-env-desc "$EXEC_ENV_DESC" --server-name "$SERVER_NAME" --app-version "$(git describe --tags)" --testsuite-version "$TESTSUITE_VERSION"
-    - python $LOC/main.py -m 2 -j $CI_JOB_ID -f "$SYNC_LOG" -db $DB_URL #no additional arguments because of the same id (already inserted)
+    - python $LOC/main.py -m 1 -j $CI_JOB_ID -f "$SERVER_LOG" -db postgresql://$USER:$PASS@$HOST:$PORT/$NAME --desc "$DESC" --exec-env-desc "$EXEC_ENV_DESC" --server-name "$SERVER_NAME" --app-version "$(git describe --tags)" --testsuite-version "$TESTSUITE_VERSION"
+    - python $LOC/main.py -m 2 -j $CI_JOB_ID -f "$SYNC_LOG" -db postgresql://$USER:$PASS@$HOST:$PORT/$NAME #no additional arguments because of the same id (already inserted)
   tags:
     - hive-4 
