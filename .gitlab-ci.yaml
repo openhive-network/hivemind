@@ -406,7 +406,7 @@ sync-e2e-benchmark:
     - *api-smoketest-benchmark-script
   after_script:
     - echo "ARTIFACTS_JOB_ID=$CI_JOB_ID" >> variables.env
-    - echo "APP_VERSION=$DEPLOY_TAG" >> variables.env
+    - echo "APP_VERSION=$(git describe --tags)" >> variables.env
     - echo "SERVER_NAME=$CI_RUNNER_DESCRIPTION" >> variables.env
   artifacts:
     when: always
@@ -427,6 +427,7 @@ sync-e2e-benchmark:
 
 Trigger benchmark-results-collector:
   stage: post-deploy
+  needs: ["sync-e2e-benchmark"]
   variables:
     ARTIFACTS_URL: https://gitlab.syncad.com/api/v4/projects/$CI_PROJECT_ID/jobs/$ARTIFACTS_JOB_ID/artifacts
     PRIVATE_TOKEN: $READ_ARTIFACT_ACCESS_TOKEN
