@@ -404,6 +404,10 @@ sync-e2e-benchmark:
     - *mock_tests-script
     - *hive_api_smoketest-script
     - *api-smoketest-benchmark-script
+  after_script:
+    - echo "ARTIFACTS_JOB_ID=$CI_JOB_ID" >> variables.env
+    - echo "APP_VERSION=$DEPLOY_TAG" >> variables.env
+    - echo "SERVER_NAME=$CI_RUNNER_DESCRIPTION" >> variables.env
   artifacts:
     when: always
     paths:
@@ -416,6 +420,25 @@ sync-e2e-benchmark:
       - request_process_times.log
     reports:
       junit: "*.xml"
+      dotenv: variables.env
     expire_in: 7 days
   tags:
     - hivemind-heavy-job
+
+Trigger benchmark-results-collector:
+  stage: post-deploy
+  variables:
+    ARTIFACTS_URL: https://gitlab.syncad.com/api/v4/projects/$CI_PROJECT_ID/jobs/$ARTIFACTS_JOB_ID/artifacts
+    PRIVATE_TOKEN: $READ_ARTIFACT_ACCESS_TOKEN
+    #description:
+    SOURCE: HIVEMIND_CI
+    JOB_ID: $ARTIFACTS_JOB_ID
+    DESC: "Hivemind CI spawn"
+    EXEC_ENV_DESC: branch=$CI_COMMIT_REF_SLUG
+    SERVER_NAME: $SERVER_NAME
+    APP_VERSION: $APP_VERSION
+    TESTSUITE_VERSION: commit_short_sha=$CI_COMMIT_SHORT_SHA
+  trigger:
+    project: hive/benchmark-results-collector
+    branch: master
+    strategy: depend
