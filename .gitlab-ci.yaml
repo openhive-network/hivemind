@@ -428,6 +428,16 @@ sync-e2e-benchmark:
 Trigger benchmark-results-collector:
   stage: post-deploy
   needs: ["sync-e2e-benchmark"]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: manual
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: manual
+    - when: manual
   variables:
     ARTIFACTS_URL: https://gitlab.syncad.com/api/v4/projects/$CI_PROJECT_ID/jobs/$ARTIFACTS_JOB_ID/artifacts
     PRIVATE_TOKEN: $READ_ARTIFACT_ACCESS_TOKEN
