@@ -35,7 +35,8 @@ stages:
   - echo "HIVEMIND_DB_NAME is $HIVEMIND_DB_NAME"
 
 .fetch-git-tags: &fetch-git-tags
-  - git fetch --tags # Looks to be unnecessary.
+  #- git fetch --tags # Looks to be unnecessary.
+  - scripts/ci/fix_ci_tag.sh
   #- echo git tag -f ci_implicit_tag # Needed to build python package
 
 .start-timer: &start-timer
@@ -80,7 +81,7 @@ stages:
     default: false
     variables: false
   variables:
-    GIT_DEPTH: 10
+    GIT_DEPTH: 1
     GIT_STRATEGY: clone
     GIT_SUBMODULE_STRATEGY: recursive
     PIPENV_VENV_IN_PROJECT: 1
