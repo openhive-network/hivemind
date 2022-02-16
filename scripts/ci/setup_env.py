@@ -93,7 +93,7 @@ def setup_env(current_runner_id, hive_sync_runner_id, infile, outfile, end, **kw
                     else:
                         runner[key] = hive_sync_runner[key]
                 elif key.startswith('hived_url'):
-                    runner[key] = '{\"default\": \"http://172.17.0.1:58091\"}' # temporary point different hived node
+                    runner[key] = '{\\"default\\": \\"http://172.17.0.1:58091\\"}' # temporary point different hived node
                 else:
                     runner[key] = value
 
@@ -102,6 +102,8 @@ def setup_env(current_runner_id, hive_sync_runner_id, infile, outfile, end, **kw
             runner[key] = 'localhost'
         if key == 'postgres_port': # to be eliminated when CI will be only at psql12
             runner[key] = 25432
+        elif key.startswith('hived_url'):
+            runner[key] = '{\\"default\\": \\"http://172.17.0.1:58091\\"}' # temporary point different hived node
 
         output(
             f'export RUNNER_{key.upper()}="{str(runner[key])}"',
