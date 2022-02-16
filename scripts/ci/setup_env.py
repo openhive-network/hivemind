@@ -92,6 +92,8 @@ def setup_env(current_runner_id, hive_sync_runner_id, infile, outfile, end, **kw
                         runner[key] = 25432
                     else:
                         runner[key] = hive_sync_runner[key]
+                elif key.startswith('hived_url'):
+                    runner[key] = '{\"default\": \"http://172.17.0.1:58091\"}' # temporary point different hived node
                 else:
                     runner[key] = value
 

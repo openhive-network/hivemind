@@ -420,3 +420,4 @@ sync-e2e-benchmark:
     expire_in: 7 days
   tags:
     - hivemind-heavy-job
+    - hive-3
