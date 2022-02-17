@@ -293,6 +293,9 @@ def run_server(conf):
 
     async def jsonrpc_handler(request):
         """Handles all hive jsonrpc API requests."""
+        def current_millis():
+            return round(time.time() * 1000)
+
         t_start = perf_counter()
         request = await request.text()
         # debug=True refs https://github.com/bcb/jsonrpcserver/issues/71
@@ -319,7 +322,7 @@ def run_server(conf):
             }
             ret = web.json_response(error_response, status=200, headers=headers, dumps=decimal_serialize)
             if req_res_log is not None:
-              req_res_log.info("Request: {} processed in {:.4f}s".format(request, perf_counter() - t_start))
+                req_res_log.info(f"{current_millis()} Request: {request} processed in {perf_counter() - t_start:.4f}s")
 
             return ret
 
@@ -329,12 +332,12 @@ def run_server(conf):
             }
             ret = web.json_response(response.deserialized(), status=200, headers=headers, dumps=decimal_serialize)
             if req_res_log is not None:
-              req_res_log.info("Request: {} processed in {:.4f}s".format(request, perf_counter() - t_start))
+                req_res_log.info(f"{current_millis()} Request: {request} processed in {perf_counter() - t_start:.4f}s")
             return ret
         ret = web.Response()
 
         if req_res_log is not None:
-          req_res_log.info("Request: {} processed in {:.4f}s".format(request, perf_counter() - t_start))
+            req_res_log.info(f"{current_millis()} Request: {request} processed in {perf_counter() - t_start:.4f}s")
 
         return ret
 
