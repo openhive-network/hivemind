@@ -230,6 +230,7 @@ class DbState:
     @classmethod
     def processing_indexes(cls, is_pre_process, drop, create):
         start_time = FOSM.start()
+        action = 'CREATING' if create else 'DROPPING'
         _indexes = cls._disableable_indexes()
 
         methods = []
@@ -240,11 +241,11 @@ class DbState:
 
         real_time = FOSM.stop(start_time)
 
-        log.info("=== CREATING INDEXES ===")
-        threads_time = FOSM.log_current("Total creating indexes time")
+        log.info(f"=== {action} INDEXES ===")
+        threads_time = FOSM.log_current(f"Total {action} indexes time")
         log.info(f"Elapsed time: {real_time :.4f}s. Calculated elapsed time: {threads_time :.4f}s. Difference: {real_time - threads_time :.4f}s")
         FOSM.clear()
-        log.info("=== CREATING INDEXES ===")
+        log.info(f"=== {action} INDEXES ===")
 
     @classmethod
     def before_initial_sync(cls, last_imported_block, hived_head_block):
