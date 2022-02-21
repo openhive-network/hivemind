@@ -361,7 +361,7 @@ stages:
       junit: api_smoketest_hive_api.xml
 
 
-.api-smoketest-benchmark-script: &api-smoketest-benchmark-script
+.api-benchmark-script: &api-benchmark-script
   - |
     ./scripts/ci/start-api-benchmarks.sh \
         localhost $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
@@ -369,13 +369,13 @@ stages:
         $RUNNER_BENCHMARK_JOBS \
         $CI_PROJECT_DIR/tests/api_tests/hivemind/tavern
 
-.api-smoketest-benchmark:
+.api-benchmark:
   stage: benchmark-tests
   extends: .test-common
   # Temporary failure (when any call is longer than 1s is allowed)
   allow_failure: true
   script:
-    - *api-smoketest-benchmark-script
+    - *api-benchmark-script
   artifacts:
     when: always
     paths:
@@ -394,17 +394,20 @@ sync-e2e-benchmark:
     - touch tox-installed
     - *bridge_api_smoketest-script
     - *bridge_api_smoketest_negative-script
-    - *condenser_api_smoketest-script
-    - *condenser_api_smoketest_negative-script
-    - *database_api_smoketest-script
-    - *database_api_smoketest_negative-script
-    - *follow_api_smoketest-script
-    - *follow_api_smoketest_negative-script
-    - *tags_api_smoketest-script
-    - *tags_api_smoketest_negative-script
-    - *mock_tests-script
-    - *hive_api_smoketest-script
-    - *api-smoketest-benchmark-script
+    # - *condenser_api_smoketest-script
+    # - *condenser_api_smoketest_negative-script
+    # - *database_api_smoketest-script
+    # - *database_api_smoketest_negative-script
+    # - *follow_api_smoketest-script
+    # - *follow_api_smoketest_negative-script
+    # - *tags_api_smoketest-script
+    # - *tags_api_smoketest_negative-script
+    # - *mock_tests-script
+    # - *hive_api_smoketest-script
+    - ./scripts/ci/hive-server.sh stop
+    - mv ./request_process_times.log ./request_process_times_smoketests.log
+    - ./scripts/ci/hive-server.sh start
+    - *api-benchmark-script
   after_script:
     - echo "ARTIFACTS_JOB_ID=$CI_JOB_ID" >> variables.env
     - echo "APP_VERSION=$(git describe --tags)" >> variables.env
@@ -419,6 +422,7 @@ sync-e2e-benchmark:
       - tavern_benchmarks_report.html
       - tests/api_tests/hivemind/tavern/**/*.out.json
       - request_process_times.log
+      - request_process_times_smoketests.log
     reports:
       junit: "*.xml"
       dotenv: variables.env
