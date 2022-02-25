@@ -456,5 +456,5 @@ Trigger benchmark-results-collector:
     TESTSUITE_VERSION: commit_short_sha=$CI_COMMIT_SHORT_SHA
   trigger:
     project: hive/benchmark-results-collector
-    branch: master
+    branch: mzebrak/manual-insertion-by-ci-url-variable
     strategy: depend
