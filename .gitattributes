@@ -1,0 +1,3 @@
+# Consistent behavior for all users, regardless of their Git settings and environment.
+# Always convert line endings to LF on checkout.
+* text eol=lf
