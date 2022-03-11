@@ -1,6 +1,6 @@
-from hive.indexer.block import Block, Operation, Transaction, OperationType, VirtualOperationType
-
 import logging
+
+from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
 
 log = logging.getLogger(__name__)
 

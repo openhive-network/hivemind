@@ -1,10 +1,10 @@
 """Methods to parse steemd values and clean strings."""
 
+from datetime import datetime
+import decimal
 import logging
 import math
-import decimal
 
-from datetime import datetime
 from pytz import utc
 import ujson as json
 
@@ -24,7 +24,8 @@ UNIT_NAI = {'HBD': '@@000000013', 'HIVE': '@@000000021', 'VESTS': '@@000000037'}
 
 # convert special chars into their octal formats recognized by sql
 SPECIAL_CHARS = {
-    "\x00": " ",  # nul char cannot be stored in string column (ABW: if we ever find the need to store nul chars we'll need bytea, not text)
+    "\x00": " ",
+    # nul char cannot be stored in string column (ABW: if we ever find the need to store nul chars we'll need bytea, not text)
     "\r": "\\015",
     "\n": "\\012",
     "\v": "\\013",

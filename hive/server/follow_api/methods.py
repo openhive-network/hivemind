@@ -1,5 +1,5 @@
-from hive.server.condenser_api.methods import _get_account_reputations_impl
 from hive.server.common.helpers import return_error_info
+from hive.server.condenser_api.methods import _get_account_reputations_impl
 
 
 @return_error_info

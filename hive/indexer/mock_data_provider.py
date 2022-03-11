@@ -1,8 +1,7 @@
 """ Data provider for test operations """
-import os
-import logging
-
 from json import dumps
+import logging
+import os
 
 log = logging.getLogger(__name__)
 

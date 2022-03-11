@@ -1,10 +1,6 @@
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 import logging
 import queue
-import math
-from time import sleep
-
-from hive.indexer.mock_block_provider import MockBlockProvider
 
 log = logging.getLogger(__name__)
 

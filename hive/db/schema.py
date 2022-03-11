@@ -1,16 +1,17 @@
 """Db schema definitions and setup routines."""
 
-import sqlalchemy as sa
-from sqlalchemy.sql import text as sql_text
-from sqlalchemy.types import SMALLINT
-from sqlalchemy.types import CHAR
-from sqlalchemy.types import VARCHAR
-from sqlalchemy.types import TEXT
-from sqlalchemy.types import BOOLEAN
-
 import logging
 
+import sqlalchemy as sa
+from sqlalchemy.sql import text as sql_text
+from sqlalchemy.types import BOOLEAN
+from sqlalchemy.types import CHAR
+from sqlalchemy.types import SMALLINT
+from sqlalchemy.types import TEXT
+from sqlalchemy.types import VARCHAR
+
 log = logging.getLogger(__name__)
+
 
 # pylint: disable=line-too-long, too-many-lines, bad-whitespace
 
@@ -674,7 +675,8 @@ def setup(db):
         "is_superuser.sql",
         "update_hive_blocks_consistency_flag.sql",
         "update_table_statistics.sql",
-        "upgrade/update_db_patchlevel.sql",  # Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
+        "upgrade/update_db_patchlevel.sql",
+        # Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
     ]
     from os.path import dirname, realpath
 
@@ -701,7 +703,7 @@ def reset_autovac(db):
     We use a scale factor of 0 and specify exact threshold tuple counts,
     per-table, in the format (autovacuum_threshold, autoanalyze_threshold)."""
 
-    autovac_config = {  #    vacuum  analyze
+    autovac_config = {  # vacuum  analyze
         'hive_accounts': (50000, 100000),
         'hive_posts': (2500, 10000),
         'hive_follows': (5000, 5000),

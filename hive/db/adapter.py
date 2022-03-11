@@ -1,14 +1,14 @@
 """Wrapper for sqlalchemy, providing a simple interface."""
 
+from collections import OrderedDict
 import logging
 from time import perf_counter as perf
-from collections import OrderedDict
+
 from funcy.seqs import first
 import sqlalchemy
-import os
 
-from hive.utils.stats import Stats
 from hive.db.autoexplain_controller import AutoExplainWrapper
+from hive.utils.stats import Stats
 
 logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 

@@ -1,4 +1,4 @@
-from hive.indexer.block import Block, Transaction
+from hive.indexer.block import Block
 
 
 class ExtendedByMockBlockAdapter(Block):

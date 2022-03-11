@@ -1,29 +1,22 @@
-from hive.utils.stats import WaitingStatusManager as WSM
-
-from hive.indexer.block import VirtualOperationType, OperationType, BlocksProviderBase
-from hive.indexer.hive_db.block import BlockHiveDb, OperationHiveDb
-from hive.db.adapter import Db
-
-from hive.indexer.mock_block_provider import MockBlockProvider
-from hive.indexer.mock_vops_provider import MockVopsProvider
-from hive.indexer.mock_block import ExtendedByMockBlockAdapter
-from hive.indexer.hive_rpc.block_from_rest import BlockFromRpc
-
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
-import asyncio
+from concurrent.futures import ThreadPoolExecutor
 import logging
 import queue
+from typing import Final, Optional
+
+from hive.db.adapter import Db
+from hive.indexer.block import BlocksProviderBase, OperationType, VirtualOperationType
+from hive.indexer.hive_db.block import BlockHiveDb
+from hive.indexer.hive_rpc.block_from_rest import BlockFromRpc
+from hive.indexer.mock_block import ExtendedByMockBlockAdapter
+from hive.indexer.mock_block_provider import MockBlockProvider
+from hive.indexer.mock_vops_provider import MockVopsProvider
+from hive.utils.stats import WaitingStatusManager as WSM
 
 log = logging.getLogger(__name__)
 
-operations_query = """
-    SELECT * FROM enum_operations4hivemind( :first, :last )
-   """
-
-blocks_query = """SELECT * FROM enum_blocks4hivemind( :first, :last )"""
-
-number_of_blocks_query = """SELECT num as num FROM hive_blocks ORDER BY num DESC LIMIT 1"""
+OPERATIONS_QUERY: Final[str] = "SELECT * FROM enum_operations4hivemind(:first, :last)"
+BLOCKS_QUERY: Final[str] = "SELECT * FROM enum_blocks4hivemind(:first, :last)"
+NUMBER_OF_BLOCKS_QUERY: Final[str] = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
 
 
 class BlocksDataFromDbProvider:
@@ -31,49 +24,43 @@ class BlocksDataFromDbProvider:
 
     def __init__(
         self,
-        sql_query,
-        db,
-        blocks_per_request,
-        start_block,
-        max_block,
-        breaker,
-        exception_reporter,
-        external_thread_pool=None,
+        sql_query: str,
+        db: Db,
+        blocks_per_request: int,
+        lbound: int,
+        ubound: int,
+        breaker,  # hive.steem.signal.can_continue_thread
+        exception_reporter,  # hive.steem.signal.set_exception_thrown
+        external_thread_pool: Optional[ThreadPoolExecutor] = None,
     ):
         """
-        db - database
-        start_block - block from which the processing starts
-        max_block - last to get block's number
+        lbound - block from which the processing starts
+        ubound - last to get block's number
         breaker - callable object which returns true if processing must be continues
         exception_reporter - callable, invoke it when an exception occurs in a thread
         external_thread_pool - thread pool controlled outside the class
         """
 
         assert breaker
-        assert db
         assert blocks_per_request >= 1
-        assert sql_query
 
         self._breaker = breaker
         self._exception_reporter = exception_reporter
-        self._start_block = start_block
-        self._max_block = max_block  # to inlude upperbound in results
+        self._lbound = lbound
+        self._ubound = ubound  # to inlude upperbound in results
         self._db = db
-        if external_thread_pool:
-            self._thread_pool = external_thread_pool
-        else:
-            self._thread_pool = ThreadPoolExecutor(1)
+        self._thread_pool = external_thread_pool if external_thread_pool else ThreadPoolExecutor(1)
         self._blocks_per_request = blocks_per_request
         self._sql_query = sql_query
 
     def thread_body_get_data(self, queue_for_data):
         try:
-            for block in range(self._start_block, self._max_block, self._blocks_per_request):
+            for block in range(self._lbound, self._ubound, self._blocks_per_request):
                 if not self._breaker():
                     break
 
                 data_rows = self._db.query_all(
-                    self._sql_query, first=block, last=min([block + self._blocks_per_request, self._max_block])
+                    self._sql_query, first=block, last=min([block + self._blocks_per_request, self._ubound])
                 )
                 while self._breaker():
                     try:
@@ -126,13 +113,13 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
 
     def __init__(
         self,
-        databases,
-        number_of_blocks_in_batch,
-        lbound,
-        ubound,
-        breaker,
-        exception_reporter,
-        external_thread_pool=None,
+        databases: Databases,
+        number_of_blocks_in_batch: int,
+        lbound: int,
+        ubound: int,
+        breaker,  # hive.steem.signal.can_continue_thread
+        exception_reporter,  # hive.steem.signal.set_exception_thrown
+        external_thread_pool: Optional[ThreadPoolExecutor] = None,
     ):
         """
         databases - object Databases with opened databases
@@ -153,38 +140,33 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         self._operations_queue = queue.Queue(maxsize=self._operations_queue_size)
         self._blocks_data_queue = queue.Queue(maxsize=self._blocks_data_queue_size)
 
-        self._last_block_num_in_db = self._db.query_one(
-            """SELECT num as num FROM hive_blocks ORDER BY num DESC LIMIT 1"""
-        )
+        self._last_block_num_in_db = self._db.query_one(sql=NUMBER_OF_BLOCKS_QUERY)
         assert self._last_block_num_in_db is not None
 
-        if external_thread_pool:
-            assert type(external_thread_pool) == ThreadPoolExecutor
-            self._thread_pool = external_thread_pool
-        else:
-            self._thread_pool = MassiveBlocksDataProviderHiveDb.create_thread_pool()
+        self._thread_pool = (
+            external_thread_pool if external_thread_pool else MassiveBlocksDataProviderHiveDb.create_thread_pool()
+        )
 
         # read all blocks from db, rest of blocks ( ubound - self._last_block_num_in_db ) are supposed to be mocks
         self._operations_provider = BlocksDataFromDbProvider(
-            operations_query,
-            databases.get_operations(),
-            self._blocks_per_query,
-            self._lbound,
-            self._last_block_num_in_db + 1,  # ubound
-            breaker,
-            exception_reporter,
-            self._thread_pool,
+            sql_query=OPERATIONS_QUERY,
+            db=databases.get_operations(),
+            blocks_per_request=self._blocks_per_query,
+            lbound=self._lbound,
+            ubound=self._last_block_num_in_db + 1,
+            breaker=breaker,
+            exception_reporter=exception_reporter,
+            external_thread_pool=self._thread_pool,
         )
-
         self._blocks_data_provider = BlocksDataFromDbProvider(
-            blocks_query,
-            databases.get_blocks_data(),
-            self._blocks_per_query,
-            self._lbound,
-            self._last_block_num_in_db + 1,  # ubound
-            breaker,
-            exception_reporter,
-            self._thread_pool,
+            sql_query=BLOCKS_QUERY,
+            db=databases.get_blocks_data(),
+            blocks_per_request=self._blocks_per_query,
+            lbound=self._lbound,
+            ubound=self._last_block_num_in_db + 1,
+            breaker=breaker,
+            exception_reporter=exception_reporter,
+            external_thread_pool=self._thread_pool,
         )
 
         if not MassiveBlocksDataProviderHiveDb._vop_types_dictionary:
@@ -205,21 +187,25 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
                     name[len('hive::protocol::') :]
                 )
 
-    def _id_to_virtual_type(id):
-        if id in MassiveBlocksDataProviderHiveDb._vop_types_dictionary:
-            return MassiveBlocksDataProviderHiveDb._vop_types_dictionary[id]
+    @staticmethod
+    def _id_to_virtual_type(id_: int):
+        if id_ in MassiveBlocksDataProviderHiveDb._vop_types_dictionary:
+            return MassiveBlocksDataProviderHiveDb._vop_types_dictionary[id_]
 
-    def _id_to_operation_type(id):
-        if id in MassiveBlocksDataProviderHiveDb._op_types_dictionary:
-            return MassiveBlocksDataProviderHiveDb._op_types_dictionary[id]
+    @staticmethod
+    def _id_to_operation_type(id_: int):
+        if id_ in MassiveBlocksDataProviderHiveDb._op_types_dictionary:
+            return MassiveBlocksDataProviderHiveDb._op_types_dictionary[id_]
 
-    def _operation_id_to_enum(id):
-        vop = MassiveBlocksDataProviderHiveDb._id_to_virtual_type(id)
+    @staticmethod
+    def _operation_id_to_enum(id_: int):
+        vop = MassiveBlocksDataProviderHiveDb._id_to_virtual_type(id_)
         if vop:
             return vop
-        return MassiveBlocksDataProviderHiveDb._id_to_operation_type(id)
+        return MassiveBlocksDataProviderHiveDb._id_to_operation_type(id_)
 
-    def _get_mocked_block(self, block_num, always_create):
+    @staticmethod
+    def _get_mocked_block(block_num, always_create):
         # normally it should create mocked block only when block mock or vops are added,
         # but there is a situation when we ask for mock blocks after the database head,
         # we need to alwyas return at least empty block otherwise live sync streamer
@@ -331,25 +317,26 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
             self._exception_reporter()
             raise
 
-    def create_thread_pool():
+    @staticmethod
+    def create_thread_pool() -> ThreadPoolExecutor:
         """Creates initialzied thread pool with number of threads required by the provider.
         You can pass the thread pool to provider during its creation to controll its lifetime
         outside the provider"""
 
         return ThreadPoolExecutor(max_workers=MassiveBlocksDataProviderHiveDb.get_number_of_threads())
 
-    def get_number_of_threads():
+    @staticmethod
+    def get_number_of_threads() -> int:
         return 3  # block data + operations + collect thread
 
     def start(self):
-        futures = []
-        futures.append(self._operations_provider.start(self._operations_queue))
-        futures.append(self._blocks_data_provider.start(self._blocks_data_queue))
+        return [
+            self._operations_provider.start(queue_for_data=self._operations_queue),
+            self._blocks_data_provider.start(queue_for_data=self._blocks_data_queue),
+            self._thread_pool.submit(self._thread_get_block),
+        ]  # futures
 
-        futures.append(self._thread_pool.submit(self._thread_get_block))
-        return futures
-
-    def get(self, number_of_blocks):
+    def get(self, number_of_blocks: int):
         """Returns blocks and vops data for next number_of_blocks"""
         blocks = []
         wait_blocks_time = WSM.start()

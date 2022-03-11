@@ -1,28 +1,26 @@
 """Blocks processor."""
 
-import logging
 import concurrent
-from time import perf_counter
 from concurrent.futures import ThreadPoolExecutor
+import logging
+from time import perf_counter
+
 from hive.db.adapter import Db
-
 from hive.indexer.accounts import Accounts
-from hive.indexer.posts import Posts
+from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
 from hive.indexer.custom_op import CustomOp
-from hive.indexer.payments import Payments
 from hive.indexer.follow import Follow
-from hive.indexer.votes import Votes
-from hive.indexer.post_data_cache import PostDataCache
-from hive.indexer.reputations import Reputations
-from hive.indexer.reblog import Reblog
 from hive.indexer.notify import Notify
-from hive.indexer.block import Block, Transaction, Operation, VirtualOperationType, OperationType
-
-from hive.utils.stats import OPStatusManager as OPSM
-from hive.utils.stats import FlushStatusManager as FSM
-
-from hive.server.common.payout_stats import PayoutStats
+from hive.indexer.payments import Payments
+from hive.indexer.post_data_cache import PostDataCache
+from hive.indexer.posts import Posts
+from hive.indexer.reblog import Reblog
+from hive.indexer.reputations import Reputations
+from hive.indexer.votes import Votes
 from hive.server.common.mentions import Mentions
+from hive.server.common.payout_stats import PayoutStats
+from hive.utils.stats import FlushStatusManager as FSM
+from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.timer import time_it
 
 log = logging.getLogger(__name__)
@@ -214,10 +212,10 @@ class Blocks:
     def prepare_vops(comment_payout_ops, block, date, block_num, is_safe_cashout):
         def get_empty_ops():
             return {
-                VirtualOperationType.AuthorReward: None,
-                VirtualOperationType.CommentReward: None,
-                VirtualOperationType.EffectiveCommentVote: None,
-                VirtualOperationType.CommentPayoutUpdate: None,
+                VirtualOperationType.AUTHOR_REWARD: None,
+                VirtualOperationType.COMMENT_REWARD: None,
+                VirtualOperationType.EFFECTIVE_COMMENT_VOTE: None,
+                VirtualOperationType.COMMENT_PAYOUT_UPDATE: None,
             }
 
         ineffective_deleted_ops = {}
@@ -234,21 +232,21 @@ class Blocks:
 
             key = f"{op_value['author']}/{op_value['permlink']}"
 
-            if op_type == VirtualOperationType.AuthorReward:
+            if op_type == VirtualOperationType.AUTHOR_REWARD:
                 if key not in comment_payout_ops:
                     comment_payout_ops[key] = get_empty_ops()
 
                 comment_payout_ops[key][op_type] = (op_value, date)
 
-            elif op_type == VirtualOperationType.CommentReward:
+            elif op_type == VirtualOperationType.COMMENT_REWARD:
                 if key not in comment_payout_ops:
                     comment_payout_ops[key] = get_empty_ops()
 
-                comment_payout_ops[key][VirtualOperationType.EffectiveCommentVote] = None
+                comment_payout_ops[key][VirtualOperationType.EFFECTIVE_COMMENT_VOTE] = None
 
                 comment_payout_ops[key][op_type] = (op_value, date)
 
-            elif op_type == VirtualOperationType.EffectiveCommentVote:
+            elif op_type == VirtualOperationType.EFFECTIVE_COMMENT_VOTE:
                 Reputations.process_vote(block_num, op_value)
                 # ABW: votes cast before HF1 (block 905693, timestamp 2016-04-25T17:30:00) have to be upscaled
                 # by 1mln - there is no need to scale it anywhere else because first payouts happened only after
@@ -267,13 +265,13 @@ class Blocks:
 
                     comment_payout_ops[key][op_type] = (op_value, date)
 
-            elif op_type == VirtualOperationType.CommentPayoutUpdate:
+            elif op_type == VirtualOperationType.COMMENT_PAYOUT_UPDATE:
                 if key not in comment_payout_ops:
                     comment_payout_ops[key] = get_empty_ops()
 
                 comment_payout_ops[key][op_type] = (op_value, date)
 
-            elif op_type == VirtualOperationType.IneffectiveDeleteComment:
+            elif op_type == VirtualOperationType.INEFFECTIVE_DELETE_COMMENT:
                 ineffective_deleted_ops[key] = {}
 
             OPSM.op_stats(str(op_type), OPSM.stop(start))
@@ -318,21 +316,21 @@ class Blocks:
                 op_details = None
                 potentially_new_account = False
                 # account ops
-                if op_type == OperationType.Pow:
+                if op_type == OperationType.POW:
                     account_name = op['worker_account']
                     potentially_new_account = True
-                elif op_type == OperationType.Pow2:
+                elif op_type == OperationType.POW_2:
                     account_name = op['work']['value']['input']['worker_account']
                     potentially_new_account = True
-                elif op_type == OperationType.AccountCreate:
+                elif op_type == OperationType.ACCOUNT_CREATE:
                     account_name = op['new_account_name']
                     op_details = op
                     potentially_new_account = True
-                elif op_type == OperationType.AccountCreateWithDelegation:
+                elif op_type == OperationType.ACCOUNT_CREATE_WITH_DELEGATION:
                     account_name = op['new_account_name']
                     op_details = op
                     potentially_new_account = True
-                elif op_type == OperationType.CreateClaimedAccount:
+                elif op_type == OperationType.CREATE_CLAIMED_ACCOUNT:
                     account_name = op['new_account_name']
                     op_details = op
                     potentially_new_account = True
@@ -343,27 +341,27 @@ class Blocks:
                     log.error(f"Failed to register account {account_name} from operation: {op}")
 
                 # account metadata updates
-                if op_type == OperationType.AccountUpdate:
+                if op_type == OperationType.ACCOUNT_UPDATE:
                     Accounts.update_op(op, False)
-                elif op_type == OperationType.AccountUpdate2:
+                elif op_type == OperationType.ACCOUNT_UPDATE_2:
                     Accounts.update_op(op, True)
 
                 # post ops
-                elif op_type == OperationType.Comment:
+                elif op_type == OperationType.COMMENT:
                     Posts.comment_op(op, cls._head_block_date)
-                elif op_type == OperationType.DeleteComment:
+                elif op_type == OperationType.DELETE_COMMENT:
                     key = f"{op['author']}/{op['permlink']}"
                     if key not in ineffective_deleted_ops:
                         Posts.delete_op(op, cls._head_block_date)
-                elif op_type == OperationType.CommentOption:
+                elif op_type == OperationType.COMMENT_OPTION:
                     Posts.comment_options_op(op)
-                elif op_type == OperationType.Vote:
+                elif op_type == OperationType.VOTE:
                     Votes.vote_op(op, cls._head_block_date)
 
                 # misc ops
-                elif op_type == OperationType.Transfer:
+                elif op_type == OperationType.TRANSFER:
                     Payments.op_transfer(op, transaction.get_id(), num, cls._head_block_date)
-                elif op_type == OperationType.CustomJson:  # follow/reblog/community ops
+                elif op_type == OperationType.CUSTOM_JSON:  # follow/reblog/community ops
                     CustomOp.process_op(op, num, cls._head_block_date)
 
                 OPSM.op_stats(str(op_type), OPSM.stop(start))

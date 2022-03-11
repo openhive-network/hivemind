@@ -1,22 +1,21 @@
 """Bridge API public endpoints for posts"""
 
-from hive.server.bridge_api.objects import load_profiles, _bridge_post_object, append_statistics_to_post
-from hive.server.database_api.methods import find_votes_impl, VotesPresentation
+from hive.server.bridge_api.objects import _bridge_post_object, append_statistics_to_post, load_profiles
 from hive.server.common.helpers import (
-    return_error_info,
-    valid_account,
-    valid_permlink,
-    valid_tag,
-    valid_limit,
     check_community,
     json_date,
+    return_error_info,
+    valid_account,
+    valid_limit,
+    valid_permlink,
+    valid_tag,
 )
-
-from hive.utils.account import safe_db_profile_metadata
-
+from hive.server.common.mutes import Mutes
+from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 from hive.server.hive_api.common import get_account_id
 from hive.server.hive_api.community import list_top_communities
-from hive.server.common.mutes import Mutes
+from hive.utils.account import safe_db_profile_metadata
+
 
 # pylint: disable=too-many-arguments, no-else-return
 

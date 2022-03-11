@@ -2,12 +2,13 @@
 
 import atexit
 import logging
-
+from os import getpid
 from queue import Queue
 from time import perf_counter as perf
-from hive.utils.system import colorize, peak_usage_mb
+
 from psutil import pid_exists
-from os import getpid
+
+from hive.utils.system import colorize, peak_usage_mb
 
 log = logging.getLogger(__name__)
 
@@ -38,7 +39,6 @@ class BroadcastObject:
 
 
 class PrometheusClient:
-
     deamon = None
     logs_to_broadcast = Queue()
 

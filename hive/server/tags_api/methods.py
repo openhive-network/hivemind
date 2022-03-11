@@ -1,5 +1,5 @@
+from hive.server.common.helpers import return_error_info
 from hive.server.condenser_api.methods import _get_content_impl, _get_content_replies_impl
-from hive.server.common.helpers import return_error_info, valid_account, valid_permlink
 
 
 @return_error_info

@@ -1,40 +1,35 @@
 # -*- coding: utf-8 -*-
 """Hive JSON-RPC API server."""
+from datetime import datetime
+import logging
 import os
 import sys
-import logging
 import time
-
-from datetime import datetime
 from time import perf_counter
-from sqlalchemy.exc import OperationalError
+
 from aiohttp import web
-from jsonrpcserver.methods import Methods
 from jsonrpcserver import async_dispatch as dispatch
-
+from jsonrpcserver.methods import Methods
 import simplejson
-
-from hive.server.condenser_api import methods as condenser_api
-from hive.server.condenser_api.tags import get_trending_tags as condenser_api_get_trending_tags
-from hive.server.condenser_api.get_state import get_state as condenser_api_get_state
-from hive.server.condenser_api.call import call as condenser_api_call
-from hive.server.common.mutes import Mutes
+from sqlalchemy.exc import OperationalError
 
 from hive.server.bridge_api import methods as bridge_api
-from hive.server.bridge_api.thread import get_discussion as bridge_api_get_discussion
-from hive.server.bridge_api.support import normalize_post as bridge_api_normalize_post
 from hive.server.bridge_api.support import get_post_header as bridge_api_get_post_header
+from hive.server.bridge_api.support import normalize_post as bridge_api_normalize_post
+from hive.server.bridge_api.thread import get_discussion as bridge_api_get_discussion
+from hive.server.condenser_api import methods as condenser_api
+from hive.server.condenser_api.call import call as condenser_api_call
+from hive.server.condenser_api.get_state import get_state as condenser_api_get_state
+from hive.server.condenser_api.tags import get_trending_tags as condenser_api_get_trending_tags
+from hive.server.database_api import methods as database_api
+from hive.server.db import Db
+from hive.server.follow_api import methods as follow_api
 from hive.server.hive_api import community as hive_api_community
 from hive.server.hive_api import notify as hive_api_notify
 from hive.server.hive_api import stats as hive_api_stats
 from hive.server.hive_api.public import get_info as hive_api_get_info
-
-from hive.server.follow_api import methods as follow_api
 from hive.server.tags_api import methods as tags_api
 
-from hive.server.database_api import methods as database_api
-
-from hive.server.db import Db
 
 # pylint: disable=too-many-lines
 
@@ -232,6 +227,7 @@ def run_server(conf):
     app['config'] = dict()
     app['config']['args'] = conf.args()
     app['config']['hive.MAX_DB_ROW_RESULTS'] = 100000
+
     # app['config']['hive.logger'] = logger
 
     async def init_db(app):

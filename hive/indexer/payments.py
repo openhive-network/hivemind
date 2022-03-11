@@ -3,10 +3,8 @@
 import logging
 
 from hive.db.adapter import Db
-from hive.utils.normalize import parse_amount
-
-from hive.indexer.posts import Posts
 from hive.indexer.accounts import Accounts
+from hive.utils.normalize import parse_amount
 
 log = logging.getLogger(__name__)
 

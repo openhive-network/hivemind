@@ -2,6 +2,7 @@
 
 from enum import IntEnum
 import logging
+
 from hive.db.adapter import Db
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters

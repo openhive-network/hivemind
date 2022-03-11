@@ -1,16 +1,14 @@
 """Tight and reliable steem API client for hive indexer."""
 
-from hive.indexer.mock_data_provider import MockDataProviderException
-import logging
-
-from time import perf_counter as perf
 from decimal import Decimal
+import logging
+from time import perf_counter as perf
 
-from hive.utils.stats import Stats
-from hive.utils.normalize import parse_amount, steem_amount, vests_amount
-from hive.steem.http_client import HttpClient
 from hive.indexer.mock_block_provider import MockBlockProvider
 from hive.indexer.mock_vops_provider import MockVopsProvider
+from hive.steem.http_client import HttpClient
+from hive.utils.normalize import parse_amount, steem_amount, vests_amount
+from hive.utils.stats import Stats
 
 logger = logging.getLogger(__name__)
 

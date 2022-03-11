@@ -1,21 +1,21 @@
 """Steemd/condenser_api compatibility layer API methods."""
 from functools import wraps
 
-import hive.server.condenser_api.cursor as cursor
-from hive.server.condenser_api.objects import _condenser_post_object
 from hive.server.common.helpers import (
-    ApiError,
-    return_error_info,
     json_date,
+    return_error_info,
     valid_account,
+    valid_follow_type,
+    valid_limit,
+    valid_offset,
     valid_permlink,
     valid_tag,
-    valid_offset,
-    valid_limit,
     valid_truncate,
-    valid_follow_type,
 )
+import hive.server.condenser_api.cursor as cursor
+from hive.server.condenser_api.objects import _condenser_post_object
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
+
 
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
 

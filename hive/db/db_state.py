@@ -2,22 +2,18 @@
 
 # pylint: disable=too-many-lines
 
+from concurrent.futures import as_completed, ThreadPoolExecutor
+import logging
 import time
 from time import perf_counter
 
-import logging
 import sqlalchemy
 
-from hive.db.schema import setup, set_logged_table_attribute, build_metadata, build_metadata_community, teardown
 from hive.db.adapter import Db
-
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from hive.db.schema import build_metadata, setup, teardown
 from hive.indexer.auto_db_disposer import AutoDbDisposer
-
-from hive.utils.communities_rank import update_communities_posts_and_rank
-
 from hive.server.common.payout_stats import PayoutStats
-
+from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.utils.stats import FinalOperationStatusManager as FOSM
 
 log = logging.getLogger(__name__)
@@ -259,7 +255,7 @@ class DbState:
         # is_pre_process, drop, create
         cls.processing_indexes(True, True, False)
 
-        from hive.db.schema import drop_fk, set_logged_table_attribute
+        from hive.db.schema import drop_fk
 
         log.info("Dropping FKs")
         drop_fk(cls.db())
@@ -534,7 +530,7 @@ class DbState:
         cls.db().query_no_return("UPDATE hive_state SET block_num = :block_num", block_num=current_imported_block)
 
         if massive_sync_preconditions:
-            from hive.db.schema import create_fk, set_logged_table_attribute
+            from hive.db.schema import create_fk
 
             # intentionally disabled since it needs a lot of WAL disk space when switching back to LOGGED
             # set_logged_table_attribute(cls.db(), True)

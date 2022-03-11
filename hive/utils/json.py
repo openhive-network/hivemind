@@ -1,10 +1,12 @@
 """Methods to parse steemd values and clean strings."""
 
-import re
 import logging
+import re
+
 import ujson as json
 
 log = logging.getLogger(__name__)
+
 
 # Value validation
 # ----------------

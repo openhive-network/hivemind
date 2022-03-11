@@ -1,10 +1,9 @@
 """Hive signal handling."""
 
 import logging
-
 from signal import SIGINT
-from atomic import AtomicLong
 
+from atomic import AtomicLong
 
 log = logging.getLogger(__name__)
 

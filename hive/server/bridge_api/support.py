@@ -1,15 +1,15 @@
 """Handles building condenser-compatible response objects."""
 
 import logging
-from hive.server.common.helpers import valid_account, valid_permlink
-
-# import ujson as json
 
 from hive.server.bridge_api.methods import get_post
 from hive.server.common.helpers import (
     # ApiError,
     return_error_info,
 )
+from hive.server.common.helpers import valid_account, valid_permlink
+
+# import ujson as json
 
 log = logging.getLogger(__name__)
 

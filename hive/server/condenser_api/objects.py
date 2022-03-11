@@ -1,14 +1,15 @@
 """Handles building condenser_api-compatible response objects."""
 
 import logging
+
 import ujson as json
 
-from hive.utils.normalize import sbd_amount
-from hive.server.common.helpers import json_date, get_hive_accounts_info_view_query_string
-from hive.server.database_api.methods import find_votes_impl, VotesPresentation
+from hive.server.common.helpers import get_hive_accounts_info_view_query_string, json_date
 from hive.utils.account import safe_db_profile_metadata
+from hive.utils.normalize import sbd_amount
 
 log = logging.getLogger(__name__)
+
 
 # Building of legacy account objects
 

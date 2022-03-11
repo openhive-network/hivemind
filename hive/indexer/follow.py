@@ -1,14 +1,13 @@
 """Handles follow operations."""
 
-import logging
 import enum
+import logging
 
 from funcy.seqs import first
-from hive.indexer.accounts import Accounts
 
+from hive.indexer.accounts import Accounts
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
-
 
 log = logging.getLogger(__name__)
 

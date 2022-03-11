@@ -1,12 +1,11 @@
-from hive.indexer.hive_rpc.massive_blocks_data_provider_hive_rpc import MassiveBlocksDataProviderHiveRpc
-from hive.indexer.hive_rpc.block_from_rest import VirtualOperationFromRpc
-from hive.indexer.hive_rpc.vops_provider import VopsProvider
-from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
-from hive.indexer.block import Block, BlockWrapper
-
-
 from abc import ABC, abstractmethod
 import logging
+
+from hive.indexer.block import BlockWrapper
+from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
+from hive.indexer.hive_rpc.block_from_rest import VirtualOperationFromRpc
+from hive.indexer.hive_rpc.massive_blocks_data_provider_hive_rpc import MassiveBlocksDataProviderHiveRpc
+from hive.indexer.hive_rpc.vops_provider import VopsProvider
 
 log = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 """System-specific utility methods"""
 
-import sys
 import resource
+import sys
 
 USE_COLOR = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
 

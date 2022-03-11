@@ -1,9 +1,8 @@
-from hive.indexer.block import Block, Transaction, Operation, VirtualOperationType, OperationType
+import logging
 
-import bisect
 import ujson as json
 
-import logging
+from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
 
 log = logging.getLogger(__name__)
 

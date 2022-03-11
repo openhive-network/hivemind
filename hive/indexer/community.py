@@ -2,9 +2,10 @@
 
 # pylint: disable=too-many-lines
 
+from enum import IntEnum
 import logging
 import re
-from enum import IntEnum
+
 import ujson as json
 
 from hive.db.adapter import Db
@@ -196,9 +197,9 @@ class Community:
         return (
             DB.query_one(
                 """SELECT role_id FROM hive_roles
-                                WHERE community_id = :community_id
-                                  AND account_id = :account_id
-                                LIMIT 1""",
+                                    WHERE community_id = :community_id
+                                      AND account_id = :account_id
+                                    LIMIT 1""",
                 community_id=community_id,
                 account_id=account_id,
             )

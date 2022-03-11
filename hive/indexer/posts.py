@@ -1,25 +1,20 @@
 """Core posts manager."""
 
 import logging
-import collections
-
-from ujson import dumps, loads
 
 from diff_match_patch import diff_match_patch
+from ujson import dumps, loads
 
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
-
-from hive.indexer.votes import Votes
-from hive.indexer.reblog import Reblog
+from hive.indexer.block import VirtualOperationType
 from hive.indexer.community import Community
+from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.notify import Notify
 from hive.indexer.post_data_cache import PostDataCache
-from hive.indexer.db_adapter_holder import DbAdapterHolder
-from hive.indexer.block import VirtualOperationType
+from hive.indexer.votes import Votes
 from hive.utils.misc import chunks
-
-from hive.utils.normalize import sbd_amount, legacy_amount, safe_img_url, escape_characters
+from hive.utils.normalize import escape_characters, legacy_amount, safe_img_url, sbd_amount
 
 log = logging.getLogger(__name__)
 DB = Db.instance()
@@ -246,8 +241,8 @@ class Posts(DbAdapterHolder):
             # ABW: prior to some early HF that was not necessarily final payout since those were discussion driven so new comment/vote could trigger new cashout window, see f.e.
             # soulsistashakti/re-emily-cook-let-me-introduce-myself-my-name-is-emily-cook-and-i-m-the-producer-and-presenter-of-a-monthly-film-show-film-focus-20160701t012330329z
             # it emits that "final" operation at blocks: 2889020, 3053237, 3172559 and 4028469
-            if v[VirtualOperationType.CommentPayoutUpdate] is not None:
-                value, date = v[VirtualOperationType.CommentPayoutUpdate]
+            if v[VirtualOperationType.COMMENT_PAYOUT_UPDATE] is not None:
+                value, date = v[VirtualOperationType.COMMENT_PAYOUT_UPDATE]
                 if author is None:
                     author = value['author']
                     permlink = value['permlink']
@@ -260,8 +255,8 @@ class Posts(DbAdapterHolder):
                 total_vote_weight = 0
 
             # author rewards in current (final or nonfinal) payout (always comes with comment_reward_operation)
-            if v[VirtualOperationType.AuthorReward] is not None:
-                value, date = v[VirtualOperationType.AuthorReward]
+            if v[VirtualOperationType.AUTHOR_REWARD] is not None:
+                value, date = v[VirtualOperationType.AUTHOR_REWARD]
                 if author is None:
                     author = value['author']
                     permlink = value['permlink']
@@ -271,8 +266,8 @@ class Posts(DbAdapterHolder):
                 # curators_vesting_payout = value['curators_vesting_payout']['amount']
 
             # summary of comment rewards in current (final or nonfinal) payout (always comes with author_reward_operation)
-            if v[VirtualOperationType.CommentReward] is not None:
-                value, date = v[VirtualOperationType.CommentReward]
+            if v[VirtualOperationType.COMMENT_REWARD] is not None:
+                value, date = v[VirtualOperationType.COMMENT_REWARD]
                 if author is None:
                     author = value['author']
                     permlink = value['permlink']
@@ -287,8 +282,8 @@ class Posts(DbAdapterHolder):
                 last_payout_at = date
 
             # estimated pending_payout from vote (if exists with actual payout the value comes from vote cast after payout)
-            if v[VirtualOperationType.EffectiveCommentVote] is not None:
-                value, date = v[VirtualOperationType.EffectiveCommentVote]
+            if v[VirtualOperationType.EFFECTIVE_COMMENT_VOTE] is not None:
+                value, date = v[VirtualOperationType.EFFECTIVE_COMMENT_VOTE]
                 if author is None:
                     author = value['author']
                     permlink = value['permlink']

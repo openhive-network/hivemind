@@ -1,20 +1,19 @@
 # coding=utf-8
 """Simple HTTP client for communicating with jussi/steem."""
 
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import logging
-import socket
+from concurrent.futures import as_completed, ThreadPoolExecutor
 from functools import partial
 from itertools import cycle
-from time import sleep, perf_counter as perf
-import ujson as json
+import logging
+import socket
+from time import perf_counter as perf, sleep
 
 import certifi
+import ujson as json
 import urllib3
-
-from urllib3.util import Retry
 from urllib3.connection import HTTPConnection
 from urllib3.exceptions import HTTPError
+from urllib3.util import Retry
 
 from hive.steem.exceptions import RPCError, RPCErrorFatal
 from hive.steem.signal import can_continue_thread

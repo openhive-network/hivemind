@@ -8,69 +8,69 @@ log = logging.getLogger(__name__)
 
 
 class VirtualOperationType(Enum):
-    AuthorReward = 1
-    CommentReward = 2
-    EffectiveCommentVote = 3
-    CommentPayoutUpdate = 4
-    IneffectiveDeleteComment = 5
+    AUTHOR_REWARD = 1
+    COMMENT_REWARD = 2
+    EFFECTIVE_COMMENT_VOTE = 3
+    COMMENT_PAYOUT_UPDATE = 4
+    INEFFECTIVE_DELETE_COMMENT = 5
 
     def from_name(operation_name):
         if operation_name == 'author_reward_operation':
-            return VirtualOperationType.AuthorReward
+            return VirtualOperationType.AUTHOR_REWARD
         if operation_name == 'comment_reward_operation':
-            return VirtualOperationType.CommentReward
+            return VirtualOperationType.COMMENT_REWARD
         if operation_name == 'effective_comment_vote_operation':
-            return VirtualOperationType.EffectiveCommentVote
+            return VirtualOperationType.EFFECTIVE_COMMENT_VOTE
         if operation_name == 'ineffective_delete_comment_operation':
-            return VirtualOperationType.IneffectiveDeleteComment
+            return VirtualOperationType.INEFFECTIVE_DELETE_COMMENT
         if operation_name == 'comment_payout_update_operation':
-            return VirtualOperationType.CommentPayoutUpdate
+            return VirtualOperationType.COMMENT_PAYOUT_UPDATE
 
         return None
 
 
 class OperationType(Enum):
-    Pow = 1
-    Pow2 = 2
-    AccountCreate = 3
-    AccountCreateWithDelegation = 4
-    CreateClaimedAccount = 5
-    AccountUpdate = 6
-    AccountUpdate2 = 7
-    Comment = 8
-    DeleteComment = 9
-    CommentOption = 10
-    Vote = 11
-    Transfer = 12
-    CustomJson = 13
+    POW = 1
+    POW_2 = 2
+    ACCOUNT_CREATE = 3
+    ACCOUNT_CREATE_WITH_DELEGATION = 4
+    CREATE_CLAIMED_ACCOUNT = 5
+    ACCOUNT_UPDATE = 6
+    ACCOUNT_UPDATE_2 = 7
+    COMMENT = 8
+    DELETE_COMMENT = 9
+    COMMENT_OPTION = 10
+    VOTE = 11
+    TRANSFER = 12
+    CUSTOM_JSON = 13
 
     def from_name(operation_name):
         if operation_name == 'pow_operation':
-            return OperationType.Pow
+            return OperationType.POW
         if operation_name == 'pow2_operation':
-            return OperationType.Pow2
+            return OperationType.POW_2
         if operation_name == 'account_create_operation':
-            return OperationType.AccountCreate
+            return OperationType.ACCOUNT_CREATE
         if operation_name == 'account_create_with_delegation_operation':
-            return OperationType.AccountCreateWithDelegation
+            return OperationType.ACCOUNT_CREATE_WITH_DELEGATION
         if operation_name == 'create_claimed_account_operation':
-            return OperationType.CreateClaimedAccount
+            return OperationType.CREATE_CLAIMED_ACCOUNT
         if operation_name == 'account_update_operation':
-            return OperationType.AccountUpdate
+            return OperationType.ACCOUNT_UPDATE
         if operation_name == 'account_update2_operation':
-            return OperationType.AccountUpdate2
+            return OperationType.ACCOUNT_UPDATE_2
         if operation_name == 'comment_operation':
-            return OperationType.Comment
+            return OperationType.COMMENT
         if operation_name == 'delete_comment_operation':
-            return OperationType.DeleteComment
+            return OperationType.DELETE_COMMENT
         if operation_name == 'comment_options_operation':
-            return OperationType.CommentOption
+            return OperationType.COMMENT_OPTION
         if operation_name == 'vote_operation':
-            return OperationType.Vote
+            return OperationType.VOTE
         if operation_name == 'transfer_operation':
-            return OperationType.Transfer
+            return OperationType.TRANSFER
         if operation_name == 'custom_json_operation':
-            return OperationType.CustomJson
+            return OperationType.CUSTOM_JSON
         # for operations not supported by hivemind
         return None
 

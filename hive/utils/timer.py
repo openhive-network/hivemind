@@ -1,12 +1,13 @@
 """Timer for reporting progress on long batch operations."""
 
-from time import perf_counter as perf
-from hive.utils.normalize import secs_to_str
 from functools import wraps
-
 import logging
+from time import perf_counter as perf
+
+from hive.utils.normalize import secs_to_str
 
 log = logging.getLogger(__name__)
+
 
 # timeit decorator for measuring method execution time
 def time_it(method):

@@ -1,17 +1,16 @@
 """Hive API: Notifications"""
 import logging
 
+from hive.indexer.notify import NotifyType
 from hive.server.common.helpers import (
+    json_date,
     return_error_info,
     valid_account,
-    valid_permlink,
-    valid_number,
     valid_limit,
+    valid_number,
+    valid_permlink,
     valid_score,
-    json_date,
 )
-from hive.indexer.notify import NotifyType
-from hive.server.common.mutes import Mutes
 
 log = logging.getLogger(__name__)
 

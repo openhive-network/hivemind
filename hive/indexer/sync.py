@@ -1,50 +1,37 @@
 """Hive sync manager."""
 
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 import logging
+from signal import getsignal, SIGINT, signal, SIGTERM
+import sys
 from time import perf_counter as perf
+
 import ujson as json
 
-import queue
-from concurrent.futures import ThreadPoolExecutor
-
 from hive.db.db_state import DbState
-
-from hive.utils.timer import Timer
-from hive.steem.block.stream import MicroForkException
-from hive.indexer.hive_rpc.massive_blocks_data_provider_hive_rpc import MassiveBlocksDataProviderHiveRpc
-from hive.steem.block.stream import BlockStream
-from hive.steem.signal import finish_signals_handler, set_exception_thrown, can_continue_thread
-
-from hive.indexer.blocks import Blocks
 from hive.indexer.accounts import Accounts
-from hive.indexer.follow import Follow
+from hive.indexer.block import BlocksProviderBase
+from hive.indexer.blocks import Blocks
 from hive.indexer.community import Community
+from hive.indexer.db_adapter_holder import DbLiveContextHolder
 from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
-from hive.indexer.block import Block, BlocksProviderBase
-
-from hive.server.common.payout_stats import PayoutStats
-from hive.server.common.mentions import Mentions
-
-from hive.server.common.mutes import Mutes
-
-from hive.utils.stats import OPStatusManager as OPSM
-from hive.utils.stats import FlushStatusManager as FSM
-from hive.utils.stats import WaitingStatusManager as WSM
-from hive.utils.stats import PrometheusClient as PC
-from hive.utils.stats import BroadcastObject
-from hive.utils.communities_rank import update_communities_posts_and_rank
-from hive.utils.misc import show_app_version, log_memory_usage
-
+from hive.indexer.hive_rpc.massive_blocks_data_provider_hive_rpc import MassiveBlocksDataProviderHiveRpc
 from hive.indexer.mock_block_provider import MockBlockProvider
 from hive.indexer.mock_vops_provider import MockVopsProvider
-from hive.indexer.db_adapter_holder import DbLiveContextHolder
-
-from datetime import datetime
-
-from signal import signal, SIGINT, SIGTERM, getsignal
-from threading import Thread
-from collections import deque
-
+from hive.server.common.mentions import Mentions
+from hive.server.common.payout_stats import PayoutStats
+from hive.steem.block.stream import BlockStream
+from hive.steem.block.stream import MicroForkException
+from hive.steem.signal import can_continue_thread, finish_signals_handler, set_exception_thrown
+from hive.utils.communities_rank import update_communities_posts_and_rank
+from hive.utils.misc import log_memory_usage
+from hive.utils.stats import BroadcastObject
+from hive.utils.stats import FlushStatusManager as FSM
+from hive.utils.stats import OPStatusManager as OPSM
+from hive.utils.stats import PrometheusClient as PC
+from hive.utils.stats import WaitingStatusManager as WSM
+from hive.utils.timer import Timer
 
 log = logging.getLogger(__name__)
 
@@ -156,7 +143,7 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
                 otm = OPSM.log_current("Operations present in the processed blocks")
                 ftm = FSM.log_current("Flushing times")
                 wtm = WSM.log_current("Waiting times")
-                log.info(f"Calculated time: {otm+ftm+wtm :.4f} s.")
+                log.info(f"Calculated time: {otm + ftm + wtm :.4f} s.")
 
             OPSM.next_blocks()
             FSM.next_blocks()
@@ -462,7 +449,6 @@ class LiveSync(DBSync):
                 break
 
     def run(self):
-        import sys
 
         max_block_limit = sys.maxsize
         do_stale_block_check = True

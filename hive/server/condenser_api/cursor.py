@@ -3,6 +3,7 @@
 from hive.server.condenser_api.objects import _condenser_post_object
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 
+
 # pylint: disable=too-many-lines
 
 

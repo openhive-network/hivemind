@@ -1,14 +1,12 @@
+from concurrent.futures import ThreadPoolExecutor
+import logging
+import queue
+
 from hive.indexer.block import BlocksProviderBase
+from hive.indexer.hive_rpc.block_from_rest import BlockFromRpc
 from hive.indexer.hive_rpc.blocks_provider import BlocksProvider
 from hive.indexer.hive_rpc.vops_provider import VopsProvider
 from hive.utils.stats import WaitingStatusManager as WSM
-
-from hive.indexer.hive_rpc.block_from_rest import BlockFromRpc
-
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
-import logging
-import queue
 
 log = logging.getLogger(__name__)
 
@@ -75,6 +73,7 @@ class MassiveBlocksDataProviderHiveRpc(BlocksProviderBase):
         self.vops_queue = queue.Queue(maxsize=self._operations_queue_size)
         self.blocks_queue = queue.Queue(maxsize=self._blocks_data_queue_size)
 
+    @staticmethod
     def create_thread_pool(threads_for_blocks, threads_for_vops):
         """Creates initialzied thread pool with number of threads required by the provider.
         You can pass the thread pool to provider during its creation to controll its lifetime

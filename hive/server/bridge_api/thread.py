@@ -3,9 +3,8 @@
 import logging
 
 from hive.server.bridge_api.objects import _bridge_post_object, append_statistics_to_post
-from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 from hive.server.common.helpers import return_error_info, valid_account, valid_permlink
-from hive.server.common.mutes import Mutes
+from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 
 log = logging.getLogger(__name__)
 

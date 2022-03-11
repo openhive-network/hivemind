@@ -1,5 +1,7 @@
-import os, psutil
-from hive.utils.stats import PrometheusClient, BroadcastObject
+import os
+import psutil
+
+from hive.utils.stats import BroadcastObject, PrometheusClient
 
 
 def log_memory_usage(memtypes=["rss", "vms", "shared"], broadcast=True) -> str:
@@ -11,7 +13,7 @@ def log_memory_usage(memtypes=["rss", "vms", "shared"], broadcast=True) -> str:
 
     def format_bytes(val: int):
         assert isinstance(val, int) or isinstance(val, float), 'invalid data type, required int or float'
-        return f'{ val / 1024.0 / 1024.0 :.2f} MB'
+        return f'{val / 1024.0 / 1024.0 :.2f} MB'
 
     human_readable = {
         "rss": "physical_memory",
@@ -27,7 +29,7 @@ def log_memory_usage(memtypes=["rss", "vms", "shared"], broadcast=True) -> str:
         PrometheusClient.broadcast(
             [BroadcastObject(f'hivemind_memory_{key}', getattr(stats, key), 'b') for key in stats._fields]
         )  # broadcast to prometheus
-    return f"memory usage report: { ', '.join( [ f'{ human_readable.get(k, k) } = { format_bytes(getattr(stats, k)) }' for k in memtypes ] ) }"
+    return f"memory usage report: {', '.join([f'{human_readable.get(k, k)} = {format_bytes(getattr(stats, k))}' for k in memtypes])}"
 
 
 def chunks(lst, n):

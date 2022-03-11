@@ -2,9 +2,9 @@
 
 import logging
 from time import sleep
+
+from hive.steem.block.one_block_provider import OneBlockProviderFactory
 from hive.steem.block.schedule import BlockSchedule
-from hive.steem.block.one_block_provider import OneBlockProviderBase, OneBlockProviderFactory
-from hive.indexer.block import Block
 
 log = logging.getLogger(__name__)
 

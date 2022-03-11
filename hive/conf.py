@@ -1,12 +1,13 @@
 """Conf handles reading run-time config and app-level settings."""
 
-import re
 import logging
+import re
+
 import configargparse
 
-from hive.steem.client import SteemClient
 from hive.db.adapter import Db
-from hive.utils.normalize import strtobool, int_log_level
+from hive.steem.client import SteemClient
+from hive.utils.normalize import int_log_level, strtobool
 from hive.utils.stats import DbStats
 
 log = logging.getLogger(__name__)

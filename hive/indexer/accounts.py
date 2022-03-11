@@ -3,9 +3,8 @@
 import logging
 
 from hive.db.adapter import Db
-from hive.utils.account import get_profile_str
-
 from hive.indexer.db_adapter_holder import DbAdapterHolder
+from hive.utils.account import get_profile_str
 from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)

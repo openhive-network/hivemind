@@ -1,6 +1,7 @@
 """Block scheduler."""
 import logging
-from time import time, sleep
+from time import sleep, time
+
 from hive.utils.normalize import block_date, utc_timestamp
 from hive.utils.stats import Stats
 

@@ -1,7 +1,7 @@
 """ Votes indexing and processing """
 
-import logging
 import collections
+import logging
 
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
