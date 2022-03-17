@@ -1,17 +1,18 @@
 """List of muted accounts for server process."""
 
+
 class Mutes:
     """Singleton tracking muted accounts."""
 
     @classmethod
-    async def get_blacklisted_for_observer(cls, observer, context, flags=1+2+4+8):
-        """ fetch the list of users that the observer has blacklisted
-            flags allow filtering the query:
-            1 - accounts blacklisted by observer
-            2 - accounts blacklisted by observer's follow_blacklist lists
-            4 - accounts muted by observer
-            8 - accounts muted by observer's follow_mutes lists
-            by default all flags are set
+    async def get_blacklisted_for_observer(cls, observer, context, flags=1 + 2 + 4 + 8):
+        """fetch the list of users that the observer has blacklisted
+        flags allow filtering the query:
+        1 - accounts blacklisted by observer
+        2 - accounts blacklisted by observer's follow_blacklist lists
+        4 - accounts muted by observer
+        8 - accounts muted by observer's follow_mutes lists
+        by default all flags are set
         """
         if not observer or not context:
             return {}
@@ -27,13 +28,13 @@ class Mutes:
                 blacklisted_users[account_name] = ([], [])
             if row['is_blacklisted']:
                 blacklisted_users[account_name][0].append(row['source'])
-            else: # muted
+            else:  # muted
                 blacklisted_users[account_name][1].append(row['source'])
         return blacklisted_users
 
     @classmethod
-    async def get_blacklists_for_observer(cls, observer, context, follow_blacklist = True, follow_muted = True):
-        """ fetch the list of accounts that are followed by observer through follow_blacklist/follow_muted """
+    async def get_blacklists_for_observer(cls, observer, context, follow_blacklist=True, follow_muted=True):
+        """fetch the list of accounts that are followed by observer through follow_blacklist/follow_muted"""
         if not observer or not context:
             return {}
 

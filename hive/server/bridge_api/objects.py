@@ -15,9 +15,10 @@ log = logging.getLogger(__name__)
 
 # pylint: disable=too-many-lines
 
+
 def append_statistics_to_post(post, row, is_pinned):
-    """ apply information such as blacklists and community names/roles to a given post """
-    
+    """apply information such as blacklists and community names/roles to a given post"""
+
     post['blacklists'] = []
     if 'blacklists' in row and row['blacklists']:
         split_lists = row['blacklists'].split(',')
@@ -26,7 +27,7 @@ def append_statistics_to_post(post, row, is_pinned):
     reputation = post['author_reputation']
     if reputation < 1:
         post['blacklists'].append('reputation-0')
-    elif reputation  == 1:
+    elif reputation == 1:
         post['blacklists'].append('reputation-1')
 
     if 'community_title' in row and row['community_title']:
@@ -44,16 +45,18 @@ def append_statistics_to_post(post, row, is_pinned):
         post['stats']['is_pinned'] = True
     return post
 
+
 async def load_profiles(db, names):
     """`get_accounts`-style lookup for `get_state` compat layer."""
-    sql = get_hive_accounts_info_view_query_string( names )
+    sql = get_hive_accounts_info_view_query_string(names)
     rows = await db.query_all(sql, names=tuple(names))
     return [_bridge_profile_object(row) for row in rows]
+
 
 def _bridge_profile_object(row):
     """Convert an internal account record into legacy-steemd style."""
 
-    #Important. The member `sp` in `stats` is removed, because currently the hivemind doesn't hold any balances.
+    # Important. The member `sp` in `stats` is removed, because currently the hivemind doesn't hold any balances.
     # The member `vote_weight` from `hive_accounts` is removed as well.
     profile = safe_db_profile_metadata(row['posting_json_metadata'], row['json_metadata'])
 
@@ -71,15 +74,21 @@ def _bridge_profile_object(row):
             'followers': row['followers'],
         },
         'metadata': {
-            'profile': {'name': profile['name'],
-                        'about': profile['about'],
-                        'website': profile['website'],
-                        'location': profile['location'],
-                        'cover_image': profile['cover_image'],
-                        'profile_image': profile['profile_image'],
-                        'blacklist_description': profile['blacklist_description'] if 'blacklist_description' in profile else '',
-                        'muted_list_description': profile['muted_list_description'] if 'muted_list_description' in profile else ''
-                       }}}
+            'profile': {
+                'name': profile['name'],
+                'about': profile['about'],
+                'website': profile['website'],
+                'location': profile['location'],
+                'cover_image': profile['cover_image'],
+                'profile_image': profile['profile_image'],
+                'blacklist_description': profile['blacklist_description'] if 'blacklist_description' in profile else '',
+                'muted_list_description': profile['muted_list_description']
+                if 'muted_list_description' in profile
+                else '',
+            }
+        },
+    }
+
 
 def _bridge_post_object(row, truncate_body=0):
     """Given a hive_posts row, create a legacy-style post object."""
@@ -108,14 +117,14 @@ def _bridge_post_object(row, truncate_body=0):
     post['payout_at'] = json_date(row['payout_at'])
     post['payout'] = float(row['payout'] + row['pending_payout'])
     post['pending_payout_value'] = _amount(0 if paid else post['payout'])
-    post['author_payout_value'] = _amount(0) # supplemented below
-    post['curator_payout_value'] = _amount(0) # supplemented below
+    post['author_payout_value'] = _amount(0)  # supplemented below
+    post['curator_payout_value'] = _amount(0)  # supplemented below
     post['promoted'] = _amount(row['promoted'])
 
     post['replies'] = []
     post['author_reputation'] = rep_log10(row['author_rep'])
 
-    neg_rshares = ( row['rshares'] - row['abs_rshares'] ) // 2 # effectively sum of all negative rshares
+    neg_rshares = (row['rshares'] - row['abs_rshares']) // 2  # effectively sum of all negative rshares
     # take negative rshares, divide by 2, truncate 10 digits (plus neg sign),
     #   and count digits. creates a cheap log10, stake-based flag weight.
     #   result: 1 = approx $400 of downvoting stake; 2 = $4,000; etc
@@ -125,10 +134,10 @@ def _bridge_post_object(row, truncate_body=0):
         'hide': row['is_hidden'],
         'gray': row['is_grayed'],
         'total_votes': row['total_votes'],
-        'flag_weight': float(flag_weight)} # TODO: down_weight
+        'flag_weight': float(flag_weight),
+    }  # TODO: down_weight
 
-
-    #post['author_reputation'] = rep_to_raw(row['author_rep'])
+    # post['author_reputation'] = rep_to_raw(row['author_rep'])
 
     post['url'] = row['url']
     post['beneficiaries'] = row['beneficiaries']
@@ -144,9 +153,10 @@ def _bridge_post_object(row, truncate_body=0):
     if row['depth'] > 0:
         post['parent_author'] = row['parent_author']
         post['parent_permlink'] = row['parent_permlink_or_category']
-        post['title'] = 'RE: ' + row['root_title'] # PostSummary & comment context
+        post['title'] = 'RE: ' + row['root_title']  # PostSummary & comment context
 
     return post
+
 
 def _amount(amount, asset='HBD'):
     """Return a steem-style amount string given a (numeric, asset-str)."""

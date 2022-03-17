@@ -12,26 +12,28 @@ from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
 
+
 class Action(enum.IntEnum):
-    Nothing = 0 # cancel existing Blog/Ignore
-    Blog = 1 # follow
-    Ignore = 2 # mute
+    Nothing = 0  # cancel existing Blog/Ignore
+    Blog = 1  # follow
+    Ignore = 2  # mute
     Blacklist = 3
     Follow_blacklist = 4
-    Unblacklist = 5 # cancel existing Blacklist
-    Unfollow_blacklist = 6 # cancel existing Follow_blacklist
+    Unblacklist = 5  # cancel existing Blacklist
+    Unfollow_blacklist = 6  # cancel existing Follow_blacklist
     Follow_muted = 7
-    Unfollow_muted = 8 # cancel existing Follow_muted
-    Reset_blacklist = 9 # cancel all existing records of Blacklist type
-    Reset_following_list = 10 # cancel all existing records of Blog type
-    Reset_muted_list = 11 # cancel all existing records of Ignore type
-    Reset_follow_blacklist = 12 # cancel all existing records of Follow_blacklist type
-    Reset_follow_muted_list = 13 # cancel all existing records of Follow_muted type
-    Reset_all_lists = 14 # cancel all existing records of ??? types
+    Unfollow_muted = 8  # cancel existing Follow_muted
+    Reset_blacklist = 9  # cancel all existing records of Blacklist type
+    Reset_following_list = 10  # cancel all existing records of Blog type
+    Reset_muted_list = 11  # cancel all existing records of Ignore type
+    Reset_follow_blacklist = 12  # cancel all existing records of Follow_blacklist type
+    Reset_follow_muted_list = 13  # cancel all existing records of Follow_muted type
+    Reset_all_lists = 14  # cancel all existing records of ??? types
+
 
 class Follow(DbAdapterHolder):
     """Handles processing of incoming follow ups and flushing to db."""
-    
+
     follow_items_to_flush = dict()
     list_resets_to_flush = []
 
@@ -42,28 +44,33 @@ class Follow(DbAdapterHolder):
         data['idx'] = cls.idx
         data['blacklisted'] = False
         data['block_num'] = op['block_num']
+
     @classmethod
     def _reset_following_list(cls, data, op):
         if data['state'] == 1:
             data['idx'] = cls.idx
             data['state'] = 0
             data['block_num'] = op['block_num']
+
     @classmethod
     def _reset_muted_list(cls, data, op):
         if data['state'] == 2:
             data['idx'] = cls.idx
             data['state'] = 0
             data['block_num'] = op['block_num']
+
     @classmethod
     def _reset_follow_blacklist(cls, data, op):
         data['idx'] = cls.idx
         data['follow_blacklists'] = False
         data['block_num'] = op['block_num']
+
     @classmethod
     def _reset_follow_muted_list(cls, data, op):
         data['idx'] = cls.idx
         data['follow_muted'] = False
         data['block_num'] = op['block_num']
+
     @classmethod
     def _reset_all_lists(cls, data, op):
         data['idx'] = cls.idx
@@ -74,8 +81,17 @@ class Follow(DbAdapterHolder):
         data['block_num'] = op['block_num']
 
     @classmethod
-    def _follow_single(cls, follower, following, at, block_num,
-                       new_state=None, new_blacklisted=None, new_follow_blacklists=None, new_follow_muted=None):
+    def _follow_single(
+        cls,
+        follower,
+        following,
+        at,
+        block_num,
+        new_state=None,
+        new_blacklisted=None,
+        new_follow_blacklists=None,
+        new_follow_muted=None,
+    ):
         # add or update single record in flush cache
         k = f'{follower}/{following}'
         if k not in cls.follow_items_to_flush:
@@ -89,7 +105,7 @@ class Follow(DbAdapterHolder):
                 follow_blacklists=new_follow_blacklists if new_follow_blacklists is not None else 'NULL',
                 follow_muted=new_follow_muted if new_follow_muted is not None else 'NULL',
                 at=at,
-                block_num=block_num
+                block_num=block_num,
             )
         else:
             # follow item already in cache - just overwrite previous value where applicable
@@ -131,24 +147,36 @@ class Follow(DbAdapterHolder):
             add_null_muted = False
             if state == Action.Reset_blacklist:
                 reset_list = Follow._reset_blacklist
-                cls.list_resets_to_flush.append(dict(follower=follower, reset_call='follow_reset_blacklist', block_num=block_num))
+                cls.list_resets_to_flush.append(
+                    dict(follower=follower, reset_call='follow_reset_blacklist', block_num=block_num)
+                )
             elif state == Action.Reset_following_list:
                 reset_list = Follow._reset_following_list
-                cls.list_resets_to_flush.append(dict(follower=follower, reset_call='follow_reset_following_list', block_num=block_num))
+                cls.list_resets_to_flush.append(
+                    dict(follower=follower, reset_call='follow_reset_following_list', block_num=block_num)
+                )
             elif state == Action.Reset_muted_list:
                 reset_list = Follow._reset_muted_list
-                cls.list_resets_to_flush.append(dict(follower=follower, reset_call='follow_reset_muted_list', block_num=block_num))
+                cls.list_resets_to_flush.append(
+                    dict(follower=follower, reset_call='follow_reset_muted_list', block_num=block_num)
+                )
             elif state == Action.Reset_follow_blacklist:
                 reset_list = Follow._reset_follow_blacklist
-                cls.list_resets_to_flush.append(dict(follower=follower, reset_call='follow_reset_follow_blacklist', block_num=block_num))
+                cls.list_resets_to_flush.append(
+                    dict(follower=follower, reset_call='follow_reset_follow_blacklist', block_num=block_num)
+                )
                 add_null_blacklist = True
             elif state == Action.Reset_follow_muted_list:
                 reset_list = Follow._reset_follow_muted_list
-                cls.list_resets_to_flush.append(dict(follower=follower, reset_call='follow_reset_follow_muted_list', block_num=block_num))
+                cls.list_resets_to_flush.append(
+                    dict(follower=follower, reset_call='follow_reset_follow_muted_list', block_num=block_num)
+                )
                 add_null_muted = True
             elif state == Action.Reset_all_lists:
                 reset_list = Follow._reset_all_lists
-                cls.list_resets_to_flush.append(dict(follower=follower, reset_call='follow_reset_all_lists', block_num=block_num))
+                cls.list_resets_to_flush.append(
+                    dict(follower=follower, reset_call='follow_reset_all_lists', block_num=block_num)
+                )
                 add_null_blacklist = True
                 add_null_muted = True
             else:
@@ -163,25 +191,39 @@ class Follow(DbAdapterHolder):
                 # since 'null' account can't have its blacklist/mute list, following such list is only used
                 # as an indicator for frontend to no longer bother user with proposition of following predefined
                 # lists (since that user is already choosing his own lists)
-                cls._follow_single(follower, escape_characters('null'), op['at'], op['block_num'], None, None, add_null_blacklist, add_null_muted)
+                cls._follow_single(
+                    follower,
+                    escape_characters('null'),
+                    op['at'],
+                    op['block_num'],
+                    None,
+                    None,
+                    add_null_blacklist,
+                    add_null_muted,
+                )
         else:
             # set new state/flags to be applied to each pair with changing 'following'
             new_state = state if state in (Action.Nothing, Action.Blog, Action.Ignore) else None
             new_blacklisted = true_false_none(state, Action.Blacklist, Action.Unblacklist)
             new_follow_blacklists = true_false_none(state, Action.Follow_blacklist, Action.Unfollow_blacklist)
             new_follow_muted = true_false_none(state, Action.Follow_muted, Action.Unfollow_muted)
-            
+
             for following in op['following']:
-                cls._follow_single(follower, following, op['at'], block_num,
-                                   new_state, new_blacklisted, new_follow_blacklists, new_follow_muted)
+                cls._follow_single(
+                    follower,
+                    following,
+                    op['at'],
+                    block_num,
+                    new_state,
+                    new_blacklisted,
+                    new_follow_blacklists,
+                    new_follow_muted,
+                )
 
     @classmethod
     def _validated_op(cls, account, op, date):
         """Validate and normalize the operation."""
-        if (not 'what' in op
-            or not isinstance(op['what'], list)
-            or not 'follower' in op
-            or not 'following' in op):
+        if not 'what' in op or not isinstance(op['what'], list) or not 'follower' in op or not 'following' in op:
             log.info("follow_op %s ignored due to basic errors", op)
             return None
 
@@ -191,13 +233,24 @@ class Follow(DbAdapterHolder):
         # only if we wanted to immediately remove empty records)
         # we could add aliases for '' - 'unfollow' and 'unignore'/'unmute'
         # we could add alias for 'ignore' - 'mute'
-        defs = {'': Action.Nothing, 'blog': Action.Blog, 'follow': Action.Blog, 'ignore': Action.Ignore,
-                'blacklist': Action.Blacklist, 'follow_blacklist': Action.Follow_blacklist,
-                'unblacklist': Action.Unblacklist, 'unfollow_blacklist': Action.Unfollow_blacklist,
-                'follow_muted': Action.Follow_muted, 'unfollow_muted': Action.Unfollow_muted,
-                'reset_blacklist' : Action.Reset_blacklist, 'reset_following_list': Action.Reset_following_list,
-                'reset_muted_list': Action.Reset_muted_list, 'reset_follow_blacklist': Action.Reset_follow_blacklist,
-                'reset_follow_muted_list': Action.Reset_follow_muted_list, 'reset_all_lists': Action.Reset_all_lists}
+        defs = {
+            '': Action.Nothing,
+            'blog': Action.Blog,
+            'follow': Action.Blog,
+            'ignore': Action.Ignore,
+            'blacklist': Action.Blacklist,
+            'follow_blacklist': Action.Follow_blacklist,
+            'unblacklist': Action.Unblacklist,
+            'unfollow_blacklist': Action.Unfollow_blacklist,
+            'follow_muted': Action.Follow_muted,
+            'unfollow_muted': Action.Unfollow_muted,
+            'reset_blacklist': Action.Reset_blacklist,
+            'reset_following_list': Action.Reset_following_list,
+            'reset_muted_list': Action.Reset_muted_list,
+            'reset_follow_blacklist': Action.Reset_follow_blacklist,
+            'reset_follow_muted_list': Action.Reset_follow_muted_list,
+            'reset_all_lists': Action.Reset_all_lists,
+        }
         if not isinstance(what, str) or what not in defs:
             log.info("follow_op %s ignored due to unknown type of follow", op)
             return None
@@ -211,7 +264,11 @@ class Follow(DbAdapterHolder):
         op['following'] = op['following'] if isinstance(op['following'], list) else [op['following']]
 
         # if following name does not exist do not process it: basically equal to drop op for single following entry
-        op['following'] = [following for following in op['following'] if following and Accounts.exists(following) and following != op['follower']]
+        op['following'] = [
+            following
+            for following in op['following']
+            if following and Accounts.exists(following) and following != op['follower']
+        ]
         # ABW: note that since you could make 'following' list empty anyway by supplying nonexisting account
         # there was no point in excluding follow_op with provided empty list/empty string - such call actually
         # makes sense for state > 8 when 'following' is ignored
@@ -220,17 +277,19 @@ class Follow(DbAdapterHolder):
             log.info("follow_op %s is void due to effectively empty list of following", op)
             return None
 
-        return dict(follower=escape_characters(op['follower']),
-                    following=[escape_characters(following) for following in op['following']],
-                    state=state,
-                    at=date)
+        return dict(
+            follower=escape_characters(op['follower']),
+            following=[escape_characters(following) for following in op['following']],
+            state=state,
+            at=date,
+        )
 
     @classmethod
     def flush(cls):
         n = 0
         if cls.follow_items_to_flush or cls.list_resets_to_flush:
             cls.beginTx()
-            
+
             sql = "SELECT {}({}::VARCHAR, {}::INT)"
             for reset_list in cls.list_resets_to_flush:
                 query = sql.format(reset_list['reset_call'], reset_list['follower'], reset_list['block_num'])
@@ -285,7 +344,9 @@ class Follow(DbAdapterHolder):
             count = 0
 
             for _, follow_item in cls.follow_items_to_flush.items():
-                values.append(f"({follow_item['idx']}, {follow_item['follower']}, {follow_item['following']}, '{follow_item['at']}'::timestamp, {follow_item['state']}::smallint, {follow_item['blacklisted']}::boolean, {follow_item['follow_blacklists']}::boolean, {follow_item['follow_muted']}::boolean, {follow_item['block_num']})")
+                values.append(
+                    f"({follow_item['idx']}, {follow_item['follower']}, {follow_item['following']}, '{follow_item['at']}'::timestamp, {follow_item['state']}::smallint, {follow_item['blacklisted']}::boolean, {follow_item['follow_blacklists']}::boolean, {follow_item['follow_muted']}::boolean, {follow_item['block_num']})"
+                )
                 count = count + 1
                 if count >= limit:
                     query = str(sql).format(",".join(values))

@@ -1,4 +1,4 @@
-#pylint: disable=missing-docstring,line-too-long
+# pylint: disable=missing-docstring,line-too-long
 from decimal import Decimal
 
 from hive.utils.post import (
@@ -15,7 +15,7 @@ POST_1 = {
             "rshares": 1506388632,
             "time": "2017-06-20T15:53:51",
             "voter": "test-safari",
-            "weight": 0
+            "weight": 0,
         },
         {
             "percent": 200,
@@ -23,7 +23,7 @@ POST_1 = {
             "rshares": 110837437,
             "time": "2017-06-20T16:24:09",
             "voter": "darth-cryptic",
-            "weight": 846
+            "weight": 846,
         },
         {
             "percent": 10000,
@@ -31,7 +31,7 @@ POST_1 = {
             "rshares": 621340000,
             "time": "2017-06-20T15:55:15",
             "voter": "test25",
-            "weight": 273
+            "weight": 273,
         },
         {
             "percent": 10000,
@@ -39,8 +39,8 @@ POST_1 = {
             "rshares": 493299375,
             "time": "2017-06-20T15:54:54",
             "voter": "mysqlthrashmetal",
-            "weight": 263
-        }
+            "weight": 263,
+        },
     ],
     "allow_curation_rewards": True,
     "allow_replies": True,
@@ -83,7 +83,7 @@ POST_1 = {
     "total_pending_payout_value": "0.000 HIVE",
     "total_vote_weight": 0,
     "url": "/spam/@test-safari/june-spam",
-    "vote_rshares": 0
+    "vote_rshares": 0,
 }
 
 POST_2 = {
@@ -131,8 +131,9 @@ POST_2 = {
     "total_pending_payout_value": "0.000 HIVE",
     "total_vote_weight": 0,
     "url": "/spam/@test-safari/june-spam",
-    "vote_rshares": 0
+    "vote_rshares": 0,
 }
+
 
 def test_mentions():
     # pylint: disable=invalid-name

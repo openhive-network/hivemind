@@ -1,7 +1,15 @@
 """Hive API: Notifications"""
 import logging
 
-from hive.server.common.helpers import return_error_info, valid_account, valid_permlink, valid_number, valid_limit, valid_score, json_date
+from hive.server.common.helpers import (
+    return_error_info,
+    valid_account,
+    valid_permlink,
+    valid_number,
+    valid_limit,
+    valid_score,
+    json_date,
+)
 from hive.indexer.notify import NotifyType
 from hive.server.common.mutes import Mutes
 
@@ -9,35 +17,33 @@ log = logging.getLogger(__name__)
 
 STRINGS = {
     # community
-    NotifyType.new_community:  '<dst> was created', # no <src> available
-    NotifyType.set_role:       '<src> set <dst> <payload>',
-    NotifyType.set_props:      '<src> set properties <payload>',
-    NotifyType.set_label:      '<src> label <dst> <payload>',
-    NotifyType.mute_post:      '<src> mute <post> - <payload>',
-    NotifyType.unmute_post:    '<src> unmute <post> - <payload>',
-    NotifyType.pin_post:       '<src> pin <post>',
-    NotifyType.unpin_post:     '<src> unpin <post>',
-    NotifyType.flag_post:      '<src> flag <post> - <payload>',
-    NotifyType.subscribe:      '<src> subscribed to <comm>',
-
+    NotifyType.new_community: '<dst> was created',  # no <src> available
+    NotifyType.set_role: '<src> set <dst> <payload>',
+    NotifyType.set_props: '<src> set properties <payload>',
+    NotifyType.set_label: '<src> label <dst> <payload>',
+    NotifyType.mute_post: '<src> mute <post> - <payload>',
+    NotifyType.unmute_post: '<src> unmute <post> - <payload>',
+    NotifyType.pin_post: '<src> pin <post>',
+    NotifyType.unpin_post: '<src> unpin <post>',
+    NotifyType.flag_post: '<src> flag <post> - <payload>',
+    NotifyType.subscribe: '<src> subscribed to <comm>',
     # personal
-    NotifyType.error:          'error: <payload>',
-    NotifyType.reblog:         '<src> reblogged your post',
-    NotifyType.follow:         '<src> followed you',
-    NotifyType.reply:          '<src> replied to your post',
-    NotifyType.reply_comment:  '<src> replied to your comment',
-    NotifyType.mention:        '<src> mentioned you and <other_mentions> others',
-    NotifyType.vote:           '<src> voted on your post',
-
-    #NotifyType.update_account: '<dst> updated account',
-    #NotifyType.receive:        '<src> sent <dst> <payload>',
-    #NotifyType.send:           '<dst> sent <src> <payload>',
-
-    #NotifyType.reward:         '<post> rewarded <payload>',
-    #NotifyType.power_up:       '<dst> power up <payload>',
-    #NotifyType.power_down:     '<dst> power down <payload>',
-    #NotifyType.message:        '<src>: <payload>',
+    NotifyType.error: 'error: <payload>',
+    NotifyType.reblog: '<src> reblogged your post',
+    NotifyType.follow: '<src> followed you',
+    NotifyType.reply: '<src> replied to your post',
+    NotifyType.reply_comment: '<src> replied to your comment',
+    NotifyType.mention: '<src> mentioned you and <other_mentions> others',
+    NotifyType.vote: '<src> voted on your post',
+    # NotifyType.update_account: '<dst> updated account',
+    # NotifyType.receive:        '<src> sent <dst> <payload>',
+    # NotifyType.send:           '<dst> sent <src> <payload>',
+    # NotifyType.reward:         '<post> rewarded <payload>',
+    # NotifyType.power_up:       '<dst> power up <payload>',
+    # NotifyType.power_down:     '<dst> power down <payload>',
+    # NotifyType.message:        '<src>: <payload>',
 }
+
 
 @return_error_info
 async def unread_notifications(context, account, min_score=25):
@@ -49,6 +55,7 @@ async def unread_notifications(context, account, min_score=25):
     sql = """SELECT * FROM get_number_of_unread_notifications( :account, (:min_score)::SMALLINT)"""
     row = await db.query_row(sql, account=account, min_score=min_score)
     return dict(lastread=str(row['lastread_at']), unread=row['unread'])
+
 
 @return_error_info
 async def account_notifications(context, account, min_score=25, last_id=None, limit=100):
@@ -64,8 +71,11 @@ async def account_notifications(context, account, min_score=25, last_id=None, li
     rows = await db.query_all(sql_query, account=account, min_score=min_score, last_id=last_id, limit=limit)
     return [_render(row) for row in rows]
 
+
 @return_error_info
-async def post_notifications(context, author:str, permlink:str, min_score:int=25, last_id:int=None, limit:int=100):
+async def post_notifications(
+    context, author: str, permlink: str, min_score: int = 25, last_id: int = None, limit: int = 100
+):
     """Load notifications for a specific post."""
     # pylint: disable=too-many-arguments
     db = context['db']
@@ -77,8 +87,11 @@ async def post_notifications(context, author:str, permlink:str, min_score:int=25
 
     sql_query = "SELECT * FROM post_notifications( (:author)::VARCHAR, (:permlink)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::BIGINT, (:limit)::SMALLINT )"
 
-    rows = await db.query_all(sql_query, author=author, permlink=permlink, min_score=min_score, last_id=last_id, limit=limit)
+    rows = await db.query_all(
+        sql_query, author=author, permlink=permlink, min_score=min_score, last_id=last_id, limit=limit
+    )
     return [_render(row) for row in rows]
+
 
 def _notifs_sql(where):
     sql = """SELECT hn.id, hn.type_id, hn.score, hn.created_at,
@@ -99,21 +112,24 @@ def _notifs_sql(where):
           LIMIT :limit"""
     return sql % where
 
+
 def _render(row):
     """Convert object to string rep."""
     # src dst payload community post
-    out = {'id': row['id'],
-           'type': NotifyType(row['type_id']).name,
-           'score': row['score'],
-           'date': json_date(row['created_at']),
-           'msg': _render_msg(row),
-           'url': _render_url(row),
-          }
+    out = {
+        'id': row['id'],
+        'type': NotifyType(row['type_id']).name,
+        'score': row['score'],
+        'date': json_date(row['created_at']),
+        'msg': _render_msg(row),
+        'url': _render_url(row),
+    }
 
-    #if row['community']:
+    # if row['community']:
     #    out['community'] = (row['community'], row['community_title'])
 
     return out
+
 
 def _render_msg(row):
     msg = STRINGS[row['type_id']]
@@ -121,21 +137,33 @@ def _render_msg(row):
     if row['type_id'] == NotifyType.vote and payload:
         msg += ' <payload>'
 
-    if '<dst>' in msg: msg = msg.replace('<dst>', '@' + row['dst'])
-    if '<src>' in msg: msg = msg.replace('<src>', '@' + row['src'])
-    if '<post>' in msg: msg = msg.replace('<post>', _post_url(row))
-    if '<payload>' in msg: msg = msg.replace('<payload>', payload or 'null')
-    if '<comm>' in msg: msg = msg.replace('<comm>', row['community_title'])
-    if '<other_mentions>' in msg: msg = msg.replace('<other_mentions>', str( row['number_of_mentions'] - 1 ) )
+    if '<dst>' in msg:
+        msg = msg.replace('<dst>', '@' + row['dst'])
+    if '<src>' in msg:
+        msg = msg.replace('<src>', '@' + row['src'])
+    if '<post>' in msg:
+        msg = msg.replace('<post>', _post_url(row))
+    if '<payload>' in msg:
+        msg = msg.replace('<payload>', payload or 'null')
+    if '<comm>' in msg:
+        msg = msg.replace('<comm>', row['community_title'])
+    if '<other_mentions>' in msg:
+        msg = msg.replace('<other_mentions>', str(row['number_of_mentions'] - 1))
     return msg
+
 
 def _post_url(row):
     return '@' + row['author'] + '/' + row['permlink']
 
+
 def _render_url(row):
-    if row['permlink']: return '@' + row['author'] + '/' + row['permlink']
-    if row['community']: return 'trending/' + row['community']
-    if row['src']: return '@' + row['src']
-    if row['dst']: return '@' + row['dst']
+    if row['permlink']:
+        return '@' + row['author'] + '/' + row['permlink']
+    if row['community']:
+        return 'trending/' + row['community']
+    if row['src']:
+        return '@' + row['src']
+    if row['dst']:
+        return '@' + row['dst']
     assert False, f'no url for {row}'
     return None

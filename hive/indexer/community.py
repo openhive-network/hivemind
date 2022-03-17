@@ -1,6 +1,6 @@
 """[WIP] Process community ops."""
 
-#pylint: disable=too-many-lines
+# pylint: disable=too-many-lines
 
 import logging
 import re
@@ -16,8 +16,10 @@ log = logging.getLogger(__name__)
 
 DB = Db.instance()
 
+
 class Role(IntEnum):
     """Labels for `role_id` field."""
+
     muted = -2
     guest = 0
     member = 2
@@ -25,26 +27,31 @@ class Role(IntEnum):
     admin = 6
     owner = 8
 
+
 TYPE_TOPIC = 1
 TYPE_JOURNAL = 2
 TYPE_COUNCIL = 3
 
 # https://en.wikipedia.org/wiki/ISO_639-1
-LANGS = ("ab,aa,af,ak,sq,am,ar,an,hy,as,av,ae,ay,az,bm,ba,eu,be,bn,bh,bi,"
-         "bs,br,bg,my,ca,ch,ce,ny,zh,cv,kw,co,cr,hr,cs,da,dv,nl,dz,en,eo,"
-         "et,ee,fo,fj,fi,fr,ff,gl,ka,de,el,gn,gu,ht,ha,he,hz,hi,ho,hu,ia,"
-         "id,ie,ga,ig,ik,io,is,it,iu,ja,jv,kl,kn,kr,ks,kk,km,ki,rw,ky,kv,"
-         "kg,ko,ku,kj,la,lb,lg,li,ln,lo,lt,lu,lv,gv,mk,mg,ms,ml,mt,mi,mr,"
-         "mh,mn,na,nv,nd,ne,ng,nb,nn,no,ii,nr,oc,oj,cu,om,or,os,pa,pi,fa,"
-         "pl,ps,pt,qu,rm,rn,ro,ru,sa,sc,sd,se,sm,sg,sr,gd,sn,si,sk,sl,so,"
-         "st,es,su,sw,ss,sv,ta,te,tg,th,ti,bo,tk,tl,tn,to,tr,ts,tt,tw,ty,"
-         "ug,uk,ur,uz,ve,vi,vo,wa,cy,wo,fy,xh,yi,yo,za").split(',')
+LANGS = (
+    "ab,aa,af,ak,sq,am,ar,an,hy,as,av,ae,ay,az,bm,ba,eu,be,bn,bh,bi,"
+    "bs,br,bg,my,ca,ch,ce,ny,zh,cv,kw,co,cr,hr,cs,da,dv,nl,dz,en,eo,"
+    "et,ee,fo,fj,fi,fr,ff,gl,ka,de,el,gn,gu,ht,ha,he,hz,hi,ho,hu,ia,"
+    "id,ie,ga,ig,ik,io,is,it,iu,ja,jv,kl,kn,kr,ks,kk,km,ki,rw,ky,kv,"
+    "kg,ko,ku,kj,la,lb,lg,li,ln,lo,lt,lu,lv,gv,mk,mg,ms,ml,mt,mi,mr,"
+    "mh,mn,na,nv,nd,ne,ng,nb,nn,no,ii,nr,oc,oj,cu,om,or,os,pa,pi,fa,"
+    "pl,ps,pt,qu,rm,rn,ro,ru,sa,sc,sd,se,sm,sg,sr,gd,sn,si,sk,sl,so,"
+    "st,es,su,sw,ss,sv,ta,te,tg,th,ti,bo,tk,tl,tn,to,tr,ts,tt,tw,ty,"
+    "ug,uk,ur,uz,ve,vi,vo,wa,cy,wo,fy,xh,yi,yo,za"
+).split(',')
+
 
 def _valid_url_proto(url):
     assert url
     assert isinstance(url, str), 'url was not string'
     assert len(url) < 1024, 'url must be shorter than 1024 characters'
     return url[0:7] == 'http://' or url[0:8] == 'https://'
+
 
 def assert_keys_match(keys, expected, allow_missing=True):
     """Compare a set of input keys to expected keys."""
@@ -54,9 +61,11 @@ def assert_keys_match(keys, expected, allow_missing=True):
     extra = keys - expected
     assert not extra, f'extraneous keys: {extra}'
 
+
 def process_json_community_op(actor, op_json, date, block_num):
     """Validates community op and apply state changes to db."""
     CommunityOp.process_if_valid(actor, op_json, date, block_num)
+
 
 def read_key_bool(op, key):
     """Reads a key from dict, ensuring valid bool if present."""
@@ -64,6 +73,7 @@ def read_key_bool(op, key):
         assert isinstance(op[key], bool), f'must be bool: {key}'
         return op[key]
     return None
+
 
 def read_key_str(op, key, maxlen=None, fmt=None, allow_blank=False):
     """Reads a key from a dict, ensuring non-blank str if present."""
@@ -82,6 +92,7 @@ def read_key_str(op, key, maxlen=None, fmt=None, allow_blank=False):
         assert fmt is None, f'invalid fmt: {fmt}'
 
     return op[key]
+
 
 def read_key_dict(obj, key):
     """Given a dict, read `key`, ensuring result is a dict."""
@@ -110,7 +121,7 @@ class Community:
         This method checks for any valid community names and inserts them.
         """
 
-        #if not re.match(r'^hive-[123]\d{4,6}$', name):
+        # if not re.match(r'^hive-[123]\d{4,6}$', name):
         if not re.match(r'^hive-[1]\d{4,6}$', name):
             return
         type_id = int(name[5])
@@ -124,8 +135,7 @@ class Community:
         # insert owner
         sql = """INSERT INTO hive_roles (community_id, account_id, role_id, created_at)
                         VALUES (:community_id, :account_id, :role_id, :date)"""
-        DB.query(sql, community_id=_id, account_id=_id,
-                    role_id=Role.owner.value, date=block_date)
+        DB.query(sql, community_id=_id, account_id=_id, role_id=Role.owner.value, date=block_date)
 
     @classmethod
     def validated_id(cls, name):
@@ -140,7 +150,7 @@ class Community:
 
     @classmethod
     def validated_name(cls, name):
-        if (check_community(name)):
+        if check_community(name):
             return name
         return None
 
@@ -171,26 +181,33 @@ class Community:
     @classmethod
     def get_all_muted(cls, community_id):
         """Return a list of all muted accounts."""
-        return DB.query_col("""SELECT name FROM hive_accounts
+        return DB.query_col(
+            """SELECT name FROM hive_accounts
                                 WHERE id IN (SELECT account_id FROM hive_roles
                                               WHERE community_id = :community_id
                                                 AND role_id < 0)""",
-                            community_id=community_id)
+            community_id=community_id,
+        )
 
     @classmethod
     def get_user_role(cls, community_id, account_id):
         """Get user role within a specific community."""
 
-        return DB.query_one("""SELECT role_id FROM hive_roles
+        return (
+            DB.query_one(
+                """SELECT role_id FROM hive_roles
                                 WHERE community_id = :community_id
                                   AND account_id = :account_id
                                 LIMIT 1""",
-                            community_id=community_id,
-                            account_id=account_id) or Role.guest.value
+                community_id=community_id,
+                account_id=account_id,
+            )
+            or Role.guest.value
+        )
 
     @classmethod
     def is_post_valid(cls, community_id, comment_op: dict):
-        """ Given a new post/comment, check if valid as per community rules
+        """Given a new post/comment, check if valid as per community rules
 
         For a comment to be valid, these conditions apply:
             - Author is not muted in this community
@@ -213,23 +230,25 @@ class Community:
                 return role >= Role.member
         elif type_id == TYPE_COUNCIL:
             return role >= Role.member
-        return role >= Role.guest # or at least not muted
+        return role >= Role.guest  # or at least not muted
+
 
 class CommunityOp:
     """Handles validating and processing of community custom_json ops."""
-    #pylint: disable=too-many-instance-attributes
+
+    # pylint: disable=too-many-instance-attributes
 
     SCHEMA = {
-        'updateProps':    ['community', 'props'],
-        'setRole':        ['community', 'account', 'role'],
-        'setUserTitle':   ['community', 'account', 'title'],
-        'mutePost':       ['community', 'account', 'permlink', 'notes'],
-        'unmutePost':     ['community', 'account', 'permlink', 'notes'],
-        'pinPost':        ['community', 'account', 'permlink'],
-        'unpinPost':      ['community', 'account', 'permlink'],
-        'flagPost':       ['community', 'account', 'permlink', 'notes'],
-        'subscribe':      ['community'],
-        'unsubscribe':    ['community'],
+        'updateProps': ['community', 'props'],
+        'setRole': ['community', 'account', 'role'],
+        'setUserTitle': ['community', 'account', 'title'],
+        'mutePost': ['community', 'account', 'permlink', 'notes'],
+        'unmutePost': ['community', 'account', 'permlink', 'notes'],
+        'pinPost': ['community', 'account', 'permlink'],
+        'unpinPost': ['community', 'account', 'permlink'],
+        'flagPost': ['community', 'account', 'permlink', 'notes'],
+        'subscribe': ['community'],
+        'unsubscribe': ['community'],
     }
 
     def __init__(self, actor, date, block_num):
@@ -290,8 +309,7 @@ class CommunityOp:
         except AssertionError as e:
             payload = str(e)
             log.info("validation failed with message: '%s'", payload)
-            Notify(block_num=self.block_num, type_id='error', dst_id=self.actor_id,
-                   when=self.date, payload=payload)
+            Notify(block_num=self.block_num, type_id='error', dst_id=self.actor_id, when=self.date, payload=payload)
 
         return self.valid
 
@@ -312,65 +330,94 @@ class CommunityOp:
             role_id=self.role_id,
             notes=self.notes,
             title=self.title,
-            block_num=self.block_num
+            block_num=self.block_num,
         )
 
         # Community-level commands
         if action == 'updateProps':
-            bind = ', '.join([k+" = :"+k for k in list(self.props.keys())])
-            DB.query(f"UPDATE hive_communities SET {bind} WHERE id = :id",
-                     id=self.community_id, **self.props)
+            bind = ', '.join([k + " = :" + k for k in list(self.props.keys())])
+            DB.query(f"UPDATE hive_communities SET {bind} WHERE id = :id", id=self.community_id, **self.props)
             self._notify('set_props', payload=json.dumps(read_key_dict(self.op, 'props')))
 
         elif action == 'subscribe':
-            DB.query("""INSERT INTO hive_subscriptions
+            DB.query(
+                """INSERT INTO hive_subscriptions
                                (account_id, community_id, created_at, block_num)
-                        VALUES (:actor_id, :community_id, :date, :block_num)""", **params)
-            DB.query("""UPDATE hive_communities
+                        VALUES (:actor_id, :community_id, :date, :block_num)""",
+                **params,
+            )
+            DB.query(
+                """UPDATE hive_communities
                            SET subscribers = subscribers + 1
-                         WHERE id = :community_id""", **params)
+                         WHERE id = :community_id""",
+                **params,
+            )
         elif action == 'unsubscribe':
-            DB.query("""DELETE FROM hive_subscriptions
+            DB.query(
+                """DELETE FROM hive_subscriptions
                          WHERE account_id = :actor_id
-                           AND community_id = :community_id""", **params)
-            DB.query("""UPDATE hive_communities
+                           AND community_id = :community_id""",
+                **params,
+            )
+            DB.query(
+                """UPDATE hive_communities
                            SET subscribers = subscribers - 1
-                         WHERE id = :community_id""", **params)
+                         WHERE id = :community_id""",
+                **params,
+            )
 
         # Account-level actions
         elif action == 'setRole':
-            DB.query("""INSERT INTO hive_roles
+            DB.query(
+                """INSERT INTO hive_roles
                                (account_id, community_id, role_id, created_at)
                         VALUES (:account_id, :community_id, :role_id, :date)
                             ON CONFLICT (account_id, community_id)
-                            DO UPDATE SET role_id = :role_id """, **params)
+                            DO UPDATE SET role_id = :role_id """,
+                **params,
+            )
             self._notify('set_role', payload=Role(self.role_id).name)
         elif action == 'setUserTitle':
-            DB.query("""INSERT INTO hive_roles
+            DB.query(
+                """INSERT INTO hive_roles
                                (account_id, community_id, title, created_at)
                         VALUES (:account_id, :community_id, :title, :date)
                             ON CONFLICT (account_id, community_id)
-                            DO UPDATE SET title = :title""", **params)
+                            DO UPDATE SET title = :title""",
+                **params,
+            )
             self._notify('set_label', payload=self.title)
 
         # Post-level actions
         elif action == 'mutePost':
-            DB.query("""UPDATE hive_posts SET is_muted = '1'
-                         WHERE id = :post_id""", **params)
+            DB.query(
+                """UPDATE hive_posts SET is_muted = '1'
+                         WHERE id = :post_id""",
+                **params,
+            )
             self._notify('mute_post', payload=self.notes)
 
         elif action == 'unmutePost':
-            DB.query("""UPDATE hive_posts SET is_muted = '0'
-                         WHERE id = :post_id""", **params)
+            DB.query(
+                """UPDATE hive_posts SET is_muted = '0'
+                         WHERE id = :post_id""",
+                **params,
+            )
             self._notify('unmute_post', payload=self.notes)
 
         elif action == 'pinPost':
-            DB.query("""UPDATE hive_posts SET is_pinned = '1'
-                         WHERE id = :post_id""", **params)
+            DB.query(
+                """UPDATE hive_posts SET is_pinned = '1'
+                         WHERE id = :post_id""",
+                **params,
+            )
             self._notify('pin_post', payload=self.notes)
         elif action == 'unpinPost':
-            DB.query("""UPDATE hive_posts SET is_pinned = '0'
-                         WHERE id = :post_id""", **params)
+            DB.query(
+                """UPDATE hive_posts SET is_pinned = '0'
+                         WHERE id = :post_id""",
+                **params,
+            )
             self._notify('unpin_post', payload=self.notes)
         elif action == 'flagPost':
             self._notify('flag_post', payload=self.notes)
@@ -386,10 +433,17 @@ class CommunityOp:
             if not self._subscribed(self.account_id):
                 score = 15
 
-        Notify(block_num=self.block_num, type_id=op, src_id=self.actor_id, dst_id=dst_id,
-               post_id=self.post_id, when=self.date,
-               community_id=self.community_id,
-               score=score, **kwargs)
+        Notify(
+            block_num=self.block_num,
+            type_id=op,
+            src_id=self.actor_id,
+            dst_id=dst_id,
+            post_id=self.post_id,
+            when=self.date,
+            community_id=self.community_id,
+            score=score,
+            **kwargs,
+        )
 
     def _validate_raw_op(self, raw_op):
         assert isinstance(raw_op, list), 'op json must be list'
@@ -403,13 +457,20 @@ class CommunityOp:
         """Validate structure; read and validate keys."""
         schema = self.SCHEMA[self.action]
         assert_keys_match(self.op.keys(), schema, allow_missing=False)
-        if 'community' in schema: self._read_community()
-        if 'account'   in schema: self._read_account()
-        if 'permlink'  in schema: self._read_permlink()
-        if 'role'      in schema: self._read_role()
-        if 'notes'     in schema: self._read_notes()
-        if 'title'     in schema: self._read_title()
-        if 'props'     in schema: self._read_props()
+        if 'community' in schema:
+            self._read_community()
+        if 'account' in schema:
+            self._read_account()
+        if 'permlink' in schema:
+            self._read_permlink()
+        if 'role' in schema:
+            self._read_role()
+        if 'notes' in schema:
+            self._read_notes()
+        if 'title' in schema:
+            self._read_title()
+        if 'props' in schema:
+            self._read_props()
 
     def _read_community(self):
         _name = read_key_str(self.op, 'community', 16)
@@ -470,8 +531,7 @@ class CommunityOp:
     def _read_props(self):
         # TODO: assert props changed?
         props = read_key_dict(self.op, 'props')
-        valid = ['title', 'about', 'lang', 'is_nsfw',
-                 'description', 'flag_text', 'settings']
+        valid = ['title', 'about', 'lang', 'is_nsfw', 'description', 'flag_text', 'settings']
         assert_keys_match(props.keys(), valid, allow_missing=True)
 
         out = {}
@@ -498,7 +558,6 @@ class CommunityOp:
                 out['avatar_url'] = avatar_url
         assert out, 'props were blank'
         self.props = out
-
 
     def _validate_permissions(self):
         community_id = self.community_id
@@ -544,8 +603,7 @@ class CommunityOp:
         sql = """SELECT 1 FROM hive_subscriptions
                   WHERE community_id = :community_id
                     AND account_id = :account_id"""
-        return bool(DB.query_one(
-            sql, community_id=self.community_id, account_id=account_id))
+        return bool(DB.query_one(sql, community_id=self.community_id, account_id=account_id))
 
     def _muted(self):
         """Check post's muted status."""
@@ -566,13 +624,18 @@ class CommunityOp:
     def _flagged(self):
         """Check user's flag status."""
         from hive.indexer.notify import NotifyType
+
         sql = """SELECT 1 FROM hive_notifs
                   WHERE community_id = :community_id
                     AND post_id = :post_id
                     AND type_id = :type_id
                     AND src_id = :src_id"""
-        return bool(DB.query_one(sql,
-                                 community_id=self.community_id,
-                                 post_id=self.post_id,
-                                 type_id=NotifyType['flag_post'],
-                                 src_id=self.actor_id))
+        return bool(
+            DB.query_one(
+                sql,
+                community_id=self.community_id,
+                post_id=self.post_id,
+                type_id=NotifyType['flag_post'],
+                src_id=self.actor_id,
+            )
+        )

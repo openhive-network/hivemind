@@ -5,19 +5,20 @@ from hive.indexer.db_adapter_holder import DbAdapterHolder
 
 log = logging.getLogger(__name__)
 
-class PostDataCache(DbAdapterHolder):
-    """ Procides cache for DB operations on post data table in order to speed up initial sync """
-    _data = {}
 
+class PostDataCache(DbAdapterHolder):
+    """Procides cache for DB operations on post data table in order to speed up initial sync"""
+
+    _data = {}
 
     @classmethod
     def is_cached(cls, pid):
-        """ Check if data is cached """
+        """Check if data is cached"""
         return pid in cls._data
 
     @classmethod
     def add_data(cls, pid, post_data, is_new_post):
-        """ Add data to cache """
+        """Add data to cache"""
         if not cls.is_cached(pid):
             cls._data[pid] = post_data
             cls._data[pid]['is_new_post'] = is_new_post
@@ -29,20 +30,20 @@ class PostDataCache(DbAdapterHolder):
 
     @classmethod
     def get_post_body(cls, pid):
-        """ Returns body of given post from collected cache or from underlying DB storage. """
+        """Returns body of given post from collected cache or from underlying DB storage."""
         try:
             post_data = cls._data[pid]
         except KeyError:
             sql = """
                   SELECT hpd.body FROM hive_post_data hpd WHERE hpd.id = :post_id;
                   """
-            row = cls.db.query_row(sql, post_id = pid)
+            row = cls.db.query_row(sql, post_id=pid)
             post_data = dict(row)
         return post_data['body']
 
     @classmethod
-    def flush(cls, print_query = False):
-        """ Flush data from cache to db """
+    def flush(cls, print_query=False):
+        """Flush data from cache to db"""
         if cls._data:
             values_insert = []
             values_update = []
@@ -74,7 +75,7 @@ class PostDataCache(DbAdapterHolder):
                 if print_query:
                     log.info(f"Executing query:\n{sql}")
                 cls.db.query_prepared(sql)
-                values_insert.clear();
+                values_insert.clear()
 
             if len(values_update) > 0:
                 sql = """

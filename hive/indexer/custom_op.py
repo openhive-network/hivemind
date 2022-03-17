@@ -19,6 +19,7 @@ DB = Db.instance()
 
 log = logging.getLogger(__name__)
 
+
 def _get_auth(op):
     """get account name submitting a custom_json op.
 
@@ -33,16 +34,17 @@ def _get_auth(op):
         return None
     return op['required_posting_auths'][0]
 
+
 class CustomOp:
     """Processes custom ops and dispatches updates."""
 
     @classmethod
     def process_op(cls, op, block_num, block_date):
-        opName = str(op['id']) + ( '-ignored' if op['id'] not in ['follow', 'community', 'notify', 'reblog'] else '' )
+        opName = str(op['id']) + ('-ignored' if op['id'] not in ['follow', 'community', 'notify', 'reblog'] else '')
 
         account = _get_auth(op)
         if not account:
-           return
+            return
 
         op_json = load_json_key(op, 'json')
         if op['id'] == 'follow':
@@ -77,7 +79,11 @@ class CustomOp:
                 else:
                     date = valid_date(explicit_date)
                     if date > block_date:
-                        log.warning("setLastRead::date: `%s' exceeds head block time. Correcting to head block time: `%s'", date, block_date)
+                        log.warning(
+                            "setLastRead::date: `%s' exceeds head block time. Correcting to head block time: `%s'",
+                            date,
+                            block_date,
+                        )
                         date = block_date
 
                 Notify.set_lastread(account, date)

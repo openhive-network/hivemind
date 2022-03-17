@@ -1,16 +1,16 @@
 """ Data provider for test vops """
 from hive.indexer.mock_data_provider import MockDataProvider
 
+
 class MockVopsProvider(MockDataProvider):
-    """ Data provider for test vops """
-    block_data = {
-        'ops' : {},
-        'ops_by_block' : {}
-    }
+    """Data provider for test vops"""
+
+    block_data = {'ops': {}, 'ops_by_block': {}}
 
     @classmethod
     def add_block_data_from_file(cls, file_name):
         from json import load
+
         data = {}
         with open(file_name, "r") as src:
             data = load(src)
@@ -67,6 +67,6 @@ class MockVopsProvider(MockDataProvider):
                         ret[block_num]['ops'].extend(mock_vops['ops'])
                 else:
                     if 'ops' in mock_vops:
-                        ret[block_num] = {"ops" : mock_vops['ops']}
+                        ret[block_num] = {"ops": mock_vops['ops']}
                     if 'ops_by_block' in mock_vops:
-                        ret[block_num] = {"ops" : mock_vops['ops_by_block']}
+                        ret[block_num] = {"ops": mock_vops['ops_by_block']}

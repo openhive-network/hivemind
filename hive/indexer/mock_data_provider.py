@@ -6,11 +6,14 @@ from json import dumps
 
 log = logging.getLogger(__name__)
 
+
 class MockDataProviderException(Exception):
     pass
 
-class MockDataProvider():
-    """ Data provider for test operations """
+
+class MockDataProvider:
+    """Data provider for test operations"""
+
     block_data = {}
 
     @classmethod
@@ -20,6 +23,7 @@ class MockDataProvider():
     @classmethod
     def add_block_data_from_directory(cls, dir_name):
         from fnmatch import fnmatch
+
         pattern = "*.json"
         for path, _, files in os.walk(dir_name):
             for name in files:

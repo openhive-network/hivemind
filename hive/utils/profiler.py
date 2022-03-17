@@ -4,6 +4,7 @@
 import cProfile
 import pstats
 
+
 class Profiler:
     """Context-based profiler."""
 

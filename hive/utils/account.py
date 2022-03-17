@@ -3,26 +3,28 @@
 import ujson as json
 from hive.utils.normalize import trunc
 
+
 def get_profile_str(account):
     _posting_json_metadata = ""
     _json_metadata = ""
 
     if account is not None:
-      if 'posting_json_metadata' in account:
-        _posting_json_metadata = account['posting_json_metadata']
-      if 'json_metadata' in account:
-        _json_metadata = account['json_metadata']
+        if 'posting_json_metadata' in account:
+            _posting_json_metadata = account['posting_json_metadata']
+        if 'json_metadata' in account:
+            _json_metadata = account['json_metadata']
 
-    return ( _posting_json_metadata, _json_metadata )
+    return (_posting_json_metadata, _json_metadata)
+
 
 def get_db_profile(posting_json_metadata, json_metadata):
     prof = {}
     json_metadata_is_read = False
 
-    #`posting_json_metadata` should dominate, so at the start is necessary to load `posting_json_metadata`
+    # `posting_json_metadata` should dominate, so at the start is necessary to load `posting_json_metadata`
     # We can skip `posting_json_metadata` loading when it doesn't exist or content doesn't make any sense(f.e. '' or '{}' )
     try:
-        if posting_json_metadata is None or len( posting_json_metadata ) <= 2:
+        if posting_json_metadata is None or len(posting_json_metadata) <= 2:
             json_metadata_is_read = True
             prof = json.loads(json_metadata)['profile']
         else:
@@ -35,6 +37,7 @@ def get_db_profile(posting_json_metadata, json_metadata):
             prof = {}
 
     return prof
+
 
 def get_profile(account):
     prof = {}
@@ -53,6 +56,7 @@ def get_profile(account):
             prof = {}
 
     return prof
+
 
 def process_profile(prof):
     """Returns profile data."""
@@ -105,17 +109,21 @@ def process_profile(prof):
         muted_list_description=muted_list_description or '',
     )
 
+
 def safe_db_profile_metadata(posting_json_metadata, json_metadata):
-  prof = get_db_profile(posting_json_metadata, json_metadata)
-  return process_profile(prof)
+    prof = get_db_profile(posting_json_metadata, json_metadata)
+    return process_profile(prof)
+
 
 def safe_profile_metadata(account):
-  prof = get_profile(account)
-  return process_profile(prof)
+    prof = get_profile(account)
+    return process_profile(prof)
+
 
 def _valid_url_proto(url):
     assert url
     return url[0:7] == 'http://' or url[0:8] == 'https://'
+
 
 def _char_police(string):
     """If a string has bad chars, ignore it.

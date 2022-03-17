@@ -1,10 +1,12 @@
 from hive.server.common.helpers import json_date
 from hive.utils.normalize import sbd_amount, to_nai
 
+
 def _amount(amount, asset='HBD'):
     """Return a steem-style amount string given a (numeric, asset-str)."""
     assert asset == 'HBD', f'unhandled asset {asset}'
     return f"{amount:.3f} HBD"
+
 
 def database_post_object(row, truncate_body=0):
     """Given a hive_posts row, create a legacy-style post object."""
@@ -29,13 +31,15 @@ def database_post_object(row, truncate_body=0):
 
     post['last_payout'] = json_date(row['last_payout_at'])
     post['cashout_time'] = json_date(row['cashout_time'])
-    post['max_cashout_time'] = json_date(None) # ABW: only relevant up to HF17, timestamp::max for all posts later (and also all paid)
+    post['max_cashout_time'] = json_date(
+        None
+    )  # ABW: only relevant up to HF17, timestamp::max for all posts later (and also all paid)
 
     curator_payout = sbd_amount(row['curator_payout_value'])
     post['curator_payout_value'] = to_nai(_amount(curator_payout))
     post['total_payout_value'] = to_nai(_amount(row['payout'] - curator_payout))
 
-    post['reward_weight'] = 10000 # ABW: only relevant between HF12 and HF17 and we don't have access to correct value
+    post['reward_weight'] = 10000  # ABW: only relevant between HF12 and HF17 and we don't have access to correct value
 
     post['root_author'] = row['root_author']
     post['root_permlink'] = row['root_permlink']
@@ -55,14 +59,18 @@ def database_post_object(row, truncate_body=0):
     if paid:
         post['total_vote_weight'] = 0
         post['vote_rshares'] = 0
-        post['net_rshares'] = 0 # if row['rshares'] > 0 else row['rshares'] ABW: used to be like this but after HF19 cashouts disappear and all give 0
+        post[
+            'net_rshares'
+        ] = 0  # if row['rshares'] > 0 else row['rshares'] ABW: used to be like this but after HF19 cashouts disappear and all give 0
         post['abs_rshares'] = 0
         post['children_abs_rshares'] = 0
     else:
         post['total_vote_weight'] = row['total_vote_weight']
-        post['vote_rshares'] = ( row['rshares'] + row['abs_rshares'] ) // 2 # effectively sum of all positive rshares
+        post['vote_rshares'] = (row['rshares'] + row['abs_rshares']) // 2  # effectively sum of all positive rshares
         post['net_rshares'] = row['rshares']
         post['abs_rshares'] = row['abs_rshares']
-        post['children_abs_rshares'] = 0 # TODO - ABW: I'm not sure about that, it is costly and useless (used to be part of mechanism to determine cashout time)
+        post[
+            'children_abs_rshares'
+        ] = 0  # TODO - ABW: I'm not sure about that, it is costly and useless (used to be part of mechanism to determine cashout time)
 
     return post

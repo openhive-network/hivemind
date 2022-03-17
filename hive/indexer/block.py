@@ -6,6 +6,7 @@ import queue
 
 log = logging.getLogger(__name__)
 
+
 class VirtualOperationType(Enum):
     AuthorReward = 1
     CommentReward = 2
@@ -13,7 +14,7 @@ class VirtualOperationType(Enum):
     CommentPayoutUpdate = 4
     IneffectiveDeleteComment = 5
 
-    def from_name( operation_name ):
+    def from_name(operation_name):
         if operation_name == 'author_reward_operation':
             return VirtualOperationType.AuthorReward
         if operation_name == 'comment_reward_operation':
@@ -43,7 +44,7 @@ class OperationType(Enum):
     Transfer = 12
     CustomJson = 13
 
-    def from_name( operation_name ):
+    def from_name(operation_name):
         if operation_name == 'pow_operation':
             return OperationType.Pow
         if operation_name == 'pow2_operation':
@@ -72,7 +73,6 @@ class OperationType(Enum):
             return OperationType.CustomJson
         # for operations not supported by hivemind
         return None
-
 
 
 class Block(ABC):
@@ -110,6 +110,7 @@ class Block(ABC):
     def get_next_transaction(self):
         pass
 
+
 class Operation(ABC):
     @abstractmethod
     def get_type(self):
@@ -118,6 +119,7 @@ class Operation(ABC):
     @abstractmethod
     def get_body(self):
         pass
+
 
 class Transaction(ABC):
     @abstractmethod
@@ -128,10 +130,11 @@ class Transaction(ABC):
     def get_next_operation(self):
         pass
 
-class BlockWrapper( Block ):
-    def __init__(self, wrapped_block ):
+
+class BlockWrapper(Block):
+    def __init__(self, wrapped_block):
         """
-            wrapped_block - block which is wrapped
+        wrapped_block - block which is wrapped
         """
         assert wrapped_block
         self.wrapped_block = wrapped_block
@@ -160,11 +163,12 @@ class BlockWrapper( Block ):
     def get_next_transaction(self):
         return self.wrapped_block.get_next_transaction()
 
+
 class BlocksProviderBase(ABC):
     def __init__(self, breaker, exception_reporter):
         """
-            breaker - callable, returns true when sync can continue, false when break was requested
-            exception_reporter - callable, use to inform about undesire exception in a synchronizaton thread
+        breaker - callable, returns true when sync can continue, false when break was requested
+        exception_reporter - callable, use to inform about undesire exception in a synchronizaton thread
         """
         assert breaker
         assert exception_reporter
@@ -172,10 +176,10 @@ class BlocksProviderBase(ABC):
         self._breaker = breaker
         self._exception_reporter = exception_reporter
 
-        self._blocks_queue_size       = 1500
-        self._blocks_data_queue_size  = 1500
+        self._blocks_queue_size = 1500
+        self._blocks_data_queue_size = 1500
 
-        self._operations_queue_size   = 1500
+        self._operations_queue_size = 1500
 
     def report_exception():
         self._exception_reporter()
@@ -190,15 +194,15 @@ class BlocksProviderBase(ABC):
         """Returns lists of blocks"""
         pass
 
-    def _get_from_queue( self, data_queue, number_of_elements ):
+    def _get_from_queue(self, data_queue, number_of_elements):
         """Tool function to get elements from queue"""
         ret = []
-        for element in range( number_of_elements ):
+        for element in range(number_of_elements):
             if not self._breaker():
                 break
             while self._breaker():
                 try:
-                    ret.append( data_queue.get(True, 1) )
+                    ret.append(data_queue.get(True, 1))
                     data_queue.task_done()
                 except queue.Empty:
                     continue

@@ -22,6 +22,7 @@ from hive.steem.signal import can_continue_thread
 logging.getLogger('urllib3.connectionpool').setLevel(logging.WARNING)
 log = logging.getLogger(__name__)
 
+
 def validated_json_payload(response):
     """Asserts that the HTTP response was successful and valid JSON."""
     if response.status != 200:
@@ -34,6 +35,7 @@ def validated_json_payload(response):
         raise Exception(f"JSON error {str(e)}: {data[0:1024]}")
 
     return payload
+
 
 def validated_result(payload, body):
     """Asserts that the JSON-RPC payload is valid/sane."""
@@ -48,6 +50,7 @@ def validated_result(payload, body):
     assert 'result' in payload, "response with no result key"
     return payload['result']
 
+
 def _validated_batch_result(payload, body):
     """Asserts that the batch payload, and each item, is valid/sane."""
     assert isinstance(payload, list), "batch result must be list"
@@ -59,6 +62,7 @@ def _validated_batch_result(payload, body):
             raise RPCError.build(item['error'], body, idx)
         assert 'result' in item, "batch[%d] resp empty" % idx
     return [item['result'] for item in payload]
+
 
 def chunkify(iterable, chunksize=3000):
     """Yields chunks of an iterator."""
@@ -74,10 +78,12 @@ def chunkify(iterable, chunksize=3000):
     if chunk:
         yield chunk
 
+
 def _rpc_body(method, args, _id=0):
     if args is None:
         args = [] if 'condenser_api' in method else {}
     return dict(jsonrpc="2.0", id=_id, method=method, params=args)
+
 
 class HttpClient(object):
     """Simple Steem JSON-HTTP-RPC API"""
@@ -90,13 +96,14 @@ class HttpClient(object):
         get_dynamic_global_properties='database_api',
         get_comment_pending_payouts='database_api',
         get_ops_in_block='account_history_api',
-        enum_virtual_ops='account_history_api'
+        enum_virtual_ops='account_history_api',
     )
 
     def __init__(self, nodes, max_retries, **kwargs):
         if kwargs.get('tcp_keepalive', True):
-            socket_options = HTTPConnection.default_socket_options + \
-                             [(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1), ]
+            socket_options = HTTPConnection.default_socket_options + [
+                (socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1),
+            ]
         else:
             socket_options = HTTPConnection.default_socket_options
 
@@ -107,11 +114,10 @@ class HttpClient(object):
             socket_options=socket_options,
             block=False,
             retries=Retry(total=False),
-            headers={
-                'Content-Type': 'application/json',
-                'accept-encoding': 'gzip'},
+            headers={'Content-Type': 'application/json', 'accept-encoding': 'gzip'},
             cert_reqs='CERT_REQUIRED',
-            ca_certs=certifi.where())
+            ca_certs=certifi.where(),
+        )
 
         self.nodes = cycle(nodes)
         self.url = ''
@@ -137,7 +143,7 @@ class HttpClient(object):
         if not is_batch:
             body = _rpc_body(fqm, args, -1)
         else:
-            body = [_rpc_body(fqm, arg, i+1) for i, arg in enumerate(args)]
+            body = [_rpc_body(fqm, arg, i + 1) for i, arg in enumerate(args)]
 
         return body
 
@@ -158,9 +164,7 @@ class HttpClient(object):
                 response = self.request(body=body_data)
                 secs = perf() - start
 
-                info = {'jussi-id': response.headers.get('x-jussi-request-id'),
-                        'secs': round(secs, 3),
-                        'try': tries}
+                info = {'jussi-id': response.headers.get('x-jussi-request-id'), 'secs': round(secs, 3), 'try': tries}
 
                 # strict validation/asserts, error check
                 payload = validated_json_payload(response)
@@ -175,11 +179,10 @@ class HttpClient(object):
                 raise e
 
             except (Exception, socket.timeout) as e:
-                if secs < 0: # request failed
+                if secs < 0:  # request failed
                     secs = perf() - start
                     info = {'secs': round(secs, 3), 'try': tries}
-                log.warning('%s failed in %.1fs. try %d. %s - %s',
-                            what, secs, tries, info, repr(e))
+                log.warning('%s failed in %.1fs. try %d. %s - %s', what, secs, tries, info, repr(e))
 
             if not can_continue_thread():
                 break
@@ -191,7 +194,7 @@ class HttpClient(object):
             allowed_tries -= 1
             if allowed_tries == 0:
                 break
-            if allowed_tries < 0: # case of infinite retries
+            if allowed_tries < 0:  # case of infinite retries
                 allowed_tries = 0
 
         raise Exception("abort %s after %d tries" % (method, tries))
@@ -201,7 +204,7 @@ class HttpClient(object):
         chunks = [[name, args, True] for args in chunkify(params, batch_size)]
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             for items in executor.map(lambda tup: self.exec(*tup), chunks):
-                yield list(items) # (use of `map` preserves request order)
+                yield list(items)  # (use of `map` preserves request order)
 
     def exec_multi_as_completed(self, name, params, max_workers, batch_size):
         """Process a batch as parallel requests; yields unordered."""

@@ -5,9 +5,10 @@ from hive.utils.normalize import secs_to_str
 from functools import wraps
 
 import logging
+
 log = logging.getLogger(__name__)
 
-#timeit decorator for measuring method execution time
+# timeit decorator for measuring method execution time
 def time_it(method):
     @wraps(method)
     def time_method(*args, **kwargs):
@@ -15,6 +16,7 @@ def time_it(method):
         result = method(*args, **kwargs)
         log.info("%s executed in %.4f s", method.__name__, perf() - start_time)
         return result
+
     return time_method
 
 
@@ -29,7 +31,8 @@ class Timer:
     `full_total` - total items to process, outside of
                    (and including) this invocation. [optional]
     """
-    #pylint: disable=too-many-instance-attributes
+
+    # pylint: disable=too-many-instance-attributes
 
     # Name of entity, lap units (e.g. rps, wps), total items in job
     _entity = []
@@ -71,9 +74,7 @@ class Timer:
             out = prefix
         else:
             # " -- post 1 of 10"
-            out = " -- %s %d of %d" % (self._entity,
-                                       self._processed,
-                                       self._full_total)
+            out = " -- %s %d of %d" % (self._entity, self._processed, self._full_total)
 
         # " (3/s, 4rps, 5wps) -- "
         rates = []
@@ -97,10 +98,10 @@ class Timer:
     def _eta(self):
         """Time to finish, based on most recent batch."""
         left = self._full_total - self._processed
-        secs = (left / self._rate())
+        secs = left / self._rate()
         return secs_to_str(secs)
 
     def _elapsed(self, lap_idx=None):
         if not lap_idx:
             return self._laps[-1] - self._laps[0]
-        return self._laps[lap_idx] - self._laps[lap_idx-1]
+        return self._laps[lap_idx] - self._laps[lap_idx - 1]

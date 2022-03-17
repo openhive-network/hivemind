@@ -10,41 +10,36 @@ from hive.server.condenser_api.methods import (
     get_followers,
     get_following,
     get_follow_count,
-
     get_reblogged_by,
     get_account_reputations,
-
     get_content,
     get_content_replies,
-    
     get_discussions_by_trending,
     get_discussions_by_hot,
     get_discussions_by_promoted,
     get_discussions_by_created,
     get_post_discussions_by_payout,
     get_comment_discussions_by_payout,
-
     get_discussions_by_blog,
     get_discussions_by_feed,
     get_discussions_by_comments,
     get_replies_by_last_update,
-
     get_discussions_by_author_before_date,
     get_blog,
     get_blog_entries,
-
     get_account_votes,
-    get_active_votes
+    get_active_votes,
 )
+
 
 def _strict_list(params, expected_len, min_len=None):
     assert isinstance(params, list), "params not a list"
     if min_len is None:
         assert len(params) == expected_len, "expected %d params" % expected_len
     else:
-        assert (len(params) <= expected_len and
-                len(params) >= min_len), "expected %d params" % expected_len
+        assert len(params) <= expected_len and len(params) >= min_len, "expected %d params" % expected_len
     return params
+
 
 def _strict_query(params):
     query = _strict_list(params, 1)[0]
@@ -53,9 +48,20 @@ def _strict_query(params):
     # remove optional-yet-blank param keys -- some clients include every key
     # possible, and steemd seems to ignore them silently. need to strip
     # them here, if blank, to avoid argument mismatch errors.
-    all_keys = ['filter_tags', 'select_tags', 'select_authors', 'author',
-                'start_author', 'start_permlink', 'start_tag', 'parent_author',
-                'parent_permlink', 'start_parent_author', 'before_date', 'tag']
+    all_keys = [
+        'filter_tags',
+        'select_tags',
+        'select_authors',
+        'author',
+        'start_author',
+        'start_permlink',
+        'start_tag',
+        'parent_author',
+        'parent_permlink',
+        'start_parent_author',
+        'before_date',
+        'tag',
+    ]
     for key in all_keys:
         if key in query and not query[key]:
             del query[key]
@@ -78,6 +84,7 @@ def _strict_query(params):
     assert not unknown, f"unknown query key {unknown}"
 
     return query
+
 
 @return_error_info
 async def call(context, api, method, params):

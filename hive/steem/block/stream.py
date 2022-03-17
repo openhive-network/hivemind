@@ -8,13 +8,18 @@ from hive.indexer.block import Block
 
 log = logging.getLogger(__name__)
 
+
 class ForkException(Exception):
     """Raised when a non-trivial fork is encountered."""
+
     pass
+
 
 class MicroForkException(Exception):
     """Raised when a potentially trivial fork is encountered."""
+
     pass
+
 
 class BlockQueue:
     """A block queue with fork detection and adjustable length buffer.
@@ -24,6 +29,7 @@ class BlockQueue:
 
     Throws ForkException; or MicroForkException if the fork seems to be
     confined to the buffer (ie easily recoverable by restarting stream)."""
+
     def __init__(self, max_size, prev_block):
         self._max_size = max_size
         self._prev = prev_block
@@ -36,7 +42,7 @@ class BlockQueue:
         MicroForkException is thrown; otherwise, ForkException."""
         if self._prev.get_hash() != block.get_previous_block_hash():
             fork = f"{self._prev}--> {block.get_previous_block_hash()}->{block.get_hash()}"
-            if self._queue: # if using max_size>0, fork might be in buffer only
+            if self._queue:  # if using max_size>0, fork might be in buffer only
                 buff = self.size()
                 alert = "NOTIFYALERT " if buff < self._max_size else ""
                 raise MicroForkException("%squeue:%d %s" % (alert, buff, fork))
@@ -51,11 +57,14 @@ class BlockQueue:
         """Count blocks in our queue."""
         return len(self._queue)
 
+
 class BlockStream:
     """ETA-based block streamer."""
 
     @classmethod
-    def stream(cls, conf, client, start_block, breaker, exception_reporter, min_gap=0, max_gap=100, do_stale_block_check=True):
+    def stream(
+        cls, conf, client, start_block, breaker, exception_reporter, min_gap=0, max_gap=100, do_stale_block_check=True
+    ):
         """Instantiates a BlockStream and returns a generator."""
         streamer = BlockStream(conf, client, min_gap, max_gap)
         return streamer.start(start_block, do_stale_block_check, breaker, exception_reporter)
@@ -77,10 +86,10 @@ class BlockStream:
         Will run forever unless `max_gap` is specified and exceeded.
         """
 
-        with OneBlockProviderFactory( self._conf, self._client, breaker, exception_reporter ) as one_block_provider:
+        with OneBlockProviderFactory(self._conf, self._client, breaker, exception_reporter) as one_block_provider:
             curr = start_block
             head = self._client.head_block()
-            prev = one_block_provider.get_block( curr - 1 )
+            prev = one_block_provider.get_block(curr - 1)
 
             assert prev
 

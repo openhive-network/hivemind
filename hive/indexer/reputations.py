@@ -8,6 +8,7 @@ log = logging.getLogger(__name__)
 
 CACHED_ITEMS_LIMIT = 200
 
+
 class Reputations(DbAdapterHolder):
     _values = []
     _total_values = 0

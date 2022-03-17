@@ -1,12 +1,13 @@
 """Hive API: Community methods"""
 import logging
 
-from hive.server.hive_api.common import (get_community_id)
-from hive.server.common.helpers import (return_error_info, valid_community, valid_account, valid_limit, json_date)
+from hive.server.hive_api.common import get_community_id
+from hive.server.common.helpers import return_error_info, valid_community, valid_account, valid_limit, json_date
 
 # pylint: disable=too-many-lines
 
 log = logging.getLogger(__name__)
+
 
 @return_error_info
 async def get_community(context, name, observer=None):
@@ -24,6 +25,7 @@ async def get_community(context, name, observer=None):
 
     return result
 
+
 @return_error_info
 async def get_community_context(context, name, account):
     """For a community/account: returns role, title, subscribed state"""
@@ -36,14 +38,15 @@ async def get_community_context(context, name, account):
 
     return dict(row['bridge_get_community_context'])
 
+
 @return_error_info
 async def list_top_communities(context, limit=25):
     """List top communities. Returns lite community list."""
     limit = valid_limit(limit, 100, 25)
     sql = """SELECT hc.name, hc.title FROM hive_communities hc
               WHERE hc.rank > 0 ORDER BY hc.rank LIMIT :limit"""
-    #ABW: restored older version since hardcoded id is out of the question
-    #sql = """SELECT name, title FROM hive_communities
+    # ABW: restored older version since hardcoded id is out of the question
+    # sql = """SELECT name, title FROM hive_communities
     #          WHERE id = 1344247 OR rank > 0
     #       ORDER BY (CASE WHEN id = 1344247 THEN 0 ELSE rank END)
     #          LIMIT :limit"""
@@ -54,7 +57,7 @@ async def list_top_communities(context, limit=25):
 
 
 @return_error_info
-async def list_pop_communities(context, limit:int=25):
+async def list_pop_communities(context, limit: int = 25):
     """List communities by new subscriber count. Returns lite community list."""
     limit = valid_limit(limit, 25, 25)
     sql = "SELECT * FROM bridge_list_pop_communities( (:limit)::INT )"
@@ -73,6 +76,7 @@ async def list_all_subscriptions(context, account):
     rows = await db.query_all(sql, account=account)
     return [(r[0], r[1], r[2], r[3]) for r in rows]
 
+
 @return_error_info
 async def list_subscribers(context, community, last='', limit=100):
     """Lists subscribers of `community`."""
@@ -83,6 +87,7 @@ async def list_subscribers(context, community, last='', limit=100):
     sql = "SELECT * FROM bridge_list_subscribers( (:community)::VARCHAR, (:last)::VARCHAR, (:limit)::INT )"
     rows = await db.query_all(sql, community=community, last=last, limit=limit)
     return [(r[0], r[1], r[2], json_date(r[3])) for r in rows]
+
 
 @return_error_info
 async def list_communities(context, last='', limit=100, query=None, sort='rank', observer=None):
@@ -96,8 +101,11 @@ async def list_communities(context, last='', limit=100, query=None, sort='rank',
     search = query
     db = context['db']
 
-    sql = "SELECT * FROM bridge_list_communities_by_" + \
-          sort + "( (:observer)::VARCHAR, (:last)::VARCHAR, (:search)::VARCHAR, (:limit)::INT )"
+    sql = (
+        "SELECT * FROM bridge_list_communities_by_"
+        + sort
+        + "( (:observer)::VARCHAR, (:last)::VARCHAR, (:search)::VARCHAR, (:limit)::INT )"
+    )
 
     rows = await db.query_all(sql, observer=observer, last=last, search=search, limit=limit)
 
@@ -117,6 +125,7 @@ async def list_community_roles(context, community, last='', limit=50):
 
     return [(r['name'], r['role'], r['title']) for r in rows]
 
+
 # Communities - internal
 # ----------------------
 def remove_empty_admins_field(rows):
@@ -128,8 +137,10 @@ def remove_empty_admins_field(rows):
         result.append(new)
     return result
 
+
 # Stats
 # -----
+
 
 async def top_community_voters(context, community):
     """Get a list of top 5 (pending) community voters."""
@@ -145,6 +156,7 @@ async def top_community_voters(context, community):
                 total[voter] += abs(int(rshares))
     return sorted(total, key=total.get, reverse=True)[:5]
 
+
 async def top_community_authors(context, community):
     """Get a list of top 5 (pending) community authors."""
     db = context['db']
@@ -157,6 +169,7 @@ async def top_community_authors(context, community):
         total[author] += payout
     return sorted(total, key=total.get, reverse=True)[:5]
 
+
 async def top_community_muted(context, community):
     """Get top authors (by SP) who are muted in a community."""
     db = context['db']
@@ -166,6 +179,7 @@ async def top_community_muted(context, community):
               WHERE r.community_id = :community_id AND r.role_id < 0
            ORDER BY voting_weight DESC LIMIT 5"""
     return await db.query(sql, community_id=cid)
+
 
 async def _top_community_posts(db, community, limit=50):
     # TODO: muted equivalent

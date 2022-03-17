@@ -14,12 +14,13 @@ logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 
 log = logging.getLogger(__name__)
 
+
 class Db:
     """RDBMS adapter for hive. Handles connecting and querying."""
 
     _instance = None
 
-    #maximum number of connections that is required so as to execute some tasks concurrently
+    # maximum number of connections that is required so as to execute some tasks concurrently
     necessary_connections = 15
     max_connections = 1
 
@@ -40,18 +41,23 @@ class Db:
         assert db is not None, "Database has to be initialized"
         cls.max_connections = db.query_one("SELECT setting::int FROM pg_settings WHERE  name = 'max_connections'")
         if cls.necessary_connections > cls.max_connections:
-          log.info(f"A database offers only {cls.max_connections} connections, but it's required {cls.necessary_connections} connections")
+            log.info(
+                f"A database offers only {cls.max_connections} connections, but it's required {cls.necessary_connections} connections"
+            )
         else:
-          log.info(f"A database offers maximum connections: {cls.max_connections}. Required {cls.necessary_connections} connections.")
+            log.info(
+                f"A database offers maximum connections: {cls.max_connections}. Required {cls.necessary_connections} connections."
+            )
 
-    def __init__(self, url, name, enable_autoexplain = False):
+    def __init__(self, url, name, enable_autoexplain=False):
         """Initialize an instance.
 
         No work is performed here. Some modues might initialize an
         instance before config is loaded.
         """
-        assert url, ('--database-url (or DATABASE_URL env) not specified; '
-                     'e.g. postgresql://user:pass@localhost:5432/hive')
+        assert url, (
+            '--database-url (or DATABASE_URL env) not specified; ' 'e.g. postgresql://user:pass@localhost:5432/hive'
+        )
         self._url = url
         self._conn = []
         self._engine = None
@@ -60,7 +66,7 @@ class Db:
 
         self.name = name
 
-        self._conn.append( { "connection" : self.engine().connect(), "name" : name } )
+        self._conn.append({"connection": self.engine().connect(), "name": name})
         # Since we need to manage transactions ourselves, yet the
         # core behavior of DBAPI (per PEP-0249) is that a transaction
         # is always in progress, this COMMIT is a workaround to get
@@ -68,9 +74,9 @@ class Db:
         self._basic_connection = self.get_connection(0)
         self._basic_connection.execute(sqlalchemy.text("COMMIT"))
 
-        self.__autoexplain = None;
+        self.__autoexplain = None
         if enable_autoexplain:
-            self.__autoexplain = AutoExplainWrapper( self )
+            self.__autoexplain = AutoExplainWrapper(self)
 
     def clone(self, name):
         cloned = Db(self._url, name, self.__autoexplain)
@@ -99,7 +105,7 @@ class Db:
                 self._engine.dispose()
                 self._engine = None
             else:
-              log.info("SQL engine was already disposed")
+                log.info("SQL engine was already disposed")
         except Exception as ex:
             log.exception(f"Error during database closing: {ex}")
             raise ex
@@ -114,14 +120,15 @@ class Db:
         if self._engine is None:
             self._engine = sqlalchemy.create_engine(
                 self._url,
-                isolation_level="READ UNCOMMITTED", # only supported in mysql
+                isolation_level="READ UNCOMMITTED",  # only supported in mysql
                 pool_size=self.max_connections,
                 pool_recycle=3600,
-                echo=False)
+                echo=False,
+            )
         return self._engine
 
     def get_new_connection(self, name):
-        self._conn.append( { "connection" : self.engine().connect(), "name" : name } )
+        self._conn.append({"connection": self.engine().connect(), "name": name})
         return self.get_connection(len(self._conn) - 1)
 
     def get_dialect(self):
@@ -133,9 +140,9 @@ class Db:
 
     def explain(self):
         if self.__autoexplain:
-            return self.__autoexplain;
+            return self.__autoexplain
 
-        return self;
+        return self
 
     def query(self, sql, **kwargs):
         """Perform a (*non-`SELECT`*) write query."""
@@ -211,7 +218,7 @@ class Db:
 
         fields = list(values.keys())
         cols = ', '.join([k for k in fields])
-        params = ', '.join([':'+k for k in fields])
+        params = ', '.join([':' + k for k in fields])
         sql = "INSERT INTO %s (%s) VALUES (%s)"
         sql = sql % (table, cols, params)
 
@@ -225,23 +232,23 @@ class Db:
         values = OrderedDict(values)
         fields = list(values.keys())
 
-        update = ', '.join([k+" = :"+k for k in fields if k not in pks])
-        where = ' AND '.join([k+" = :"+k for k in fields if k in pks])
+        update = ', '.join([k + " = :" + k for k in fields if k not in pks])
+        where = ' AND '.join([k + " = :" + k for k in fields if k in pks])
         sql = "UPDATE %s SET %s WHERE %s"
         sql = sql % (table, update, where)
 
         return (sql, values)
 
     def _sql_text(self, sql, is_prepared):
-#        if sql in self._prep_sql:
-#            query = self._prep_sql[sql]
-#        else:
-#            query = sqlalchemy.text(sql).execution_options(autocommit=False)
-#            self._prep_sql[sql] = query
+        #        if sql in self._prep_sql:
+        #            query = self._prep_sql[sql]
+        #        else:
+        #            query = sqlalchemy.text(sql).execution_options(autocommit=False)
+        #            self._prep_sql[sql] = query
         if is_prepared:
-          query = sql
+            query = sql
         else:
-          query = sqlalchemy.text(sql)
+            query = sqlalchemy.text(sql)
         return query
 
     def _query(self, sql, is_prepared, **kwargs):
@@ -264,8 +271,7 @@ class Db:
             Stats.log_db(sql, perf() - start)
             return result
         except Exception as e:
-            log.warning("[SQL-ERR] %s in query %s (%s)",
-                        e.__class__.__name__, sql, kwargs)
+            log.warning("[SQL-ERR] %s in query %s (%s)", e.__class__.__name__, sql, kwargs)
             raise e
 
     @staticmethod
@@ -274,7 +280,6 @@ class Db:
         action = sql.strip()[0:6].strip()
         if action == 'SELECT':
             return False
-        if action in ['DELETE', 'UPDATE', 'INSERT', 'COMMIT', 'START',
-                      'ALTER', 'TRUNCA', 'CREATE', 'DROP I', 'DROP T']:
+        if action in ['DELETE', 'UPDATE', 'INSERT', 'COMMIT', 'START', 'ALTER', 'TRUNCA', 'CREATE', 'DROP I', 'DROP T']:
             return True
         raise Exception(f"unknown action: {sql}")

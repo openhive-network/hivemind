@@ -12,6 +12,7 @@ log = logging.getLogger(__name__)
 
 DB = Db.instance()
 
+
 class Accounts(DbAdapterHolder):
     """Manages account id map, dirty queue, and `hive_accounts` table."""
 
@@ -37,7 +38,7 @@ class Accounts(DbAdapterHolder):
             raise RuntimeError("Fatal error")
 
         key = update_operation['account']
-        ( _posting_json_metadata, _json_metadata ) = get_profile_str( update_operation )
+        (_posting_json_metadata, _json_metadata) = get_profile_str(update_operation)
 
         if key in cls._updates_data:
             if allow_change_posting:
@@ -46,7 +47,11 @@ class Accounts(DbAdapterHolder):
 
             cls._updates_data[key]['json_metadata'] = _json_metadata
         else:
-            cls._updates_data[key] = { 'allow_change_posting' : allow_change_posting, 'posting_json_metadata' : _posting_json_metadata, 'json_metadata' : _json_metadata }
+            cls._updates_data[key] = {
+                'allow_change_posting': allow_change_posting,
+                'posting_json_metadata': _posting_json_metadata,
+                'json_metadata': _json_metadata,
+            }
 
     @classmethod
     def load_ids(cls):
@@ -64,11 +69,16 @@ class Accounts(DbAdapterHolder):
         """Return default notification score based on rank."""
         _id = cls.get_id(name)
         rank = cls._ranks[_id] if _id in cls._ranks else 1000000
-        if rank < 200: return 70    # 0.02% 100k
-        if rank < 1000: return 60   # 0.1%  10k
-        if rank < 6500: return 50   # 0.5%  1k
-        if rank < 25000: return 40  # 2.0%  100
-        if rank < 100000: return 30 # 8.0%  15
+        if rank < 200:
+            return 70  # 0.02% 100k
+        if rank < 1000:
+            return 60  # 0.1%  10k
+        if rank < 6500:
+            return 50  # 0.5%  1k
+        if rank < 25000:
+            return 40  # 2.0%  100
+        if rank < 100000:
+            return 30  # 8.0%  15
         return 20
 
     @classmethod
@@ -84,7 +94,6 @@ class Accounts(DbAdapterHolder):
         assert isinstance(name, str), "account name should be string"
         return cls._ids.get(name, None)
 
-
     @classmethod
     def exists(cls, names):
         """Check if an account name exists."""
@@ -94,14 +103,14 @@ class Accounts(DbAdapterHolder):
 
     @classmethod
     def check_names(cls, names):
-        """ Check which names from name list does not exists in the database """
+        """Check which names from name list does not exists in the database"""
         assert isinstance(names, list), "Expecting list as argument"
         return [name for name in names if name not in cls._ids]
 
     @classmethod
-    def get_json_data(cls, source ):
+    def get_json_data(cls, source):
         """json-data preprocessing."""
-        return escape_characters( source )
+        return escape_characters(source)
 
     @classmethod
     def register(cls, name, op_details, block_date, block_num):
@@ -120,7 +129,7 @@ class Accounts(DbAdapterHolder):
         if cls.exists(name):
             return True
 
-        ( _posting_json_metadata, _json_metadata ) = get_profile_str( op_details )
+        (_posting_json_metadata, _json_metadata) = get_profile_str(op_details)
 
         sql = f"""
                   INSERT INTO hive_accounts (name, created_at, posting_json_metadata, json_metadata )
@@ -128,13 +137,14 @@ class Accounts(DbAdapterHolder):
                   RETURNING id
               """
 
-        new_id = DB.query_one( sql )
+        new_id = DB.query_one(sql)
         if new_id is None:
-             return False
+            return False
         cls._ids[name] = new_id
 
         # post-insert: pass to communities to check for new registrations
         from hive.indexer.community import Community
+
         if block_num > Community.start_block:
             Community.register(name, block_date, block_num)
 
@@ -142,7 +152,7 @@ class Accounts(DbAdapterHolder):
 
     @classmethod
     def flush(cls):
-        """ Flush json_metadatafrom cache to database """
+        """Flush json_metadatafrom cache to database"""
 
         cls.inside_flush = True
         n = 0
@@ -182,7 +192,9 @@ class Accounts(DbAdapterHolder):
             values_limit = 1000
 
             for name, data in cls._updates_data.items():
-                values.append(f"({data['allow_change_posting']}, {cls.get_json_data(data['posting_json_metadata'])}, {cls.get_json_data(data['json_metadata'])}, '{name}')")
+                values.append(
+                    f"({data['allow_change_posting']}, {cls.get_json_data(data['posting_json_metadata'])}, {cls.get_json_data(data['json_metadata'])}, '{name}')"
+                )
 
                 if len(values) >= values_limit:
                     values_str = ','.join(values)

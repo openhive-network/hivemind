@@ -1,17 +1,18 @@
 """Handles building condenser-compatible response objects."""
 
 import logging
-from hive.server.common.helpers import (
-    valid_account,
-    valid_permlink)
-#import ujson as json
+from hive.server.common.helpers import valid_account, valid_permlink
+
+# import ujson as json
 
 from hive.server.bridge_api.methods import get_post
 from hive.server.common.helpers import (
-    #ApiError,
-    return_error_info)
+    # ApiError,
+    return_error_info,
+)
 
 log = logging.getLogger(__name__)
+
 
 @return_error_info
 async def get_post_header(context, author, permlink):
@@ -36,11 +37,7 @@ async def get_post_header(context, author, permlink):
 
     assert row, f'Post {author}/{permlink} does not exist'
 
-    return dict(
-        author=row['author'],
-        permlink=row['permlink'],
-        category=row['category'],
-        depth=row['depth'])
+    return dict(author=row['author'], permlink=row['permlink'], category=row['category'], depth=row['depth'])
 
 
 @return_error_info
@@ -51,7 +48,7 @@ async def normalize_post(context, post):
     return await get_post(context, post['author'], post['permlink'])
 
     # decorate
-    #if core['community_id']:
+    # if core['community_id']:
     #    sql = """SELECT title FROM hive_communities WHERE id = :id"""
     #    title = await db.query_one(sql, id=core['community_id'])
 
@@ -65,4 +62,4 @@ async def normalize_post(context, post):
     #    ret['author_role'] = ROLES[role[0] if role else 0]
     #    ret['author_title'] = role[1] if role else ''
 
-    #return ret
+    # return ret

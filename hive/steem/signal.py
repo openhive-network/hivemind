@@ -15,15 +15,19 @@ FINISH_SIGNAL_DURING_SYNC = AtomicLong(0)
 def finish_signals_handler(signal, frame):
     global FINISH_SIGNAL_DURING_SYNC
     FINISH_SIGNAL_DURING_SYNC += 1
-    log.info(f"""
+    log.info(
+        f"""
                   **********************************************************
                   CAUGHT {'SIGINT' if signal == SIGINT else 'SIGTERM'}. PLEASE WAIT... PROCESSING DATA IN QUEUES...
                   **********************************************************
-    """ )
+    """
+    )
+
 
 def set_exception_thrown():
     global EXCEPTION_THROWN
     EXCEPTION_THROWN += 1
+
 
 def can_continue_thread():
     return EXCEPTION_THROWN.value == 0 and FINISH_SIGNAL_DURING_SYNC.value == 0

@@ -1,7 +1,8 @@
-#pylint: disable=missing-docstring,line-too-long
+# pylint: disable=missing-docstring,line-too-long
 import json
 
 from hive.utils.account import safe_profile_metadata
+
 
 def test_valid_account():
     raw_profile = dict(
@@ -19,6 +20,7 @@ def test_valid_account():
     for key, safe_value in safe_profile.items():
         assert raw_profile[key] == safe_value
 
+
 def test_invalid_account():
     raw_profile = dict(
         name='NameIsTooBigByOneChar',
@@ -30,13 +32,16 @@ def test_invalid_account():
     ignore_prof = dict(
         name='Ignore me -- missing version:2!',
     )
-    account = {'name': 'foo', 'json_metadata': json.dumps(dict(profile=raw_profile)),
-               'posting_json_metadata': json.dumps(dict(profile=ignore_prof))}
+    account = {
+        'name': 'foo',
+        'json_metadata': json.dumps(dict(profile=raw_profile)),
+        'posting_json_metadata': json.dumps(dict(profile=ignore_prof)),
+    }
 
     safe_profile = safe_profile_metadata(account)
     assert safe_profile['name'] == 'NameIsTooBigByOne...'
     assert safe_profile['about'] == ''
     assert safe_profile['location'] == ''
-    assert safe_profile['website'] == 'http://davincilife.com/' # TODO: should normalize to https?
+    assert safe_profile['website'] == 'http://davincilife.com/'  # TODO: should normalize to https?
     assert safe_profile['cover_image'] == ''
     assert safe_profile['profile_image'] == ''

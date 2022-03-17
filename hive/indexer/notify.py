@@ -5,13 +5,16 @@ import logging
 from hive.db.adapter import Db
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
-#pylint: disable=too-many-lines,line-too-long
+
+# pylint: disable=too-many-lines,line-too-long
 
 log = logging.getLogger(__name__)
 DB = Db.instance()
 
+
 class NotifyType(IntEnum):
     """Labels for notify `type_id` field."""
+
     # active
     new_community = 1
     set_role = 2
@@ -33,25 +36,38 @@ class NotifyType(IntEnum):
     vote = 17
 
     # inactive
-    #vote_comment = 16
+    # vote_comment = 16
 
-    #update_account = 19
-    #receive = 20
-    #send = 21
+    # update_account = 19
+    # receive = 20
+    # send = 21
 
-    #reward = 22
-    #power_up = 23
-    #power_down = 24
-    #message = 25
+    # reward = 22
+    # power_up = 23
+    # power_down = 24
+    # message = 25
+
 
 class Notify(DbAdapterHolder):
     """Handles writing notifications/messages."""
+
     # pylint: disable=too-many-instance-attributes,too-many-arguments
     DEFAULT_SCORE = 35
     _notifies = []
 
-    def __init__(self, block_num, type_id, when=None, src_id=None, dst_id=None, community_id=None,
-                 post_id=None, payload=None, score=None, **kwargs):
+    def __init__(
+        self,
+        block_num,
+        type_id,
+        when=None,
+        src_id=None,
+        dst_id=None,
+        community_id=None,
+        post_id=None,
+        payload=None,
+        score=None,
+        **kwargs,
+    ):
         """Create a notification."""
 
         assert type_id, 'op is blank :('
@@ -76,7 +92,7 @@ class Notify(DbAdapterHolder):
         # for HF24 we started save notifications from block 44300000
         # about 90 days before release day
         if block_num > 44300000:
-            Notify._notifies.append( self )
+            Notify._notifies.append(self)
 
     @classmethod
     def set_lastread(cls, account, date):
@@ -87,20 +103,22 @@ class Notify(DbAdapterHolder):
     def to_db_values(self):
         """Generate a db row."""
         return "( {}, {}, {}, '{}'::timestamp, {}, {}, {}, {}, {} )".format(
-                  self.block_num
-                , self.enum.value
-                , self.score
-                , self.when if self.when else "NULL"
-                , self.src_id if self.src_id else "NULL"
-                , self.dst_id if self.dst_id else "NULL"
-                , self.post_id if self.post_id else "NULL"
-                , self.community_id if self.community_id else "NULL"
-                , escape_characters(str(self.payload)) if self.payload else "NULL")
+            self.block_num,
+            self.enum.value,
+            self.score,
+            self.when if self.when else "NULL",
+            self.src_id if self.src_id else "NULL",
+            self.dst_id if self.dst_id else "NULL",
+            self.post_id if self.post_id else "NULL",
+            self.community_id if self.community_id else "NULL",
+            escape_characters(str(self.payload)) if self.payload else "NULL",
+        )
 
     @classmethod
     def flush(cls):
         """Store buffered notifs"""
-        def execute_query( sql, values ):
+
+        def execute_query(sql, values):
             values_str = ','.join(values)
             actual_query = sql.format(values_str)
             cls.db.query_prepared(actual_query)
@@ -121,7 +139,7 @@ class Notify(DbAdapterHolder):
             values_limit = 1000
 
             for notify in Notify._notifies:
-                values.append( f"{notify.to_db_values()}" )
+                values.append(f"{notify.to_db_values()}")
 
                 if len(values) >= values_limit:
                     execute_query(sql, values)

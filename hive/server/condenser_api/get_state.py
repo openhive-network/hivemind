@@ -1,6 +1,6 @@
 """Routes then builds a get_state response object"""
 
-#pylint: disable=line-too-long,too-many-lines
+# pylint: disable=line-too-long,too-many-lines
 import logging
 from collections import OrderedDict
 import ujson as json
@@ -9,19 +9,9 @@ from aiocache import cached
 from hive.utils.normalize import legacy_amount
 from hive.server.common.mutes import Mutes
 
-from hive.server.condenser_api.objects import (
-    load_accounts,
-    _condenser_post_object)
-from hive.server.common.helpers import (
-    ApiError,
-    return_error_info,
-    valid_account,
-    valid_permlink,
-    valid_sort,
-    valid_tag)
-from hive.server.condenser_api.tags import (
-    get_trending_tags,
-    get_top_trending_tags_summary)
+from hive.server.condenser_api.objects import load_accounts, _condenser_post_object
+from hive.server.common.helpers import ApiError, return_error_info, valid_account, valid_permlink, valid_sort, valid_tag
+from hive.server.condenser_api.tags import get_trending_tags, get_top_trending_tags_summary
 
 import hive.server.condenser_api.cursor as cursor
 
@@ -31,19 +21,10 @@ from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 log = logging.getLogger(__name__)
 
 # steemd account 'tabs' - specific post list queries
-ACCOUNT_TAB_KEYS = {
-    'blog': 'blog',
-    'feed': 'feed',
-    'comments': 'comments',
-    'recent-replies': 'recent_replies'}
+ACCOUNT_TAB_KEYS = {'blog': 'blog', 'feed': 'feed', 'comments': 'comments', 'recent-replies': 'recent_replies'}
 
 # dummy account paths used by condenser - just need account object
-ACCOUNT_TAB_IGNORE = [
-    'followed',
-    'followers',
-    'permissions',
-    'password',
-    'settings']
+ACCOUNT_TAB_IGNORE = ['followed', 'followers', 'permissions', 'password', 'settings']
 
 # misc dummy paths used by condenser - send minimal get_state structure
 CONDENSER_NOOP_URLS = [
@@ -82,6 +63,7 @@ POST_LIST_SORTS = [
     'cashout',
 ]
 
+
 @return_error_info
 async def get_state(context, path: str):
     """`get_state` reimplementation.
@@ -99,7 +81,8 @@ async def get_state(context, path: str):
         'accounts': {},
         'content': {},
         'tag_idx': {'trending': []},
-        'discussion_idx': {"": {}}}
+        'discussion_idx': {"": {}},
+    }
 
     # account - `/@account/tab` (feed, blog, comments, replies)
     if part[0] and part[0][0] == '@':
@@ -118,7 +101,7 @@ async def get_state(context, path: str):
             state['content'] = _keyed_posts(posts)
             state['accounts'][account][key] = list(state['content'].keys())
         elif part[1] in ACCOUNT_TAB_IGNORE:
-            pass # condenser no-op URLs
+            pass  # condenser no-op URLs
         else:
             # invalid/undefined case; probably requesting `@user/permlink`,
             # but condenser still relies on a valid response for redirect.
@@ -156,6 +139,7 @@ async def get_state(context, path: str):
 
     return state
 
+
 async def _get_account_discussion_by_key(db, account, key):
     assert account, 'account must be specified'
     assert key, 'discussion key must be specified'
@@ -172,6 +156,7 @@ async def _get_account_discussion_by_key(db, account, key):
         raise ApiError(f"unknown account discussion key {key}")
 
     return posts
+
 
 def _normalize_path(path):
     if path and path[0] == '/':
@@ -194,25 +179,30 @@ def _normalize_path(path):
         parts.append('')
     return (path, parts)
 
+
 def _keyed_posts(posts):
     out = OrderedDict()
     for post in posts:
         out[_ref(post)] = post
     return out
 
+
 def _ref(post):
     return post['author'] + '/' + post['permlink']
+
 
 def _ref_parent(post):
     return post['parent_author'] + '/' + post['parent_permlink']
 
-async def _load_content_accounts(db, content, lite = False):
+
+async def _load_content_accounts(db, content, lite=False):
     if not content:
         return {}
     posts = content.values()
     names = set(map(lambda p: p['author'], posts))
     accounts = await load_accounts(db, names, lite)
     return {a['name']: a for a in accounts}
+
 
 async def _load_account(db, name):
     ret = await load_accounts(db, [name])
@@ -221,6 +211,7 @@ async def _load_account(db, name):
     for key in ACCOUNT_TAB_KEYS.values():
         account[key] = []
     return account
+
 
 async def _child_ids(db, parent_ids):
     """Load child ids for multuple parent ids."""
@@ -234,6 +225,7 @@ async def _child_ids(db, parent_ids):
     rows = await db.query_all(sql, ids=tuple(parent_ids))
     return [[row[0], row[1]] for row in rows]
 
+
 async def _load_discussion(db, author, permlink, observer=None):
     """Load a full discussion thread."""
 
@@ -245,27 +237,28 @@ async def _load_discussion(db, author, permlink, observer=None):
     replies = {}
 
     for row in sql_result:
-      post = _condenser_post_object(row)
+        post = _condenser_post_object(row)
 
-      post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
-      posts.append(post)
+        post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
+        posts.append(post)
 
-      parent_key = _ref_parent(post)
-      _key = _ref(post)
-      if parent_key not in replies:
-        replies[parent_key] = []
-      replies[parent_key].append(_key)
-
-    for post in posts:
-      _key = _ref(post)
-      if _key in replies:
-        replies[_key].sort()
-        post['replies'] = replies[_key]
+        parent_key = _ref_parent(post)
+        _key = _ref(post)
+        if parent_key not in replies:
+            replies[parent_key] = []
+        replies[parent_key].append(_key)
 
     for post in posts:
-      posts_by_id[_ref(post)] = post
+        _key = _ref(post)
+        if _key in replies:
+            replies[_key].sort()
+            post['replies'] = replies[_key]
+
+    for post in posts:
+        posts_by_id[_ref(post)] = post
 
     return posts_by_id
+
 
 @cached(ttl=1800, timeout=1200)
 async def _get_feed_price(db):
@@ -273,25 +266,32 @@ async def _get_feed_price(db):
     price = await db.query_one("SELECT usd_per_steem FROM hive_state")
     return {"base": f"{price:.3f} HBD", "quote": "1.000 HIVE"}
 
+
 @cached(ttl=1800, timeout=1200)
 async def _get_props_lite(db):
     """Return a minimal version of get_dynamic_global_properties data."""
     raw = json.loads(await db.query_one("SELECT dgpo FROM hive_state"))
 
     # convert NAI amounts to legacy
-    nais = ['virtual_supply', 'current_supply', 'current_sbd_supply',
-            'pending_rewarded_vesting_hive', 'pending_rewarded_vesting_shares',
-            'total_vesting_fund_hive', 'total_vesting_shares']
+    nais = [
+        'virtual_supply',
+        'current_supply',
+        'current_sbd_supply',
+        'pending_rewarded_vesting_hive',
+        'pending_rewarded_vesting_shares',
+        'total_vesting_fund_hive',
+        'total_vesting_shares',
+    ]
     for k in nais:
         if k in raw:
             raw[k] = legacy_amount(raw[k])
 
     return dict(
-        time=raw['time'], #*
+        time=raw['time'],  # *
         hbd_print_rate=raw['hbd_print_rate'],
         hbd_interest_rate=raw['hbd_interest_rate'],
-        head_block_number=raw['head_block_number'], #*
+        head_block_number=raw['head_block_number'],  # *
         total_vesting_shares=raw['total_vesting_shares'],
         total_vesting_fund_hive=raw['total_vesting_fund_hive'],
-        last_irreversible_block_num=raw['last_irreversible_block_num'], #*
+        last_irreversible_block_num=raw['last_irreversible_block_num'],  # *
     )
