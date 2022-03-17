@@ -186,7 +186,8 @@ if __name__ == "__main__":
         extras_require={
             'dev': [
                 'pyYAML',
-                'prettytable'
+                'prettytable',
+                'black~=22.1.0',
             ]
         },
         entry_points={
