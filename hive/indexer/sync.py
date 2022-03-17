@@ -194,9 +194,9 @@ class DBSync:
     def __enter__(self):
         assert self._db, "The database must exist"
 
-        log.info("Entering into {} synchronization".format( "LIVE" if DbLiveContextHolder.is_live_context() else "MASSIVE" ))
+        log.info(f"Entering into {'LIVE' if DbLiveContextHolder.is_live_context() else 'MASSIVE'} synchronization")
         Blocks.setup_own_db_access(self._db)
-        log.info("Exiting from {} synchronization".format( "LIVE" if DbLiveContextHolder.is_live_context() else "MASSIVE" ))
+        log.info(f"Exiting from {'LIVE' if DbLiveContextHolder.is_live_context() else 'MASSIVE'} synchronization")
 
         return self
 

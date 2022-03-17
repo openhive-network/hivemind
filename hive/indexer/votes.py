@@ -28,8 +28,8 @@ class Votes(DbAdapterHolder):
             log.exception("Adding new vote-info into '_votes_data' dict")
             raise RuntimeError("Fatal error")
 
-        post_key = "{}/{}".format(author, permlink)
-        key = "{}/{}".format(voter, post_key)
+        post_key = f"{author}/{permlink}"
+        key = f"{voter}/{post_key}"
 
         if key in cls._votes_data:
             vote_data = cls._votes_data[key]
@@ -59,10 +59,10 @@ class Votes(DbAdapterHolder):
         # make it to the DB due to "counter_deleted = 0" condition and "INNER JOIN hive_posts"
         # while votes from previous packs will remain in DB (they can be accessed with
         # database_api.list_votes so it is not entirely inconsequential)
-        post_key = "{}/{}".format(comment_delete_operation["author"], comment_delete_operation["permlink"])
+        post_key = f"{comment_delete_operation['author']}/{comment_delete_operation['permlink']}"
         if post_key in cls._votes_per_post:
             for voter in cls._votes_per_post[post_key]:
-                key = "{}/{}".format(voter, post_key)
+                key = f"{voter}/{post_key}"
                 del cls._votes_data[key]
             del cls._votes_per_post[post_key]
 
@@ -70,8 +70,8 @@ class Votes(DbAdapterHolder):
     def effective_comment_vote_op(cls, vop):
         """ Process effective_comment_vote_operation """
 
-        post_key = "{}/{}".format(vop['author'], vop['permlink'])
-        key = "{}/{}".format(vop['voter'], post_key)
+        post_key = f"{vop['author']}/{vop['permlink']}"
+        key = f"{vop['voter']}/{post_key}"
 
         if key in cls._votes_data:
             vote_data = cls._votes_data[key]

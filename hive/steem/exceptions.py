@@ -12,19 +12,19 @@ class RPCError(Exception):
     @staticmethod
     def build(error, body, index=None):
         """Given an RPC error, builds exception w/ appropriate severity."""
-        assert 'message' in error, "missing error msg key: {}".format(error)
-        assert 'code' in error, "missing error code key: {}".format(error)
+        assert 'message' in error, f"missing error msg key: {error}"
+        assert 'code' in error, f"missing error code key: {error}"
 
         if isinstance(body, list):
             item = body[index] if index else body[0]
-            method = item['method'] + ('[%s]' % index if index else '')
+            method = item['method'] + (f'[{index}]' if index else '')
             params = '[%s, (%d more)]' % (item['params'], len(body) - 1)
         else:
             method = body['method']
             params = _str_trunc(body['params'], 1024)
 
         message = RPCError.humanize(error)
-        message += ' in %s(%s)' % (method, params)
+        message += f' in {method}({params})'
 
         if not RPCError.is_recoverable(error):
             return RPCErrorFatal(message)
@@ -57,12 +57,12 @@ class RPCError(Exception):
                 name = error['data']['exception']
             else:
                 name = 'unspecified exception'
-            info = '[jussi:%s]' % error['data']['error_id']
+            info = f"[jussi:{error['data']['error_id']}]"
         else:
             name = 'unspecified error'
             info = str(error)
 
-        return "%s[%s]: `%s` %s" % (name, code, message, info)
+        return f"{name}[{code}]: `{message}` {info}"
 
 class RPCErrorFatal(RPCError):
     """Represents a steemd error which is not recoverable."""

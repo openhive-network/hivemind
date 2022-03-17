@@ -91,7 +91,7 @@ async def list_communities(context, last='', limit=100, query=None, sort='rank',
     last = valid_community(last, True)
     limit = valid_limit(limit, 100, 100)
     supported_sort_list = ['rank', 'new', 'subs']
-    assert sort in supported_sort_list, "Unsupported sort, valid sorts: {}".format(", ".join(supported_sort_list))
+    assert sort in supported_sort_list, f"Unsupported sort, valid sorts: {', '.join(supported_sort_list)}"
     observer = valid_account(observer, True)
     search = query
     db = context['db']

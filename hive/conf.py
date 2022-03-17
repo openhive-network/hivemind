@@ -98,7 +98,7 @@ class Conf():
                 if port_range_len == 2 and port_range[0] > port_range[1]:
                     raise ValueError("port min value is greater than port max value")
         except Exception as ex:
-            root.error("Value error: {}".format(ex))
+            root.error(f"Value error: {ex}")
             exit(1)
 
         # Print command line args, but on continuous integration server

@@ -328,7 +328,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         wait_blocks_time = WSM.start()
 
         if self._blocks_queue.qsize() < number_of_blocks and self._breaker():
-                 log.info("Awaiting any blocks to process... {}".format(self._blocks_queue.qsize()))
+                 log.info(f"Awaiting any blocks to process... {self._blocks_queue.qsize()}")
 
         if not self._blocks_queue.empty() or self._breaker():
             blocks = self._get_from_queue( self._blocks_queue, number_of_blocks )

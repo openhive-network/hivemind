@@ -129,5 +129,5 @@ def _condenser_post_object(row, truncate_body=0, get_content_additions=False):
 
 def _amount(amount, asset='HBD'):
     """Return a steem-style amount string given a (numeric, asset-str)."""
-    assert asset == 'HBD', 'unhandled asset %s' % asset
-    return "%.3f HBD" % amount
+    assert asset == 'HBD', f'unhandled asset {asset}'
+    return f"{amount:.3f} HBD"

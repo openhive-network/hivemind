@@ -75,7 +75,7 @@ class BlockSchedule:
             gap = int(time() - utc_timestamp(date))
             assert gap > -60, 'system clock is %ds behind chain' % gap
             if gap > 60:
-                raise StaleHeadException("chain gap is %fs" % gap)
+                raise StaleHeadException(f"chain gap is {gap:f}s")
 
     def _check_missing(self, num, prev_date, next_date):
         """Check missing blocks between previous and next block dates."""

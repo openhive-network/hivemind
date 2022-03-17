@@ -80,16 +80,16 @@ def json_date(date=None):
 def get_hive_accounts_info_view_query_string(names, lite = False):
     values = []
     for name in names:
-      values.append("('{}')".format( name ))
+      values.append(f"('{name}')")
     values_str = ','.join(values)
-    sql = """
+    sql = f"""
               SELECT *
-              FROM {} v
+              FROM {'hive_accounts_info_view_lite' if lite else 'hive_accounts_info_view'} v
               JOIN
                 (
-                  VALUES {}
+                  VALUES {values_str}
                 )T( _name ) ON v.name = T._name
-          """.format( ( 'hive_accounts_info_view_lite' if lite else 'hive_accounts_info_view' ), values_str )
+          """
     return sql
 
 def check_community(name) -> bool:
@@ -113,7 +113,7 @@ def valid_account(name, allow_empty=False):
         assert allow_empty, 'invalid account (not specified)'
         return ""
     assert isinstance(name, str), "invalid account name type"
-    assert 3 <= len(name) <= 16, "invalid account name length: `%s`" % name
+    assert 3 <= len(name) <= 16, f"invalid account name length: `{name}`"
     assert name[0] != '@', "invalid account name char `@`"
     assert re.match(r'^[a-z0-9-\.]+$', name), 'invalid account char'
     return name
@@ -136,7 +136,7 @@ def valid_sort(sort, allow_empty=False):
     # TODO: differentiate valid sorts on comm vs tag
     valid_sorts = ['trending', 'promoted', 'hot', 'created',
                    'payout', 'payout_comments', 'muted']
-    assert sort in valid_sorts, 'invalid sort `%s`' % sort
+    assert sort in valid_sorts, f'invalid sort `{sort}`'
     return sort
 
 def valid_tag(tag, allow_empty=False):
@@ -145,13 +145,13 @@ def valid_tag(tag, allow_empty=False):
         assert allow_empty, 'tag was blank'
         return ""
     assert isinstance(tag, str), 'tag must be a string'
-    assert re.match('^[a-z0-9-_]+$', tag), 'invalid tag `%s`' % tag
+    assert re.match('^[a-z0-9-_]+$', tag), f'invalid tag `{tag}`'
     return tag
 
 def valid_number(num, default=None, name='integer value', lbound=None, ubound=None):
     """Given a user-provided number, return a valid int, or raise."""
     if not num and num != 0:
-      assert default is not None, "%s must be provided" % name
+      assert default is not None, f"{name} must be provided"
       num = default
     try:
       num = int(num)
@@ -182,7 +182,7 @@ def valid_follow_type(follow_type: str):
     """Ensure follow type is valid steemd type."""
     # ABW: should be extended with blacklists etc. (and those should be implemented as next 'state' values)
     supported_follow_types = dict(blog=1, ignore=2)
-    assert follow_type in supported_follow_types, "Unsupported follow type, valid types: {}".format(", ".join(supported_follow_types.keys()))
+    assert follow_type in supported_follow_types, f"Unsupported follow type, valid types: {', '.join(supported_follow_types.keys())}"
     return supported_follow_types[follow_type]
 
 def valid_date(date, allow_empty=False):

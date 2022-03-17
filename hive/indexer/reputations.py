@@ -14,14 +14,13 @@ class Reputations(DbAdapterHolder):
 
     @classmethod
     def process_vote(self, block_num, effective_vote_op):
-        tuple = "('{}', '{}', {}, {}, {})".format(effective_vote_op['author'], effective_vote_op['voter'],
-            escape_characters(effective_vote_op['permlink']), effective_vote_op['rshares'], block_num)
+        tuple = f"('{effective_vote_op['author']}', '{effective_vote_op['voter']}', {escape_characters(effective_vote_op['permlink'])}, {effective_vote_op['rshares']}, {block_num})"
         self._values.append(tuple)
 
     @classmethod
     def flush(self):
         if not self._values:
-            log.info("Written total reputation data records: {}".format(self._total_values))
+            log.info(f"Written total reputation data records: {self._total_values}")
             return 0
 
         sql = """
@@ -62,6 +61,6 @@ class Reputations(DbAdapterHolder):
 
         self._total_values = self._total_values + n
 
-        log.info("Written total reputation data records: {}".format(self._total_values))
+        log.info(f"Written total reputation data records: {self._total_values}")
 
         return n

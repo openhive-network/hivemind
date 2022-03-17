@@ -137,5 +137,5 @@ def _render_url(row):
     if row['community']: return 'trending/' + row['community']
     if row['src']: return '@' + row['src']
     if row['dst']: return '@' + row['dst']
-    assert False, 'no url for %s' % row
+    assert False, f'no url for {row}'
     return None

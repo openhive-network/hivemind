@@ -79,15 +79,13 @@ class Timer:
         rates = []
         for i, unit in enumerate(['/s', *self._lap_units]):
             rates.append('%d%s' % (self._rate(i), unit))
-        out += " (%s) -- "  % ', '.join(rates)
+        out += f" ({', '.join(rates)}) -- "
 
         if self._processed < self._total:
-            out += "eta %s" % self._eta()
+            out += f"eta {self._eta()}"
         else:
             total_time = self._laps[-1] - self._start_time
-            out += "done in %s, avg rate: %.1f/s" % (
-                secs_to_str(total_time),
-                self._total / total_time)
+            out += f"done in {secs_to_str(total_time)}, avg rate: {self._total / total_time:.1f}/s"
 
         return out
 

@@ -34,7 +34,7 @@ async def get_post_header(context, author, permlink):
 
     row = await db.query_row(sql, author=author, permlink=permlink)
 
-    assert row, 'Post {}/{} does not exist'.format(author,permlink)
+    assert row, f'Post {author}/{permlink} does not exist'
 
     return dict(
         author=row['author'],

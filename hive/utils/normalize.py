@@ -51,7 +51,7 @@ def to_nai(value):
 
     elif isinstance(value, str):
         raw_amount, unit = value.split(' ')
-        assert unit in UNIT_NAI, "Unknown unit {}".format(unit)
+        assert unit in UNIT_NAI, f"Unknown unit {unit}"
         nai = UNIT_NAI[unit]
         precision = NAI_PRECISION[nai]
         satoshis = int(decimal.Decimal(raw_amount) * (10**precision))
@@ -59,16 +59,16 @@ def to_nai(value):
 
     elif isinstance(value, list):
         satoshis, precision, nai = value
-        assert nai in NAI_MAP, "Unknown NAI {}".format(nai)
+        assert nai in NAI_MAP, f"Unknown NAI {nai}"
 
     else:
-        raise Exception("Invalid input amount %s" % repr(value))
+        raise Exception(f"Invalid input amount {repr(value)}")
     return ret
 
 
 def escape_characters(text):
     """ Escape special charactes """
-    assert isinstance(text, str), "Expected string got: {}".format(type(text))
+    assert isinstance(text, str), f"Expected string got: {type(text)}"
     if len(text.strip()) == 0:
         return "'" + text + "'"
 
@@ -127,12 +127,11 @@ def parse_amount(value, expected_unit=None):
     elif isinstance(value, list):
         satoshis, precision, nai = value
         dec_amount = decimal.Decimal(satoshis) / (10**precision)
-        assert nai in NAI_MAP, "unknown NAI %s; expected %s" % (
-            nai, expected_unit or '(any)')
+        assert nai in NAI_MAP, f"unknown NAI {nai}; expected {expected_unit or '(any)'}"
         unit = NAI_MAP[nai]
 
     else:
-        raise Exception("invalid input amount %s" % repr(value))
+        raise Exception(f"invalid input amount {repr(value)}")
 
     if expected_unit:
 # FIXME to be uncommented when payout collection will be corrected
@@ -257,7 +256,7 @@ def strtobool(val):
     elif val in ('n', 'no', 'f', 'false', 'off', '0'):
         return False
     else:
-        raise ValueError("not booleany: %r" % (val,))
+        raise ValueError(f"not booleany: {val!r}")
 
 def int_log_level(str_log_level):
     """Get `logger`s internal int level from config string."""
@@ -265,5 +264,5 @@ def int_log_level(str_log_level):
         raise ValueError('Empty log level passed')
     log_level = getattr(logging, str_log_level.upper(), None)
     if not isinstance(log_level, int):
-        raise ValueError('Invalid log level: %s' % str_log_level)
+        raise ValueError(f'Invalid log level: {str_log_level}')
     return log_level

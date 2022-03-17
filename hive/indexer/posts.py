@@ -79,7 +79,7 @@ class Posts(DbAdapterHolder):
                    parent_permlink=op['parent_permlink'], date=block_date, community_support_start_block=Community.start_block, block_num=op['block_num'], tags=tags)
 
         if not row:
-            log.error("Failed to process comment_op: {}".format(op))
+            log.error(f"Failed to process comment_op: {op}")
             return
         result = dict(row)
 
@@ -290,9 +290,9 @@ class Posts(DbAdapterHolder):
               "NULL" if ( payout is None ) else payout,
               "NULL" if ( pending_payout is None ) else pending_payout,
 
-              "NULL" if ( payout_at is None ) else ( "'{}'::timestamp".format( payout_at ) ),
-              "NULL" if ( last_payout_at is None ) else ( "'{}'::timestamp".format( last_payout_at ) ),
-              "NULL" if ( cashout_time is None ) else ( "'{}'::timestamp".format( cashout_time ) ),
+              "NULL" if ( payout_at is None ) else ( f"'{payout_at}'::timestamp" ),
+              "NULL" if ( last_payout_at is None ) else ( f"'{last_payout_at}'::timestamp" ),
+              "NULL" if ( cashout_time is None ) else ( f"'{cashout_time}'::timestamp" ),
 
               "NULL" if ( is_paidout is None ) else is_paidout,
 
@@ -398,9 +398,9 @@ class Posts(DbAdapterHolder):
 #            log.info("Old body definition: {}".format(old_body))
             new_body = new_body_def
         except Exception as ex:
-            log.info("Merging a body post id: {} caused an unknown exception {}".format(id, ex))
-            log.info("New body definition: {}".format(new_body_def))
-            log.info("Old body definition: {}".format(old_body))
+            log.info(f"Merging a body post id: {id} caused an unknown exception {ex}")
+            log.info(f"New body definition: {new_body_def}")
+            log.info(f"Old body definition: {old_body}")
             new_body = new_body_def
 
         return new_body

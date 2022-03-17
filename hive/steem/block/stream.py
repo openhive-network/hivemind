@@ -35,7 +35,7 @@ class BlockQueue:
         If a fork is encountered and there are blocks in the queue, a
         MicroForkException is thrown; otherwise, ForkException."""
         if self._prev.get_hash() != block.get_previous_block_hash():
-            fork = "%s--> %s->%s" % (self._prev, block.get_previous_block_hash(), block.get_hash())
+            fork = f"{self._prev}--> {block.get_previous_block_hash()}->{block.get_hash()}"
             if self._queue: # if using max_size>0, fork might be in buffer only
                 buff = self.size()
                 alert = "NOTIFYALERT " if buff < self._max_size else ""

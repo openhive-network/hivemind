@@ -77,7 +77,7 @@ class Follow(DbAdapterHolder):
     def _follow_single(cls, follower, following, at, block_num,
                        new_state=None, new_blacklisted=None, new_follow_blacklists=None, new_follow_muted=None):
         # add or update single record in flush cache
-        k = '{}/{}'.format(follower, following)
+        k = f'{follower}/{following}'
         if k not in cls.follow_items_to_flush:
             # fresh follow item (note that db might have that pair already)
             cls.follow_items_to_flush[k] = dict(
@@ -285,16 +285,7 @@ class Follow(DbAdapterHolder):
             count = 0
 
             for _, follow_item in cls.follow_items_to_flush.items():
-                values.append("({}, {}, {}, '{}'::timestamp, {}::smallint, {}::boolean, {}::boolean, {}::boolean, {})".format(
-                    follow_item['idx'],
-                    follow_item['follower'],
-                    follow_item['following'],
-                    follow_item['at'],
-                    follow_item['state'],
-                    follow_item['blacklisted'],
-                    follow_item['follow_blacklists'],
-                    follow_item['follow_muted'],
-                    follow_item['block_num']))
+                values.append(f"({follow_item['idx']}, {follow_item['follower']}, {follow_item['following']}, '{follow_item['at']}'::timestamp, {follow_item['state']}::smallint, {follow_item['blacklisted']}::boolean, {follow_item['follow_blacklists']}::boolean, {follow_item['follow_muted']}::boolean, {follow_item['block_num']})")
                 count = count + 1
                 if count >= limit:
                     query = str(sql).format(",".join(values))

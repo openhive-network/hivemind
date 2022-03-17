@@ -46,7 +46,7 @@ class Reblog(DbAdapterHolder):
         if not op:
             return
 
-        key = "{}/{}/{}".format(op['author'], op['permlink'], op['account'])
+        key = f"{op['author']}/{op['permlink']}/{op['account']}"
 
         if op['delete']:
             if key in cls.reblog_items_to_flush:
@@ -97,22 +97,14 @@ class Reblog(DbAdapterHolder):
             for k, v in cls.reblog_items_to_flush.items():
                 reblog_item = v['op']
                 if count < limit:
-                    values.append("({}, {}, {}, '{}'::timestamp, {})".format(escape_characters(reblog_item['account']),
-                                                                                escape_characters(reblog_item['author']),
-                                                                                escape_characters(reblog_item['permlink']),
-                                                                                reblog_item['block_date'],
-                                                                                reblog_item['block_num']))
+                    values.append(f"({escape_characters(reblog_item['account'])}, {escape_characters(reblog_item['author'])}, {escape_characters(reblog_item['permlink'])}, '{reblog_item['block_date']}'::timestamp, {reblog_item['block_num']})")
                     count = count + 1
                 else:
                     values_str = ",".join(values)
                     query = sql_prefix.format(values_str, values_str)
                     cls.db.query_prepared(query)
                     values.clear()
-                    values.append("({}, {}, {}, '{}'::timestamp, {})".format(escape_characters(reblog_item['account']),
-                                                                                escape_characters(reblog_item['author']),
-                                                                                escape_characters(reblog_item['permlink']),
-                                                                                reblog_item['block_date'],
-                                                                                reblog_item['block_num']))
+                    values.append(f"({escape_characters(reblog_item['account'])}, {escape_characters(reblog_item['author'])}, {escape_characters(reblog_item['permlink'])}, '{reblog_item['block_date']}'::timestamp, {reblog_item['block_num']})")
                     count = 1
 
             if len(values) > 0:

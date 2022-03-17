@@ -3,8 +3,8 @@ from hive.utils.normalize import sbd_amount, to_nai
 
 def _amount(amount, asset='HBD'):
     """Return a steem-style amount string given a (numeric, asset-str)."""
-    assert asset == 'HBD', 'unhandled asset %s' % asset
-    return "%.3f HBD" % amount
+    assert asset == 'HBD', f'unhandled asset {asset}'
+    return f"{amount:.3f} HBD"
 
 def database_post_object(row, truncate_body=0):
     """Given a hive_posts row, create a legacy-style post object."""

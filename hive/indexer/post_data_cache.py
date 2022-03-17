@@ -53,12 +53,12 @@ class PostDataCache(DbAdapterHolder):
                 VALUES 
             """
             for k, data in cls._data.items():
-                title = 'NULL' if data['title'] is None else "{}".format(escape_characters(data['title']))
-                body = 'NULL' if data['body'] is None else "{}".format(escape_characters(data['body']))
-                preview = 'NULL' if data['body'] is None else "{}".format(escape_characters(data['body'][0:1024]))
-                json = 'NULL' if data['json'] is None else "{}".format(escape_characters(data['json']))
-                img_url = 'NULL' if data['img_url'] is None else "{}".format(escape_characters(data['img_url']))
-                value = "({},{},{},{},{},{})".format(k, title, preview, img_url, body, json)
+                title = 'NULL' if data['title'] is None else f"{escape_characters(data['title'])}"
+                body = 'NULL' if data['body'] is None else f"{escape_characters(data['body'])}"
+                preview = 'NULL' if data['body'] is None else f"{escape_characters(data['body'][0:1024])}"
+                json = 'NULL' if data['json'] is None else f"{escape_characters(data['json'])}"
+                img_url = 'NULL' if data['img_url'] is None else f"{escape_characters(data['img_url'])}"
+                value = f"({k},{title},{preview},{img_url},{body},{json})"
                 if data['is_new_post']:
                     values_insert.append(value)
                 else:
@@ -72,7 +72,7 @@ class PostDataCache(DbAdapterHolder):
                 """
                 sql += ','.join(values_insert)
                 if print_query:
-                    log.info("Executing query:\n{}".format(sql))
+                    log.info(f"Executing query:\n{sql}")
                 cls.db.query_prepared(sql)
                 values_insert.clear();
 
@@ -95,7 +95,7 @@ class PostDataCache(DbAdapterHolder):
                     WHERE hpd.id = data_source.id
                 """
                 if print_query:
-                    log.info("Executing query:\n{}".format(sql))
+                    log.info(f"Executing query:\n{sql}")
                 cls.db.query_prepared(sql)
                 values_update.clear()
 

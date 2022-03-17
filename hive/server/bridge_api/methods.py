@@ -27,7 +27,7 @@ async def get_profile(context, account, observer=None):
     observer = valid_account(observer, allow_empty=True)
 
     ret = await load_profiles(db, [valid_account(account)])
-    assert ret, 'Account \'{}\' does not exist'.format(account) # should not be needed
+    assert ret, f'Account \'{account}\' does not exist' # should not be needed
 
     observer_id = await get_account_id(db, observer) if observer else None
     if observer_id:
@@ -227,7 +227,7 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
                            limit:int=20, tag:str='', observer:str=''):
     """Query posts, sorted by given method."""
     supported_sort_list = ['trending', 'hot', 'created', 'promoted', 'payout', 'payout_comments', 'muted']
-    assert sort in supported_sort_list, "Unsupported sort, valid sorts: {}".format(", ".join(supported_sort_list))
+    assert sort in supported_sort_list, f"Unsupported sort, valid sorts: {', '.join(supported_sort_list)}"
 
     db = context['db']
 
@@ -266,7 +266,7 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
                             limit:int=20, observer:str=None):
     """Get posts for an account -- blog, feed, comments, or replies."""
     supported_sort_list = ['blog', 'feed', 'posts', 'comments', 'replies', 'payout']
-    assert sort in supported_sort_list, "Unsupported sort, valid sorts: {}".format(", ".join(supported_sort_list))
+    assert sort in supported_sort_list, f"Unsupported sort, valid sorts: {', '.join(supported_sort_list)}"
 
     db = context['db']
 
@@ -372,7 +372,7 @@ async def get_follow_list(context, observer, follow_type='blacklisted'):
     """
     observer = valid_account(observer)
     valid_types = dict(blacklisted=1, follow_blacklist=2, muted=4, follow_muted=8)
-    assert follow_type in valid_types, "Unsupported follow_type, valid values: {}".format(", ".join(valid_types.keys()))
+    assert follow_type in valid_types, f"Unsupported follow_type, valid values: {', '.join(valid_types.keys())}"
 
     db = context['db']
 

@@ -152,7 +152,7 @@ class DbState:
                 to_return[ table ].append(index)
 
         # ensure we found all the items we expected
-        assert not to_locate, "indexes not located: {}".format(to_locate)
+        assert not to_locate, f"indexes not located: {to_locate}"
         return to_return
 
     @classmethod
@@ -212,7 +212,7 @@ class DbState:
                             elapsed_time = end_time - time_start
                             log.info("Index %s dropped in time %.4f s", index.name, elapsed_time)
                 except sqlalchemy.exc.ProgrammingError as ex:
-                    log.warning("Ignoring ex: {}".format(ex))
+                    log.warning(f"Ignoring ex: {ex}")
 
                 if create:
                     if cls.has_index(db_mgr.db, index.name):
@@ -293,9 +293,9 @@ class DbState:
         with AutoDbDisposer(db, "finish_hive_posts") as db_mgr:
             #UPDATE: `abs_rshares`, `vote_rshares`, `sc_hot`, ,`sc_trend`, `total_votes`, `net_votes`
             time_start = perf_counter()
-            sql = """
-                  SELECT update_posts_rshares({}, {});
-                  """.format(last_imported_block, current_imported_block)
+            sql = f"""
+                  SELECT update_posts_rshares({last_imported_block}, {current_imported_block});
+                  """
             cls._execute_and_explain_query(db_mgr.db, sql)
             log.info("[INIT] update_posts_rshares executed in %.4fs", perf_counter() - time_start)
 
@@ -307,16 +307,16 @@ class DbState:
                 cls._execute_query(db_mgr.db, "select update_all_hive_posts_children_count()")
             else:
                 # Update count of child posts processed during partial sync (what was hold during initial sync)
-                sql = "select update_hive_posts_children_count({}, {})".format(last_imported_block, current_imported_block)
+                sql = f"select update_hive_posts_children_count({last_imported_block}, {current_imported_block})"
                 cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_hive_posts_children_count executed in %.4fs", perf_counter() - time_start)
 
             #UPDATE: `root_id`
             # Update root_id all root posts
             time_start = perf_counter()
-            sql = """
-                  select update_hive_posts_root_id({}, {})
-                  """.format(last_imported_block, current_imported_block)
+            sql = f"""
+                  select update_hive_posts_root_id({last_imported_block}, {current_imported_block})
+                  """
             cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_hive_posts_root_id executed in %.4fs", perf_counter() - time_start)
 
@@ -324,9 +324,9 @@ class DbState:
     def _finish_hive_posts_api_helper(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_hive_posts_api_helper") as db_mgr:
             time_start = perf_counter()
-            sql = """
-                  select update_hive_posts_api_helper({}, {})
-                  """.format(last_imported_block, current_imported_block)
+            sql = f"""
+                  select update_hive_posts_api_helper({last_imported_block}, {current_imported_block})
+                  """
             cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_hive_posts_api_helper executed in %.4fs", perf_counter() - time_start)
 
@@ -334,9 +334,9 @@ class DbState:
     def _finish_hive_feed_cache(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_hive_feed_cache") as db_mgr:
             time_start = perf_counter()
-            sql = """
-                SELECT update_feed_cache({}, {});
-            """.format(last_imported_block, current_imported_block)
+            sql = f"""
+                SELECT update_feed_cache({last_imported_block}, {current_imported_block});
+            """
             cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_feed_cache executed in %.4fs", perf_counter() - time_start)
 
@@ -344,9 +344,9 @@ class DbState:
     def _finish_hive_mentions(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_hive_mentions") as db_mgr:
             time_start = perf_counter()
-            sql = """
-                SELECT update_hive_posts_mentions({}, {});
-            """.format(last_imported_block, current_imported_block)
+            sql = f"""
+                SELECT update_hive_posts_mentions({last_imported_block}, {current_imported_block});
+            """
             cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_hive_posts_mentions executed in %.4fs", perf_counter() - time_start)
 
@@ -358,13 +358,13 @@ class DbState:
 
     @classmethod
     def _finish_account_reputations(cls, db, last_imported_block, current_imported_block):
-        log.info("Performing update_account_reputations on block rangge: {}:{}".format(last_imported_block, current_imported_block))
+        log.info(f"Performing update_account_reputations on block rangge: {last_imported_block}:{current_imported_block}")
 
         with AutoDbDisposer(db, "finish_account_reputations") as db_mgr:
             time_start = perf_counter()
-            sql = """
-                  SELECT update_account_reputations({}, {}, True);
-                  """.format(last_imported_block, current_imported_block)
+            sql = f"""
+                  SELECT update_account_reputations({last_imported_block}, {current_imported_block}, True);
+                  """
             cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_account_reputations executed in %.4fs", perf_counter() - time_start)
 
@@ -379,9 +379,9 @@ class DbState:
     def _finish_blocks_consistency_flag(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_blocks_consistency_flag") as db_mgr:
             time_start = perf_counter()
-            sql = """
-                  SELECT update_hive_blocks_consistency_flag({}, {});
-                  """.format(last_imported_block, current_imported_block)
+            sql = f"""
+                  SELECT update_hive_blocks_consistency_flag({last_imported_block}, {current_imported_block});
+                  """
             cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_hive_blocks_consistency_flag executed in %.4fs", perf_counter() - time_start)
 
@@ -399,9 +399,9 @@ class DbState:
     def _finish_follow_count(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_follow_count") as db_mgr:
             time_start = perf_counter()
-            sql = """
-                  SELECT update_follow_count({}, {});
-                  """.format(last_imported_block, current_imported_block)
+            sql = f"""
+                  SELECT update_follow_count({last_imported_block}, {current_imported_block});
+                  """
             cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_follow_count executed in %.4fs", perf_counter() - time_start)
 
@@ -425,7 +425,7 @@ class DbState:
             elapsedTime = future.result()
             FOSM.final_stat(description, elapsedTime)
           except Exception as exc:
-              log.error('%r generated an exception: %s' % (description, exc))
+              log.error(f'{description!r} generated an exception: {exc}')
               raise exc
 
         pool.shutdown()
@@ -540,7 +540,7 @@ class DbState:
             """))
         if _engine_name == 'mysql':
             return bool(cls.db().query_one('SHOW TABLES'))
-        raise Exception("unknown db engine %s" % _engine_name)
+        raise Exception(f"unknown db engine {_engine_name}")
 
     @classmethod
     def _is_feed_cache_empty(cls):

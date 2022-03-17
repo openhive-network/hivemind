@@ -274,8 +274,7 @@ def run_server(conf):
             result = 'db not available'
         elif not is_syncer and state['db_head_age'] > max_head_age:
             status = 500
-            result = 'head block age (%s) > max (%s); head block num: %s' % (
-                state['db_head_age'], max_head_age, state['db_head_block'])
+            result = f"head block age ({state['db_head_age']}) > max ({max_head_age}); head block num: {state['db_head_block']}"
         else:
             status = 200
             result = 'head block age is %d, head block num is %d' % (
@@ -361,18 +360,18 @@ def run_server(conf):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         while port_from <= port_to:
             try:
-                log.debug("Trying port: {}".format(port_from))
+                log.debug(f"Trying port: {port_from}")
                 sock.bind(('', port_from))
             except OSError as ex:
-                log.debug("Exception: {}".format(ex))
+                log.debug(f"Exception: {ex}")
                 port_from += 1
             except Exception as ex:
                 # log and rethrow exception
-                log.exception("Exception: {}".format(ex))
+                log.exception(f"Exception: {ex}")
                 raise ex
             else:
                 with open('hivemind.port', 'w') as port_file:
-                    port_file.write("{}\n".format(port_from))
+                    port_file.write(f"{port_from}\n")
                 web.run_app(app, sock=sock)
                 break
         if port_from == port_to:

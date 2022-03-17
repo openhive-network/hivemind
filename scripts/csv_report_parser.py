@@ -17,7 +17,7 @@ def parse_csv_files(root_dir):
     ret_benchmark_time_threshold = {}
     ret_benchmark_request_params = {}
     file_path = os.path.join(root_dir, "benchmark.csv")
-    print("Processing file: {}".format(file_path))
+    print(f"Processing file: {file_path}")
     with open(file_path, 'r') as csv_file:
         reader = csv.reader(csv_file)
         for row in reader:
@@ -108,18 +108,18 @@ if __name__ == "__main__":
                 t_start = perf_counter()
                 req_data = request_data[name]
                 req_data_benchmark_time_threshold = report_data_time_threshold.get(name, None)
-                print("Sending {} for reference time measurement".format(req_data))
-                ret = requests.post("{}:{}".format(args.address, args.port), req_data)
+                print(f"Sending {req_data} for reference time measurement")
+                ret = requests.post(f"{args.address}:{args.port}", req_data)
                 ref_time = 0.
                 if ret.status_code == 200:
                     ref_time = perf_counter() - t_start
-                print("Got response in {:.4f}s".format(ref_time))
+                print(f"Got response in {ref_time:.4f}s")
                 ref_size = int(ret.headers.get("Content-Length", 0))
                 if (req_data_benchmark_time_threshold is None and dmean > args.time_threshold) or (req_data_benchmark_time_threshold is not None and dmean > req_data_benchmark_time_threshold):
-                    ofile.write("        <tr><td>{}<br/>Parameters: {}</td><td>{:.1f}</td><td>{:.1f}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, req_data, dmean_size / 1000., ref_size / 1000., dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
-                    above_treshold.append((name, "{:.4f}".format(dmean)))
+                    ofile.write(f"        <tr><td>{name}<br/>Parameters: {req_data}</td><td>{dmean_size / 1000.0:.1f}</td><td>{ref_size / 1000.0:.1f}</td><td>{dmin * 1000:.4f}</td><td>{dmax * 1000:.4f}</td><td bgcolor=\"red\">{dmean * 1000:.4f}</td><td>{dmedian * 1000:.4f}</td><td>{ref_time * 1000:.4f}</td><td>{abs_rel_diff(dmean, ref_time):.4f}</td><td>{abs_rel_diff(dmedian, ref_time):.4f}</td></tr>\n")
+                    above_treshold.append((name, f"{dmean:.4f}"))
                 else:
-                    ofile.write("        <tr><td>{}</td><td>{:.1f}</td><td>{:.1f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(name, dmean_size / 1000., ref_size / 1000., dmin * 1000, dmax * 1000, dmean * 1000, dmedian * 1000, ref_time * 1000, abs_rel_diff(dmean, ref_time), abs_rel_diff(dmedian, ref_time)))
+                    ofile.write(f"        <tr><td>{name}</td><td>{dmean_size / 1000.0:.1f}</td><td>{ref_size / 1000.0:.1f}</td><td>{dmin * 1000:.4f}</td><td>{dmax * 1000:.4f}</td><td>{dmean * 1000:.4f}</td><td>{dmedian * 1000:.4f}</td><td>{ref_time * 1000:.4f}</td><td>{abs_rel_diff(dmean, ref_time):.4f}</td><td>{abs_rel_diff(dmedian, ref_time):.4f}</td></tr>\n")
         ofile.write("      </tbody>\n")
         ofile.write("    </table>\n")
         ofile.write("  </body>\n")
@@ -131,13 +131,13 @@ if __name__ == "__main__":
         summary = PrettyTable()
         summary.field_names = ['Test name', 'Custom time value [s]']
         for name, threshold in report_data_time_threshold.items():
-            summary.add_row((name, "{:.4f}".format(threshold)))
+            summary.add_row((name, f"{threshold:.4f}"))
         print(summary)
 
     if above_treshold:
         from prettytable import PrettyTable
         summary = PrettyTable()
-        print("########## Test failed with following tests above {}s threshold ##########".format(args.time_threshold))
+        print(f"########## Test failed with following tests above {args.time_threshold}s threshold ##########")
         summary.field_names = ['Test name', 'Mean time [s]']
         for entry in above_treshold:
             summary.add_row(entry)

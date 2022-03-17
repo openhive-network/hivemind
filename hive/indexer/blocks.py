@@ -133,7 +133,7 @@ class Blocks:
 #                if n > 0:
 #                    log.info('%r flush generated %d records' % (description, n))
             except Exception as exc:
-                log.error('%r generated an exception: %s' % (description, exc))
+                log.error(f'{description!r} generated an exception: {exc}')
                 raise exc
         pool.shutdown()
 
@@ -145,7 +145,7 @@ class Blocks:
           try:
               f()
           except Exception as exc:
-              log.error('%r generated an exception: %s' % (description, exc))
+              log.error(f'{description!r} generated an exception: {exc}')
               raise exc
 
     @classmethod
@@ -221,7 +221,7 @@ class Blocks:
             op_value = vop.get_body()
             op_value['block_num'] = block_num
 
-            key = "{}/{}".format(op_value['author'], op_value['permlink'])
+            key = f"{op_value['author']}/{op_value['permlink']}"
 
             if op_type == VirtualOperationType.AuthorReward:
                 if key not in comment_payout_ops:
@@ -326,7 +326,7 @@ class Blocks:
                     potentially_new_account = True
 
                 if potentially_new_account and not Accounts.register(account_name, op_details, cls._head_block_date, num):
-                    log.error("Failed to register account {} from operation: {}".format(account_name, op))
+                    log.error(f"Failed to register account {account_name} from operation: {op}")
 
                 # account metadata updates
                 if op_type == OperationType.AccountUpdate:
@@ -338,7 +338,7 @@ class Blocks:
                 elif op_type == OperationType.Comment:
                     Posts.comment_op(op, cls._head_block_date)
                 elif op_type == OperationType.DeleteComment:
-                    key = "{}/{}".format(op['author'], op['permlink'])
+                    key = f"{op['author']}/{op['permlink']}"
                     if key not in ineffective_deleted_ops:
                         Posts.delete_op(op, cls._head_block_date)
                 elif op_type == OperationType.CommentOption:
@@ -421,10 +421,7 @@ class Blocks:
         """
         values = []
         for block in cls.blocks_to_flush:
-            values.append("({}, '{}', '{}', {}, {}, '{}', {})".format(block['num'], block['hash'],
-                                                                  block['prev'], block['txs'],
-                                                                  block['ops'], block['date'],
-                                                                  False))
+            values.append(f"({block['num']}, '{block['hash']}', '{block['prev']}', {block['txs']}, {block['ops']}, '{block['date']}', {False})")
         query = query + ",".join(values)
         DB.query_prepared(query)
         values.clear()
@@ -498,16 +495,16 @@ class Blocks:
         is_hour_action = last_block % 1200 == 0
 
         queries = [
-            "SELECT update_posts_rshares({}, {})".format(first_block, last_block),
-            "SELECT update_hive_posts_children_count({}, {})".format(first_block, last_block),
-            "SELECT update_hive_posts_root_id({},{})".format(first_block, last_block),
-            "SELECT update_hive_posts_api_helper({},{})".format(first_block, last_block),
-            "SELECT update_feed_cache({}, {})".format(first_block, last_block),
-            "SELECT update_hive_posts_mentions({}, {})".format(first_block, last_block),
-            "SELECT update_notification_cache({}, {}, {})".format(first_block, last_block, is_hour_action),
-            "SELECT update_follow_count({}, {})".format(first_block, last_block),
-            "SELECT update_account_reputations({}, {}, False)".format(first_block, last_block),
-            "SELECT update_hive_blocks_consistency_flag({}, {})".format(first_block, last_block)
+            f"SELECT update_posts_rshares({first_block}, {last_block})",
+            f"SELECT update_hive_posts_children_count({first_block}, {last_block})",
+            f"SELECT update_hive_posts_root_id({first_block},{last_block})",
+            f"SELECT update_hive_posts_api_helper({first_block},{last_block})",
+            f"SELECT update_feed_cache({first_block}, {last_block})",
+            f"SELECT update_hive_posts_mentions({first_block}, {last_block})",
+            f"SELECT update_notification_cache({first_block}, {last_block}, {is_hour_action})",
+            f"SELECT update_follow_count({first_block}, {last_block})",
+            f"SELECT update_account_reputations({first_block}, {last_block}, False)",
+            f"SELECT update_hive_blocks_consistency_flag({first_block}, {last_block})"
         ]
 
         for query in queries:

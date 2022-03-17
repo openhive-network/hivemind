@@ -87,9 +87,9 @@ def json_report_parser(path_to_test_dir, json_file, time_threshold=1.0):
         for benchmark in json_data['benchmarks']:
             if float(benchmark['stats']['mean']) > time_threshold:
                 ofile.write("      <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td></tr>\n".format(benchmark['name'], get_request_from_yaml(class_to_path(benchmark['name'][5:], class_to_path_dic)), benchmark['stats']['min'] * 1000, benchmark['stats']['max'] * 1000, benchmark['stats']['mean'] * 1000))
-                above_treshold.append((benchmark['name'], "{:.4f}".format(benchmark['stats']['mean'] * 1000), get_request_from_yaml(class_to_path(benchmark['name'][5:], class_to_path_dic))))
+                above_treshold.append((benchmark['name'], f"{benchmark['stats']['mean'] * 1000:.4f}", get_request_from_yaml(class_to_path(benchmark['name'][5:], class_to_path_dic))))
             else:
-                ofile.write("      <tr><td>{}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(benchmark['name'], benchmark['stats']['min'] * 1000, benchmark['stats']['max'] * 1000, benchmark['stats']['mean'] * 1000))
+                ofile.write(f"      <tr><td>{benchmark['name']}</td><td>{benchmark['stats']['min'] * 1000:.4f}</td><td>{benchmark['stats']['max'] * 1000:.4f}</td><td>{benchmark['stats']['mean'] * 1000:.4f}</td></tr>\n")
         ofile.write("    </table>\n")
         ofile.write("  </body>\n")
         ofile.write("</html>\n")

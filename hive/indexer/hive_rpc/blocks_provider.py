@@ -103,7 +103,7 @@ class BlocksProvider:
                                         block["block"]["transactions"].extend( block_mock["transactions"] )
                                     else:
                                         block["block"] = block_mock
-                                        log.warning("Pure mock block: id {}, previous {}".format(block_mock["block_id"], block_mock["previous"]))
+                                        log.warning(f"Pure mock block: id {block_mock['block_id']}, previous {block_mock['previous']}")
                                 block_for_queue = None if not 'block' in block else block['block']
 
                                 while cls._breaker():

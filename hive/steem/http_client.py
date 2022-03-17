@@ -31,7 +31,7 @@ def validated_json_payload(response):
         data = response.data.decode('utf-8')
         payload = json.loads(data)
     except Exception as e:
-        raise Exception("JSON error %s: %s" % (str(e), data[0:1024]))
+        raise Exception(f"JSON error {str(e)}: {data[0:1024]}")
 
     return payload
 
@@ -53,7 +53,7 @@ def _validated_batch_result(payload, body):
     assert isinstance(payload, list), "batch result must be list"
     assert len(body) == len(payload), "batch result len mismatch"
     for req, res in zip(body, payload):
-        assert req['id'] == res['id'], "id mismatch: %s -> %s" % (req, res)
+        assert req['id'] == res['id'], f"id mismatch: {req} -> {res}"
     for idx, item in enumerate(payload):
         if 'error' in item:
             raise RPCError.build(item['error'], body, idx)

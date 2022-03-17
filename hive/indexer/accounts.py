@@ -75,7 +75,7 @@ class Accounts(DbAdapterHolder):
     def get_id(cls, name):
         """Get account id by name. Throw if not found."""
         assert isinstance(name, str), "account name should be string"
-        assert name in cls._ids, 'Account \'%s\' does not exist' % name
+        assert name in cls._ids, f'Account \'{name}\' does not exist'
         return cls._ids[name]
 
     @classmethod
@@ -122,11 +122,11 @@ class Accounts(DbAdapterHolder):
 
         ( _posting_json_metadata, _json_metadata ) = get_profile_str( op_details )
 
-        sql = """
+        sql = f"""
                   INSERT INTO hive_accounts (name, created_at, posting_json_metadata, json_metadata )
-                  VALUES ( '{}', '{}', {}, {} )
+                  VALUES ( '{name}', '{block_date}', {cls.get_json_data(_posting_json_metadata)}, {cls.get_json_data(_json_metadata)} )
                   RETURNING id
-              """.format( name, block_date, cls.get_json_data( _posting_json_metadata ), cls.get_json_data( _json_metadata ) )
+              """
 
         new_id = DB.query_one( sql )
         if new_id is None:
@@ -182,11 +182,7 @@ class Accounts(DbAdapterHolder):
             values_limit = 1000
 
             for name, data in cls._updates_data.items():
-                values.append("({}, {}, {}, '{}')".format(
-                  data['allow_change_posting'],
-                  cls.get_json_data( data['posting_json_metadata'] ),
-                  cls.get_json_data( data['json_metadata'] ),
-                  name))
+                values.append(f"({data['allow_change_posting']}, {cls.get_json_data(data['posting_json_metadata'])}, {cls.get_json_data(data['json_metadata'])}, '{name}')")
 
                 if len(values) >= values_limit:
                     values_str = ','.join(values)

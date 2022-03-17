@@ -50,9 +50,9 @@ def assert_keys_match(keys, expected, allow_missing=True):
     """Compare a set of input keys to expected keys."""
     if not allow_missing:
         missing = expected - keys
-        assert not missing, 'missing keys: %s' % missing
+        assert not missing, f'missing keys: {missing}'
     extra = keys - expected
-    assert not extra, 'extraneous keys: %s' % extra
+    assert not extra, f'extraneous keys: {extra}'
 
 def process_json_community_op(actor, op_json, date, block_num):
     """Validates community op and apply state changes to db."""
@@ -61,7 +61,7 @@ def process_json_community_op(actor, op_json, date, block_num):
 def read_key_bool(op, key):
     """Reads a key from dict, ensuring valid bool if present."""
     if key in op:
-        assert isinstance(op[key], bool), 'must be bool: %s' % key
+        assert isinstance(op[key], bool), f'must be bool: {key}'
         return op[key]
     return None
 
@@ -69,25 +69,25 @@ def read_key_str(op, key, maxlen=None, fmt=None, allow_blank=False):
     """Reads a key from a dict, ensuring non-blank str if present."""
     if key not in op:
         return None
-    assert isinstance(op[key], str), 'key `%s` was not str' % key
-    assert allow_blank or op[key], 'key `%s` was blank' % key
-    assert op[key] == op[key].strip(), 'invalid padding: %s' % key
-    assert not maxlen or len(op[key]) <= maxlen, 'exceeds max len: %s' % key
+    assert isinstance(op[key], str), f'key `{key}` was not str'
+    assert allow_blank or op[key], f'key `{key}` was blank'
+    assert op[key] == op[key].strip(), f'invalid padding: {key}'
+    assert not maxlen or len(op[key]) <= maxlen, f'exceeds max len: {key}'
 
     if fmt == 'hex':
-        assert re.match(r'^#[0-9a-f]{6}$', op[key]), 'invalid HEX: %s' % key
+        assert re.match(r'^#[0-9a-f]{6}$', op[key]), f'invalid HEX: {key}'
     elif fmt == 'lang':
-        assert op[key] in LANGS, 'invalid lang: %s' % key
+        assert op[key] in LANGS, f'invalid lang: {key}'
     else:
-        assert fmt is None, 'invalid fmt: %s' % fmt
+        assert fmt is None, f'invalid fmt: {fmt}'
 
     return op[key]
 
 def read_key_dict(obj, key):
     """Given a dict, read `key`, ensuring result is a dict."""
-    assert key in obj, 'key `%s` not found' % key
-    assert obj[key], 'key `%s` was blank' % key
-    assert isinstance(obj[key], dict), 'key `%s` not a dict' % key
+    assert key in obj, f'key `{key}` not found'
+    assert obj[key], f'key `{key}` was blank'
+    assert isinstance(obj[key], dict), f'key `{key}` not a dict'
     return obj[key]
 
 
@@ -318,7 +318,7 @@ class CommunityOp:
         # Community-level commands
         if action == 'updateProps':
             bind = ', '.join([k+" = :"+k for k in list(self.props.keys())])
-            DB.query("UPDATE hive_communities SET %s WHERE id = :id" % bind,
+            DB.query(f"UPDATE hive_communities SET {bind} WHERE id = :id",
                      id=self.community_id, **self.props)
             self._notify('set_props', payload=json.dumps(read_key_dict(self.op, 'props')))
 
@@ -415,7 +415,7 @@ class CommunityOp:
         _name = read_key_str(self.op, 'community', 16)
         assert _name, 'must name a community'
         _id = Community.validated_id(_name)
-        assert _id, 'Community \'%s\' does not exist' % _name
+        assert _id, f'Community \'{_name}\' does not exist'
 
         self.community = _name
         self.community_id = _id
@@ -555,7 +555,7 @@ class CommunityOp:
     def _parent_muted(self):
         """Check parent post's muted status."""
         parent_id = "SELECT parent_id FROM hive_posts WHERE id = :id"
-        sql = "SELECT is_muted FROM hive_posts WHERE id = (%s)" % parent_id
+        sql = f"SELECT is_muted FROM hive_posts WHERE id = ({parent_id})"
         return bool(DB.query_one(sql, id=self.post_id))
 
     def _pinned(self):

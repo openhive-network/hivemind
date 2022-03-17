@@ -74,8 +74,8 @@ def _strict_query(params):
     provided_keys = query.keys()
     missing = expected_keys - provided_keys
     unknown = provided_keys - expected_keys - optional_keys
-    assert not missing, "missing query key %s" % missing
-    assert not unknown, "unknown query key %s" % unknown
+    assert not missing, f"missing query key {missing}"
+    assert not unknown, f"unknown query key {unknown}"
 
     return query
 
@@ -156,4 +156,4 @@ async def call(context, api, method, params):
     elif method == 'get_active_votes':
         return await get_active_votes(context, *_strict_list(params, 2))
 
-    assert False, "unknown method: %s.%s" % (api, method)
+    assert False, f"unknown method: {api}.{method}"

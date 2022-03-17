@@ -88,7 +88,7 @@ class MassiveBlocksDataProviderHiveRpc(BlocksProviderBase):
         """Returns blocks and vops data for next number_of_blocks"""
         vops_and_blocks = { 'vops': [], 'blocks': [] }
 
-        log.info("vops_queue.qsize: {} blocks_queue.qsize: {}".format(self.vops_queue.qsize(), self.blocks_queue.qsize()))
+        log.info(f"vops_queue.qsize: {self.vops_queue.qsize()} blocks_queue.qsize: {self.blocks_queue.qsize()}")
 
         wait_vops_time = WSM.start()
         if self.vops_queue.qsize() < number_of_blocks and self._breaker():

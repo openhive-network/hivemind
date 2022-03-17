@@ -18,14 +18,12 @@ def setup_logging(conf):
     if timestamp and epoch:
         datefmt='%Y-%m-%d %H:%M:%S'
         timezone = time.strftime('%z')
-        fmt = '%(asctime)s.%(msecs)03d{} %(created).6f ' \
-            '%(levelname)s - %(name)s - %(message)s'.format(timezone)
+        fmt = f'%(asctime)s.%(msecs)03d{timezone} %(created).6f %(levelname)s - %(name)s - %(message)s'
         logging.basicConfig(format=fmt, datefmt=datefmt)
     elif timestamp:
         datefmt='%Y-%m-%d %H:%M:%S'
         timezone = time.strftime('%z')
-        fmt = '%(asctime)s.%(msecs)03d{} ' \
-            '%(levelname)s - %(name)s - %(message)s'.format(timezone)
+        fmt = f'%(asctime)s.%(msecs)03d{timezone} %(levelname)s - %(name)s - %(message)s'
         logging.basicConfig(format=fmt, datefmt=datefmt)
     elif epoch:
         fmt = '%(created).6f %(levelname)s - %(name)s - %(message)s'
@@ -89,7 +87,7 @@ def launch_mode(mode, conf):
         print(DbState.status())
 
     else:
-        raise Exception("unknown run mode %s" % mode)
+        raise Exception(f"unknown run mode {mode}")
 
 if __name__ == '__main__':
     run()

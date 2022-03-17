@@ -9,7 +9,7 @@ def colorize(string, color='93', force=False):
     """Colorizes a string for stdout, if attached to terminal"""
     if not USE_COLOR and not force:
         return string
-    return "\033[%sm%s\033[0m" % (color, string)
+    return f"[{color}m{string}[0m"
 
 def peak_usage_mb():
     """Get peak memory usage of hive process."""

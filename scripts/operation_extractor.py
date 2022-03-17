@@ -49,9 +49,9 @@ if __name__ == "__main__":
                 for idx in range(len(block_data['transactions'])):
                     block_data['transactions'][idx]['operations'] = [op for op in block_data['transactions'][idx]['operations'] if op['type'] in args.operations]
                     if args.dump_ops_only and block_data['transactions'][idx]['operations']:
-                        output_file.write("{}\n".format(dumps(block_data['transactions'][idx]['operations'])))
+                        output_file.write(f"{dumps(block_data['transactions'][idx]['operations'])}\n")
                 if not args.dump_ops_only:
-                    output_file.write('"{}":{},\n'.format(block_num, dumps(block_data)))
+                    output_file.write(f'"{block_num}":{dumps(block_data)},\n')
             from_block = to_block
         if not args.dump_ops_only:
             output_file.write("}\n")

@@ -104,7 +104,7 @@ async def get_state(context, path: str):
     # account - `/@account/tab` (feed, blog, comments, replies)
     if part[0] and part[0][0] == '@':
         assert not part[1] == 'transfers', 'transfers API not served here'
-        assert not part[2], 'unexpected account path[2] %s' % path
+        assert not part[2], f'unexpected account path[2] {path}'
 
         if part[1] == '':
             part[1] = 'blog'
@@ -122,7 +122,7 @@ async def get_state(context, path: str):
         else:
             # invalid/undefined case; probably requesting `@user/permlink`,
             # but condenser still relies on a valid response for redirect.
-            state['error'] = 'invalid get_state account path %s' % path
+            state['error'] = f'invalid get_state account path {path}'
 
     # discussion - `/category/@account/permlink`
     elif part[1] and part[1][0] == '@':
@@ -133,7 +133,7 @@ async def get_state(context, path: str):
 
     # ranked posts - `/sort/category`
     elif part[0] in POST_LIST_SORTS:
-        assert not part[2], "unexpected discussion path part[2] %s" % path
+        assert not part[2], f"unexpected discussion path part[2] {path}"
         sort = valid_sort(part[0])
         tag = valid_tag(part[1].lower(), allow_empty=True)
         pids = await get_posts_by_given_sort(context, sort, '', '', 20, tag)
@@ -152,7 +152,7 @@ async def get_state(context, path: str):
         assert not part[1] and not part[2]
 
     else:
-        raise ApiError('unhandled path: /%s' % path)
+        raise ApiError(f'unhandled path: /{path}')
 
     return state
 
@@ -169,7 +169,7 @@ async def _get_account_discussion_by_key(db, account, key):
     elif key == 'feed':
         posts = await get_discussions_by_feed_impl(db, account, '', '', 20)
     else:
-        raise ApiError("unknown account discussion key %s" % key)
+        raise ApiError(f"unknown account discussion key {key}")
 
     return posts
 
@@ -184,12 +184,12 @@ def _normalize_path(path):
     if not path:
         path = 'trending'
     assert '#' not in path, 'path contains hash mark (#)'
-    assert '?' not in path, 'path contains query string: `%s`' % path
+    assert '?' not in path, f'path contains query string: `{path}`'
 
     parts = path.split('/')
     if len(parts) == 4 and parts[3] == '':
         parts = parts[:-1]
-    assert len(parts) < 4, 'too many parts in path: `%s`' % path
+    assert len(parts) < 4, f'too many parts in path: `{path}`'
     while len(parts) < 3:
         parts.append('')
     return (path, parts)
@@ -216,7 +216,7 @@ async def _load_content_accounts(db, content, lite = False):
 
 async def _load_account(db, name):
     ret = await load_accounts(db, [name])
-    assert ret, 'account not found: `%s`' % name
+    assert ret, f'account not found: `{name}`'
     account = ret[0]
     for key in ACCOUNT_TAB_KEYS.values():
         account[key] = []
@@ -271,7 +271,7 @@ async def _load_discussion(db, author, permlink, observer=None):
 async def _get_feed_price(db):
     """Get a steemd-style ratio object representing feed price."""
     price = await db.query_one("SELECT usd_per_steem FROM hive_state")
-    return {"base": "%.3f HBD" % price, "quote": "1.000 HIVE"}
+    return {"base": f"{price:.3f} HBD", "quote": "1.000 HIVE"}
 
 @cached(ttl=1800, timeout=1200)
 async def _get_props_lite(db):

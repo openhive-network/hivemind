@@ -60,7 +60,7 @@ class Notify(DbAdapterHolder):
         elif isinstance(type_id, int):
             enum = NotifyType(type_id)
         else:
-            raise Exception("unknown type %s" % repr(type_id))
+            raise Exception(f"unknown type {repr(type_id)}")
 
         self.block_num = block_num
         self.enum = enum
@@ -121,7 +121,7 @@ class Notify(DbAdapterHolder):
             values_limit = 1000
 
             for notify in Notify._notifies:
-                values.append( "{}".format( notify.to_db_values() ) )
+                values.append( f"{notify.to_db_values()}" )
 
                 if len(values) >= values_limit:
                     execute_query(sql, values)

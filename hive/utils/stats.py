@@ -147,7 +147,7 @@ class StatusManager:
         sorted_stats = sorted(col.items(), key=lambda kv: kv[1], reverse=True)
         measured_time = 0.0
         for (k, v) in sorted_stats:
-            log.info("`{}`: {}".format(k, v))
+            log.info(f"`{k}`: {v}")
             measured_time += v.time
         return measured_time
 

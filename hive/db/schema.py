@@ -434,7 +434,7 @@ def drop_fk(db):
     db.query_no_return("START TRANSACTION")
     for table in build_metadata().sorted_tables:
         for fk in table.foreign_keys:
-            sql = """ALTER TABLE {} DROP CONSTRAINT IF EXISTS {}""".format(table.name, fk.name)
+            sql = f"""ALTER TABLE {table.name} DROP CONSTRAINT IF EXISTS {fk.name}"""
             db.query_no_return(sql)
     db.query_no_return("COMMIT")
 
@@ -625,7 +625,7 @@ def setup(db):
     from os.path import dirname, realpath
     dir_path = dirname(realpath(__file__))
     for script in sql_scripts:
-        execute_sql_script(db.query_no_return, "{}/sql_scripts/{}".format(dir_path, script))
+        execute_sql_script(db.query_no_return, f"{dir_path}/sql_scripts/{script}")
 
     # Move this part here, to mark latest db patch level as current Hivemind revision (which just created schema).
     sql = """
@@ -691,7 +691,7 @@ def set_logged_table_attribute(db, logged):
     ]
 
     for table in logged_config:
-        log.info("Setting {} attribute on a table: {}".format('LOGGED' if logged else 'UNLOGGED', table))
+        log.info(f"Setting {'LOGGED' if logged else 'UNLOGGED'} attribute on a table: {table}")
         sql = """ALTER TABLE {} SET {}"""
         db.query_no_return(sql.format(table, 'LOGGED' if logged else 'UNLOGGED'))
 
@@ -715,6 +715,6 @@ def execute_sql_script(query_executor, path_to_script):
         if sql_script is not None:
             return query_executor(sql_script)
     except Exception as ex:
-        log.exception("Error running sql script: {}".format(ex))
+        log.exception(f"Error running sql script: {ex}")
         raise ex
     return None

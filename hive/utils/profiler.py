@@ -25,7 +25,7 @@ class Profiler:
         f = self.filepath
         self._profile.dump_stats(f)
         print("\nStats saved. For results run:")
-        print("pyprof2calltree -k -i %s\n" % f)
+        print(f"pyprof2calltree -k -i {f}\n")
 
     def echo(self, lines=10):
         """Reads profile results from file and prints."""

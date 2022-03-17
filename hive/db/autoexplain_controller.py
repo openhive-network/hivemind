@@ -45,7 +45,7 @@ class AutoExplainController:
         self.__wrapped_db.query_no_return( "SET auto_explain.log_verbose=off" )
 
         if PostgresClientLogSeverity[ self.__previous_psql_client_log_level ].value > PostgresClientLogSeverity.log.value:
-            self.__wrapped_db.query_no_return( "SET client_min_messages={}".format( self.__previous_psql_client_log_level ) )
+            self.__wrapped_db.query_no_return( f"SET client_min_messages={self.__previous_psql_client_log_level}" )
 
         if self.__previous_log_level > getattr(logging, 'INFO'):
             logging.getLogger('sqlalchemy.dialects').setLevel(self.__previous_log_level)

@@ -40,9 +40,9 @@ class Db:
         assert db is not None, "Database has to be initialized"
         cls.max_connections = db.query_one("SELECT setting::int FROM pg_settings WHERE  name = 'max_connections'")
         if cls.necessary_connections > cls.max_connections:
-          log.info("A database offers only {} connections, but it's required {} connections".format(cls.max_connections, cls.necessary_connections))
+          log.info(f"A database offers only {cls.max_connections} connections, but it's required {cls.necessary_connections} connections")
         else:
-          log.info("A database offers maximum connections: {}. Required {} connections.".format(cls.max_connections, cls.necessary_connections))
+          log.info(f"A database offers maximum connections: {cls.max_connections}. Required {cls.necessary_connections} connections.")
 
     def __init__(self, url, name, enable_autoexplain = False):
         """Initialize an instance.
@@ -83,12 +83,12 @@ class Db:
         try:
             for item in self._conn:
                 if item is not None:
-                    log.info("Closing database connection: '{}'".format(item['name']))
+                    log.info(f"Closing database connection: '{item['name']}'")
                     item['connection'].close()
                     item = None
             self._conn = []
         except Exception as ex:
-            log.exception("Error during connections closing: {}".format(ex))
+            log.exception(f"Error during connections closing: {ex}")
             raise ex
 
     def close_engine(self):
@@ -101,11 +101,11 @@ class Db:
             else:
               log.info("SQL engine was already disposed")
         except Exception as ex:
-            log.exception("Error during database closing: {}".format(ex))
+            log.exception(f"Error during database closing: {ex}")
             raise ex
 
     def get_connection(self, number):
-        assert len(self._conn) > number, "Incorrect number of connection. total: {} number: {}".format(len(self._conn), number)
+        assert len(self._conn) > number, f"Incorrect number of connection. total: {len(self._conn)} number: {number}"
         assert 'connection' in self._conn[number], 'Incorrect construction of db connection'
         return self._conn[number]['connection']
 
@@ -181,7 +181,7 @@ class Db:
         """Get the name of the engine (e.g. `postgresql`, `mysql`)."""
         _engine_name = self.get_dialect().name
         if _engine_name not in ['postgresql', 'mysql']:
-            raise Exception("db engine %s not supported" % _engine_name)
+            raise Exception(f"db engine {_engine_name} not supported")
         return _engine_name
 
     def batch_queries(self, queries, trx):
@@ -257,10 +257,10 @@ class Db:
             start = perf()
             query = self._sql_text(sql, is_prepared)
             if 'log_query' in kwargs and kwargs['log_query']:
-                log.info("QUERY: {}".format(query))
+                log.info(f"QUERY: {query}")
             result = self._basic_connection.execution_options(autocommit=False).execute(query, **kwargs)
             if 'log_result' in kwargs and kwargs['log_result']:
-                log.info("RESULT: {}".format(result))
+                log.info(f"RESULT: {result}")
             Stats.log_db(sql, perf() - start)
             return result
         except Exception as e:
@@ -277,4 +277,4 @@ class Db:
         if action in ['DELETE', 'UPDATE', 'INSERT', 'COMMIT', 'START',
                       'ALTER', 'TRUNCA', 'CREATE', 'DROP I', 'DROP T']:
             return True
-        raise Exception("unknown action: {}".format(sql))
+        raise Exception(f"unknown action: {sql}")

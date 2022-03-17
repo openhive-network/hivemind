@@ -12,14 +12,14 @@ def send_rpc_query(address, data):
     """
 
 def make_benchmark(test_name, address, test_payload):
-    return """
-def test_{}(benchmark):
-    response_json = benchmark(send_rpc_query, "{}", dumps({}))
+    return f"""
+def test_{test_name}(benchmark):
+    response_json = benchmark(send_rpc_query, "{address}", dumps({test_payload}))
     error = response_json.get("error", None)
     result = response_json.get("result", None)
 
     assert error is not None or result is not None, "No error or result in response"
-    """.format(test_name, address, test_payload)
+    """
 
 def get_request_from_yaml(path_to_yaml):
     import yaml

@@ -12,7 +12,7 @@ async def list_comments(context, start: list, limit: int = 1000, order: str = No
 
     supported_order_list = ['by_cashout_time', 'by_permlink', 'by_root', 'by_parent', 'by_last_update', 'by_author_last_update']
     assert not order is None, "missing a required argument: 'order'"
-    assert order in supported_order_list, "Unsupported order, valid orders: {}".format(", ".join(supported_order_list))
+    assert order in supported_order_list, f"Unsupported order, valid orders: {', '.join(supported_order_list)}"
     limit = valid_limit(limit, 1000, 1000)
     db = context['db']
 
@@ -165,7 +165,7 @@ async def find_comments(context, comments: list):
             continue
         if idx > 0:
             values += ","
-        values += "({},{},{})".format(escape_characters(author), escape_characters(permlink), idx)
+        values += f"({escape_characters(author)},{escape_characters(permlink)},{idx})"
         idx += 1
     sql = SQL_TEMPLATE.format(values)
 
@@ -220,7 +220,7 @@ async def list_votes(context, start: list, limit: int = 1000, order: str = None)
     """ Returns all votes, starting with the specified voter and/or author and permlink. """
     supported_order_list = ["by_comment_voter", "by_voter_comment"]
     assert not order is None, "missing a required argument: 'order'"
-    assert order in supported_order_list, "Unsupported order, valid orders: {}".format(", ".join(supported_order_list))
+    assert order in supported_order_list, f"Unsupported order, valid orders: {', '.join(supported_order_list)}"
     limit = valid_limit(limit, 1000, 1000)
     db = context['db']
 
