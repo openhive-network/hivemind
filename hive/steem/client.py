@@ -108,55 +108,6 @@ class SteemClient:
         """Get last irreversible block"""
         return self._gdgp()['last_irreversible_block_num']
 
-    def gdgp_extended(self):
-        """Get dynamic global props without the cruft plus useful bits."""
-        dgpo = self._gdgp()
-
-        # remove unused/deprecated keys
-        unused = [
-            'total_pow',
-            'num_pow_witnesses',
-            'confidential_supply',
-            'confidential_sbd_supply',
-            'total_reward_fund_steem',
-            'total_reward_shares2',
-        ]
-        for key in unused:
-            if key in dgpo:
-                del dgpo[key]
-
-        return {
-            'dgpo': dgpo,
-            'usd_per_steem': self._get_feed_price(),
-            'sbd_per_steem': self._get_steem_price(),
-            'steem_per_mvest': SteemClient._get_steem_per_mvest(dgpo),
-        }
-
-    @staticmethod
-    def _get_steem_per_mvest(dgpo):
-        steem = steem_amount(dgpo['total_vesting_fund_hive'])
-        mvests = vests_amount(dgpo['total_vesting_shares']) / Decimal(1e6)
-        return f"{steem / mvests:.6f}"
-
-    def _get_feed_price(self):
-        # TODO: add latest feed price: get_feed_history.price_history[0]
-        feed = self.__exec('get_feed_history')['current_median_history']
-        units = dict([parse_amount(feed[k])[::-1] for k in ['base', 'quote']])
-        if 'TBD' in units and 'TESTS' in units:
-            price = units['TBD'] / units['TESTS']
-        else:
-            price = units['HBD'] / units['HIVE']
-        return f"{price:.6f}"
-
-    def _get_steem_price(self):
-        orders = self.__exec('get_order_book', [1])
-        if orders['asks'] and orders['bids']:
-            ask = Decimal(orders['asks'][0]['real_price'])
-            bid = Decimal(orders['bids'][0]['real_price'])
-            price = (ask + bid) / 2
-            return f"{price:.6f}"
-        return "0"
-
     def get_blocks_range(self, lbound, ubound, breaker):
         """Retrieves blocks in the range of [lbound, ubound)."""
         block_nums = range(lbound, ubound)
