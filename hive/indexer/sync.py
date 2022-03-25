@@ -205,22 +205,6 @@ class DBSync:
         if not DbLiveContextHolder.is_live_context():
             Blocks.close_own_db_access()
 
-    # refetch dynamic_global_properties, feed price, etc
-    def _update_chain_state(self):
-        """Update basic state props (head block, feed price) in db."""
-        state = self._steem.gdgp_extended()
-        self._db.query(
-            """UPDATE hive_state SET block_num = :block_num,
-                       steem_per_mvest = :spm, usd_per_steem = :ups,
-                       sbd_per_steem = :sps, dgpo = :dgpo""",
-            block_num=Blocks.head_num(),
-            spm=state['steem_per_mvest'],
-            ups=state['usd_per_steem'],
-            sps=state['sbd_per_steem'],
-            dgpo=json.dumps(state['dgpo']),
-        )
-        return state['dgpo']['head_block_number']
-
     def from_steemd(self, is_initial_sync=False, chunk_size=1000):
         """Fast sync strategy: read/process blocks in batches."""
         steemd = self._steem
@@ -342,8 +326,6 @@ class MassiveSync(DBSync):
             # recover from fork
             Blocks.verify_head(self._steem)
 
-        self._update_chain_state()
-
         global trail_blocks
         trail_blocks = self._conf.get('trail_blocks')
         assert trail_blocks >= 0
@@ -357,7 +339,6 @@ class LiveSync(DBSync):
     def refresh_sparse_stats(self):
         # normally it should be refreshed in various time windows
         # but we need the ability to do it all at the same time
-        self._update_chain_state()
         update_communities_posts_and_rank(self._db)
         with ThreadPoolExecutor(max_workers=2) as executor:
             executor.submit(PayoutStats.generate)
@@ -437,8 +418,6 @@ class LiveSync(DBSync):
                     executor.submit(Mentions.refresh)
             if num % 200 == 0:  # 10min
                 update_communities_posts_and_rank(self._db)
-            if num % 20 == 0:  # 1min
-                self._update_chain_state()
 
             PC.broadcast(BroadcastObject('sync_current_block', num, 'blocks'))
             FSM.next_blocks()

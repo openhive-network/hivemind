@@ -325,10 +325,6 @@ def build_metadata():
         metadata,
         sa.Column('block_num', sa.Integer, primary_key=True, autoincrement=False),
         sa.Column('db_version', sa.Integer, nullable=False),
-        sa.Column('steem_per_mvest', sa.types.DECIMAL(14, 6), nullable=False),
-        sa.Column('usd_per_steem', sa.types.DECIMAL(14, 6), nullable=False),
-        sa.Column('sbd_per_steem', sa.types.DECIMAL(14, 6), nullable=False),
-        sa.Column('dgpo', sa.Text, nullable=False),
     )
 
     sa.Table(
@@ -522,7 +518,7 @@ def setup(db):
 
     # default rows
     sqls = [
-        "INSERT INTO hive_state (block_num, db_version, steem_per_mvest, usd_per_steem, sbd_per_steem, dgpo) VALUES (0, 0, 0, 0, 0, '')",
+        "INSERT INTO hive_state (block_num, db_version) VALUES (0, 0)",
         "INSERT INTO hive_blocks (num, hash, created_at, completed) VALUES (0, '0000000000000000000000000000000000000000', '2016-03-24 16:04:57', true)",
         "INSERT INTO hive_permlink_data (id, permlink) VALUES (0, '')",
         "INSERT INTO hive_category_data (id, category) VALUES (0, '')",
