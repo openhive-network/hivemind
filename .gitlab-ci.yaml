@@ -435,7 +435,7 @@ Trigger benchmark-results-collector:
   needs: ["sync-e2e-benchmark"]
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: manual
+      when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: on_success
     - if: '$CI_COMMIT_BRANCH == "develop"'
