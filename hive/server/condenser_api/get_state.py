@@ -73,8 +73,8 @@ async def get_state(context, path: str):
     db = context['db']
 
     state = {
-        'feed_price': await _get_feed_price(db),
-        'props': await _get_props_lite(db),
+        'feed_price': {"message": "Not further supported"},
+        'props': {"message": "Not further supported"},
         'tags': {},
         'accounts': {},
         'content': {},
@@ -256,40 +256,3 @@ async def _load_discussion(db, author, permlink, observer=None):
         posts_by_id[_ref(post)] = post
 
     return posts_by_id
-
-
-@cached(ttl=1800, timeout=1200)
-async def _get_feed_price(db):
-    """Get a steemd-style ratio object representing feed price."""
-    price = await db.query_one("SELECT usd_per_steem FROM hive_state")
-    return {"base": f"{price:.3f} HBD", "quote": "1.000 HIVE"}
-
-
-@cached(ttl=1800, timeout=1200)
-async def _get_props_lite(db):
-    """Return a minimal version of get_dynamic_global_properties data."""
-    raw = json.loads(await db.query_one("SELECT dgpo FROM hive_state"))
-
-    # convert NAI amounts to legacy
-    nais = [
-        'virtual_supply',
-        'current_supply',
-        'current_sbd_supply',
-        'pending_rewarded_vesting_hive',
-        'pending_rewarded_vesting_shares',
-        'total_vesting_fund_hive',
-        'total_vesting_shares',
-    ]
-    for k in nais:
-        if k in raw:
-            raw[k] = legacy_amount(raw[k])
-
-    return dict(
-        time=raw['time'],  # *
-        hbd_print_rate=raw['hbd_print_rate'],
-        hbd_interest_rate=raw['hbd_interest_rate'],
-        head_block_number=raw['head_block_number'],  # *
-        total_vesting_shares=raw['total_vesting_shares'],
-        total_vesting_fund_hive=raw['total_vesting_fund_hive'],
-        last_irreversible_block_num=raw['last_irreversible_block_num'],  # *
-    )

@@ -72,13 +72,6 @@ def test_last_irreversible(client):
     assert client.last_irreversible() > 23e6
 
 
-def test_gdgp_extended(client):
-    ret = client.gdgp_extended()
-    assert 'dgpo' in ret
-    assert 'head_block_number' in ret['dgpo']
-    assert 'usd_per_steem' in ret
-
-
 def test_get_blocks_range(client):
     def breaker():
         return True
