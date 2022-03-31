@@ -16,7 +16,8 @@ class OneBlockProviderBase(ABC):
         self._node = node
         self._thread_pool = thread_pool
 
-    def _get_block_from_provider(self, blocks_provider, block_num):
+    @staticmethod
+    def _get_block_from_provider(blocks_provider):
         futures = blocks_provider.start()
         for future in futures:
             exception = future.exception()
@@ -49,7 +50,7 @@ class OneBlockProviderFromHivedDb(OneBlockProviderBase):
             self._thread_pool,
         )
 
-        return self._get_block_from_provider(blocks_provider, block_num)
+        return self._get_block_from_provider(blocks_provider)
 
 
 class LiveSyncBlockFromRpc(BlockWrapper):
@@ -92,7 +93,7 @@ class OneBlockProviderFromNode(OneBlockProviderBase):
             ubound=block_num + 1,
             external_thread_pool=self._thread_pool,
         )
-        block = self._get_block_from_provider(blocks_provider, block_num)
+        block = self._get_block_from_provider(blocks_provider)
 
         if block == None:
             return None
@@ -119,9 +120,7 @@ class OneBlockProviderFactory:
             )
 
         self._thread_pool = MassiveBlocksDataProviderHiveRpc.create_thread_pool(1, 1)
-        return OneBlockProviderFromNode(
-            self._conf, self._node, self._thread_pool
-        )
+        return OneBlockProviderFromNode(self._conf, self._node, self._thread_pool)
 
     def __exit__(self, exc_type, exc_value, traceback):
         if self._databases_for_massive_sync:

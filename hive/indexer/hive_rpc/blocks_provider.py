@@ -1,8 +1,10 @@
 from concurrent.futures import ThreadPoolExecutor
 import logging
 import queue
+from typing import Optional
 
 from hive.indexer.mock_block_provider import MockBlockProvider
+from hive.steem.http_client import HttpClient
 from hive.steem.signal import can_continue_thread, set_exception_thrown
 
 log = logging.getLogger(__name__)
@@ -12,13 +14,13 @@ class BlocksProvider:
     """Starts threads which request node for blocks, and collect responses to one queue"""
 
     def __init__(
-        cls,
-        http_client,
-        number_of_threads,
-        blocks_per_request,
-        start_block,
-        max_block,
-        external_thread_pool=None,
+        self,
+        http_client: HttpClient,
+        number_of_threads: int,
+        blocks_per_request: int,
+        start_block: int,
+        max_block: int,
+        external_thread_pool: Optional[ThreadPoolExecutor] = None,
     ):
         """
         http_client - object which will ask the node for blocks
@@ -33,34 +35,37 @@ class BlocksProvider:
         assert http_client
         assert blocks_per_request >= 1
 
-        cls._responses_queues = []
-        cls._start_block = start_block
-        cls._max_block = max_block  # to inlude upperbound in results
-        cls._http_client = http_client
-        if external_thread_pool:
-            assert type(external_thread_pool) == ThreadPoolExecutor
-            cls._thread_pool = external_thread_pool
-        else:
-            cls._thread_pool = ThreadPoolExecutor(BlocksProvider.get_number_of_threads(number_of_threads))
-        cls._number_of_threads = number_of_threads
-        cls._blocks_per_request = blocks_per_request
+        self._responses_queues = []
+        self._start_block = start_block
+        self._max_block = max_block  # to inlude upperbound in results
+        self._http_client = http_client
+
+        self._thread_pool = (
+            external_thread_pool
+            if external_thread_pool
+            else ThreadPoolExecutor(BlocksProvider.get_number_of_threads(number_of_threads))
+        )
+
+        self._number_of_threads = number_of_threads
+        self._blocks_per_request = blocks_per_request
 
         # prepare quques and threads
         for i in range(0, number_of_threads):
-            cls._responses_queues.append(queue.Queue(maxsize=50))
+            self._responses_queues.append(queue.Queue(maxsize=50))
 
+    @staticmethod
     def get_number_of_threads(number_of_threads):
         """Return number of used thread if user want to collects blocks in some threads number
         number_of_threads - how many threds will ask for blocks
         """
         return number_of_threads + 1  # +1 because of a thread for collecting blocks from threads
 
-    def thread_body_get_block(cls, blocks_shift):
+    def thread_body_get_block(self, blocks_shift):
         try:
             for block in range(
-                cls._start_block + blocks_shift * cls._blocks_per_request,
-                cls._max_block,
-                cls._number_of_threads * cls._blocks_per_request,
+                self._start_block + blocks_shift * self._blocks_per_request,
+                self._max_block,
+                self._number_of_threads * self._blocks_per_request,
             ):
                 if not can_continue_thread():
                     return
@@ -69,15 +74,15 @@ class BlocksProvider:
                 number_of_expected_blocks = 1
 
                 query_param = [
-                    {'block_num': i} for i in range(block, min([block + cls._blocks_per_request, cls._max_block]))
+                    {'block_num': i} for i in range(block, min([block + self._blocks_per_request, self._max_block]))
                 ]
                 number_of_expected_blocks = len(query_param)
-                results = cls._http_client.exec('get_block', query_param, True)
+                results = self._http_client.exec('get_block', query_param, True)
 
                 if results:
                     while can_continue_thread():
                         try:
-                            cls._responses_queues[blocks_shift].put(results, True, 1)
+                            self._responses_queues[blocks_shift].put(results, True, 1)
                             break
                         except queue.Full:
                             continue
@@ -85,18 +90,18 @@ class BlocksProvider:
             set_exception_thrown()
             raise
 
-    def thread_body_blocks_collector(cls, queue_for_blocks):
+    def thread_body_blocks_collector(self, queue_for_blocks):
         try:
-            currently_received_block = cls._start_block - 1
+            currently_received_block = self._start_block - 1
             while can_continue_thread():
                 # take in order all blocks from threads queues
-                for blocks_queue in range(0, cls._number_of_threads):
+                for blocks_queue in range(0, self._number_of_threads):
                     if not can_continue_thread():
                         return
                     while can_continue_thread():
                         try:
-                            blocks = cls._responses_queues[blocks_queue].get(True, 1)
-                            cls._responses_queues[blocks_queue].task_done()
+                            blocks = self._responses_queues[blocks_queue].get(True, 1)
+                            self._responses_queues[blocks_queue].task_done()
                             # split blocks range
 
                             for block in blocks:
@@ -123,7 +128,7 @@ class BlocksProvider:
                                     try:
                                         queue_for_blocks.put(block_for_queue, True, 1)
                                         currently_received_block += 1
-                                        if currently_received_block >= (cls._max_block - 1):
+                                        if currently_received_block >= (self._max_block - 1):
                                             return
                                         break
                                     except queue.Full:
@@ -135,12 +140,12 @@ class BlocksProvider:
             set_exception_thrown()
             raise
 
-    def start(cls, queue_for_blocks):
+    def start(self, queue_for_blocks):
         futures = []
-        for future_number in range(0, cls._number_of_threads):
-            future = cls._thread_pool.submit(cls.thread_body_get_block, future_number)
+        for future_number in range(0, self._number_of_threads):
+            future = self._thread_pool.submit(self.thread_body_get_block, future_number)
             futures.append(future)
 
-        future = cls._thread_pool.submit(cls.thread_body_blocks_collector, queue_for_blocks)
+        future = self._thread_pool.submit(self.thread_body_blocks_collector, queue_for_blocks)
         futures.append(future)
         return futures
