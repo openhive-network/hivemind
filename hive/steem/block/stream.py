@@ -63,9 +63,7 @@ class BlockStream:
     """ETA-based block streamer."""
 
     @classmethod
-    def stream(
-        cls, conf, client, start_block, min_gap=0, max_gap=100, do_stale_block_check=True
-    ):
+    def stream(cls, conf, client, start_block, min_gap=0, max_gap=100, do_stale_block_check=True):
         """Instantiates a BlockStream and returns a generator."""
         streamer = BlockStream(conf, client, min_gap, max_gap)
         return streamer.start(start_block, do_stale_block_check)
