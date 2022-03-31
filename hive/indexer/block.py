@@ -181,7 +181,8 @@ class BlocksProviderBase(ABC):
         """Returns lists of blocks"""
         pass
 
-    def _get_from_queue(self, data_queue, number_of_elements):
+    @staticmethod
+    def _get_from_queue(data_queue, number_of_elements):
         """Tool function to get elements from queue"""
         ret = []
         for element in range(number_of_elements):
