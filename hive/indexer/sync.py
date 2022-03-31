@@ -224,7 +224,7 @@ class DBSync:
         if self._conf.get('hived_database_url'):
             databases = MassiveBlocksDataProviderHiveDb.Databases(self._conf)
             massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
-                databases, self._conf.get('max_batch'), lbound, ubound, can_continue_thread, set_exception_thrown
+                databases, self._conf.get('max_batch'), lbound, ubound
             )
         else:
             massive_blocks_data_provider = MassiveBlocksDataProviderHiveRpc(
@@ -235,8 +235,6 @@ class DBSync:
                 self._conf.get('max_batch'),
                 lbound,
                 ubound,
-                can_continue_thread,
-                set_exception_thrown,
             )
         _process_blocks_from_provider(self, massive_blocks_data_provider, is_initial_sync, lbound, ubound)
 
@@ -345,15 +343,13 @@ class LiveSync(DBSync):
             executor.submit(Mentions.refresh)
 
     def _stream_blocks(
-        self, start_from, breaker, exception_reporter, trail_blocks=0, max_gap=100, do_stale_block_check=True
+        self, start_from, trail_blocks=0, max_gap=100, do_stale_block_check=True
     ):
         """Stream blocks. Returns a generator."""
         return BlockStream.stream(
             self._conf,
             self._steem,
             start_from,
-            breaker,
-            exception_reporter,
             trail_blocks,
             max_gap,
             do_stale_block_check,
@@ -384,7 +380,7 @@ class LiveSync(DBSync):
             return
 
         for block in self._stream_blocks(
-            hive_head + 1, can_continue_thread, set_exception_thrown, trail_blocks, max_gap, do_stale_block_check
+            hive_head + 1, trail_blocks, max_gap, do_stale_block_check
         ):
             if not can_continue_thread():
                 break
