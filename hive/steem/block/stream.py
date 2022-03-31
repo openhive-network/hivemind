@@ -5,6 +5,7 @@ from time import sleep
 
 from hive.steem.block.one_block_provider import OneBlockProviderFactory
 from hive.steem.block.schedule import BlockSchedule
+from hive.steem.signal import can_continue_thread
 
 log = logging.getLogger(__name__)
 
@@ -63,11 +64,11 @@ class BlockStream:
 
     @classmethod
     def stream(
-        cls, conf, client, start_block, breaker, exception_reporter, min_gap=0, max_gap=100, do_stale_block_check=True
+        cls, conf, client, start_block, min_gap=0, max_gap=100, do_stale_block_check=True
     ):
         """Instantiates a BlockStream and returns a generator."""
         streamer = BlockStream(conf, client, min_gap, max_gap)
-        return streamer.start(start_block, do_stale_block_check, breaker, exception_reporter)
+        return streamer.start(start_block, do_stale_block_check)
 
     def __init__(self, conf, client, min_gap=0, max_gap=100):
         assert not (min_gap < 0 or min_gap > 100)
@@ -80,13 +81,13 @@ class BlockStream:
         """Ensures gap between curr and head is within limits (max_gap)."""
         return not self._max_gap or head - curr < self._max_gap
 
-    def start(self, start_block, do_stale_block_check, breaker, exception_reporter):
+    def start(self, start_block, do_stale_block_check):
         """Stream blocks starting from `start_block`.
 
         Will run forever unless `max_gap` is specified and exceeded.
         """
 
-        with OneBlockProviderFactory(self._conf, self._client, breaker, exception_reporter) as one_block_provider:
+        with OneBlockProviderFactory(self._conf, self._client) as one_block_provider:
             curr = start_block
             head = self._client.head_block()
             prev = one_block_provider.get_block(curr - 1)
@@ -98,7 +99,7 @@ class BlockStream:
             schedule = BlockSchedule(head, do_stale_block_check)
 
             while self._gap_ok(curr, head):
-                if not breaker():
+                if not can_continue_thread():
                     return
                 head = schedule.wait_for_block(curr)
                 block = one_block_provider.get_block(curr)
