@@ -11,11 +11,9 @@ log = logging.getLogger(__name__)
 
 
 class OneBlockProviderBase(ABC):
-    def __init__(self, conf, node, breaker, exception_reporter, thread_pool):
+    def __init__(self, conf, node, thread_pool):
         self._conf = conf
         self._node = node
-        self._breaker = breaker
-        self._exception_reporter = exception_reporter
         self._thread_pool = thread_pool
 
     def _get_block_from_provider(self, blocks_provider, block_num):
@@ -36,10 +34,10 @@ class OneBlockProviderBase(ABC):
 
 
 class OneBlockProviderFromHivedDb(OneBlockProviderBase):
-    def __init__(self, conf, node, breaker, exception_reporter, databases, thread_pool):
+    def __init__(self, conf, node, databases, thread_pool):
         assert databases
 
-        OneBlockProviderBase.__init__(self, conf, node, breaker, exception_reporter, thread_pool)
+        OneBlockProviderBase.__init__(self, conf, node, thread_pool)
         self._databases_for_massive_sync = databases
 
     def get_block(self, block_num):
@@ -48,8 +46,6 @@ class OneBlockProviderFromHivedDb(OneBlockProviderBase):
             1,
             block_num,
             block_num + 1,
-            self._breaker,
-            self._exception_reporter,
             self._thread_pool,
         )
 
@@ -82,8 +78,8 @@ class LiveSyncBlockFromRpc(BlockWrapper):
 
 
 class OneBlockProviderFromNode(OneBlockProviderBase):
-    def __init__(self, conf, node, breaker, exception_reporter, thread_pool):
-        OneBlockProviderBase.__init__(self, conf, node, breaker, exception_reporter, thread_pool)
+    def __init__(self, conf, node, thread_pool):
+        OneBlockProviderBase.__init__(self, conf, node, thread_pool)
 
     def get_block(self, block_num):
         blocks_provider = MassiveBlocksDataProviderHiveRpc(
@@ -94,8 +90,6 @@ class OneBlockProviderFromNode(OneBlockProviderBase):
             number_of_blocks_data_in_one_batch=1,
             lbound=block_num,
             ubound=block_num + 1,
-            breaker=self._breaker,
-            exception_reporter=self._exception_reporter,
             external_thread_pool=self._thread_pool,
         )
         block = self._get_block_from_provider(blocks_provider, block_num)
@@ -107,11 +101,9 @@ class OneBlockProviderFromNode(OneBlockProviderBase):
 
 
 class OneBlockProviderFactory:
-    def __init__(self, conf, node, breaker, exception_reporter):
+    def __init__(self, conf, node):
         self._conf = conf
         self._node = node
-        self._breaker = breaker
-        self._exception_reporter = exception_reporter
         self._databases_for_massive_sync = None
         self._thread_pool = None
 
@@ -122,15 +114,13 @@ class OneBlockProviderFactory:
             return OneBlockProviderFromHivedDb(
                 self._conf,
                 self._node,
-                self._breaker,
-                self._exception_reporter,
                 self._databases_for_massive_sync,
                 self._thread_pool,
             )
 
         self._thread_pool = MassiveBlocksDataProviderHiveRpc.create_thread_pool(1, 1)
         return OneBlockProviderFromNode(
-            self._conf, self._node, self._breaker, self._exception_reporter, self._thread_pool
+            self._conf, self._node, self._thread_pool
         )
 
     def __exit__(self, exc_type, exc_value, traceback):
