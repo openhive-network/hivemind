@@ -1,11 +1,14 @@
 from concurrent.futures import ThreadPoolExecutor
 import logging
 import queue
+from typing import Optional
 
+from hive.conf import Conf
 from hive.indexer.block import BlocksProviderBase
 from hive.indexer.hive_rpc.block_from_rest import BlockFromRpc
 from hive.indexer.hive_rpc.blocks_provider import BlocksProvider
 from hive.indexer.hive_rpc.vops_provider import VopsProvider
+from hive.steem.client import SteemClient
 from hive.steem.signal import can_continue_thread
 from hive.utils.stats import WaitingStatusManager as WSM
 
@@ -15,14 +18,14 @@ log = logging.getLogger(__name__)
 class MassiveBlocksDataProviderHiveRpc(BlocksProviderBase):
     def __init__(
         self,
-        conf,
-        node_client,
+        conf: Conf,
+        node_client: SteemClient,
         blocks_get_threads,
         vops_get_threads,
-        number_of_blocks_data_in_one_batch,
-        lbound,
-        ubound,
-        external_thread_pool=None,
+        number_of_blocks_data_in_one_batch: int,
+        lbound: int,
+        ubound: int,
+        external_thread_pool: Optional[ThreadPoolExecutor] = None,
     ):
         """
         conf - configuration
@@ -37,12 +40,11 @@ class MassiveBlocksDataProviderHiveRpc(BlocksProviderBase):
 
         BlocksProviderBase.__init__(self)
 
-        thread_pool = None
-        if external_thread_pool:
-            assert type(external_thread_pool) == ThreadPoolExecutor
-            thread_pool = external_thread_pool
-        else:
-            thread_pool = MassiveBlocksDataProviderHiveRpc.create_thread_pool(blocks_get_threads, vops_get_threads)
+        thread_pool = (
+            external_thread_pool
+            if external_thread_pool
+            else MassiveBlocksDataProviderHiveRpc.create_thread_pool(blocks_get_threads, vops_get_threads)
+        )
 
         self.blocks_provider = BlocksProvider(
             node_client._client["get_block"] if "get_block" in node_client._client else node_client._client["default"],
