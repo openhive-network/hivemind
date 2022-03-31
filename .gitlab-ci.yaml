@@ -51,7 +51,7 @@ stages:
   - export POSTGRES_MAJOR_VERSION=$(./scripts/ci/get-postgres-version.sh)
   - ./scripts/ci/drop-db.sh
   - ./scripts/ci/create-db.sh
-  - ./scripts/ci/hive-sync.sh
+  - ./scripts/ci/hive-sync.sh hived
   - ./scripts/ci/collect-db-stats.sh
 
 .rules-for-sync: &rules-for-sync
