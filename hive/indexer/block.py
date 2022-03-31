@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from enum import Enum
-
 import logging
 import queue
+
+from hive.steem.signal import can_continue_thread
 
 log = logging.getLogger(__name__)
 
@@ -165,24 +166,10 @@ class BlockWrapper(Block):
 
 
 class BlocksProviderBase(ABC):
-    def __init__(self, breaker, exception_reporter):
-        """
-        breaker - callable, returns true when sync can continue, false when break was requested
-        exception_reporter - callable, use to inform about undesire exception in a synchronizaton thread
-        """
-        assert breaker
-        assert exception_reporter
-
-        self._breaker = breaker
-        self._exception_reporter = exception_reporter
-
+    def __init__(self):
         self._blocks_queue_size = 1500
         self._blocks_data_queue_size = 1500
-
         self._operations_queue_size = 1500
-
-    def report_exception():
-        self._exception_reporter()
 
     @abstractmethod
     def start(self):
@@ -198,9 +185,9 @@ class BlocksProviderBase(ABC):
         """Tool function to get elements from queue"""
         ret = []
         for element in range(number_of_elements):
-            if not self._breaker():
+            if not can_continue_thread():
                 break
-            while self._breaker():
+            while can_continue_thread():
                 try:
                     ret.append(data_queue.get(True, 1))
                     data_queue.task_done()
