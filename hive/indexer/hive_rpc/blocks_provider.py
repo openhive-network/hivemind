@@ -3,6 +3,7 @@ import logging
 import queue
 
 from hive.indexer.mock_block_provider import MockBlockProvider
+from hive.steem.signal import can_continue_thread, set_exception_thrown
 
 log = logging.getLogger(__name__)
 
@@ -17,8 +18,6 @@ class BlocksProvider:
         blocks_per_request,
         start_block,
         max_block,
-        breaker,
-        exception_reporter,
         external_thread_pool=None,
     ):
         """
@@ -26,21 +25,15 @@ class BlocksProvider:
         number_of_threads - how many threads will be used to ask for blocks
         start_block - block from which the processing starts
         max_block - last to get block's number
-        breaker - callable object which returns true if processing must be continues
-        exception_reporter - callable, invoke to report an undesire exception in a thread
         external_thread_pool - thread pool controlled outside the class
         """
 
         assert number_of_threads > 0
         assert max_block > start_block
-        assert breaker
-        assert exception_reporter
         assert http_client
         assert blocks_per_request >= 1
 
         cls._responses_queues = []
-        cls._breaker = breaker
-        cls._exception_reporter = exception_reporter
         cls._start_block = start_block
         cls._max_block = max_block  # to inlude upperbound in results
         cls._http_client = http_client
@@ -69,7 +62,7 @@ class BlocksProvider:
                 cls._max_block,
                 cls._number_of_threads * cls._blocks_per_request,
             ):
-                if not cls._breaker():
+                if not can_continue_thread():
                     return
 
                 results = []
@@ -82,25 +75,25 @@ class BlocksProvider:
                 results = cls._http_client.exec('get_block', query_param, True)
 
                 if results:
-                    while cls._breaker():
+                    while can_continue_thread():
                         try:
                             cls._responses_queues[blocks_shift].put(results, True, 1)
                             break
                         except queue.Full:
                             continue
         except:
-            cls._exception_reporter()
+            set_exception_thrown()
             raise
 
     def thread_body_blocks_collector(cls, queue_for_blocks):
         try:
             currently_received_block = cls._start_block - 1
-            while cls._breaker():
+            while can_continue_thread():
                 # take in order all blocks from threads queues
                 for blocks_queue in range(0, cls._number_of_threads):
-                    if not cls._breaker():
+                    if not can_continue_thread():
                         return
-                    while cls._breaker():
+                    while can_continue_thread():
                         try:
                             blocks = cls._responses_queues[blocks_queue].get(True, 1)
                             cls._responses_queues[blocks_queue].task_done()
@@ -126,7 +119,7 @@ class BlocksProvider:
                                         )
                                 block_for_queue = None if not 'block' in block else block['block']
 
-                                while cls._breaker():
+                                while can_continue_thread():
                                     try:
                                         queue_for_blocks.put(block_for_queue, True, 1)
                                         currently_received_block += 1
@@ -139,7 +132,7 @@ class BlocksProvider:
                         except queue.Empty:
                             continue
         except:
-            cls._exception_reporter()
+            set_exception_thrown()
             raise
 
     def start(cls, queue_for_blocks):

@@ -10,6 +10,7 @@ from hive.indexer.hive_rpc.block_from_rest import BlockFromRpc
 from hive.indexer.mock_block import ExtendedByMockBlockAdapter
 from hive.indexer.mock_block_provider import MockBlockProvider
 from hive.indexer.mock_vops_provider import MockVopsProvider
+from hive.steem.signal import can_continue_thread, set_exception_thrown
 from hive.utils.stats import WaitingStatusManager as WSM
 
 log = logging.getLogger(__name__)
@@ -29,23 +30,16 @@ class BlocksDataFromDbProvider:
         blocks_per_request: int,
         lbound: int,
         ubound: int,
-        breaker,  # hive.steem.signal.can_continue_thread
-        exception_reporter,  # hive.steem.signal.set_exception_thrown
         external_thread_pool: Optional[ThreadPoolExecutor] = None,
     ):
         """
         lbound - block from which the processing starts
         ubound - last to get block's number
-        breaker - callable object which returns true if processing must be continues
-        exception_reporter - callable, invoke it when an exception occurs in a thread
         external_thread_pool - thread pool controlled outside the class
         """
 
-        assert breaker
         assert blocks_per_request >= 1
 
-        self._breaker = breaker
-        self._exception_reporter = exception_reporter
         self._lbound = lbound
         self._ubound = ubound  # to inlude upperbound in results
         self._db = db
@@ -56,20 +50,20 @@ class BlocksDataFromDbProvider:
     def thread_body_get_data(self, queue_for_data):
         try:
             for block in range(self._lbound, self._ubound, self._blocks_per_request):
-                if not self._breaker():
+                if not can_continue_thread():
                     break
 
                 data_rows = self._db.query_all(
                     self._sql_query, first=block, last=min([block + self._blocks_per_request, self._ubound])
                 )
-                while self._breaker():
+                while can_continue_thread():
                     try:
                         queue_for_data.put(data_rows, True, 1)
                         break
                     except queue.Full:
                         continue
         except:
-            self._exception_reporter()
+            set_exception_thrown()
             raise
 
     def start(self, queue_for_data):
@@ -82,10 +76,8 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
     _op_types_dictionary = {}
 
     class Databases:
-        def __init__(self, conf):
-            self._db_root = Db(
-                conf.get('hived_database_url'), "MassiveBlocksProvider.Root", conf.get('log_explain_queries')
-            )
+        def __init__(self, db_root: Db, conf: Conf):
+            self._db_root = db_root
             self._db_operations = Db(
                 conf.get('hived_database_url'), "MassiveBlocksProvider.OperationsData", conf.get('log_explain_queries')
             )
@@ -117,8 +109,6 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         number_of_blocks_in_batch: int,
         lbound: int,
         ubound: int,
-        breaker,  # hive.steem.signal.can_continue_thread
-        exception_reporter,  # hive.steem.signal.set_exception_thrown
         external_thread_pool: Optional[ThreadPoolExecutor] = None,
     ):
         """
@@ -129,7 +119,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         assert lbound <= ubound
         assert lbound >= 0
 
-        BlocksProviderBase.__init__(self, breaker, exception_reporter)
+        BlocksProviderBase.__init__(self)
 
         self._db = databases.get_root()
         self._lbound = lbound
@@ -154,8 +144,6 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
             blocks_per_request=self._blocks_per_query,
             lbound=self._lbound,
             ubound=self._last_block_num_in_db + 1,
-            breaker=breaker,
-            exception_reporter=exception_reporter,
             external_thread_pool=self._thread_pool,
         )
         self._blocks_data_provider = BlocksDataFromDbProvider(
@@ -164,8 +152,6 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
             blocks_per_request=self._blocks_per_query,
             lbound=self._lbound,
             ubound=self._last_block_num_in_db + 1,
-            breaker=breaker,
-            exception_reporter=exception_reporter,
             external_thread_pool=self._thread_pool,
         )
 
@@ -226,11 +212,11 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
 
     def _get_mocks_after_db_blocks(self, first_mock_block_num):
         for block_proposition in range(first_mock_block_num, self._ubound):
-            if not self._breaker():
+            if not can_continue_thread():
                 return
             mocked_block = self._get_mocked_block(block_proposition, True)
 
-            while self._breaker():
+            while can_continue_thread():
                 try:
                     self._blocks_queue.put(mocked_block, True, 1)
                     break
@@ -246,11 +232,11 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
                 self._get_mocks_after_db_blocks(self._lbound)
                 return
 
-            while self._breaker():
+            while can_continue_thread():
                 blocks_data = self._get_from_queue(self._blocks_data_queue, 1)
                 operations = self._get_from_queue(self._operations_queue, 1)
 
-                if not self._breaker():
+                if not can_continue_thread():
                     break
 
                 assert len(blocks_data) == 1, "Always one element should be returned"
@@ -299,7 +285,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
                     if mocked_block:
                         new_block = ExtendedByMockBlockAdapter(new_block, mocked_block)
 
-                    while self._breaker():
+                    while can_continue_thread():
                         try:
                             self._blocks_queue.put(new_block, True, 1)
                             currently_received_block += 1
@@ -314,7 +300,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
                         self._get_mocks_after_db_blocks(new_block.get_num() + 1)
                         return
         except:
-            self._exception_reporter()
+            set_exception_thrown()
             raise
 
     @staticmethod
@@ -341,10 +327,10 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         blocks = []
         wait_blocks_time = WSM.start()
 
-        if self._blocks_queue.qsize() < number_of_blocks and self._breaker():
+        if self._blocks_queue.qsize() < number_of_blocks and can_continue_thread():
             log.info(f"Awaiting any blocks to process... {self._blocks_queue.qsize()}")
 
-        if not self._blocks_queue.empty() or self._breaker():
+        if not self._blocks_queue.empty() or can_continue_thread():
             blocks = self._get_from_queue(self._blocks_queue, number_of_blocks)
 
         WSM.wait_stat('block_consumer_block', WSM.stop(wait_blocks_time))
