@@ -1,13 +1,12 @@
 """Tight and reliable steem API client for hive indexer."""
 
-from decimal import Decimal
 import logging
 from time import perf_counter as perf
 
 from hive.indexer.mock_block_provider import MockBlockProvider
 from hive.indexer.mock_vops_provider import MockVopsProvider
 from hive.steem.http_client import HttpClient
-from hive.utils.normalize import parse_amount, steem_amount, vests_amount
+from hive.steem.signal import can_continue_thread
 from hive.utils.stats import Stats
 
 logger = logging.getLogger(__name__)
@@ -79,11 +78,11 @@ class SteemClient:
             return mocked_block
 
     def stream_blocks(
-        self, conf, start_from, breaker, exception_reporter, trail_blocks=0, max_gap=100, do_stale_block_check=True
+        self, conf, start_from, trail_blocks=0, max_gap=100, do_stale_block_check=True
     ):
         """Stream blocks. Returns a generator."""
         return BlockStream.stream(
-            conself, start_from, breaker, exception_reporter, trail_blocks, max_gap, do_stale_block_check
+            conself, start_from, trail_blocks, max_gap, do_stale_block_check
         )
 
     def _gdgp(self):
@@ -108,7 +107,7 @@ class SteemClient:
         """Get last irreversible block"""
         return self._gdgp()['last_irreversible_block_num']
 
-    def get_blocks_range(self, lbound, ubound, breaker):
+    def get_blocks_range(self, lbound, ubound):
         """Retrieves blocks in the range of [lbound, ubound)."""
         block_nums = range(lbound, ubound)
         blocks = {}
@@ -116,7 +115,7 @@ class SteemClient:
         batch_params = [{'block_num': i} for i in block_nums]
         idx = 0
         for result in self.__exec_batch('get_block', batch_params):
-            if not breaker():
+            if not can_continue_thread():
                 return []
             block_num = batch_params[idx]['block_num']
             if 'block' in result:

@@ -6,6 +6,7 @@ from hive.indexer.block import BlocksProviderBase
 from hive.indexer.hive_rpc.block_from_rest import BlockFromRpc
 from hive.indexer.hive_rpc.blocks_provider import BlocksProvider
 from hive.indexer.hive_rpc.vops_provider import VopsProvider
+from hive.steem.signal import can_continue_thread
 from hive.utils.stats import WaitingStatusManager as WSM
 
 log = logging.getLogger(__name__)
@@ -21,8 +22,6 @@ class MassiveBlocksDataProviderHiveRpc(BlocksProviderBase):
         number_of_blocks_data_in_one_batch,
         lbound,
         ubound,
-        breaker,
-        exception_reporter,
         external_thread_pool=None,
     ):
         """
@@ -33,12 +32,10 @@ class MassiveBlocksDataProviderHiveRpc(BlocksProviderBase):
         number_of_blocks_data_in_one_batch - number of blocks which will be asked for the node in one HTTP get
         lbound - first block to get
         ubound - last block to get
-        breaker - callable, returns False when processing must be stopped
-        exception_reporter - callable, invoke to report an undesire exception in a thread
         external_thread_pool - thread pool controlled outside the class
         """
 
-        BlocksProviderBase.__init__(self, breaker, exception_reporter)
+        BlocksProviderBase.__init__(self)
 
         thread_pool = None
         if external_thread_pool:
@@ -53,8 +50,6 @@ class MassiveBlocksDataProviderHiveRpc(BlocksProviderBase):
             number_of_blocks_data_in_one_batch,
             lbound,
             ubound,
-            breaker,
-            exception_reporter,
             thread_pool,
         )
 
@@ -65,8 +60,6 @@ class MassiveBlocksDataProviderHiveRpc(BlocksProviderBase):
             number_of_blocks_data_in_one_batch,
             lbound,
             ubound,
-            breaker,
-            exception_reporter,
             thread_pool,
         )
 
@@ -91,22 +84,22 @@ class MassiveBlocksDataProviderHiveRpc(BlocksProviderBase):
         log.info(f"vops_queue.qsize: {self.vops_queue.qsize()} blocks_queue.qsize: {self.blocks_queue.qsize()}")
 
         wait_vops_time = WSM.start()
-        if self.vops_queue.qsize() < number_of_blocks and self._breaker():
+        if self.vops_queue.qsize() < number_of_blocks and can_continue_thread():
             log.info("Awaiting any vops to process...")
 
-        if not self.vops_queue.empty() or self._breaker():
+        if not self.vops_queue.empty() or can_continue_thread():
             vops = self._get_from_queue(self.vops_queue, number_of_blocks)
 
-            if self._breaker():
+            if can_continue_thread():
                 assert len(vops) == number_of_blocks
                 vops_and_blocks['vops'] = vops
         WSM.wait_stat('block_consumer_vop', WSM.stop(wait_vops_time))
 
         wait_blocks_time = WSM.start()
-        if (self.blocks_queue.qsize() < number_of_blocks) and self._breaker():
+        if (self.blocks_queue.qsize() < number_of_blocks) and can_continue_thread():
             log.info("Awaiting any block to process...")
 
-        if not self.blocks_queue.empty() or self._breaker():
+        if not self.blocks_queue.empty() or can_continue_thread():
             vops_and_blocks['blocks'] = self._get_from_queue(self.blocks_queue, number_of_blocks)
         WSM.wait_stat('block_consumer_block', WSM.stop(wait_blocks_time))
 

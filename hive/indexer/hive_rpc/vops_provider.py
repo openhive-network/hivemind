@@ -2,6 +2,8 @@ from concurrent.futures import ThreadPoolExecutor
 import logging
 import queue
 
+from hive.steem.signal import can_continue_thread, set_exception_thrown
+
 log = logging.getLogger(__name__)
 
 
@@ -16,8 +18,6 @@ class VopsProvider:
         blocks_per_request,
         start_block,
         max_block,
-        breaker,
-        exception_reporter,
         external_thread_pool=None,
     ):
         """
@@ -26,23 +26,17 @@ class VopsProvider:
         number_of_threads - how many threads will be used to ask for blocks
         start_block - block from which the processing starts
         max_block - last to get block's number
-        breaker - callable object which returns true if processing must be continues
-        exception_reporter - callable, invoke to report an undesire exception in a thread
         external_thread_pool - thread pool controlled outside the class
         """
 
         assert conf
         assert number_of_threads > 0
         assert max_block > start_block
-        assert breaker
-        assert exception_reporter
         assert client
         assert blocks_per_request >= 1
 
         cls._conf = conf
         cls._responses_queues = []
-        cls._breaker = breaker
-        cls._exception_reporter = exception_reporter
         cls._start_block = start_block
         cls._max_block = max_block  # to inlude upperbound in results
         cls._client = client
@@ -76,25 +70,25 @@ class VopsProvider:
                 cls._max_block + cls._blocks_per_request,
                 cls._number_of_threads * cls._blocks_per_request,
             ):
-                if not cls._breaker():
+                if not can_continue_thread():
                     return
 
                 results = VopsProvider.get_virtual_operation_for_blocks(
                     cls._client, cls._conf, block, cls._blocks_per_request
                 )
-                while cls._breaker():
+                while can_continue_thread():
                     try:
                         cls._responses_queues[blocks_shift].put(results, True, 1)
                         break
                     except queue.Full:
                         continue
         except:
-            cls._exception_reporter()
+            set_exception_thrown()
             raise
 
     def _fill_queue_with_no_vops(cls, queue_for_vops, number_of_no_vops):
         for vop in range(0, number_of_no_vops):
-            while cls._breaker():
+            while can_continue_thread():
                 try:
                     queue_for_vops.put([], True, 1)
                     cls.currently_received_block += 1
@@ -107,12 +101,12 @@ class VopsProvider:
 
     def thread_body_blocks_collector(cls, queue_for_vops):
         try:
-            while cls._breaker():
+            while can_continue_thread():
                 # take in order all vops from threads queues
                 for vops_queue in range(0, cls._number_of_threads):
-                    if not cls._breaker():
+                    if not can_continue_thread():
                         return
-                    while cls._breaker():
+                    while can_continue_thread():
                         try:
                             vops = cls._responses_queues[vops_queue].get(True, 1)
                             cls._responses_queues[vops_queue].task_done()
@@ -127,7 +121,7 @@ class VopsProvider:
                                     ):
                                         return
                                     vop = vops[block]
-                                    while cls._breaker():
+                                    while can_continue_thread():
                                         try:
                                             queue_for_vops.put(vop['ops'], True, 1)
                                             cls.currently_received_block += 1
@@ -140,7 +134,7 @@ class VopsProvider:
                         except queue.Empty:
                             continue
         except:
-            cls._exception_reporter()
+            set_exception_thrown()
             raise
 
     def start(cls, queue_for_vops):
