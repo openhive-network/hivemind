@@ -77,13 +77,9 @@ class SteemClient:
                 logger.warning(f"Pure mock block: id {mocked_block['block_id']}, previous {mocked_block['previous']}")
             return mocked_block
 
-    def stream_blocks(
-        self, conf, start_from, trail_blocks=0, max_gap=100, do_stale_block_check=True
-    ):
+    def stream_blocks(self, conf, start_from, trail_blocks=0, max_gap=100, do_stale_block_check=True):
         """Stream blocks. Returns a generator."""
-        return BlockStream.stream(
-            conself, start_from, trail_blocks, max_gap, do_stale_block_check
-        )
+        return BlockStream.stream(conself, start_from, trail_blocks, max_gap, do_stale_block_check)
 
     def _gdgp(self):
         ret = self.__exec('get_dynamic_global_properties')

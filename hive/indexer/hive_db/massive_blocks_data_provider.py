@@ -3,6 +3,7 @@ import logging
 import queue
 from typing import Final, Optional
 
+from hive.conf import Conf
 from hive.db.adapter import Db
 from hive.indexer.block import BlocksProviderBase, OperationType, VirtualOperationType
 from hive.indexer.hive_db.block import BlockHiveDb
