@@ -685,6 +685,85 @@
               "json_metadata": "",
               "extensions": []
             }
+          },{
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "howo",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "fredrikaa",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
           },
           {
             "type": "comment_operation",
@@ -807,7 +886,7 @@
             "value": {
               "parent_author": "",
               "parent_permlink": "hive-111111",
-              "author": "test-safari",
+              "author": "howo",
               "permlink": "displayed",
               "title": "normal post",
               "body": "This post is displayed",
@@ -819,7 +898,7 @@
             "value": {
               "parent_author": "",
               "parent_permlink": "hive-222222",
-              "author": "test-safari",
+              "author": "howo",
               "permlink": "hidden1",
               "title": "This post is hidden",
               "body": "This post is hidden",
@@ -831,7 +910,7 @@
             "value": {
               "parent_author": "",
               "parent_permlink": "hive-333333",
-              "author": "test-safari",
+              "author": "howo",
               "permlink": "hidden2",
               "title": "This post is hidden",
               "body": "This post is hidden",
@@ -846,7 +925,7 @@
                 "hive-222222"
               ],
               "id": "community",
-              "json": "[\"setRole\",{\"community\":\"hive-222222\",\"account\":\"test-safari\",\"role\":\"member\"}]"
+              "json": "[\"setRole\",{\"community\":\"hive-222222\",\"account\":\"howo\",\"role\":\"member\"}]"
             }
           },
           {
@@ -857,7 +936,7 @@
                 "hive-333333"
               ],
               "id": "community",
-              "json": "[\"setRole\",{\"community\":\"hive-333333\",\"account\":\"test-safari\",\"role\":\"member\"}]"
+              "json": "[\"setRole\",{\"community\":\"hive-333333\",\"account\":\"howo\",\"role\":\"member\"}]"
             }
           },
           {
@@ -865,7 +944,7 @@
             "value": {
               "parent_author": "",
               "parent_permlink": "hive-222222",
-              "author": "test-safari",
+              "author": "howo",
               "permlink": "display2",
               "title": "This post is shown because I am a member",
               "body": "This post is shown because I am a member",
@@ -877,7 +956,7 @@
             "value": {
               "parent_author": "test-safari",
               "parent_permlink": "display2",
-              "author": "blocktrades",
+              "author": "fredrikaa",
               "permlink": "display_comment",
               "title": "This comment is shown even though I'm a guest because community type 2",
               "body": "hello",
@@ -889,7 +968,7 @@
             "value": {
               "parent_author": "",
               "parent_permlink": "hive-333333",
-              "author": "test-safari",
+              "author": "howo",
               "permlink": "display3",
               "title": "This post is shown because I am a member",
               "body": "Hello",
@@ -899,9 +978,9 @@
           {
             "type": "comment_operation",
             "value": {
-              "parent_author": "test-safari",
+              "parent_author": "howo",
               "parent_permlink": "display3",
-              "author": "test-safari",
+              "author": "howo",
               "permlink": "display_comment1",
               "title": "This comment is shown because member and community type 3",
               "body": "hello",
@@ -911,9 +990,9 @@
           {
             "type": "comment_operation",
             "value": {
-              "parent_author": "test-safari",
+              "parent_author": "howo",
               "parent_permlink": "display3",
-              "author": "blocktrades",
+              "author": "fredrikaa",
               "permlink": "hidden_comment",
               "title": "This comment is hidden because guest and community type 3",
               "body": "hello",
@@ -925,7 +1004,7 @@
             "value": {
               "parent_author": "",
               "parent_permlink": "hive-222222",
-              "author": "blocktrades",
+              "author": "fredrikaa",
               "permlink": "hidden",
               "title": "This post is hidden  because the community type is now 2",
               "body": "Hello",
@@ -948,7 +1027,7 @@
             "value": {
               "parent_author": "",
               "parent_permlink": "hive-222222",
-              "author": "blocktrades",
+              "author": "fredrikaa",
               "permlink": "display4",
               "title": "This post is shown because the community type is now 1",
               "body": "Hello",
