@@ -685,7 +685,8 @@
               "json_metadata": "",
               "extensions": []
             }
-          },{
+          },
+          {
             "type": "account_create_operation",
             "value": {
               "creator": "test-safari",
