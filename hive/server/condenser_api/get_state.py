@@ -5,16 +5,12 @@ from collections import OrderedDict
 # pylint: disable=line-too-long,too-many-lines
 import logging
 
-from aiocache import cached
-import ujson as json
-
 from hive.server.common.helpers import ApiError, return_error_info, valid_account, valid_permlink, valid_sort, valid_tag
 import hive.server.condenser_api.cursor as cursor
 from hive.server.condenser_api.methods import get_discussions_by_feed_impl, get_posts_by_given_sort
 from hive.server.condenser_api.objects import _condenser_post_object, load_accounts
 from hive.server.condenser_api.tags import get_top_trending_tags_summary, get_trending_tags
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
-from hive.utils.normalize import legacy_amount
 
 log = logging.getLogger(__name__)
 
