@@ -20,7 +20,6 @@ from hive.indexer.reputations import Reputations
 from hive.indexer.votes import Votes
 from hive.server.common.mentions import Mentions
 from hive.server.common.payout_stats import PayoutStats
-from hive.steem.client import SteemClient
 from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.timer import time_it
@@ -370,44 +369,6 @@ class Blocks:
         cls._head_block_date = cls._current_block_date
 
         return num
-
-    @classmethod
-    def verify_head(cls, steem: SteemClient) -> None:
-        """Perform a fork recovery check on startup."""
-        hive_head = cls.head_num()
-        if not hive_head:
-            return
-
-        # move backwards from head until hive/steem agree
-        to_pop = []
-        cursor = hive_head
-        while True:
-            assert hive_head - cursor < 25, "fork too deep"
-            hive_block = cls._get(cursor)
-            steem_hash = steem.get_block(cursor)['block_id']
-            match = hive_block['hash'] == steem_hash
-            log.info(
-                "[INIT] fork check. block %d: %s vs %s --- %s",
-                hive_block['num'],
-                hive_block['hash'],
-                steem_hash,
-                'ok' if match else 'invalid',
-            )
-            if match:
-                break
-            to_pop.append(hive_block)
-            cursor -= 1
-
-        if hive_head == cursor:
-            return  # no fork!
-
-        log.error("[FORK] depth is %d; popping blocks %d - %d", hive_head - cursor, cursor + 1, hive_head)
-
-        # we should not attempt to recover from fork until it's safe
-        fork_limit = steem.last_irreversible()
-        assert cursor < fork_limit, "not proceeding until head is irreversible"
-
-        cls._pop(to_pop)
 
     @staticmethod
     def _get(num: int) -> dict:
