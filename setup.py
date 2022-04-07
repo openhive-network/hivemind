@@ -177,7 +177,7 @@ if __name__ == "__main__":
             'funcy==1.16',
             'toolz==0.11.1',
             'maya==0.6.1',
-            'ujson==4.0.2',
+            'ujson==5.2.0',
             'urllib3==1.26.5',
             'psycopg2-binary==2.8.6',
             'aiocache==0.11.1',
