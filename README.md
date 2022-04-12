@@ -6,14 +6,13 @@ Hivemind is a "consensus interpretation" layer for the Hive blockchain, maintain
 
 ## Development Environment
 
- - Python 3.6+ required
+ - Python 3.8+ required
  - Python setuptools in version >= 57.0, like also pip tool in version >= 21.0
- - Postgres 10+ recommended
+ - Postgres 12+ recommended
 
 ### Dependencies:
 
- - OSX: `$ brew install python3 postgresql`
- - Ubuntu: `$ sudo apt-get install python3 python3-pip`
+  - Ubuntu: `$ sudo apt-get install python3 python3-pip`
 
 ### Installation:
 
@@ -142,17 +141,15 @@ Precedence: CLI over ENV over hive.conf. Check `hive --help` for details.
 ### Hardware
 
  - Focus on Postgres performance
- - 2.5GB of memory for `hive sync` process
- - 500GB storage for database
+ - 9GB of memory for `hive sync` process
+ - 750GB storage for database
 
 
 ### Hive config
 
 Plugins
 
- - Required: `database_api condenser_api block_api account_history_api account_history_rocksdb`
- - Not required: `follow*`, `tags*`, `market_history`, `account_history` (obsolete, do not use), `witness`
-
+ - Required: `database_api`,`condenser_api`,`block_api`,`account_history_api`
 
 ### Postgres Performance
 
@@ -173,7 +170,7 @@ max_wal_size = 4GB
 
 ## JSON-RPC API
 
-The minimum viable API is to remove the requirement for the `follow` and `tags` plugins (now rolled into [`condenser_api`](https://gitlab.syncad.com/hive/hive/-/tree/master/libraries/plugins/apis/condenser_api/condenser_api.cpp)) from the backend node while still being able to power condenser's non-wallet features. Thus, this is the core API set:
+This is the core API set:
 
 ```
 condenser_api.get_followers
