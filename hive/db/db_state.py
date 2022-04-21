@@ -276,12 +276,12 @@ class DbState:
         current_work_mem = row['work_mem']
 
         sql = """
-              DO $$
-              BEGIN
-                EXECUTE 'ALTER DATABASE '||current_database()||' SET work_mem TO "{}"';
-              END
-              $$;
-              """
+DO $$
+BEGIN
+    EXECUTE 'ALTER DATABASE '||current_database()||' SET work_mem TO "{}"';
+END
+$$;
+"""
         cls.db().query_no_return(sql.format(workmem_value))
 
         return current_work_mem
@@ -291,9 +291,7 @@ class DbState:
         with AutoDbDisposer(db, "finish_hive_posts") as db_mgr:
             # UPDATE: `abs_rshares`, `vote_rshares`, `sc_hot`, ,`sc_trend`, `total_votes`, `net_votes`
             time_start = perf_counter()
-            sql = f"""
-                  SELECT update_posts_rshares({last_imported_block}, {current_imported_block});
-                  """
+            sql = f"SELECT update_posts_rshares({last_imported_block}, {current_imported_block});"
             cls._execute_and_explain_query(db_mgr.db, sql)
             log.info("[INIT] update_posts_rshares executed in %.4fs", perf_counter() - time_start)
 
@@ -312,9 +310,7 @@ class DbState:
             # UPDATE: `root_id`
             # Update root_id all root posts
             time_start = perf_counter()
-            sql = f"""
-                  select update_hive_posts_root_id({last_imported_block}, {current_imported_block})
-                  """
+            sql = f"SELECT update_hive_posts_root_id({last_imported_block}, {current_imported_block});"
             cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_hive_posts_root_id executed in %.4fs", perf_counter() - time_start)
 
@@ -322,9 +318,7 @@ class DbState:
     def _finish_hive_posts_api_helper(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_hive_posts_api_helper") as db_mgr:
             time_start = perf_counter()
-            sql = f"""
-                  select update_hive_posts_api_helper({last_imported_block}, {current_imported_block})
-                  """
+            sql = f"SELECT update_hive_posts_api_helper({last_imported_block}, {current_imported_block});"
             cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_hive_posts_api_helper executed in %.4fs", perf_counter() - time_start)
 
@@ -332,9 +326,7 @@ class DbState:
     def _finish_hive_feed_cache(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_hive_feed_cache") as db_mgr:
             time_start = perf_counter()
-            sql = f"""
-                SELECT update_feed_cache({last_imported_block}, {current_imported_block});
-            """
+            sql = f"SELECT update_feed_cache({last_imported_block}, {current_imported_block});"
             cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_feed_cache executed in %.4fs", perf_counter() - time_start)
 
@@ -342,9 +334,7 @@ class DbState:
     def _finish_hive_mentions(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_hive_mentions") as db_mgr:
             time_start = perf_counter()
-            sql = f"""
-                SELECT update_hive_posts_mentions({last_imported_block}, {current_imported_block});
-            """
+            sql = f"SELECT update_hive_posts_mentions({last_imported_block}, {current_imported_block});"
             cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_hive_posts_mentions executed in %.4fs", perf_counter() - time_start)
 
@@ -362,9 +352,7 @@ class DbState:
 
         with AutoDbDisposer(db, "finish_account_reputations") as db_mgr:
             time_start = perf_counter()
-            sql = f"""
-                  SELECT update_account_reputations({last_imported_block}, {current_imported_block}, True);
-                  """
+            sql = f"SELECT update_account_reputations({last_imported_block}, {current_imported_block}, True);"
             cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_account_reputations executed in %.4fs", perf_counter() - time_start)
 
@@ -379,9 +367,7 @@ class DbState:
     def _finish_blocks_consistency_flag(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_blocks_consistency_flag") as db_mgr:
             time_start = perf_counter()
-            sql = f"""
-                  SELECT update_hive_blocks_consistency_flag({last_imported_block}, {current_imported_block});
-                  """
+            sql = f"SELECT update_hive_blocks_consistency_flag({last_imported_block}, {current_imported_block});"
             cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_hive_blocks_consistency_flag executed in %.4fs", perf_counter() - time_start)
 
@@ -389,9 +375,7 @@ class DbState:
     def _finish_notification_cache(cls, db):
         with AutoDbDisposer(db, "finish_notification_cache") as db_mgr:
             time_start = perf_counter()
-            sql = """
-                  SELECT update_notification_cache(NULL, NULL, False);
-                  """
+            sql = "SELECT update_notification_cache(NULL, NULL, False);"
             cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_notification_cache executed in %.4fs", perf_counter() - time_start)
 
@@ -399,9 +383,7 @@ class DbState:
     def _finish_follow_count(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_follow_count") as db_mgr:
             time_start = perf_counter()
-            sql = f"""
-                  SELECT update_follow_count({last_imported_block}, {current_imported_block});
-                  """
+            sql = f"SELECT update_follow_count({last_imported_block}, {current_imported_block});"
             cls._execute_query(db_mgr.db, sql)
             log.info("[INIT] update_follow_count executed in %.4fs", perf_counter() - time_start)
 
