@@ -51,12 +51,12 @@ class BlocksDataFromDbProvider:
 
     def thread_body_get_data(self, queue_for_data):
         try:
-            for block in range(self._lbound, self._ubound, self._blocks_per_request):
+            for block in range(self._lbound, self._ubound + 1, self._blocks_per_request):
                 if not can_continue_thread():
                     break
 
                 data_rows = self._db.query_all(
-                    self._sql_query, first=block, last=min([block + self._blocks_per_request, self._ubound])
+                    self._sql_query, first=block, last=min([block + self._blocks_per_request - 1, self._ubound])
                 )
                 while can_continue_thread():
                     try:
@@ -119,7 +119,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         ubound - last block
         """
         assert lbound <= ubound
-        assert lbound >= 0
+        assert lbound >= 1
 
         BlocksProviderBase.__init__(self)
 
@@ -144,7 +144,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
             db=databases.get_operations(),
             blocks_per_request=self._blocks_per_query,
             lbound=self._lbound,
-            ubound=self._last_block_num_in_db + 1,
+            ubound=self._ubound,
             external_thread_pool=self._thread_pool,
         )
         self._blocks_data_provider = BlocksDataFromDbProvider(
@@ -152,7 +152,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
             db=databases.get_blocks_data(),
             blocks_per_request=self._blocks_per_query,
             lbound=self._lbound,
-            ubound=self._last_block_num_in_db + 1,
+            ubound=self._ubound,
             external_thread_pool=self._thread_pool,
         )
 
