@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # For debug only!
-RUNNER_HIVEMIND_SYNC_MAX_BLOCK=5000026
+RUNNER_HIVEMIND_SYNC_MAX_BLOCK=5000024
 # RUNNER_HIVED_URL='{"default":"http://hived-node:8091"}'
 # RUNNER_HIVED_URL='{"default":"http://172.17.0.1:8091"}'
 
