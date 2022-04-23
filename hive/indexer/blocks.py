@@ -1,8 +1,8 @@
 """Blocks processor."""
 
 import concurrent
-from concurrent.futures import ThreadPoolExecutor
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from time import perf_counter
 from typing import Tuple
 
@@ -191,7 +191,6 @@ class Blocks:
 
         DB.query("START TRANSACTION")
         first_block, last_num = cls.process_blocks(blocks)
-        # log.info('LAST PROCESSED BLOCK: %d', cls.head_num())
         DB.query("COMMIT")
 
         if not is_massive_sync:
