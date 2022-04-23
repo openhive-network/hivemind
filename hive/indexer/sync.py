@@ -300,7 +300,7 @@ class SyncHiveDb:
             count = ubound - lbound + 1
             timer = Timer(count, entity='block', laps=['rps', 'wps'])
 
-            while lbound < ubound:
+            while lbound <= ubound:
                 number_of_blocks_to_proceed = min([LIMIT_FOR_PROCESSED_BLOCKS, ubound - lbound + 1])
                 time_before_waiting_for_data = perf()
 
@@ -311,7 +311,7 @@ class SyncHiveDb:
 
                 assert len(blocks) == number_of_blocks_to_proceed
 
-                to = min(lbound + number_of_blocks_to_proceed, ubound)
+                to = min(lbound + number_of_blocks_to_proceed, ubound + 1)
                 timer.batch_start()
 
                 block_start = perf()
