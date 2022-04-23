@@ -81,9 +81,9 @@ def launch_mode(mode, conf):
         run_server(conf=conf)
 
     elif mode == 'sync':
-        from hive.indexer.sync import Sync
+        from hive.indexer.sync import SyncHiveDb
 
-        with Sync(conf=conf) as sync:
+        with SyncHiveDb(conf=conf) as sync:
             sync.run()
 
     elif mode == 'status':

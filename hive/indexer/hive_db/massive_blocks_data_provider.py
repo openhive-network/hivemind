@@ -1,7 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
 import logging
 import queue
-from typing import Final, Optional
+from typing import Final, List, Optional
 
 from hive.conf import Conf
 from hive.db.adapter import Db
@@ -16,9 +16,10 @@ from hive.utils.stats import WaitingStatusManager as WSM
 
 log = logging.getLogger(__name__)
 
-OPERATIONS_QUERY: Final[str] = "SELECT * FROM enum_operations4hivemind(:first, :last)"
-BLOCKS_QUERY: Final[str] = "SELECT * FROM enum_blocks4hivemind(:first, :last)"
-NUMBER_OF_BLOCKS_QUERY: Final[str] = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
+
+OPERATIONS_QUERY: Final[str] = "SELECT * FROM hivemind_app.enum_operations4hivemind(:first, :last)"
+BLOCKS_QUERY: Final[str] = "SELECT * FROM hivemind_app.enum_blocks4hivemind(:first, :last)"
+NUMBER_OF_BLOCKS_QUERY: Final[str] = "SELECT num FROM hive.blocks ORDER BY num DESC LIMIT 1"
 
 
 class BlocksDataFromDbProvider:
@@ -126,7 +127,6 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         self._lbound = lbound
         self._ubound = ubound
         self._blocks_per_query = number_of_blocks_in_batch
-        self._first_block_to_get = lbound
         self._blocks_queue = queue.Queue(maxsize=self._blocks_queue_size)
         self._operations_queue = queue.Queue(maxsize=self._operations_queue_size)
         self._blocks_data_queue = queue.Queue(maxsize=self._blocks_data_queue_size)
@@ -158,7 +158,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
 
         if not MassiveBlocksDataProviderHiveDb._vop_types_dictionary:
             virtual_operations_types_ids = self._db.query_all(
-                "SELECT id, name FROM hive_operation_types WHERE is_virtual  = true"
+                "SELECT id, name FROM hive.operation_types WHERE is_virtual  = true"
             )
             for id, name in virtual_operations_types_ids:
                 MassiveBlocksDataProviderHiveDb._vop_types_dictionary[id] = VirtualOperationType.from_name(
@@ -167,7 +167,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
 
         if not MassiveBlocksDataProviderHiveDb._op_types_dictionary:
             operations_types_ids = self._db.query_all(
-                "SELECT id, name FROM hive_operation_types WHERE is_virtual  = false"
+                "SELECT id, name FROM hive.operation_types WHERE is_virtual  = false"
             )
             for id, name in operations_types_ids:
                 MassiveBlocksDataProviderHiveDb._op_types_dictionary[id] = OperationType.from_name(
@@ -212,7 +212,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         return BlockFromRpc(block_mock, vops)
 
     def _get_mocks_after_db_blocks(self, first_mock_block_num):
-        for block_proposition in range(first_mock_block_num, self._ubound):
+        for block_proposition in range(first_mock_block_num, self._ubound + 1):
             if not can_continue_thread():
                 return
             mocked_block = self._get_mocked_block(block_proposition, True)
@@ -230,11 +230,12 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
 
             # only mocked blocks are possible
             if self._lbound > self._last_block_num_in_db:
+                log.info('ATTEMPTING TO GET MOCK BLOCKS AFTER DB BLOCKS')
                 self._get_mocks_after_db_blocks(self._lbound)
                 return
 
             while can_continue_thread():
-                blocks_data = self._get_from_queue(self._blocks_data_queue, 1)
+                blocks_data = self._get_from_queue(self._blocks_data_queue, 1)  # batches of blocks  (lists)
                 operations = self._get_from_queue(self._operations_queue, 1)
 
                 if not can_continue_thread():
@@ -285,12 +286,13 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
                     )
                     if mocked_block:
                         new_block = ExtendedByMockBlockAdapter(new_block, mocked_block)
+                        log.info(f'mocked block: {new_block.get_num()}')
 
                     while can_continue_thread():
                         try:
                             self._blocks_queue.put(new_block, True, 1)
                             currently_received_block += 1
-                            if currently_received_block >= (self._ubound - 1):
+                            if currently_received_block >= self._ubound:
                                 return
                             break
                         except queue.Full:
@@ -323,7 +325,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
             self._thread_pool.submit(self._thread_get_block),
         ]  # futures
 
-    def get(self, number_of_blocks: int):
+    def get(self, number_of_blocks: int) -> List[BlockHiveDb]:
         """Returns blocks and vops data for next number_of_blocks"""
         blocks = []
         wait_blocks_time = WSM.start()
