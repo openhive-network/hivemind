@@ -64,7 +64,7 @@ class SyncHiveDb:
         DbLiveContextHolder.set_live_context(False)
         self._databases = MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db_haf, conf=self._conf)
 
-        Blocks.setup_own_db_access(self._db_hivemind)
+        Blocks.setup(conf=self._conf)
 
         Community.start_block = self._conf.get("community_start_block")
         DbState.initialize()
