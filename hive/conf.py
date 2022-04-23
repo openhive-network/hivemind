@@ -26,6 +26,7 @@ class Conf:
         self._args = None
         self._env = None
         self._db = None
+        self._db_haf = None
         self._steem = None
         self.arguments = None
 
@@ -253,13 +254,25 @@ class Conf:
         if self._db is None:
             url = self.get('database_url')
             enable_autoexplain = self.get('log_explain_queries')
-            assert url, (
-                '--database-url (or DATABASE_URL env) not specified; ' 'e.g. postgresql://user:pass@localhost:5432/hive'
-            )
+            assert url, '--database-url (or DATABASE_URL env) not specified'
             self._db = Db(url, "root db creation", enable_autoexplain)
-            log.info("The database created...")
+            log.info("The database instance is created...")
 
         return self._db
+
+    def db_haf(self):
+        """Get a configured instance of HAF Db."""
+        if self._db_haf is None:
+            url = self.get('hived_database_url')
+            if not url:
+                log.info("--hived-database-url (or HIVED_DATABASE_URL env) not specified")
+                return None
+
+            enable_autoexplain = self.get('log_explain_queries')
+            self._db_haf = Db(url, "MassiveBlocksProvider.Root", enable_autoexplain)
+            log.info("The HAF database instance created...")
+
+        return self._db_haf
 
     def get(self, param):
         """Reads a single property, e.g. `database_url`."""

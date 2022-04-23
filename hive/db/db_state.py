@@ -27,7 +27,7 @@ class DbState:
     _db = None
 
     # prop is true until initial sync complete
-    _is_initial_sync = True
+    _is_massive_sync = True
 
     @classmethod
     def initialize(cls):
@@ -46,7 +46,7 @@ class DbState:
             setup(cls.db())
 
         # check if initial sync complete
-        cls._is_initial_sync = True
+        cls._is_massive_sync = True
         log.info("[INIT] Continue with initial sync...")
 
     @classmethod
@@ -62,17 +62,18 @@ class DbState:
         return cls._db
 
     @classmethod
-    def finish_initial_sync(cls, current_imported_block):
+    def finish_massive_sync(cls, current_imported_block) -> None:
         """Set status to initial sync complete."""
-        assert cls._is_initial_sync, "initial sync was not started."
-        cls._after_initial_sync(current_imported_block)
-        cls._is_initial_sync = False
+        if not cls._is_massive_sync:
+            return
+        cls._after_massive_sync(current_imported_block)
+        cls._is_massive_sync = False
         log.info("[INIT] Initial sync complete!")
 
     @classmethod
     def is_initial_sync(cls):
         """Check if we're still in the process of initial sync."""
-        return cls._is_initial_sync
+        return cls._is_massive_sync
 
     @classmethod
     def _all_foreign_keys(cls):
@@ -240,16 +241,14 @@ class DbState:
         log.info(f"=== {action} INDEXES ===")
 
     @classmethod
-    def before_initial_sync(cls, last_imported_block, hived_head_block):
-        """Routine which runs *once* after db setup.
+    def before_massive_sync(cls, last_imported_block: int, hived_head_block: int):
+        """Disables non-critical indexes for faster sync, as well as foreign key constraints."""
 
-        Disables non-critical indexes for faster initial sync, as well
-        as foreign key constraints."""
-
+        cls._is_massive_sync = True
         to_sync = hived_head_block - last_imported_block
 
         if to_sync < SYNCED_BLOCK_LIMIT:
-            log.info("[INIT] Skipping pre-initial sync hooks")
+            log.info("[MASSIVE] Skipping pre-initial sync hooks")
             return
 
         # is_pre_process, drop, create
@@ -263,7 +262,7 @@ class DbState:
         # intentionally disabled since it needs a lot of WAL disk space when switching back to LOGGED
         # set_logged_table_attribute(cls.db(), False)
 
-        log.info("[INIT] Finish pre-initial sync hooks")
+        log.info("[MASSIVE] Finish pre-initial sync hooks")
 
     @classmethod
     def update_work_mem(cls, workmem_value):
@@ -468,11 +467,8 @@ $$;
         log.info("=== FILLING FINAL DATA INTO TABLES ===")
 
     @classmethod
-    def _after_initial_sync(cls, current_imported_block):
-        """Routine which runs *once* after initial sync.
-
-        Re-creates non-core indexes for serving APIs after init sync,
-        as well as all foreign keys."""
+    def _after_massive_sync(cls, current_imported_block: int) -> None:
+        """Re-creates non-core indexes for serving APIs after init sync, as well as all foreign keys."""
 
         start_time = perf_counter()
 
