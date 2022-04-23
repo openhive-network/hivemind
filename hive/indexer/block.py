@@ -1,7 +1,7 @@
-from abc import ABC, abstractmethod
-from enum import Enum
 import logging
 import queue
+from abc import ABC, abstractmethod
+from enum import Enum
 
 from hive.steem.signal import can_continue_thread
 
@@ -186,8 +186,6 @@ class BlocksProviderBase(ABC):
         """Tool function to get elements from queue"""
         ret = []
         for element in range(number_of_elements):
-            if not can_continue_thread():
-                break
             while can_continue_thread():
                 try:
                     ret.append(data_queue.get(True, 1))
