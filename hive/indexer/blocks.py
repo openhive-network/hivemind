@@ -1,11 +1,13 @@
 """Blocks processor."""
 
 import concurrent
-import logging
 from concurrent.futures import ThreadPoolExecutor
+import logging
+from pathlib import Path
 from time import perf_counter
 from typing import Tuple
 
+from hive.conf import Conf
 from hive.db.adapter import Db
 from hive.indexer.accounts import Accounts
 from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
@@ -39,6 +41,7 @@ def time_collector(f):
 class Blocks:
     """Processes blocks, dispatches work, manages `hive_blocks` table."""
 
+    _conf = None
     blocks_to_flush = []
     _head_block_date = None
     _current_block_date = None
@@ -64,6 +67,12 @@ class Blocks:
         else:
             self.__class__._head_block_date = head_date
             self.__class__._current_block_date = head_date
+
+    @classmethod
+    def setup(cls, conf: Conf):
+        cls._conf = conf
+        Blocks.setup_own_db_access(shared_db_adapter=conf.db())
+
 
     @staticmethod
     def setup_own_db_access(shared_db_adapter: Db) -> None:
@@ -208,8 +217,8 @@ class Blocks:
 
         log.info(f"[PROCESS MULTI] {len(blocks)} blocks in {OPSM.stop(time_start) :.4f}s")
 
-    @staticmethod
-    def prepare_vops(comment_payout_ops: dict, block: Block, date, block_num: int, is_safe_cashout: bool) -> dict:
+    @classmethod
+    def prepare_vops(cls, comment_payout_ops: dict, block: Block, date, block_num: int, is_safe_cashout: bool) -> dict:
         def get_empty_ops():
             return {
                 VirtualOperationType.AUTHOR_REWARD: None,
@@ -221,6 +230,11 @@ class Blocks:
         ineffective_deleted_ops = {}
 
         for vop in block.get_next_vop():
+            if cls._conf.get('log_virtual_op_calls'):
+                with open(Path(__file__).parent.parent / 'virtual_operations.log', 'a', encoding='utf-8') as file:
+                    file.write(f'{block.get_num()}: {vop.get_type()}')
+                    file.write(str(vop.get_body()))
+
             start = OPSM.start()
 
             op_type = vop.get_type()
@@ -302,6 +316,11 @@ class Blocks:
             assert issubclass(type(transaction), Transaction)
             for operation in transaction.get_next_operation():
                 assert issubclass(type(operation), Operation)
+
+                if cls._conf.get('log_op_calls'):
+                    with open(Path(__file__).parent.parent / 'operations.log', 'a', encoding='utf-8') as file:
+                        file.write(f'{block.get_num()}: {operation.get_type()}')
+                        file.write(str(operation.get_body()))
 
                 start = OPSM.start()
                 op_type = operation.get_type()
