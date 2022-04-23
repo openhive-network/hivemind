@@ -1,8 +1,8 @@
 """Hive sync manager."""
 
+import logging
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-import logging
 from pathlib import Path
 from time import perf_counter as perf
 from typing import Final, Tuple
@@ -47,7 +47,9 @@ class SyncHiveDb:
         self._conf = conf
         self._db_hivemind = conf.db()
         self._db_haf = conf.db_haf()
-        self._test_max_block = self._conf.get('test_max_block')
+
+        # Might be lower or higher than actual block number stored in HAF database
+        self._last_block_to_process = self._conf.get('test_max_block')
 
         self._massive_blocks_data_provider = None
         self._lbound = None
@@ -112,23 +114,23 @@ class SyncHiveDb:
 
             self._lbound, self._ubound = self._query_for_app_next_block()
 
-            if self._test_max_block:
-                if last_imported_block >= self._test_max_block:
-                    log.info(f"REACHED test_max_block of {self._test_max_block}")
+            if self._last_block_to_process:
+                if last_imported_block >= self._last_block_to_process:
+                    log.info(f"REACHED test_max_block of {self._last_block_to_process}")
                     return
 
                 if not (self._lbound and self._ubound):  # all blocks from HAF db processed
                     self._lbound = last_imported_block + 1
-                    self._ubound = self._test_max_block
+                    self._ubound = self._last_block_to_process
                     self._were_mocks_after_db_blocks = True
                 else:
-                    self._ubound = min(self._test_max_block, self._ubound)
+                    self._ubound = min(self._last_block_to_process, self._ubound)
 
             if not (self._lbound and self._ubound):
                 continue
 
             log.info(f"target_head_block: {self._ubound}")
-            log.info(f"test_max_block: {self._test_max_block}")
+            log.info(f"test_max_block: {self._last_block_to_process}")
 
             self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
                 databases=self._databases,
