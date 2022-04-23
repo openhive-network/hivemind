@@ -327,6 +327,10 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
 
     def get(self, number_of_blocks: int) -> List[BlockHiveDb]:
         """Returns blocks and vops data for next number_of_blocks"""
+        log.info(f"blocks_data_queue.qsize: {self._blocks_data_queue.qsize()}")
+        log.info(f"operations_queue.qsize: {self._operations_queue.qsize()}")
+        log.info(f"blocks_queue.qsize: {self._blocks_queue.qsize()}")
+
         blocks = []
         wait_blocks_time = WSM.start()
 
