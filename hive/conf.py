@@ -120,10 +120,16 @@ class Conf:
             action='store_true',
         )
         add(
+            '--log-op-calls',
+            env_var='LOG_OP_CALLS',
+            help='(debug) log operations calls and responses',
+            action='store_true',
+        )
+        add(
             '--log-virtual-op-calls',
             env_var='LOG_VIRTUAL_OP_CALLS',
             help='(debug) log virtual op calls and responses',
-            default=False,
+            action='store_true',
         )
         add(
             '--mock-block-data-path',
