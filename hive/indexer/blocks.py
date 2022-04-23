@@ -185,25 +185,26 @@ class Blocks:
         return first_block, last_num
 
     @classmethod
-    def process_multi(cls, blocks, is_initial_sync: bool) -> None:
+    def process_multi(cls, blocks, is_massive_sync: bool) -> None:
         """Batch-process blocks; wrapped in a transaction."""
 
         time_start = OPSM.start()
 
         DB.query("START TRANSACTION")
-
         first_block, last_num = cls.process_blocks(blocks)
+        # log.info('LAST PROCESSED BLOCK: %d', cls.head_num())
+        DB.query("COMMIT")
 
-        if not is_initial_sync:
+        if not is_massive_sync:
+            DB.query("START TRANSACTION")
             log.info("[PROCESS MULTI] Flushing data in 1 thread")
             cls.flush_data_in_1_thread()
             if first_block > -1:
                 log.info("[PROCESS MULTI] Tables updating in live synchronization")
                 cls.on_live_blocks_processed(first_block, last_num)
+            DB.query("COMMIT")
 
-        DB.query("COMMIT")
-
-        if is_initial_sync:
+        if is_massive_sync:
             log.info("[PROCESS MULTI] Flushing data in N threads")
             cls.flush_data_in_n_threads()
 
