@@ -1220,7 +1220,7 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
-                "alice"
+                "test-safari"
               ],
               "id": "community",
               "json": "[\"subscribe\",{\"community\":\"hive-171488\"}]"
