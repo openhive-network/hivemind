@@ -567,206 +567,6 @@
             }
           },
           {
-            "type": "account_create_operation",
-            "value": {
-              "creator": "test-safari",
-              "new_account_name": "hive-111111",
-              "owner": {
-                "weight_threshold": 1,
-                "account_auths": [],
-                "key_auths": [
-                  [
-                    "",
-                    1
-                  ]
-                ]
-              },
-              "active": {
-                "weight_threshold": 1,
-                "account_auths": [],
-                "key_auths": [
-                  [
-                    "",
-                    1
-                  ]
-                ]
-              },
-              "posting": {
-                "weight_threshold": 1,
-                "account_auths": [],
-                "key_auths": [
-                  [
-                    "",
-                    1
-                  ]
-                ]
-              },
-              "memo_key": "",
-              "json_metadata": "",
-              "extensions": []
-            }
-          },
-          {
-            "type": "account_create_operation",
-            "value": {
-              "creator": "test-safari",
-              "new_account_name": "hive-222222",
-              "owner": {
-                "weight_threshold": 1,
-                "account_auths": [],
-                "key_auths": [
-                  [
-                    "",
-                    1
-                  ]
-                ]
-              },
-              "active": {
-                "weight_threshold": 1,
-                "account_auths": [],
-                "key_auths": [
-                  [
-                    "",
-                    1
-                  ]
-                ]
-              },
-              "posting": {
-                "weight_threshold": 1,
-                "account_auths": [],
-                "key_auths": [
-                  [
-                    "",
-                    1
-                  ]
-                ]
-              },
-              "memo_key": "",
-              "json_metadata": "",
-              "extensions": []
-            }
-          },
-          {
-            "type": "account_create_operation",
-            "value": {
-              "creator": "test-safari",
-              "new_account_name": "hive-333333",
-              "owner": {
-                "weight_threshold": 1,
-                "account_auths": [],
-                "key_auths": [
-                  [
-                    "",
-                    1
-                  ]
-                ]
-              },
-              "active": {
-                "weight_threshold": 1,
-                "account_auths": [],
-                "key_auths": [
-                  [
-                    "",
-                    1
-                  ]
-                ]
-              },
-              "posting": {
-                "weight_threshold": 1,
-                "account_auths": [],
-                "key_auths": [
-                  [
-                    "",
-                    1
-                  ]
-                ]
-              },
-              "memo_key": "",
-              "json_metadata": "",
-              "extensions": []
-            }
-          },
-          {
-            "type": "account_create_operation",
-            "value": {
-              "creator": "test-safari",
-              "new_account_name": "howo",
-              "owner": {
-                "weight_threshold": 1,
-                "account_auths": [],
-                "key_auths": [
-                  [
-                    "",
-                    1
-                  ]
-                ]
-              },
-              "active": {
-                "weight_threshold": 1,
-                "account_auths": [],
-                "key_auths": [
-                  [
-                    "",
-                    1
-                  ]
-                ]
-              },
-              "posting": {
-                "weight_threshold": 1,
-                "account_auths": [],
-                "key_auths": [
-                  [
-                    "",
-                    1
-                  ]
-                ]
-              },
-              "memo_key": "",
-              "json_metadata": "",
-              "extensions": []
-            }
-          },
-          {
-            "type": "account_create_operation",
-            "value": {
-              "creator": "test-safari",
-              "new_account_name": "fredrikaa",
-              "owner": {
-                "weight_threshold": 1,
-                "account_auths": [],
-                "key_auths": [
-                  [
-                    "",
-                    1
-                  ]
-                ]
-              },
-              "active": {
-                "weight_threshold": 1,
-                "account_auths": [],
-                "key_auths": [
-                  [
-                    "",
-                    1
-                  ]
-                ]
-              },
-              "posting": {
-                "weight_threshold": 1,
-                "account_auths": [],
-                "key_auths": [
-                  [
-                    "",
-                    1
-                  ]
-                ]
-              },
-              "memo_key": "",
-              "json_metadata": "",
-              "extensions": []
-            }
-          },
-          {
             "type": "comment_operation",
             "value": {
               "parent_author": "",
@@ -879,159 +679,6 @@
               "permlink": "muted-and-edited",
               "title": "Mute edit",
               "body": "This test is muted in community after creation, then edited - all in the same block for good measure. Test checks if muting survives edit (it should).",
-              "json_metadata": "{}"
-            }
-          },
-          {
-            "type": "comment_operation",
-            "value": {
-              "parent_author": "",
-              "parent_permlink": "hive-111111",
-              "author": "howo",
-              "permlink": "displayed",
-              "title": "normal post",
-              "body": "This post is displayed",
-              "json_metadata": "{}"
-            }
-          },
-          {
-            "type": "comment_operation",
-            "value": {
-              "parent_author": "",
-              "parent_permlink": "hive-222222",
-              "author": "howo",
-              "permlink": "hidden1",
-              "title": "This post is hidden",
-              "body": "This post is hidden",
-              "json_metadata": "{}"
-            }
-          },
-          {
-            "type": "comment_operation",
-            "value": {
-              "parent_author": "",
-              "parent_permlink": "hive-333333",
-              "author": "howo",
-              "permlink": "hidden2",
-              "title": "This post is hidden",
-              "body": "This post is hidden",
-              "json_metadata": "{}"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "hive-222222"
-              ],
-              "id": "community",
-              "json": "[\"setRole\",{\"community\":\"hive-222222\",\"account\":\"howo\",\"role\":\"member\"}]"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "hive-333333"
-              ],
-              "id": "community",
-              "json": "[\"setRole\",{\"community\":\"hive-333333\",\"account\":\"howo\",\"role\":\"member\"}]"
-            }
-          },
-          {
-            "type": "comment_operation",
-            "value": {
-              "parent_author": "",
-              "parent_permlink": "hive-222222",
-              "author": "howo",
-              "permlink": "display2",
-              "title": "This post is shown because I am a member",
-              "body": "This post is shown because I am a member",
-              "json_metadata": "{}"
-            }
-          },
-          {
-            "type": "comment_operation",
-            "value": {
-              "parent_author": "test-safari",
-              "parent_permlink": "display2",
-              "author": "fredrikaa",
-              "permlink": "display_comment",
-              "title": "This comment is shown even though I'm a guest because community type 2",
-              "body": "hello",
-              "json_metadata": "{}"
-            }
-          },
-          {
-            "type": "comment_operation",
-            "value": {
-              "parent_author": "",
-              "parent_permlink": "hive-333333",
-              "author": "howo",
-              "permlink": "display3",
-              "title": "This post is shown because I am a member",
-              "body": "Hello",
-              "json_metadata": "{}"
-            }
-          },
-          {
-            "type": "comment_operation",
-            "value": {
-              "parent_author": "howo",
-              "parent_permlink": "display3",
-              "author": "howo",
-              "permlink": "display_comment1",
-              "title": "This comment is shown because member and community type 3",
-              "body": "hello",
-              "json_metadata": "{}"
-            }
-          },
-          {
-            "type": "comment_operation",
-            "value": {
-              "parent_author": "howo",
-              "parent_permlink": "display3",
-              "author": "fredrikaa",
-              "permlink": "hidden_comment",
-              "title": "This comment is hidden because guest and community type 3",
-              "body": "hello",
-              "json_metadata": "{}"
-            }
-          },
-          {
-            "type": "comment_operation",
-            "value": {
-              "parent_author": "",
-              "parent_permlink": "hive-222222",
-              "author": "fredrikaa",
-              "permlink": "hidden",
-              "title": "This post is hidden  because the community type is now 2",
-              "body": "Hello",
-              "json_metadata": "{}"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "hive-222222"
-              ],
-              "id": "community",
-              "json": "[\"updateProps\",{\"community\":\"hive-222222\",\"props\":{\"type_id\":1,\"title\":\"World News\",\"about\":\"A place for major news from around the world.\",\"is_nsfw\":true,\"description\":\"\",\"flag_text\":\"\"}}]"
-            }
-          },
-          {
-            "type": "comment_operation",
-            "value": {
-              "parent_author": "",
-              "parent_permlink": "hive-222222",
-              "author": "fredrikaa",
-              "permlink": "display4",
-              "title": "This post is shown because the community type is now 1",
-              "body": "Hello",
               "json_metadata": "{}"
             }
           }
@@ -4614,6 +4261,206 @@
               ],
               "id": "community",
               "json": "[\"mutePost\",{\"community\":\"hive-198723\",\"account\":\"agartha\",\"permlink\":\"regular-post\",\"notes\":\"Muting community post of different community\"}]"
+            }
+          },
+           {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "hive-111111",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "hive-222222",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "hive-333333",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "howo",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "fredrikaa",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
             }
           }
         ]
