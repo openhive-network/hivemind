@@ -100,6 +100,8 @@ def setup_env(current_runner_id, hive_sync_runner_id, infile, outfile, end, **kw
             runner[key] = 'localhost'
         if key == 'postgres_port':  # to be eliminated when CI will be only at psql12
             runner[key] = 25432
+        if key == 'hived_url':  # Only for testing purposes
+            runner[key] = '{\\"default\\":\\"http://172.17.0.1:18092\\",\\"enum_virtual_ops\\":\\"http://172.17.0.1:6543\\",\\"get_account_history\\":\\"http://172.17.0.1:6543\\",\\"get_ops_in_block\\":\\"http://172.17.0.1:6543\\",\\"get_transaction\\":\\"http://172.17.0.1:6543\\"}'
 
         output(
             f'export RUNNER_{key.upper()}="{str(runner[key])}"',
