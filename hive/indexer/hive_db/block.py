@@ -77,8 +77,8 @@ class BlockHiveDb(Block):
 
         self._num = num
         self._date = date
-        self._hash = hash.tobytes().decode()
-        self._prev_hash = previous_block_hash.tobytes().decode()
+        self._hash = hash.hex()
+        self._prev_hash = previous_block_hash.hex()
         self._number_of_transactions = number_of_transactions
         self._number_of_operations = number_of_operations
         self._operations = operations
