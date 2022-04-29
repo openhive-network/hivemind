@@ -30,7 +30,7 @@ class MockBlockProvider(MockDataProvider):
         new_date = dateutil.parser.isoparse(block_date)
         if cls.last_real_block_time > new_date:
             log.error(
-                f"Incoming block has older timestamp than previous one: old {cls.last_real_block_time}, new {new_date}"
+                f"Incoming block {block_num} has older timestamp than previous one: old {cls.last_real_block_time}, new {new_date}"
             )
         cls.last_real_block_time = new_date
 

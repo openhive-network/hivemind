@@ -63,7 +63,7 @@ class DbState:
 
     @classmethod
     def finish_massive_sync(cls, current_imported_block) -> None:
-        """Set status to initial sync complete."""
+        """Set status to massive sync complete."""
         if not cls._is_massive_sync:
             return
         cls._after_massive_sync(current_imported_block)
@@ -71,8 +71,8 @@ class DbState:
         log.info("[INIT] Initial sync complete!")
 
     @classmethod
-    def is_initial_sync(cls):
-        """Check if we're still in the process of initial sync."""
+    def is_massive_sync(cls):
+        """Check if we're still in the process of massive sync."""
         return cls._is_massive_sync
 
     @classmethod
