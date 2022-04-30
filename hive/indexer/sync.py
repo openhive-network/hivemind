@@ -199,7 +199,7 @@ class SyncHiveDb:
 
     def _prepare_app_schema(self) -> None:
         log.info("Attempting to create application schema...")
-        script_path = Path(__file__).parent / "hive_db/hafapp_api.sql"
+        script_path = Path(__file__).parent.parent / "db/sql_scripts/hafapp_api.sql"
 
         log.info(f"Attempting to execute SQL script: '{script_path}'")
         execute_sql_script(query_executor=self._db_haf.query_no_return, path_to_script=script_path)
