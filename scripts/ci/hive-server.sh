@@ -65,7 +65,6 @@ start() {
       --log-mask-sensitive-data \
       --pid-file hive_server.pid \
       --http-server-port ${RUNNER_HIVEMIND_SERVER_HTTP_PORT} \
-      --steemd-url "${RUNNER_HIVED_URL}" \
       --database-url "${DATABASE_URL}" \
       > hivemind-server.log 2>&1 &
 
