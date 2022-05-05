@@ -51,6 +51,8 @@ stages:
   - export POSTGRES_MAJOR_VERSION=$(./scripts/ci/get-postgres-version.sh)
   - ./scripts/ci/drop-db.sh
   - ./scripts/ci/create-db.sh
+  - export RUNNER_HIVEMIND_LAST_BLOCK_FOR_MASSIVE=4999979
+  - export RUNNER_HIVED_DB_URL=postgresql://hive@172.17.0.1:15432/haf_block_log
   - ./scripts/ci/hive-sync.sh
   - ./scripts/ci/collect-db-stats.sh
 
