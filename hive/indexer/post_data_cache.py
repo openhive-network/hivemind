@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 
 
 class PostDataCache(DbAdapterHolder):
-    """Procides cache for DB operations on post data table in order to speed up initial sync"""
+    """Procides cache for DB operations on post data table in order to speed up massive sync"""
 
     _data = {}
 
