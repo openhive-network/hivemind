@@ -431,6 +431,7 @@ sync-e2e-benchmark:
     expire_in: 7 days
   tags:
     - hivemind-heavy-job
+    - hive-4
 
 Trigger benchmark-results-collector:
   stage: post-deploy
