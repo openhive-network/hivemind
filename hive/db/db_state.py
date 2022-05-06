@@ -1,4 +1,4 @@
-"""Hive db state manager. Check if schema loaded, init synced, etc."""
+"""Hive db state manager. Check if schema loaded, massive synced, etc."""
 
 # pylint: disable=too-many-lines
 
@@ -26,7 +26,7 @@ class DbState:
 
     _db = None
 
-    # prop is true until initial sync complete
+    # prop is true until massive sync complete
     _is_massive_sync = True
 
     @classmethod
@@ -35,19 +35,19 @@ class DbState:
 
         1) Load schema if needed
         2) Run migrations if needed
-        3) Check if initial sync has completed
+        3) Check if massive sync has completed
         """
 
-        log.info("[INIT] Welcome to hive!")
+        log.info("[MASSIVE] Welcome to hive!")
 
         # create db schema if needed
         if not cls._is_schema_loaded():
-            log.info("[INIT] Create db schema...")
+            log.info("[MASSIVE] Create db schema...")
             setup(cls.db())
 
-        # check if initial sync complete
+        # check if massive sync complete
         cls._is_massive_sync = True
-        log.info("[INIT] Continue with initial sync...")
+        log.info("[MASSIVE] Continue with massive sync...")
 
     @classmethod
     def teardown(cls):
@@ -63,16 +63,16 @@ class DbState:
 
     @classmethod
     def finish_massive_sync(cls, current_imported_block) -> None:
-        """Set status to initial sync complete."""
+        """Set status to massive sync complete."""
         if not cls._is_massive_sync:
             return
         cls._after_massive_sync(current_imported_block)
         cls._is_massive_sync = False
-        log.info("[INIT] Initial sync complete!")
+        log.info("[MASSIVE] Massive sync complete!")
 
     @classmethod
-    def is_initial_sync(cls):
-        """Check if we're still in the process of initial sync."""
+    def is_massive_sync(cls):
+        """Check if we're still in the process of massive sync."""
         return cls._is_massive_sync
 
     @classmethod
@@ -160,32 +160,32 @@ class DbState:
         time_start = perf_counter()
 
         current_work_mem = cls.update_work_mem('2GB')
-        log.info("[INIT] Attempting to execute query: `%s'...", query)
+        log.info("[MASSIVE] Attempting to execute query: `%s'...", query)
 
         row = db.query_no_return(query)
 
         cls.update_work_mem(current_work_mem)
 
         time_end = perf_counter()
-        log.info("[INIT] Query `%s' done in %.4fs", query, time_end - time_start)
+        log.info("[MASSIVE] Query `%s' done in %.4fs", query, time_end - time_start)
 
     @classmethod
     def _execute_and_explain_query(cls, db, query):
         time_start = perf_counter()
 
         current_work_mem = cls.update_work_mem('2GB')
-        log.info("[INIT] Attempting to execute query: `%s'...", query)
+        log.info("[MASSIVE] Attempting to execute query: `%s'...", query)
 
         row = db.explain().query_no_return(query)
 
         cls.update_work_mem(current_work_mem)
 
         time_end = perf_counter()
-        log.info("[INIT] Query `%s' done in %.4fs", query, time_end - time_start)
+        log.info("[MASSIVE] Query `%s' done in %.4fs", query, time_end - time_start)
 
     @classmethod
     def processing_indexes_per_table(cls, db, table_name, indexes, is_pre_process, drop, create):
-        log.info("[INIT] Begin %s-initial sync hooks for table %s", "pre" if is_pre_process else "post", table_name)
+        log.info("[MASSIVE] Begin %s-massive sync hooks for table %s", "pre" if is_pre_process else "post", table_name)
         with AutoDbDisposer(db, table_name) as db_mgr:
             engine = db_mgr.db.engine()
 
@@ -215,7 +215,7 @@ class DbState:
                         log.info("Index %s created in time %.4f s", index.name, elapsed_time)
                         any_index_created = True
 
-        log.info("[INIT] End %s-initial sync hooks for table %s", "pre" if is_pre_process else "post", table_name)
+        log.info("[MASSIVE] End %s-massive sync hooks for table %s", "pre" if is_pre_process else "post", table_name)
 
     @classmethod
     def processing_indexes(cls, is_pre_process, drop, create):
@@ -233,7 +233,7 @@ class DbState:
                 )
             )
 
-        cls.process_tasks_in_threads("[INIT] %i threads finished creating indexes.", methods)
+        cls.process_tasks_in_threads("[MASSIVE] %i threads finished creating indexes.", methods)
 
         real_time = FOSM.stop(start_time)
 
@@ -253,7 +253,7 @@ class DbState:
         to_sync = hived_head_block - last_imported_block
 
         if to_sync < SYNCED_BLOCK_LIMIT:
-            log.info("[MASSIVE] Skipping pre-initial sync hooks")
+            log.info("[MASSIVE] Skipping pre-massive sync hooks")
             return
 
         # is_pre_process, drop, create
@@ -267,7 +267,7 @@ class DbState:
         # intentionally disabled since it needs a lot of WAL disk space when switching back to LOGGED
         # set_logged_table_attribute(cls.db(), False)
 
-        log.info("[MASSIVE] Finish pre-initial sync hooks")
+        log.info("[MASSIVE] Finish pre-massive sync hooks")
 
     @classmethod
     def update_work_mem(cls, workmem_value):
@@ -292,26 +292,26 @@ $$;
             time_start = perf_counter()
             sql = f"SELECT update_posts_rshares({last_imported_block}, {current_imported_block});"
             cls._execute_and_explain_query(db_mgr.db, sql)
-            log.info("[INIT] update_posts_rshares executed in %.4fs", perf_counter() - time_start)
+            log.info("[MASSIVE] update_posts_rshares executed in %.4fs", perf_counter() - time_start)
 
             time_start = perf_counter()
 
             # UPDATE: `children`
             if massive_sync_preconditions:
-                # Update count of all child posts (what was hold during initial sync)
+                # Update count of all child posts (what was hold during massive sync)
                 cls._execute_query(db_mgr.db, "select update_all_hive_posts_children_count()")
             else:
-                # Update count of child posts processed during partial sync (what was hold during initial sync)
+                # Update count of child posts processed during partial sync (what was hold during massive sync)
                 sql = f"select update_hive_posts_children_count({last_imported_block}, {current_imported_block})"
                 cls._execute_query(db_mgr.db, sql)
-            log.info("[INIT] update_hive_posts_children_count executed in %.4fs", perf_counter() - time_start)
+            log.info("[MASSIVE] update_hive_posts_children_count executed in %.4fs", perf_counter() - time_start)
 
             # UPDATE: `root_id`
             # Update root_id all root posts
             time_start = perf_counter()
             sql = f"SELECT update_hive_posts_root_id({last_imported_block}, {current_imported_block});"
             cls._execute_query(db_mgr.db, sql)
-            log.info("[INIT] update_hive_posts_root_id executed in %.4fs", perf_counter() - time_start)
+            log.info("[MASSIVE] update_hive_posts_root_id executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_hive_posts_api_helper(cls, db, last_imported_block, current_imported_block):
@@ -319,7 +319,7 @@ $$;
             time_start = perf_counter()
             sql = f"SELECT update_hive_posts_api_helper({last_imported_block}, {current_imported_block});"
             cls._execute_query(db_mgr.db, sql)
-            log.info("[INIT] update_hive_posts_api_helper executed in %.4fs", perf_counter() - time_start)
+            log.info("[MASSIVE] update_hive_posts_api_helper executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_hive_feed_cache(cls, db, last_imported_block, current_imported_block):
@@ -327,7 +327,7 @@ $$;
             time_start = perf_counter()
             sql = f"SELECT update_feed_cache({last_imported_block}, {current_imported_block});"
             cls._execute_query(db_mgr.db, sql)
-            log.info("[INIT] update_feed_cache executed in %.4fs", perf_counter() - time_start)
+            log.info("[MASSIVE] update_feed_cache executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_hive_mentions(cls, db, last_imported_block, current_imported_block):
@@ -335,13 +335,13 @@ $$;
             time_start = perf_counter()
             sql = f"SELECT update_hive_posts_mentions({last_imported_block}, {current_imported_block});"
             cls._execute_query(db_mgr.db, sql)
-            log.info("[INIT] update_hive_posts_mentions executed in %.4fs", perf_counter() - time_start)
+            log.info("[MASSIVE] update_hive_posts_mentions executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_payout_stats_view(cls):
         time_start = perf_counter()
         PayoutStats.generate()
-        log.info("[INIT] payout_stats_view executed in %.4fs", perf_counter() - time_start)
+        log.info("[MASSIVE] payout_stats_view executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_account_reputations(cls, db, last_imported_block, current_imported_block):
@@ -353,14 +353,14 @@ $$;
             time_start = perf_counter()
             sql = f"SELECT update_account_reputations({last_imported_block}, {current_imported_block}, True);"
             cls._execute_query(db_mgr.db, sql)
-            log.info("[INIT] update_account_reputations executed in %.4fs", perf_counter() - time_start)
+            log.info("[MASSIVE] update_account_reputations executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_communities_posts_and_rank(cls, db):
         with AutoDbDisposer(db, "finish_communities_posts_and_rank") as db_mgr:
             time_start = perf_counter()
             update_communities_posts_and_rank(db_mgr.db)
-            log.info("[INIT] update_communities_posts_and_rank executed in %.4fs", perf_counter() - time_start)
+            log.info("[MASSIVE] update_communities_posts_and_rank executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_blocks_consistency_flag(cls, db, last_imported_block, current_imported_block):
@@ -368,7 +368,7 @@ $$;
             time_start = perf_counter()
             sql = f"SELECT update_hive_blocks_consistency_flag({last_imported_block}, {current_imported_block});"
             cls._execute_query(db_mgr.db, sql)
-            log.info("[INIT] update_hive_blocks_consistency_flag executed in %.4fs", perf_counter() - time_start)
+            log.info("[MASSIVE] update_hive_blocks_consistency_flag executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_notification_cache(cls, db):
@@ -376,7 +376,7 @@ $$;
             time_start = perf_counter()
             sql = "SELECT update_notification_cache(NULL, NULL, False);"
             cls._execute_query(db_mgr.db, sql)
-            log.info("[INIT] update_notification_cache executed in %.4fs", perf_counter() - time_start)
+            log.info("[MASSIVE] update_notification_cache executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_follow_count(cls, db, last_imported_block, current_imported_block):
@@ -384,7 +384,7 @@ $$;
             time_start = perf_counter()
             sql = f"SELECT update_follow_count({last_imported_block}, {current_imported_block});"
             cls._execute_query(db_mgr.db, sql)
-            log.info("[INIT] update_follow_count executed in %.4fs", perf_counter() - time_start)
+            log.info("[MASSIVE] update_follow_count executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def time_collector(cls, func, args):
@@ -443,7 +443,7 @@ $$;
                 [cls.db(), last_imported_block, current_imported_block],
             )
         )
-        cls.process_tasks_in_threads("[INIT] %i threads finished filling tables. Part nr 0", methods)
+        cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 0", methods)
 
         methods = []
         # Notifications are dependent on many tables, therefore it's necessary to calculate it at the end
@@ -459,7 +459,7 @@ $$;
         methods.append(
             ('follow_count', cls._finish_follow_count, [cls.db(), last_imported_block, current_imported_block])
         )
-        cls.process_tasks_in_threads("[INIT] %i threads finished filling tables. Part nr 1", methods)
+        cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 1", methods)
 
         real_time = FOSM.stop(start_time)
 
@@ -473,14 +473,14 @@ $$;
 
     @classmethod
     def _after_massive_sync(cls, current_imported_block: int) -> None:
-        """Re-creates non-core indexes for serving APIs after init sync, as well as all foreign keys."""
+        """Re-creates non-core indexes for serving APIs after massive sync, as well as all foreign keys."""
 
         start_time = perf_counter()
 
         last_imported_block = DbState.db().query_one("SELECT block_num FROM hive_state LIMIT 1")
 
         log.info(
-            "[INIT] Current imported block: %s. Last imported block: %s.", current_imported_block, last_imported_block
+            "[MASSIVE] Current imported block: %s. Last imported block: %s.", current_imported_block, last_imported_block
         )
         if last_imported_block > current_imported_block:
             last_imported_block = current_imported_block
@@ -525,7 +525,7 @@ $$;
             cls._execute_query(cls.db(), "VACUUM (VERBOSE,ANALYZE)")
 
         end_time = perf_counter()
-        log.info("[INIT] After initial sync actions done in %.4fs", end_time - start_time)
+        log.info("[MASSIVE] After massive sync actions done in %.4fs", end_time - start_time)
 
     @staticmethod
     def status():
@@ -557,6 +557,6 @@ $$;
     def _is_feed_cache_empty(cls):
         """Check if the hive_feed_cache table is empty.
 
-        If empty, it indicates that the initial sync has not finished.
+        If empty, it indicates that the massive sync has not finished.
         """
         return not cls.db().query_one("SELECT 1 FROM hive_feed_cache LIMIT 1")
