@@ -40,20 +40,6 @@ class Conf:
 
         # common
         add('--database-url', env_var='DATABASE_URL', required=False, help='database connection url', default='')
-        add(
-            '--muted-accounts-url',
-            env_var='MUTED_ACCOUNTS_URL',
-            required=False,
-            help='url to flat list of muted accounts',
-            default='https://raw.githubusercontent.com/hivevectordefense/irredeemables/master/full.txt',
-        )
-        add(
-            '--blacklist-api-url',
-            env_var='BLACKLIST_API_URL',
-            required=False,
-            help='url to access blacklist api',
-            default='https://blacklist.usehive.com',
-        )
 
         # server
         add('--http-server-port', type=int, env_var='HTTP_SERVER_PORT', default=8080)
@@ -68,13 +54,8 @@ class Conf:
         # sync
         add('--max-workers', type=int, env_var='MAX_WORKERS', help='max workers for batch requests', default=6)
         add('--max-batch', type=int, env_var='MAX_BATCH', help='max chunk size for batch requests', default=35)
-        add(
-            '--max-retries',
-            type=int,
-            env_var='MAX_RETRIES',
-            help='max number of retries after request failure is accepted; default -1 means no limit',
-            default=-1,
-        )
+
+        # --sync-to-s3 seems to be unnecessary
         add(
             '--sync-to-s3',
             type=strtobool,
@@ -93,13 +74,6 @@ class Conf:
         # test/debug
         add('--log-level', env_var='LOG_LEVEL', default='INFO')
         add(
-            '--test-disable-sync',
-            type=strtobool,
-            env_var='TEST_DISABLE_SYNC',
-            help='(debug) skip sync and sweep; jump to block streaming',
-            default=False,
-        )
-        add(
             '--test-max-block',
             type=int,
             env_var='TEST_MAX_BLOCK',
@@ -112,12 +86,6 @@ class Conf:
             env_var='TEST_LAST_BLOCK_MASSIVE',
             help='(debug) stop massive sync on a given LIB then synchronize in LIVE by processing blocks one at a time',
             default=None,
-        )
-        add(
-            '--test-skip-ais-phase',
-            env_var='TEST_SKIP_AIS_PHASE',
-            help='(debug) Allows to skip After-Initial-Sync phase. Useful to go into live sync or exit if TEST_MAX_BLOCK is used',
-            action='store_true',
         )
         add('--test-profile', type=strtobool, env_var='TEST_PROFILE', help='(debug) profile execution', default=False)
         add(
