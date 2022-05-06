@@ -512,5 +512,5 @@ class Blocks:
         If any record has `completed` == false, it indicates that the database was closed incorrectly or a rollback failed.
         """
         not_completed_blocks = DB.query_one("SELECT count(*) FROM hive_blocks WHERE completed = false LIMIT 1")
-        log.info("[INIT] Number of not completed blocks: %s.", not_completed_blocks)
+        log.info("[MASSIVE] Number of not completed blocks: %s.", not_completed_blocks)
         return not_completed_blocks == 0
