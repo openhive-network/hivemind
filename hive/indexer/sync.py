@@ -53,6 +53,7 @@ class SyncHiveDb:
         self._lbound = None
         self._ubound = None
         self._databases = None
+        self._were_mocks_after_db_blocks = False
 
     def __enter__(self):
         log.info("Entering HAF mode synchronization")
@@ -84,8 +85,10 @@ class SyncHiveDb:
     def __exit__(self, exc_type, value, traceback):
         log.info("Exiting HAF mode synchronization")
 
-        self._context_detach()  # context attaching requires context to be detached or error will be raised
-        self._context_attach()
+        if not self._were_mocks_after_db_blocks:
+            self._context_detach()  # context attaching requires context to be detached or error will be raised
+            self._context_attach()
+
         last_imported_block = Blocks.head_num()
         DbState.finish_massive_sync(current_imported_block=last_imported_block)
 
@@ -117,6 +120,7 @@ class SyncHiveDb:
                 if not (self._lbound and self._ubound):  # all blocks from HAF db processed
                     self._lbound = last_imported_block + 1
                     self._ubound = self._test_max_block
+                    self._were_mocks_after_db_blocks = True
                 else:
                     self._ubound = min(self._test_max_block, self._ubound)
 
