@@ -1,5 +1,3 @@
-DROP SCHEMA IF EXISTS hivemind_app CASCADE;
-
 CREATE SCHEMA IF NOT EXISTS hivemind_app;
 
 CREATE OR REPLACE PROCEDURE hivemind_app.define_schema()
@@ -416,7 +414,7 @@ $$
 BEGIN
     RAISE NOTICE 'Attempting to create an application schema indexes...';
 
-    ASSERT EXISTS (SELECT * FROM pg_extension WHERE extname='intarray'), 'The database requires created "intarray" extension';
+    ASSERT EXISTS(SELECT * FROM pg_extension WHERE extname = 'intarray'), 'The database requires created "intarray" extension';
 
     -- hive_blocks
     CREATE INDEX hive_blocks_created_at_idx ON hivemind_app.hive_blocks (created_at);
@@ -514,3 +512,62 @@ END
 $$
 ;
 
+CREATE OR REPLACE PROCEDURE hivemind_app.populate_with_defaults()
+    LANGUAGE 'plpgsql'
+AS
+$$
+BEGIN
+    RAISE NOTICE 'Attempting to insert default rows...';
+
+    INSERT INTO hive_state (block_num, db_version) VALUES (0, 0);
+    INSERT INTO hive_blocks (num, hash, created_at, completed)
+    VALUES (0, '0000000000000000000000000000000000000000', '2016-03-24 16:04:57', true);
+    INSERT INTO hive_permlink_data (id, permlink) VALUES (0, '');
+    INSERT INTO hive_category_data (id, category) VALUES (0, '');
+    INSERT INTO hive_tag_data (id, tag) VALUES (0, '');
+    INSERT INTO hive_accounts (id, name, created_at) VALUES (0, '', '1970-01-01T00:00:00');
+    INSERT INTO hive_accounts (name, created_at) VALUES ('miners', '2016-03-24 16:05:00');
+    INSERT INTO hive_accounts (name, created_at) VALUES ('null', '2016-03-24 16:05:00');
+    INSERT INTO hive_accounts (name, created_at) VALUES ('temp', '2016-03-24 16:05:00');
+    INSERT INTO hive_accounts (name, created_at) VALUES ('initminer', '2016-03-24 16:05:00');
+    INSERT INTO public.hive_posts(id, root_id, parent_id, author_id, permlink_id, category_id, community_id, created_at,
+                                  depth, block_num, block_num_created)
+    VALUES (0, 0, 0, 0, 0, 0, 0, current_timestamp, 0, 0, 0);
+END
+$$
+;
+
+CREATE OR REPLACE FUNCTION hivemind_app.get_add_fks_queries()
+    RETURNS SETOF text
+    LANGUAGE 'plpgsql'
+AS
+$$
+BEGIN
+    RETURN QUERY
+        SELECT 'ALTER TABLE ' || nspname || '.' || relname || ' ADD CONSTRAINT ' || conname || ' ' ||
+               pg_get_constraintdef(pg_constraint.oid) || ';'
+        FROM pg_constraint
+                 INNER JOIN pg_class ON conrelid = pg_class.oid
+                 INNER JOIN pg_namespace ON pg_namespace.oid = pg_class.relnamespace
+        WHERE nspname = 'hivemind_app'
+          AND contype = 'f'
+        ORDER BY nspname, relname, conname;
+END
+$$;
+
+CREATE OR REPLACE FUNCTION hivemind_app.get_drop_fks_queries()
+    RETURNS SETOF text
+    LANGUAGE 'plpgsql'
+AS
+$$
+BEGIN
+    RETURN QUERY
+        SELECT 'ALTER TABLE ' || nspname || '.' || relname || ' DROP CONSTRAINT IF EXISTS ' || conname || ';'
+        FROM pg_constraint
+                 INNER JOIN pg_class ON conrelid = pg_class.oid
+                 INNER JOIN pg_namespace ON pg_namespace.oid = pg_class.relnamespace
+        WHERE nspname = 'hivemind_app'
+          AND contype = 'f'
+        ORDER BY nspname, relname, conname;
+END
+$$;

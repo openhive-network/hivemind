@@ -1,501 +1,34 @@
 """Db schema definitions and setup routines."""
 
 import logging
+from pathlib import Path
 
-import sqlalchemy as sa
-from sqlalchemy.sql import text as sql_text
-from sqlalchemy.types import BOOLEAN
-from sqlalchemy.types import CHAR
-from sqlalchemy.types import SMALLINT
-from sqlalchemy.types import TEXT
-from sqlalchemy.types import VARCHAR
+from hive.conf import SCHEMA_NAME
 
 log = logging.getLogger(__name__)
 
-
 # pylint: disable=line-too-long, too-many-lines, bad-whitespace
-
-
-def build_metadata():
-    """Build schema def with SqlAlchemy"""
-    metadata = sa.MetaData()
-
-    sa.Table(
-        'hive_blocks',
-        metadata,
-        sa.Column('num', sa.Integer, primary_key=True, autoincrement=False),
-        sa.Column('hash', CHAR(40), nullable=False),
-        sa.Column('prev', CHAR(40)),
-        sa.Column('created_at', sa.DateTime, nullable=False),
-        sa.Column('completed', sa.Boolean, nullable=False, server_default='0'),
-        sa.UniqueConstraint('hash', name='hive_blocks_ux1'),
-        sa.ForeignKeyConstraint(['prev'], ['hive_blocks.hash'], name='hive_blocks_fk1'),
-        sa.Index('hive_blocks_created_at_idx', 'created_at'),
-        sa.Index('hive_blocks_completed_idx', 'completed'),
-    )
-
-    sa.Table(
-        'hive_accounts',
-        metadata,
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('name', VARCHAR(16, collation='C'), nullable=False),
-        sa.Column('created_at', sa.DateTime, nullable=False),
-        # sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Column('reputation', sa.BigInteger, nullable=False, server_default='0'),
-        sa.Column('is_implicit', sa.Boolean, nullable=False, server_default='1'),
-        sa.Column('followers', sa.Integer, nullable=False, server_default='0'),
-        sa.Column('following', sa.Integer, nullable=False, server_default='0'),
-        sa.Column('rank', sa.Integer, nullable=False, server_default='0'),
-        sa.Column('lastread_at', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
-        sa.Column('posting_json_metadata', sa.Text),
-        sa.Column('json_metadata', sa.Text),
-        sa.UniqueConstraint('name', name='hive_accounts_ux1'),
-        sa.Index('hive_accounts_reputation_id_idx', sa.text('reputation DESC, id')),
-    )
-
-    sa.Table(
-        'hive_reputation_data',
-        metadata,
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('author_id', sa.Integer, nullable=False),
-        sa.Column('voter_id', sa.Integer, nullable=False),
-        sa.Column('permlink', sa.String(255, collation='C'), nullable=False),
-        sa.Column('rshares', sa.BigInteger, nullable=False),
-        sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Index('hive_reputation_data_author_permlink_voter_idx', 'author_id', 'permlink', 'voter_id'),
-        sa.Index('hive_reputation_data_block_num_idx', 'block_num'),
-    )
-
-    sa.Table(
-        'hive_posts',
-        metadata,
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('root_id', sa.Integer, nullable=False),  # records having initially set 0 will be updated to their id
-        sa.Column('parent_id', sa.Integer, nullable=False),
-        sa.Column('author_id', sa.Integer, nullable=False),
-        sa.Column('permlink_id', sa.Integer, nullable=False),
-        sa.Column('category_id', sa.Integer, nullable=False),
-        sa.Column('community_id', sa.Integer, nullable=True),
-        sa.Column('created_at', sa.DateTime, nullable=False),
-        sa.Column('depth', SMALLINT, nullable=False),
-        sa.Column('counter_deleted', sa.Integer, nullable=False, server_default='0'),
-        sa.Column('is_pinned', BOOLEAN, nullable=False, server_default='0'),
-        sa.Column('is_muted', BOOLEAN, nullable=False, server_default='0'),
-        sa.Column('is_valid', BOOLEAN, nullable=False, server_default='1'),
-        sa.Column('promoted', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
-        sa.Column('children', sa.Integer, nullable=False, server_default='0'),
-        # core stats/indexes
-        sa.Column('payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
-        sa.Column('pending_payout', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
-        sa.Column('payout_at', sa.DateTime, nullable=False, server_default='1970-01-01'),
-        sa.Column('last_payout_at', sa.DateTime, nullable=False, server_default='1970-01-01'),
-        sa.Column('updated_at', sa.DateTime, nullable=False, server_default='1970-01-01'),
-        sa.Column('is_paidout', BOOLEAN, nullable=False, server_default='0'),
-        # ui flags/filters
-        sa.Column('is_nsfw', BOOLEAN, nullable=False, server_default='0'),
-        sa.Column('is_declined', BOOLEAN, nullable=False, server_default='0'),
-        sa.Column('is_full_power', BOOLEAN, nullable=False, server_default='0'),
-        sa.Column('is_hidden', BOOLEAN, nullable=False, server_default='0'),
-        # important indexes
-        sa.Column('sc_trend', sa.Float(precision=6), nullable=False, server_default='0'),
-        sa.Column('sc_hot', sa.Float(precision=6), nullable=False, server_default='0'),
-        sa.Column('total_payout_value', sa.String(30), nullable=False, server_default='0.000 HBD'),
-        sa.Column('author_rewards', sa.BigInteger, nullable=False, server_default='0'),
-        sa.Column('author_rewards_hive', sa.BigInteger, nullable=False, server_default='0'),
-        sa.Column('author_rewards_hbd', sa.BigInteger, nullable=False, server_default='0'),
-        sa.Column('author_rewards_vests', sa.BigInteger, nullable=False, server_default='0'),
-        sa.Column('abs_rshares', sa.Numeric, nullable=False, server_default='0'),
-        sa.Column('vote_rshares', sa.Numeric, nullable=False, server_default='0'),
-        sa.Column('total_vote_weight', sa.Numeric, nullable=False, server_default='0'),
-        sa.Column('total_votes', sa.BigInteger, nullable=False, server_default='0'),
-        sa.Column('net_votes', sa.BigInteger, nullable=False, server_default='0'),
-        sa.Column('active', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
-        sa.Column('cashout_time', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
-        sa.Column('percent_hbd', sa.Integer, nullable=False, server_default='10000'),
-        sa.Column('curator_payout_value', sa.String(30), nullable=False, server_default='0.000 HBD'),
-        sa.Column('max_accepted_payout', sa.String(30), nullable=False, server_default='1000000.000 HBD'),
-        sa.Column('allow_votes', BOOLEAN, nullable=False, server_default='1'),
-        sa.Column('allow_curation_rewards', BOOLEAN, nullable=False, server_default='1'),
-        sa.Column('beneficiaries', sa.JSON, nullable=False, server_default='[]'),
-        sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Column('block_num_created', sa.Integer, nullable=False),
-        sa.Column('tags_ids', sa.ARRAY(sa.Integer), nullable=True),
-        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_posts_fk1'),
-        sa.ForeignKeyConstraint(['root_id'], ['hive_posts.id'], name='hive_posts_fk2'),
-        sa.ForeignKeyConstraint(['parent_id'], ['hive_posts.id'], name='hive_posts_fk3'),
-        sa.UniqueConstraint('author_id', 'permlink_id', 'counter_deleted', name='hive_posts_ux1'),
-        sa.Index('hive_posts_depth_idx', 'depth'),
-        sa.Index('hive_posts_root_id_id_idx', 'root_id', 'id'),
-        sa.Index(
-            'hive_posts_parent_id_id_idx',
-            sa.text('parent_id, id DESC'),
-            postgresql_where=sql_text("counter_deleted = 0"),
-        ),
-        sa.Index('hive_posts_community_id_id_idx', 'community_id', sa.text('id DESC')),
-        sa.Index('hive_posts_payout_at_idx', 'payout_at'),
-        sa.Index('hive_posts_payout_idx', 'payout'),
-        sa.Index(
-            'hive_posts_promoted_id_idx',
-            'promoted',
-            'id',
-            postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0"),
-        ),
-        sa.Index(
-            'hive_posts_sc_trend_id_idx',
-            'sc_trend',
-            'id',
-            postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0 AND depth = 0"),
-        ),
-        sa.Index(
-            'hive_posts_sc_hot_id_idx',
-            'sc_hot',
-            'id',
-            postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0 AND depth = 0"),
-        ),
-        sa.Index('hive_posts_author_id_created_at_id_idx', sa.text('author_id DESC, created_at DESC, id')),
-        sa.Index('hive_posts_author_id_id_idx', 'author_id', 'id', postgresql_where=sql_text('depth = 0')),
-        sa.Index('hive_posts_block_num_idx', 'block_num'),
-        sa.Index('hive_posts_block_num_created_idx', 'block_num_created'),
-        sa.Index('hive_posts_cashout_time_id_idx', 'cashout_time', 'id'),
-        sa.Index('hive_posts_updated_at_idx', sa.text('updated_at DESC')),
-        sa.Index(
-            'hive_posts_payout_plus_pending_payout_id_idx',
-            sa.text('(payout+pending_payout), id'),
-            postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0"),
-        ),
-        sa.Index(
-            'hive_posts_category_id_payout_plus_pending_payout_depth_idx',
-            sa.text('category_id, (payout+pending_payout), depth'),
-            postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0"),
-        ),
-        sa.Index(
-            'hive_posts_tags_ids_idx', 'tags_ids', postgresql_using="gin", postgresql_ops={'tags_ids': 'gin__int_ops'}
-        ),
-    )
-
-    sa.Table(
-        'hive_post_data',
-        metadata,
-        sa.Column('id', sa.Integer, primary_key=True, autoincrement=False),
-        sa.Column('title', VARCHAR(512), nullable=False, server_default=''),
-        sa.Column('preview', VARCHAR(1024), nullable=False, server_default=''),  # first 1k of 'body'
-        sa.Column('img_url', VARCHAR(1024), nullable=False, server_default=''),  # first 'image' from 'json'
-        sa.Column('body', TEXT, nullable=False, server_default=''),
-        sa.Column('json', TEXT, nullable=False, server_default=''),
-    )
-
-    sa.Table(
-        'hive_permlink_data',
-        metadata,
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('permlink', sa.String(255, collation='C'), nullable=False),
-        sa.UniqueConstraint('permlink', name='hive_permlink_data_permlink'),
-    )
-
-    sa.Table(
-        'hive_category_data',
-        metadata,
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('category', sa.String(255, collation='C'), nullable=False),
-        sa.UniqueConstraint('category', name='hive_category_data_category'),
-    )
-
-    sa.Table(
-        'hive_votes',
-        metadata,
-        sa.Column('id', sa.BigInteger, primary_key=True),
-        sa.Column('post_id', sa.Integer, nullable=False),
-        sa.Column('voter_id', sa.Integer, nullable=False),
-        sa.Column('author_id', sa.Integer, nullable=False),
-        sa.Column('permlink_id', sa.Integer, nullable=False),
-        sa.Column('weight', sa.Numeric, nullable=False, server_default='0'),
-        sa.Column('rshares', sa.BigInteger, nullable=False, server_default='0'),
-        sa.Column('vote_percent', sa.Integer, server_default='0'),
-        sa.Column('last_update', sa.DateTime, nullable=False, server_default='1970-01-01 00:00:00'),
-        sa.Column('num_changes', sa.Integer, server_default='0'),
-        sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Column('is_effective', BOOLEAN, nullable=False, server_default='0'),
-        sa.UniqueConstraint(
-            'voter_id', 'author_id', 'permlink_id', name='hive_votes_voter_id_author_id_permlink_id_uk'
-        ),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_votes_fk1'),
-        sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id'], name='hive_votes_fk2'),
-        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_votes_fk3'),
-        sa.ForeignKeyConstraint(['permlink_id'], ['hive_permlink_data.id'], name='hive_votes_fk4'),
-        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_votes_fk5'),
-        sa.Index(
-            'hive_votes_voter_id_post_id_idx', 'voter_id', 'post_id'
-        ),  # probably this index is redundant to hive_votes_voter_id_last_update_idx because of starting voter_id.
-        sa.Index(
-            'hive_votes_voter_id_last_update_idx', 'voter_id', 'last_update'
-        ),  # this index is critical for hive_accounts_info_view performance
-        sa.Index('hive_votes_post_id_voter_id_idx', 'post_id', 'voter_id'),
-        sa.Index('hive_votes_block_num_idx', 'block_num'),  # this is also important for hive_accounts_info_view
-        sa.Index(
-            'hive_votes_post_id_block_num_rshares_vote_is_effective_idx',
-            'post_id',
-            'block_num',
-            'rshares',
-            'is_effective',
-        ),  # this index is needed by update_posts_rshares procedure.
-    )
-
-    sa.Table(
-        'hive_tag_data',
-        metadata,
-        sa.Column('id', sa.Integer, nullable=False, primary_key=True),
-        sa.Column('tag', VARCHAR(64, collation='C'), nullable=False, server_default=''),
-        sa.UniqueConstraint('tag', name='hive_tag_data_ux1'),
-    )
-
-    sa.Table(
-        'hive_follows',
-        metadata,
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('follower', sa.Integer, nullable=False),
-        sa.Column('following', sa.Integer, nullable=False),
-        sa.Column('state', SMALLINT, nullable=False, server_default='1'),
-        sa.Column('created_at', sa.DateTime, nullable=False),
-        sa.Column('blacklisted', sa.Boolean, nullable=False, server_default='0'),
-        sa.Column('follow_blacklists', sa.Boolean, nullable=False, server_default='0'),
-        sa.Column('follow_muted', BOOLEAN, nullable=False, server_default='0'),
-        sa.Column('block_num', sa.Integer, nullable=False),
-        sa.UniqueConstraint('following', 'follower', name='hive_follows_ux1'),  # core
-        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_follows_fk1'),
-        sa.Index('hive_follows_ix5a', 'following', 'state', 'created_at', 'follower'),
-        sa.Index('hive_follows_ix5b', 'follower', 'state', 'created_at', 'following'),
-        sa.Index('hive_follows_block_num_idx', 'block_num'),
-        sa.Index('hive_follows_created_at_idx', 'created_at'),
-    )
-
-    sa.Table(
-        'hive_reblogs',
-        metadata,
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('blogger_id', sa.Integer, nullable=False),
-        sa.Column('post_id', sa.Integer, nullable=False),
-        sa.Column('created_at', sa.DateTime, nullable=False),
-        sa.Column('block_num', sa.Integer, nullable=False),
-        sa.ForeignKeyConstraint(['blogger_id'], ['hive_accounts.id'], name='hive_reblogs_fk1'),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_reblogs_fk2'),
-        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_reblogs_fk3'),
-        sa.UniqueConstraint('blogger_id', 'post_id', name='hive_reblogs_ux1'),  # core
-        sa.Index('hive_reblogs_post_id', 'post_id'),
-        sa.Index('hive_reblogs_block_num_idx', 'block_num'),
-        sa.Index('hive_reblogs_created_at_idx', 'created_at'),
-    )
-
-    sa.Table(
-        'hive_payments',
-        metadata,
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Column('tx_idx', SMALLINT, nullable=False),
-        sa.Column('post_id', sa.Integer, nullable=False),
-        sa.Column('from_account', sa.Integer, nullable=False),
-        sa.Column('to_account', sa.Integer, nullable=False),
-        sa.Column('amount', sa.types.DECIMAL(10, 3), nullable=False),
-        sa.Column('token', VARCHAR(5), nullable=False),
-        sa.ForeignKeyConstraint(['from_account'], ['hive_accounts.id'], name='hive_payments_fk1'),
-        sa.ForeignKeyConstraint(['to_account'], ['hive_accounts.id'], name='hive_payments_fk2'),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_payments_fk3'),
-        sa.Index('hive_payments_from', 'from_account'),
-        sa.Index('hive_payments_to', 'to_account'),
-        sa.Index('hive_payments_post_id', 'post_id'),
-    )
-
-    sa.Table(
-        'hive_feed_cache',
-        metadata,
-        sa.Column('post_id', sa.Integer, nullable=False),
-        sa.Column('account_id', sa.Integer, nullable=False),
-        sa.Column('created_at', sa.DateTime, nullable=False),
-        sa.Column('block_num', sa.Integer, nullable=False),
-        sa.PrimaryKeyConstraint('account_id', 'post_id', name='hive_feed_cache_pk'),
-        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_feed_cache_fk1'),
-        sa.Index('hive_feed_cache_block_num_idx', 'block_num'),
-        sa.Index('hive_feed_cache_created_at_idx', 'created_at'),
-        sa.Index('hive_feed_cache_post_id_idx', 'post_id'),
-    )
-
-    sa.Table(
-        'hive_state',
-        metadata,
-        sa.Column('block_num', sa.Integer, primary_key=True, autoincrement=False),
-        sa.Column('db_version', sa.Integer, nullable=False),
-    )
-
-    sa.Table(
-        'hive_posts_api_helper',
-        metadata,
-        sa.Column('id', sa.Integer, primary_key=True, autoincrement=False),
-        sa.Column(
-            'author_s_permlink', VARCHAR(275, collation='C'), nullable=False
-        ),  # concatenation of author '/' permlink
-        sa.Index('hive_posts_api_helper_author_s_permlink_idx', 'author_s_permlink'),
-    )
-
-    sa.Table(
-        'hive_mentions',
-        metadata,
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('post_id', sa.Integer, nullable=False),
-        sa.Column('account_id', sa.Integer, nullable=False),
-        sa.Column('block_num', sa.Integer, nullable=False),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_mentions_fk1'),
-        sa.ForeignKeyConstraint(['account_id'], ['hive_accounts.id'], name='hive_mentions_fk2'),
-        sa.Index('hive_mentions_account_id_idx', 'account_id'),
-        sa.UniqueConstraint('post_id', 'account_id', 'block_num', name='hive_mentions_ux1'),
-    )
-
-    metadata = build_metadata_community(metadata)
-
-    return metadata
-
-
-def build_metadata_community(metadata=None):
-    """Build community schema defs"""
-    if not metadata:
-        metadata = sa.MetaData()
-
-    sa.Table(
-        'hive_communities',
-        metadata,
-        sa.Column('id', sa.Integer, primary_key=True, autoincrement=False),
-        sa.Column('type_id', SMALLINT, nullable=False),
-        sa.Column('lang', CHAR(2), nullable=False, server_default='en'),
-        sa.Column('name', VARCHAR(16, collation='C'), nullable=False),
-        sa.Column('title', sa.String(32), nullable=False, server_default=''),
-        sa.Column('created_at', sa.DateTime, nullable=False),
-        sa.Column('sum_pending', sa.Integer, nullable=False, server_default='0'),
-        sa.Column('num_pending', sa.Integer, nullable=False, server_default='0'),
-        sa.Column('num_authors', sa.Integer, nullable=False, server_default='0'),
-        sa.Column('rank', sa.Integer, nullable=False, server_default='0'),
-        sa.Column('subscribers', sa.Integer, nullable=False, server_default='0'),
-        sa.Column('is_nsfw', BOOLEAN, nullable=False, server_default='0'),
-        sa.Column('about', sa.String(120), nullable=False, server_default=''),
-        sa.Column('primary_tag', sa.String(32), nullable=False, server_default=''),
-        sa.Column('category', sa.String(32), nullable=False, server_default=''),
-        sa.Column('avatar_url', sa.String(1024), nullable=False, server_default=''),
-        sa.Column('description', sa.String(5000), nullable=False, server_default=''),
-        sa.Column('flag_text', sa.String(5000), nullable=False, server_default=''),
-        sa.Column('settings', TEXT, nullable=False, server_default='{}'),
-        sa.Column('block_num', sa.Integer, nullable=False),
-        sa.UniqueConstraint('name', name='hive_communities_ux1'),
-        sa.Index('hive_communities_ix1', 'rank', 'id'),
-        sa.Index('hive_communities_block_num_idx', 'block_num'),
-    )
-
-    sa.Table(
-        'hive_roles',
-        metadata,
-        sa.Column('account_id', sa.Integer, nullable=False),
-        sa.Column('community_id', sa.Integer, nullable=False),
-        sa.Column('created_at', sa.DateTime, nullable=False),
-        sa.Column('role_id', SMALLINT, nullable=False, server_default='0'),
-        sa.Column('title', sa.String(140), nullable=False, server_default=''),
-        sa.PrimaryKeyConstraint('account_id', 'community_id', name='hive_roles_pk'),
-        sa.Index('hive_roles_ix1', 'community_id', 'account_id', 'role_id'),
-    )
-
-    sa.Table(
-        'hive_subscriptions',
-        metadata,
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('account_id', sa.Integer, nullable=False),
-        sa.Column('community_id', sa.Integer, nullable=False),
-        sa.Column('created_at', sa.DateTime, nullable=False),
-        sa.Column('block_num', sa.Integer, nullable=False),
-        sa.UniqueConstraint('account_id', 'community_id', name='hive_subscriptions_ux1'),
-        sa.Index('hive_subscriptions_community_idx', 'community_id'),
-        sa.Index('hive_subscriptions_block_num_idx', 'block_num'),
-    )
-
-    sa.Table(
-        'hive_notifs',
-        metadata,
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Column('type_id', SMALLINT, nullable=False),
-        sa.Column('score', SMALLINT, nullable=False),
-        sa.Column('created_at', sa.DateTime, nullable=False),
-        sa.Column('src_id', sa.Integer, nullable=True),
-        sa.Column('dst_id', sa.Integer, nullable=True),
-        sa.Column('post_id', sa.Integer, nullable=True),
-        sa.Column('community_id', sa.Integer, nullable=True),
-        sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Column('payload', sa.Text, nullable=True),
-        sa.Index('hive_notifs_ix1', 'dst_id', 'id', postgresql_where=sql_text("dst_id IS NOT NULL")),
-        sa.Index('hive_notifs_ix2', 'community_id', 'id', postgresql_where=sql_text("community_id IS NOT NULL")),
-        sa.Index(
-            'hive_notifs_ix3', 'community_id', 'type_id', 'id', postgresql_where=sql_text("community_id IS NOT NULL")
-        ),
-        sa.Index(
-            'hive_notifs_ix4',
-            'community_id',
-            'post_id',
-            'type_id',
-            'id',
-            postgresql_where=sql_text("community_id IS NOT NULL AND post_id IS NOT NULL"),
-        ),
-        sa.Index(
-            'hive_notifs_ix5',
-            'post_id',
-            'type_id',
-            'dst_id',
-            'src_id',
-            postgresql_where=sql_text("post_id IS NOT NULL AND type_id IN (16,17)"),
-        ),  # filter: dedupe
-        sa.Index(
-            'hive_notifs_ix6', 'dst_id', 'created_at', 'score', 'id', postgresql_where=sql_text("dst_id IS NOT NULL")
-        ),  # unread
-    )
-
-    sa.Table(
-        'hive_notification_cache',
-        metadata,
-        sa.Column('id', sa.BigInteger, primary_key=True),
-        sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Column('type_id', sa.Integer, nullable=False),
-        sa.Column('dst', sa.Integer, nullable=True),  # dst account id except persistent notifs from hive_notifs
-        sa.Column('src', sa.Integer, nullable=True),  # src account id
-        sa.Column('dst_post_id', sa.Integer, nullable=True),  # destination post id
-        sa.Column('post_id', sa.Integer, nullable=True),
-        sa.Column('created_at', sa.DateTime, nullable=False),  # notification creation time
-        sa.Column('score', sa.Integer, nullable=False),
-        sa.Column('community_title', sa.String(32), nullable=True),
-        sa.Column('community', sa.String(16), nullable=True),
-        sa.Column('payload', sa.String, nullable=True),
-        sa.Index('hive_notification_cache_block_num_idx', 'block_num'),
-        sa.Index('hive_notification_cache_dst_score_idx', 'dst', 'score', postgresql_where=sql_text("dst IS NOT NULL")),
-    )
-
-    return metadata
-
-
-def teardown(db):
-    """Drop all tables"""
-    build_metadata().drop_all(db.engine())
+recreate_fks_queries = []
 
 
 def drop_fk(db):
-    db.query_no_return("START TRANSACTION")
-    for table in build_metadata().sorted_tables:
-        for fk in table.foreign_keys:
-            sql = f"""ALTER TABLE {table.name} DROP CONSTRAINT IF EXISTS {fk.name}"""
-            db.query_no_return(sql)
-    db.query_no_return("COMMIT")
+    global recreate_fks_queries
+    recreate_fks_queries = db.query_col(f"SELECT {SCHEMA_NAME}.get_add_fks_queries();")
+
+    queries_to_drop_fks = db.query_col(f"SELECT {SCHEMA_NAME}.get_drop_fks_queries();")
+    for sql in queries_to_drop_fks:
+        db.query(sql)
 
 
 def create_fk(db):
-    from sqlalchemy.schema import AddConstraint
     from sqlalchemy import text
+
+    global recreate_fks_queries
 
     connection = db.get_new_connection('create_fk')
     connection.execute(text("START TRANSACTION"))
-    for table in build_metadata().sorted_tables:
-        for fk in table.foreign_keys:
-            connection.execute(AddConstraint(fk.constraint))
+    for sql in recreate_fks_queries:
+        connection.execute(sql)
     connection.execute(text("COMMIT"))
 
 
@@ -505,8 +38,13 @@ def setup(db):
     sql = """SELECT * FROM pg_extension WHERE extname='intarray'"""
     assert db.query_row(sql), "The database requires created 'intarray' extension"
 
+    sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
+
+    # create schema and aux functions
+    execute_sql_script(query_executor=db.query_no_return, path_to_script=sql_scripts_dir_path / 'schema.sql')
+
     # initialize schema
-    build_metadata().create_all(db.engine())
+    db.query_no_return(f"CALL {SCHEMA_NAME}.define_schema();")
 
     # tune auto vacuum/analyze
     reset_autovac(db)
@@ -515,28 +53,7 @@ def setup(db):
     set_fillfactor(db)
 
     # default rows
-    sqls = [
-        "INSERT INTO hive_state (block_num, db_version) VALUES (0, 0)",
-        "INSERT INTO hive_blocks (num, hash, created_at, completed) VALUES (0, '0000000000000000000000000000000000000000', '2016-03-24 16:04:57', true)",
-        "INSERT INTO hive_permlink_data (id, permlink) VALUES (0, '')",
-        "INSERT INTO hive_category_data (id, category) VALUES (0, '')",
-        "INSERT INTO hive_tag_data (id, tag) VALUES (0, '')",
-        "INSERT INTO hive_accounts (id, name, created_at) VALUES (0, '', '1970-01-01T00:00:00')",
-        "INSERT INTO hive_accounts (name, created_at) VALUES ('miners',    '2016-03-24 16:05:00')",
-        "INSERT INTO hive_accounts (name, created_at) VALUES ('null',      '2016-03-24 16:05:00')",
-        "INSERT INTO hive_accounts (name, created_at) VALUES ('temp',      '2016-03-24 16:05:00')",
-        "INSERT INTO hive_accounts (name, created_at) VALUES ('initminer', '2016-03-24 16:05:00')",
-        """
-        INSERT INTO
-            public.hive_posts(id, root_id, parent_id, author_id, permlink_id, category_id,
-                community_id, created_at, depth, block_num, block_num_created
-            )
-        VALUES
-            (0, 0, 0, 0, 0, 0, 0, now(), 0, 0, 0);
-        """,
-    ]
-    for sql in sqls:
-        db.query(sql)
+    db.query_no_return(f"CALL {SCHEMA_NAME}.populate_with_defaults();")
 
     sql = "CREATE INDEX hive_communities_ft1 ON hive_communities USING GIN (to_tsvector('english', title || ' ' || about))"
     db.query(sql)
@@ -672,11 +189,9 @@ def setup(db):
         "upgrade/update_db_patchlevel.sql",
         # Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
     ]
-    from os.path import dirname, realpath
 
-    dir_path = dirname(realpath(__file__))
     for script in sql_scripts:
-        execute_sql_script(db.query_no_return, f"{dir_path}/sql_scripts/{script}")
+        execute_sql_script(db.query_no_return, sql_scripts_dir_path / script)
 
     # Move this part here, to mark latest db patch level as current Hivemind revision (which just created schema).
     sql = """
@@ -708,11 +223,13 @@ def reset_autovac(db):
     }
 
     for table, (n_vacuum, n_analyze) in autovac_config.items():
-        sql = """ALTER TABLE %s SET (autovacuum_vacuum_scale_factor = 0,
-                                     autovacuum_vacuum_threshold = %s,
-                                     autovacuum_analyze_scale_factor = 0,
-                                     autovacuum_analyze_threshold = %s)"""
-        db.query(sql % (table, n_vacuum, n_analyze))
+        sql = f"""
+ALTER TABLE {SCHEMA_NAME}.{table} SET (autovacuum_vacuum_scale_factor = 0,
+                                  autovacuum_vacuum_threshold = {n_vacuum},
+                                  autovacuum_analyze_scale_factor = 0,
+                                  autovacuum_analyze_threshold = {n_analyze});
+"""
+        db.query(sql)
 
 
 def set_fillfactor(db):
@@ -721,8 +238,8 @@ def set_fillfactor(db):
     fillfactor_config = {'hive_posts': 70, 'hive_post_data': 70, 'hive_votes': 70, 'hive_reputation_data': 50}
 
     for table, fillfactor in fillfactor_config.items():
-        sql = """ALTER TABLE {} SET (FILLFACTOR = {})"""
-        db.query(sql.format(table, fillfactor))
+        sql = f"ALTER TABLE {SCHEMA_NAME}.{table} SET (FILLFACTOR = {fillfactor});"
+        db.query(sql)
 
 
 def set_logged_table_attribute(db, logged):

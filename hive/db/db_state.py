@@ -9,6 +9,7 @@ from time import perf_counter
 
 import sqlalchemy
 
+from hive.conf import SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.db.schema import build_metadata, setup, teardown
 from hive.indexer.auto_db_disposer import AutoDbDisposer
@@ -48,11 +49,6 @@ class DbState:
         # check if massive sync complete
         cls._is_massive_sync = True
         log.info("[MASSIVE] Continue with massive sync...")
-
-    @classmethod
-    def teardown(cls):
-        """Drop all tables in db."""
-        teardown(cls.db())
 
     @classmethod
     def db(cls):
@@ -475,7 +471,9 @@ $$;
         last_imported_block = DbState.db().query_one("SELECT block_num FROM hive_state LIMIT 1")
 
         log.info(
-            "[MASSIVE] Current imported block: %s. Last imported block: %s.", current_imported_block, last_imported_block
+            "[MASSIVE] Current imported block: %s. Last imported block: %s.",
+            current_imported_block,
+            last_imported_block,
         )
         if last_imported_block > current_imported_block:
             last_imported_block = current_imported_block
@@ -537,13 +535,7 @@ $$;
         # check if database has been initialized (i.e. schema loaded)
         _engine_name = cls.db().engine_name()
         if _engine_name == 'postgresql':
-            return bool(
-                cls.db().query_one(
-                    """
-                SELECT 1 FROM pg_catalog.pg_tables WHERE schemaname = 'public'
-            """
-                )
-            )
+            return bool(cls.db().query_one(f"SELECT 1 FROM pg_catalog.pg_tables WHERE schemaname = '{SCHEMA_NAME}';"))
         if _engine_name == 'mysql':
             return bool(cls.db().query_one('SHOW TABLES'))
         raise Exception(f"unknown db engine {_engine_name}")
