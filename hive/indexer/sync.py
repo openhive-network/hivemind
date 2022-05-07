@@ -45,8 +45,7 @@ class SyncHiveDb:
 
     def __init__(self, conf: Conf):
         self._conf = conf
-        self._db_hivemind = conf.db()
-        self._db_haf = conf.db_haf()
+        self._db = conf.db()
 
         # Might be lower or higher than actual block number stored in HAF database
         self._last_block_to_process = self._conf.get('test_max_block')
@@ -64,14 +63,14 @@ class SyncHiveDb:
         set_custom_signal_handlers()
 
         DbLiveContextHolder.set_live_context(False)
-        self._databases = MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db_haf, conf=self._conf)
+        self._databases = MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db, conf=self._conf)
 
         Blocks.setup(conf=self._conf)
 
         Community.start_block = self._conf.get("community_start_block")
         DbState.initialize()
 
-        self._show_info(self._db_hivemind)
+        self._show_info(self._db)
 
         self._check_log_explain_queries()
 
@@ -79,7 +78,7 @@ class SyncHiveDb:
             raise RuntimeError("Fatal error related to `hive_blocks` consistency")
         self._load_mock_data()
         Accounts.load_ids()  # prefetch id->name and id->rank memory maps
-        update_communities_posts_and_rank(self._db_hivemind)
+        update_communities_posts_and_rank(self._db)
 
         self._prepare_app_context()
         self._prepare_app_schema()
@@ -109,8 +108,7 @@ class SyncHiveDb:
             Blocks.close_own_db_access()
 
     def run(self) -> None:
-        hived_database_url = self._conf.get('hived_database_url')
-        log.info(f"Using HAF database as block data provider, pointed by url: '{hived_database_url}'")
+        log.info(f"Using HAF database as block data provider, pointed by url: '{self._conf.get('database_url')}'")
 
         while True:
             if not can_continue_thread():
@@ -185,16 +183,16 @@ class SyncHiveDb:
         elif block_num % 200 == 0:  # 10min
             log.info("[SINGLE] 10min")
             log.info("[SINGLE] updating communities posts and rank")
-            update_communities_posts_and_rank(self._db_hivemind)
+            update_communities_posts_and_rank(self._db)
 
     def _prepare_app_context(self) -> None:
         log.info(f"Looking for '{self.HIVEMIND_APP_CONTEXT}' context.")
-        ctx_present = self._db_haf.query_one(
+        ctx_present = self._db.query_one(
             f"SELECT hive.app_context_exists('{self.HIVEMIND_APP_CONTEXT}') as ctx_present;"
         )
         if not ctx_present:
             log.info(f"No application context present. Attempting to create a '{self.HIVEMIND_APP_CONTEXT}' context...")
-            self._db_haf.query_no_return(f"SELECT hive.app_create_context('{self.HIVEMIND_APP_CONTEXT}');")
+            self._db.query_no_return(f"SELECT hive.app_create_context('{self.HIVEMIND_APP_CONTEXT}');")
             log.info("Application context creation done.")
 
     def _prepare_app_schema(self) -> None:
@@ -202,14 +200,14 @@ class SyncHiveDb:
         script_path = Path(__file__).parent.parent / "db/sql_scripts/hafapp_api.sql"
 
         log.info(f"Attempting to execute SQL script: '{script_path}'")
-        execute_sql_script(query_executor=self._db_haf.query_no_return, path_to_script=script_path)
+        execute_sql_script(query_executor=self._db.query_no_return, path_to_script=script_path)
         log.info("Application schema created.")
 
     def _query_for_app_next_block(self) -> Tuple[int, int]:
         log.info("Querying for next block for app context...")
-        self._db_haf.query("START TRANSACTION")
-        lbound, ubound = self._db_haf.query_row(f"SELECT * FROM hive.app_next_block('{self.HIVEMIND_APP_CONTEXT}')")
-        self._db_haf.query("COMMIT")
+        self._db.query("START TRANSACTION")
+        lbound, ubound = self._db.query_row(f"SELECT * FROM hive.app_next_block('{self.HIVEMIND_APP_CONTEXT}')")
+        self._db.query("COMMIT")
         log.info(f"Next block range from hive.app_next_block is: <{lbound}:{ubound}>")
         return lbound, ubound
 
@@ -226,10 +224,10 @@ class SyncHiveDb:
         log.info(f"Block range: <{self._lbound}:{self._ubound}> processing finished")
 
     def _context_detach(self) -> None:
-        is_attached = self._db_haf.query_one(f"SELECT hive.app_context_is_attached('{self.HIVEMIND_APP_CONTEXT}')")
+        is_attached = self._db.query_one(f"SELECT hive.app_context_is_attached('{self.HIVEMIND_APP_CONTEXT}')")
         if is_attached:
             log.info("Trying to detach app context...")
-            self._db_haf.query_no_return(f"SELECT hive.app_context_detach('{self.HIVEMIND_APP_CONTEXT}')")
+            self._db.query_no_return(f"SELECT hive.app_context_detach('{self.HIVEMIND_APP_CONTEXT}')")
             log.info("App context detaching done.")
         else:
             log.info("No attached context - detach skipped.")
@@ -237,12 +235,12 @@ class SyncHiveDb:
     def _context_attach(self) -> None:
         last_block = Blocks.head_num()
         log.info(f"Trying to attach app context with block number: {last_block}")
-        self._db_haf.query_no_return(f"SELECT hive.app_context_attach('{self.HIVEMIND_APP_CONTEXT}', {last_block})")
+        self._db.query_no_return(f"SELECT hive.app_context_attach('{SCHEMA_NAME}', {last_block})")
         log.info("App context attaching done.")
 
     def _check_log_explain_queries(self) -> None:
         if self._conf.get("log_explain_queries"):
-            is_superuser = self._db_hivemind.query_one("SELECT is_superuser()")
+            is_superuser = self._db.query_one("SELECT is_superuser()")
             assert (
                 is_superuser
             ), 'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
