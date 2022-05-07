@@ -28,7 +28,6 @@ class Conf:
         self._args = None
         self._env = None
         self._db = None
-        self._db_haf = None
         self.arguments = None
 
     def init_argparse(self, strict=True, **kwargs):
@@ -65,13 +64,6 @@ class Conf:
             env_var='SYNC_TO_S3',
             help='alternative healthcheck for background sync service',
             default=False,
-        )
-        add(
-            '--hived-database-url',
-            env_var='HIVED_DATABASE_URL',
-            required=False,
-            help='Hived blocks database connection url',
-            default='',
         )
 
         # test/debug
@@ -220,20 +212,6 @@ class Conf:
             log.info("The database instance is created...")
 
         return self._db
-
-    def db_haf(self):
-        """Get a configured instance of HAF Db."""
-        if self._db_haf is None:
-            url = self.get('hived_database_url')
-            if not url:
-                log.info("--hived-database-url (or HIVED_DATABASE_URL env) not specified")
-                return None
-
-            enable_autoexplain = self.get('log_explain_queries')
-            self._db_haf = Db(url, "MassiveBlocksProvider.Root", enable_autoexplain)
-            log.info("The HAF database instance created...")
-
-        return self._db_haf
 
     def get(self, param):
         """Reads a single property, e.g. `database_url`."""
