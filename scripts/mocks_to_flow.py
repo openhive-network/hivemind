@@ -1,5 +1,6 @@
 # This script parses a json mock file and outputs a flow.txt file
 import json
+import argparse
 
 def parse_custom_json(op):
     data = json.loads(op['json'].replace('\n', r'\n'))
@@ -31,21 +32,19 @@ def parse_op(op):
         return 'delete_comment_operation( `{}`, `{}`)'.format(op['value']['author'], op['value']['permlink'])
     elif op['type'] == 'vote_operation':
         return 'delete_comment_operation(`{}` -> `{}`, `{}`, `{}`)'.format(op['value']['voter'], op['value']['author'], op['value']['permlink'], op['value']['weight'])
+    elif op['type'] == 'create_claimed_account_operation':
+        return 'create_claimed_account_operation(`{}` -> `{}`)'.format(op['value']['creator'], op['value']['new_account_name'])
     else:
         raise 'operation type not known'
 
 if __name__ == "__main__":
-    import argparse
-
     parser = argparse.ArgumentParser()
-
     parser.add_argument("file", type=str, help="Path of the mock file")
-
     args = parser.parse_args()
-
     f = open(args.file)
     data = json.load(f)
     flow_str = ''
+
     for block_id in data:
         flow_str += '***block {}***\n'.format(block_id)
         operations = data[block_id]['transactions'][0]['operations']

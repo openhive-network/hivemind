@@ -1,0 +1,11 @@
+***block 1000000***
+custom_json_operation("[\"setLastRead\", {\"date\": \"2021-05-26T14:21:43\"}]")
+custom_json_operation("[\"setLastRead\", {\"date\": null}]")
+custom_json_operation("[\"setLastRead\", {}]")
+custom_json_operation("[\"setLastRead\", {\"date\": \"2016-05-26T14:21:43\"}]")
+custom_json_operation("[\"setLastRead\", {\"date\": \"2099-02-26T14:21:43\"}]")
+custom_json_operation("[\"setLastRead\", {\"date\": null}]")
+custom_json_operation("[\"setLastRead\"]")
+custom_json_operation("[\"setLastRead\", {\"date\": \"2015-02-26T14:21:43\"}]")
+custom_json_operation("[\"setLastRead\", {\"date\": \"1968-02-26T14:21:43\"}]")
+custom_json_operation("[\"setLastRead\", {}]")
