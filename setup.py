@@ -182,7 +182,7 @@ if __name__ == "__main__":
             'psycopg2-binary==2.8.6',
             'aiocache==0.11.1',
             'configargparse==1.4.1',
-            'pdoc==0.3.2',
+            'pdoc==11.2.0',
             'diff-match-patch==20200713',
             'prometheus-client==0.10.1',
             'psutil==5.8.0',
