@@ -6,6 +6,155 @@ from hive.server.common.helpers import return_error_info, valid_account, valid_d
 from hive.server.database_api.objects import database_post_object
 from hive.utils.normalize import escape_characters
 
+from hive.server.db import Db
+
+from distutils import util
+
+
+# -*- coding: utf-8 -*-
+from jsonrpcserver.exceptions import ApiError
+
+JSON_RPC_SERVER_ERROR       = -32000
+JSON_RPC_ERROR_DURING_CALL  = -32003
+
+class SQLExceptionWrapper(ApiError):
+  def __init__(self, msg):
+    super().__init__(msg, JSON_RPC_ERROR_DURING_CALL)
+
+class InternalServerException(ApiError):
+  def __init__(self, msg):
+    super().__init__(msg, JSON_RPC_ERROR_DURING_CALL)
+
+class CustomUInt64ParserApiException(ApiError):
+  def __init__(self):
+    super().__init__("Parse Error:Couldn't parse uint64_t", JSON_RPC_SERVER_ERROR)
+
+class CustomInt64ParserApiException(ApiError):
+  def __init__(self):
+    super().__init__("Parse Error:Couldn't parse int64_t", JSON_RPC_SERVER_ERROR)
+
+class CustomBoolParserApiException(ApiError):
+  def __init__(self):
+    super().__init__("Bad Cast:Cannot convert string to bool (only \"true\" or \"false\" can be converted)", JSON_RPC_SERVER_ERROR)
+
+
+MAX_BIGINT_POSTGRES = 9_223_372_036_854_775_807
+ENUM_VIRTUAL_OPS_LIMIT = 150_000
+DEFAULT_INCLUDE_IRREVERSIBLE = False
+DEFAULT_LIMIT = 1_000
+BLOCK_WIDTH_LIMIT = 2 * DEFAULT_LIMIT
+RANGEINT = 2**32
+
+
+def convert(val, default_value):
+    try:
+        if val is None:
+            return default_value
+
+        invalid_val = False
+        if isinstance(val, str):
+            if(val == "true" or val == "false"):#old code from AH doesn't allow f.e. `True` value
+                return bool(util.strtobool(val))
+            else:
+                invalid_val = True
+        elif isinstance(val, int):
+            return bool(val)
+    except Exception as ex:
+        raise CustomBoolParserApiException()
+
+    if invalid_val:
+        raise CustomBoolParserApiException()
+    else:
+        return val
+
+@return_error_info
+async def get_ops_in_block( context, block_num : int, only_virtual : bool = None, include_reversible : bool = None):
+    try:
+        block_num = 0 if block_num is None else int(block_num)
+    except Exception:
+        raise CustomUInt64ParserApiException()
+
+    include_reversible  = convert(include_reversible, DEFAULT_INCLUDE_IRREVERSIBLE)
+    only_virtual        = convert(only_virtual, False)
+
+
+    db : Db = context['db']
+    return await db.query_one(
+        "SELECT * FROM hafah_python.get_ops_in_block_json( :block_num, :only_virt, :include_reversible, :is_legacy_style )",
+        block_num=block_num,
+        only_virt=only_virtual,
+        include_reversible=include_reversible,
+        is_legacy_style=True
+    )
+
+@return_error_info
+async def get_transaction(context, id : str, include_reversible : bool = None):
+    include_reversible = convert(include_reversible, DEFAULT_INCLUDE_IRREVERSIBLE)
+
+    db : Db = context['db']
+    return await db.query_one(
+        "SELECT * FROM hafah_python.get_transaction_json( :trx_hash, :include_reversible, :is_legacy_style )",
+        trx_hash=f'\\x{id}',
+        include_reversible=include_reversible,
+        is_legacy_style=True
+    )
+
+@return_error_info
+async def get_account_history(context, account : str, operation_filter_low : int = None, operation_filter_high : int = None, start : int = None, limit : int = None, include_reversible : bool = None):
+    try:
+        start                  = -1            if start is None                  else int(start)
+        limit                  = DEFAULT_LIMIT if limit is None                  else int(limit)
+        operation_filter_low   = 0             if operation_filter_low is None   else int(operation_filter_low)
+        operation_filter_high  = 0             if operation_filter_high is None  else int(operation_filter_high)
+    except Exception:
+        raise CustomUInt64ParserApiException()
+
+    include_reversible = convert(include_reversible, DEFAULT_INCLUDE_IRREVERSIBLE)
+
+    start = start if start >= 0 else MAX_BIGINT_POSTGRES
+    limit = (RANGEINT + limit) if limit < 0 else limit
+
+    db : Db = context['db']
+    return await db.query_one(
+        f"SELECT * FROM hafah_python.ah_get_account_history_json( :filter_low, :filter_high, :account, :start ::BIGINT, :limit, :include_reversible, :is_legacy_style )",
+        filter_low=operation_filter_low,
+        filter_high=operation_filter_high,
+        account=account,
+        start=start,
+        limit=limit,
+        include_reversible=include_reversible,
+        is_legacy_style=True
+    )
+
+@return_error_info
+async def enum_virtual_ops(context, block_range_begin : int, block_range_end : int, operation_begin : int = None, filter : int = None, limit : int = None, include_reversible : bool = None, group_by_block : bool = None):
+    try:
+        block_range_begin  = int(block_range_begin)
+        block_range_end    = int(block_range_end)
+        operation_begin    = 0       if operation_begin is None  else int(operation_begin)
+        filter             = filter  if filter is None           else int(filter)
+    except Exception:
+        raise CustomUInt64ParserApiException()
+
+    try:
+        limit              = ENUM_VIRTUAL_OPS_LIMIT if limit is None            else int(limit)
+    except Exception:
+        raise CustomInt64ParserApiException()
+
+    include_reversible  = convert(include_reversible, DEFAULT_INCLUDE_IRREVERSIBLE)
+    group_by_block      = convert(group_by_block, False)
+
+    db : Db = context['db']
+    return await db.query_one(
+        "SELECT * FROM hafah_python.enum_virtual_ops_json( :filter, :block_range_begin, :block_range_end, :operation_begin, :limit, :include_reversible, :group_by_block )",
+        filter=filter,
+        block_range_begin=block_range_begin,
+        block_range_end=block_range_end,
+        operation_begin=operation_begin,
+        limit=limit,
+        include_reversible=include_reversible,
+        group_by_block=group_by_block
+    )
 
 @return_error_info
 async def list_comments(context, start: list, limit: int = 1000, order: str = None):

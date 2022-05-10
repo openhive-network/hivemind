@@ -133,6 +133,8 @@ def get_sql_scripts(dir, base_dir):
     from os import listdir
     from os.path import isfile, join, relpath
 
+    return []
+
     if base_dir is None:
         return [join(dir, f) for f in listdir(dir) if isfile(join(dir, f))]
     else:

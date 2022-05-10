@@ -169,6 +169,12 @@ def build_methods():
             'database_api.find_comments': database_api.find_comments,
             'database_api.list_votes': database_api.list_votes,
             'database_api.find_votes': database_api.find_votes,
+
+
+            'account_history_api.enum_virtual_ops': database_api.enum_virtual_ops,
+            'account_history_api.get_account_history': database_api.get_account_history,
+            'account_history_api.get_transaction': database_api.get_transaction,
+            'account_history_api.get_ops_in_block': database_api.get_ops_in_block,
         }
     )
 
@@ -241,6 +247,7 @@ def run_server(conf):
         await app['db'].wait_closed()
 
     async def show_info(app):
+        return
         sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
         database_head_block = await app['db'].query_one(sql)
 
