@@ -67,13 +67,6 @@ class BlockFromRpc(Block):
     def get_previous_block_hash(self):
         return self._blocks_data['previous']
 
-    def get_number_of_transactions(self):
-        return len(self._blocks_data['transactions'])
-
-    def get_number_of_operations(self):
-        txs = self._blocks_data['transactions']
-        return sum([len(tx['operations']) for tx in txs])
-
     def get_next_vop(self):
         for vop in self._virtual_ops:
             vop_object = VirtualOperationFromRpc(vop['type'], vop['value'])
