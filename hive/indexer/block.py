@@ -1,7 +1,7 @@
-import logging
-import queue
 from abc import ABC, abstractmethod
 from enum import Enum
+import logging
+import queue
 
 from hive.steem.signal import can_continue_thread
 
@@ -100,14 +100,6 @@ class Block(ABC):
         pass
 
     @abstractmethod
-    def get_number_of_transactions(self):
-        pass
-
-    @abstractmethod
-    def get_number_of_operations(self):
-        pass
-
-    @abstractmethod
     def get_next_transaction(self):
         pass
 
@@ -154,12 +146,6 @@ class BlockWrapper(Block):
 
     def get_previous_block_hash(self):
         return self.wrapped_block.get_previous_block_hash()
-
-    def get_number_of_transactions(self):
-        return self.wrapped_block.get_number_of_transactions()
-
-    def get_number_of_operations(self):
-        return self.wrapped_block.get_number_of_operations()
 
     def get_next_transaction(self):
         return self.wrapped_block.get_next_transaction()
