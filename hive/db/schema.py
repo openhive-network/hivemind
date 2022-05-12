@@ -26,8 +26,6 @@ def build_metadata():
         sa.Column('num', sa.Integer, primary_key=True, autoincrement=False),
         sa.Column('hash', CHAR(40), nullable=False),
         sa.Column('prev', CHAR(40)),
-        sa.Column('txs', SMALLINT, server_default='0', nullable=False),
-        sa.Column('ops', sa.Integer, server_default='0', nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
         sa.Column('completed', sa.Boolean, nullable=False, server_default='0'),
         sa.UniqueConstraint('hash', name='hive_blocks_ux1'),
