@@ -43,9 +43,7 @@ CREATE TYPE hivemind_app.hive_api_hivemind_blocks AS (
     num INTEGER,
     hash BYTEA,
     prev BYTEA,
-    date TEXT,
-    tx_number BIGINT,
-    op_number BIGINT
+    date TEXT
     );
 
 
