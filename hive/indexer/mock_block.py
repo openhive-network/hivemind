@@ -27,12 +27,6 @@ class ExtendedByMockBlockAdapter(Block):
     def get_previous_block_hash(self):
         return self._wrapped_block.get_previous_block_hash()
 
-    def get_number_of_transactions(self):
-        return self._wrapped_block.get_number_of_transactions() + self._extended_block.get_number_of_transactions()
-
-    def get_number_of_operations(self):
-        return self._wrapped_block.get_number_of_operations() + self._extended_block.get_number_of_operations()
-
     def get_next_transaction(self):
         for transaction in self._wrapped_block.get_next_transaction():
             yield transaction
