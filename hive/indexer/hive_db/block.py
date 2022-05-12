@@ -68,8 +68,6 @@ class BlockHiveDb(Block):
         date,
         hash,
         previous_block_hash,
-        number_of_transactions,
-        number_of_operations,
         operations,
         first_operation_idx,
         opertion_id_to_enum,
@@ -79,8 +77,6 @@ class BlockHiveDb(Block):
         self._date = date
         self._hash = hash.hex()
         self._prev_hash = previous_block_hash.hex()
-        self._number_of_transactions = number_of_transactions
-        self._number_of_operations = number_of_operations
         self._operations = operations
         self._first_operation_idx = first_operation_idx
         self._operation_id_to_enum = opertion_id_to_enum
@@ -111,12 +107,6 @@ class BlockHiveDb(Block):
 
     def get_previous_block_hash(self):
         return self._prev_hash
-
-    def get_number_of_transactions(self):
-        return self._number_of_transactions
-
-    def get_number_of_operations(self):
-        return self._number_of_operations
 
     def get_next_transaction(self):
         if self._first_operation_idx is None:
