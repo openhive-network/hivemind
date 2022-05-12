@@ -60,8 +60,6 @@ SELECT -- hive_api_hivemind_blocks
      , hb.hash
      , hb.prev as prev
      , to_char( created_at,  'YYYY-MM-DDThh24:MI:SS' ) as date
-        , ( SELECT COUNT(1) tx_number  FROM hive.hivemind_app_transactions_view ht WHERE ht.block_num = hb.num ) as tx_number
-        , ( SELECT COUNT(1) op_number  FROM hive.hivemind_app_operations_view ho WHERE ho.block_num = hb.num AND ( ho.op_type_id < 50 OR ho.op_type_id in (51, 53, 61, 72, 73) ) ) as op_number
 FROM hive.blocks hb
 WHERE hb.num BETWEEN _first_block AND _last_block
 ORDER by hb.num
