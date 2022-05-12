@@ -401,8 +401,6 @@ class Blocks:
                 'num': block.get_num(),
                 'hash': block.get_hash(),
                 'prev': block.get_previous_block_hash(),
-                'txs': block.get_number_of_transactions(),
-                'ops': block.get_number_of_operations(),
                 'date': block.get_date(),
             }
         )
@@ -410,12 +408,10 @@ class Blocks:
 
     @classmethod
     def _flush_blocks(cls) -> int:
-        query = "INSERT INTO hive_blocks (num, hash, prev, txs, ops, created_at, completed) VALUES"
+        query = "INSERT INTO hive_blocks (num, hash, prev, created_at, completed) VALUES"
         values = []
         for block in cls.blocks_to_flush:
-            values.append(
-                f"({block['num']}, '{block['hash']}', '{block['prev']}', {block['txs']}, {block['ops']}, '{block['date']}', {False})"
-            )
+            values.append(f"({block['num']}, '{block['hash']}', '{block['prev']}', '{block['date']}', {False})")
         query = query + ",".join(values)
         DB.query_prepared(query)
         values.clear()
