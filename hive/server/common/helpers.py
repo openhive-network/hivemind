@@ -10,6 +10,8 @@ from jsonrpcserver.exceptions import ApiError as RPCApiError
 from psycopg2.errors import DatabaseError
 from sqlalchemy.exc import DatabaseError as AlchemyDatabaseError
 
+from hive.conf import SCHEMA_NAME
+
 log = logging.getLogger(__name__)
 
 
@@ -94,7 +96,7 @@ def get_hive_accounts_info_view_query_string(names, lite=False):
     values_str = ','.join(values)
     sql = f"""
               SELECT *
-              FROM {'hive_accounts_info_view_lite' if lite else 'hive_accounts_info_view'} v
+              FROM {SCHEMA_NAME}.{'hive_accounts_info_view_lite' if lite else 'hive_accounts_info_view'} v
               JOIN
                 (
                   VALUES {values_str}

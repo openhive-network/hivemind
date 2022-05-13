@@ -1,13 +1,13 @@
-DROP FUNCTION IF EXISTS bridge_get_post;
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_post;
 
-CREATE FUNCTION bridge_get_post( in _author VARCHAR, in _permlink VARCHAR )
-RETURNS SETOF bridge_api_post
+CREATE FUNCTION hivemind_app.bridge_get_post( in _author VARCHAR, in _permlink VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
   __post_id INT;
 BEGIN
-  __post_id = find_comment_id( _author, _permlink, True );
+  __post_id = hivemind_app.find_comment_id( _author, _permlink, True );
   RETURN QUERY SELECT
       hp.id,
       hp.author,
@@ -47,7 +47,7 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       NULL
-  FROM get_post_view_by_id(__post_id) hp;
+  FROM hivemind_app.get_post_view_by_id(__post_id) hp;
 END
 $function$
 language plpgsql STABLE;

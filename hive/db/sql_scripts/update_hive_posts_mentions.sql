@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS update_hive_posts_mentions(INTEGER, INTEGER);
-CREATE OR REPLACE FUNCTION update_hive_posts_mentions(in _first_block INTEGER, in _last_block INTEGER)
+DROP FUNCTION IF EXISTS hivemind_app.update_hive_posts_mentions(INTEGER, INTEGER);
+CREATE OR REPLACE FUNCTION hivemind_app.update_hive_posts_mentions(in _first_block INTEGER, in _last_block INTEGER)
 RETURNS VOID
 LANGUAGE 'plpgsql'
 AS
@@ -12,10 +12,10 @@ BEGIN
     _first_block = _last_block - __block_limit;
   END IF;
 
-  INSERT INTO hive_mentions( post_id, account_id, block_num )
+  INSERT INTO hivemind_app.hive_mentions( post_id, account_id, block_num )
     SELECT DISTINCT T.id_post, ha.id, T.block_num
     FROM
-      hive_accounts ha
+      hivemind_app.hive_accounts ha
     INNER JOIN
     (
       SELECT T.id_post, LOWER( ( SELECT trim( T.mention::text, '{""}') ) ) AS mention, T.author_id, T.block_num
@@ -23,8 +23,8 @@ BEGIN
       (
         SELECT
           hp.id, REGEXP_MATCHES( hpd.body, '(?:^|[^a-zA-Z0-9_!#$%&*@\\/])(?:@)([a-zA-Z0-9\\.-]{1,16}[a-zA-Z0-9])(?![a-z])', 'g') AS mention, hp.author_id, hp.block_num
-        FROM hive_posts hp
-        INNER JOIN hive_post_data hpd ON hp.id = hpd.id
+        FROM hivemind_app.hive_posts hp
+        INNER JOIN hivemind_app.hive_post_data hpd ON hp.id = hpd.id
         WHERE hp.block_num >= _first_block
       )T( id_post, mention, author_id, block_num )
     )T( id_post, mention, author_id, block_num ) ON ha.name = T.mention

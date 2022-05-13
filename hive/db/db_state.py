@@ -9,6 +9,7 @@ from time import perf_counter
 
 import sqlalchemy
 
+from hive.conf import SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.db.schema import build_metadata, setup, teardown
 from hive.indexer.auto_db_disposer import AutoDbDisposer
@@ -285,7 +286,7 @@ $$;
         with AutoDbDisposer(db, "finish_hive_posts") as db_mgr:
             # UPDATE: `abs_rshares`, `vote_rshares`, `sc_hot`, ,`sc_trend`, `total_votes`, `net_votes`
             time_start = perf_counter()
-            sql = f"SELECT update_posts_rshares({last_imported_block}, {current_imported_block});"
+            sql = f"SELECT {SCHEMA_NAME}.update_posts_rshares({last_imported_block}, {current_imported_block});"
             cls._execute_and_explain_query(db_mgr.db, sql)
             log.info("[MASSIVE] update_posts_rshares executed in %.4fs", perf_counter() - time_start)
 
@@ -294,17 +295,17 @@ $$;
             # UPDATE: `children`
             if massive_sync_preconditions:
                 # Update count of all child posts (what was hold during massive sync)
-                cls._execute_query(db_mgr.db, "select update_all_hive_posts_children_count()")
+                cls._execute_query(db_mgr.db, f"SELECT {SCHEMA_NAME}.update_all_hive_posts_children_count()")
             else:
                 # Update count of child posts processed during partial sync (what was hold during massive sync)
-                sql = f"select update_hive_posts_children_count({last_imported_block}, {current_imported_block})"
+                sql = f"SELECT {SCHEMA_NAME}.update_hive_posts_children_count({last_imported_block}, {current_imported_block})"
                 cls._execute_query(db_mgr.db, sql)
             log.info("[MASSIVE] update_hive_posts_children_count executed in %.4fs", perf_counter() - time_start)
 
             # UPDATE: `root_id`
             # Update root_id all root posts
             time_start = perf_counter()
-            sql = f"SELECT update_hive_posts_root_id({last_imported_block}, {current_imported_block});"
+            sql = f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id({last_imported_block}, {current_imported_block});"
             cls._execute_query(db_mgr.db, sql)
             log.info("[MASSIVE] update_hive_posts_root_id executed in %.4fs", perf_counter() - time_start)
 
@@ -312,7 +313,7 @@ $$;
     def _finish_hive_posts_api_helper(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_hive_posts_api_helper") as db_mgr:
             time_start = perf_counter()
-            sql = f"SELECT update_hive_posts_api_helper({last_imported_block}, {current_imported_block});"
+            sql = f"SELECT {SCHEMA_NAME}.update_hive_posts_api_helper({last_imported_block}, {current_imported_block});"
             cls._execute_query(db_mgr.db, sql)
             log.info("[MASSIVE] update_hive_posts_api_helper executed in %.4fs", perf_counter() - time_start)
 
@@ -320,7 +321,7 @@ $$;
     def _finish_hive_feed_cache(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_hive_feed_cache") as db_mgr:
             time_start = perf_counter()
-            sql = f"SELECT update_feed_cache({last_imported_block}, {current_imported_block});"
+            sql = f"SELECT {SCHEMA_NAME}.update_feed_cache({last_imported_block}, {current_imported_block});"
             cls._execute_query(db_mgr.db, sql)
             log.info("[MASSIVE] update_feed_cache executed in %.4fs", perf_counter() - time_start)
 
@@ -328,7 +329,7 @@ $$;
     def _finish_hive_mentions(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_hive_mentions") as db_mgr:
             time_start = perf_counter()
-            sql = f"SELECT update_hive_posts_mentions({last_imported_block}, {current_imported_block});"
+            sql = f"SELECT {SCHEMA_NAME}.update_hive_posts_mentions({last_imported_block}, {current_imported_block});"
             cls._execute_query(db_mgr.db, sql)
             log.info("[MASSIVE] update_hive_posts_mentions executed in %.4fs", perf_counter() - time_start)
 
@@ -346,7 +347,7 @@ $$;
 
         with AutoDbDisposer(db, "finish_account_reputations") as db_mgr:
             time_start = perf_counter()
-            sql = f"SELECT update_account_reputations({last_imported_block}, {current_imported_block}, True);"
+            sql = f"SELECT {SCHEMA_NAME}.update_account_reputations({last_imported_block}, {current_imported_block}, True);"
             cls._execute_query(db_mgr.db, sql)
             log.info("[MASSIVE] update_account_reputations executed in %.4fs", perf_counter() - time_start)
 
@@ -361,7 +362,7 @@ $$;
     def _finish_blocks_consistency_flag(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_blocks_consistency_flag") as db_mgr:
             time_start = perf_counter()
-            sql = f"SELECT update_hive_blocks_consistency_flag({last_imported_block}, {current_imported_block});"
+            sql = f"SELECT {SCHEMA_NAME}.update_hive_blocks_consistency_flag({last_imported_block}, {current_imported_block});"
             cls._execute_query(db_mgr.db, sql)
             log.info("[MASSIVE] update_hive_blocks_consistency_flag executed in %.4fs", perf_counter() - time_start)
 
@@ -369,7 +370,7 @@ $$;
     def _finish_notification_cache(cls, db):
         with AutoDbDisposer(db, "finish_notification_cache") as db_mgr:
             time_start = perf_counter()
-            sql = "SELECT update_notification_cache(NULL, NULL, False);"
+            sql = f"SELECT {SCHEMA_NAME}.update_notification_cache(NULL, NULL, False);"
             cls._execute_query(db_mgr.db, sql)
             log.info("[MASSIVE] update_notification_cache executed in %.4fs", perf_counter() - time_start)
 
@@ -377,7 +378,7 @@ $$;
     def _finish_follow_count(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_follow_count") as db_mgr:
             time_start = perf_counter()
-            sql = f"SELECT update_follow_count({last_imported_block}, {current_imported_block});"
+            sql = f"SELECT {SCHEMA_NAME}.update_follow_count({last_imported_block}, {current_imported_block});"
             cls._execute_query(db_mgr.db, sql)
             log.info("[MASSIVE] update_follow_count executed in %.4fs", perf_counter() - time_start)
 
@@ -472,7 +473,7 @@ $$;
 
         start_time = perf_counter()
 
-        last_imported_block = DbState.db().query_one("SELECT block_num FROM hive_state LIMIT 1")
+        last_imported_block = DbState.db().query_one(f"SELECT block_num FROM {SCHEMA_NAME}.hive_state LIMIT 1")
 
         log.info(
             "[MASSIVE] Current imported block: %s. Last imported block: %s.", current_imported_block, last_imported_block
@@ -505,7 +506,9 @@ $$;
         log.info("Filling tables with final values: finished")
 
         # Update a block num immediately
-        cls.db().query_no_return("UPDATE hive_state SET block_num = :block_num", block_num=current_imported_block)
+        cls.db().query_no_return(
+            f"UPDATE {SCHEMA_NAME}.hive_state SET block_num = :block_num", block_num=current_imported_block
+        )
 
         if massive_sync_preconditions:
             from hive.db.schema import create_fk
@@ -525,7 +528,7 @@ $$;
     @staticmethod
     def status():
         """Basic health status: head block/time, current age (secs)."""
-        sql = "SELECT num, created_at, extract(epoch from created_at) ts " "FROM hive_blocks ORDER BY num DESC LIMIT 1"
+        sql = f"SELECT num, created_at, extract(epoch from created_at) ts FROM {SCHEMA_NAME}.hive_blocks ORDER BY num DESC LIMIT 1"
         row = DbState.db().query_row(sql)
         return dict(
             db_head_block=row['num'], db_head_time=str(row['created_at']), db_head_age=int(time.time() - row['ts'])
@@ -537,13 +540,7 @@ $$;
         # check if database has been initialized (i.e. schema loaded)
         _engine_name = cls.db().engine_name()
         if _engine_name == 'postgresql':
-            return bool(
-                cls.db().query_one(
-                    """
-                SELECT 1 FROM pg_catalog.pg_tables WHERE schemaname = 'public'
-            """
-                )
-            )
+            return bool(cls.db().query_one(f"SELECT 1 FROM pg_catalog.pg_tables WHERE schemaname = '{SCHEMA_NAME}';"))
         if _engine_name == 'mysql':
             return bool(cls.db().query_one('SHOW TABLES'))
         raise Exception(f"unknown db engine {_engine_name}")
@@ -554,4 +551,4 @@ $$;
 
         If empty, it indicates that the massive sync has not finished.
         """
-        return not cls.db().query_one("SELECT 1 FROM hive_feed_cache LIMIT 1")
+        return not cls.db().query_one(f"SELECT 1 FROM {SCHEMA_NAME}.hive_feed_cache LIMIT 1")
