@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_pinned_for_community;
-CREATE FUNCTION bridge_get_ranked_post_pinned_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR)
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_pinned_for_community;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_pinned_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR)
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -74,9 +74,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_trends_for_community;
-CREATE FUNCTION bridge_get_ranked_post_by_trends_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_trends_for_community;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_trends_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -156,9 +156,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_promoted_for_community;
-CREATE FUNCTION bridge_get_ranked_post_by_promoted_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_promoted_for_community;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_promoted_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -236,9 +236,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_payout_for_community;
-CREATE FUNCTION bridge_get_ranked_post_by_payout_for_community(in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_payout_for_community;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_payout_for_community(in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -318,9 +318,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_payout_comments_for_community;
-CREATE FUNCTION bridge_get_ranked_post_by_payout_comments_for_community( in _community VARCHAR,  in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_payout_comments_for_community;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_payout_comments_for_community( in _community VARCHAR,  in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -398,9 +398,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_muted_for_community;
-CREATE FUNCTION bridge_get_ranked_post_by_muted_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_muted_for_community;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_muted_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -480,9 +480,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_hot_for_community;
-CREATE FUNCTION bridge_get_ranked_post_by_hot_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_hot_for_community;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_hot_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -559,9 +559,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_created_for_community;
-CREATE FUNCTION bridge_get_ranked_post_by_created_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_created_for_community;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_created_for_community( in _community VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE

@@ -1,13 +1,13 @@
-DROP TYPE IF EXISTS bridge_api_community_context CASCADE;
-CREATE TYPE bridge_api_community_context AS (
+DROP TYPE IF EXISTS hivemind_app.bridge_api_community_context CASCADE;
+CREATE TYPE hivemind_app.bridge_api_community_context AS (
     role_id SMALLINT,
     title VARCHAR,
     subscribed BOOLEAN
 );
 
-DROP FUNCTION IF EXISTS bridge_get_community_context
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_community_context
 ;
-CREATE OR REPLACE FUNCTION bridge_get_community_context(
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_get_community_context(
     in _account hivemind_app.hive_accounts.name%TYPE,
     in _name hivemind_app.hive_communities.name%TYPE
 )

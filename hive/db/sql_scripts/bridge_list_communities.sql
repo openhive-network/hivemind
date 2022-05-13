@@ -1,5 +1,5 @@
-DROP TYPE IF EXISTS bridge_api_list_communities CASCADE;
-CREATE TYPE bridge_api_list_communities AS (
+DROP TYPE IF EXISTS hivemind_app.bridge_api_list_communities CASCADE;
+CREATE TYPE hivemind_app.bridge_api_list_communities AS (
     id INTEGER,
     name VARCHAR(16),
     title VARCHAR(32),
@@ -17,15 +17,15 @@ CREATE TYPE bridge_api_list_communities AS (
     admins VARCHAR ARRAY
 );
 
-DROP FUNCTION IF EXISTS bridge_list_communities_by_rank
+DROP FUNCTION IF EXISTS hivemind_app.bridge_list_communities_by_rank
 ;
-CREATE OR REPLACE FUNCTION bridge_list_communities_by_rank(
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_list_communities_by_rank(
     in _observer hivemind_app.hive_accounts.name%TYPE,
     in _last hivemind_app.hive_accounts.name%TYPE,
     in _search VARCHAR,
     in _limit INT
 )
-RETURNS SETOF bridge_api_list_communities
+RETURNS SETOF hivemind_app.bridge_api_list_communities
 LANGUAGE plpgsql
 AS
 $function$
@@ -65,15 +65,15 @@ END
 $function$
 ;
 
-DROP FUNCTION IF EXISTS bridge_list_communities_by_new
+DROP FUNCTION IF EXISTS hivemind_app.bridge_list_communities_by_new
 ;
-CREATE OR REPLACE FUNCTION bridge_list_communities_by_new(
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_list_communities_by_new(
     in _observer hivemind_app.hive_accounts.name%TYPE,
     in _last hivemind_app.hive_accounts.name%TYPE,
     in _search VARCHAR,
     in _limit INT
 )
-RETURNS SETOF bridge_api_list_communities
+RETURNS SETOF hivemind_app.bridge_api_list_communities
 LANGUAGE plpgsql
 AS
 $function$
@@ -109,15 +109,15 @@ END
 $function$
 ;
 
-DROP FUNCTION IF EXISTS bridge_list_communities_by_subs
+DROP FUNCTION IF EXISTS hivemind_app.bridge_list_communities_by_subs
 ;
-CREATE OR REPLACE FUNCTION bridge_list_communities_by_subs(
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_list_communities_by_subs(
     in _observer hivemind_app.hive_accounts.name%TYPE,
     in _last hivemind_app.hive_accounts.name%TYPE,
     in _search VARCHAR,
     in _limit INT
 )
-RETURNS SETOF bridge_api_list_communities
+RETURNS SETOF hivemind_app.bridge_api_list_communities
 LANGUAGE plpgsql
 AS
 $function$

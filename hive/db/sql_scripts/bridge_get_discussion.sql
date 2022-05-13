@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS bridge_get_discussion;
-CREATE OR REPLACE FUNCTION public.bridge_get_discussion(_author character varying, _permlink character varying, _observer character varying)
- RETURNS SETOF bridge_api_post_discussion
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_discussion;
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_get_discussion(_author character varying, _permlink character varying, _observer character varying)
+ RETURNS SETOF hivemind_app.bridge_api_post_discussion
 AS $function$
 DECLARE
     __post_id INT;

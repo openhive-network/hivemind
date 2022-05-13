@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS public.update_hive_posts_api_helper(INTEGER, INTEGER);
+DROP FUNCTION IF EXISTS hivemind_app.update_hive_posts_api_helper(INTEGER, INTEGER);
 
-CREATE OR REPLACE FUNCTION public.update_hive_posts_api_helper(in _first_block_num INTEGER, _last_block_num INTEGER)
+CREATE OR REPLACE FUNCTION hivemind_app.update_hive_posts_api_helper(in _first_block_num INTEGER, _last_block_num INTEGER)
   RETURNS void
   LANGUAGE 'plpgsql'
   VOLATILE

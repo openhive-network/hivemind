@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_created;
-CREATE FUNCTION bridge_get_ranked_post_by_created( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_created;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_created( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -71,9 +71,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_hot;
-CREATE FUNCTION bridge_get_ranked_post_by_hot( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_hot;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_hot( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -148,9 +148,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_muted;
-CREATE FUNCTION bridge_get_ranked_post_by_muted( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_muted;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_muted( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -227,9 +227,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_payout_comments;
-CREATE FUNCTION bridge_get_ranked_post_by_payout_comments( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_payout_comments;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_payout_comments( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -305,9 +305,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_payout;
-CREATE FUNCTION bridge_get_ranked_post_by_payout( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_payout;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_payout( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -385,9 +385,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_promoted;
-CREATE FUNCTION bridge_get_ranked_post_by_promoted( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_promoted;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_promoted( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -463,9 +463,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_trends;
-CREATE FUNCTION bridge_get_ranked_post_by_trends( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_trends;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_trends( in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE

@@ -1,6 +1,6 @@
-DROP TYPE IF EXISTS database_api_vote CASCADE;
+DROP TYPE IF EXISTS hivemind_app.database_api_vote CASCADE;
 
-CREATE TYPE database_api_vote AS (
+CREATE TYPE hivemind_app.database_api_vote AS (
   id BIGINT,
   voter VARCHAR(16),
   author VARCHAR(16),
@@ -13,15 +13,15 @@ CREATE TYPE database_api_vote AS (
   reputation BIGINT
 );
 
-DROP FUNCTION IF EXISTS find_votes( character varying, character varying, int )
+DROP FUNCTION IF EXISTS hivemind_app.find_votes( character varying, character varying, int )
 ;
-CREATE OR REPLACE FUNCTION public.find_votes
+CREATE OR REPLACE FUNCTION hivemind_app.find_votes
 (
   in _AUTHOR hivemind_app.hive_accounts.name%TYPE,
   in _PERMLINK hivemind_app.hive_permlink_data.permlink%TYPE,
   in _LIMIT INT
 )
-RETURNS SETOF database_api_vote
+RETURNS SETOF hivemind_app.database_api_vote
 LANGUAGE 'plpgsql'
 AS
 $function$
@@ -54,16 +54,16 @@ RETURN QUERY
 END
 $function$;
 
-DROP FUNCTION IF EXISTS list_votes_by_voter_comment( character varying, character varying, character varying, int )
+DROP FUNCTION IF EXISTS hivemind_app.list_votes_by_voter_comment( character varying, character varying, character varying, int )
 ;
-CREATE OR REPLACE FUNCTION public.list_votes_by_voter_comment
+CREATE OR REPLACE FUNCTION hivemind_app.list_votes_by_voter_comment
 (
   in _VOTER hivemind_app.hive_accounts.name%TYPE,
   in _AUTHOR hivemind_app.hive_accounts.name%TYPE,
   in _PERMLINK hivemind_app.hive_permlink_data.permlink%TYPE,
   in _LIMIT INT
 )
-RETURNS SETOF database_api_vote
+RETURNS SETOF hivemind_app.database_api_vote
 LANGUAGE 'plpgsql'
 AS
 $function$
@@ -100,16 +100,16 @@ RETURN QUERY
 END
 $function$;
 
-DROP FUNCTION IF EXISTS list_votes_by_comment_voter( character varying, character varying, character varying, int )
+DROP FUNCTION IF EXISTS hivemind_app.list_votes_by_comment_voter( character varying, character varying, character varying, int )
 ;
-CREATE OR REPLACE FUNCTION public.list_votes_by_comment_voter
+CREATE OR REPLACE FUNCTION hivemind_app.list_votes_by_comment_voter
 (
   in _VOTER hivemind_app.hive_accounts.name%TYPE,
   in _AUTHOR hivemind_app.hive_accounts.name%TYPE,
   in _PERMLINK hivemind_app.hive_permlink_data.permlink%TYPE,
   in _LIMIT INT
 )
-RETURNS SETOF database_api_vote
+RETURNS SETOF hivemind_app.database_api_vote
 LANGUAGE 'plpgsql'
 AS
 $function$

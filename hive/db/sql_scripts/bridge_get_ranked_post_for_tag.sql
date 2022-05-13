@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_created_for_tag;
-CREATE OR REPLACE FUNCTION bridge_get_ranked_post_by_created_for_tag( _tag VARCHAR, _author VARCHAR, _permlink VARCHAR, _limit SMALLINT, _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_created_for_tag;
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_get_ranked_post_by_created_for_tag( _tag VARCHAR, _author VARCHAR, _permlink VARCHAR, _limit SMALLINT, _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -73,9 +73,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_hot_for_tag;
-CREATE FUNCTION bridge_get_ranked_post_by_hot_for_tag( in _tag VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_hot_for_tag;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_hot_for_tag( in _tag VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -153,9 +153,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_muted_for_tag;
-CREATE FUNCTION bridge_get_ranked_post_by_muted_for_tag( in _tag VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_muted_for_tag;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_muted_for_tag( in _tag VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -235,9 +235,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_payout_comments_for_category;
-CREATE FUNCTION bridge_get_ranked_post_by_payout_comments_for_category( in _category VARCHAR,  in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_payout_comments_for_category;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_payout_comments_for_category( in _category VARCHAR,  in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -316,9 +316,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_payout_for_category;
-CREATE FUNCTION bridge_get_ranked_post_by_payout_for_category( in _category VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_payout_for_category;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_payout_for_category( in _category VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _bridge_api BOOLEAN, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -400,9 +400,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_promoted_for_tag;
-CREATE FUNCTION bridge_get_ranked_post_by_promoted_for_tag( in _tag VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_promoted_for_tag;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_promoted_for_tag( in _tag VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -482,9 +482,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_trends_for_tag;
-CREATE FUNCTION bridge_get_ranked_post_by_trends_for_tag( in _tag VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_trends_for_tag;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_trends_for_tag( in _tag VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE

@@ -1,33 +1,33 @@
-DROP TYPE IF EXISTS bridge_api_list_community_roles CASCADE;
-CREATE TYPE bridge_api_list_community_roles AS (
+DROP TYPE IF EXISTS hivemind_app.bridge_api_list_community_roles CASCADE;
+CREATE TYPE hivemind_app.bridge_api_list_community_roles AS (
     name VARCHAR(16),
     role VARCHAR,
     title VARCHAR
 );
 
-DROP TYPE IF EXISTS bridge_api_community_team CASCADE;
-CREATE TYPE bridge_api_community_team AS (
+DROP TYPE IF EXISTS hivemind_app.bridge_api_community_team CASCADE;
+CREATE TYPE hivemind_app.bridge_api_community_team AS (
     name VARCHAR,
     role_id SMALLINT,
     title VARCHAR
 );
 
-DROP FUNCTION IF EXISTS bridge_list_community_roles
+DROP FUNCTION IF EXISTS hivemind_app.bridge_list_community_roles
 ;
-CREATE OR REPLACE FUNCTION bridge_list_community_roles(
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_list_community_roles(
     in _community hivemind_app.hive_communities.name%TYPE,
     in _last hivemind_app.hive_accounts.name%TYPE,
     in _limit INT
 )
-RETURNS SETOF bridge_api_list_community_roles
+RETURNS SETOF hivemind_app.bridge_api_list_community_roles
 LANGUAGE plpgsql
 AS
 $function$
 DECLARE
     __last_role INT;
     __community_id INT := find_community_id( _community, True );
-    __context bridge_api_community_context;
-    __team bridge_api_community_team;
+    __context hivemind_app.bridge_api_community_context;
+    __team hivemind_app.bridge_api_community_team;
 BEGIN
 
     IF _last <> '' THEN

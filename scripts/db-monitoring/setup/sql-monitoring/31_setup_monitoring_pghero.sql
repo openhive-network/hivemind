@@ -37,7 +37,7 @@ $$ LANGUAGE sql VOLATILE SECURITY DEFINER;
 -- query stats
 CREATE OR REPLACE FUNCTION pghero.pg_stat_statements() RETURNS SETOF pg_stat_statements AS
 $$
-  SELECT * FROM public.pg_stat_statements;
+  SELECT * FROM pg_stat_statements;
 $$ LANGUAGE sql VOLATILE SECURITY DEFINER;
 
 CREATE OR REPLACE VIEW pghero.pg_stat_statements AS SELECT * FROM pghero.pg_stat_statements();
@@ -45,13 +45,13 @@ CREATE OR REPLACE VIEW pghero.pg_stat_statements AS SELECT * FROM pghero.pg_stat
 -- query stats reset
 CREATE OR REPLACE FUNCTION pghero.pg_stat_statements_reset() RETURNS void AS
 $$
-  SELECT public.pg_stat_statements_reset();
+  SELECT pg_stat_statements_reset();
 $$ LANGUAGE sql VOLATILE SECURITY DEFINER;
 
 -- improved query stats reset for Postgres 12+ - delete for earlier versions
 -- CREATE OR REPLACE FUNCTION pghero.pg_stat_statements_reset(userid oid, dbid oid, queryid bigint) RETURNS void AS
 -- $$
---   SELECT public.pg_stat_statements_reset(userid, dbid, queryid);
+--   SELECT pg_stat_statements_reset(userid, dbid, queryid);
 -- $$ LANGUAGE sql VOLATILE SECURITY DEFINER;
 
 -- suggested indexes

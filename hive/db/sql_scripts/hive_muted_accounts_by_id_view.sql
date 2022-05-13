@@ -1,4 +1,4 @@
-DROP VIEW IF EXISTS muted_accounts_by_id_view CASCADE;
+DROP VIEW IF EXISTS hivemind_app.muted_accounts_by_id_view CASCADE;
 CREATE OR REPLACE VIEW muted_accounts_by_id_view AS
 SELECT observer_accounts.id AS observer_id,
     following_accounts.id AS muted_id

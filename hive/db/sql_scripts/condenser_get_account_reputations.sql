@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS condenser_get_account_reputations;
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_account_reputations;
 
-CREATE OR REPLACE FUNCTION condenser_get_account_reputations(
+CREATE OR REPLACE FUNCTION hivemind_app.condenser_get_account_reputations(
   in _account_lower_bound VARCHAR,
   in _limit INTEGER
 )

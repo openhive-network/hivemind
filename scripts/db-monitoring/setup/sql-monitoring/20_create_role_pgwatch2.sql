@@ -11,7 +11,7 @@ SET client_min_messages = 'warning';
 DO
 $do$
 BEGIN
-    IF EXISTS (SELECT * FROM pg_user WHERE pg_user.usename = 'pgwatch2') THEN
+    IF EXISTS hivemind_app.(SELECT * FROM pg_user WHERE pg_user.usename = 'pgwatch2') THEN
         raise warning 'Role % already exists', 'pgwatch2';
     ELSE
         -- NB! For critical databases it might make sense to ensure that the user account

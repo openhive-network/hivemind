@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS condenser_get_follow_count;
-CREATE FUNCTION condenser_get_follow_count( in _account VARCHAR,
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_follow_count;
+CREATE FUNCTION hivemind_app.condenser_get_follow_count( in _account VARCHAR,
   out following hivemind_app.hive_accounts.following%TYPE, out followers hivemind_app.hive_accounts.followers%TYPE )
 AS
 $function$
@@ -14,9 +14,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS condenser_get_followers;
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_followers;
 -- list of account names that follow/ignore given account
-CREATE FUNCTION condenser_get_followers( in _account VARCHAR, in _start VARCHAR, in _type INT, in _limit INT )
+CREATE FUNCTION hivemind_app.condenser_get_followers( in _account VARCHAR, in _start VARCHAR, in _type INT, in _limit INT )
 RETURNS SETOF hivemind_app.hive_accounts.name%TYPE
 AS
 $function$
@@ -42,9 +42,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS condenser_get_following;
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_following;
 -- list of account names followed/ignored by given account
-CREATE FUNCTION condenser_get_following( in _account VARCHAR, in _start VARCHAR, in _type INT, in _limit INT )
+CREATE FUNCTION hivemind_app.condenser_get_following( in _account VARCHAR, in _start VARCHAR, in _type INT, in _limit INT )
 RETURNS SETOF hivemind_app.hive_accounts.name%TYPE
 AS
 $function$

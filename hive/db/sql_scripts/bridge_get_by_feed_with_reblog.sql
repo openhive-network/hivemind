@@ -1,7 +1,7 @@
-DROP FUNCTION IF EXISTS bridge_get_by_feed_with_reblog;
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_by_feed_with_reblog;
 
-CREATE OR REPLACE FUNCTION bridge_get_by_feed_with_reblog( IN _account VARCHAR, IN _author VARCHAR, IN _permlink VARCHAR, IN _limit INTEGER)
-    RETURNS SETOF bridge_api_post_reblogs
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_get_by_feed_with_reblog( IN _account VARCHAR, IN _author VARCHAR, IN _permlink VARCHAR, IN _limit INTEGER)
+    RETURNS SETOF hivemind_app.bridge_api_post_reblogs
     LANGUAGE 'plpgsql'
     STABLE 
     ROWS 1000
@@ -21,7 +21,7 @@ BEGIN
     WHERE hf.state = 1 AND hf.follower = __account_id AND hfc.post_id = __post_id;
   END IF;
 
-  __cutoff = block_before_head( '1 month' );
+  __cutoff = hivemind_app.block_before_head( '1 month' );
 
   RETURN QUERY 
   WITH feed AS MATERIALIZED -- bridge_get_by_feed_with_reblog

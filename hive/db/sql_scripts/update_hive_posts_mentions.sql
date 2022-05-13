@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS update_hive_posts_mentions(INTEGER, INTEGER);
-CREATE OR REPLACE FUNCTION update_hive_posts_mentions(in _first_block INTEGER, in _last_block INTEGER)
+DROP FUNCTION IF EXISTS hivemind_app.update_hive_posts_mentions(INTEGER, INTEGER);
+CREATE OR REPLACE FUNCTION hivemind_app.update_hive_posts_mentions(in _first_block INTEGER, in _last_block INTEGER)
 RETURNS VOID
 LANGUAGE 'plpgsql'
 AS

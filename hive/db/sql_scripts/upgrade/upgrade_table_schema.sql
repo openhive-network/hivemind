@@ -75,8 +75,8 @@ IF EXISTS(SELECT data_type
 
     PERFORM deps_save_and_drop_dependencies('public', 'hive_accounts', true);
     ALTER TABLE ONlY hivemind_app.hive_accounts
-      DROP COLUMN IF EXISTS blacklist_description,
-      DROP COLUMN IF EXISTS muted_list_description
+      DROP COLUMN IF EXISTS hivemind_app.blacklist_description,
+      DROP COLUMN IF EXISTS hivemind_app.muted_list_description
       ;
 ELSE
   RAISE NOTICE 'hive_accounts::blacklist_description/muted_list_description migration skipped';
@@ -87,14 +87,14 @@ $BODY$;
 
 DROP TABLE IF EXISTS hivemind_app.hive_account_reputation_status;
 
-drop index if exists hivemind_app.hive_posts_sc_hot_idx;
-drop index if exists hivemind_app.hive_posts_sc_trend_idx;
-drop index if exists hivemind_app.hive_reblogs_blogger_id;
-drop index if exists hivemind_app.hive_subscriptions_community_idx;
-drop index if exists hivemind_app.hive_votes_post_id_idx;
-drop index if exists hivemind_app.hive_votes_voter_id_idx;
-drop index if exists hivemind_app.hive_votes_last_update_idx;
-drop index if exists hivemind_app.hive_posts_community_id_idx;
+drop index IF EXISTS hivemind_app.hive_posts_sc_hot_idx;
+drop index IF EXISTS hivemind_app.hive_posts_sc_trend_idx;
+drop index IF EXISTS hivemind_app.hive_reblogs_blogger_id;
+drop index IF EXISTS hivemind_app.hive_subscriptions_community_idx;
+drop index IF EXISTS hivemind_app.hive_votes_post_id_idx;
+drop index IF EXISTS hivemind_app.hive_votes_voter_id_idx;
+drop index IF EXISTS hivemind_app.hive_votes_last_update_idx;
+drop index IF EXISTS hivemind_app.hive_posts_community_id_idx;
 
 CREATE INDEX IF NOT EXISTS hive_posts_cashout_time_id_idx ON hivemind_app.hive_posts (cashout_time, id);
 CREATE INDEX IF NOT EXISTS hive_posts_updated_at_idx ON hivemind_app.hive_posts (updated_at DESC);
@@ -183,7 +183,7 @@ IF EXISTS(SELECT data_type
   PERFORM deps_save_and_drop_dependencies('public', 'hive_posts', true);
 
   ALTER TABLE hivemind_app.hive_posts
-    DROP COLUMN IF EXISTS is_grayed;
+    DROP COLUMN IF EXISTS hivemind_app.is_grayed;
 
   perform deps_restore_dependencies('public', 'hive_posts');
 ELSE
@@ -370,7 +370,7 @@ where not exists (select null from hivemind_app.hive_db_patch_level where patche
 --- Rename hivemind_app.hive_votes_ux1 unique constraint to the hivemind_app.hive_votes_voter_id_author_id_permlink_id_uk
 DO $$
 BEGIN
-IF EXISTS (SELECT * FROM pg_constraint WHERE conname='hive_votes_ux1') THEN
+IF EXISTS hivemind_app.(SELECT * FROM pg_constraint WHERE conname='hive_votes_ux1') THEN
   RAISE NOTICE 'Attempting to rename hivemind_app.hive_votes_ux1 to hivemind_app.hive_votes_voter_id_author_id_permlink_id_uk...';
   ALTER TABLE hivemind_app.hive_votes RENAME CONSTRAINT hivemind_app.hive_votes_ux1 to hivemind_app.hive_votes_voter_id_author_id_permlink_id_uk;
 END IF;

@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS bridge_get_relationship_between_accounts;
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_relationship_between_accounts;
 
-CREATE FUNCTION bridge_get_relationship_between_accounts( in _account1 VARCHAR, in _account2 VARCHAR,
+CREATE FUNCTION hivemind_app.bridge_get_relationship_between_accounts( in _account1 VARCHAR, in _account2 VARCHAR,
   out state hivemind_app.hive_follows.state%TYPE,
   out blacklisted hivemind_app.hive_follows.blacklisted%TYPE,
   out follow_blacklists hivemind_app.hive_follows.follow_blacklists%TYPE,

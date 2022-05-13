@@ -49,7 +49,7 @@ TABLESPACE pg_default;
 
 -- DROP FUNCTION deps_save_and_drop_dependencies(character varying, character varying, boolean);
 
-CREATE OR REPLACE FUNCTION deps_save_and_drop_dependencies(
+CREATE OR REPLACE FUNCTION hivemind_app.deps_save_and_drop_dependencies(
     p_view_schema character varying,
     p_view_name character varying,
     drop_relation boolean DEFAULT true
@@ -176,7 +176,7 @@ $BODY$;
 
 -- DROP FUNCTION deps_restore_dependencies(character varying, character varying);
 
-CREATE OR REPLACE FUNCTION deps_restore_dependencies(
+CREATE OR REPLACE FUNCTION hivemind_app.deps_restore_dependencies(
     p_view_schema character varying,
     p_view_name character varying
   )

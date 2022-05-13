@@ -1,8 +1,8 @@
 
-DROP FUNCTION IF EXISTS delete_reblog_feed_cache(character varying,character varying,character varying)
+DROP FUNCTION IF EXISTS hivemind_app.delete_reblog_feed_cache(character varying,character varying,character varying)
 ;
 
-CREATE OR REPLACE FUNCTION delete_reblog_feed_cache(
+CREATE OR REPLACE FUNCTION hivemind_app.delete_reblog_feed_cache(
   in _author hivemind_app.hive_accounts.name%TYPE,
   in _permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _account hivemind_app.hive_accounts.name%TYPE)

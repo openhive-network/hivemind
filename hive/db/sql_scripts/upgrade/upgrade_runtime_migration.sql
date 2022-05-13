@@ -60,7 +60,7 @@ START TRANSACTION;
 DO
 $BODY$
 BEGIN
-IF EXISTS (SELECT * FROM hivemind_app.hive_db_data_migration WHERE migration = 'update_posts_rshares( 0, head_block_number) execution') THEN
+IF EXISTS hivemind_app.(SELECT * FROM hivemind_app.hive_db_data_migration WHERE migration = 'update_posts_rshares( 0, head_block_number) execution') THEN
   RAISE NOTICE 'Performing posts rshares, hot and trend recalculation on range ( 0, head_block_number)...';
   SET work_mem='2GB';
   PERFORM update_posts_rshares(0, (SELECT hb.num FROM hivemind_app.hive_blocks hb ORDER BY hb.num DESC LIMIT 1) );
@@ -77,7 +77,7 @@ START TRANSACTION;
 DO
 $BODY$
 BEGIN
-IF EXISTS (SELECT * FROM hivemind_app.hive_db_data_migration WHERE migration = 'update_hive_posts_children_count execution') THEN
+IF EXISTS hivemind_app.(SELECT * FROM hivemind_app.hive_db_data_migration WHERE migration = 'update_hive_posts_children_count execution') THEN
   RAISE NOTICE 'Performing initial post children count execution ( 0, head_block_number)...';
   SET work_mem='2GB';
   update hivemind_app.hive_posts set children = 0 where children != 0;
@@ -94,7 +94,7 @@ START TRANSACTION;
 DO
 $BODY$
 BEGIN
-IF EXISTS (SELECT * FROM hivemind_app.hive_db_data_migration WHERE migration = 'update_hive_post_mentions refill execution') THEN
+IF EXISTS hivemind_app.(SELECT * FROM hivemind_app.hive_db_data_migration WHERE migration = 'update_hive_post_mentions refill execution') THEN
   RAISE NOTICE 'Performing hivemind_app.hive_mentions refill...';
   SET work_mem='2GB';
   TRUNCATE TABLE hivemind_app.hive_mentions RESTART IDENTITY;

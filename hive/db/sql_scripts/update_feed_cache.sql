@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS update_feed_cache(in _from_block_num INTEGER, in _to_block_num INTEGER);
-CREATE OR REPLACE FUNCTION update_feed_cache(in _from_block_num INTEGER, in _to_block_num INTEGER)
+DROP FUNCTION IF EXISTS hivemind_app.update_feed_cache(in _from_block_num INTEGER, in _to_block_num INTEGER);
+CREATE OR REPLACE FUNCTION hivemind_app.update_feed_cache(in _from_block_num INTEGER, in _to_block_num INTEGER)
 RETURNS void
 LANGUAGE 'plpgsql'
 VOLATILE

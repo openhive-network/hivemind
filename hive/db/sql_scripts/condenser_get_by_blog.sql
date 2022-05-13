@@ -1,12 +1,12 @@
-DROP FUNCTION IF EXISTS condenser_get_by_blog;
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_by_blog;
 
-CREATE OR REPLACE FUNCTION condenser_get_by_blog(
+CREATE OR REPLACE FUNCTION hivemind_app.condenser_get_by_blog(
   in _account VARCHAR,
   in _author VARCHAR,
   in _permlink VARCHAR,
   in _limit INTEGER
 )
-RETURNS SETOF bridge_api_post
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE

@@ -1,15 +1,15 @@
-DROP TYPE IF EXISTS bridge_api_list_pop_communities CASCADE;
-CREATE TYPE bridge_api_list_pop_communities AS (
+DROP TYPE IF EXISTS hivemind_app.bridge_api_list_pop_communities CASCADE;
+CREATE TYPE hivemind_app.bridge_api_list_pop_communities AS (
     name VARCHAR,
     title VARCHAR
 );
 
-DROP FUNCTION IF EXISTS bridge_list_pop_communities
+DROP FUNCTION IF EXISTS hivemind_app.bridge_list_pop_communities
 ;
-CREATE OR REPLACE FUNCTION bridge_list_pop_communities(
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_list_pop_communities(
     in _limit INT
 )
-RETURNS SETOF bridge_api_list_pop_communities
+RETURNS SETOF hivemind_app.bridge_api_list_pop_communities
 LANGUAGE plpgsql
 AS
 $function$

@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS public.update_hive_posts_root_id(INTEGER, INTEGER);
+DROP FUNCTION IF EXISTS hivemind_app.update_hive_posts_root_id(INTEGER, INTEGER);
 
-CREATE OR REPLACE FUNCTION public.update_hive_posts_root_id(in _first_block_num INTEGER, _last_block_num INTEGER)
+CREATE OR REPLACE FUNCTION hivemind_app.update_hive_posts_root_id(in _first_block_num INTEGER, _last_block_num INTEGER)
     RETURNS void
     LANGUAGE 'plpgsql'
     VOLATILE

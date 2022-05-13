@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS update_communities_posts_data_and_rank;
-CREATE FUNCTION update_communities_posts_data_and_rank()
+DROP FUNCTION IF EXISTS hivemind_app.update_communities_posts_data_and_rank;
+CREATE FUNCTION hivemind_app.update_communities_posts_data_and_rank()
 RETURNS void
 AS
 $function$

@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS condenser_get_blog_helper CASCADE;
-CREATE FUNCTION condenser_get_blog_helper( in _blogger VARCHAR, in _last INT, in _limit INT,
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_blog_helper CASCADE;
+CREATE FUNCTION hivemind_app.condenser_get_blog_helper( in _blogger VARCHAR, in _last INT, in _limit INT,
                                            out _account_id INT, out _offset INT, out _new_limit INT )
 AS
 $function$
@@ -23,10 +23,10 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS condenser_get_blog;
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_blog;
 -- blog posts [ _last - _limit + 1, _last ] oldest first (reverted by caller)
-CREATE FUNCTION condenser_get_blog( in _blogger VARCHAR, in _last INT, in _limit INT )
-RETURNS SETOF condenser_api_post
+CREATE FUNCTION hivemind_app.condenser_get_blog( in _blogger VARCHAR, in _last INT, in _limit INT )
+RETURNS SETOF hivemind_app.condenser_api_post
 AS
 $function$
 DECLARE
@@ -86,9 +86,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS condenser_get_blog_entries;
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_blog_entries;
 -- blog entries [ _last - _limit + 1, _last ] oldest first (reverted by caller)
-CREATE FUNCTION condenser_get_blog_entries( in _blogger VARCHAR, in _last INT, in _limit INT )
+CREATE FUNCTION hivemind_app.condenser_get_blog_entries( in _blogger VARCHAR, in _last INT, in _limit INT )
 RETURNS TABLE( entry_id INT, author hivemind_app.hive_accounts.name%TYPE, permlink hivemind_app.hive_permlink_data.permlink%TYPE, reblogged_at TIMESTAMP )
 AS
 $function$

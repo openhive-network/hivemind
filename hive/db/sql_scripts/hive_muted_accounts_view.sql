@@ -1,4 +1,4 @@
- DROP VIEW IF EXISTS muted_accounts_view;
+ DROP VIEW IF EXISTS hivemind_app.muted_accounts_view;
  CREATE OR REPLACE VIEW muted_accounts_view AS
  (
    SELECT observer_accounts.name AS observer, following_accounts.name AS muted

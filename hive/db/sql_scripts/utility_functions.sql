@@ -13,9 +13,9 @@ BEGIN
 END
 $BODY$;
 
-DROP FUNCTION IF EXISTS find_comment_id(character varying, character varying, boolean)
+DROP FUNCTION IF EXISTS hivemind_app.find_comment_id(character varying, character varying, boolean)
 ;
-CREATE OR REPLACE FUNCTION find_comment_id(
+CREATE OR REPLACE FUNCTION hivemind_app.find_comment_id(
   in _author hivemind_app.hive_accounts.name%TYPE,
   in _permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _check boolean)
@@ -54,9 +54,9 @@ END
 $function$
 ;
 
-DROP FUNCTION IF EXISTS find_account_id(character varying, boolean)
+DROP FUNCTION IF EXISTS hivemind_app.find_account_id(character varying, boolean)
 ;
-CREATE OR REPLACE FUNCTION find_account_id(
+CREATE OR REPLACE FUNCTION hivemind_app.find_account_id(
   in _account hivemind_app.hive_accounts.name%TYPE,
   in _check boolean)
 RETURNS INT
@@ -150,9 +150,9 @@ $function$
 ;
 
 --Maybe better to convert roles to ENUM
-DROP FUNCTION IF EXISTS get_role_name
+DROP FUNCTION IF EXISTS hivemind_app.get_role_name
 ;
-CREATE OR REPLACE FUNCTION get_role_name(in _role_id INT)
+CREATE OR REPLACE FUNCTION hivemind_app.get_role_name(in _role_id INT)
 RETURNS VARCHAR
 LANGUAGE 'plpgsql'
 AS
@@ -171,9 +171,9 @@ END
 $function$
 ;
 
-DROP FUNCTION IF EXISTS is_pinned
+DROP FUNCTION IF EXISTS hivemind_app.is_pinned
 ;
-CREATE OR REPLACE FUNCTION is_pinned(in _post_id INT)
+CREATE OR REPLACE FUNCTION hivemind_app.is_pinned(in _post_id INT)
 RETURNS boolean
 LANGUAGE 'plpgsql'
 AS

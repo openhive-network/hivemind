@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS follow_reset_blacklist(character varying, integer)
+DROP FUNCTION IF EXISTS hivemind_app.follow_reset_blacklist(character varying, integer)
 ;
-CREATE OR REPLACE FUNCTION follow_reset_blacklist(in _follower hivemind_app.hive_accounts.name%TYPE, in _block_num hivemind_app.hive_follows.block_num%TYPE)
+CREATE OR REPLACE FUNCTION hivemind_app.follow_reset_blacklist(in _follower hivemind_app.hive_accounts.name%TYPE, in _block_num hivemind_app.hive_follows.block_num%TYPE)
 RETURNS VOID
 LANGUAGE plpgsql
 AS
@@ -16,9 +16,9 @@ END
 $function$
 ;
 
-DROP FUNCTION IF EXISTS follow_reset_following_list(character varying, integer)
+DROP FUNCTION IF EXISTS hivemind_app.follow_reset_following_list(character varying, integer)
 ;
-CREATE OR REPLACE FUNCTION follow_reset_following_list(in _follower hivemind_app.hive_accounts.name%TYPE, in _block_num hivemind_app.hive_follows.block_num%TYPE)
+CREATE OR REPLACE FUNCTION hivemind_app.follow_reset_following_list(in _follower hivemind_app.hive_accounts.name%TYPE, in _block_num hivemind_app.hive_follows.block_num%TYPE)
 RETURNS VOID
 LANGUAGE plpgsql
 AS
@@ -34,9 +34,9 @@ END
 $function$
 ;
 
-DROP FUNCTION IF EXISTS follow_reset_muted_list(character varying, integer)
+DROP FUNCTION IF EXISTS hivemind_app.follow_reset_muted_list(character varying, integer)
 ;
-CREATE OR REPLACE FUNCTION follow_reset_muted_list(in _follower hivemind_app.hive_accounts.name%TYPE, in _block_num hivemind_app.hive_follows.block_num%TYPE)
+CREATE OR REPLACE FUNCTION hivemind_app.follow_reset_muted_list(in _follower hivemind_app.hive_accounts.name%TYPE, in _block_num hivemind_app.hive_follows.block_num%TYPE)
 RETURNS VOID
 LANGUAGE plpgsql
 AS
@@ -52,9 +52,9 @@ END
 $function$
 ;
 
-DROP FUNCTION IF EXISTS follow_reset_follow_blacklist(character varying, integer)
+DROP FUNCTION IF EXISTS hivemind_app.follow_reset_follow_blacklist(character varying, integer)
 ;
-CREATE OR REPLACE FUNCTION follow_reset_follow_blacklist(in _follower hivemind_app.hive_accounts.name%TYPE, in _block_num hivemind_app.hive_follows.block_num%TYPE)
+CREATE OR REPLACE FUNCTION hivemind_app.follow_reset_follow_blacklist(in _follower hivemind_app.hive_accounts.name%TYPE, in _block_num hivemind_app.hive_follows.block_num%TYPE)
 RETURNS VOID
 LANGUAGE plpgsql
 AS
@@ -70,9 +70,9 @@ END
 $function$
 ;
 
-DROP FUNCTION IF EXISTS follow_reset_follow_muted_list(character varying, integer)
+DROP FUNCTION IF EXISTS hivemind_app.follow_reset_follow_muted_list(character varying, integer)
 ;
-CREATE OR REPLACE FUNCTION follow_reset_follow_muted_list(in _follower hivemind_app.hive_accounts.name%TYPE, in _block_num hivemind_app.hive_follows.block_num%TYPE)
+CREATE OR REPLACE FUNCTION hivemind_app.follow_reset_follow_muted_list(in _follower hivemind_app.hive_accounts.name%TYPE, in _block_num hivemind_app.hive_follows.block_num%TYPE)
 RETURNS VOID
 LANGUAGE plpgsql
 AS
@@ -88,9 +88,9 @@ END
 $function$
 ;
 
-DROP FUNCTION IF EXISTS follow_reset_all_lists(character varying, integer)
+DROP FUNCTION IF EXISTS hivemind_app.follow_reset_all_lists(character varying, integer)
 ;
-CREATE OR REPLACE FUNCTION follow_reset_all_lists(in _follower hivemind_app.hive_accounts.name%TYPE, in _block_num hivemind_app.hive_follows.block_num%TYPE)
+CREATE OR REPLACE FUNCTION hivemind_app.follow_reset_all_lists(in _follower hivemind_app.hive_accounts.name%TYPE, in _block_num hivemind_app.hive_follows.block_num%TYPE)
 RETURNS VOID
 LANGUAGE plpgsql
 AS

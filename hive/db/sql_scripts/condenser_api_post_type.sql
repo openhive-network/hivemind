@@ -1,6 +1,6 @@
-DROP TYPE IF EXISTS condenser_api_post CASCADE;
+DROP TYPE IF EXISTS hivemind_app.condenser_api_post CASCADE;
 -- type for regular condenser_api posts
-CREATE TYPE condenser_api_post AS (
+CREATE TYPE hivemind_app.condenser_api_post AS (
     id INT,
     entry_id INT, -- used for paging with offset (otherwise can be any value)
     author VARCHAR(16),

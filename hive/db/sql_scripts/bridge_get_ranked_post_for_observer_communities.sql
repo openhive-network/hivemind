@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_created_for_observer_communities;
-CREATE FUNCTION bridge_get_ranked_post_by_created_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_created_for_observer_communities;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_created_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -81,9 +81,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_hot_for_observer_communities;
-CREATE FUNCTION bridge_get_ranked_post_by_hot_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_hot_for_observer_communities;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_hot_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -159,9 +159,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_payout_comments_for_observer_communities;
-CREATE FUNCTION bridge_get_ranked_post_by_payout_comments_for_observer_communities( in _observer VARCHAR,  in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_payout_comments_for_observer_communities;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_payout_comments_for_observer_communities( in _observer VARCHAR,  in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -239,9 +239,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_payout_for_observer_communities;
-CREATE FUNCTION bridge_get_ranked_post_by_payout_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_payout_for_observer_communities;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_payout_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -322,9 +322,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_promoted_for_observer_communities;
-CREATE FUNCTION bridge_get_ranked_post_by_promoted_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_promoted_for_observer_communities;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_promoted_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -401,9 +401,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_trends_for_observer_communities;
-CREATE OR REPLACE FUNCTION bridge_get_ranked_post_by_trends_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_trends_for_observer_communities;
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_get_ranked_post_by_trends_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
@@ -481,9 +481,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS bridge_get_ranked_post_by_muted_for_observer_communities;
-CREATE FUNCTION bridge_get_ranked_post_by_muted_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
-RETURNS SETOF bridge_api_post
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_muted_for_observer_communities;
+CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_muted_for_observer_communities( in _observer VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE

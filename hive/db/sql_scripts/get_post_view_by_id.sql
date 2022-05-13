@@ -1,6 +1,6 @@
-DROP TYPE IF EXISTS get_post_view_by_id_return_t CASCADE;
+DROP TYPE IF EXISTS hivemind_app.get_post_view_by_id_return_t CASCADE;
 
-CREATE TYPE get_post_view_by_id_return_t AS(
+CREATE TYPE hivemind_app.get_post_view_by_id_return_t AS(
   id integer,
   community_id integer,
   root_id integer,
@@ -66,7 +66,7 @@ CREATE TYPE get_post_view_by_id_return_t AS(
   block_num integer
 );
 
-CREATE OR REPLACE FUNCTION get_post_view_by_id(_id hivemind_app.hive_posts.id%TYPE) RETURNS SETOF get_post_view_by_id_return_t
+CREATE OR REPLACE FUNCTION hivemind_app.get_post_view_by_id(_id hivemind_app.hive_posts.id%TYPE) RETURNS SETOF hivemind_app.get_post_view_by_id_return_t
 AS $function$
 BEGIN 
   RETURN QUERY

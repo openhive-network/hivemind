@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS condenser_get_names_by_reblogged;
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_names_by_reblogged;
 
-CREATE FUNCTION condenser_get_names_by_reblogged( in _author VARCHAR, in _permlink VARCHAR )
+CREATE FUNCTION hivemind_app.condenser_get_names_by_reblogged( in _author VARCHAR, in _permlink VARCHAR )
 RETURNS TABLE(
     names hivemind_app.hive_accounts.name%TYPE
 )

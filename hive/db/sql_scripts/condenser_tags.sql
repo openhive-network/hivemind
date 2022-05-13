@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS condenser_get_top_trending_tags_summary;
-CREATE FUNCTION condenser_get_top_trending_tags_summary( in _limit INT )
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_top_trending_tags_summary;
+CREATE FUNCTION hivemind_app.condenser_get_top_trending_tags_summary( in _limit INT )
 RETURNS SETOF VARCHAR
 AS
 $function$
@@ -17,8 +17,8 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS condenser_get_trending_tags;
-CREATE FUNCTION condenser_get_trending_tags( in _category VARCHAR, in _limit INT )
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_trending_tags;
+CREATE FUNCTION hivemind_app.condenser_get_trending_tags( in _category VARCHAR, in _limit INT )
 RETURNS TABLE( category VARCHAR, total_posts BIGINT, top_posts BIGINT, total_payouts hivemind_app.hive_posts.payout%TYPE )
 AS
 $function$

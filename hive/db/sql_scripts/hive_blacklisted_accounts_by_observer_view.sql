@@ -1,4 +1,4 @@
-DROP VIEW IF EXISTS blacklisted_by_observer_view;
+DROP VIEW IF EXISTS hivemind_app.blacklisted_by_observer_view;
 CREATE OR REPLACE VIEW blacklisted_by_observer_view AS
 SELECT observer_accounts.id AS observer_id,
     following_accounts.id AS blacklisted_id,

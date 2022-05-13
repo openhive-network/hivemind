@@ -445,7 +445,7 @@ BEGIN
     CREATE INDEX hive_posts_updated_at_idx ON hivemind_app.hive_posts (updated_at DESC);
     CREATE INDEX hive_posts_payout_plus_pending_payout_id_idx ON hivemind_app.hive_posts (((payout + pending_payout)), id) WHERE ((NOT is_paidout) AND (counter_deleted = 0));
     CREATE INDEX hive_posts_category_id_payout_plus_pending_payout_depth_idx ON hivemind_app.hive_posts (category_id, ((payout + pending_payout)), depth) WHERE ((NOT is_paidout) AND (counter_deleted = 0));
-    CREATE INDEX hive_posts_tags_ids_idx ON hivemind_app.hive_posts USING gin (tags_ids public.gin__int_ops);
+    CREATE INDEX hive_posts_tags_ids_idx ON hivemind_app.hive_posts USING gin (tags_ids hivemind_app.gin__int_ops);
 
     -- hive_votes
     CREATE INDEX hive_votes_voter_id_post_id_idx ON hivemind_app.hive_votes (voter_id, post_id); -- probably this index is redundant to hive_votes_voter_id_last_update_idx because of starting voter_id.
@@ -562,7 +562,7 @@ AS
 $$
 BEGIN
     RETURN QUERY
-        SELECT 'ALTER TABLE ' || nspname || '.' || relname || ' DROP CONSTRAINT IF EXISTS ' || conname || ';'
+        SELECT 'ALTER TABLE ' || nspname || '.' || relname || ' DROP CONSTRAINT IF EXISTS hivemind_app.' || conname || ';'
         FROM pg_constraint
                  INNER JOIN pg_class ON conrelid = pg_class.oid
                  INNER JOIN pg_namespace ON pg_namespace.oid = pg_class.relnamespace

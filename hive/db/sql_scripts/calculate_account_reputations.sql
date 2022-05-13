@@ -1,21 +1,21 @@
-DROP TYPE IF EXISTS AccountReputation CASCADE;
+DROP TYPE IF EXISTS hivemind_app.AccountReputation CASCADE;
 
-CREATE TYPE AccountReputation AS (id int, reputation bigint, is_implicit boolean, changed boolean);
+CREATE TYPE hivemind_app.AccountReputation AS (id int, reputation bigint, is_implicit boolean, changed boolean);
 
-DROP FUNCTION IF EXISTS calculate_account_reputations;
+DROP FUNCTION IF EXISTS hivemind_app.calculate_account_reputations;
 
 --- Massive version of account reputation calculation.
-CREATE OR REPLACE FUNCTION calculate_account_reputations(
+CREATE OR REPLACE FUNCTION hivemind_app.calculate_account_reputations(
   _first_block_num integer,
   _last_block_num integer,
   _tracked_account character varying DEFAULT NULL::character varying)
-    RETURNS SETOF accountreputation 
+    RETURNS SETOF hivemind_app.accountreputation
     LANGUAGE 'plpgsql'
     STABLE 
 AS $BODY$
 DECLARE
   __vote_data RECORD;
-  __account_reputations AccountReputation[];
+  __account_reputations hivemind_app.AccountReputation[];
   __author_rep bigint;
   __new_author_rep bigint;
   __voter_rep bigint;
@@ -108,9 +108,9 @@ END
 $BODY$
 ;
 
-DROP FUNCTION IF EXISTS calculate_account_reputations_for_block;
+DROP FUNCTION IF EXISTS hivemind_app.calculate_account_reputations_for_block;
 
-DROP TABLE IF EXISTS __new_reputation_data;
+DROP TABLE IF EXISTS hivemind_app.__new_reputation_data;
 
 CREATE UNLOGGED TABLE IF NOT EXISTS __new_reputation_data
 (
@@ -121,7 +121,7 @@ CREATE UNLOGGED TABLE IF NOT EXISTS __new_reputation_data
     prev_rshares bigint
 );
 
-DROP TABLE IF EXISTS __tmp_accounts;
+DROP TABLE IF EXISTS hivemind_app.__tmp_accounts;
 
 CREATE UNLOGGED TABLE IF NOT EXISTS __tmp_accounts
 (
@@ -131,8 +131,8 @@ CREATE UNLOGGED TABLE IF NOT EXISTS __tmp_accounts
     changed boolean
 );
 
-CREATE OR REPLACE FUNCTION calculate_account_reputations_for_block(_block_num INT, _tracked_account VARCHAR DEFAULT NULL::VARCHAR)
-  RETURNS SETOF accountreputation 
+CREATE OR REPLACE FUNCTION hivemind_app.calculate_account_reputations_for_block(_block_num INT, _tracked_account VARCHAR DEFAULT NULL::VARCHAR)
+  RETURNS SETOF hivemind_app.accountreputation
   LANGUAGE 'plpgsql'
   VOLATILE
 AS $BODY$
@@ -254,9 +254,9 @@ END
 $BODY$
 ;
 
-DROP FUNCTION IF EXISTS truncate_account_reputation_data;
+DROP FUNCTION IF EXISTS hivemind_app.truncate_account_reputation_data;
 
-CREATE OR REPLACE FUNCTION truncate_account_reputation_data(
+CREATE OR REPLACE FUNCTION hivemind_app.truncate_account_reputation_data(
   in _day_limit INTERVAL,
   in _allow_truncate BOOLEAN)
   RETURNS VOID 
@@ -267,10 +267,10 @@ DECLARE
   __block_num_limit INT;
 
 BEGIN
-  __block_num_limit = block_before_head(_day_limit);
+  __block_num_limit = hivemind_app.block_before_head(_day_limit);
   
   IF _allow_truncate THEN
-    DROP TABLE IF EXISTS __actual_reputation_data;
+    DROP TABLE IF EXISTS hivemind_app.__actual_reputation_data;
     CREATE UNLOGGED TABLE IF NOT EXISTS __actual_reputation_data
     AS
     SELECT * FROM hivemind_app.hive_reputation_data hrd
@@ -281,7 +281,7 @@ BEGIN
     SELECT * FROM __actual_reputation_data;
 
     TRUNCATE TABLE __actual_reputation_data;
-    DROP TABLE IF EXISTS __actual_reputation_data;
+    DROP TABLE IF EXISTS hivemind_app.__actual_reputation_data;
   ELSE
     DELETE FROM hivemind_app.hive_reputation_data hpd
     WHERE hpd.block_num < __block_num_limit
@@ -292,9 +292,9 @@ $BODY$
 ;
 
 
-DROP FUNCTION IF EXISTS update_account_reputations;
+DROP FUNCTION IF EXISTS hivemind_app.update_account_reputations;
 
-CREATE OR REPLACE FUNCTION update_account_reputations(
+CREATE OR REPLACE FUNCTION hivemind_app.update_account_reputations(
   in _first_block_num INTEGER,
   in _last_block_num INTEGER,
   in _force_data_truncate BOOLEAN)
@@ -313,13 +313,13 @@ BEGIN
   FROM 
   (
     SELECT p.id as account_id, p.reputation, p.is_implicit
-    FROM calculate_account_reputations(_first_block_num, _last_block_num) p
+    FROM hivemind_app.calculate_account_reputations(_first_block_num, _last_block_num) p
     WHERE _first_block_num IS NULL OR _last_block_num IS NULL OR _first_block_num != _last_block_num
 
     UNION ALL
 
     SELECT p.id as account_id, p.reputation, p.is_implicit
-    FROM calculate_account_reputations_for_block(_first_block_num) p
+    FROM hivemind_app.calculate_account_reputations_for_block(_first_block_num) p
     WHERE _first_block_num IS NOT NULL AND _last_block_num IS NOT NULL AND _first_block_num = _last_block_num
 
   ) ds

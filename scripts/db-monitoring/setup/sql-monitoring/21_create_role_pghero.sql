@@ -11,7 +11,7 @@ SET client_min_messages = 'warning';
 DO
 $do$
 BEGIN
-    IF EXISTS (SELECT * FROM pg_user WHERE pg_user.usename = 'pghero') THEN
+    IF EXISTS hivemind_app.(SELECT * FROM pg_user WHERE pg_user.usename = 'pghero') THEN
         raise warning 'Role % already exists', 'pghero';
     ELSE
         CREATE ROLE pghero WITH LOGIN PASSWORD 'pghero';

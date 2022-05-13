@@ -185,7 +185,7 @@ $$;
 
 
 CREATE FUNCTION pgwatch2.get_stat_statements()
-        RETURNS SETOF public.pg_stat_statements
+        RETURNS SETOF pg_stat_statements
     LANGUAGE sql SECURITY DEFINER
     AS $$
   select

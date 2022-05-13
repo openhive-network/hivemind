@@ -1,19 +1,19 @@
-DROP TYPE IF EXISTS bridge_api_list_subscribers CASCADE;
-CREATE TYPE bridge_api_list_subscribers AS (
+DROP TYPE IF EXISTS hivemind_app.bridge_api_list_subscribers CASCADE;
+CREATE TYPE hivemind_app.bridge_api_list_subscribers AS (
     name VARCHAR,
     role VARCHAR,
     title VARCHAR,
     created_at TIMESTAMP WITHOUT TIME ZONE
 );
 
-DROP FUNCTION IF EXISTS bridge_list_subscribers
+DROP FUNCTION IF EXISTS hivemind_app.bridge_list_subscribers
 ;
-CREATE OR REPLACE FUNCTION bridge_list_subscribers(
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_list_subscribers(
     in _community hivemind_app.hive_communities.name%TYPE,
     in _last hivemind_app.hive_accounts.name%TYPE,
     in _limit INT
 )
-RETURNS SETOF bridge_api_list_subscribers
+RETURNS SETOF hivemind_app.bridge_api_list_subscribers
 LANGUAGE plpgsql
 AS
 $function$

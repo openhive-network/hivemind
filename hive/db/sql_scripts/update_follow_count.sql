@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS update_follow_count(hive_blocks.num%TYPE, hivemind_app.hive_blocks.num%TYPE);
-CREATE OR REPLACE FUNCTION update_follow_count(
+DROP FUNCTION IF EXISTS hivemind_app.update_follow_count(hive_blocks.num%TYPE, hivemind_app.hive_blocks.num%TYPE);
+CREATE OR REPLACE FUNCTION hivemind_app.update_follow_count(
   in _first_block hivemind_app.hive_blocks.num%TYPE,
   in _last_block hivemind_app.hive_blocks.num%TYPE
 )

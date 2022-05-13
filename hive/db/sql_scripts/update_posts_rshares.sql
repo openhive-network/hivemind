@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS update_posts_rshares;
-CREATE OR REPLACE FUNCTION update_posts_rshares(
+DROP FUNCTION IF EXISTS hivemind_app.update_posts_rshares;
+CREATE OR REPLACE FUNCTION hivemind_app.update_posts_rshares(
     _first_block hivemind_app.hive_blocks.num%TYPE
   , _last_block hivemind_app.hive_blocks.num%TYPE
 )

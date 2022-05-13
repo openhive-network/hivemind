@@ -1,5 +1,5 @@
-DROP TYPE IF EXISTS database_api_post CASCADE;
-CREATE TYPE database_api_post AS (
+DROP TYPE IF EXISTS hivemind_app.database_api_post CASCADE;
+CREATE TYPE hivemind_app.database_api_post AS (
   id INT,
   community_id INT,
   author VARCHAR(16),
@@ -42,12 +42,12 @@ CREATE TYPE database_api_post AS (
   author_rewards BIGINT
 );
 
-DROP FUNCTION IF EXISTS list_comments_by_permlink(character varying, character varying, int);
-CREATE OR REPLACE FUNCTION list_comments_by_permlink(
+DROP FUNCTION IF EXISTS hivemind_app.list_comments_by_permlink(character varying, character varying, int);
+CREATE OR REPLACE FUNCTION hivemind_app.list_comments_by_permlink(
   in _author hivemind_app.hive_accounts.name%TYPE,
   in _permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _limit INT)
-  RETURNS SETOF database_api_post
+  RETURNS SETOF hivemind_app.database_api_post
 AS
 $function$
 BEGIN
@@ -82,13 +82,13 @@ END;
 $function$
 LANGUAGE plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS list_comments_by_cashout_time(timestamp, character varying, character varying, int);
-CREATE OR REPLACE FUNCTION list_comments_by_cashout_time(
+DROP FUNCTION IF EXISTS hivemind_app.list_comments_by_cashout_time(timestamp, character varying, character varying, int);
+CREATE OR REPLACE FUNCTION hivemind_app.list_comments_by_cashout_time(
   in _cashout_time timestamp,
   in _author hivemind_app.hive_accounts.name%TYPE,
   in _permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _limit INT)
-  RETURNS SETOF database_api_post
+  RETURNS SETOF hivemind_app.database_api_post
 AS
 $function$
 DECLARE
@@ -129,14 +129,14 @@ END
 $function$
 LANGUAGE plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS list_comments_by_root(character varying, character varying, character varying, character varying, int);
-CREATE OR REPLACE FUNCTION list_comments_by_root(
+DROP FUNCTION IF EXISTS hivemind_app.list_comments_by_root(character varying, character varying, character varying, character varying, int);
+CREATE OR REPLACE FUNCTION hivemind_app.list_comments_by_root(
   in _root_author hivemind_app.hive_accounts.name%TYPE,
   in _root_permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _start_post_author hivemind_app.hive_accounts.name%TYPE,
   in _start_post_permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _limit INT)
-  RETURNS SETOF database_api_post
+  RETURNS SETOF hivemind_app.database_api_post
 AS
 $function$
 DECLARE
@@ -173,15 +173,15 @@ END
 $function$
 LANGUAGE plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS list_comments_by_parent(character varying, character varying, character varying, character varying, int)
+DROP FUNCTION IF EXISTS hivemind_app.list_comments_by_parent(character varying, character varying, character varying, character varying, int)
 ;
-CREATE OR REPLACE FUNCTION list_comments_by_parent(
+CREATE OR REPLACE FUNCTION hivemind_app.list_comments_by_parent(
   in _parent_author hivemind_app.hive_accounts.name%TYPE,
   in _parent_permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _start_post_author hivemind_app.hive_accounts.name%TYPE,
   in _start_post_permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _limit INT)
-  RETURNS SETOF database_api_post
+  RETURNS SETOF hivemind_app.database_api_post
 AS $function$
 DECLARE
   __post_id INT;
@@ -217,15 +217,15 @@ END
 $function$
 LANGUAGE plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS list_comments_by_last_update(character varying, timestamp, character varying, character varying, int)
+DROP FUNCTION IF EXISTS hivemind_app.list_comments_by_last_update(character varying, timestamp, character varying, character varying, int)
 ;
-CREATE OR REPLACE FUNCTION list_comments_by_last_update(
+CREATE OR REPLACE FUNCTION hivemind_app.list_comments_by_last_update(
   in _parent_author hivemind_app.hive_accounts.name%TYPE,
   in _updated_at hivemind_app.hive_posts.updated_at%TYPE,
   in _start_post_author hivemind_app.hive_accounts.name%TYPE,
   in _start_post_permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _limit INT)
-  RETURNS SETOF database_api_post
+  RETURNS SETOF hivemind_app.database_api_post
 AS
 $function$
 DECLARE
@@ -268,15 +268,15 @@ END
 $function$
 LANGUAGE plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS list_comments_by_author_last_update(character varying, timestamp, character varying, character varying, int)
+DROP FUNCTION IF EXISTS hivemind_app.list_comments_by_author_last_update(character varying, timestamp, character varying, character varying, int)
 ;
-CREATE OR REPLACE FUNCTION list_comments_by_author_last_update(
+CREATE OR REPLACE FUNCTION hivemind_app.list_comments_by_author_last_update(
   in _author hivemind_app.hive_accounts.name%TYPE,
   in _updated_at hivemind_app.hive_posts.updated_at%TYPE,
   in _start_post_author hivemind_app.hive_accounts.name%TYPE,
   in _start_post_permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _limit INT)
-  RETURNS SETOF database_api_post
+  RETURNS SETOF hivemind_app.database_api_post
 AS
 $function$
 DECLARE

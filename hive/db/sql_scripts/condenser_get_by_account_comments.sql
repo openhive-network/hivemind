@@ -1,7 +1,7 @@
-DROP FUNCTION IF EXISTS condenser_get_by_account_comments;
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_by_account_comments;
 
-CREATE OR REPLACE FUNCTION condenser_get_by_account_comments( in _author VARCHAR, in _permlink VARCHAR, in _limit INTEGER)
-RETURNS SETOF bridge_api_post
+CREATE OR REPLACE FUNCTION hivemind_app.condenser_get_by_account_comments( in _author VARCHAR, in _permlink VARCHAR, in _limit INTEGER)
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE

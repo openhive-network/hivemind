@@ -1,5 +1,5 @@
-DROP TYPE IF EXISTS bridge_api_community CASCADE;
-CREATE TYPE bridge_api_community AS (
+DROP TYPE IF EXISTS hivemind_app.bridge_api_community CASCADE;
+CREATE TYPE hivemind_app.bridge_api_community AS (
     id INTEGER,
     name VARCHAR(16),
     title VARCHAR(32),
@@ -20,13 +20,13 @@ CREATE TYPE bridge_api_community AS (
     team JSON
 );
 
-DROP FUNCTION IF EXISTS bridge_get_community
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_community
 ;
-CREATE OR REPLACE FUNCTION bridge_get_community(
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_get_community(
     in _name hivemind_app.hive_communities.name%TYPE,
     in _observer hivemind_app.hive_accounts.name%TYPE
 )
-RETURNS SETOF bridge_api_community
+RETURNS SETOF hivemind_app.bridge_api_community
 LANGUAGE plpgsql
 AS
 $function$

@@ -1,17 +1,17 @@
-DROP TYPE IF EXISTS bridge_api_list_all_subscriptions CASCADE;
-CREATE TYPE bridge_api_list_all_subscriptions AS (
+DROP TYPE IF EXISTS hivemind_app.bridge_api_list_all_subscriptions CASCADE;
+CREATE TYPE hivemind_app.bridge_api_list_all_subscriptions AS (
     name VARCHAR,
     title VARCHAR,
     role VARCHAR,
     role_title VARCHAR
 );
 
-DROP FUNCTION IF EXISTS bridge_list_all_subscriptions
+DROP FUNCTION IF EXISTS hivemind_app.bridge_list_all_subscriptions
 ;
-CREATE OR REPLACE FUNCTION bridge_list_all_subscriptions(
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_list_all_subscriptions(
     in _account hivemind_app.hive_accounts.name%TYPE
 )
-RETURNS SETOF bridge_api_list_all_subscriptions
+RETURNS SETOF hivemind_app.bridge_api_list_all_subscriptions
 LANGUAGE plpgsql
 AS
 $function$

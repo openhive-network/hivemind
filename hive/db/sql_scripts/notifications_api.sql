@@ -1,6 +1,6 @@
-DROP TYPE IF EXISTS notification CASCADE
+DROP TYPE IF EXISTS hivemind_app.notification CASCADE
 ;
-CREATE TYPE notification AS
+CREATE TYPE hivemind_app.notification AS
 (
   id BIGINT
 , type_id SMALLINT
@@ -16,8 +16,8 @@ CREATE TYPE notification AS
 , number_of_mentions INTEGER
 );
 
-DROP FUNCTION IF EXISTS get_number_of_unread_notifications;
-CREATE OR REPLACE FUNCTION get_number_of_unread_notifications(in _account VARCHAR, in _minimum_score SMALLINT)
+DROP FUNCTION IF EXISTS hivemind_app.get_number_of_unread_notifications;
+CREATE OR REPLACE FUNCTION hivemind_app.get_number_of_unread_notifications(in _account VARCHAR, in _minimum_score SMALLINT)
 RETURNS TABLE( lastread_at TIMESTAMP, unread BIGINT )
 LANGUAGE 'plpgsql' STABLE
 AS
@@ -26,7 +26,7 @@ DECLARE
     __account_id INT := 0;
     __last_read_at TIMESTAMP;
     __last_read_at_block hivemind_app.hive_blocks.num%TYPE;
-    __limit_block hivemind_app.hive_blocks.num%TYPE = block_before_head( '90 days' );
+    __limit_block hivemind_app.hive_blocks.num%TYPE = hivemind_app.block_before_head( '90 days' );
 BEGIN
   __account_id = find_account_id( _account, True );
 
@@ -52,8 +52,8 @@ END
 $BODY$
 ;
 
-DROP FUNCTION IF EXISTS get_number_of_mentions_in_post;
-CREATE OR REPLACE FUNCTION public.get_number_of_mentions_in_post( _post_id hivemind_app.hive_posts.id%TYPE )
+DROP FUNCTION IF EXISTS hivemind_app.get_number_of_mentions_in_post;
+CREATE OR REPLACE FUNCTION hivemind_app.get_number_of_mentions_in_post( _post_id hivemind_app.hive_posts.id%TYPE )
 RETURNS INTEGER
 LANGUAGE 'plpgsql'
 STABLE
@@ -67,19 +67,19 @@ BEGIN
 END
 $BODY$;
 
-DROP FUNCTION IF EXISTS account_notifications;
-CREATE OR REPLACE FUNCTION public.account_notifications(
+DROP FUNCTION IF EXISTS hivemind_app.account_notifications;
+CREATE OR REPLACE FUNCTION hivemind_app.account_notifications(
   _account character varying,
   _min_score smallint,
   _last_id bigint,
   _limit smallint)
-    RETURNS SETOF notification
+    RETURNS SETOF hivemind_app.notification
     LANGUAGE 'plpgsql'
     STABLE
 AS $BODY$
 DECLARE
   __account_id INT;
-  __limit_block hivemind_app.hive_blocks.num%TYPE = block_before_head( '90 days' );
+  __limit_block hivemind_app.hive_blocks.num%TYPE = hivemind_app.block_before_head( '90 days' );
 BEGIN
   __account_id = find_account_id( _account, True );
   RETURN QUERY SELECT
@@ -119,15 +119,15 @@ BEGIN
 END
 $BODY$;
 
-DROP FUNCTION IF EXISTS post_notifications
+DROP FUNCTION IF EXISTS hivemind_app.post_notifications
 ;
-CREATE OR REPLACE FUNCTION post_notifications(in _author VARCHAR, in _permlink VARCHAR, in _min_score SMALLINT, in _last_id BIGINT, in _limit SMALLINT)
-RETURNS SETOF notification
+CREATE OR REPLACE FUNCTION hivemind_app.post_notifications(in _author VARCHAR, in _permlink VARCHAR, in _min_score SMALLINT, in _last_id BIGINT, in _limit SMALLINT)
+RETURNS SETOF hivemind_app.notification
 AS
 $function$
 DECLARE
   __post_id INT;
-  __limit_block hivemind_app.hive_blocks.num%TYPE = block_before_head( '90 days' );
+  __limit_block hivemind_app.hive_blocks.num%TYPE = hivemind_app.block_before_head( '90 days' );
 BEGIN
   __post_id = find_comment_id(_author, _permlink, True);
   RETURN QUERY SELECT
@@ -169,14 +169,14 @@ $function$
 LANGUAGE plpgsql STABLE
 ;
 
-DROP FUNCTION IF EXISTS update_notification_cache;
+DROP FUNCTION IF EXISTS hivemind_app.update_notification_cache;
 ;
-CREATE OR REPLACE FUNCTION update_notification_cache(in _first_block_num INT, in _last_block_num INT, in _prune_old BOOLEAN)
+CREATE OR REPLACE FUNCTION hivemind_app.update_notification_cache(in _first_block_num INT, in _last_block_num INT, in _prune_old BOOLEAN)
 RETURNS VOID
 AS
 $function$
 DECLARE
-  __limit_block hivemind_app.hive_blocks.num%TYPE = block_before_head( '90 days' );
+  __limit_block hivemind_app.hive_blocks.num%TYPE = hivemind_app.block_before_head( '90 days' );
 BEGIN
   IF _first_block_num IS NULL THEN
     TRUNCATE TABLE hivemind_app.hive_notification_cache;

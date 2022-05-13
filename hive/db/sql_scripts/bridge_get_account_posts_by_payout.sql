@@ -1,7 +1,7 @@
-DROP FUNCTION IF EXISTS bridge_get_account_posts_by_payout;
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_account_posts_by_payout;
 
-CREATE FUNCTION bridge_get_account_posts_by_payout( in _account VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
-RETURNS SETOF bridge_api_post
+CREATE FUNCTION hivemind_app.bridge_get_account_posts_by_payout( in _account VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE

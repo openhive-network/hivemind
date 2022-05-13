@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS public.update_hive_posts_children_count;
-CREATE OR REPLACE FUNCTION public.update_hive_posts_children_count(in _first_block INTEGER, in _last_block INTEGER)
+DROP FUNCTION IF EXISTS hivemind_app.update_hive_posts_children_count;
+CREATE OR REPLACE FUNCTION hivemind_app.update_hive_posts_children_count(in _first_block INTEGER, in _last_block INTEGER)
   RETURNS void
   LANGUAGE 'plpgsql'
   VOLATILE
@@ -61,8 +61,8 @@ WHERE uhp.id = data_source.queried_parent
 END
 $BODY$;
 
-DROP FUNCTION IF EXISTS public.update_all_hive_posts_children_count;
-CREATE OR REPLACE FUNCTION public.update_all_hive_posts_children_count()
+DROP FUNCTION IF EXISTS hivemind_app.update_all_hive_posts_children_count;
+CREATE OR REPLACE FUNCTION hivemind_app.update_all_hive_posts_children_count()
   RETURNS void
   LANGUAGE 'plpgsql'
   VOLATILE

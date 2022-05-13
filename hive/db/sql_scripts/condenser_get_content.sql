@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS condenser_get_content;
-CREATE FUNCTION condenser_get_content( in _author VARCHAR, in _permlink VARCHAR )
-RETURNS SETOF condenser_api_post_ex
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_content;
+CREATE FUNCTION hivemind_app.condenser_get_content( in _author VARCHAR, in _permlink VARCHAR )
+RETURNS SETOF hivemind_app.condenser_api_post_ex
 AS
 $function$
 DECLARE
@@ -54,9 +54,9 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS condenser_get_content_replies;
-CREATE FUNCTION condenser_get_content_replies( in _author VARCHAR, in _permlink VARCHAR )
-RETURNS SETOF condenser_api_post_ex
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_content_replies;
+CREATE FUNCTION hivemind_app.condenser_get_content_replies( in _author VARCHAR, in _permlink VARCHAR )
+RETURNS SETOF hivemind_app.condenser_api_post_ex
 AS
 $function$
 DECLARE

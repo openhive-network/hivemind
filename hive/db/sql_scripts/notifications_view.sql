@@ -26,9 +26,9 @@ left join
 ) ds on ds.id = ha.id
 ; 
 
-DROP FUNCTION IF EXISTS public.calculate_notify_vote_score(_payout hivemind_app.hive_posts.payout%TYPE, _abs_rshares hivemind_app.hive_posts.abs_rshares%TYPE, _rshares hivemind_app.hive_votes.rshares%TYPE) CASCADE
+DROP FUNCTION IF EXISTS hivemind_app.calculate_notify_vote_score(_payout hivemind_app.hive_posts.payout%TYPE, _abs_rshares hivemind_app.hive_posts.abs_rshares%TYPE, _rshares hivemind_app.hive_votes.rshares%TYPE) CASCADE
 ;
-CREATE OR REPLACE FUNCTION public.calculate_notify_vote_score(_payout hivemind_app.hive_posts.payout%TYPE, _abs_rshares hivemind_app.hive_posts.abs_rshares%TYPE, _rshares hivemind_app.hive_votes.rshares%TYPE)
+CREATE OR REPLACE FUNCTION hivemind_app.calculate_notify_vote_score(_payout hivemind_app.hive_posts.payout%TYPE, _abs_rshares hivemind_app.hive_posts.abs_rshares%TYPE, _rshares hivemind_app.hive_votes.rshares%TYPE)
 RETURNS INT
 LANGUAGE 'sql'
 IMMUTABLE
@@ -39,9 +39,9 @@ AS $BODY$
     END;
 $BODY$;
 
-DROP FUNCTION IF EXISTS notification_id CASCADE;
+DROP FUNCTION IF EXISTS hivemind_app.notification_id CASCADE;
 ;
-CREATE OR REPLACE FUNCTION notification_id(in _block_number INTEGER, in _notifyType INTEGER, in _id INTEGER)
+CREATE OR REPLACE FUNCTION hivemind_app.notification_id(in _block_number INTEGER, in _notifyType INTEGER, in _id INTEGER)
 RETURNS BIGINT
 AS
 $function$
@@ -54,8 +54,8 @@ $function$
 LANGUAGE plpgsql IMMUTABLE
 ;
 
-DROP FUNCTION IF EXISTS public.calculate_value_of_vote_on_post CASCADE;
-CREATE OR REPLACE FUNCTION public.calculate_value_of_vote_on_post(
+DROP FUNCTION IF EXISTS hivemind_app.calculate_value_of_vote_on_post CASCADE;
+CREATE OR REPLACE FUNCTION hivemind_app.calculate_value_of_vote_on_post(
     _post_payout hivemind_app.hive_posts.payout%TYPE
   , _post_rshares hivemind_app.hive_posts.vote_rshares%TYPE
   , _vote_rshares hivemind_app.hive_votes.rshares%TYPE)
@@ -89,7 +89,7 @@ CREATE OR REPLACE VIEW hivemind_app.hive_raw_notifications_as_view
     notifs.payload,
     harv.score
    FROM ( SELECT hpv.block_num,
-            notification_id(hpv.block_num,
+            hivemind_app.notification_id(hpv.block_num,
                 CASE hpv.depth
                     WHEN 1 THEN 12
                     ELSE 13
@@ -113,7 +113,7 @@ CREATE OR REPLACE VIEW hivemind_app.hive_raw_notifications_as_view
                                     WHERE hf.follower = hpv.parent_author_id AND hf.following = hpv.author_id AND hf.state = 2)
 UNION ALL
  SELECT hf.block_num,
-    notification_id(hf.block_num, 15, hf.id) AS id,
+    hivemind_app.notification_id(hf.block_num, 15, hf.id) AS id,
     0 AS post_id,
     15 AS type_id,
     hb.created_at,
@@ -129,7 +129,7 @@ UNION ALL
 
 UNION ALL
  SELECT hr.block_num,
-    notification_id(hr.block_num, 14, hr.id) AS id,
+    hivemind_app.notification_id(hr.block_num, 14, hr.id) AS id,
     hp.id AS post_id,
     14 AS type_id,
     hr.created_at,
@@ -143,7 +143,7 @@ UNION ALL
    JOIN hivemind_app.hive_posts hp ON hr.post_id = hp.id
 UNION ALL
  SELECT hs.block_num,
-    notification_id(hs.block_num, 11, hs.id) AS id,
+    hivemind_app.notification_id(hs.block_num, 11, hs.id) AS id,
     0 AS post_id,
     11 AS type_id,
     hs.created_at,
@@ -157,7 +157,7 @@ UNION ALL
    JOIN hivemind_app.hive_communities hc ON hs.community_id = hc.id
 UNION ALL
  SELECT hm.block_num,
-    notification_id(hm.block_num, 16, hm.id) AS id,
+    hivemind_app.notification_id(hm.block_num, 16, hm.id) AS id,
     hm.post_id,
     16 AS type_id,
     hb.created_at,
@@ -197,7 +197,7 @@ FROM
   (
     SELECT
         hv1.block_num
-      , notification_id(hv1.block_num, 17, hv1.id::integer) AS id
+      , hivemind_app.notification_id(hv1.block_num, 17, hv1.id::integer) AS id
       , hpv.id AS post_id
       , 17 AS type_id
       , hv1.last_update AS created_at
@@ -206,8 +206,8 @@ FROM
       , hpv.id AS dst_post_id
       , ''::VARCHAR(16) AS community
       , ''::VARCHAR AS community_title
-      , calculate_value_of_vote_on_post(hpv.payout + hpv.pending_payout, hpv.rshares, hv1.rshares) AS vote_value
-      , calculate_notify_vote_score(hpv.payout + hpv.pending_payout, hpv.abs_rshares, hv1.rshares) AS score
+      , hivemind_app.calculate_value_of_vote_on_post(hpv.payout + hpv.pending_payout, hpv.rshares, hv1.rshares) AS vote_value
+      , hivemind_app.calculate_notify_vote_score(hpv.payout + hpv.pending_payout, hpv.abs_rshares, hv1.rshares) AS score
     FROM hivemind_app.hive_votes hv1
     JOIN
       (
@@ -219,7 +219,7 @@ FROM
           , hpvi.abs_rshares
           , hpvi.vote_rshares as rshares
          FROM hivemind_app.hive_posts hpvi
-         WHERE hpvi.block_num > block_before_head('97 days'::interval)
+         WHERE hpvi.block_num > hivemind_app.block_before_head('97 days'::interval)
        ) hpv ON hv1.post_id = hpv.id
     WHERE hv1.rshares >= 10e9
   ) as vn
@@ -227,7 +227,7 @@ FROM
 UNION ALL
   SELECT -- new community
       hc.block_num as block_num
-      , notification_id(hc.block_num, 11, hc.id) as id
+      , hivemind_app.notification_id(hc.block_num, 11, hc.id) as id
       , 0 as post_id
       , 1 as type_id
       , hc.created_at as created_at
@@ -243,7 +243,7 @@ UNION ALL
 UNION ALL
   SELECT --persistent notifs
        hn.block_num
-     , notification_id(hn.block_num, hn.type_id, CAST( hn.id as INT) ) as id
+     , hivemind_app.notification_id(hn.block_num, hn.type_id, CAST( hn.id as INT) ) as id
      , hn.post_id as post_id
      , hn.type_id as type_id
      , hn.created_at as created_at

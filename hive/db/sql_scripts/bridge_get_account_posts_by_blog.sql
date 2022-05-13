@@ -1,13 +1,13 @@
-DROP FUNCTION IF EXISTS bridge_get_account_posts_by_blog;
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_account_posts_by_blog;
 
-CREATE OR REPLACE FUNCTION bridge_get_account_posts_by_blog(
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_get_account_posts_by_blog(
   in _account VARCHAR,
   in _author VARCHAR,
   in _permlink VARCHAR,
   in _limit INTEGER,
   in _bridge_api BOOLEAN
 )
-RETURNS SETOF bridge_api_post
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE

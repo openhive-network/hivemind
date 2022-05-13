@@ -1,4 +1,4 @@
-DROP MATERIALIZED VIEW IF EXISTS payout_stats_view;
+DROP MATERIALIZED VIEW IF EXISTS hivemind_app.payout_stats_view;
 
 CREATE MATERIALIZED VIEW payout_stats_view AS
   SELECT

@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS mutes_get_blacklisted_for_observer;
-CREATE FUNCTION mutes_get_blacklisted_for_observer( in _observer VARCHAR, in _flags INTEGER )
+DROP FUNCTION IF EXISTS hivemind_app.mutes_get_blacklisted_for_observer;
+CREATE FUNCTION hivemind_app.mutes_get_blacklisted_for_observer( in _observer VARCHAR, in _flags INTEGER )
 RETURNS TABLE(
     account hivemind_app.hive_accounts.name%TYPE,
     source VARCHAR,
@@ -67,8 +67,8 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS mutes_get_blacklists_for_observer;
-CREATE FUNCTION mutes_get_blacklists_for_observer( in _observer VARCHAR, in _follow_blacklist BOOLEAN, in _follow_muted BOOLEAN )
+DROP FUNCTION IF EXISTS hivemind_app.mutes_get_blacklists_for_observer;
+CREATE FUNCTION hivemind_app.mutes_get_blacklists_for_observer( in _observer VARCHAR, in _follow_blacklist BOOLEAN, in _follow_muted BOOLEAN )
 RETURNS TABLE(
     list hivemind_app.hive_accounts.name%TYPE,
     posting_json_metadata hivemind_app.hive_accounts.name%TYPE,

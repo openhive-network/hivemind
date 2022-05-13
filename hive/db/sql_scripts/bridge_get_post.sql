@@ -1,7 +1,7 @@
-DROP FUNCTION IF EXISTS bridge_get_post;
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_post;
 
-CREATE FUNCTION bridge_get_post( in _author VARCHAR, in _permlink VARCHAR )
-RETURNS SETOF bridge_api_post
+CREATE FUNCTION hivemind_app.bridge_get_post( in _author VARCHAR, in _permlink VARCHAR )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE

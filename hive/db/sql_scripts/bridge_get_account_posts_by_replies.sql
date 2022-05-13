@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION bridge_get_account_posts_by_replies(_account VARCHAR, _author VARCHAR, _permlink VARCHAR, _limit SMALLINT, _bridge_api BOOLEAN) RETURNS SETOF bridge_api_post
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_get_account_posts_by_replies(_account VARCHAR, _author VARCHAR, _permlink VARCHAR, _limit SMALLINT, _bridge_api BOOLEAN) RETURNS SETOF hivemind_app.bridge_api_post
 AS $function$
 DECLARE
   __account_id INT;

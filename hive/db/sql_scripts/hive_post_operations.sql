@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS prepare_tags;
-CREATE OR REPLACE FUNCTION prepare_tags( in _raw_tags VARCHAR[] )
+DROP FUNCTION IF EXISTS hivemind_app.prepare_tags;
+CREATE OR REPLACE FUNCTION hivemind_app.prepare_tags( in _raw_tags VARCHAR[] )
 RETURNS SETOF hivemind_app.hive_tag_data.id%TYPE
 LANGUAGE 'plpgsql'
 VOLATILE
@@ -25,9 +25,9 @@ BEGIN
 END
 $function$;
 
-DROP FUNCTION IF EXISTS process_hive_post_operation;
+DROP FUNCTION IF EXISTS hivemind_app.process_hive_post_operation;
 ;
-CREATE OR REPLACE FUNCTION process_hive_post_operation(
+CREATE OR REPLACE FUNCTION hivemind_app.process_hive_post_operation(
   in _author hivemind_app.hive_accounts.name%TYPE,
   in _permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _parent_author hivemind_app.hive_accounts.name%TYPE,
@@ -144,9 +144,9 @@ END
 $function$
 ;
 
-DROP FUNCTION if exists delete_hive_post(character varying,character varying,character varying, integer, timestamp)
+DROP FUNCTION IF EXISTS hivemind_app.delete_hive_post(character varying,character varying,character varying, integer, timestamp)
 ;
-CREATE OR REPLACE FUNCTION delete_hive_post(
+CREATE OR REPLACE FUNCTION hivemind_app.delete_hive_post(
   in _author hivemind_app.hive_accounts.name%TYPE,
   in _permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _block_num hivemind_app.hive_blocks.num%TYPE,
