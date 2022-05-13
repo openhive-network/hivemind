@@ -1,4 +1,4 @@
-SELECT COALESCE((SELECT hd.vacuum_needed FROM hive_db_vacuum_needed hd WHERE hd.vacuum_needed LIMIT 1), False) AS needs_vacuum
+SELECT COALESCE((SELECT hd.vacuum_needed FROM hivemind_app.hive_db_vacuum_needed hd WHERE hd.vacuum_needed LIMIT 1), False) AS needs_vacuum
 \gset
 \if :needs_vacuum
 \qecho Running VACUUM on the database

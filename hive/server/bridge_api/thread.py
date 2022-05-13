@@ -2,6 +2,7 @@
 
 import logging
 
+from hive.conf import SCHEMA_NAME
 from hive.server.bridge_api.objects import _bridge_post_object, append_statistics_to_post
 from hive.server.common.helpers import return_error_info, valid_account, valid_permlink
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
@@ -18,7 +19,7 @@ async def get_discussion(context, author: str, permlink: str, observer: str = ''
     permlink = valid_permlink(permlink)
     observer = valid_account(observer, allow_empty=True)
 
-    sql = "SELECT * FROM bridge_get_discussion(:author,:permlink,:observer)"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_discussion(:author,:permlink,:observer)"
     rows = await db.query_all(sql, author=author, permlink=permlink, observer=observer)
     if not rows or len(rows) == 0:
         return {}
