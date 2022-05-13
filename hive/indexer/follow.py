@@ -5,6 +5,7 @@ import logging
 
 from funcy.seqs import first
 
+from hive.conf import SCHEMA_NAME
 from hive.indexer.accounts import Accounts
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
@@ -289,15 +290,14 @@ class Follow(DbAdapterHolder):
         if cls.follow_items_to_flush or cls.list_resets_to_flush:
             cls.beginTx()
 
-            sql = "SELECT {}({}::VARCHAR, {}::INT)"
             for reset_list in cls.list_resets_to_flush:
-                query = sql.format(reset_list['reset_call'], reset_list['follower'], reset_list['block_num'])
-                cls.db.query_no_return(query)
+                sql = f"SELECT {SCHEMA_NAME}.{reset_list['reset_call']}({reset_list['follower']}::VARCHAR, {reset_list['block_num']}::INT)"
+                cls.db.query_no_return(sql)
 
             cls.list_resets_to_flush.clear()
 
-            sql = """
-                INSERT INTO hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
+            sql = f"""
+                INSERT INTO {SCHEMA_NAME}.hive_follows as hf (follower, following, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
                 SELECT
                     ds.follower_id,
                     ds.following_id,
@@ -322,12 +322,12 @@ class Follow(DbAdapterHolder):
                     FROM
                         (
                             VALUES
-                            {}
+                            {{}}
                         ) as T (id, follower, following, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
-                    INNER JOIN hive_accounts ha_flr ON ha_flr.name = T.follower
-                    INNER JOIN hive_accounts ha_flg ON ha_flg.name = T.following
+                    INNER JOIN {SCHEMA_NAME}.hive_accounts ha_flr ON ha_flr.name = T.follower
+                    INNER JOIN {SCHEMA_NAME}.hive_accounts ha_flg ON ha_flg.name = T.following
                 ) AS ds(id, follower_id, following_id, created_at, state, blacklisted, follow_blacklists, follow_muted, block_num)
-                LEFT JOIN hive_follows hfs ON hfs.follower = ds.follower_id AND hfs.following = ds.following_id
+                LEFT JOIN {SCHEMA_NAME}.hive_follows hfs ON hfs.follower = ds.follower_id AND hfs.following = ds.following_id
                 ORDER BY ds.id ASC 
                 ON CONFLICT ON CONSTRAINT hive_follows_ux1 DO UPDATE
                     SET

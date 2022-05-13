@@ -7,7 +7,7 @@ from pathlib import Path
 from time import perf_counter as perf
 from typing import Final, Tuple
 
-from hive.conf import Conf
+from hive.conf import Conf, SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 from hive.db.schema import execute_sql_script
@@ -41,8 +41,6 @@ log = logging.getLogger(__name__)
 
 
 class SyncHiveDb:
-    HIVEMIND_APP_CONTEXT: Final[str] = 'hivemind_app'
-
     def __init__(self, conf: Conf):
         self._conf = conf
         self._db = conf.db()
@@ -186,13 +184,13 @@ class SyncHiveDb:
             update_communities_posts_and_rank(self._db)
 
     def _prepare_app_context(self) -> None:
-        log.info(f"Looking for '{self.HIVEMIND_APP_CONTEXT}' context.")
+        log.info(f"Looking for '{SCHEMA_NAME}' context.")
         ctx_present = self._db.query_one(
-            f"SELECT hive.app_context_exists('{self.HIVEMIND_APP_CONTEXT}') as ctx_present;"
+            f"SELECT hive.app_context_exists('{SCHEMA_NAME}') as ctx_present;"
         )
         if not ctx_present:
-            log.info(f"No application context present. Attempting to create a '{self.HIVEMIND_APP_CONTEXT}' context...")
-            self._db.query_no_return(f"SELECT hive.app_create_context('{self.HIVEMIND_APP_CONTEXT}');")
+            log.info(f"No application context present. Attempting to create a '{SCHEMA_NAME}' context...")
+            self._db.query_no_return(f"SELECT hive.app_create_context('{SCHEMA_NAME}');")
             log.info("Application context creation done.")
 
     def _prepare_app_schema(self) -> None:
@@ -206,7 +204,7 @@ class SyncHiveDb:
     def _query_for_app_next_block(self) -> Tuple[int, int]:
         log.info("Querying for next block for app context...")
         self._db.query("START TRANSACTION")
-        lbound, ubound = self._db.query_row(f"SELECT * FROM hive.app_next_block('{self.HIVEMIND_APP_CONTEXT}')")
+        lbound, ubound = self._db.query_row(f"SELECT * FROM hive.app_next_block('{SCHEMA_NAME}')")
         self._db.query("COMMIT")
         log.info(f"Next block range from hive.app_next_block is: <{lbound}:{ubound}>")
         return lbound, ubound
@@ -224,10 +222,10 @@ class SyncHiveDb:
         log.info(f"Block range: <{self._lbound}:{self._ubound}> processing finished")
 
     def _context_detach(self) -> None:
-        is_attached = self._db.query_one(f"SELECT hive.app_context_is_attached('{self.HIVEMIND_APP_CONTEXT}')")
+        is_attached = self._db.query_one(f"SELECT hive.app_context_is_attached('{SCHEMA_NAME}')")
         if is_attached:
             log.info("Trying to detach app context...")
-            self._db.query_no_return(f"SELECT hive.app_context_detach('{self.HIVEMIND_APP_CONTEXT}')")
+            self._db.query_no_return(f"SELECT hive.app_context_detach('{SCHEMA_NAME}')")
             log.info("App context detaching done.")
         else:
             log.info("No attached context - detach skipped.")
@@ -257,7 +255,7 @@ class SyncHiveDb:
     def _show_info(database: Db) -> None:
         last_block = Blocks.head_num()
 
-        sql = "SELECT level, patch_date, patched_to_revision FROM hive_db_patch_level ORDER BY level DESC LIMIT 1"
+        sql = f"SELECT level, patch_date, patched_to_revision FROM {SCHEMA_NAME}.hive_db_patch_level ORDER BY level DESC LIMIT 1"
         patch_level_data = database.query_row(sql)
 
         from hive.utils.misc import show_app_version

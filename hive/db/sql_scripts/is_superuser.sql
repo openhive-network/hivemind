@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION is_superuser()
+CREATE OR REPLACE FUNCTION hivemind_app.is_superuser()
   RETURNS bool
   LANGUAGE sql
   STABLE
