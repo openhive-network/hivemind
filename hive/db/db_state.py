@@ -11,7 +11,7 @@ import sqlalchemy
 
 from hive.conf import SCHEMA_NAME
 from hive.db.adapter import Db
-from hive.db.schema import build_metadata, setup, teardown
+from hive.db.schema import setup
 from hive.indexer.auto_db_disposer import AutoDbDisposer
 from hive.server.common.payout_stats import PayoutStats
 from hive.utils.communities_rank import update_communities_posts_and_rank
@@ -72,14 +72,6 @@ class DbState:
         return cls._is_massive_sync
 
     @classmethod
-    def _all_foreign_keys(cls):
-        md = build_metadata()
-        out = []
-        for table in md.tables.values():
-            out.extend(table.foreign_keys)
-        return out
-
-    @classmethod
     def _disableable_indexes(cls):
         to_locate = [
             'hive_blocks_created_at_idx',
@@ -123,7 +115,6 @@ class DbState:
         ]
 
         to_return = {}
-        md = build_metadata()
         for table in md.tables.values():
             for index in table.indexes:
                 if index.name not in to_locate:
@@ -212,7 +203,12 @@ class DbState:
     def processing_indexes(cls, is_pre_process, drop, create):
         start_time = FOSM.start()
         action = 'CREATING' if create else 'DROPPING'
-        _indexes = cls._disableable_indexes()
+        # _indexes = cls._disableable_indexes()
+
+        sql = f'SELECT {SCHEMA_NAME}.save_and_drop_indexes()'
+        indexes = cls.db().query_all()
+
+
 
         methods = []
         for _key_table, indexes in _indexes.items():
@@ -342,7 +338,7 @@ $$;
 
         with AutoDbDisposer(db, "finish_account_reputations") as db_mgr:
             time_start = perf_counter()
-            sql = f"SELECT update_account_reputations({last_imported_block}, {current_imported_block}, True);"
+            sql = f"SELECT {SCHEMA_NAME}.update_account_reputations({last_imported_block}, {current_imported_block}, True);"
             cls._execute_query(db_mgr.db, sql)
             log.info("[MASSIVE] update_account_reputations executed in %.4fs", perf_counter() - time_start)
 

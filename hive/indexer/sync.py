@@ -17,6 +17,7 @@ from hive.indexer.blocks import Blocks
 from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbLiveContextHolder
 from hive.indexer.hive_db.block import BlockHiveDb
+from hive.indexer.hive_db.haf_functions import context_attach, context_detach, prepare_app_context
 from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
 from hive.indexer.mock_block_provider import MockBlockProvider
 from hive.indexer.mock_vops_provider import MockVopsProvider
@@ -78,9 +79,12 @@ class SyncHiveDb:
             raise RuntimeError("Fatal error related to `hive_blocks` consistency")
         self._load_mock_data()
         Accounts.load_ids()  # prefetch id->name and id->rank memory maps
-        update_communities_posts_and_rank(self._db)
 
-        self._prepare_app_context()
+        context_detach(db=self._db)
+        update_communities_posts_and_rank(self._db)
+        context_attach(db=self._db, block_number=Blocks.head_num())
+
+        prepare_app_context(db=self._db)
         self._prepare_app_schema()
 
         self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
@@ -94,8 +98,8 @@ class SyncHiveDb:
         log.info("Exiting HAF mode synchronization")
 
         if not self._were_mocks_after_db_blocks:
-            self._context_detach()  # context attaching requires context to be detached or error will be raised
-            self._context_attach()
+            context_detach(db=self._db)  # context attaching requires context to be detached or error will be raised
+            context_attach(db=self._db, block_number=Blocks.head_num())
 
         last_imported_block = Blocks.head_num()
         DbState.finish_massive_sync(current_imported_block=last_imported_block)
@@ -153,9 +157,9 @@ class SyncHiveDb:
 
                 DbState.before_massive_sync(self._lbound, self._ubound)
 
-                self._context_detach()
+                context_detach(db=self._db)
                 self._catchup_irreversible_block(is_massive_sync=True)
-                self._context_attach()
+                context_attach(db=self._db, block_number=Blocks.head_num())
 
                 last_block = Blocks.head_num()
                 DbState.finish_massive_sync(current_imported_block=last_block)
@@ -185,16 +189,6 @@ class SyncHiveDb:
             log.info("[SINGLE] updating communities posts and rank")
             update_communities_posts_and_rank(self._db_hivemind)
 
-    def _prepare_app_context(self) -> None:
-        log.info(f"Looking for '{self.HIVEMIND_APP_CONTEXT}' context.")
-        ctx_present = self._db.query_one(
-            f"SELECT hive.app_context_exists('{self.HIVEMIND_APP_CONTEXT}') as ctx_present;"
-        )
-        if not ctx_present:
-            log.info(f"No application context present. Attempting to create a '{self.HIVEMIND_APP_CONTEXT}' context...")
-            self._db.query_no_return(f"SELECT hive.app_create_context('{self.HIVEMIND_APP_CONTEXT}');")
-            log.info("Application context creation done.")
-
     def _prepare_app_schema(self) -> None:
         log.info("Attempting to create application schema...")
         script_path = Path(__file__).parent.parent / "db/sql_scripts/hafapp_api.sql"
@@ -206,7 +200,7 @@ class SyncHiveDb:
     def _query_for_app_next_block(self) -> Tuple[int, int]:
         log.info("Querying for next block for app context...")
         self._db.query("START TRANSACTION")
-        lbound, ubound = self._db.query_row(f"SELECT * FROM hive.app_next_block('{self.HIVEMIND_APP_CONTEXT}')")
+        lbound, ubound = self._db.query_row(f"SELECT * FROM hive.app_next_block('{SCHEMA_NAME}')")
         self._db.query("COMMIT")
         log.info(f"Next block range from hive.app_next_block is: <{lbound}:{ubound}>")
         return lbound, ubound
@@ -222,21 +216,6 @@ class SyncHiveDb:
             ubound=self._ubound,
         )
         log.info(f"Block range: <{self._lbound}:{self._ubound}> processing finished")
-
-    def _context_detach(self) -> None:
-        is_attached = self._db.query_one(f"SELECT hive.app_context_is_attached('{self.HIVEMIND_APP_CONTEXT}')")
-        if is_attached:
-            log.info("Trying to detach app context...")
-            self._db.query_no_return(f"SELECT hive.app_context_detach('{self.HIVEMIND_APP_CONTEXT}')")
-            log.info("App context detaching done.")
-        else:
-            log.info("No attached context - detach skipped.")
-
-    def _context_attach(self) -> None:
-        last_block = Blocks.head_num()
-        log.info(f"Trying to attach app context with block number: {last_block}")
-        self._db.query_no_return(f"SELECT hive.app_context_attach('{self.HIVEMIND_APP_CONTEXT}', {last_block})")
-        log.info("App context attaching done.")
 
     def _check_log_explain_queries(self) -> None:
         if self._conf.get("log_explain_queries"):

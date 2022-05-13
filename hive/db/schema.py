@@ -4,11 +4,11 @@ import logging
 from pathlib import Path
 
 from hive.conf import SCHEMA_NAME
+from hive.indexer.hive_db.haf_functions import context_attach, context_detach, prepare_app_context
 
 log = logging.getLogger(__name__)
 
 # pylint: disable=line-too-long, too-many-lines, bad-whitespace
-recreate_fks_queries = []
 
 
 def drop_fk(db):
@@ -41,16 +41,22 @@ def setup(db):
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
 
     # create schema and aux functions
+    prepare_app_context(db=db)
     execute_sql_script(query_executor=db.query_no_return, path_to_script=sql_scripts_dir_path / 'schema.sql')
+    # execute_sql_script(query_executor=db.query_no_return, path_to_script=sql_scripts_dir_path / 'hivemind_indexes.sql')
 
     # initialize schema
     db.query_no_return(f"CALL {SCHEMA_NAME}.define_schema();")
+    db.query_no_return(f"CALL {SCHEMA_NAME}.create_indexes();")
+
 
     # tune auto vacuum/analyze
     reset_autovac(db)
 
     # sets FILLFACTOR:
     set_fillfactor(db)
+
+    context_detach(db=db)
 
     # default rows
     db.query_no_return(f"CALL {SCHEMA_NAME}.populate_with_defaults();")
@@ -204,6 +210,7 @@ def setup(db):
     from hive.version import GIT_REVISION
 
     db.query_no_return(sql.format(GIT_REVISION))
+    context_attach(db=db, block_number=0)
 
 
 def reset_autovac(db):
