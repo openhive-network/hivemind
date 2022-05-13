@@ -1,20 +1,20 @@
-DROP FUNCTION IF EXISTS bridge_get_account_posts_by_posts;
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_account_posts_by_posts;
 
-CREATE FUNCTION bridge_get_account_posts_by_posts( in _account VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
-RETURNS SETOF bridge_api_post
+CREATE FUNCTION hivemind_app.bridge_get_account_posts_by_posts( in _account VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT )
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
   __account_id INT;
   __post_id INT;
 BEGIN
-  __account_id = find_account_id( _account, True );
-  __post_id = find_comment_id( _author, _permlink, True );
+  __account_id = hivemind_app.find_account_id( _account, True );
+  __post_id = hivemind_app.find_comment_id( _author, _permlink, True );
   RETURN QUERY
   WITH posts AS MATERIALIZED -- bridge_get_account_posts_by_posts
   (
     SELECT id
-    FROM live_posts_view hp
+    FROM hivemind_app.live_posts_view hp
     WHERE
       hp.author_id = __account_id
       AND ( __post_id = 0 OR hp.id < __post_id )
@@ -61,7 +61,7 @@ BEGIN
       hp.is_muted,
       NULL
   FROM posts,
-  LATERAL get_post_view_by_id(posts.id) hp
+  LATERAL hivemind_app.get_post_view_by_id(posts.id) hp
   ORDER BY posts.id DESC
   LIMIT _limit;
 END

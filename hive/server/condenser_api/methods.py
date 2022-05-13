@@ -1,6 +1,7 @@
 """Steemd/condenser_api compatibility layer API methods."""
 from functools import wraps
 
+from hive.conf import SCHEMA_NAME
 from hive.server.common.helpers import (
     json_date,
     return_error_info,
@@ -77,7 +78,7 @@ async def get_follow_count(context, account: str):
     """Get follow count stats. (EOL)"""
     db = context['db']
     account = valid_account(account)
-    sql = "SELECT * FROM condenser_get_follow_count( (:account)::VARCHAR )"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.condenser_get_follow_count( (:account)::VARCHAR )"
     counters = await db.query_row(sql, account=account)
     return dict(account=account, following_count=counters[0], follower_count=counters[1])
 
@@ -101,7 +102,7 @@ async def _get_account_reputations_impl(db, fat_node_style, account_lower_bound,
     assert isinstance(account_lower_bound, str), "invalid account_lower_bound type"
     limit = valid_limit(limit, 1000, 1000)
 
-    sql = "SELECT * FROM condenser_get_account_reputations( (:start)::VARCHAR, :limit )"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.condenser_get_account_reputations( (:start)::VARCHAR, :limit )"
     rows = await db.query_all(sql, start=account_lower_bound, limit=limit)
     if fat_node_style:
         return [dict(account=r[0], reputation=r[1]) for r in rows]
@@ -124,7 +125,7 @@ async def _get_content_impl(db, fat_node_style, author: str, permlink: str, obse
     valid_account(author)
     valid_permlink(permlink)
 
-    sql = "SELECT * FROM condenser_get_content(:author, :permlink)"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.condenser_get_content(:author, :permlink)"
 
     post = None
     result = await db.query_all(sql, author=author, permlink=permlink)
@@ -150,7 +151,7 @@ async def _get_content_replies_impl(db, fat_node_style, author: str, permlink: s
     valid_account(author)
     valid_permlink(permlink)
 
-    sql = "SELECT * FROM condenser_get_content_replies(:author, :permlink)"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.condenser_get_content_replies(:author, :permlink)"
     result = await db.query_all(sql, author=author, permlink=permlink)
 
     posts = []
@@ -222,42 +223,42 @@ async def get_posts_by_given_sort(
 
     if sort == 'created':
         if is_community:
-            sql = "SELECT * FROM bridge_get_ranked_post_by_created_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False, (:observer)::VARCHAR )"
+            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_created_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False, (:observer)::VARCHAR )"
         elif tag == '':
-            sql = "SELECT * FROM bridge_get_ranked_post_by_created( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_created( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         else:
-            sql = "SELECT * FROM bridge_get_ranked_post_by_created_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_created_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
     elif sort == 'trending':
         if is_community:
-            sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False, (:observer)::VARCHAR )"
+            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_trends_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False, (:observer)::VARCHAR )"
         elif tag == '':
-            sql = "SELECT * FROM bridge_get_ranked_post_by_trends( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_trends( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         else:
-            sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_trends_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
     elif sort == 'hot':
         if is_community:
-            sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_hot_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         elif tag == '':
-            sql = "SELECT * FROM bridge_get_ranked_post_by_hot( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_hot( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         else:
-            sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_hot_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
     elif sort == 'promoted':
         if is_community:
-            sql = "SELECT * FROM bridge_get_ranked_post_by_promoted_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_promoted_for_community( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         elif tag == '':
-            sql = "SELECT * FROM bridge_get_ranked_post_by_promoted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_promoted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         else:
-            sql = "SELECT * FROM bridge_get_ranked_post_by_promoted_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_promoted_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
     elif sort == 'post_by_payout':
         if tag == '':
-            sql = "SELECT * FROM bridge_get_ranked_post_by_payout( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False, (:observer)::VARCHAR )"
+            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_payout( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False, (:observer)::VARCHAR )"
         else:
-            sql = "SELECT * FROM bridge_get_ranked_post_by_payout_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False, (:observer)::VARCHAR )"
+            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_payout_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, False, (:observer)::VARCHAR )"
     elif sort == 'comment_by_payout':
         if tag == '':
-            sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_payout_comments( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         else:
-            sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+            sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_payout_comments_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
     else:
         return posts
 
@@ -391,7 +392,7 @@ async def get_discussions_by_blog(
     limit = valid_limit(limit, 100, 20)
     truncate_body = valid_truncate(truncate_body)
 
-    sql = "SELECT * FROM bridge_get_account_posts_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, False )"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, False )"
 
     db = context['db']
     result = await db.query_all(sql, account=tag, author=start_author, permlink=start_permlink, limit=limit)
@@ -418,7 +419,7 @@ async def get_discussions_by_feed_impl(
     observer: str = None,
 ):
     """Get a list of posts for an account's feed."""
-    sql = "SELECT * FROM bridge_get_by_feed_with_reblog((:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER)"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_by_feed_with_reblog((:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER)"
     result = await db.query_all(
         sql, account=account, author=start_author, permlink=start_permlink, limit=limit, observer=observer
     )
@@ -485,7 +486,7 @@ async def get_discussions_by_comments(
     posts = []
     db = context['db']
 
-    sql = "SELECT * FROM bridge_get_account_posts_by_comments( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_comments( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     result = await db.query_all(
         sql, account=start_author, author=start_author if start_permlink else '', permlink=start_permlink, limit=limit
     )
@@ -568,7 +569,7 @@ async def get_blog(context, account: str, start_entry_id: int = 0, limit: int = 
         limit = min(limit, 500)
     limit = valid_limit(limit, 500, None)
 
-    sql = "SELECT * FROM condenser_get_blog(:account, :last, :limit)"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.condenser_get_blog(:account, :last, :limit)"
     result = await db.query_all(sql, account=account, last=start_entry_id, limit=limit)
 
     out = []
@@ -607,7 +608,7 @@ async def get_blog_entries(context, account: str, start_entry_id: int = 0, limit
         limit = min(limit, 500)
     limit = valid_limit(limit, 500, None)
 
-    sql = "SELECT * FROM condenser_get_blog_entries(:account, :last, :limit)"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.condenser_get_blog_entries(:account, :last, :limit)"
     result = await db.query_all(sql, account=account, last=start_entry_id, limit=limit)
 
     out = []
