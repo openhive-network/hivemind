@@ -1,4 +1,5 @@
 """List of muted accounts for server process."""
+from hive.conf import SCHEMA_NAME
 
 
 class Mutes:
@@ -20,7 +21,9 @@ class Mutes:
         blacklisted_users = {}
 
         db = context['db']
-        sql = "SELECT * FROM mutes_get_blacklisted_for_observer( (:observer)::VARCHAR, (:flags)::INTEGER )"
+        sql = (
+            f"SELECT * FROM {SCHEMA_NAME}.mutes_get_blacklisted_for_observer( (:observer)::VARCHAR, (:flags)::INTEGER )"
+        )
         sql_result = await db.query_all(sql, observer=observer, flags=flags)
         for row in sql_result:
             account_name = row['account']
@@ -39,5 +42,5 @@ class Mutes:
             return {}
 
         db = context['db']
-        sql = "SELECT * FROM mutes_get_blacklists_for_observer( (:observer)::VARCHAR, (:fb)::BOOLEAN, (:fm)::BOOLEAN )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.mutes_get_blacklists_for_observer( (:observer)::VARCHAR, (:fb)::BOOLEAN, (:fm)::BOOLEAN )"
         return await db.query_all(sql, observer=observer, fb=follow_blacklist, fm=follow_muted)

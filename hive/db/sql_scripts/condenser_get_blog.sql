@@ -1,12 +1,12 @@
-DROP FUNCTION IF EXISTS condenser_get_blog_helper CASCADE;
-CREATE FUNCTION condenser_get_blog_helper( in _blogger VARCHAR, in _last INT, in _limit INT,
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_blog_helper CASCADE;
+CREATE FUNCTION hivemind_app.condenser_get_blog_helper( in _blogger VARCHAR, in _last INT, in _limit INT,
                                            out _account_id INT, out _offset INT, out _new_limit INT )
 AS
 $function$
 BEGIN
-  _account_id = find_account_id( _blogger, True );
+  _account_id = hivemind_app.find_account_id( _blogger, True );
   IF _last < 0 THEN -- caller wants "most recent" page
-      SELECT INTO _last ( SELECT COUNT(1) - 1 FROM hive_feed_cache hfc WHERE hfc.account_id = _account_id );
+      SELECT INTO _last ( SELECT COUNT(1) - 1 FROM hivemind_app.hive_feed_cache hfc WHERE hfc.account_id = _account_id );
       _offset = _last - _limit + 1;
       IF _offset < 0 THEN
         _offset = 0;
@@ -23,17 +23,17 @@ END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS condenser_get_blog;
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_blog;
 -- blog posts [ _last - _limit + 1, _last ] oldest first (reverted by caller)
-CREATE FUNCTION condenser_get_blog( in _blogger VARCHAR, in _last INT, in _limit INT )
-RETURNS SETOF condenser_api_post
+CREATE FUNCTION hivemind_app.condenser_get_blog( in _blogger VARCHAR, in _last INT, in _limit INT )
+RETURNS SETOF hivemind_app.condenser_api_post
 AS
 $function$
 DECLARE
   __account_id INT;
   __offset INT;
 BEGIN
-  SELECT h.* INTO __account_id, __offset, _limit FROM condenser_get_blog_helper( _blogger, _last, _limit ) h;
+  SELECT h.* INTO __account_id, __offset, _limit FROM hivemind_app.condenser_get_blog_helper( _blogger, _last, _limit ) h;
   RETURN QUERY SELECT
       hp.id,
       blog.entry_id::INT,
@@ -73,30 +73,30 @@ BEGIN
       SELECT
           hfc.created_at, hfc.post_id, row_number() over (ORDER BY hfc.created_at ASC, hfc.post_id ASC) - 1 as entry_id
       FROM
-          hive_feed_cache hfc
+          hivemind_app.hive_feed_cache hfc
       WHERE
           hfc.account_id = __account_id
       ORDER BY hfc.created_at ASC, hfc.post_id ASC
       LIMIT _limit
       OFFSET __offset
   ) as blog,
-  LATERAL get_post_view_by_id(blog.post_id) hp
+  LATERAL hivemind_app.get_post_view_by_id(blog.post_id) hp
   ORDER BY blog.created_at ASC, blog.post_id ASC;
 END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS condenser_get_blog_entries;
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_blog_entries;
 -- blog entries [ _last - _limit + 1, _last ] oldest first (reverted by caller)
-CREATE FUNCTION condenser_get_blog_entries( in _blogger VARCHAR, in _last INT, in _limit INT )
-RETURNS TABLE( entry_id INT, author hive_accounts.name%TYPE, permlink hive_permlink_data.permlink%TYPE, reblogged_at TIMESTAMP )
+CREATE FUNCTION hivemind_app.condenser_get_blog_entries( in _blogger VARCHAR, in _last INT, in _limit INT )
+RETURNS TABLE( entry_id INT, author hivemind_app.hive_accounts.name%TYPE, permlink hivemind_app.hive_permlink_data.permlink%TYPE, reblogged_at TIMESTAMP )
 AS
 $function$
 DECLARE
   __account_id INT;
   __offset INT;
 BEGIN
-  SELECT h.* INTO __account_id, __offset, _limit FROM condenser_get_blog_helper( _blogger, _last, _limit ) h;
+  SELECT h.* INTO __account_id, __offset, _limit FROM hivemind_app.condenser_get_blog_helper( _blogger, _last, _limit ) h;
   RETURN QUERY SELECT
       blog.entry_id::INT,
       ha.name as author,
@@ -112,16 +112,16 @@ BEGIN
       SELECT
           hfc.created_at, hfc.post_id, row_number() over (ORDER BY hfc.created_at ASC, hfc.post_id ASC) - 1 as entry_id
       FROM
-          hive_feed_cache hfc
+          hivemind_app.hive_feed_cache hfc
       WHERE
           hfc.account_id = __account_id
       ORDER BY hfc.created_at ASC, hfc.post_id ASC
       LIMIT _limit
       OFFSET __offset
   ) as blog
-  JOIN hive_posts hp ON hp.id = blog.post_id
-  JOIN hive_accounts ha ON ha.id = hp.author_id
-  JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
+  JOIN hivemind_app.hive_posts hp ON hp.id = blog.post_id
+  JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
+  JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id
   ORDER BY blog.created_at ASC, blog.post_id ASC;
 END
 $function$

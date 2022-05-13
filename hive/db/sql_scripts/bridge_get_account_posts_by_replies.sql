@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION bridge_get_account_posts_by_replies(_account VARCHAR, _author VARCHAR, _permlink VARCHAR, _limit SMALLINT, _bridge_api BOOLEAN) RETURNS SETOF bridge_api_post
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_get_account_posts_by_replies(_account VARCHAR, _author VARCHAR, _permlink VARCHAR, _limit SMALLINT, _bridge_api BOOLEAN) RETURNS SETOF hivemind_app.bridge_api_post
 AS $function$
 DECLARE
   __account_id INT;
@@ -6,22 +6,22 @@ DECLARE
 BEGIN
   IF NOT _bridge_api AND _permlink <> '' THEN
       -- find blogger account using parent author of page defining post
-      __post_id = find_comment_id( _author, _permlink, True );
+      __post_id = hivemind_app.find_comment_id( _author, _permlink, True );
       SELECT pp.author_id INTO __account_id
-      FROM hive_posts hp
-      JOIN hive_posts pp ON hp.parent_id = pp.id
+      FROM hivemind_app.hive_posts hp
+      JOIN hivemind_app.hive_posts pp ON hp.parent_id = pp.id
       WHERE hp.id = __post_id;
       IF __account_id = 0 THEN __account_id = NULL; END IF;
   ELSE
-      __account_id = find_account_id( _account, True );
-      __post_id = find_comment_id( _author, _permlink, True );
+      __account_id = hivemind_app.find_account_id( _account, True );
+      __post_id = hivemind_app.find_comment_id( _author, _permlink, True );
   END IF;
   RETURN QUERY
   WITH replies AS MATERIALIZED --bridge_get_account_posts_by_replies
   (
     SELECT hpr.id
-    FROM live_posts_comments_view hpr
-    JOIN hive_posts hp1 ON hp1.id = hpr.parent_id
+    FROM hivemind_app.live_posts_comments_view hpr
+    JOIN hivemind_app.hive_posts hp1 ON hp1.id = hpr.parent_id
     WHERE hp1.author_id = __account_id
       AND (__post_id = 0 OR hpr.id < __post_id )
     ORDER BY hpr.id DESC
@@ -67,7 +67,7 @@ BEGIN
       hp.is_muted,
       NULL
   FROM replies,
-  LATERAL get_post_view_by_id(replies.id) hp
+  LATERAL hivemind_app.get_post_view_by_id(replies.id) hp
   ORDER BY replies.id DESC
   LIMIT _limit;
 END
