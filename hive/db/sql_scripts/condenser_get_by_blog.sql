@@ -1,26 +1,26 @@
-DROP FUNCTION IF EXISTS condenser_get_by_blog;
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_by_blog;
 
-CREATE OR REPLACE FUNCTION condenser_get_by_blog(
+CREATE OR REPLACE FUNCTION hivemind_app.condenser_get_by_blog(
   in _account VARCHAR,
   in _author VARCHAR,
   in _permlink VARCHAR,
   in _limit INTEGER
 )
-RETURNS SETOF bridge_api_post
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
   __post_id INTEGER := 0;
-  __account_id INTEGER := find_account_id( _account, True );
+  __account_id INTEGER := hivemind_app.find_account_id( _account, True );
   __created_at TIMESTAMP;
 BEGIN
 
   IF _permlink <> '' THEN
-    __post_id = find_comment_id( _author, _permlink, True );
+    __post_id = hivemind_app.find_comment_id( _author, _permlink, True );
     __created_at = 
     (
       SELECT created_at
-      FROM hive_feed_cache
+      FROM hivemind_app.hive_feed_cache
       WHERE account_id = __account_id
       AND post_id = __post_id
     );
@@ -30,8 +30,8 @@ BEGIN
   WITH blog_posts AS MATERIALIZED -- condenser_get_by_blog
   (
     SELECT hp.id
-    FROM live_posts_comments_view hp
-    JOIN hive_feed_cache hfc ON hp.id = hfc.post_id
+    FROM hivemind_app.live_posts_comments_view hp
+    JOIN hivemind_app.hive_feed_cache hfc ON hp.id = hfc.post_id
     WHERE hfc.account_id = __account_id 
       AND ( ( __post_id = 0 ) OR ( hfc.created_at <= __created_at ) )
     ORDER BY hp.created_at DESC, hp.id DESC
@@ -77,7 +77,7 @@ BEGIN
       hp.is_muted,
       NULL
     FROM blog_posts,
-    LATERAL get_post_view_by_id(blog_posts.id) hp
+    LATERAL hivemind_app.get_post_view_by_id(blog_posts.id) hp
     ORDER BY hp.created_at DESC, hp.id DESC
     LIMIT _limit;
 

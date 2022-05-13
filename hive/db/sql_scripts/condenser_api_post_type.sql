@@ -1,6 +1,6 @@
-DROP TYPE IF EXISTS condenser_api_post CASCADE;
+DROP TYPE IF EXISTS hivemind_app.condenser_api_post CASCADE;
 -- type for regular condenser_api posts
-CREATE TYPE condenser_api_post AS (
+CREATE TYPE hivemind_app.condenser_api_post AS (
     id INT,
     entry_id INT, -- used for paging with offset (otherwise can be any value)
     author VARCHAR(16),
@@ -18,7 +18,7 @@ CREATE TYPE condenser_api_post AS (
     children INT,
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
-    reblogged_at TIMESTAMP, -- used when post data is combined with hive_feed_cache (otherwise can be date)
+    reblogged_at TIMESTAMP, -- used when post data is combined with hivemind_app.hive_feed_cache (otherwise can be date)
     rshares NUMERIC,
     json TEXT,
     parent_author VARCHAR(16),

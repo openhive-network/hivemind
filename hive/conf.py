@@ -2,6 +2,7 @@
 
 import logging
 import re
+from typing import Final
 
 import configargparse
 
@@ -10,6 +11,8 @@ from hive.utils.normalize import int_log_level, strtobool
 from hive.utils.stats import DbStats
 
 log = logging.getLogger(__name__)
+
+SCHEMA_NAME: Final[str] = 'hivemind_app'
 
 
 def _sanitized_conf(parser):

@@ -1,6 +1,7 @@
 """Hive API: Stats"""
 import logging
 
+from hive.conf import SCHEMA_NAME
 from hive.server.common.helpers import return_error_info, valid_limit
 
 log = logging.getLogger(__name__)
@@ -23,10 +24,10 @@ async def get_payout_stats(context, limit=250):
     db = context['db']
     limit = valid_limit(limit, 250, 250)
 
-    sql = """
+    sql = f"""
         SELECT hc.name, hc.title, author, payout, posts, authors
-          FROM payout_stats_view
-     LEFT JOIN hive_communities hc ON hc.id = community_id
+          FROM {SCHEMA_NAME}.payout_stats_view
+     LEFT JOIN {SCHEMA_NAME}.hive_communities hc ON hc.id = community_id
          WHERE (community_id IS NULL AND author IS NOT NULL)
             OR (community_id IS NOT NULL AND author IS NULL)
       ORDER BY payout DESC
@@ -36,10 +37,10 @@ async def get_payout_stats(context, limit=250):
     rows = await db.query_all(sql, limit=limit)
     items = list(map(_row, rows))
 
-    sql = """SELECT SUM(payout) FROM payout_stats_view WHERE author IS NULL"""
+    sql = f"""SELECT SUM(payout) FROM {SCHEMA_NAME}.payout_stats_view WHERE author IS NULL"""
     total = await db.query_one(sql)
 
-    sql = """SELECT SUM(payout) FROM payout_stats_view
+    sql = f"""SELECT SUM(payout) FROM {SCHEMA_NAME}.payout_stats_view
               WHERE community_id IS NULL AND author IS NULL"""
     blog_ttl = await db.query_one(sql)
 

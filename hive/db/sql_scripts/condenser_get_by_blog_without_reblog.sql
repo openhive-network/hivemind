@@ -1,21 +1,21 @@
-DROP FUNCTION IF EXISTS condenser_get_by_blog_without_reblog;
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_by_blog_without_reblog;
 
-CREATE OR REPLACE FUNCTION condenser_get_by_blog_without_reblog( in _author VARCHAR, in _permlink VARCHAR, in _limit INTEGER)
-RETURNS SETOF bridge_api_post
+CREATE OR REPLACE FUNCTION hivemind_app.condenser_get_by_blog_without_reblog( in _author VARCHAR, in _permlink VARCHAR, in _limit INTEGER)
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
   __author_id INT;
   __post_id INT;
 BEGIN
-  __author_id = find_account_id( _author, True );
-  __post_id = find_comment_id( _author, _permlink, _permlink <> '' );
+  __author_id = hivemind_app.find_account_id( _author, True );
+  __post_id = hivemind_app.find_comment_id( _author, _permlink, _permlink <> '' );
   RETURN QUERY 
   WITH blog_posts AS MATERIALIZED -- condenser_get_by_blog_without_reblog
   (
     SELECT
       hp.id
-    FROM live_posts_view hp
+    FROM hivemind_app.live_posts_view hp
     WHERE hp.author_id = __author_id
       AND ((__post_id = 0) OR (hp.id < __post_id))
     ORDER BY hp.id DESC
@@ -61,7 +61,7 @@ BEGIN
       hp.is_muted,
       NULL
     FROM blog_posts,
-    LATERAL get_post_view_by_id(blog_posts.id) hp
+    LATERAL hivemind_app.get_post_view_by_id(blog_posts.id) hp
     ORDER BY hp.id DESC
     LIMIT _limit;
 END
