@@ -2,6 +2,7 @@
 
 import logging
 
+from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
 
@@ -25,18 +26,18 @@ class Reputations(DbAdapterHolder):
             log.info(f"Written total reputation data records: {self._total_values}")
             return 0
 
-        sql = """
-              INSERT INTO hive_reputation_data
+        sql = f"""
+              INSERT INTO {SCHEMA_NAME}.hive_reputation_data
               (voter_id, author_id, permlink, rshares, block_num)
 
-              SELECT (SELECT ha_v.id FROM hive_accounts ha_v WHERE ha_v.name = t.voter) as voter_id,
-                     (SELECT ha.id FROM hive_accounts ha WHERE ha.name = t.author) as author_id,
+              SELECT (SELECT ha_v.id FROM {SCHEMA_NAME}.hive_accounts ha_v WHERE ha_v.name = t.voter) as voter_id,
+                     (SELECT ha.id FROM {SCHEMA_NAME}.hive_accounts ha WHERE ha.name = t.author) as author_id,
                      t.permlink as permlink, t.rshares, t.block_num
               FROM
               (
               VALUES
                 -- author, voter, permlink, rshares, block_num
-                {}
+                {{}}
               ) AS T(author, voter, permlink, rshares, block_num)
               """
 

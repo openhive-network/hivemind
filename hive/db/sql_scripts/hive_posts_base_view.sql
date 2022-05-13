@@ -1,5 +1,5 @@
-DROP VIEW IF EXISTS public.hive_posts_base_view cascade;
-CREATE OR REPLACE VIEW public.hive_posts_base_view
+DROP VIEW IF EXISTS hivemind_app.hive_posts_base_view cascade;
+CREATE OR REPLACE VIEW hivemind_app.hive_posts_base_view
 AS
 SELECT
       hp.block_num
@@ -10,12 +10,12 @@ SELECT
     , hp.pending_payout
     , hp.abs_rshares
     , hp.vote_rshares AS rshares
-FROM hive_posts hp
+FROM hivemind_app.hive_posts hp
 ;
 
-DROP VIEW IF EXISTS public.hive_posts_pp_view CASCADE;
+DROP VIEW IF EXISTS hivemind_app.hive_posts_pp_view CASCADE;
 
-CREATE OR REPLACE VIEW public.hive_posts_pp_view
+CREATE OR REPLACE VIEW hivemind_app.hive_posts_pp_view
  AS
  SELECT hp.id,
     hp.community_id,
@@ -59,9 +59,9 @@ CREATE OR REPLACE VIEW public.hive_posts_pp_view
     hp.is_nsfw,
     hp.is_valid,
     hp.block_num
-   FROM hive_posts hp
-     JOIN hive_posts pp ON pp.id = hp.parent_id
-     JOIN hive_permlink_data hpd_pp ON hpd_pp.id = pp.permlink_id
-     JOIN hive_category_data hcd ON hcd.id = hp.category_id
+   FROM hivemind_app.hive_posts hp
+     JOIN hivemind_app.hive_posts pp ON pp.id = hp.parent_id
+     JOIN hivemind_app.hive_permlink_data hpd_pp ON hpd_pp.id = pp.permlink_id
+     JOIN hivemind_app.hive_category_data hcd ON hcd.id = hp.category_id
   WHERE hp.counter_deleted = 0 AND hp.id <> 0
   ;

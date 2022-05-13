@@ -5,6 +5,7 @@ import logging
 from diff_match_patch import diff_match_patch
 from ujson import dumps, loads
 
+from hive.conf import SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 from hive.indexer.block import VirtualOperationType
@@ -34,7 +35,7 @@ class Posts(DbAdapterHolder):
     @classmethod
     def last_id(cls):
         """Get the last indexed post id."""
-        sql = "SELECT MAX(id) FROM hive_posts WHERE counter_deleted = 0"
+        sql = f"SELECT MAX(id) FROM {SCHEMA_NAME}.hive_posts WHERE counter_deleted = 0"
         return DB.query_one(sql) or 0
 
     @classmethod
@@ -66,9 +67,9 @@ class Posts(DbAdapterHolder):
                 if tag and isinstance(tag, str):
                     tags.append(tag)  # No escaping needed due to used sqlalchemy formatting features
 
-        sql = """
+        sql = f"""
             SELECT is_new_post, id, author_id, permlink_id, post_category, parent_id, community_id, is_valid, is_muted, depth
-            FROM process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_block)::integer, (:block_num)::integer, (:tags)::VARCHAR[]);
+            FROM {SCHEMA_NAME}.process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_block)::integer, (:block_num)::integer, (:tags)::VARCHAR[]);
             """
 
         row = DB.query_row(
@@ -135,8 +136,8 @@ class Posts(DbAdapterHolder):
 
     @classmethod
     def flush_into_db(cls):
-        sql = """
-              UPDATE hive_posts AS ihp SET
+        sql = f"""
+              UPDATE {SCHEMA_NAME}.hive_posts AS ihp SET
                   total_payout_value    = COALESCE( data_source.total_payout_value,                     ihp.total_payout_value ),
                   curator_payout_value  = COALESCE( data_source.curator_payout_value,                   ihp.curator_payout_value ),
                   author_rewards        = CAST( data_source.author_rewards as BIGINT ) + ihp.author_rewards,
@@ -170,7 +171,7 @@ class Posts(DbAdapterHolder):
               (
               VALUES
                 --- put all constant values here
-                {}
+                {{}}
               ) AS T(author, permlink,
                       total_payout_value,
                       curator_payout_value,
@@ -185,8 +186,8 @@ class Posts(DbAdapterHolder):
                       cashout_time,
                       is_paidout,
                       total_vote_weight)
-              INNER JOIN hive_accounts ha_a ON ha_a.name = t.author
-              INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
+              INNER JOIN {SCHEMA_NAME}.hive_accounts ha_a ON ha_a.name = t.author
+              INNER JOIN {SCHEMA_NAME}.hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
               ) as data_source
               WHERE ihp.permlink_id = data_source.permlink_id and ihp.author_id = data_source.author_id
         """
@@ -317,9 +318,9 @@ class Posts(DbAdapterHolder):
     @classmethod
     def update_child_count(cls, child_id, op='+'):
         """Increase/decrease child count by 1"""
-        sql = """
+        sql = f"""
             UPDATE
-                hive_posts
+                {SCHEMA_NAME}.hive_posts
             SET
                 children = GREATEST(0, (
                     SELECT
@@ -329,15 +330,15 @@ class Posts(DbAdapterHolder):
                             ELSE children
                         END
                     FROM
-                        hive_posts
-                    WHERE id = (SELECT parent_id FROM hive_posts WHERE id = :child_id)
+                        {SCHEMA_NAME}.hive_posts
+                    WHERE id = (SELECT parent_id FROM {SCHEMA_NAME}.hive_posts WHERE id = :child_id)
                 )::int
         """
         if op == '+':
             sql += """ + 1)"""
         else:
             sql += """ - 1)"""
-        sql += """ WHERE id = (SELECT parent_id FROM hive_posts WHERE id = :child_id)"""
+        sql += f""" WHERE id = (SELECT parent_id FROM {SCHEMA_NAME}.hive_posts WHERE id = :child_id)"""
 
         DB.query(sql, child_id=child_id)
 
@@ -355,9 +356,9 @@ class Posts(DbAdapterHolder):
         for ex in extensions:
             if 'type' in ex and ex['type'] == 'comment_payout_beneficiaries' and 'beneficiaries' in ex['value']:
                 beneficiaries = ex['value']['beneficiaries']
-        sql = """
+        sql = f"""
             UPDATE
-                hive_posts hp
+                {SCHEMA_NAME}.hive_posts hp
             SET
                 max_accepted_payout = :max_accepted_payout,
                 percent_hbd = :percent_hbd,
@@ -365,8 +366,8 @@ class Posts(DbAdapterHolder):
                 allow_curation_rewards = :allow_curation_rewards,
                 beneficiaries = :beneficiaries
             WHERE
-            hp.author_id = (SELECT id FROM hive_accounts WHERE name = :author) AND
-            hp.permlink_id = (SELECT id FROM hive_permlink_data WHERE permlink = :permlink)
+            hp.author_id = (SELECT id FROM {SCHEMA_NAME}.hive_accounts WHERE name = :author) AND
+            hp.permlink_id = (SELECT id FROM {SCHEMA_NAME}.hive_permlink_data WHERE permlink = :permlink)
         """
         DB.query(
             sql,
@@ -382,9 +383,7 @@ class Posts(DbAdapterHolder):
     @classmethod
     def delete(cls, op, block_date):
         """Marks a post record as being deleted."""
-        sql = (
-            "SELECT delete_hive_post((:author)::varchar, (:permlink)::varchar, (:block_num)::int, (:date)::timestamp);"
-        )
+        sql = f"SELECT {SCHEMA_NAME}.delete_hive_post((:author)::varchar, (:permlink)::varchar, (:block_num)::int, (:date)::timestamp);"
         DB.query_no_return(
             sql, author=op['author'], permlink=op['permlink'], block_num=op['block_num'], date=block_date
         )

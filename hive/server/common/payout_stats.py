@@ -2,6 +2,7 @@
 
 import logging
 
+from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 
 log = logging.getLogger(__name__)
@@ -14,4 +15,4 @@ class PayoutStats(DbAdapterHolder):
 
         log.warning("Rebuilding payout_stats_view")
 
-        cls.db.query_no_return("REFRESH MATERIALIZED VIEW CONCURRENTLY payout_stats_view;")
+        cls.db.query_no_return(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {SCHEMA_NAME}.payout_stats_view;")

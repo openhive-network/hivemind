@@ -1,5 +1,5 @@
 """Bridge API public endpoints for posts"""
-
+from hive.conf import SCHEMA_NAME
 from hive.server.bridge_api.objects import _bridge_post_object, append_statistics_to_post, load_profiles
 from hive.server.common.helpers import (
     check_community,
@@ -64,7 +64,7 @@ async def get_post(context, author, permlink, observer=None):
     valid_account(observer, allow_empty=True)
     valid_permlink(permlink)
 
-    sql = "SELECT * FROM bridge_get_post( (:author)::VARCHAR, (:permlink)::VARCHAR )"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_post( (:author)::VARCHAR, (:permlink)::VARCHAR )"
     result = await db.query_all(sql, author=author, permlink=permlink)
 
     post = _bridge_post_object(result[0])
@@ -81,31 +81,31 @@ async def _get_ranked_posts_for_observer_communities(
         return await db.query_all(sql, observer=observer, author=start_author, permlink=start_permlink, limit=limit)
 
     if sort == 'trending':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_trends_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
         return await execute_observer_community_query(db, sql, limit)
 
     if sort == 'created':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_created_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_created_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
         return await execute_observer_community_query(db, sql, limit)
 
     if sort == 'hot':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_hot_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
         return await execute_observer_community_query(db, sql, limit)
 
     if sort == 'promoted':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_promoted_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_promoted_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
         return await execute_observer_community_query(db, sql, limit)
 
     if sort == 'payout':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_payout_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
         return await execute_observer_community_query(db, sql, limit)
 
     if sort == 'payout_comments':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_payout_comments_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
         return await execute_observer_community_query(db, sql, limit)
 
     if sort == 'muted':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_muted_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_muted_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
         return await execute_observer_community_query(db, sql, limit)
 
     assert False, "Unknown sort order"
@@ -120,15 +120,15 @@ async def _get_ranked_posts_for_communities(
             sql, community=community, author=start_author, permlink=start_permlink, limit=limit, observer=observer
         )
 
-    pinned_sql = "SELECT * FROM bridge_get_ranked_post_pinned_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+    pinned_sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_pinned_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
 
     if sort == 'hot':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_hot_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_community_query(db, sql, limit)
 
     if sort == 'trending':
         result_with_pinned_posts = []
-        sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_trends_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True, (:observer)::VARCHAR )"
         result_with_pinned_posts = await execute_community_query(db, pinned_sql, limit)
         limit -= len(result_with_pinned_posts)
         if limit > 0:
@@ -136,11 +136,11 @@ async def _get_ranked_posts_for_communities(
         return result_with_pinned_posts
 
     if sort == 'promoted':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_promoted_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_promoted_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_community_query(db, sql, limit)
 
     if sort == 'created':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_created_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_created_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True, (:observer)::VARCHAR )"
         result_with_pinned_posts = await execute_community_query(db, pinned_sql, limit)
         limit -= len(result_with_pinned_posts)
         if limit > 0:
@@ -148,15 +148,15 @@ async def _get_ranked_posts_for_communities(
         return result_with_pinned_posts
 
     if sort == 'muted':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_muted_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_muted_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_community_query(db, sql, limit)
 
     if sort == 'payout':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_payout_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_community_query(db, sql, limit)
 
     if sort == 'payout_comments':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_payout_comments_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_community_query(db, sql, limit)
 
     assert False, "Unknown sort order"
@@ -170,31 +170,31 @@ async def _get_ranked_posts_for_tag(db, sort: str, tag, start_author: str, start
         )
 
     if sort == 'hot':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_hot_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_tags_query(db, sql)
 
     if sort == 'promoted':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_promoted_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_promoted_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_tags_query(db, sql)
 
     if sort == 'payout':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_payout_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True, (:observer)::VARCHAR )"
         return await execute_tags_query(db, sql)
 
     if sort == 'payout_comments':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_payout_comments_for_category( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_tags_query(db, sql)
 
     if sort == 'muted':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_muted_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_muted_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_tags_query(db, sql)
 
     if sort == 'trending':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_trends_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_tags_query(db, sql)
 
     if sort == 'created':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_created_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_created_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_tags_query(db, sql)
 
     assert False, "Unknown sort order"
@@ -206,31 +206,31 @@ async def _get_ranked_posts_for_all(db, sort: str, start_author: str, start_perm
         return await db.query_all(sql, author=start_author, permlink=start_permlink, limit=limit, observer=observer)
 
     if sort == 'trending':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_trends( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_trends( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_query(db, sql)
 
     if sort == 'created':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_created( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_created( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_query(db, sql)
 
     if sort == 'hot':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_hot( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_hot( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_query(db, sql)
 
     if sort == 'promoted':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_promoted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_promoted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_query(db, sql)
 
     if sort == 'payout':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_payout( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_payout( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True, (:observer)::VARCHAR )"
         return await execute_query(db, sql)
 
     if sort == 'payout_comments':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_payout_comments( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_payout_comments( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_query(db, sql)
 
     if sort == 'muted':
-        sql = "SELECT * FROM bridge_get_ranked_post_by_muted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_ranked_post_by_muted( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
         return await execute_query(db, sql)
 
     assert False, "Unknown sort order"
@@ -312,18 +312,18 @@ async def get_account_posts(
     sql = None
     account_posts = True  # set when only posts (or reblogs) of given account are supposed to be in results
     if sort == 'blog':
-        sql = "SELECT * FROM bridge_get_account_posts_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, True )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, True )"
     elif sort == 'feed':
-        sql = "SELECT * FROM bridge_get_by_feed_with_reblog((:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER)"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_by_feed_with_reblog((:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER)"
     elif sort == 'posts':
-        sql = "SELECT * FROM bridge_get_account_posts_by_posts( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_posts( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'comments':
-        sql = "SELECT * FROM bridge_get_account_posts_by_comments( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_comments( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
     elif sort == 'replies':
         account_posts = False
-        sql = "SELECT * FROM bridge_get_account_posts_by_replies( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_replies( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True )"
     elif sort == 'payout':
-        sql = "SELECT * FROM bridge_get_account_posts_by_payout( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_payout( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
 
     sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit)
     posts = []
@@ -354,7 +354,7 @@ async def get_relationship_between_accounts(context, account1, account2, observe
 
     db = context['db']
 
-    sql = "SELECT * FROM bridge_get_relationship_between_accounts( (:account1)::VARCHAR, (:account2)::VARCHAR )"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_relationship_between_accounts( (:account1)::VARCHAR, (:account2)::VARCHAR )"
     sql_result = await db.query_row(sql, account1=account1, account2=account2)
 
     result = {
@@ -439,7 +439,7 @@ async def get_follow_list(context, observer, follow_type='blacklisted'):
 
 
 async def _follow_contexts(db, accounts, observer_id, include_mute=False):
-    sql = """SELECT following, state FROM hive_follows
+    sql = f"""SELECT following, state FROM {SCHEMA_NAME}.hive_follows
               WHERE follower = :account_id AND following IN :ids"""
     rows = await db.query_all(sql, account_id=observer_id, ids=tuple(accounts.keys()))
     for row in rows:

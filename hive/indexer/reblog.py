@@ -2,6 +2,7 @@
 
 import logging
 
+from hive.conf import SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.indexer.accounts import Accounts
 from hive.indexer.db_adapter_holder import DbAdapterHolder
@@ -59,7 +60,7 @@ class Reblog(DbAdapterHolder):
     @classmethod
     def delete(cls, author, permlink, account):
         """Remove a reblog from hive_reblogs + feed from hive_feed_cache."""
-        sql = "SELECT delete_reblog_feed_cache( (:author)::VARCHAR, (:permlink)::VARCHAR, (:account)::VARCHAR );"
+        sql = f"SELECT {SCHEMA_NAME}.delete_reblog_feed_cache( (:author)::VARCHAR, (:permlink)::VARCHAR, (:account)::VARCHAR );"
         status = DB.query_col(sql, author=author, permlink=permlink, account=account)
         assert status is not None
         if status == 0:
@@ -68,8 +69,8 @@ class Reblog(DbAdapterHolder):
     @classmethod
     def flush(cls):
         """Flush collected data to database"""
-        sql_prefix = """
-            INSERT INTO hive_reblogs (blogger_id, post_id, created_at, block_num)
+        sql_prefix = f"""
+            INSERT INTO {SCHEMA_NAME}.hive_reblogs (blogger_id, post_id, created_at, block_num)
             SELECT 
                 data_source.blogger_id, data_source.post_id, data_source.created_at, data_source.block_num
             FROM
@@ -78,12 +79,12 @@ class Reblog(DbAdapterHolder):
                     ha_b.id as blogger_id, hp.id as post_id, t.block_date as created_at, t.block_num 
                 FROM
                     (VALUES
-                        {}
+                        {{}}
                     ) AS T(blogger, author, permlink, block_date, block_num)
-                    INNER JOIN hive_accounts ha ON ha.name = t.author
-                    INNER JOIN hive_accounts ha_b ON ha_b.name = t.blogger
-                    INNER JOIN hive_permlink_data hpd ON hpd.permlink = t.permlink
-                    INNER JOIN hive_posts hp ON hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
+                    INNER JOIN {SCHEMA_NAME}.hive_accounts ha ON ha.name = t.author
+                    INNER JOIN {SCHEMA_NAME}.hive_accounts ha_b ON ha_b.name = t.blogger
+                    INNER JOIN {SCHEMA_NAME}.hive_permlink_data hpd ON hpd.permlink = t.permlink
+                    INNER JOIN {SCHEMA_NAME}.hive_posts hp ON hp.author_id = ha.id AND hp.permlink_id = hpd.id AND hp.counter_deleted = 0
             ) AS data_source (blogger_id, post_id, created_at, block_num)
             ON CONFLICT ON CONSTRAINT hive_reblogs_ux1 DO NOTHING
         """
