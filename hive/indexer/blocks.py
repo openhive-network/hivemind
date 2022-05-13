@@ -7,7 +7,7 @@ from pathlib import Path
 from time import perf_counter
 from typing import Tuple
 
-from hive.conf import Conf
+from hive.conf import Conf, SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.indexer.accounts import Accounts
 from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
@@ -102,7 +102,7 @@ class Blocks:
     @staticmethod
     def head_num() -> int:
         """Get hive's head block number."""
-        sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
+        sql = f"SELECT num FROM {SCHEMA_NAME}.hive_blocks ORDER BY num DESC LIMIT 1"
         return DB.query_one(sql) or 0
 
     @staticmethod
@@ -390,7 +390,7 @@ class Blocks:
     @staticmethod
     def _get(num: int) -> dict:
         """Fetch a specific block."""
-        sql = "SELECT num, created_at date, hash FROM hive_blocks WHERE num = :num LIMIT 1"
+        sql = f"SELECT num, created_at date, hash FROM {SCHEMA_NAME}.hive_blocks WHERE num = :num LIMIT 1"
         return dict(DB.query_row(sql, num=num))
 
     @classmethod
@@ -408,7 +408,7 @@ class Blocks:
 
     @classmethod
     def _flush_blocks(cls) -> int:
-        query = "INSERT INTO hive_blocks (num, hash, prev, created_at, completed) VALUES"
+        query = f"INSERT INTO {SCHEMA_NAME}.hive_blocks (num, hash, prev, created_at, completed) VALUES"
         values = []
         for block in cls.blocks_to_flush:
             values.append(f"({block['num']}, '{block['hash']}', '{block['prev']}', '{block['date']}', {False})")
@@ -450,27 +450,27 @@ class Blocks:
             assert num == cls.head_num(), "can only pop head block"
 
             # get all affected post_ids in this block
-            sql = "SELECT id FROM hive_posts WHERE created_at >= :date"
+            sql = f"SELECT id FROM {SCHEMA_NAME}.hive_posts WHERE created_at >= :date"
             post_ids = tuple(DB.query_col(sql, date=date))
 
             # remove all recent records -- communities
-            DB.query("DELETE FROM hive_notifs        WHERE created_at >= :date", date=date)
-            DB.query("DELETE FROM hive_subscriptions WHERE created_at >= :date", date=date)
-            DB.query("DELETE FROM hive_roles         WHERE created_at >= :date", date=date)
-            DB.query("DELETE FROM hive_communities   WHERE created_at >= :date", date=date)
+            DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_notifs        WHERE created_at >= :date", date=date)
+            DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_subscriptions WHERE created_at >= :date", date=date)
+            DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_roles         WHERE created_at >= :date", date=date)
+            DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_communities   WHERE created_at >= :date", date=date)
 
             # remove all recent records -- core
-            DB.query("DELETE FROM hive_feed_cache  WHERE created_at >= :date", date=date)
-            DB.query("DELETE FROM hive_reblogs     WHERE created_at >= :date", date=date)
-            DB.query("DELETE FROM hive_follows     WHERE created_at >= :date", date=date)
+            DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_feed_cache  WHERE created_at >= :date", date=date)
+            DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_reblogs     WHERE created_at >= :date", date=date)
+            DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_follows     WHERE created_at >= :date", date=date)
 
             # remove posts: core, tags, cache entries
             if post_ids:
-                DB.query("DELETE FROM hive_posts       WHERE id      IN :ids", ids=post_ids)
-                DB.query("DELETE FROM hive_post_data   WHERE id      IN :ids", ids=post_ids)
+                DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_posts       WHERE id      IN :ids", ids=post_ids)
+                DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_post_data   WHERE id      IN :ids", ids=post_ids)
 
-            DB.query("DELETE FROM hive_payments    WHERE block_num = :num", num=num)
-            DB.query("DELETE FROM hive_blocks      WHERE num = :num", num=num)
+            DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_payments    WHERE block_num = :num", num=num)
+            DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_blocks      WHERE num = :num", num=num)
 
         DB.query("COMMIT")
         log.warning("[FORK] recovery complete")
@@ -485,16 +485,16 @@ class Blocks:
         is_hour_action = ubound % 1200 == 0
 
         queries = [
-            f"SELECT update_posts_rshares({lbound}, {ubound})",
-            f"SELECT update_hive_posts_children_count({lbound}, {ubound})",
-            f"SELECT update_hive_posts_root_id({lbound},{ubound})",
-            f"SELECT update_hive_posts_api_helper({lbound},{ubound})",
-            f"SELECT update_feed_cache({lbound}, {ubound})",
-            f"SELECT update_hive_posts_mentions({lbound}, {ubound})",
-            f"SELECT update_notification_cache({lbound}, {ubound}, {is_hour_action})",
-            f"SELECT update_follow_count({lbound}, {ubound})",
-            f"SELECT update_account_reputations({lbound}, {ubound}, False)",
-            f"SELECT update_hive_blocks_consistency_flag({lbound}, {ubound})",
+            f"SELECT {SCHEMA_NAME}.update_posts_rshares({lbound}, {ubound})",
+            f"SELECT {SCHEMA_NAME}.update_hive_posts_children_count({lbound}, {ubound})",
+            f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id({lbound},{ubound})",
+            f"SELECT {SCHEMA_NAME}.update_hive_posts_api_helper({lbound},{ubound})",
+            f"SELECT {SCHEMA_NAME}.update_feed_cache({lbound}, {ubound})",
+            f"SELECT {SCHEMA_NAME}.update_hive_posts_mentions({lbound}, {ubound})",
+            f"SELECT {SCHEMA_NAME}.update_notification_cache({lbound}, {ubound}, {is_hour_action})",
+            f"SELECT {SCHEMA_NAME}.update_follow_count({lbound}, {ubound})",
+            f"SELECT {SCHEMA_NAME}.update_account_reputations({lbound}, {ubound}, False)",
+            f"SELECT {SCHEMA_NAME}.update_hive_blocks_consistency_flag({lbound}, {ubound})",
         ]
 
         for query in queries:
@@ -507,6 +507,8 @@ class Blocks:
         """Check if all tuples in `hive_blocks` are written correctly.
         If any record has `completed` == false, it indicates that the database was closed incorrectly or a rollback failed.
         """
-        not_completed_blocks = DB.query_one("SELECT count(*) FROM hive_blocks WHERE completed = false LIMIT 1")
+        not_completed_blocks = DB.query_one(
+            f"SELECT count(*) FROM {SCHEMA_NAME}.hive_blocks WHERE completed = false LIMIT 1"
+        )
         log.info("[MASSIVE] Number of not completed blocks: %s.", not_completed_blocks)
         return not_completed_blocks == 0

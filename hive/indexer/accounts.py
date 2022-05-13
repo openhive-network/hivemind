@@ -2,6 +2,7 @@
 
 import logging
 
+from hive.conf import SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.account import get_profile_str
@@ -56,7 +57,7 @@ class Accounts(DbAdapterHolder):
     def load_ids(cls):
         """Load a full (name: id) dict into memory."""
         assert not cls._ids, "id map already loaded"
-        cls._ids = dict(DB.query_all("SELECT name, id FROM hive_accounts"))
+        cls._ids = dict(DB.query_all(f"SELECT name, id FROM {SCHEMA_NAME}.hive_accounts"))
 
     @classmethod
     def clear_ids(cls):
@@ -131,7 +132,7 @@ class Accounts(DbAdapterHolder):
         (_posting_json_metadata, _json_metadata) = get_profile_str(op_details)
 
         sql = f"""
-                  INSERT INTO hive_accounts (name, created_at, posting_json_metadata, json_metadata )
+                  INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at, posting_json_metadata, json_metadata )
                   VALUES ( '{name}', '{block_date}', {cls.get_json_data(_posting_json_metadata)}, {cls.get_json_data(_json_metadata)} )
                   RETURNING id
               """
@@ -159,8 +160,8 @@ class Accounts(DbAdapterHolder):
         if cls._updates_data:
             cls.beginTx()
 
-            sql = """
-                    UPDATE hive_accounts ha
+            sql = f"""
+                    UPDATE {SCHEMA_NAME}.hive_accounts ha
                     SET
                     posting_json_metadata = 
                             (
@@ -181,7 +182,7 @@ class Accounts(DbAdapterHolder):
                       (
                       VALUES
                         -- allow_change_posting, posting_json_metadata, json_metadata, name
-                        {}
+                        {{}}
                       )T( allow_change_posting, posting_json_metadata, json_metadata, name )
                     )T2
                     WHERE ha.name = T2.name

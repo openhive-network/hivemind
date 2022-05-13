@@ -3,6 +3,7 @@
 import collections
 import logging
 
+from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
 
@@ -110,8 +111,8 @@ class Votes(DbAdapterHolder):
         if cls._votes_data:
             cls.beginTx()
 
-            sql = """
-                INSERT INTO hive_votes
+            sql = f"""
+                INSERT INTO {SCHEMA_NAME}.hive_votes
                 (post_id, voter_id, author_id, permlink_id, weight, rshares, vote_percent, last_update, num_changes, block_num, is_effective)
 
                 SELECT hp.id as post_id, ha_v.id as voter_id, ha_a.id as author_id, hpd_p.id as permlink_id,
@@ -120,24 +121,24 @@ class Votes(DbAdapterHolder):
                 (
                 VALUES
                   -- order_id, voter, author, permlink, weight, rshares, vote_percent, last_update, num_changes, block_num, is_effective
-                  {}
+                  {{}}
                 ) AS T(order_id, voter, author, permlink, weight, rshares, vote_percent, last_update, num_changes, block_num, is_effective)
-                INNER JOIN hive_accounts ha_v ON ha_v.name = t.voter
-                INNER JOIN hive_accounts ha_a ON ha_a.name = t.author
-                INNER JOIN hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
-                INNER JOIN hive_posts hp ON hp.author_id = ha_a.id AND hp.permlink_id = hpd_p.id
+                INNER JOIN {SCHEMA_NAME}.hive_accounts ha_v ON ha_v.name = t.voter
+                INNER JOIN {SCHEMA_NAME}.hive_accounts ha_a ON ha_a.name = t.author
+                INNER JOIN {SCHEMA_NAME}.hive_permlink_data hpd_p ON hpd_p.permlink = t.permlink
+                INNER JOIN {SCHEMA_NAME}.hive_posts hp ON hp.author_id = ha_a.id AND hp.permlink_id = hpd_p.id
                 WHERE hp.counter_deleted = 0
                 ORDER BY t.order_id
                 ON CONFLICT ON CONSTRAINT hive_votes_voter_id_author_id_permlink_id_uk DO
                 UPDATE
                   SET
-                    weight = CASE EXCLUDED.is_effective WHEN true THEN EXCLUDED.weight ELSE hive_votes.weight END,
-                    rshares = CASE EXCLUDED.is_effective WHEN true THEN EXCLUDED.rshares ELSE hive_votes.rshares END,
+                    weight = CASE EXCLUDED.is_effective WHEN true THEN EXCLUDED.weight ELSE {SCHEMA_NAME}.hive_votes.weight END,
+                    rshares = CASE EXCLUDED.is_effective WHEN true THEN EXCLUDED.rshares ELSE {SCHEMA_NAME}.hive_votes.rshares END,
                     vote_percent = EXCLUDED.vote_percent,
                     last_update = EXCLUDED.last_update,
-                    num_changes = hive_votes.num_changes + EXCLUDED.num_changes + 1,
+                    num_changes = {SCHEMA_NAME}.hive_votes.num_changes + EXCLUDED.num_changes + 1,
                     block_num = EXCLUDED.block_num
-                  WHERE hive_votes.voter_id = EXCLUDED.voter_id and hive_votes.author_id = EXCLUDED.author_id and hive_votes.permlink_id = EXCLUDED.permlink_id;
+                  WHERE {SCHEMA_NAME}.hive_votes.voter_id = EXCLUDED.voter_id and {SCHEMA_NAME}.hive_votes.author_id = EXCLUDED.author_id and {SCHEMA_NAME}.hive_votes.permlink_id = EXCLUDED.permlink_id;
                 """
             # WHERE clause above seems superfluous (and works all the same without it, at least up to 5mln)
 
