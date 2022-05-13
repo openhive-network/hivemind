@@ -37,11 +37,11 @@ jobs:
         python3 -m pip install --no-cache-dir --verbose --user .
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
+      uses: github/codeql-action/init@v2
       with:
         languages: ${{ matrix.language }}
         setup-python-dependencies: false
         config-file: ./.github/codeql-config.yml
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+      uses: github/codeql-action/analyze@v2
