@@ -55,7 +55,7 @@ def setup(db):
     # default rows
     db.query_no_return(f"CALL {SCHEMA_NAME}.populate_with_defaults();")
 
-    sql = "CREATE INDEX hive_communities_ft1 ON hive_communities USING GIN (to_tsvector('english', title || ' ' || about))"
+    sql = f"CREATE INDEX hive_communities_ft1 ON {SCHEMA_NAME}.hive_communities USING GIN (to_tsvector('english', title || ' ' || about))"
     db.query(sql)
 
     # find_comment_id definition moved to utility_functions.sql
@@ -105,8 +105,8 @@ def setup(db):
           """
     db.query_no_return(sql)
 
-    sql = """
-          CREATE TABLE IF NOT EXISTS hive_db_patch_level
+    sql = f"""
+          CREATE TABLE IF NOT EXISTS {SCHEMA_NAME}.hive_db_patch_level
           (
             level SERIAL NOT NULL PRIMARY KEY,
             patch_date timestamp without time zone NOT NULL,
@@ -194,11 +194,11 @@ def setup(db):
         execute_sql_script(db.query_no_return, sql_scripts_dir_path / script)
 
     # Move this part here, to mark latest db patch level as current Hivemind revision (which just created schema).
-    sql = """
-          INSERT INTO hive_db_patch_level
+    sql = f"""
+          INSERT INTO {SCHEMA_NAME}.hive_db_patch_level
           (patch_date, patched_to_revision)
           values
-          (now(), '{}');
+          (now(), '{{}}');
           """
 
     from hive.version import GIT_REVISION

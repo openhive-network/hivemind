@@ -61,11 +61,11 @@ BEGIN
             SELECT children.id, children.parent_id, blacklisted_by_observer_view.source as source
             FROM live_posts_comments_view children left outer join blacklisted_by_observer_view on (blacklisted_by_observer_view.observer_id = __observer_id AND blacklisted_by_observer_view.blacklisted_id = children.author_id)
             JOIN child_posts ON children.parent_id = child_posts.id
-            JOIN hive_accounts ON children.author_id = hive_accounts.id
+            JOIN hivemind_app.hive_accounts ON children.author_id = hivemind_app.hive_accounts.id
             AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = children.author_id))
         )
         SELECT hp2.id, cp.source
-        FROM hive_posts hp2
+        FROM hivemind_app.hive_posts hp2
         JOIN child_posts cp ON cp.id = hp2.id
         ORDER BY hp2.id
     ) ds,

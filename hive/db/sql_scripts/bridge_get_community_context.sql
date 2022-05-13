@@ -8,8 +8,8 @@ CREATE TYPE bridge_api_community_context AS (
 DROP FUNCTION IF EXISTS bridge_get_community_context
 ;
 CREATE OR REPLACE FUNCTION bridge_get_community_context(
-    in _account hive_accounts.name%TYPE,
-    in _name hive_communities.name%TYPE
+    in _account hivemind_app.hive_accounts.name%TYPE,
+    in _name hivemind_app.hive_communities.name%TYPE
 )
 RETURNS SETOF JSON
 LANGUAGE plpgsql
@@ -26,7 +26,7 @@ BEGIN
       RETURN;
     END IF;
 
-    __subscribed = EXISTS(SELECT 1 FROM hive_subscriptions WHERE account_id = __account_id AND community_id = __community_id);
+    __subscribed = EXISTS(SELECT 1 FROM hivemind_app.hive_subscriptions WHERE account_id = __account_id AND community_id = __community_id);
 
     RETURN QUERY SELECT
         json_build_object(
@@ -34,7 +34,7 @@ BEGIN
             'subscribed', __subscribed,
             'title', title
         )
-    FROM hive_roles
+    FROM hivemind_app.hive_roles
     WHERE account_id = __account_id
     AND community_id = __community_id
     ;

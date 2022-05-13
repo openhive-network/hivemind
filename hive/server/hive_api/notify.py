@@ -1,6 +1,7 @@
 """Hive API: Notifications"""
 import logging
 
+from hive.conf import SCHEMA_NAME
 from hive.indexer.notify import NotifyType
 from hive.server.common.helpers import (
     json_date,
@@ -93,17 +94,17 @@ async def post_notifications(
 
 
 def _notifs_sql(where):
-    sql = """SELECT hn.id, hn.type_id, hn.score, hn.created_at,
+    sql = f"""SELECT hn.id, hn.type_id, hn.score, hn.created_at,
                     src.name src, dst.name dst,
-                    (SELECT name FROM hive_accounts WHERE id = hp.author_id) as author,
-                    (SELECT permlink FROM hive_permlink_data WHERE id = hp.permlink_id) as permlink,
+                    (SELECT name FROM {SCHEMA_NAME}.hive_accounts WHERE id = hp.author_id) as author,
+                    (SELECT permlink FROM {SCHEMA_NAME}.hive_permlink_data WHERE id = hp.permlink_id) as permlink,
                     hc.name community,
                     hc.title community_title, payload
-               FROM hive_notifs hn
-          LEFT JOIN hive_accounts src ON hn.src_id = src.id
-          LEFT JOIN hive_accounts dst ON hn.dst_id = dst.id
-          LEFT JOIN hive_posts hp ON hn.post_id = hp.id
-          LEFT JOIN hive_communities hc ON hn.community_id = hc.id
+               FROM {SCHEMA_NAME}.hive_notifs hn
+          LEFT JOIN {SCHEMA_NAME}.hive_accounts src ON hn.src_id = src.id
+          LEFT JOIN {SCHEMA_NAME}.hive_accounts dst ON hn.dst_id = dst.id
+          LEFT JOIN {SCHEMA_NAME}.hive_posts hp ON hn.post_id = hp.id
+          LEFT JOIN {SCHEMA_NAME}.hive_communities hc ON hn.community_id = hc.id
           WHERE %s
             AND score >= :min_score
             AND COALESCE(hp.counter_deleted, 0) = 0

@@ -8,8 +8,8 @@ BEGIN
       -- find blogger account using parent author of page defining post
       __post_id = find_comment_id( _author, _permlink, True );
       SELECT pp.author_id INTO __account_id
-      FROM hive_posts hp
-      JOIN hive_posts pp ON hp.parent_id = pp.id
+      FROM hivemind_app.hive_posts hp
+      JOIN hivemind_app.hive_posts pp ON hp.parent_id = pp.id
       WHERE hp.id = __post_id;
       IF __account_id = 0 THEN __account_id = NULL; END IF;
   ELSE
@@ -21,7 +21,7 @@ BEGIN
   (
     SELECT hpr.id
     FROM live_posts_comments_view hpr
-    JOIN hive_posts hp1 ON hp1.id = hpr.parent_id
+    JOIN hivemind_app.hive_posts hp1 ON hp1.id = hpr.parent_id
     WHERE hp1.author_id = __account_id
       AND (__post_id = 0 OR hpr.id < __post_id )
     ORDER BY hpr.id DESC

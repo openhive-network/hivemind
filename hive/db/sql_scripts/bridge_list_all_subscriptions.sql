@@ -9,7 +9,7 @@ CREATE TYPE bridge_api_list_all_subscriptions AS (
 DROP FUNCTION IF EXISTS bridge_list_all_subscriptions
 ;
 CREATE OR REPLACE FUNCTION bridge_list_all_subscriptions(
-    in _account hive_accounts.name%TYPE
+    in _account hivemind_app.hive_accounts.name%TYPE
 )
 RETURNS SETOF bridge_api_list_all_subscriptions
 LANGUAGE plpgsql
@@ -21,9 +21,9 @@ BEGIN
 
     RETURN QUERY
     SELECT c.name, c.title, get_role_name(COALESCE(r.role_id, 0)), COALESCE(r.title, '')
-    FROM hive_communities c
-    JOIN hive_subscriptions s ON c.id = s.community_id
-    LEFT JOIN hive_roles r ON r.account_id = s.account_id
+    FROM hivemind_app.hive_communities c
+    JOIN hivemind_app.hive_subscriptions s ON c.id = s.community_id
+    LEFT JOIN hivemind_app.hive_roles r ON r.account_id = s.account_id
         AND r.community_id = c.id
     WHERE s.account_id = __account_id
     ORDER BY COALESCE(role_id, 0) DESC, c.rank;

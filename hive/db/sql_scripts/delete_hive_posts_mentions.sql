@@ -11,7 +11,7 @@ BEGIN
 
   __90_days_beyond_head_block_number = block_before_head('90 days'::interval);
 
-  DELETE FROM hive_mentions
+  DELETE FROM hivemind_app.hive_mentions
   WHERE block_num < __90_days_beyond_head_block_number;
 
 END

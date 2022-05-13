@@ -2,7 +2,7 @@ DROP FUNCTION IF EXISTS condenser_get_names_by_reblogged;
 
 CREATE FUNCTION condenser_get_names_by_reblogged( in _author VARCHAR, in _permlink VARCHAR )
 RETURNS TABLE(
-    names hive_accounts.name%TYPE
+    names hivemind_app.hive_accounts.name%TYPE
 )
 AS
 $function$
@@ -13,8 +13,8 @@ BEGIN
 
   RETURN QUERY SELECT
     ha.name
-  FROM hive_accounts ha
-  JOIN hive_feed_cache hfc ON ha.id = hfc.account_id
+  FROM hivemind_app.hive_accounts ha
+  JOIN hivemind_app.hive_feed_cache hfc ON ha.id = hfc.account_id
   WHERE hfc.post_id = __post_id
   ORDER BY ha.name
   ;

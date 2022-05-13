@@ -16,8 +16,8 @@ BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
     SELECT MIN(hfc.created_at) INTO __min_date
-    FROM hive_feed_cache hfc
-    JOIN hive_follows hf ON hfc.account_id = hf.following
+    FROM hivemind_app.hive_feed_cache hfc
+    JOIN hivemind_app.hive_follows hf ON hfc.account_id = hf.following
     WHERE hf.state = 1 AND hf.follower = __account_id AND hfc.post_id = __post_id;
   END IF;
 
@@ -30,9 +30,9 @@ BEGIN
       hfc.post_id, 
       MIN(hfc.created_at) as min_created, 
       array_agg(ha.name) AS reblogged_by
-    FROM hive_feed_cache hfc
-    JOIN hive_follows hf ON hfc.account_id = hf.following
-    JOIN hive_accounts ha ON ha.id = hf.following
+    FROM hivemind_app.hive_feed_cache hfc
+    JOIN hivemind_app.hive_follows hf ON hfc.account_id = hf.following
+    JOIN hivemind_app.hive_accounts ha ON ha.id = hf.following
     WHERE hfc.block_num > __cutoff AND hf.state = 1 AND hf.follower = __account_id
     GROUP BY hfc.post_id
     HAVING __post_id = 0 OR MIN(hfc.created_at) < __min_date OR ( MIN(hfc.created_at) = __min_date AND hfc.post_id < __post_id )

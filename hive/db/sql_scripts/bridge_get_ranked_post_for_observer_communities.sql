@@ -16,17 +16,17 @@ BEGIN
     FROM 
     (
       SELECT community_id
-      FROM hive_subscriptions
+      FROM hivemind_app.hive_subscriptions
       WHERE account_id = __account_id
     ) communities
     CROSS JOIN LATERAL 
     (
       SELECT hp.id
       FROM live_posts_view hp
-      JOIN hive_accounts on (hp.author_id = hive_accounts.id)
+      JOIN hivemind_app.hive_accounts on (hp.author_id = hivemind_app.hive_accounts.id)
       WHERE hp.community_id = communities.community_id
         AND (__post_id = 0 OR hp.id < __post_id)
-        AND hive_accounts.reputation > '-464800000000'::bigint
+        AND hivemind_app.hive_accounts.reputation > '-464800000000'::bigint
         AND (NOT EXISTS (SELECT 1 FROM muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp.author_id))
       ORDER BY id DESC
       LIMIT _limit
@@ -93,7 +93,7 @@ DECLARE
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
-      SELECT hp.sc_hot INTO __hot_limit FROM hive_posts hp WHERE hp.id = __post_id;
+      SELECT hp.sc_hot INTO __hot_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
   END IF;
   __account_id = find_account_id( _observer, True );
   RETURN QUERY 
@@ -103,7 +103,7 @@ BEGIN
       hp.id,
       blacklist.source
     FROM live_posts_view hp
-    JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
+    JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __account_id AND blacklist.blacklisted_id = hp.author_id)
     WHERE hs.account_id = __account_id 
       AND NOT hp.is_paidout
@@ -166,12 +166,12 @@ AS
 $function$
 DECLARE
   __post_id INT;
-  __payout_limit hive_posts.payout%TYPE;
+  __payout_limit hivemind_app.hive_posts.payout%TYPE;
   __account_id INT;
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
-      SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
+      SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
   END IF;
   __account_id = find_account_id( _observer, True );
   RETURN QUERY
@@ -182,7 +182,7 @@ BEGIN
       (hp1.payout + hp1.pending_payout) as total_payout,
       blacklist.source
     FROM live_comments_view hp1
-    JOIN hive_subscriptions hs ON hp1.community_id = hs.community_id
+    JOIN hivemind_app.hive_subscriptions hs ON hp1.community_id = hs.community_id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __account_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE hs.account_id = __account_id
       AND NOT hp1.is_paidout
@@ -246,13 +246,13 @@ AS
 $function$
 DECLARE
   __post_id INT;
-  __payout_limit hive_posts.payout%TYPE;
+  __payout_limit hivemind_app.hive_posts.payout%TYPE;
   __head_block_time TIMESTAMP;
   __account_id INT;
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
-      SELECT (hp.payout + hp.pending_payout) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
+      SELECT (hp.payout + hp.pending_payout) INTO __payout_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
   END IF;
   __account_id = find_account_id( _observer, True );
   __head_block_time = head_block_time();
@@ -264,7 +264,7 @@ BEGIN
       (hp.payout + hp.pending_payout) as total_payout,
       blacklist.source
     FROM live_posts_comments_view hp
-    JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
+    JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __account_id AND blacklist.blacklisted_id = hp.author_id)
     WHERE hs.account_id = __account_id 
       AND NOT hp.is_paidout 
@@ -329,12 +329,12 @@ AS
 $function$
 DECLARE
   __post_id INT;
-  __promoted_limit hive_posts.promoted%TYPE;
+  __promoted_limit hivemind_app.hive_posts.promoted%TYPE;
   __account_id INT;
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
-      SELECT hp.promoted INTO __promoted_limit FROM hive_posts hp WHERE hp.id = __post_id;
+      SELECT hp.promoted INTO __promoted_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
   END IF;
   __account_id = find_account_id( _observer, True );
   RETURN QUERY
@@ -344,7 +344,7 @@ BEGIN
       hp.id,
       blacklist.source
     FROM live_posts_view hp
-    JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
+    JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __account_id AND blacklist.blacklisted_id = hp.author_id)
     WHERE hs.account_id = __account_id
       AND NOT hp.is_paidout
@@ -414,7 +414,7 @@ BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __account_id = find_account_id( _observer, True );
   IF __post_id <> 0 THEN
-      SELECT hp.sc_trend INTO __trending_limit FROM hive_posts hp WHERE hp.id = __post_id;
+      SELECT hp.sc_trend INTO __trending_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
   END IF;
   __account_id = find_account_id( _observer, True );
   RETURN QUERY
@@ -425,7 +425,7 @@ BEGIN
       hp1.sc_trend,
       blacklist.source
     FROM live_posts_view hp1
-    JOIN hive_subscriptions hs ON hp1.community_id = hs.community_id
+    JOIN hivemind_app.hive_subscriptions hs ON hp1.community_id = hs.community_id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __account_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE hs.account_id = __account_id
       AND NOT hp1.is_paidout
@@ -488,12 +488,12 @@ AS
 $function$
 DECLARE
   __post_id INT;
-  __payout_limit hive_posts.payout%TYPE;
+  __payout_limit hivemind_app.hive_posts.payout%TYPE;
   __account_id INT;
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
-      SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
+      SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
   END IF;
   __account_id = find_account_id( _observer, True );
   RETURN QUERY 
@@ -504,8 +504,8 @@ BEGIN
       blacklist.source,
       (hp.payout + hp.pending_payout) as total_payout
     FROM live_posts_comments_view hp
-    JOIN hive_subscriptions hs ON hp.community_id = hs.community_id
-    JOIN hive_accounts_view ha ON ha.id = hp.author_id
+    JOIN hivemind_app.hive_subscriptions hs ON hp.community_id = hs.community_id
+    JOIN hivemind_app.hive_accounts_view ha ON ha.id = hp.author_id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __account_id AND blacklist.blacklisted_id = hp.author_id)
     WHERE hs.account_id = __account_id 
       AND NOT hp.is_paidout 

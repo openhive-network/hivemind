@@ -13,7 +13,7 @@ BEGIN
     RAISE EXCEPTION 'First/last block number is required' USING ERRCODE = 'CEHMA';
   END IF;
 
-  UPDATE hive_blocks
+  UPDATE hivemind_app.hive_blocks
   SET completed = True
   WHERE num BETWEEN _first_block_num AND _last_block_num;
 END

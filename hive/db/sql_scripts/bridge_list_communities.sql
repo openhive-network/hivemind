@@ -20,8 +20,8 @@ CREATE TYPE bridge_api_list_communities AS (
 DROP FUNCTION IF EXISTS bridge_list_communities_by_rank
 ;
 CREATE OR REPLACE FUNCTION bridge_list_communities_by_rank(
-    in _observer hive_accounts.name%TYPE,
-    in _last hive_accounts.name%TYPE,
+    in _observer hivemind_app.hive_accounts.name%TYPE,
+    in _last hivemind_app.hive_accounts.name%TYPE,
     in _search VARCHAR,
     in _limit INT
 )
@@ -31,10 +31,10 @@ AS
 $function$
 DECLARE
     __last_id INT := find_community_id( _last, True );
-    __rank hive_communities.rank%TYPE = 0;
+    __rank hivemind_app.hive_communities.rank%TYPE = 0;
 BEGIN
     IF ( _last <> '' ) THEN
-        SELECT hc.rank INTO __rank FROM hive_communities hc WHERE hc.id = __last_id;
+        SELECT hc.rank INTO __rank FROM hivemind_app.hive_communities hc WHERE hc.id = __last_id;
     END IF;
     RETURN QUERY SELECT
         hc.id,
@@ -52,9 +52,9 @@ BEGIN
         hc.avatar_url,
         bridge_get_community_context(_observer, hc.name),
         array_agg(ha.name ORDER BY ha.name)
-    FROM hive_communities as hc
-    LEFT JOIN hive_roles hr ON hr.community_id = hc.id AND hr.role_id = 6
-    LEFT JOIN hive_accounts ha ON hr.account_id = ha.id
+    FROM hivemind_app.hive_communities as hc
+    LEFT JOIN hivemind_app.hive_roles hr ON hr.community_id = hc.id AND hr.role_id = 6
+    LEFT JOIN hivemind_app.hive_accounts ha ON hr.account_id = ha.id
     WHERE hc.rank > __rank
     AND (_search IS NULL OR to_tsvector('english', hc.title || ' ' || hc.about) @@ plainto_tsquery(_search))
     GROUP BY hc.id
@@ -68,8 +68,8 @@ $function$
 DROP FUNCTION IF EXISTS bridge_list_communities_by_new
 ;
 CREATE OR REPLACE FUNCTION bridge_list_communities_by_new(
-    in _observer hive_accounts.name%TYPE,
-    in _last hive_accounts.name%TYPE,
+    in _observer hivemind_app.hive_accounts.name%TYPE,
+    in _last hivemind_app.hive_accounts.name%TYPE,
     in _search VARCHAR,
     in _limit INT
 )
@@ -96,9 +96,9 @@ BEGIN
         hc.avatar_url,
         bridge_get_community_context(_observer, hc.name),
         array_agg(ha.name ORDER BY ha.name)
-    FROM hive_communities as hc
-    LEFT JOIN hive_roles hr ON hr.community_id = hc.id AND hr.role_id = 6
-    LEFT JOIN hive_accounts ha ON hr.account_id = ha.id
+    FROM hivemind_app.hive_communities as hc
+    LEFT JOIN hivemind_app.hive_roles hr ON hr.community_id = hc.id AND hr.role_id = 6
+    LEFT JOIN hivemind_app.hive_accounts ha ON hr.account_id = ha.id
     WHERE (__last_id = 0 OR hc.id < __last_id)
     AND (_search IS NULL OR to_tsvector('english', hc.title || ' ' || hc.about) @@ plainto_tsquery(_search))
     GROUP BY hc.id
@@ -112,8 +112,8 @@ $function$
 DROP FUNCTION IF EXISTS bridge_list_communities_by_subs
 ;
 CREATE OR REPLACE FUNCTION bridge_list_communities_by_subs(
-    in _observer hive_accounts.name%TYPE,
-    in _last hive_accounts.name%TYPE,
+    in _observer hivemind_app.hive_accounts.name%TYPE,
+    in _last hivemind_app.hive_accounts.name%TYPE,
     in _search VARCHAR,
     in _limit INT
 )
@@ -123,10 +123,10 @@ AS
 $function$
 DECLARE
     __last_id INT := find_community_id( _last, True );
-    __subscribers hive_communities.subscribers%TYPE;
+    __subscribers hivemind_app.hive_communities.subscribers%TYPE;
 BEGIN
     IF ( _last <> '' ) THEN
-        SELECT hc.subscribers INTO __subscribers FROM hive_communities hc WHERE hc.id = __last_id;
+        SELECT hc.subscribers INTO __subscribers FROM hivemind_app.hive_communities hc WHERE hc.id = __last_id;
     END IF;
     RETURN QUERY SELECT
         hc.id,
@@ -144,9 +144,9 @@ BEGIN
         hc.avatar_url,
         bridge_get_community_context(_observer, hc.name),
         array_agg(ha.name ORDER BY ha.name)
-    FROM hive_communities as hc
-    LEFT JOIN hive_roles hr ON hr.community_id = hc.id AND hr.role_id = 6
-    LEFT JOIN hive_accounts ha ON hr.account_id = ha.id
+    FROM hivemind_app.hive_communities as hc
+    LEFT JOIN hivemind_app.hive_roles hr ON hr.community_id = hc.id AND hr.role_id = 6
+    LEFT JOIN hivemind_app.hive_accounts ha ON hr.account_id = ha.id
     WHERE (__last_id = 0 OR hc.subscribers < __subscribers OR (hc.subscribers = __subscribers AND hc.id < __last_id))
     AND (_search IS NULL OR to_tsvector('english', hc.title || ' ' || hc.about) @@ plainto_tsquery(_search))
     GROUP BY hc.id

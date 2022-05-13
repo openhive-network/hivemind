@@ -1,6 +1,7 @@
 """Hive API: Community methods"""
 import logging
 
+from hive.conf import SCHEMA_NAME
 from hive.server.common.helpers import json_date, return_error_info, valid_account, valid_community, valid_limit
 from hive.server.hive_api.common import get_community_id
 
@@ -43,7 +44,7 @@ async def get_community_context(context, name, account):
 async def list_top_communities(context, limit=25):
     """List top communities. Returns lite community list."""
     limit = valid_limit(limit, 100, 25)
-    sql = """SELECT hc.name, hc.title FROM hive_communities hc
+    sql = f"""SELECT hc.name, hc.title FROM {SCHEMA_NAME}.hive_communities hc
               WHERE hc.rank > 0 ORDER BY hc.rank LIMIT :limit"""
     # ABW: restored older version since hardcoded id is out of the question
     # sql = """SELECT name, title FROM hive_communities
@@ -174,8 +175,8 @@ async def top_community_muted(context, community):
     """Get top authors (by SP) who are muted in a community."""
     db = context['db']
     cid = await get_community_id(db, community)
-    sql = """SELECT a.name, a.voting_weight, r.title FROM hive_accounts a
-               JOIN hive_roles r ON a.id = r.account_id
+    sql = f"""SELECT a.name, a.voting_weight, r.title FROM {SCHEMA_NAME}.hive_accounts a
+               JOIN {SCHEMA_NAME}.hive_roles r ON a.id = r.account_id
               WHERE r.community_id = :community_id AND r.role_id < 0
            ORDER BY voting_weight DESC LIMIT 5"""
     return await db.query(sql, community_id=cid)
@@ -183,16 +184,16 @@ async def top_community_muted(context, community):
 
 async def _top_community_posts(db, community, limit=50):
     # TODO: muted equivalent
-    sql = """
+    sql = f"""
     SELECT ha_a.name as author,
         0 as votes,
         ( hp.payout + hp.pending_payout ) as payout
-    FROM hive_posts hp
-    INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-    LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
-    LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+    FROM {SCHEMA_NAME}.hive_posts hp
+    INNER JOIN {SCHEMA_NAME}.hive_accounts ha_a ON ha_a.id = hp.author_id
+    LEFT JOIN {SCHEMA_NAME}.hive_post_data hpd ON hpd.id = hp.id
+    LEFT JOIN {SCHEMA_NAME}.hive_category_data hcd ON hcd.id = hp.category_id
     WHERE hcd.category = :community AND hp.counter_deleted = 0 AND NOT hp.is_paidout
-        AND post_id IN (SELECT id FROM hive_posts WHERE is_muted = '0')
+        AND post_id IN (SELECT id FROM {SCHEMA_NAME}.hive_posts WHERE is_muted = '0')
     ORDER BY ( hp.payout + hp.pending_payout ) DESC LIMIT :limit"""
 
     return await db.query_all(sql, community=community, limit=limit)

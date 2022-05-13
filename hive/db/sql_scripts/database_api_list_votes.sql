@@ -17,8 +17,8 @@ DROP FUNCTION IF EXISTS find_votes( character varying, character varying, int )
 ;
 CREATE OR REPLACE FUNCTION public.find_votes
 (
-  in _AUTHOR hive_accounts.name%TYPE,
-  in _PERMLINK hive_permlink_data.permlink%TYPE,
+  in _AUTHOR hivemind_app.hive_accounts.name%TYPE,
+  in _PERMLINK hivemind_app.hive_permlink_data.permlink%TYPE,
   in _LIMIT INT
 )
 RETURNS SETOF database_api_vote
@@ -43,7 +43,7 @@ RETURN QUERY
         v.num_changes,
         v.reputation
     FROM
-        hive_votes_view v
+        hivemind_app.hive_votes_view v
     WHERE
         v.post_id = _POST_ID
     ORDER BY
@@ -58,9 +58,9 @@ DROP FUNCTION IF EXISTS list_votes_by_voter_comment( character varying, characte
 ;
 CREATE OR REPLACE FUNCTION public.list_votes_by_voter_comment
 (
-  in _VOTER hive_accounts.name%TYPE,
-  in _AUTHOR hive_accounts.name%TYPE,
-  in _PERMLINK hive_permlink_data.permlink%TYPE,
+  in _VOTER hivemind_app.hive_accounts.name%TYPE,
+  in _AUTHOR hivemind_app.hive_accounts.name%TYPE,
+  in _PERMLINK hivemind_app.hive_permlink_data.permlink%TYPE,
   in _LIMIT INT
 )
 RETURNS SETOF database_api_vote
@@ -88,7 +88,7 @@ RETURN QUERY
         v.num_changes,
         v.reputation
     FROM
-        hive_votes_view v
+        hivemind_app.hive_votes_view v
     WHERE
         v.voter_id = __voter_id
         AND v.post_id >= __post_id
@@ -104,9 +104,9 @@ DROP FUNCTION IF EXISTS list_votes_by_comment_voter( character varying, characte
 ;
 CREATE OR REPLACE FUNCTION public.list_votes_by_comment_voter
 (
-  in _VOTER hive_accounts.name%TYPE,
-  in _AUTHOR hive_accounts.name%TYPE,
-  in _PERMLINK hive_permlink_data.permlink%TYPE,
+  in _VOTER hivemind_app.hive_accounts.name%TYPE,
+  in _AUTHOR hivemind_app.hive_accounts.name%TYPE,
+  in _PERMLINK hivemind_app.hive_permlink_data.permlink%TYPE,
   in _LIMIT INT
 )
 RETURNS SETOF database_api_vote
@@ -134,7 +134,7 @@ RETURN QUERY
         v.num_changes,
         v.reputation
     FROM
-        hive_votes_view v
+        hivemind_app.hive_votes_view v
     WHERE
         v.post_id = __post_id
         AND v.voter_id >= __voter_id

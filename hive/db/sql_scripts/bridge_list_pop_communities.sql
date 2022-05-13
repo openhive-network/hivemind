@@ -16,10 +16,10 @@ $function$
 BEGIN
     RETURN QUERY
     SELECT name, title
-    FROM hive_communities
+    FROM hivemind_app.hive_communities
     JOIN (
         SELECT community_id, COUNT(*) newsubs
-        FROM hive_subscriptions
+        FROM hivemind_app.hive_subscriptions
         WHERE created_at > head_block_time() - INTERVAL '1 MONTH'
         GROUP BY community_id
     ) stats

@@ -19,7 +19,7 @@ BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
     SELECT hfc.created_at INTO __created_at
-    FROM hive_feed_cache hfc
+    FROM hivemind_app.hive_feed_cache hfc
     WHERE hfc.account_id = __account_id AND hfc.post_id = __post_id;
   END IF;
 
@@ -29,14 +29,14 @@ BEGIN
     SELECT 
       hfc.post_id,
       hfc.created_at
-    FROM hive_feed_cache hfc
+    FROM hivemind_app.hive_feed_cache hfc
     WHERE hfc.account_id = __account_id
       AND ( __post_id = 0 OR hfc.created_at < __created_at
                           OR (hfc.created_at = __created_at AND hfc.post_id < __post_id) )
       AND ( NOT _bridge_api OR
             NOT EXISTS (SELECT NULL FROM live_posts_comments_view hp1 --should this just be live_posts_view?
                         WHERE hp1.id = hfc.post_id AND hp1.community_id IS NOT NULL
-                        AND NOT EXISTS (SELECT NULL FROM hive_reblogs hr WHERE hr.blogger_id = __account_id AND hr.post_id = hp1.id)
+                        AND NOT EXISTS (SELECT NULL FROM hivemind_app.hive_reblogs hr WHERE hr.blogger_id = __account_id AND hr.post_id = hp1.id)
                        )
           )
     ORDER BY hfc.created_at DESC, hfc.post_id DESC

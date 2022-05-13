@@ -41,9 +41,9 @@ $$ LANGUAGE plpgsql IMMUTABLE
 ;
 
 
-DROP FUNCTION IF EXISTS public.calculate_time_part_of_trending(_post_created_at hive_posts.created_at%TYPE ) CASCADE;
+DROP FUNCTION IF EXISTS public.calculate_time_part_of_trending(_post_created_at hivemind_app.hive_posts.created_at%TYPE ) CASCADE;
 CREATE OR REPLACE FUNCTION public.calculate_time_part_of_trending(
-  _post_created_at hive_posts.created_at%TYPE)
+  _post_created_at hivemind_app.hive_posts.created_at%TYPE)
     RETURNS double precision
     LANGUAGE 'plpgsql'
     IMMUTABLE
@@ -60,9 +60,9 @@ $BODY$
 ;
 
 
-DROP FUNCTION IF EXISTS public.calculate_time_part_of_hot(_post_created_at hive_posts.created_at%TYPE ) CASCADE;
+DROP FUNCTION IF EXISTS public.calculate_time_part_of_hot(_post_created_at hivemind_app.hive_posts.created_at%TYPE ) CASCADE;
 CREATE OR REPLACE FUNCTION public.calculate_time_part_of_hot(
-  _post_created_at hive_posts.created_at%TYPE)
+  _post_created_at hivemind_app.hive_posts.created_at%TYPE)
     RETURNS double precision
     LANGUAGE 'plpgsql'
     IMMUTABLE
@@ -78,8 +78,8 @@ END;
 $BODY$
 ;
 
-DROP FUNCTION IF EXISTS public.calculate_rhsares_part_of_hot_and_trend(_rshares hive_posts.vote_rshares%TYPE) CASCADE;
-CREATE OR REPLACE FUNCTION public.calculate_rhsares_part_of_hot_and_trend(_rshares hive_posts.vote_rshares%TYPE)
+DROP FUNCTION IF EXISTS public.calculate_rhsares_part_of_hot_and_trend(_rshares hivemind_app.hive_posts.vote_rshares%TYPE) CASCADE;
+CREATE OR REPLACE FUNCTION public.calculate_rhsares_part_of_hot_and_trend(_rshares hivemind_app.hive_posts.vote_rshares%TYPE)
 RETURNS double precision
 LANGUAGE 'plpgsql'
 IMMUTABLE
@@ -97,11 +97,11 @@ END;
 $BODY$
 ;
 
-DROP FUNCTION IF EXISTS public.calculate_hot(hive_posts.vote_rshares%TYPE, hive_posts.created_at%TYPE);
+DROP FUNCTION IF EXISTS public.calculate_hot(hive_posts.vote_rshares%TYPE, hivemind_app.hive_posts.created_at%TYPE);
 CREATE OR REPLACE FUNCTION public.calculate_hot(
-    _rshares hive_posts.vote_rshares%TYPE,
-    _post_created_at hive_posts.created_at%TYPE)
-RETURNS hive_posts.sc_hot%TYPE
+    _rshares hivemind_app.hive_posts.vote_rshares%TYPE,
+    _post_created_at hivemind_app.hive_posts.created_at%TYPE)
+RETURNS hivemind_app.hive_posts.sc_hot%TYPE
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS $BODY$
@@ -111,11 +111,11 @@ END;
 $BODY$
 ;
 
-DROP FUNCTION IF EXISTS public.calculate_trending(hive_posts.vote_rshares%TYPE, hive_posts.created_at%TYPE);
+DROP FUNCTION IF EXISTS public.calculate_trending(hive_posts.vote_rshares%TYPE, hivemind_app.hive_posts.created_at%TYPE);
 CREATE OR REPLACE FUNCTION public.calculate_trending(
-    _rshares hive_posts.vote_rshares%TYPE,
-    _post_created_at hive_posts.created_at%TYPE)
-RETURNS hive_posts.sc_trend%TYPE
+    _rshares hivemind_app.hive_posts.vote_rshares%TYPE,
+    _post_created_at hivemind_app.hive_posts.created_at%TYPE)
+RETURNS hivemind_app.hive_posts.sc_trend%TYPE
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS $BODY$

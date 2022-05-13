@@ -1,5 +1,5 @@
 """Bridge API public endpoints for posts"""
-
+from hive.conf import SCHEMA_NAME
 from hive.server.bridge_api.objects import _bridge_post_object, append_statistics_to_post, load_profiles
 from hive.server.common.helpers import (
     check_community,
@@ -439,7 +439,7 @@ async def get_follow_list(context, observer, follow_type='blacklisted'):
 
 
 async def _follow_contexts(db, accounts, observer_id, include_mute=False):
-    sql = """SELECT following, state FROM hive_follows
+    sql = f"""SELECT following, state FROM {SCHEMA_NAME}.hive_follows
               WHERE follower = :account_id AND following IN :ids"""
     rows = await db.query_all(sql, account_id=observer_id, ids=tuple(accounts.keys()))
     for row in rows:

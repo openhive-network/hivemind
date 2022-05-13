@@ -44,8 +44,8 @@ CREATE TYPE database_api_post AS (
 
 DROP FUNCTION IF EXISTS list_comments_by_permlink(character varying, character varying, int);
 CREATE OR REPLACE FUNCTION list_comments_by_permlink(
-  in _author hive_accounts.name%TYPE,
-  in _permlink hive_permlink_data.permlink%TYPE,
+  in _author hivemind_app.hive_accounts.name%TYPE,
+  in _permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _limit INT)
   RETURNS SETOF database_api_post
 AS
@@ -57,7 +57,7 @@ BEGIN
     SELECT
       hph.id,
       hph.author_s_permlink
-    FROM hive_posts_api_helper hph
+    FROM hivemind_app.hive_posts_api_helper hph
     JOIN live_posts_comments_view hp ON hp.id = hph.id
     WHERE hph.author_s_permlink >= _author || '/' || _permlink
       AND NOT hp.is_muted -- all the mute checks in this file look insufficient, but maybe no one uses these API calls?
@@ -85,8 +85,8 @@ LANGUAGE plpgsql STABLE;
 DROP FUNCTION IF EXISTS list_comments_by_cashout_time(timestamp, character varying, character varying, int);
 CREATE OR REPLACE FUNCTION list_comments_by_cashout_time(
   in _cashout_time timestamp,
-  in _author hive_accounts.name%TYPE,
-  in _permlink hive_permlink_data.permlink%TYPE,
+  in _author hivemind_app.hive_accounts.name%TYPE,
+  in _permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _limit INT)
   RETURNS SETOF database_api_post
 AS
@@ -131,10 +131,10 @@ LANGUAGE plpgsql STABLE;
 
 DROP FUNCTION IF EXISTS list_comments_by_root(character varying, character varying, character varying, character varying, int);
 CREATE OR REPLACE FUNCTION list_comments_by_root(
-  in _root_author hive_accounts.name%TYPE,
-  in _root_permlink hive_permlink_data.permlink%TYPE,
-  in _start_post_author hive_accounts.name%TYPE,
-  in _start_post_permlink hive_permlink_data.permlink%TYPE,
+  in _root_author hivemind_app.hive_accounts.name%TYPE,
+  in _root_permlink hivemind_app.hive_permlink_data.permlink%TYPE,
+  in _start_post_author hivemind_app.hive_accounts.name%TYPE,
+  in _start_post_permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _limit INT)
   RETURNS SETOF database_api_post
 AS
@@ -176,10 +176,10 @@ LANGUAGE plpgsql STABLE;
 DROP FUNCTION IF EXISTS list_comments_by_parent(character varying, character varying, character varying, character varying, int)
 ;
 CREATE OR REPLACE FUNCTION list_comments_by_parent(
-  in _parent_author hive_accounts.name%TYPE,
-  in _parent_permlink hive_permlink_data.permlink%TYPE,
-  in _start_post_author hive_accounts.name%TYPE,
-  in _start_post_permlink hive_permlink_data.permlink%TYPE,
+  in _parent_author hivemind_app.hive_accounts.name%TYPE,
+  in _parent_permlink hivemind_app.hive_permlink_data.permlink%TYPE,
+  in _start_post_author hivemind_app.hive_accounts.name%TYPE,
+  in _start_post_permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _limit INT)
   RETURNS SETOF database_api_post
 AS $function$
@@ -220,10 +220,10 @@ LANGUAGE plpgsql STABLE;
 DROP FUNCTION IF EXISTS list_comments_by_last_update(character varying, timestamp, character varying, character varying, int)
 ;
 CREATE OR REPLACE FUNCTION list_comments_by_last_update(
-  in _parent_author hive_accounts.name%TYPE,
-  in _updated_at hive_posts.updated_at%TYPE,
-  in _start_post_author hive_accounts.name%TYPE,
-  in _start_post_permlink hive_permlink_data.permlink%TYPE,
+  in _parent_author hivemind_app.hive_accounts.name%TYPE,
+  in _updated_at hivemind_app.hive_posts.updated_at%TYPE,
+  in _start_post_author hivemind_app.hive_accounts.name%TYPE,
+  in _start_post_permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _limit INT)
   RETURNS SETOF database_api_post
 AS
@@ -241,7 +241,7 @@ BEGIN
       hp1.id,
       hp1.updated_at
     FROM live_posts_comments_view hp1
-    JOIN hive_posts hp2 ON hp1.parent_id = hp2.id
+    JOIN hivemind_app.hive_posts hp2 ON hp1.parent_id = hp2.id
     WHERE hp2.author_id = __parent_author_id
         AND NOT hp1.is_muted
         AND (
@@ -271,10 +271,10 @@ LANGUAGE plpgsql STABLE;
 DROP FUNCTION IF EXISTS list_comments_by_author_last_update(character varying, timestamp, character varying, character varying, int)
 ;
 CREATE OR REPLACE FUNCTION list_comments_by_author_last_update(
-  in _author hive_accounts.name%TYPE,
-  in _updated_at hive_posts.updated_at%TYPE,
-  in _start_post_author hive_accounts.name%TYPE,
-  in _start_post_permlink hive_permlink_data.permlink%TYPE,
+  in _author hivemind_app.hive_accounts.name%TYPE,
+  in _updated_at hivemind_app.hive_posts.updated_at%TYPE,
+  in _start_post_author hivemind_app.hive_accounts.name%TYPE,
+  in _start_post_permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _limit INT)
   RETURNS SETOF database_api_post
 AS

@@ -18,7 +18,7 @@ CREATE TYPE condenser_api_post AS (
     children INT,
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
-    reblogged_at TIMESTAMP, -- used when post data is combined with hive_feed_cache (otherwise can be date)
+    reblogged_at TIMESTAMP, -- used when post data is combined with hivemind_app.hive_feed_cache (otherwise can be date)
     rshares NUMERIC,
     json TEXT,
     parent_author VARCHAR(16),

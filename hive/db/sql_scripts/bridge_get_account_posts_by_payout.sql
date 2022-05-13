@@ -7,12 +7,12 @@ $function$
 DECLARE
   __account_id INT;
   __post_id INT;
-  __payout_limit hive_posts.payout%TYPE;
+  __payout_limit hivemind_app.hive_posts.payout%TYPE;
 BEGIN
   __account_id = find_account_id( _account, True );
   __post_id = find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
-      SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
+      SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY
   WITH payouts AS

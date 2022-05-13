@@ -7,8 +7,8 @@ CREATE MATERIALIZED VIEW payout_stats_view AS
       SUM( hp1.payout + hp1.pending_payout ) AS payout,
       COUNT(*) AS posts,
       NULL AS authors
-  FROM hive_posts hp1
-      JOIN hive_accounts ha ON ha.id = hp1.author_id
+  FROM hivemind_app.hive_posts hp1
+      JOIN hivemind_app.hive_accounts ha ON ha.id = hp1.author_id
   WHERE hp1.counter_deleted = 0 AND NOT hp1.is_paidout AND hp1.id != 0
   GROUP BY community_id, author
 
@@ -20,7 +20,7 @@ CREATE MATERIALIZED VIEW payout_stats_view AS
         SUM( hp2.payout + hp2.pending_payout ) AS payout,
         COUNT(*) AS posts,
         COUNT(DISTINCT(author_id)) AS authors
-  FROM hive_posts hp2
+  FROM hivemind_app.hive_posts hp2
   WHERE hp2.counter_deleted = 0 AND NOT hp2.is_paidout AND hp2.id != 0
   GROUP BY community_id
 

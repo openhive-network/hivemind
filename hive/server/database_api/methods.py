@@ -1,6 +1,7 @@
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
 from enum import Enum
 
+from hive.conf import SCHEMA_NAME
 from hive.server.common.helpers import json_date
 from hive.server.common.helpers import return_error_info, valid_account, valid_date, valid_limit, valid_permlink
 from hive.server.database_api.objects import database_post_object
@@ -144,7 +145,7 @@ async def find_comments(context, comments: list):
     assert len(comments) <= 1000, "Parameters count is greather than max allowed (1000)"
     db = context['db']
 
-    SQL_TEMPLATE = """
+    SQL_TEMPLATE = f"""
       SELECT
         pv.id,
         pv.community_id,
@@ -191,9 +192,9 @@ async def find_comments(context, comments: list):
           hp.id
         FROM
           live_posts_comments_view hp
-        JOIN hive_accounts_view ha_a ON ha_a.id = hp.author_id
-        JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        JOIN (VALUES {}) AS t (author, permlink, number) ON ha_a.name = t.author AND hpd_p.permlink = t.permlink
+        JOIN {SCHEMA_NAME}.hive_accounts_view ha_a ON ha_a.id = hp.author_id
+        JOIN {SCHEMA_NAME}.hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        JOIN (VALUES {{}}) AS t (author, permlink, number) ON ha_a.name = t.author AND hpd_p.permlink = t.permlink
         WHERE
           NOT hp.is_muted
         ORDER BY t.number

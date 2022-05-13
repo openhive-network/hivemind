@@ -468,7 +468,7 @@ $$;
 
         start_time = perf_counter()
 
-        last_imported_block = DbState.db().query_one("SELECT block_num FROM hive_state LIMIT 1")
+        last_imported_block = DbState.db().query_one(f"SELECT block_num FROM {SCHEMA_NAME}.hive_state LIMIT 1")
 
         log.info(
             "[MASSIVE] Current imported block: %s. Last imported block: %s.",
@@ -503,7 +503,9 @@ $$;
         log.info("Filling tables with final values: finished")
 
         # Update a block num immediately
-        cls.db().query_no_return("UPDATE hive_state SET block_num = :block_num", block_num=current_imported_block)
+        cls.db().query_no_return(
+            f"UPDATE {SCHEMA_NAME}.hive_state SET block_num = :block_num", block_num=current_imported_block
+        )
 
         if massive_sync_preconditions:
             from hive.db.schema import create_fk
@@ -523,7 +525,7 @@ $$;
     @staticmethod
     def status():
         """Basic health status: head block/time, current age (secs)."""
-        sql = "SELECT num, created_at, extract(epoch from created_at) ts " "FROM hive_blocks ORDER BY num DESC LIMIT 1"
+        sql = f"SELECT num, created_at, extract(epoch from created_at) ts FROM {SCHEMA_NAME}.hive_blocks ORDER BY num DESC LIMIT 1"
         row = DbState.db().query_row(sql)
         return dict(
             db_head_block=row['num'], db_head_time=str(row['created_at']), db_head_age=int(time.time() - row['ts'])
@@ -546,4 +548,4 @@ $$;
 
         If empty, it indicates that the massive sync has not finished.
         """
-        return not cls.db().query_one("SELECT 1 FROM hive_feed_cache LIMIT 1")
+        return not cls.db().query_one(f"SELECT 1 FROM {SCHEMA_NAME}.hive_feed_cache LIMIT 1")

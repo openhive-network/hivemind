@@ -5,7 +5,7 @@ CREATE OR REPLACE FUNCTION public.update_hive_posts_children_count(in _first_blo
   VOLATILE
 AS $BODY$
 BEGIN
-UPDATE hive_posts uhp
+UPDATE hivemind_app.hive_posts uhp
 SET children = data_source.delta + uhp.children
 FROM
 (
@@ -35,7 +35,7 @@ WITH recursive tblChild AS
         ELSE 0
       END
       ) as delta_deleted
-  FROM hive_posts h1
+  FROM hivemind_app.hive_posts h1
   WHERE h1.block_num BETWEEN _first_block AND _last_block OR h1.block_num_created BETWEEN _first_block AND _last_block
   ORDER BY h1.depth DESC
   ) s
@@ -45,7 +45,7 @@ WITH recursive tblChild AS
   , p.id as id
   , p.depth as depth
   , tblChild.delta as delta
-  FROM hive_posts p
+  FROM hivemind_app.hive_posts p
   JOIN tblChild  ON p.id = tblChild.queried_parent
   WHERE p.depth < tblChild.depth
 )
@@ -69,7 +69,7 @@ CREATE OR REPLACE FUNCTION public.update_all_hive_posts_children_count()
 AS $BODY$
 declare __depth INT;
 BEGIN
-  SELECT MAX(hp.depth) into __depth FROM hive_posts hp ;
+  SELECT MAX(hp.depth) into __depth FROM hivemind_app.hive_posts hp ;
 
   CREATE UNLOGGED TABLE IF NOT EXISTS __post_children
   (
@@ -89,7 +89,7 @@ BEGIN
                       0
                     ) + 1
         ) AS count
-      FROM hive_posts h1
+      FROM hivemind_app.hive_posts h1
       WHERE (h1.parent_id != 0 OR __depth = 0) AND h1.counter_deleted = 0 AND h1.id != 0 AND h1.depth = __depth
       GROUP BY h1.parent_id
 
@@ -100,7 +100,7 @@ BEGIN
     __depth := __depth -1;
   END LOOP;
 
-  UPDATE hive_posts uhp
+  UPDATE hivemind_app.hive_posts uhp
   SET children = s.child_count
   FROM
   __post_children s 

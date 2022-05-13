@@ -3,9 +3,9 @@ DROP FUNCTION IF EXISTS delete_reblog_feed_cache(character varying,character var
 ;
 
 CREATE OR REPLACE FUNCTION delete_reblog_feed_cache(
-  in _author hive_accounts.name%TYPE,
-  in _permlink hive_permlink_data.permlink%TYPE,
-  in _account hive_accounts.name%TYPE)
+  in _author hivemind_app.hive_accounts.name%TYPE,
+  in _permlink hivemind_app.hive_permlink_data.permlink%TYPE,
+  in _account hivemind_app.hive_accounts.name%TYPE)
 RETURNS INTEGER
 LANGUAGE plpgsql
 AS
@@ -22,10 +22,10 @@ BEGIN
     RETURN 0;
   END IF;
 
-  DELETE FROM hive_reblogs
+  DELETE FROM hivemind_app.hive_reblogs
   WHERE blogger_id = __account_id AND post_id = __post_id;
 
-  DELETE FROM hive_feed_cache
+  DELETE FROM hivemind_app.hive_feed_cache
   WHERE account_id = __account_id AND post_id = __post_id;
 
   RETURN 1;

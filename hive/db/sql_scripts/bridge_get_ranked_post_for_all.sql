@@ -16,7 +16,7 @@ BEGIN
       hp1.id,
       blacklist.source
     FROM live_posts_view hp1
-    JOIN hive_accounts_view ha ON hp1.author_id = ha.id
+    JOIN hivemind_app.hive_accounts_view ha ON hp1.author_id = ha.id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE NOT ha.is_grayed
       AND ( __post_id = 0 OR hp1.id < __post_id )
@@ -84,7 +84,7 @@ BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __observer_id = find_account_id( _observer, True );
   IF __post_id <> 0 THEN
-      SELECT hp.sc_hot INTO __hot_limit FROM hive_posts hp WHERE hp.id = __post_id;
+      SELECT hp.sc_hot INTO __hot_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY
   WITH hot AS -- bridge_get_ranked_post_by_hot
@@ -155,13 +155,13 @@ AS
 $function$
 DECLARE
   __post_id INT;
-  __payout_limit hive_posts.payout%TYPE;
+  __payout_limit hivemind_app.hive_posts.payout%TYPE;
   __observer_id INT;
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __observer_id = find_account_id(_observer, True);
   IF __post_id <> 0 THEN
-      SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
+      SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY
   WITH payout AS
@@ -171,7 +171,7 @@ BEGIN
       (hp1.payout + hp1.pending_payout) as total_payout,
       blacklist.source
     FROM live_posts_comments_view hp1
-    JOIN hive_accounts_view ha ON hp1.author_id = ha.id
+    JOIN hivemind_app.hive_accounts_view ha ON hp1.author_id = ha.id
     LEFT OUTER JOIN blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE NOT hp1.is_paidout
       AND ha.is_grayed
@@ -234,13 +234,13 @@ AS
 $function$
 DECLARE
   __post_id INT;
-  __payout_limit hive_posts.payout%TYPE;
+  __payout_limit hivemind_app.hive_posts.payout%TYPE;
   __observer_id INT;
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __observer_id = find_account_id( _observer, True );
   IF __post_id <> 0 THEN
-      SELECT (hp.payout + hp.pending_payout) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
+      SELECT (hp.payout + hp.pending_payout) INTO __payout_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY
   WITH payout AS -- bridge_get_ranked_post_by_payout_comments
@@ -312,14 +312,14 @@ AS
 $function$
 DECLARE
   __post_id INT;
-  __payout_limit hive_posts.payout%TYPE;
+  __payout_limit hivemind_app.hive_posts.payout%TYPE;
   __head_block_time TIMESTAMP;
   __observer_id INT;
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __observer_id = find_account_id( _observer, True );
   IF __post_id <> 0 THEN
-      SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
+      SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
   END IF;
   __head_block_time = head_block_time();
   RETURN QUERY
@@ -392,13 +392,13 @@ AS
 $function$
 DECLARE
   __post_id INT;
-  __promoted_limit hive_posts.promoted%TYPE;
+  __promoted_limit hivemind_app.hive_posts.promoted%TYPE;
   __observer_id INT;
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __observer_id = find_account_id( _observer, True );
   IF __post_id <> 0 THEN
-      SELECT hp.promoted INTO __promoted_limit FROM hive_posts hp WHERE hp.id = __post_id;
+      SELECT hp.promoted INTO __promoted_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY
   WITH promoted AS -- bridge_get_ranked_post_by_promoted
@@ -476,7 +476,7 @@ BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __observer_id = find_account_id( _observer, True );
   IF __post_id <> 0 THEN
-      SELECT hp.sc_trend INTO __trending_limit FROM hive_posts hp WHERE hp.id = __post_id;
+      SELECT hp.sc_trend INTO __trending_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY 
   WITH trends AS -- bridge_get_ranked_post_by_trends

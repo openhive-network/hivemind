@@ -29,20 +29,20 @@ DECLARE
   __account_name varchar;
 BEGIN
   SELECT INTO __account_reputations ARRAY(SELECT ROW(a.id, a.reputation, a.is_implicit, false)::AccountReputation
-  FROM hive_accounts a
+  FROM hivemind_app.hive_accounts a
   WHERE a.id != 0
   ORDER BY a.id);
 
---  SELECT COALESCE((SELECT ha.id FROM hive_accounts ha WHERE ha.name = _tracked_account), 0) INTO __traced_author;
+--  SELECT COALESCE((SELECT ha.id FROM hivemind_app.hive_accounts ha WHERE ha.name = _tracked_account), 0) INTO __traced_author;
 
   FOR __vote_data IN
     SELECT rd.id, rd.author_id, rd.voter_id, rd.rshares,
       COALESCE((SELECT prd.rshares
-                FROM hive_reputation_data prd
+                FROM hivemind_app.hive_reputation_data prd
                 WHERE prd.author_id = rd.author_id and prd.voter_id = rd.voter_id
                       and prd.permlink = rd.permlink and prd.id < rd.id
                         ORDER BY prd.id DESC LIMIT 1), 0) as prev_rshares
-      FROM hive_reputation_data rd 
+      FROM hivemind_app.hive_reputation_data rd
       WHERE (_first_block_num IS NULL AND _last_block_num IS NULL) OR (rd.block_num BETWEEN _first_block_num AND _last_block_num)
       ORDER BY rd.id
     LOOP
@@ -51,7 +51,7 @@ BEGIN
     
 /*      IF __vote_data.author_id = __traced_author THEN
            raise notice 'Processing vote <%> rshares: %, prev_rshares: %', __vote_data.id, __vote_data.rshares, __vote_data.prev_rshares;
-       select ha.name into __account_name from hive_accounts ha where ha.id = __vote_data.voter_id;
+       select ha.name into __account_name from hivemind_app.hive_accounts ha where ha.id = __vote_data.voter_id;
        raise notice 'Voter `%` (%) reputation: %', __account_name, __vote_data.voter_id,  __voter_rep;
       END IF;
 */
@@ -157,11 +157,11 @@ BEGIN
   INSERT INTO __new_reputation_data 
     SELECT rd.id, rd.author_id, rd.voter_id, rd.rshares,
       COALESCE((SELECT prd.rshares
-               FROM hive_reputation_data prd
+               FROM hivemind_app.hive_reputation_data prd
                WHERE prd.author_id = rd.author_id AND prd.voter_id = rd.voter_id
                      AND prd.permlink = rd.permlink AND prd.id < rd.id
                       ORDER BY prd.id DESC LIMIT 1), 0) AS prev_rshares
-    FROM hive_reputation_data rd 
+    FROM hivemind_app.hive_reputation_data rd
     WHERE rd.block_num = _block_num
     ORDER BY rd.id
     ;
@@ -172,14 +172,14 @@ BEGIN
   INSERT INTO __tmp_accounts
   SELECT ha.id, ha.reputation, ha.is_implicit, false AS changed
   FROM __new_reputation_data rd
-  JOIN hive_accounts ha on rd.author_id = ha.id
+  JOIN hivemind_app.hive_accounts ha on rd.author_id = ha.id
   UNION
   SELECT hv.id, hv.reputation, hv.is_implicit, false as changed
   FROM __new_reputation_data rd
-  JOIN hive_accounts hv on rd.voter_id = hv.id
+  JOIN hivemind_app.hive_accounts hv on rd.voter_id = hv.id
   ;
 
---  SELECT COALESCE((SELECT ha.id FROM hive_accounts ha WHERE ha.name = _tracked_account), 0) INTO __traced_author;
+--  SELECT COALESCE((SELECT ha.id FROM hivemind_app.hive_accounts ha WHERE ha.name = _tracked_account), 0) INTO __traced_author;
 
   FOR __vote_data IN
       SELECT rd.id, rd.author_id, rd.voter_id, rd.rshares, rd.prev_rshares
@@ -193,7 +193,7 @@ BEGIN
 
 /*      IF __vote_data.author_id = __traced_author THEN
            raise notice 'Processing vote <%> rshares: %, prev_rshares: %', __vote_data.id, __vote_data.rshares, __vote_data.prev_rshares;
-       select ha.name into __account_name from hive_accounts ha where ha.id = __vote_data.voter_id;
+       select ha.name into __account_name from hivemind_app.hive_accounts ha where ha.id = __vote_data.voter_id;
        raise notice 'Voter `%` (%) reputation: %', __account_name, __vote_data.voter_id,  __voter_rep;
       END IF;
 */
@@ -273,17 +273,17 @@ BEGIN
     DROP TABLE IF EXISTS __actual_reputation_data;
     CREATE UNLOGGED TABLE IF NOT EXISTS __actual_reputation_data
     AS
-    SELECT * FROM hive_reputation_data hrd
+    SELECT * FROM hivemind_app.hive_reputation_data hrd
     WHERE hrd.block_num >= __block_num_limit;
 
-    TRUNCATE TABLE hive_reputation_data;
-    INSERT INTO hive_reputation_data
+    TRUNCATE TABLE hivemind_app.hive_reputation_data;
+    INSERT INTO hivemind_app.hive_reputation_data
     SELECT * FROM __actual_reputation_data;
 
     TRUNCATE TABLE __actual_reputation_data;
     DROP TABLE IF EXISTS __actual_reputation_data;
   ELSE
-    DELETE FROM hive_reputation_data hpd
+    DELETE FROM hivemind_app.hive_reputation_data hpd
     WHERE hpd.block_num < __block_num_limit
     ;
   END IF;
@@ -307,7 +307,7 @@ DECLARE
   __truncate_block_count INT := 1*24*1200*3; --- 1day
 
 BEGIN
-  UPDATE hive_accounts urs
+  UPDATE hivemind_app.hive_accounts urs
   SET reputation = ds.reputation,
       is_implicit = ds.is_implicit
   FROM 

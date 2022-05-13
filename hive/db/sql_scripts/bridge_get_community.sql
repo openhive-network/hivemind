@@ -23,8 +23,8 @@ CREATE TYPE bridge_api_community AS (
 DROP FUNCTION IF EXISTS bridge_get_community
 ;
 CREATE OR REPLACE FUNCTION bridge_get_community(
-    in _name hive_communities.name%TYPE,
-    in _observer hive_accounts.name%TYPE
+    in _name hivemind_app.hive_communities.name%TYPE,
+    in _observer hivemind_app.hive_accounts.name%TYPE
 )
 RETURNS SETOF bridge_api_community
 LANGUAGE plpgsql
@@ -59,12 +59,12 @@ BEGIN
         hc.settings::JSON,
         __context,
         (SELECT json_agg(json_build_array(a.name, get_role_name(r.role_id), r.title) ORDER BY r.role_id DESC, r.account_id DESC)
-            FROM hive_roles r
-            JOIN hive_accounts a ON r.account_id = a.id
+            FROM hivemind_app.hive_roles r
+            JOIN hivemind_app.hive_accounts a ON r.account_id = a.id
             WHERE r.community_id = __community_id
             AND r.role_id BETWEEN 4 AND 8
         )
-    FROM hive_communities hc
+    FROM hivemind_app.hive_communities hc
     WHERE hc.id = __community_id
     GROUP BY hc.id
     ;

@@ -7,7 +7,7 @@ from pathlib import Path
 from time import perf_counter as perf
 from typing import Final, Tuple
 
-from hive.conf import Conf
+from hive.conf import Conf, SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 from hive.db.schema import execute_sql_script
@@ -257,7 +257,7 @@ class SyncHiveDb:
     def _show_info(database: Db) -> None:
         last_block = Blocks.head_num()
 
-        sql = "SELECT level, patch_date, patched_to_revision FROM hive_db_patch_level ORDER BY level DESC LIMIT 1"
+        sql = f"SELECT level, patch_date, patched_to_revision FROM {SCHEMA_NAME}.hive_db_patch_level ORDER BY level DESC LIMIT 1"
         patch_level_data = database.query_row(sql)
 
         from hive.utils.misc import show_app_version

@@ -20,7 +20,7 @@ BEGIN
     __created_at = 
     (
       SELECT created_at
-      FROM hive_feed_cache
+      FROM hivemind_app.hive_feed_cache
       WHERE account_id = __account_id
       AND post_id = __post_id
     );
@@ -31,7 +31,7 @@ BEGIN
   (
     SELECT hp.id
     FROM live_posts_comments_view hp
-    JOIN hive_feed_cache hfc ON hp.id = hfc.post_id
+    JOIN hivemind_app.hive_feed_cache hfc ON hp.id = hfc.post_id
     WHERE hfc.account_id = __account_id 
       AND ( ( __post_id = 0 ) OR ( hfc.created_at <= __created_at ) )
     ORDER BY hp.created_at DESC, hp.id DESC
