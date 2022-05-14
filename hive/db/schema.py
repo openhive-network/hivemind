@@ -1,6 +1,7 @@
 """Db schema definitions and setup routines."""
 
 import logging
+from pathlib import Path
 
 import sqlalchemy as sa
 from sqlalchemy.sql import text as sql_text
@@ -696,11 +697,10 @@ def setup(db):
         "upgrade/update_db_patchlevel.sql",
         # Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
     ]
-    from os.path import dirname, realpath
 
-    dir_path = dirname(realpath(__file__))
+    sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
     for script in sql_scripts:
-        execute_sql_script(db.query_no_return, f"{dir_path}/sql_scripts/{script}")
+        execute_sql_script(db.query_no_return, sql_scripts_dir_path / script)
 
     # Move this part here, to mark latest db patch level as current Hivemind revision (which just created schema).
     sql = f"""
