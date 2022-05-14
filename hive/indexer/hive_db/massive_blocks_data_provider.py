@@ -63,11 +63,6 @@ class BlocksDataFromDbProvider:
                         break
                     except queue.Full:
                         continue
-            log.info(
-                f'Processed'
-                f' {"operations" if self._sql_query == OPERATIONS_QUERY else "blocks data"}'
-                f' {self._lbound}:{self._ubound}'
-            )
         except:
             set_exception_thrown()
             raise
