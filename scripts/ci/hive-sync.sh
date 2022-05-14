@@ -16,6 +16,7 @@ haf_sync() {
 
     echo Removing hivemind context and table from HAF database
     psql $RUNNER_HIVED_DB_URL -c "SELECT hive.app_remove_context('hivemind_app');" || true
+    psql $RUNNER_HIVED_DB_URL -c "DROP SCHEMA IF EXISTS hivemind_app CASCADE;"
     psql $RUNNER_HIVED_DB_URL -c "CREATE SCHEMA IF NOT EXISTS hivemind_app;"
 
     cat << EOF
@@ -29,9 +30,8 @@ EOF
         --test-max-block=${RUNNER_HIVEMIND_SYNC_MAX_BLOCK} \
         --test-last-block-for-massive=${RUNNER_HIVEMIND_LAST_BLOCK_FOR_MASSIVE} \
         --test-profile=False \
-        --hived-database-url "${RUNNER_HIVED_DB_URL}" \
         --prometheus-port 11011 \
-        --database-url "${DATABASE_URL}" \
+        --database-url "${RUNNER_HIVED_DB_URL}" \
         --mock-block-data-path mock_data/block_data/follow_op/mock_block_data_follow.json \
           mock_data/block_data/follow_op/mock_block_data_follow_tests.json \
           mock_data/block_data/community_op/mock_block_data_community.json \
