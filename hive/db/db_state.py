@@ -481,7 +481,9 @@ $$;
         last_imported_block = DbState.db().query_one(f"SELECT block_num FROM {SCHEMA_NAME}.hive_state LIMIT 1")
 
         log.info(
-            "[MASSIVE] Current imported block: %s. Last imported block: %s.", current_imported_block, last_imported_block
+            "[MASSIVE] Current imported block: %s. Last imported block: %s.",
+            current_imported_block,
+            last_imported_block,
         )
         if last_imported_block > current_imported_block:
             last_imported_block = current_imported_block
