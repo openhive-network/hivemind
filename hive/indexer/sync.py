@@ -201,7 +201,10 @@ class SyncHiveDb:
             lbound=self._lbound,
             ubound=self._ubound,
         )
-        log.info(f"Block range: <{self._lbound}:{self._ubound}> processing finished")
+        log.info(
+            f"Block range: <{self._lbound}:{self._ubound}> processing"
+            f" {'finished' if can_continue_thread() else 'interrupted'}"
+        )
 
     def _check_log_explain_queries(self) -> None:
         if self._conf.get("log_explain_queries"):
