@@ -80,7 +80,6 @@ class SyncHiveDb:
         update_communities_posts_and_rank(self._db)
 
         prepare_app_context(db=self._db)
-        self._prepare_app_schema()
 
         self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
             databases=self._databases,
@@ -183,14 +182,6 @@ class SyncHiveDb:
             log.info("[SINGLE] 10min")
             log.info("[SINGLE] updating communities posts and rank")
             update_communities_posts_and_rank(self._db)
-
-    def _prepare_app_schema(self) -> None:
-        log.info("Attempting to create application schema...")
-        script_path = Path(__file__).parent.parent / "db/sql_scripts/hafapp_api.sql"
-
-        log.info(f"Attempting to execute SQL script: '{script_path}'")
-        execute_sql_script(query_executor=self._db.query_no_return, path_to_script=script_path)
-        log.info("Application schema created.")
 
     def _query_for_app_next_block(self) -> Tuple[int, int]:
         log.info("Querying for next block for app context...")

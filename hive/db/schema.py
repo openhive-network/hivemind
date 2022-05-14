@@ -10,6 +10,7 @@ from sqlalchemy.types import CHAR
 from sqlalchemy.types import SMALLINT
 from sqlalchemy.types import TEXT
 from sqlalchemy.types import VARCHAR
+
 from hive.conf import SCHEMA_NAME
 
 log = logging.getLogger(__name__)
@@ -694,8 +695,8 @@ def setup(db):
         "is_superuser.sql",
         "update_hive_blocks_consistency_flag.sql",
         "update_table_statistics.sql",
-        "upgrade/update_db_patchlevel.sql",
-        # Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
+        "upgrade/update_db_patchlevel.sql",  # Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
+        "hafapp_api.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
