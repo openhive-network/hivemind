@@ -77,7 +77,10 @@ class SyncHiveDb:
             raise RuntimeError("Fatal error related to `hive_blocks` consistency")
         self._load_mock_data()
         Accounts.load_ids()  # prefetch id->name and id->rank memory maps
+
+        context_detach(db=self._db)
         update_communities_posts_and_rank(self._db)
+        context_attach(db=self._db, block_number=Blocks.head_num())
 
         prepare_app_context(db=self._db)
 
