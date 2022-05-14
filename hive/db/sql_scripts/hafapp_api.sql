@@ -1,5 +1,3 @@
-CREATE SCHEMA IF NOT EXISTS hivemind_app;
-
 DROP TYPE IF EXISTS hivemind_app.hive_api_operation CASCADE;
 CREATE TYPE hivemind_app.hive_api_operation AS (
     id BIGINT,
