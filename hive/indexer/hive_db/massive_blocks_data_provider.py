@@ -116,6 +116,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         self._lbound = None
         self._ubound = None
         self._last_block_num_in_db = None
+        self.were_mocks_after_db_blocks = False
 
         self._blocks_per_query = number_of_blocks_in_batch
         self._blocks_queue = queue.Queue(maxsize=self._blocks_queue_size)
@@ -222,6 +223,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
             # only mocked blocks are possible
             if self._lbound > self._last_block_num_in_db:
                 log.info('ATTEMPTING TO GET MOCK BLOCKS AFTER DB BLOCKS')
+                self.were_mocks_after_db_blocks = True
                 self._get_mocks_after_db_blocks(self._lbound)
                 return
 
@@ -287,6 +289,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
                     # we reach last block in db, now only mocked blocks are possible
                     if new_block.get_num() >= self._last_block_num_in_db:
                         log.info('ATTEMPTING TO GET MOCK BLOCKS AFTER DB BLOCKS')
+                        self.were_mocks_after_db_blocks = True
                         self._get_mocks_after_db_blocks(new_block.get_num() + 1)
                         return
         except:
