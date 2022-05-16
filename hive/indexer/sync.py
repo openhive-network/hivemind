@@ -3,14 +3,12 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 import logging
-from pathlib import Path
 from time import perf_counter as perf
-from typing import Final, Tuple
+from typing import Tuple
 
 from hive.conf import Conf, SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
-from hive.db.schema import execute_sql_script
 from hive.indexer.accounts import Accounts
 from hive.indexer.block import BlocksProviderBase
 from hive.indexer.blocks import Blocks
@@ -55,7 +53,6 @@ class SyncHiveDb:
         self._lbound = None
         self._ubound = None
         self._databases = None
-        self._were_mocks_after_db_blocks = False
 
     def __enter__(self):
         log.info("Entering HAF mode synchronization")
@@ -93,15 +90,9 @@ class SyncHiveDb:
 
     def __exit__(self, exc_type, value, traceback):
         log.info("Exiting HAF mode synchronization")
-
-        if not self._were_mocks_after_db_blocks:
-            context_detach(db=self._db)  # context attaching requires context to be detached or error will be raised
-            context_attach(db=self._db, block_number=Blocks.head_num())
-
-        last_imported_block = Blocks.head_num()
-        DbState.finish_massive_sync(current_imported_block=last_imported_block)
         PayoutStats.generate()
 
+        log.info(f'LAST IMPORTED BLOCK IS: {Blocks.head_num()}')
         Blocks.close_own_db_access()
         if self._databases:
             self._databases.close()
@@ -121,14 +112,6 @@ class SyncHiveDb:
 
             self._lbound, self._ubound = self._query_for_app_next_block()
 
-            allow_massive = True
-            if self._last_block_for_massive_sync and self._lbound:
-                if self._lbound < self._last_block_for_massive_sync:
-                    self._ubound = self._last_block_for_massive_sync
-
-                if self._lbound > self._last_block_for_massive_sync:
-                    allow_massive = False
-
             if self._last_block_to_process:
                 if last_imported_block >= self._last_block_to_process:
                     log.info(f"REACHED test_max_block of {self._last_block_to_process}")
@@ -137,9 +120,16 @@ class SyncHiveDb:
                 if not (self._lbound and self._ubound):  # all blocks from HAF db processed
                     self._lbound = last_imported_block + 1
                     self._ubound = self._last_block_to_process
-                    self._were_mocks_after_db_blocks = True
                 else:
                     self._ubound = min(self._last_block_to_process, self._ubound)
+
+            allow_massive = True
+            if self._last_block_for_massive_sync and self._lbound:
+                if self._lbound < self._last_block_for_massive_sync:
+                    self._ubound = self._last_block_for_massive_sync
+
+                if self._lbound > self._last_block_for_massive_sync:
+                    allow_massive = False
 
             if not (self._lbound and self._ubound):
                 continue
@@ -156,10 +146,11 @@ class SyncHiveDb:
 
                 context_detach(db=self._db)
                 self._catchup_irreversible_block(is_massive_sync=True)
-                context_attach(db=self._db, block_number=Blocks.head_num())
 
                 last_block = Blocks.head_num()
                 DbState.finish_massive_sync(current_imported_block=last_block)
+                if not self._massive_blocks_data_provider.were_mocks_after_db_blocks:
+                    context_attach(db=self._db, block_number=last_block)
             else:
                 # mode with attached indexes and context
                 log.info("[SINGLE] *** SINGLE block processing***")
@@ -170,6 +161,7 @@ class SyncHiveDb:
                 blocks = self._massive_blocks_data_provider.get(number_of_blocks=1)
                 Blocks.process_multi(blocks, is_massive_sync=False)
                 self._periodic_actions(blocks[0])
+                context_attach(db=self._db, block_number=Blocks.head_num())
 
     def _periodic_actions(self, block: BlockHiveDb) -> None:
         """Actions performed at a given time, calculated on the basis of the current block number"""
