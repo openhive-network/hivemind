@@ -58,7 +58,8 @@ start() {
 
   USER=${RUNNER_POSTGRES_APP_USER}:${RUNNER_POSTGRES_APP_USER_PASSWORD}
   OPTIONS="host=${RUNNER_POSTGRES_HOST}&port=${RUNNER_POSTGRES_PORT}"
-  DATABASE_URL="postgresql://${USER}@/${HIVEMIND_DB_NAME}?${OPTIONS}"
+  #DATABASE_URL="postgresql://${USER}@/${HIVEMIND_DB_NAME}?${OPTIONS}"
+  DATABASE_URL="postgresql://hive@172.17.0.1:15432/haf_block_log"
 
   hive server \
       --log-request-times \
