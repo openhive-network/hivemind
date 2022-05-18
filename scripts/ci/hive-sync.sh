@@ -15,6 +15,10 @@ haf_sync() {
     # Start hive sync process from haf database
 
     echo Removing hivemind context and table from HAF database
+
+    pwd
+    psql $RUNNER_HIVED_DB_URL -f update_function.sql
+
     psql $RUNNER_HIVED_DB_URL -c "SELECT hive.app_remove_context('hivemind_app');" || true
     psql $RUNNER_HIVED_DB_URL -c "DROP SCHEMA IF EXISTS hivemind_app CASCADE;"
     psql $RUNNER_HIVED_DB_URL -c "CREATE SCHEMA IF NOT EXISTS hivemind_app;"
