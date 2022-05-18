@@ -120,13 +120,12 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         self._db = databases.get_root()
         self._lbound = None
         self._ubound = None
+        self._last_block_num_in_db = None
+
         self._blocks_per_query = number_of_blocks_in_batch
         self._blocks_queue = queue.Queue(maxsize=self._blocks_queue_size)
         self._operations_queue = queue.Queue(maxsize=self._operations_queue_size)
         self._blocks_data_queue = queue.Queue(maxsize=self._blocks_data_queue_size)
-
-        self._last_block_num_in_db = self._db.query_one(sql=NUMBER_OF_BLOCKS_QUERY)
-        assert self._last_block_num_in_db is not None
 
         self._thread_pool = (
             external_thread_pool if external_thread_pool else MassiveBlocksDataProviderHiveDb.create_thread_pool()
@@ -171,6 +170,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         self._ubound = ubound
         self._operations_provider.update_sync_block_range(lbound, ubound)
         self._blocks_data_provider.update_sync_block_range(lbound, ubound)
+        self._last_block_num_in_db = self._db.query_one(sql=NUMBER_OF_BLOCKS_QUERY)
 
     @staticmethod
     def _id_to_virtual_type(id_: int):
