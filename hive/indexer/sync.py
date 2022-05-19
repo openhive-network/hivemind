@@ -296,9 +296,6 @@ class MassiveSync(DBSync):
         # prefetch id->name and id->rank memory maps
         Accounts.load_ids()
 
-        # community stats
-        update_communities_posts_and_rank(self._db)
-
         last_imported_block = Blocks.head_num()
         hived_head_block = self._conf.get('test_max_block') or self._steem.last_irreversible()
 
