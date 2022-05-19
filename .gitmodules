@@ -1,3 +1,6 @@
 [submodule "tests_api"]
 	path = tests/tests_api
 	url = ../tests_api.git
+[submodule "haf"]
+	path = haf
+	url = ../haf.git
