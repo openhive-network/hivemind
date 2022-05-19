@@ -1,12 +1,16 @@
 stages:
   - build
-  - test
   - sync-e2e-benchmark
   - data-supply
   - deploy
   - e2e-test
   - benchmark-tests
   - post-deploy
+
+variables:
+  GIT_DEPTH: 1
+  GIT_STRATEGY: clone
+  GIT_SUBMODULE_STRATEGY: recursive
 
 .setup-pip: &setup-pip
   - python -m venv .venv
@@ -52,7 +56,7 @@ stages:
   - ./scripts/ci/drop-db.sh
   - ./scripts/ci/create-db.sh
   - export RUNNER_HIVEMIND_LAST_BLOCK_FOR_MASSIVE=4999979
-  - export RUNNER_HIVED_DB_URL=postgresql://hive@172.17.0.1:15432/haf_block_log
+  - export RUNNER_HIVED_DB_URL=${HAF_POSTGRES_URL}
   - ./scripts/ci/hive-sync.sh
   - ./scripts/ci/collect-db-stats.sh
 
@@ -81,16 +85,15 @@ stages:
   interruptible: true
   inherit:
     default: false
-    variables: false
+    variables: true
   variables:
-    GIT_DEPTH: 1
-    GIT_STRATEGY: clone
-    GIT_SUBMODULE_STRATEGY: recursive
     PIPENV_VENV_IN_PROJECT: 1
     PIPENV_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pipenv"
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
     POSTGRES_CLIENT_TOOLS_PATH: /usr/lib/postgresql
     HIVEMIND_DB_NAME: "hive_${CI_COMMIT_REF_SLUG}"
+    HAF_POSTGRES_URL: postgresql://haf_app_admin@haf-instance:5432/haf_block_log
+
   cache: &global-cache
     # Per-branch caching. CI_COMMIT_REF_SLUG is the same thing.
     # key: "$CI_COMMIT_REF_NAME"
@@ -110,7 +113,26 @@ stages:
   after_script:
     - *stop-timer
 
+include:
+  - project: 'hive/haf'
+    ref: develop
+    file: '/scripts/ci-helpers/prepare_data_image_job.yml'
+
 ##### Jobs #####
+
+prepare_haf_image:
+  extends: .prepare_haf_data_5m_image
+  <<: *rules-for-sync
+  stage: build
+
+  variables:
+    SUBMODULE_DIR: "$CI_PROJECT_DIR/haf"
+    REGISTRY_USER: "$HAF_IMG_BUILDER_USER"
+    REGISTRY_PASS: $HAF_IMG_BUILDER_PASSWORD
+
+  tags:
+    - hivemind-heavy-job
+    - hive-4
 
 .hivemind-sync:
   # Postgres shared on host.
@@ -383,12 +405,18 @@ stages:
     paths:
       - tavern_benchmarks_report.html
 
-
 sync-e2e-benchmark:
   extends: .default
   <<: *rules-for-sync
   stage: sync-e2e-benchmark
-  needs: []
+  needs:
+    - job: prepare_haf_image
+      artifacts: true
+
+  services:
+    - name: $HAF_IMAGE_NAME
+      alias: haf-instance
+
   script:
     - *hive-sync-script-common
     - ./scripts/ci/hive-server.sh start
