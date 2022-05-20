@@ -11,6 +11,7 @@ variables:
   GIT_DEPTH: 1
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: recursive
+  FF_NETWORK_PER_BUILD: 1
 
 .setup-pip: &setup-pip
   - python -m venv .venv
@@ -93,6 +94,9 @@ variables:
     POSTGRES_CLIENT_TOOLS_PATH: /usr/lib/postgresql
     HIVEMIND_DB_NAME: "hive_${CI_COMMIT_REF_SLUG}"
     HAF_POSTGRES_URL: postgresql://haf_app_admin@haf-instance:5432/haf_block_log
+    RUNNER_POSTGRES_ADMIN_USER: "haf_app_admin"
+    RUNNER_POSTGRES_HOST: "haf-instance"
+    RUNNER_POSTGRES_PORT: 5432
 
   cache: &global-cache
     # Per-branch caching. CI_COMMIT_REF_SLUG is the same thing.
