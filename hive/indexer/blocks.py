@@ -13,6 +13,7 @@ from hive.indexer.accounts import Accounts
 from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
 from hive.indexer.custom_op import CustomOp
 from hive.indexer.follow import Follow
+from hive.indexer.hive_db.block import BlockHiveDb
 from hive.indexer.notify import Notify
 from hive.indexer.payments import Payments
 from hive.indexer.post_data_cache import PostDataCache
@@ -22,6 +23,7 @@ from hive.indexer.reputations import Reputations
 from hive.indexer.votes import Votes
 from hive.server.common.mentions import Mentions
 from hive.server.common.payout_stats import PayoutStats
+from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.timer import time_it
@@ -71,7 +73,6 @@ class Blocks:
     @classmethod
     def setup(cls, conf: Conf):
         cls._conf = conf
-        Blocks.setup_own_db_access(shared_db_adapter=conf.db())
 
     @staticmethod
     def setup_own_db_access(shared_db_adapter: Db) -> None:
@@ -199,22 +200,38 @@ class Blocks:
 
         DB.query("START TRANSACTION")
         first_block, last_num = cls.process_blocks(blocks)
-        DB.query("COMMIT")
 
         if not is_massive_sync:
-            DB.query("START TRANSACTION")
             log.info("[PROCESS MULTI] Flushing data in 1 thread")
             cls.flush_data_in_1_thread()
             if first_block > -1:
                 log.info("[PROCESS MULTI] Tables updating in live synchronization")
                 cls.on_live_blocks_processed(first_block, last_num)
-            DB.query("COMMIT")
+                cls._periodic_actions(blocks[0])
+
+        DB.query("COMMIT")
 
         if is_massive_sync:
             log.info("[PROCESS MULTI] Flushing data in N threads")
             cls.flush_data_in_n_threads()
 
         log.info(f"[PROCESS MULTI] {len(blocks)} blocks in {OPSM.stop(time_start) :.4f}s")
+
+    @classmethod
+    def _periodic_actions(cls, block: BlockHiveDb) -> None:
+        """Actions performed at a given time, calculated on the basis of the current block number"""
+
+        if (block_num := block.get_num()) % 1200 == 0:  # 1hour
+            log.info(f"head block {block_num} @ {block.get_date()}")
+            log.info("[SINGLE] hourly stats")
+            log.info("[SINGLE] filling payout_stats_view executed")
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                executor.submit(PayoutStats.generate)
+                executor.submit(Mentions.refresh)
+        elif block_num % 200 == 0:  # 10min
+            log.info("[SINGLE] 10min")
+            log.info("[SINGLE] updating communities posts and rank")
+            update_communities_posts_and_rank(db=DB)
 
     @classmethod
     def prepare_vops(cls, comment_payout_ops: dict, block: Block, date, block_num: int, is_safe_cashout: bool) -> dict:
