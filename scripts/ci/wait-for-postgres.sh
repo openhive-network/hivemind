@@ -45,8 +45,7 @@ output_configuration() {
     echo "-------------------------------------------------"
     echo "Postgres version and configuration"
     echo "-------------------------------------------------"
-    PGPASSWORD=$RUNNER_POSTGRES_ADMIN_USER_PASSWORD psql \
-            --username "$RUNNER_POSTGRES_ADMIN_USER" \
+    psql --username "$RUNNER_POSTGRES_ADMIN_USER" \
             --host "$HOST" \
             --port $PORT \
             --dbname postgres <<EOF
