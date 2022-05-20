@@ -441,6 +441,8 @@ sync-e2e-benchmark:
     - pip3 install tox
 
   script:
+    # temporary soln just to get things working
+    - docker container exec -it haf-instance /bin/bash -c "psql -d haf_block_log -c 'CREATE EXTENSION IF NOT EXISTS intarray;'
     - *hive-sync-script-common
     - ./scripts/ci/hive-server.sh start
     - pip install tox
