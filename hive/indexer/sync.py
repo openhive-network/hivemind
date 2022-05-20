@@ -14,12 +14,10 @@ from hive.indexer.block import BlocksProviderBase
 from hive.indexer.blocks import Blocks
 from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbLiveContextHolder
-from hive.indexer.hive_db.block import BlockHiveDb
 from hive.indexer.hive_db.haf_functions import context_attach, context_detach, prepare_app_context
 from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
 from hive.indexer.mock_block_provider import MockBlockProvider
 from hive.indexer.mock_vops_provider import MockVopsProvider
-from hive.server.common.mentions import Mentions
 from hive.server.common.payout_stats import PayoutStats
 from hive.steem.signal import (
     can_continue_thread,
@@ -58,7 +56,6 @@ class SyncHiveDb:
         log.info("Entering HAF mode synchronization")
         set_custom_signal_handlers()
 
-        DbLiveContextHolder.set_live_context(False)
         self._databases = MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db, conf=self._conf)
 
         Blocks.setup(conf=self._conf)
@@ -136,10 +133,13 @@ class SyncHiveDb:
 
             log.info(f"target_head_block: {self._ubound}")
             log.info(f"test_max_block: {self._last_block_to_process}")
+            log.info(f"last_block_for_massive: {self._last_block_for_massive_sync}")
 
             if self._ubound - self._lbound > 100 and allow_massive:
                 # mode with detached indexes and context
                 log.info("[MASSIVE] *** MASSIVE blocks processing ***")
+                DbLiveContextHolder.set_live_context(False)
+                Blocks.setup_own_db_access(shared_db_adapter=self._db)
                 self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._ubound)
 
                 DbState.before_massive_sync(self._lbound, self._ubound)
@@ -154,29 +154,14 @@ class SyncHiveDb:
             else:
                 # mode with attached indexes and context
                 log.info("[SINGLE] *** SINGLE block processing***")
+                DbLiveContextHolder.set_live_context(True)
+                Blocks.setup_own_db_access(shared_db_adapter=self._db)
                 self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._lbound)
 
                 log.info(f"Attempting to process first block in range: <{self._lbound}:{self._ubound}>")
                 self._blocks_data_provider(self._massive_blocks_data_provider)
                 blocks = self._massive_blocks_data_provider.get(number_of_blocks=1)
                 Blocks.process_multi(blocks, is_massive_sync=False)
-                self._periodic_actions(blocks[0])
-                context_attach(db=self._db, block_number=Blocks.head_num())
-
-    def _periodic_actions(self, block: BlockHiveDb) -> None:
-        """Actions performed at a given time, calculated on the basis of the current block number"""
-
-        if (block_num := block.get_num()) % 1200 == 0:  # 1hour
-            log.warning(f"head block {block_num} @ {block.get_date()}")
-            log.info("[SINGLE] hourly stats")
-            log.info("[SINGLE] filling payout_stats_view executed")
-            with ThreadPoolExecutor(max_workers=2) as executor:
-                executor.submit(PayoutStats.generate)
-                executor.submit(Mentions.refresh)
-        elif block_num % 200 == 0:  # 10min
-            log.info("[SINGLE] 10min")
-            log.info("[SINGLE] updating communities posts and rank")
-            update_communities_posts_and_rank(self._db)
 
     def _query_for_app_next_block(self) -> Tuple[int, int]:
         log.info("Querying for next block for app context...")
