@@ -434,8 +434,9 @@ sync-e2e-benchmark:
       alias: haf-instance
 
   before_script:
+    - !reference [.docker_image_builder_job, before_script] 
     - echo "HAF image name $HAF_IMAGE_NAME"
-    - apk update && apk add bash git ca-certificates curl build-base python3-dev
+    - apk update && apk add build-base python3-dev postgresql-client
     - python3 -m ensurepip
     - pip3 install tox
 
