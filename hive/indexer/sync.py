@@ -14,7 +14,7 @@ from hive.indexer.block import BlocksProviderBase
 from hive.indexer.blocks import Blocks
 from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbLiveContextHolder
-from hive.indexer.hive_db.haf_functions import context_attach, context_detach, prepare_app_context
+from hive.indexer.hive_db.haf_functions import context_attach, context_detach
 from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
 from hive.indexer.mock_block_provider import MockBlockProvider
 from hive.indexer.mock_vops_provider import MockVopsProvider
@@ -25,7 +25,6 @@ from hive.steem.signal import (
     set_custom_signal_handlers,
     set_exception_thrown,
 )
-from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.utils.misc import log_memory_usage
 from hive.utils.stats import BroadcastObject
 from hive.utils.stats import FlushStatusManager as FSM
@@ -71,12 +70,6 @@ class SyncHiveDb:
             raise RuntimeError("Fatal error related to `hive_blocks` consistency")
         self._load_mock_data()
         Accounts.load_ids()  # prefetch id->name and id->rank memory maps
-
-        context_detach(db=self._db)
-        update_communities_posts_and_rank(self._db)
-        context_attach(db=self._db, block_number=Blocks.head_num())
-
-        prepare_app_context(db=self._db)
 
         self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
             databases=self._databases,
