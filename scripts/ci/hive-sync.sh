@@ -7,10 +7,6 @@ RUNNER_HIVEMIND_SYNC_MAX_BLOCK=5000024
 # RUNNER_HIVED_URL='{"default":"http://hived-node:8091"}'
 # RUNNER_HIVED_URL='{"default":"http://172.17.0.1:8091"}'
 
-USER=${RUNNER_POSTGRES_APP_USER}:${RUNNER_POSTGRES_APP_USER_PASSWORD}
-OPTIONS="host=${RUNNER_POSTGRES_HOST}&port=${RUNNER_POSTGRES_PORT}"
-DATABASE_URL="postgresql://${USER}@/${HIVEMIND_DB_NAME}?${OPTIONS}"
-
 haf_sync() {
     # Start hive sync process from haf database
 
