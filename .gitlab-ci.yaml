@@ -441,6 +441,7 @@ sync-e2e-benchmark:
     - pip3 install tox
 
   script:
+    - ./scripts/ci/wait-for-postgres.sh "haf-instance"
     # temporary soln just to get things working
     - docker container exec -it haf-instance /bin/bash -c "psql -d haf_block_log -c 'CREATE EXTENSION IF NOT EXISTS intarray;'"
     - *hive-sync-script-common
