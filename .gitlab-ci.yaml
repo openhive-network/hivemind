@@ -11,7 +11,6 @@ variables:
   GIT_DEPTH: 1
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: recursive
-  FF_NETWORK_PER_BUILD: 1
 
 .setup-pip: &setup-pip
   - python -m venv .venv
@@ -424,6 +423,7 @@ sync-e2e-benchmark:
     RUNNER_POSTGRES_ADMIN_USER: "haf_app_admin"
     RUNNER_POSTGRES_HOST: "haf-instance"
     RUNNER_POSTGRES_PORT: 5432
+    FF_NETWORK_PER_BUILD: 1
 
   needs:
     - job: prepare_haf_image
@@ -435,12 +435,12 @@ sync-e2e-benchmark:
 
   before_script:
     - !reference [.docker_image_builder_job, before_script] 
-    - echo "HAF image name $HAF_IMAGE_NAME"
     - apk update && apk add build-base python3-dev postgresql-client
     - python3 -m ensurepip
     - pip3 install tox
 
   script:
+    - echo "HAF image name $HAF_IMAGE_NAME"
     - ./scripts/ci/wait-for-postgres.sh "haf-instance"
     # temporary soln just to get things working
     - docker container exec -it haf-instance /bin/bash -c "psql -d haf_block_log -c 'CREATE EXTENSION IF NOT EXISTS intarray;'"
