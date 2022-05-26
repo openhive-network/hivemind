@@ -81,7 +81,7 @@ variables:
     - when: on_success
 
 .default:
-  image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
+#  image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
   interruptible: true
   inherit:
     default: false
