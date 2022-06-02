@@ -106,19 +106,20 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
 
     def __init__(
         self,
+        conf: Conf,
         databases: Databases,
-        number_of_blocks_in_batch: int,
         external_thread_pool: Optional[ThreadPoolExecutor] = None,
     ):
         BlocksProviderBase.__init__(self)
 
+        self._conf = conf
         self._db = databases.get_root()
         self._lbound = None
         self._ubound = None
         self._last_block_num_in_db = None
         self.were_mocks_after_db_blocks = False
 
-        self._blocks_per_query = number_of_blocks_in_batch
+        self._blocks_per_query = conf.get('max_batch')
         self._blocks_queue = queue.Queue(maxsize=self._blocks_queue_size)
         self._operations_queue = queue.Queue(maxsize=self._operations_queue_size)
         self._blocks_data_queue = queue.Queue(maxsize=self._blocks_data_queue_size)
@@ -166,7 +167,9 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         self._ubound = ubound
         self._operations_provider.update_sync_block_range(lbound, ubound)
         self._blocks_data_provider.update_sync_block_range(lbound, ubound)
-        self._last_block_num_in_db = self._db.query_one(sql=NUMBER_OF_BLOCKS_QUERY)
+
+        if self._conf.get('test_max_block'):
+            self._last_block_num_in_db = self._db.query_one(sql=NUMBER_OF_BLOCKS_QUERY)
 
     @staticmethod
     def _id_to_virtual_type(id_: int):
@@ -221,7 +224,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
     def _thread_get_block(self):
         try:
             # only mocked blocks are possible
-            if self._lbound > self._last_block_num_in_db:
+            if self._conf.get('test_max_block') and self._lbound > self._last_block_num_in_db:
                 log.info('ATTEMPTING TO GET MOCK BLOCKS AFTER DB BLOCKS')
                 self.were_mocks_after_db_blocks = True
                 self._get_mocks_after_db_blocks(self._lbound)
@@ -287,7 +290,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
                             continue
 
                     # we reach last block in db, now only mocked blocks are possible
-                    if new_block.get_num() >= self._last_block_num_in_db:
+                    if self._conf.get('test_max_block') and new_block.get_num() >= self._last_block_num_in_db:
                         log.info('ATTEMPTING TO GET MOCK BLOCKS AFTER DB BLOCKS')
                         self.were_mocks_after_db_blocks = True
                         self._get_mocks_after_db_blocks(new_block.get_num() + 1)
