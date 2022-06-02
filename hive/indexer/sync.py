@@ -26,6 +26,7 @@ from hive.steem.signal import (
     set_exception_thrown,
 )
 from hive.utils.misc import log_memory_usage
+from hive.utils.normalize import secs_to_str
 from hive.utils.stats import BroadcastObject
 from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import OPStatusManager as OPSM
@@ -92,6 +93,9 @@ class SyncHiveDb:
             Blocks.close_own_db_access()
 
     def run(self) -> None:
+        start_time = perf()
+        is_in_live_sync = False
+
         log.info(f"Using HAF database as block data provider, pointed by url: '{self._conf.get('database_url')}'")
 
         while True:
@@ -140,6 +144,7 @@ class SyncHiveDb:
                 DbState.before_massive_sync(self._lbound, self._ubound)
 
                 context_detach(db=self._db)
+                log.info(f"[MASSIVE] Attempting to process block range: <{self._lbound}:{self._ubound}>")
                 self._catchup_irreversible_block(is_massive_sync=True)
 
                 if not can_continue_thread():
@@ -153,11 +158,19 @@ class SyncHiveDb:
             else:
                 # mode with attached indexes and context
                 log.info("[SINGLE] *** SINGLE block processing***")
+                log.info(f"[SINGLE] Current system time: {datetime.now().isoformat(sep=' ', timespec='milliseconds')}")
+
+                if not is_in_live_sync:
+                    is_in_live_sync = True
+                    log.info(
+                        f"[SINGLE] Switched to single block processing mode after: {secs_to_str(perf() - start_time)}"
+                    )
+
                 DbLiveContextHolder.set_live_context(True)
                 Blocks.setup_own_db_access(shared_db_adapter=self._db)
                 self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._lbound)
 
-                log.info(f"Attempting to process first block in range: <{self._lbound}:{self._ubound}>")
+                log.info(f"[SINGLE] Attempting to process first block in range: <{self._lbound}:{self._ubound}>")
                 self._blocks_data_provider(self._massive_blocks_data_provider)
                 blocks = self._massive_blocks_data_provider.get(number_of_blocks=1)
                 Blocks.process_multi(blocks, is_massive_sync=False)
@@ -173,7 +186,6 @@ class SyncHiveDb:
     def _catchup_irreversible_block(self, is_massive_sync: bool = False) -> None:
         assert self._massive_blocks_data_provider is not None
 
-        log.info(f"Attempting to process block range: <{self._lbound}:{self._ubound}>")
         self._process_blocks_from_provider(
             massive_block_provider=self._massive_blocks_data_provider,
             is_massive_sync=is_massive_sync,
@@ -287,7 +299,7 @@ class SyncHiveDb:
 
                 log.info(timer.batch_status(prefix))
                 log.info(f"[MASSIVE] Time elapsed: {time_current - time_start}s")
-                log.info(f"[MASSIVE] Current system time: {datetime.now().strftime('%H:%M:%S')}")
+                log.info(f"[MASSIVE] Current system time: {datetime.now().isoformat(sep=' ', timespec='milliseconds')}")
                 log.info(log_memory_usage())
                 rate = minmax(rate, len(blocks), time_current - time_before_waiting_for_data, lbound)
 
