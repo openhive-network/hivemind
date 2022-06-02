@@ -72,8 +72,8 @@ class SyncHiveDb:
         Accounts.load_ids()  # prefetch id->name and id->rank memory maps
 
         self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
+            conf=self._conf,
             databases=self._databases,
-            number_of_blocks_in_batch=self._conf.get('max_batch'),
         )
 
         return self
