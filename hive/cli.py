@@ -19,18 +19,18 @@ def setup_logging(conf):
     if timestamp and epoch:
         datefmt = '%Y-%m-%d %H:%M:%S'
         timezone = time.strftime('%z')
-        fmt = f'%(asctime)s.%(msecs)03d{timezone} %(created).6f %(levelname)s - %(name)s - %(message)s'
+        fmt = f'%(asctime)s.%(msecs)03d{timezone} %(created).6f %(levelname)s - %(name)s:%(lineno)d - %(message)s'
         logging.basicConfig(format=fmt, datefmt=datefmt)
     elif timestamp:
         datefmt = '%Y-%m-%d %H:%M:%S'
         timezone = time.strftime('%z')
-        fmt = f'%(asctime)s.%(msecs)03d{timezone} %(levelname)s - %(name)s - %(message)s'
+        fmt = f'%(asctime)s.%(msecs)03d{timezone} %(levelname)s - %(name)s:%(lineno)d - %(message)s'
         logging.basicConfig(format=fmt, datefmt=datefmt)
     elif epoch:
-        fmt = '%(created).6f %(levelname)s - %(name)s - %(message)s'
+        fmt = '%(created).6f %(levelname)s - %(name)s:%(lineno)d - %(message)s'
         logging.basicConfig(format=fmt)
     else:
-        fmt = '%(levelname)s - %(name)s - %(message)s'
+        fmt = '%(levelname)s - %(name)s:%(lineno)d - %(message)s'
         logging.basicConfig(format=fmt)
 
 
