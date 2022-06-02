@@ -67,7 +67,9 @@ class SyncHiveDb:
         self._check_log_explain_queries()
 
         if not Blocks.is_consistency():
-            raise RuntimeError("Fatal error related to `hive_blocks` consistency")
+            last_block = Blocks.head_num()
+            context_attach(db=self._db, block_number=last_block)
+
         self._load_mock_data()
         Accounts.load_ids()  # prefetch id->name and id->rank memory maps
 
@@ -139,6 +141,10 @@ class SyncHiveDb:
 
                 context_detach(db=self._db)
                 self._catchup_irreversible_block(is_massive_sync=True)
+
+                if not can_continue_thread():
+                    restore_default_signal_handlers()
+                    return
 
                 last_block = Blocks.head_num()
                 DbState.finish_massive_sync(current_imported_block=last_block)
