@@ -128,13 +128,15 @@ def valid_community(name, allow_empty=False):
 
 def valid_account(name, allow_empty=False):
     """Returns validated account name or throws Assert."""
+    name_segment = r'[a-z][a-z0-9\-]+[a-z0-9]'
+
     if not name:
         assert allow_empty, 'invalid account (not specified)'
         return ""
     assert isinstance(name, str), "invalid account name type"
     assert 3 <= len(name) <= 16, f"invalid account name length: `{name}`"
     assert name[0] != '@', "invalid account name char `@`"
-    assert re.match(r'^[a-z0-9-\.]+$', name), 'invalid account char'
+    assert re.match(fr'^{name_segment}(?:\.{name_segment})*$', name), 'invalid account char'
     return name
 
 
