@@ -208,7 +208,7 @@ class Conf:
             url = self.get('database_url')
             enable_autoexplain = self.get('log_explain_queries')
             assert url, '--database-url (or DATABASE_URL env) not specified'
-            self._db = Db(url, "root db creation", enable_autoexplain)
+            self._db = Db(url, "root", enable_autoexplain)
             log.info("The database instance is created...")
 
         return self._db
