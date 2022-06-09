@@ -80,7 +80,6 @@ class Db:
 
     def clone(self, name):
         cloned = Db(self._url, name, self.__autoexplain)
-        cloned._engine = self._engine
 
         return cloned
 
@@ -88,11 +87,11 @@ class Db:
         """Close connection."""
         try:
             for item in self._conn:
-                if item is not None:
-                    log.info(f"Closing database connection: '{item['name']}'")
-                    item['connection'].close()
-                    item = None
+                log.info(f"Closing database connection: '{item['name']}'")
+                item['connection'].close()
+            self._engine.dispose()
             self._conn = []
+            assert self._engine.pool.checkedin() == 0, f'All connections of {self.name} should be closed!'
         except Exception as ex:
             log.exception(f"Error during connections closing: {ex}")
             raise ex
@@ -121,9 +120,10 @@ class Db:
             self._engine = sqlalchemy.create_engine(
                 self._url,
                 isolation_level="READ UNCOMMITTED",  # only supported in mysql
-                pool_size=self.max_connections,
+                pool_size=Db.max_connections,
                 pool_recycle=3600,
                 echo=False,
+                connect_args={'application_name': f'hivemind_{self.name}'},
             )
         return self._engine
 
