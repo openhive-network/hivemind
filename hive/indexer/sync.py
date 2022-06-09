@@ -89,8 +89,6 @@ class SyncHiveDb:
         Blocks.close_own_db_access()
         if self._databases:
             self._databases.close()
-        if not DbLiveContextHolder.is_live_context():
-            Blocks.close_own_db_access()
 
     def run(self) -> None:
         start_time = perf()
@@ -138,6 +136,7 @@ class SyncHiveDb:
                 # mode with detached indexes and context
                 log.info("[MASSIVE] *** MASSIVE blocks processing ***")
                 DbLiveContextHolder.set_live_context(False)
+                active_connections_before_massive = self._get_number_of_active_db_connections()
                 Blocks.setup_own_db_access(shared_db_adapter=self._db)
                 self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._ubound)
 
@@ -155,6 +154,11 @@ class SyncHiveDb:
                 DbState.finish_massive_sync(current_imported_block=last_block)
                 if not self._massive_blocks_data_provider.were_mocks_after_db_blocks:
                     context_attach(db=self._db, block_number=last_block)
+                Blocks.close_own_db_access()
+                active_connections_after_massive = self._get_number_of_active_db_connections()
+                assert (
+                    active_connections_after_massive == active_connections_before_massive
+                ), 'Some db connections used in massive sync were not closed!'
             else:
                 # mode with attached indexes and context
                 log.info("[SINGLE] *** SINGLE block processing***")
@@ -347,3 +351,8 @@ class SyncHiveDb:
 
             if block_data_provider_exception:
                 raise block_data_provider_exception
+
+    def _get_number_of_active_db_connections(self):
+        sql = "SELECT * FROM pg_stat_activity WHERE application_name LIKE 'hivemind_%';"
+        active_connections = self._db.query_all(sql)
+        return len(active_connections)
