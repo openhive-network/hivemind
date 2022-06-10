@@ -198,7 +198,6 @@ class Blocks:
 
         time_start = OPSM.start()
 
-        DB.query("START TRANSACTION")
         first_block, last_num = cls.process_blocks(blocks)
 
         if not is_massive_sync:
@@ -209,7 +208,7 @@ class Blocks:
                 cls.on_live_blocks_processed(first_block, last_num)
                 cls._periodic_actions(blocks[0])
 
-        DB.query("COMMIT")
+            DB.query("COMMIT")
 
         if is_massive_sync:
             log.info("[PROCESS MULTI] Flushing data in N threads")
