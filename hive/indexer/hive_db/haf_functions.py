@@ -17,15 +17,23 @@ def prepare_app_context(db: Db) -> None:
 
 def context_detach(db: Db) -> None:
     is_attached = db.query_one(f"SELECT hive.app_context_is_attached('{SCHEMA_NAME}')")
-    if is_attached:
-        log.info("Trying to detach app context...")
-        db.query_no_return(f"SELECT hive.app_context_detach('{SCHEMA_NAME}')")
-        log.info("App context detaching done.")
-    else:
+
+    if not is_attached:
         log.info("No attached context - detach skipped.")
+        return
+
+    log.info("Trying to detach app context...")
+    db.query_no_return(f"SELECT hive.app_context_detach('{SCHEMA_NAME}')")
+    log.info("App context detaching done.")
 
 
 def context_attach(db: Db, block_number: int) -> None:
+    is_attached = db.query_one(f"SELECT hive.app_context_is_attached('{SCHEMA_NAME}')")
+
+    if is_attached:
+        log.info("Context already attached - attaching skipped.")
+        return
+
     log.info(f"Trying to attach app context with block number: {block_number}")
     db.query_no_return(f"SELECT hive.app_context_attach('{SCHEMA_NAME}', {block_number})")
     log.info("App context attaching done.")
