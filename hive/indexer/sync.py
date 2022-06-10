@@ -104,6 +104,7 @@ class SyncHiveDb:
             last_imported_block = Blocks.head_num()
             log.info(f"Last imported block is: {last_imported_block}")
 
+            self._db.query("START TRANSACTION")
             self._lbound, self._ubound = self._query_for_app_next_block()
 
             if self._last_block_to_process:
@@ -126,6 +127,7 @@ class SyncHiveDb:
                     allow_massive = False
 
             if not (self._lbound and self._ubound):
+                self._db.query("COMMIT")
                 continue
 
             log.info(f"target_head_block: {self._ubound}")
@@ -135,6 +137,7 @@ class SyncHiveDb:
             if self._ubound - self._lbound > 100 and allow_massive:
                 # mode with detached indexes and context
                 log.info("[MASSIVE] *** MASSIVE blocks processing ***")
+                self._db.query("COMMIT")  # in massive we re not operating in same transaction as app_next_block query
                 DbLiveContextHolder.set_live_context(False)
                 active_connections_before_massive = self._get_number_of_active_db_connections()
                 Blocks.setup_own_db_access(shared_db_adapter=self._db)
@@ -181,9 +184,7 @@ class SyncHiveDb:
 
     def _query_for_app_next_block(self) -> Tuple[int, int]:
         log.info("Querying for next block for app context...")
-        self._db.query("START TRANSACTION")
         lbound, ubound = self._db.query_row(f"SELECT * FROM hive.app_next_block('{SCHEMA_NAME}')")
-        self._db.query("COMMIT")
         log.info(f"Next block range from hive.app_next_block is: <{lbound}:{ubound}>")
         return lbound, ubound
 
