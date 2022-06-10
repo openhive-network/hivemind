@@ -83,6 +83,7 @@ class SyncHiveDb:
 
     def __exit__(self, exc_type, value, traceback):
         log.info("Exiting HAF mode synchronization")
+        Blocks.setup_own_db_access(shared_db_adapter=self._db)  # needed for PayoutStats.generate
         PayoutStats.generate()
 
         log.info(f'LAST IMPORTED BLOCK IS: {Blocks.head_num()}')
@@ -176,6 +177,11 @@ class SyncHiveDb:
                 DbLiveContextHolder.set_live_context(True)
                 Blocks.setup_own_db_access(shared_db_adapter=self._db)
                 self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._lbound)
+
+                if not Blocks.is_consistency():
+                    last_block = Blocks.head_num()
+                    DbState._after_massive_sync(current_imported_block=last_block)
+                assert Blocks.is_consistency()
 
                 log.info(f"[SINGLE] Attempting to process first block in range: <{self._lbound}:{self._ubound}>")
                 self._blocks_data_provider(self._massive_blocks_data_provider)
