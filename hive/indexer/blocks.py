@@ -198,7 +198,9 @@ class Blocks:
 
         time_start = OPSM.start()
 
-        DB.query("START TRANSACTION")
+        if is_massive_sync:
+            DB.query("START TRANSACTION")
+
         first_block, last_num = cls.process_blocks(blocks)
 
         if not is_massive_sync:
