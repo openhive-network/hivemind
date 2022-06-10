@@ -53,10 +53,16 @@ class BlocksDataFromDbProvider:
             for block in range(self._lbound, self._ubound + 1, self._blocks_per_request):
                 if not can_continue_thread():
                     break
+                last = min([block + self._blocks_per_request - 1, self._ubound])
+                sql = self._sql_query.replace(':first', str(block)).replace(':last', str(last))
 
-                data_rows = self._db.query_all(
-                    self._sql_query, first=block, last=min([block + self._blocks_per_request - 1, self._ubound])
-                )
+                data_rows = self._db.query_all(sql)
+                log.info(f'Querying: {sql}')
+
+                if not data_rows:
+                    log.warning(f'DATA ROWS IS EMPTY! query: {sql}')
+                # assert data_rows, f'{sql} should return data rows!'
+
                 while can_continue_thread():
                     try:
                         queue_for_data.put(data_rows, True, 1)
