@@ -3,6 +3,8 @@ import logging
 import queue
 from typing import Final, List, Optional
 
+from sqlalchemy import text
+
 from hive.conf import Conf
 from hive.db.adapter import Db
 from hive.indexer.block import BlocksProviderBase, OperationType, VirtualOperationType
@@ -53,10 +55,15 @@ class BlocksDataFromDbProvider:
             for block in range(self._lbound, self._ubound + 1, self._blocks_per_request):
                 if not can_continue_thread():
                     break
+                last = min([block + self._blocks_per_request - 1, self._ubound])
 
-                data_rows = self._db.query_all(
-                    self._sql_query, first=block, last=min([block + self._blocks_per_request - 1, self._ubound])
-                )
+                stmt = text(self._sql_query).bindparams(first=block, last=last)
+
+                data_rows = self._db.query_all(stmt, is_prepared=True)
+
+                if not data_rows:
+                    log.warning(f'DATA ROWS ARE EMPTY! query: {stmt.compile(compile_kwargs={"literal_binds": True})}')
+
                 while can_continue_thread():
                     try:
                         queue_for_data.put(data_rows, True, 1)
