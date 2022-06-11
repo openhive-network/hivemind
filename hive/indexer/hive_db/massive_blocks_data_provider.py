@@ -9,8 +9,7 @@ from hive.conf import Conf
 from hive.db.adapter import Db
 from hive.indexer.block import BlocksProviderBase, OperationType, VirtualOperationType
 from hive.indexer.hive_db.block import BlockHiveDb
-from hive.indexer.hive_rpc.block_from_rest import BlockFromRpc
-from hive.indexer.mocking.mock_block import ExtendedByMockBlockAdapter
+from hive.indexer.mocking.mock_block import BlockMock, ExtendedByMockBlockAdapter
 from hive.indexer.mocking.mock_block_provider import MockBlockProvider
 from hive.indexer.mocking.mock_vops_provider import MockVopsProvider
 from hive.signals import can_continue_thread, set_exception_thrown
@@ -210,7 +209,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
 
         if vops:
             vops = vops[block_num]['ops']
-        return BlockFromRpc(block_mock, vops)
+        return BlockMock(block_mock, vops)
 
     def _get_mocks_after_db_blocks(self, first_mock_block_num):
         for block_proposition in range(first_mock_block_num, self._ubound + 1):
