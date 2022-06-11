@@ -13,7 +13,7 @@ from hive.indexer.hive_rpc.block_from_rest import BlockFromRpc
 from hive.indexer.mock_block import ExtendedByMockBlockAdapter
 from hive.indexer.mock_block_provider import MockBlockProvider
 from hive.indexer.mock_vops_provider import MockVopsProvider
-from hive.steem.signal import can_continue_thread, set_exception_thrown
+from hive.signals import can_continue_thread, set_exception_thrown
 from hive.utils.stats import WaitingStatusManager as WSM
 
 log = logging.getLogger(__name__)
