@@ -1,72 +1,41 @@
 """ Data provider for test vops """
+import json
+import logging
+from typing import Optional
+
 from hive.indexer.mocking.mock_data_provider import MockDataProvider
+
+log = logging.getLogger(__name__)
 
 
 class MockVopsProvider(MockDataProvider):
     """Data provider for test vops"""
 
-    block_data = {'ops': {}, 'ops_by_block': {}}
+    block_data = {}
 
     @classmethod
-    def add_block_data_from_file(cls, file_name):
-        from json import load
+    def add_block_data_from_file(cls, filename) -> None:
+        with open(filename, encoding='utf-8') as file:
+            data = json.load(file)
 
-        data = {}
-        with open(file_name, "r") as src:
-            data = load(src)
-        cls.add_block_data(data)
-
-    @classmethod
-    def add_block_data(cls, data):
-        if 'ops' in data:
-            for op in data['ops']:
-                if 'ops' in cls.block_data and op['block'] in cls.block_data['ops']:
-                    cls.block_data['ops'][op['block']].append(op)
-                else:
-                    cls.block_data['ops'][op['block']] = [op]
-
-        if 'ops_by_block' in data:
-            for ops in data['ops_by_block']:
-                if 'ops_by_block' in cls.block_data and ops['block'] in cls.block_data['ops_by_block']:
-                    cls.block_data['ops_by_block'][ops['block']].extend(ops['ops'])
-                else:
-                    cls.block_data['ops_by_block'][ops['block']] = ops
+        for block_num, block_content in data.items():
+            cls._add_block_data(int(block_num), dict(block_content))
 
     @classmethod
-    def get_block_data(cls, block_num):
-        ret = {}
-        if 'ops' in cls.block_data and block_num in cls.block_data['ops']:
-            data = cls.block_data['ops'][block_num]
-            if data:
-                if 'ops' in ret:
-                    ret['ops'].extend([op['op'] for op in data])
-                else:
-                    ret['ops'] = [op['op'] for op in data]
+    def _add_block_data(cls, block_num: int, block_content: dict) -> None:
+        assert 'virtual_operations' in block_content
 
-        if 'ops_by_block' in cls.block_data and block_num in cls.block_data['ops_by_block']:
-            data = cls.block_data['ops_by_block'][block_num]
-            if data:
-                if 'ops_by_block' in ret:
-                    ret['ops_by_block'].extend([ops['op'] for ops in data['ops']])
-                else:
-                    ret['ops_by_block'] = [ops['op'] for ops in data['ops']]
-        return ret
+        if block_num in cls.block_data:
+            cls.block_data[block_num]['virtual_operations'].extend(block_content['virtual_operations'])
+        else:
+            cls.block_data[block_num] = block_content
 
     @classmethod
-    def add_mock_vops(cls, ret, from_block, end_block):
-        # dont do anyting when there is no block data
-        if not cls.block_data['ops_by_block'] and not cls.block_data['ops']:
-            return
-        for block_num in range(from_block, end_block):
-            mock_vops = cls.get_block_data(block_num)
-            if mock_vops:
-                if block_num in ret:
-                    if 'ops_by_block' in mock_vops:
-                        ret[block_num]['ops'].extend(mock_vops['ops_by_block'])
-                    if 'ops' in mock_vops:
-                        ret[block_num]['ops'].extend(mock_vops['ops'])
-                else:
-                    if 'ops' in mock_vops:
-                        ret[block_num] = {"ops": mock_vops['ops']}
-                    if 'ops_by_block' in mock_vops:
-                        ret[block_num] = {"ops": mock_vops['ops_by_block']}
+    def get_mock_block_data(cls, block_number: int) -> Optional[dict]:
+        return cls.block_data.get(block_number, None)
+
+    @classmethod
+    def get_mock_vops(cls, block_number: int) -> Optional[dict]:
+        mock_block_data = cls.get_mock_block_data(block_number)
+
+        return mock_block_data.get('virtual_operations', None) if mock_block_data else None

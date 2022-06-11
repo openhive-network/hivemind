@@ -200,16 +200,13 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         # that is the reason why 'always_create' parameter was added
         # NOTE: it affects only situation when mocks are loaded, otherwiese mock provider methods
         # do not return block data
-        vops = {}
-        MockVopsProvider.add_mock_vops(vops, block_num, block_num + 1)
+        vops_by_block_number = MockVopsProvider.get_mock_vops(block_num)
 
-        block_mock = MockBlockProvider.get_block_data(block_num, bool(vops) or always_create)
-        if not block_mock:
+        block_data = MockBlockProvider.get_block_data(block_num, bool(vops_by_block_number) or always_create)
+        if not block_data:
             return None
 
-        if vops:
-            vops = vops[block_num]['ops']
-        return BlockMock(block_mock, vops)
+        return BlockMock(block_data, vops_by_block_number)
 
     def _get_mocks_after_db_blocks(self, first_mock_block_num):
         for block_proposition in range(first_mock_block_num, self._ubound + 1):
