@@ -1,5 +1,5 @@
 """ Data provider for test vops """
-from hive.indexer.mock_data_provider import MockDataProvider
+from hive.indexer.mocking.mock_data_provider import MockDataProvider
 
 
 class MockVopsProvider(MockDataProvider):
