@@ -1,13 +1,7 @@
 {
-  "ops": [
-    {
-      "trx_id": "0000000000000000000000000000000000000000",
-      "block": 300,
-      "trx_in_block": 4294967295,
-      "op_in_trx": 0,
-      "virtual_op": 1,
-      "timestamp": "2016-03-24T16:20:30",
-      "op": {
+  "300": {
+    "virtual_operations": [
+      {
         "type": "producer_reward_operation",
         "value": {
           "producer": "tester1",
@@ -18,10 +12,22 @@
           }
         }
       },
-      "operation_id": "9223372039063639274"
-    }
-  ],
-  "ops_by_block": [],
-  "next_block_range_begin": 10977,
-  "next_operation_begin": 0
+      {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "voter": "ignoreall",
+          "author": "agartha",
+          "permlink": "regular-post",
+          "weight": 200,
+          "rshares": 20000000,
+          "total_vote_weight": 200,
+          "pending_payout": {
+            "amount": "2",
+            "precision": 3,
+            "nai": "@@000000013"
+          }
+        }
+      }
+    ]
+  }
 }
