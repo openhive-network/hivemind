@@ -10,9 +10,9 @@ from hive.db.adapter import Db
 from hive.indexer.block import BlocksProviderBase, OperationType, VirtualOperationType
 from hive.indexer.hive_db.block import BlockHiveDb
 from hive.indexer.hive_rpc.block_from_rest import BlockFromRpc
-from hive.indexer.mock_block import ExtendedByMockBlockAdapter
-from hive.indexer.mock_block_provider import MockBlockProvider
-from hive.indexer.mock_vops_provider import MockVopsProvider
+from hive.indexer.mocking.mock_block import ExtendedByMockBlockAdapter
+from hive.indexer.mocking.mock_block_provider import MockBlockProvider
+from hive.indexer.mocking.mock_vops_provider import MockVopsProvider
 from hive.signals import can_continue_thread, set_exception_thrown
 from hive.utils.stats import WaitingStatusManager as WSM
 
