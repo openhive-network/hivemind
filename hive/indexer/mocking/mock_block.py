@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
 
@@ -46,14 +47,15 @@ class TransactionMock(Transaction):
 
 
 class BlockMock(Block):
-    def __init__(self, block_data, virtual_ops):
+    def __init__(self, block_data: dict, virtual_ops: Optional[dict] = None):
         """
         block_data - raw format of the blocks
         virtual_ops - list of virtual ops in the blocks
         previous_block_hash - hash of the previous block
         """
+
         self._blocks_data = block_data
-        self._virtual_ops = virtual_ops
+        self._virtual_ops = virtual_ops if virtual_ops is not None else {}
 
     def get_num(self):
         return int(self._blocks_data['block_id'][:8], base=16)
