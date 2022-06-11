@@ -1,8 +1,7 @@
 {
-  "ops": [
-    {
-      "block": 4998008,
-      "op": {
+  "4998008": {
+    "virtual_operations": [
+      {
         "type": "effective_comment_vote_operation",
         "value": {
           "voter": "alice",
@@ -17,11 +16,8 @@
             "nai": "@@000000013"
           }
         }
-      }
-    },
-    {
-      "block": 4998008,
-      "op": {
+      },
+      {
         "type": "effective_comment_vote_operation",
         "value": {
           "voter": "alice",
@@ -36,11 +32,8 @@
             "nai": "@@000000013"
           }
         }
-      }
-    },
-    {
-      "block": 4998008,
-      "op": {
+      },
+      {
         "type": "effective_comment_vote_operation",
         "value": {
           "voter": "alice",
@@ -55,11 +48,8 @@
             "nai": "@@000000013"
           }
         }
-      }
-    },
-    {
-      "block": 4998008,
-      "op": {
+      },
+      {
         "type": "effective_comment_vote_operation",
         "value": {
           "voter": "alice",
@@ -74,11 +64,8 @@
             "nai": "@@000000013"
           }
         }
-      }
-    },
-    {
-      "block": 4998008,
-      "op": {
+      },
+      {
         "type": "effective_comment_vote_operation",
         "value": {
           "voter": "alice",
@@ -94,10 +81,11 @@
           }
         }
       }
-    },
-    {
-      "block": 4998011,
-      "op": {
+    ]
+  },
+  "4998011": {
+    "virtual_operations": [
+      {
         "type": "effective_comment_vote_operation",
         "value": {
           "voter": "alice",
@@ -112,11 +100,8 @@
             "nai": "@@000000013"
           }
         }
-      }
-    },
-    {
-      "block": 4998011,
-      "op": {
+      },
+      {
         "type": "effective_comment_vote_operation",
         "value": {
           "voter": "alice",
@@ -132,10 +117,11 @@
           }
         }
       }
-    },
-    {
-      "block": 4998012,
-      "op": {
+    ]
+  },
+  "4998012": {
+    "virtual_operations": [
+      {
         "type": "effective_comment_vote_operation",
         "value": {
           "voter": "ignoreall",
@@ -151,7 +137,6 @@
           }
         }
       }
-    }
-  ],
-  "ops_by_block": []
+    ]
+  }
 }
