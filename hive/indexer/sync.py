@@ -19,7 +19,7 @@ from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataP
 from hive.indexer.mock_block_provider import MockBlockProvider
 from hive.indexer.mock_vops_provider import MockVopsProvider
 from hive.server.common.payout_stats import PayoutStats
-from hive.steem.signal import (
+from hive.signals import (
     can_continue_thread,
     restore_default_signal_handlers,
     set_custom_signal_handlers,

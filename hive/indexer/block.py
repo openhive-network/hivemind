@@ -3,7 +3,7 @@ from enum import Enum
 import logging
 import queue
 
-from hive.steem.signal import can_continue_thread
+from hive.signals import can_continue_thread
 
 log = logging.getLogger(__name__)
 
