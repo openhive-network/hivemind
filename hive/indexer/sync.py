@@ -16,8 +16,8 @@ from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbLiveContextHolder
 from hive.indexer.hive_db.haf_functions import context_attach, context_detach
 from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
-from hive.indexer.mock_block_provider import MockBlockProvider
-from hive.indexer.mock_vops_provider import MockVopsProvider
+from hive.indexer.mocking.mock_block_provider import MockBlockProvider
+from hive.indexer.mocking.mock_vops_provider import MockVopsProvider
 from hive.server.common.payout_stats import PayoutStats
 from hive.signals import (
     can_continue_thread,
