@@ -4,7 +4,7 @@ import logging
 
 import dateutil.parser
 
-from hive.indexer.mock_data_provider import MockDataProvider
+from hive.indexer.mocking.mock_data_provider import MockDataProvider
 
 log = logging.getLogger(__name__)
 
