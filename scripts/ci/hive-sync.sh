@@ -32,14 +32,8 @@ EOF
         --test-profile=False \
         --prometheus-port 11011 \
         --database-url "${RUNNER_HIVED_DB_URL}" \
-        --mock-block-data-path mock_data/block_data/follow_op/mock_block_data_follow.json \
-          mock_data/block_data/follow_op/mock_block_data_follow_tests.json \
-          mock_data/block_data/community_op/mock_block_data_community.json \
-          mock_data/block_data/reblog_op/mock_block_data_reblog.json \
-          mock_data/block_data/reblog_op/mock_block_data_reblog_delete.json \
-          mock_data/block_data/payments_op/mock_block_data_payments.json \
-          mock_data/block_data/notify_op/mock_block_data.json \
-        --mock-vops-data-path mock_data/block_data/community_op/mock_vops_data_community.json \
+        --mock-block-data-path mock_data/block_data/ \
+        --mock-vops-data-path mock_data/vops_data/ \
         --community-start-block 4998000 \
         2>&1 | tee -i hivemind-sync.log
 }
