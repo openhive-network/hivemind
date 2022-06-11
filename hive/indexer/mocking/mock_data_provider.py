@@ -2,6 +2,7 @@
 from json import dumps
 import logging
 import os
+from pathlib import Path
 
 log = logging.getLogger(__name__)
 
@@ -21,13 +22,10 @@ class MockDataProvider:
 
     @classmethod
     def add_block_data_from_directory(cls, dir_name):
-        from fnmatch import fnmatch
-
         pattern = "*.json"
-        for path, _, files in os.walk(dir_name):
-            for name in files:
-                if fnmatch(name, pattern):
-                    cls.add_block_data_from_file(os.path.join(path, name))
+        for path in Path(dir_name).rglob(pattern):
+            log.warning(f"Loading mock ops data from file: {path}")
+            cls.add_block_data_from_file(path)
 
     @classmethod
     def add_block_data_from_file(cls, file_name):
