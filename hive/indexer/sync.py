@@ -3,6 +3,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 import logging
+import time
 from time import perf_counter as perf
 from typing import Tuple
 
@@ -140,7 +141,7 @@ class SyncHiveDb:
                 log.info("[MASSIVE] *** MASSIVE blocks processing ***")
                 self._db.query("COMMIT")  # in massive we re not operating in same transaction as app_next_block query
                 DbLiveContextHolder.set_live_context(False)
-                active_connections_before_massive = self._get_number_of_active_db_connections()
+                active_connections_before_massive = self._get_active_db_connections()
                 Blocks.setup_own_db_access(shared_db_adapter=self._db)
                 self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._ubound)
 
@@ -159,10 +160,16 @@ class SyncHiveDb:
                 if not self._massive_blocks_data_provider.were_mocks_after_db_blocks:
                     context_attach(db=self._db, block_number=last_block)
                 Blocks.close_own_db_access()
-                active_connections_after_massive = self._get_number_of_active_db_connections()
-                assert (
-                    active_connections_after_massive == active_connections_before_massive
-                ), 'Some db connections used in massive sync were not closed!'
+                time.sleep(1)
+                active_connections_after_massive = self._get_active_db_connections()
+
+                assert_message = (
+                    f'Some db connections used in massive sync were not closed!\n'
+                    f'before: {active_connections_before_massive}\n'
+                    f'after: {active_connections_after_massive}'
+                )
+
+                assert len(active_connections_after_massive) == len(active_connections_before_massive), assert_message
             else:
                 # mode with attached indexes and context
                 log.info("[SINGLE] *** SINGLE block processing***")
@@ -359,7 +366,7 @@ class SyncHiveDb:
             if block_data_provider_exception:
                 raise block_data_provider_exception
 
-    def _get_number_of_active_db_connections(self):
-        sql = "SELECT * FROM pg_stat_activity WHERE application_name LIKE 'hivemind_%';"
+    def _get_active_db_connections(self):
+        sql = "SELECT application_name FROM pg_stat_activity WHERE application_name LIKE 'hivemind_%';"
         active_connections = self._db.query_all(sql)
-        return len(active_connections)
+        return active_connections
