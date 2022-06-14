@@ -85,7 +85,7 @@ class SyncHiveDb:
     def __exit__(self, exc_type, value, traceback):
         log.info("Exiting HAF mode synchronization")
         Blocks.setup_own_db_access(shared_db_adapter=self._db)  # needed for PayoutStats.generate
-        PayoutStats.generate()
+        PayoutStats.generate(separate_transaction=True)
 
         log.info(f'LAST IMPORTED BLOCK IS: {Blocks.head_num()}')
         Blocks.close_own_db_access()
@@ -112,6 +112,7 @@ class SyncHiveDb:
             if self._last_block_to_process:
                 if last_imported_block >= self._last_block_to_process:
                     log.info(f"REACHED test_max_block of {self._last_block_to_process}")
+                    self._db.query("COMMIT")
                     return
 
                 if not (self._lbound and self._ubound):  # all blocks from HAF db processed
