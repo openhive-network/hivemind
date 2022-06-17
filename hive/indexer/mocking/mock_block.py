@@ -1,114 +1,220 @@
+from abc import abstractmethod
+import hashlib
 import logging
+from typing import Iterator
 from typing import Optional
+from typing import Union
 
-from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
+import ujson as json
+
+from hive.db.adapter import Db
+from hive.indexer.block import OperationType
+from hive.indexer.block import VirtualOperationType
 
 log = logging.getLogger(__name__)
 
 
-class VirtualOperationMock(Operation):
-    def __init__(self, operation_name, operation_body):
-        self._operation_type = VirtualOperationType.from_name(operation_name)
-        self._operation_body = operation_body
+class AccountMock:
+    account_id: Optional[int] = None
 
-    def get_type(self):
-        return self._operation_type
+    def __init__(self, block_number: int, name: str):
+        self._block_number = block_number
+        self._name = name
 
-    def get_body(self):
-        return self._operation_body
+        if self.__class__.account_id is None:
+            last_account_id = Db.instance().query_one(sql='SELECT max(id) from hive.accounts;')
+            log.info(f'Last account id stored in HAf database is: {last_account_id}')
+            self.__class__.account_id = last_account_id
+
+    @property
+    def block_number(self) -> int:
+        return self._block_number
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    def push(self) -> None:
+        sql = """
+INSERT INTO 
+    hive.accounts (id, name, block_num)
+VALUES
+    (:id, :name, :block_num);
+"""
+
+        self.__class__.account_id += 1
+
+        log.info(f'Attempting to push mocked ACCOUNT with name: {self.name}')
+
+        Db.instance().query(
+            sql=sql,
+            id=self.__class__.account_id,
+            name=self.name,
+            block_num=self.block_number,
+        )
+
+        log.info('ACCOUNT pushed successfully!')
 
 
-class OperationMock(Operation):
-    def __init__(self, operation_name, operation_body):
-        self._operation_type = OperationType.from_name(operation_name)
-        self._operation_body = operation_body
+class OperationBase:
+    operation_id: Optional[int] = None
 
-    def get_type(self):
-        return self._operation_type
+    def __init__(self, block_number: int, body: dict):
+        self._block_number = block_number
+        self._body = body
 
-    def get_body(self):
-        return self._operation_body
+        if OperationBase.operation_id is None:
+            last_operation_id = Db.instance().query_one(sql='SELECT max(id) from hive.operations;')
+            log.info(f'Last operation id stored in HAf database is: {last_operation_id}')
+            OperationBase.operation_id = last_operation_id
+
+    @property
+    @abstractmethod
+    def type(self) -> Optional[Union[OperationType, VirtualOperationType]]:
+        raise NotImplementedError
+
+    @property
+    def block_number(self) -> int:
+        return self._block_number
+
+    @property
+    def body(self) -> dict:
+        return self._body
+
+    def push(self) -> None:
+        sql = """
+INSERT INTO 
+    hive.operations (id, block_num, trx_in_block, op_pos, op_type_id, timestamp, body)
+VALUES
+    (:id, :block_num, -2, -2, :op_type_id, now(), :body);
+"""
+        OperationBase.operation_id += 1
+
+        log.info(
+            f'Attempting to push mocked {self.__class__.__name__} - type: {self.type} id: {OperationBase.operation_id}'
+        )
+
+        Db.instance().query(
+            sql=sql,
+            id=OperationBase.operation_id,
+            block_num=self.block_number,
+            op_type_id=self.type.value,
+            body=json.dumps(self.body),
+        )
+
+        # account ops
+        account_name = None
+        if self.type == OperationType.POW:
+            account_name = self.body['value']['worker_account']
+        elif self.type == OperationType.POW_2:
+            account_name = self.body['value']['work']['value']['input']['worker_account']
+        elif self.type == OperationType.ACCOUNT_CREATE:
+            account_name = self.body['value']['new_account_name']
+        elif self.type == OperationType.ACCOUNT_CREATE_WITH_DELEGATION:
+            account_name = self.body['value']['new_account_name']
+        elif self.type == OperationType.CREATE_CLAIMED_ACCOUNT:
+            account_name = self.body['value']['new_account_name']
+
+        if account_name:
+            log.info(f'Account create operation with account name: {account_name}')
+            AccountMock(block_number=self.block_number, name=account_name).push()
+
+        log.info(f'{self.__class__.__name__} pushed successfully!')
 
 
-class TransactionMock(Transaction):
-    def __init__(self, id, transaction):
-        self._id = id
-        self._transaction = transaction
+class VirtualOperationMock(OperationBase):
+    def __init__(self, block_number: int, body: dict):
+        super().__init__(block_number=block_number, body=body)
+        self._type = VirtualOperationType.from_name(operation_name=body['type'])
 
-    def get_id(self):
-        return self._id
+    @property
+    def type(self) -> Optional[VirtualOperationType]:
+        return self._type
 
-    def get_next_operation(self):
-        for raw_operation in self._transaction['operations']:
-            operation = OperationMock(raw_operation['type'], raw_operation['value'])
-            if not operation.get_type():
+
+class OperationMock(OperationBase):
+    def __init__(self, block_number: int, body: dict):
+        super().__init__(block_number=block_number, body=body)
+        self._type = OperationType.from_name(operation_name=body['type'])
+
+    @property
+    def type(self) -> Optional[OperationType]:
+        return self._type
+
+
+class TransactionMock:
+    def __init__(self, block_number: int, body: dict):
+        self._block_number = block_number
+        self._body = body
+
+    @property
+    def block_number(self) -> int:
+        return self._block_number
+
+    @property
+    def ref_block_num(self) -> int:
+        return self._body['ref_block_num']
+
+    @property
+    def ref_block_prefix(self) -> int:
+        return self._body['ref_block_prefix']
+
+    @property
+    def expiration(self) -> str:
+        return self._body['expiration']
+
+    @property
+    def hash(self) -> str:
+        to_hash = f'{self._block_number}{json.dumps(self._body)}'.encode('utf-8')
+        sha1 = hashlib.sha1(to_hash)
+        return sha1.hexdigest()
+
+    def get_next_operation(self) -> Iterator[OperationMock]:
+        for operation_raw in self._body['operations']:
+            operation = OperationMock(self._block_number, body=operation_raw)
+            if not operation.type:
                 continue
             yield operation
 
+    def push(self) -> None:
+        sql = """
+INSERT INTO 
+    hive.transactions (block_num, trx_in_block, trx_hash, ref_block_num, ref_block_prefix, expiration, signature)
+VALUES
+    (:block_num, -2, :trx_hash, :ref_block_num, :ref_block_prefix, :expiration, NULL);
+"""
 
-class BlockMock(Block):
-    def __init__(self, block_data: dict, virtual_ops: Optional[dict] = None):
-        """
-        block_data - raw format of the blocks
-        virtual_ops - list of virtual ops in the blocks
-        previous_block_hash - hash of the previous block
-        """
+        log.info(f'Attempting to push mocked TRANSACTION with hash: {self.hash}')
 
+        Db.instance().query(
+            sql=sql,
+            block_num=self.block_number,
+            trx_hash=self.hash,
+            ref_block_num=self.ref_block_num,
+            ref_block_prefix=self.ref_block_prefix,
+            expiration=self.expiration,
+        )
+
+        log.info('TRANSACTION pushed successfully!')
+
+
+class BlockMock:
+    def __init__(self, block_number: int, block_data: dict, virtual_ops: Optional[dict] = None):
+        self._block_number = block_number
         self._blocks_data = block_data
         self._virtual_ops = virtual_ops if virtual_ops is not None else {}
 
-    def get_num(self):
-        return int(self._blocks_data['block_id'][:8], base=16)
+    @property
+    def block_number(self) -> int:
+        return self._block_number
 
-    def get_date(self):
-        return self._blocks_data['timestamp']
-
-    def get_hash(self):
-        return self._blocks_data['block_id']
-
-    def get_previous_block_hash(self):
-        return self._blocks_data['previous']
-
-    def get_next_vop(self):
-        for vop in self._virtual_ops:
-            vop_object = VirtualOperationMock(vop['type'], vop['value'])
-            if not vop_object.get_type():
+    def get_next_virtual_operation(self) -> Iterator[VirtualOperationMock]:
+        for virtual_operation_raw in self._virtual_ops:
+            vop_mock = VirtualOperationMock(block_number=self.block_number, body=virtual_operation_raw)
+            if not vop_mock.type:
                 continue
-            yield vop_object
+            yield vop_mock
 
-    def get_next_transaction(self):
-        for tx_idx, tx in enumerate(self._blocks_data['transactions']):
-            yield TransactionMock(tx_idx, tx)
-
-
-class ExtendedByMockBlockAdapter(Block):
-    def __init__(self, block, extended_block):
-        assert issubclass(type(block), Block)
-        assert issubclass(type(extended_block), Block)
-
-        self._wrapped_block = block
-        self._extended_block = extended_block
-
-    def get_num(self):
-        return self._wrapped_block.get_num()
-
-    def get_next_vop(self):
-        for vop in self._wrapped_block.get_next_vop():
-            yield vop
-        for vop in self._extended_block.get_next_vop():
-            yield vop
-
-    def get_date(self):
-        return self._wrapped_block.get_date()
-
-    def get_hash(self):
-        return self._wrapped_block.get_hash()
-
-    def get_previous_block_hash(self):
-        return self._wrapped_block.get_previous_block_hash()
-
-    def get_next_transaction(self):
-        for transaction in self._wrapped_block.get_next_transaction():
-            yield transaction
-        for transaction in self._extended_block.get_next_transaction():
-            yield transaction
+    def get_next_transaction(self) -> Iterator[TransactionMock]:
+        for transaction_body in self._blocks_data['transactions']:
+            yield TransactionMock(block_number=self._block_number, body=transaction_body)
