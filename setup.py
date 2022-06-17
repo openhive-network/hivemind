@@ -200,6 +200,7 @@ if __name__ == "__main__":
         entry_points={
             'console_scripts': [
                 'hive=hive.cli:run',
+                'mocker=hive.indexer.mocking.populate_haf_with_mocked_data:main',
             ]
         },
     )
