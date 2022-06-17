@@ -9,13 +9,15 @@ log = logging.getLogger(__name__)
 
 
 class VirtualOperationType(Enum):
-    AUTHOR_REWARD = 1
-    COMMENT_REWARD = 2
-    EFFECTIVE_COMMENT_VOTE = 3
-    COMMENT_PAYOUT_UPDATE = 4
-    INEFFECTIVE_DELETE_COMMENT = 5
+    # same ids as in hive.operation_types table
+    AUTHOR_REWARD = 51
+    COMMENT_REWARD = 53
+    COMMENT_PAYOUT_UPDATE = 61
+    EFFECTIVE_COMMENT_VOTE = 72
+    INEFFECTIVE_DELETE_COMMENT = 73
 
-    def from_name(operation_name):
+    @classmethod
+    def from_name(cls, operation_name: str):
         if operation_name == 'author_reward_operation':
             return VirtualOperationType.AUTHOR_REWARD
         if operation_name == 'comment_reward_operation':
@@ -31,21 +33,23 @@ class VirtualOperationType(Enum):
 
 
 class OperationType(Enum):
-    POW = 1
-    POW_2 = 2
-    ACCOUNT_CREATE = 3
-    ACCOUNT_CREATE_WITH_DELEGATION = 4
-    CREATE_CLAIMED_ACCOUNT = 5
-    ACCOUNT_UPDATE = 6
-    ACCOUNT_UPDATE_2 = 7
-    COMMENT = 8
-    DELETE_COMMENT = 9
-    COMMENT_OPTION = 10
-    VOTE = 11
-    TRANSFER = 12
-    CUSTOM_JSON = 13
+    # same ids as in hive.operation_types table
+    VOTE = 0
+    COMMENT = 1
+    TRANSFER = 2
+    ACCOUNT_CREATE = 9
+    ACCOUNT_UPDATE = 10
+    POW = 14
+    DELETE_COMMENT = 17
+    CUSTOM_JSON = 18
+    COMMENT_OPTION = 19
+    CREATE_CLAIMED_ACCOUNT = 23
+    POW_2 = 30
+    ACCOUNT_CREATE_WITH_DELEGATION = 41
+    ACCOUNT_UPDATE_2 = 43
 
-    def from_name(operation_name):
+    @classmethod
+    def from_name(cls, operation_name: str):
         if operation_name == 'pow_operation':
             return OperationType.POW
         if operation_name == 'pow2_operation':
