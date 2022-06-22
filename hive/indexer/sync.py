@@ -105,8 +105,8 @@ class SyncHiveDb:
             last_imported_block = Blocks.head_num()
             log.info(f"Last imported block is: {last_imported_block}")
 
-            self._db.query("START TRANSACTION")
             self._lbound, self._ubound = self._query_for_app_next_block()
+            self._db.query("START TRANSACTION")
 
             if self._last_block_to_process:
                 if last_imported_block >= self._last_block_to_process:
