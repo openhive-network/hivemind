@@ -84,7 +84,8 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
     _op_types_dictionary = {}
 
     class Databases:
-        def __init__(self, db_root: Db, conf: Conf):
+        def __init__(self, db_root: Db, conf: Conf, shared: bool = False):
+            self._shared = shared
             self._db_root = db_root
             self._db_operations = Db(
                 conf.get('database_url'), "MassiveBlocksProvider.OperationsData", conf.get('log_explain_queries')
@@ -106,10 +107,10 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
             return self._db_root
 
         def get_operations(self):
-            return self._db_operations
+            return self._db_operations if not self._shared else self._db_root
 
         def get_blocks_data(self):
-            return self._db_blocks_data
+            return self._db_blocks_data if not self._shared else self._db_root
 
     def __init__(
         self,
@@ -324,6 +325,11 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
             self._blocks_data_provider.start(queue_for_data=self._blocks_data_queue),
             self._thread_pool.submit(self._thread_get_block),
         ]  # futures
+
+    def start_without_threading(self):
+        self._blocks_data_provider.thread_body_get_data(queue_for_data=self._blocks_data_queue)
+        self._operations_provider.thread_body_get_data(queue_for_data=self._operations_queue)
+        self._thread_get_block()
 
     def get(self, number_of_blocks: int) -> List[BlockHiveDb]:
         """Returns blocks and vops data for next number_of_blocks"""
