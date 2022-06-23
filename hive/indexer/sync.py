@@ -57,8 +57,6 @@ class SyncHiveDb:
         log.info("Entering HAF mode synchronization")
         set_custom_signal_handlers()
 
-        self._databases = MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db, conf=self._conf)
-
         Blocks.setup(conf=self._conf)
 
         Community.start_block = self._conf.get("community_start_block")
@@ -74,11 +72,6 @@ class SyncHiveDb:
 
         self._load_mock_data()
         Accounts.load_ids()  # prefetch id->name and id->rank memory maps
-
-        self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
-            conf=self._conf,
-            databases=self._databases,
-        )
 
         return self
 
@@ -141,9 +134,15 @@ class SyncHiveDb:
                 # mode with detached indexes and context
                 log.info("[MASSIVE] *** MASSIVE blocks processing ***")
                 self._db.query("COMMIT")  # in massive we re not operating in same transaction as app_next_block query
+
                 DbLiveContextHolder.set_live_context(False)
                 active_connections_before_massive = self._get_active_db_connections()
                 Blocks.setup_own_db_access(shared_db_adapter=self._db)
+                self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
+                    conf=self._conf,
+                    databases=MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db, conf=self._conf),
+                )
+
                 self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._ubound)
 
                 DbState.before_massive_sync(self._lbound, self._ubound)
@@ -184,6 +183,11 @@ class SyncHiveDb:
 
                 DbLiveContextHolder.set_live_context(True)
                 Blocks.setup_own_db_access(shared_db_adapter=self._db)
+                self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
+                    conf=self._conf,
+                    databases=MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db, conf=self._conf, shared=True),
+                )
+
                 self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._lbound)
 
                 if not Blocks.is_consistency():
@@ -192,7 +196,7 @@ class SyncHiveDb:
                 assert Blocks.is_consistency()
 
                 log.info(f"[SINGLE] Attempting to process first block in range: <{self._lbound}:{self._ubound}>")
-                self._blocks_data_provider(self._massive_blocks_data_provider)
+                self._massive_blocks_data_provider.start_without_threading()
                 blocks = self._massive_blocks_data_provider.get(number_of_blocks=1)
                 Blocks.process_multi(blocks, is_massive_sync=False)
 
