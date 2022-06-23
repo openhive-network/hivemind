@@ -157,6 +157,7 @@ sync-e2e-benchmark:
     POSTGRES_CLIENT_TOOLS_PATH: /usr/lib/postgresql
     HIVEMIND_DB_NAME: "hive_${CI_COMMIT_REF_SLUG}"
     HAF_POSTGRES_URL: postgresql://haf_app_admin@haf-instance:5432/haf_block_log
+    HAF_ADMIN_POSTGRES_URL: postgresql://haf_admin@haf-instance:5432/haf_block_log
     RUNNER_POSTGRES_ADMIN_USER: "haf_app_admin"
     RUNNER_POSTGRES_HOST: "haf-instance"
     RUNNER_POSTGRES_PORT: 5432
@@ -180,12 +181,15 @@ sync-e2e-benchmark:
     - echo "HAF image name $HAF_IMAGE_NAME"
     - ./scripts/ci/wait-for-postgres.sh "haf-instance"
     # temporary soln just to get things working
-    - docker logout || true
-    - docker ps
-    - docker network ls
-    - echo $HIVEMIND_CI_IMGBUILDER_PASSWORD | docker login -u "$HIVEMIND_CI_IMG_BUILDER_USER" registry.gitlab.syncad.com/hive/hivemind --password-stdin
-    - echo "Login succeeded - continuing execution"
-    - docker container exec -it haf-instance /bin/bash -c "psql -d haf_block_log -c 'CREATE EXTENSION IF NOT EXISTS intarray;'"
+    # - docker logout || true
+    # - docker info
+    # - docker context list
+    # - docker ps
+    # - docker network ls
+    # - echo $HIVEMIND_CI_IMGBUILDER_PASSWORD | docker login -u "$HIVEMIND_CI_IMG_BUILDER_USER" registry.gitlab.syncad.com/hive/hivemind --password-stdin
+    # - echo "Login succeeded - continuing execution"
+    # - docker container exec -it haf-instance /bin/bash -c "psql -d haf_block_log -c 'CREATE EXTENSION IF NOT EXISTS intarray;'"
+    - psql -d ${HAF_ADMIN_POSTGRES_URL} -c 'CREATE EXTENSION IF NOT EXISTS intarray;'
     - export RUNNER_HIVEMIND_LAST_BLOCK_FOR_MASSIVE=4999979
     - export RUNNER_HIVED_DB_URL=${HAF_POSTGRES_URL}
     - ./scripts/ci/hive-sync.sh
