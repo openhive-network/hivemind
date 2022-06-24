@@ -84,15 +84,14 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
     _op_types_dictionary = {}
 
     class Databases:
-        def __init__(self, db_root: Db, conf: Conf, shared: bool = False):
+        def __init__(self, db_root: Db, shared: bool = False):
             self._db_root = db_root
             self._db_operations = db_root.clone('MassiveBlocksProvider_OperationsData') if not shared else None
             self._db_blocks_data = db_root.clone('MassiveBlocksProvider_BlocksData') if not shared else None
 
             assert self._db_root
 
-        def close(self):
-            self._db_root.close()
+        def close_cloned_databases(self):
             self._db_operations.close()
             self._db_blocks_data.close()
 
@@ -114,6 +113,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         BlocksProviderBase.__init__(self)
 
         self._conf = conf
+        self._databases = databases
         self._db = databases.get_root()
         self._lbound = None
         self._ubound = None
@@ -171,6 +171,9 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
 
         if self._conf.get('test_max_block'):
             self._last_block_num_in_db = self._db.query_one(sql=NUMBER_OF_BLOCKS_QUERY)
+
+    def close_databases(self):
+        self._databases.close_cloned_databases()
 
     @staticmethod
     def _id_to_virtual_type(id_: int):
