@@ -140,7 +140,7 @@ class SyncHiveDb:
                 Blocks.setup_own_db_access(shared_db_adapter=self._db)
                 self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
                     conf=self._conf,
-                    databases=MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db, conf=self._conf),
+                    databases=MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db),
                 )
 
                 self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._ubound)
@@ -160,6 +160,7 @@ class SyncHiveDb:
                 if not self._massive_blocks_data_provider.were_mocks_after_db_blocks:
                     context_attach(db=self._db, block_number=last_block)
                 Blocks.close_own_db_access()
+                self._massive_blocks_data_provider.close_databases()
                 time.sleep(1)
                 active_connections_after_massive = self._get_active_db_connections()
 
@@ -185,7 +186,7 @@ class SyncHiveDb:
                 Blocks.setup_own_db_access(shared_db_adapter=self._db)
                 self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
                     conf=self._conf,
-                    databases=MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db, conf=self._conf, shared=True),
+                    databases=MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db, shared=True),
                 )
 
                 self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._lbound)
