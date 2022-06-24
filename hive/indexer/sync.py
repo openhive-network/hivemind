@@ -100,6 +100,9 @@ class SyncHiveDb:
             self._lbound, self._ubound = self._query_for_app_next_block()
 
             if self._last_block_to_process:
+                if self._ubound and self._ubound > self._last_block_to_process:
+                    self._ubound = self._last_block_to_process
+
                 if last_imported_block >= self._last_block_to_process:
                     log.info(f"REACHED test_max_block of {self._last_block_to_process}")
                     self._db.query("COMMIT")
