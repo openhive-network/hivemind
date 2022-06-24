@@ -16,8 +16,6 @@ from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbLiveContextHolder
 from hive.indexer.hive_db.haf_functions import context_attach, context_detach
 from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
-from hive.indexer.mocking.mock_block_provider import MockBlockProvider
-from hive.indexer.mocking.mock_vops_provider import MockVopsProvider
 from hive.server.common.payout_stats import PayoutStats
 from hive.signals import (
     can_continue_thread,
@@ -45,8 +43,6 @@ class SyncHiveDb:
         # Might be lower or higher than actual block number stored in HAF database
         self._last_block_to_process = self._conf.get('test_max_block')
 
-        self._last_block_for_massive_sync = self._conf.get('test_last_block_for_massive')
-
         self._massive_blocks_data_provider = None
         self._lbound = None
         self._ubound = None
@@ -67,7 +63,6 @@ class SyncHiveDb:
 
         context_attach(db=self._db, block_number=Blocks.head_num())
 
-        self._load_mock_data()
         Accounts.load_ids()  # prefetch id->name and id->rank memory maps
 
         return self
@@ -110,29 +105,14 @@ class SyncHiveDb:
                     self._db.query("COMMIT")
                     return
 
-                if not (self._lbound and self._ubound):  # all blocks from HAF db processed
-                    self._lbound = last_imported_block + 1
-                    self._ubound = self._last_block_to_process
-                else:
-                    self._ubound = min(self._last_block_to_process, self._ubound)
-
-            allow_massive = True
-            if self._last_block_for_massive_sync and self._lbound:
-                if self._lbound < self._last_block_for_massive_sync:
-                    self._ubound = self._last_block_for_massive_sync
-
-                if self._lbound > self._last_block_for_massive_sync:
-                    allow_massive = False
-
             if not (self._lbound and self._ubound):
                 self._db.query("COMMIT")
                 continue
 
             log.info(f"target_head_block: {self._ubound}")
             log.info(f"test_max_block: {self._last_block_to_process}")
-            log.info(f"last_block_for_massive: {self._last_block_for_massive_sync}")
 
-            if self._ubound - self._lbound > 100 and allow_massive:
+            if self._ubound - self._lbound > 100:
                 # mode with detached indexes and context
                 log.info("[MASSIVE] *** MASSIVE blocks processing ***")
                 self._db.query("COMMIT")  # in massive we re not operating in same transaction as app_next_block query
@@ -158,8 +138,7 @@ class SyncHiveDb:
 
                 last_block = Blocks.head_num()
                 DbState.finish_massive_sync(current_imported_block=last_block)
-                if not self._massive_blocks_data_provider.were_mocks_after_db_blocks:
-                    context_attach(db=self._db, block_number=last_block)
+                context_attach(db=self._db, block_number=last_block)
                 Blocks.close_own_db_access()
                 self._massive_blocks_data_provider.close_databases()
 
@@ -225,14 +204,6 @@ class SyncHiveDb:
             assert (
                 is_superuser
             ), 'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
-
-    def _load_mock_data(self) -> None:
-        paths = self._conf.get("mock_block_data_path") or []
-        for path in paths:
-            MockBlockProvider.load_block_data(path)
-
-        if mock_vops_data_path := self._conf.get("mock_vops_data_path"):
-            MockVopsProvider.load_block_data(mock_vops_data_path)
 
     @staticmethod
     def _show_info(database: Db) -> None:
