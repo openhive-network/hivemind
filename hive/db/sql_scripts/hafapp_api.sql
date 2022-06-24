@@ -28,7 +28,7 @@ BEGIN
           AND (ho.op_type_id < 50
                OR ho.op_type_id in (51, 53, 61, 72, 73)
               )
-    ORDER BY ho.id
+    ORDER BY ho.block_num, ho.id
 ;
 
 END
