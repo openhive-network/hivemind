@@ -9,9 +9,6 @@ from hive.conf import Conf
 from hive.db.adapter import Db
 from hive.indexer.block import BlocksProviderBase, OperationType, VirtualOperationType
 from hive.indexer.hive_db.block import BlockHiveDb
-from hive.indexer.mocking.mock_block import BlockMock, ExtendedByMockBlockAdapter
-from hive.indexer.mocking.mock_block_provider import MockBlockProvider
-from hive.indexer.mocking.mock_vops_provider import MockVopsProvider
 from hive.signals import can_continue_thread, set_exception_thrown
 from hive.utils.stats import WaitingStatusManager as WSM
 
@@ -116,8 +113,6 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         self._db = databases.get_root()
         self._lbound = None
         self._ubound = None
-        self._last_block_num_in_db = None
-        self.were_mocks_after_db_blocks = False
 
         self._blocks_per_query = conf.get('max_batch')
         self._blocks_queue = queue.Queue(maxsize=self._blocks_queue_size)
@@ -168,9 +163,6 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         self._operations_provider.update_sync_block_range(lbound, ubound)
         self._blocks_data_provider.update_sync_block_range(lbound, ubound)
 
-        if self._conf.get('test_max_block'):
-            self._last_block_num_in_db = self._db.query_one(sql=NUMBER_OF_BLOCKS_QUERY)
-
     def close_databases(self):
         self._databases.close_cloned_databases()
 
@@ -191,45 +183,8 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
             return vop
         return MassiveBlocksDataProviderHiveDb._id_to_operation_type(id_)
 
-    @staticmethod
-    def _get_mocked_block(block_num, always_create):
-        # normally it should create mocked block only when block mock or vops are added,
-        # but there is a situation when we ask for mock blocks after the database head,
-        # we need to alwyas return at least empty block otherwise live sync streamer
-        # may hang in waiting for new blocks to start process already queued  block ( trailing block mechanism)
-        # that is the reason why 'always_create' parameter was added
-        # NOTE: it affects only situation when mocks are loaded, otherwiese mock provider methods
-        # do not return block data
-        vops_by_block_number = MockVopsProvider.get_mock_vops(block_num)
-
-        block_data = MockBlockProvider.get_block_data(block_num, bool(vops_by_block_number) or always_create)
-        if not block_data:
-            return None
-
-        return BlockMock(block_data, vops_by_block_number)
-
-    def _get_mocks_after_db_blocks(self, first_mock_block_num):
-        for block_proposition in range(first_mock_block_num, self._ubound + 1):
-            if not can_continue_thread():
-                return
-            mocked_block = self._get_mocked_block(block_proposition, True)
-
-            while can_continue_thread():
-                try:
-                    self._blocks_queue.put(mocked_block, True, 1)
-                    break
-                except queue.Full:
-                    continue
-
     def _thread_get_block(self):
         try:
-            # only mocked blocks are possible
-            if self._conf.get('test_max_block') and self._lbound > self._last_block_num_in_db:
-                log.info('ATTEMPTING TO GET MOCK BLOCKS AFTER DB BLOCKS')
-                self.were_mocks_after_db_blocks = True
-                self._get_mocks_after_db_blocks(self._lbound)
-                return
-
             while can_continue_thread():
                 blocks_data = self._get_from_queue(self._blocks_data_queue, 1)  # batches of blocks  (lists)
                 operations = self._get_from_queue(self._operations_queue, 1)
@@ -271,15 +226,6 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
                         if operations[block_operation_idx]['block_num'] > block_data['num']:
                             break
 
-                    mocked_block = self._get_mocked_block(new_block.get_num(), False)
-                    # live sync with mocks needs this, otherwise stream will wait almost forever for a block
-                    MockBlockProvider.set_last_real_block_num_date(
-                        new_block.get_num(), new_block.get_date(), new_block.get_hash()
-                    )
-                    if mocked_block:
-                        new_block = ExtendedByMockBlockAdapter(new_block, mocked_block)
-                        log.info(f'mocked block: {new_block.get_num()}')
-
                     while can_continue_thread():
                         try:
                             self._blocks_queue.put(new_block, True, 1)
@@ -288,13 +234,6 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
                             break
                         except queue.Full:
                             continue
-
-                    # we reach last block in db, now only mocked blocks are possible
-                    if self._conf.get('test_max_block') and new_block.get_num() >= self._last_block_num_in_db:
-                        log.info('ATTEMPTING TO GET MOCK BLOCKS AFTER DB BLOCKS')
-                        self.were_mocks_after_db_blocks = True
-                        self._get_mocks_after_db_blocks(new_block.get_num() + 1)
-                        return
         except:
             set_exception_thrown()
             raise

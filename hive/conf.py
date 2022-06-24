@@ -75,13 +75,6 @@ class Conf:
             help='(debug) only sync to given block, for running sync test',
             default=None,
         )
-        add(
-            '--test-last-block-for-massive',
-            type=int,
-            env_var='TEST_LAST_BLOCK_MASSIVE',
-            help='(debug) stop massive sync on a given LIB then synchronize in LIVE by processing blocks one at a time',
-            default=None,
-        )
         add('--test-profile', type=strtobool, env_var='TEST_PROFILE', help='(debug) profile execution', default=False)
         add(
             '--log-request-times',
