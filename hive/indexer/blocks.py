@@ -529,5 +529,8 @@ class Blocks:
         not_completed_blocks = DB.query_one(
             f"SELECT count(*) FROM {SCHEMA_NAME}.hive_blocks WHERE completed = false LIMIT 1"
         )
-        log.info("[MASSIVE] Number of not completed blocks: %s.", not_completed_blocks)
-        return not_completed_blocks == 0
+
+        if not_completed_blocks:
+            log.warning(f"Number of not completed blocks: {not_completed_blocks}")
+            return False
+        return True
