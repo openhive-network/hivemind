@@ -1,4 +1,5 @@
 from abc import abstractmethod
+import datetime
 import hashlib
 import logging
 from typing import Iterator
@@ -218,3 +219,46 @@ class BlockMock:
     def get_next_transaction(self) -> Iterator[TransactionMock]:
         for transaction_body in self._blocks_data['transactions']:
             yield TransactionMock(block_number=self._block_number, body=transaction_body)
+
+
+class BlockMockAfterDb:
+    def __init__(self, block_number: int, hash: str, previous_hash: str, created_at: datetime.datetime):
+        self._block_number = block_number
+        self._hash = hash
+        self._previous_hash = previous_hash
+        self._created_at = created_at
+
+    @property
+    def block_number(self) -> int:
+        return self._block_number
+
+    @property
+    def hash(self) -> str:
+        return self._hash
+
+    @property
+    def previous_hash(self) -> str:
+        return self._previous_hash
+
+    @property
+    def created_at(self) -> datetime.datetime:
+        return self._created_at
+
+    def push(self) -> None:
+        sql = """
+INSERT INTO
+    hive.blocks (num, hash, prev, created_at)  VALUES
+    (:num, :hash, :prev, :created_at);
+"""
+
+        log.info(f'Attempting to push mocked BLOCK with number: {self.block_number}')
+
+        Db.instance().query(
+            sql=sql,
+            num=self.block_number,
+            hash=self.hash,
+            prev=self.previous_hash,
+            created_at=self.created_at,
+        )
+
+        log.info('BLOCK pushed successfully!')
