@@ -135,14 +135,14 @@ class SyncHiveDb:
                 log.info("[MASSIVE] *** MASSIVE blocks processing ***")
                 self._db.query("COMMIT")  # in massive we re not operating in same transaction as app_next_block query
 
+                DbLiveContextHolder.set_live_context(False)
+                active_connections_before_massive = self._get_active_db_connections()
+                Blocks.setup_own_db_access(shared_db_adapter=self._db)
                 self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
                     conf=self._conf,
                     databases=MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db, conf=self._conf),
                 )
 
-                DbLiveContextHolder.set_live_context(False)
-                active_connections_before_massive = self._get_active_db_connections()
-                Blocks.setup_own_db_access(shared_db_adapter=self._db)
                 self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._ubound)
 
                 DbState.before_massive_sync(self._lbound, self._ubound)
@@ -181,13 +181,13 @@ class SyncHiveDb:
                         f"[SINGLE] Switched to single block processing mode after: {secs_to_str(perf() - start_time)}"
                     )
 
+                DbLiveContextHolder.set_live_context(True)
+                Blocks.setup_own_db_access(shared_db_adapter=self._db)
                 self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
                     conf=self._conf,
                     databases=MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db, conf=self._conf, shared=True),
                 )
 
-                DbLiveContextHolder.set_live_context(True)
-                Blocks.setup_own_db_access(shared_db_adapter=self._db)
                 self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._lbound)
 
                 if not Blocks.is_consistency():
