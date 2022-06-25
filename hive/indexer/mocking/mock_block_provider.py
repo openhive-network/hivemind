@@ -27,12 +27,11 @@ class MockBlockProvider(MockDataProvider):
             )
         cls.last_real_block_num = int(block_num)
         cls.last_real_block_id = block_id
-        new_date = dateutil.parser.isoparse(block_date)
-        if cls.last_real_block_time > new_date:
+        if cls.last_real_block_time > block_date:
             log.error(
-                f"Incoming block {block_num} has older timestamp than previous one: old {cls.last_real_block_time}, new {new_date}"
+                f"Incoming block {block_num} has older timestamp than previous one: old {cls.last_real_block_time}, new {block_date}"
             )
-        cls.last_real_block_time = new_date
+        cls.last_real_block_time = block_date
 
     @classmethod
     def add_block_data_from_file(cls, file_name):
@@ -93,7 +92,7 @@ class MockBlockProvider(MockDataProvider):
         if block_num == cls.last_real_block_num:
             return cls.last_real_block_id
         else:
-            return f"{block_num:08x}00000000000000000000000000000000"
+            return f"\\x{block_num:08x}00000000000000000000000000000000"
 
     @classmethod
     def make_block_timestamp(cls, block_num):
