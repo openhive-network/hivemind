@@ -192,6 +192,7 @@ sync-e2e-benchmark:
     - psql -d ${HAF_ADMIN_POSTGRES_URL} -c 'CREATE EXTENSION IF NOT EXISTS intarray;'
     - export RUNNER_HIVEMIND_LAST_BLOCK_FOR_MASSIVE=4999979
     - export RUNNER_HIVED_DB_URL=${HAF_POSTGRES_URL}
+    - pip install --no-cache-dir --verbose .
     - ./scripts/ci/hive-sync.sh
     - ./scripts/ci/collect-db-stats.sh
     - ./scripts/ci/hive-server.sh start
