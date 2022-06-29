@@ -276,13 +276,14 @@ class DbState:
         current_work_mem = row['work_mem']
 
         sql = """
-DO $$
-BEGIN
-    EXECUTE 'ALTER DATABASE '||current_database()||' SET work_mem TO "{}"';
-END
-$$;
+    SET work_mem TO "{}";
 """
         cls.db().query_no_return(sql.format(workmem_value))
+
+        row = cls.db().query_row("SHOW work_mem")
+        set_work_mem = row['work_mem']
+
+        assert set_work_mem == workmem_value, 'SET work_mem was ineffective?'
 
         return current_work_mem
 
