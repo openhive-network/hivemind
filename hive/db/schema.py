@@ -514,14 +514,12 @@ def drop_fk(db):
 
 def create_fk(db):
     from sqlalchemy.schema import AddConstraint
-    from sqlalchemy import text
 
-    connection = db.get_new_connection('create_fk')
-    connection.execute(text("START TRANSACTION"))
+    db.query_no_return("START TRANSACTION")
     for table in build_metadata().sorted_tables:
         for fk in table.foreign_keys:
-            connection.execute(AddConstraint(fk.constraint))
-    connection.execute(text("COMMIT"))
+            db.query_no_return(AddConstraint(fk.constraint), is_prepared=True)
+    db.query_no_return("COMMIT")
 
 
 def setup(db):
