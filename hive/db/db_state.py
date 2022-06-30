@@ -44,7 +44,9 @@ class DbState:
         # create db schema if needed
         if not cls._is_schema_loaded():
             log.info("[MASSIVE] Create db schema...")
-            setup(cls.db())
+            db_setup = cls.db().clone('setup')
+            setup(db=db_setup)
+            db_setup.close()
 
         # check if massive sync complete
         cls._is_massive_sync = True
