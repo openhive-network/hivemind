@@ -518,10 +518,10 @@ class DbState:
 
             # intentionally disabled since it needs a lot of WAL disk space when switching back to LOGGED
             # set_logged_table_attribute(cls.db(), True)
-
+            start_time_foreign_keys = perf_counter()
             log.info("Recreating foreign keys")
             create_fk(cls.db())
-            log.info("Foreign keys were recreated")
+            log.info(f"Foreign keys were recreated in {perf_counter() - start_time_foreign_keys:.3f}s")
 
             cls._execute_query(cls.db(), "VACUUM (VERBOSE,ANALYZE)")
 
