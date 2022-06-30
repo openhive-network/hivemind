@@ -127,10 +127,6 @@ class Db:
             )
         return self._engine
 
-    def get_new_connection(self, name):
-        self._conn.append({"connection": self.engine().connect(), "name": name})
-        return self.get_connection(len(self._conn) - 1)
-
     def get_dialect(self):
         return self.get_connection(0).dialect
 
