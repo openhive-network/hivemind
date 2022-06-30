@@ -84,8 +84,8 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         def __init__(self, db_root: Db, shared: bool = False):
             self._shared = shared
             self._db_root = db_root
-            self._db_operations = db_root.clone('hivemind_MassiveBlocksProvider_OperationsData')
-            self._db_blocks_data = db_root.clone('hivemind_MassiveBlocksProvider_BlocksData')
+            self._db_operations = db_root.clone('MassiveBlocksProvider_OperationsData')
+            self._db_blocks_data = db_root.clone('MassiveBlocksProvider_BlocksData')
 
             assert self._db_root
             assert self._db_operations
