@@ -82,14 +82,11 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
 
     class Databases:
         def __init__(self, db_root: Db, shared: bool = False):
-            self._shared = shared
             self._db_root = db_root
-            self._db_operations = db_root.clone('MassiveBlocksProvider_OperationsData')
-            self._db_blocks_data = db_root.clone('MassiveBlocksProvider_BlocksData')
+            self._db_operations = db_root.clone('MassiveBlocksProvider_OperationsData') if not shared else None
+            self._db_blocks_data = db_root.clone('MassiveBlocksProvider_BlocksData') if not shared else None
 
             assert self._db_root
-            assert self._db_operations
-            assert self._db_blocks_data
 
         def close_cloned_databases(self):
             self._db_operations.close()
@@ -99,10 +96,10 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
             return self._db_root
 
         def get_operations(self):
-            return self._db_operations if not self._shared else self._db_root
+            return self._db_operations or self._db_root
 
         def get_blocks_data(self):
-            return self._db_blocks_data if not self._shared else self._db_root
+            return self._db_blocks_data or self._db_root
 
     def __init__(
         self,
