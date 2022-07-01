@@ -3,9 +3,8 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 import logging
-import time
 from time import perf_counter as perf
-from typing import Tuple
+from typing import Iterable, Tuple
 
 from hive.conf import Conf, SCHEMA_NAME
 from hive.db.adapter import Db
@@ -96,6 +95,8 @@ class SyncHiveDb:
                 restore_default_signal_handlers()
                 return
 
+            active_connections_before = self._get_active_db_connections()
+
             last_imported_block = Blocks.head_num()
             log.info(f"Last imported block is: {last_imported_block}")
 
@@ -136,7 +137,6 @@ class SyncHiveDb:
                 self._db.query("COMMIT")  # in massive we re not operating in same transaction as app_next_block query
 
                 DbLiveContextHolder.set_live_context(False)
-                active_connections_before_massive = self._get_active_db_connections()
                 Blocks.setup_own_db_access(shared_db_adapter=self._db)
                 self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
                     conf=self._conf,
@@ -161,16 +161,10 @@ class SyncHiveDb:
                     context_attach(db=self._db, block_number=last_block)
                 Blocks.close_own_db_access()
                 self._massive_blocks_data_provider.close_databases()
-                time.sleep(1)
+
                 active_connections_after_massive = self._get_active_db_connections()
+                self._assert_connections_closed(active_connections_before, active_connections_after_massive)
 
-                assert_message = (
-                    f'Some db connections used in massive sync were not closed!\n'
-                    f'before: {active_connections_before_massive}\n'
-                    f'after: {active_connections_after_massive}'
-                )
-
-                assert len(active_connections_after_massive) == len(active_connections_before_massive), assert_message
             else:
                 # mode with attached indexes and context
                 log.info("[SINGLE] *** SINGLE block processing***")
@@ -200,6 +194,9 @@ class SyncHiveDb:
                 self._massive_blocks_data_provider.start_without_threading()
                 blocks = self._massive_blocks_data_provider.get(number_of_blocks=1)
                 Blocks.process_multi(blocks, is_massive_sync=False)
+
+                active_connections_after_live = self._get_active_db_connections()
+                self._assert_connections_closed(active_connections_before, active_connections_after_live)
 
     def _query_for_app_next_block(self) -> Tuple[int, int]:
         log.info("Querying for next block for app context...")
@@ -376,3 +373,14 @@ class SyncHiveDb:
         sql = "SELECT application_name FROM pg_stat_activity WHERE application_name LIKE 'hivemind_%';"
         active_connections = self._db.query_all(sql)
         return active_connections
+
+    @staticmethod
+    def _assert_connections_closed(connections_before: Iterable, connections_after: Iterable) -> None:
+        assert_message = (
+            f'Some db connections used in '
+            f'{"LIVE" if DbLiveContextHolder.is_live_context() else "MASSIVE"} sync were not closed!\n'
+            f'before: {connections_before}\n'
+            f'after: {connections_after}'
+        )
+
+        assert set(connections_before) == set(connections_after), assert_message
