@@ -131,8 +131,8 @@ prepare_haf_image:
     REGISTRY_PASS: $HAF_IMG_BUILDER_PASSWORD
 
   tags:
-    - hivemind-heavy-job
-    - hive-4
+    - public-runner-docker
+    - hived-for-tests
 
 .hivemind-sync:
   # Postgres shared on host.
@@ -457,7 +457,8 @@ sync-e2e-benchmark:
       dotenv: variables.env
     expire_in: 7 days
   tags:
-    - hivemind-heavy-job
+    - public-runner-docker
+    - hived-for-tests
 
 Trigger benchmark-results-collector:
   stage: post-deploy
