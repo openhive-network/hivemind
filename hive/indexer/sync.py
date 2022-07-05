@@ -1,8 +1,8 @@
 """Hive sync manager."""
 
-import logging
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+import logging
 from pathlib import Path
 from time import perf_counter as perf
 from typing import Final, Tuple
@@ -51,6 +51,8 @@ class SyncHiveDb:
         # Might be lower or higher than actual block number stored in HAF database
         self._last_block_to_process = self._conf.get('test_max_block')
 
+        self._last_block_for_massive_sync = self._conf.get('test_last_block_for_massive')
+
         self._massive_blocks_data_provider = None
         self._lbound = None
         self._ubound = None
@@ -82,6 +84,11 @@ class SyncHiveDb:
         self._prepare_app_context()
         self._prepare_app_schema()
 
+        self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
+            databases=self._databases,
+            number_of_blocks_in_batch=self._conf.get('max_batch'),
+        )
+
         return self
 
     def __exit__(self, exc_type, value, traceback):
@@ -93,6 +100,7 @@ class SyncHiveDb:
 
         last_imported_block = Blocks.head_num()
         DbState.finish_massive_sync(current_imported_block=last_imported_block)
+        PayoutStats.generate()
 
         Blocks.close_own_db_access()
         if self._databases:
@@ -114,6 +122,14 @@ class SyncHiveDb:
 
             self._lbound, self._ubound = self._query_for_app_next_block()
 
+            allow_massive = True
+            if self._last_block_for_massive_sync and self._lbound:
+                if self._lbound < self._last_block_for_massive_sync:
+                    self._ubound = self._last_block_for_massive_sync
+
+                if self._lbound > self._last_block_for_massive_sync:
+                    allow_massive = False
+
             if self._last_block_to_process:
                 if last_imported_block >= self._last_block_to_process:
                     log.info(f"REACHED test_max_block of {self._last_block_to_process}")
@@ -132,16 +148,11 @@ class SyncHiveDb:
             log.info(f"target_head_block: {self._ubound}")
             log.info(f"test_max_block: {self._last_block_to_process}")
 
-            self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
-                databases=self._databases,
-                number_of_blocks_in_batch=self._conf.get('max_batch'),
-                lbound=self._lbound,
-                ubound=self._ubound,
-            )
-
-            if self._ubound - self._lbound > 100:
+            if self._ubound - self._lbound > 100 and allow_massive:
                 # mode with detached indexes and context
                 log.info("[MASSIVE] *** MASSIVE blocks processing ***")
+                self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._ubound)
+
                 DbState.before_massive_sync(self._lbound, self._ubound)
 
                 self._context_detach()
@@ -153,9 +164,11 @@ class SyncHiveDb:
             else:
                 # mode with attached indexes and context
                 log.info("[SINGLE] *** SINGLE block processing***")
+                self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._lbound)
+
                 log.info(f"Attempting to process first block in range: <{self._lbound}:{self._ubound}>")
                 self._blocks_data_provider(self._massive_blocks_data_provider)
-                blocks = self._massive_blocks_data_provider.get(1)
+                blocks = self._massive_blocks_data_provider.get(number_of_blocks=1)
                 Blocks.process_multi(blocks, is_massive_sync=False)
                 self._periodic_actions(blocks[0])
 
