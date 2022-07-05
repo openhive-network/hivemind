@@ -73,7 +73,6 @@ class Blocks:
         cls._conf = conf
         Blocks.setup_own_db_access(shared_db_adapter=conf.db())
 
-
     @staticmethod
     def setup_own_db_access(shared_db_adapter: Db) -> None:
         PostDataCache.setup_own_db_access(shared_db_adapter, "PostDataCache")
