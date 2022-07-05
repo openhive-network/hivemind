@@ -16,7 +16,6 @@ from hive.utils.stats import WaitingStatusManager as WSM
 
 log = logging.getLogger(__name__)
 
-
 OPERATIONS_QUERY: Final[str] = "SELECT * FROM hivemind_app.enum_operations4hivemind(:first, :last)"
 BLOCKS_QUERY: Final[str] = "SELECT * FROM hivemind_app.enum_blocks4hivemind(:first, :last)"
 NUMBER_OF_BLOCKS_QUERY: Final[str] = "SELECT num FROM hive.blocks ORDER BY num DESC LIMIT 1"
@@ -30,24 +29,24 @@ class BlocksDataFromDbProvider:
         sql_query: str,
         db: Db,
         blocks_per_request: int,
-        lbound: int,
-        ubound: int,
         external_thread_pool: Optional[ThreadPoolExecutor] = None,
     ):
         """
-        lbound - block from which the processing starts
-        ubound - last to get block's number
         external_thread_pool - thread pool controlled outside the class
         """
 
         assert blocks_per_request >= 1
 
-        self._lbound = lbound
-        self._ubound = ubound  # to inlude upperbound in results
+        self._lbound = None
+        self._ubound = None
         self._db = db
         self._thread_pool = external_thread_pool if external_thread_pool else ThreadPoolExecutor(1)
         self._blocks_per_request = blocks_per_request
         self._sql_query = sql_query
+
+    def update_sync_block_range(self, lbound: int, ubound: int) -> None:
+        self._lbound = lbound
+        self._ubound = ubound
 
     def thread_body_get_data(self, queue_for_data):
         try:
@@ -64,6 +63,11 @@ class BlocksDataFromDbProvider:
                         break
                     except queue.Full:
                         continue
+            log.info(
+                f'Processed'
+                f' {"operations" if self._sql_query == OPERATIONS_QUERY else "blocks data"}'
+                f' {self._lbound}:{self._ubound}'
+            )
         except:
             set_exception_thrown()
             raise
@@ -109,23 +113,13 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         self,
         databases: Databases,
         number_of_blocks_in_batch: int,
-        lbound: int,
-        ubound: int,
         external_thread_pool: Optional[ThreadPoolExecutor] = None,
     ):
-        """
-        databases - object Databases with opened databases
-        lbound - start blocks
-        ubound - last block
-        """
-        assert lbound <= ubound
-        assert lbound >= 1
-
         BlocksProviderBase.__init__(self)
 
         self._db = databases.get_root()
-        self._lbound = lbound
-        self._ubound = ubound
+        self._lbound = None
+        self._ubound = None
         self._blocks_per_query = number_of_blocks_in_batch
         self._blocks_queue = queue.Queue(maxsize=self._blocks_queue_size)
         self._operations_queue = queue.Queue(maxsize=self._operations_queue_size)
@@ -138,21 +132,16 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
             external_thread_pool if external_thread_pool else MassiveBlocksDataProviderHiveDb.create_thread_pool()
         )
 
-        # read all blocks from db, rest of blocks ( ubound - self._last_block_num_in_db ) are supposed to be mocks
         self._operations_provider = BlocksDataFromDbProvider(
             sql_query=OPERATIONS_QUERY,
             db=databases.get_operations(),
             blocks_per_request=self._blocks_per_query,
-            lbound=self._lbound,
-            ubound=self._ubound,
             external_thread_pool=self._thread_pool,
         )
         self._blocks_data_provider = BlocksDataFromDbProvider(
             sql_query=BLOCKS_QUERY,
             db=databases.get_blocks_data(),
             blocks_per_request=self._blocks_per_query,
-            lbound=self._lbound,
-            ubound=self._ubound,
             external_thread_pool=self._thread_pool,
         )
 
@@ -173,6 +162,15 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
                 MassiveBlocksDataProviderHiveDb._op_types_dictionary[id] = OperationType.from_name(
                     name[len('hive::protocol::') :]
                 )
+
+    def update_sync_block_range(self, lbound: int, ubound: int) -> None:
+        assert lbound <= ubound
+        assert lbound >= 1
+
+        self._lbound = lbound
+        self._ubound = ubound
+        self._operations_provider.update_sync_block_range(lbound, ubound)
+        self._blocks_data_provider.update_sync_block_range(lbound, ubound)
 
     @staticmethod
     def _id_to_virtual_type(id_: int):
@@ -226,8 +224,6 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
 
     def _thread_get_block(self):
         try:
-            currently_received_block = 0
-
             # only mocked blocks are possible
             if self._lbound > self._last_block_num_in_db:
                 log.info('ATTEMPTING TO GET MOCK BLOCKS AFTER DB BLOCKS')
@@ -291,8 +287,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
                     while can_continue_thread():
                         try:
                             self._blocks_queue.put(new_block, True, 1)
-                            currently_received_block += 1
-                            if currently_received_block >= self._ubound:
+                            if block_data['num'] >= self._ubound:
                                 return
                             break
                         except queue.Full:
@@ -300,6 +295,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
 
                     # we reach last block in db, now only mocked blocks are possible
                     if new_block.get_num() >= self._last_block_num_in_db:
+                        log.info('ATTEMPTING TO GET MOCK BLOCKS AFTER DB BLOCKS')
                         self._get_mocks_after_db_blocks(new_block.get_num() + 1)
                         return
         except:
