@@ -107,6 +107,13 @@ class Conf:
             default=None,
         )
         add(
+            '--test-last-block-for-massive',
+            type=int,
+            env_var='TEST_LAST_BLOCK_MASSIVE',
+            help='(debug) stop massive sync on a given LIB then synchronize in LIVE by processing blocks one at a time',
+            default=None,
+        )
+        add(
             '--test-skip-ais-phase',
             env_var='TEST_SKIP_AIS_PHASE',
             help='(debug) Allows to skip After-Initial-Sync phase. Useful to go into live sync or exit if TEST_MAX_BLOCK is used',
