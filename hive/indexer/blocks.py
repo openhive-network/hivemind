@@ -208,7 +208,7 @@ class Blocks:
             cls.flush_data_in_1_thread()
             if first_block > -1:
                 log.info("[PROCESS MULTI] Tables updating in live synchronization")
-                cls.on_live_blocks_processed(first_block, last_num)
+                cls.on_live_blocks_processed(first_block)
                 cls._periodic_actions(blocks[0])
 
         DB.query("COMMIT")
@@ -497,23 +497,23 @@ class Blocks:
 
     @staticmethod
     @time_it
-    def on_live_blocks_processed(lbound: int, ubound: int) -> None:
+    def on_live_blocks_processed(block_number: int) -> None:
         """Is invoked when processing of block range is done and received
         informations from hived are already stored in db
         """
-        is_hour_action = ubound % 1200 == 0
+        is_hour_action = block_number % 1200 == 0
 
         queries = [
-            f"SELECT {SCHEMA_NAME}.update_posts_rshares({lbound}, {ubound})",
-            f"SELECT {SCHEMA_NAME}.update_hive_posts_children_count({lbound}, {ubound})",
-            f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id({lbound},{ubound})",
-            f"SELECT {SCHEMA_NAME}.update_hive_posts_api_helper({lbound},{ubound})",
-            f"SELECT {SCHEMA_NAME}.update_feed_cache({lbound}, {ubound})",
-            f"SELECT {SCHEMA_NAME}.update_hive_posts_mentions({lbound}, {ubound})",
-            f"SELECT {SCHEMA_NAME}.update_notification_cache({lbound}, {ubound}, {is_hour_action})",
-            f"SELECT {SCHEMA_NAME}.update_follow_count({lbound}, {ubound})",
-            f"SELECT {SCHEMA_NAME}.update_account_reputations({lbound}, {ubound}, False)",
-            f"SELECT {SCHEMA_NAME}.update_hive_blocks_consistency_flag({lbound}, {ubound})",
+            f"SELECT {SCHEMA_NAME}.update_posts_rshares({block_number}, {block_number})",
+            f"SELECT {SCHEMA_NAME}.update_hive_posts_children_count({block_number}, {block_number})",
+            f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id({block_number},{block_number})",
+            f"SELECT {SCHEMA_NAME}.update_hive_posts_api_helper({block_number},{block_number})",
+            f"SELECT {SCHEMA_NAME}.update_feed_cache({block_number}, {block_number})",
+            f"SELECT {SCHEMA_NAME}.update_hive_posts_mentions({block_number}, {block_number})",
+            f"SELECT {SCHEMA_NAME}.update_notification_cache({block_number}, {block_number}, {is_hour_action})",
+            f"SELECT {SCHEMA_NAME}.update_follow_count({block_number}, {block_number})",
+            f"SELECT {SCHEMA_NAME}.update_account_reputations({block_number}, {block_number}, False)",
+            f"SELECT {SCHEMA_NAME}.update_hive_blocks_consistency_flag({block_number}, {block_number})",
         ]
 
         for query in queries:
