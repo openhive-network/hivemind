@@ -156,32 +156,32 @@ class Db:
 
         # this method is reserved for anything but SELECT
         assert self._is_write_query(sql), sql
-        return self._query(sql, False, **kwargs)
+        return self._query(sql, **kwargs)
 
     def query_prepared(self, sql, **kwargs):
         self._query(sql, True, **kwargs)
 
     def query_no_return(self, sql, **kwargs):
-        self._query(sql, False, **kwargs)
+        self._query(sql, **kwargs)
 
     def query_all(self, sql, **kwargs):
         """Perform a `SELECT n*m`"""
-        res = self._query(sql, False, **kwargs)
+        res = self._query(sql,**kwargs)
         return res.fetchall()
 
     def query_row(self, sql, **kwargs):
         """Perform a `SELECT 1*m`"""
-        res = self._query(sql, False, **kwargs)
+        res = self._query(sql, **kwargs)
         return first(res)
 
     def query_col(self, sql, **kwargs):
         """Perform a `SELECT n*1`"""
-        res = self._query(sql, False, **kwargs).fetchall()
+        res = self._query(sql, **kwargs).fetchall()
         return [r[0] for r in res]
 
     def query_one(self, sql, **kwargs):
         """Perform a `SELECT 1*1`"""
-        row = first(self._query(sql, False, **kwargs))
+        row = first(self._query(sql, **kwargs))
         return first(row) if row else None
 
     def engine_name(self):
@@ -251,7 +251,7 @@ class Db:
             query = sqlalchemy.text(sql)
         return query
 
-    def _query(self, sql, is_prepared, **kwargs):
+    def _query(self, sql, is_prepared: bool = False, **kwargs):
         """Send a query off to SQLAlchemy."""
         if sql == 'START TRANSACTION':
             assert not self._trx_active
