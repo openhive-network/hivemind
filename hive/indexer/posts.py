@@ -121,7 +121,7 @@ class Posts(DbAdapterHolder):
         #        log.info("Adding author: {}  permlink: {}".format(op['author'], op['permlink']))
         PostDataCache.add_data(result['id'], post_data, is_new_post)
 
-        if not DbState.is_initial_sync():
+        if not DbState.is_massive_sync():
             if error:
                 author_id = result['author_id']
                 Notify(
