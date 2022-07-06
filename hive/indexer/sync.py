@@ -210,14 +210,18 @@ class SyncHiveDb:
 
     @staticmethod
     def _show_info(database: Db) -> None:
-        last_block = Blocks.head_num()
+        from hive.utils.misc import show_app_version, BlocksInfo, PatchLevelInfo
 
-        sql = f"SELECT level, patch_date, patched_to_revision FROM {SCHEMA_NAME}.hive_db_patch_level ORDER BY level DESC LIMIT 1"
-        patch_level_data = database.query_row(sql)
+        blocks_info = BlocksInfo(
+            last=Blocks.head_num(),
+            last_imported=Blocks.last_imported(),
+            last_completed=Blocks.last_completed(),
+        )
 
-        from hive.utils.misc import show_app_version
+        sql = f"SELECT * FROM {SCHEMA_NAME}.hive_db_patch_level ORDER BY level DESC LIMIT 1"
+        patch_level_info = PatchLevelInfo(**database.query_row(sql))
 
-        show_app_version(log, last_block, patch_level_data)
+        show_app_version(log, blocks_info, patch_level_info)
 
     @staticmethod
     def _blocks_data_provider(blocks_data_provider: BlocksProviderBase) -> None:
