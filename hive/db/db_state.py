@@ -367,9 +367,9 @@ class DbState:
     def _finish_blocks_consistency_flag(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_blocks_consistency_flag") as db_mgr:
             time_start = perf_counter()
-            sql = f"SELECT {SCHEMA_NAME}.update_hive_blocks_consistency_flag({last_imported_block}, {current_imported_block});"
+            sql = f"SELECT {SCHEMA_NAME}.update_last_completed_block({current_imported_block});"
             cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
-            log.info("[MASSIVE] update_hive_blocks_consistency_flag executed in %.4fs", perf_counter() - time_start)
+            log.info("[MASSIVE] update_last_completed_block executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_notification_cache(cls, db):
@@ -466,10 +466,11 @@ class DbState:
     @classmethod
     def _after_massive_sync(cls, current_imported_block: int) -> None:
         """Re-creates non-core indexes for serving APIs after massive sync, as well as all foreign keys."""
+        from hive.indexer.blocks import Blocks
 
         start_time = perf_counter()
 
-        last_imported_block = DbState.db().query_one(f"SELECT block_num FROM {SCHEMA_NAME}.hive_state LIMIT 1")
+        last_imported_block = Blocks.last_completed()
 
         log.info(
             "[MASSIVE] Current imported block: %s. Last imported block: %s.",
@@ -502,11 +503,6 @@ class DbState:
         log.info("Filling tables with final values: started")
         cls._finish_all_tables(massive_sync_preconditions, last_imported_block, current_imported_block)
         log.info("Filling tables with final values: finished")
-
-        # Update a block num immediately
-        cls.db().query_no_return(
-            f"UPDATE {SCHEMA_NAME}.hive_state SET block_num = :block_num", block_num=current_imported_block
-        )
 
         if massive_sync_preconditions:
             from hive.db.schema import create_fk
