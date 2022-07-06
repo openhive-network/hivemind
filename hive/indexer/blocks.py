@@ -41,7 +41,7 @@ def time_collector(f):
 
 
 class Blocks:
-    """Processes blocks, dispatches work, manages `hive_blocks` table."""
+    """Processes blocks, dispatches work, manages the state of the database (blocks consistency, and numbers)."""
 
     _conf = None
     _head_block_date = None
@@ -101,8 +101,26 @@ class Blocks:
 
     @staticmethod
     def head_num() -> int:
-        """Get hive's head block number."""
-        sql = f"SELECT num FROM {SCHEMA_NAME}.hive_blocks ORDER BY num DESC LIMIT 1"
+        """Get head block number from the application view (hive.hivemind_app_blocks_view)."""
+        sql = f"SELECT MAX(num) FROM hive.{SCHEMA_NAME}_blocks_view;"
+        return DB.query_one(sql) or 0
+
+    @staticmethod
+    def last_imported() -> int:
+        """
+        Get hivemind_app last block that was imported.
+        (could not be completed yet! which means there were no update queries run with this block number)
+        """
+        sql = f"SELECT last_imported_block_num FROM {SCHEMA_NAME}.hive_state;"
+        return DB.query_one(sql) or 0
+
+    @staticmethod
+    def last_completed() -> int:
+        """
+        Get hivemind_app last block that was completed.
+        (block is considered as completed when all update queries were run with this block number)
+        """
+        sql = f"SELECT last_completed_block_num FROM {SCHEMA_NAME}.hive_state;"
         return DB.query_one(sql) or 0
 
     @staticmethod
@@ -181,7 +199,7 @@ class Blocks:
         # deltas in memory and update follow/er counts in bulk.
 
         log.info("#############################################################################")
-        register_time(flush_time, "Blocks", cls._flush_blocks())
+        DB.query_no_return(f'SELECT {SCHEMA_NAME}.update_last_imported_block({last_num});')
         return first_block, last_num
 
     @classmethod
@@ -416,7 +434,7 @@ class Blocks:
             f"SELECT {SCHEMA_NAME}.update_notification_cache({block_number}, {block_number}, {is_hour_action})",
             f"SELECT {SCHEMA_NAME}.update_follow_count({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_account_reputations({block_number}, {block_number}, False)",
-            f"SELECT {SCHEMA_NAME}.update_hive_blocks_consistency_flag({block_number}, {block_number})",
+            f"SELECT {SCHEMA_NAME}.update_last_completed_block({block_number})",
         ]
 
         for query in queries:
@@ -426,12 +444,11 @@ class Blocks:
 
     @staticmethod
     def is_consistency() -> bool:
-        """Check if all tuples in `hive_blocks` are written correctly.
-        If any record has `completed` == false, it indicates that the database was closed incorrectly or a rollback failed.
         """
-        not_completed_blocks = DB.query_one(
-            f"SELECT count(*) FROM {SCHEMA_NAME}.hive_blocks WHERE completed = false LIMIT 1"
-        )
+        Check if all tuples in are written correctly.
+        If there are any not_completed_blocks, it means that there were no update queries ran on these blocks.
+        """
+        not_completed_blocks = Blocks.last_imported() - Blocks.last_completed()
 
         if not_completed_blocks:
             log.warning(f"Number of not completed blocks: {not_completed_blocks}")
