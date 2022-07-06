@@ -61,7 +61,7 @@ class SyncHiveDb:
 
         self._check_log_explain_queries()
 
-        context_attach(db=self._db, block_number=Blocks.head_num())
+        context_attach(db=self._db, block_number=Blocks.last_imported())
 
         Accounts.load_ids()  # prefetch id->name and id->rank memory maps
 
@@ -72,8 +72,10 @@ class SyncHiveDb:
         Blocks.setup_own_db_access(shared_db_adapter=self._db)  # needed for PayoutStats.generate
         PayoutStats.generate(separate_transaction=True)
 
-        last_imported_block = Blocks.head_num()
+        last_imported_block = Blocks.last_imported()
         log.info(f'LAST IMPORTED BLOCK IS: {last_imported_block}')
+        log.info(f'LAST COMPLETED BLOCK IS: {Blocks.last_completed()}')
+
         context_attach(db=self._db, block_number=last_imported_block)
 
         Blocks.close_own_db_access()
@@ -93,7 +95,7 @@ class SyncHiveDb:
 
             active_connections_before = self._get_active_db_connections()
 
-            last_imported_block = Blocks.head_num()
+            last_imported_block = Blocks.last_imported()
             log.info(f"Last imported block is: {last_imported_block}")
 
             self._db.query("START TRANSACTION")
@@ -139,9 +141,9 @@ class SyncHiveDb:
                     restore_default_signal_handlers()
                     return
 
-                last_block = Blocks.head_num()
-                DbState.finish_massive_sync(current_imported_block=last_block)
-                context_attach(db=self._db, block_number=last_block)
+                last_imported_block = Blocks.last_imported()
+                DbState.finish_massive_sync(current_imported_block=last_imported_block)
+                context_attach(db=self._db, block_number=last_imported_block)
                 Blocks.close_own_db_access()
                 self._massive_blocks_data_provider.close_databases()
 
@@ -169,8 +171,7 @@ class SyncHiveDb:
                 self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._lbound)
 
                 if not Blocks.is_consistency():
-                    last_block = Blocks.head_num()
-                    DbState._after_massive_sync(current_imported_block=last_block)
+                    DbState._after_massive_sync(current_imported_block=Blocks.last_imported())
                 assert Blocks.is_consistency()
 
                 log.info(f"[SINGLE] Attempting to process first block in range: <{self._lbound}:{self._ubound}>")
