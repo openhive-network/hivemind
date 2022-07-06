@@ -65,9 +65,7 @@ class SyncHiveDb:
 
         self._check_log_explain_queries()
 
-        if not Blocks.is_consistency():
-            last_block = Blocks.head_num()
-            context_attach(db=self._db, block_number=last_block)
+        context_attach(db=self._db, block_number=Blocks.head_num())
 
         self._load_mock_data()
         Accounts.load_ids()  # prefetch id->name and id->rank memory maps
@@ -79,7 +77,10 @@ class SyncHiveDb:
         Blocks.setup_own_db_access(shared_db_adapter=self._db)  # needed for PayoutStats.generate
         PayoutStats.generate(separate_transaction=True)
 
-        log.info(f'LAST IMPORTED BLOCK IS: {Blocks.head_num()}')
+        last_imported_block = Blocks.head_num()
+        log.info(f'LAST IMPORTED BLOCK IS: {last_imported_block}')
+        context_attach(db=self._db, block_number=last_imported_block)
+
         Blocks.close_own_db_access()
         if self._databases:
             self._databases.close()
