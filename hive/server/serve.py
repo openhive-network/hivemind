@@ -242,15 +242,18 @@ def run_server(conf):
         await app['db'].wait_closed()
 
     async def show_info(app):
-        sql = f"SELECT num FROM {SCHEMA_NAME}.hive_blocks ORDER BY num DESC LIMIT 1"
-        database_head_block = await app['db'].query_one(sql)
+        from hive.utils.misc import show_app_version, BlocksInfo, PatchLevelInfo
 
-        sql = f"SELECT level, patch_date, patched_to_revision FROM {SCHEMA_NAME}.hive_db_patch_level ORDER BY level DESC LIMIT 1"
-        patch_level_data = await app['db'].query_row(sql)
+        last = await app['db'].query_one(f"SELECT MAX(num) FROM hive.{SCHEMA_NAME}_blocks_view;")
+        last_imported = await app['db'].query_one(f"SELECT last_imported_block_num FROM {SCHEMA_NAME}.hive_state;")
+        last_completed = await app['db'].query_one(f"SELECT last_completed_block_num FROM {SCHEMA_NAME}.hive_state;")
 
-        from hive.utils.misc import show_app_version
+        blocks_info = BlocksInfo(last, last_imported, last_completed)
 
-        show_app_version(log, database_head_block, patch_level_data)
+        sql = f"SELECT * FROM {SCHEMA_NAME}.hive_db_patch_level ORDER BY level DESC LIMIT 1;"
+        patch_level_info = PatchLevelInfo(**await app['db'].query_row(sql))
+
+        show_app_version(log, blocks_info, patch_level_info)
 
     app.on_startup.append(init_db)
     app.on_startup.append(show_info)
