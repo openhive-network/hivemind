@@ -219,7 +219,6 @@ def build_metadata():
         sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id'], name='hive_votes_fk2', deferrable=True),
         sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_votes_fk3', deferrable=True),
         sa.ForeignKeyConstraint(['permlink_id'], ['hive_permlink_data.id'], name='hive_votes_fk4', deferrable=True),
-        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_votes_fk5', deferrable=True),
         sa.Index(
             'hive_votes_voter_id_post_id_idx', 'voter_id', 'post_id'
         ),  # probably this index is redundant to hive_votes_voter_id_last_update_idx because of starting voter_id.
@@ -260,7 +259,6 @@ def build_metadata():
         sa.Column('follow_muted', BOOLEAN, nullable=False, server_default='0'),
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.UniqueConstraint('following', 'follower', name='hive_follows_ux1'),  # core
-        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_follows_fk1', deferrable=True),
         sa.Index('hive_follows_ix5a', 'following', 'state', 'created_at', 'follower'),
         sa.Index('hive_follows_ix5b', 'follower', 'state', 'created_at', 'following'),
         sa.Index('hive_follows_block_num_idx', 'block_num'),
@@ -278,7 +276,6 @@ def build_metadata():
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.ForeignKeyConstraint(['blogger_id'], ['hive_accounts.id'], name='hive_reblogs_fk1', deferrable=True),
         sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_reblogs_fk2', deferrable=True),
-        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_reblogs_fk3', deferrable=True),
         sa.UniqueConstraint('blogger_id', 'post_id', name='hive_reblogs_ux1'),  # core
         sa.Index('hive_reblogs_post_id', 'post_id'),
         sa.Index('hive_reblogs_block_num_idx', 'block_num'),
@@ -314,7 +311,6 @@ def build_metadata():
         sa.Column('created_at', sa.DateTime, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.PrimaryKeyConstraint('account_id', 'post_id', name='hive_feed_cache_pk'),
-        sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_feed_cache_fk1', deferrable=True),
         sa.Index('hive_feed_cache_block_num_idx', 'block_num'),
         sa.Index('hive_feed_cache_created_at_idx', 'created_at'),
         sa.Index('hive_feed_cache_post_id_idx', 'post_id'),
@@ -537,7 +533,7 @@ def setup(db):
 
     # default rows
     sqls = [
-        f"INSERT INTO {SCHEMA_NAME}.hive_state (last_imported_block_num, last_completed_block_num, db_version) VALUES (0, 0, 0)",
+        f"INSERT INTO {SCHEMA_NAME}.hive_state (last_imported_block_num, last_completed_block_num, db_version) VALUES (1, 1, 0)",
         f"INSERT INTO {SCHEMA_NAME}.hive_permlink_data (id, permlink) VALUES (0, '')",
         f"INSERT INTO {SCHEMA_NAME}.hive_category_data (id, category) VALUES (0, '')",
         f"INSERT INTO {SCHEMA_NAME}.hive_tag_data (id, tag) VALUES (0, '')",
