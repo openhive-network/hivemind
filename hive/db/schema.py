@@ -25,21 +25,6 @@ def build_metadata():
     hive_rowid_seq = sa.Sequence('hive.hivemind_app_hive_rowid_seq', metadata=metadata)
 
     sa.Table(
-        'hive_blocks',
-        metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
-        sa.Column('num', sa.Integer, primary_key=True, autoincrement=False),
-        sa.Column('hash', CHAR(40), nullable=False),
-        sa.Column('prev', CHAR(40)),
-        sa.Column('created_at', sa.DateTime, nullable=False),
-        sa.Column('completed', sa.Boolean, nullable=False, server_default='0'),
-        sa.UniqueConstraint('hash', name='hive_blocks_ux1'),
-        sa.ForeignKeyConstraint(['prev'], ['hive_blocks.hash'], name='hive_blocks_fk1', deferrable=True),
-        sa.Index('hive_blocks_created_at_idx', 'created_at'),
-        sa.Index('hive_blocks_completed_idx', 'completed'),
-    )
-
-    sa.Table(
         'hive_accounts',
         metadata,
         sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
@@ -742,7 +727,6 @@ def reset_autovac(db):
         'hive_posts': (2500, 10000),
         'hive_follows': (5000, 5000),
         'hive_feed_cache': (5000, 5000),
-        'hive_blocks': (5000, 25000),
         'hive_reblogs': (5000, 5000),
         'hive_payments': (5000, 5000),
     }
