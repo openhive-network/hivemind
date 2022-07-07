@@ -124,7 +124,7 @@ UNION ALL
     ''::character varying AS community_title,
     ''::character varying AS payload
    FROM hivemind_app.hive_follows hf
-   JOIN hivemind_app.hive_blocks hb ON hb.num = hf.block_num - 1 -- use time of previous block to match head_block_time behavior at given block
+   JOIN hive.hivemind_app_blocks_view hb ON hb.num = hf.block_num - 1 -- use time of previous block to match head_block_time behavior at given block
    WHERE hf.state = 1 --only follow blog
 
 UNION ALL
@@ -169,7 +169,7 @@ UNION ALL
     ''::character varying AS payload
    FROM hivemind_app.hive_mentions hm
    JOIN hivemind_app.hive_posts hp ON hm.post_id = hp.id
-   JOIN hivemind_app.hive_blocks hb ON hb.num = hm.block_num - 1 -- use time of previous block to match head_block_time behavior at given block
+   JOIN hive.hivemind_app_blocks_view hb ON hb.num = hm.block_num - 1 -- use time of previous block to match head_block_time behavior at given block
 ) notifs
 JOIN hivemind_app.hive_accounts_rank_view harv ON harv.id = notifs.src
 ;
