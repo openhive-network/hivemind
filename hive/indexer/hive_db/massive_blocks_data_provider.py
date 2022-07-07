@@ -16,7 +16,6 @@ log = logging.getLogger(__name__)
 
 OPERATIONS_QUERY: Final[str] = "SELECT * FROM hivemind_app.enum_operations4hivemind(:first, :last)"
 BLOCKS_QUERY: Final[str] = "SELECT * FROM hivemind_app.enum_blocks4hivemind(:first, :last)"
-NUMBER_OF_BLOCKS_QUERY: Final[str] = "SELECT num FROM hive.blocks ORDER BY num DESC LIMIT 1"
 
 
 class BlocksDataFromDbProvider:
