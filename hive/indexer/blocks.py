@@ -44,7 +44,6 @@ class Blocks:
     """Processes blocks, dispatches work, manages `hive_blocks` table."""
 
     _conf = None
-    blocks_to_flush = []
     _head_block_date = None
     _current_block_date = None
     _last_safe_cashout_block = 0
@@ -181,13 +180,6 @@ class Blocks:
         # expensive. So is tracking follows at all; hence we track
         # deltas in memory and update follow/er counts in bulk.
 
-        flush_time = FSM.start()
-
-        def register_time(f_time, name, pushed):
-            assert pushed is not None
-            FSM.flush_stat(name, FSM.stop(f_time), pushed)
-            return FSM.start()
-
         log.info("#############################################################################")
         register_time(flush_time, "Blocks", cls._flush_blocks())
         return first_block, last_num
@@ -314,7 +306,7 @@ class Blocks:
         """Process a single block. Assumes a trx is open."""
         # pylint: disable=too-many-branches
         assert issubclass(type(block), Block)
-        num = cls._push(block)
+        num = block.get_num()
         cls._current_block_date = block.get_date()
 
         # head block date shall point to last imported block (not yet current one) to conform hived behavior.
@@ -405,95 +397,6 @@ class Blocks:
         cls._head_block_date = cls._current_block_date
 
         return num
-
-    @staticmethod
-    def _get(num: int) -> dict:
-        """Fetch a specific block."""
-        sql = f"SELECT num, created_at date, hash FROM {SCHEMA_NAME}.hive_blocks WHERE num = :num LIMIT 1"
-        return dict(DB.query_row(sql, num=num))
-
-    @classmethod
-    def _push(cls, block: Block) -> int:
-        """Insert a row in `hive_blocks`."""
-        cls.blocks_to_flush.append(
-            {
-                'num': block.get_num(),
-                'hash': block.get_hash(),
-                'prev': block.get_previous_block_hash(),
-                'date': block.get_date(),
-            }
-        )
-        return block.get_num()
-
-    @classmethod
-    def _flush_blocks(cls) -> int:
-        query = f"INSERT INTO {SCHEMA_NAME}.hive_blocks (num, hash, prev, created_at, completed) VALUES"
-        values = []
-        for block in cls.blocks_to_flush:
-            values.append(f"({block['num']}, '{block['hash']}', '{block['prev']}', '{block['date']}', {False})")
-        query = query + ",".join(values)
-        DB.query_prepared(query)
-        values.clear()
-        n = len(cls.blocks_to_flush)
-        cls.blocks_to_flush.clear()
-        return n
-
-    @classmethod
-    def _pop(cls, blocks) -> None:
-        """Pop head blocks to navigate head to a point prior to fork.
-
-        Without an undo database, there is a limit to how fully we can recover.
-
-        If consistency is critical, run hive with TRAIL_BLOCKS=-1 to only index
-        up to last irreversible. Otherwise use TRAIL_BLOCKS=2 to stay closer
-        while avoiding the vast majority of microforks.
-
-        As-is, there are a few caveats with the following strategy:
-
-         - follow counts can get out of sync (hive needs to force-recount)
-         - follow state could get out of sync (user-recoverable)
-
-        For 1.5, also need to handle:
-
-         - hive_communities
-         - hive_members
-         - hive_flags
-         - hive_modlog
-        """
-        DB.query("START TRANSACTION")
-
-        for block in blocks:
-            num = block['num']
-            date = block['date']
-            log.warning("[FORK] popping block %d @ %s", num, date)
-            assert num == cls.head_num(), "can only pop head block"
-
-            # get all affected post_ids in this block
-            sql = f"SELECT id FROM {SCHEMA_NAME}.hive_posts WHERE created_at >= :date"
-            post_ids = tuple(DB.query_col(sql, date=date))
-
-            # remove all recent records -- communities
-            DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_notifs        WHERE created_at >= :date", date=date)
-            DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_subscriptions WHERE created_at >= :date", date=date)
-            DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_roles         WHERE created_at >= :date", date=date)
-            DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_communities   WHERE created_at >= :date", date=date)
-
-            # remove all recent records -- core
-            DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_feed_cache  WHERE created_at >= :date", date=date)
-            DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_reblogs     WHERE created_at >= :date", date=date)
-            DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_follows     WHERE created_at >= :date", date=date)
-
-            # remove posts: core, tags, cache entries
-            if post_ids:
-                DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_posts       WHERE id      IN :ids", ids=post_ids)
-                DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_post_data   WHERE id      IN :ids", ids=post_ids)
-
-            DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_payments    WHERE block_num = :num", num=num)
-            DB.query(f"DELETE FROM {SCHEMA_NAME}.hive_blocks      WHERE num = :num", num=num)
-
-        DB.query("COMMIT")
-        log.warning("[FORK] recovery complete")
-        # TODO: manually re-process here the blocks which were just popped.
 
     @staticmethod
     @time_it
