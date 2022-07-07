@@ -46,7 +46,7 @@ def decimal_deserialize(s):
 async def db_head_state(context):
     """Status/health check."""
     db = context['db']
-    sql = f"SELECT num, created_at, extract(epoch from created_at) ts FROM {SCHEMA_NAME}.hive_blocks ORDER BY num DESC LIMIT 1"
+    sql = f"SELECT num, created_at, extract(epoch from created_at) ts FROM hive.{SCHEMA_NAME}_blocks_view ORDER BY num DESC LIMIT 1"
     row = await db.query_row(sql)
     return dict(db_head_block=row['num'], db_head_time=str(row['created_at']), db_head_age=int(time.time() - float(row['ts'])))
 
