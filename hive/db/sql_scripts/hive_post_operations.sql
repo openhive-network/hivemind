@@ -149,7 +149,7 @@ DROP FUNCTION IF EXISTS hivemind_app.delete_hive_post(character varying,characte
 CREATE OR REPLACE FUNCTION hivemind_app.delete_hive_post(
   in _author hivemind_app.hive_accounts.name%TYPE,
   in _permlink hivemind_app.hive_permlink_data.permlink%TYPE,
-  in _block_num hivemind_app.hive_blocks.num%TYPE,
+  in _block_num hive.hivemind_app_blocks_view.num%TYPE,
   in _date hivemind_app.hive_posts.active%TYPE)
 RETURNS VOID
 LANGUAGE plpgsql
