@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 async def get_info(context):
     db = context['db']
 
-    sql = f"SELECT num FROM {SCHEMA_NAME}.hive_blocks ORDER BY num DESC LIMIT 1"
+    sql = f"SELECT MAX(num) FROM hive.{SCHEMA_NAME}_blocks_view;"
     database_head_block = await db.query_one(sql)
 
     sql = f"SELECT level, patch_date, patched_to_revision FROM {SCHEMA_NAME}.hive_db_patch_level ORDER BY level DESC LIMIT 1"
