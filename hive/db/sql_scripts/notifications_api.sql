@@ -25,8 +25,8 @@ $BODY$
 DECLARE
     __account_id INT := 0;
     __last_read_at TIMESTAMP;
-    __last_read_at_block hivemind_app.hive_blocks.num%TYPE;
-    __limit_block hivemind_app.hive_blocks.num%TYPE = hivemind_app.block_before_head( '90 days' );
+    __last_read_at_block hive.hivemind_app_blocks_view.num%TYPE;
+    __limit_block hive.hivemind_app_blocks_view.num%TYPE = hivemind_app.block_before_head( '90 days' );
 BEGIN
   __account_id = hivemind_app.find_account_id( _account, True );
 
@@ -36,7 +36,7 @@ BEGIN
 
   --- Warning given account can have no last_read_at set, so lets fallback to the block limit to avoid comparison to NULL.
   SELECT COALESCE((SELECT hb.num
-                   FROM hivemind_app.hive_blocks hb
+                   FROM hive.hivemind_app_blocks_view hb
                    WHERE hb.created_at <= __last_read_at
                    ORDER by hb.created_at desc
                    LIMIT 1), __limit_block)
@@ -79,7 +79,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.account_notifications(
 AS $BODY$
 DECLARE
   __account_id INT;
-  __limit_block hivemind_app.hive_blocks.num%TYPE = hivemind_app.block_before_head( '90 days' );
+  __limit_block hive.hivemind_app_blocks_view.num%TYPE = hivemind_app.block_before_head( '90 days' );
 BEGIN
   __account_id = hivemind_app.find_account_id( _account, True );
   RETURN QUERY SELECT
@@ -127,7 +127,7 @@ AS
 $function$
 DECLARE
   __post_id INT;
-  __limit_block hivemind_app.hive_blocks.num%TYPE = hivemind_app.block_before_head( '90 days' );
+  __limit_block hive.hivemind_app_blocks_view.num%TYPE = hivemind_app.block_before_head( '90 days' );
 BEGIN
   __post_id = hivemind_app.find_comment_id(_author, _permlink, True);
   RETURN QUERY SELECT
@@ -176,7 +176,7 @@ RETURNS VOID
 AS
 $function$
 DECLARE
-  __limit_block hivemind_app.hive_blocks.num%TYPE = hivemind_app.block_before_head( '90 days' );
+  __limit_block hive.hivemind_app_blocks_view.num%TYPE = hivemind_app.block_before_head( '90 days' );
 BEGIN
   IF _first_block_num IS NULL THEN
     TRUNCATE TABLE hivemind_app.hive_notification_cache;
