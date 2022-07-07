@@ -91,7 +91,6 @@ class DbState:
     @classmethod
     def _disableable_indexes(cls):
         to_locate = [
-            'hive_blocks_created_at_idx',
             'hive_feed_cache_block_num_idx',
             'hive_feed_cache_created_at_idx',
             'hive_feed_cache_post_id_idx',
