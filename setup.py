@@ -158,6 +158,7 @@ if __name__ == "__main__":
             'atomic==0.7.3',
             'python-dateutil==2.8.1',
             'regex==2021.4.4',
+            'gitpython==3.1.27',
         ],
         extras_require={
             'dev': [
