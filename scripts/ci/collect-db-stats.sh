@@ -4,16 +4,13 @@ set -euo pipefail
 
 collect_db_stats() {
 
-    echo "Collecting statistics from database ${HIVEMIND_DB_NAME}"
+    echo "Collecting statistics from database ${HAF_ADMIN_POSTGRES_URL}"
 
     mkdir -p pg-stats
     DIR=$PWD/pg-stats
 
-    PGPASSWORD=${RUNNER_POSTGRES_APP_USER_PASSWORD} psql \
-        --username "${RUNNER_POSTGRES_APP_USER=}" \
-        --host ${RUNNER_POSTGRES_HOST} \
-        --port ${RUNNER_POSTGRES_PORT} \
-        --dbname ${HIVEMIND_DB_NAME} << EOF
+    psql "${HAF_ADMIN_POSTGRES_URL}"\
+         << EOF
 \timing
 \copy (select * from pg_settings) to '$DIR/pg_settings.csv' WITH CSV HEADER
 \copy (select * from pg_stat_user_tables) to '$DIR/pg_stat_user_tables.csv' WITH CSV HEADER
