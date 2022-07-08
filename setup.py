@@ -128,17 +128,12 @@ VERSION, GIT_REVISION = GitRevisionProvider.provide_git_revision()
 
 
 if __name__ == "__main__":
-    found_packages = find_packages(exclude=['scripts'])
-
-    for p in found_packages:
-        print(f"Found Python package: {p}")
-
     setup(
         name='hivemind',
         version=VERSION + "+" + GIT_REVISION,
         description='Developer-friendly microservice powering social networks on the Hive blockchain.',
         long_description=open('README.md').read(),
-        packages=found_packages,
+        packages=find_packages(exclude=['scripts']),
         package_data={'sql_scripts': ['hive/db/sql_scripts/*.sql']},
         setup_requires=['pytest-runner'],
         install_requires=[
