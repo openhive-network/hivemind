@@ -4,7 +4,7 @@ RETURNS TIMESTAMP
 LANGUAGE 'sql' STABLE
 AS
 $BODY$
-SELECT hb.created_at FROM hive.hivemind_app_blocks_view hb ORDER BY hb.num DESC LIMIT 1
+SELECT hb.created_at FROM hive.blocks hb ORDER BY hb.num DESC LIMIT 1
 $BODY$
 ;
 
@@ -15,5 +15,5 @@ RETURNS hive.hivemind_app_blocks_view.num%TYPE
 LANGUAGE 'sql' STABLE
 AS
 $BODY$
-SELECT MAX(hb1.num) - CAST( extract(epoch from _time)/3 as INTEGER ) FROM hive.hivemind_app_blocks_view hb1
+SELECT MAX(hb1.num) - CAST( extract(epoch from _time)/3 as INTEGER ) FROM hive.blocks hb1
 $BODY$
