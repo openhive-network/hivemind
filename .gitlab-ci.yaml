@@ -146,9 +146,11 @@ prepare_haf_image:
         $CI_PROJECT_DIR/tests/api_tests/hivemind/tavern
 
 sync-e2e-benchmark:
+  image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
 #  extends: .docker_image_builder_job
-  <<: *rules-for-sync
   stage: sync-e2e-benchmark
+  rules:
+    - when: on_success
 
   variables:
     PIPENV_VENV_IN_PROJECT: 1
@@ -157,10 +159,10 @@ sync-e2e-benchmark:
     POSTGRES_CLIENT_TOOLS_PATH: /usr/lib/postgresql
     HIVEMIND_DB_NAME: "hive_${CI_COMMIT_REF_SLUG}"
     HAF_POSTGRES_URL: postgresql://haf_app_admin@haf-instance:5432/haf_block_log
-    RUNNER_POSTGRES_ADMIN_USER: "haf_app_admin"
-    RUNNER_POSTGRES_HOST: "haf-instance"
-    RUNNER_POSTGRES_PORT: 5432
+    HAF_ADMIN_POSTGRES_URL: postgresql://haf_admin@haf-instance:5432/haf_block_log
     FF_NETWORK_PER_BUILD: 1
+    RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
+    RUNNER_HIVEMIND_SERVER_HTTP_PORT: 8080
 
   needs:
     - job: prepare_haf_image
@@ -173,26 +175,24 @@ sync-e2e-benchmark:
   before_script:
 #    - !reference [.docker_image_builder_job, before_script] 
     - apk update && apk add bash git ca-certificates curl build-base python3-dev postgresql-client
-    - python3 -m ensurepip
-    - pip3 install tox
+    - scripts/ci/fix_ci_tag.sh
+    - pip install --upgrade pip setuptools wheel
+    - python3 -V
+    - pip3 -V
+    - python3 -m venv venv/
+    - . venv/bin/activate
+    - pip install pyyaml tox
+    - pip install --no-cache-dir --verbose . 2>&1 | tee pip_install.log
+    - pip list
 
   script:
     - echo "HAF image name $HAF_IMAGE_NAME"
     - ./scripts/ci/wait-for-postgres.sh "haf-instance"
-    # temporary soln just to get things working
-    - docker logout || true
-    - docker ps
-    - docker network ls
-    - echo $HIVEMIND_CI_IMGBUILDER_PASSWORD | docker login -u "$HIVEMIND_CI_IMG_BUILDER_USER" registry.gitlab.syncad.com/hive/hivemind --password-stdin
-    - echo "Login succeeded - continuing execution"
-    - docker container exec -it haf-instance /bin/bash -c "psql -d haf_block_log -c 'CREATE EXTENSION IF NOT EXISTS intarray;'"
-    - export RUNNER_HIVEMIND_LAST_BLOCK_FOR_MASSIVE=4999979
-    - export RUNNER_HIVED_DB_URL=${HAF_POSTGRES_URL}
+    - ./scripts/ci/add-mocks-to-db.sh
+    - psql "${HAF_ADMIN_POSTGRES_URL}" -c 'CREATE EXTENSION IF NOT EXISTS intarray;'
     - ./scripts/ci/hive-sync.sh
     - ./scripts/ci/collect-db-stats.sh
     - ./scripts/ci/hive-server.sh start
-    - pip install tox
-    - touch tox-installed
     - *bridge_api_smoketest-script
     - *bridge_api_smoketest_negative-script
     - *condenser_api_smoketest-script
@@ -216,6 +216,7 @@ sync-e2e-benchmark:
   artifacts:
     when: always
     paths:
+      - pip_install.log
       - hivemind-sync.log
       - hivemind-server.log
       - pg-stats
