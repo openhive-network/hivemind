@@ -1,11 +1,7 @@
-import sys
 from pathlib import Path
 from typing import Final
 
 from setuptools import find_packages, setup
-
-assert sys.version_info[0] == 3 and sys.version_info[1] >= 6, "hive requires Python 3.6 or newer"
-
 
 VERSION_FILEPATH: Final[Path] = Path('hive/version.py')
 
@@ -20,6 +16,7 @@ setup(
     long_description=open('README.md').read(),
     packages=find_packages(exclude=['scripts']),
     package_data={'sql_scripts': ['hive/db/sql_scripts/*.sql']},
+    python_requires='>=3.8',
     setup_requires=['pytest-runner'],
     install_requires=[
         'aiopg==1.2.1',
