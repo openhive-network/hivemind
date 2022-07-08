@@ -184,12 +184,14 @@ class Blocks:
     @classmethod
     def process_blocks(cls, blocks) -> Tuple[int, int]:
         last_num = 0
+        last_date = None
         first_block = -1
         try:
             for block in blocks:
                 if first_block == -1:
                     first_block = block.get_num()
                 last_num = cls._process(block)
+                last_date = block.get_date()
         except Exception as e:
             log.error("exception encountered block %d", last_num + 1)
             raise e
@@ -199,7 +201,8 @@ class Blocks:
         # deltas in memory and update follow/er counts in bulk.
 
         log.info("#############################################################################")
-        DB.query_no_return(f'SELECT {SCHEMA_NAME}.update_last_imported_block({last_num});')
+        sql = f'SELECT {SCHEMA_NAME}.update_last_imported_block(:last_num, :last_date);'
+        DB.query_no_return(sql, last_num=last_num, last_date=last_date)
         return first_block, last_num
 
     @classmethod
