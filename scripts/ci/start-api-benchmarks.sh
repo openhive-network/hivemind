@@ -2,8 +2,6 @@
 
 set -e
 
-pip3 install tox
-
 export HIVEMIND_ADDRESS=$1
 export HIVEMIND_PORT=$2
 ITERATIONS=${3:-5}
