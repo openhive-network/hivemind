@@ -21,7 +21,7 @@ async def get_info(context):
     ret = {
         "hivemind_version": VERSION,
         "hivemind_git_rev": GIT_REVISION,
-        "hivemind_git_date": GIT_DATE,
+        "hivemind_git_date": str(GIT_DATE),
         "database_schema_version": patch_level_data['level'],
         "database_patch_date": str(patch_level_data['patch_date']),
         "database_patched_to_revision": patch_level_data['patched_to_revision'],
