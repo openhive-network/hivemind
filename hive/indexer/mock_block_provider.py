@@ -2,8 +2,6 @@
 import datetime
 import logging
 
-import dateutil.parser
-
 from hive.indexer.mock_data_provider import MockDataProvider
 
 log = logging.getLogger(__name__)
@@ -17,7 +15,7 @@ class MockBlockProvider(MockDataProvider):
 
     last_real_block_num = 1
     last_real_block_id = ""
-    last_real_block_time = dateutil.parser.isoparse("2016-03-24T16:05:00")
+    last_real_block_time = datetime.datetime.fromisoformat("2016-03-24T16:05:00")
 
     @classmethod
     def set_last_real_block_num_date(cls, block_num, block_date, block_id):
@@ -27,7 +25,7 @@ class MockBlockProvider(MockDataProvider):
             )
         cls.last_real_block_num = int(block_num)
         cls.last_real_block_id = block_id
-        new_date = dateutil.parser.isoparse(block_date)
+        new_date = datetime.datetime.fromisoformat(block_date)
         if cls.last_real_block_time > new_date:
             log.error(
                 f"Incoming block has older timestamp than previous one: old {cls.last_real_block_time}, new {new_date}"
