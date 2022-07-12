@@ -10,3 +10,8 @@ requires = [
 [tool.black]
 line-length = 120
 skip-string-normalization = true
+
+
+[tool.isort]
+line_length = 120
+force_single_line = true
