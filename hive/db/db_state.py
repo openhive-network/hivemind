@@ -157,12 +157,8 @@ class DbState:
     def _execute_query(cls, db, query):
         time_start = perf_counter()
 
-        current_work_mem = cls.update_work_mem('2GB')
         log.info("[MASSIVE] Attempting to execute query: `%s'...", query)
-
-        row = db.query_no_return(query)
-
-        cls.update_work_mem(current_work_mem)
+        db.query_no_return(query)
 
         time_end = perf_counter()
         log.info("[MASSIVE] Query `%s' done in %.4fs", query, time_end - time_start)
@@ -171,12 +167,8 @@ class DbState:
     def _execute_and_explain_query(cls, db, query):
         time_start = perf_counter()
 
-        current_work_mem = cls.update_work_mem('2GB')
         log.info("[MASSIVE] Attempting to execute query: `%s'...", query)
-
-        row = db.explain().query_no_return(query)
-
-        cls.update_work_mem(current_work_mem)
+        db.explain().query_no_return(query)
 
         time_end = perf_counter()
         log.info("[MASSIVE] Query `%s' done in %.4fs", query, time_end - time_start)
@@ -488,6 +480,8 @@ class DbState:
         cls.processing_indexes(False, force_index_rebuild, True)
         log.info("Creating indexes: finished")
 
+        work_mem_before = cls.update_work_mem('2GB')
+
         # Update statistics and execution plans after index creation.
         if massive_sync_preconditions:
             cls._execute_query(cls.db(), "VACUUM (VERBOSE,ANALYZE)")
@@ -513,6 +507,8 @@ class DbState:
             log.info(f"Foreign keys were recreated in {perf_counter() - start_time_foreign_keys:.3f}s")
 
             cls._execute_query(cls.db(), "VACUUM (VERBOSE,ANALYZE)")
+
+        cls.update_work_mem(work_mem_before)
 
         end_time = perf_counter()
         log.info("[MASSIVE] After massive sync actions done in %.4fs", end_time - start_time)
