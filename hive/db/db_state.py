@@ -269,18 +269,14 @@ class DbState:
 
     @classmethod
     def update_work_mem(cls, workmem_value):
-        row = cls.db().query_row("SHOW work_mem")
-        current_work_mem = row['work_mem']
+        current_work_mem = cls.db().query_one("SHOW work_mem")
 
-        sql = """
-    SET work_mem TO "{}";
-"""
-        cls.db().query_no_return(sql.format(workmem_value))
+        cls.db().query_no_return(sql='SET work_mem = :work_mem', work_mem=workmem_value)
 
-        row = cls.db().query_row("SHOW work_mem")
-        set_work_mem = row['work_mem']
+        set_work_mem = cls.db().query_one("SHOW work_mem")
 
-        assert set_work_mem == workmem_value, 'SET work_mem was ineffective?'
+        message = f'SET work_mem was ineffective; given: {workmem_value} before: {current_work_mem} set: {set_work_mem}'
+        assert set_work_mem == workmem_value, message
 
         return current_work_mem
 
