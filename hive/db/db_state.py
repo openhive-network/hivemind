@@ -398,6 +398,7 @@ class DbState:
 
     @classmethod
     def process_tasks_in_threads(cls, info, methods):
+        start_time = perf_counter()
         futures = []
         pool = ThreadPoolExecutor(max_workers=Db.max_connections)
         futures = {
@@ -416,7 +417,7 @@ class DbState:
                 raise exc
 
         pool.shutdown()
-        log.info(info, completedThreads)
+        log.info(f'{info} Real elapsed time: {perf_counter() - start_time:.3f}', completedThreads)
 
     @classmethod
     def _finish_all_tables(cls, massive_sync_preconditions, last_imported_block, current_imported_block):
