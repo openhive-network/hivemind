@@ -420,45 +420,35 @@ class DbState:
 
         log.info("#############################################################################")
 
-        methods = []
-        methods.append(
+        methods = [
+            ('hive_feed_cache', cls._finish_hive_feed_cache, [cls.db(), last_imported_block, current_imported_block]),
+            ('hive_mentions', cls._finish_hive_mentions, [cls.db(), last_imported_block, current_imported_block]),
+            ('payout_stats_view', cls._finish_payout_stats_view, []),
+            ('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]),
             (
                 'hive_posts',
                 cls._finish_hive_posts,
                 [cls.db(), massive_sync_preconditions, last_imported_block, current_imported_block],
-            )
-        )
-        methods.append(
-            ('hive_feed_cache', cls._finish_hive_feed_cache, [cls.db(), last_imported_block, current_imported_block])
-        )
-        methods.append(
-            ('hive_mentions', cls._finish_hive_mentions, [cls.db(), last_imported_block, current_imported_block])
-        )
-        methods.append(('payout_stats_view', cls._finish_payout_stats_view, []))
-        methods.append(('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]))
-        methods.append(
+            ),
             (
                 'blocks_consistency_flag',
                 cls._finish_blocks_consistency_flag,
                 [cls.db(), last_imported_block, current_imported_block],
-            )
-        )
+            ),
+        ]
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 0", methods)
 
-        methods = []
-        # Notifications are dependent on many tables, therefore it's necessary to calculate it at the end
-        methods.append(('notification_cache', cls._finish_notification_cache, [cls.db()]))
-        # hive_posts_api_helper is dependent on `hive_posts/root_id` filling
-        methods.append(
+        methods = [
+            ('notification_cache', cls._finish_notification_cache, [cls.db()]),
+            ('follow_count', cls._finish_follow_count, [cls.db(), last_imported_block, current_imported_block]),
             (
                 'hive_posts_api_helper',
                 cls._finish_hive_posts_api_helper,
                 [cls.db(), last_imported_block, current_imported_block],
-            )
-        )
-        methods.append(
-            ('follow_count', cls._finish_follow_count, [cls.db(), last_imported_block, current_imported_block])
-        )
+            ),
+        ]
+        # Notifications are dependent on many tables, therefore it's necessary to calculate it at the end
+        # hive_posts_api_helper is dependent on `hive_posts/root_id` filling
         cls.process_tasks_in_threads("[MASSIVE] %i threads finished filling tables. Part nr 1", methods)
 
         real_time = FOSM.stop(start_time)
