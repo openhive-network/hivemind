@@ -21,6 +21,5 @@ echo "Selected test group (if empty all will be executed): $TEST_GROUP"
 
 tox -e tavern -- \
     -W ignore::pytest.PytestDeprecationWarning \
-    --workers $JOBS \
-    --tests-per-worker auto \
+    -n $JOBS \
     --junitxml=../../../../$JUNITXML $TEST_GROUP
