@@ -167,7 +167,7 @@ To run api tests:
 5. Run tests using tox:
 
     ```bash
-    $ tox -e tavern -- --workers auto --tests-per-worker auto --durations=0
+    $ tox -e tavern -- -n auto --durations=0
     ```
 
 ## Production Environment
