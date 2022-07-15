@@ -236,6 +236,7 @@ workflow:
 
 sync_hivemind:
   stage: sync
+#  image: docker:stable
   image: $CI_REGISTRY_IMAGE/ci_base_image_with_docker:3.8
 #  needs: [ 'prepare_haf_image' ]
   rules:
@@ -243,13 +244,26 @@ sync_hivemind:
   services:
     - docker:20.10.10-dind
   variables:
-    DOCKER_HOST: tcp://docker:2375
+    DOCKER_HOST: tcp://docker:2376
     DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_CERT_PATH: /certs/client
+    DOCKER_TLS_VERIFY: 1
     RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
 #  before_script: *prepare
   script:
+    # - export DOCKER_VERSION="5:20.10.10~3-0~debian-buster"
+    # - mkdir /certs/client -p
+    # - apt-get update
+    # - apt-get install -y --no-install-recommends curl ca-certificates gnupg gnupg2 apt-transport-https software-properties-common
+    # - curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+    # - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+    # - apt-get update
+    # - apt-cache policy docker-ce
+    # - apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
     - echo "HAF image name $HAF_IMAGE_NAME"
+    - env
+    - docker --version
     - docker info
     - docker context list
     - docker run -d --name $HAF_CONTAINER_NAME $HAF_IMAGE_NAME
