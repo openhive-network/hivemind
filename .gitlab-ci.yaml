@@ -214,42 +214,42 @@ workflow:
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| JOBS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-prepare_haf_image:
-  stage: build
-  extends: .prepare_haf_data_5m_image
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: always
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-      when: always
-    - if: '$CI_COMMIT_BRANCH == "develop"'
-      when: always
-    - when: manual
-  variables:
-    SUBMODULE_DIR: "$CI_PROJECT_DIR/haf"
-    REGISTRY_USER: "$HAF_IMG_BUILDER_USER"
-    REGISTRY_PASS: $HAF_IMG_BUILDER_PASSWORD
-  tags:
-    - public-runner-docker
-    - hived-for-tests
+#prepare_haf_image:
+#  stage: build
+#  extends: .prepare_haf_data_5m_image
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#      when: always
+#    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+#      when: always
+#    - if: '$CI_COMMIT_BRANCH == "develop"'
+#      when: always
+#    - when: manual
+#  variables:
+#    SUBMODULE_DIR: "$CI_PROJECT_DIR/haf"
+#    REGISTRY_USER: "$HAF_IMG_BUILDER_USER"
+#    REGISTRY_PASS: $HAF_IMG_BUILDER_PASSWORD
+#  tags:
+#    - public-runner-docker
+#    - hived-for-tests
 
 
 sync_hivemind:
   stage: sync
   image: $CI_REGISTRY_IMAGE/ci_base_image_with_docker:3.8
-  needs: [ 'prepare_haf_image' ]
+#  needs: [ 'prepare_haf_image' ]
   rules:
     - when: on_success
   services:
-    - name: docker:20.10.10-dind
-      alias: dind
+    - docker:20.10.10-dind
   variables:
-    DOCKER_HOST: tcp://dind:2375
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: 1
     DOCKER_BUILDKIT: 1
     DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: "/certs"
     RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
-  before_script: *prepare
+#  before_script: *prepare
   script:
     - echo "HAF image name $HAF_IMAGE_NAME"
     - docker info
@@ -281,8 +281,8 @@ sync_hivemind:
 run_e2e_tests:
   stage: test
   extends: .setup_with_dind
-  needs: [ 'prepare_haf_image', 'sync_hivemind' ]
-  before_script: *prepare
+#  needs: [ 'prepare_haf_image', 'sync_hivemind' ]
+#  before_script: *prepare
   script:
     - docker load -i image.tar
     - docker images
@@ -317,8 +317,8 @@ run_e2e_tests:
 run_benchmark:
   stage: benchmark
   extends: .setup_with_dind
-  needs: [ 'prepare_haf_image', 'sync_hivemind', 'run_e2e_tests' ]
-  before_script: *prepare
+#  needs: [ 'prepare_haf_image', 'sync_hivemind', 'run_e2e_tests' ]
+#  before_script: *prepare
   script:
     - docker load -i image.tar
     - docker images
