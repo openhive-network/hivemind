@@ -67,6 +67,7 @@ start() {
       --pid-file hive_server.pid \
       --http-server-port ${RUNNER_HIVEMIND_SERVER_HTTP_PORT} \
       --database-url "${DATABASE_URL}" \
+      --database-url "${HAF_POSTGRES_URL}" \
       > hivemind-server.log 2>&1 &
 
   HIVEMIND_PID=$!
