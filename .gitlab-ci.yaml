@@ -13,8 +13,6 @@ include:
 
 
 variables:
-  # HIVEMIND
-  RUNNER_HIVEMIND_SERVER_HTTP_PORT: 8080
   # HAF
   HAF_POSTGRES_URL: postgresql://haf_app_admin@haf-instance:5432/haf_block_log
   HAF_ADMIN_POSTGRES_URL: postgresql://haf_admin@haf-instance:5432/haf_block_log
@@ -26,175 +24,11 @@ variables:
   GIT_SUBMODULE_STRATEGY: recursive
 
 
-workflow:
-  # do not create pipeline twice when merge requests is open
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "web"'
-    - if: '$CI_MERGE_REQUEST_ID'
-    - if: '$CI_OPEN_MERGE_REQUESTS'
-      when: never
-    - when: always
-
-
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| HELPERS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-.start-timer: &start-timer
-  - ./scripts/ci/timer.sh start
-
-
-.check-timer: &check-timer
-  - ./scripts/ci/timer.sh check
-
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| HELPERS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| ANCHORS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 .shared_tags:
   tags: &shared_tags
     - public-runner-docker
     - hived-for-tests
-
-.bridge_api_smoketest-script: &bridge_api_smoketest-script
-  - |
-    ./scripts/ci/start-api-smoketest.sh \
-        localhost \
-        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        bridge_api_patterns/ \
-        api_smoketest_bridge.xml \
-        $RUNNER_PYTEST_WORKERS
-
-
-.bridge_api_smoketest_negative-script: &bridge_api_smoketest_negative-script
-  - |
-    ./scripts/ci/start-api-smoketest.sh \
-        localhost \
-        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        bridge_api_negative/ \
-        api_smoketest_bridge_negative.xml \
-        $RUNNER_PYTEST_WORKERS
-
-
-.condenser_api_smoketest-script: &condenser_api_smoketest-script
-  - |
-    ./scripts/ci/start-api-smoketest.sh \
-        localhost \
-        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        condenser_api_patterns/ \
-        api_smoketest_condenser_api.xml \
-        $RUNNER_PYTEST_WORKERS
-
-
-.condenser_api_smoketest_negative-script: &condenser_api_smoketest_negative-script
-  - |
-    ./scripts/ci/start-api-smoketest.sh \
-        localhost \
-        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        condenser_api_negative/ \
-        api_smoketest_condenser_api_negative.xml \
-        $RUNNER_PYTEST_WORKERS
-
-
-.database_api_smoketest-script: &database_api_smoketest-script
-  - |
-    ./scripts/ci/start-api-smoketest.sh \
-        localhost \
-        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        database_api_patterns/ \
-        api_smoketest_database_api.xml \
-        $RUNNER_PYTEST_WORKERS
-
-
-.database_api_smoketest_negative-script: &database_api_smoketest_negative-script
-  - |
-    ./scripts/ci/start-api-smoketest.sh \
-        localhost \
-        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        database_api_negative/ \
-        api_smoketest_database_api_negative.xml \
-        $RUNNER_PYTEST_WORKERS
-
-
-.follow_api_smoketest-script: &follow_api_smoketest-script
-  - |
-    ./scripts/ci/start-api-smoketest.sh \
-        localhost \
-        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        follow_api_patterns/ \
-        api_smoketest_follow_api.xml \
-        $RUNNER_PYTEST_WORKERS
-
-
-.follow_api_smoketest_negative-script: &follow_api_smoketest_negative-script
-  - |
-    ./scripts/ci/start-api-smoketest.sh \
-        localhost \
-        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        follow_api_negative/ \
-        api_smoketest_follow_api_negative.xml \
-        $RUNNER_PYTEST_WORKERS
-
-
-.tags_api_smoketest-script: &tags_api_smoketest-script
-  - |
-    ./scripts/ci/start-api-smoketest.sh \
-        localhost \
-        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        tags_api_negative/ \
-        api_smoketest_tags_api_negative.xml \
-        $RUNNER_PYTEST_WORKERS
-
-
-.tags_api_smoketest_negative-script: &tags_api_smoketest_negative-script
-  - |
-    ./scripts/ci/start-api-smoketest.sh \
-        localhost \
-        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        tags_api_patterns/ \
-        api_smoketest_tags_api.xml \
-        $RUNNER_PYTEST_WORKERS
-
-
-.mock_tests-script: &mock_tests-script
-  - |
-    ./scripts/ci/start-api-smoketest.sh \
-        localhost \
-        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        mock_tests/ \
-        api_smoketest_mock_tests.xml \
-        $RUNNER_PYTEST_WORKERS
-
-
-.hive_api_smoketest-script: &hive_api_smoketest-script
-  - |
-    ./scripts/ci/start-api-smoketest.sh \
-        localhost \
-        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        hive_api_patterns/ \
-        api_smoketest_hive_api.xml \
-        $RUNNER_PYTEST_WORKERS
-
-
-.api-benchmark-script: &api-benchmark-script
-  - |
-    ./scripts/ci/start-api-benchmarks.sh \
-        localhost \
-        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        $RUNNER_BENCHMARK_ITERATIONS \
-        $RUNNER_PYTEST_WORKERS
-
-.prepare:
-  before_script: &prepare
-    - apk update && apk add bash git ca-certificates curl build-base python3-dev postgresql-client
-    - scripts/ci/fix_ci_tag.sh
-    - pip install --upgrade pip setuptools wheel
-    - python3 -V
-    - pip3 -V
-    - python3 -m venv venv/
-    - . venv/bin/activate
-    - pip install --no-cache-dir ."[dev]" 2>&1 | tee pip_install.log
-    - pip list
-
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| ANCHORS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| JOBS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -219,7 +53,7 @@ prepare_haf_image:
     - hived-for-tests
 
 
-sync_hivemind:
+modify_haf_data:
   image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
   stage: sync
   needs: [ 'prepare_haf_image' ]
@@ -228,135 +62,28 @@ sync_hivemind:
   services:
     - name: $HAF_IMAGE_NAME
       alias: haf-instance
-  variables:
-    RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
-  before_script: *prepare
   script:
     - echo "HAF image name $HAF_IMAGE_NAME"
     - ./scripts/ci/wait-for-postgres.sh "haf-instance"
-    - ./scripts/ci/add-mocks-to-db.sh
-    - psql "${HAF_ADMIN_POSTGRES_URL}" -c 'CREATE EXTENSION IF NOT EXISTS intarray;'
-    - ./scripts/ci/hive-sync.sh
-    - ./scripts/ci/collect-db-stats.sh
-  after_script:
-    - echo "SERVER_NAME=$CI_RUNNER_DESCRIPTION" >> variables.env
+    - psql "${HAF_ADMIN_POSTGRES_URL}" -c "SELECT hive.app_create_context('hivemind_app');"
+    - psql "${HAF_ADMIN_POSTGRES_URL}" -c 'SELECT * FROM hive.contexts;'
+    - docker save -o image.tar $HAF_IMAGE_NAME
   artifacts:
-    expire_in: 7 days
-    reports:
-      dotenv: variables.env
     paths:
-      - pip_install.log
-      - hivemind-sync.log
-      - pg-stats
-      - tests/api_tests/hivemind/tavern/**/*.out.json
+      - image.tar
   tags: *shared_tags
 
 
-run_e2e_tests:
+read_haf_data:
   image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
   stage: test
-  needs: [ 'prepare_haf_image', 'sync_hivemind' ]
-  services:
-    - name: $HAF_IMAGE_NAME
-      alias: haf-instance
-  before_script: *prepare
+  needs: [ 'prepare_haf_image', 'modify_haf_data' ]
   script:
-    - echo "HAF image name $HAF_IMAGE_NAME"
+    - docker load -i image.tar
     - ./scripts/ci/wait-for-postgres.sh "haf-instance"
-    - psql "${HAF_ADMIN_POSTGRES_URL}" -c 'SELECT MAX(num) FROM hive_blocks;'
+    - psql "${HAF_ADMIN_POSTGRES_URL}" -c 'SELECT MAX(num) FROM hive.blocks;'
     - psql "${HAF_ADMIN_POSTGRES_URL}" -c 'SELECT * FROM hive.contexts;'
-    - ./scripts/ci/hive-server.sh start
-    - *bridge_api_smoketest-script
-    - *bridge_api_smoketest_negative-script
-    - *condenser_api_smoketest-script
-    - *condenser_api_smoketest_negative-script
-    - *database_api_smoketest-script
-    - *database_api_smoketest_negative-script
-    - *follow_api_smoketest-script
-    - *follow_api_smoketest_negative-script
-    - *tags_api_smoketest-script
-    - *tags_api_smoketest_negative-script
-    - *mock_tests-script
-    - *hive_api_smoketest-script
-    - ./scripts/ci/hive-server.sh stop
-  after_script:
-    mv hivemind-server.log hivemind-server.smoke-tests.log
-    mv request_process_times.log request_process_times.smoke-tests.log
-  artifacts:
-    paths:
-      - pip_install.log
-      - hivemind-server.smoke-tests.log
-      - request_process_times.smoke-tests.log
   tags: *shared_tags
 
-
-run_benchmark:
-  image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
-  stage: benchmark
-  needs: [ 'prepare_haf_image', 'sync_hivemind', 'run_e2e_tests' ]
-  services:
-    - name: $HAF_IMAGE_NAME
-      alias: haf-instance
-  before_script: *prepare
-  script:
-    - echo "HAF image name $HAF_IMAGE_NAME"
-    - ./scripts/ci/hive-server.sh start
-    - *api-benchmark-script
-    - ./scripts/ci/hive-server.sh stop
-  artifacts:
-    paths:
-      - pip_install.log
-      - hivemind-server.log
-      - request_process_times.log
-      - tavern_benchmarks_report.html
-  tags: *shared_tags
-
-
-collect_artifacts:
-  image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
-  stage: collector
-  needs: [ 'sync_hivemind', 'run_e2e_tests', 'run_benchmark' ]
-  script:
-    - ls -al
-    - cat hivemind-server.log
-  after_script:
-    - echo "ARTIFACTS_JOB_ID=$CI_JOB_ID" >> variables.env
-    - echo "APP_VERSION=$(git describe --tags)" >> variables.env
-  artifacts:
-    reports:
-      dotenv: artifacts/variables.env
-    paths:
-      - hivemind-sync.log
-      - hivemind-server.log
-      - request_process_times.log
-  tags: *shared_tags
-
-
-#Trigger benchmark-results-collector:
-#  stage: collector
-#  needs: [ 'collect_artifacts' ]
-#  rules:
-#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-#      when: never
-#    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-#      when: on_success
-#    - if: '$CI_COMMIT_BRANCH == "develop"'
-#      when: on_success
-#    - when: manual
-#  variables:
-#    ARTIFACTS_URL: https://gitlab.syncad.com/api/v4/projects/$CI_PROJECT_ID/jobs/$ARTIFACTS_JOB_ID/artifacts
-#    PRIVATE_TOKEN: $READ_ARTIFACT_ACCESS_TOKEN
-#    #description:
-#    SOURCE: hivemind
-#    JOB_ID: $ARTIFACTS_JOB_ID
-#    DESC: "hivemind CI"
-#    EXEC_ENV_DESC: branch=$CI_COMMIT_REF_SLUG
-#    SERVER_NAME: $SERVER_NAME
-#    APP_VERSION: $APP_VERSION
-#    TESTSUITE_VERSION: commit_short_sha=$CI_COMMIT_SHORT_SHA
-#  trigger:
-#    project: hive/benchmark-results-collector
-#    branch: master
-#    strategy: depend
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| JOBS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
