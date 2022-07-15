@@ -17,6 +17,9 @@ RUN apt-get update \
         curl \
         ca-certificates \
         gnupg \
+        gnupg2 \
+        apt-transport-https \
+        software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
 # Install debian pgdg repository.
@@ -28,6 +31,14 @@ RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
     apt-get install -y --no-install-recommends \
                     postgresql-client-12 \
     && rm -rf /var/lib/apt/lists/*
+
+# Install docker
+ENV DOCKER_VERSION "5:20.10.10~3-0~debian-buster"
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" && \
+    apt-get update && \
+    apt-cache policy docker-ce && \
+    apt-get install -y docker-ce=$DOCKER_VERSION docker-ce-cli=$DOCKER_VERSION containerd.io docker-compose-plugin
 
 # Upgrade some crucial python packages.
 RUN pip install --upgrade pip setuptools wheel && \
