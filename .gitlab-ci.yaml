@@ -244,7 +244,7 @@ sync_hivemind:
     - name: docker:20.10.10-dind
       alias: dind
   variables:
-    DOCKER_HOST: tcp://dind:2376
+    DOCKER_HOST: tcp://dind:2375
     DOCKER_BUILDKIT: 1
     DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: "/certs"
