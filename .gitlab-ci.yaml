@@ -3,6 +3,7 @@ stages:
   - sync
   - test
   - benchmark
+  - collector
 
 
 include:
@@ -12,6 +13,7 @@ include:
 
 
 variables:
+  HAF_CONTAINER_NAME: haf_instance
   # HIVEMIND
   RUNNER_HIVEMIND_SERVER_HTTP_PORT: 8080
   # HAF
@@ -23,6 +25,30 @@ variables:
   GIT_DEPTH: 1
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: recursive
+
+
+workflow:
+  # do not create pipeline twice when merge requests is open
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_MERGE_REQUEST_ID'
+    - if: '$CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - when: always
+
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| SETUPS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+.setup_with_dind:
+  image: $CI_REGISTRY_IMAGE/ci_base_image_with_docker:3.8
+  services:
+    - docker:20.10.10-dind
+  variables:
+    DOCKER_BUILDKIT: 1
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: "/certs"
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| SETUPS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| HELPERS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -171,6 +197,18 @@ variables:
         $RUNNER_BENCHMARK_ITERATIONS \
         $RUNNER_PYTEST_WORKERS
 
+.prepare:
+  before_script: &prepare
+    - apk update && apk add bash git ca-certificates curl build-base python3-dev postgresql-client
+    - scripts/ci/fix_ci_tag.sh
+    - pip install --upgrade pip setuptools wheel
+    - python3 -V
+    - pip3 -V
+    - python3 -m venv venv/
+    - . venv/bin/activate
+    - pip install --no-cache-dir ."[dev]" 2>&1 | tee pip_install.log
+    - pip list
+
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| ANCHORS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
@@ -196,41 +234,61 @@ prepare_haf_image:
     - hived-for-tests
 
 
-hivemind sync:
-  image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
+sync_hivemind:
   stage: sync
+  image: $CI_REGISTRY_IMAGE/ci_base_image_with_docker:3.8
   needs: [ 'prepare_haf_image' ]
   rules:
     - when: on_success
   services:
-    - name: $HAF_IMAGE_NAME
-      alias: haf-instance
+    - name: docker:20.10.10-dind
+      alias: dind
   variables:
-    PIPENV_VENV_IN_PROJECT: 1
-    PIPENV_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pipenv"
-    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+    DOCKER_HOST: tcp://dind:2376
+    DOCKER_BUILDKIT: 1
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: "/certs"
     RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
-    RUNNER_PYTEST_WORKERS: "auto"
-    RUNNER_BENCHMARK_ITERATIONS: 5
-  before_script:
-    #    - !reference [.docker_image_builder_job, before_script]
-    - apk update && apk add bash git ca-certificates curl build-base python3-dev postgresql-client
-    - scripts/ci/fix_ci_tag.sh
-    - pip install --upgrade pip setuptools wheel
-    - python3 -V
-    - pip3 -V
-    - python3 -m venv venv/
-    - . venv/bin/activate
-    - pip install pyyaml tox
-    - pip install --no-cache-dir --verbose . 2>&1 | tee pip_install.log
-    - pip list
+  before_script: *prepare
   script:
     - echo "HAF image name $HAF_IMAGE_NAME"
-    - ./scripts/ci/wait-for-postgres.sh "haf-instance"
+    - docker info
+    - docker context list
+    - docker run -d --name $HAF_CONTAINER_NAME $HAF_IMAGE_NAME
+    - ./scripts/ci/wait-for-postgres.sh $HAF_CONTAINER_NAME
     - ./scripts/ci/add-mocks-to-db.sh
     - psql "${HAF_ADMIN_POSTGRES_URL}" -c 'CREATE EXTENSION IF NOT EXISTS intarray;'
     - ./scripts/ci/hive-sync.sh
     - ./scripts/ci/collect-db-stats.sh
+    - docker commit $HAF_CONTAINER_NAME synced_image
+    - docker images
+    - docker save -o image.tar synced_image
+  after_script:
+    - echo "SERVER_NAME=$CI_RUNNER_DESCRIPTION" >> variables.env
+  artifacts:
+    expire_in: 7 days
+    reports:
+      dotenv: variables.env
+    paths:
+      - image.tar
+      - pip_install.log
+      - hivemind-sync.log
+      - pg-stats
+      - tests/api_tests/hivemind/tavern/**/*.out.json
+  tags: *shared_tags
+
+
+run_e2e_tests:
+  stage: test
+  extends: .setup_with_dind
+  needs: [ 'prepare_haf_image', 'sync_hivemind' ]
+  before_script: *prepare
+  script:
+    - docker load -i image.tar
+    - docker images
+    - docker run -d --name $HAF_CONTAINER_NAME synced_image
+    - ./scripts/ci/wait-for-postgres.sh $HAF_CONTAINER_NAME
+    - psql "${HAF_ADMIN_POSTGRES_URL}" -c 'SELECT MAX(num) FROM hive.blocks;'
     - ./scripts/ci/hive-server.sh start
     - *bridge_api_smoketest-script
     - *bridge_api_smoketest_negative-script
@@ -245,52 +303,62 @@ hivemind sync:
     - *mock_tests-script
     - *hive_api_smoketest-script
     - ./scripts/ci/hive-server.sh stop
-    - mv ./request_process_times.log ./request_process_times_smoketests.log
-    - ./scripts/ci/hive-server.sh start
-    - *api-benchmark-script
   after_script:
-    - echo "ARTIFACTS_JOB_ID=$CI_JOB_ID" >> variables.env
-    - echo "APP_VERSION=$(git describe --tags)" >> variables.env
-    - echo "SERVER_NAME=$CI_RUNNER_DESCRIPTION" >> variables.env
+    mv hivemind-server.log hivemind-server.smoke-tests.log
+    mv request_process_times.log request_process_times.smoke-tests.log
   artifacts:
-    when: always
     paths:
       - pip_install.log
-      - hivemind-sync.log
-      - hivemind-server.log
-      - pg-stats
-      - hive-sync-runner-id.txt
-      - tavern_benchmarks_report.html
-      - tests/api_tests/hivemind/tavern/**/*.out.json
-      - request_process_times.log
-      - request_process_times_smoketests.log
-      - .tox/
-      - venv/
-    reports:
-      junit: "*.xml"
-      dotenv: variables.env
-    expire_in: 7 days
+      - hivemind-server.smoke-tests.log
+      - request_process_times.smoke-tests.log
   tags: *shared_tags
 
 
-Test job:
-  image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
-  stage: test
-  needs: [ 'prepare_haf_image', 'hivemind sync' ]
-  services:
-    - name: $HAF_IMAGE_NAME
-      alias: haf-instance
+run_benchmark:
+  stage: benchmark
+  extends: .setup_with_dind
+  needs: [ 'prepare_haf_image', 'sync_hivemind', 'run_e2e_tests' ]
+  before_script: *prepare
   script:
-    - echo "HAF image name $HAF_IMAGE_NAME"
-    - ./scripts/ci/wait-for-postgres.sh "haf-instance"
-    - psql "${HAF_ADMIN_POSTGRES_URL}" -c 'SELECT MAX(num) FROM hive_blocks;'
-    - psql "${HAF_ADMIN_POSTGRES_URL}" -c 'SELECT * FROM hive.contexts;'
+    - docker load -i image.tar
+    - docker images
+    - docker run -d --name $HAF_CONTAINER_NAME synced_image
+    - ./scripts/ci/wait-for-postgres.sh $HAF_CONTAINER_NAME
+    - psql "${HAF_ADMIN_POSTGRES_URL}" -c 'SELECT MAX(num) FROM hive.blocks;'
+    - ./scripts/ci/hive-server.sh start
+    - *api-benchmark-script
+    - ./scripts/ci/hive-server.sh stop
+  artifacts:
+    paths:
+      - pip_install.log
+      - hivemind-server.log
+      - request_process_times.log
+      - tavern_benchmarks_report.html
+  tags: *shared_tags
+
+
+collect_artifacts:
+  stage: collector
+  needs: [ 'sync_hivemind', 'run_e2e_tests', 'run_benchmark' ]
+  script:
+    - ls -al
+    - cat hivemind-server.log
+  after_script:
+    - echo "ARTIFACTS_JOB_ID=$CI_JOB_ID" >> variables.env
+    - echo "APP_VERSION=$(git describe --tags)" >> variables.env
+  artifacts:
+    reports:
+      dotenv: artifacts/variables.env
+    paths:
+      - hivemind-sync.log
+      - hivemind-server.log
+      - request_process_times.log
   tags: *shared_tags
 
 
 #Trigger benchmark-results-collector:
-#  stage: post-deploy
-#  needs: [ 'hivemind sync' ]
+#  stage: collector
+#  needs: [ 'collect_artifacts' ]
 #  rules:
 #    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 #      when: never
