@@ -244,7 +244,7 @@ sync_hivemind:
     - docker:20.10.10-dind
   variables:
     DOCKER_HOST: tcp://docker:2376
-    DOCKER_TLS_VERIFY: 1
+    DOCKER_TLS_VERIFY: 0
     DOCKER_BUILDKIT: 1
     DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: "/certs"
