@@ -222,7 +222,7 @@ sync_e2e_benchmark:
     - pip3 -V
     - python3 -m venv venv/
     - . venv/bin/activate
-    - pip install --no-cache-dir . tox==3.25.0 2>&1 | tee pip_install.log
+    - pip install --no-cache-dir ."[tests]" 2>&1 | tee pip_install.log
     - pip list
     - env
   script:
