@@ -13,7 +13,7 @@ stages:
   - source .venv/bin/activate
   - time pip install --upgrade pip setuptools wheel
   - pip install pyyaml
-  - pip install .
+  - pip install .[tests]
 
 .setup-runner-env: &setup-runner-env
   # Setup runner environment (to connect to correct postgres server, mainly).
@@ -390,8 +390,6 @@ sync-e2e-benchmark:
   script:
     - *hive-sync-script-common
     - ./scripts/ci/hive-server.sh start
-    - pip install tox
-    - touch tox-installed
     - *bridge_api_smoketest-script
     - *bridge_api_smoketest_negative-script
     - *condenser_api_smoketest-script
