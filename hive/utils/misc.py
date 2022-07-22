@@ -51,3 +51,9 @@ def show_app_version(log, database_head_block, patch_level_data):
     log.info("database_patched_to_revision : %s", patch_level_data['patched_to_revision'])
 
     log.info("database_head_block : %s", database_head_block)
+
+
+def get_memory_amount() -> float:
+    """Returns memory amount in MB"""
+    return round(psutil.virtual_memory().total / 1024.0 / 1024.0, 2)
+
