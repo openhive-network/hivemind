@@ -7,6 +7,7 @@ from functools import wraps
 import logging
 import time
 from time import perf_counter
+from typing import Optional
 
 import sqlalchemy
 
@@ -16,6 +17,7 @@ from hive.db.schema import build_metadata, setup, teardown
 from hive.indexer.auto_db_disposer import AutoDbDisposer
 from hive.server.common.payout_stats import PayoutStats
 from hive.utils.communities_rank import update_communities_posts_and_rank
+from hive.utils.misc import get_memory_amount
 from hive.utils.stats import FinalOperationStatusManager as FOSM
 
 log = logging.getLogger(__name__)
@@ -23,12 +25,15 @@ log = logging.getLogger(__name__)
 SYNCED_BLOCK_LIMIT = 7 * 24 * 1200  # 7 days
 
 
-def work_mem_factory(value: str = '2GB', separate_transaction: bool = False):
+def work_mem_factory(value: Optional[str] = None, separate_transaction: bool = False):
     def _work_mem(function):
         @wraps(function)
         def _wrapper(*args, **kwargs):
             db = kwargs.get('db')
             assert db, 'db kwarg was not provided'
+
+            divide_factor = 64
+            _value = value or f'{int(get_memory_amount() / divide_factor)}MB'
 
             sql_show_work_mem = 'SHOW work_mem;'
             work_mem_before = db.query_one(sql_show_work_mem)
@@ -36,11 +41,11 @@ def work_mem_factory(value: str = '2GB', separate_transaction: bool = False):
             if separate_transaction:
                 db.query('START TRANSACTION')
 
-            db.query_no_return(sql='SET LOCAL work_mem = :work_mem', work_mem=value)
+            db.query_no_return(sql='SET LOCAL work_mem = :work_mem', work_mem=_value)
             work_mem_local = db.query_one(sql_show_work_mem)
 
-            message = f'SET work_mem was ineffective; given: {value} before: {work_mem_before} now: {work_mem_local}'
-            assert work_mem_local == value, message
+            message = f'SET work_mem was ineffective; given: {_value} before: {work_mem_before} now: {work_mem_local}'
+            assert work_mem_local == _value, message
 
             output = function(*args, **kwargs)
 
@@ -189,7 +194,7 @@ class DbState:
             return False
 
     @classmethod
-    @work_mem_factory('2GB', separate_transaction=True)
+    @work_mem_factory(separate_transaction=True)
     def _execute_query(cls, *, db, sql):
         time_start = perf_counter()
 
@@ -200,7 +205,7 @@ class DbState:
         log.info("[MASSIVE] Query `%s' done in %.4fs", sql, time_end - time_start)
 
     @classmethod
-    @work_mem_factory('2GB', separate_transaction=True)
+    @work_mem_factory(separate_transaction=True)
     def _execute_and_explain_query(cls, *, db, sql):
         time_start = perf_counter()
 
