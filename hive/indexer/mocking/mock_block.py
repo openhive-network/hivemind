@@ -245,10 +245,12 @@ class BlockMockAfterDb:
         return self._created_at
 
     def push(self) -> None:
-        sql = """
-INSERT INTO
-    hive.blocks (num, hash, prev, created_at)  VALUES
-    (:num, :hash, :prev, :created_at);
+        initminer_account_id = 3
+
+        sql = f"""
+INSERT INTO hive.blocks (num, hash, prev, created_at, producer_account_id, transaction_merkle_root, extensions,
+                         witness_signature, signing_key)
+VALUES (:num, :hash, :prev, :created_at, {initminer_account_id}, 'mocked'::bytea, NULL, 'mocked'::bytea, 'mocked');
 """
 
         log.info(f'Attempting to push mocked BLOCK with number: {self.block_number}')
