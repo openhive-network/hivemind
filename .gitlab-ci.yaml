@@ -213,6 +213,11 @@ sync_e2e_benchmark:
   services:
     - name: $HAF_IMAGE_NAME
       alias: haf-instance
+      variables:
+        PG_ACCESS: "
+         host    haf_block_log    haf_app_admin    172.0.0.0/8    trust\n
+         host    haf_block_log    haf_admin        172.0.0.0/8    trust\n
+         "
   variables:
     RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
   before_script:
