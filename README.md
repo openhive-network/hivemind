@@ -1,64 +1,134 @@
 # Hivemind
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 #### Developer-friendly microservice powering social networks on the Hive blockchain.
 
 Hivemind is a "consensus interpretation" layer for the Hive blockchain, maintaining the state of social features such as
 post feeds, follows, and communities. Written in Python, it synchronizes an SQL database with chain state, providing
 developers with a more flexible/extensible alternative to the raw hived API.
 
-## Development Environment
+## Table of Contents
+
+1. [Environment](#environment)
+2. [Installation](#installation)
+3. [Updating from an existing hivemind database](#updating-from-an-existing-hivemind-database)
+4. [Running](#running)
+5. [Tests](#tests)
+6. [Production Environment](#production-environment)
+7. [Configuration](#configuration)
+8. [Requirements](#requirements)
+9. [JSON-RPC API](#json-rpc-api)
+10. [Overview](#overview)
+11. [Documentation](#documentation)
+
+## Environment
 
 - Python 3.8+ required
-- Python setuptools in version >= 57.0, like also pip tool in version >= 21.0
+- Python dependencies: `pip >= 22.2.2` and `setuptools >= 63.1.0`
 - Postgres 12+ recommended
 
-### Dependencies:
+#### Dependencies:
 
-- Ubuntu: `$ sudo apt-get install python3 python3-pip`
+- Ubuntu: `$ sudo apt-get install python3 python3-pip python3-venv`
 
-### Installation:
+## Installation:
 
-Try to update Python installation tools first, by specifying:
+#### Prerequisites:
+
+Create a new database for hivemind:
+
+```bash
+$ createdb hive
+```
+
+Hivemind also requires the postgresql `intarray` extension to be installed. The postgresql user who has `CREATE`
+privilege can load the module with following command:
+
+```postgresql
+CREATE EXTENSION IF NOT EXISTS intarray;
+```
+
+Clone the hivemind repository with its submodules:
+
+```bash
+$ git clone --recurse-submodules https://gitlab.syncad.com/hive/hivemind.git
+$ cd hivemind
+```
+
+Update your global Python installation tools, by specifying:
 
 ```bash
 $ python3 -m pip install --upgrade pip setuptools wheel
 ```
 
-If you have too old setup tools, pip spawn will fail with error similar to:
+#### Install the Hivemind itself:
 
-```
-Complete output from command python setup.py egg_info:
-    Traceback (most recent call last):
-      File "<string>", line 1, in <module>
-    ModuleNotFoundError: No module named 'setuptools'
-```
-
-Before creating the hive database, Hivemind requires the postgresql 'intarray' extension. The postgresql user who has
-CREATE privilege can load the module with the command `CREATE EXTENSION IF NOT EXISTS intarray;`.
+You can install additional dependencies for testing, development etc.
+All the dependencies are listed in the `setup.cfg` file under the `[options.extras_require]` section.
+You can include them by adding the extra flag to install command like:
 
 ```bash
-$ createdb hive
-$ export DATABASE_URL=postgresql://user:pass@localhost:5432/hive
-```
+$ pip install .'[tests]'
+````
+
+<details>
+<summary>Install in virtual environment manually (RECOMMENDED)</summary>
 
 ```bash
-$ git clone --recurse-submodules https://gitlab.syncad.com/hive/hivemind.git
-$ cd hivemind
-$ python3 -m pip install --no-cache-dir --verbose --user . 2>&1 | tee pip_install.log
+$ cd hivemind                # Go to the hivemind repository
+$ python3 -m venv venv/      # Create virtual environment in the ./venv/ directory
+$ . venv/bin/activate        # Activate it
+$ pip install .              # Install Hivemind
 ```
 
-### Updating from an existing hivemind database:
+Now everytime you want to start the hivemind indexer or API server, you should activate the virtual environment with:
 
 ```bash
 $ cd hivemind
-$ python3 -m pip install --no-cache-dir --verbose --user . 2>&1 | tee pip_install.log
-$ cd hive/db/sql_scripts
+$ . venv/bin/activate
+```
+
+To deactivate virtual environment run:
+
+```bash
+$ deactivate
+```
+
+</details>
+
+<details>
+<summary>Install in your operating system scope</summary>
+
+Enter following command in terminal:
+
+```bash
+$ cd hivemind
+$ pip install --no-cache-dir --verbose --user . 2>&1 | tee pip_install.log
+```
+
+</details>
+
+## Updating from an existing hivemind database
+
+```bash
+$ cd hivemind/hive/db/sql_scripts
 $ ./db_upgrade.sh <user-name> hive
 ```
 
 (where <user-name> is your database login name)
 
-### Start the indexer:
+## Running
+
+> If you installed in the virtual environment, don't forget to activate it first
+
+Indicate access to your hivemind database:
+
+```bash
+$ export DATABASE_URL=postgresql://user:pass@localhost:5432/hive
+```
+
+#### Start the indexer (aka synchronization process):
 
 ```bash
 $ hive sync
@@ -69,7 +139,7 @@ $ hive status
 {'db_head_block': 19930833, 'db_head_time': '2018-02-16 21:37:36', 'db_head_age': 10}
 ```
 
-### Start the server:
+#### Start the API server:
 
 ```bash
 $ hive server
@@ -80,52 +150,29 @@ $ curl --data '{"jsonrpc":"2.0","id":0,"method":"hive.db_head_state","params":{}
 {"jsonrpc": "2.0", "result": {"db_head_block": 19930795, "db_head_time": "2018-02-16 21:35:42", "db_head_age": 10}, "id": 0}
 ```
 
-### Run tests:
-
-To run unit tests:
-
-```bash
-$ make test
-```
+## Tests:
 
 To run api tests:
 
 1. Make sure that current version of `hivemind` is installed,
-2. Api tests require that `hivemind` is synced to a node replayed up to 5 000 000 blocks,
+2. Api tests require that `hivemind` is synced to a node replayed up to `5_000_000` blocks.\
 3. Run `hivemind` in `server` mode
 4. Set env variables:
 
-```bash
-$ export HIVEMIND_PORT=8080
-$ export HIVEMIND_ADDRESS=127.0.0.1
-```
+    ```bash
+    $ export HIVEMIND_PORT=8080
+    $ export HIVEMIND_ADDRESS=127.0.0.1
+    ```
 
 5. Run tests using tox:
 
-```bash
-$ tox -e tavern -- --workers auto --tests-per-worker auto --durations=0
-```
+    ```bash
+    $ tox -e tavern -- --workers auto --tests-per-worker auto --durations=0
+    ```
 
 ## Production Environment
 
-Hivemind is deployed as a Docker container.
-
-Here is an example command that will initialize the database schema and start the syncing process:
-
-```
-docker run -d --name hivemind --env DATABASE_URL=postgresql://user:pass@hostname:5432/databasename --env STEEMD_URL='{"default":"https://yourhivenode"}' --env SYNC_SERVICE=1 -p 8080:8080 hive/hivemind:latest
-```
-
-Be sure to set `DATABASE_URL` to point to your postgres database and set `STEEMD_URL` to point to your hived node to
-sync from.
-
-Once the database is synced, Hivemind will be available for serving requests.
-
-To watch the logs on your console:
-
-```
-docker logs -f hivemind
-```
+Deploying Hivemind as a Docker container will be available when Hivemind HAf version will be released.
 
 ## Configuration
 
@@ -145,19 +192,19 @@ Precedence: CLI over ENV over hive.conf. Check `hive --help` for details.
 
 ## Requirements
 
-### Hardware
+#### Hardware
 
 - Focus on Postgres performance
 - 9GB of memory for `hive sync` process
 - 750GB storage for database
 
-### Hive config
+#### Hive config
 
 Plugins
 
 - Required: `database_api`,`condenser_api`,`block_api`,`account_history_api`
 
-### Postgres Performance
+#### Postgres Performance
 
 For a system with 16G of memory, here's a good start:
 
@@ -265,7 +312,7 @@ full with their final state.
 
 #### API layer
 
-Performs queries against the core and cache tables, merging them into a response in such a way that the frontend will
+Perform queries against the core and cache tables, merging them into a response in such a way that the frontend will
 not need to perform any additional calls to `hived` itself. The initial API simply mimics hived's `condenser_api` for
 backwards compatibility, but will be extended to leverage new opportunities and simplify application development.
 
@@ -289,7 +336,3 @@ expect quick feedback, e.g. votes and live discussions. We can apply the followi
 ```bash
 $ make docs && open docs/hive/index.html
 ```
-
-## License
-
-MIT
