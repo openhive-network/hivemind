@@ -36,11 +36,8 @@ developers with a more flexible/extensible alternative to the raw hived API.
 
 #### Prerequisites:
 
-Create a new database for hivemind:
-
-```bash
-$ createdb hive
-```
+Hivemind is a [HAF](https://gitlab.syncad.com/hive/haf)-based application. To work properly it requires an existing
+and working HAF database.
 
 Hivemind also requires the postgresql `intarray` extension to be installed. The postgresql user who has `CREATE`
 privilege can load the module with following command:
@@ -120,12 +117,10 @@ $ ./db_upgrade.sh <user-name> hive
 
 ## Running
 
-> If you installed in the virtual environment, don't forget to activate it first
-
-Indicate access to your hivemind database:
+Indicate access to your HAF database:
 
 ```bash
-$ export DATABASE_URL=postgresql://user:pass@localhost:5432/hive
+$ export DATABASE_URL=postgresql://hivemind_app:pass@localhost:5432/hive
 ```
 
 #### Start the indexer (aka synchronization process):
@@ -155,7 +150,14 @@ $ curl --data '{"jsonrpc":"2.0","id":0,"method":"hive.db_head_state","params":{}
 To run api tests:
 
 1. Make sure that current version of `hivemind` is installed,
-2. Api tests require that `hivemind` is synced to a node replayed up to `5_000_000` blocks.\
+2. Api tests require that `hivemind` is synced to a node replayed up to `5_000_024` blocks (including mocks).\
+   This means, you should have HAF database replayed up to `5_000_000` mainnet blocks and run the mocking script with:
+
+    ```bash
+    $ cd hivemind/scripts/ci/
+    $ ./scripts/ci/add-mocks-to-db.sh
+    ```
+
 3. Run `hivemind` in `server` mode
 4. Set env variables:
 
@@ -176,17 +178,14 @@ Deploying Hivemind as a Docker container will be available when Hivemind HAf ver
 
 ## Configuration
 
-| Environment          | CLI argument           | Default                                    |
-|----------------------|------------------------|--------------------------------------------|
-| `LOG_LEVEL`          | `--log-level`          | INFO                                       |
-| `HTTP_SERVER_PORT`   | `--http-server-port`   | 8080                                       |
-| `DATABASE_URL`       | `--database-url`       | postgresql://user:pass@localhost:5432/hive |
-| `STEEMD_URL`         | `--steemd-url`         | '{"default":"https://yourhivenode"}'       |
-| `MAX_BATCH`          | `--max-batch`          | 35                                         |
-| `MAX_WORKERS`        | `--max-workers`        | 6                                          |
-| `MAX_RETRIES`        | `--max-retries`        | -1                                         |
-| `TRAIL_BLOCKS`       | `--trail-blocks`       | 2                                          |
-| `HIVED_DATABASE_URL` | `--hived-database-url` |                                            |
+| Environment        | CLI argument         | Default                                    |
+|--------------------|----------------------|--------------------------------------------|
+| `LOG_LEVEL`        | `--log-level`        | INFO                                       |
+| `HTTP_SERVER_PORT` | `--http-server-port` | 8080                                       |
+| `DATABASE_URL`     | `--database-url`     | postgresql://user:pass@localhost:5432/hive |
+| `MAX_BATCH`        | `--max-batch`        | 35                                         |
+| `MAX_WORKERS`      | `--max-workers`      | 6                                          |
+| `MAX_RETRIES`      | `--max-retries`      | -1                                         |
 
 Precedence: CLI over ENV over hive.conf. Check `hive --help` for details.
 
@@ -312,7 +311,7 @@ full with their final state.
 
 #### API layer
 
-Perform queries against the core and cache tables, merging them into a response in such a way that the frontend will
+Performs queries against the core and cache tables, merging them into a response in such a way that the frontend will
 not need to perform any additional calls to `hived` itself. The initial API simply mimics hived's `condenser_api` for
 backwards compatibility, but will be extended to leverage new opportunities and simplify application development.
 
