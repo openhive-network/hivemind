@@ -46,7 +46,7 @@ pushd /home/hivemind/app
 echo "Attempting to start Hivemind process..."
 sudo -HEnu hivemind /bin/bash <<EOF
   source /home/hivemind/.hivemind-venv/bin/activate
-  hive "${HIVEMIND_ARGS[@]}"
+  hive "${HIVEMIND_ARGS[@]}" --database-url="${POSTGRES_URL}"
 EOF
 echo "Hivemind process finished execution: $?"
 } &
