@@ -9,7 +9,7 @@ cleanup () {
   python_pid=$(pidof 'python3')
   echo "python_pid: $python_pid"
   
-  kill -INT $python_pid
+  sudo -n kill -INT $python_pid
 
   echo "Waiting for hivemind finish..."
   tail --pid=$python_pid -f /dev/null || true
@@ -46,7 +46,7 @@ pushd /home/hivemind/app
 echo "Attempting to start Hivemind process..."
 sudo -HEnu hivemind /bin/bash <<EOF
   source /home/hivemind/.hivemind-venv/bin/activate
-  hive "${HIVEMIND_ARGS[@]}"
+  hive "${HIVEMIND_ARGS[@]}" --database-url="${POSTGRES_URL}"
 EOF
 echo "Hivemind process finished execution: $?"
 } &
