@@ -32,18 +32,21 @@ SHELL ["/bin/bash", "-c"]
 RUN apk update && DEBIAN_FRONTEND=noniteractive apk add --no-cache \
   postgresql-libs \
   git \
-  && apk add -- gcc musl-dev postgresql-dev libffi-dev python3-dev
+  && apk add --no-cache gcc musl-dev postgresql-dev libffi-dev python3-dev
 
 FROM ${CI_REGISTRY_IMAGE}ci-base-image${CI_IMAGE_TAG} AS builder
 
 WORKDIR /home/hivemind
 
-COPY . /home/hivemind/app
-RUN apk update && DEBIAN_FRONTEND=noniteractive apk add --no-cache --virtual build-dependencies libpq-dev build-base \
-  && ./app/scripts/ci/build.sh \
-  &&  apk del --no-cache build-dependencies
+COPY --chown=hivemind:hivemind . /home/hivemind/app
 
-FROM ${CI_REGISTRY_IMAGE}runtime${CI_IMAGE_TAG} AS instance
+RUN apk update && DEBIAN_FRONTEND=noniteractive apk add --no-cache --virtual build-dependencies libpq-dev build-base \
+  && git config --global --add safe.directory /home/hivemind/app \
+  && ./app/scripts/ci/build.sh 
+#  &&  apk del --no-cache build-dependencies
+
+#FROM ${CI_REGISTRY_IMAGE}runtime${CI_IMAGE_TAG} AS instance
+FROM builder AS instance
 
 ARG HTTP_PORT=8080
 ENV HTTP_PORT=${HTTP_PORT}
