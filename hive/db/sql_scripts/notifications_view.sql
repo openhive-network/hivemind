@@ -116,7 +116,7 @@ UNION ALL
     hivemind_app.notification_id(hf.block_num, 15, hf.id) AS id,
     0 AS post_id,
     15 AS type_id,
-    hb.created_at,
+    (select hb.created_at from hive.hivemind_app_blocks_view hb where hb.num = (hf.block_num - 1)) as created_at, -- use time of previous block to match head_block_time behavior at given block
     hf.follower AS src,
     hf.following AS dst,
     0 as dst_post_id,
@@ -124,7 +124,6 @@ UNION ALL
     ''::character varying AS community_title,
     ''::character varying AS payload
    FROM hivemind_app.hive_follows hf
-   JOIN hive.hivemind_app_blocks_view hb ON hb.num = hf.block_num - 1 -- use time of previous block to match head_block_time behavior at given block
    WHERE hf.state = 1 --only follow blog
 
 UNION ALL
@@ -160,7 +159,7 @@ UNION ALL
     hivemind_app.notification_id(hm.block_num, 16, hm.id) AS id,
     hm.post_id,
     16 AS type_id,
-    hb.created_at,
+    (select hb.created_at from hive.hivemind_app_blocks_view hb where hb.num = (hm.block_num - 1)) as created_at, -- use time of previous block to match head_block_time behavior at given block
     hp.author_id AS src,
     hm.account_id AS dst,
     hm.post_id as dst_post_id,
@@ -169,7 +168,6 @@ UNION ALL
     ''::character varying AS payload
    FROM hivemind_app.hive_mentions hm
    JOIN hivemind_app.hive_posts hp ON hm.post_id = hp.id
-   JOIN hive.hivemind_app_blocks_view hb ON hb.num = hm.block_num - 1 -- use time of previous block to match head_block_time behavior at given block
 ) notifs
 JOIN hivemind_app.hive_accounts_rank_view harv ON harv.id = notifs.src
 ;
