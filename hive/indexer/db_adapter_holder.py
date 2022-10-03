@@ -1,5 +1,7 @@
 import logging
+
 log = logging.getLogger(__name__)
+
 
 class DbLiveContextHolder(object):
     _live_context = False
@@ -11,6 +13,7 @@ class DbLiveContextHolder(object):
     @classmethod
     def is_live_context(cls):
         return cls._live_context
+
 
 class DbAdapterHolder(object):
     db = None

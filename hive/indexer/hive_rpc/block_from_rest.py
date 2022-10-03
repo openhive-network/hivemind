@@ -1,12 +1,13 @@
-from hive.indexer.block import Block, Operation, Transaction, OperationType, VirtualOperationType
-
 import logging
+
+from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
 
 log = logging.getLogger(__name__)
 
+
 class VirtualOperationFromRpc(Operation):
-    def __init__( self, operation_name, operation_body ):
-        self._operation_type = VirtualOperationType.from_name( operation_name )
+    def __init__(self, operation_name, operation_body):
+        self._operation_type = VirtualOperationType.from_name(operation_name)
         self._operation_body = operation_body
 
     def get_type(self):
@@ -17,8 +18,8 @@ class VirtualOperationFromRpc(Operation):
 
 
 class OperationFromRpc(Operation):
-    def __init__( self, operation_name, operation_body ):
-        self._operation_type = OperationType.from_name( operation_name )
+    def __init__(self, operation_name, operation_body):
+        self._operation_type = OperationType.from_name(operation_name)
         self._operation_body = operation_body
 
     def get_type(self):
@@ -28,7 +29,7 @@ class OperationFromRpc(Operation):
         return self._operation_body
 
 
-class TransactionFromRpc(Transaction ):
+class TransactionFromRpc(Transaction):
     def __init__(self, id, transaction):
         self._id = id
         self._transaction = transaction
@@ -38,12 +39,13 @@ class TransactionFromRpc(Transaction ):
 
     def get_next_operation(self):
         for raw_operation in self._transaction['operations']:
-            operation = OperationFromRpc( raw_operation[ 'type' ], raw_operation['value'] )
+            operation = OperationFromRpc(raw_operation['type'], raw_operation['value'])
             if not operation.get_type():
                 continue
-            yield  operation
+            yield operation
 
-class BlockFromRpc( Block ):
+
+class BlockFromRpc(Block):
     def __init__(self, block_data, virtual_ops):
         """
         block_data - raw format of the blocks
@@ -74,12 +76,11 @@ class BlockFromRpc( Block ):
 
     def get_next_vop(self):
         for vop in self._virtual_ops:
-            vop_object = VirtualOperationFromRpc( vop[ 'type' ], vop[ 'value' ] )
+            vop_object = VirtualOperationFromRpc(vop['type'], vop['value'])
             if not vop_object.get_type():
                 continue
             yield vop_object
 
-
     def get_next_transaction(self):
         for tx_idx, tx in enumerate(self._blocks_data['transactions']):
-            yield TransactionFromRpc( tx_idx, tx )
+            yield TransactionFromRpc(tx_idx, tx)

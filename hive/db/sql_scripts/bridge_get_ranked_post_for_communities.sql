@@ -574,7 +574,7 @@ BEGIN
     __post_id = 0;
   END IF;
   RETURN QUERY
-  WITH created as -- bridge_get_ranked_post_by_created_for_community
+  WITH created as MATERIALIZED -- bridge_get_ranked_post_by_created_for_community
   (
     SELECT
       hp1.id,

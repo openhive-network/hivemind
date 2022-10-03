@@ -692,17 +692,10 @@
     "": {}
   },
   "feed_price": {
-    "base": "0.637 HBD",
-    "quote": "1.000 HIVE"
+    "message": "Not further supported"
   },
   "props": {
-    "hbd_interest_rate": 1000,
-    "hbd_print_rate": 10000,
-    "head_block_number": 5000024,
-    "last_irreversible_block_num": 4999980,
-    "time": "2016-09-15T19:48:33",
-    "total_vesting_fund_hive": "149190428.013 HIVE",
-    "total_vesting_shares": "448144916705.468384 VESTS"
+    "message": "Not further supported"
   },
   "tag_idx": {
     "trending": []

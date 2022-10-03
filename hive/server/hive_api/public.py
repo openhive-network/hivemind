@@ -4,6 +4,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
+
 async def get_info(context):
     db = context['db']
 
@@ -16,13 +17,13 @@ async def get_info(context):
     from hive.version import VERSION, GIT_REVISION, GIT_DATE
 
     ret = {
-        "hivemind_version" : VERSION,
-        "hivemind_git_rev" : GIT_REVISION,
-        "hivemind_git_date" : GIT_DATE,
-        "database_schema_version" : patch_level_data['level'],
-        "database_patch_date" : str(patch_level_data['patch_date']),
-        "database_patched_to_revision" : patch_level_data['patched_to_revision'],
-        "database_head_block" : database_head_block
+        "hivemind_version": VERSION,
+        "hivemind_git_rev": GIT_REVISION,
+        "hivemind_git_date": str(GIT_DATE),
+        "database_schema_version": patch_level_data['level'],
+        "database_patch_date": str(patch_level_data['patch_date']),
+        "database_patched_to_revision": patch_level_data['patched_to_revision'],
+        "database_head_block": database_head_block,
     }
 
     return ret

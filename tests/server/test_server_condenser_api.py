@@ -1,8 +1,9 @@
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 import pytest
 from hive.server.condenser_api.get_state import get_state
 from hive.server.condenser_api.tags import get_trending_tags
 from hive.server.condenser_api.call import call
+
 
 @pytest.mark.asyncio
 async def test_get_state():
@@ -35,17 +36,16 @@ async def test_get_state():
     with pytest.raises(Exception):
         await get_state('witnesses')
 
+
 @pytest.mark.asyncio
 async def test_call():
-    assert await call('condenser_api',
-                      'get_followers',
-                      ['xeroc', '', 'blog', 10])
-    assert await call('condenser_api',
-                      'get_discussions_by_blog',
-                      [{"tag": "xeroc",
-                        "start_author": "",
-                        "start_permlink": "",
-                        "limit": 10}])
+    assert await call('condenser_api', 'get_followers', ['xeroc', '', 'blog', 10])
+    assert await call(
+        'condenser_api',
+        'get_discussions_by_blog',
+        [{"tag": "xeroc", "start_author": "", "start_permlink": "", "limit": 10}],
+    )
+
 
 @pytest.mark.asyncio
 async def test_get_trending_tags():

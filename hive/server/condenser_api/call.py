@@ -1,50 +1,44 @@
 """Handles legacy `call` method."""
 
 from hive.server.common.helpers import (
-    ApiError,
     return_error_info,
 )
 from hive.server.condenser_api.get_state import get_state
-from hive.server.condenser_api.tags import get_trending_tags
 from hive.server.condenser_api.methods import (
-    get_followers,
-    get_following,
-    get_follow_count,
-
-    get_reblogged_by,
     get_account_reputations,
-
-    get_content,
-    get_content_replies,
-    
-    get_discussions_by_trending,
-    get_discussions_by_hot,
-    get_discussions_by_promoted,
-    get_discussions_by_created,
-    get_post_discussions_by_payout,
-    get_comment_discussions_by_payout,
-
-    get_discussions_by_blog,
-    get_discussions_by_feed,
-    get_discussions_by_comments,
-    get_replies_by_last_update,
-
-    get_discussions_by_author_before_date,
+    get_account_votes,
+    get_active_votes,
     get_blog,
     get_blog_entries,
-
-    get_account_votes,
-    get_active_votes
+    get_comment_discussions_by_payout,
+    get_content,
+    get_content_replies,
+    get_discussions_by_author_before_date,
+    get_discussions_by_blog,
+    get_discussions_by_comments,
+    get_discussions_by_created,
+    get_discussions_by_feed,
+    get_discussions_by_hot,
+    get_discussions_by_promoted,
+    get_discussions_by_trending,
+    get_follow_count,
+    get_followers,
+    get_following,
+    get_post_discussions_by_payout,
+    get_reblogged_by,
+    get_replies_by_last_update,
 )
+from hive.server.condenser_api.tags import get_trending_tags
+
 
 def _strict_list(params, expected_len, min_len=None):
     assert isinstance(params, list), "params not a list"
     if min_len is None:
         assert len(params) == expected_len, "expected %d params" % expected_len
     else:
-        assert (len(params) <= expected_len and
-                len(params) >= min_len), "expected %d params" % expected_len
+        assert len(params) <= expected_len and len(params) >= min_len, "expected %d params" % expected_len
     return params
+
 
 def _strict_query(params):
     query = _strict_list(params, 1)[0]
@@ -53,9 +47,20 @@ def _strict_query(params):
     # remove optional-yet-blank param keys -- some clients include every key
     # possible, and steemd seems to ignore them silently. need to strip
     # them here, if blank, to avoid argument mismatch errors.
-    all_keys = ['filter_tags', 'select_tags', 'select_authors', 'author',
-                'start_author', 'start_permlink', 'start_tag', 'parent_author',
-                'parent_permlink', 'start_parent_author', 'before_date', 'tag']
+    all_keys = [
+        'filter_tags',
+        'select_tags',
+        'select_authors',
+        'author',
+        'start_author',
+        'start_permlink',
+        'start_tag',
+        'parent_author',
+        'parent_permlink',
+        'start_parent_author',
+        'before_date',
+        'tag',
+    ]
     for key in all_keys:
         if key in query and not query[key]:
             del query[key]
@@ -74,10 +79,11 @@ def _strict_query(params):
     provided_keys = query.keys()
     missing = expected_keys - provided_keys
     unknown = provided_keys - expected_keys - optional_keys
-    assert not missing, "missing query key %s" % missing
-    assert not unknown, "unknown query key %s" % unknown
+    assert not missing, f"missing query key {missing}"
+    assert not unknown, f"unknown query key {unknown}"
 
     return query
+
 
 @return_error_info
 async def call(context, api, method, params):
@@ -156,4 +162,4 @@ async def call(context, api, method, params):
     elif method == 'get_active_votes':
         return await get_active_votes(context, *_strict_list(params, 2))
 
-    assert False, "unknown method: %s.%s" % (api, method)
+    assert False, f"unknown method: {api}.{method}"

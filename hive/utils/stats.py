@@ -2,17 +2,19 @@
 
 import atexit
 import logging
-
+from os import getpid
 from queue import Queue
 from time import perf_counter as perf
-from hive.utils.system import colorize, peak_usage_mb
+
 from psutil import pid_exists
-from os import getpid
+
+from hive.utils.system import colorize, peak_usage_mb
 
 log = logging.getLogger(__name__)
 
+
 class BroadcastObject:
-    def __init__(self, category : str, value, unit):
+    def __init__(self, category: str, value, unit):
         self.category = category
         self.value = value
         self.unit = unit
@@ -31,25 +33,26 @@ class BroadcastObject:
 
     def __repr__(self):
         return self.__str__()
-    
+
     def __str__(self):
         return str(self.__dict__)
 
-class PrometheusClient:
 
+class PrometheusClient:
     deamon = None
     logs_to_broadcast = Queue()
 
     @staticmethod
-    def work( port, pid ):
+    def work(port, pid):
         try:
             import prometheus_client as prom
+
             prom.start_http_server(port)
 
             gauges = {}
 
             while pid_exists(pid):
-                value : BroadcastObject = PrometheusClient.logs_to_broadcast.get(True)
+                value: BroadcastObject = PrometheusClient.logs_to_broadcast.get(True)
                 value.debug()
                 value_name = value.name()
 
@@ -75,7 +78,8 @@ class PrometheusClient:
                 log.warn("Failed to import prometheus client. Online stats disabled")
                 return
             from threading import Thread
-            PrometheusClient.deamon = Thread(target=PrometheusClient.work, args=[ port, getpid() ], daemon=True)
+
+            PrometheusClient.deamon = Thread(target=PrometheusClient.work, args=[port, getpid()], daemon=True)
             PrometheusClient.deamon.start()
 
     @staticmethod
@@ -89,6 +93,7 @@ class PrometheusClient:
             PrometheusClient.logs_to_broadcast.put(obj)
         else:
             raise Exception(f"Not expected type. Should be list or BroadcastObject, but: {type(obj)} given")
+
 
 class Stat:
     def __init__(self, time):
@@ -111,6 +116,7 @@ class Stat:
     def broadcast(self, name):
         return BroadcastObject(name, self.time, 's')
 
+
 class StatusManager:
 
     # Fully abstract class
@@ -122,38 +128,39 @@ class StatusManager:
         return perf()
 
     @staticmethod
-    def stop( start : float ):
+    def stop(start: float):
         return perf() - start
 
     @staticmethod
-    def merge_dicts(od1, od2, broadcast : bool = False, total_broadcast : bool = True):
+    def merge_dicts(od1, od2, broadcast: bool = False, total_broadcast: bool = True):
         if od2 is not None:
             for k, v in od2.items():
                 if k in od1:
                     od1[k].update(v)
                 else:
                     od1[k] = v
-                
+
                 if broadcast:
                     PrometheusClient.broadcast(v.broadcast(k))
 
                 if total_broadcast:
-                    PrometheusClient.broadcast( od1[k].broadcast( f"{k}_total" ) )
+                    PrometheusClient.broadcast(od1[k].broadcast(f"{k}_total"))
 
         return od1
 
     @staticmethod
-    def log_dict(col : dict) -> float:
+    def log_dict(col: dict) -> float:
         sorted_stats = sorted(col.items(), key=lambda kv: kv[1], reverse=True)
         measured_time = 0.0
         for (k, v) in sorted_stats:
-            log.info("`{}`: {}".format(k, v))
+            log.info(f"`{k}`: {v}")
             measured_time += v.time
         return measured_time
 
     @staticmethod
     def print_row():
         log.info("#" * 20)
+
 
 class OPStat(Stat):
     def __init__(self, time, count):
@@ -163,11 +170,12 @@ class OPStat(Stat):
     def __str__(self):
         return f"Processed {self.count :.0f} times in {self.time :.5f} seconds"
 
-    def broadcast(self, name : str):
+    def broadcast(self, name: str):
         n = name.lower()
         if not n.endswith('operation'):
             n = f"{n}_operation"
-        return list([ super().broadcast(n), BroadcastObject(n + "_count", self.count, 'b') ])
+        return list([super().broadcast(n), BroadcastObject(n + "_count", self.count, 'b')])
+
 
 class OPStatusManager(StatusManager):
     # Summary for whole sync
@@ -177,7 +185,7 @@ class OPStatusManager(StatusManager):
     cpbs = {}
 
     @staticmethod
-    def op_stats( name, time, processed = 1 ):
+    def op_stats(name, time, processed=1):
         if name in OPStatusManager.cpbs.keys():
             OPStatusManager.cpbs[name].time += time
             OPStatusManager.cpbs[name].count += processed
@@ -187,28 +195,26 @@ class OPStatusManager(StatusManager):
     @staticmethod
     def next_blocks():
         OPStatusManager.global_stats = StatusManager.merge_dicts(
-            OPStatusManager.global_stats, 
-            OPStatusManager.cpbs,
-            True
+            OPStatusManager.global_stats, OPStatusManager.cpbs, True
         )
         OPStatusManager.cpbs.clear()
 
     @staticmethod
-    def log_global(label : str):
+    def log_global(label: str):
         StatusManager.print_row()
         log.info(label)
         tm = StatusManager.log_dict(OPStatusManager.global_stats)
         log.info(f"Total time for processing operations time: {tm :.4f}s.")
         return tm
 
-
     @staticmethod
-    def log_current(label : str):
+    def log_current(label: str):
         StatusManager.print_row()
         log.info(label)
         tm = StatusManager.log_dict(OPStatusManager.cpbs)
         log.info(f"Current time for processing operations time: {tm :.4f}s.")
         return tm
+
 
 class FlushStat(Stat):
     def __init__(self, time, pushed):
@@ -218,9 +224,10 @@ class FlushStat(Stat):
     def __str__(self):
         return f"Pushed {self.pushed :.0f} records in {self.time :.4f} seconds"
 
-    def broadcast(self, name : str):
+    def broadcast(self, name: str):
         n = f"flushing_{name.lower()}"
-        return list([ super().broadcast(n), BroadcastObject(n + "_items", self.pushed, 'b') ])
+        return list([super().broadcast(n), BroadcastObject(n + "_items", self.pushed, 'b')])
+
 
 class FlushStatusManager(StatusManager):
     # Summary for whole sync
@@ -240,14 +247,12 @@ class FlushStatusManager(StatusManager):
     @staticmethod
     def next_blocks():
         FlushStatusManager.global_stats = StatusManager.merge_dicts(
-            FlushStatusManager.global_stats, 
-            FlushStatusManager.current_flushes,
-            True
+            FlushStatusManager.global_stats, FlushStatusManager.current_flushes, True
         )
         FlushStatusManager.current_flushes.clear()
 
     @staticmethod
-    def log_global(label : str):
+    def log_global(label: str):
         StatusManager.print_row()
         log.info(label)
         tm = StatusManager.log_dict(FlushStatusManager.global_stats)
@@ -255,12 +260,13 @@ class FlushStatusManager(StatusManager):
         return tm
 
     @staticmethod
-    def log_current(label : str):
+    def log_current(label: str):
         StatusManager.print_row()
         log.info(label)
         tm = StatusManager.log_dict(FlushStatusManager.current_flushes)
         log.info(f"Current flushing time: {tm :.4f}s.")
         return tm
+
 
 class FinalStat(Stat):
     def __init__(self, time):
@@ -269,9 +275,10 @@ class FinalStat(Stat):
     def __str__(self):
         return f"Processed final operations in {self.time :.4f} seconds"
 
-    def broadcast(self, name : str):
+    def broadcast(self, name: str):
         n = f"flushing_{name.lower()}"
-        return list([ super().broadcast(n), BroadcastObject(n + "_items", '', 'b') ])
+        return list([super().broadcast(n), BroadcastObject(n + "_items", '', 'b')])
+
 
 class FinalOperationStatusManager(StatusManager):
     # Summary for whole sync
@@ -288,7 +295,7 @@ class FinalOperationStatusManager(StatusManager):
             FinalOperationStatusManager.current_finals[name] = FinalStat(time)
 
     @staticmethod
-    def log_current(label : str):
+    def log_current(label: str):
         StatusManager.print_row()
         log.info(label)
         tm = StatusManager.log_dict(FinalOperationStatusManager.current_finals)
@@ -299,12 +306,14 @@ class FinalOperationStatusManager(StatusManager):
     def clear():
         FinalOperationStatusManager.current_finals.clear()
 
+
 class WaitStat(Stat):
     def __init__(self, time):
         super().__init__(time)
 
     def __str__(self):
         return f"Waited {self.time :.4f} seconds"
+
 
 class WaitingStatusManager(StatusManager):
     # Summary for whole sync
@@ -323,14 +332,12 @@ class WaitingStatusManager(StatusManager):
     @staticmethod
     def next_blocks():
         WaitingStatusManager.global_stats = StatusManager.merge_dicts(
-            WaitingStatusManager.global_stats, 
-            WaitingStatusManager.current_waits,
-            True
+            WaitingStatusManager.global_stats, WaitingStatusManager.current_waits, True
         )
         WaitingStatusManager.current_waits.clear()
 
     @staticmethod
-    def log_global(label : str):
+    def log_global(label: str):
         StatusManager.print_row()
         log.info(label)
         tm = StatusManager.log_dict(WaitingStatusManager.global_stats)
@@ -338,18 +345,19 @@ class WaitingStatusManager(StatusManager):
         return tm
 
     @staticmethod
-    def log_current(label : str):
+    def log_current(label: str):
         StatusManager.print_row()
         log.info(label)
         tm = StatusManager.log_dict(WaitingStatusManager.current_waits)
         log.info(f"Current waiting time: {tm :.4f}s.")
         return tm
 
-def minmax(collection : dict, blocks : int, time : float, _from : int):
-    value = blocks/time
+
+def minmax(collection: dict, blocks: int, time: float, _from: int):
+    value = blocks / time
     _to = _from + blocks
     PrometheusClient.broadcast(BroadcastObject('block_processing_rate', value, 'bps'))
-    if len(collection.keys())  == 0:
+    if len(collection.keys()) == 0:
 
         collection['min'] = value
         collection['min_from'] = _from
@@ -371,21 +379,22 @@ def minmax(collection : dict, blocks : int, time : float, _from : int):
             collection['max'] = value
             collection['max_from'] = _from
             collection['max_to'] = _to
-    
+
     return collection
+
 
 def _normalize_sql(sql, maxlen=180):
     """Collapse whitespace and middle-truncate if needed."""
     out = ' '.join(sql.split())
     if len(out) > maxlen:
         i = int(maxlen / 2 - 4)
-        out = (out[0:i] +
-               ' ... ' +
-               out[-i:None])
+        out = out[0:i] + ' ... ' + out[-i:None]
     return out
+
 
 class StatsAbstract:
     """Tracks service call timings"""
+
     def __init__(self, service):
         self._service = service
         self.clear()
@@ -424,23 +433,21 @@ class StatsAbstract:
             return
 
         total_ms = parent_secs * 1000
-        log.info("Service: %s -- %ds total (%.1f%%)",
-                 self._service,
-                 round(self._ms / 1000),
-                 100 * (self._ms / total_ms))
+        log.info(
+            "Service: %s -- %ds total (%.1f%%)", self._service, round(self._ms / 1000), 100 * (self._ms / total_ms)
+        )
 
         log.info('%7s %9s %9s %9s', '-pct-', '-ttl-', '-avg-', '-cnt-')
         for call, ms, reqs in self.table(40):
             try:
-              avg = ms/reqs
-              millisec = ms/self._ms
+                avg = ms / reqs
+                millisec = ms / self._ms
             except ZeroDivisionError as ex:
-              avg = 0.0
-              millisec = 0.0
+                avg = 0.0
+                millisec = 0.0
             if reqs == 0:
                 reqs = 1
-            log.info("% 6.1f%% % 7dms % 9.2f % 8dx -- %s",
-                     100 * millisec, ms, avg, reqs, call)
+            log.info("% 6.1f%% % 7dms % 9.2f % 8dx -- %s", 100 * millisec, ms, avg, reqs, call)
         self.clear()
 
 
@@ -462,9 +469,9 @@ class SteemStats(StatsAbstract):
         'get_order_book': 20,
         'get_feed_history': 20,
         'lookup_accounts': 1000,
-        'get_comment_pending_payouts':1000,
-        'get_ops_in_block':500,
-        'enum_virtual_ops':1000
+        'get_comment_pending_payouts': 1000,
+        'get_ops_in_block': 500,
+        'enum_virtual_ops': 1000,
     }
 
     def __init__(self):
@@ -478,13 +485,13 @@ class SteemStats(StatsAbstract):
         par = self.PAR_STEEMD[call]
         over = per / par
         if over >= self.PAR_THRESHOLD:
-            out = ("[STEEM][%dms] %s[%d] -- %.1fx par (%d/%d)"
-                   % (ms, call, batch_size, over, per, par))
+            out = "[STEEM][%dms] %s[%d] -- %.1fx par (%d/%d)" % (ms, call, batch_size, over, per, par)
             log.warning(colorize(out))
 
 
 class DbStats(StatsAbstract):
     """Tracks database query timings."""
+
     SLOW_QUERY_MS = 250
     LOGGING_TRESHOLD = 50
 
@@ -500,8 +507,10 @@ class DbStats(StatsAbstract):
                 out = "[SQL][%dms] %s" % (ms, call[:250])
                 log.warning(colorize(out))
 
+
 class Stats:
     """Container for steemd and db timing data."""
+
     PRINT_THRESH_MINS = 1
 
     COLLECT_DB_STATS = 0
@@ -546,14 +555,20 @@ class Stats:
     def report(cls):
         """Emit a timing report for tracked services."""
         if not cls._secs:
-            return # nothing to report
+            return  # nothing to report
         total = perf() - cls._start
         non_idle = total - cls._idle
-        log.info("cumtime %ds (%.1f%% of %ds). %.1f%% idle. peak %dmb.",
-                 cls._secs, 100 * cls._secs / non_idle, non_idle,
-                 100 * cls._idle / total, peak_usage_mb())
+        log.info(
+            "cumtime %ds (%.1f%% of %ds). %.1f%% idle. peak %dmb.",
+            cls._secs,
+            100 * cls._secs / non_idle,
+            non_idle,
+            100 * cls._idle / total,
+            peak_usage_mb(),
+        )
         if cls._secs > 1:
             cls._db.report(cls._secs)
             cls._steemd.report(cls._secs)
+
 
 atexit.register(Stats.report)

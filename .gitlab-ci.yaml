@@ -12,12 +12,16 @@ stages:
   - python -m venv .venv
   - source .venv/bin/activate
   - time pip install --upgrade pip setuptools wheel
-  - pip install .
+  - pip install pyyaml
+  - pip install .[tests]
 
 .setup-runner-env: &setup-runner-env
   # Setup runner environment (to connect to correct postgres server, mainly).
   - TMP_VAR=$(cat hive-sync-runner-id.txt 2>/dev/null || true); export HIVE_SYNC_RUNNER_ID=${TMP_VAR:-0}
   - eval $(cat "$RUNNER_CONF" | ./scripts/ci/setup_env.py --current-runner-id=${CI_RUNNER_ID} --hive-sync-runner-id=${HIVE_SYNC_RUNNER_ID})
+  - export RUNNER_POSTGRES_HOST=172.17.0.1
+  - export RUNNER_POSTGRES_PORT=25432
+  - echo "Postgres host $RUNNER_POSTGRES_HOST port $RUNNER_POSTGRES_PORT"
 
 .set-variables: &set-variables
   # - export # List all variables and its values set by Gitlab CI.
@@ -31,8 +35,8 @@ stages:
   - echo "HIVEMIND_DB_NAME is $HIVEMIND_DB_NAME"
 
 .fetch-git-tags: &fetch-git-tags
-  - git fetch --tags # Looks to be unnecessary.
-  - git describe --tags --long --dirty
+  #- git fetch --tags # Looks to be unnecessary.
+  - scripts/ci/fix_ci_tag.sh
   #- echo git tag -f ci_implicit_tag # Needed to build python package
 
 .start-timer: &start-timer
@@ -71,12 +75,13 @@ stages:
     - when: on_success
 
 .default:
-  image: hivemind/python:3.6
+  image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
   interruptible: true
   inherit:
     default: false
     variables: false
   variables:
+    GIT_DEPTH: 1
     GIT_STRATEGY: clone
     GIT_SUBMODULE_STRATEGY: recursive
     PIPENV_VENV_IN_PROJECT: 1
@@ -356,7 +361,7 @@ stages:
       junit: api_smoketest_hive_api.xml
 
 
-.api-smoketest-benchmark-script: &api-smoketest-benchmark-script
+.api-benchmark-script: &api-benchmark-script
   - |
     ./scripts/ci/start-api-benchmarks.sh \
         localhost $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
@@ -364,13 +369,13 @@ stages:
         $RUNNER_BENCHMARK_JOBS \
         $CI_PROJECT_DIR/tests/api_tests/hivemind/tavern
 
-.api-smoketest-benchmark:
+.api-benchmark:
   stage: benchmark-tests
   extends: .test-common
   # Temporary failure (when any call is longer than 1s is allowed)
   allow_failure: true
   script:
-    - *api-smoketest-benchmark-script
+    - *api-benchmark-script
   artifacts:
     when: always
     paths:
@@ -385,8 +390,6 @@ sync-e2e-benchmark:
   script:
     - *hive-sync-script-common
     - ./scripts/ci/hive-server.sh start
-    - pip install tox
-    - touch tox-installed
     - *bridge_api_smoketest-script
     - *bridge_api_smoketest_negative-script
     - *condenser_api_smoketest-script
@@ -399,7 +402,14 @@ sync-e2e-benchmark:
     - *tags_api_smoketest_negative-script
     - *mock_tests-script
     - *hive_api_smoketest-script
-    - *api-smoketest-benchmark-script
+    - ./scripts/ci/hive-server.sh stop
+    - mv ./request_process_times.log ./request_process_times_smoketests.log
+    - ./scripts/ci/hive-server.sh start
+    - *api-benchmark-script
+  after_script:
+    - echo "ARTIFACTS_JOB_ID=$CI_JOB_ID" >> variables.env
+    - echo "APP_VERSION=$(git describe --tags)" >> variables.env
+    - echo "SERVER_NAME=$CI_RUNNER_DESCRIPTION" >> variables.env
   artifacts:
     when: always
     paths:
@@ -410,8 +420,40 @@ sync-e2e-benchmark:
       - tavern_benchmarks_report.html
       - tests/api_tests/hivemind/tavern/**/*.out.json
       - request_process_times.log
+      - request_process_times_smoketests.log
+      - hive/_version.py
     reports:
       junit: "*.xml"
+      dotenv: variables.env
     expire_in: 7 days
   tags:
     - hivemind-heavy-job
+
+Trigger benchmark-results-collector:
+  stage: post-deploy
+  needs: ["sync-e2e-benchmark"]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: manual
+    - when: manual
+  variables:
+    ARTIFACTS_URL: https://gitlab.syncad.com/api/v4/projects/$CI_PROJECT_ID/jobs/$ARTIFACTS_JOB_ID/artifacts
+    PRIVATE_TOKEN: $READ_ARTIFACT_ACCESS_TOKEN
+    #description:
+    SOURCE: hivemind
+    JOB_ID: $ARTIFACTS_JOB_ID
+    DESC: "hivemind CI"
+    EXEC_ENV_DESC: branch=$CI_COMMIT_REF_SLUG
+    SERVER_NAME: $SERVER_NAME
+    APP_VERSION: $APP_VERSION
+    TESTSUITE_VERSION: commit_short_sha=$CI_COMMIT_SHORT_SHA
+  trigger:
+    project: hive/benchmark-results-collector
+    branch: master
+    strategy: depend

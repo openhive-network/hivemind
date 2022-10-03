@@ -3,7 +3,6 @@
 import logging
 
 from hive.db.adapter import Db
-
 from hive.indexer.accounts import Accounts
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
@@ -11,19 +10,19 @@ from hive.utils.normalize import escape_characters
 log = logging.getLogger(__name__)
 DB = Db.instance()
 
+
 class Reblog(DbAdapterHolder):
-    """ Class for reblog operations """
+    """Class for reblog operations"""
+
     reblog_items_to_flush = {}
 
     @classmethod
     def _validated_op(cls, actor, op, block_date, block_num):
-        if 'account' not in op or \
-            'author' not in op or \
-            'permlink' not in op:
+        if 'account' not in op or 'author' not in op or 'permlink' not in op:
             return None
 
         if op['account'] != actor:
-            return None # impersonation
+            return None  # impersonation
 
         if not Accounts.exists(op['account']):
             return None
@@ -32,42 +31,43 @@ class Reblog(DbAdapterHolder):
 
         _delete = True if ('delete' in op and op['delete'] == 'delete') else False
 
-        return dict(author = op['author'],
-                    permlink = op['permlink'],
-                    account = op['account'],
-                    block_date = block_date,
-                    block_num = block_num,
-                    delete = _delete )
+        return dict(
+            author=op['author'],
+            permlink=op['permlink'],
+            account=op['account'],
+            block_date=block_date,
+            block_num=block_num,
+            delete=_delete,
+        )
 
     @classmethod
     def reblog_op(cls, actor, op, block_date, block_num):
-        """ Process reblog operation """
+        """Process reblog operation"""
         op = cls._validated_op(actor, op, block_date, block_num)
         if not op:
             return
 
-        key = "{}/{}/{}".format(op['author'], op['permlink'], op['account'])
+        key = f"{op['author']}/{op['permlink']}/{op['account']}"
 
         if op['delete']:
             if key in cls.reblog_items_to_flush:
                 del cls.reblog_items_to_flush[key]
-            cls.delete( op['author'], op['permlink'], op['account'] )
+            cls.delete(op['author'], op['permlink'], op['account'])
         else:
-            cls.reblog_items_to_flush[key] = { 'op': op }
+            cls.reblog_items_to_flush[key] = {'op': op}
 
     @classmethod
-    def delete(cls, author, permlink, account ):
-        """Remove a reblog from hive_reblogs + feed from hive_feed_cache.
-        """
+    def delete(cls, author, permlink, account):
+        """Remove a reblog from hive_reblogs + feed from hive_feed_cache."""
         sql = "SELECT delete_reblog_feed_cache( (:author)::VARCHAR, (:permlink)::VARCHAR, (:account)::VARCHAR );"
         status = DB.query_col(sql, author=author, permlink=permlink, account=account)
         assert status is not None
         if status == 0:
-          log.debug("reblog: post not found: %s/%s", author, permlink)
+            log.debug("reblog: post not found: %s/%s", author, permlink)
 
     @classmethod
     def flush(cls):
-        """ Flush collected data to database """
+        """Flush collected data to database"""
         sql_prefix = """
             INSERT INTO hive_reblogs (blogger_id, post_id, created_at, block_num)
             SELECT 
@@ -97,22 +97,18 @@ class Reblog(DbAdapterHolder):
             for k, v in cls.reblog_items_to_flush.items():
                 reblog_item = v['op']
                 if count < limit:
-                    values.append("({}, {}, {}, '{}'::timestamp, {})".format(escape_characters(reblog_item['account']),
-                                                                                escape_characters(reblog_item['author']),
-                                                                                escape_characters(reblog_item['permlink']),
-                                                                                reblog_item['block_date'],
-                                                                                reblog_item['block_num']))
+                    values.append(
+                        f"({escape_characters(reblog_item['account'])}, {escape_characters(reblog_item['author'])}, {escape_characters(reblog_item['permlink'])}, '{reblog_item['block_date']}'::timestamp, {reblog_item['block_num']})"
+                    )
                     count = count + 1
                 else:
                     values_str = ",".join(values)
                     query = sql_prefix.format(values_str, values_str)
                     cls.db.query_prepared(query)
                     values.clear()
-                    values.append("({}, {}, {}, '{}'::timestamp, {})".format(escape_characters(reblog_item['account']),
-                                                                                escape_characters(reblog_item['author']),
-                                                                                escape_characters(reblog_item['permlink']),
-                                                                                reblog_item['block_date'],
-                                                                                reblog_item['block_num']))
+                    values.append(
+                        f"({escape_characters(reblog_item['account'])}, {escape_characters(reblog_item['author'])}, {escape_characters(reblog_item['permlink'])}, '{reblog_item['block_date']}'::timestamp, {reblog_item['block_num']})"
+                    )
                     count = 1
 
             if len(values) > 0:

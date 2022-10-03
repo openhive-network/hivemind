@@ -3,23 +3,27 @@
 import logging
 from time import perf_counter as perf
 
+from aiopg.sa import create_engine
 import sqlalchemy
 from sqlalchemy.engine.url import make_url
-from aiopg.sa import create_engine
 
 from hive.utils.stats import Stats
 
 logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 log = logging.getLogger(__name__)
 
+
 def sqltimer(function):
     """Decorator for DB query methods which tracks timing."""
+
     async def _wrapper(*args, **kwargs):
         start = perf()
         result = await function(*args, **kwargs)
         Stats.log_db(args[1], perf() - start)
         return result
+
     return _wrapper
+
 
 class Db:
     """Wrapper for aiopg.sa db driver."""
@@ -104,8 +108,7 @@ class Db:
         try:
             return await conn.execute(self._sql_text(sql), **kwargs)
         except Exception as e:
-            log.warning("[SQL-ERR] %s in query %s (%s)",
-                        e.__class__.__name__, sql, kwargs)
+            log.warning("[SQL-ERR] %s in query %s (%s)", e.__class__.__name__, sql, kwargs)
             raise e
 
     def _sql_text(self, sql):

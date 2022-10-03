@@ -1,33 +1,32 @@
 """Blocks processor."""
 
-import logging
 import concurrent
-from time import perf_counter
 from concurrent.futures import ThreadPoolExecutor
+import logging
+from time import perf_counter
+
 from hive.db.adapter import Db
-
 from hive.indexer.accounts import Accounts
-from hive.indexer.posts import Posts
+from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
 from hive.indexer.custom_op import CustomOp
-from hive.indexer.payments import Payments
 from hive.indexer.follow import Follow
-from hive.indexer.votes import Votes
-from hive.indexer.post_data_cache import PostDataCache
-from hive.indexer.reputations import Reputations
-from hive.indexer.reblog import Reblog
 from hive.indexer.notify import Notify
-from hive.indexer.block import Block, Transaction, Operation, VirtualOperationType, OperationType
-
-from hive.utils.stats import OPStatusManager as OPSM
-from hive.utils.stats import FlushStatusManager as FSM
-
-from hive.server.common.payout_stats import PayoutStats
+from hive.indexer.payments import Payments
+from hive.indexer.post_data_cache import PostDataCache
+from hive.indexer.posts import Posts
+from hive.indexer.reblog import Reblog
+from hive.indexer.reputations import Reputations
+from hive.indexer.votes import Votes
 from hive.server.common.mentions import Mentions
+from hive.server.common.payout_stats import PayoutStats
+from hive.utils.stats import FlushStatusManager as FSM
+from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.timer import time_it
 
 log = logging.getLogger(__name__)
 
 DB = Db.instance()
+
 
 def time_collector(f):
     startTime = FSM.start()
@@ -36,8 +35,10 @@ def time_collector(f):
 
     return (result, elapsedTime)
 
+
 class Blocks:
     """Processes blocks, dispatches work, manages `hive_blocks` table."""
+
     blocks_to_flush = []
     _head_block_date = None
     _current_block_date = None
@@ -45,14 +46,14 @@ class Blocks:
     _is_initial_sync = False
 
     _concurrent_flush = [
-      ('Posts', Posts.flush, Posts),
-      ('PostDataCache', PostDataCache.flush, PostDataCache),
-      ('Reputations', Reputations.flush, Reputations),
-      ('Votes', Votes.flush, Votes),
-      ('Follow', Follow.flush, Follow),
-      ('Reblog', Reblog.flush, Reblog),
-      ('Notify', Notify.flush, Notify),
-      ('Accounts', Accounts.flush, Accounts)
+        ('Posts', Posts.flush, Posts),
+        ('PostDataCache', PostDataCache.flush, PostDataCache),
+        ('Reputations', Reputations.flush, Reputations),
+        ('Votes', Votes.flush, Votes),
+        ('Follow', Follow.flush, Follow),
+        ('Reblog', Reblog.flush, Reblog),
+        ('Notify', Notify.flush, Notify),
+        ('Accounts', Accounts.flush, Accounts),
     ]
 
     def __init__(cls):
@@ -112,14 +113,20 @@ class Blocks:
             # after HF17 all posts are paid after 7 days which means it is safe to assume that
             # posts created at or before LIB - 7days will be paidout at the end of massive sync
             cls._last_safe_cashout_block = lib - 7 * 24 * 1200
-        log.info( "End-of-sync LIB is set to %d, last block that guarantees cashout at end of sync is %d", lib, cls._last_safe_cashout_block )
+        log.info(
+            "End-of-sync LIB is set to %d, last block that guarantees cashout at end of sync is %d",
+            lib,
+            cls._last_safe_cashout_block,
+        )
 
     @classmethod
     def flush_data_in_n_threads(cls):
         completedThreads = 0
 
-        pool = ThreadPoolExecutor(max_workers = len(cls._concurrent_flush))
-        flush_futures = {pool.submit(time_collector, f): (description, c) for (description, f, c) in cls._concurrent_flush}
+        pool = ThreadPoolExecutor(max_workers=len(cls._concurrent_flush))
+        flush_futures = {
+            pool.submit(time_collector, f): (description, c) for (description, f, c) in cls._concurrent_flush
+        }
         for future in concurrent.futures.as_completed(flush_futures):
             (description, c) = flush_futures[future]
             completedThreads = completedThreads + 1
@@ -130,10 +137,10 @@ class Blocks:
 
                 FSM.flush_stat(description, elapsedTime, n)
 
-#                if n > 0:
-#                    log.info('%r flush generated %d records' % (description, n))
+            #                if n > 0:
+            #                    log.info('%r flush generated %d records' % (description, n))
             except Exception as exc:
-                log.error('%r generated an exception: %s' % (description, exc))
+                log.error(f'{description!r} generated an exception: {exc}')
                 raise exc
         pool.shutdown()
 
@@ -142,11 +149,11 @@ class Blocks:
     @classmethod
     def flush_data_in_1_thread(cls):
         for description, f, c in cls._concurrent_flush:
-          try:
-              f()
-          except Exception as exc:
-              log.error('%r generated an exception: %s' % (description, exc))
-              raise exc
+            try:
+                f()
+            except Exception as exc:
+                log.error(f'{description!r} generated an exception: {exc}')
+                raise exc
 
     @classmethod
     def process_blocks(cls, blocks):
@@ -166,6 +173,7 @@ class Blocks:
         # deltas in memory and update follow/er counts in bulk.
 
         flush_time = FSM.start()
+
         def register_time(f_time, name, pushed):
             assert pushed is not None
             FSM.flush_stat(name, FSM.stop(f_time), pushed)
@@ -190,23 +198,24 @@ class Blocks:
             cls.flush_data_in_1_thread()
             if first_block > -1:
                 log.info("[PROCESS MULTI] Tables updating in live synchronization")
-                cls.on_live_blocks_processed( first_block, last_num )
+                cls.on_live_blocks_processed(first_block, last_num)
 
         DB.query("COMMIT")
 
         if is_initial_sync:
-          log.info("[PROCESS MULTI] Flushing data in N threads")
-          cls.flush_data_in_n_threads()
+            log.info("[PROCESS MULTI] Flushing data in N threads")
+            cls.flush_data_in_n_threads()
 
         log.info(f"[PROCESS MULTI] {len(blocks)} blocks in {OPSM.stop(time_start) :.4f}s")
 
     @staticmethod
     def prepare_vops(comment_payout_ops, block, date, block_num, is_safe_cashout):
         def get_empty_ops():
-            return { VirtualOperationType.AuthorReward:None
-                , VirtualOperationType.CommentReward:None
-                , VirtualOperationType.EffectiveCommentVote:None
-                , VirtualOperationType.CommentPayoutUpdate:None
+            return {
+                VirtualOperationType.AUTHOR_REWARD: None,
+                VirtualOperationType.COMMENT_REWARD: None,
+                VirtualOperationType.EFFECTIVE_COMMENT_VOTE: None,
+                VirtualOperationType.COMMENT_PAYOUT_UPDATE: None,
             }
 
         ineffective_deleted_ops = {}
@@ -221,23 +230,23 @@ class Blocks:
             op_value = vop.get_body()
             op_value['block_num'] = block_num
 
-            key = "{}/{}".format(op_value['author'], op_value['permlink'])
+            key = f"{op_value['author']}/{op_value['permlink']}"
 
-            if op_type == VirtualOperationType.AuthorReward:
+            if op_type == VirtualOperationType.AUTHOR_REWARD:
                 if key not in comment_payout_ops:
                     comment_payout_ops[key] = get_empty_ops()
 
-                comment_payout_ops[key][op_type] = ( op_value, date )
+                comment_payout_ops[key][op_type] = (op_value, date)
 
-            elif op_type == VirtualOperationType.CommentReward:
+            elif op_type == VirtualOperationType.COMMENT_REWARD:
                 if key not in comment_payout_ops:
                     comment_payout_ops[key] = get_empty_ops()
 
-                comment_payout_ops[key][VirtualOperationType.EffectiveCommentVote] = None
+                comment_payout_ops[key][VirtualOperationType.EFFECTIVE_COMMENT_VOTE] = None
 
-                comment_payout_ops[key][op_type] = ( op_value, date )
+                comment_payout_ops[key][op_type] = (op_value, date)
 
-            elif op_type == VirtualOperationType.EffectiveCommentVote:
+            elif op_type == VirtualOperationType.EFFECTIVE_COMMENT_VOTE:
                 Reputations.process_vote(block_num, op_value)
                 # ABW: votes cast before HF1 (block 905693, timestamp 2016-04-25T17:30:00) have to be upscaled
                 # by 1mln - there is no need to scale it anywhere else because first payouts happened only after
@@ -245,7 +254,7 @@ class Blocks:
                 # (we don't touch reputation - yet - because it affects a lot of test patterns)
                 if block_num < 905693:
                     op_value["rshares"] *= 1000000
-                Votes.effective_comment_vote_op( op_value )
+                Votes.effective_comment_vote_op(op_value)
 
                 # skip effective votes for those posts that will become paidout before massive sync ends (both
                 # total_vote_weight and pending_payout carried by this vop become zero when post is paid) - note
@@ -254,26 +263,25 @@ class Blocks:
                     if key not in comment_payout_ops:
                         comment_payout_ops[key] = get_empty_ops()
 
-                    comment_payout_ops[key][op_type] = ( op_value, date )
+                    comment_payout_ops[key][op_type] = (op_value, date)
 
-            elif op_type == VirtualOperationType.CommentPayoutUpdate:
+            elif op_type == VirtualOperationType.COMMENT_PAYOUT_UPDATE:
                 if key not in comment_payout_ops:
                     comment_payout_ops[key] = get_empty_ops()
 
-                comment_payout_ops[key][op_type] = ( op_value, date )
+                comment_payout_ops[key][op_type] = (op_value, date)
 
-            elif op_type == VirtualOperationType.IneffectiveDeleteComment:
+            elif op_type == VirtualOperationType.INEFFECTIVE_DELETE_COMMENT:
                 ineffective_deleted_ops[key] = {}
 
             OPSM.op_stats(str(op_type), OPSM.stop(start))
 
         return ineffective_deleted_ops
 
-
     @classmethod
     def _process(cls, block):
         """Process a single block. Assumes a trx is open."""
-        #pylint: disable=too-many-branches
+        # pylint: disable=too-many-branches
         assert issubclass(type(block), Block)
         num = cls._push(block)
         cls._current_block_date = block.get_date()
@@ -286,7 +294,9 @@ class Blocks:
         if cls._head_block_date is None:
             cls._head_block_date = cls._current_block_date
 
-        ineffective_deleted_ops = Blocks.prepare_vops(Posts.comment_payout_ops, block, cls._current_block_date, num, num <= cls._last_safe_cashout_block)
+        ineffective_deleted_ops = Blocks.prepare_vops(
+            Posts.comment_payout_ops, block, cls._current_block_date, num, num <= cls._last_safe_cashout_block
+        )
 
         json_ops = []
         for transaction in block.get_next_transaction():
@@ -306,50 +316,52 @@ class Blocks:
                 op_details = None
                 potentially_new_account = False
                 # account ops
-                if op_type == OperationType.Pow:
+                if op_type == OperationType.POW:
                     account_name = op['worker_account']
                     potentially_new_account = True
-                elif op_type == OperationType.Pow2:
+                elif op_type == OperationType.POW_2:
                     account_name = op['work']['value']['input']['worker_account']
                     potentially_new_account = True
-                elif op_type == OperationType.AccountCreate:
+                elif op_type == OperationType.ACCOUNT_CREATE:
                     account_name = op['new_account_name']
                     op_details = op
                     potentially_new_account = True
-                elif op_type == OperationType.AccountCreateWithDelegation:
+                elif op_type == OperationType.ACCOUNT_CREATE_WITH_DELEGATION:
                     account_name = op['new_account_name']
                     op_details = op
                     potentially_new_account = True
-                elif op_type == OperationType.CreateClaimedAccount:
+                elif op_type == OperationType.CREATE_CLAIMED_ACCOUNT:
                     account_name = op['new_account_name']
                     op_details = op
                     potentially_new_account = True
 
-                if potentially_new_account and not Accounts.register(account_name, op_details, cls._head_block_date, num):
-                    log.error("Failed to register account {} from operation: {}".format(account_name, op))
+                if potentially_new_account and not Accounts.register(
+                    account_name, op_details, cls._head_block_date, num
+                ):
+                    log.error(f"Failed to register account {account_name} from operation: {op}")
 
                 # account metadata updates
-                if op_type == OperationType.AccountUpdate:
-                    Accounts.update_op( op, False )
-                elif op_type == OperationType.AccountUpdate2:
-                    Accounts.update_op( op, True )
+                if op_type == OperationType.ACCOUNT_UPDATE:
+                    Accounts.update_op(op, False)
+                elif op_type == OperationType.ACCOUNT_UPDATE_2:
+                    Accounts.update_op(op, True)
 
                 # post ops
-                elif op_type == OperationType.Comment:
+                elif op_type == OperationType.COMMENT:
                     Posts.comment_op(op, cls._head_block_date)
-                elif op_type == OperationType.DeleteComment:
-                    key = "{}/{}".format(op['author'], op['permlink'])
+                elif op_type == OperationType.DELETE_COMMENT:
+                    key = f"{op['author']}/{op['permlink']}"
                     if key not in ineffective_deleted_ops:
                         Posts.delete_op(op, cls._head_block_date)
-                elif op_type == OperationType.CommentOption:
+                elif op_type == OperationType.COMMENT_OPTION:
                     Posts.comment_options_op(op)
-                elif op_type == OperationType.Vote:
+                elif op_type == OperationType.VOTE:
                     Votes.vote_op(op, cls._head_block_date)
 
                 # misc ops
-                elif op_type == OperationType.Transfer:
+                elif op_type == OperationType.TRANSFER:
                     Payments.op_transfer(op, transaction.get_id(), num, cls._head_block_date)
-                elif op_type == OperationType.CustomJson: # follow/reblog/community ops
+                elif op_type == OperationType.CUSTOM_JSON:  # follow/reblog/community ops
                     CustomOp.process_op(op, num, cls._head_block_date)
 
                 OPSM.op_stats(str(op_type), OPSM.stop(start))
@@ -373,19 +385,22 @@ class Blocks:
             hive_block = cls._get(cursor)
             steem_hash = steem.get_block(cursor)['block_id']
             match = hive_block['hash'] == steem_hash
-            log.info("[INIT] fork check. block %d: %s vs %s --- %s",
-                     hive_block['num'], hive_block['hash'],
-                     steem_hash, 'ok' if match else 'invalid')
+            log.info(
+                "[INIT] fork check. block %d: %s vs %s --- %s",
+                hive_block['num'],
+                hive_block['hash'],
+                steem_hash,
+                'ok' if match else 'invalid',
+            )
             if match:
                 break
             to_pop.append(hive_block)
             cursor -= 1
 
         if hive_head == cursor:
-            return # no fork!
+            return  # no fork!
 
-        log.error("[FORK] depth is %d; popping blocks %d - %d",
-                  hive_head - cursor, cursor + 1, hive_head)
+        log.error("[FORK] depth is %d; popping blocks %d - %d", hive_head - cursor, cursor + 1, hive_head)
 
         # we should not attempt to recover from fork until it's safe
         fork_limit = steem.last_irreversible()
@@ -403,13 +418,16 @@ class Blocks:
     @classmethod
     def _push(cls, block):
         """Insert a row in `hive_blocks`."""
-        cls.blocks_to_flush.append({
-            'num': block.get_num(),
-            'hash': block.get_hash(),
-            'prev': block.get_previous_block_hash(),
-            'txs': block.get_number_of_transactions(),
-            'ops': block.get_number_of_operations(),
-            'date': block.get_date()})
+        cls.blocks_to_flush.append(
+            {
+                'num': block.get_num(),
+                'hash': block.get_hash(),
+                'prev': block.get_previous_block_hash(),
+                'txs': block.get_number_of_transactions(),
+                'ops': block.get_number_of_operations(),
+                'date': block.get_date(),
+            }
+        )
         return block.get_num()
 
     @classmethod
@@ -421,10 +439,9 @@ class Blocks:
         """
         values = []
         for block in cls.blocks_to_flush:
-            values.append("({}, '{}', '{}', {}, {}, '{}', {})".format(block['num'], block['hash'],
-                                                                  block['prev'], block['txs'],
-                                                                  block['ops'], block['date'],
-                                                                  False))
+            values.append(
+                f"({block['num']}, '{block['hash']}', '{block['prev']}', {block['txs']}, {block['ops']}, '{block['date']}', {False})"
+            )
         query = query + ",".join(values)
         DB.query_prepared(query)
         values.clear()
@@ -491,23 +508,23 @@ class Blocks:
 
     @classmethod
     @time_it
-    def on_live_blocks_processed( cls, first_block, last_block ):
+    def on_live_blocks_processed(cls, first_block, last_block):
         """Is invoked when processing of block range is done and received
-           informations from hived are already stored in db
+        informations from hived are already stored in db
         """
         is_hour_action = last_block % 1200 == 0
 
         queries = [
-            "SELECT update_posts_rshares({}, {})".format(first_block, last_block),
-            "SELECT update_hive_posts_children_count({}, {})".format(first_block, last_block),
-            "SELECT update_hive_posts_root_id({},{})".format(first_block, last_block),
-            "SELECT update_hive_posts_api_helper({},{})".format(first_block, last_block),
-            "SELECT update_feed_cache({}, {})".format(first_block, last_block),
-            "SELECT update_hive_posts_mentions({}, {})".format(first_block, last_block),
-            "SELECT update_notification_cache({}, {}, {})".format(first_block, last_block, is_hour_action),
-            "SELECT update_follow_count({}, {})".format(first_block, last_block),
-            "SELECT update_account_reputations({}, {}, False)".format(first_block, last_block),
-            "SELECT update_hive_blocks_consistency_flag({}, {})".format(first_block, last_block)
+            f"SELECT update_posts_rshares({first_block}, {last_block})",
+            f"SELECT update_hive_posts_children_count({first_block}, {last_block})",
+            f"SELECT update_hive_posts_root_id({first_block},{last_block})",
+            f"SELECT update_hive_posts_api_helper({first_block},{last_block})",
+            f"SELECT update_feed_cache({first_block}, {last_block})",
+            f"SELECT update_hive_posts_mentions({first_block}, {last_block})",
+            f"SELECT update_notification_cache({first_block}, {last_block}, {is_hour_action})",
+            f"SELECT update_follow_count({first_block}, {last_block})",
+            f"SELECT update_account_reputations({first_block}, {last_block}, False)",
+            f"SELECT update_hive_blocks_consistency_flag({first_block}, {last_block})",
         ]
 
         for query in queries:
@@ -518,10 +535,8 @@ class Blocks:
     @classmethod
     def is_consistency(cls):
         """Check if all tuples in `hive_blocks` are written correctly.
-            If any record has `completed` == false, it indicates that the database was closed incorrectly or a rollback failed.
+        If any record has `completed` == false, it indicates that the database was closed incorrectly or a rollback failed.
         """
         not_completed_blocks = DB.query_one("SELECT count(*) FROM hive_blocks WHERE completed = false LIMIT 1")
         log.info("[INIT] Number of not completed blocks: %s.", not_completed_blocks)
         return not_completed_blocks == 0
-
-

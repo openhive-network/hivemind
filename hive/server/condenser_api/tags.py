@@ -1,7 +1,9 @@
 """condenser_api trending tag fetching methods"""
 
 from aiocache import cached
-from hive.server.common.helpers import (return_error_info, valid_tag, valid_limit)
+
+from hive.server.common.helpers import return_error_info, valid_limit, valid_tag
+
 
 @return_error_info
 @cached(ttl=7200, timeout=1200)
@@ -9,6 +11,7 @@ async def get_top_trending_tags_summary(context):
     """Get top 50 trending tags among pending posts."""
     sql = "SELECT condenser_get_top_trending_tags_summary(50)"
     return await context['db'].query_col(sql)
+
 
 @return_error_info
 @cached(ttl=3600, timeout=1200)
@@ -22,10 +25,13 @@ async def get_trending_tags(context, start_tag: str = '', limit: int = 250):
 
     out = []
     for row in await context['db'].query_all(sql, limit=limit, tag=start_tag):
-        out.append({
-            'name': row['category'],
-            'comments': row['total_posts'] - row['top_posts'],
-            'top_posts': row['top_posts'],
-            'total_payouts': "%.3f HBD" % row['total_payouts']})
+        out.append(
+            {
+                'name': row['category'],
+                'comments': row['total_posts'] - row['top_posts'],
+                'top_posts': row['top_posts'],
+                'total_payouts': f"{row['total_payouts']:.3f} HBD",
+            }
+        )
 
     return out

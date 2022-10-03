@@ -71,4 +71,4 @@ echo "Attempting to start tests on hivemind instance listening on: $HIVEMIND_ADD
 
 echo "Additional test options: ${@:3}"
 
-tox -e tavern -- -W ignore::pytest.PytestDeprecationWarning --workers auto --tests-per-worker auto -p no:logging ${@:3}
+tox -e tavern -- -W ignore::pytest.PytestDeprecationWarning -n auto -p no:logging ${@:3}

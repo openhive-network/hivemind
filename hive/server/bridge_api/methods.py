@@ -1,23 +1,24 @@
 """Bridge API public endpoints for posts"""
 
-from hive.server.bridge_api.objects import load_profiles, _bridge_post_object, append_statistics_to_post
-from hive.server.database_api.methods import find_votes_impl, VotesPresentation
+from hive.server.bridge_api.objects import _bridge_post_object, append_statistics_to_post, load_profiles
 from hive.server.common.helpers import (
+    check_community,
+    json_date,
     return_error_info,
     valid_account,
+    valid_limit,
     valid_permlink,
     valid_tag,
-    valid_limit,
-    check_community,
-    json_date)
-
-from hive.utils.account import safe_db_profile_metadata
-
+)
+from hive.server.common.mutes import Mutes
+from hive.server.database_api.methods import find_votes_impl, VotesPresentation
 from hive.server.hive_api.common import get_account_id
 from hive.server.hive_api.community import list_top_communities
-from hive.server.common.mutes import Mutes
+from hive.utils.account import safe_db_profile_metadata
 
-#pylint: disable=too-many-arguments, no-else-return
+
+# pylint: disable=too-many-arguments, no-else-return
+
 
 @return_error_info
 async def get_profile(context, account, observer=None):
@@ -27,36 +28,37 @@ async def get_profile(context, account, observer=None):
     observer = valid_account(observer, allow_empty=True)
 
     ret = await load_profiles(db, [valid_account(account)])
-    assert ret, 'Account \'{}\' does not exist'.format(account) # should not be needed
+    assert ret, f'Account \'{account}\' does not exist'  # should not be needed
 
     observer_id = await get_account_id(db, observer) if observer else None
     if observer_id:
         await _follow_contexts(db, {ret[0]['id']: ret[0]}, observer_id, True)
     return ret[0]
 
+
 @return_error_info
-async def get_trending_topics(context, limit:int=10, observer:str=None):
+async def get_trending_topics(context, limit: int = 10, observer: str = None):
     """Return top trending topics across pending posts."""
     # pylint: disable=unused-argument
-    #db = context['db']
-    #observer_id = await get_account_id(db, observer) if observer else None
-    #assert not observer, 'observer not supported'
+    # db = context['db']
+    # observer_id = await get_account_id(db, observer) if observer else None
+    # assert not observer, 'observer not supported'
     limit = valid_limit(limit, 25, 10)
     out = []
     cells = await list_top_communities(context, limit)
     for name, title in cells:
         out.append((name, title or name))
-    for tag in ('photography', 'travel', 'gaming',
-                'crypto', 'newsteem', 'music', 'food'):
+    for tag in ('photography', 'travel', 'gaming', 'crypto', 'newsteem', 'music', 'food'):
         if len(out) < limit:
             out.append((tag, '#' + tag))
     return out
+
 
 @return_error_info
 async def get_post(context, author, permlink, observer=None):
     """Fetch a single post"""
     # pylint: disable=unused-variable
-    #TODO: `observer` logic for user-post state
+    # TODO: `observer` logic for user-post state
     db = context['db']
     valid_account(author)
     valid_account(observer, allow_empty=True)
@@ -70,10 +72,13 @@ async def get_post(context, author, permlink, observer=None):
     post = append_statistics_to_post(post, result[0], False)
     return post
 
+
 @return_error_info
-async def _get_ranked_posts_for_observer_communities( db, sort:str, start_author:str, start_permlink:str, limit, observer:str):
+async def _get_ranked_posts_for_observer_communities(
+    db, sort: str, start_author: str, start_permlink: str, limit, observer: str
+):
     async def execute_observer_community_query(db, sql, limit):
-        return await db.query_all(sql, observer=observer, author=start_author, permlink=start_permlink, limit=limit )
+        return await db.query_all(sql, observer=observer, author=start_author, permlink=start_permlink, limit=limit)
 
     if sort == 'trending':
         sql = "SELECT * FROM bridge_get_ranked_post_by_trends_for_observer_communities( (:observer)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
@@ -105,10 +110,15 @@ async def _get_ranked_posts_for_observer_communities( db, sort:str, start_author
 
     assert False, "Unknown sort order"
 
+
 @return_error_info
-async def _get_ranked_posts_for_communities( db, sort:str, community, start_author:str, start_permlink:str, limit, observer:str ):
+async def _get_ranked_posts_for_communities(
+    db, sort: str, community, start_author: str, start_permlink: str, limit, observer: str
+):
     async def execute_community_query(db, sql, limit):
-        return await db.query_all(sql, community=community, author=start_author, permlink=start_permlink, limit=limit, observer=observer )
+        return await db.query_all(
+            sql, community=community, author=start_author, permlink=start_permlink, limit=limit, observer=observer
+        )
 
     pinned_sql = "SELECT * FROM bridge_get_ranked_post_pinned_for_community( (:community)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
 
@@ -153,9 +163,11 @@ async def _get_ranked_posts_for_communities( db, sort:str, community, start_auth
 
 
 @return_error_info
-async def _get_ranked_posts_for_tag( db, sort:str, tag, start_author:str, start_permlink:str, limit, observer:str ):
+async def _get_ranked_posts_for_tag(db, sort: str, tag, start_author: str, start_permlink: str, limit, observer: str):
     async def execute_tags_query(db, sql):
-        return await db.query_all(sql, tag=tag, author=start_author, permlink=start_permlink, limit=limit, observer=observer )
+        return await db.query_all(
+            sql, tag=tag, author=start_author, permlink=start_permlink, limit=limit, observer=observer
+        )
 
     if sort == 'hot':
         sql = "SELECT * FROM bridge_get_ranked_post_by_hot_for_tag( (:tag)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
@@ -187,10 +199,11 @@ async def _get_ranked_posts_for_tag( db, sort:str, tag, start_author:str, start_
 
     assert False, "Unknown sort order"
 
+
 @return_error_info
-async def _get_ranked_posts_for_all( db, sort:str, start_author:str, start_permlink:str, limit, observer:str ):
+async def _get_ranked_posts_for_all(db, sort: str, start_author: str, start_permlink: str, limit, observer: str):
     async def execute_query(db, sql):
-        return await db.query_all(sql, author=start_author, permlink=start_permlink, limit=limit, observer=observer )
+        return await db.query_all(sql, author=start_author, permlink=start_permlink, limit=limit, observer=observer)
 
     if sort == 'trending':
         sql = "SELECT * FROM bridge_get_ranked_post_by_trends( (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
@@ -222,20 +235,30 @@ async def _get_ranked_posts_for_all( db, sort:str, start_author:str, start_perml
 
     assert False, "Unknown sort order"
 
+
 @return_error_info
-async def get_ranked_posts(context, sort:str, start_author:str='', start_permlink:str='',
-                           limit:int=20, tag:str='', observer:str=''):
+async def get_ranked_posts(
+    context,
+    sort: str,
+    start_author: str = '',
+    start_permlink: str = '',
+    limit: int = 20,
+    tag: str = '',
+    observer: str = '',
+):
     """Query posts, sorted by given method."""
     supported_sort_list = ['trending', 'hot', 'created', 'promoted', 'payout', 'payout_comments', 'muted']
-    assert sort in supported_sort_list, "Unsupported sort, valid sorts: {}".format(", ".join(supported_sort_list))
+    assert sort in supported_sort_list, f"Unsupported sort, valid sorts: {', '.join(supported_sort_list)}"
 
     db = context['db']
 
-    async def process_query_results( sql_result ):
+    async def process_query_results(sql_result):
         posts = []
         for row in sql_result:
             post = _bridge_post_object(row)
-            post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.BridgeApi)
+            post['active_votes'] = await find_votes_impl(
+                db, row['author'], row['permlink'], VotesPresentation.BridgeApi
+            )
             post = append_statistics_to_post(post, row, row['is_pinned'])
             posts.append(post)
         return posts
@@ -247,37 +270,47 @@ async def get_ranked_posts(context, sort:str, start_author:str='', start_permlin
     observer = valid_account(observer, allow_empty=(tag != "my"))
 
     if tag == "my":
-        result = await _get_ranked_posts_for_observer_communities(db, sort, start_author, start_permlink, limit, observer)
+        result = await _get_ranked_posts_for_observer_communities(
+            db, sort, start_author, start_permlink, limit, observer
+        )
         return await process_query_results(result)
 
     if tag and check_community(tag):
         result = await _get_ranked_posts_for_communities(db, sort, tag, start_author, start_permlink, limit, observer)
         return await process_query_results(result)
 
-    if ( tag and tag != "all" ):
+    if tag and tag != "all":
         result = await _get_ranked_posts_for_tag(db, sort, tag, start_author, start_permlink, limit, observer)
         return await process_query_results(result)
 
     result = await _get_ranked_posts_for_all(db, sort, start_author, start_permlink, limit, observer)
     return await process_query_results(result)
 
+
 @return_error_info
-async def get_account_posts(context, sort:str, account:str, start_author:str='', start_permlink:str='',
-                            limit:int=20, observer:str=None):
+async def get_account_posts(
+    context,
+    sort: str,
+    account: str,
+    start_author: str = '',
+    start_permlink: str = '',
+    limit: int = 20,
+    observer: str = None,
+):
     """Get posts for an account -- blog, feed, comments, or replies."""
     supported_sort_list = ['blog', 'feed', 'posts', 'comments', 'replies', 'payout']
-    assert sort in supported_sort_list, "Unsupported sort, valid sorts: {}".format(", ".join(supported_sort_list))
+    assert sort in supported_sort_list, f"Unsupported sort, valid sorts: {', '.join(supported_sort_list)}"
 
     db = context['db']
 
-    account =         valid_account(account)
-    start_author =    valid_account(start_author, allow_empty=True)
-    start_permlink =  valid_permlink(start_permlink, allow_empty=True)
-    observer =        valid_account(observer, allow_empty=True)
-    limit =           valid_limit(limit, 100, 20)
+    account = valid_account(account)
+    start_author = valid_account(start_author, allow_empty=True)
+    start_permlink = valid_permlink(start_permlink, allow_empty=True)
+    observer = valid_account(observer, allow_empty=True)
+    limit = valid_limit(limit, 100, 20)
 
     sql = None
-    account_posts = True # set when only posts (or reblogs) of given account are supposed to be in results
+    account_posts = True  # set when only posts (or reblogs) of given account are supposed to be in results
     if sort == 'blog':
         sql = "SELECT * FROM bridge_get_account_posts_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, True )"
     elif sort == 'feed':
@@ -292,7 +325,7 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
     elif sort == 'payout':
         sql = "SELECT * FROM bridge_get_account_posts_by_payout( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
 
-    sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit )
+    sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit)
     posts = []
 
     for row in sql_result:
@@ -303,7 +336,7 @@ async def get_account_posts(context, sort:str, account:str, start_author:str='',
                 post['reblogged_by'] = [account]
         elif sort == 'feed':
             reblogged_by = set(row['reblogged_by'])
-            reblogged_by.discard(row['author']) # Eliminate original author of reblogged post
+            reblogged_by.discard(row['author'])  # Eliminate original author of reblogged post
             if reblogged_by:
                 reblogged_by_list = list(reblogged_by)
                 reblogged_by_list.sort()
@@ -329,7 +362,7 @@ async def get_relationship_between_accounts(context, account1, account2, observe
         'ignores': False,
         'blacklists': False,
         'follows_blacklists': False,
-        'follows_muted': False
+        'follows_muted': False,
     }
 
     row = dict(sql_result)
@@ -355,9 +388,10 @@ async def get_relationship_between_accounts(context, account1, account2, observe
 
     return result
 
+
 @return_error_info
 async def does_user_follow_any_lists(context, observer):
-    """ Tells if given observer follows any blacklist or mute list """
+    """Tells if given observer follows any blacklist or mute list"""
     blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context)
 
     if len(blacklists_for_user) == 0:
@@ -365,41 +399,49 @@ async def does_user_follow_any_lists(context, observer):
     else:
         return True
 
+
 @return_error_info
 async def get_follow_list(context, observer, follow_type='blacklisted'):
-    """ For given observer gives directly blacklisted/muted accounts or
-        list of blacklists/mute lists followed by observer
+    """For given observer gives directly blacklisted/muted accounts or
+    list of blacklists/mute lists followed by observer
     """
     observer = valid_account(observer)
     valid_types = dict(blacklisted=1, follow_blacklist=2, muted=4, follow_muted=8)
-    assert follow_type in valid_types, "Unsupported follow_type, valid values: {}".format(", ".join(valid_types.keys()))
+    assert follow_type in valid_types, f"Unsupported follow_type, valid values: {', '.join(valid_types.keys())}"
 
     db = context['db']
 
     results = []
     if follow_type == 'follow_blacklist' or follow_type == 'follow_muted':
-        blacklists_for_user = await Mutes.get_blacklists_for_observer(observer, context, follow_type == 'follow_blacklist', follow_type == 'follow_muted')
+        blacklists_for_user = await Mutes.get_blacklists_for_observer(
+            observer, context, follow_type == 'follow_blacklist', follow_type == 'follow_muted'
+        )
         for row in blacklists_for_user:
             metadata = safe_db_profile_metadata(row['posting_json_metadata'], row['json_metadata'])
 
-            #list_data = await get_profile(context, row['list'])
-            #metadata = list_data["metadata"]["profile"]
+            # list_data = await get_profile(context, row['list'])
+            # metadata = list_data["metadata"]["profile"]
             blacklist_description = metadata["blacklist_description"] if "blacklist_description" in metadata else ''
             muted_list_description = metadata["muted_list_description"] if "muted_list_description" in metadata else ''
-            results.append({'name': row['list'], 'blacklist_description': blacklist_description, 'muted_list_description': muted_list_description})
-    else: # blacklisted or muted
+            results.append(
+                {
+                    'name': row['list'],
+                    'blacklist_description': blacklist_description,
+                    'muted_list_description': muted_list_description,
+                }
+            )
+    else:  # blacklisted or muted
         blacklisted_for_user = await Mutes.get_blacklisted_for_observer(observer, context, valid_types[follow_type])
         for account in blacklisted_for_user.keys():
             results.append({'name': account, 'blacklist_description': '', 'muted_list_description': ''})
 
     return results
 
+
 async def _follow_contexts(db, accounts, observer_id, include_mute=False):
     sql = """SELECT following, state FROM hive_follows
               WHERE follower = :account_id AND following IN :ids"""
-    rows = await db.query_all(sql,
-                              account_id=observer_id,
-                              ids=tuple(accounts.keys()))
+    rows = await db.query_all(sql, account_id=observer_id, ids=tuple(accounts.keys()))
     for row in rows:
         following_id = row[0]
         state = row[1]

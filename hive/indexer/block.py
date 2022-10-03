@@ -6,73 +6,73 @@ import queue
 
 log = logging.getLogger(__name__)
 
-class VirtualOperationType(Enum):
-    AuthorReward = 1
-    CommentReward = 2
-    EffectiveCommentVote = 3
-    CommentPayoutUpdate = 4
-    IneffectiveDeleteComment = 5
 
-    def from_name( operation_name ):
+class VirtualOperationType(Enum):
+    AUTHOR_REWARD = 1
+    COMMENT_REWARD = 2
+    EFFECTIVE_COMMENT_VOTE = 3
+    COMMENT_PAYOUT_UPDATE = 4
+    INEFFECTIVE_DELETE_COMMENT = 5
+
+    def from_name(operation_name):
         if operation_name == 'author_reward_operation':
-            return VirtualOperationType.AuthorReward
+            return VirtualOperationType.AUTHOR_REWARD
         if operation_name == 'comment_reward_operation':
-            return VirtualOperationType.CommentReward
+            return VirtualOperationType.COMMENT_REWARD
         if operation_name == 'effective_comment_vote_operation':
-            return VirtualOperationType.EffectiveCommentVote
+            return VirtualOperationType.EFFECTIVE_COMMENT_VOTE
         if operation_name == 'ineffective_delete_comment_operation':
-            return VirtualOperationType.IneffectiveDeleteComment
+            return VirtualOperationType.INEFFECTIVE_DELETE_COMMENT
         if operation_name == 'comment_payout_update_operation':
-            return VirtualOperationType.CommentPayoutUpdate
+            return VirtualOperationType.COMMENT_PAYOUT_UPDATE
 
         return None
 
 
 class OperationType(Enum):
-    Pow = 1
-    Pow2 = 2
-    AccountCreate = 3
-    AccountCreateWithDelegation = 4
-    CreateClaimedAccount = 5
-    AccountUpdate = 6
-    AccountUpdate2 = 7
-    Comment = 8
-    DeleteComment = 9
-    CommentOption = 10
-    Vote = 11
-    Transfer = 12
-    CustomJson = 13
+    POW = 1
+    POW_2 = 2
+    ACCOUNT_CREATE = 3
+    ACCOUNT_CREATE_WITH_DELEGATION = 4
+    CREATE_CLAIMED_ACCOUNT = 5
+    ACCOUNT_UPDATE = 6
+    ACCOUNT_UPDATE_2 = 7
+    COMMENT = 8
+    DELETE_COMMENT = 9
+    COMMENT_OPTION = 10
+    VOTE = 11
+    TRANSFER = 12
+    CUSTOM_JSON = 13
 
-    def from_name( operation_name ):
+    def from_name(operation_name):
         if operation_name == 'pow_operation':
-            return OperationType.Pow
+            return OperationType.POW
         if operation_name == 'pow2_operation':
-            return OperationType.Pow2
+            return OperationType.POW_2
         if operation_name == 'account_create_operation':
-            return OperationType.AccountCreate
+            return OperationType.ACCOUNT_CREATE
         if operation_name == 'account_create_with_delegation_operation':
-            return OperationType.AccountCreateWithDelegation
+            return OperationType.ACCOUNT_CREATE_WITH_DELEGATION
         if operation_name == 'create_claimed_account_operation':
-            return OperationType.CreateClaimedAccount
+            return OperationType.CREATE_CLAIMED_ACCOUNT
         if operation_name == 'account_update_operation':
-            return OperationType.AccountUpdate
+            return OperationType.ACCOUNT_UPDATE
         if operation_name == 'account_update2_operation':
-            return OperationType.AccountUpdate2
+            return OperationType.ACCOUNT_UPDATE_2
         if operation_name == 'comment_operation':
-            return OperationType.Comment
+            return OperationType.COMMENT
         if operation_name == 'delete_comment_operation':
-            return OperationType.DeleteComment
+            return OperationType.DELETE_COMMENT
         if operation_name == 'comment_options_operation':
-            return OperationType.CommentOption
+            return OperationType.COMMENT_OPTION
         if operation_name == 'vote_operation':
-            return OperationType.Vote
+            return OperationType.VOTE
         if operation_name == 'transfer_operation':
-            return OperationType.Transfer
+            return OperationType.TRANSFER
         if operation_name == 'custom_json_operation':
-            return OperationType.CustomJson
+            return OperationType.CUSTOM_JSON
         # for operations not supported by hivemind
         return None
-
 
 
 class Block(ABC):
@@ -110,6 +110,7 @@ class Block(ABC):
     def get_next_transaction(self):
         pass
 
+
 class Operation(ABC):
     @abstractmethod
     def get_type(self):
@@ -118,6 +119,7 @@ class Operation(ABC):
     @abstractmethod
     def get_body(self):
         pass
+
 
 class Transaction(ABC):
     @abstractmethod
@@ -128,10 +130,11 @@ class Transaction(ABC):
     def get_next_operation(self):
         pass
 
-class BlockWrapper( Block ):
-    def __init__(self, wrapped_block ):
+
+class BlockWrapper(Block):
+    def __init__(self, wrapped_block):
         """
-            wrapped_block - block which is wrapped
+        wrapped_block - block which is wrapped
         """
         assert wrapped_block
         self.wrapped_block = wrapped_block
@@ -160,11 +163,12 @@ class BlockWrapper( Block ):
     def get_next_transaction(self):
         return self.wrapped_block.get_next_transaction()
 
+
 class BlocksProviderBase(ABC):
     def __init__(self, breaker, exception_reporter):
         """
-            breaker - callable, returns true when sync can continue, false when break was requested
-            exception_reporter - callable, use to inform about undesire exception in a synchronizaton thread
+        breaker - callable, returns true when sync can continue, false when break was requested
+        exception_reporter - callable, use to inform about undesire exception in a synchronizaton thread
         """
         assert breaker
         assert exception_reporter
@@ -172,10 +176,10 @@ class BlocksProviderBase(ABC):
         self._breaker = breaker
         self._exception_reporter = exception_reporter
 
-        self._blocks_queue_size       = 1500
-        self._blocks_data_queue_size  = 1500
+        self._blocks_queue_size = 1500
+        self._blocks_data_queue_size = 1500
 
-        self._operations_queue_size   = 1500
+        self._operations_queue_size = 1500
 
     def report_exception():
         self._exception_reporter()
@@ -190,15 +194,15 @@ class BlocksProviderBase(ABC):
         """Returns lists of blocks"""
         pass
 
-    def _get_from_queue( self, data_queue, number_of_elements ):
+    def _get_from_queue(self, data_queue, number_of_elements):
         """Tool function to get elements from queue"""
         ret = []
-        for element in range( number_of_elements ):
+        for element in range(number_of_elements):
             if not self._breaker():
                 break
             while self._breaker():
                 try:
-                    ret.append( data_queue.get(True, 1) )
+                    ret.append(data_queue.get(True, 1))
                     data_queue.task_done()
                 except queue.Empty:
                     continue

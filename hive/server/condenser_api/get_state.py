@@ -1,49 +1,28 @@
 """Routes then builds a get_state response object"""
 
-#pylint: disable=line-too-long,too-many-lines
-import logging
 from collections import OrderedDict
-import ujson as json
+
+# pylint: disable=line-too-long,too-many-lines
+import logging
+
 from aiocache import cached
+import ujson as json
 
-from hive.utils.normalize import legacy_amount
-from hive.server.common.mutes import Mutes
-
-from hive.server.condenser_api.objects import (
-    load_accounts,
-    _condenser_post_object)
-from hive.server.common.helpers import (
-    ApiError,
-    return_error_info,
-    valid_account,
-    valid_permlink,
-    valid_sort,
-    valid_tag)
-from hive.server.condenser_api.tags import (
-    get_trending_tags,
-    get_top_trending_tags_summary)
-
+from hive.server.common.helpers import ApiError, return_error_info, valid_account, valid_permlink, valid_sort, valid_tag
 import hive.server.condenser_api.cursor as cursor
-
-from hive.server.condenser_api.methods import get_posts_by_given_sort, get_discussions_by_feed_impl
+from hive.server.condenser_api.methods import get_discussions_by_feed_impl, get_posts_by_given_sort
+from hive.server.condenser_api.objects import _condenser_post_object, load_accounts
+from hive.server.condenser_api.tags import get_top_trending_tags_summary, get_trending_tags
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
+from hive.utils.normalize import legacy_amount
 
 log = logging.getLogger(__name__)
 
 # steemd account 'tabs' - specific post list queries
-ACCOUNT_TAB_KEYS = {
-    'blog': 'blog',
-    'feed': 'feed',
-    'comments': 'comments',
-    'recent-replies': 'recent_replies'}
+ACCOUNT_TAB_KEYS = {'blog': 'blog', 'feed': 'feed', 'comments': 'comments', 'recent-replies': 'recent_replies'}
 
 # dummy account paths used by condenser - just need account object
-ACCOUNT_TAB_IGNORE = [
-    'followed',
-    'followers',
-    'permissions',
-    'password',
-    'settings']
+ACCOUNT_TAB_IGNORE = ['followed', 'followers', 'permissions', 'password', 'settings']
 
 # misc dummy paths used by condenser - send minimal get_state structure
 CONDENSER_NOOP_URLS = [
@@ -82,6 +61,7 @@ POST_LIST_SORTS = [
     'cashout',
 ]
 
+
 @return_error_info
 async def get_state(context, path: str):
     """`get_state` reimplementation.
@@ -93,18 +73,19 @@ async def get_state(context, path: str):
     db = context['db']
 
     state = {
-        'feed_price': await _get_feed_price(db),
-        'props': await _get_props_lite(db),
+        'feed_price': {"message": "Not further supported"},
+        'props': {"message": "Not further supported"},
         'tags': {},
         'accounts': {},
         'content': {},
         'tag_idx': {'trending': []},
-        'discussion_idx': {"": {}}}
+        'discussion_idx': {"": {}},
+    }
 
     # account - `/@account/tab` (feed, blog, comments, replies)
     if part[0] and part[0][0] == '@':
         assert not part[1] == 'transfers', 'transfers API not served here'
-        assert not part[2], 'unexpected account path[2] %s' % path
+        assert not part[2], f'unexpected account path[2] {path}'
 
         if part[1] == '':
             part[1] = 'blog'
@@ -118,11 +99,11 @@ async def get_state(context, path: str):
             state['content'] = _keyed_posts(posts)
             state['accounts'][account][key] = list(state['content'].keys())
         elif part[1] in ACCOUNT_TAB_IGNORE:
-            pass # condenser no-op URLs
+            pass  # condenser no-op URLs
         else:
             # invalid/undefined case; probably requesting `@user/permlink`,
             # but condenser still relies on a valid response for redirect.
-            state['error'] = 'invalid get_state account path %s' % path
+            state['error'] = f'invalid get_state account path {path}'
 
     # discussion - `/category/@account/permlink`
     elif part[1] and part[1][0] == '@':
@@ -133,7 +114,7 @@ async def get_state(context, path: str):
 
     # ranked posts - `/sort/category`
     elif part[0] in POST_LIST_SORTS:
-        assert not part[2], "unexpected discussion path part[2] %s" % path
+        assert not part[2], f"unexpected discussion path part[2] {path}"
         sort = valid_sort(part[0])
         tag = valid_tag(part[1].lower(), allow_empty=True)
         pids = await get_posts_by_given_sort(context, sort, '', '', 20, tag)
@@ -152,9 +133,10 @@ async def get_state(context, path: str):
         assert not part[1] and not part[2]
 
     else:
-        raise ApiError('unhandled path: /%s' % path)
+        raise ApiError(f'unhandled path: /{path}')
 
     return state
+
 
 async def _get_account_discussion_by_key(db, account, key):
     assert account, 'account must be specified'
@@ -169,9 +151,10 @@ async def _get_account_discussion_by_key(db, account, key):
     elif key == 'feed':
         posts = await get_discussions_by_feed_impl(db, account, '', '', 20)
     else:
-        raise ApiError("unknown account discussion key %s" % key)
+        raise ApiError(f"unknown account discussion key {key}")
 
     return posts
+
 
 def _normalize_path(path):
     if path and path[0] == '/':
@@ -184,15 +167,16 @@ def _normalize_path(path):
     if not path:
         path = 'trending'
     assert '#' not in path, 'path contains hash mark (#)'
-    assert '?' not in path, 'path contains query string: `%s`' % path
+    assert '?' not in path, f'path contains query string: `{path}`'
 
     parts = path.split('/')
     if len(parts) == 4 and parts[3] == '':
         parts = parts[:-1]
-    assert len(parts) < 4, 'too many parts in path: `%s`' % path
+    assert len(parts) < 4, f'too many parts in path: `{path}`'
     while len(parts) < 3:
         parts.append('')
     return (path, parts)
+
 
 def _keyed_posts(posts):
     out = OrderedDict()
@@ -200,13 +184,16 @@ def _keyed_posts(posts):
         out[_ref(post)] = post
     return out
 
+
 def _ref(post):
     return post['author'] + '/' + post['permlink']
+
 
 def _ref_parent(post):
     return post['parent_author'] + '/' + post['parent_permlink']
 
-async def _load_content_accounts(db, content, lite = False):
+
+async def _load_content_accounts(db, content, lite=False):
     if not content:
         return {}
     posts = content.values()
@@ -214,13 +201,15 @@ async def _load_content_accounts(db, content, lite = False):
     accounts = await load_accounts(db, names, lite)
     return {a['name']: a for a in accounts}
 
+
 async def _load_account(db, name):
     ret = await load_accounts(db, [name])
-    assert ret, 'account not found: `%s`' % name
+    assert ret, f'account not found: `{name}`'
     account = ret[0]
     for key in ACCOUNT_TAB_KEYS.values():
         account[key] = []
     return account
+
 
 async def _child_ids(db, parent_ids):
     """Load child ids for multuple parent ids."""
@@ -234,6 +223,7 @@ async def _child_ids(db, parent_ids):
     rows = await db.query_all(sql, ids=tuple(parent_ids))
     return [[row[0], row[1]] for row in rows]
 
+
 async def _load_discussion(db, author, permlink, observer=None):
     """Load a full discussion thread."""
 
@@ -245,53 +235,24 @@ async def _load_discussion(db, author, permlink, observer=None):
     replies = {}
 
     for row in sql_result:
-      post = _condenser_post_object(row)
+        post = _condenser_post_object(row)
 
-      post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
-      posts.append(post)
+        post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.CondenserApi)
+        posts.append(post)
 
-      parent_key = _ref_parent(post)
-      _key = _ref(post)
-      if parent_key not in replies:
-        replies[parent_key] = []
-      replies[parent_key].append(_key)
-
-    for post in posts:
-      _key = _ref(post)
-      if _key in replies:
-        replies[_key].sort()
-        post['replies'] = replies[_key]
+        parent_key = _ref_parent(post)
+        _key = _ref(post)
+        if parent_key not in replies:
+            replies[parent_key] = []
+        replies[parent_key].append(_key)
 
     for post in posts:
-      posts_by_id[_ref(post)] = post
+        _key = _ref(post)
+        if _key in replies:
+            replies[_key].sort()
+            post['replies'] = replies[_key]
+
+    for post in posts:
+        posts_by_id[_ref(post)] = post
 
     return posts_by_id
-
-@cached(ttl=1800, timeout=1200)
-async def _get_feed_price(db):
-    """Get a steemd-style ratio object representing feed price."""
-    price = await db.query_one("SELECT usd_per_steem FROM hive_state")
-    return {"base": "%.3f HBD" % price, "quote": "1.000 HIVE"}
-
-@cached(ttl=1800, timeout=1200)
-async def _get_props_lite(db):
-    """Return a minimal version of get_dynamic_global_properties data."""
-    raw = json.loads(await db.query_one("SELECT dgpo FROM hive_state"))
-
-    # convert NAI amounts to legacy
-    nais = ['virtual_supply', 'current_supply', 'current_sbd_supply',
-            'pending_rewarded_vesting_hive', 'pending_rewarded_vesting_shares',
-            'total_vesting_fund_hive', 'total_vesting_shares']
-    for k in nais:
-        if k in raw:
-            raw[k] = legacy_amount(raw[k])
-
-    return dict(
-        time=raw['time'], #*
-        hbd_print_rate=raw['hbd_print_rate'],
-        hbd_interest_rate=raw['hbd_interest_rate'],
-        head_block_number=raw['head_block_number'], #*
-        total_vesting_shares=raw['total_vesting_shares'],
-        total_vesting_fund_hive=raw['total_vesting_fund_hive'],
-        last_irreversible_block_num=raw['last_irreversible_block_num'], #*
-    )

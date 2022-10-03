@@ -5,6 +5,7 @@ from hive.server.common.helpers import return_error_info, valid_limit
 
 log = logging.getLogger(__name__)
 
+
 def _row(row):
     if row['name']:
         url = row['name']
@@ -14,6 +15,7 @@ def _row(row):
         label = url
 
     return (url, label, float(row['payout']), row['posts'], row['authors'])
+
 
 @return_error_info
 async def get_payout_stats(context, limit=250):
@@ -41,4 +43,8 @@ async def get_payout_stats(context, limit=250):
               WHERE community_id IS NULL AND author IS NULL"""
     blog_ttl = await db.query_one(sql)
 
-    return dict(items=items, total=float(total if total is not None else 0.), blogs=float(blog_ttl if blog_ttl is not None else 0.))
+    return dict(
+        items=items,
+        total=float(total if total is not None else 0.0),
+        blogs=float(blog_ttl if blog_ttl is not None else 0.0),
+    )

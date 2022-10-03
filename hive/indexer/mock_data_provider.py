@@ -1,16 +1,18 @@
 """ Data provider for test operations """
-import os
-import logging
-
 from json import dumps
+import logging
+import os
 
 log = logging.getLogger(__name__)
+
 
 class MockDataProviderException(Exception):
     pass
 
-class MockDataProvider():
-    """ Data provider for test operations """
+
+class MockDataProvider:
+    """Data provider for test operations"""
+
     block_data = {}
 
     @classmethod
@@ -20,6 +22,7 @@ class MockDataProvider():
     @classmethod
     def add_block_data_from_directory(cls, dir_name):
         from fnmatch import fnmatch
+
         pattern = "*.json"
         for path, _, files in os.walk(dir_name):
             for name in files:
@@ -33,8 +36,8 @@ class MockDataProvider():
     @classmethod
     def load_block_data(cls, data_path):
         if os.path.isdir(data_path):
-            log.warning("Loading mock ops data from directory: {}".format(data_path))
+            log.warning(f"Loading mock ops data from directory: {data_path}")
             cls.add_block_data_from_directory(data_path)
         else:
-            log.warning("Loading mock ops data from file: {}".format(data_path))
+            log.warning(f"Loading mock ops data from file: {data_path}")
             cls.add_block_data_from_file(data_path)

@@ -3,18 +3,18 @@
 import logging
 
 from hive.db.adapter import Db
-from hive.utils.normalize import parse_amount
-
-from hive.indexer.posts import Posts
 from hive.indexer.accounts import Accounts
+from hive.utils.normalize import parse_amount
 
 log = logging.getLogger(__name__)
 
 DB = Db.instance()
 
+
 class Payments:
     """Handles payments to update post promotion values."""
-    #pylint: disable=too-few-public-methods
+
+    # pylint: disable=too-few-public-methods
 
     @classmethod
     def op_transfer(cls, op, tx_idx, num, date):
@@ -26,8 +26,7 @@ class Payments:
         record, author_id, permlink = result
 
         # add payment record and return post id
-        sql = \
-"""
+        sql = """
 INSERT INTO hive_payments(block_num, tx_idx, post_id, from_account, to_account, amount, token) SELECT
   bn, tx, hp.id, fa, ta, am, tkn
 FROM
@@ -43,55 +42,61 @@ ON hp.author_id=vv.auth_id AND hp.permlink_id=vv.hpd_id
 RETURNING post_id
 """
 
-        post_id = DB.query_one(sql, 
-          _block_num=record['block_num'], 
-          _tx_idx=record['tx_idx'], 
-          _permlink=permlink, 
-          _author_id=author_id,
-          _from_account=record['from_account'],
-          _to_account=record['to_account'],
-          _amount=record['amount'],
-          _token=record['token']
+        post_id = DB.query_one(
+            sql,
+            _block_num=record['block_num'],
+            _tx_idx=record['tx_idx'],
+            _permlink=permlink,
+            _author_id=author_id,
+            _from_account=record['from_account'],
+            _to_account=record['to_account'],
+            _amount=record['amount'],
+            _token=record['token'],
         )
 
         amount = record['amount']
         if not isinstance(amount, float):
-          amount = float(amount)
+            amount = float(amount)
 
         if amount != 0.0 and post_id is not None:
-          # update post record
-          sql = "UPDATE hive_posts SET promoted = promoted + :val WHERE id = :id"
-          DB.query(sql, val=amount, id=post_id)
+            # update post record
+            sql = "UPDATE hive_posts SET promoted = promoted + :val WHERE id = :id"
+            DB.query(sql, val=amount, id=post_id)
 
     @classmethod
     def _validated(cls, op, tx_idx, num, date):
         """Validate and normalize the transfer op."""
         # pylint: disable=unused-argument
         if op['to'] != 'null':
-            return # only care about payments to null
+            return  # only care about payments to null
 
         amount, token = parse_amount(op['amount'])
         if token != 'HBD':
-            return # only care about HBD payments
+            return  # only care about HBD payments
 
         url = op['memo']
         if not cls._validate_url(url):
             log.debug("invalid url: %s", url)
-            return # invalid url
+            return  # invalid url
 
         author, permlink = cls._split_url(url)
         author_id = Accounts.get_id_noexept(author)
         if not author_id:
             return
 
-
-        return [{'id': None,
+        return [
+            {
+                'id': None,
                 'block_num': num,
                 'tx_idx': tx_idx,
                 'from_account': Accounts.get_id(op['from']),
                 'to_account': Accounts.get_id(op['to']),
                 'amount': amount,
-                'token': token}, author_id, permlink]
+                'token': token,
+            },
+            author_id,
+            permlink,
+        ]
 
     @staticmethod
     def _validate_url(url):

@@ -7,14 +7,16 @@ import os
 from sys import exit
 from json import dumps, load
 
+
 def get_request_from_yaml(path_to_yaml):
-    """ Extract request parameters from given yaml file
+    """Extract request parameters from given yaml file
     Parameters:
     - path_to_yaml - path to yaml file
     Returns:
     - string with request parameters
     """
     import yaml
+
     yaml_document = None
     with open(path_to_yaml, "r") as yaml_file:
         yaml_document = yaml.load(yaml_file, Loader=yaml.BaseLoader)
@@ -25,8 +27,9 @@ def get_request_from_yaml(path_to_yaml):
             return dumps(json_parameters)
     return ""
 
+
 def make_class_path_dict(root_dir):
-    """ Scan root dir for files with given pattern and construct dictionary
+    """Scan root dir for files with given pattern and construct dictionary
     with keys as path with replaced ., -, / characters and values as file path
     Parameters:
     - root_dir - dir to scan for files
@@ -46,8 +49,9 @@ def make_class_path_dict(root_dir):
                 ret[test_path.replace(".", "_").replace("-", "_").replace("/", "_")] = test_path
     return ret
 
+
 def class_to_path(class_name, class_to_path_dic):
-    """ Return path to test file basing on class name
+    """Return path to test file basing on class name
     Parameters:
     - class_name - test to find,
     - class_to_path_dic - dict with class -> path key/values
@@ -55,10 +59,12 @@ def class_to_path(class_name, class_to_path_dic):
     - path to test file
     """
     from fnmatch import fnmatch
+
     for c, p in class_to_path_dic.items():
         if fnmatch(c, "*" + class_name):
             return p
     return None
+
 
 def json_report_parser(path_to_test_dir, json_file, time_threshold=1.0):
     above_treshold = []
@@ -80,30 +86,55 @@ def json_report_parser(path_to_test_dir, json_file, time_threshold=1.0):
         ofile.write("  </head>\n")
         ofile.write("  <body>\n")
         ofile.write("    <table>\n")
-        ofile.write("      <tr><th>Test name</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th></tr>\n")
+        ofile.write(
+            "      <tr><th>Test name</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th></tr>\n"
+        )
         json_data = None
         with open(json_file, "r") as json_file:
             json_data = load(json_file)
         for benchmark in json_data['benchmarks']:
             if float(benchmark['stats']['mean']) > time_threshold:
-                ofile.write("      <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td></tr>\n".format(benchmark['name'], get_request_from_yaml(class_to_path(benchmark['name'][5:], class_to_path_dic)), benchmark['stats']['min'] * 1000, benchmark['stats']['max'] * 1000, benchmark['stats']['mean'] * 1000))
-                above_treshold.append((benchmark['name'], "{:.4f}".format(benchmark['stats']['mean'] * 1000), get_request_from_yaml(class_to_path(benchmark['name'][5:], class_to_path_dic))))
+                ofile.write(
+                    "      <tr><td>{}<br/>Parameters: {}</td><td>{:.4f}</td><td>{:.4f}</td><td bgcolor=\"red\">{:.4f}</td></tr>\n".format(
+                        benchmark['name'],
+                        get_request_from_yaml(class_to_path(benchmark['name'][5:], class_to_path_dic)),
+                        benchmark['stats']['min'] * 1000,
+                        benchmark['stats']['max'] * 1000,
+                        benchmark['stats']['mean'] * 1000,
+                    )
+                )
+                above_treshold.append(
+                    (
+                        benchmark['name'],
+                        f"{benchmark['stats']['mean'] * 1000:.4f}",
+                        get_request_from_yaml(class_to_path(benchmark['name'][5:], class_to_path_dic)),
+                    )
+                )
             else:
-                ofile.write("      <tr><td>{}</td><td>{:.4f}</td><td>{:.4f}</td><td>{:.4f}</td></tr>\n".format(benchmark['name'], benchmark['stats']['min'] * 1000, benchmark['stats']['max'] * 1000, benchmark['stats']['mean'] * 1000))
+                ofile.write(
+                    f"      <tr><td>{benchmark['name']}</td><td>{benchmark['stats']['min'] * 1000:.4f}</td><td>{benchmark['stats']['max'] * 1000:.4f}</td><td>{benchmark['stats']['mean'] * 1000:.4f}</td></tr>\n"
+                )
         ofile.write("    </table>\n")
         ofile.write("  </body>\n")
         ofile.write("</html>\n")
     return above_treshold
 
+
 if __name__ == '__main__':
     import argparse
+
     parser = argparse.ArgumentParser()
-    parser.add_argument("path_to_test_dir", type = str, help = "Path to test directory for given json benchmark file")
-    parser.add_argument("json_file", type = str, help = "Path to benchmark json file")
-    parser.add_argument("--time-threshold", dest="time_threshold", type=float, default=1.0, help="Time threshold for test execution time, tests with execution time greater than threshold will be marked on red.")
+    parser.add_argument("path_to_test_dir", type=str, help="Path to test directory for given json benchmark file")
+    parser.add_argument("json_file", type=str, help="Path to benchmark json file")
+    parser.add_argument(
+        "--time-threshold",
+        dest="time_threshold",
+        type=float,
+        default=1.0,
+        help="Time threshold for test execution time, tests with execution time greater than threshold will be marked on red.",
+    )
     args = parser.parse_args()
 
     if not json_report_parser(args.path_to_test_dir, args.json_file, args.time_threshold):
         exit(1)
     exit(0)
-

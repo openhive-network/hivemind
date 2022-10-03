@@ -1,50 +1,37 @@
 """Hive sync manager."""
 
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 import logging
+from signal import getsignal, SIGINT, signal, SIGTERM
+import sys
 from time import perf_counter as perf
+
 import ujson as json
 
-import queue
-from concurrent.futures import ThreadPoolExecutor
-
 from hive.db.db_state import DbState
-
-from hive.utils.timer import Timer
-from hive.steem.block.stream import MicroForkException
-from hive.indexer.hive_rpc.massive_blocks_data_provider_hive_rpc import MassiveBlocksDataProviderHiveRpc
-from hive.steem.block.stream import BlockStream
-from hive.steem.signal import finish_signals_handler, set_exception_thrown, can_continue_thread
-
-from hive.indexer.blocks import Blocks
 from hive.indexer.accounts import Accounts
-from hive.indexer.follow import Follow
+from hive.indexer.block import BlocksProviderBase
+from hive.indexer.blocks import Blocks
 from hive.indexer.community import Community
+from hive.indexer.db_adapter_holder import DbLiveContextHolder
 from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
-from hive.indexer.block import Block, BlocksProviderBase
-
-from hive.server.common.payout_stats import PayoutStats
-from hive.server.common.mentions import Mentions
-
-from hive.server.common.mutes import Mutes
-
-from hive.utils.stats import OPStatusManager as OPSM
-from hive.utils.stats import FlushStatusManager as FSM
-from hive.utils.stats import WaitingStatusManager as WSM
-from hive.utils.stats import PrometheusClient as PC
-from hive.utils.stats import BroadcastObject
-from hive.utils.communities_rank import update_communities_posts_and_rank
-from hive.utils.misc import show_app_version, log_memory_usage
-
+from hive.indexer.hive_rpc.massive_blocks_data_provider_hive_rpc import MassiveBlocksDataProviderHiveRpc
 from hive.indexer.mock_block_provider import MockBlockProvider
 from hive.indexer.mock_vops_provider import MockVopsProvider
-from hive.indexer.db_adapter_holder import DbLiveContextHolder
-
-from datetime import datetime
-
-from signal import signal, SIGINT, SIGTERM, getsignal
-from threading import Thread
-from collections import deque
-
+from hive.server.common.mentions import Mentions
+from hive.server.common.payout_stats import PayoutStats
+from hive.steem.block.stream import BlockStream
+from hive.steem.block.stream import MicroForkException
+from hive.steem.signal import can_continue_thread, finish_signals_handler, set_exception_thrown
+from hive.utils.communities_rank import update_communities_posts_and_rank
+from hive.utils.misc import log_memory_usage
+from hive.utils.stats import BroadcastObject
+from hive.utils.stats import FlushStatusManager as FSM
+from hive.utils.stats import OPStatusManager as OPSM
+from hive.utils.stats import PrometheusClient as PC
+from hive.utils.stats import WaitingStatusManager as WSM
+from hive.utils.timer import Timer
 
 log = logging.getLogger(__name__)
 
@@ -52,15 +39,18 @@ old_sig_int_handler = None
 old_sig_term_handler = None
 trail_blocks = None
 
+
 def set_handlers():
     global old_sig_int_handler
     global old_sig_term_handler
     old_sig_int_handler = signal(SIGINT, finish_signals_handler)
     old_sig_term_handler = signal(SIGTERM, finish_signals_handler)
 
+
 def restore_handlers():
     signal(SIGINT, old_sig_int_handler)
     signal(SIGTERM, old_sig_term_handler)
+
 
 def show_info(_db):
     database_head_block = Blocks.head_num()
@@ -68,8 +58,10 @@ def show_info(_db):
     sql = "SELECT level, patch_date, patched_to_revision FROM hive_db_patch_level ORDER BY level DESC LIMIT 1"
     patch_level_data = _db.query_row(sql)
 
-    from hive.utils.misc import show_app_version;
+    from hive.utils.misc import show_app_version
+
     show_app_version(log, database_head_block, patch_level_data)
+
 
 def _blocks_data_provider(blocks_data_provider):
     try:
@@ -83,13 +75,15 @@ def _blocks_data_provider(blocks_data_provider):
         log.exception("Exception caught during fetching blocks data")
         raise
 
+
 def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
     from hive.utils.stats import minmax
+
     is_debug = log.isEnabledFor(10)
     num = 0
     time_start = OPSM.start()
     rate = {}
-    LIMIT_FOR_PROCESSED_BLOCKS = 1000;
+    LIMIT_FOR_PROCESSED_BLOCKS = 1000
 
     rate = minmax(rate, 0, 1.0, 0)
     sync_type_prefix = "[INITIAL SYNC]" if is_initial_sync else "[FAST SYNC]"
@@ -103,23 +97,27 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
         ttm = ftm + otm + wtm
         log.info(f"Elapsed time: {stop :.4f}s. Calculated elapsed time: {ttm :.4f}s. Difference: {stop - ttm :.4f}s")
         if rate:
-            log.info(f"Highest block processing rate: {rate['max'] :.4f} bps. From: {rate['max_from']} To: {rate['max_to']}")
-            log.info(f"Lowest block processing rate: {rate['min'] :.4f} bps. From: {rate['min_from']} To: {rate['min_to']}")
+            log.info(
+                f"Highest block processing rate: {rate['max'] :.4f} bps. From: {rate['max_from']} To: {rate['max_to']}"
+            )
+            log.info(
+                f"Lowest block processing rate: {rate['min'] :.4f} bps. From: {rate['min_from']} To: {rate['min_to']}"
+            )
         log.info("=== TOTAL STATS ===")
 
     try:
-        Blocks.set_end_of_sync_lib( ubound )
+        Blocks.set_end_of_sync_lib(ubound)
         count = ubound - lbound
         timer = Timer(count, entity='block', laps=['rps', 'wps'])
 
         while lbound < ubound:
-            number_of_blocks_to_proceed = min( [ LIMIT_FOR_PROCESSED_BLOCKS, ubound - lbound  ] )
+            number_of_blocks_to_proceed = min([LIMIT_FOR_PROCESSED_BLOCKS, ubound - lbound])
             time_before_waiting_for_data = perf()
 
-            blocks = blocks_data_provider.get( number_of_blocks_to_proceed )
+            blocks = blocks_data_provider.get(number_of_blocks_to_proceed)
 
             if not can_continue_thread():
-                break;
+                break
 
             assert len(blocks) == number_of_blocks_to_proceed
 
@@ -134,8 +132,7 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
             timer.batch_finish(len(blocks))
             time_current = perf()
 
-            prefix = ("%s Got block %d @ %s" % (
-                sync_type_prefix, to - 1, blocks[-1].get_date()))
+            prefix = "%s Got block %d @ %s" % (sync_type_prefix, to - 1, blocks[-1].get_date())
             log.info(timer.batch_status(prefix))
             log.info("%s Time elapsed: %fs", sync_type_prefix, time_current - time_start)
             log.info("%s Current system time: %s", sync_type_prefix, datetime.now().strftime("%H:%M:%S"))
@@ -146,7 +143,7 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
                 otm = OPSM.log_current("Operations present in the processed blocks")
                 ftm = FSM.log_current("Flushing times")
                 wtm = WSM.log_current("Waiting times")
-                log.info(f"Calculated time: {otm+ftm+wtm :.4f} s.")
+                log.info(f"Calculated time: {otm + ftm + wtm :.4f} s.")
 
             OPSM.next_blocks()
             FSM.next_blocks()
@@ -168,10 +165,11 @@ def _block_consumer(blocks_data_provider, is_initial_sync, lbound, ubound):
     print_summary()
     return num
 
-def _process_blocks_from_provider(self, massive_block_provider, is_initial_sync, lbound, ubound):
-    assert issubclass( type(massive_block_provider), BlocksProviderBase )
 
-    with ThreadPoolExecutor(max_workers = 2) as pool:
+def _process_blocks_from_provider(self, massive_block_provider, is_initial_sync, lbound, ubound):
+    assert issubclass(type(massive_block_provider), BlocksProviderBase)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
         block_data_provider_future = pool.submit(_blocks_data_provider, massive_block_provider)
         blockConsumerFuture = pool.submit(_block_consumer, massive_block_provider, is_initial_sync, lbound, ubound)
 
@@ -184,6 +182,7 @@ def _process_blocks_from_provider(self, massive_block_provider, is_initial_sync,
         if block_data_provider_exception:
             raise block_data_provider_exception
 
+
 class DBSync:
     def __init__(self, conf, db, steem, live_context):
         self._conf = conf
@@ -194,31 +193,17 @@ class DBSync:
     def __enter__(self):
         assert self._db, "The database must exist"
 
-        log.info("Entering into {} synchronization".format( "LIVE" if DbLiveContextHolder.is_live_context() else "MASSIVE" ))
+        log.info(f"Entering into {'LIVE' if DbLiveContextHolder.is_live_context() else 'MASSIVE'} synchronization")
         Blocks.setup_own_db_access(self._db)
-        log.info("Exiting from {} synchronization".format( "LIVE" if DbLiveContextHolder.is_live_context() else "MASSIVE" ))
+        log.info(f"Exiting from {'LIVE' if DbLiveContextHolder.is_live_context() else 'MASSIVE'} synchronization")
 
         return self
 
     def __exit__(self, exc_type, value, traceback):
-        #During massive-sync every object has own copy of database, as a result all copies have to be closed
-        #During live-sync an original database is used and can't be closed, because it can be used later.
+        # During massive-sync every object has own copy of database, as a result all copies have to be closed
+        # During live-sync an original database is used and can't be closed, because it can be used later.
         if not DbLiveContextHolder.is_live_context():
             Blocks.close_own_db_access()
-
-    # refetch dynamic_global_properties, feed price, etc
-    def _update_chain_state(self):
-        """Update basic state props (head block, feed price) in db."""
-        state = self._steem.gdgp_extended()
-        self._db.query("""UPDATE hive_state SET block_num = :block_num,
-                       steem_per_mvest = :spm, usd_per_steem = :ups,
-                       sbd_per_steem = :sps, dgpo = :dgpo""",
-                       block_num=Blocks.head_num(),
-                       spm=state['steem_per_mvest'],
-                       ups=state['usd_per_steem'],
-                       sps=state['sbd_per_steem'],
-                       dgpo=json.dumps(state['dgpo']))
-        return state['dgpo']['head_block_number']
 
     def from_steemd(self, is_initial_sync=False, chunk_size=1000):
         """Fast sync strategy: read/process blocks in batches."""
@@ -237,31 +222,27 @@ class DBSync:
         massive_blocks_data_provider = None
         databases = None
         if self._conf.get('hived_database_url'):
-            databases = MassiveBlocksDataProviderHiveDb.Databases( self._conf )
+            databases = MassiveBlocksDataProviderHiveDb.Databases(self._conf)
             massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
-                  databases
-                , self._conf.get( 'max_batch' )
-                , lbound
-                , ubound
-                , can_continue_thread
-                , set_exception_thrown
+                databases, self._conf.get('max_batch'), lbound, ubound, can_continue_thread, set_exception_thrown
             )
         else:
             massive_blocks_data_provider = MassiveBlocksDataProviderHiveRpc(
-                  self._conf
-                , self._steem
-                , self._conf.get( 'max_workers' )
-                , self._conf.get( 'max_workers' )
-                , self._conf.get( 'max_batch' )
-                , lbound
-                , ubound
-                , can_continue_thread
-                , set_exception_thrown
+                self._conf,
+                self._steem,
+                self._conf.get('max_workers'),
+                self._conf.get('max_workers'),
+                self._conf.get('max_batch'),
+                lbound,
+                ubound,
+                can_continue_thread,
+                set_exception_thrown,
             )
-        _process_blocks_from_provider( self, massive_blocks_data_provider, is_initial_sync, lbound, ubound )
+        _process_blocks_from_provider(self, massive_blocks_data_provider, is_initial_sync, lbound, ubound)
 
         if databases:
             databases.close()
+
 
 class MassiveSync(DBSync):
     def __init__(self, conf, db, steem):
@@ -276,7 +257,7 @@ class MassiveSync(DBSync):
         if not can_continue_thread():
             return
 
-    def load_mock_data(self,mock_block_data_path):
+    def load_mock_data(self, mock_block_data_path):
         if mock_block_data_path:
             MockBlockProvider.load_block_data(mock_block_data_path)
             # MockBlockProvider.print_data()
@@ -292,8 +273,10 @@ class MassiveSync(DBSync):
         # ensure db schema up to date, check app status
         DbState.initialize()
         if self._conf.get("log_explain_queries"):
-            is_superuser = self._db.query_one( "SELECT is_superuser()" )
-            assert is_superuser, 'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
+            is_superuser = self._db.query_one("SELECT is_superuser()")
+            assert (
+                is_superuser
+            ), 'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
 
         _is_consistency = Blocks.is_consistency()
         if not _is_consistency:
@@ -303,7 +286,7 @@ class MassiveSync(DBSync):
 
         paths = self._conf.get("mock_block_data_path") or []
         for path in paths:
-          self.load_mock_data(path)
+            self.load_mock_data(path)
 
         mock_vops_data_path = self._conf.get("mock_vops_data_path")
         if mock_vops_data_path:
@@ -343,12 +326,11 @@ class MassiveSync(DBSync):
             # recover from fork
             Blocks.verify_head(self._steem)
 
-        self._update_chain_state()
-
         global trail_blocks
         trail_blocks = self._conf.get('trail_blocks')
         assert trail_blocks >= 0
         assert trail_blocks <= 100
+
 
 class LiveSync(DBSync):
     def __init__(self, conf, db, steem):
@@ -357,21 +339,31 @@ class LiveSync(DBSync):
     def refresh_sparse_stats(self):
         # normally it should be refreshed in various time windows
         # but we need the ability to do it all at the same time
-        self._update_chain_state()
         update_communities_posts_and_rank(self._db)
         with ThreadPoolExecutor(max_workers=2) as executor:
             executor.submit(PayoutStats.generate)
             executor.submit(Mentions.refresh)
 
-    def _stream_blocks(self, start_from, breaker, exception_reporter, trail_blocks=0, max_gap=100, do_stale_block_check=True):
+    def _stream_blocks(
+        self, start_from, breaker, exception_reporter, trail_blocks=0, max_gap=100, do_stale_block_check=True
+    ):
         """Stream blocks. Returns a generator."""
-        return BlockStream.stream(self._conf, self._steem, start_from, breaker, exception_reporter, trail_blocks, max_gap, do_stale_block_check)
+        return BlockStream.stream(
+            self._conf,
+            self._steem,
+            start_from,
+            breaker,
+            exception_reporter,
+            trail_blocks,
+            max_gap,
+            do_stale_block_check,
+        )
 
     def listen(self, trail_blocks, max_sync_block, do_stale_block_check):
         """Live (block following) mode.
-            trail_blocks - how many blocks need to be collected to start processed the oldest ( delay in blocks processing against blocks collecting )
-            max_sync_block - limit of blocks to sync, the function will return if it is reached
-            do_stale_block_check - check if the last collected block is not older than 60s
+        trail_blocks - how many blocks need to be collected to start processed the oldest ( delay in blocks processing against blocks collecting )
+        max_sync_block - limit of blocks to sync, the function will return if it is reached
+        do_stale_block_check - check if the last collected block is not older than 60s
         """
 
         # debug: no max gap if disable_sync in effect
@@ -384,12 +376,18 @@ class LiveSync(DBSync):
 
         if hive_head >= max_sync_block:
             self.refresh_sparse_stats()
-            log.info("[LIVE SYNC] Exiting due to block limit exceeded: synced block number: %d, max_sync_block: %d", hive_head, max_sync_block)
+            log.info(
+                "[LIVE SYNC] Exiting due to block limit exceeded: synced block number: %d, max_sync_block: %d",
+                hive_head,
+                max_sync_block,
+            )
             return
 
-        for block in self._stream_blocks(hive_head + 1, can_continue_thread, set_exception_thrown, trail_blocks, max_gap, do_stale_block_check):
+        for block in self._stream_blocks(
+            hive_head + 1, can_continue_thread, set_exception_thrown, trail_blocks, max_gap, do_stale_block_check
+        ):
             if not can_continue_thread():
-                break;
+                break
             num = block.get_num()
             log.info("[LIVE SYNC] =====> About to process block %d with timestamp %s", num, block.get_date())
 
@@ -400,12 +398,17 @@ class LiveSync(DBSync):
             ftm = FSM.log_current("Flushing times")
 
             ms = (perf() - start_time) * 1000
-            log.info("[LIVE SYNC] <===== Processed block %d at %s --% 4d txs"
-                     " --% 5dms%s", num, block.get_date(), block.get_number_of_transactions(),
-                     ms, ' SLOW' if ms > 1000 else '')
+            log.info(
+                "[LIVE SYNC] <===== Processed block %d at %s --% 4d txs" " --% 5dms%s",
+                num,
+                block.get_date(),
+                block.get_number_of_transactions(),
+                ms,
+                ' SLOW' if ms > 1000 else '',
+            )
             log.info("[LIVE SYNC] Current system time: %s", datetime.now().strftime("%H:%M:%S"))
 
-            if num % 1200 == 0: #1hour
+            if num % 1200 == 0:  # 1hour
                 log.warning("head block %d @ %s", num, block.get_date())
                 log.info("[LIVE SYNC] hourly stats")
 
@@ -413,10 +416,8 @@ class LiveSync(DBSync):
                 with ThreadPoolExecutor(max_workers=2) as executor:
                     executor.submit(PayoutStats.generate)
                     executor.submit(Mentions.refresh)
-            if num % 200 == 0: #10min
+            if num % 200 == 0:  # 10min
                 update_communities_posts_and_rank(self._db)
-            if num % 20 == 0: #1min
-                self._update_chain_state()
 
             PC.broadcast(BroadcastObject('sync_current_block', num, 'blocks'))
             FSM.next_blocks()
@@ -427,7 +428,7 @@ class LiveSync(DBSync):
                 break
 
     def run(self):
-        import sys
+
         max_block_limit = sys.maxsize
         do_stale_block_check = True
         if self._conf.get('test_max_block'):
@@ -435,11 +436,13 @@ class LiveSync(DBSync):
             do_stale_block_check = False
             # Correct max_block_limit by trail_blocks
             max_block_limit = max_block_limit - trail_blocks
-            log.info("max_block_limit corrected by specified trail_blocks number: %d is: %d", trail_blocks, max_block_limit)
+            log.info(
+                "max_block_limit corrected by specified trail_blocks number: %d is: %d", trail_blocks, max_block_limit
+            )
 
         if self._conf.get('test_disable_sync'):
             # debug mode: no sync, just stream
-            result =  self.listen(trail_blocks, max_block_limit, do_stale_block_check)
+            result = self.listen(trail_blocks, max_block_limit, do_stale_block_check)
             restore_handlers()
             return result
 
@@ -452,8 +455,11 @@ class LiveSync(DBSync):
             head = Blocks.head_num()
             if head >= max_block_limit:
                 self.refresh_sparse_stats()
-                log.info("Exiting [LIVE SYNC] because irreversible block sync reached specified block limit: %d", max_block_limit)
-                break;
+                log.info(
+                    "Exiting [LIVE SYNC] because irreversible block sync reached specified block limit: %d",
+                    max_block_limit,
+                )
+                break
 
             try:
                 # listen for new blocks
@@ -466,11 +472,12 @@ class LiveSync(DBSync):
             if head >= max_block_limit:
                 self.refresh_sparse_stats()
                 log.info("Exiting [LIVE SYNC] because of specified block limit: %d", max_block_limit)
-                break;
+                break
 
             if not can_continue_thread():
                 break
         restore_handlers()
+
 
 class Sync:
     """Manages the sync/index process.
@@ -489,15 +496,16 @@ class Sync:
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, value, traceback): pass
+    def __exit__(self, exc_type, value, traceback):
+        pass
 
     def run(self):
         """Initialize state; setup/recovery checks; sync and runloop."""
         with MassiveSync(conf=self._conf, db=self._db, steem=self._steem) as massive_sync:
-          massive_sync.run()
+            massive_sync.run()
 
         if not can_continue_thread():
-            return;
+            return
 
         with LiveSync(conf=self._conf, db=self._db, steem=self._steem) as live_sync:
-          live_sync.run()
+            live_sync.run()

@@ -1,14 +1,18 @@
 """Block scheduler."""
 import logging
-from time import time, sleep
+from time import sleep, time
+
 from hive.utils.normalize import block_date, utc_timestamp
 from hive.utils.stats import Stats
 
 log = logging.getLogger(__name__)
 
+
 class StaleHeadException(Exception):
     """Raised when the head block appears to be too old."""
+
     pass
+
 
 class BlockSchedule:
     """Maintains a self-adjusting schedule which anticipates new blocks."""
@@ -34,8 +38,7 @@ class BlockSchedule:
         while head_time >= self._next_expected:
             self._advance()
             if head_time < self._next_expected:
-                log.warning("%d blocks behind",
-                            self._head_num - num)
+                log.warning("%d blocks behind", self._head_num - num)
 
         # if head is behind, sleep until ready
         while self._head_num < num:
@@ -62,8 +65,7 @@ class BlockSchedule:
             self._last_date = date
         else:
             self._drift_backward()
-            log.info("block %d not available. head:%s drift:%fs",
-                     num, self._head_num, self._drift)
+            log.info("block %d not available. head:%s drift:%fs", num, self._head_num, self._drift)
 
     def _check_head_date(self, num, date):
         """Sanity-checking of head block date.
@@ -75,7 +77,7 @@ class BlockSchedule:
             gap = int(time() - utc_timestamp(date))
             assert gap > -60, 'system clock is %ds behind chain' % gap
             if gap > 60:
-                raise StaleHeadException("chain gap is %fs" % gap)
+                raise StaleHeadException(f"chain gap is {gap:f}s")
 
     def _check_missing(self, num, prev_date, next_date):
         """Check missing blocks between previous and next block dates."""

@@ -88,70 +88,58 @@ def setup_env(current_runner_id, hive_sync_runner_id, infile, outfile, end, **kw
                 if key.startswith('postgres'):
                     if key == 'postgres_host':
                         runner[key] = hive_sync_runner['host']
+                    if key == 'postgres_port':  # to be eliminated when CI will be only at psql12
+                        runner[key] = 25432
                     else:
                         runner[key] = hive_sync_runner[key]
                 else:
                     runner[key] = value
 
     for key in runner:
+        if key == 'postgres_host':  # to be eliminated when CI will be only at psql12
+            runner[key] = 'localhost'
+        if key == 'postgres_port':  # to be eliminated when CI will be only at psql12
+            runner[key] = 25432
+
         output(
             f'export RUNNER_{key.upper()}="{str(runner[key])}"',
             outfile,
             end,
-            )
+        )
 
     for key in data['common']:
         output(
             f"export RUNNER_{key.upper()}=\"{str(data['common'][key])}\"",
             outfile,
             end,
-            )
+        )
 
 
 def parse_args():
     """Parse command line arguments"""
-    parser = argparse.ArgumentParser(
-        description=__doc__,
-        formatter_class=argparse.RawDescriptionHelpFormatter
-        )
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
-        'infile',
-        type=argparse.FileType('r'),
-        nargs='?',
-        default=sys.stdin,
-        help='Input file or pipe via STDIN'
-        )
+        'infile', type=argparse.FileType('r'), nargs='?', default=sys.stdin, help='Input file or pipe via STDIN'
+    )
     parser.add_argument(
-        '-o', '--outfile',
-        type=argparse.FileType('w'),
-        default=sys.stdout,
-        help='Output file, STDOUT if not set'
-        )
+        '-o', '--outfile', type=argparse.FileType('w'), default=sys.stdout, help='Output file, STDOUT if not set'
+    )
+    parser.add_argument("-e", "--end", dest='end', default='\n', help='String at the end of line in output')
     parser.add_argument(
-        "-e", "--end",
-        dest='end',
-        default='\n',
-        help='String at the end of line in output'
-        )
-    parser.add_argument(
-        "-s", "--hive-sync-runner-id",
+        "-s",
+        "--hive-sync-runner-id",
         required=True,
         type=int,
-        help='Id of runner which did hive sync, 0 when current runner does hive sync actually'
-        )
-    parser.add_argument(
-        "-c", "--current-runner-id",
-        required=True,
-        type=int,
-        help='Id of current runner'
-        )
+        help='Id of runner which did hive sync, 0 when current runner does hive sync actually',
+    )
+    parser.add_argument("-c", "--current-runner-id", required=True, type=int, help='Id of current runner')
     parser.add_argument(
         '--log-level',
         default='INFO',
         dest='log_level',
         choices=['debug', 'info', 'warning', 'error'],
         help='Log level (string)',
-        )
+    )
 
     result = parser.parse_args()
 

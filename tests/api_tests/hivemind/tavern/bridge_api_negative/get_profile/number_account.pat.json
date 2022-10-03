@@ -1,5 +1,5 @@
 {
   "code": -32602,
-  "data": "Account '468' does not exist",
+  "data": "invalid account char",
   "message": "Invalid parameters"
 }

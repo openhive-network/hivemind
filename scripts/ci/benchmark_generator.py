@@ -2,6 +2,7 @@
 
 from json import dumps
 
+
 def make_benchmark_header():
     return """from requests import post
 from json import dumps
@@ -11,18 +12,21 @@ def send_rpc_query(address, data):
     return response_json
     """
 
+
 def make_benchmark(test_name, address, test_payload):
-    return """
-def test_{}(benchmark):
-    response_json = benchmark(send_rpc_query, "{}", dumps({}))
+    return f"""
+def test_{test_name}(benchmark):
+    response_json = benchmark(send_rpc_query, "{address}", dumps({test_payload}))
     error = response_json.get("error", None)
     result = response_json.get("result", None)
 
     assert error is not None or result is not None, "No error or result in response"
-    """.format(test_name, address, test_payload)
+    """
+
 
 def get_request_from_yaml(path_to_yaml):
     import yaml
+
     yaml_document = None
     with open(path_to_yaml, "r") as yaml_file:
         yaml_document = yaml.load(yaml_file, Loader=yaml.BaseLoader)
@@ -33,9 +37,11 @@ def get_request_from_yaml(path_to_yaml):
             return dumps(json_parameters)
     return None
 
+
 def make_test_name_from_path(test_path):
     splited = test_path.split("/")
     return ("_".join(splited[-3:])).replace(".", "_").replace("-", "_")
+
 
 def make_benchmark_test_file(file_name, address, tests_root_dir):
     import os
@@ -56,16 +62,14 @@ def make_benchmark_test_file(file_name, address, tests_root_dir):
             benchmarks_file.write(make_benchmark(test_name, address, test_payload))
             benchmarks_file.write("\n")
 
+
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser()
-    parser.add_argument("path_to_test_dir", type=str, help = "Path to test directory for given xml file")
+    parser.add_argument("path_to_test_dir", type=str, help="Path to test directory for given xml file")
     parser.add_argument("benchmark_test_file_name", type=str, help="Name of the generated test file")
     parser.add_argument("target_ip_address", type=str, help="Address of the hivemind")
     args = parser.parse_args()
 
     make_benchmark_test_file(args.benchmark_test_file_name, args.target_ip_address, args.path_to_test_dir)
-
-
-
-

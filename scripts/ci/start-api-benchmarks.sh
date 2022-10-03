@@ -27,7 +27,7 @@ do
   rm -f HIVEMIND_BENCHMARKS_IDS_FILE
   tox -e tavern-benchmark -- \
       -W ignore::pytest.PytestDeprecationWarning \
-      --workers $JOBS \
+      -n "${JOBS}" \
       "${@:6}"
   echo Done!
 done

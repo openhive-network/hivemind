@@ -1,5 +1,6 @@
-#pylint: disable=missing-docstring, invalid-name
+# pylint: disable=missing-docstring, invalid-name
 from hive.utils.unique_fifo import UniqueFIFO
+
 
 def test_unique_queue():
     q = UniqueFIFO()

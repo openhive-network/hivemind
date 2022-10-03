@@ -1,6 +1,7 @@
 """Performant FIFO queue which ignores duplicates."""
 from math import ceil
 
+
 class UniqueFIFO:
     """FIFO queue which ignores duplicates and shifts efficiently."""
 

@@ -3,15 +3,18 @@ from hive.utils.timer import time_it
 
 DB = Db.instance()
 
+
 def update_all_hot_and_trending():
     """Calculate and set hot and trending values of all posts"""
     # NOT USED!!!
     update_hot_and_trending_for_block_range()
 
+
 NO_CONSTRAINT = -1
 
+
 @time_it
-def update_hot_and_trending_for_block_range( first_block = NO_CONSTRAINT, last_block = NO_CONSTRAINT):
+def update_hot_and_trending_for_block_range(first_block=NO_CONSTRAINT, last_block=NO_CONSTRAINT):
     """Calculate and set hot and trending values of all posts"""
     # NOT USED!!!
     hot_and_trend_sql = """
@@ -30,13 +33,13 @@ def update_hot_and_trending_for_block_range( first_block = NO_CONSTRAINT, last_b
 
     sql = ""
     if first_block == NO_CONSTRAINT and last_block == NO_CONSTRAINT:
-        sql = hot_and_trend_sql.format( "" )
+        sql = hot_and_trend_sql.format("")
     elif last_block == NO_CONSTRAINT:
-        sql = hot_and_trend_sql.format( "WHERE block_num >= {}".format( first_block ) )
+        sql = hot_and_trend_sql.format(f"WHERE block_num >= {first_block}")
     elif first_block == NO_CONSTRAINT:
-        sql = hot_and_trend_sql.format( "WHERE block_num <= {}".format( last_block ) )
+        sql = hot_and_trend_sql.format(f"WHERE block_num <= {last_block}")
     elif first_block == last_block:
-        sql = hot_and_trend_sql.format( "WHERE block_num = {}".format( last_block ) )
+        sql = hot_and_trend_sql.format(f"WHERE block_num = {last_block}")
     else:
-        sql = hot_and_trend_sql.format( "WHERE block_num >= {} AND block_num <= {}".format( first_block, last_block ) )
+        sql = hot_and_trend_sql.format(f"WHERE block_num >= {first_block} AND block_num <= {last_block}")
     DB.query_no_return(sql)
