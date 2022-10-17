@@ -11,7 +11,7 @@ BEGIN
   __account_id = find_account_id( _account, True );
   __post_id = find_comment_id( _author, _permlink, True );
   RETURN QUERY
-  WITH ds AS --bridge_get_account_posts_by_comments
+  WITH ds AS MATERIALIZED --bridge_get_account_posts_by_comments
   (
     SELECT hp1.id
     FROM live_comments_view hp1

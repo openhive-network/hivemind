@@ -11,7 +11,7 @@ BEGIN
   __account_id = find_account_id( _account, True );
   __post_id = find_comment_id( _author, _permlink, True );
   RETURN QUERY
-  WITH posts AS
+  WITH posts AS MATERIALIZED -- bridge_get_account_posts_by_posts
   (
     SELECT id
     FROM live_posts_view hp
