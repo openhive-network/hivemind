@@ -12,7 +12,7 @@ BEGIN
   __hive_tag = ARRAY_APPEND( __hive_tag, find_tag_id( _tag, True ));
   __observer_id = find_account_id(_observer, True);
   RETURN QUERY
-  WITH created AS
+  WITH created AS MATERIALIZED
   (
     SELECT
       hp1.id,

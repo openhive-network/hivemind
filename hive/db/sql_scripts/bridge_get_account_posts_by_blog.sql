@@ -24,7 +24,7 @@ BEGIN
   END IF;
 
   RETURN QUERY 
-  WITH blog AS -- bridge_get_account_posts_by_blog
+  WITH blog AS MATERIALIZED -- bridge_get_account_posts_by_blog
   (
     SELECT 
       hfc.post_id,
