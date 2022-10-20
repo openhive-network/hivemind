@@ -23,7 +23,7 @@ class AccountMock:
         self._name = name
 
         if self.__class__.account_id is None:
-            last_account_id = Db.instance().query_one(sql='SELECT max(id) from hive.accounts;')
+            last_account_id = Db.instance().query_one(sql='SELECT id from hive.accounts ORDER BY id DESC LIMIT 1;')
             log.info(f'Last account id stored in HAf database is: {last_account_id}')
             self.__class__.account_id = last_account_id
 
@@ -65,7 +65,7 @@ class OperationBase:
         self._body = body
 
         if OperationBase.operation_id is None:
-            last_operation_id = Db.instance().query_one(sql='SELECT max(id) from hive.operations;')
+            last_operation_id = Db.instance().query_one(sql='SELECT id from hive.operations ORDER BY id DESC LIMIT 1;')
             log.info(f'Last operation id stored in HAf database is: {last_operation_id}')
             OperationBase.operation_id = last_operation_id
 
