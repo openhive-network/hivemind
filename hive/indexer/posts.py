@@ -35,7 +35,7 @@ class Posts(DbAdapterHolder):
     @classmethod
     def last_id(cls):
         """Get the last indexed post id."""
-        sql = f"SELECT MAX(id) FROM {SCHEMA_NAME}.hive_posts WHERE counter_deleted = 0"
+        sql = f"SELECT id FROM {SCHEMA_NAME}.hive_posts WHERE counter_deleted = 0 ORDER BY id DESC LIMIT 1;"
         return DB.query_one(sql) or 0
 
     @classmethod

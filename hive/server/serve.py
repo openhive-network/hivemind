@@ -244,7 +244,7 @@ def run_server(conf):
     async def show_info(app):
         from hive.utils.misc import show_app_version, BlocksInfo, PatchLevelInfo
 
-        last = await app['db'].query_one(f"SELECT MAX(num) FROM hive.{SCHEMA_NAME}_blocks_view;")
+        last = await app['db'].query_one(f"SELECT num FROM hive.{SCHEMA_NAME}_blocks_view ORDER BY num DESC LIMIT 1;")
         last_imported = await app['db'].query_one(f"SELECT last_imported_block_num FROM {SCHEMA_NAME}.hive_state;")
         last_completed = await app['db'].query_one(f"SELECT last_completed_block_num FROM {SCHEMA_NAME}.hive_state;")
 
