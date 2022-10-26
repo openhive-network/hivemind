@@ -47,7 +47,7 @@ async def db_head_state(context):
     db = context['db']
     sql = "SELECT num, created_at, extract(epoch from created_at) ts " "FROM hive_blocks ORDER BY num DESC LIMIT 1"
     row = await db.query_row(sql)
-    return dict(db_head_block=row['num'], db_head_time=str(row['created_at']), db_head_age=int(time.time() - row['ts']))
+    return dict(db_head_block=row['num'], db_head_time=str(row['created_at']), db_head_age=int(time.time() - float(row['ts'])))
 
 
 def build_methods():
