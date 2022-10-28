@@ -536,7 +536,10 @@ CREATE INDEX IF NOT EXISTS hive_votes_post_id_block_num_rshares_vote_is_effectiv
 
 DROP INDEX IF EXISTS hive_accounts_ix6;
 
-CREATE INDEX IF NOT EXISTS hive_accounts_reputation_id
+--- previously there was a typo and redunant index could be created after fresh instance (where in the python code hive_accounts_reputation_id_idx was created) has applied upgrade.
+DROP INDEX IF EXISTS hive_accounts_reputation_id;
+
+CREATE INDEX IF NOT EXISTS hive_accounts_reputation_id_idx
   ON public.hive_accounts USING btree
   (reputation desc, id asc)
   ;
