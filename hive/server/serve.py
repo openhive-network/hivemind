@@ -46,9 +46,9 @@ def decimal_deserialize(s):
 async def db_head_state(context):
     """Status/health check."""
     db = context['db']
-    sql = f"SELECT num, created_at, extract(epoch from created_at) ts FROM hive.{SCHEMA_NAME}_blocks_view ORDER BY num DESC LIMIT 1"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.get_head_state()"
     row = await db.query_row(sql)
-    return dict(db_head_block=row['num'], db_head_time=str(row['created_at']), db_head_age=int(time.time() - float(row['ts'])))
+    return dict(db_head_block=row['num'], db_head_time=str(row['created_at']), db_head_age=int(time.time() - float(row['age'])))
 
 
 def build_methods():
@@ -244,7 +244,7 @@ def run_server(conf):
     async def show_info(app):
         from hive.utils.misc import show_app_version, BlocksInfo, PatchLevelInfo
 
-        last = await app['db'].query_one(f"SELECT num FROM hive.{SCHEMA_NAME}_blocks_view ORDER BY num DESC LIMIT 1;")
+        last = await app['db'].query_one(f"SELECT num FROM {SCHEMA_NAME}.get_head_state();")
         last_imported = await app['db'].query_one(f"SELECT last_imported_block_num FROM {SCHEMA_NAME}.hive_state;")
         last_completed = await app['db'].query_one(f"SELECT last_completed_block_num FROM {SCHEMA_NAME}.hive_state;")
 
