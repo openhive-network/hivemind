@@ -517,10 +517,10 @@ class DbState:
     @staticmethod
     def status():
         """Basic health status: head block/time, current age (secs)."""
-        sql = f"SELECT num, created_at, extract(epoch from created_at) ts FROM hive.{SCHEMA_NAME}_blocks_view ORDER BY num DESC LIMIT 1"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.get_head_state()"
         row = DbState.db().query_row(sql)
         return dict(
-            db_head_block=row['num'], db_head_time=str(row['created_at']), db_head_age=int(time.time() - row['ts'])
+            db_head_block=row['num'], db_head_time=str(row['created_at']), db_head_age=int(time.time() - row['age'])
         )
 
     @classmethod
