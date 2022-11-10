@@ -102,7 +102,7 @@ class Blocks:
     @staticmethod
     def head_num() -> int:
         """Get head block number from the application view (hive.hivemind_app_blocks_view)."""
-        sql = f"SELECT num FROM hive.{SCHEMA_NAME}_blocks_view ORDER BY num DESC LIMIT 1;"
+        sql = f"SELECT num FROM {SCHEMA_NAME}.get_head_state();"
         return DB.query_one(sql) or 0
 
     @staticmethod
