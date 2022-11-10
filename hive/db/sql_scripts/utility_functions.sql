@@ -214,3 +214,39 @@ BEGIN
 END
 $function$
 ;
+
+DROP TYPE IF EXISTS hivemind_app.head_state CASCADE;
+CREATE TYPE hivemind_app.head_state AS
+(
+    num        int,
+    created_at timestamp,
+    age        int
+);
+
+DROP FUNCTION IF EXISTS hivemind_app.get_head_state();
+CREATE OR REPLACE FUNCTION hivemind_app.get_head_state()
+    RETURNS SETOF hivemind_app.head_state
+    LANGUAGE 'plpgsql'
+AS
+$$
+DECLARE
+    __num        int;
+    __created_at timestamp := '1970-01-01 00:00:00'::timestamp;
+    __record     hivemind_app.head_state;
+BEGIN
+    SELECT current_block_num INTO __num FROM hive.hivemind_app_context_data_view;
+    IF __num > 0 THEN
+        SELECT created_at INTO __created_at FROM hive.hivemind_app_blocks_view WHERE num = __num;
+    ELSE
+        -- MIGHT BE NULL
+        __num = 0;
+    END IF;
+
+    __record.num = __num;
+    __record.created_at = __created_at;
+    __record.age = extract(epoch from __created_at);
+
+    RETURN NEXT __record;
+END
+$$
+;
