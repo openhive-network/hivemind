@@ -259,6 +259,7 @@ sync_e2e_benchmark:
     - echo "APP_VERSION=$(git describe --tags)" >> variables.env
     - echo "SERVER_NAME=$CI_RUNNER_DESCRIPTION" >> variables.env
   artifacts:
+    when: always
     expire_in: 7 days
     reports:
       junit: "*.xml"
