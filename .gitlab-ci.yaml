@@ -190,14 +190,6 @@ workflow:
 prepare_haf_image:
   stage: build
   extends: .prepare_haf_data_5m_image
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: always
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-      when: always
-    - if: '$CI_COMMIT_BRANCH == "develop"'
-      when: always
-    - when: manual
   variables:
     SUBMODULE_DIR: "$CI_PROJECT_DIR/haf"
     REGISTRY_USER: "$HAF_IMG_BUILDER_USER"
