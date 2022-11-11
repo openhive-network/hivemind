@@ -255,6 +255,7 @@ sync_e2e_benchmark:
     - ./scripts/ci/hive-server.sh start
     - *api-benchmark-script
   after_script:
+    - cat venv/lib/python3.8/site-packages/hive/_version.py > version.log
     - echo "ARTIFACTS_JOB_ID=$CI_JOB_ID" >> variables.env
     - echo "APP_VERSION=$(git describe --tags)" >> variables.env
     - echo "SERVER_NAME=$CI_RUNNER_DESCRIPTION" >> variables.env
@@ -272,7 +273,7 @@ sync_e2e_benchmark:
       - tests/api_tests/hivemind/tavern/**/*.out.json
       - request_process_times.log
       - request_process_times_smoketests.log
-      - hive/_version.py
+      - version.log
   tags: *shared_tags
 
 
