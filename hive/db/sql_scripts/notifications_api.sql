@@ -36,7 +36,7 @@ BEGIN
 
   --- Warning given account can have no last_read_at set, so lets fallback to the block limit to avoid comparison to NULL.
   SELECT COALESCE((SELECT hb.num
-                   FROM hive.hivemind_app_blocks_view hb
+                   FROM hive.blocks_view hb -- very important for performance (originally it was a hivemind_app_blocks_view)
                    WHERE hb.created_at <= __last_read_at
                    ORDER by hb.created_at desc
                    LIMIT 1), __limit_block)
