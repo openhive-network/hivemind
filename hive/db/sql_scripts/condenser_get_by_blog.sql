@@ -27,7 +27,7 @@ BEGIN
   END IF;
 
   RETURN QUERY 
-  WITH blog_posts AS
+  WITH blog_posts AS MATERIALIZED -- condenser_get_by_blog
   (
     SELECT hp.id
     FROM live_posts_comments_view hp

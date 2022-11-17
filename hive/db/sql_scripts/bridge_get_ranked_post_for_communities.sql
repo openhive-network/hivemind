@@ -13,7 +13,7 @@ BEGIN
     RETURN;
   END IF;
   RETURN QUERY
-  WITH pinned AS
+  WITH pinned AS MATERIALIZED -- bridge_get_ranked_post_pinned_for_community
   (
     SELECT 
       hp.id, 
@@ -92,7 +92,7 @@ BEGIN
       __post_id = 0;
   END IF;
   RETURN QUERY
-  WITH trends as
+  WITH trends as MATERIALIZED -- bridge_get_ranked_post_by_trends_for_community
   (
     SELECT
       hp1.id,
@@ -172,7 +172,7 @@ BEGIN
       SELECT hp.promoted INTO __promoted_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY 
-  WITH promoted as
+  WITH promoted as MATERIALIZED -- bridge_get_ranked_post_by_promoted_for_community
   (
     SELECT
       hp1.id,
@@ -254,7 +254,7 @@ BEGIN
   END IF;
   __head_block_time = head_block_time();
   RETURN QUERY 
-  WITH payout as
+  WITH payout as MATERIALIZED -- bridge_get_ranked_post_by_payout_for_community
   (
     SELECT
       hp1.id,
@@ -334,7 +334,7 @@ BEGIN
       SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY
-  WITH payout as
+  WITH payout as MATERIALIZED -- bridge_get_ranked_post_by_payout_comments_for_community
   (
     SELECT
       hp1.id,
@@ -414,7 +414,7 @@ BEGIN
   END IF;
   __observer_id = find_account_id(_observer, True);
   RETURN QUERY
-  WITH payout as
+  WITH payout as MATERIALIZED -- bridge_get_ranked_post_by_muted_for_community
   (
     SELECT
       hp1.id,
@@ -496,7 +496,7 @@ BEGIN
       SELECT hp.sc_hot INTO __hot_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY 
-  WITH hot AS -- bridge_get_ranked_post_by_hot_for_community
+  WITH hot AS MATERIALIZED -- bridge_get_ranked_post_by_hot_for_community
   (
     SELECT
       hp1.id,

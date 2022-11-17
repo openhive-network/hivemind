@@ -52,7 +52,7 @@ AS
 $function$
 BEGIN
   RETURN QUERY
-  WITH comments AS
+  WITH comments AS MATERIALIZED -- list_comments_by_permlink
   (
     SELECT
       hph.id,
@@ -96,7 +96,7 @@ DECLARE
 BEGIN
   __post_id = find_comment_id(_author,_permlink, True);
   RETURN QUERY
-  WITH comments AS
+  WITH comments AS MATERIALIZED -- list_comments_by_cashout_time
   (
     SELECT
       hp1.id,
@@ -146,7 +146,7 @@ BEGIN
   __root_id = find_comment_id(_root_author, _root_permlink, True);
   __post_id = find_comment_id(_start_post_author, _start_post_permlink, True);
   RETURN QUERY
-  WITH comments AS
+  WITH comments AS MATERIALIZED -- list_comments_by_root
   (
     SELECT hp.id
     FROM live_posts_comments_view hp
@@ -190,7 +190,7 @@ BEGIN
   __parent_id = find_comment_id(_parent_author, _parent_permlink, True);
   __post_id = find_comment_id(_start_post_author, _start_post_permlink, True);
   RETURN QUERY
-  WITH comments AS
+  WITH comments AS MATERIALIZED -- list_comments_by_parent
   (
     SELECT hp.id
     FROM live_posts_comments_view hp
@@ -235,7 +235,7 @@ BEGIN
   __parent_author_id = find_account_id(_parent_author, True);
   __post_id = find_comment_id(_start_post_author, _start_post_permlink, True);
   RETURN QUERY
-  WITH comments AS
+  WITH comments AS MATERIALIZED -- list_comments_by_last_update
   (
     SELECT
       hp1.id,
@@ -286,7 +286,7 @@ BEGIN
   __author_id = find_account_id(_author, True);
   __post_id = find_comment_id(_start_post_author, _start_post_permlink, True);
   RETURN QUERY
-  WITH comments AS
+  WITH comments AS MATERIALIZED -- list_comments_by_author_last_update
   (
     SELECT
       hp1.id,

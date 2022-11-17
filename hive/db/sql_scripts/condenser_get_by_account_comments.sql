@@ -14,7 +14,7 @@ BEGIN
   END IF;
 
   RETURN QUERY 
-  WITH comments AS
+  WITH comments AS MATERIALIZED -- condenser_get_by_account_comments
   (
     SELECT id
     FROM live_comments_view hp

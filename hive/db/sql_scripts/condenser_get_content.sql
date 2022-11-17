@@ -64,7 +64,7 @@ DECLARE
 BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   RETURN QUERY 
-  WITH replies AS
+  WITH replies AS MATERIALIZED -- condenser_get_content_replies
   (
     SELECT id 
     FROM live_posts_comments_view hp 

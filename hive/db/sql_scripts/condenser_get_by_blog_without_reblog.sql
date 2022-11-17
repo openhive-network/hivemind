@@ -11,7 +11,7 @@ BEGIN
   __author_id = find_account_id( _author, True );
   __post_id = find_comment_id( _author, _permlink, _permlink <> '' );
   RETURN QUERY 
-  WITH blog_posts AS
+  WITH blog_posts AS MATERIALIZED -- condenser_get_by_blog_without_reblog
   (
     SELECT
       hp.id
