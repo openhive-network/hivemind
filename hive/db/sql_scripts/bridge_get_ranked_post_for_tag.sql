@@ -12,7 +12,7 @@ BEGIN
   __hive_tag = ARRAY_APPEND( __hive_tag, find_tag_id( _tag, True ));
   __observer_id = find_account_id(_observer, True);
   RETURN QUERY
-  WITH created AS MATERIALIZED
+  WITH created AS MATERIALIZED -- bridge_get_ranked_post_by_created_for_tag
   (
     SELECT
       hp1.id,
@@ -91,7 +91,7 @@ BEGIN
   __hive_tag = ARRAY_APPEND( __hive_tag, find_tag_id( _tag, True ));
   __observer_id = find_account_id(_observer, True);
   RETURN QUERY
-  WITH hot AS 
+  WITH hot AS MATERIALIZED -- bridge_get_ranked_post_by_hot_for_tag
   (
     SELECT
       hp1.id,
@@ -171,7 +171,7 @@ BEGIN
   __hive_tag = ARRAY_APPEND( __hive_tag, find_tag_id( _tag, True ) );
   __observer_id = find_account_id(_observer, True);
   RETURN QUERY
-  WITH payout AS
+  WITH payout AS MATERIALIZED -- bridge_get_ranked_post_by_muted_for_tag
   (
     SELECT
       hp1.id,
@@ -253,7 +253,7 @@ BEGIN
   __hive_category = find_category_id( _category, True );
   __observer_id = find_account_id(_observer, True);
   RETURN QUERY
-  WITH payout AS
+  WITH payout AS MATERIALIZED -- bridge_get_ranked_post_by_payout_comments_for_category
   (
     SELECT
       hp1.id,
@@ -336,7 +336,7 @@ BEGIN
   __head_block_time = head_block_time();
   __observer_id = find_account_id(_observer, True);
   RETURN QUERY
-  WITH payout AS
+  WITH payout AS MATERIALIZED -- bridge_get_ranked_post_by_payout_for_category
   (
     SELECT
       hp1.id,
@@ -418,7 +418,7 @@ BEGIN
   __hive_tag = ARRAY_APPEND( __hive_tag,  find_tag_id( _tag, True ) );
   __observer_id = find_account_id(_observer, True);
   RETURN QUERY
-  WITH promoted AS
+  WITH promoted AS MATERIALIZED -- bridge_get_ranked_post_by_promoted_for_tag
   (
     SELECT
       hp1.id,
@@ -500,7 +500,7 @@ BEGIN
   __hive_tag = ARRAY_APPEND( __hive_tag, find_tag_id( _tag, True ));
   __observer_id = find_account_id(_observer, True);
   RETURN QUERY
-  WITH trends AS
+  WITH trends AS MATERIALIZED -- bridge_get_ranked_post_by_trends_for_tag
   (
     SELECT
       hp1.id,
