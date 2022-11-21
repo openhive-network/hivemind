@@ -224,7 +224,7 @@ sync_e2e_benchmark:
     - env
   script:
     - echo "HAF image name $HAF_IMAGE_NAME"
-    - ./scripts/ci/wait-for-postgres.sh $HAF_ADMIN_POSTGRES_URL
+#    - ./scripts/ci/wait-for-postgres.sh $HAF_ADMIN_POSTGRES_URL
     - ./scripts/ci/add-mocks-to-db.sh
     - psql "${HAF_ADMIN_POSTGRES_URL}" -c 'CREATE EXTENSION IF NOT EXISTS intarray;'
     - ./scripts/ci/hive-sync.sh
