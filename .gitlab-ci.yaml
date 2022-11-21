@@ -214,11 +214,11 @@ sync_e2e_benchmark:
     RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
   before_script:
     - scripts/ci/fix_ci_tag.sh
-    - pip install --upgrade pip setuptools wheel
     - python3 -V
     - pip3 -V
     - python3 -m venv venv/
     - . venv/bin/activate
+    - pip install --upgrade pip setuptools wheel
     - pip install --no-cache-dir .[tests] 2>&1 | tee pip_install.log
     - pip list
     - env
