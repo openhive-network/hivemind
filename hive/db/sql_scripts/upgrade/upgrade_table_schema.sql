@@ -543,3 +543,23 @@ CREATE INDEX IF NOT EXISTS hive_accounts_reputation_id_idx
   ON public.hive_accounts USING btree
   (reputation desc, id asc)
   ;
+
+--- Begin changes done in MR https://gitlab.syncad.com/hive/hivemind/-/merge_requests/574
+
+DROP INDEX IF EXISTS hivemind_app.hive_posts_community_id_id_idx;
+
+CREATE INDEX IF NOT EXISTS hive_posts_community_id_id_idx
+    ON public.hive_posts USING btree
+    (community_id ASC NULLS LAST)
+    INCLUDE(id)
+    WHERE counter_deleted = 0;
+
+DROP INDEX IF EXISTS hive_posts_community_id_is_pinned_idx;
+
+CREATE INDEX IF NOT EXISTS hive_posts_community_id_is_pinned_idx
+    ON public.hive_posts USING btree
+    (community_id ASC NULLS LAST)
+    INCLUDE(id)
+    WHERE is_pinned AND counter_deleted = 0;
+
+--- End of MR https://gitlab.syncad.com/hive/hivemind/-/merge_requests/574
