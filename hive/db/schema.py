@@ -133,7 +133,12 @@ def build_metadata():
             sa.text('parent_id, id DESC'),
             postgresql_where=sql_text("counter_deleted = 0"),
         ),
-        sa.Index('hive_posts_community_id_id_idx', 'community_id', sa.text('id DESC')),
+        sa.Index('hive_posts_community_id_id_idx', 'community_id',
+            postgresql_include=['id'],
+            postgresql_where=sql_text("counter_deleted = 0")),
+        sa.Index('hive_posts_community_id_is_pinned_idx', 'community_id',
+            postgresql_include=['id'],
+            postgresql_where=sql_text("is_pinned AND counter_deleted = 0")),
         sa.Index('hive_posts_payout_at_idx', 'payout_at'),
         sa.Index('hive_posts_payout_idx', 'payout'),
         sa.Index(
