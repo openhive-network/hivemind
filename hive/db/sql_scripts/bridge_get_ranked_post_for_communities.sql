@@ -92,6 +92,7 @@ BEGIN
       __post_id = 0;
   END IF;
   RETURN QUERY
+  --- Close related to hive_posts_community_id_not_is_paidout_idx
   WITH trends as MATERIALIZED -- bridge_get_ranked_post_by_trends_for_community
   (
     SELECT
@@ -574,6 +575,7 @@ BEGIN
     __post_id = 0;
   END IF;
   RETURN QUERY
+  --- Very close related to hive_posts_community_id_not_is_pinned_idx PARTIAL index. Please adjust when any condition will be changed.
   WITH created as MATERIALIZED -- bridge_get_ranked_post_by_created_for_community
   (
     SELECT
