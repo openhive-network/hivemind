@@ -45,13 +45,7 @@ SHOW from_collapse_limit;
 
 --- Begin changes done in MR https://gitlab.syncad.com/hive/hivemind/-/merge_requests/574
 
-DROP INDEX IF EXISTS hivemind_app.hive_posts_community_id_id_idx;
-
-CREATE INDEX IF NOT EXISTS hive_posts_community_id_id_idx
-    ON public.hive_posts USING btree
-    (community_id ASC NULLS LAST)
-    INCLUDE(id)
-    WHERE counter_deleted = 0;
+--- Changes done in index hive_posts_community_id_id_idx overwritted by MR 575 (see below)
 
 DROP INDEX IF EXISTS hive_posts_community_id_is_pinned_idx;
 
@@ -62,3 +56,67 @@ CREATE INDEX IF NOT EXISTS hive_posts_community_id_is_pinned_idx
     WHERE is_pinned AND counter_deleted = 0;
 
 --- End of MR https://gitlab.syncad.com/hive/hivemind/-/merge_requests/574
+
+--- Begin of MR https://gitlab.syncad.com/hive/hivemind/-/merge_requests/575 --- 
+
+DROP INDEX IF EXISTS hive_posts_community_id_id_idx;
+
+CREATE INDEX IF NOT EXISTS hive_posts_community_id_id_idx
+    ON public.hive_posts USING btree
+    (community_id ASC NULLS LAST, id DESC)
+    WHERE counter_deleted = 0
+    ;
+
+--- dedicated to bridge_get_ranked_post_by_created_for_community
+CREATE INDEX IF NOT EXISTS hive_posts_community_id_not_is_pinned_idx
+  ON public.hive_posts USING btree
+  (community_id, id DESC)
+  WHERE NOT is_pinned and depth = 0 and counter_deleted = 0
+  ;
+
+--- Specific to bridge_get_ranked_post_by_trends_for_community
+CREATE INDEX IF NOT EXISTS hive_posts_community_id_not_is_paidout_idx
+  ON public.hive_posts USING btree
+  (community_id)
+  INCLUDE (id)
+  WHERE NOT is_paidout AND depth = 0 AND counter_deleted = 0
+  ;
+
+DROP INDEX IF EXISTS hive_posts_author_id_id_idx;
+
+CREATE INDEX IF NOT EXISTS hive_posts_author_id_id_idx
+  ON public.hive_posts USING btree
+  (author_id, id DESC)
+  WHERE counter_deleted = 0
+  ;
+
+DROP INDEX IF EXISTS hive_follows_following_state_idx;
+
+CREATE INDEX IF NOT EXISTS hive_follows_following_state_idx
+  ON public.hive_follows USING btree
+  (following, state)
+  ;
+
+DROP INDEX IF EXISTS hive_follows_follower_state_idx;
+
+CREATE INDEX IF NOT EXISTS hive_follows_follower_state_idx
+  ON public.hive_follows USING btree
+  (follower, state)
+  ;
+
+DROP INDEX IF EXISTS hive_follows_follower_following_state_idx;
+
+CREATE INDEX IF NOT EXISTS hive_follows_follower_following_state_idx
+  ON public.hive_follows USING btree
+  (follower, following, state)
+  ;
+
+DROP INDEX IF EXISTS hive_feed_cache_account_id_created_at_post_id_idx;
+
+--- Dedicated index to bridge_get_account_posts_by_blog
+CREATE INDEX IF NOT EXISTS hive_feed_cache_account_id_created_at_post_id_idx
+  ON public.hive_feed_cache
+  (account_id, created_at DESC, post_id DESC)
+  ;
+
+--- End of MR https://gitlab.syncad.com/hive/hivemind/-/merge_requests/575 --- 
