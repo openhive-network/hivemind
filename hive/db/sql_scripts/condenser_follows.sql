@@ -57,15 +57,23 @@ BEGIN
   IF __start_id <> 0 THEN
       SELECT INTO __start_id ( SELECT id FROM hive_follows WHERE follower = __account_id AND following = __start_id );
   END IF;
-  RETURN QUERY SELECT
+  RETURN QUERY 
+  WITH following_set AS MATERIALIZED --- condenser_get_following
+  (
+  SELECT
+     hf.id, hf.following
+  FROM hive_follows hf
+  WHERE hf.follower = __account_id AND hf.state = _type AND ( __start_id = 0 OR hf.id < __start_id )
+  ORDER BY hf.id + 1 DESC --- + 1 is important hack for Postgres Intelligence to use dedicated index and avoid choosing PK index and performing a linear filtering on it
+  LIMIT _limit
+  )
+  SELECT
      ha.name
-  FROM
-     hive_follows hf
-     JOIN hive_accounts ha ON hf.following = ha.id
-  WHERE
-     hf.follower = __account_id AND hf.state = _type AND ( __start_id = 0 OR hf.id < __start_id )
-  ORDER BY hf.id DESC
+  FROM following_set fs
+  JOIN hive_accounts ha ON fs.following = ha.id
+  ORDER BY fs.id DESC
   LIMIT _limit;
+
 END
 $function$
 language plpgsql STABLE;
