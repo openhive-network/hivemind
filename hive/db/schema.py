@@ -284,8 +284,9 @@ def build_metadata():
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.UniqueConstraint('following', 'follower', name='hive_follows_ux1'),  # core
         sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_follows_fk1'),
-        sa.Index('hive_follows_ix5a', 'following', 'state', 'created_at', 'follower'),
-        sa.Index('hive_follows_ix5b', 'follower', 'state', 'created_at', 'following'),
+        sa.Index('hive_follows_following_state_idx', 'following', 'state'),
+        sa.Index('hive_follows_follower_state_idx', 'follower', 'state'),
+        sa.Index('hive_follows_follower_following_state_idx', 'follower', 'following', 'state'),
         sa.Index('hive_follows_block_num_idx', 'block_num'),
         sa.Index('hive_follows_created_at_idx', 'created_at'),
     )
