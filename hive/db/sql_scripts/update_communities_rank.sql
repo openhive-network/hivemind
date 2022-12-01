@@ -1,9 +1,9 @@
-DROP FUNCTION IF EXISTS update_communities_posts_data_and_rank;
-CREATE FUNCTION update_communities_posts_data_and_rank()
+DROP FUNCTION IF EXISTS hivemind_app.update_communities_posts_data_and_rank;
+CREATE FUNCTION hivemind_app.update_communities_posts_data_and_rank()
 RETURNS void
 AS
 $function$
-UPDATE hive_communities hc SET
+UPDATE hivemind_app.hive_communities hc SET
   num_pending = cr.posts,
   sum_pending = cr.payouts,
   num_authors = cr.authors,
@@ -16,13 +16,13 @@ FROM
       COALESCE(p.posts, 0) as posts,
       COALESCE(p.payouts, 0) as payouts,
       COALESCE(p.authors, 0) as authors
-    FROM hive_communities c
+    FROM hivemind_app.hive_communities c
     LEFT JOIN (
               SELECT hp.community_id,
                      COUNT(*) posts,
                      ROUND(SUM(hp.pending_payout)) payouts,
                      COUNT(DISTINCT hp.author_id) authors
-                FROM hive_posts hp
+                FROM hivemind_app.hive_posts hp
                WHERE community_id IS NOT NULL
                  AND NOT hp.is_paidout
                  AND hp.counter_deleted = 0

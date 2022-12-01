@@ -1,6 +1,7 @@
 """Hive API: Notifications"""
 import logging
 
+from hive.conf import SCHEMA_NAME
 from hive.indexer.notify import NotifyType
 from hive.server.common.helpers import (
     json_date,
@@ -51,7 +52,7 @@ async def unread_notifications(context, account, min_score=25):
     valid_account(account)
     min_score = valid_score(min_score, 100, 25)
 
-    sql = """SELECT * FROM get_number_of_unread_notifications( :account, (:min_score)::SMALLINT)"""
+    sql = f"SELECT * FROM {SCHEMA_NAME}.get_number_of_unread_notifications( :account, (:min_score)::SMALLINT)"
     row = await db.query_row(sql, account=account, min_score=min_score)
     return dict(lastread=str(row['lastread_at']), unread=row['unread'])
 
@@ -65,7 +66,7 @@ async def account_notifications(context, account, min_score=25, last_id=None, li
     last_id = valid_number(last_id, 0, "last_id")
     limit = valid_limit(limit, 100, 100)
 
-    sql_query = "SELECT * FROM account_notifications( (:account)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::BIGINT, (:limit)::SMALLINT )"
+    sql_query = f"SELECT * FROM {SCHEMA_NAME}.account_notifications( (:account)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::BIGINT, (:limit)::SMALLINT )"
 
     rows = await db.query_all(sql_query, account=account, min_score=min_score, last_id=last_id, limit=limit)
     return [_render(row) for row in rows]
@@ -84,7 +85,7 @@ async def post_notifications(
     last_id = valid_number(last_id, 0, "last_id")
     limit = valid_limit(limit, 100, 100)
 
-    sql_query = "SELECT * FROM post_notifications( (:author)::VARCHAR, (:permlink)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::BIGINT, (:limit)::SMALLINT )"
+    sql_query = f"SELECT * FROM {SCHEMA_NAME}.post_notifications( (:author)::VARCHAR, (:permlink)::VARCHAR, (:min_score)::SMALLINT, (:last_id)::BIGINT, (:limit)::SMALLINT )"
 
     rows = await db.query_all(
         sql_query, author=author, permlink=permlink, min_score=min_score, last_id=last_id, limit=limit
@@ -93,17 +94,17 @@ async def post_notifications(
 
 
 def _notifs_sql(where):
-    sql = """SELECT hn.id, hn.type_id, hn.score, hn.created_at,
+    sql = f"""SELECT hn.id, hn.type_id, hn.score, hn.created_at,
                     src.name src, dst.name dst,
-                    (SELECT name FROM hive_accounts WHERE id = hp.author_id) as author,
-                    (SELECT permlink FROM hive_permlink_data WHERE id = hp.permlink_id) as permlink,
+                    (SELECT name FROM {SCHEMA_NAME}.hive_accounts WHERE id = hp.author_id) as author,
+                    (SELECT permlink FROM {SCHEMA_NAME}.hive_permlink_data WHERE id = hp.permlink_id) as permlink,
                     hc.name community,
                     hc.title community_title, payload
-               FROM hive_notifs hn
-          LEFT JOIN hive_accounts src ON hn.src_id = src.id
-          LEFT JOIN hive_accounts dst ON hn.dst_id = dst.id
-          LEFT JOIN hive_posts hp ON hn.post_id = hp.id
-          LEFT JOIN hive_communities hc ON hn.community_id = hc.id
+               FROM {SCHEMA_NAME}.hive_notifs hn
+          LEFT JOIN {SCHEMA_NAME}.hive_accounts src ON hn.src_id = src.id
+          LEFT JOIN {SCHEMA_NAME}.hive_accounts dst ON hn.dst_id = dst.id
+          LEFT JOIN {SCHEMA_NAME}.hive_posts hp ON hn.post_id = hp.id
+          LEFT JOIN {SCHEMA_NAME}.hive_communities hc ON hn.community_id = hc.id
           WHERE %s
             AND score >= :min_score
             AND COALESCE(hp.counter_deleted, 0) = 0

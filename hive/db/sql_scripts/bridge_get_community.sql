@@ -1,5 +1,5 @@
-DROP TYPE IF EXISTS bridge_api_community CASCADE;
-CREATE TYPE bridge_api_community AS (
+DROP TYPE IF EXISTS hivemind_app.bridge_api_community CASCADE;
+CREATE TYPE hivemind_app.bridge_api_community AS (
     id INTEGER,
     name VARCHAR(16),
     title VARCHAR(32),
@@ -20,24 +20,24 @@ CREATE TYPE bridge_api_community AS (
     team JSON
 );
 
-DROP FUNCTION IF EXISTS bridge_get_community
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_community
 ;
-CREATE OR REPLACE FUNCTION bridge_get_community(
-    in _name hive_communities.name%TYPE,
-    in _observer hive_accounts.name%TYPE
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_get_community(
+    in _name hivemind_app.hive_communities.name%TYPE,
+    in _observer hivemind_app.hive_accounts.name%TYPE
 )
-RETURNS SETOF bridge_api_community
+RETURNS SETOF hivemind_app.bridge_api_community
 LANGUAGE plpgsql
 AS
 $function$
 DECLARE
     __observer_id INT;
-    __community_id INT := find_community_id( _name, True );
+    __community_id INT := hivemind_app.find_community_id( _name, True );
     __context JSON := '{}'::json;
 BEGIN
     IF _observer <> '' THEN
-        __observer_id = find_account_id( _observer, True );
-        __context= bridge_get_community_context(_observer, _name);
+        __observer_id = hivemind_app.find_account_id( _observer, True );
+        __context= hivemind_app.bridge_get_community_context(_observer, _name);
     END IF;
 
     RETURN QUERY SELECT
@@ -58,13 +58,13 @@ BEGIN
         hc.flag_text,
         hc.settings::JSON,
         __context,
-        (SELECT json_agg(json_build_array(a.name, get_role_name(r.role_id), r.title) ORDER BY r.role_id DESC, r.account_id DESC)
-            FROM hive_roles r
-            JOIN hive_accounts a ON r.account_id = a.id
+        (SELECT json_agg(json_build_array(a.name, hivemind_app.get_role_name(r.role_id), r.title) ORDER BY r.role_id DESC, r.account_id DESC)
+            FROM hivemind_app.hive_roles r
+            JOIN hivemind_app.hive_accounts a ON r.account_id = a.id
             WHERE r.community_id = __community_id
             AND r.role_id BETWEEN 4 AND 8
         )
-    FROM hive_communities hc
+    FROM hivemind_app.hive_communities hc
     WHERE hc.id = __community_id
     GROUP BY hc.id
     ;

@@ -2,6 +2,7 @@
 
 import logging
 
+from hive.conf import SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.indexer.accounts import Accounts
 from hive.utils.normalize import parse_amount
@@ -26,18 +27,18 @@ class Payments:
         record, author_id, permlink = result
 
         # add payment record and return post id
-        sql = """
-INSERT INTO hive_payments(block_num, tx_idx, post_id, from_account, to_account, amount, token) SELECT
+        sql = f"""
+INSERT INTO {SCHEMA_NAME}.hive_payments(block_num, tx_idx, post_id, from_account, to_account, amount, token) SELECT
   bn, tx, hp.id, fa, ta, am, tkn
 FROM
 ( 
   SELECT bn, tx, hpd.id, auth_id, fa, ta, am, tkn
   FROM (VALUES (:_block_num, :_tx_idx, :_permlink, :_author_id , :_from_account , :_to_account , :_amount, :_token)) 
   AS v(bn, tx, perm, auth_id, fa, ta, am, tkn) 
-  JOIN hive_permlink_data hpd
+  JOIN {SCHEMA_NAME}.hive_permlink_data hpd
   ON v.perm = hpd.permlink
 ) as vv(bn, tx, hpd_id, auth_id, fa, ta, am, tkn )
-JOIN hive_posts hp
+JOIN {SCHEMA_NAME}.hive_posts hp
 ON hp.author_id=vv.auth_id AND hp.permlink_id=vv.hpd_id
 RETURNING post_id
 """
@@ -60,7 +61,7 @@ RETURNING post_id
 
         if amount != 0.0 and post_id is not None:
             # update post record
-            sql = "UPDATE hive_posts SET promoted = promoted + :val WHERE id = :id"
+            sql = f"UPDATE {SCHEMA_NAME}.hive_posts SET promoted = promoted + :val WHERE id = :id"
             DB.query(sql, val=amount, id=post_id)
 
     @classmethod

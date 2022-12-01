@@ -9,16 +9,16 @@ from sqlalchemy.types import CHAR
 from sqlalchemy.types import SMALLINT
 from sqlalchemy.types import TEXT
 from sqlalchemy.types import VARCHAR
+from hive.conf import SCHEMA_NAME
 
 log = logging.getLogger(__name__)
-
 
 # pylint: disable=line-too-long, too-many-lines, bad-whitespace
 
 
 def build_metadata():
     """Build schema def with SqlAlchemy"""
-    metadata = sa.MetaData()
+    metadata = sa.MetaData(schema=SCHEMA_NAME)
 
     sa.Table(
         'hive_blocks',
@@ -506,7 +506,7 @@ def drop_fk(db):
     db.query_no_return("START TRANSACTION")
     for table in build_metadata().sorted_tables:
         for fk in table.foreign_keys:
-            sql = f"""ALTER TABLE {table.name} DROP CONSTRAINT IF EXISTS {fk.name}"""
+            sql = f"""ALTER TABLE {SCHEMA_NAME}.{table.name} DROP CONSTRAINT IF EXISTS {fk.name}"""
             db.query_no_return(sql)
     db.query_no_return("COMMIT")
 
@@ -540,19 +540,19 @@ def setup(db):
 
     # default rows
     sqls = [
-        "INSERT INTO hive_state (block_num, db_version) VALUES (0, 0)",
-        "INSERT INTO hive_blocks (num, hash, created_at, completed) VALUES (0, '0000000000000000000000000000000000000000', '2016-03-24 16:04:57', true)",
-        "INSERT INTO hive_permlink_data (id, permlink) VALUES (0, '')",
-        "INSERT INTO hive_category_data (id, category) VALUES (0, '')",
-        "INSERT INTO hive_tag_data (id, tag) VALUES (0, '')",
-        "INSERT INTO hive_accounts (id, name, created_at) VALUES (0, '', '1970-01-01T00:00:00')",
-        "INSERT INTO hive_accounts (name, created_at) VALUES ('miners',    '2016-03-24 16:05:00')",
-        "INSERT INTO hive_accounts (name, created_at) VALUES ('null',      '2016-03-24 16:05:00')",
-        "INSERT INTO hive_accounts (name, created_at) VALUES ('temp',      '2016-03-24 16:05:00')",
-        "INSERT INTO hive_accounts (name, created_at) VALUES ('initminer', '2016-03-24 16:05:00')",
-        """
+        f"INSERT INTO {SCHEMA_NAME}.hive_state (block_num, db_version) VALUES (0, 0)",
+        f"INSERT INTO {SCHEMA_NAME}.hive_blocks (num, hash, created_at, completed) VALUES (0, '0000000000000000000000000000000000000000', '2016-03-24 16:04:57', true)",
+        f"INSERT INTO {SCHEMA_NAME}.hive_permlink_data (id, permlink) VALUES (0, '')",
+        f"INSERT INTO {SCHEMA_NAME}.hive_category_data (id, category) VALUES (0, '')",
+        f"INSERT INTO {SCHEMA_NAME}.hive_tag_data (id, tag) VALUES (0, '')",
+        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (id, name, created_at) VALUES (0, '', '1970-01-01T00:00:00')",
+        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('miners',    '2016-03-24 16:05:00')",
+        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('null',      '2016-03-24 16:05:00')",
+        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('temp',      '2016-03-24 16:05:00')",
+        f"INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at) VALUES ('initminer', '2016-03-24 16:05:00')",
+        f"""
         INSERT INTO
-            public.hive_posts(id, root_id, parent_id, author_id, permlink_id, category_id,
+            {SCHEMA_NAME}.hive_posts(id, root_id, parent_id, author_id, permlink_id, category_id,
                 community_id, created_at, depth, block_num, block_num_created
             )
         VALUES
@@ -562,7 +562,7 @@ def setup(db):
     for sql in sqls:
         db.query(sql)
 
-    sql = "CREATE INDEX hive_communities_ft1 ON hive_communities USING GIN (to_tsvector('english', title || ' ' || about))"
+    sql = f"CREATE INDEX hive_communities_ft1 ON {SCHEMA_NAME}.hive_communities USING GIN (to_tsvector('english', title || ' ' || about))"
     db.query(sql)
 
     # find_comment_id definition moved to utility_functions.sql
@@ -612,8 +612,8 @@ def setup(db):
           """
     db.query_no_return(sql)
 
-    sql = """
-          CREATE TABLE IF NOT EXISTS hive_db_patch_level
+    sql = f"""
+          CREATE TABLE IF NOT EXISTS {SCHEMA_NAME}.hive_db_patch_level
           (
             level SERIAL NOT NULL PRIMARY KEY,
             patch_date timestamp without time zone NOT NULL,
@@ -703,11 +703,11 @@ def setup(db):
         execute_sql_script(db.query_no_return, f"{dir_path}/sql_scripts/{script}")
 
     # Move this part here, to mark latest db patch level as current Hivemind revision (which just created schema).
-    sql = """
-          INSERT INTO hive_db_patch_level
+    sql = f"""
+          INSERT INTO {SCHEMA_NAME}.hive_db_patch_level
           (patch_date, patched_to_revision)
           values
-          (now(), '{}');
+          (now(), '{{}}');
           """
 
     from hive.version import GIT_REVISION
@@ -732,11 +732,13 @@ def reset_autovac(db):
     }
 
     for table, (n_vacuum, n_analyze) in autovac_config.items():
-        sql = """ALTER TABLE %s SET (autovacuum_vacuum_scale_factor = 0,
-                                     autovacuum_vacuum_threshold = %s,
-                                     autovacuum_analyze_scale_factor = 0,
-                                     autovacuum_analyze_threshold = %s)"""
-        db.query(sql % (table, n_vacuum, n_analyze))
+        sql = f"""
+ALTER TABLE {SCHEMA_NAME}.{table} SET (autovacuum_vacuum_scale_factor = 0,
+                                  autovacuum_vacuum_threshold = {n_vacuum},
+                                  autovacuum_analyze_scale_factor = 0,
+                                  autovacuum_analyze_threshold = {n_analyze});
+"""
+        db.query(sql)
 
 
 def set_fillfactor(db):
@@ -745,8 +747,8 @@ def set_fillfactor(db):
     fillfactor_config = {'hive_posts': 70, 'hive_post_data': 70, 'hive_votes': 70, 'hive_reputation_data': 50}
 
     for table, fillfactor in fillfactor_config.items():
-        sql = """ALTER TABLE {} SET (FILLFACTOR = {})"""
-        db.query(sql.format(table, fillfactor))
+        sql = f"ALTER TABLE {SCHEMA_NAME}.{table} SET (FILLFACTOR = {fillfactor});"
+        db.query(sql)
 
 
 def set_logged_table_attribute(db, logged):

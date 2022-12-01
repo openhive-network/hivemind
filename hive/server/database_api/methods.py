@@ -1,6 +1,7 @@
 # pylint: disable=too-many-arguments,line-too-long,too-many-lines
 from enum import Enum
 
+from hive.conf import SCHEMA_NAME
 from hive.server.common.helpers import json_date
 from hive.server.common.helpers import return_error_info, valid_account, valid_date, valid_limit, valid_permlink
 from hive.server.database_api.objects import database_post_object
@@ -37,7 +38,7 @@ async def list_comments(context, start: list, limit: int = 1000, order: str = No
         valid_account(author, allow_empty=True)
         permlink = start[2]
         valid_permlink(permlink, allow_empty=True)
-        sql = "SELECT * FROM list_comments_by_cashout_time(:cashout_time, :author, :permlink, :limit)"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.list_comments_by_cashout_time(:cashout_time, :author, :permlink, :limit)"
         result = await db.query_all(sql, cashout_time=cashout_time, author=author, permlink=permlink, limit=limit)
     elif order == 'by_permlink':
         assert len(start) == 2, "Expecting two arguments in 'start' array: author and permlink"
@@ -45,7 +46,7 @@ async def list_comments(context, start: list, limit: int = 1000, order: str = No
         assert isinstance(author, str), "invalid account name type"
         permlink = start[1]
         assert isinstance(permlink, str), "permlink must be string"
-        sql = "SELECT * FROM list_comments_by_permlink(:author, :permlink, :limit)"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.list_comments_by_permlink(:author, :permlink, :limit)"
         result = await db.query_all(sql, author=author, permlink=permlink, limit=limit)
     elif order == 'by_root':
         assert (
@@ -59,7 +60,7 @@ async def list_comments(context, start: list, limit: int = 1000, order: str = No
         valid_account(start_post_author, allow_empty=True)
         start_post_permlink = start[3]
         valid_permlink(start_post_permlink, allow_empty=True)
-        sql = "SELECT * FROM list_comments_by_root(:root_author, :root_permlink, :start_post_author, :start_post_permlink, :limit)"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.list_comments_by_root(:root_author, :root_permlink, :start_post_author, :start_post_permlink, :limit)"
         result = await db.query_all(
             sql,
             root_author=root_author,
@@ -80,7 +81,7 @@ async def list_comments(context, start: list, limit: int = 1000, order: str = No
         valid_account(start_post_author, allow_empty=True)
         start_post_permlink = start[3]
         valid_permlink(start_post_permlink, allow_empty=True)
-        sql = "SELECT * FROM list_comments_by_parent(:parent_author, :parent_permlink, :start_post_author, :start_post_permlink, :limit)"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.list_comments_by_parent(:parent_author, :parent_permlink, :start_post_author, :start_post_permlink, :limit)"
         result = await db.query_all(
             sql,
             parent_author=parent_author,
@@ -101,7 +102,7 @@ async def list_comments(context, start: list, limit: int = 1000, order: str = No
         valid_account(start_post_author, allow_empty=True)
         start_post_permlink = start[3]
         valid_permlink(start_post_permlink, allow_empty=True)
-        sql = "SELECT * FROM list_comments_by_last_update(:parent_author, :updated_at, :start_post_author, :start_post_permlink, :limit)"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.list_comments_by_last_update(:parent_author, :updated_at, :start_post_author, :start_post_permlink, :limit)"
         result = await db.query_all(
             sql,
             parent_author=parent_author,
@@ -122,7 +123,7 @@ async def list_comments(context, start: list, limit: int = 1000, order: str = No
         valid_account(start_post_author, allow_empty=True)
         start_post_permlink = start[3]
         valid_permlink(start_post_permlink, allow_empty=True)
-        sql = "SELECT * FROM list_comments_by_author_last_update(:author, :updated_at, :start_post_author, :start_post_permlink, :limit)"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.list_comments_by_author_last_update(:author, :updated_at, :start_post_author, :start_post_permlink, :limit)"
         result = await db.query_all(
             sql,
             author=author,
@@ -144,7 +145,7 @@ async def find_comments(context, comments: list):
     assert len(comments) <= 1000, "Parameters count is greather than max allowed (1000)"
     db = context['db']
 
-    SQL_TEMPLATE = """
+    SQL_TEMPLATE = f"""
       SELECT
         pv.id,
         pv.community_id,
@@ -190,15 +191,15 @@ async def find_comments(context, comments: list):
         SELECT
           hp.id
         FROM
-          live_posts_comments_view hp
-        JOIN hive_accounts_view ha_a ON ha_a.id = hp.author_id
-        JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-        JOIN (VALUES {}) AS t (author, permlink, number) ON ha_a.name = t.author AND hpd_p.permlink = t.permlink
+          {SCHEMA_NAME}.live_posts_comments_view hp
+        JOIN {SCHEMA_NAME}.hive_accounts_view ha_a ON ha_a.id = hp.author_id
+        JOIN {SCHEMA_NAME}.hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+        JOIN (VALUES {{}}) AS t (author, permlink, number) ON ha_a.name = t.author AND hpd_p.permlink = t.permlink
         WHERE
           NOT hp.is_muted
         ORDER BY t.number
       ) ds,
-      LATERAL get_post_view_by_id (ds.id) pv
+      LATERAL {SCHEMA_NAME}.get_post_view_by_id (ds.id) pv
     """
 
     idx = 0
@@ -269,7 +270,7 @@ def api_vote_info(rows, votes_presentation):
 
 @return_error_info
 async def find_votes_impl(db, author: str, permlink: str, votes_presentation, limit: int = 1000):
-    sql = "SELECT * FROM find_votes(:author,:permlink,:limit)"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.find_votes(:author,:permlink,:limit)"
     rows = await db.query_all(sql, author=author, permlink=permlink, limit=limit)
     return api_vote_info(rows, votes_presentation)
 
@@ -299,7 +300,7 @@ async def list_votes(context, start: list, limit: int = 1000, order: str = None)
         valid_account(start_post_author, allow_empty=True)
         start_post_permlink = start[2]
         valid_permlink(start_post_permlink, allow_empty=True)
-        sql = "SELECT * FROM list_votes_by_voter_comment(:voter,:author,:permlink,:limit)"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.list_votes_by_voter_comment(:voter,:author,:permlink,:limit)"
         rows = await db.query_all(sql, voter=voter, author=start_post_author, permlink=start_post_permlink, limit=limit)
     else:
         assert (
@@ -311,6 +312,6 @@ async def list_votes(context, start: list, limit: int = 1000, order: str = None)
         valid_permlink(permlink)
         start_voter = start[2]
         valid_account(start_voter, allow_empty=True)
-        sql = "SELECT * FROM list_votes_by_comment_voter(:voter,:author,:permlink,:limit)"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.list_votes_by_comment_voter(:voter,:author,:permlink,:limit)"
         rows = await db.query_all(sql, voter=start_voter, author=author, permlink=permlink, limit=limit)
     return {'votes': api_vote_info(rows, VotesPresentation.DatabaseApi)}

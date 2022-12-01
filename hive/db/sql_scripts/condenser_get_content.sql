@@ -1,12 +1,12 @@
-DROP FUNCTION IF EXISTS condenser_get_content;
-CREATE FUNCTION condenser_get_content( in _author VARCHAR, in _permlink VARCHAR )
-RETURNS SETOF condenser_api_post_ex
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_content;
+CREATE FUNCTION hivemind_app.condenser_get_content( in _author VARCHAR, in _permlink VARCHAR )
+RETURNS SETOF hivemind_app.condenser_api_post_ex
 AS
 $function$
 DECLARE
   __post_id INT;
 BEGIN
-  __post_id = find_comment_id( _author, _permlink, True );
+  __post_id = hivemind_app.find_comment_id( _author, _permlink, True );
   RETURN QUERY 
   SELECT
       hp.id,
@@ -49,25 +49,25 @@ BEGIN
       hp.root_title,
       hp.active,
       hp.author_rewards
-    FROM get_post_view_by_id(__post_id) hp;
+    FROM hivemind_app.get_post_view_by_id(__post_id) hp;
 END
 $function$
 language plpgsql STABLE;
 
-DROP FUNCTION IF EXISTS condenser_get_content_replies;
-CREATE FUNCTION condenser_get_content_replies( in _author VARCHAR, in _permlink VARCHAR )
-RETURNS SETOF condenser_api_post_ex
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_content_replies;
+CREATE FUNCTION hivemind_app.condenser_get_content_replies( in _author VARCHAR, in _permlink VARCHAR )
+RETURNS SETOF hivemind_app.condenser_api_post_ex
 AS
 $function$
 DECLARE
   __post_id INT;
 BEGIN
-  __post_id = find_comment_id( _author, _permlink, True );
+  __post_id = hivemind_app.find_comment_id( _author, _permlink, True );
   RETURN QUERY 
   WITH replies AS MATERIALIZED -- condenser_get_content_replies
   (
     SELECT id 
-    FROM live_posts_comments_view hp 
+    FROM hivemind_app.live_posts_comments_view hp
     WHERE hp.parent_id = __post_id 
     ORDER BY hp.id
     LIMIT 5000
@@ -114,7 +114,7 @@ BEGIN
       hp.active,
       hp.author_rewards
     FROM replies,
-    LATERAL get_post_view_by_id(replies.id) hp
+    LATERAL hivemind_app.get_post_view_by_id(replies.id) hp
     ORDER BY hp.id;
 END
 $function$

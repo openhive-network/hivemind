@@ -1,7 +1,7 @@
-DROP FUNCTION IF EXISTS bridge_get_by_feed_with_reblog;
+DROP FUNCTION IF EXISTS hivemind_app.bridge_get_by_feed_with_reblog;
 
-CREATE OR REPLACE FUNCTION bridge_get_by_feed_with_reblog( IN _account VARCHAR, IN _author VARCHAR, IN _permlink VARCHAR, IN _limit INTEGER)
-    RETURNS SETOF bridge_api_post_reblogs
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_get_by_feed_with_reblog( IN _account VARCHAR, IN _author VARCHAR, IN _permlink VARCHAR, IN _limit INTEGER)
+    RETURNS SETOF hivemind_app.bridge_api_post_reblogs
     LANGUAGE 'plpgsql'
     STABLE 
     ROWS 1000
@@ -12,16 +12,16 @@ DECLARE
   __account_id INT;
   __min_date TIMESTAMP;
 BEGIN
-  __account_id = find_account_id( _account, True );
-  __post_id = find_comment_id( _author, _permlink, True );
+  __account_id = hivemind_app.find_account_id( _account, True );
+  __post_id = hivemind_app.find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
     SELECT MIN(hfc.created_at) INTO __min_date
-    FROM hive_feed_cache hfc
-    JOIN hive_follows hf ON hfc.account_id = hf.following
+    FROM hivemind_app.hive_feed_cache hfc
+    JOIN hivemind_app.hive_follows hf ON hfc.account_id = hf.following
     WHERE hf.state = 1 AND hf.follower = __account_id AND hfc.post_id = __post_id;
   END IF;
 
-  __cutoff = block_before_head( '1 month' );
+  __cutoff = hivemind_app.block_before_head( '1 month' );
 
   RETURN QUERY 
   WITH feed AS MATERIALIZED -- bridge_get_by_feed_with_reblog
@@ -30,9 +30,9 @@ BEGIN
       hfc.post_id, 
       MIN(hfc.created_at) as min_created, 
       array_agg(ha.name) AS reblogged_by
-    FROM hive_feed_cache hfc
-    JOIN hive_follows hf ON hfc.account_id = hf.following
-    JOIN hive_accounts ha ON ha.id = hf.following
+    FROM hivemind_app.hive_feed_cache hfc
+    JOIN hivemind_app.hive_follows hf ON hfc.account_id = hf.following
+    JOIN hivemind_app.hive_accounts ha ON ha.id = hf.following
     WHERE hfc.block_num > __cutoff AND hf.state = 1 AND hf.follower = __account_id
     GROUP BY hfc.post_id
     HAVING __post_id = 0 OR MIN(hfc.created_at) < __min_date OR ( MIN(hfc.created_at) = __min_date AND hfc.post_id < __post_id )
@@ -79,7 +79,7 @@ BEGIN
       hp.is_muted,
       feed.reblogged_by
   FROM feed,
-  LATERAL get_post_view_by_id(feed.post_id) hp
+  LATERAL hivemind_app.get_post_view_by_id(feed.post_id) hp
   ORDER BY feed.min_created DESC, feed.post_id DESC
   LIMIT _limit;
 END
