@@ -41,7 +41,7 @@ $$;
 SHOW join_collapse_limit;
 SHOW from_collapse_limit;
 
-####################################### 1.26 release upgrades #######################################
+--- ####################################### 1.26 release upgrades #######################################
 
 --- Begin changes done in MR https://gitlab.syncad.com/hive/hivemind/-/merge_requests/574
 
