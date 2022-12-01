@@ -10,7 +10,7 @@ BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __account_id = find_account_id( _observer, True );
   RETURN QUERY
-  WITH post_ids AS
+  WITH post_ids AS MATERIALIZED -- bridge_get_ranked_post_by_created_for_observer_communities
   (
     SELECT posts.id
     FROM 
@@ -97,7 +97,7 @@ BEGIN
   END IF;
   __account_id = find_account_id( _observer, True );
   RETURN QUERY 
-  WITH hot AS
+  WITH hot AS MATERIALIZED -- bridge_get_ranked_post_by_hot_for_observer_communities
   (
     SELECT 
       hp.id,
@@ -175,7 +175,7 @@ BEGIN
   END IF;
   __account_id = find_account_id( _observer, True );
   RETURN QUERY
-  WITH payout AS
+  WITH payout AS MATERIALIZED -- bridge_get_ranked_post_by_payout_comments_for_observer_communities
   (
     SELECT
       hp1.id,
@@ -257,7 +257,7 @@ BEGIN
   __account_id = find_account_id( _observer, True );
   __head_block_time = head_block_time();
   RETURN QUERY 
-  WITH payout as
+  WITH payout as MATERIALIZED -- bridge_get_ranked_post_by_payout_for_observer_communities
   (
     SELECT
       hp.id,
@@ -338,7 +338,7 @@ BEGIN
   END IF;
   __account_id = find_account_id( _observer, True );
   RETURN QUERY
-  WITH promoted AS
+  WITH promoted AS MATERIALIZED -- bridge_get_ranked_post_by_promoted_for_observer_communities
   (
     SELECT
       hp.id,
@@ -418,7 +418,7 @@ BEGIN
   END IF;
   __account_id = find_account_id( _observer, True );
   RETURN QUERY
-  WITH trending AS
+  WITH trending AS MATERIALIZED -- bridge_get_ranked_post_by_trends_for_observer_communities
   (
     SELECT
       hp1.id,
@@ -497,7 +497,7 @@ BEGIN
   END IF;
   __account_id = find_account_id( _observer, True );
   RETURN QUERY 
-  WITH muted AS
+  WITH muted AS MATERIALIZED -- bridge_get_ranked_post_by_muted_for_observer_communities
   (
     SELECT
       hp.id,

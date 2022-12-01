@@ -24,6 +24,7 @@ BEGIN
   END IF;
 
   RETURN QUERY 
+  --- Very tightly coupled to hive_feed_cache_account_id_created_at_post_id_idx
   WITH blog AS MATERIALIZED -- bridge_get_account_posts_by_blog
   (
     SELECT 

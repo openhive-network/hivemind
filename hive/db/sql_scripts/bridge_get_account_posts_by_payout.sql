@@ -15,7 +15,7 @@ BEGIN
       SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY
-  WITH payouts AS
+  WITH payouts AS MATERIALIZED -- bridge_get_account_posts_by_payout
   (  
     SELECT 
       id,

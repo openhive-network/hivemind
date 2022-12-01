@@ -10,7 +10,7 @@ BEGIN
   __post_id = find_comment_id( _author, _permlink, True );
   __observer_id = find_account_id( _observer, True );
   RETURN QUERY 
-  WITH created AS -- bridge_get_ranked_post_by_created
+  WITH created AS MATERIALIZED -- bridge_get_ranked_post_by_created
   (
     SELECT
       hp1.id,
@@ -87,7 +87,7 @@ BEGIN
       SELECT hp.sc_hot INTO __hot_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY
-  WITH hot AS -- bridge_get_ranked_post_by_hot
+  WITH hot AS MATERIALIZED -- bridge_get_ranked_post_by_hot
   (
     SELECT
       hp1.id,
@@ -164,7 +164,7 @@ BEGIN
       SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY
-  WITH payout AS
+  WITH payout AS MATERIALIZED -- bridge_get_ranked_post_by_muted
   (
     SELECT
       hp1.id,
@@ -243,7 +243,7 @@ BEGIN
       SELECT (hp.payout + hp.pending_payout) INTO __payout_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY
-  WITH payout AS -- bridge_get_ranked_post_by_payout_comments
+  WITH payout AS MATERIALIZED -- bridge_get_ranked_post_by_payout_comments
   (
     SELECT
       hp1.id,
@@ -323,7 +323,7 @@ BEGIN
   END IF;
   __head_block_time = head_block_time();
   RETURN QUERY
-  WITH payout AS -- bridge_get_ranked_post_by_payout
+  WITH payout AS MATERIALIZED -- bridge_get_ranked_post_by_payout
   (
     SELECT
       hp1.id,
@@ -401,7 +401,7 @@ BEGIN
       SELECT hp.promoted INTO __promoted_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY
-  WITH promoted AS -- bridge_get_ranked_post_by_promoted
+  WITH promoted AS MATERIALIZED -- bridge_get_ranked_post_by_promoted
   (
     SELECT
       hp1.id,
@@ -479,7 +479,7 @@ BEGIN
       SELECT hp.sc_trend INTO __trending_limit FROM hive_posts hp WHERE hp.id = __post_id;
   END IF;
   RETURN QUERY 
-  WITH trends AS -- bridge_get_ranked_post_by_trends
+  WITH trends AS MATERIALIZED -- bridge_get_ranked_post_by_trends
   (
     SELECT
       hp1.id,

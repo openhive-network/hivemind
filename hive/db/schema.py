@@ -133,7 +133,24 @@ def build_metadata():
             sa.text('parent_id, id DESC'),
             postgresql_where=sql_text("counter_deleted = 0"),
         ),
-        sa.Index('hive_posts_community_id_id_idx', 'community_id', sa.text('id DESC')),
+
+        # used by i.e. bridge_get_ranked_post_by_created_for_observer_communities
+        sa.Index('hive_posts_community_id_id_idx', sa.text('community_id, id DESC'),
+            postgresql_where=sql_text("counter_deleted = 0")),
+
+        sa.Index('hive_posts_community_id_is_pinned_idx', 'community_id',
+            postgresql_include=['id'],
+            postgresql_where=sql_text("is_pinned AND counter_deleted = 0")),
+
+        # dedicated to bridge_get_ranked_post_by_created_for_community
+        sa.Index('hive_posts_community_id_not_is_pinned_idx', sa.text('community_id, id DESC'),
+            postgresql_where=sql_text("NOT is_pinned and depth = 0 and counter_deleted = 0")),
+
+        # Specific to bridge_get_ranked_post_by_trends_for_community
+        sa.Index('hive_posts_community_id_not_is_paidout_idx', 'community_id',
+            postgresql_include=['id'],
+            postgresql_where=sql_text("NOT is_paidout AND depth = 0 AND counter_deleted = 0")),
+
         sa.Index('hive_posts_payout_at_idx', 'payout_at'),
         sa.Index('hive_posts_payout_idx', 'payout'),
         sa.Index(
@@ -155,7 +172,10 @@ def build_metadata():
             postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0 AND depth = 0"),
         ),
         sa.Index('hive_posts_author_id_created_at_id_idx', sa.text('author_id DESC, created_at DESC, id')),
-        sa.Index('hive_posts_author_id_id_idx', 'author_id', 'id', postgresql_where=sql_text('depth = 0')),
+        # bridge_get_account_posts_by_comments, bridge_get_account_posts_by_posts
+
+        sa.Index('hive_posts_author_id_id_idx', sa.text('author_id, id DESC'), postgresql_where=sql_text('counter_deleted = 0')),
+
         sa.Index('hive_posts_block_num_idx', 'block_num'),
         sa.Index('hive_posts_block_num_created_idx', 'block_num_created'),
         sa.Index('hive_posts_cashout_time_id_idx', 'cashout_time', 'id'),
@@ -264,8 +284,9 @@ def build_metadata():
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.UniqueConstraint('following', 'follower', name='hive_follows_ux1'),  # core
         sa.ForeignKeyConstraint(['block_num'], ['hive_blocks.num'], name='hive_follows_fk1'),
-        sa.Index('hive_follows_ix5a', 'following', 'state', 'created_at', 'follower'),
-        sa.Index('hive_follows_ix5b', 'follower', 'state', 'created_at', 'following'),
+        sa.Index('hive_follows_following_state_idx', 'following', 'state'),
+        sa.Index('hive_follows_follower_state_idx', 'follower', 'state'),
+        sa.Index('hive_follows_follower_following_state_idx', 'follower', 'following', 'state'),
         sa.Index('hive_follows_block_num_idx', 'block_num'),
         sa.Index('hive_follows_created_at_idx', 'created_at'),
     )
@@ -318,6 +339,9 @@ def build_metadata():
         sa.Index('hive_feed_cache_block_num_idx', 'block_num'),
         sa.Index('hive_feed_cache_created_at_idx', 'created_at'),
         sa.Index('hive_feed_cache_post_id_idx', 'post_id'),
+        # Dedicated index to bridge_get_account_posts_by_blog
+        sa.Index('hive_feed_cache_account_id_created_at_post_id_idx',
+          sa.text('account_id, created_at DESC, post_id DESC')),
     )
 
     sa.Table(

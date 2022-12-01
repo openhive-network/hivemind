@@ -89,14 +89,19 @@ class DbState:
             'hive_feed_cache_block_num_idx',
             'hive_feed_cache_created_at_idx',
             'hive_feed_cache_post_id_idx',
-            'hive_follows_ix5a',  # (following, state, created_at, follower)
-            'hive_follows_ix5b',  # (follower, state, created_at, following)
+            'hive_feed_cache_account_id_created_at_post_id_idx',
+            'hive_follows_following_state_idx',  # (following, state, created_at, follower)
+            'hive_follows_follower_state_idx',  # (follower, state, created_at, following)
+            'hive_follows_follower_following_state_idx',
             'hive_follows_block_num_idx',
             'hive_follows_created_at_idx',
             'hive_posts_parent_id_id_idx',
             'hive_posts_depth_idx',
             'hive_posts_root_id_id_idx',
             'hive_posts_community_id_id_idx',
+            'hive_posts_community_id_is_pinned_idx',
+            'hive_posts_community_id_not_is_pinned_idx',
+            'hive_posts_community_id_not_is_paidout_idx',
             'hive_posts_payout_at_idx',
             'hive_posts_payout_idx',
             'hive_posts_promoted_id_idx',
