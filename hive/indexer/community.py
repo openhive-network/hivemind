@@ -8,6 +8,7 @@ import re
 
 import ujson as json
 
+from hive.conf import SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.indexer.accounts import Accounts
 from hive.indexer.notify import Notify
@@ -129,12 +130,12 @@ class Community:
         _id = Accounts.get_id(name)
 
         # insert community
-        sql = """INSERT INTO hive_communities (id, name, type_id, created_at, block_num)
+        sql = f"""INSERT INTO {SCHEMA_NAME}.hive_communities (id, name, type_id, created_at, block_num)
                         VALUES (:id, :name, :type_id, :date, :block_num)"""
         DB.query(sql, id=_id, name=name, type_id=type_id, date=block_date, block_num=block_num)
 
         # insert owner
-        sql = """INSERT INTO hive_roles (community_id, account_id, role_id, created_at)
+        sql = f"""INSERT INTO {SCHEMA_NAME}.hive_roles (community_id, account_id, role_id, created_at)
                         VALUES (:community_id, :account_id, :role_id, :date)"""
         DB.query(sql, community_id=_id, account_id=_id, role_id=Role.owner.value, date=block_date)
 
@@ -161,7 +162,7 @@ class Community:
         assert name, 'name is empty'
         if name in cls._ids:
             return cls._ids[name]
-        sql = "SELECT id FROM hive_communities WHERE name = :name"
+        sql = f"SELECT id FROM {SCHEMA_NAME}.hive_communities WHERE name = :name"
         cid = DB.query_one(sql, name=name)
         if cid:
             cls._ids[name] = cid
@@ -172,7 +173,7 @@ class Community:
     def _get_name(cls, cid):
         if cid in cls._names:
             return cls._names[cid]
-        sql = "SELECT name FROM hive_communities WHERE id = :id"
+        sql = f"SELECT name FROM {SCHEMA_NAME}.hive_communities WHERE id = :id"
         name = DB.query_one(sql, id=cid)
         if cid:
             cls._ids[name] = cid
@@ -183,8 +184,8 @@ class Community:
     def get_all_muted(cls, community_id):
         """Return a list of all muted accounts."""
         return DB.query_col(
-            """SELECT name FROM hive_accounts
-                                WHERE id IN (SELECT account_id FROM hive_roles
+            f"""SELECT name FROM {SCHEMA_NAME}.hive_accounts
+                                WHERE id IN (SELECT account_id FROM {SCHEMA_NAME}.hive_roles
                                               WHERE community_id = :community_id
                                                 AND role_id < 0)""",
             community_id=community_id,
@@ -196,7 +197,7 @@ class Community:
 
         return (
             DB.query_one(
-                """SELECT role_id FROM hive_roles
+                f"""SELECT role_id FROM {SCHEMA_NAME}.hive_roles
                                     WHERE community_id = :community_id
                                       AND account_id = :account_id
                                     LIMIT 1""",
@@ -337,31 +338,33 @@ class CommunityOp:
         # Community-level commands
         if action == 'updateProps':
             bind = ', '.join([k + " = :" + k for k in list(self.props.keys())])
-            DB.query(f"UPDATE hive_communities SET {bind} WHERE id = :id", id=self.community_id, **self.props)
+            DB.query(
+                f"UPDATE {SCHEMA_NAME}.hive_communities SET {bind} WHERE id = :id", id=self.community_id, **self.props
+            )
             self._notify('set_props', payload=json.dumps(read_key_dict(self.op, 'props')))
 
         elif action == 'subscribe':
             DB.query(
-                """INSERT INTO hive_subscriptions
+                f"""INSERT INTO {SCHEMA_NAME}.hive_subscriptions
                                (account_id, community_id, created_at, block_num)
                         VALUES (:actor_id, :community_id, :date, :block_num)""",
                 **params,
             )
             DB.query(
-                """UPDATE hive_communities
+                f"""UPDATE {SCHEMA_NAME}.hive_communities
                            SET subscribers = subscribers + 1
                          WHERE id = :community_id""",
                 **params,
             )
         elif action == 'unsubscribe':
             DB.query(
-                """DELETE FROM hive_subscriptions
+                f"""DELETE FROM {SCHEMA_NAME}.hive_subscriptions
                          WHERE account_id = :actor_id
                            AND community_id = :community_id""",
                 **params,
             )
             DB.query(
-                """UPDATE hive_communities
+                f"""UPDATE {SCHEMA_NAME}.hive_communities
                            SET subscribers = subscribers - 1
                          WHERE id = :community_id""",
                 **params,
@@ -370,7 +373,7 @@ class CommunityOp:
         # Account-level actions
         elif action == 'setRole':
             DB.query(
-                """INSERT INTO hive_roles
+                f"""INSERT INTO {SCHEMA_NAME}.hive_roles
                                (account_id, community_id, role_id, created_at)
                         VALUES (:account_id, :community_id, :role_id, :date)
                             ON CONFLICT (account_id, community_id)
@@ -380,7 +383,7 @@ class CommunityOp:
             self._notify('set_role', payload=Role(self.role_id).name)
         elif action == 'setUserTitle':
             DB.query(
-                """INSERT INTO hive_roles
+                f"""INSERT INTO {SCHEMA_NAME}.hive_roles
                                (account_id, community_id, title, created_at)
                         VALUES (:account_id, :community_id, :title, :date)
                             ON CONFLICT (account_id, community_id)
@@ -392,7 +395,7 @@ class CommunityOp:
         # Post-level actions
         elif action == 'mutePost':
             DB.query(
-                """UPDATE hive_posts SET is_muted = '1'
+                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '1'
                          WHERE id = :post_id""",
                 **params,
             )
@@ -400,7 +403,7 @@ class CommunityOp:
 
         elif action == 'unmutePost':
             DB.query(
-                """UPDATE hive_posts SET is_muted = '0'
+                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '0'
                          WHERE id = :post_id""",
                 **params,
             )
@@ -408,14 +411,14 @@ class CommunityOp:
 
         elif action == 'pinPost':
             DB.query(
-                """UPDATE hive_posts SET is_pinned = '1'
+                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_pinned = '1'
                          WHERE id = :post_id""",
                 **params,
             )
             self._notify('pin_post', payload=self.notes)
         elif action == 'unpinPost':
             DB.query(
-                """UPDATE hive_posts SET is_pinned = '0'
+                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_pinned = '0'
                          WHERE id = :post_id""",
                 **params,
             )
@@ -493,10 +496,10 @@ class CommunityOp:
         _permlink = read_key_str(self.op, 'permlink', 256)
         assert _permlink, 'must name a permlink'
 
-        sql = """
+        sql = f"""
           SELECT hp.id, community_id
-          FROM live_posts_comments_view hp
-          JOIN hive_permlink_data hpd ON hp.permlink_id=hpd.id
+          FROM {SCHEMA_NAME}.live_posts_comments_view hp
+          JOIN {SCHEMA_NAME}.hive_permlink_data hpd ON hp.permlink_id=hpd.id
           WHERE author_id=:_author AND hpd.permlink=:_permlink
         """
         result = DB.query_row(sql, _author=self.account_id, _permlink=_permlink)
@@ -601,32 +604,32 @@ class CommunityOp:
 
     def _subscribed(self, account_id):
         """Check an account's subscription status."""
-        sql = """SELECT 1 FROM hive_subscriptions
+        sql = f"""SELECT 1 FROM {SCHEMA_NAME}.hive_subscriptions
                   WHERE community_id = :community_id
                     AND account_id = :account_id"""
         return bool(DB.query_one(sql, community_id=self.community_id, account_id=account_id))
 
     def _muted(self):
         """Check post's muted status."""
-        sql = "SELECT is_muted FROM hive_posts WHERE id = :id"
+        sql = f"SELECT is_muted FROM {SCHEMA_NAME}.hive_posts WHERE id = :id"
         return bool(DB.query_one(sql, id=self.post_id))
 
     def _parent_muted(self):
         """Check parent post's muted status."""
-        parent_id = "SELECT parent_id FROM hive_posts WHERE id = :id"
-        sql = f"SELECT is_muted FROM hive_posts WHERE id = ({parent_id})"
+        parent_id = f"SELECT parent_id FROM {SCHEMA_NAME}.hive_posts WHERE id = :id"
+        sql = f"SELECT is_muted FROM {SCHEMA_NAME}.hive_posts WHERE id = ({parent_id})"
         return bool(DB.query_one(sql, id=self.post_id))
 
     def _pinned(self):
         """Check post's pinned status."""
-        sql = "SELECT is_pinned FROM hive_posts WHERE id = :id"
+        sql = f"SELECT is_pinned FROM {SCHEMA_NAME}.hive_posts WHERE id = :id"
         return bool(DB.query_one(sql, id=self.post_id))
 
     def _flagged(self):
         """Check user's flag status."""
         from hive.indexer.notify import NotifyType
 
-        sql = """SELECT 1 FROM hive_notifs
+        sql = f"""SELECT 1 FROM {SCHEMA_NAME}.hive_notifs
                   WHERE community_id = :community_id
                     AND post_id = :post_id
                     AND type_id = :type_id

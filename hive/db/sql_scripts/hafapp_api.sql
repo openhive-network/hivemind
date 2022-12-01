@@ -53,7 +53,7 @@ AS
 $function$
 BEGIN
 RETURN QUERY
-SELECT -- hive_api_hivemind_blocks
+SELECT -- hivemind_app.hive_api_hivemind_blocks
     hb.num
      , hb.hash
      , hb.prev as prev

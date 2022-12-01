@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS public.max_time_stamp() CASCADE;
-CREATE OR REPLACE FUNCTION public.max_time_stamp( _first TIMESTAMP, _second TIMESTAMP )
+DROP FUNCTION IF EXISTS hivemind_app.max_time_stamp() CASCADE;
+CREATE OR REPLACE FUNCTION hivemind_app.max_time_stamp( _first TIMESTAMP, _second TIMESTAMP )
 RETURNS TIMESTAMP
 LANGUAGE 'plpgsql'
 IMMUTABLE
@@ -13,11 +13,11 @@ BEGIN
 END
 $BODY$;
 
-DROP FUNCTION IF EXISTS find_comment_id(character varying, character varying, boolean)
+DROP FUNCTION IF EXISTS hivemind_app.find_comment_id(character varying, character varying, boolean)
 ;
-CREATE OR REPLACE FUNCTION find_comment_id(
-  in _author hive_accounts.name%TYPE,
-  in _permlink hive_permlink_data.permlink%TYPE,
+CREATE OR REPLACE FUNCTION hivemind_app.find_comment_id(
+  in _author hivemind_app.hive_accounts.name%TYPE,
+  in _permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _check boolean)
 RETURNS INT
 LANGUAGE 'plpgsql'
@@ -29,17 +29,17 @@ BEGIN
   IF (_author <> '' OR _permlink <> '') THEN
     SELECT INTO __post_id COALESCE( (
       SELECT hp.id
-      FROM hive_posts hp
-      JOIN hive_accounts ha ON ha.id = hp.author_id
-      JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
+      FROM hivemind_app.hive_posts hp
+      JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
+      JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id
       WHERE ha.name = _author AND hpd.permlink = _permlink AND hp.counter_deleted = 0
     ), 0 );
     IF _check AND __post_id = 0 THEN
       SELECT INTO __post_id (
         SELECT COUNT(hp.id)
-        FROM hive_posts hp
-        JOIN hive_accounts ha ON ha.id = hp.author_id
-        JOIN hive_permlink_data hpd ON hpd.id = hp.permlink_id
+        FROM hivemind_app.hive_posts hp
+        JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
+        JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id
         WHERE ha.name = _author AND hpd.permlink = _permlink
       );
       IF __post_id = 0 THEN
@@ -54,10 +54,10 @@ END
 $function$
 ;
 
-DROP FUNCTION IF EXISTS find_account_id(character varying, boolean)
+DROP FUNCTION IF EXISTS hivemind_app.find_account_id(character varying, boolean)
 ;
-CREATE OR REPLACE FUNCTION find_account_id(
-  in _account hive_accounts.name%TYPE,
+CREATE OR REPLACE FUNCTION hivemind_app.find_account_id(
+  in _account hivemind_app.hive_accounts.name%TYPE,
   in _check boolean)
 RETURNS INT
 LANGUAGE 'plpgsql'
@@ -67,7 +67,7 @@ DECLARE
   __account_id INT = 0;
 BEGIN
   IF (_account <> '') THEN
-    SELECT INTO __account_id COALESCE( ( SELECT id FROM hive_accounts WHERE name=_account ), 0 );
+    SELECT INTO __account_id COALESCE( ( SELECT id FROM hivemind_app.hive_accounts WHERE name=_account ), 0 );
     IF _check AND __account_id = 0 THEN
       RAISE EXCEPTION 'Account % does not exist', _account USING ERRCODE = 'CEHM4';
     END IF;
@@ -77,10 +77,10 @@ END
 $function$
 ;
 
-DROP FUNCTION IF EXISTS public.find_tag_id CASCADE
+DROP FUNCTION IF EXISTS hivemind_app.find_tag_id CASCADE
 ;
-CREATE OR REPLACE FUNCTION public.find_tag_id(
-    in _tag_name hive_tag_data.tag%TYPE,
+CREATE OR REPLACE FUNCTION hivemind_app.find_tag_id(
+    in _tag_name hivemind_app.hive_tag_data.tag%TYPE,
     in _check BOOLEAN
 )
 RETURNS INTEGER
@@ -91,7 +91,7 @@ DECLARE
   __tag_id INT = 0;
 BEGIN
   IF (_tag_name <> '') THEN
-    SELECT INTO __tag_id COALESCE( ( SELECT id FROM hive_tag_data WHERE tag=_tag_name ), 0 );
+    SELECT INTO __tag_id COALESCE( ( SELECT id FROM hivemind_app.hive_tag_data WHERE tag=_tag_name ), 0 );
     IF _check AND __tag_id = 0 THEN
       RAISE EXCEPTION 'Tag % does not exist', _tag_name USING ERRCODE = 'CEHM5';
     END IF;
@@ -101,10 +101,10 @@ END
 $function$
 ;
 
-DROP FUNCTION IF EXISTS public.find_category_id CASCADE
+DROP FUNCTION IF EXISTS hivemind_app.find_category_id CASCADE
 ;
-CREATE OR REPLACE FUNCTION public.find_category_id(
-    in _category_name hive_category_data.category%TYPE,
+CREATE OR REPLACE FUNCTION hivemind_app.find_category_id(
+    in _category_name hivemind_app.hive_category_data.category%TYPE,
     in _check BOOLEAN
 )
 RETURNS INTEGER
@@ -115,7 +115,7 @@ DECLARE
   __category_id INT = 0;
 BEGIN
   IF (_category_name <> '') THEN
-    SELECT INTO __category_id COALESCE( ( SELECT id FROM hive_category_data WHERE category=_category_name ), 0 );
+    SELECT INTO __category_id COALESCE( ( SELECT id FROM hivemind_app.hive_category_data WHERE category=_category_name ), 0 );
     IF _check AND __category_id = 0 THEN
       RAISE EXCEPTION 'Category % does not exist', _category_name USING ERRCODE = 'CEHM6';
     END IF;
@@ -125,10 +125,10 @@ END
 $function$
 ;
 
-DROP FUNCTION IF EXISTS public.find_community_id CASCADE
+DROP FUNCTION IF EXISTS hivemind_app.find_community_id CASCADE
 ;
-CREATE OR REPLACE FUNCTION public.find_community_id(
-    in _community_name hive_communities.name%TYPE,
+CREATE OR REPLACE FUNCTION hivemind_app.find_community_id(
+    in _community_name hivemind_app.hive_communities.name%TYPE,
     in _check BOOLEAN
 )
 RETURNS INTEGER
@@ -139,7 +139,7 @@ DECLARE
   __community_id INT = 0;
 BEGIN
   IF (_community_name <> '') THEN
-    SELECT INTO __community_id COALESCE( ( SELECT id FROM hive_communities WHERE name=_community_name ), 0 );
+    SELECT INTO __community_id COALESCE( ( SELECT id FROM hivemind_app.hive_communities WHERE name=_community_name ), 0 );
     IF _check AND __community_id = 0 THEN
       RAISE EXCEPTION 'Community % does not exist', _community_name USING ERRCODE = 'CEHM7';
     END IF;
@@ -150,9 +150,9 @@ $function$
 ;
 
 --Maybe better to convert roles to ENUM
-DROP FUNCTION IF EXISTS get_role_name
+DROP FUNCTION IF EXISTS hivemind_app.get_role_name
 ;
-CREATE OR REPLACE FUNCTION get_role_name(in _role_id INT)
+CREATE OR REPLACE FUNCTION hivemind_app.get_role_name(in _role_id INT)
 RETURNS VARCHAR
 LANGUAGE 'plpgsql'
 AS
@@ -171,25 +171,25 @@ END
 $function$
 ;
 
-DROP FUNCTION IF EXISTS is_pinned
+DROP FUNCTION IF EXISTS hivemind_app.is_pinned
 ;
-CREATE OR REPLACE FUNCTION is_pinned(in _post_id INT)
+CREATE OR REPLACE FUNCTION hivemind_app.is_pinned(in _post_id INT)
 RETURNS boolean
 LANGUAGE 'plpgsql'
 AS
 $function$
 BEGIN
-    RETURN is_pinned FROM hive_posts WHERE id = _post_id LIMIT 1
+    RETURN is_pinned FROM hivemind_app.hive_posts WHERE id = _post_id LIMIT 1
     ;
 END
 $function$
 ;
 
-DROP FUNCTION IF EXISTS public.find_subscription_id CASCADE
+DROP FUNCTION IF EXISTS hivemind_app.find_subscription_id CASCADE
 ;
-CREATE OR REPLACE FUNCTION public.find_subscription_id(
-    in _account hive_accounts.name%TYPE,
-    in _community_name hive_communities.name%TYPE,
+CREATE OR REPLACE FUNCTION hivemind_app.find_subscription_id(
+    in _account hivemind_app.hive_accounts.name%TYPE,
+    in _community_name hivemind_app.hive_communities.name%TYPE,
     in _check BOOLEAN
 )
 RETURNS INTEGER
@@ -201,9 +201,9 @@ DECLARE
 BEGIN
   IF (_account <> '') THEN
     SELECT INTO __subscription_id COALESCE( (
-    SELECT hs.id FROM hive_subscriptions hs 
-    JOIN hive_accounts ha ON ha.id = hs.account_id
-    JOIN hive_communities hc ON hc.id = hs.community_id
+    SELECT hs.id FROM hivemind_app.hive_subscriptions hs
+    JOIN hivemind_app.hive_accounts ha ON ha.id = hs.account_id
+    JOIN hivemind_app.hive_communities hc ON hc.id = hs.community_id
     WHERE ha.name = _account AND hc.name = _community_name
     ), 0 );
     IF _check AND __subscription_id = 0 THEN

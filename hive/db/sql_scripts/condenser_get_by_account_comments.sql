@@ -1,23 +1,23 @@
-DROP FUNCTION IF EXISTS condenser_get_by_account_comments;
+DROP FUNCTION IF EXISTS hivemind_app.condenser_get_by_account_comments;
 
-CREATE OR REPLACE FUNCTION condenser_get_by_account_comments( in _author VARCHAR, in _permlink VARCHAR, in _limit INTEGER)
-RETURNS SETOF bridge_api_post
+CREATE OR REPLACE FUNCTION hivemind_app.condenser_get_by_account_comments( in _author VARCHAR, in _permlink VARCHAR, in _limit INTEGER)
+RETURNS SETOF hivemind_app.bridge_api_post
 AS
 $function$
 DECLARE
   __post_id INTEGER := 0;
   __author_id INTEGER := 0;
 BEGIN
-  __author_id = find_account_id(_author, True);
+  __author_id = hivemind_app.find_account_id(_author, True);
   IF _permlink <> '' THEN
-    __post_id = find_comment_id( _author, _permlink, True );
+    __post_id = hivemind_app.find_comment_id( _author, _permlink, True );
   END IF;
 
   RETURN QUERY 
   WITH comments AS MATERIALIZED -- condenser_get_by_account_comments
   (
     SELECT id
-    FROM live_comments_view hp
+    FROM hivemind_app.live_comments_view hp
     WHERE hp.author_id = __author_id
       AND ( ( __post_id = 0 ) OR ( hp.id <= __post_id ) ) 
     ORDER BY hp.id DESC
@@ -63,7 +63,7 @@ BEGIN
       hp.is_muted,
       NULL
     FROM comments,
-    LATERAL get_post_view_by_id(comments.id) hp
+    LATERAL hivemind_app.get_post_view_by_id(comments.id) hp
     ORDER BY hp.id DESC
     LIMIT _limit;
 END

@@ -37,7 +37,7 @@ $$ LANGUAGE sql VOLATILE SECURITY DEFINER;
 -- query stats
 CREATE OR REPLACE FUNCTION pghero.pg_stat_statements() RETURNS SETOF pg_stat_statements AS
 $$
-  SELECT * FROM public.pg_stat_statements;
+  SELECT * FROM pg_stat_statements;
 $$ LANGUAGE sql VOLATILE SECURITY DEFINER;
 
 CREATE OR REPLACE VIEW pghero.pg_stat_statements AS SELECT * FROM pghero.pg_stat_statements();
