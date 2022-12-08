@@ -120,3 +120,8 @@ CREATE INDEX IF NOT EXISTS hive_feed_cache_account_id_created_at_post_id_idx
   ;
 
 --- End of MR https://gitlab.syncad.com/hive/hivemind/-/merge_requests/575 --- 
+
+--- Supplement for https://gitlab.syncad.com/hive/hivemind/-/merge_requests/575 --- 
+DROP INDEX IF EXISTS hive_follows_ix5a;
+DROP INDEX IF EXISTS hive_follows_ix5b;
+--- End of supplement for https://gitlab.syncad.com/hive/hivemind/-/merge_requests/575 --- 
