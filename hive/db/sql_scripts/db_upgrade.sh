@@ -75,6 +75,7 @@ for sql in upgrade/assert_public_schema.sql \
           follows.sql \
           is_superuser.sql \
           update_hive_blocks_consistency_flag.sql \
+          community_helpers.sql \
           update_table_statistics.sql # Must be last
 
 do

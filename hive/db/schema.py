@@ -671,6 +671,7 @@ def setup(db):
         "is_superuser.sql",
         "update_hive_blocks_consistency_flag.sql",
         "update_table_statistics.sql",
+        "community_helpers.sql",
         "upgrade/update_db_patchlevel.sql",
         # Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
     ]

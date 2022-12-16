@@ -652,6 +652,17 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-135485\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
                 "hive-135485"
               ],
               "id": "community",
@@ -713,10 +724,32 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
+                "blocktrades"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-135485\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
                 "test-safari"
               ],
               "id": "community",
               "json": "[\"setRole\",{\"community\":\"hive-135485\",\"account\":\"blocktrades\",\"role\":\"mod\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-171487\"}]"
             }
           },
           {
@@ -735,10 +768,32 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-157439\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
                 "hive-157439"
               ],
               "id": "community",
               "json": "[\"setRole\",{\"community\":\"hive-157439\",\"account\":\"test-safari\",\"role\":\"mod\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-198723\"}]"
             }
           },
           {
@@ -760,7 +815,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"setUserTitle\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"title\":\"Bill Gates\"}]"
+              "json": "[\"subscribe\",{\"community\":\"hive-135485\"}]"
             }
           },
           {
@@ -771,7 +826,7 @@
                 "test-safari"
               ],
               "id": "community",
-              "json": "[\"subscribe\",{\"community\":\"hive-135485\"}]"
+              "json": "[\"setUserTitle\",{\"community\":\"hive-135485\",\"account\":\"test-safari\",\"title\":\"Bill Gates\"}]"
             }
           },
           {
@@ -901,7 +956,29 @@
                 "test-safari"
               ],
               "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-167892\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
               "json": "[\"setRole\",{\"community\":\"hive-167892\",\"account\":\"test-safari\",\"role\":\"admin\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "alice"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-198723\"}]"
             }
           },
           {
@@ -946,17 +1023,6 @@
               ],
               "id": "community",
               "json": "[\"subscribe\",{\"community\":\"hive-157439\"}]"
-            }
-          },     
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "alice"
-              ],
-              "id": "community",
-              "json": "[\"subscribe\",{\"community\":\"hive-198723\"}]"
             }
           },
           {
@@ -1154,6 +1220,17 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-171488\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
                 "hive-171488"
               ],
               "id": "community",
@@ -1198,6 +1275,17 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
+                "test-safari"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-117600\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
                 "hive-117600"
               ],
               "id": "community",
@@ -1209,10 +1297,32 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
+                "roadscape"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-117600\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
                 "test-safari"
               ],
               "id": "community",
               "json": "[\"setRole\",{\"community\":\"hive-117600\",\"account\":\"roadscape\",\"role\":\"mod\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "gtg"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-117600\"}]"
             }
           },
           {
@@ -1465,6 +1575,7 @@
               "json_metadata": "{}"
             }
           },
+
           {
             "type": "custom_json_operation",
             "value": {
@@ -3122,10 +3233,32 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
+                "good-karma"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-117600\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
                 "hive-117600"
               ],
               "id": "community",
               "json": "[\"setRole\",{\"community\":\"hive-117600\",\"account\":\"good-karma\",\"role\":\"admin\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "abit"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-117600\"}]"
             }
           },
           {
@@ -3196,6 +3329,17 @@
         "ref_block_prefix": 1,
         "expiration": "2020-03-23T12:17:00",
         "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "alice"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-188204\"}]"
+            }
+          },
           {
             "type": "custom_json_operation",
             "value": {
@@ -3379,6 +3523,17 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
+                "agartha"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-188204\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
                 "hive-188204"
               ],
               "id": "community",
@@ -3423,10 +3578,32 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
+                "alice"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-171487\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
                 "hive-171487"
               ],
               "id": "community",
               "json": "[\"setRole\",{\"community\":\"hive-171487\",\"account\":\"alice\",\"role\":\"member\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "alice"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-157439\"}]"
             }
           },
           {
@@ -3445,10 +3622,32 @@
             "value": {
               "required_auths": [],
               "required_posting_auths": [
+                "alice"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-198723\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
                 "hive-198723"
               ],
               "id": "community",
               "json": "[\"setRole\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"role\":\"member\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "blocktrades"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-157439\"}]"
             }
           },
           {
@@ -3617,6 +3816,17 @@
         "ref_block_prefix": 1,
         "expiration": "2020-03-23T12:17:00",
         "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "camilla"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-188204\"}]"
+            }
+          },
           {
             "type": "custom_json_operation",
             "value": {
@@ -4116,6 +4326,246 @@
               "author": "blocktrades",
               "permlink": "elephant01"
             }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "root",
+              "new_account_name": "howo",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "howo",
+              "new_account_name": "notmember",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "howo",
+              "new_account_name": "ismember",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "howo",
+              "new_account_name": "notmembermuted",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "howo",
+              "new_account_name": "isoldmember",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "howo",
+              "new_account_name": "hive-199999",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "",
+              "json_metadata": "",
+              "extensions": []
+            }
           }
         ]
       }
@@ -4229,6 +4679,28 @@
               "id": "community",
               "json": "[\"unmutePost\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"permlink\":\"First-after-member-post-hive3\",\"notes\":\"hive3 Unmute first post\"}]"
             }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ismember"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-199999\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "isoldmember"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-199999\"}]"
+            }
           }
         ]
       }
@@ -4261,6 +4733,105 @@
               ],
               "id": "community",
               "json": "[\"mutePost\",{\"community\":\"hive-198723\",\"account\":\"agartha\",\"permlink\":\"regular-post\",\"notes\":\"Muting community post of different community\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-198723"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"role\":\"member\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-199999"
+              ],
+              "id": "community",
+              "json": "[\"setUserTitle\",{\"community\":\"hive-199999\",\"account\":\"notmember\",\"title\":\"Not set\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-199999"
+              ],
+              "id": "community",
+              "json": "[\"setUserTitle\",{\"community\":\"hive-199999\",\"account\":\"ismember\",\"title\":\"Is set\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-199999"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-199999\",\"account\":\"ismember\",\"role\":\"mod\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-199999"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-199999\",\"account\":\"notmember\",\"role\":\"mod\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-199999"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-199999\",\"account\":\"notmembermuted\",\"role\":\"muted\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-199999"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-199999\",\"account\":\"isoldmember\",\"role\":\"mod\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "isoldmember"
+              ],
+              "id": "community",
+              "json": "[\"unsubscribe\",{\"community\":\"hive-199999\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-199999"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-199999\",\"account\":\"isoldmember\",\"role\":\"member\"}]"
             }
           }
         ]
