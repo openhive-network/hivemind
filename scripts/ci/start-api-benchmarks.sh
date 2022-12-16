@@ -15,7 +15,7 @@ echo "HIVEMIND_PORT: ${HIVEMIND_PORT}"
 echo "ITERATIONS: ${ITERATIONS}"
 echo "JOBS: ${JOBS}"
 
-# since it working inside docker it shoud be fine to hardcode it to tmp
+# since it working inside docker it should be fine to hardcode it to tmp
 export HIVEMIND_BENCHMARKS_IDS_FILE=/tmp/test_ids.csv
 export TAVERN_DISABLE_COMPARATOR=true
 
