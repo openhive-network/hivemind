@@ -201,10 +201,10 @@ class Community:
                                     WHERE community_id = :community_id
                                       AND account_id = :account_id
                                     LIMIT 1""",
-                community_id=community_id,
-                account_id=account_id,
-            )
-            or Role.guest.value
+                    community_id=community_id,
+                    account_id=account_id,
+                )
+                or Role.guest.value
         )
 
     @classmethod
@@ -372,24 +372,22 @@ class CommunityOp:
 
         # Account-level actions
         elif action == 'setRole':
-            DB.query(
-                f"""INSERT INTO {SCHEMA_NAME}.hive_roles
-                               (account_id, community_id, role_id, created_at)
-                        VALUES (:account_id, :community_id, :role_id, :date)
-                            ON CONFLICT (account_id, community_id)
-                            DO UPDATE SET role_id = :role_id """,
+            subscribed = DB.query_one(
+                f"""SELECT * FROM {SCHEMA_NAME}.set_community_role_or_title(:community_id, :account_id, :role_id, NULL::varchar, CAST(:date AS timestamp ))""",
                 **params,
             )
+            if not subscribed:
+                log.info("set role failed account '%s' must be subscribed to the community", params['account'])
+                return
             self._notify('set_role', payload=Role(self.role_id).name)
         elif action == 'setUserTitle':
-            DB.query(
-                f"""INSERT INTO {SCHEMA_NAME}.hive_roles
-                               (account_id, community_id, title, created_at)
-                        VALUES (:account_id, :community_id, :title, :date)
-                            ON CONFLICT (account_id, community_id)
-                            DO UPDATE SET title = :title""",
+            subscribed = DB.query_one(
+                f"""SELECT * FROM {SCHEMA_NAME}.set_community_role_or_title(:community_id, :account_id, NULL::integer , :title, CAST(:date AS timestamp ))""",
                 **params,
             )
+            if not subscribed:
+                log.info("set role failed account '%s' must be subscribed to the community", params['account'])
+                return
             self._notify('set_label', payload=self.title)
 
         # Post-level actions
