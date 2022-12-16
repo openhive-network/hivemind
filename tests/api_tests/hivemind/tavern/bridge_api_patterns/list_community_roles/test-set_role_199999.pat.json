@@ -1,0 +1,22 @@
+[
+  [
+    "hive-199999",
+    "owner",
+    ""
+  ],
+  [
+    "ismember",
+    "mod",
+    "Is set"
+  ],
+  [
+    "isoldmember",
+    "member",
+    ""
+  ],
+  [
+    "notmembermuted",
+    "muted",
+    ""
+  ]
+]
