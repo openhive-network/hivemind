@@ -9,6 +9,7 @@ BEGIN
 
   EXECUTE 'ALTER DATABASE '||current_database()||' SET join_collapse_limit TO 16';
   EXECUTE 'ALTER DATABASE '||current_database()||' SET from_collapse_limit TO 16';
+  EXECUTE 'GRANT CREATE ON DATABASE '||current_database()||' TO hivemind';
 
   IF __version >= 120000 THEN
     RAISE NOTICE 'Disabling a JIT optimization on the current database level...';
@@ -16,4 +17,3 @@ BEGIN
   END IF;
 END
 $$;
-
