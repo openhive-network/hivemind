@@ -12,6 +12,7 @@ developers with a more flexible/extensible alternative to the raw hived API.
 
 1. [Environment](#environment)
 2. [Installation](#installation)
+2a [Installation of dockerized version](#dockerized-setup)
 3. [Updating from an existing hivemind database](#updating-from-an-existing-hivemind-database)
 4. [Running](#running)
 5. [Tests](#tests)
@@ -106,6 +107,80 @@ $ pip install --no-cache-dir --verbose --user . 2>&1 | tee pip_install.log
 
 </details>
 
+## Dockerized setup
+
+### Building
+To build image holding Hivemind instance, please use [build_instance.sh](scripts/ci/build_instance.sh). This script requires several parameters:
+- tag identifier to be set on built image
+- directory where Hivemind source code is located
+- docker registry url to produce fully qualified image name and allow to correctly resolve its dependencies
+
+```bash
+$ # Assuming you are in workdir directory, to perform out of source build
+$ ../hivemind/scripts/ci/build_instance.sh local ../hivemind registry.gitlab.syncad.com/hive/hivemind/
+```
+
+### Running HAF instance container
+Hivemind instance requires a HAF instance to process data collected by it like also to share its database for storing own data.
+Easiest way to setup HAF instance is also used dockerized setup. 
+
+To start HAF instance we need to prepare a data directory containing:
+- blockchain subdirectory (where can be put block_log file)
+- optional, but very useful, copy of haf/doc/haf_postgresql_conf.d directory, what allows to simple customization of Postgres setup by modification of `custom_postgres.conf` and `custom_pg_hba.conf` stored inside
+
+Please take care for correct permissions, to provide write access to the data directory for processes running inside started container.
+
+```bash
+$ cd /storage1/haf-data-dir/
+$ ../hivemind/haf/scripts/run_hived_img.sh registry.gitlab.syncad.com/hive/haf/instance:instance-<tag> --name=haf-mainnet-instance  --data-dir="$(pwd)" <hived-options>
+```
+
+For example, for testing purposes (assuming block_log file has been put into data-dir), you can spawn 5M replay to prepare HAF database for further quick testing:
+```
+../hivemind/haf/scripts/run_hived_img.sh registry.gitlab.syncad.com/hive/haf/instance:instance-v1.27.3.0 --name=haf-mainnet-instance  --data-dir="$(pwd)" --replay --stop-replay-at-block=5000000
+```
+
+By examining hived.log file or using docker logs haf-mainnet-instance you can examine state of started instance, once replay will be finished you can continue and start Hivemind sync process.
+
+Example output of hived process stopped on 5000000 block:
+```
+2022-12-19T18:28:05.574637 chain_plugin.cpp:701          replay_blockchain    ] Stopped blockchain replaying on user request. Last applied block numbe
+r: 5000000.
+2022-12-19T18:28:05.574658 chain_plugin.cpp:966          plugin_startup       ] P2P enabling after replaying...
+2022-12-19T18:28:05.574670 chain_plugin.cpp:721          work                 ] Started on blockchain with 5000000 blocks, LIB: 4999980
+2022-12-19T18:28:05.574687 chain_plugin.cpp:727          work                 ] Started on blockchain with 5000000 blocks
+2022-12-19T18:28:05.574736 chain_plugin.cpp:993          plugin_startup       ] Chain plugin initialization finished...
+2022-12-19T18:28:05.574753 sql_serializer.cpp:712        plugin_startup       ] sql::plugin_startup()
+2022-12-19T18:28:05.574772 p2p_plugin.cpp:466            plugin_startup       ] P2P plugin startup...
+2022-12-19T18:28:05.574764 chain_plugin.cpp:339          operator()           ] Write processing thread started.
+2022-12-19T18:28:05.574782 p2p_plugin.cpp:470            plugin_startup       ] P2P plugin is not enabled...
+2022-12-19T18:28:05.574840 witness_plugin.cpp:648        plugin_startup       ] witness plugin:  plugin_startup() begin
+2022-12-19T18:28:05.574866 witness_plugin.cpp:655        plugin_startup       ] Witness plugin is not enabled, beause P2P plugin is disabled...
+2022-12-19T18:28:05.574885 wallet_bridge_api_plugin.cpp:20 plugin_startup       ] Wallet bridge api plugin initialization...
+2022-12-19T18:28:05.574905 wallet_bridge_api.cpp:169     api_startup          ] Wallet bridge api initialized. Missing plugins: database_api block_api
+ account_history_api market_history_api network_broadcast_api rc_api_plugin
+2022-12-19T18:28:05.575624 webserver_plugin.cpp:240      operator()           ] start processing ws thread
+Entering application main loop...
+2022-12-19T18:28:05.575687 webserver_plugin.cpp:261      operator()           ] start listening for http requests on 0.0.0.0:8090
+2022-12-19T18:28:05.575716 webserver_plugin.cpp:263      operator()           ] start listening for ws requests on 0.0.0.0:8090
+2022-12-19T18:28:35.575535 chain_plugin.cpp:380          operator()           ] No P2P data (block/transaction) received in last 30 seconds... peer_count=0
+```
+
+
+### Running Hivemind instance container
+Built Hivemind instance requires preconfigured HAF database to store its data. To perform required database configuration, you should start:
+
+```bash
+$ ../hivemind/scripts/setup_postgres.sh --postgres-url=postgresql://haf_app_admin@172.17.0.2/haf_block_log
+$ ../hivemind/scripts/setup_db.sh --postgres-url=postgresql://haf_admin@172.17.0.2/haf_block_log # warning this command requires haf_admin access since super user permissions are required to install intarray extension
+```
+
+Above commands assume that running HAF container has IP: 172.17.0.2
+
+```bash
+$ ../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local sync --database-url="postgresql://haf_app_admin@172.17.0.2:5432/haf_block_log"
+```
+
 ## Updating from an existing hivemind database
 
 ```bash
@@ -120,7 +195,7 @@ $ ./db_upgrade.sh <user-name> hive
 Indicate access to your HAF database:
 
 ```bash
-$ export DATABASE_URL=postgresql://hivemind_app:pass@localhost:5432/hive
+$ export DATABASE_URL=postgresql://hivemind_app:pass@localhost:5432/haf_block_log
 ```
 
 #### Start the indexer (aka synchronization process):
