@@ -56,9 +56,11 @@ pwd
 
 "$SRCROOTDIR/scripts/ci/fix_ci_tag.sh"
 
-docker build --target=instance \
+export DOCKER_BUILDKIT=1
+
+docker build --platform=amd64 --target=instance \
   --build-arg CI_REGISTRY_IMAGE=$REGISTRY \
-  --build-arg BUILD_IMAGE_TAG=$BUILD_IMAGE_TAG -t ${REGISTRY}${IMAGE_TAG_PREFIX}instance${BUILD_IMAGE_TAG} -f Dockerfile .
+  -t ${REGISTRY}${IMAGE_TAG_PREFIX}instance${BUILD_IMAGE_TAG} -f Dockerfile .
 
 popd
 
