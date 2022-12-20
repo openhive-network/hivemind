@@ -111,7 +111,7 @@ $ pip install --no-cache-dir --verbose --user . 2>&1 | tee pip_install.log
 
 ### Building
 To build image holding Hivemind instance, please use [build_instance.sh](scripts/ci/build_instance.sh). This script requires several parameters:
-- tag identifier to be set on built image
+- a tag identifier to be set on the built image
 - directory where Hivemind source code is located
 - docker registry url to produce fully qualified image name and allow to correctly resolve its dependencies
 
@@ -121,28 +121,28 @@ $ ../hivemind/scripts/ci/build_instance.sh local ../hivemind registry.gitlab.syn
 ```
 
 ### Running HAF instance container
-Hivemind instance requires a HAF instance to process data collected by it like also to share its database for storing own data.
-Easiest way to setup HAF instance is also used dockerized setup. 
+A Hivemind instance requires a HAF instance to process incoming blockchain data collected and to store its own data in fork-resistant manner (allows hivemind data to be reverted in case of a fork).
+The easiest way to setup a HAF instance is to use a dockerized instance.
 
-To start HAF instance we need to prepare a data directory containing:
-- blockchain subdirectory (where can be put block_log file)
-- optional, but very useful, copy of haf/doc/haf_postgresql_conf.d directory, what allows to simple customization of Postgres setup by modification of `custom_postgres.conf` and `custom_pg_hba.conf` stored inside
+To start a HAF instance, we need to prepare a data directory containing:
+- a blockchain subdirectory (where can be put the block_log file used by hived)
+- optionally, but very useful, a copy of haf/doc/haf_postgresql_conf.d directory, which allows simple customization of Postgres database setup by modification of `custom_postgres.conf` and `custom_pg_hba.conf` files stored inside.
 
-Please take care for correct permissions, to provide write access to the data directory for processes running inside started container.
+Please take care to set correct file permissions in order to provide write access to the data directory for processes running inside the HAF container.
 
 ```bash
 $ cd /storage1/haf-data-dir/
 $ ../hivemind/haf/scripts/run_hived_img.sh registry.gitlab.syncad.com/hive/haf/instance:instance-<tag> --name=haf-mainnet-instance  --data-dir="$(pwd)" <hived-options>
 ```
 
-For example, for testing purposes (assuming block_log file has been put into data-dir), you can spawn 5M replay to prepare HAF database for further quick testing:
+For example, for testing purposes (assuming block_log file has been put into data-dir), you can spawn a 5M block replay to prepare a HAF database for further quick testing:
 ```
 ../hivemind/haf/scripts/run_hived_img.sh registry.gitlab.syncad.com/hive/haf/instance:instance-v1.27.3.0 --name=haf-mainnet-instance  --data-dir="$(pwd)" --replay --stop-replay-at-block=5000000
 ```
 
-By examining hived.log file or using docker logs haf-mainnet-instance you can examine state of started instance, once replay will be finished you can continue and start Hivemind sync process.
+By examining hived.log file or using docker logs haf-mainnet-instance, you can examine state of the started instance. Once replay will be finished, you can continue and start the Hivemind sync process.
 
-Example output of hived process stopped on 5000000 block:
+Example output of hived process stopped on 5,000,000th block:
 ```
 2022-12-19T18:28:05.574637 chain_plugin.cpp:701          replay_blockchain    ] Stopped blockchain replaying on user request. Last applied block numbe
 r: 5000000.
@@ -168,14 +168,14 @@ Entering application main loop...
 
 
 ### Running Hivemind instance container
-Built Hivemind instance requires preconfigured HAF database to store its data. To perform required database configuration, you should start:
+The built Hivemind instance requires a preconfigured HAF database to store its data. To perform required database configuration, you should start:
 
 ```bash
 $ ../hivemind/scripts/setup_postgres.sh --postgres-url=postgresql://haf_app_admin@172.17.0.2/haf_block_log
 $ ../hivemind/scripts/setup_db.sh --postgres-url=postgresql://haf_admin@172.17.0.2/haf_block_log # warning this command requires haf_admin access since super user permissions are required to install intarray extension
 ```
 
-Above commands assume that running HAF container has IP: 172.17.0.2
+Above commands assume that the running HAF container has IP: 172.17.0.2
 
 ```bash
 $ ../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local sync --database-url="postgresql://haf_app_admin@172.17.0.2:5432/haf_block_log"
@@ -192,13 +192,13 @@ $ ./db_upgrade.sh <user-name> hive
 
 ## Running
 
-Indicate access to your HAF database:
+Export the URL to your HAF database:
 
 ```bash
 $ export DATABASE_URL=postgresql://hivemind_app:pass@localhost:5432/haf_block_log
 ```
 
-#### Start the indexer (aka synchronization process):
+#### Start the hivemind indexer (aka synchronization process):
 
 ```bash
 $ hive sync
@@ -209,7 +209,7 @@ $ hive status
 {'db_head_block': 19930833, 'db_head_time': '2018-02-16 21:37:36', 'db_head_age': 10}
 ```
 
-#### Start the API server:
+#### Start the hivemind API server:
 
 ```bash
 $ hive server
@@ -224,9 +224,9 @@ $ curl --data '{"jsonrpc":"2.0","id":0,"method":"hive.db_head_state","params":{}
 
 To run api tests:
 
-1. Make sure that current version of `hivemind` is installed,
+1. Make sure that the current version of `hivemind` is installed,
 2. Api tests require that `hivemind` is synced to a node replayed up to `5_000_024` blocks (including mocks).\
-   This means, you should have HAF database replayed up to `5_000_000` mainnet blocks and run the mocking script with:
+   This means, you should have your HAF database replayed up to `5_000_000` mainnet blocks and run the mocking script with:
 
     ```bash
     $ cd hivemind/scripts/ci/
@@ -247,10 +247,6 @@ To run api tests:
     $ tox -e tavern -- -n auto --durations=0
     ```
 
-## Production Environment
-
-Deploying Hivemind as a Docker container will be available when Hivemind HAf version will be released.
-
 ## Configuration
 
 | Environment        | CLI argument         | Default                                    |
@@ -270,13 +266,13 @@ Precedence: CLI over ENV over hive.conf. Check `hive --help` for details.
 
 - Focus on Postgres performance
 - 9GB of memory for `hive sync` process
-- 750GB storage for database
+- 750GB storage for hivemind's use of the database
 
-#### Hive config
+#### Hived config
 
 Plugins
 
-- Required: `database_api`,`condenser_api`,`block_api`,`account_history_api`
+- Required: `sql_serializer`
 
 #### Postgres Performance
 
