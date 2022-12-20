@@ -5,8 +5,8 @@ See http://pretius.com/postgresql-stop-worrying-about-table-and-view-dependencie
 Enhanced by Wojciech Barcik wbarcik@syncad.com (handling of rules).
 */
 
-DROP TABLE IF EXISTS deps_saved_ddl;
-DROP SEQUENCE IF EXISTS deps_saved_ddl_deps_id_seq;
+DROP TABLE IF EXISTS hivemind_app.deps_saved_ddl;
+DROP SEQUENCE IF EXISTS hivemind_app.deps_saved_ddl_deps_id_seq;
 
 -- SEQUENCE: deps_saved_ddl_deps_id_seq
 
@@ -38,7 +38,7 @@ CREATE TABLE if not exists deps_saved_ddl
 
 -- DROP FUNCTION deps_save_and_drop_dependencies(character varying, character varying, boolean);
 
-CREATE OR REPLACE FUNCTION deps_save_and_drop_dependencies(
+CREATE OR REPLACE FUNCTION hivemind_app.deps_save_and_drop_dependencies(
     p_view_schema character varying,
     p_view_name character varying,
     drop_relation boolean DEFAULT true
@@ -165,7 +165,7 @@ $BODY$;
 
 -- DROP FUNCTION deps_restore_dependencies(character varying, character varying);
 
-CREATE OR REPLACE FUNCTION deps_restore_dependencies(
+CREATE OR REPLACE FUNCTION hivemind_app.deps_restore_dependencies(
     p_view_schema character varying,
     p_view_name character varying
   )

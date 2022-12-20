@@ -3,13 +3,17 @@
 import concurrent
 from concurrent.futures import ThreadPoolExecutor
 import logging
+from pathlib import Path
 from time import perf_counter
+from typing import Tuple
 
+from hive.conf import Conf, SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.indexer.accounts import Accounts
 from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
 from hive.indexer.custom_op import CustomOp
 from hive.indexer.follow import Follow
+from hive.indexer.hive_db.block import BlockHiveDb
 from hive.indexer.notify import Notify
 from hive.indexer.payments import Payments
 from hive.indexer.post_data_cache import PostDataCache
@@ -19,6 +23,7 @@ from hive.indexer.reputations import Reputations
 from hive.indexer.votes import Votes
 from hive.server.common.mentions import Mentions
 from hive.server.common.payout_stats import PayoutStats
+from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.timer import time_it
@@ -29,17 +34,16 @@ DB = Db.instance()
 
 
 def time_collector(f):
-    startTime = FSM.start()
+    start_time = FSM.start()
     result = f()
-    elapsedTime = FSM.stop(startTime)
-
-    return (result, elapsedTime)
+    elapsed_time = FSM.stop(start_time)
+    return result, elapsed_time
 
 
 class Blocks:
-    """Processes blocks, dispatches work, manages `hive_blocks` table."""
+    """Processes blocks, dispatches work, manages the state of the database (blocks consistency, and numbers)."""
 
-    blocks_to_flush = []
+    _conf = None
     _head_block_date = None
     _current_block_date = None
     _last_safe_cashout_block = 0
@@ -56,30 +60,34 @@ class Blocks:
         ('Accounts', Accounts.flush, Accounts),
     ]
 
-    def __init__(cls):
-        head_date = cls.head_date()
+    def __init__(self):
+        head_date = self.head_date()
         if head_date == '':
-            cls._head_block_date = None
-            cls._current_block_date = None
+            self.__class__._head_block_date = None
+            self.__class__._current_block_date = None
         else:
-            cls._head_block_date = head_date
-            cls._current_block_date = head_date
+            self.__class__._head_block_date = head_date
+            self.__class__._current_block_date = head_date
 
     @classmethod
-    def setup_own_db_access(cls, sharedDbAdapter):
-        PostDataCache.setup_own_db_access(sharedDbAdapter, "PostDataCache")
-        Reputations.setup_own_db_access(sharedDbAdapter, "Reputations")
-        Votes.setup_own_db_access(sharedDbAdapter, "Votes")
-        Follow.setup_own_db_access(sharedDbAdapter, "Follow")
-        Posts.setup_own_db_access(sharedDbAdapter, "Posts")
-        Reblog.setup_own_db_access(sharedDbAdapter, "Reblog")
-        Notify.setup_own_db_access(sharedDbAdapter, "Notify")
-        Accounts.setup_own_db_access(sharedDbAdapter, "Accounts")
-        PayoutStats.setup_own_db_access(sharedDbAdapter, "PayoutStats")
-        Mentions.setup_own_db_access(sharedDbAdapter, "Mentions")
+    def setup(cls, conf: Conf):
+        cls._conf = conf
 
-    @classmethod
-    def close_own_db_access(cls):
+    @staticmethod
+    def setup_own_db_access(shared_db_adapter: Db) -> None:
+        PostDataCache.setup_own_db_access(shared_db_adapter, "PostDataCache")
+        Reputations.setup_own_db_access(shared_db_adapter, "Reputations")
+        Votes.setup_own_db_access(shared_db_adapter, "Votes")
+        Follow.setup_own_db_access(shared_db_adapter, "Follow")
+        Posts.setup_own_db_access(shared_db_adapter, "Posts")
+        Reblog.setup_own_db_access(shared_db_adapter, "Reblog")
+        Notify.setup_own_db_access(shared_db_adapter, "Notify")
+        Accounts.setup_own_db_access(shared_db_adapter, "Accounts")
+        PayoutStats.setup_own_db_access(shared_db_adapter, "PayoutStats")
+        Mentions.setup_own_db_access(shared_db_adapter, "Mentions")
+
+    @staticmethod
+    def close_own_db_access() -> None:
         PostDataCache.close_own_db_access()
         Reputations.close_own_db_access()
         Votes.close_own_db_access()
@@ -91,20 +99,38 @@ class Blocks:
         PayoutStats.close_own_db_access()
         Mentions.close_own_db_access()
 
-    @classmethod
-    def head_num(cls):
-        """Get hive's head block number."""
-        sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
+    @staticmethod
+    def head_num() -> int:
+        """Get head block number from the application view (hive.hivemind_app_blocks_view)."""
+        sql = f"SELECT num FROM {SCHEMA_NAME}.get_head_state();"
         return DB.query_one(sql) or 0
 
-    @classmethod
-    def head_date(cls):
+    @staticmethod
+    def last_imported() -> int:
+        """
+        Get hivemind_app last block that was imported.
+        (could not be completed yet! which means there were no update queries run with this block number)
+        """
+        sql = f"SELECT last_imported_block_num FROM {SCHEMA_NAME}.hive_state;"
+        return DB.query_one(sql) or 0
+
+    @staticmethod
+    def last_completed() -> int:
+        """
+        Get hivemind_app last block that was completed.
+        (block is considered as completed when all update queries were run with this block number)
+        """
+        sql = f"SELECT last_completed_block_num FROM {SCHEMA_NAME}.hive_state;"
+        return DB.query_one(sql) or 0
+
+    @staticmethod
+    def head_date() -> str:
         """Get hive's head block date."""
         sql = "SELECT head_block_time()"
         return str(DB.query_one(sql) or '')
 
     @classmethod
-    def set_end_of_sync_lib(cls, lib):
+    def set_end_of_sync_lib(cls, lib: int) -> None:
         """Set last block that guarantees cashout before end of sync based on LIB"""
         if lib < 10629455:
             # posts created before HF17 could stay unpaid forever
@@ -120,8 +146,8 @@ class Blocks:
         )
 
     @classmethod
-    def flush_data_in_n_threads(cls):
-        completedThreads = 0
+    def flush_data_in_n_threads(cls) -> None:
+        completed_threads = 0
 
         pool = ThreadPoolExecutor(max_workers=len(cls._concurrent_flush))
         flush_futures = {
@@ -129,7 +155,7 @@ class Blocks:
         }
         for future in concurrent.futures.as_completed(flush_futures):
             (description, c) = flush_futures[future]
-            completedThreads = completedThreads + 1
+            completed_threads = completed_threads + 1
             try:
                 (n, elapsedTime) = future.result()
                 assert n is not None
@@ -144,10 +170,10 @@ class Blocks:
                 raise exc
         pool.shutdown()
 
-        assert completedThreads == len(cls._concurrent_flush)
+        assert completed_threads == len(cls._concurrent_flush)
 
     @classmethod
-    def flush_data_in_1_thread(cls):
+    def flush_data_in_1_thread(cls) -> None:
         for description, f, c in cls._concurrent_flush:
             try:
                 f()
@@ -156,14 +182,16 @@ class Blocks:
                 raise exc
 
     @classmethod
-    def process_blocks(cls, blocks):
+    def process_blocks(cls, blocks) -> Tuple[int, int]:
         last_num = 0
+        last_date = None
         first_block = -1
         try:
             for block in blocks:
                 if first_block == -1:
                     first_block = block.get_num()
                 last_num = cls._process(block)
+                last_date = block.get_date()
         except Exception as e:
             log.error("exception encountered block %d", last_num + 1)
             raise e
@@ -172,44 +200,56 @@ class Blocks:
         # expensive. So is tracking follows at all; hence we track
         # deltas in memory and update follow/er counts in bulk.
 
-        flush_time = FSM.start()
-
-        def register_time(f_time, name, pushed):
-            assert pushed is not None
-            FSM.flush_stat(name, FSM.stop(f_time), pushed)
-            return FSM.start()
-
         log.info("#############################################################################")
-        flush_time = register_time(flush_time, "Blocks", cls._flush_blocks())
+        sql = f'SELECT {SCHEMA_NAME}.update_last_imported_block(:last_num, :last_date);'
+        DB.query_no_return(sql, last_num=last_num, last_date=last_date)
         return first_block, last_num
 
     @classmethod
-    def process_multi(cls, blocks, is_initial_sync):
+    def process_multi(cls, blocks, is_massive_sync: bool) -> None:
         """Batch-process blocks; wrapped in a transaction."""
 
         time_start = OPSM.start()
 
-        DB.query("START TRANSACTION")
+        if is_massive_sync:
+            DB.query("START TRANSACTION")
 
         first_block, last_num = cls.process_blocks(blocks)
 
-        if not is_initial_sync:
+        if not is_massive_sync:
             log.info("[PROCESS MULTI] Flushing data in 1 thread")
             cls.flush_data_in_1_thread()
             if first_block > -1:
                 log.info("[PROCESS MULTI] Tables updating in live synchronization")
-                cls.on_live_blocks_processed(first_block, last_num)
+                cls.on_live_blocks_processed(first_block)
+                cls._periodic_actions(blocks[0])
 
         DB.query("COMMIT")
 
-        if is_initial_sync:
+        if is_massive_sync:
             log.info("[PROCESS MULTI] Flushing data in N threads")
             cls.flush_data_in_n_threads()
 
         log.info(f"[PROCESS MULTI] {len(blocks)} blocks in {OPSM.stop(time_start) :.4f}s")
 
-    @staticmethod
-    def prepare_vops(comment_payout_ops, block, date, block_num, is_safe_cashout):
+    @classmethod
+    def _periodic_actions(cls, block: BlockHiveDb) -> None:
+        """Actions performed at a given time, calculated on the basis of the current block number"""
+
+        if (block_num := block.get_num()) % 1200 == 0:  # 1hour
+            log.info(f"head block {block_num} @ {block.get_date()}")
+            log.info("[SINGLE] hourly stats")
+            log.info("[SINGLE] filling payout_stats_view executed")
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                executor.submit(PayoutStats.generate)
+                executor.submit(Mentions.refresh)
+        elif block_num % 200 == 0:  # 10min
+            log.info("[SINGLE] 10min")
+            log.info("[SINGLE] updating communities posts and rank")
+            update_communities_posts_and_rank(db=DB)
+
+    @classmethod
+    def prepare_vops(cls, comment_payout_ops: dict, block: Block, date, block_num: int, is_safe_cashout: bool) -> dict:
         def get_empty_ops():
             return {
                 VirtualOperationType.AUTHOR_REWARD: None,
@@ -221,8 +261,12 @@ class Blocks:
         ineffective_deleted_ops = {}
 
         for vop in block.get_next_vop():
+            if cls._conf.get('log_virtual_op_calls'):
+                with open(Path(__file__).parent.parent / 'virtual_operations.log', 'a', encoding='utf-8') as file:
+                    file.write(f'{block.get_num()}: {vop.get_type()}')
+                    file.write(str(vop.get_body()))
+
             start = OPSM.start()
-            key = None
 
             op_type = vop.get_type()
             assert op_type
@@ -279,11 +323,11 @@ class Blocks:
         return ineffective_deleted_ops
 
     @classmethod
-    def _process(cls, block):
+    def _process(cls, block: Block) -> int:
         """Process a single block. Assumes a trx is open."""
         # pylint: disable=too-many-branches
         assert issubclass(type(block), Block)
-        num = cls._push(block)
+        num = block.get_num()
         cls._current_block_date = block.get_date()
 
         # head block date shall point to last imported block (not yet current one) to conform hived behavior.
@@ -303,6 +347,11 @@ class Blocks:
             assert issubclass(type(transaction), Transaction)
             for operation in transaction.get_next_operation():
                 assert issubclass(type(operation), Operation)
+
+                if cls._conf.get('log_op_calls'):
+                    with open(Path(__file__).parent.parent / 'operations.log', 'a', encoding='utf-8') as file:
+                        file.write(f'{block.get_num()}: {operation.get_type()}')
+                        file.write(str(operation.get_body()))
 
                 start = OPSM.start()
                 op_type = operation.get_type()
@@ -370,161 +419,25 @@ class Blocks:
 
         return num
 
-    @classmethod
-    def verify_head(cls, steem):
-        """Perform a fork recovery check on startup."""
-        hive_head = cls.head_num()
-        if not hive_head:
-            return
-
-        # move backwards from head until hive/steem agree
-        to_pop = []
-        cursor = hive_head
-        while True:
-            assert hive_head - cursor < 25, "fork too deep"
-            hive_block = cls._get(cursor)
-            steem_hash = steem.get_block(cursor)['block_id']
-            match = hive_block['hash'] == steem_hash
-            log.info(
-                "[INIT] fork check. block %d: %s vs %s --- %s",
-                hive_block['num'],
-                hive_block['hash'],
-                steem_hash,
-                'ok' if match else 'invalid',
-            )
-            if match:
-                break
-            to_pop.append(hive_block)
-            cursor -= 1
-
-        if hive_head == cursor:
-            return  # no fork!
-
-        log.error("[FORK] depth is %d; popping blocks %d - %d", hive_head - cursor, cursor + 1, hive_head)
-
-        # we should not attempt to recover from fork until it's safe
-        fork_limit = steem.last_irreversible()
-        assert cursor < fork_limit, "not proceeding until head is irreversible"
-
-        cls._pop(to_pop)
-
-    @classmethod
-    def _get(cls, num):
-        """Fetch a specific block."""
-        sql = """SELECT num, created_at date, hash
-                 FROM hive_blocks WHERE num = :num LIMIT 1"""
-        return dict(DB.query_row(sql, num=num))
-
-    @classmethod
-    def _push(cls, block):
-        """Insert a row in `hive_blocks`."""
-        cls.blocks_to_flush.append(
-            {
-                'num': block.get_num(),
-                'hash': block.get_hash(),
-                'prev': block.get_previous_block_hash(),
-                'txs': block.get_number_of_transactions(),
-                'ops': block.get_number_of_operations(),
-                'date': block.get_date(),
-            }
-        )
-        return block.get_num()
-
-    @classmethod
-    def _flush_blocks(cls):
-        query = """
-            INSERT INTO
-                hive_blocks (num, hash, prev, txs, ops, created_at, completed)
-            VALUES
-        """
-        values = []
-        for block in cls.blocks_to_flush:
-            values.append(
-                f"({block['num']}, '{block['hash']}', '{block['prev']}', {block['txs']}, {block['ops']}, '{block['date']}', {False})"
-            )
-        query = query + ",".join(values)
-        DB.query_prepared(query)
-        values.clear()
-        n = len(cls.blocks_to_flush)
-        cls.blocks_to_flush.clear()
-        return n
-
-    @classmethod
-    def _pop(cls, blocks):
-        """Pop head blocks to navigate head to a point prior to fork.
-
-        Without an undo database, there is a limit to how fully we can recover.
-
-        If consistency is critical, run hive with TRAIL_BLOCKS=-1 to only index
-        up to last irreversible. Otherwise use TRAIL_BLOCKS=2 to stay closer
-        while avoiding the vast majority of microforks.
-
-        As-is, there are a few caveats with the following strategy:
-
-         - follow counts can get out of sync (hive needs to force-recount)
-         - follow state could get out of sync (user-recoverable)
-
-        For 1.5, also need to handle:
-
-         - hive_communities
-         - hive_members
-         - hive_flags
-         - hive_modlog
-        """
-        DB.query("START TRANSACTION")
-
-        for block in blocks:
-            num = block['num']
-            date = block['date']
-            log.warning("[FORK] popping block %d @ %s", num, date)
-            assert num == cls.head_num(), "can only pop head block"
-
-            # get all affected post_ids in this block
-            sql = "SELECT id FROM hive_posts WHERE created_at >= :date"
-            post_ids = tuple(DB.query_col(sql, date=date))
-
-            # remove all recent records -- communities
-            DB.query("DELETE FROM hive_notifs        WHERE created_at >= :date", date=date)
-            DB.query("DELETE FROM hive_subscriptions WHERE created_at >= :date", date=date)
-            DB.query("DELETE FROM hive_roles         WHERE created_at >= :date", date=date)
-            DB.query("DELETE FROM hive_communities   WHERE created_at >= :date", date=date)
-
-            # remove all recent records -- core
-            DB.query("DELETE FROM hive_feed_cache  WHERE created_at >= :date", date=date)
-            DB.query("DELETE FROM hive_reblogs     WHERE created_at >= :date", date=date)
-            DB.query("DELETE FROM hive_follows     WHERE created_at >= :date", date=date)
-
-            # remove posts: core, tags, cache entries
-            if post_ids:
-                DB.query("DELETE FROM hive_posts       WHERE id      IN :ids", ids=post_ids)
-                DB.query("DELETE FROM hive_post_data   WHERE id      IN :ids", ids=post_ids)
-
-            DB.query("DELETE FROM hive_payments    WHERE block_num = :num", num=num)
-            DB.query("DELETE FROM hive_blocks      WHERE num = :num", num=num)
-
-        DB.query("COMMIT")
-        log.warning("[FORK] recovery complete")
-        # TODO: manually re-process here the blocks which were just popped.
-
-    @classmethod
+    @staticmethod
     @time_it
-    def on_live_blocks_processed(cls, first_block, last_block):
+    def on_live_blocks_processed(block_number: int) -> None:
         """Is invoked when processing of block range is done and received
         informations from hived are already stored in db
         """
-        is_hour_action = last_block % 1200 == 0
+        is_hour_action = block_number % 1200 == 0
 
         queries = [
-            f"SELECT update_posts_rshares({first_block}, {last_block})",
-            f"SELECT update_hive_posts_children_count({first_block}, {last_block})",
-            f"SELECT update_hive_posts_root_id({first_block},{last_block})",
-            f"SELECT update_hive_posts_api_helper({first_block},{last_block})",
-            f"SELECT update_feed_cache({first_block}, {last_block})",
-            f"SELECT update_hive_posts_mentions({first_block}, {last_block})",
-            f"SELECT update_notification_cache({first_block}, {last_block}, {is_hour_action})",
-            f"SELECT update_follow_count({first_block}, {last_block})",
-            f"SELECT update_account_reputations({first_block}, {last_block}, False)",
-            f"SELECT update_hive_blocks_consistency_flag({first_block}, {last_block})",
+            f"SELECT {SCHEMA_NAME}.update_posts_rshares({block_number}, {block_number})",
+            f"SELECT {SCHEMA_NAME}.update_hive_posts_children_count({block_number}, {block_number})",
+            f"SELECT {SCHEMA_NAME}.update_hive_posts_root_id({block_number},{block_number})",
+            f"SELECT {SCHEMA_NAME}.update_hive_posts_api_helper({block_number},{block_number})",
+            f"SELECT {SCHEMA_NAME}.update_feed_cache({block_number}, {block_number})",
+            f"SELECT {SCHEMA_NAME}.update_hive_posts_mentions({block_number}, {block_number})",
+            f"SELECT {SCHEMA_NAME}.update_notification_cache({block_number}, {block_number}, {is_hour_action})",
+            f"SELECT {SCHEMA_NAME}.update_follow_count({block_number}, {block_number})",
+            f"SELECT {SCHEMA_NAME}.update_account_reputations({block_number}, {block_number}, False)",
+            f"SELECT {SCHEMA_NAME}.update_last_completed_block({block_number})",
         ]
 
         for query in queries:
@@ -532,11 +445,15 @@ class Blocks:
             DB.query_no_return(query)
             log.info("%s executed in: %.4f s", query, perf_counter() - time_start)
 
-    @classmethod
-    def is_consistency(cls):
-        """Check if all tuples in `hive_blocks` are written correctly.
-        If any record has `completed` == false, it indicates that the database was closed incorrectly or a rollback failed.
+    @staticmethod
+    def is_consistency() -> bool:
         """
-        not_completed_blocks = DB.query_one("SELECT count(*) FROM hive_blocks WHERE completed = false LIMIT 1")
-        log.info("[INIT] Number of not completed blocks: %s.", not_completed_blocks)
-        return not_completed_blocks == 0
+        Check if all tuples in are written correctly.
+        If there are any not_completed_blocks, it means that there were no update queries ran on these blocks.
+        """
+        not_completed_blocks = Blocks.last_imported() - Blocks.last_completed()
+
+        if not_completed_blocks:
+            log.warning(f"Number of not completed blocks: {not_completed_blocks}")
+            return False
+        return True

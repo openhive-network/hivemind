@@ -1,7 +1,7 @@
-DROP FUNCTION IF EXISTS update_posts_rshares;
-CREATE OR REPLACE FUNCTION update_posts_rshares(
-    _first_block hive_blocks.num%TYPE
-  , _last_block hive_blocks.num%TYPE
+DROP FUNCTION IF EXISTS hivemind_app.update_posts_rshares;
+CREATE OR REPLACE FUNCTION hivemind_app.update_posts_rshares(
+    _first_block hive.hivemind_app_blocks_view.num%TYPE
+  , _last_block hive.hivemind_app_blocks_view.num%TYPE
 )
 RETURNS VOID
 LANGUAGE 'plpgsql'
@@ -12,12 +12,12 @@ BEGIN
 SET LOCAL work_mem='2GB';
 
 IF (_last_block - _first_block) > 10000 THEN
-  UPDATE hive_posts hp
+  UPDATE hivemind_app.hive_posts hp
   SET
        abs_rshares = votes_rshares.abs_rshares
       ,vote_rshares = votes_rshares.rshares
-      ,sc_hot = CASE hp.is_paidout WHEN True Then 0 ELSE calculate_hot( votes_rshares.rshares, hp.created_at) END
-      ,sc_trend = CASE hp.is_paidout WHEN True Then 0 ELSE calculate_trending( votes_rshares.rshares, hp.created_at) END
+      ,sc_hot = CASE hp.is_paidout WHEN True Then 0 ELSE hivemind_app.calculate_hot( votes_rshares.rshares, hp.created_at) END
+      ,sc_trend = CASE hp.is_paidout WHEN True Then 0 ELSE hivemind_app.calculate_trending( votes_rshares.rshares, hp.created_at) END
       ,total_votes = votes_rshares.total_votes
       ,net_votes = votes_rshares.net_votes
   FROM
@@ -32,7 +32,7 @@ IF (_last_block - _first_block) > 10000 THEN
                 WHEN hv.rshares = 0 THEN 0
                 ELSE -1
               END ) as net_votes
-      FROM hive_votes hv
+      FROM hivemind_app.hive_votes hv
       GROUP BY hv.post_id
     ) as votes_rshares
   WHERE hp.id = votes_rshares.post_id
@@ -44,12 +44,12 @@ IF (_last_block - _first_block) > 10000 THEN
     OR hp.net_votes != votes_rshares.net_votes
   );
 ELSE
-  UPDATE hive_posts hp
+  UPDATE hivemind_app.hive_posts hp
   SET
       abs_rshares = votes_rshares.abs_rshares
      ,vote_rshares = votes_rshares.rshares
-     ,sc_hot = CASE hp.is_paidout WHEN True Then 0 ELSE calculate_hot( votes_rshares.rshares, hp.created_at) END
-     ,sc_trend = CASE hp.is_paidout WHEN True Then 0 ELSE calculate_trending( votes_rshares.rshares, hp.created_at) END
+     ,sc_hot = CASE hp.is_paidout WHEN True Then 0 ELSE hivemind_app.calculate_hot( votes_rshares.rshares, hp.created_at) END
+     ,sc_trend = CASE hp.is_paidout WHEN True Then 0 ELSE hivemind_app.calculate_trending( votes_rshares.rshares, hp.created_at) END
      ,total_votes = votes_rshares.total_votes
      ,net_votes = votes_rshares.net_votes
   FROM
@@ -64,11 +64,11 @@ ELSE
                 WHEN hv.rshares = 0 THEN 0
                 ELSE -1
               END ) as net_votes
-      FROM hive_votes hv
+      FROM hivemind_app.hive_votes hv
       WHERE EXISTS
         (
           SELECT NULL
-          FROM hive_votes hv2
+          FROM hivemind_app.hive_votes hv2
           WHERE hv2.post_id = hv.post_id AND hv2.block_num BETWEEN _first_block AND _last_block
         )
       GROUP BY hv.post_id

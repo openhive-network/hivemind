@@ -1,5 +1,5 @@
-DROP TYPE IF EXISTS bridge_api_post CASCADE;
-CREATE TYPE bridge_api_post AS (
+DROP TYPE IF EXISTS hivemind_app.bridge_api_post CASCADE;
+CREATE TYPE hivemind_app.bridge_api_post AS (
     id INTEGER,
     author VARCHAR,
     parent_author VARCHAR,
@@ -40,9 +40,9 @@ CREATE TYPE bridge_api_post AS (
     blacklists TEXT
 );
 
-DROP TYPE IF EXISTS bridge_api_post_reblogs CASCADE;
+DROP TYPE IF EXISTS hivemind_app.bridge_api_post_reblogs CASCADE;
 -- extension of bridge_api_post (same fields/types/order plus extras at the end)
-CREATE TYPE bridge_api_post_reblogs AS (
+CREATE TYPE hivemind_app.bridge_api_post_reblogs AS (
     id INTEGER,
     author VARCHAR,
     parent_author VARCHAR,
@@ -83,9 +83,9 @@ CREATE TYPE bridge_api_post_reblogs AS (
     reblogged_by VARCHAR[]
 );
 
-DROP TYPE IF EXISTS bridge_api_post_discussion CASCADE;
+DROP TYPE IF EXISTS hivemind_app.bridge_api_post_discussion CASCADE;
 -- extension of bridge_api_post (same fields/types/order plus extras at the end)
-CREATE TYPE bridge_api_post_discussion AS (
+CREATE TYPE hivemind_app.bridge_api_post_discussion AS (
     id INTEGER,
     author VARCHAR,
     parent_author VARCHAR,

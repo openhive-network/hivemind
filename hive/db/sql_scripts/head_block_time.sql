@@ -1,19 +1,19 @@
-DROP FUNCTION IF EXISTS head_block_time CASCADE;
-CREATE OR REPLACE FUNCTION head_block_time()
+DROP FUNCTION IF EXISTS hivemind_app.head_block_time CASCADE;
+CREATE OR REPLACE FUNCTION hivemind_app.head_block_time()
 RETURNS TIMESTAMP
 LANGUAGE 'sql' STABLE
 AS
 $BODY$
-SELECT hb.created_at FROM hive_blocks hb ORDER BY hb.num DESC LIMIT 1
+SELECT last_imported_block_date FROM hivemind_app.hive_state LIMIT 1
 $BODY$
 ;
 
 
-DROP FUNCTION IF EXISTS block_before_head CASCADE;
-CREATE OR REPLACE FUNCTION block_before_head( in _time INTERVAL )
-RETURNS hive_blocks.num%TYPE
+DROP FUNCTION IF EXISTS hivemind_app.block_before_head CASCADE;
+CREATE OR REPLACE FUNCTION hivemind_app.block_before_head( in _time INTERVAL )
+RETURNS hive.hivemind_app_blocks_view.num%TYPE
 LANGUAGE 'sql' STABLE
 AS
 $BODY$
-SELECT MAX(hb1.num) - CAST( extract(epoch from _time)/3 as INTEGER ) FROM hive_blocks hb1
+SELECT last_imported_block_num - CAST( extract(epoch from _time)/3 as INTEGER ) FROM hivemind_app.hive_state LIMIT 1
 $BODY$

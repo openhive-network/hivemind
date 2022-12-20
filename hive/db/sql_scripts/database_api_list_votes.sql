@@ -1,6 +1,6 @@
-DROP TYPE IF EXISTS database_api_vote CASCADE;
+DROP TYPE IF EXISTS hivemind_app.database_api_vote CASCADE;
 
-CREATE TYPE database_api_vote AS (
+CREATE TYPE hivemind_app.database_api_vote AS (
   id BIGINT,
   voter VARCHAR(16),
   author VARCHAR(16),
@@ -13,21 +13,21 @@ CREATE TYPE database_api_vote AS (
   reputation BIGINT
 );
 
-DROP FUNCTION IF EXISTS find_votes( character varying, character varying, int )
+DROP FUNCTION IF EXISTS hivemind_app.find_votes( character varying, character varying, int )
 ;
-CREATE OR REPLACE FUNCTION public.find_votes
+CREATE OR REPLACE FUNCTION hivemind_app.find_votes
 (
-  in _AUTHOR hive_accounts.name%TYPE,
-  in _PERMLINK hive_permlink_data.permlink%TYPE,
+  in _AUTHOR hivemind_app.hive_accounts.name%TYPE,
+  in _PERMLINK hivemind_app.hive_permlink_data.permlink%TYPE,
   in _LIMIT INT
 )
-RETURNS SETOF database_api_vote
+RETURNS SETOF hivemind_app.database_api_vote
 LANGUAGE 'plpgsql'
 AS
 $function$
 DECLARE _POST_ID INT;
 BEGIN
-_POST_ID = find_comment_id( _AUTHOR, _PERMLINK, True);
+_POST_ID = hivemind_app.find_comment_id( _AUTHOR, _PERMLINK, True);
 
 RETURN QUERY
 (
@@ -43,7 +43,7 @@ RETURN QUERY
         v.num_changes,
         v.reputation
     FROM
-        hive_votes_view v
+        hivemind_app.hive_votes_view v
     WHERE
         v.post_id = _POST_ID
     ORDER BY
@@ -54,16 +54,16 @@ RETURN QUERY
 END
 $function$;
 
-DROP FUNCTION IF EXISTS list_votes_by_voter_comment( character varying, character varying, character varying, int )
+DROP FUNCTION IF EXISTS hivemind_app.list_votes_by_voter_comment( character varying, character varying, character varying, int )
 ;
-CREATE OR REPLACE FUNCTION public.list_votes_by_voter_comment
+CREATE OR REPLACE FUNCTION hivemind_app.list_votes_by_voter_comment
 (
-  in _VOTER hive_accounts.name%TYPE,
-  in _AUTHOR hive_accounts.name%TYPE,
-  in _PERMLINK hive_permlink_data.permlink%TYPE,
+  in _VOTER hivemind_app.hive_accounts.name%TYPE,
+  in _AUTHOR hivemind_app.hive_accounts.name%TYPE,
+  in _PERMLINK hivemind_app.hive_permlink_data.permlink%TYPE,
   in _LIMIT INT
 )
-RETURNS SETOF database_api_vote
+RETURNS SETOF hivemind_app.database_api_vote
 LANGUAGE 'plpgsql'
 AS
 $function$
@@ -71,8 +71,8 @@ DECLARE __voter_id INT;
 DECLARE __post_id INT;
 BEGIN
 
-__voter_id = find_account_id( _VOTER, True );
-__post_id = find_comment_id( _AUTHOR, _PERMLINK, True );
+__voter_id = hivemind_app.find_account_id( _VOTER, True );
+__post_id = hivemind_app.find_comment_id( _AUTHOR, _PERMLINK, True );
 
 RETURN QUERY
 (
@@ -88,7 +88,7 @@ RETURN QUERY
         v.num_changes,
         v.reputation
     FROM
-        hive_votes_view v
+        hivemind_app.hive_votes_view v
     WHERE
         v.voter_id = __voter_id
         AND v.post_id >= __post_id
@@ -100,16 +100,16 @@ RETURN QUERY
 END
 $function$;
 
-DROP FUNCTION IF EXISTS list_votes_by_comment_voter( character varying, character varying, character varying, int )
+DROP FUNCTION IF EXISTS hivemind_app.list_votes_by_comment_voter( character varying, character varying, character varying, int )
 ;
-CREATE OR REPLACE FUNCTION public.list_votes_by_comment_voter
+CREATE OR REPLACE FUNCTION hivemind_app.list_votes_by_comment_voter
 (
-  in _VOTER hive_accounts.name%TYPE,
-  in _AUTHOR hive_accounts.name%TYPE,
-  in _PERMLINK hive_permlink_data.permlink%TYPE,
+  in _VOTER hivemind_app.hive_accounts.name%TYPE,
+  in _AUTHOR hivemind_app.hive_accounts.name%TYPE,
+  in _PERMLINK hivemind_app.hive_permlink_data.permlink%TYPE,
   in _LIMIT INT
 )
-RETURNS SETOF database_api_vote
+RETURNS SETOF hivemind_app.database_api_vote
 LANGUAGE 'plpgsql'
 AS
 $function$
@@ -117,8 +117,8 @@ DECLARE __voter_id INT;
 DECLARE __post_id INT;
 BEGIN
 
-__voter_id = find_account_id( _VOTER, True );
-__post_id = find_comment_id( _AUTHOR, _PERMLINK, True );
+__voter_id = hivemind_app.find_account_id( _VOTER, True );
+__post_id = hivemind_app.find_comment_id( _AUTHOR, _PERMLINK, True );
 
 RETURN QUERY
 (
@@ -134,7 +134,7 @@ RETURN QUERY
         v.num_changes,
         v.reputation
     FROM
-        hive_votes_view v
+        hivemind_app.hive_votes_view v
     WHERE
         v.post_id = __post_id
         AND v.voter_id >= __voter_id

@@ -1,6 +1,7 @@
 """Hive API: Community methods"""
 import logging
 
+from hive.conf import SCHEMA_NAME
 from hive.server.common.helpers import json_date, return_error_info, valid_account, valid_community, valid_limit
 from hive.server.hive_api.common import get_community_id
 
@@ -19,7 +20,7 @@ async def get_community(context, name, observer=None):
     name = valid_community(name)
     observer = valid_account(observer, allow_empty=True)
 
-    sql = "SELECT * FROM bridge_get_community( (:name)::VARCHAR, (:observer)::VARCHAR )"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_community( (:name)::VARCHAR, (:observer)::VARCHAR )"
     sql_result = await db.query_row(sql, name=name, observer=observer)
     result = dict(sql_result)
 
@@ -33,7 +34,7 @@ async def get_community_context(context, name, account):
     name = valid_community(name)
     account = valid_account(account)
 
-    sql = "SELECT * FROM bridge_get_community_context( (:account)::VARCHAR, (:name)::VARCHAR )"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_community_context( (:account)::VARCHAR, (:name)::VARCHAR )"
     row = await db.query_row(sql, account=account, name=name)
 
     return dict(row['bridge_get_community_context'])
@@ -43,7 +44,7 @@ async def get_community_context(context, name, account):
 async def list_top_communities(context, limit=25):
     """List top communities. Returns lite community list."""
     limit = valid_limit(limit, 100, 25)
-    sql = """SELECT hc.name, hc.title FROM hive_communities hc
+    sql = f"""SELECT hc.name, hc.title FROM {SCHEMA_NAME}.hive_communities hc
               WHERE hc.rank > 0 ORDER BY hc.rank LIMIT :limit"""
     # ABW: restored older version since hardcoded id is out of the question
     # sql = """SELECT name, title FROM hive_communities
@@ -60,7 +61,7 @@ async def list_top_communities(context, limit=25):
 async def list_pop_communities(context, limit: int = 25):
     """List communities by new subscriber count. Returns lite community list."""
     limit = valid_limit(limit, 25, 25)
-    sql = "SELECT * FROM bridge_list_pop_communities( (:limit)::INT )"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_list_pop_communities( (:limit)::INT )"
     out = await context['db'].query_all(sql, limit=limit)
 
     return [(r[0], r[1]) for r in out]
@@ -72,7 +73,7 @@ async def list_all_subscriptions(context, account):
     db = context['db']
     account = valid_account(account)
 
-    sql = "SELECT * FROM bridge_list_all_subscriptions( (:account)::VARCHAR )"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_list_all_subscriptions( (:account)::VARCHAR )"
     rows = await db.query_all(sql, account=account)
     return [(r[0], r[1], r[2], r[3]) for r in rows]
 
@@ -84,7 +85,9 @@ async def list_subscribers(context, community, last='', limit=100):
     last = valid_account(last, True)
     limit = valid_limit(limit, 100, 100)
     db = context['db']
-    sql = "SELECT * FROM bridge_list_subscribers( (:community)::VARCHAR, (:last)::VARCHAR, (:limit)::INT )"
+    sql = (
+        f"SELECT * FROM {SCHEMA_NAME}.bridge_list_subscribers( (:community)::VARCHAR, (:last)::VARCHAR, (:limit)::INT )"
+    )
     rows = await db.query_all(sql, community=community, last=last, limit=limit)
     return [(r[0], r[1], r[2], json_date(r[3])) for r in rows]
 
@@ -102,7 +105,7 @@ async def list_communities(context, last='', limit=100, query=None, sort='rank',
     db = context['db']
 
     sql = (
-        "SELECT * FROM bridge_list_communities_by_"
+        f"SELECT * FROM {SCHEMA_NAME}.bridge_list_communities_by_"
         + sort
         + "( (:observer)::VARCHAR, (:last)::VARCHAR, (:search)::VARCHAR, (:limit)::INT )"
     )
@@ -120,7 +123,7 @@ async def list_community_roles(context, community, last='', limit=50):
     last = valid_account(last, True)
     limit = valid_limit(limit, 1000, 50)
 
-    sql = "SELECT * FROM bridge_list_community_roles( (:community)::VARCHAR, (:last)::VARCHAR, (:limit)::INT )"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_list_community_roles( (:community)::VARCHAR, (:last)::VARCHAR, (:limit)::INT )"
     rows = await db.query_all(sql, community=community, last=last, limit=limit)
 
     return [(r['name'], r['role'], r['title']) for r in rows]
@@ -174,8 +177,8 @@ async def top_community_muted(context, community):
     """Get top authors (by SP) who are muted in a community."""
     db = context['db']
     cid = await get_community_id(db, community)
-    sql = """SELECT a.name, a.voting_weight, r.title FROM hive_accounts a
-               JOIN hive_roles r ON a.id = r.account_id
+    sql = f"""SELECT a.name, a.voting_weight, r.title FROM {SCHEMA_NAME}.hive_accounts a
+               JOIN {SCHEMA_NAME}.hive_roles r ON a.id = r.account_id
               WHERE r.community_id = :community_id AND r.role_id < 0
            ORDER BY voting_weight DESC LIMIT 5"""
     return await db.query(sql, community_id=cid)
@@ -183,16 +186,16 @@ async def top_community_muted(context, community):
 
 async def _top_community_posts(db, community, limit=50):
     # TODO: muted equivalent
-    sql = """
+    sql = f"""
     SELECT ha_a.name as author,
         0 as votes,
         ( hp.payout + hp.pending_payout ) as payout
-    FROM hive_posts hp
-    INNER JOIN hive_accounts ha_a ON ha_a.id = hp.author_id
-    LEFT JOIN hive_post_data hpd ON hpd.id = hp.id
-    LEFT JOIN hive_category_data hcd ON hcd.id = hp.category_id
+    FROM {SCHEMA_NAME}.hive_posts hp
+    INNER JOIN {SCHEMA_NAME}.hive_accounts ha_a ON ha_a.id = hp.author_id
+    LEFT JOIN {SCHEMA_NAME}.hive_post_data hpd ON hpd.id = hp.id
+    LEFT JOIN {SCHEMA_NAME}.hive_category_data hcd ON hcd.id = hp.category_id
     WHERE hcd.category = :community AND hp.counter_deleted = 0 AND NOT hp.is_paidout
-        AND post_id IN (SELECT id FROM hive_posts WHERE is_muted = '0')
+        AND post_id IN (SELECT id FROM {SCHEMA_NAME}.hive_posts WHERE is_muted = '0')
     ORDER BY ( hp.payout + hp.pending_payout ) DESC LIMIT :limit"""
 
     return await db.query_all(sql, community=community, limit=limit)

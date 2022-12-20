@@ -13,6 +13,7 @@ from jsonrpcserver.methods import Methods
 import simplejson
 from sqlalchemy.exc import OperationalError
 
+from hive.conf import SCHEMA_NAME
 from hive.server.bridge_api import methods as bridge_api
 from hive.server.bridge_api.support import get_post_header as bridge_api_get_post_header
 from hive.server.bridge_api.support import normalize_post as bridge_api_normalize_post
@@ -45,9 +46,9 @@ def decimal_deserialize(s):
 async def db_head_state(context):
     """Status/health check."""
     db = context['db']
-    sql = "SELECT num, created_at, extract(epoch from created_at) ts " "FROM hive_blocks ORDER BY num DESC LIMIT 1"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.get_head_state()"
     row = await db.query_row(sql)
-    return dict(db_head_block=row['num'], db_head_time=str(row['created_at']), db_head_age=int(time.time() - float(row['ts'])))
+    return dict(db_head_block=row['num'], db_head_time=str(row['created_at']), db_head_age=int(time.time() - float(row['age'])))
 
 
 def build_methods():
@@ -241,15 +242,18 @@ def run_server(conf):
         await app['db'].wait_closed()
 
     async def show_info(app):
-        sql = "SELECT num FROM hive_blocks ORDER BY num DESC LIMIT 1"
-        database_head_block = await app['db'].query_one(sql)
+        from hive.utils.misc import show_app_version, BlocksInfo, PatchLevelInfo
 
-        sql = "SELECT level, patch_date, patched_to_revision FROM hive_db_patch_level ORDER BY level DESC LIMIT 1"
-        patch_level_data = await app['db'].query_row(sql)
+        last = await app['db'].query_one(f"SELECT num FROM {SCHEMA_NAME}.get_head_state();")
+        last_imported = await app['db'].query_one(f"SELECT last_imported_block_num FROM {SCHEMA_NAME}.hive_state;")
+        last_completed = await app['db'].query_one(f"SELECT last_completed_block_num FROM {SCHEMA_NAME}.hive_state;")
 
-        from hive.utils.misc import show_app_version
+        blocks_info = BlocksInfo(last, last_imported, last_completed)
 
-        show_app_version(log, database_head_block, patch_level_data)
+        sql = f"SELECT * FROM {SCHEMA_NAME}.hive_db_patch_level ORDER BY level DESC LIMIT 1;"
+        patch_level_info = PatchLevelInfo(**await app['db'].query_row(sql))
+
+        show_app_version(log, blocks_info, patch_level_info)
 
     app.on_startup.append(init_db)
     app.on_startup.append(show_info)

@@ -1,6 +1,6 @@
-DROP TYPE IF EXISTS condenser_api_post_ex CASCADE;
+DROP TYPE IF EXISTS hivemind_app.condenser_api_post_ex CASCADE;
 -- type for fat node style post of get_content()
-CREATE TYPE condenser_api_post_ex AS (
+CREATE TYPE hivemind_app.condenser_api_post_ex AS (
     id INT,
     author VARCHAR(16),
     permlink VARCHAR(255),

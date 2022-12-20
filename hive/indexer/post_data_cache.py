@@ -1,5 +1,6 @@
 import logging
 
+from hive.conf import SCHEMA_NAME
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
 
@@ -7,7 +8,7 @@ log = logging.getLogger(__name__)
 
 
 class PostDataCache(DbAdapterHolder):
-    """Procides cache for DB operations on post data table in order to speed up initial sync"""
+    """Procides cache for DB operations on post data table in order to speed up massive sync"""
 
     _data = {}
 
@@ -34,8 +35,8 @@ class PostDataCache(DbAdapterHolder):
         try:
             post_data = cls._data[pid]
         except KeyError:
-            sql = """
-                  SELECT hpd.body FROM hive_post_data hpd WHERE hpd.id = :post_id;
+            sql = f"""
+                  SELECT hpd.body FROM {SCHEMA_NAME}.hive_post_data hpd WHERE hpd.id = :post_id;
                   """
             row = cls.db.query_row(sql, post_id=pid)
             post_data = dict(row)
@@ -48,9 +49,9 @@ class PostDataCache(DbAdapterHolder):
             values_insert = []
             values_update = []
             cls.beginTx()
-            sql = """
+            sql = f"""
                 INSERT INTO 
-                    hive_post_data (id, title, preview, img_url, body, json) 
+                    {SCHEMA_NAME}.hive_post_data (id, title, preview, img_url, body, json) 
                 VALUES 
             """
             for k, data in cls._data.items():
@@ -66,9 +67,9 @@ class PostDataCache(DbAdapterHolder):
                     values_update.append(value)
 
             if len(values_insert) > 0:
-                sql = """
+                sql = f"""
                     INSERT INTO 
-                        hive_post_data (id, title, preview, img_url, body, json) 
+                        {SCHEMA_NAME}.hive_post_data (id, title, preview, img_url, body, json) 
                     VALUES 
                 """
                 sql += ','.join(values_insert)
@@ -78,8 +79,8 @@ class PostDataCache(DbAdapterHolder):
                 values_insert.clear()
 
             if len(values_update) > 0:
-                sql = """
-                    UPDATE hive_post_data AS hpd SET 
+                sql = f"""
+                    UPDATE {SCHEMA_NAME}.hive_post_data AS hpd SET 
                         title = COALESCE( data_source.title, hpd.title ),
                         preview = COALESCE( data_source.preview, hpd.preview ),
                         img_url = COALESCE( data_source.img_url, hpd.img_url ),

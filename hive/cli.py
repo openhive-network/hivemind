@@ -19,18 +19,18 @@ def setup_logging(conf):
     if timestamp and epoch:
         datefmt = '%Y-%m-%d %H:%M:%S'
         timezone = time.strftime('%z')
-        fmt = f'%(asctime)s.%(msecs)03d{timezone} %(created).6f %(levelname)s - %(name)s - %(message)s'
+        fmt = f'%(asctime)s.%(msecs)03d{timezone} %(created).6f %(levelname)s - %(name)s:%(lineno)d - %(message)s'
         logging.basicConfig(format=fmt, datefmt=datefmt)
     elif timestamp:
         datefmt = '%Y-%m-%d %H:%M:%S'
         timezone = time.strftime('%z')
-        fmt = f'%(asctime)s.%(msecs)03d{timezone} %(levelname)s - %(name)s - %(message)s'
+        fmt = f'%(asctime)s.%(msecs)03d{timezone} %(levelname)s - %(name)s:%(lineno)d - %(message)s'
         logging.basicConfig(format=fmt, datefmt=datefmt)
     elif epoch:
-        fmt = '%(created).6f %(levelname)s - %(name)s - %(message)s'
+        fmt = '%(created).6f %(levelname)s - %(name)s:%(lineno)d - %(message)s'
         logging.basicConfig(format=fmt)
     else:
-        fmt = '%(levelname)s - %(name)s - %(message)s'
+        fmt = '%(levelname)s - %(name)s:%(lineno)d - %(message)s'
         logging.basicConfig(format=fmt)
 
 
@@ -81,9 +81,9 @@ def launch_mode(mode, conf):
         run_server(conf=conf)
 
     elif mode == 'sync':
-        from hive.indexer.sync import Sync
+        from hive.indexer.sync import SyncHiveDb
 
-        with Sync(conf=conf) as sync:
+        with SyncHiveDb(conf=conf) as sync:
             sync.run()
 
     elif mode == 'status':

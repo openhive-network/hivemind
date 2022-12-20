@@ -1,6 +1,6 @@
-DROP TYPE IF EXISTS get_post_view_by_id_return_t CASCADE;
+DROP TYPE IF EXISTS hivemind_app.get_post_view_by_id_return_t CASCADE;
 
-CREATE TYPE get_post_view_by_id_return_t AS(
+CREATE TYPE hivemind_app.get_post_view_by_id_return_t AS(
   id integer,
   community_id integer,
   root_id integer,
@@ -66,7 +66,7 @@ CREATE TYPE get_post_view_by_id_return_t AS(
   block_num integer
 );
 
-CREATE OR REPLACE FUNCTION get_post_view_by_id(_id hive_posts.id%TYPE) RETURNS SETOF get_post_view_by_id_return_t
+CREATE OR REPLACE FUNCTION hivemind_app.get_post_view_by_id(_id hivemind_app.hive_posts.id%TYPE) RETURNS SETOF hivemind_app.get_post_view_by_id_return_t
 AS $function$
 BEGIN 
   RETURN QUERY
@@ -141,25 +141,25 @@ BEGIN
     hc.title AS community_title,
     hc.name AS community_name,
     hp.block_num
-   FROM hive_posts hp
+   FROM hivemind_app.hive_posts hp
      -- post data (6 joins)
-     JOIN hive_accounts_view ha_a ON ha_a.id = hp.author_id
-     JOIN hive_category_data hcd ON hcd.id = hp.category_id
-     JOIN hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
-     LEFT JOIN hive_communities hc ON hp.community_id = hc.id
-     LEFT JOIN hive_roles hr ON hp.author_id = hr.account_id AND hp.community_id = hr.community_id
+     JOIN hivemind_app.hive_accounts_view ha_a ON ha_a.id = hp.author_id
+     JOIN hivemind_app.hive_category_data hcd ON hcd.id = hp.category_id
+     JOIN hivemind_app.hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
+     LEFT JOIN hivemind_app.hive_communities hc ON hp.community_id = hc.id
+     LEFT JOIN hivemind_app.hive_roles hr ON hp.author_id = hr.account_id AND hp.community_id = hr.community_id
      -- parent post data 
-     JOIN hive_posts pp ON pp.id = hp.parent_id -- parent post (0 or 1 parent)
-     JOIN hive_accounts ha_pp ON ha_pp.id = pp.author_id
-     JOIN hive_permlink_data hpd_pp ON hpd_pp.id = pp.permlink_id
+     JOIN hivemind_app.hive_posts pp ON pp.id = hp.parent_id -- parent post (0 or 1 parent)
+     JOIN hivemind_app.hive_accounts ha_pp ON ha_pp.id = pp.author_id
+     JOIN hivemind_app.hive_permlink_data hpd_pp ON hpd_pp.id = pp.permlink_id
      -- root post data
-     JOIN hive_posts rp ON rp.id = hp.root_id -- root_post (0 or 1 root)
-     JOIN hive_accounts ha_rp ON ha_rp.id = rp.author_id
-     JOIN hive_permlink_data hpd_rp ON hpd_rp.id = rp.permlink_id
-     JOIN hive_category_data rcd ON rcd.id = rp.category_id
-     JOIN hive_post_data rpd ON rpd.id = rp.id
+     JOIN hivemind_app.hive_posts rp ON rp.id = hp.root_id -- root_post (0 or 1 root)
+     JOIN hivemind_app.hive_accounts ha_rp ON ha_rp.id = rp.author_id
+     JOIN hivemind_app.hive_permlink_data hpd_rp ON hpd_rp.id = rp.permlink_id
+     JOIN hivemind_app.hive_category_data rcd ON rcd.id = rp.category_id
+     JOIN hivemind_app.hive_post_data rpd ON rpd.id = rp.id
      -- largest joined data
-     JOIN hive_post_data hpd ON hpd.id = hp.id 
+     JOIN hivemind_app.hive_post_data hpd ON hpd.id = hp.id
   WHERE hp.id = _id AND hp.counter_deleted = 0;
 END;
 $function$ LANGUAGE plpgsql STABLE SET join_collapse_limit = 1;

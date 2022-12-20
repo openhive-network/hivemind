@@ -3,6 +3,7 @@
 from enum import IntEnum
 import logging
 
+from hive.conf import SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
@@ -98,7 +99,7 @@ class Notify(DbAdapterHolder):
     @classmethod
     def set_lastread(cls, account, date):
         """Update `lastread` column for a named account."""
-        sql = "UPDATE hive_accounts SET lastread_at = :date WHERE name = :name"
+        sql = f"UPDATE {SCHEMA_NAME}.hive_accounts SET lastread_at = :date WHERE name = :name"
         DB.query(sql, date=date, name=account)
 
     def to_db_values(self):
@@ -129,12 +130,12 @@ class Notify(DbAdapterHolder):
         if Notify._notifies:
             cls.beginTx()
 
-            sql = """INSERT INTO hive_notifs (block_num, type_id, score, created_at, src_id,
+            sql = f"""INSERT INTO {SCHEMA_NAME}.hive_notifs (block_num, type_id, score, created_at, src_id,
                                               dst_id, post_id, community_id,
                                               payload)
                           VALUES
                           -- block_num, type_id, score, created_at, src_id, dst_id, post_id, community_id, payload
-                          {}"""
+                          {{}}"""
 
             values = []
             values_limit = 1000

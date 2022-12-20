@@ -56,17 +56,12 @@ start() {
 
   echo "Starting hive server on port ${RUNNER_HIVEMIND_SERVER_HTTP_PORT}"
 
-  USER=${RUNNER_POSTGRES_APP_USER}:${RUNNER_POSTGRES_APP_USER_PASSWORD}
-  OPTIONS="host=${RUNNER_POSTGRES_HOST}&port=${RUNNER_POSTGRES_PORT}"
-  DATABASE_URL="postgresql://${USER}@/${HIVEMIND_DB_NAME}?${OPTIONS}"
-
   hive server \
       --log-request-times \
       --log-mask-sensitive-data \
       --pid-file hive_server.pid \
       --http-server-port ${RUNNER_HIVEMIND_SERVER_HTTP_PORT} \
-      --steemd-url "${RUNNER_HIVED_URL}" \
-      --database-url "${DATABASE_URL}" \
+      --database-url "${HAF_POSTGRES_URL}" \
       > hivemind-server.log 2>&1 &
 
   HIVEMIND_PID=$!

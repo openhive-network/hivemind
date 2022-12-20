@@ -80,7 +80,6 @@ class Db:
 
     def clone(self, name):
         cloned = Db(self._url, name, self.__autoexplain)
-        cloned._engine = self._engine
 
         return cloned
 
@@ -88,11 +87,11 @@ class Db:
         """Close connection."""
         try:
             for item in self._conn:
-                if item is not None:
-                    log.info(f"Closing database connection: '{item['name']}'")
-                    item['connection'].close()
-                    item = None
+                log.info(f"Closing database connection: '{item['name']}'")
+                item['connection'].close()
+            self._engine.dispose()
             self._conn = []
+            assert self._engine.pool.checkedin() == 0, f'All connections of {self.name} should be closed!'
         except Exception as ex:
             log.exception(f"Error during connections closing: {ex}")
             raise ex
@@ -121,15 +120,12 @@ class Db:
             self._engine = sqlalchemy.create_engine(
                 self._url,
                 isolation_level="READ UNCOMMITTED",  # only supported in mysql
-                pool_size=self.max_connections,
+                pool_size=Db.max_connections,
                 pool_recycle=3600,
                 echo=False,
+                connect_args={'application_name': f'hivemind_{self.name}'},
             )
         return self._engine
-
-    def get_new_connection(self, name):
-        self._conn.append({"connection": self.engine().connect(), "name": name})
-        return self.get_connection(len(self._conn) - 1)
 
     def get_dialect(self):
         return self.get_connection(0).dialect
@@ -156,32 +152,32 @@ class Db:
 
         # this method is reserved for anything but SELECT
         assert self._is_write_query(sql), sql
-        return self._query(sql, False, **kwargs)
+        return self._query(sql, **kwargs)
 
     def query_prepared(self, sql, **kwargs):
         self._query(sql, True, **kwargs)
 
     def query_no_return(self, sql, **kwargs):
-        self._query(sql, False, **kwargs)
+        self._query(sql, **kwargs)
 
     def query_all(self, sql, **kwargs):
         """Perform a `SELECT n*m`"""
-        res = self._query(sql, False, **kwargs)
+        res = self._query(sql,**kwargs)
         return res.fetchall()
 
     def query_row(self, sql, **kwargs):
         """Perform a `SELECT 1*m`"""
-        res = self._query(sql, False, **kwargs)
+        res = self._query(sql, **kwargs)
         return first(res)
 
     def query_col(self, sql, **kwargs):
         """Perform a `SELECT n*1`"""
-        res = self._query(sql, False, **kwargs).fetchall()
+        res = self._query(sql, **kwargs).fetchall()
         return [r[0] for r in res]
 
     def query_one(self, sql, **kwargs):
         """Perform a `SELECT 1*1`"""
-        row = first(self._query(sql, False, **kwargs))
+        row = first(self._query(sql, **kwargs))
         return first(row) if row else None
 
     def engine_name(self):
@@ -251,7 +247,7 @@ class Db:
             query = sqlalchemy.text(sql)
         return query
 
-    def _query(self, sql, is_prepared, **kwargs):
+    def _query(self, sql, is_prepared: bool = False, **kwargs):
         """Send a query off to SQLAlchemy."""
         if sql == 'START TRANSACTION':
             assert not self._trx_active

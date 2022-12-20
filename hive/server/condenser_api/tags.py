@@ -2,6 +2,7 @@
 
 from aiocache import cached
 
+from hive.conf import SCHEMA_NAME
 from hive.server.common.helpers import return_error_info, valid_limit, valid_tag
 
 
@@ -9,7 +10,7 @@ from hive.server.common.helpers import return_error_info, valid_limit, valid_tag
 @cached(ttl=7200, timeout=1200)
 async def get_top_trending_tags_summary(context):
     """Get top 50 trending tags among pending posts."""
-    sql = "SELECT condenser_get_top_trending_tags_summary(50)"
+    sql = f"SELECT {SCHEMA_NAME}.condenser_get_top_trending_tags_summary(50)"
     return await context['db'].query_col(sql)
 
 
@@ -21,7 +22,7 @@ async def get_trending_tags(context, start_tag: str = '', limit: int = 250):
     limit = valid_limit(limit, 250, 250)
     start_tag = valid_tag(start_tag, allow_empty=True)
 
-    sql = "SELECT * FROM condenser_get_trending_tags( (:tag)::VARCHAR, :limit )"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.condenser_get_trending_tags( (:tag)::VARCHAR, :limit )"
 
     out = []
     for row in await context['db'].query_all(sql, limit=limit, tag=start_tag):

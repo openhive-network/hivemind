@@ -5,16 +5,13 @@ from collections import OrderedDict
 # pylint: disable=line-too-long,too-many-lines
 import logging
 
-from aiocache import cached
-import ujson as json
-
+from hive.conf import SCHEMA_NAME
 from hive.server.common.helpers import ApiError, return_error_info, valid_account, valid_permlink, valid_sort, valid_tag
 import hive.server.condenser_api.cursor as cursor
 from hive.server.condenser_api.methods import get_discussions_by_feed_impl, get_posts_by_given_sort
 from hive.server.condenser_api.objects import _condenser_post_object, load_accounts
 from hive.server.condenser_api.tags import get_top_trending_tags_summary, get_trending_tags
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
-from hive.utils.normalize import legacy_amount
 
 log = logging.getLogger(__name__)
 
@@ -213,9 +210,9 @@ async def _load_account(db, name):
 
 async def _child_ids(db, parent_ids):
     """Load child ids for multuple parent ids."""
-    sql = """
+    sql = f"""
              SELECT parent_id, array_agg(id)
-               FROM hive_posts
+               FROM {SCHEMA_NAME}.hive_posts
               WHERE parent_id IN :ids
                 AND counter_deleted = 0
            GROUP BY parent_id
@@ -227,7 +224,7 @@ async def _child_ids(db, parent_ids):
 async def _load_discussion(db, author, permlink, observer=None):
     """Load a full discussion thread."""
 
-    sql = "SELECT * FROM bridge_get_discussion(:author,:permlink,:observer)"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_discussion(:author,:permlink,:observer)"
     sql_result = await db.query_all(sql, author=author, permlink=permlink, observer=observer)
 
     posts = []

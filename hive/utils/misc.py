@@ -1,4 +1,8 @@
+from dataclasses import dataclass
+from datetime import datetime
+from logging import Logger
 import os
+
 import psutil
 
 from hive.utils.stats import BroadcastObject, PrometheusClient
@@ -38,15 +42,36 @@ def chunks(lst, n):
         yield lst[i : i + n]
 
 
-def show_app_version(log, database_head_block, patch_level_data):
+def get_memory_amount() -> float:
+    """Returns memory amount in MB"""
+    return round(psutil.virtual_memory().total / 1024.0 / 1024.0, 2)
+
+
+@dataclass
+class BlocksInfo:
+    last: int
+    last_imported: int
+    last_completed: int
+
+
+@dataclass
+class PatchLevelInfo:
+    level: int
+    patch_date: datetime
+    patched_to_revision: str
+
+
+def show_app_version(log: Logger, blocks_info: BlocksInfo, patch_level_info: PatchLevelInfo):
     from hive.version import VERSION, GIT_REVISION, GIT_DATE
 
-    log.info("hivemind_version : %s", VERSION)
-    log.info("hivemind_git_rev : %s", GIT_REVISION)
-    log.info("hivemind_git_date : %s", GIT_DATE)
+    log.info(f"hivemind_version : {VERSION}")
+    log.info(f"hivemind_git_rev : {GIT_REVISION}")
+    log.info(f"hivemind_git_date : {GIT_DATE}")
 
-    log.info("database_schema_version : %s", patch_level_data['level'])
-    log.info("database_patch_date : %s", patch_level_data['patch_date'])
-    log.info("database_patched_to_revision : %s", patch_level_data['patched_to_revision'])
+    log.info(f"database_schema_version : {patch_level_info.level}")
+    log.info(f"database_patch_date : {patch_level_info.patch_date}")
+    log.info(f"database_patched_to_revision : {patch_level_info.patched_to_revision}")
 
-    log.info("database_head_block : %s", database_head_block)
+    log.info(f"last_block_from_view : {blocks_info.last}")
+    log.info(f"last_imported_block : {blocks_info.last_imported}")
+    log.info(f"last_completed_block : {blocks_info.last_completed}")

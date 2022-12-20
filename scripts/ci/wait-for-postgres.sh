@@ -1,64 +1,16 @@
-#!/bin/sh
+#!/bin/bash
 
-# wait-for-postgres.sh
-# Use in docker-compose:
-# command: ["./wait-for-postgres.sh", "name-of-postgres-service", "python", "app.py"]
+set -euo pipefail
 
-set -e
+LIMIT=300 #seconds
 
-LIMIT=10 #seconds
-
-HOST=$1
-PORT=$2
-
-if [ -z "$HOST" ]
-then
-    HOST="$RUNNER_POSTGRES_HOST"
-fi
-if [ -z "$PORT" ]
-then
-    PORT="$RUNNER_POSTGRES_PORT"
-fi
+DATABASE_URL=$1
 
 wait_for_postgres() {
-    counter=0
-    echo "Waiting for postgres on ${HOST}:${PORT}."
-    while ! pg_isready \
-            --host $HOST \
-            --port $PORT \
-            --timeout=1 --quiet; do
-        counter=$((counter+1))
-        sleep 1
-        if [ $counter -eq $LIMIT ]; then
-            echo "Timeout reached, postgres is unavailable, exiting."
-            exit 1
-        fi
-    done
-}
+  echo "Waiting for postgres hosted by container at the URL: ${DATABASE_URL}."
 
-output_configuration() {
-
-    mkdir -p pg-stats
-    DIR=$PWD/pg-stats
-
-    echo "Postgres is up (discovered after ${counter}s)."
-    echo "-------------------------------------------------"
-    echo "Postgres version and configuration"
-    echo "-------------------------------------------------"
-    PGPASSWORD=$RUNNER_POSTGRES_ADMIN_USER_PASSWORD psql \
-            --username "$RUNNER_POSTGRES_ADMIN_USER" \
-            --host "$HOST" \
-            --port $PORT \
-            --dbname postgres <<EOF
-SELECT version();
--- select name, setting, unit from pg_settings;
--- show all;
-\copy (select name, setting, unit from pg_settings) to '$DIR/pg_settings_on_start.csv' WITH CSV HEADER
-\q
-EOF
-    echo "-------------------------------------------------"
+  timeout $LIMIT bash -c "until psql \"${DATABASE_URL}\" -c \"SELECT hive.wait_for_ready_instance('4 MIN'::interval);\" ; do sleep 3 ; done"
 
 }
 
 wait_for_postgres
-output_configuration
