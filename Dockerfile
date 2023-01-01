@@ -32,7 +32,7 @@ RUN apt update && DEBIAN_FRONTEND=noniteractive apt install -y  \
  
 SHELL ["/bin/bash", "-c"] 
 
-FROM ${CI_REGISTRY_IMAGE}runtime${CI_IMAGE_TAG} AS ci-base-image
+FROM ${CI_REGISTRY_IMAGE}ci-base-image${CI_IMAGE_TAG} AS ci-base-image
 
 ENV LANG=en_US.UTF-8
 SHELL ["/bin/bash", "-c"] 
@@ -51,7 +51,7 @@ COPY --chown=hivemind:hivemind . /home/hivemind/app
 
 RUN ./app/scripts/ci/build.sh
 
-FROM ${CI_REGISTRY_IMAGE}runtime${CI_IMAGE_TAG} AS instance
+FROM ${CI_REGISTRY_IMAGE}ci-base-image${CI_IMAGE_TAG} AS instance
 
 ARG HTTP_PORT=8080
 ENV HTTP_PORT=${HTTP_PORT}
