@@ -1,13 +1,9 @@
 stages:
   - build
   - sync-e2e-benchmark
+  - publish
   - collector
   - cleanup
-
-include:
-  - project: hive/haf
-    ref: 7d52319046375526badc926587c26ba0431f388d # develop 
-    file: /scripts/ci-helpers/prepare_data_image_job.yml
 
 variables:
   # HIVEMIND
@@ -24,6 +20,11 @@ variables:
   CI_DEBUG_SERVICES: "true"
   DATA_CACHE_MAINNET: /cache/replay_data_hivemind_${CI_PIPELINE_ID}
   BLOCK_LOG_SOURCE_DIR_5M: /blockchain/block_log_5m
+
+include:
+  - project: hive/haf
+    ref: 7d52319046375526badc926587c26ba0431f388d # develop 
+    file: /scripts/ci-helpers/prepare_data_image_job.yml
 
 workflow:
   # do not create pipeline twice when merge requests is open on current branch
@@ -165,7 +166,7 @@ workflow:
         localhost \
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
         $RUNNER_BENCHMARK_ITERATIONS \
-        $RUNNER_PYTEST_WORKERS
+        $RUNNER_PYTEST_WORKERS 
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| BASH SCRIPTS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -178,6 +179,15 @@ prepare_haf_image:
     SUBMODULE_DIR: "$CI_PROJECT_DIR/haf"
     REGISTRY_USER: "$HAF_IMG_BUILDER_USER"
     REGISTRY_PASS: "$HAF_IMG_BUILDER_PASSWORD"
+  before_script:
+    - git config --global --add safe.directory $CI_PROJECT_DIR/haf
+  tags: *shared_tags
+
+prepare_hivemind_image:
+  stage: build
+  extends: .docker_image_builder_job_template
+  script:
+    - *instance-build-script
   tags: *shared_tags
 
 prepare_haf_data:
@@ -280,6 +290,13 @@ sync_e2e_benchmark:
       - version.log
   tags:
     - hive-builder-4
+
+publish_instance_image:
+  stage: publish
+  extends: .publish_docker_image_template
+  script:
+    - scripts/ci/build_and_publish_instance.sh
+  tags: *shared_tags
 
 Trigger benchmark-results-collector:
   stage: collector
