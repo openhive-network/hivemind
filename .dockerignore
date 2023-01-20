@@ -54,5 +54,3 @@ local.db
 *.db
 envfile
 /deploy
-
-Dockerfile
