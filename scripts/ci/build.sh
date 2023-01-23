@@ -13,12 +13,11 @@ pip3 install pyyaml
 
 # Do actual installation in the source directory
 pushd "$SRCROOT"
+git status
 pip3 install .
 
 # immediately initialize atomic package to avoid spawning compiler at final image
 python3 -c 'import atomic'
-
-git status
 
 python3 -m build --wheel
 
