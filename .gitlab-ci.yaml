@@ -7,7 +7,7 @@ stages:
 
 include:
   - project: hive/haf
-    ref: ms_setup_ci_using_cache
+    ref: ms_setup_ci_using_cache_with_mirrornet
     file: /scripts/ci-helpers/prepare_data_image_job.yml
 
 
@@ -25,6 +25,8 @@ variables:
   GIT_SUBMODULE_STRATEGY: recursive
   DATA_CACHE_MAINNET: /cache/replay_data_hivemind_${CI_PIPELINE_ID}
   BLOCK_LOG_SOURCE_DIR_5M: /blockchain/block_log_5m
+  BLOCK_LOG_SOURCE_DIR_MIRRORNET_5M: /blockchain/block_log_5m_mirrornet
+  CI_DEBUG_SERVICES: "true"
 
 
 workflow:
@@ -220,6 +222,39 @@ prepare_haf_data:
   tags:
     - hive-builder-4
 
+prepare_haf_image_mirrornet:
+  extends: .prepare_haf_image
+  stage: build
+  variables:
+    SUBMODULE_DIR: "$CI_PROJECT_DIR/haf"
+    REGISTRY_USER: "$HAF_IMG_BUILDER_USER"
+    REGISTRY_PASS: "$HAF_IMG_BUILDER_PASSWORD"
+    HIVE_NETWORK_TYPE: mirrornet
+
+  tags:
+    - public-runner-docker
+    - hived-for-tests
+
+prepare_haf_data_mirrornet:
+  extends: .prepare_haf_data_5m
+  needs:
+    - job: prepare_haf_image_mirrornet
+      artifacts: true
+  stage: build
+  variables:
+    SUBMODULE_DIR: "$CI_PROJECT_DIR/haf"
+    BLOCK_LOG_SOURCE_DIR: $BLOCK_LOG_SOURCE_DIR_MIRRORNET_5M
+    CONFIG_INI_SOURCE: "$CI_PROJECT_DIR/haf/docker/config_mirrornet_5M.ini"
+    HIVE_NETWORK_TYPE: mirrornet
+    FAKETIME_TIMESTAMP: "2016-09-15T19:47:21"
+  before_script:
+    - env
+    - echo $DATA_CACHE
+    - echo $CONFIG_INI_SOURCE
+    - !reference [.prepare_haf_data_5m, before_script]
+  tags:
+    - hive-builder-4
+
 cleanup_cache_manual:
   extends: .docker_image_cleanup_job
   needs: []
@@ -237,9 +272,9 @@ sync_e2e_benchmark:
   image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
   stage: sync-e2e-benchmark
   needs:
-    - job: prepare_haf_image
+    - job: prepare_haf_image_mirrornet
       artifacts: true
-    - job: prepare_haf_data
+    - job: prepare_haf_data_mirrornet
   when: on_success
   services:
     - name: $HAF_IMAGE_NAME
@@ -252,6 +287,7 @@ sync_e2e_benchmark:
         DATADIR: $DATA_CACHE_MAINNET/datadir
         SHM_DIR: $DATA_CACHE_MAINNET/shm_dir
         LOG_FILE: $CI_JOB_NAME.log
+      command: ["--replay-blockchain"]
   variables:
     RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
   before_script:
@@ -265,11 +301,45 @@ sync_e2e_benchmark:
     - pip list
     - env
   script:
+    - set -x
     - echo "HAF image name $HAF_IMAGE_NAME"
+    - |
+        curl -XPOST -d '{
+        "jsonrpc": "2.0",
+        "method": "database_api.get_dynamic_global_properties",
+        "params": {
+        },
+        "id": 2
+        }' haf-instance:8090 || true
+    - sleep 60
+    - |
+        curl -XPOST -d '{
+        "jsonrpc": "2.0",
+        "method": "database_api.get_dynamic_global_properties",
+        "params": {
+        },
+        "id": 2
+        }' haf-instance:8090 || true
     - ./scripts/ci/wait-for-postgres.sh $HAF_ADMIN_POSTGRES_URL
     - ./scripts/ci/add-mocks-to-db.sh
     - psql "${HAF_ADMIN_POSTGRES_URL}" -c 'CREATE EXTENSION IF NOT EXISTS intarray;'
+    - |
+        curl -XPOST -d '{
+        "jsonrpc": "2.0",
+        "method": "database_api.get_dynamic_global_properties",
+        "params": {
+        },
+        "id": 2
+        }' haf-instance:8090 || true
     - ./scripts/ci/hive-sync.sh
+    - |
+        curl -XPOST -d '{
+        "jsonrpc": "2.0",
+        "method": "database_api.get_dynamic_global_properties",
+        "params": {
+        },
+        "id": 2
+        }' haf-instance:8090 || true
     - ./scripts/ci/collect-db-stats.sh
     - ./scripts/ci/hive-server.sh start
     - *bridge_api_smoketest-script
@@ -308,7 +378,8 @@ sync_e2e_benchmark:
       - request_process_times.log
       - request_process_times_smoketests.log
       - version.log
-  tags: *shared_tags
+  tags:
+    - hive-builder-4
 
 
 Trigger benchmark-results-collector:
