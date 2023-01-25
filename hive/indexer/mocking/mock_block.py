@@ -87,7 +87,7 @@ class OperationBase:
 INSERT INTO 
     hive.operations (id, block_num, trx_in_block, op_pos, op_type_id, timestamp, body)
 VALUES
-    (:id, :block_num, -2, -2, :op_type_id, now(), :body);
+    (:id, :block_num, -2, -2, :op_type_id, now(), :body :: hive.operation);
 """
         OperationBase.operation_id += 1
 
@@ -249,8 +249,10 @@ class BlockMockAfterDb:
 
         sql = f"""
 INSERT INTO hive.blocks (num, hash, prev, created_at, producer_account_id, transaction_merkle_root, extensions,
-                         witness_signature, signing_key)
-VALUES (:num, :hash, :prev, :created_at, {initminer_account_id}, 'mocked'::bytea, NULL, 'mocked'::bytea, 'mocked');
+                         witness_signature, signing_key, hbd_interest_rate, total_vesting_fund_hive, total_vesting_shares,
+                         total_reward_fund_hive, virtual_supply, current_supply, current_hbd_supply, dhf_interval_ledger)
+VALUES (:num, :hash, :prev, :created_at, {initminer_account_id}, 'mocked'::bytea, NULL, 'mocked'::bytea, 'mocked', 1000, 1000,
+                         1000000, 1000, 1000, 1000, 2000, 2000);
 """
 
         log.info(f'Attempting to push mocked BLOCK with number: {self.block_number}')
