@@ -6,7 +6,7 @@
 set -e
 
 docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-#docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
+docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
 
 pushd "$CI_PROJECT_DIR"
 
@@ -17,10 +17,10 @@ TAG=$(echo "$CI_COMMIT_TAG" | sed 's/[!+]/-/g')
 docker buildx build --platform=amd64 --progress=plain --target=instance \
   --build-arg CI_REGISTRY_IMAGE="$CI_REGISTRY_IMAGE/" \
   --tag "${CI_REGISTRY_IMAGE}/instance:instance-${TAG}" \
-  --tag "hiveio/hive:${TAG}" \
+  --tag "hiveio/hivemind:${TAG}" \
   --file Dockerfile .
 
 docker push "${CI_REGISTRY_IMAGE}/instance:instance-${TAG}"
-#docker push "hiveio/hive:${TAG}"
+docker push "hiveio/hivemind:${TAG}"
 
 popd
