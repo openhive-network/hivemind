@@ -190,8 +190,9 @@ workflow:
 
 .instance-build-script: &instance-build-script
   - |
+    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
     ./scripts/ci/build_instance.sh \
-      "$CI_COMMIT_SHA" \
+      "instance-$CI_COMMIT_SHA" \
       "$CI_PROJECT_DIR" \
       "${CI_REGISTRY_IMAGE}/"
     docker images
