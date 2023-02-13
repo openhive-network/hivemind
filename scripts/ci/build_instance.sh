@@ -1,16 +1,14 @@
 #! /bin/bash
 
-SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-SCRIPTSDIR="$SCRIPTPATH/.."
+SCRIPTSDIR="$(dirname "$(realpath "$0")")/.."
 
-LOG_FILE=build_instance.log
+export LOG_FILE=build_instance.log
+# shellcheck source=../haf/scripts/common.sh
 source "$SCRIPTSDIR/../haf/scripts/common.sh"
 
 BUILD_IMAGE_TAG=""
 REGISTRY=""
 SRCROOTDIR=""
-
-IMAGE_TAG_PREFIX=""
 
 
 print_help () {
@@ -45,13 +43,13 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-TST_IMGTAG=${BUILD_IMAGE_TAG:?"Missing arg #1 to specify built image tag"}
-TST_SRCDIR=${SRCROOTDIR:?"Missing arg #2 to specify source directory"}
-TST_REGISTRY=${REGISTRY:?"Missing arg #3 to specify target container registry"}
+[[ -z "$BUILD_IMAGE_TAG" ]] && echo "Variable BUILD_IMAGE_TAG must be set" && exit 1
+[[ -z "$SRCROOTDIR" ]] && echo "Variable SRCROOTDIR must be set" && exit 1
+[[ -z "$REGISTRY" ]] && echo "Variable REGISTRY must be set" && exit 1
 
 echo "Moving into source root directory: ${SRCROOTDIR}"
 
-pushd "$SRCROOTDIR"
+pushd "$SRCROOTDIR" || exit 1
 pwd
 
 "$SRCROOTDIR/scripts/ci/fix_ci_tag.sh"
@@ -59,9 +57,8 @@ pwd
 export DOCKER_BUILDKIT=1
 
 docker build --platform=amd64 --target=instance \
-  --build-arg CI_REGISTRY_IMAGE=$REGISTRY \
-  -t ${REGISTRY}${IMAGE_TAG_PREFIX}instance${BUILD_IMAGE_TAG} -f Dockerfile .
+  --build-arg CI_REGISTRY_IMAGE="$REGISTRY" \
+  --tag "${REGISTRY}instance${BUILD_IMAGE_TAG}" \
+  --file Dockerfile .
 
-popd
-
-
+popd || exit 1
