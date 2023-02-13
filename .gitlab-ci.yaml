@@ -188,6 +188,14 @@ workflow:
         $RUNNER_BENCHMARK_ITERATIONS \
         $RUNNER_PYTEST_WORKERS
 
+.instance-build-script: &instance-build-script
+  - |
+    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    ./scripts/ci/build_instance.sh \
+      "instance-$CI_COMMIT_SHA" \
+      "$CI_PROJECT_DIR" \
+      "${CI_REGISTRY_IMAGE}/"  
+
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| BASH SCRIPTS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
@@ -200,6 +208,13 @@ prepare_haf_image:
     SUBMODULE_DIR: "$CI_PROJECT_DIR/haf"
     REGISTRY_USER: "$HAF_IMG_BUILDER_USER"
     REGISTRY_PASS: "$HAF_IMG_BUILDER_PASSWORD"
+  tags: *shared_tags
+
+prepare_hivemind_image:
+  stage: build
+  extends: .docker_image_builder_job_template
+  script:
+    - *instance-build-script
   tags: *shared_tags
 
 
@@ -274,14 +289,13 @@ sync_e2e_benchmark:
       - version.log
   tags: *shared_tags
 
-build_and_publish_image:
+publish_instance_image:
   stage: publish
   extends: .docker_image_builder_job_template
-  dependencies: []
-  before_script:
-    - echo "Disabled the default before_script block"
+  needs:
+    - prepare_hivemind_image
   script:
-    - scripts/ci/build_and_publish_instance.sh
+    - scripts/ci/publish_instance.sh
   tags: *shared_tags  
   rules:
     - if: '$CI_COMMIT_TAG && $CI_COMMIT_REF_PROTECTED == "true"'
