@@ -60,8 +60,8 @@ if [[ -n "${CI:-}" ]]
 then
   REF="${REGISTRY}instance:cache-$CI_COMMIT_REF_SLUG"
   BUILD_OPTIONS+=("--push")
-  BUILD_OPTIONS+=("--cache-from=\"type=registry,ref=${REF}\"")
-  BUILD_OPTIONS+=("--cache-to=\"type=registry,mode=max,ref=${REF}\"")
+  BUILD_OPTIONS+=("--cache-from=type=registry,ref=${REF}")
+  BUILD_OPTIONS+=("--cache-to=type=registry,mode=max,ref=${REF}")
 fi;
 
 docker buildx build "${BUILD_OPTIONS[@]}" \
