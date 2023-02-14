@@ -54,9 +54,14 @@ pwd
 
 "$SRCROOTDIR/scripts/ci/fix_ci_tag.sh"
 
-export DOCKER_BUILDKIT=1
+BUILD_OPTIONS=("--platform=amd64" "--target=instance" "--progress=plain")
 
-docker build --platform=amd64 --target=instance \
+if [[ -n "${CI:-}" ]]
+then
+  BUILD_OPTIONS+=("--push")
+fi;
+
+docker buildx build "${BUILD_OPTIONS[@]}" \
   --build-arg CI_REGISTRY_IMAGE="$REGISTRY" \
   --tag "${REGISTRY}instance${BUILD_IMAGE_TAG}" \
   --file Dockerfile .
