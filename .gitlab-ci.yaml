@@ -194,9 +194,7 @@ workflow:
     ./scripts/ci/build_instance.sh \
       "instance-$CI_COMMIT_SHA" \
       "$CI_PROJECT_DIR" \
-      "${CI_REGISTRY_IMAGE}/"
-    docker images
-    docker push "${CI_REGISTRY_IMAGE}/instance:instance-${CI_COMMIT_SHA}"  
+      "${CI_REGISTRY_IMAGE}/"  
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| BASH SCRIPTS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
