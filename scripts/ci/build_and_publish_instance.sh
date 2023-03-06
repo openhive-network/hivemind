@@ -1,26 +1,103 @@
 #! /bin/bash
 
-[[ -z "$DOCKER_HUB_USER" ]] && echo "Variable DOCKER_HUB_USER must be set" && exit 1
-[[ -z "$DOCKER_HUB_PASSWORD" ]] && echo "Variable DOCKER_HUB_PASSWORD must be set" && exit 1
+SCRIPT_DIR=$(dirname "$(realpath "$0")")
+SRC_DIR="$SCRIPT_DIR/../.."
+
+print_help () {
+    echo "Usage: $0 OPTION[=VALUE]..."
+    echo
+    echo "Script for building Docker image of Hivemin instance and pushing it to GitLab registry and to Docker Hub"
+    echo "All options (except '--help') are required"
+    echo "OPTIONS:"
+    echo "  --registry-user=USERNAME   Docker registry user"
+    echo "  --registry-password=PASS   Docker registry user"
+    echo "  --registry=URL             Docker registry URL, eg. 'registry.gitlab.syncad.com'"
+    echo "  --image-tag=TAG            Docker image tag, in CI the same as Git tag"
+    echo "  --image-name-prefix=PREFIX Docker image name prefix, eg. 'registry.gitlab.syncad.com/hive/hivemind'"
+    echo "  --docker-hub-user=USERNAME Docker Hub username"
+    echo "  --docker-hub-password=PASS Docker Hub password"
+    echo "  -?/--help                  Display this help screen and exit"
+    echo
+}
 
 set -e
 
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --registry-user=*)
+        arg="${1#*=}"
+        CI_REGISTRY_USER="$arg"
+        ;;
+    --registry-password=*)
+        arg="${1#*=}"
+        CI_REGISTRY_PASSWORD="$arg"
+        ;;
+    --registry=*)
+        arg="${1#*=}"
+        CI_REGISTRY="$arg"
+        ;;
+    --image-tag=*)
+        arg="${1#*=}"
+        CI_COMMIT_TAG="$arg"
+        ;;
+    --image-name-prefix=*)
+        arg="${1#*=}"
+        CI_REGISTRY_IMAGE="$arg"
+        ;;
+    --docker-hub-user=*)
+        arg="${1#*=}"
+        DOCKER_HUB_USER="$arg"
+        ;;
+    --docker-hub-password=*)
+        arg="${1#*=}"
+        DOCKER_HUB_PASSWORD="$arg"
+        ;;
+    --help)
+        print_help
+        exit 0
+        ;;
+    -?)
+        print_help
+        exit 0
+        ;;
+    *)
+        echo "ERROR: '$1' is not a valid option/positional argument"
+        echo
+        print_help
+        exit 2
+        ;;
+    esac
+    shift
+done
+
+[[ -z "$CI_REGISTRY_USER" ]] && echo "Option '--registry-user' must be set" && print_help && exit 1
+[[ -z "$CI_REGISTRY_PASSWORD" ]] && echo "Option '--registry-password' must be set" && print_help && exit 1
+[[ -z "$CI_REGISTRY" ]] && echo "Option '--registry' must be set" && print_help && exit 1
+[[ -z "$CI_COMMIT_TAG" ]] && echo "Option '--image-tag' must be set" && print_help && exit 1
+[[ -z "$CI_REGISTRY_IMAGE" ]] && echo "Option '--image-name-prefix' must be set" && print_help && exit 1
+[[ -z "$DOCKER_HUB_USER" ]] && echo "Option '--docker-hub-user' must be set" && print_help && exit 1
+[[ -z "$DOCKER_HUB_PASSWORD" ]] && echo "Option '--docker-hub-password' must be set" && print_help && exit 1
+
+CI_PROJECT_NAME="${CI_REGISTRY_IMAGE##*/}"
+
+echo "Logging to Docker Hub and $CI_REGISTRY"
 docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
 docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
 
-pushd "$CI_PROJECT_DIR"
-
+echo "Building an instance image in the source directory $SRC_DIR"
 # Turn PEP 440-compliant version number into a Docker-compliant tag
 #shellcheck disable=SC2001
 TAG=$(echo "$CI_COMMIT_TAG" | sed 's/[!+]/-/g')
+"$SRC_DIR/scripts/ci/build_instance.sh" \
+      "instance-$TAG" \
+      "$SRC_DIR" \
+      "$CI_REGISTRY_IMAGE/"
 
-docker buildx build --platform=amd64 --progress=plain --target=instance \
-  --build-arg CI_REGISTRY_IMAGE="$CI_REGISTRY_IMAGE/" \
-  --tag "${CI_REGISTRY_IMAGE}/instance:instance-${TAG}" \
-  --tag "hiveio/hivemind:${TAG}" \
-  --file Dockerfile .
+echo "Tagging the image built in the previous step as hiveio/$CI_PROJECT_NAME:$TAG"
+docker tag "$CI_REGISTRY_IMAGE/instance:instance-$TAG" "hiveio/$CI_PROJECT_NAME:$TAG"
 
-docker push "${CI_REGISTRY_IMAGE}/instance:instance-${TAG}"
-docker push "hiveio/hivemind:${TAG}"
+docker images
 
-popd
+echo "Pushing the instance image to the Docker Hub and GitLab registries"
+docker push "$CI_REGISTRY_IMAGE/instance:instance-$TAG"
+docker push "hiveio/$CI_PROJECT_NAME:$TAG"
