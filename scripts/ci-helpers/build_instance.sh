@@ -10,14 +10,14 @@ BUILD_IMAGE_TAG=""
 REGISTRY=""
 SRCROOTDIR=""
 
-
 print_help () {
-    echo "Usage: $0 <image_tag> <src_dir> <registry_url> [OPTION[=VALUE]]..."
-    echo
-    echo "Allows to build docker image containing Hivemind installation"
-    echo "OPTIONS:"
-    echo "  --help  Display this help screen and exit"
-    echo
+cat <<EOF
+Usage: $0 <image_tag> <src_dir> <registry_url> [OPTION[=VALUE]]...
+Allows to build docker image containing Hivemind installation
+OPTIONS:
+  --help  Display this help screen and exit
+
+EOF
 }
 
 while [ $# -gt 0 ]; do
@@ -25,7 +25,7 @@ while [ $# -gt 0 ]; do
     *)
         if [ -z "$BUILD_IMAGE_TAG" ];
         then
-          BUILD_IMAGE_TAG=:"${1}"
+          BUILD_IMAGE_TAG="${1}"
         elif [ -z "$SRCROOTDIR" ];
         then
           SRCROOTDIR="${1}"
@@ -43,11 +43,11 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-[[ -z "$BUILD_IMAGE_TAG" ]] && echo "Variable BUILD_IMAGE_TAG must be set" && exit 1
-[[ -z "$SRCROOTDIR" ]] && echo "Variable SRCROOTDIR must be set" && exit 1
-[[ -z "$REGISTRY" ]] && echo "Variable REGISTRY must be set" && exit 1
+[[ -z "$BUILD_IMAGE_TAG" ]] && printf "Variable BUILD_IMAGE_TAG must be set\n\n" && print_help && exit 1
+[[ -z "$SRCROOTDIR" ]] && printf "Variable SRCROOTDIR must be set\n\n" && print_help && exit 1
+[[ -z "$REGISTRY" ]] && printf "Variable REGISTRY must be set\n\n" && print_help && exit 1
 
-echo "Moving into source root directory: ${SRCROOTDIR}"
+printf "Moving into source root directory: %s\n" "$SRCROOTDIR"
 
 pushd "$SRCROOTDIR" || exit 1
 pwd
@@ -57,8 +57,8 @@ pwd
 BUILD_OPTIONS=("--platform=amd64" "--target=instance" "--progress=plain")
 
 docker buildx build "${BUILD_OPTIONS[@]}" \
-  --build-arg CI_REGISTRY_IMAGE="$REGISTRY" \
-  --tag "${REGISTRY}instance${BUILD_IMAGE_TAG}" \
+  --build-arg CI_REGISTRY_IMAGE="$REGISTRY/" \
+  --tag "$REGISTRY/instance:instance-$BUILD_IMAGE_TAG" \
   --file Dockerfile .
 
 popd || exit 1

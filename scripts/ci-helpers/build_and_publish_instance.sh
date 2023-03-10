@@ -1,19 +1,19 @@
 #! /bin/bash
 
-SCRIPT_DIR=$(dirname "$(realpath "$0")")
+SCRIPT_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 || exit 1; pwd -P )"
 SRC_DIR="$SCRIPT_DIR/../.."
 
 print_help () {
     echo "Usage: $0 OPTION[=VALUE]..."
     echo
-    echo "Script for building Docker image of Hivemin instance and pushing it to GitLab registry and to Docker Hub"
+    echo "Script for building Docker image of Hive instance and pushingit to GitLab registry and to Docker Hub"
     echo "All options (except '--help') are required"
     echo "OPTIONS:"
     echo "  --registry-user=USERNAME   Docker registry user"
     echo "  --registry-password=PASS   Docker registry user"
     echo "  --registry=URL             Docker registry URL, eg. 'registry.gitlab.syncad.com'"
     echo "  --image-tag=TAG            Docker image tag, in CI the same as Git tag"
-    echo "  --image-name-prefix=PREFIX Docker image name prefix, eg. 'registry.gitlab.syncad.com/hive/hivemind'"
+    echo "  --image-name-prefix=PREFIX Docker image name prefix, eg. 'registry.gitlab.syncad.com/hive/hive'"
     echo "  --docker-hub-user=USERNAME Docker Hub username"
     echo "  --docker-hub-password=PASS Docker Hub password"
     echo "  -?/--help                  Display this help screen and exit"
@@ -85,19 +85,13 @@ docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
 docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
 
 echo "Building an instance image in the source directory $SRC_DIR"
-# Turn PEP 440-compliant version number into a Docker-compliant tag
-#shellcheck disable=SC2001
-TAG=$(echo "$CI_COMMIT_TAG" | sed 's/[!+]/-/g')
-"$SRC_DIR/scripts/ci/build_instance.sh" \
-      "instance-$TAG" \
-      "$SRC_DIR" \
-      "$CI_REGISTRY_IMAGE/"
+"$SRC_DIR/scripts/ci-helpers/build_instance.sh" "$CI_COMMIT_TAG" "$SRC_DIR" "$CI_REGISTRY_IMAGE"
 
-echo "Tagging the image built in the previous step as hiveio/$CI_PROJECT_NAME:$TAG"
-docker tag "$CI_REGISTRY_IMAGE/instance:instance-$TAG" "hiveio/$CI_PROJECT_NAME:$TAG"
+echo "Tagging the image built in the previous step as hiveio/$CI_PROJECT_NAME:$CI_COMMIT_TAG"
+docker tag "$CI_REGISTRY_IMAGE/instance:instance-$CI_COMMIT_TAG" "hiveio/$CI_PROJECT_NAME:$CI_COMMIT_TAG"
 
 docker images
 
-echo "Pushing the instance image to the Docker Hub and GitLab registries"
-docker push "$CI_REGISTRY_IMAGE/instance:instance-$TAG"
-docker push "hiveio/$CI_PROJECT_NAME:$TAG"
+echo "Pushing instance images"
+docker push "$CI_REGISTRY_IMAGE/instance:instance-$CI_COMMIT_TAG"
+docker push "hiveio/$CI_PROJECT_NAME:$CI_COMMIT_TAG"
