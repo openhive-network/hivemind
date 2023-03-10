@@ -183,13 +183,6 @@ prepare_haf_image:
     - git config --global --add safe.directory $CI_PROJECT_DIR/haf
   tags: *shared_tags
 
-prepare_hivemind_image:
-  stage: build
-  extends: .docker_image_builder_job_template
-  script:
-    - *instance-build-script
-  tags: *shared_tags
-
 prepare_haf_data:
   extends: .prepare_haf_data_5m
   needs:
@@ -295,7 +288,9 @@ publish_instance_image:
   stage: publish
   extends: .publish_docker_image_template
   script:
-    - scripts/ci/build_and_publish_instance.sh
+    - |
+      TAG=$(echo "$CI_COMMIT_TAG" | sed 's/[!+]/-/g')
+      scripts/ci-helpers/build_and_publish_instance.sh --image-tag=$TAG
   tags: *shared_tags
 
 Trigger benchmark-results-collector:
