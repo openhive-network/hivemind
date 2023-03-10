@@ -81,7 +81,7 @@ done
 CI_PROJECT_NAME="${CI_REGISTRY_IMAGE##*/}"
 
 echo "Logging to Docker Hub and $CI_REGISTRY"
-#docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
 #docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
 
 echo "Building an instance image in the source directory $SRC_DIR"
@@ -93,5 +93,5 @@ docker tag "$CI_REGISTRY_IMAGE/instance:instance-$CI_COMMIT_TAG" "hiveio/$CI_PRO
 docker images
 
 echo "Pushing instance images"
-#docker push "$CI_REGISTRY_IMAGE/instance:instance-$CI_COMMIT_TAG"
+docker push "$CI_REGISTRY_IMAGE/instance:instance-$CI_COMMIT_TAG"
 #docker push "hiveio/$CI_PROJECT_NAME:$CI_COMMIT_TAG"
