@@ -26,7 +26,7 @@ while [ $# -gt 0 ]; do
     *)
         if [ -z "$BUILD_IMAGE_TAG" ];
         then
-          BUILD_IMAGE_TAG=:"${1}"
+          BUILD_IMAGE_TAG="${1}"
         elif [ -z "$SRCROOTDIR" ];
         then
           SRCROOTDIR="${1}"
@@ -59,7 +59,7 @@ BUILD_OPTIONS=("--platform=amd64" "--target=instance" "--progress=plain")
 
 docker buildx build "${BUILD_OPTIONS[@]}" \
   --build-arg CI_REGISTRY_IMAGE="$REGISTRY/" \
-  --tag "$REGISTRY/instance$BUILD_IMAGE_TAG" \
+  --tag "$REGISTRY/instance:instance-$BUILD_IMAGE_TAG" \
   --file Dockerfile .
 
 popd || exit 1
