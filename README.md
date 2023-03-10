@@ -110,14 +110,14 @@ $ pip install --no-cache-dir --verbose --user . 2>&1 | tee pip_install.log
 ## Dockerized setup
 
 ### Building
-To build image holding Hivemind instance, please use [build_instance.sh](scripts/ci/build_instance.sh). This script requires several parameters:
+To build image holding Hivemind instance, please use [build_instance.sh](scripts/ci-helpers/build_instance.sh). This script requires several parameters:
 - a tag identifier to be set on the built image
 - directory where Hivemind source code is located
 - docker registry url to produce fully qualified image name and allow to correctly resolve its dependencies
 
 ```bash
 $ # Assuming you are in workdir directory, to perform out of source build
-$ ../hivemind/scripts/ci/build_instance.sh local ../hivemind registry.gitlab.syncad.com/hive/hivemind/
+$ ../hivemind/scripts/ci-helpers/build_instance.sh local ../hivemind registry.gitlab.syncad.com/hive/hivemind/
 ```
 
 ### Running HAF instance container
