@@ -595,7 +595,7 @@
             "value": {
               "from": "test-safari",
               "to": "null",
-              "amount": {"amount":"10","precision":3,"nai":"@@000000013"},
+              "amount": {"amount":"11","precision":3,"nai":"@@000000013"},
               "memo": "@test-safari/secrets2"
             }
           },
