@@ -246,6 +246,12 @@ sync_e2e_benchmark:
     - mv ./request_process_times.log ./request_process_times_smoketests.log
     - ./scripts/ci/hive-server.sh start
     - *api-benchmark-script
+    - find . -name "*out.json"
+    - |
+        curl http://localhost:$RUNNER_HIVEMIND_SERVER_HTTP_PORT -XPOST --data '{  "jsonrpc": "2.0",  "id": "1",  "method": "bridge.get_account_posts",  "params": {   "sort": "posts",   "account": "test-safari"  } } ' || true
+    - sudo apt update && sudo apt install -y curl
+    - |
+        curl http://localhost:$RUNNER_HIVEMIND_SERVER_HTTP_PORT -XPOST --data '{  "jsonrpc": "2.0",  "id": "1",  "method": "bridge.get_account_posts",  "params": {   "sort": "posts",   "account": "test-safari"  } } '
   after_script:
     - cat venv/lib/python3.8/site-packages/hive/_version.py > version.log
     - echo "ARTIFACTS_JOB_ID=$CI_JOB_ID" >> variables.env
