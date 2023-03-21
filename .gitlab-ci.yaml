@@ -6,7 +6,7 @@ stages:
 
 include:
   - project: hive/haf
-    ref: develop
+    ref: 51768056086910b6a051283d9831df6506a7d82f # develop 
     file: /scripts/ci-helpers/prepare_data_image_job.yml
 
 
