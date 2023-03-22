@@ -2,6 +2,7 @@ stages:
   - build
   - sync-e2e-benchmark
   - collector
+  - cleanup
 
 
 include:
@@ -22,7 +23,9 @@ variables:
   GIT_DEPTH: 1
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: recursive
-#  CI_DEBUG_SERVICES: "true"
+  CI_DEBUG_SERVICES: "true"
+  DATA_CACHE_MAINNET: /cache/replay_data_hivemind_${CI_PIPELINE_ID}
+  BLOCK_LOG_SOURCE_DIR_5M: /blockchain/block_log_5m
 
 workflow:
   # do not create pipeline twice when merge requests is open on current branch
@@ -189,7 +192,7 @@ workflow:
 
 prepare_haf_image:
   stage: build
-  extends: .prepare_haf_data_5m_image
+  extends: .prepare_haf_image
   variables:
     SUBMODULE_DIR: "$CI_PROJECT_DIR/haf"
     REGISTRY_USER: "$HAF_IMG_BUILDER_USER"
@@ -197,10 +200,36 @@ prepare_haf_image:
   tags: *shared_tags
 
 
+prepare_haf_data:
+  extends: .prepare_haf_data_5m
+  needs:
+    - job: prepare_haf_image
+      artifacts: true
+  stage: build
+  variables:
+    SUBMODULE_DIR: "$CI_PROJECT_DIR/haf"
+    BLOCK_LOG_SOURCE_DIR: $BLOCK_LOG_SOURCE_DIR_5M
+    CONFIG_INI_SOURCE: "$CI_PROJECT_DIR/haf/docker/config_5M.ini"
+  tags:
+    - hive-builder-4
+
+
+cleanup_haf_cache_manual:
+  extends: .cleanup_cache_manual
+  stage: cleanup
+  variables:
+    CLEANUP_PATH_PATTERN: "/cache/replay_data_haf_*"
+  resource_group: ${CI_COMMIT_SHA}
+  tags:
+    - hive-builder-4
+
+
 sync_e2e_benchmark:
   image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
   stage: sync-e2e-benchmark
-  needs: [ 'prepare_haf_image' ]
+  needs:
+    - job: prepare_haf_data
+      artifacts: true
   when: on_success
   services:
     - name: $HAF_IMAGE_NAME
@@ -210,8 +239,13 @@ sync_e2e_benchmark:
          host    haf_block_log    haf_app_admin    0.0.0.0/0    trust\n
          host    haf_block_log    haf_admin        0.0.0.0/0    trust\n
          "
+        DATADIR: $DATA_CACHE_MAINNET/datadir
+        SHM_DIR: $DATA_CACHE_MAINNET/shm_dir
+        LOG_FILE: $CI_JOB_NAME.log
+      command: ["--replay-blockchain", "--stop-replay-at-block=5000000"]
   variables:
     RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
+    HIVED_UID: $HIVED_UID
   before_script:
     - scripts/ci/fix_ci_tag.sh
     - python3 -V
@@ -266,7 +300,8 @@ sync_e2e_benchmark:
       - request_process_times.log
       - request_process_times_smoketests.log
       - version.log
-  tags: *shared_tags
+  tags:
+    - hive-builder-4
 
 
 Trigger benchmark-results-collector:
