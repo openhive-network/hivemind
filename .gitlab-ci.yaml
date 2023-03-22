@@ -7,7 +7,7 @@ stages:
 
 include:
   - project: hive/haf
-    ref: 51768056086910b6a051283d9831df6506a7d82f # develop 
+    ref: 319551c0bd84a9490ba5000d18efbb335f7559d6 # mine branch
     file: /scripts/ci-helpers/prepare_data_image_job.yml
 
 
@@ -26,6 +26,8 @@ variables:
   CI_DEBUG_SERVICES: "true"
   DATA_CACHE_MAINNET: /cache/replay_data_hivemind_${CI_PIPELINE_ID}
   BLOCK_LOG_SOURCE_DIR_5M: /blockchain/block_log_5m
+  DATA_CACHE_MIRRORNET: /cache/replay_data_hivemind_${CI_PIPELINE_ID}
+  BLOCK_LOG_SOURCE_DIR_MIRRORNET_5M: /blockchain/block_log_5m_mirrornet
 
 workflow:
   # do not create pipeline twice when merge requests is open on current branch
@@ -190,26 +192,28 @@ workflow:
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| JOBS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-prepare_haf_image:
+prepare_haf_image_mirrornet:
   stage: build
   extends: .prepare_haf_image
   variables:
     SUBMODULE_DIR: "$CI_PROJECT_DIR/haf"
     REGISTRY_USER: "$HAF_IMG_BUILDER_USER"
     REGISTRY_PASS: "$HAF_IMG_BUILDER_PASSWORD"
+    HIVE_NETWORK_TYPE: mirrornet
   tags: *shared_tags
 
 
-prepare_haf_data:
+prepare_haf_data_mirrornet:
   extends: .prepare_haf_data_5m
   needs:
-    - job: prepare_haf_image
+    - job: prepare_haf_image_mirrornet
       artifacts: true
   stage: build
   variables:
     SUBMODULE_DIR: "$CI_PROJECT_DIR/haf"
-    BLOCK_LOG_SOURCE_DIR: $BLOCK_LOG_SOURCE_DIR_5M
-    CONFIG_INI_SOURCE: "$CI_PROJECT_DIR/haf/docker/config_5M.ini"
+    BLOCK_LOG_SOURCE_DIR: $BLOCK_LOG_SOURCE_DIR_MIRRORNET_5M
+    CONFIG_INI_SOURCE: "$CI_PROJECT_DIR/haf/hive/docker/config_mirrornet_5M.ini"
+    FAKETIME_TIMESTAMP: "2016-09-15T19:47:21"
   tags:
     - hive-builder-4
 
@@ -224,11 +228,11 @@ cleanup_haf_cache_manual:
     - hive-builder-4
 
 
-sync_e2e_benchmark:
+hivemind_live_sync:
   image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
   stage: sync-e2e-benchmark
   needs:
-    - job: prepare_haf_data
+    - job: prepare_haf_data_mirrornet
       artifacts: true
   when: on_success
   services:
@@ -239,10 +243,10 @@ sync_e2e_benchmark:
          host    haf_block_log    haf_app_admin    0.0.0.0/0    trust\n
          host    haf_block_log    haf_admin        0.0.0.0/0    trust\n
          "
-        DATADIR: $DATA_CACHE_MAINNET/datadir
-        SHM_DIR: $DATA_CACHE_MAINNET/shm_dir
+        DATADIR: $DATA_CACHE_MIRRORNET/datadir
+        SHM_DIR: $DATA_CACHE_MIRRORNET/shm_dir
         LOG_FILE: $CI_JOB_NAME.log
-      command: ["--replay-blockchain", "--stop-replay-at-block=5000000"]
+      command: ["--replay-blockchain"]
   variables:
     RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
     HIVED_UID: $HIVED_UID
@@ -259,32 +263,9 @@ sync_e2e_benchmark:
   script:
     - echo "HAF image name $HAF_IMAGE_NAME"
     - ./scripts/ci/wait-for-postgres.sh $HAF_ADMIN_POSTGRES_URL
-    - ./scripts/ci/add-mocks-to-db.sh
-    - psql "${HAF_ADMIN_POSTGRES_URL}" -c 'CREATE EXTENSION IF NOT EXISTS intarray;'
-    - ./scripts/ci/hive-sync.sh
-    - ./scripts/ci/collect-db-stats.sh
-    - ./scripts/ci/hive-server.sh start
-    - *bridge_api_smoketest-script
-    - *bridge_api_smoketest_negative-script
-    - *condenser_api_smoketest-script
-    - *condenser_api_smoketest_negative-script
-    - *database_api_smoketest-script
-    - *database_api_smoketest_negative-script
-    - *follow_api_smoketest-script
-    - *follow_api_smoketest_negative-script
-    - *tags_api_smoketest-script
-    - *tags_api_smoketest_negative-script
-    - *mock_tests-script
-    - *hive_api_smoketest-script
-    - ./scripts/ci/hive-server.sh stop
-    - mv ./request_process_times.log ./request_process_times_smoketests.log
-    - ./scripts/ci/hive-server.sh start
-    - *api-benchmark-script
-  after_script:
-    - cat venv/lib/python3.8/site-packages/hive/_version.py > version.log
-    - echo "ARTIFACTS_JOB_ID=$CI_JOB_ID" >> variables.env
-    - echo "APP_VERSION=$(git describe --tags)" >> variables.env
-    - echo "SERVER_NAME=$CI_RUNNER_DESCRIPTION" >> variables.env
+    - psql $HAF_ADMIN_POSTGRES_URL -c 'SELECT max(num) FROM hive.blocks;'
+    - sleep 60
+    - psql $HAF_ADMIN_POSTGRES_URL -c 'SELECT max(num) FROM hive.blocks;'
   artifacts:
     when: always
     expire_in: 7 days
@@ -293,42 +274,5 @@ sync_e2e_benchmark:
       dotenv: variables.env
     paths:
       - pip_install.log
-      - hivemind-sync.log
-      - hivemind-server.log
-      - pg-stats
-      - tests/api_tests/hivemind/tavern/**/*.out.json
-      - request_process_times.log
-      - request_process_times_smoketests.log
-      - version.log
   tags:
     - hive-builder-4
-
-
-Trigger benchmark-results-collector:
-  stage: collector
-  needs: [ 'sync_e2e_benchmark' ]
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-      when: on_success
-    - if: '$CI_COMMIT_BRANCH == "develop"'
-      when: on_success
-    - when: manual
-  variables:
-    ARTIFACTS_URL: https://gitlab.syncad.com/api/v4/projects/$CI_PROJECT_ID/jobs/$ARTIFACTS_JOB_ID/artifacts
-    PRIVATE_TOKEN: $READ_ARTIFACT_ACCESS_TOKEN
-    #description:
-    SOURCE: hivemind
-    JOB_ID: $ARTIFACTS_JOB_ID
-    DESC: "hivemind CI"
-    EXEC_ENV_DESC: "branch=$CI_COMMIT_REF_SLUG"
-    SERVER_NAME: "$SERVER_NAME"
-    APP_VERSION: "$APP_VERSION"
-    TESTSUITE_VERSION: "commit_short_sha=$CI_COMMIT_SHORT_SHA"
-  trigger:
-    project: hive/benchmark-results-collector
-    branch: master
-    strategy: depend
-
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| JOBS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
