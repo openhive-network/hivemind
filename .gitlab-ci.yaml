@@ -218,7 +218,7 @@ cleanup_haf_cache_manual:
   extends: .cleanup_cache_manual
   stage: cleanup
   variables:
-    CLEANUP_PATH_PATTERN: "/cache/replay_data_haf_*"
+    CLEANUP_PATH_PATTERN: "/cache/replay_data_hivemind_*"
   resource_group: ${CI_COMMIT_SHA}
   tags:
     - hive-builder-4
