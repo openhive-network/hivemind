@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -e
+
 SCRIPTSDIR="$(dirname "$(realpath "$0")")/.."
 
 export LOG_FILE=build_instance.log
@@ -14,6 +16,7 @@ print_help () {
 cat <<EOF
 Usage: $0 <image_tag> <src_dir> <registry_url> [OPTION[=VALUE]]...
 Allows to build docker image containing Hivemind installation
+The image will be tagged with name '<registry_url>/instance:instance-<image_tag>'
 OPTIONS:
   --help  Display this help screen and exit
 
@@ -43,13 +46,13 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-[[ -z "$BUILD_IMAGE_TAG" ]] && printf "Variable BUILD_IMAGE_TAG must be set\n\n" && print_help && exit 1
-[[ -z "$SRCROOTDIR" ]] && printf "Variable SRCROOTDIR must be set\n\n" && print_help && exit 1
-[[ -z "$REGISTRY" ]] && printf "Variable REGISTRY must be set\n\n" && print_help && exit 1
+[[ -z "$BUILD_IMAGE_TAG" ]] && printf "Missing argument #1 - image tag suffix\n\n" && print_help && exit 1
+[[ -z "$SRCROOTDIR" ]] && printf "Missing argument #2 - source directory path\n\n" && print_help && exit 1
+[[ -z "$REGISTRY" ]] && printf "Missing argument #3 - target container registry URL\n\n" && print_help && exit 1
 
 printf "Moving into source root directory: %s\n" "$SRCROOTDIR"
 
-pushd "$SRCROOTDIR" || exit 1
+pushd "$SRCROOTDIR"
 pwd
 
 "$SRCROOTDIR/scripts/ci/fix_ci_tag.sh"
@@ -61,4 +64,4 @@ docker buildx build "${BUILD_OPTIONS[@]}" \
   --tag "$REGISTRY/instance:instance-$BUILD_IMAGE_TAG" \
   --file Dockerfile .
 
-popd || exit 1
+popd
