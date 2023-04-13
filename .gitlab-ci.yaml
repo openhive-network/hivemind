@@ -52,6 +52,19 @@ workflow:
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| BASH SCRIPTS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+.instance-build-script: &instance-build-script
+  - |
+    ./scripts/ci-helpers/build_instance.sh \
+      "$CI_COMMIT_SHA" \
+      "$CI_PROJECT_DIR" \
+      "$CI_REGISTRY_IMAGE" \
+      --dot-env-filename=hivemind_image.env \
+      --dot-env-var-name=HIVEMIND_IMAGE
+    docker images
+    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    source hivemind_image.env
+    docker push "$HIVEMIND_IMAGE"  
+
 .bridge_api_smoketest-script: &bridge_api_smoketest-script
   - |
     ./scripts/ci/start-api-smoketest.sh \
@@ -195,6 +208,22 @@ prepare_haf_data:
     CONFIG_INI_SOURCE: "$CI_PROJECT_DIR/haf/docker/config_5M.ini"
   tags:
     - hive-builder-4
+
+prepare_hivemind_image:
+  stage: build
+  extends: .docker_image_builder_job_template
+  before_script:
+    - git config --global --add safe.directory $CI_PROJECT_DIR
+  script:
+    - *instance-build-script
+  artifacts:
+    when: always
+    expire_in: 7 days
+    reports:
+      dotenv: hivemind_image.env
+    paths:
+      - hivemind_image.env
+  tags: *shared_tags
 
 cleanup_haf_cache_manual:
   extends: .cleanup_cache_manual
