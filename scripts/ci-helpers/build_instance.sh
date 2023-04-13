@@ -17,14 +17,26 @@ cat <<EOF
 Usage: $0 <image_tag> <src_dir> <registry_url> [OPTION[=VALUE]]...
 Allows to build docker image containing Hivemind installation
 The image will be tagged with name '<registry_url>/instance:instance-<image_tag>'
-OPTIONS:
-  --help  Display this help screen and exit
 
+OPTIONS:
+  -?,--help                        Display this help screen and exit
+  --dot-env-filename=<filename> File name of the dot env file to be generated
+  --dot-env-var-name=<var name> Vaiable name to be used in the generated file (default: 'IMAGE')
 EOF
 }
 
 while [ $# -gt 0 ]; do
   case "$1" in
+    -?|--help)
+        print_help
+        exit 0
+        ;;
+    --dot-env-filename=*)
+        DOT_ENV_FILENAME="${1#*=}"
+        ;;
+    --dot-env-var-name=*)
+        DOTENV_VAR_NAME="${1#*=}"
+        ;;
     *)
         if [ -z "$BUILD_IMAGE_TAG" ];
         then
@@ -58,10 +70,13 @@ pwd
 "$SRCROOTDIR/scripts/ci/fix_ci_tag.sh"
 
 BUILD_OPTIONS=("--platform=amd64" "--target=instance" "--progress=plain")
+TAG="$REGISTRY/instance:instance-$BUILD_IMAGE_TAG"
 
 docker buildx build "${BUILD_OPTIONS[@]}" \
   --build-arg CI_REGISTRY_IMAGE="$REGISTRY/" \
-  --tag "$REGISTRY/instance:instance-$BUILD_IMAGE_TAG" \
+  --tag "$TAG" \
   --file Dockerfile .
+
+[[ -n "${DOT_ENV_FILENAME:-}" ]] && echo "${DOTENV_VAR_NAME:-IMAGE}=$TAG" > "$DOT_ENV_FILENAME"
 
 popd
