@@ -219,8 +219,9 @@ def run_server(conf):
     req_res_log = None
 
     if conf.get('log_request_times'):
+        log_path = conf.get('log_request_times_path')
         req_res_log = logging.getLogger("Request-Process-Time-Logger")
-        conf_stdout_custom_file_logger(req_res_log, "./request_process_times.log")
+        conf_stdout_custom_file_logger(req_res_log, log_path)
 
     methods = build_methods()
 
