@@ -12,7 +12,7 @@ run_mocker() {
   psql "${HAF_ADMIN_POSTGRES_URL}" -f "${SCRIPTPATH}/wrapper_for_app_next_block.sql"
 
   echo "Running mocking script"
-  mocker --database-url ${HAF_ADMIN_POSTGRES_URL}
+  mocker --database-url "${HAF_ADMIN_POSTGRES_URL}"
 }
 
 run_mocker
