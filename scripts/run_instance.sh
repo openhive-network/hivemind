@@ -16,10 +16,13 @@ print_help () {
     echo
     echo "Allows to setup a database already filled by HAF instance, to work with hivemind application."
     echo "OPTIONS:"
-    echo "  --host=VALUE         Allows to specify a PostgreSQL host location (defaults to /var/run/postgresql)"
-    echo "  --port=NUMBER        Allows to specify a PostgreSQL operating port (defaults to 5432)"
-    echo "  --postgres-url=URL   Allows to specify a PostgreSQL URL (in opposite to separate --host and --port options)"
-    echo "  --help               Display this help screen and exit"
+    echo "  --host=VALUE           Allows to specify a PostgreSQL host location (defaults to /var/run/postgresql)"
+    echo "  --port=NUMBER          Allows to specify a PostgreSQL operating port (defaults to 5432)"
+    echo "  --postgres-url=URL     Allows to specify a PostgreSQL URL (in opposite to separate --host and --port options)"
+    echo "  --name=CONTAINER_NAME  Allows to specify a dedicated name to the spawned container instance"
+    echo "  --detach               Allows to start container instance in detached mode. Otherwise, you can detach using Ctrl+p+q key binding"
+    echo "  --docker-option=OPTION Allows to specify additional docker option, to be passed to underlying docker run spawn."
+    echo "  --help                 Display this help screen and exit"
     echo
 }
 
@@ -63,12 +66,17 @@ while [ $# -gt 0 ]; do
         HTTP_ENDPOINT="${1#*=}"
         add_docker_arg "--publish=${HTTP_ENDPOINT}:8080"
         ;;
-
     --docker-option=*)
         option="${1#*=}"
         add_docker_arg "$option"
         ;; 
-
+     --name=*)
+        CONTAINER_NAME="${1#*=}"
+        echo "Container name is: $CONTAINER_NAME"
+        ;;
+    --detach)
+      add_docker_arg "--detach"
+      ;;
     --help)
         print_help
         exit 0
