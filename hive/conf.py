@@ -83,6 +83,13 @@ class Conf:
             action='store_true',
         )
         add(
+            '--log-request-times-path',
+            env_var='LOG_REQUEST_TIMES_PATH',
+            help='(debug) specifies path for the log containing request processing times (requires --log-request-times)',
+            action='store',
+            default='./request_process_times.log'
+        )
+        add(
             '--log-op-calls',
             env_var='LOG_OP_CALLS',
             help='(debug) log operations calls and responses',
