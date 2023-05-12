@@ -20,12 +20,13 @@ variables:
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: recursive
   CI_DEBUG_SERVICES: "true"
-  DATA_CACHE_MAINNET: /cache/replay_data_hivemind_${CI_PIPELINE_ID}
+  DATA_CACHE_HAF_TEMPLATE: /cache/replay_data_hivemind_haf
+  DATA_CACHE_HAF: "/cache/replay_data_hivemind_haf_${CI_PIPELINE_ID}"
   BLOCK_LOG_SOURCE_DIR_5M: /blockchain/block_log_5m
 
 include:
   - project: hive/haf
-    ref: d533a7afbba53ecc7bb1030dbfa6c181bb899409 # develop 
+    ref: 94183788111c2f6f650859ad11bebbf867aa5010 # develop
     file: /scripts/ci-helpers/prepare_data_image_job.yml
 
 workflow:
@@ -253,8 +254,8 @@ sync_e2e_benchmark:
          host    haf_block_log    haf_app_admin    all    trust\n
          host    haf_block_log    haf_admin        all    trust\n
          "
-        DATADIR: $DATA_CACHE_MAINNET/datadir
-        SHM_DIR: $DATA_CACHE_MAINNET/shm_dir
+        DATADIR: $DATA_CACHE_HAF/datadir
+        SHM_DIR: $DATA_CACHE_HAF/shm_dir
         LOG_FILE: $CI_JOB_NAME.log
       command: ["--replay-blockchain", "--stop-replay-at-block=5000000"]
     - name: $HIVEMIND_IMAGE
