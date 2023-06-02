@@ -25,12 +25,12 @@ BEGIN
         end if;
 
         IF _role_id IS NOT NULL AND _title IS NULL THEN
-            INSERT INTO hive_roles(account_id, community_id, role_id, created_at)
+            INSERT INTO hivemind_app.hive_roles(account_id, community_id, role_id, created_at)
             VALUES (_account_id, _community_id, _role_id, _created_at)
             ON CONFLICT (account_id, community_id)
                 DO UPDATE SET role_id = _role_id;
         ELSIF _title IS NOT NULL AND _role_id IS NULL THEN
-            INSERT INTO hive_roles(account_id, community_id, title, created_at)
+            INSERT INTO hivemind_app.hive_roles(account_id, community_id, title, created_at)
             VALUES (_account_id, _community_id, _title, _created_at)
             ON CONFLICT (account_id, community_id)
                 DO UPDATE SET title = _title;
