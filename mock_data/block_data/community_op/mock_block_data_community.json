@@ -4450,28 +4450,6 @@
               "id": "community",
               "json": "[\"unmutePost\",{\"community\":\"hive-198723\",\"account\":\"alice\",\"permlink\":\"First-after-member-post-hive3\",\"notes\":\"hive3 Unmute first post\"}]"
             }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "ismember"
-              ],
-              "id": "community",
-              "json": "[\"subscribe\",{\"community\":\"hive-199999\"}]"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "isoldmember"
-              ],
-              "id": "community",
-              "json": "[\"subscribe\",{\"community\":\"hive-199999\"}]"
-            }
           }
         ]
       }
@@ -4779,6 +4757,28 @@
         "ref_block_prefix": 1,
         "expiration": "2020-03-23T12:17:00",
         "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ismember"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-199999\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "isoldmember"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-199999\"}]"
+            }
+          },
           {
             "type": "custom_json_operation",
             "value": {
