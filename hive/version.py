@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Final
 
-VERSION: Final[str] = "1.0"
-GIT_REVISION: Final[str] = "955ab9ab60bc99f42eee1f18d13882833acfabab"
-GIT_DATE: Final[datetime] = datetime.fromisoformat("2023-05-31T17:32:23.000")
+import hive._version as generated
+
+VERSION: Final[str] = generated.__version__
+GIT_REVISION: Final[str] = generated.__git_revision__
+GIT_DATE: Final[datetime] = datetime.fromisoformat(generated.__git_revision_date__)
