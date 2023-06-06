@@ -47,6 +47,7 @@ def init_argparse(args: Sequence[str]) -> configargparse.Namespace:
 
 
 def load_mock_data(mock_block_data_paths: Optional[List[str]] = None, mock_vops_data_paths: Optional[List[str]] = None):
+    log.info('Loading mock data')
     mock_block_data_paths = [] if not mock_block_data_paths else mock_block_data_paths
     mock_vops_data_paths = [] if not mock_vops_data_paths else mock_vops_data_paths
 
@@ -73,6 +74,7 @@ def create_mocked_blocks_after_haf_db_blocks(lbound: int, ubound: int):
 def main():
     args = init_argparse(sys.argv[1:])
 
+    log.info(f'Setting up the database connection using URL {args.database_url}')
     db = Db(url=args.database_url, name='mocker')
     Db.set_shared_instance(db)
 
@@ -80,6 +82,7 @@ def main():
 
     block_data = MockBlockProvider.block_data
 
+    log.info('Processing block data')
     blocks = []
     for block_number, data in block_data.items():
 
@@ -90,6 +93,7 @@ def main():
         block = BlockMock(block_number=block_number, block_data=data, virtual_ops=vops)
         blocks.append(block)
 
+    log.info('Sorting block data')
     blocks.sort(key=lambda b: b.block_number)
 
     last_block_in_db = db.query_row("SELECT * FROM hive.blocks ORDER BY num DESC LIMIT 1")

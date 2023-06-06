@@ -4,7 +4,9 @@ set -euo pipefail
 
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
+# shellcheck disable=SC2034
 LOG_FILE=run_instance.log
+# shellcheck source=./common.sh
 source "$SCRIPTPATH/common.sh"
 
 log_exec_params "$@"
@@ -103,9 +105,6 @@ CMD_ARGS=("$@")
 CMD_ARGS+=("${HIVEMIND_ARGS[@]}")
 
 docker container rm -f -v "$CONTAINER_NAME" 2>/dev/null || true
-
-#docker run -it --rm --name=haf-hivemind-instance -e POSTGRES_URL=postgresql://haf_app_admin@172.17.0.7:5432/haf_block_log registry.gitlab.syncad.com/hive/hivemind/instance:3c0c897a sync --database-url=postgresql://haf_app_admin@172.17.0.7:5432/haf_block_log
-
 
 docker run --rm -it -e UID=$(id -u) -e GID=$(id -g) --name "$CONTAINER_NAME" --stop-timeout=180 ${DOCKER_ARGS[@]} -e POSTGRES_URL="${POSTGRES_ACCESS}" "${IMAGE_NAME}" "${CMD_ARGS[@]}"
 

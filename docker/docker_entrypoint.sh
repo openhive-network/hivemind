@@ -1,62 +1,74 @@
 #! /bin/bash
 
-set -euo pipefail 
+set -euo pipefail
 
-SCRIPTDIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-
-cleanup () {
-  echo "Performing cleanup...."
-  python_pid=$(pidof 'python3')
-  echo "python_pid: $python_pid"
-  
-  sudo -n kill -INT $python_pid
-
-  echo "Waiting for hivemind finish..."
-  tail --pid=$python_pid -f /dev/null || true
-  echo "Hivemind app finish done."
-
-  echo "Cleanup actions done."
+# Logger function
+function log () {
+    local -r category=$1
+    local -r message=$2
+    local -r timestamp=$(date +"%F %T,%3N%:z")
+    echo "[Entrypoint] $timestamp INFO  [$category] (main) $message"
 }
 
-trap cleanup INT QUIT TERM
+log "global" "Hivemind arguments: $*"
 
+COMMAND="$1"
 HIVEMIND_ARGS=()
+ADD_MOCKS=${ADD_MOCKS:-false}
+LOG_PATH=${LOG_PATH:-}
+POSTGRES_URL=${POSTGRES_URL:-}
+POSTGRES_ADMIN_URL=${POSTGRES_ADMIN_URL:-}
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --database-url=*)
         POSTGRES_URL="${1#*=}"
         ;;
-    --port=*)
-        HTTP_PORT="${1#*=}"
+    --database-admin-url=*)
+        POSTGRES_ADMIN_URL="${1#*=}"
         ;;
-  *)
+    *)
       HIVEMIND_ARGS+=("$1") 
-    esac
-    shift
+  esac
+  shift
 done
 
-pushd /home/hivemind/app
+log "global" "Hivemind arguments: ${HIVEMIND_ARGS[*]}"
+log "global" "Using PostgreSQL instance: $POSTGRES_URL"
 
-# temporary comment out - fully dockerized version needs separate steps
-#./scripts/setup_postgres.sh --postgres-url=${POSTGRES_URL}
-#./scripts/setup_db.sh --postgres-url=${POSTGRES_URL}
-
-{
-echo "Attempting to start Hivemind process..."
-sudo -HEnu hivemind /bin/bash <<EOF
+run_hive() {
+  # shellcheck source=/dev/null
   source /home/hivemind/.hivemind-venv/bin/activate
-  hive "${HIVEMIND_ARGS[@]}" --database-url="${POSTGRES_URL}"
-EOF
-echo "Hivemind process finished execution: $?"
-} &
+  if [[ -n "$LOG_PATH" ]]; then
+    log "run_hive" "Starting Hivemind with log $LOG_PATH"
+    hive "${HIVEMIND_ARGS[@]}" --database-url="${POSTGRES_URL}" 2>&1 | tee -i "$LOG_PATH"
+  else
+    log "run_hive" "Starting Hivemind..."
+    hive "${HIVEMIND_ARGS[@]}" --database-url="${POSTGRES_URL}"
+  fi
+}
 
-job_pid=$!
+sync() {
+  log "sync" "Setting up the database before sync..."
+  cd /home/hivemind/app
+  ./setup_postgres.sh --postgres-url="${POSTGRES_URL}"
+  ./setup_db.sh --postgres-url="${POSTGRES_ADMIN_URL}"
+  if [[ "$ADD_MOCKS" == "true" ]]; then
+    log "sync" "Adding mocks to database..."
+    # shellcheck source=/dev/null
+    source /home/hivemind/.hivemind-venv/bin/activate
+    ci/add-mocks-to-db.sh --postgres-url="${POSTGRES_ADMIN_URL}"
+    deactivate
+  fi 
+  run_hive
+}
 
-jobs -l
+case "$COMMAND" in
+    sync)
+      sync
+      ;;
+    *)
+      run_hive
+esac
 
-echo "waiting for job finish: $job_pid."
-wait $job_pid || true
-
-echo "Exiting docker entrypoint..."
-
+log "global" "Exiting docker entrypoint..."
