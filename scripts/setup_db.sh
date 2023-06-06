@@ -4,7 +4,9 @@ set -euo pipefail
 
 SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
+# shellcheck disable=SC2034
 LOG_FILE=setup_db.log
+# shellcheck source=./common.sh
 source "$SCRIPTPATH/common.sh"
 
 log_exec_params "$@"
@@ -64,7 +66,4 @@ else
   POSTGRES_ACCESS=$POSTGRES_URL
 fi
 
-psql $POSTGRES_ACCESS -v ON_ERROR_STOP=on -f "${SCRIPTPATH}/setup_db.sql"
-
-
-
+psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -f "${SCRIPTPATH}/setup_db.sql"

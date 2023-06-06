@@ -185,17 +185,14 @@ Entering application main loop...
 
 #### Running Hivemind instance container
 
-The built Hivemind instance requires a preconfigured HAF database to store its data. To perform required database configuration, you should start:
+The built Hivemind instance requires a preconfigured HAF database to store its data. The required database configuration will be performed automatically by the container before the `hive sync` command is run:
+
+The commands below assume that the running HAF container has IP: 172.17.0.2
 
 ```bash
-../hivemind/scripts/setup_postgres.sh --postgres-url=postgresql://haf_app_admin@172.17.0.2/haf_block_log
-../hivemind/scripts/setup_db.sh --postgres-url=postgresql://haf_admin@172.17.0.2/haf_block_log # warning this command requires haf_admin access since super user permissions are required to install intarray extension
-```
-
-Above commands assume that the running HAF container has IP: 172.17.0.2
-
-```bash
-../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local sync --database-url="postgresql://haf_app_admin@172.17.0.2:5432/haf_block_log"
+../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local sync \
+   --database-url="postgresql://haf_app_admin@172.17.0.2:5432/haf_block_log" \
+   --database-admin-url="postgresql://haf_admin@172.17.0.2/haf_block_log" # haf_admin access URL
 ```
 
 ## Updating from an existing hivemind database
@@ -247,7 +244,7 @@ To run api tests:
 
     ```bash
     cd hivemind/scripts/ci/
-    ./scripts/ci/add-mocks-to-db.sh
+    ./scripts/ci/add-mocks-to-db.sh --postgres-url="postgresql://haf_admin@172.17.0.2/haf_block_log" # haf_admin access URL, assuming HAF is running on 172.17.0.2
     ```
 
 3. Run `hivemind` in `server` mode

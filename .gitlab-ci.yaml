@@ -263,56 +263,69 @@ sync_e2e_benchmark:
         - bash
         - -c
         - |
-          df -h && \
+          cat /etc/hosts && \
           sleep 20s && \
-          cd /home/hivemind/app && \
-          source /home/hivemind/.hivemind-venv/bin/activate && \
+          cd ${WORKING_DIR}/app && \
           ci/wait-for-postgres.sh ${HAF_ADMIN_POSTGRES_URL} && \
-          ci/add-mocks-to-db.sh && \
-          psql "${HAF_ADMIN_POSTGRES_URL}" -c 'CREATE EXTENSION IF NOT EXISTS intarray;' && \
-          cd ${HOME} && \
-          cat /home/hivemind/.hivemind-venv/lib/python3.8/site-packages/hive/_version.py > version.log && \
-          /home/hivemind/app/ci/hive-sync.sh && \
-          /home/hivemind/app/ci/collect-db-stats.sh && \
-          python -m http.server ${RUNNER_HIVEMIND_SERVER_HTTP_PORT}
-    - name: $HIVEMIND_IMAGE
-      alias: hivemind-benchmark # cannot be a variable
-      entrypoint:
-        - bash
-        - -c
-        - |
-          (python -m http.server --directory ${HOME} $LOG_SERVER_PORT &) && \
-          wget --header "PRIVATE-TOKEN: $AWAIT_SERVICE_ACCESS_TOKEN" "$AWAIT_PACKAGE_URL" -O ${HOME}/await && \
-          chmod +x ${HOME}/await && \
-          ${HOME}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Database found" && \
-          ${HOME}/await -t 1h ${RUNNER_HIVEMIND_SYNC_URL} -- echo "Hivemind sync finished" && \
-          source /home/hivemind/.hivemind-venv/bin/activate && \
-          hive server \
-            --log-request-times \
-            --log-request-times-path ${HOME}/request_process_times.log \
+          cd ${WORKING_DIR} && \
+          cat ${WORKING_DIR}/.hivemind-venv/lib/python3.8/site-packages/hive/_version.py > version.log && \
+          ${WORKING_DIR}/docker_entrypoint.sh sync \
             --log-mask-sensitive-data \
-            --http-server-port ${RUNNER_HIVEMIND_SERVER_HTTP_PORT} \
-            --database-url "${HAF_POSTGRES_URL}" \
-            2>&1 | tee ${HOME}/hivemind-benchmark-server.log
+            --pid-file hive_sync.pid \
+            --test-max-block="${RUNNER_HIVEMIND_SYNC_MAX_BLOCK}" \
+            --test-profile=False \
+            --prometheus-port 11011 \
+            --database-url="${HAF_POSTGRES_URL}" \
+            --database-admin-url="${HAF_ADMIN_POSTGRES_URL}" \
+            --community-start-block 4998000 && \
+          ${WORKING_DIR}/app/ci/collect-db-stats.sh && \
+          python -m http.server ${RUNNER_HIVEMIND_SERVER_HTTP_PORT}
+      variables:
+        WORKING_DIR: /home/hivemind
+        LOG_PATH: $WORKING_DIR/hivemind-sync.log
+        ADD_MOCKS: "true"
     - name: $HIVEMIND_IMAGE
       alias: hivemind-smoketest # cannot be a variable
       entrypoint:
         - bash
         - -c
         - |
-          (python -m http.server --directory ${HOME} $LOG_SERVER_PORT &) && \
-          wget --header "PRIVATE-TOKEN: $AWAIT_SERVICE_ACCESS_TOKEN" "$AWAIT_PACKAGE_URL" -O ${HOME}/await && \
-          chmod +x ${HOME}/await && \
-          ${HOME}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Database found" && \
-          ${HOME}/await -t 1h ${RUNNER_HIVEMIND_SYNC_URL} -- echo "Hivemind sync finished" && \
-          source /home/hivemind/.hivemind-venv/bin/activate && \
-          hive server \
+          (python -m http.server --directory ${WORKING_DIR} $LOG_SERVER_PORT &) && \
+          cat /etc/hosts && \
+          wget --header "PRIVATE-TOKEN: $AWAIT_SERVICE_ACCESS_TOKEN" "$AWAIT_PACKAGE_URL" -O ${WORKING_DIR}/await && \
+          chmod +x ${WORKING_DIR}/await && \
+          ${WORKING_DIR}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Database found" && \
+          ${WORKING_DIR}/await -t 1h ${RUNNER_HIVEMIND_SYNC_URL} -- echo "Hivemind sync finished" && \
+          ${WORKING_DIR}/docker_entrypoint.sh server \
             --log-request-times \
-            --log-request-times-path ${HOME}/request_process_times_smoketests.log \
+            --log-request-times-path=${WORKING_DIR}/request_process_times_smoketests.log \
             --log-mask-sensitive-data \
-            --http-server-port ${RUNNER_HIVEMIND_SERVER_HTTP_PORT} \
-            --database-url "${HAF_POSTGRES_URL}" \
-            2>&1 | tee ${HOME}/hivemind-server.log
+            --http-server-port=${RUNNER_HIVEMIND_SERVER_HTTP_PORT} \
+            --database-url="${HAF_POSTGRES_URL}"
+      variables:
+        WORKING_DIR: /home/hivemind
+        LOG_PATH: /home/hivemind/hivemind-server.log
+    - name: $HIVEMIND_IMAGE
+      alias: hivemind-benchmark # cannot be a variable
+      entrypoint:
+        - bash
+        - -c
+        - |
+          (python -m http.server --directory ${WORKING_DIR} $LOG_SERVER_PORT &) && \
+          cat /etc/hosts && \
+          wget --header "PRIVATE-TOKEN: $AWAIT_SERVICE_ACCESS_TOKEN" "$AWAIT_PACKAGE_URL" -O ${WORKING_DIR}/await && \
+          chmod +x ${WORKING_DIR}/await && \
+          ${WORKING_DIR}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Database found" && \
+          ${WORKING_DIR}/await -t 1h ${RUNNER_HIVEMIND_SYNC_URL} -- echo "Hivemind sync finished" && \
+          ${WORKING_DIR}/docker_entrypoint.sh server \
+            --log-request-times \
+            --log-request-times-path=${WORKING_DIR}/request_process_times.log \
+            --log-mask-sensitive-data \
+            --http-server-port=${RUNNER_HIVEMIND_SERVER_HTTP_PORT} \
+            --database-url="${HAF_POSTGRES_URL}"
+      variables:
+        WORKING_DIR: /home/hivemind
+        LOG_PATH: /home/hivemind/hivemind-benchmark-server.log
   variables:
     RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
     HIVED_UID: $HIVED_UID
