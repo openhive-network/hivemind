@@ -60,6 +60,9 @@ ENV HTTP_PORT=${HTTP_PORT}
 ARG POSTGRES_URL="postgresql://haf_app_admin@172.17.0.1/haf_block_log"
 ENV POSTGRES_URL=${POSTGRES_URL}
 
+ARG POSTGRES_ADMIN_URL="postgresql://haf_admin@172.17.0.1:5432/haf_block_log"
+ENV POSTGRES_ADMIN_URL=${POSTGRES_ADMIN_URL}
+
 ENV LANG=en_US.UTF-8
 
 USER hivemind
@@ -71,10 +74,10 @@ COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/dist /home/hiv
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/.hivemind-venv /home/hivemind/.hivemind-venv 
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/docker/docker_entrypoint.sh .
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/scripts /home/hivemind/app
+COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/haf/scripts/create_haf_app_role.sh /home/hivemind/haf/scripts/create_haf_app_role.sh
+COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/haf/scripts/common.sh /home/hivemind/haf/scripts/common.sh
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/mock_data/block_data /home/hivemind/app/mock_data/block_data
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/mock_data/vops_data /home/hivemind/app/mock_data/vops_data
-
-USER haf_admin
 
 # JSON rpc service
 EXPOSE ${HTTP_PORT}
