@@ -1,7 +1,7 @@
-ALTER FUNCTION hive.app_next_block(text) RENAME TO app_next_block_haf;
+ALTER FUNCTION hive.app_next_block( hive.contexts_group ) RENAME TO app_next_block_haf;
 
 CREATE OR REPLACE FUNCTION hive.app_next_block(
-    _context_name text)
+    _context_name  hive.contexts_group)
     RETURNS hive.blocks_range
     LANGUAGE 'plpgsql'
 AS
