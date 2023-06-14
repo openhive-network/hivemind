@@ -27,8 +27,14 @@ while [ $# -gt 0 ]; do
     --database-admin-url=*)
         POSTGRES_ADMIN_URL="${1#*=}"
         ;;
+    --add-mocks=*)
+        ADD_MOCKS="${1#*=}"
+        ;;
+    --add-mocks)
+        ADD_MOCKS=true
+        ;;
     *)
-      HIVEMIND_ARGS+=("$1") 
+        HIVEMIND_ARGS+=("$1") 
   esac
   shift
 done
@@ -48,24 +54,23 @@ run_hive() {
   fi
 }
 
-sync() {
-  log "sync" "Setting up the database before sync..."
+setup() {
+  log "setup" "Setting up the database..."
   cd /home/hivemind/app
-  ./setup_postgres.sh --postgres-url="${POSTGRES_URL}"
+  ./setup_postgres.sh --postgres-url="${POSTGRES_ADMIN_URL}"
   ./setup_db.sh --postgres-url="${POSTGRES_ADMIN_URL}"
   if [[ "$ADD_MOCKS" == "true" ]]; then
-    log "sync" "Adding mocks to database..."
+    log "setup" "Adding mocks to database..."
     # shellcheck source=/dev/null
     source /home/hivemind/.hivemind-venv/bin/activate
     ci/add-mocks-to-db.sh --postgres-url="${POSTGRES_ADMIN_URL}"
     deactivate
   fi 
-  run_hive
 }
 
 case "$COMMAND" in
-    sync)
-      sync
+    setup)
+      setup
       ;;
     *)
       run_hive
