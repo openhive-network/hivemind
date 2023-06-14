@@ -269,6 +269,9 @@ sync_e2e_benchmark:
           ci/wait-for-postgres.sh ${HAF_ADMIN_POSTGRES_URL} && \
           cd ${WORKING_DIR} && \
           cat ${WORKING_DIR}/.hivemind-venv/lib/python3.8/site-packages/hive/_version.py > version.log && \
+          /home/hivemind/docker_entrypoint.sh setup \
+            --database-admin-url="${HAF_ADMIN_POSTGRES_URL}" \
+            --add-mocks=${ADD_MOCKS} && \
           ${WORKING_DIR}/docker_entrypoint.sh sync \
             --log-mask-sensitive-data \
             --pid-file hive_sync.pid \
@@ -276,7 +279,6 @@ sync_e2e_benchmark:
             --test-profile=False \
             --prometheus-port 11011 \
             --database-url="${HAF_POSTGRES_URL}" \
-            --database-admin-url="${HAF_ADMIN_POSTGRES_URL}" \
             --community-start-block 4998000 && \
           ${WORKING_DIR}/app/ci/collect-db-stats.sh && \
           python -m http.server ${RUNNER_HIVEMIND_SERVER_HTTP_PORT}
