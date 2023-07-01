@@ -347,7 +347,7 @@ class DbState:
     @classmethod
     def _finish_account_reputations(cls, db, last_imported_block, current_imported_block):
         log.info(
-            f"Performing update_account_reputations on block rangge: {last_imported_block}:{current_imported_block}"
+            f"Performing update_account_reputations on block range: {last_imported_block}:{current_imported_block}"
         )
 
         with AutoDbDisposer(db, "finish_account_reputations") as db_mgr:
