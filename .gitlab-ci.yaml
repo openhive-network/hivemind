@@ -210,7 +210,7 @@ prepare_haf_data:
     BLOCK_LOG_SOURCE_DIR: $BLOCK_LOG_SOURCE_DIR_5M
     CONFIG_INI_SOURCE: "$CI_PROJECT_DIR/haf/docker/config_5M.ini"
   tags:
-    - hive-builder-4
+    - data-cache-storage
 
 prepare_hivemind_image:
   stage: build
@@ -235,7 +235,7 @@ cleanup_haf_cache_manual:
     CLEANUP_PATH_PATTERN: "/cache/replay_data_hivemind_*"
   resource_group: ${CI_COMMIT_SHA}
   tags:
-    - hive-builder-4
+    - data-cache-storage
 
 sync_e2e_benchmark:
   image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
@@ -407,7 +407,7 @@ sync_e2e_benchmark:
       - request_process_times_smoketests.log
       - version.log
   tags:
-    - hive-builder-4
+    - data-cache-storage
 
 publish_instance_image:
   stage: publish
