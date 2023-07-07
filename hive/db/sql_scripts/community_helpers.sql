@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS hivemind_app.set_community_role_or_title;
-CREATE OR REPLACE FUNCTION hivemind_app.set_community_role_or_title(_community_id hivemind_app.hive_posts.community_id%TYPE, _account_id hivemind_app.hive_posts.author_id%TYPE, _role_id integer, _title varchar(140), _created_at timestamp)
+DROP FUNCTION IF EXISTS hivemind_app.validate_community_set_role;
+CREATE OR REPLACE FUNCTION hivemind_app.validate_community_set_role(_community_id hivemind_app.hive_posts.community_id%TYPE, _account_id hivemind_app.hive_posts.author_id%TYPE, _role_id integer)
 RETURNS bool
 LANGUAGE plpgsql
 as
@@ -23,18 +23,6 @@ BEGIN
                 return false;
             END IF;
         end if;
-
-        IF _role_id IS NOT NULL AND _title IS NULL THEN
-            INSERT INTO hivemind_app.hive_roles(account_id, community_id, role_id, created_at)
-            VALUES (_account_id, _community_id, _role_id, _created_at)
-            ON CONFLICT (account_id, community_id)
-                DO UPDATE SET role_id = _role_id;
-        ELSIF _title IS NOT NULL AND _role_id IS NULL THEN
-            INSERT INTO hivemind_app.hive_roles(account_id, community_id, title, created_at)
-            VALUES (_account_id, _community_id, _title, _created_at)
-            ON CONFLICT (account_id, community_id)
-                DO UPDATE SET title = _title;
-        END IF;
 
         RETURN TRUE;
 END;

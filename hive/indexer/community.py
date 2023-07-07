@@ -372,22 +372,24 @@ class CommunityOp:
 
         # Account-level actions
         elif action == 'setRole':
-            subscribed = DB.query_one(
-                f"""SELECT * FROM {SCHEMA_NAME}.set_community_role_or_title(:community_id, :account_id, :role_id, NULL::varchar, CAST(:date AS timestamp ))""",
+            DB.query(
+                f"""INSERT INTO {SCHEMA_NAME}.hive_roles
+                               (account_id, community_id, role_id, created_at)
+                        VALUES (:account_id, :community_id, :role_id, :date)
+                            ON CONFLICT (account_id, community_id)
+                            DO UPDATE SET role_id = :role_id """,
                 **params,
             )
-            if not subscribed:
-                log.info("set role failed account '%s' must be subscribed to the community", params['account'])
-                return
             self._notify('set_role', payload=Role(self.role_id).name)
         elif action == 'setUserTitle':
-            subscribed = DB.query_one(
-                f"""SELECT * FROM {SCHEMA_NAME}.set_community_role_or_title(:community_id, :account_id, NULL::integer , :title, CAST(:date AS timestamp ))""",
+            DB.query(
+                f"""INSERT INTO {SCHEMA_NAME}.hive_roles
+                               (account_id, community_id, title, created_at)
+                        VALUES (:account_id, :community_id, :title, :date)
+                            ON CONFLICT (account_id, community_id)
+                            DO UPDATE SET title = :title""",
                 **params,
             )
-            if not subscribed:
-                log.info("set role failed account '%s' must be subscribed to the community", params['account'])
-                return
             self._notify('set_label', payload=self.title)
 
         # Post-level actions
@@ -575,6 +577,13 @@ class CommunityOp:
             if self.actor != self.account:
                 assert account_role < actor_role, 'cant modify higher-role user'
                 assert account_role != new_role, 'role would not change'
+
+            subscribed = DB.query_one(
+                f"""SELECT * FROM {SCHEMA_NAME}.validate_community_set_role(:community_id, :actor_id, :role_id)""",
+                community_id=self.community_id, actor_id=self.actor_id, role_id=new_role,
+            )
+            assert subscribed, f"account {self.account} must be subscribed to the community to execute setRole"
+
         elif action == 'updateProps':
             assert actor_role >= Role.admin, 'only admins can update props'
         elif action == 'setUserTitle':
