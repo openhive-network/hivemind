@@ -582,14 +582,14 @@ class CommunityOp:
             # the role "muted" is still settable regardless of subscription status
             subscribed = DB.query_one(
                 f"""SELECT * FROM {SCHEMA_NAME}.validate_community_set_role(:community_id, :actor_id, :role_id)""",
-                community_id=self.community_id, actor_id=self.actor_id, role_id=new_role,
+                community_id=self.community_id, actor_id=self.account_id, role_id=new_role,
             )
-            assert subscribed, f"{self.actor} must be subscribed to the community to change its role"
+            assert subscribed, f"{self.account} must be subscribed to the community to change its role"
 
         elif action == 'updateProps':
             assert actor_role >= Role.admin, 'only admins can update props'
         elif action == 'setUserTitle':
-            assert self._subscribed(self.actor_id),  f"{self.actor} must be subscribed to the community to change its title"
+            assert self._subscribed(self.account_id),  f"{self.account} must be subscribed to the community to change its title"
             # TODO: assert title changed?
             assert actor_role >= Role.mod, 'only mods can set user titles'
         elif action == 'mutePost':
