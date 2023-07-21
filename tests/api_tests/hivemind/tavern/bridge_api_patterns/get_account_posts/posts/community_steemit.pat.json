@@ -24,6 +24,7 @@
     "post_id": 1256861,
     "promoted": "0.000 HBD",
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -464,6 +465,7 @@
     "post_id": 1,
     "promoted": "0.000 HBD",
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 2.0,
       "gray": false,

@@ -1968,6 +1968,7 @@
     "post_id": 1187991,
     "promoted": "1.000 HBD",
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -3103,6 +3104,7 @@
     "post_id": 1185974,
     "promoted": "0.000 HBD",
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -3714,6 +3716,7 @@
     "post_id": 1189569,
     "promoted": "25.000 HBD",
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
