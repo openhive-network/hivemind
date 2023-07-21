@@ -903,6 +903,7 @@
     "post_id": 58260,
     "promoted": "0.000 HBD",
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -1389,6 +1390,7 @@
     "post_id": 51772,
     "promoted": "0.000 HBD",
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 3.0,
       "gray": false,
@@ -1887,6 +1889,7 @@
     "post_id": 50564,
     "promoted": "0.000 HBD",
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
