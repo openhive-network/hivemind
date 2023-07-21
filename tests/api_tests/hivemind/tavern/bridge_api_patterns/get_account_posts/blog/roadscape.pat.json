@@ -133,6 +133,7 @@
     "post_id": 4598,
     "promoted": "0.000 HBD",
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -353,6 +354,7 @@
     "post_id": 751,
     "promoted": "0.000 HBD",
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -721,6 +723,7 @@
     "post_id": 471,
     "promoted": "0.000 HBD",
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 3.0,
       "gray": false,
@@ -853,6 +856,7 @@
     "post_id": 97,
     "promoted": "0.000 HBD",
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 2.0,
       "gray": false,
@@ -893,6 +897,7 @@
     "post_id": 80,
     "promoted": "0.000 HBD",
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

@@ -26,6 +26,7 @@
     "post_id": 1256969,
     "promoted": "0.000 HBD",
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -63,6 +64,7 @@
     "post_id": 1256919,
     "promoted": "0.000 HBD",
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -100,6 +102,7 @@
     "post_id": 1256877,
     "promoted": "0.000 HBD",
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -139,6 +142,7 @@
       "alice/after-muted-comment-to-please-comment-hive2-03",
       "alice/after-member-comment-to-please-comment-hive2-03"
     ],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

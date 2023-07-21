@@ -3,6 +3,7 @@
 import logging
 
 from hive.conf import SCHEMA_NAME
+from hive.server.bridge_api.methods import count_reblogs
 from hive.server.bridge_api.objects import _bridge_post_object, append_statistics_to_post
 from hive.server.common.helpers import return_error_info, valid_account, valid_permlink
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
@@ -31,6 +32,7 @@ async def get_discussion(context, author: str, permlink: str, observer: str = ''
     )
     root_post = append_statistics_to_post(root_post, rows[0], False)
     root_post['replies'] = []
+    root_post['reblogs'] = await count_reblogs(db, rows[0]['id'])
     all_posts[root_id] = root_post
 
     parent_to_children_id_map = {}
@@ -46,6 +48,7 @@ async def get_discussion(context, author: str, permlink: str, observer: str = ''
         )
         post = append_statistics_to_post(post, rows[index], False)
         post['replies'] = []
+        post['reblogs'] = await count_reblogs(db, rows[index]['id'])
         all_posts[post['post_id']] = post
 
     for key in parent_to_children_id_map:

@@ -122,6 +122,7 @@ def _bridge_post_object(row, truncate_body=0):
     post['promoted'] = _amount(row['promoted'])
 
     post['replies'] = []
+    post['reblogs'] = 0
     post['author_reputation'] = rep_log10(row['author_rep'])
 
     neg_rshares = (row['rshares'] - row['abs_rshares']) // 2  # effectively sum of all negative rshares
