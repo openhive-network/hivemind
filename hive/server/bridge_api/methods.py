@@ -259,6 +259,7 @@ async def get_ranked_posts(
             post['active_votes'] = await find_votes_impl(
                 db, row['author'], row['permlink'], VotesPresentation.BridgeApi
             )
+            post['reblogs'] = await count_reblogs(db, row['id'])
             post = append_statistics_to_post(post, row, row['is_pinned'])
             posts.append(post)
         return posts
@@ -331,6 +332,7 @@ async def get_account_posts(
     for row in sql_result:
         post = _bridge_post_object(row)
         post['active_votes'] = await find_votes_impl(db, row['author'], row['permlink'], VotesPresentation.BridgeApi)
+        post['reblogs'] = await count_reblogs(db, row['id'])
         if sort == 'blog':
             if post['author'] != account:
                 post['reblogged_by'] = [account]
@@ -453,3 +455,9 @@ async def _follow_contexts(db, accounts, observer_id, include_mute=False):
     for account in accounts.values():
         if 'context' not in account:
             account['context'] = {'followed': False}
+
+@return_error_info
+async def count_reblogs(db, post_id: int):
+    sql = f"SELECT count(*) FROM {SCHEMA_NAME}.hive_reblogs(:post_id)"
+    count = db.query_one(sql, post_id=post_id)
+    return count
