@@ -240,6 +240,7 @@ cleanup_haf_cache_manual:
 sync_e2e_benchmark:
   image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
   stage: sync-e2e-benchmark
+  interruptible: true
   needs:
     - job: prepare_haf_data
       artifacts: true
