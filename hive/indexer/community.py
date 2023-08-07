@@ -201,10 +201,10 @@ class Community:
                                     WHERE community_id = :community_id
                                       AND account_id = :account_id
                                     LIMIT 1""",
-                community_id=community_id,
-                account_id=account_id,
-            )
-            or Role.guest.value
+                    community_id=community_id,
+                    account_id=account_id,
+                )
+                or Role.guest.value
         )
 
     @classmethod
@@ -577,9 +577,19 @@ class CommunityOp:
             if self.actor != self.account:
                 assert account_role < actor_role, 'cant modify higher-role user'
                 assert account_role != new_role, 'role would not change'
+
+            # prevent setting a role if the user is not subscribed to the community.
+            # the role "muted" is still settable regardless of subscription status
+            subscribed = DB.query_one(
+                f"""SELECT * FROM {SCHEMA_NAME}.validate_community_set_role(:community_id, :actor_id, :role_id)""",
+                community_id=self.community_id, actor_id=self.account_id, role_id=new_role,
+            )
+            assert subscribed, f"{self.account} must be subscribed to the community to change its role"
+
         elif action == 'updateProps':
             assert actor_role >= Role.admin, 'only admins can update props'
         elif action == 'setUserTitle':
+            assert self._subscribed(self.account_id),  f"{self.account} must be subscribed to the community to change its title"
             # TODO: assert title changed?
             assert actor_role >= Role.mod, 'only mods can set user titles'
         elif action == 'mutePost':
