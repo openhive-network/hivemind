@@ -26,7 +26,7 @@ variables:
 
 include:
   - project: hive/haf
-    ref: 94183788111c2f6f650859ad11bebbf867aa5010 # develop
+    ref: 365b6663b6ebc0cd00fe01f822a02ed16c294df5 # develop
     file: /scripts/ci-helpers/prepare_data_image_job.yml
 
 workflow:
@@ -238,6 +238,8 @@ cleanup_haf_cache_manual:
     - data-cache-storage
 
 sync_e2e_benchmark:
+  extends: .job-defaults
+  timeout: 2h
   image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
   stage: sync-e2e-benchmark
   interruptible: true
@@ -430,6 +432,7 @@ Trigger benchmark-results-collector:
     - if: '$CI_COMMIT_BRANCH == "develop"'
       when: on_success
     - when: manual
+      allow_failure: true
   variables:
     ARTIFACTS_URL: https://gitlab.syncad.com/api/v4/projects/$CI_PROJECT_ID/jobs/$ARTIFACTS_JOB_ID/artifacts
     PRIVATE_TOKEN: $READ_ARTIFACT_ACCESS_TOKEN
