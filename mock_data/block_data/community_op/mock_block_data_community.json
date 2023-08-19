@@ -4745,6 +4745,126 @@
               "json_metadata": "",
               "extensions": []
             }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "howo",
+              "new_account_name": "hive-111119",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "howo",
+              "new_account_name": "hive-211119",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "howo",
+              "new_account_name": "hive-311119",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
           }
         ]
       }
@@ -4865,6 +4985,120 @@
               ],
               "id": "community",
               "json": "[\"setRole\",{\"community\":\"hive-199999\",\"account\":\"isoldmember\",\"role\":\"member\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ismember"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-111119\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ismember"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-211119\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ismember"
+              ],
+              "id": "community",
+              "json": "[\"subscribe\",{\"community\":\"hive-311119\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-111119"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-111119\",\"account\":\"ismember\",\"role\":\"member\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-211119"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-211119\",\"account\":\"ismember\",\"role\":\"member\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-311119"
+              ],
+              "id": "community",
+              "json": "[\"setRole\",{\"community\":\"hive-311119\",\"account\":\"ismember\",\"role\":\"member\"}]"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-111119",
+              "author": "ismember",
+              "permlink": "ismember-hive-111119",
+              "title": "ismember This post will not be muted",
+              "body": "lorem ipsum",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-111119",
+              "author": "notmember",
+              "permlink": "notmember-hive-111119",
+              "title": "notmember This post will not be muted",
+              "body": "lorem ipsum",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "ismember",
+              "parent_permlink": "ismember-hive-111119",
+              "author": "ismember",
+              "permlink": "re-ismember-hive-111119",
+              "title": "ismember This comment will not be muted",
+              "body": "lorem ipsum",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "ismember",
+              "parent_permlink": "ismember-hive-111119",
+              "author": "notmember",
+              "permlink": "re-2-ismember-hive-111119",
+              "title": "notmember This comment will not be muted",
+              "body": "lorem ipsum",
+              "json_metadata": "{}"
             }
           }
         ]

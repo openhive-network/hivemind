@@ -33,6 +33,7 @@ class Role(IntEnum):
 TYPE_TOPIC = 1
 TYPE_JOURNAL = 2
 TYPE_COUNCIL = 3
+valid_types = [TYPE_TOPIC, TYPE_JOURNAL, TYPE_COUNCIL]
 
 # https://en.wikipedia.org/wiki/ISO_639-1
 LANGS = (
@@ -103,6 +104,13 @@ def read_key_dict(obj, key):
     assert isinstance(obj[key], dict), f'key `{key}` not a dict'
     return obj[key]
 
+def read_key_integer(op, key):
+    """Reads a key from dict, ensuring valid bool if present."""
+    if key in op:
+        assert isinstance(op[key], int), 'must be int: %s' % key
+        return op[key]
+    return None
+
 
 class Community:
     """Handles hive community registration and operations."""
@@ -124,7 +132,7 @@ class Community:
         """
 
         # if not re.match(r'^hive-[123]\d{4,6}$', name):
-        if not re.match(r'^hive-[1]\d{4,6}$', name):
+        if not re.match(r'^hive-[123]\d{4,6}$', name):
             return
         type_id = int(name[5])
         _id = Accounts.get_id(name)
@@ -201,10 +209,10 @@ class Community:
                                     WHERE community_id = :community_id
                                       AND account_id = :account_id
                                     LIMIT 1""",
-                    community_id=community_id,
-                    account_id=account_id,
-                )
-                or Role.guest.value
+                community_id=community_id,
+                account_id=account_id,
+            )
+            or Role.guest.value
         )
 
     @classmethod
@@ -535,7 +543,7 @@ class CommunityOp:
     def _read_props(self):
         # TODO: assert props changed?
         props = read_key_dict(self.op, 'props')
-        valid = ['title', 'about', 'lang', 'is_nsfw', 'description', 'flag_text', 'settings']
+        valid = ['title', 'about', 'lang', 'is_nsfw', 'description', 'flag_text', 'settings', 'type_id']
         assert_keys_match(props.keys(), valid, allow_missing=True)
 
         out = {}
@@ -560,6 +568,10 @@ class CommunityOp:
                 avatar_url = settings['avatar_url']
                 assert not avatar_url or _valid_url_proto(avatar_url)
                 out['avatar_url'] = avatar_url
+        if 'type_id' in props:
+            community_type = read_key_integer(props, 'type_id')
+            assert community_type in valid_types, 'invalid community type'
+            out['type_id'] = community_type
         assert out, 'props were blank'
         self.props = out
 
