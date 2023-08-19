@@ -25,6 +25,54 @@ BEGIN
 END
 $function$;
 
+
+DROP FUNCTION IF EXISTS hivemind_app.process_community_post;
+CREATE OR REPLACE FUNCTION hivemind_app.process_community_post(_block_num hivemind_app.hive_posts.block_num%TYPE, _community_support_start_block hivemind_app.hive_posts.block_num%TYPE, _community_id hivemind_app.hive_posts.community_id%TYPE, _community_name hivemind_app.hive_permlink_data.permlink%TYPE, _author_id hivemind_app.hive_posts.author_id%TYPE, is_comment bool)
+RETURNS TABLE(is_muted bool, community_id hivemind_app.hive_posts.community_id%TYPE)
+LANGUAGE plpgsql
+as
+    $$
+declare
+        __community_type_id SMALLINT;
+        __role_id SMALLINT;
+        __member_role CONSTANT SMALLINT := 2;
+        __community_type_topic CONSTANT SMALLINT := 1;
+        __community_type_journal CONSTANT SMALLINT := 2;
+        __community_type_council CONSTANT SMALLINT := 3;
+        __is_muted bool := FALSE;
+        __community_id hivemind_app.hive_posts.community_id%TYPE;
+BEGIN
+        IF _block_num < _community_support_start_block THEN
+            __is_muted := FALSE;
+            __community_id := NULL;
+        ELSE
+            IF _community_id IS NOT NULL THEN
+                SELECT type_id INTO __community_type_id FROM hivemind_app.hive_communities WHERE id = _community_id;
+            ELSE
+                SELECT type_id, id INTO __community_type_id, _community_id from hivemind_app.hive_communities where name = _community_name;
+            END IF;
+
+            IF __community_type_id = __community_type_topic THEN
+                __is_muted := TRUE;
+            ELSE
+                IF __community_type_id = __community_type_journal AND is_comment = TRUE THEN
+                    __is_muted := TRUE;
+                ELSE
+                    select role_id into __role_id from hivemind_app.hive_roles where hivemind_app.hive_roles.community_id = _community_id AND account_id = _author_id;
+                    IF __community_type_id = __community_type_journal AND is_comment = FALSE AND __role_id IS NOT NULL AND __role_id >= __member_role THEN
+                        __is_muted := TRUE;
+                    ELSIF __community_type_id = __community_type_council AND __role_id IS NOT NULL AND __role_id >= __member_role THEN
+                        __is_muted := TRUE;
+                    END IF;
+                END IF;
+            END IF;
+        END IF;
+
+        RETURN QUERY SELECT __is_muted, __community_id;
+    END;
+$$;
+
+
 DROP FUNCTION IF EXISTS hivemind_app.process_hive_post_operation;
 ;
 CREATE OR REPLACE FUNCTION hivemind_app.process_hive_post_operation(
@@ -58,17 +106,14 @@ if _parent_author != '' THEN
     root_id, is_muted, is_valid,
     author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted, block_num, block_num_created)
   SELECT php.id AS parent_id, php.depth + 1 AS depth,
-      (CASE
-          WHEN _block_num > _community_support_start_block THEN
-            COALESCE(php.community_id, (select hc.id from hivemind_app.hive_communities hc where hc.name = _parent_permlink))
-          ELSE NULL
-      END) AS community_id,
+      pcp.community_id AS community_id,
       COALESCE(php.category_id, (select hcg.id from hivemind_app.hive_category_data hcg where hcg.category = _parent_permlink)) AS category_id,
       (CASE(php.root_id)
           WHEN 0 THEN php.id
           ELSE php.root_id
         END) AS root_id,
-      php.is_muted AS is_muted, php.is_valid AS is_valid,
+      pcp.is_muted AS is_muted,
+      php.is_valid AS is_valid,
       ha.id AS author_id, hpd.id AS permlink_id, _date AS created_at,
       _date AS updated_at,
       hivemind_app.calculate_time_part_of_hot(_date) AS sc_hot,
@@ -77,6 +122,7 @@ if _parent_author != '' THEN
         _block_num as block_num, _block_num as block_num_created
   FROM hivemind_app.hive_accounts ha,
         hivemind_app.hive_permlink_data hpd,
+        hivemind_app.process_community_post(_block_num, _community_support_start_block, NULL, _parent_permlink, ha.id, false) pcp,
         hivemind_app.hive_posts php
   INNER JOIN hivemind_app.hive_accounts pha ON pha.id = php.author_id
   INNER JOIN hivemind_app.hive_permlink_data phpd ON phpd.id = php.permlink_id
@@ -106,14 +152,10 @@ ELSE
     active, payout_at, cashout_time, counter_deleted, block_num, block_num_created,
     tags_ids)
   SELECT 0 AS parent_id, 0 AS depth,
-      (CASE
-        WHEN _block_num > _community_support_start_block THEN
-          (select hc.id FROM hivemind_app.hive_communities hc WHERE hc.name = _parent_permlink)
-        ELSE NULL
-      END) AS community_id,
+      pcp.community_id AS community_id,
       (SELECT hcg.id FROM hivemind_app.hive_category_data hcg WHERE hcg.category = _parent_permlink) AS category_id,
       0 as root_id, -- will use id as root one if no parent
-      false AS is_muted, true AS is_valid,
+      pcp.is_muted AS is_muted, true AS is_valid,
       ha.id AS author_id, hpd.id AS permlink_id, _date AS created_at,
       _date AS updated_at,
       hivemind_app.calculate_time_part_of_hot(_date) AS sc_hot,
@@ -125,6 +167,7 @@ ELSE
           FROM hivemind_app.prepare_tags( ARRAY_APPEND(_metadata_tags, _parent_permlink ) )
         ) as tags_ids
   FROM hivemind_app.hive_accounts ha,
+       hivemind_app.process_community_post(_block_num, _community_support_start_block, NULL, _parent_permlink, author_id, false) pcp,
         hivemind_app.hive_permlink_data hpd
   WHERE ha.name = _author and hpd.permlink = _permlink
 

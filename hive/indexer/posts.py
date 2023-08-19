@@ -89,8 +89,7 @@ class Posts(DbAdapterHolder):
             return
         result = dict(row)
 
-        # TODO we need to enhance checking related community post validation and honor is_muted.
-        error = cls._verify_post_against_community(op, result['community_id'], result['is_valid'], result['is_muted'])
+        error = cls._verify_post_against_community(op, result['community_id'], result['is_valid'])
 
         img_url = None
         if 'image' in md:
@@ -392,12 +391,11 @@ class Posts(DbAdapterHolder):
         Votes.drop_votes_of_deleted_comment(op)
 
     @classmethod
-    def _verify_post_against_community(cls, op, community_id, is_valid, is_muted):
+    def _verify_post_against_community(cls, op, community_id, is_valid):
         error = None
         if community_id and is_valid and not Community.is_post_valid(community_id, op):
             error = 'not authorized'
             # is_valid = False # TODO: reserved for future blacklist status?
-            is_muted = True
         return error
 
     @classmethod
