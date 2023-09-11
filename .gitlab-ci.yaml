@@ -266,17 +266,16 @@ sync:
     RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
     HIVED_UID: $HIVED_UID
     WORKING_DIR: /home/hivemind
-    LOG_PATH: $WORKING_DIR/hivemind-sync.log
+    LOG_PATH: $CI_PROJECT_DIR/hivemind-sync.log
     ADD_MOCKS: "true"
   script:
     - |
-      cat /etc/hosts
       sleep 20s
-      cd ${WORKING_DIR}/app
-      ci/wait-for-postgres.sh ${HAF_ADMIN_POSTGRES_URL}
-      cd ${WORKING_DIR}
       cat ${WORKING_DIR}/.hivemind-venv/lib/python3.8/site-packages/hive/_version.py > version.log
-      /home/hivemind/docker_entrypoint.sh setup \
+      pushd ${WORKING_DIR}/app
+      ci/wait-for-postgres.sh ${HAF_ADMIN_POSTGRES_URL}
+      pushd ${WORKING_DIR}
+      ${WORKING_DIR}/docker_entrypoint.sh setup \
             --database-admin-url="${HAF_ADMIN_POSTGRES_URL}" \
             --add-mocks=${ADD_MOCKS}
       ${WORKING_DIR}/docker_entrypoint.sh sync \
@@ -287,6 +286,7 @@ sync:
             --prometheus-port 11011 \
             --database-url="${HAF_POSTGRES_URL}" \
             --community-start-block 4998000
+      pushd +2
       ${WORKING_DIR}/app/ci/collect-db-stats.sh
   artifacts:
     when: always
