@@ -10,7 +10,7 @@
   "lang": "en",
   "name": "hive-111119",
   "num_authors": 2,
-  "num_pending": 5,
+  "num_pending": 10,
   "settings": {},
   "subscribers": 1,
   "sum_pending": 0,
@@ -19,8 +19,13 @@
       "hive-111119",
       "owner",
       ""
+    ],
+    [
+      "ismember",
+      "mod",
+      ""
     ]
   ],
   "title": "@hive-111119",
-  "type_id": 1
+  "type_id": 3
 }
