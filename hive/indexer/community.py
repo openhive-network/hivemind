@@ -221,25 +221,19 @@ class Community:
 
         For a comment to be valid, these conditions apply:
             - Author is not muted in this community
-            - For council post/comment, author must be a member
-            - For journal post, author must be a member
             - Community must exist
+
+        Note that the checks related to community types are performed on insert
+        via the sql function process_community_post
         """
 
         assert community_id, 'no community_id'
-        community = cls._get_name(community_id)
         account_id = Accounts.get_id(comment_op['author'])
         role = cls.get_user_role(community_id, account_id)
-        type_id = int(community[5])
 
         # TODO: check `nsfw` tag requirement #267
         # TODO: (1.5) check that beneficiaries are valid
 
-        if type_id == TYPE_JOURNAL:
-            if not comment_op['parent_author']:
-                return role >= Role.member
-        elif type_id == TYPE_COUNCIL:
-            return role >= Role.member
         return role >= Role.guest  # or at least not muted
 
 
