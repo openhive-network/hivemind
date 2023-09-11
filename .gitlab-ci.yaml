@@ -1,6 +1,7 @@
 stages:
   - build
-  - sync-e2e-benchmark
+  - sync
+  - benchmark
   - publish
   - collector
   - cleanup
@@ -237,11 +238,11 @@ cleanup_haf_cache_manual:
   tags:
     - data-cache-storage
 
-sync_e2e_benchmark:
-  extends: .job-defaults
-  timeout: 2h
-  image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
-  stage: sync-e2e-benchmark
+sync:
+  image: 
+    name: $HIVEMIND_IMAGE
+    entrypoint: [""]
+  stage: sync
   interruptible: true
   needs:
     - job: prepare_haf_data
@@ -261,35 +262,67 @@ sync_e2e_benchmark:
         SHM_DIR: $DATA_CACHE_HAF/shm_dir
         LOG_FILE: $CI_JOB_NAME.log
       command: ["--replay-blockchain", "--stop-replay-at-block=5000000"]
-    - name: $HIVEMIND_IMAGE
-      alias: hivemind-sync # cannot be a variable
-      entrypoint:
-        - bash
-        - -c
-        - |
-          cat /etc/hosts && \
-          sleep 20s && \
-          cd ${WORKING_DIR}/app && \
-          ci/wait-for-postgres.sh ${HAF_ADMIN_POSTGRES_URL} && \
-          cd ${WORKING_DIR} && \
-          cat ${WORKING_DIR}/.hivemind-venv/lib/python3.8/site-packages/hive/_version.py > version.log && \
-          /home/hivemind/docker_entrypoint.sh setup \
+  variables:
+    RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
+    HIVED_UID: $HIVED_UID
+    WORKING_DIR: /home/hivemind
+    LOG_PATH: $WORKING_DIR/hivemind-sync.log
+    ADD_MOCKS: "true"
+  script:
+    - |
+      cat /etc/hosts
+      sleep 20s
+      cd ${WORKING_DIR}/app
+      ci/wait-for-postgres.sh ${HAF_ADMIN_POSTGRES_URL}
+      cd ${WORKING_DIR}
+      cat ${WORKING_DIR}/.hivemind-venv/lib/python3.8/site-packages/hive/_version.py > version.log
+      /home/hivemind/docker_entrypoint.sh setup \
             --database-admin-url="${HAF_ADMIN_POSTGRES_URL}" \
-            --add-mocks=${ADD_MOCKS} && \
-          ${WORKING_DIR}/docker_entrypoint.sh sync \
+            --add-mocks=${ADD_MOCKS}
+      ${WORKING_DIR}/docker_entrypoint.sh sync \
             --log-mask-sensitive-data \
             --pid-file hive_sync.pid \
             --test-max-block="${RUNNER_HIVEMIND_SYNC_MAX_BLOCK}" \
             --test-profile=False \
             --prometheus-port 11011 \
             --database-url="${HAF_POSTGRES_URL}" \
-            --community-start-block 4998000 && \
-          ${WORKING_DIR}/app/ci/collect-db-stats.sh && \
-          python -m http.server ${RUNNER_HIVEMIND_SERVER_HTTP_PORT}
+            --community-start-block 4998000
+      ${WORKING_DIR}/app/ci/collect-db-stats.sh
+  artifacts:
+    when: always
+    expire_in: 7 days
+    paths:
+      - hivemind-sync.log
+      - pg-stats
+      - version.log
+  tags:
+    - data-cache-storage
+
+
+e2e_benchmark:
+  image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
+  stage: benchmark
+  interruptible: true
+  needs:
+    - job: prepare_haf_data
+      artifacts: true
+    - job: prepare_hivemind_image
+      artifacts: true
+    - job: sync
+      artifacts: true
+  when: on_success
+  services:
+    - name: $HAF_IMAGE_NAME
+      alias: haf-instance
       variables:
-        WORKING_DIR: /home/hivemind
-        LOG_PATH: $WORKING_DIR/hivemind-sync.log
-        ADD_MOCKS: "true"
+        PG_ACCESS: "
+         host    haf_block_log    haf_app_admin    all    trust\n
+         host    haf_block_log    haf_admin        all    trust\n
+         "
+        DATADIR: $DATA_CACHE_HAF/datadir
+        SHM_DIR: $DATA_CACHE_HAF/shm_dir
+        LOG_FILE: $CI_JOB_NAME.log
+      command: ["--replay-blockchain", "--stop-replay-at-block=5000000"]
     - name: $HIVEMIND_IMAGE
       alias: hivemind-smoketest # cannot be a variable
       entrypoint:
@@ -333,10 +366,7 @@ sync_e2e_benchmark:
         WORKING_DIR: /home/hivemind
         LOG_PATH: /home/hivemind/hivemind-benchmark-server.log
   variables:
-    RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
     HIVED_UID: $HIVED_UID
-    RUNNER_HIVEMIND_SYNC_HOSTNAME: hivemind-sync
-    RUNNER_HIVEMIND_SYNC_URL: http://$RUNNER_HIVEMIND_SYNC_HOSTNAME:$RUNNER_HIVEMIND_SERVER_HTTP_PORT
     RUNNER_HIVEMIND_BENCHMARK_URL: http://$RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME
     RUNNER_HIVEMIND_SMOKETEST_URL: http://$RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME
     AWAIT_SERVICE_ACCESS_TOKEN: $AWAIT_ACCESS_TOKEN
@@ -352,8 +382,6 @@ sync_e2e_benchmark:
       echo "Hivemind image name $HIVEMIND_IMAGE"
       wget --header "PRIVATE-TOKEN: $AWAIT_ACCESS_TOKEN" "$AWAIT_PACKAGE_URL"
       chmod +x await
-      echo "Waiting for Hivemind sync to complete on ${RUNNER_HIVEMIND_SYNC_URL}"
-      ./await -t 1h ${RUNNER_HIVEMIND_SYNC_URL} -- echo "Hivemind sync has finished running"
       SMOKETEST_AWAIT_URL="tcp://${RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}"
       echo "Waiting for Hivemind smoketest server to start running on ${SMOKETEST_AWAIT_URL}"
       ./await -t 10m "${SMOKETEST_AWAIT_URL}" -- echo "Hivemind smoketest instance is running"
@@ -377,11 +405,6 @@ sync_e2e_benchmark:
   after_script:
     - |
       echo "Downloading logs..."
-      wget ${RUNNER_HIVEMIND_SYNC_URL}/hivemind-sync.log || true
-      wget ${RUNNER_HIVEMIND_SYNC_URL}/version.log || true
-      mkdir pg-stats
-      wget ${RUNNER_HIVEMIND_SYNC_URL}/pg-stats/pg_settings.csv -O pg-stats/pg_settings.csv || true
-      wget ${RUNNER_HIVEMIND_SYNC_URL}/pg-stats/pg_stat_user_tables.csv -O pg-stats/pg_stat_user_tables.csv.csv || true
       wget $RUNNER_HIVEMIND_SMOKETEST_URL:$LOG_SERVER_PORT/request_process_times_smoketests.log || true
       wget $RUNNER_HIVEMIND_SMOKETEST_URL:$LOG_SERVER_PORT/hivemind-server.log || true
       wget $RUNNER_HIVEMIND_BENCHMARK_URL:$LOG_SERVER_PORT/request_process_times.log || true
@@ -423,7 +446,9 @@ publish_instance_image:
 
 Trigger benchmark-results-collector:
   stage: collector
-  needs: [ 'sync_e2e_benchmark' ]
+  needs:
+    - job: e2e_benchmark
+      artifacts: false
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
