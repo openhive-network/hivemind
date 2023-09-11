@@ -48,21 +48,23 @@ BEGIN
         ELSE
             IF _community_id IS NOT NULL THEN
                 SELECT type_id INTO __community_type_id FROM hivemind_app.hive_communities WHERE id = _community_id;
+                __community_id = _community_id;
             ELSE
                 SELECT type_id, id INTO __community_type_id, _community_id from hivemind_app.hive_communities where name = _community_name;
+                __community_id = _community_id;
             END IF;
 
             IF __community_type_id = __community_type_topic THEN
-                __is_muted := TRUE;
+                __is_muted := FALSE;
             ELSE
                 IF __community_type_id = __community_type_journal AND is_comment = TRUE THEN
-                    __is_muted := TRUE;
+                    __is_muted := FALSE;
                 ELSE
                     select role_id into __role_id from hivemind_app.hive_roles where hivemind_app.hive_roles.community_id = _community_id AND account_id = _author_id;
                     IF __community_type_id = __community_type_journal AND is_comment = FALSE AND __role_id IS NOT NULL AND __role_id >= __member_role THEN
-                        __is_muted := TRUE;
+                        __is_muted := FALSE;
                     ELSIF __community_type_id = __community_type_council AND __role_id IS NOT NULL AND __role_id >= __member_role THEN
-                        __is_muted := TRUE;
+                        __is_muted := FALSE;
                     END IF;
                 END IF;
             END IF;
@@ -122,7 +124,7 @@ if _parent_author != '' THEN
         _block_num as block_num, _block_num as block_num_created
   FROM hivemind_app.hive_accounts ha,
         hivemind_app.hive_permlink_data hpd,
-        hivemind_app.process_community_post(_block_num, _community_support_start_block, NULL, _parent_permlink, ha.id, false) pcp,
+        hivemind_app.process_community_post(_block_num, _community_support_start_block, NULL, _parent_permlink, ha.id, TRUE) pcp,
         hivemind_app.hive_posts php
   INNER JOIN hivemind_app.hive_accounts pha ON pha.id = php.author_id
   INNER JOIN hivemind_app.hive_permlink_data phpd ON phpd.id = php.permlink_id
