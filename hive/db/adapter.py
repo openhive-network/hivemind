@@ -88,6 +88,11 @@ class Db:
         try:
             for item in self._conn:
                 log.info(f"Closing database connection: '{item['name']}'")
+                # According to doc, detach method should remove connection from its uderlying connection pool
+                # https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection.detach
+                # This can be a fix for random failures occuring at finishing massive sync, where multiple connections are closed and final checks against pg_stat_activity to verify connections really closed.
+                # See also this issue: https://gitlab.syncad.com/hive/hivemind/-/issues/207
+                item['connection'].detach() # be sure it will be not pooled anymore
                 item['connection'].close()
             self._engine.dispose()
             self._conn = []
