@@ -39,9 +39,12 @@ declare
         __community_type_topic CONSTANT SMALLINT := 1;
         __community_type_journal CONSTANT SMALLINT := 2;
         __community_type_council CONSTANT SMALLINT := 3;
-        __is_muted bool := FALSE;
+        __is_muted bool := TRUE;
         __community_id hivemind_app.hive_posts.community_id%TYPE;
 BEGIN
+
+        RAISE NOTICE 'Function parameters: _block_num: %, _community_support_start_block: %, _parent_permlink: %, _author_id: %, is_comment: %', _block_num, _community_support_start_block, _parent_permlink, _author_id, is_comment;
+
         IF _block_num < _community_support_start_block THEN
             __is_muted := FALSE;
             __community_id := NULL;
@@ -71,6 +74,8 @@ BEGIN
                         END IF;
                     END IF;
                 END IF;
+            ELSE
+                __is_muted := FALSE;
             END IF;
         END IF;
 
@@ -173,8 +178,8 @@ ELSE
           FROM hivemind_app.prepare_tags( ARRAY_APPEND(_metadata_tags, _parent_permlink ) )
         ) as tags_ids
   FROM hivemind_app.hive_accounts ha,
-       hivemind_app.process_community_post(_block_num, _community_support_start_block, _parent_permlink, author_id, FALSE) pcp,
-        hivemind_app.hive_permlink_data hpd
+       hivemind_app.process_community_post(_block_num, _community_support_start_block, _parent_permlink, ha.id, FALSE) pcp,
+       hivemind_app.hive_permlink_data hpd
   WHERE ha.name = _author and hpd.permlink = _permlink
 
   ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET

@@ -5112,6 +5112,186 @@
               "body": "lorem ipsum",
               "json_metadata": "{}"
             }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-211119",
+              "author": "ismember",
+              "permlink": "ismember-hive-211119",
+              "title": "ismember This post will not be muted",
+              "body": "community type 2, ismember This post will not be muted",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-211119",
+              "author": "notmember",
+              "permlink": "notmember-hive-211119",
+              "title": "notmember This post will BE muted",
+              "body": "community type 2, notmember This post will BE muted",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "ismember",
+              "parent_permlink": "ismember-hive-211119",
+              "author": "ismember",
+              "permlink": "re-ismember-hive-211119",
+              "title": "ismember This comment will not be muted",
+              "body": "community type 2, ismember This comment will not be muted",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "ismember",
+              "parent_permlink": "re-ismember-hive-211119",
+              "author": "ismember",
+              "permlink": "re-re-ismember-hive-211119",
+              "title": "ismember, depth 2 comment, This comment will not be muted",
+              "body": "community type 2, ismember, depth 2 comment, This comment will not be muted",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "ismember",
+              "parent_permlink": "ismember-hive-211119",
+              "author": "notmember",
+              "permlink": "re-2-ismember-hive-211119",
+              "title": "notmember This comment will not be muted",
+              "body": "community type 2, notmember This comment will not be muted",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-211119",
+              "author": "ismember",
+              "permlink": "ismember-hive-211119",
+              "title": "community type 2, ismember This post will not be muted",
+              "body": "community type 2, ismember This post will not be muted",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-211119",
+              "author": "notmember",
+              "permlink": "notmember-hive-211119",
+              "title": "notmember This post will BE muted",
+              "body": "community type 2, notmember This post will BE muted",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "ismember",
+              "parent_permlink": "ismember-hive-211119",
+              "author": "ismember",
+              "permlink": "re-ismember-hive-211119",
+              "title": "ismember This comment will not be muted",
+              "body": "community type 2, ismember This comment will not be muted",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "ismember",
+              "parent_permlink": "re-ismember-hive-211119",
+              "author": "ismember",
+              "permlink": "re-re-ismember-hive-211119",
+              "title": "ismember, depth 2 comment, This comment will not be muted",
+              "body": "community type 2, ismember, depth 2 comment, This comment will not be muted",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "ismember",
+              "parent_permlink": "ismember-hive-211119",
+              "author": "notmember",
+              "permlink": "re-2-ismember-hive-211119",
+              "title": "notmember This comment will not be muted",
+              "body": "community type 2, notmember This comment will not be muted",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-311119",
+              "author": "ismember",
+              "permlink": "ismember-hive-311119",
+              "title": "ismember This post will not be muted",
+              "body": "community type 3, ismember This post will not be muted",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-311119",
+              "author": "notmember",
+              "permlink": "notmember-hive-311119",
+              "title": "notmember This post will BE muted",
+              "body": "community type 3, notmember This post will BE muted",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "ismember",
+              "parent_permlink": "ismember-hive-311119",
+              "author": "ismember",
+              "permlink": "re-ismember-hive-311119",
+              "title": "ismember This comment will not be muted",
+              "body": "community type 3, ismember This comment will not be muted",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "ismember",
+              "parent_permlink": "re-ismember-hive-311119",
+              "author": "ismember",
+              "permlink": "re-re-ismember-hive-311119",
+              "title": "ismember, depth 2 comment, This comment will not be muted",
+              "body": "community type 3, ismember, depth 2 comment, This comment will not be muted",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "ismember",
+              "parent_permlink": "ismember-hive-311119",
+              "author": "notmember",
+              "permlink": "re-2-ismember-hive-311119",
+              "title": "notmember This comment will BE muted",
+              "body": "community type 3, notmember This comment will BE muted",
+              "json_metadata": "{}"
+            }
           }
         ]
       }
