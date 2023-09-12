@@ -47,7 +47,7 @@ BEGIN
             __community_id := NULL;
         ELSE
             IF is_comment = TRUE THEN
-                SELECT hc.type_id, hc.id INTO __community_type_id, __community_id
+                SELECT hc.type_id, hc.id, hivemind_app.hive_posts.is_muted INTO __community_type_id, __community_id, __is_muted
                 FROM hivemind_app.hive_permlink_data
                     JOIN hivemind_app.hive_posts ON hivemind_app.hive_permlink_data.id = hivemind_app.hive_posts.permlink_id
                     JOIN hivemind_app.hive_communities hc ON hivemind_app.hive_posts.community_id = hc.id
@@ -56,7 +56,8 @@ BEGIN
                 SELECT type_id, id INTO __community_type_id, __community_id from hivemind_app.hive_communities where name = _parent_permlink;
             END IF;
 
-            IF __community_id IS NOT NULL THEN
+            -- __is_muted can be TRUE here if it's a comment and its parent is muted
+            IF __community_id IS NOT NULL AND __is_muted = FALSE THEN
                 IF __community_type_id = __community_type_topic THEN
                     __is_muted := FALSE;
                 ELSE
