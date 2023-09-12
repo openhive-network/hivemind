@@ -42,9 +42,6 @@ declare
         __is_muted bool := TRUE;
         __community_id hivemind_app.hive_posts.community_id%TYPE;
 BEGIN
-
-        RAISE NOTICE 'Function parameters: _block_num: %, _community_support_start_block: %, _parent_permlink: %, _author_id: %, is_comment: %', _block_num, _community_support_start_block, _parent_permlink, _author_id, is_comment;
-
         IF _block_num < _community_support_start_block THEN
             __is_muted := FALSE;
             __community_id := NULL;
