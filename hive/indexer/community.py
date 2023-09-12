@@ -105,7 +105,7 @@ def read_key_dict(obj, key):
     return obj[key]
 
 def read_key_integer(op, key):
-    """Reads a key from dict, ensuring valid bool if present."""
+    """Reads a key from dict, ensuring valid integer if present."""
     if key in op:
         assert isinstance(op[key], int), 'must be int: %s' % key
         return op[key]
@@ -234,7 +234,7 @@ class Community:
         # TODO: check `nsfw` tag requirement #267
         # TODO: (1.5) check that beneficiaries are valid
 
-        return role >= Role.guest  # or at least not muted
+        return role >= Role.guest  # At least not muted
 
 
 class CommunityOp:
