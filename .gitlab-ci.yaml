@@ -288,8 +288,7 @@ sync:
             --community-start-block 4998000
       pushd +2
       ${WORKING_DIR}/app/ci/collect-db-stats.sh
-      ls -lAh "$DATA_CACHE_HAF"
-      # cp "$DATA_CACHE_HAF/$CI_JOB_NAME.log" "haf-$CI_JOB_NAME.log"
+      cp "$DATA_CACHE_HAF/datadir/$CI_JOB_NAME.log" "haf-$CI_JOB_NAME.log"
   artifacts:
     when: always
     expire_in: 7 days
