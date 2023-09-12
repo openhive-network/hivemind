@@ -332,42 +332,36 @@ e2e_benchmark:
         - bash
         - -c
         - |
-          (python -m http.server --directory ${WORKING_DIR} $LOG_SERVER_PORT &) && \
-          cat /etc/hosts && \
           wget --header "PRIVATE-TOKEN: $AWAIT_SERVICE_ACCESS_TOKEN" "$AWAIT_PACKAGE_URL" -O ${WORKING_DIR}/await && \
           chmod +x ${WORKING_DIR}/await && \
           ${WORKING_DIR}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Database found" && \
-          ${WORKING_DIR}/await -t 1h ${RUNNER_HIVEMIND_SYNC_URL} -- echo "Hivemind sync finished" && \
           ${WORKING_DIR}/docker_entrypoint.sh server \
             --log-request-times \
-            --log-request-times-path=${WORKING_DIR}/request_process_times_smoketests.log \
+            --log-request-times-path=${DATA_CACHE_HAF}/datadir/request_process_times_smoketests.log \
             --log-mask-sensitive-data \
             --http-server-port=${RUNNER_HIVEMIND_SERVER_HTTP_PORT} \
             --database-url="${HAF_POSTGRES_URL}"
       variables:
         WORKING_DIR: /home/hivemind
-        LOG_PATH: /home/hivemind/hivemind-server.log
+        LOG_PATH: $DATA_CACHE_HAF/datadir/hivemind-server.log
     - name: $HIVEMIND_IMAGE
       alias: hivemind-benchmark # cannot be a variable
       entrypoint:
         - bash
         - -c
         - |
-          (python -m http.server --directory ${WORKING_DIR} $LOG_SERVER_PORT &) && \
-          cat /etc/hosts && \
           wget --header "PRIVATE-TOKEN: $AWAIT_SERVICE_ACCESS_TOKEN" "$AWAIT_PACKAGE_URL" -O ${WORKING_DIR}/await && \
           chmod +x ${WORKING_DIR}/await && \
           ${WORKING_DIR}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Database found" && \
-          ${WORKING_DIR}/await -t 1h ${RUNNER_HIVEMIND_SYNC_URL} -- echo "Hivemind sync finished" && \
           ${WORKING_DIR}/docker_entrypoint.sh server \
             --log-request-times \
-            --log-request-times-path=${WORKING_DIR}/request_process_times.log \
+            --log-request-times-path=${DATA_CACHE_HAF}/datadir/request_process_times.log \
             --log-mask-sensitive-data \
             --http-server-port=${RUNNER_HIVEMIND_SERVER_HTTP_PORT} \
             --database-url="${HAF_POSTGRES_URL}"
       variables:
         WORKING_DIR: /home/hivemind
-        LOG_PATH: /home/hivemind/hivemind-benchmark-server.log
+        LOG_PATH: $DATA_CACHE_HAF/datadir/hivemind-benchmark-server.log
   variables:
     HIVED_UID: $HIVED_UID
     RUNNER_HIVEMIND_BENCHMARK_URL: http://$RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME
@@ -408,11 +402,11 @@ e2e_benchmark:
   after_script:
     - |
       echo "Downloading logs..."
-      cp "$DATA_CACHE_HAF/datadir/$CI_JOB_NAME.log" "haf-$CI_JOB_NAME.log"
-      wget $RUNNER_HIVEMIND_SMOKETEST_URL:$LOG_SERVER_PORT/request_process_times_smoketests.log || true
-      wget $RUNNER_HIVEMIND_SMOKETEST_URL:$LOG_SERVER_PORT/hivemind-server.log || true
-      wget $RUNNER_HIVEMIND_BENCHMARK_URL:$LOG_SERVER_PORT/request_process_times.log || true
-      wget $RUNNER_HIVEMIND_BENCHMARK_URL:$LOG_SERVER_PORT/hivemind-benchmark-server.log || true
+      cp "${DATA_CACHE_HAF}/datadir/${CI_JOB_NAME}.log" "haf-$CI_JOB_NAME.log"
+      cp "${DATA_CACHE_HAF}/datadir/request_process_times_smoketests.log" request_process_times_smoketests.log
+      cp "${DATA_CACHE_HAF}/datadir/hivemind-server.log" hivemind-server.log
+      cp "${DATA_CACHE_HAF}/datadir/request_process_times.log" request_process_times.log
+      cp "${DATA_CACHE_HAF}/datadir/hivemind-benchmark-server.log" hivemind-benchmark-server.log
     - |
       echo "Preparing dotenv file..."
       {
