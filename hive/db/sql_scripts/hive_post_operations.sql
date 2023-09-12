@@ -40,6 +40,7 @@ declare
         __community_type_journal CONSTANT SMALLINT := 2;
         __community_type_council CONSTANT SMALLINT := 3;
         __is_muted bool := TRUE;
+        __is_parent_muted bool := FALSE;
         __community_id hivemind_app.hive_posts.community_id%TYPE;
 BEGIN
         IF _block_num < _community_support_start_block THEN
@@ -47,7 +48,7 @@ BEGIN
             __community_id := NULL;
         ELSE
             IF is_comment = TRUE THEN
-                SELECT hc.type_id, hc.id, hivemind_app.hive_posts.is_muted INTO __community_type_id, __community_id, __is_muted
+                SELECT hc.type_id, hc.id, hivemind_app.hive_posts.is_muted INTO __community_type_id, __community_id, __is_parent_muted
                 FROM hivemind_app.hive_permlink_data
                     JOIN hivemind_app.hive_posts ON hivemind_app.hive_permlink_data.id = hivemind_app.hive_posts.permlink_id
                     JOIN hivemind_app.hive_communities hc ON hivemind_app.hive_posts.community_id = hc.id
@@ -57,7 +58,9 @@ BEGIN
             END IF;
 
             -- __is_muted can be TRUE here if it's a comment and its parent is muted
-            IF __community_id IS NOT NULL AND __is_muted = FALSE THEN
+            IF __is_parent_muted = TRUE THEN
+                __is_muted := TRUE;
+            ELSEIF __community_id IS NOT NULL THEN
                 IF __community_type_id = __community_type_topic THEN
                     __is_muted := FALSE;
                 ELSE
