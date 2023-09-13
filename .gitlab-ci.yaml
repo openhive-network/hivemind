@@ -333,6 +333,8 @@ e2e_benchmark:
         - bash
         - -c
         - |
+          id && \
+          ls -lah ${DATA_CACHE_HAF}/datadir && \
           wget --header "PRIVATE-TOKEN: $AWAIT_SERVICE_ACCESS_TOKEN" "$AWAIT_PACKAGE_URL" -O ${WORKING_DIR}/await && \
           chmod +x ${WORKING_DIR}/await && \
           ${WORKING_DIR}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Database found" && \
@@ -351,6 +353,8 @@ e2e_benchmark:
         - bash
         - -c
         - |
+          id && \
+          ls -lah ${DATA_CACHE_HAF}/datadir && \
           wget --header "PRIVATE-TOKEN: $AWAIT_SERVICE_ACCESS_TOKEN" "$AWAIT_PACKAGE_URL" -O ${WORKING_DIR}/await && \
           chmod +x ${WORKING_DIR}/await && \
           ${WORKING_DIR}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Database found" && \
@@ -403,7 +407,8 @@ e2e_benchmark:
   after_script:
     - |
       echo "Downloading logs..."
-      ls -lAh "${DATA_CACHE_HAF}/datadir"
+      id
+      ls -lah "${DATA_CACHE_HAF}/datadir"
       cp "${DATA_CACHE_HAF}/datadir/${CI_JOB_NAME}.log" "haf-$CI_JOB_NAME.log"
       cp "${DATA_CACHE_HAF}/datadir/request_process_times_smoketests.log" request_process_times_smoketests.log
       cp "${DATA_CACHE_HAF}/datadir/hivemind-server.log" hivemind-server.log
