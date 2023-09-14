@@ -56,138 +56,185 @@ workflow:
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| BASH SCRIPTS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+.base_image_build_script: &base-image-build-script
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):login[collapsed=true]\r\e[0KLogging to Docker registry..."
+    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    echo -e "\e[0Ksection_end:$(date +%s):login\r\e[0K"
+    echo -e "\e[0Ksection_start:$(date +%s):build[collapsed=true]\r\e[0KBuilding base Docker images..."
+    ./scripts/ci/build_ci_base_image.sh
+    echo -e "\e[0Ksection_end:$(date +%s):build\r\e[0K"
+
 .instance-build-script: &instance-build-script
   - |
+    echo -e "\e[0Ksection_start:$(date +%s):login[collapsed=true]\r\e[0KLogging to Docker registry..."
+    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    echo -e "\e[0Ksection_end:$(date +%s):login\r\e[0K"
+    echo -e "\e[0Ksection_start:$(date +%s):build[collapsed=true]\r\e[0KBuilding Hivemind Docker image..."
     ./scripts/ci-helpers/build_instance.sh \
       "$CI_COMMIT_SHA" \
       "$CI_PROJECT_DIR" \
       "$CI_REGISTRY_IMAGE" \
       --dot-env-filename=hivemind_image.env \
       --dot-env-var-name=HIVEMIND_IMAGE
-    docker images
-    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-    source hivemind_image.env
-    docker push "$HIVEMIND_IMAGE"  
+    cat hivemind_image.env
+    echo -e "\e[0Ksection_end:$(date +%s):build\r\e[0K"
 
 .bridge_api_smoketest-script: &bridge_api_smoketest-script
   - |
+    echo -e "\e[0Ksection_start:$(date +%s):bridge_api_smoketest[collapsed=true]\r\e[0KRunning bridge API smoketest..."
     ./scripts/ci/start-api-smoketest.sh \
         $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
         bridge_api_patterns/ \
         api_smoketest_bridge.xml \
         $RUNNER_PYTEST_WORKERS
+    echo -e "\e[0Ksection_end:$(date +%s):bridge_api_smoketest\r\e[0K"
 
 .bridge_api_smoketest_negative-script: &bridge_api_smoketest_negative-script
   - |
+    echo -e "\e[0Ksection_start:$(date +%s):bridge_api_smoketest_negative[collapsed=true]\r\e[0KRunning bridge API smoketest negative..."
     ./scripts/ci/start-api-smoketest.sh \
         $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
         bridge_api_negative/ \
         api_smoketest_bridge_negative.xml \
         $RUNNER_PYTEST_WORKERS
+    echo -e "\e[0Ksection_end:$(date +%s):bridge_api_smoketest_negative\r\e[0K"
 
 .condenser_api_smoketest-script: &condenser_api_smoketest-script
   - |
+    echo -e "\e[0Ksection_start:$(date +%s):condenser_api_smoketest[collapsed=true]\r\e[0KRunning condenser API smoketest..."
     ./scripts/ci/start-api-smoketest.sh \
         $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
         condenser_api_patterns/ \
         api_smoketest_condenser_api.xml \
         $RUNNER_PYTEST_WORKERS
+    echo -e "\e[0Ksection_end:$(date +%s):condenser_api_smoketest\r\e[0K"
 
 .condenser_api_smoketest_negative-script: &condenser_api_smoketest_negative-script
   - |
+    echo -e "\e[0Ksection_start:$(date +%s):condenser_api_smoketest_negative[collapsed=true]\r\e[0KRunning condenser API smoketest negative..."
     ./scripts/ci/start-api-smoketest.sh \
         $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
         condenser_api_negative/ \
         api_smoketest_condenser_api_negative.xml \
         $RUNNER_PYTEST_WORKERS
+    echo -e "\e[0Ksection_end:$(date +%s):condenser_api_smoketest_negative\r\e[0K"
 
 .database_api_smoketest-script: &database_api_smoketest-script
   - |
+    echo -e "\e[0Ksection_start:$(date +%s):database_api_smoketest[collapsed=true]\r\e[0KRunning database API smoketest..."
     ./scripts/ci/start-api-smoketest.sh \
         $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
         database_api_patterns/ \
         api_smoketest_database_api.xml \
         $RUNNER_PYTEST_WORKERS
+    echo -e "\e[0Ksection_end:$(date +%s):database_api_smoketest\r\e[0K"
 
 .database_api_smoketest_negative-script: &database_api_smoketest_negative-script
   - |
+    echo -e "\e[0Ksection_start:$(date +%s):database_api_smoketest_negative[collapsed=true]\r\e[0KRunning database API smoketest negative..."
     ./scripts/ci/start-api-smoketest.sh \
         $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
         database_api_negative/ \
         api_smoketest_database_api_negative.xml \
         $RUNNER_PYTEST_WORKERS
+    echo -e "\e[0Ksection_end:$(date +%s):database_api_smoketest_negative\r\e[0K"
 
 .follow_api_smoketest-script: &follow_api_smoketest-script
   - |
+    echo -e "\e[0Ksection_start:$(date +%s):follow_api_smoketest[collapsed=true]\r\e[0KRunning follow API smoketest..."
     ./scripts/ci/start-api-smoketest.sh \
         $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
         follow_api_patterns/ \
         api_smoketest_follow_api.xml \
         $RUNNER_PYTEST_WORKERS
+    echo -e "\e[0Ksection_end:$(date +%s):follow_api_smoketest\r\e[0K"
 
 .follow_api_smoketest_negative-script: &follow_api_smoketest_negative-script
   - |
+    echo -e "\e[0Ksection_start:$(date +%s):follow_api_smoketest_negative[collapsed=true]\r\e[0KRunning follow API smoketest negative..."
     ./scripts/ci/start-api-smoketest.sh \
         $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
         follow_api_negative/ \
         api_smoketest_follow_api_negative.xml \
         $RUNNER_PYTEST_WORKERS
+    echo -e "\e[0Ksection_end:$(date +%s):follow_api_smoketest_negative\r\e[0K"
 
 .tags_api_smoketest-script: &tags_api_smoketest-script
   - |
+    echo -e "\e[0Ksection_start:$(date +%s):tags_api_smoketest[collapsed=true]\r\e[0KRunning tags API smoketest..."
     ./scripts/ci/start-api-smoketest.sh \
         $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
         tags_api_negative/ \
         api_smoketest_tags_api_negative.xml \
         $RUNNER_PYTEST_WORKERS
+    echo -e "\e[0Ksection_end:$(date +%s):tags_api_smoketest\r\e[0K"
 
 .tags_api_smoketest_negative-script: &tags_api_smoketest_negative-script
   - |
+    echo -e "\e[0Ksection_start:$(date +%s):tags_api_smoketest_negative[collapsed=true]\r\e[0KRunning tags API smoketest negative..."
     ./scripts/ci/start-api-smoketest.sh \
         $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
         tags_api_patterns/ \
         api_smoketest_tags_api.xml \
         $RUNNER_PYTEST_WORKERS
+    echo -e "\e[0Ksection_end:$(date +%s):tags_api_smoketest_negative\r\e[0K"
 
 .mock_tests-script: &mock_tests-script
   - |
+    echo -e "\e[0Ksection_start:$(date +%s):mock_tests[collapsed=true]\r\e[0KRunning mock tests..."
     ./scripts/ci/start-api-smoketest.sh \
         $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
         mock_tests/ \
         api_smoketest_mock_tests.xml \
         $RUNNER_PYTEST_WORKERS
+    echo -e "\e[0Ksection_end:$(date +%s):mock_tests\r\e[0K"
 
 .hive_api_smoketest-script: &hive_api_smoketest-script
   - |
+    echo -e "\e[0Ksection_start:$(date +%s):hive_api_smoketest[collapsed=true]\r\e[0KRunning Hive API smoketests..."
     ./scripts/ci/start-api-smoketest.sh \
         $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
         hive_api_patterns/ \
         api_smoketest_hive_api.xml \
         $RUNNER_PYTEST_WORKERS
+    echo -e "\e[0Ksection_end:$(date +%s):hive_api_smoketest\r\e[0K"
 
 .api-benchmark-script: &api-benchmark-script
   - |
+    echo -e "\e[0Ksection_start:$(date +%s):api-benchmark[collapsed=true]\r\e[0KRunning API benchmark..."
     ./scripts/ci/start-api-benchmarks.sh \
         $RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME \
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
         $RUNNER_BENCHMARK_ITERATIONS \
-        $RUNNER_PYTEST_WORKERS 
+        $RUNNER_PYTEST_WORKERS
+    echo -e "\e[0Ksection_end:$(date +%s):api-benchmark\r\e[0K" 
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| BASH SCRIPTS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| JOBS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+# Build base images if they're missing from registry
+prepare_base_images:
+  stage: build
+  extends: .docker_image_builder_job_template
+  before_script:
+    - git config --global --add safe.directory $CI_PROJECT_DIR
+  script:
+    - *base-image-build-script
+  tags: *shared_tags
 
 prepare_haf_image:
   stage: build
@@ -216,6 +263,8 @@ prepare_haf_data:
 prepare_hivemind_image:
   stage: build
   extends: .docker_image_builder_job_template
+  needs:
+    - prepare_base_images
   before_script:
     - git config --global --add safe.directory $CI_PROJECT_DIR
   script:
@@ -289,7 +338,7 @@ sync:
       pushd +2
       ${WORKING_DIR}/app/ci/collect-db-stats.sh
   after_script:
-    - cp "$DATA_CACHE_HAF/datadir/$CI_JOB_NAME.log" "haf-$CI_JOB_NAME.log" # in after_script, so it's done even if job fails
+    - cp "$DATA_CACHE_HAF/datadir/$CI_JOB_NAME.log" "haf-$CI_JOB_NAME.log" # in after_script, so it's done even if the job fails
   artifacts:
     when: always
     expire_in: 7 days
@@ -303,7 +352,7 @@ sync:
 
 
 e2e_benchmark:
-  image: $CI_REGISTRY_IMAGE/ci_base_image:3.8
+  image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.8-slim-2
   stage: benchmark
   interruptible: true
   needs:
@@ -375,10 +424,6 @@ e2e_benchmark:
     AWAIT_SERVICE_ACCESS_TOKEN: $AWAIT_ACCESS_TOKEN
     AWAIT_PACKAGE_URL: $CI_SERVER_URL/api/v4/projects/345/packages/generic/await/v1.3.2/await
     LOG_SERVER_PORT: 8090
-  before_script:
-    - |
-      pip install --no-cache-dir --verbose --user tox==3.25.0
-      export PATH=/home/hivemind/.local/bin:$PATH
   script:
     - |
       echo "HAF image name $HAF_IMAGE_NAME"
@@ -407,20 +452,22 @@ e2e_benchmark:
     - *api-benchmark-script
   after_script:
     - |
-      echo "Downloading logs..."
+      echo -e "\e[0Ksection_start:$(date +%s):logs[collapsed=true]\r\e[0KDownloading logs..."
       cp "$DATA_CACHE_HAF/datadir/$CI_JOB_NAME.log" "haf-$CI_JOB_NAME.log"
       wget $RUNNER_HIVEMIND_SMOKETEST_URL:$LOG_SERVER_PORT/request_process_times_smoketests.log || true
       wget $RUNNER_HIVEMIND_SMOKETEST_URL:$LOG_SERVER_PORT/hivemind-server.log || true
       wget $RUNNER_HIVEMIND_BENCHMARK_URL:$LOG_SERVER_PORT/request_process_times.log || true
       wget $RUNNER_HIVEMIND_BENCHMARK_URL:$LOG_SERVER_PORT/hivemind-benchmark-server.log || true
+      echo -e "\e[0Ksection_end:$(date +%s):logs\r\e[0K"
     - |
-      echo "Preparing dotenv file..."
+      echo -e "\e[0Ksection_start:$(date +%s):dotenv[collapsed=true]\r\e[0KPreparing dotenv file..."
       {
         echo "ARTIFACTS_JOB_ID=$CI_JOB_ID"
         echo "APP_VERSION=$(python -c "with open('version.log') as f:  exec(f.read()); print(__version__)")"
         echo "SERVER_NAME=$CI_RUNNER_DESCRIPTION"
       } > variables.env
       cat variables.env
+      echo -e "\e[0Ksection_end:$(date +%s):dotenv\r\e[0K"
   artifacts:
     when: always
     expire_in: 7 days
