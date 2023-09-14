@@ -1,8 +1,6 @@
-# Base docker file having defined environment for build and run of HAF instance.
-# Use scripts/ci/build_ci_base_image.sh to rebuild new version of CI base image. It must be properly tagged and pushed to the container registry
-
-ARG CI_REGISTRY_IMAGE=registry.gitlab.syncad.com/hive/hivemind/
-ARG CI_IMAGE_TAG=:ubuntu20.04-1
+# syntax=docker/dockerfile:1.5
+# Base docker file having defined environment for build and run of a Hivemind instance.
+# Use scripts/ci/build_ci_base_image.sh to build a new version of the CI base image. It must be properly tagged and pushed to the container registry.
 
 FROM --platform=$BUILDPLATFORM python:3.8-slim as runtime
 
@@ -13,36 +11,57 @@ ENV LANG=en_US.UTF-8
 ENV TARGETPLATFORM=${TARGETPLATFORM}
 ENV BUILDPLATFORM=${BUILDPLATFORM}
 
-RUN apt update && DEBIAN_FRONTEND=noniteractive apt install -y  \
-  bash \
-  joe \
-  sudo \
-  git \
-  ca-certificates \
-  postgresql-client \
-  wget \
-  procps \
-  xz-utils \
-  python3-cffi \
-  && DEBIAN_FRONTEND=noniteractive apt-get clean && rm -rf /var/lib/apt/lists/* \
-  && useradd -ms /bin/bash "haf_admin" && echo "haf_admin ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
-  && useradd -ms /bin/bash "haf_app_admin" \
-  && useradd -ms /bin/bash "hivemind"
+COPY haf/scripts/setup_ubuntu.sh /root/setup_os.sh
 
- 
+RUN <<EOF
+  set -e
+  
+  apt update && DEBIAN_FRONTEND=noniteractive apt install -y  \
+    bash \
+    joe \
+    sudo \
+    git \
+    ca-certificates \
+    postgresql-client \
+    wget \
+    procps \
+    xz-utils \
+    python3-cffi \
+  
+  DEBIAN_FRONTEND=noniteractive apt-get clean && rm -rf /var/lib/apt/lists/*
+  
+  /root/setup_os.sh --haf-admin-account="haf_admin"
+  useradd -ms /bin/bash -c "HAF application admin account" -u 4001 -U "haf_app_admin" --groups users
+  # This user needs UID of 1000 to be able to save logs to cache when run in CI
+  useradd -ms /bin/bash -c "Hivemind service account" -u 1000 "hivemind" --groups users
+EOF
+
 SHELL ["/bin/bash", "-c"] 
 
-FROM ${CI_REGISTRY_IMAGE}runtime${CI_IMAGE_TAG} AS ci-base-image
+FROM runtime AS ci-base-image
 
 ENV LANG=en_US.UTF-8
 SHELL ["/bin/bash", "-c"] 
 
-RUN apt update && DEBIAN_FRONTEND=noniteractive apt install -y gcc && \
-  git config --global --add safe.directory /home/hivemind/app
+RUN <<EOF
+  set -e
 
-FROM ${CI_REGISTRY_IMAGE}ci-base-image${CI_IMAGE_TAG} AS builder
+  apt update 
+  DEBIAN_FRONTEND=noniteractive apt install -y gcc
+
+  git config --global --add safe.directory /home/hivemind/app
+EOF
 
 USER hivemind
+
+ENV PATH=/home/hivemind/.local/bin:${PATH}
+
+RUN <<EOF
+  pip install --no-cache-dir --verbose --user tox==3.25.0
+EOF
+
+FROM ci-base-image AS builder
+
 WORKDIR /home/hivemind
 
 SHELL ["/bin/bash", "-c"] 
@@ -51,7 +70,7 @@ COPY --chown=hivemind:hivemind . /home/hivemind/app
 
 RUN ./app/scripts/ci/build.sh
 
-FROM ${CI_REGISTRY_IMAGE}runtime${CI_IMAGE_TAG} AS instance
+FROM runtime AS instance
 
 ARG HTTP_PORT=8080
 ENV HTTP_PORT=${HTTP_PORT}
