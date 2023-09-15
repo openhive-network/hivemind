@@ -312,6 +312,7 @@ sync:
         LOG_FILE: $CI_JOB_NAME.log
       command: ["--replay-blockchain", "--stop-replay-at-block=5000000"]
   variables:
+    GIT_STRATEGY: none
     RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
     HIVED_UID: $HIVED_UID
     WORKING_DIR: /home/hivemind
