@@ -382,7 +382,7 @@ e2e_benchmark:
         - bash
         - -c
         - |
-          wget --header "PRIVATE-TOKEN: $AWAIT_SERVICE_ACCESS_TOKEN" "$AWAIT_PACKAGE_URL" -O ${WORKING_DIR}/await && \
+          wget --header "JOB-TOKEN: $JOB_TOKEN" "$AWAIT_PACKAGE_URL" -O ${WORKING_DIR}/await && \
           chmod +x ${WORKING_DIR}/await && \
           ${WORKING_DIR}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Database found" && \
           ${WORKING_DIR}/docker_entrypoint.sh server \
@@ -400,7 +400,7 @@ e2e_benchmark:
         - bash
         - -c
         - |
-          wget --header "PRIVATE-TOKEN: $AWAIT_SERVICE_ACCESS_TOKEN" "$AWAIT_PACKAGE_URL" -O ${WORKING_DIR}/await && \
+          wget --header "JOB-TOKEN: $JOB_TOKEN" "$AWAIT_PACKAGE_URL" -O ${WORKING_DIR}/await && \
           chmod +x ${WORKING_DIR}/await && \
           ${WORKING_DIR}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Database found" && \
           ${WORKING_DIR}/docker_entrypoint.sh server \
@@ -414,16 +414,16 @@ e2e_benchmark:
         LOG_PATH: $DATA_CACHE_HAF/datadir/hivemind-benchmark-server.log
   variables:
     HIVED_UID: $HIVED_UID
+    JOB_TOKEN: $CI_JOB_TOKEN
     RUNNER_HIVEMIND_BENCHMARK_URL: http://$RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME
     RUNNER_HIVEMIND_SMOKETEST_URL: http://$RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME
-    AWAIT_SERVICE_ACCESS_TOKEN: $AWAIT_ACCESS_TOKEN
-    AWAIT_PACKAGE_URL: $CI_SERVER_URL/api/v4/projects/345/packages/generic/await/v1.3.2/await
+    AWAIT_PACKAGE_URL: $CI_API_V4_URL/projects/440/packages/generic/await/v1.3.2.1/await
     LOG_SERVER_PORT: 8090
   script:
     - |
       echo "HAF image name $HAF_IMAGE_NAME"
       echo "Hivemind image name $HIVEMIND_IMAGE"
-      wget --header "PRIVATE-TOKEN: $AWAIT_ACCESS_TOKEN" "$AWAIT_PACKAGE_URL"
+      wget --header "JOB-TOKEN: $CI_JOB_TOKEN" "$AWAIT_PACKAGE_URL"
       chmod +x await
       SMOKETEST_AWAIT_URL="tcp://${RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}"
       echo "Waiting for Hivemind smoketest server to start running on ${SMOKETEST_AWAIT_URL}"
