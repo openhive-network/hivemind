@@ -358,7 +358,7 @@ sync:
       pushd +2
       ${WORKING_DIR}/app/ci/collect-db-stats.sh
   after_script:
-    - cp "$DATA_CACHE_HAF_DATADIR/$CI_JOB_NAME.log" "haf-$CI_JOB_NAME.log" # in after_script, so it's done even if the job fails
+    - cp "$DATA_CACHE_HAF_DATADIR/$CI_JOB_NAME.log" "haf-$CI_JOB_NAME.log"  || true # in after_script, so it's done even if the job fails
   artifacts:
     when: always
     expire_in: 7 days
@@ -402,38 +402,39 @@ e2e_benchmark:
         - bash
         - -c
         - |
-          ${DATA_CACHE_HAF}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Database found" && \
+          ${DATA_CACHE_HAF}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Database found" | tee -i "$AWAIT_LOG_PATH" && \
           ${WORKING_DIR}/docker_entrypoint.sh server \
             --log-request-times \
-            --log-request-times-path=${DATA_CACHE_HAF}/datadir/request_process_times_smoketests.log \
+            --log-request-times-path=${DATA_CACHE_HAF_DATADIR}/request_process_times_smoketests.log \
             --log-mask-sensitive-data \
             --http-server-port=${RUNNER_HIVEMIND_SERVER_HTTP_PORT} \
             --database-url="${HAF_POSTGRES_URL}"
       variables:
         WORKING_DIR: /home/hivemind
         LOG_PATH: $DATA_CACHE_HAF_DATADIR/hivemind-server.log
+        AWAIT_LOG_PATH: $DATA_CACHE_HAF_DATADIR/hivemind-server-await.log
     - name: $HIVEMIND_IMAGE
       alias: hivemind-benchmark # cannot be a variable
       entrypoint:
         - bash
         - -c
         - |
-          ${DATA_CACHE_HAF}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Database found" && \
+          ${DATA_CACHE_HAF}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Database found" | tee -i "$AWAIT_LOG_PATH" && \
           ${WORKING_DIR}/docker_entrypoint.sh server \
             --log-request-times \
-            --log-request-times-path=${DATA_CACHE_HAF}/datadir/request_process_times.log \
+            --log-request-times-path=${DATA_CACHE_HAF_DATADIR}/request_process_times.log \
             --log-mask-sensitive-data \
             --http-server-port=${RUNNER_HIVEMIND_SERVER_HTTP_PORT} \
             --database-url="${HAF_POSTGRES_URL}"
       variables:
         WORKING_DIR: /home/hivemind
         LOG_PATH: $DATA_CACHE_HAF_DATADIR/hivemind-benchmark-server.log
+        AWAIT_LOG_PATH: $DATA_CACHE_HAF_DATADIR/hivemind-benchmark-server-await.log
   variables:
     HIVED_UID: $HIVED_UID
     JOB_TOKEN: $CI_JOB_TOKEN
     RUNNER_HIVEMIND_BENCHMARK_URL: http://$RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME
     RUNNER_HIVEMIND_SMOKETEST_URL: http://$RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME
-    LOG_SERVER_PORT: 8090
   script:
     - |
       echo "HAF image name $HAF_IMAGE_NAME"
@@ -461,11 +462,14 @@ e2e_benchmark:
   after_script:
     - |
       echo -e "\e[0Ksection_start:$(date +%s):logs[collapsed=true]\r\e[0KCollecting logs..."
-      cp "${DATA_CACHE_HAF}/datadir/${CI_JOB_NAME}.log" "haf-$CI_JOB_NAME.log"
-      cp "${DATA_CACHE_HAF}/datadir/request_process_times_smoketests.log" request_process_times_smoketests.log
-      cp "${DATA_CACHE_HAF}/datadir/hivemind-server.log" hivemind-server.log
-      cp "${DATA_CACHE_HAF}/datadir/request_process_times.log" request_process_times.log
-      cp "${DATA_CACHE_HAF}/datadir/hivemind-benchmark-server.log" hivemind-benchmark-server.log
+      ls -lah "${DATA_CACHE_HAF_DATADIR}"
+      cp "${DATA_CACHE_HAF_DATADIR}/${CI_JOB_NAME}.log" "haf-$CI_JOB_NAME.log" || true
+      cp "${DATA_CACHE_HAF_DATADIR}/request_process_times_smoketests.log" request_process_times_smoketests.log || true
+      cp "${DATA_CACHE_HAF_DATADIR}/hivemind-server.log" hivemind-server.log || true
+      cp "${DATA_CACHE_HAF_DATADIR}/hivemind-server-await.log" hivemind-server-await.log || true
+      cp "${DATA_CACHE_HAF_DATADIR}/request_process_times.log" request_process_times.log || true
+      cp "${DATA_CACHE_HAF_DATADIR}/hivemind-benchmark-server.log" hivemind-benchmark-server.log || true
+      cp "${DATA_CACHE_HAF_DATADIR}/hivemind-benchmark-server-await.log" hivemind-benchmark-server-await.log || true
       echo -e "\e[0Ksection_end:$(date +%s):logs\r\e[0K"
     - |
       echo -e "\e[0Ksection_start:$(date +%s):dotenv[collapsed=true]\r\e[0KPreparing dotenv file..."
@@ -492,6 +496,8 @@ e2e_benchmark:
       - request_process_times.log
       - request_process_times_smoketests.log
       - version.log
+      - hivemind-server-await.log
+      - hivemind-benchmark-server-await.log
   tags:
     - data-cache-storage
 
