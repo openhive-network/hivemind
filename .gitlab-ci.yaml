@@ -24,6 +24,8 @@ variables:
   CI_DEBUG_SERVICES: "true"
   DATA_CACHE_HAF_TEMPLATE: /cache/replay_data_hivemind_haf
   DATA_CACHE_HAF: "/cache/replay_data_hivemind_haf_${CI_PIPELINE_ID}"
+  DATA_CACHE_HAF_DATADIR: $DATA_CACHE_HAF/datadir
+  DATA_CACHE_HAF_SHM_DIR: $DATA_CACHE_HAF/shm_dir
   BLOCK_LOG_SOURCE_DIR_5M: /blockchain/block_log_5m
 
 include:
@@ -324,8 +326,8 @@ sync:
          host    haf_block_log    haf_app_admin    all    trust\n
          host    haf_block_log    haf_admin        all    trust\n
          "
-        DATADIR: $DATA_CACHE_HAF/datadir
-        SHM_DIR: $DATA_CACHE_HAF/shm_dir
+        DATADIR: $DATA_CACHE_HAF_DATADIR
+        SHM_DIR: $DATA_CACHE_HAF_SHM_DIR
         LOG_FILE: $CI_JOB_NAME.log
       command: ["--replay-blockchain", "--stop-replay-at-block=5000000"]
   variables:
@@ -356,7 +358,7 @@ sync:
       pushd +2
       ${WORKING_DIR}/app/ci/collect-db-stats.sh
   after_script:
-    - cp "$DATA_CACHE_HAF/datadir/$CI_JOB_NAME.log" "haf-$CI_JOB_NAME.log" # in after_script, so it's done even if the job fails
+    - cp "$DATA_CACHE_HAF_DATADIR/$CI_JOB_NAME.log" "haf-$CI_JOB_NAME.log" # in after_script, so it's done even if the job fails
   artifacts:
     when: always
     expire_in: 7 days
@@ -390,8 +392,8 @@ e2e_benchmark:
          host    haf_block_log    haf_app_admin    all    trust\n
          host    haf_block_log    haf_admin        all    trust\n
          "
-        DATADIR: $DATA_CACHE_HAF/datadir
-        SHM_DIR: $DATA_CACHE_HAF/shm_dir
+        DATADIR: $DATA_CACHE_HAF_DATADIR
+        SHM_DIR: $DATA_CACHE_HAF_SHM_DIR
         LOG_FILE: $CI_JOB_NAME.log
       command: ["--replay-blockchain", "--stop-replay-at-block=5000000"]
     - name: $HIVEMIND_IMAGE
@@ -409,7 +411,7 @@ e2e_benchmark:
             --database-url="${HAF_POSTGRES_URL}"
       variables:
         WORKING_DIR: /home/hivemind
-        LOG_PATH: $DATA_CACHE_HAF/datadir/hivemind-server.log
+        LOG_PATH: $DATA_CACHE_HAF_DATADIR/hivemind-server.log
     - name: $HIVEMIND_IMAGE
       alias: hivemind-benchmark # cannot be a variable
       entrypoint:
@@ -425,7 +427,7 @@ e2e_benchmark:
             --database-url="${HAF_POSTGRES_URL}"
       variables:
         WORKING_DIR: /home/hivemind
-        LOG_PATH: $DATA_CACHE_HAF/datadir/hivemind-benchmark-server.log
+        LOG_PATH: $DATA_CACHE_HAF_DATADIR/hivemind-benchmark-server.log
   variables:
     HIVED_UID: $HIVED_UID
     JOB_TOKEN: $CI_JOB_TOKEN
