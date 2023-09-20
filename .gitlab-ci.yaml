@@ -342,6 +342,7 @@ sync:
       sleep 20s
       cat ${WORKING_DIR}/.hivemind-venv/lib/python3.8/site-packages/hive/_version.py > version.log
       pushd ${WORKING_DIR}/app
+      ${DATA_CACHE_HAF}/await -t 5m http://haf-instance:8091 -- echo "HAF ready"
       ci/wait-for-postgres.sh ${HAF_ADMIN_POSTGRES_URL}
       pushd ${WORKING_DIR}
       ${WORKING_DIR}/docker_entrypoint.sh setup \
@@ -403,7 +404,8 @@ e2e_benchmark:
         - bash
         - -c
         - |
-          ${DATA_CACHE_HAF}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Database found" | tee -i "$AWAIT_LOG_PATH" && \
+          ${DATA_CACHE_HAF}/await -t 5m http://haf-instance:8091 -- echo "HAF ready" | tee -i "$AWAIT_LOG_PATH" && \
+          ${DATA_CACHE_HAF}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Hivemind database found" | tee -a -i "$AWAIT_LOG_PATH" && \
           ${WORKING_DIR}/docker_entrypoint.sh server \
             --log-request-times \
             --log-request-times-path=${DATA_CACHE_HAF_DATADIR}/request_process_times_smoketests.log \
@@ -420,7 +422,8 @@ e2e_benchmark:
         - bash
         - -c
         - |
-          ${DATA_CACHE_HAF}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Database found" | tee -i "$AWAIT_LOG_PATH" && \
+          ${DATA_CACHE_HAF}/await -t 5m http://haf-instance:8091 -- echo "HAF ready" | tee -i "$AWAIT_LOG_PATH" && \
+          ${DATA_CACHE_HAF}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Hivemind database found" | tee -a -i "$AWAIT_LOG_PATH" && \
           ${WORKING_DIR}/docker_entrypoint.sh server \
             --log-request-times \
             --log-request-times-path=${DATA_CACHE_HAF_DATADIR}/request_process_times.log \
