@@ -223,7 +223,18 @@ workflow:
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
         $RUNNER_BENCHMARK_ITERATIONS \
         $RUNNER_PYTEST_WORKERS
-    echo -e "\e[0Ksection_end:$(date +%s):api-benchmark\r\e[0K" 
+    echo -e "\e[0Ksection_end:$(date +%s):api-benchmark\r\e[0K"
+
+.hivemind-serve-script: &hivemind-serve-script
+  |
+  ${DATA_CACHE_HAF}/await -t 5m http://haf-instance:8091 -- echo "HAF ready" | tee -i "$AWAIT_LOG_PATH" && \
+  ${DATA_CACHE_HAF}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Hivemind database found" | tee -a -i "$AWAIT_LOG_PATH" && \
+  ${WORKING_DIR}/docker_entrypoint.sh server \
+    --log-request-times \
+    --log-request-times-path=${REQUEST_PATH_LOG_PATH} \
+    --log-mask-sensitive-data \
+    --http-server-port=${RUNNER_HIVEMIND_SERVER_HTTP_PORT} \
+    --database-url="${HAF_POSTGRES_URL}"
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| BASH SCRIPTS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -403,37 +414,23 @@ e2e_benchmark:
       entrypoint:
         - bash
         - -c
-        - |
-          ${DATA_CACHE_HAF}/await -t 5m http://haf-instance:8091 -- echo "HAF ready" | tee -i "$AWAIT_LOG_PATH" && \
-          ${DATA_CACHE_HAF}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Hivemind database found" | tee -a -i "$AWAIT_LOG_PATH" && \
-          ${WORKING_DIR}/docker_entrypoint.sh server \
-            --log-request-times \
-            --log-request-times-path=${DATA_CACHE_HAF_DATADIR}/request_process_times_smoketests.log \
-            --log-mask-sensitive-data \
-            --http-server-port=${RUNNER_HIVEMIND_SERVER_HTTP_PORT} \
-            --database-url="${HAF_POSTGRES_URL}"
+        - *hivemind-serve-script
       variables:
         WORKING_DIR: /home/hivemind
         LOG_PATH: $DATA_CACHE_HAF_DATADIR/hivemind-server.log
         AWAIT_LOG_PATH: $DATA_CACHE_HAF_DATADIR/hivemind-server-await.log
+        REQUEST_PATH_LOG_PATH: $DATA_CACHE_HAF_DATADIR/request_process_times_smoketests.log
     - name: $HIVEMIND_IMAGE
       alias: hivemind-benchmark # cannot be a variable
       entrypoint:
         - bash
         - -c
-        - |
-          ${DATA_CACHE_HAF}/await -t 5m http://haf-instance:8091 -- echo "HAF ready" | tee -i "$AWAIT_LOG_PATH" && \
-          ${DATA_CACHE_HAF}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Hivemind database found" | tee -a -i "$AWAIT_LOG_PATH" && \
-          ${WORKING_DIR}/docker_entrypoint.sh server \
-            --log-request-times \
-            --log-request-times-path=${DATA_CACHE_HAF_DATADIR}/request_process_times.log \
-            --log-mask-sensitive-data \
-            --http-server-port=${RUNNER_HIVEMIND_SERVER_HTTP_PORT} \
-            --database-url="${HAF_POSTGRES_URL}"
+        - *hivemind-serve-script
       variables:
         WORKING_DIR: /home/hivemind
         LOG_PATH: $DATA_CACHE_HAF_DATADIR/hivemind-benchmark-server.log
         AWAIT_LOG_PATH: $DATA_CACHE_HAF_DATADIR/hivemind-benchmark-server-await.log
+        REQUEST_PATH_LOG_PATH: $DATA_CACHE_HAF_DATADIR/request_process_times.log
   variables:
     HIVED_UID: $HIVED_UID
     JOB_TOKEN: $CI_JOB_TOKEN
