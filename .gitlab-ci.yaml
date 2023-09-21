@@ -21,7 +21,7 @@ variables:
   GIT_DEPTH: 1
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: recursive
-  CI_DEBUG_SERVICES: "true"
+  CI_DEBUG_SERVICES: "false" #All the service logs should be saved as artifacts, so it's fine to turn this off.
   DATA_CACHE_HAF_TEMPLATE: /cache/replay_data_hivemind_haf
   DATA_CACHE_HAF: "/cache/replay_data_hivemind_haf_${CI_PIPELINE_ID}"
   DATA_CACHE_HAF_DATADIR: $DATA_CACHE_HAF/datadir
