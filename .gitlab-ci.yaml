@@ -407,8 +407,11 @@ e2e_benchmark:
         DATADIR: $DATA_CACHE_HAF_DATADIR
         SHM_DIR: $DATA_CACHE_HAF_SHM_DIR
         LOG_FILE: $CI_JOB_NAME.log
-        PGCTLTIMEOUT: 600 # give PostgreSQL more time to start if GitLab shut it down improperly after sync job
-      command: ["--replay-blockchain", "--stop-replay-at-block=5000000"]
+        PGCTLTIMEOUT: 600 # give PostgreSQL more time to start if GitLab shut it down improperly after the sync job
+      entrypoint:
+        - bash
+        - -c
+        - echo PGCTLTIMEOUT = ${PGCTLTIMEOUT} | sudo tee -a /etc/postgresql/14/main/environment && /home/haf_admin/docker_entrypoint.sh --replay-blockchain --stop-replay-at-block=5000000
     - name: $HIVEMIND_IMAGE
       alias: hivemind-smoketest # cannot be a variable
       entrypoint:
