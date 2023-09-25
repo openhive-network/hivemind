@@ -518,7 +518,7 @@ Trigger benchmark-results-collector:
   stage: collector
   needs:
     - job: e2e_benchmark
-      artifacts: false
+      artifacts: true # Even though variables.env is not a regular artifact, but a dotenv report, this still needs to be set to true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
