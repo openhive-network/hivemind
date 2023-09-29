@@ -1,8 +1,9 @@
 [build-system]
 requires = [
     "poetry-core>=1.7.0",
+    "poetry-dynamic-versioning>=1.0.0,<2.0.0",
 ]
-build-backend = "poetry.core.masonry.api"
+build-backend = "poetry_dynamic_versioning.backend"
 
 
 [tool.poetry]
@@ -58,6 +59,25 @@ black = "22.6.0"
 [tool.poetry.scripts]
 hive = "hive.cli:run"
 mocker = "hive.indexer.mocking.populate_haf_with_mocked_data:main"
+
+
+[tool.poetry-dynamic-versioning]
+enable = true
+format-jinja = """
+    {%- set dirty_postfix = '.dirty' if dirty else '' -%}
+    {%- if distance == 0 and not dirty -%}
+        {{ serialize_pep440(base, stage, revision) }}
+    {%- elif revision is not none -%}
+        {{ serialize_pep440(base, stage, revision + 1, dev=distance, metadata=[commit]) }}{{ dirty_postfix }}
+    {%- else -%}
+        {{ serialize_pep440(bump_version(base), stage, revision, dev=distance, metadata=[commit]) }}{{ dirty_postfix }}
+    {%- endif -%}
+"""
+
+[tool.poetry-dynamic-versioning.substitution]
+files = [
+    "hive/_version.py",
+]
 
 
 [tool.black]

@@ -133,10 +133,6 @@ tests/failed_blocks/
 # pyrest tests
 *.out.json
 
-# versioning
-hive/_version.py
-
-
 hivemind.port
 hive_server.pid
 hivemind-server.pid
