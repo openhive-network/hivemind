@@ -26,6 +26,11 @@ source = [
 ]
 
 
+[tool.poetry.build]
+generate-setup-file = false
+script = "build.py"
+
+
 [tool.poetry.dependencies]
 python = "^3.8"
 aiopg = "1.3.4"
@@ -54,6 +59,7 @@ pyYAML = "6.0"
 prettytable = "3.3.0"
 tox = "3.25.0"
 black = "22.6.0"
+dunamai = "^1.18.1"
 
 
 [tool.poetry.scripts]
