@@ -17,7 +17,7 @@
             "value" : {
               "author": "tester1",
               "body": "Tester1 post is here. This post was added by mock block provider. Enjoy!",
-              "json_metadata": "{\"app\":\"mock-block-provider\"}", 
+              "json_metadata": "{\"app\":\"mock-block-provider\"}",
               "parent_author": "",
               "parent_permlink": "",
               "permlink": "tester1-post",
