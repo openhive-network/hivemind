@@ -3,6 +3,7 @@
 import logging
 
 from hive.conf import SCHEMA_NAME
+from hive.server.bridge_api.methods import count_reblogs
 from hive.server.bridge_api.objects import _bridge_post_object, append_statistics_to_post
 from hive.server.common.helpers import return_error_info, valid_account, valid_permlink
 from hive.server.database_api.methods import find_votes_impl, VotesPresentation
@@ -29,6 +30,7 @@ async def get_discussion(context, author: str, permlink: str, observer: str = ''
     root_post['active_votes'] = await find_votes_impl(
         db, rows[0]['author'], rows[0]['permlink'], VotesPresentation.BridgeApi
     )
+    root_post['reblogs'] = await count_reblogs(db, rows[0]['id'])
     root_post = append_statistics_to_post(root_post, rows[0], False)
     root_post['replies'] = []
     all_posts[root_id] = root_post
@@ -44,6 +46,7 @@ async def get_discussion(context, author: str, permlink: str, observer: str = ''
         post['active_votes'] = await find_votes_impl(
             db, rows[index]['author'], rows[index]['permlink'], VotesPresentation.BridgeApi
         )
+        post['reblogs'] = await count_reblogs(db, rows[index]['id'])
         post = append_statistics_to_post(post, rows[index], False)
         post['replies'] = []
         all_posts[post['post_id']] = post
