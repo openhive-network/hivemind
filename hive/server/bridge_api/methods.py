@@ -69,6 +69,7 @@ async def get_post(context, author, permlink, observer=None):
 
     post = _bridge_post_object(result[0])
     post['active_votes'] = await find_votes_impl(db, author, permlink, VotesPresentation.BridgeApi)
+    post['reblogs'] = await count_reblogs(db, result[0]['id'])
     post = append_statistics_to_post(post, result[0], False)
     return post
 
