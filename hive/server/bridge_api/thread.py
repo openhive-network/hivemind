@@ -46,9 +46,9 @@ async def get_discussion(context, author: str, permlink: str, observer: str = ''
         post['active_votes'] = await find_votes_impl(
             db, rows[index]['author'], rows[index]['permlink'], VotesPresentation.BridgeApi
         )
-        post['reblogs'] = await count_reblogs(db, rows[index]['id'])
         post = append_statistics_to_post(post, rows[index], False)
         post['replies'] = []
+        post['reblogs'] = await count_reblogs(db, rows[index]['id'])
         all_posts[post['post_id']] = post
 
     for key in parent_to_children_id_map:
