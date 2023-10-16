@@ -29,7 +29,7 @@ variables:
 
 include:
   - project: hive/haf
-    ref: 8a5bdf1a273e2fcf20353c73c50fea84970b8885 # develop
+    ref: 14c3263b364966e5a1197ac2cd107646836fba24 # develop
     file: /scripts/ci-helpers/prepare_data_image_job.yml
 
 workflow:
@@ -291,12 +291,11 @@ prepare_hivemind_image:
       - hivemind_image.env
   tags: *shared_tags
 
-cleanup_haf_cache_manual:
+cleanup_cache_manual:
   extends: .cleanup_cache_manual
   stage: cleanup
   variables:
-    CLEANUP_PATH_PATTERN: "/cache/replay_data_hivemind_*"
-  resource_group: ${CI_COMMIT_SHA}
+    CLEANUP_PATH_PATTERN: "/cache/replay_data_haf_* /cache/replay_data_hivemind_*"
   tags:
     - data-cache-storage
 
@@ -383,6 +382,7 @@ sync:
       - pg-stats
       - version.log
       - haf-$CI_JOB_NAME.log
+  resource_group: $CI_COMMIT_SHA
   tags:
     - data-cache-storage
 
@@ -509,6 +509,7 @@ e2e_benchmark:
       - version.log
       - hivemind-server-await.log
       - hivemind-benchmark-server-await.log
+  resource_group: $CI_COMMIT_SHA
   tags:
     - data-cache-storage
 
