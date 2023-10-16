@@ -33,6 +33,7 @@ class Role(IntEnum):
 TYPE_TOPIC = 1
 TYPE_JOURNAL = 2
 TYPE_COUNCIL = 3
+valid_types = [TYPE_TOPIC, TYPE_JOURNAL, TYPE_COUNCIL]
 
 # https://en.wikipedia.org/wiki/ISO_639-1
 LANGS = (
@@ -103,6 +104,13 @@ def read_key_dict(obj, key):
     assert isinstance(obj[key], dict), f'key `{key}` not a dict'
     return obj[key]
 
+def read_key_integer(op, key):
+    """Reads a key from dict, ensuring valid integer if present."""
+    if key in op:
+        assert isinstance(op[key], int), 'must be int: %s' % key
+        return op[key]
+    return None
+
 
 class Community:
     """Handles hive community registration and operations."""
@@ -124,7 +132,7 @@ class Community:
         """
 
         # if not re.match(r'^hive-[123]\d{4,6}$', name):
-        if not re.match(r'^hive-[1]\d{4,6}$', name):
+        if not re.match(r'^hive-[123]\d{4,6}$', name):
             return
         type_id = int(name[5])
         _id = Accounts.get_id(name)
@@ -213,26 +221,20 @@ class Community:
 
         For a comment to be valid, these conditions apply:
             - Author is not muted in this community
-            - For council post/comment, author must be a member
-            - For journal post, author must be a member
             - Community must exist
+
+        Note that the checks related to community types are performed on insert
+        via the sql function process_community_post
         """
 
         assert community_id, 'no community_id'
-        community = cls._get_name(community_id)
         account_id = Accounts.get_id(comment_op['author'])
         role = cls.get_user_role(community_id, account_id)
-        type_id = int(community[5])
 
         # TODO: check `nsfw` tag requirement #267
         # TODO: (1.5) check that beneficiaries are valid
 
-        if type_id == TYPE_JOURNAL:
-            if not comment_op['parent_author']:
-                return role >= Role.member
-        elif type_id == TYPE_COUNCIL:
-            return role >= Role.member
-        return role >= Role.guest  # or at least not muted
+        return role >= Role.guest  # At least not muted
 
 
 class CommunityOp:
@@ -535,7 +537,7 @@ class CommunityOp:
     def _read_props(self):
         # TODO: assert props changed?
         props = read_key_dict(self.op, 'props')
-        valid = ['title', 'about', 'lang', 'is_nsfw', 'description', 'flag_text', 'settings']
+        valid = ['title', 'about', 'lang', 'is_nsfw', 'description', 'flag_text', 'settings', 'type_id']
         assert_keys_match(props.keys(), valid, allow_missing=True)
 
         out = {}
@@ -560,6 +562,10 @@ class CommunityOp:
                 avatar_url = settings['avatar_url']
                 assert not avatar_url or _valid_url_proto(avatar_url)
                 out['avatar_url'] = avatar_url
+        if 'type_id' in props:
+            community_type = read_key_integer(props, 'type_id')
+            assert community_type in valid_types, 'invalid community type'
+            out['type_id'] = community_type
         assert out, 'props were blank'
         self.props = out
 
@@ -577,9 +583,19 @@ class CommunityOp:
             if self.actor != self.account:
                 assert account_role < actor_role, 'cant modify higher-role user'
                 assert account_role != new_role, 'role would not change'
+
+            # prevent setting a role if the user is not subscribed to the community.
+            # the role "muted" is still settable regardless of subscription status
+            subscribed = DB.query_one(
+                f"""SELECT * FROM {SCHEMA_NAME}.validate_community_set_role(:community_id, :actor_id, :role_id)""",
+                community_id=self.community_id, actor_id=self.account_id, role_id=new_role,
+            )
+            assert subscribed, f"{self.account} must be subscribed to the community to change its role"
+
         elif action == 'updateProps':
             assert actor_role >= Role.admin, 'only admins can update props'
         elif action == 'setUserTitle':
+            assert self._subscribed(self.account_id),  f"{self.account} must be subscribed to the community to change its title"
             # TODO: assert title changed?
             assert actor_role >= Role.mod, 'only mods can set user titles'
         elif action == 'mutePost':

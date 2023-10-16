@@ -69,11 +69,19 @@ pwd
 
 "$SRCROOTDIR/scripts/ci/fix_ci_tag.sh"
 
-BUILD_OPTIONS=("--platform=amd64" "--target=instance" "--progress=plain")
+CI_IMAGE_TAG=${CI_IMAGE_TAG:-"python-3.8-slim-1"} # see scripts/ci/build_ci_base_image.sh for the current tag
+BUILD_OPTIONS=("--platform=linux/amd64" "--target=instance" "--progress=plain")
 TAG="$REGISTRY/instance:instance-$BUILD_IMAGE_TAG"
 
+# On CI push the images to the registry
+if [[ -n "${CI:-}" ]]; then
+  BUILD_OPTIONS+=("--push")
+else
+  BUILD_OPTIONS+=("--load")
+fi
+
 docker buildx build "${BUILD_OPTIONS[@]}" \
-  --build-arg CI_REGISTRY_IMAGE="$REGISTRY/" \
+  --build-context "runtime=docker-image://${REGISTRY}/runtime:${CI_IMAGE_TAG}" \
   --tag "$TAG" \
   --file Dockerfile .
 

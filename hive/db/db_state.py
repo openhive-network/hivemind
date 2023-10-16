@@ -270,13 +270,18 @@ class DbState:
             log.info("[MASSIVE] Skipping pre-massive sync hooks")
             return
 
+
+        log.info("Dropping foreign keys")
+        from hive.db.schema import drop_fk
+        time_start = perf_counter()
+        drop_fk(cls.db())
+        end_time = perf_counter()
+        elapsed_time = end_time - time_start
+        log.info("Dropped foreign keys: %.4f s", elapsed_time)
+
         # is_pre_process, drop, create
         cls.processing_indexes(True, True, False)
 
-        from hive.db.schema import drop_fk
-
-        log.info("Dropping FKs")
-        drop_fk(cls.db())
 
         # intentionally disabled since it needs a lot of WAL disk space when switching back to LOGGED
         # set_logged_table_attribute(cls.db(), False)

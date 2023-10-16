@@ -113,9 +113,9 @@ def build_metadata():
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Column('block_num_created', sa.Integer, nullable=False),
         sa.Column('tags_ids', sa.ARRAY(sa.Integer), nullable=True),
-        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_posts_fk1', deferrable=True),
-        sa.ForeignKeyConstraint(['root_id'], ['hive_posts.id'], name='hive_posts_fk2', deferrable=True),
-        sa.ForeignKeyConstraint(['parent_id'], ['hive_posts.id'], name='hive_posts_fk3', deferrable=True),
+        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_posts_fk1', deferrable=True, postgresql_not_valid=True),
+        sa.ForeignKeyConstraint(['root_id'], ['hive_posts.id'], name='hive_posts_fk2', deferrable=True, postgresql_not_valid=True),
+        sa.ForeignKeyConstraint(['parent_id'], ['hive_posts.id'], name='hive_posts_fk3', deferrable=True, postgresql_not_valid=True),
         sa.UniqueConstraint('author_id', 'permlink_id', 'counter_deleted', name='hive_posts_ux1'),
         sa.Index('hive_posts_depth_idx', 'depth'),
         sa.Index('hive_posts_root_id_id_idx', 'root_id', 'id'),
@@ -235,10 +235,10 @@ def build_metadata():
         sa.UniqueConstraint(
             'voter_id', 'author_id', 'permlink_id', name='hive_votes_voter_id_author_id_permlink_id_uk'
         ),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_votes_fk1', deferrable=True),
-        sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id'], name='hive_votes_fk2', deferrable=True),
-        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_votes_fk3', deferrable=True),
-        sa.ForeignKeyConstraint(['permlink_id'], ['hive_permlink_data.id'], name='hive_votes_fk4', deferrable=True),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_votes_fk1', deferrable=True, postgresql_not_valid=True),
+        sa.ForeignKeyConstraint(['voter_id'], ['hive_accounts.id'], name='hive_votes_fk2', deferrable=True, postgresql_not_valid=True),
+        sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_votes_fk3', deferrable=True, postgresql_not_valid=True),
+        sa.ForeignKeyConstraint(['permlink_id'], ['hive_permlink_data.id'], name='hive_votes_fk4', deferrable=True, postgresql_not_valid=True),
         sa.Index(
             'hive_votes_voter_id_post_id_idx', 'voter_id', 'post_id'
         ),  # probably this index is redundant to hive_votes_voter_id_last_update_idx because of starting voter_id.
@@ -295,8 +295,8 @@ def build_metadata():
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
-        sa.ForeignKeyConstraint(['blogger_id'], ['hive_accounts.id'], name='hive_reblogs_fk1', deferrable=True),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_reblogs_fk2', deferrable=True),
+        sa.ForeignKeyConstraint(['blogger_id'], ['hive_accounts.id'], name='hive_reblogs_fk1', deferrable=True, postgresql_not_valid=True),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_reblogs_fk2', deferrable=True, postgresql_not_valid=True),
         sa.UniqueConstraint('blogger_id', 'post_id', name='hive_reblogs_ux1'),  # core
         sa.Index('hive_reblogs_post_id', 'post_id'),
         sa.Index('hive_reblogs_block_num_idx', 'block_num'),
@@ -315,9 +315,9 @@ def build_metadata():
         sa.Column('to_account', sa.Integer, nullable=False),
         sa.Column('amount', sa.types.DECIMAL(10, 3), nullable=False),
         sa.Column('token', VARCHAR(5), nullable=False),
-        sa.ForeignKeyConstraint(['from_account'], ['hive_accounts.id'], name='hive_payments_fk1', deferrable=True),
-        sa.ForeignKeyConstraint(['to_account'], ['hive_accounts.id'], name='hive_payments_fk2', deferrable=True),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_payments_fk3', deferrable=True),
+        sa.ForeignKeyConstraint(['from_account'], ['hive_accounts.id'], name='hive_payments_fk1', deferrable=True, postgresql_not_valid=True),
+        sa.ForeignKeyConstraint(['to_account'], ['hive_accounts.id'], name='hive_payments_fk2', deferrable=True, postgresql_not_valid=True),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_payments_fk3', deferrable=True, postgresql_not_valid=True),
         sa.Index('hive_payments_from', 'from_account'),
         sa.Index('hive_payments_to', 'to_account'),
         sa.Index('hive_payments_post_id', 'post_id'),
@@ -369,8 +369,8 @@ def build_metadata():
         sa.Column('post_id', sa.Integer, nullable=False),
         sa.Column('account_id', sa.Integer, nullable=False),
         sa.Column('block_num', sa.Integer, nullable=False),
-        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_mentions_fk1', deferrable=True),
-        sa.ForeignKeyConstraint(['account_id'], ['hive_accounts.id'], name='hive_mentions_fk2', deferrable=True),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_mentions_fk1', deferrable=True, postgresql_not_valid=True),
+        sa.ForeignKeyConstraint(['account_id'], ['hive_accounts.id'], name='hive_mentions_fk2', deferrable=True, postgresql_not_valid=True),
         sa.Index('hive_mentions_account_id_idx', 'account_id'),
         sa.UniqueConstraint('post_id', 'account_id', 'block_num', name='hive_mentions_ux1'),
     )
@@ -693,6 +693,7 @@ def setup(db):
         "update_table_statistics.sql",
         "upgrade/update_db_patchlevel.sql",  # Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
         "hafapp_api.sql",
+        "community_helpers.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
