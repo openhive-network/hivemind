@@ -379,6 +379,8 @@ class Posts(DbAdapterHolder):
             beneficiaries=dumps(beneficiaries),
         )
 
+
+
     @classmethod
     def delete(cls, op, block_date):
         """Marks a post record as being deleted."""

@@ -408,6 +408,7 @@ def build_metadata_community(hive_rowid_seq: sa.Sequence, metadata=None):
         sa.Column('description', sa.String(5000), nullable=False, server_default=''),
         sa.Column('flag_text', sa.String(5000), nullable=False, server_default=''),
         sa.Column('settings', TEXT, nullable=False, server_default='{}'),
+        sa.Column('beneficiaries_settings', sa.JSON, nullable=False, server_default='[]'),
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.UniqueConstraint('name', name='hive_communities_ux1'),
         sa.Index('hive_communities_ix1', 'rank', 'id'),

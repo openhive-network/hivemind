@@ -45,6 +45,8 @@ declare
         __community_type_journal CONSTANT SMALLINT := 2;
         __community_type_council CONSTANT SMALLINT := 3;
         __is_muted bool := TRUE;
+        __beneficiaries_settings json := '[]';
+        __is_parent_muted bool := FALSE;
         __community_id hivemind_app.hive_posts.community_id%TYPE;
 BEGIN
         IF _block_num < _community_support_start_block THEN
@@ -54,7 +56,7 @@ BEGIN
             IF _is_comment = TRUE THEN
                 SELECT type_id, id INTO __community_type_id, __community_id from hivemind_app.hive_communities where id = _community_id;
             ELSE
-                SELECT type_id, id INTO __community_type_id, __community_id from hivemind_app.hive_communities where name = _parent_permlink;
+                SELECT type_id, id, beneficiaries_settings INTO __community_type_id, __community_id, __beneficiaries_settings from hivemind_app.hive_communities where name = _parent_permlink;
             END IF;
 
             -- __is_muted can be TRUE here if it's a comment and its parent is muted

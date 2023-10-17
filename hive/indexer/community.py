@@ -566,6 +566,11 @@ class CommunityOp:
             community_type = read_key_integer(props, 'type_id')
             assert community_type in valid_types, 'invalid community type'
             out['type_id'] = community_type
+        if 'beneficiaries_settings' in props:
+            # TODO
+            # community_type = read_key_integer(props, 'type_id')
+            # assert community_type in valid_types, 'invalid community type'
+            out['beneficiaries_settings'] = '[]'
         assert out, 'props were blank'
         self.props = out
 
