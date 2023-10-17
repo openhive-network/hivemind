@@ -23,6 +23,7 @@
     "permlink": "ismember-hive-311119",
     "post_id": 1258121,
     "promoted": "0.000 HBD",
+    "reblogs": 0,
     "replies": [
       "ismember/re-ismember-hive-311119",
       "notmember/re-2-ismember-hive-311119"
@@ -63,6 +64,7 @@
     "permlink": "re-ismember-hive-311119",
     "post_id": 1258123,
     "promoted": "0.000 HBD",
+    "reblogs": 0,
     "replies": [
       "ismember/re-re-ismember-hive-311119"
     ],
@@ -102,6 +104,7 @@
     "permlink": "re-re-ismember-hive-311119",
     "post_id": 1258124,
     "promoted": "0.000 HBD",
+    "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
@@ -139,6 +142,7 @@
     "permlink": "re-2-ismember-hive-311119",
     "post_id": 1258125,
     "promoted": "0.000 HBD",
+    "reblogs": 0,
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
