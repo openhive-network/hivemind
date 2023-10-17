@@ -1,8 +1,9 @@
-"""Methods for normalizing/sanitizing steemd account metadata."""
+"""Methods for normalizing/sanitizing hived account data."""
 
 import ujson as json
-
+import re
 from hive.utils.normalize import trunc
+
 
 
 def get_profile_str(account):
@@ -137,3 +138,18 @@ def _char_police(string):
     if string.find('\x00') > -1:
         return None
     return string
+
+def validate_account_name(value):
+    assert isinstance(value, str), 'account name must be a string'
+    assert value, "Account name should not be empty."
+
+    length = len(value)
+    assert length >= 3, "Account name should be longer."
+    assert length <= 16, "Account name should be shorter."
+
+    segments = value.split(".")
+    for label in segments:
+        assert re.match(r"^[a-z]", label), "Each account segment should start with a letter."
+        assert re.match(r"^[a-z0-9-]*$", label), "Each account segment should have only letters, digits, or dashes."
+        assert re.search(r"[a-z0-9]$", label), "Each account segment should end with a letter or digit."
+        assert len(label) >= 3, "Each account segment should be longer."

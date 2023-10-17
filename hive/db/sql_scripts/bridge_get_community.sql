@@ -16,6 +16,7 @@ CREATE TYPE hivemind_app.bridge_api_community AS (
     description VARCHAR(5000),
     flag_text VARCHAR(5000),
     settings JSON,
+    beneficiaries_settings JSON,
     context JSON,
     team JSON
 );
@@ -57,6 +58,7 @@ BEGIN
         hc.description,
         hc.flag_text,
         hc.settings::JSON,
+        hc.beneficiaries_settings,
         __context,
         (SELECT json_agg(json_build_array(a.name, hivemind_app.get_role_name(r.role_id), r.title) ORDER BY r.role_id DESC, r.account_id DESC)
             FROM hivemind_app.hive_roles r

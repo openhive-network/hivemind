@@ -5378,5 +5378,129 @@
         ]
       }
     ]
+  },
+  "5000013": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "howo",
+              "new_account_name": "hive-115555",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "howo",
+              "new_account_name": "hive-125555",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-115555"
+              ],
+              "id": "community",
+              "json": "[\"updateProps\",{\"community\":\"hive-115555\",\"props\":{\"beneficiaries_settings\":[{\"account\": \"hiveonboard\", \"weight\": 100}, {\"account\": \"theycallmedan\", \"weight\": 100}, {\"account\": \"urun\", \"weight\": 300}]}}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-125555"
+              ],
+              "id": "community",
+              "json": "[\"updateProps\",{\"community\":\"hive-125555\",\"props\":{\"beneficiaries_settings\":[{\"account\": \"howo\", \"weight\": 1000}]}}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hive-125555"
+              ],
+              "id": "community",
+              "json": "[\"updateProps\",{\"community\":\"hive-125555\",\"props\":{\"beneficiaries_settings\":[]}}]"
+            }
+          }
+        ]
+      }
+    ]
   }
 }

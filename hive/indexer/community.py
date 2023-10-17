@@ -13,6 +13,7 @@ from hive.db.adapter import Db
 from hive.indexer.accounts import Accounts
 from hive.indexer.notify import Notify
 from hive.server.common.helpers import check_community
+from hive.utils.account import validate_account_name
 
 log = logging.getLogger(__name__)
 
@@ -104,13 +105,20 @@ def read_key_dict(obj, key):
     assert isinstance(obj[key], dict), f'key `{key}` not a dict'
     return obj[key]
 
+
+def read_key_list(obj, key, allow_blank=False):
+    """Given a dict, read `key`, ensuring result is a list."""
+    assert key in obj, f'key `{key}` not found'
+    assert allow_blank or obj[key], f'key `{key}` was blank'
+    assert isinstance(obj[key], list), f'key `{key}` not a list'
+    return obj[key]
+
 def read_key_integer(op, key):
     """Reads a key from dict, ensuring valid integer if present."""
     if key in op:
         assert isinstance(op[key], int), 'must be int: %s' % key
         return op[key]
     return None
-
 
 class Community:
     """Handles hive community registration and operations."""
@@ -131,7 +139,6 @@ class Community:
         This method checks for any valid community names and inserts them.
         """
 
-        # if not re.match(r'^hive-[123]\d{4,6}$', name):
         if not re.match(r'^hive-[123]\d{4,6}$', name):
             return
         type_id = int(name[5])
@@ -537,7 +544,7 @@ class CommunityOp:
     def _read_props(self):
         # TODO: assert props changed?
         props = read_key_dict(self.op, 'props')
-        valid = ['title', 'about', 'lang', 'is_nsfw', 'description', 'flag_text', 'settings', 'type_id']
+        valid = ['title', 'about', 'lang', 'is_nsfw', 'description', 'flag_text', 'settings', 'type_id', 'beneficiaries_settings']
         assert_keys_match(props.keys(), valid, allow_missing=True)
 
         out = {}
@@ -567,10 +574,21 @@ class CommunityOp:
             assert community_type in valid_types, 'invalid community type'
             out['type_id'] = community_type
         if 'beneficiaries_settings' in props:
-            # TODO
-            # community_type = read_key_integer(props, 'type_id')
-            # assert community_type in valid_types, 'invalid community type'
-            out['beneficiaries_settings'] = '[]'
+            community_beneficiaries = read_key_list(props, 'beneficiaries_settings', allow_blank=True)
+            if len(community_beneficiaries) != 0:
+                assert len(community_beneficiaries) < 9, "Amount of beneficiaries must be between 1 and 8"
+                beneficiaries_accounts = [d['account'] for d in community_beneficiaries]
+                assert beneficiaries_accounts == sorted(beneficiaries_accounts), "Beneficiaries must be sorted alphabetically by account"
+
+                for beneficiary in community_beneficiaries:
+                    assert "account" in beneficiary, 'account key must be present in the beneficiary object'
+                    assert "weight" in beneficiary, 'weight key must be present in the beneficiary object'
+                    validate_account_name(beneficiary['account'])
+                    assert isinstance(beneficiary['weight'], int), 'weight must be an int'
+                    assert 0 < beneficiary['weight'] <= 10000
+                out['beneficiaries_settings'] = json.dumps(community_beneficiaries)
+            else:
+                out['beneficiaries_settings'] = '[]'
         assert out, 'props were blank'
         self.props = out
 
