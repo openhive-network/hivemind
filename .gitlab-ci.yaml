@@ -1,4 +1,5 @@
 stages:
+  - first
   - build
   - prepare
   - sync
@@ -25,7 +26,7 @@ variables:
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: recursive
   # Other
-  CI_DEBUG_SERVICES: "false" #All the service logs should be saved as artifacts, so it's fine to turn this off.
+  CI_DEBUG_SERVICES: "true" #All the service logs should be saved as artifacts, so it's fine to turn this off.
 
 include:
   - project: hive/haf
@@ -239,6 +240,13 @@ workflow:
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| JOBS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+show_cache:
+  stage: first
+  script:
+    - ls -lath /cache/replay_data_haf_629228976bde8770bbc402a501eba696a5a3d88d
+  tags:
+    - data-cache-storage
+
 # Build base images if they're missing from registry
 prepare_base_images:
   stage: build
@@ -328,6 +336,16 @@ sync:
     - job: prepare_hivemind_image
       artifacts: true
   when: on_success
+  variables:
+    GIT_STRATEGY: none
+    RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
+    HIVED_UID: $HIVED_UID
+    WORKING_DIR: /home/hivemind
+    LOG_PATH: $CI_PROJECT_DIR/hivemind-sync.log
+    ADD_MOCKS: "true"
+    DATA_CACHE_HAF: "${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
+    DATA_CACHE_HIVEMIND_DATADIR: "${DATA_CACHE_HIVEMIND}/datadir"
+    DATA_CACHE_HIVEMIND_SHM_DIR: "${DATA_CACHE_HIVEMIND_DATADIR}/blockchain"
   services:
     - name: $HAF_IMAGE_NAME
       alias: haf-instance
@@ -341,16 +359,6 @@ sync:
         SHM_DIR: $DATA_CACHE_HIVEMIND_SHM_DIR
         LOG_FILE: $CI_JOB_NAME.log
       command: ["--replay-blockchain", "--stop-replay-at-block=5000000"]
-  variables:
-    GIT_STRATEGY: none
-    RUNNER_HIVEMIND_SYNC_MAX_BLOCK: 5000024
-    HIVED_UID: $HIVED_UID
-    WORKING_DIR: /home/hivemind
-    LOG_PATH: $CI_PROJECT_DIR/hivemind-sync.log
-    ADD_MOCKS: "true"
-    DATA_CACHE_HAF: "${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
-    DATA_CACHE_HIVEMIND_DATADIR: "${DATA_CACHE_HIVEMIND}/datadir"
-    DATA_CACHE_HIVEMIND_SHM_DIR: "${DATA_CACHE_HIVEMIND_DATADIR}/blockchain"
   script:
     - |
       sleep 20s
