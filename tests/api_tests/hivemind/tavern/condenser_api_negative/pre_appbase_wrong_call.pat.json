@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "unknown method: condenser_api.find_comments",
+  "message": "Invalid parameters"
+}

@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "get_discussions_by_comments() got an unexpected keyword argument 'author'",
+  "message": "Invalid parameters"
+}

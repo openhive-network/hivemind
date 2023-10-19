@@ -1,0 +1,1873 @@
+{
+  "id": 1,
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "active_votes": [
+        {
+          "rshares": "7998041973766",
+          "voter": "dantheman"
+        },
+        {
+          "rshares": "3715205667",
+          "voter": "boy"
+        },
+        {
+          "rshares": "4509875830",
+          "voter": "bue-witness"
+        },
+        {
+          "rshares": "836168648",
+          "voter": "bunny"
+        },
+        {
+          "rshares": "64291297182",
+          "voter": "bue"
+        },
+        {
+          "rshares": "1991182946",
+          "voter": "mini"
+        },
+        {
+          "rshares": "256300834",
+          "voter": "moon"
+        },
+        {
+          "rshares": "746713781",
+          "voter": "healthcare"
+        },
+        {
+          "rshares": "1153674449",
+          "voter": "daniel.pan"
+        },
+        {
+          "rshares": "345605549",
+          "voter": "helen.tan"
+        },
+        {
+          "rshares": "56761351",
+          "voter": "eliseojacobo"
+        }
+      ],
+      "author": "timcliff",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "I don't think the point of the article was that the banking system does not have all the issues related to the global financial system and fiat currencies. The author is not really denying that. What the author is basically saying that 99% of the users out there are incapable of using the security of Bitcoins properly, and hence it invalidates the security benefit that they offer. Sure, if you are a smart user who knows how to properly secure your Bitcoins in a cold wallet, and will not lose your private keys - you are fine. For anyone who has helped a technology illiterate parent/grandparent try to use an iPhone though, imagine trying to get them to handle their Bitcoin security correctly.",
+      "category": "bitcoin",
+      "children": 0,
+      "created": "2016-08-27T04:31:18",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 2,
+      "is_paidout": false,
+      "json_metadata": {
+        "tags": [
+          "bitcoin"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 8075944760003,
+      "parent_author": "l0k1",
+      "parent_permlink": "re-bitcoindoom-why-bitcoin-will-never-be-as-secure-as-a-bank-20160827t010828048z",
+      "payout": 12.425,
+      "payout_at": "2016-09-27T01:00:54",
+      "pending_payout_value": "12.425 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-l0k1-re-bitcoindoom-why-bitcoin-will-never-be-as-secure-as-a-bank-20160827t043120465z",
+      "post_id": 763111,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 11
+      },
+      "title": "RE: Why Bitcoin will never be as secure as a Bank",
+      "updated": "2016-08-27T04:32:33",
+      "url": "/bitcoin/@bitcoindoom/why-bitcoin-will-never-be-as-secure-as-a-bank#@timcliff/re-l0k1-re-bitcoindoom-why-bitcoin-will-never-be-as-secure-as-a-bank-20160827t043120465z"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "1853552687",
+          "voter": "boy"
+        },
+        {
+          "rshares": "2249701327",
+          "voter": "bue-witness"
+        },
+        {
+          "rshares": "421636809",
+          "voter": "bunny"
+        },
+        {
+          "rshares": "31563818599",
+          "voter": "bue"
+        },
+        {
+          "rshares": "993561057",
+          "voter": "mini"
+        },
+        {
+          "rshares": "128048841",
+          "voter": "moon"
+        },
+        {
+          "rshares": "372782047",
+          "voter": "healthcare"
+        },
+        {
+          "rshares": "550741794",
+          "voter": "daniel.pan"
+        },
+        {
+          "rshares": "2681760969007",
+          "voter": "donkeypong"
+        },
+        {
+          "rshares": "172645308",
+          "voter": "helen.tan"
+        },
+        {
+          "rshares": "91691515596",
+          "voter": "craig-grant"
+        },
+        {
+          "rshares": "812941284185",
+          "voter": "cryptogee"
+        },
+        {
+          "rshares": "292596381659",
+          "voter": "kevinwong"
+        },
+        {
+          "rshares": "411003464885",
+          "voter": "infovore"
+        },
+        {
+          "rshares": "695305978767",
+          "voter": "anwenbaumeister"
+        },
+        {
+          "rshares": "159843656074",
+          "voter": "asmolokalo"
+        },
+        {
+          "rshares": "234775443",
+          "voter": "seweso"
+        },
+        {
+          "rshares": "81255240409",
+          "voter": "liberosist"
+        },
+        {
+          "rshares": "56315798",
+          "voter": "joshualoha"
+        },
+        {
+          "rshares": "381164023",
+          "voter": "ghasemkiani"
+        },
+        {
+          "rshares": "54813939",
+          "voter": "craftercrafter"
+        },
+        {
+          "rshares": "53882726",
+          "voter": "kbregu"
+        }
+      ],
+      "author": "the-alien",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "Welcome to steemit Roger! I'm sure you'll like it in here :)\n\nAll the best!\n\nAdil.",
+      "category": "bitcoin",
+      "children": 2,
+      "created": "2016-08-19T05:11:21",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 1,
+      "is_paidout": false,
+      "json_metadata": {
+        "tags": [
+          "bitcoin"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 5265485930980,
+      "parent_author": "rogerkver",
+      "parent_permlink": "time-to-end-the-block-size-blockade-by-roger-ver",
+      "payout": 6.687,
+      "payout_at": "2016-09-19T12:02:39",
+      "pending_payout_value": "6.687 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-rogerkver-time-to-end-the-block-size-blockade-by-roger-ver-20160819t051115243z",
+      "post_id": 666092,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 22
+      },
+      "title": "RE: Time to End the Block-Size Blockade - by Roger Ver",
+      "updated": "2016-08-19T05:11:21",
+      "url": "/bitcoin/@rogerkver/time-to-end-the-block-size-blockade-by-roger-ver#@the-alien/re-rogerkver-time-to-end-the-block-size-blockade-by-roger-ver-20160819t051115243z"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "4031533801306",
+          "voter": "dantheman"
+        },
+        {
+          "rshares": "669205204395",
+          "voter": "liondani"
+        },
+        {
+          "rshares": "2471431703",
+          "voter": "boy"
+        },
+        {
+          "rshares": "2999681908",
+          "voter": "bue-witness"
+        },
+        {
+          "rshares": "562186630",
+          "voter": "bunny"
+        },
+        {
+          "rshares": "42099122331",
+          "voter": "bue"
+        },
+        {
+          "rshares": "1324776194",
+          "voter": "mini"
+        },
+        {
+          "rshares": "170731788",
+          "voter": "moon"
+        },
+        {
+          "rshares": "497044136",
+          "voter": "healthcare"
+        },
+        {
+          "rshares": "734326610",
+          "voter": "daniel.pan"
+        },
+        {
+          "rshares": "230193744",
+          "voter": "helen.tan"
+        },
+        {
+          "rshares": "11256738800",
+          "voter": "dave-hughes"
+        },
+        {
+          "rshares": "13115920815",
+          "voter": "facer"
+        },
+        {
+          "rshares": "3901117929",
+          "voter": "sebastien"
+        },
+        {
+          "rshares": "247196366",
+          "voter": "dedazenia"
+        },
+        {
+          "rshares": "73376384562",
+          "voter": "demotruk"
+        },
+        {
+          "rshares": "4108378906",
+          "voter": "r-niki09"
+        },
+        {
+          "rshares": "119947910",
+          "voter": "jdenismusic"
+        },
+        {
+          "rshares": "117780376",
+          "voter": "nin0000"
+        },
+        {
+          "rshares": "114406251",
+          "voter": "jasonmiller2134"
+        },
+        {
+          "rshares": "6237107208",
+          "voter": "steve-mcclair"
+        },
+        {
+          "rshares": "3488247032",
+          "voter": "pigatron"
+        },
+        {
+          "rshares": "4872219055",
+          "voter": "satoshifpv"
+        },
+        {
+          "rshares": "2295692409",
+          "voter": "timcliff"
+        },
+        {
+          "rshares": "102302733",
+          "voter": "darkstar1o9"
+        },
+        {
+          "rshares": "26954538710",
+          "voter": "nonlinearone"
+        },
+        {
+          "rshares": "20605152042",
+          "voter": "hilarski"
+        },
+        {
+          "rshares": "243415630536",
+          "voter": "oldtimer"
+        },
+        {
+          "rshares": "57698673",
+          "voter": "dryde"
+        },
+        {
+          "rshares": "11781966738",
+          "voter": "ryan-singer"
+        },
+        {
+          "rshares": "55954103",
+          "voter": "roy2016"
+        },
+        {
+          "rshares": "56436574",
+          "voter": "saintbitts"
+        },
+        {
+          "rshares": "113843110",
+          "voter": "jacobcwitmer"
+        },
+        {
+          "rshares": "54790972",
+          "voter": "siclone23"
+        },
+        {
+          "rshares": "54962205",
+          "voter": "n8prtr"
+        },
+        {
+          "rshares": "52448145",
+          "voter": "tracemayer"
+        },
+        {
+          "rshares": "54579787",
+          "voter": "cjohn171"
+        },
+        {
+          "rshares": "55048791",
+          "voter": "arshakuny"
+        },
+        {
+          "rshares": "52687412",
+          "voter": "whatsup"
+        }
+      ],
+      "author": "alvaromann",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "So cool. I joined Steemit yesterday. Now I can brag that I was ahead of Roger Ver on at least one really amazing thing.",
+      "category": "bitcoin",
+      "children": 5,
+      "created": "2016-08-19T07:31:36",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 1,
+      "is_paidout": false,
+      "json_metadata": {
+        "tags": [
+          "bitcoin"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 5178547678895,
+      "parent_author": "rogerkver",
+      "parent_permlink": "roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit",
+      "payout": 6.38,
+      "payout_at": "2016-09-19T10:05:33",
+      "pending_payout_value": "6.380 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-rogerkver-roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit-20160819t073139449z",
+      "post_id": 667071,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 39
+      },
+      "title": "RE: Roger Ver, The World's First Bitcoin Investor Is Now On Steemit!",
+      "updated": "2016-08-19T07:31:36",
+      "url": "/bitcoin/@rogerkver/roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit#@alvaromann/re-rogerkver-roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit-20160819t073139449z"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "1937516926143",
+          "voter": "xeroc"
+        },
+        {
+          "rshares": "1041606289175",
+          "voter": "cass"
+        },
+        {
+          "rshares": "19196852383",
+          "voter": "ninzacode"
+        },
+        {
+          "rshares": "3054317538",
+          "voter": "daycrypter"
+        },
+        {
+          "rshares": "2575954627",
+          "voter": "cryptohead"
+        },
+        {
+          "rshares": "332915966820",
+          "voter": "fyrstikken"
+        },
+        {
+          "rshares": "1337203621",
+          "voter": "btcshare7"
+        },
+        {
+          "rshares": "3901117929",
+          "voter": "sebastien"
+        },
+        {
+          "rshares": "10854983463",
+          "voter": "kuriko"
+        },
+        {
+          "rshares": "119947910",
+          "voter": "jdenismusic"
+        },
+        {
+          "rshares": "51973703599",
+          "voter": "arcurus"
+        },
+        {
+          "rshares": "795919582",
+          "voter": "politicasan2"
+        },
+        {
+          "rshares": "251615009",
+          "voter": "steemuwe"
+        },
+        {
+          "rshares": "64924747",
+          "voter": "pgarcgo"
+        },
+        {
+          "rshares": "141721000",
+          "voter": "djohnston"
+        },
+        {
+          "rshares": "243415630536",
+          "voter": "oldtimer"
+        },
+        {
+          "rshares": "55063536",
+          "voter": "rich-oth-hegy"
+        },
+        {
+          "rshares": "52448145",
+          "voter": "tracemayer"
+        }
+      ],
+      "author": "donkeypong",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "It's great to have you here, Roger! You are a hero to many. Welcome to Steemit. I have a strong feeling here that we are all on the same team, whether from Bitcoin or other alt coin communities or the many people who are just discovering crypto for the first time through Steemit. There is less tribalism and more sense of community than I have seen elsewhere in crypto these last few years.",
+      "category": "bitcoin",
+      "children": 11,
+      "created": "2016-08-19T06:22:36",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 1,
+      "is_paidout": false,
+      "json_metadata": {
+        "tags": [
+          "bitcoin"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 3649830585763,
+      "parent_author": "rogerkver",
+      "parent_permlink": "roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit",
+      "payout": 3.743,
+      "payout_at": "2016-09-19T10:05:33",
+      "pending_payout_value": "3.743 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-rogerkver-roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit-20160819t062141396z",
+      "post_id": 666627,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 18
+      },
+      "title": "RE: Roger Ver, The World's First Bitcoin Investor Is Now On Steemit!",
+      "updated": "2016-08-19T06:23:06",
+      "url": "/bitcoin/@rogerkver/roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit#@donkeypong/re-rogerkver-roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit-20160819t062141396z"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "1853552687",
+          "voter": "boy"
+        },
+        {
+          "rshares": "1937516926143",
+          "voter": "xeroc"
+        },
+        {
+          "rshares": "2249701327",
+          "voter": "bue-witness"
+        },
+        {
+          "rshares": "421636809",
+          "voter": "bunny"
+        },
+        {
+          "rshares": "31563806994",
+          "voter": "bue"
+        },
+        {
+          "rshares": "993561057",
+          "voter": "mini"
+        },
+        {
+          "rshares": "128048841",
+          "voter": "moon"
+        },
+        {
+          "rshares": "372782047",
+          "voter": "healthcare"
+        },
+        {
+          "rshares": "550741794",
+          "voter": "daniel.pan"
+        },
+        {
+          "rshares": "172645308",
+          "voter": "helen.tan"
+        },
+        {
+          "rshares": "812941284185",
+          "voter": "cryptogee"
+        },
+        {
+          "rshares": "14101065496",
+          "voter": "syadastinasti"
+        },
+        {
+          "rshares": "1004678307",
+          "voter": "wisehammer"
+        },
+        {
+          "rshares": "73376384562",
+          "voter": "demotruk"
+        },
+        {
+          "rshares": "51973703599",
+          "voter": "arcurus"
+        },
+        {
+          "rshares": "5190804801",
+          "voter": "randyclemens"
+        },
+        {
+          "rshares": "5124463672",
+          "voter": "hackfisher"
+        },
+        {
+          "rshares": "55100682",
+          "voter": "randal"
+        }
+      ],
+      "author": "twitterbot",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "### ![rogerkver](https://pbs.twimg.com/profile_images/553695831782883328/IvKiS7WJ_normal.jpeg) **[Roger Ver](https://twitter.com/@rogerkver/status/766506616212422656)** tweeted @ 19 Aug 2016 - 05:26 UTC\n\n> \"Time to End the Block-Size Blockade\" is now on @Steemit \n[steemit.com/bitcoin/@roger...](https://t.co/cNmOX9YW8H) Thanks to @Anarchast @DragonAnarchist @SterlinLujan @BTCTN\n\n\n###### *Disclaimer: I am just a bot trying to be helpful.*",
+      "category": "bitcoin",
+      "children": 0,
+      "created": "2016-08-19T05:52:03",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 1,
+      "is_paidout": false,
+      "json_metadata": {},
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 2939590888311,
+      "parent_author": "rogerkver",
+      "parent_permlink": "roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit",
+      "payout": 2.736,
+      "payout_at": "2016-09-19T10:05:33",
+      "pending_payout_value": "2.736 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit-20160819t055201",
+      "post_id": 666410,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 18
+      },
+      "title": "RE: Roger Ver, The World's First Bitcoin Investor Is Now On Steemit!",
+      "updated": "2016-08-19T05:52:03",
+      "url": "/bitcoin/@rogerkver/roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit#@twitterbot/re-roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit-20160819t055201"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "2879534254478",
+          "voter": "dantheman"
+        },
+        {
+          "rshares": "3088807351",
+          "voter": "boy"
+        },
+        {
+          "rshares": "3748935380",
+          "voter": "bue-witness"
+        },
+        {
+          "rshares": "702652328",
+          "voter": "bunny"
+        },
+        {
+          "rshares": "52552597149",
+          "voter": "bue"
+        },
+        {
+          "rshares": "1655716821",
+          "voter": "mini"
+        },
+        {
+          "rshares": "213404176",
+          "voter": "moon"
+        },
+        {
+          "rshares": "621240046",
+          "voter": "healthcare"
+        },
+        {
+          "rshares": "912512009",
+          "voter": "daniel.pan"
+        },
+        {
+          "rshares": "287724583",
+          "voter": "helen.tan"
+        },
+        {
+          "rshares": "229383471",
+          "voter": "lazelchaman"
+        },
+        {
+          "rshares": "156624468958",
+          "voter": "calaber24p"
+        }
+      ],
+      "author": "inertia",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "I don't believe in working within the system.  But I'll upvote anyway.",
+      "category": "bitcoin",
+      "children": 2,
+      "created": "2016-08-18T19:52:06",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 1,
+      "is_paidout": false,
+      "json_metadata": {
+        "tags": [
+          "bitcoin"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 3100171696750,
+      "parent_author": "calaber24p",
+      "parent_permlink": "why-i-believe-the-bitcoin-cryptocurrency-community-should-hire-lobbyists",
+      "payout": 2.667,
+      "payout_at": "2016-09-18T20:56:48",
+      "pending_payout_value": "2.667 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-calaber24p-why-i-believe-the-bitcoin-cryptocurrency-community-should-hire-lobbyists-20160818t195205561z",
+      "post_id": 660214,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 12
+      },
+      "title": "RE: Why I Believe The Bitcoin/Cryptocurrency Community Should Hire Lobbyists",
+      "updated": "2016-08-18T19:52:06",
+      "url": "/bitcoin/@calaber24p/why-i-believe-the-bitcoin-cryptocurrency-community-should-hire-lobbyists#@inertia/re-calaber24p-why-i-believe-the-bitcoin-cryptocurrency-community-should-hire-lobbyists-20160818t195205561z"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "2472573792",
+          "voter": "boy"
+        },
+        {
+          "rshares": "3001108476",
+          "voter": "bue-witness"
+        },
+        {
+          "rshares": "562413629",
+          "voter": "bunny"
+        },
+        {
+          "rshares": "42178309702",
+          "voter": "bue"
+        },
+        {
+          "rshares": "1325367544",
+          "voter": "mini"
+        },
+        {
+          "rshares": "170787830",
+          "voter": "moon"
+        },
+        {
+          "rshares": "497243104",
+          "voter": "healthcare"
+        },
+        {
+          "rshares": "737438203",
+          "voter": "daniel.pan"
+        },
+        {
+          "rshares": "2736105374315",
+          "voter": "donkeypong"
+        },
+        {
+          "rshares": "230272201",
+          "voter": "helen.tan"
+        },
+        {
+          "rshares": "19679148762",
+          "voter": "nikolai"
+        },
+        {
+          "rshares": "5391688885",
+          "voter": "kingjohal"
+        },
+        {
+          "rshares": "10854983463",
+          "voter": "kuriko"
+        },
+        {
+          "rshares": "13083167579",
+          "voter": "bendjmiller222"
+        },
+        {
+          "rshares": "119511450",
+          "voter": "jobez"
+        },
+        {
+          "rshares": "58226150",
+          "voter": "ajavajive"
+        },
+        {
+          "rshares": "9299737238",
+          "voter": "delasage"
+        },
+        {
+          "rshares": "54943062",
+          "voter": "lloydy"
+        },
+        {
+          "rshares": "53827629",
+          "voter": "rogerkver"
+        }
+      ],
+      "author": "bendjmiller222",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "@donkeypong stamp of approval means quite a lot here. I hope you find steemit to be completely different than most other social media platforms. It's exciting to see a lot of well respected cryptocurrency enthusiasts come on board, and I have read about you and your beginnings with bitcoin in many different articles (I follow a few major news curators for bitcoin and blockchain technology and you are quite the legend there). Feel free to reach out to any users as it may be a little confusing as you first start. I am bendjmiller222 on steemit chat if I can be of any help to you!\n<center><img src=\"https://www.steemimg.com/images/2016/08/19/Image2383f62.jpg\" alt=\"Image2383f62.jpg\" border=\"0\" /></center>",
+      "category": "bitcoin",
+      "children": 3,
+      "created": "2016-08-19T14:09:21",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 2,
+      "is_paidout": false,
+      "json_metadata": {
+        "image": [
+          "https://www.steemimg.com/images/2016/08/19/Image2383f62.jpg"
+        ],
+        "tags": [
+          "bitcoin"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 2845876123014,
+      "parent_author": "donkeypong",
+      "parent_permlink": "re-rogerkver-roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit-20160819t062141396z",
+      "payout": 2.603,
+      "payout_at": "2016-09-19T10:05:33",
+      "pending_payout_value": "2.603 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-donkeypong-re-rogerkver-roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit-20160819t140915746z",
+      "post_id": 670283,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 19
+      },
+      "title": "RE: Roger Ver, The World's First Bitcoin Investor Is Now On Steemit!",
+      "updated": "2016-08-19T14:09:21",
+      "url": "/bitcoin/@rogerkver/roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit#@bendjmiller222/re-donkeypong-re-rogerkver-roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit-20160819t140915746z"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "223387419724",
+          "voter": "samupaha"
+        },
+        {
+          "rshares": "2471431703",
+          "voter": "boy"
+        },
+        {
+          "rshares": "1977058087901",
+          "voter": "xeroc"
+        },
+        {
+          "rshares": "2999681908",
+          "voter": "bue-witness"
+        },
+        {
+          "rshares": "562186630",
+          "voter": "bunny"
+        },
+        {
+          "rshares": "42100537263",
+          "voter": "bue"
+        },
+        {
+          "rshares": "1324776194",
+          "voter": "mini"
+        },
+        {
+          "rshares": "170731788",
+          "voter": "moon"
+        },
+        {
+          "rshares": "497044136",
+          "voter": "healthcare"
+        },
+        {
+          "rshares": "734326610",
+          "voter": "daniel.pan"
+        },
+        {
+          "rshares": "230193744",
+          "voter": "helen.tan"
+        },
+        {
+          "rshares": "410850895605",
+          "voter": "chryspano"
+        },
+        {
+          "rshares": "53034022412",
+          "voter": "arcurus"
+        }
+      ],
+      "author": "xeroc",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "Glad to see you here. What does it take to get SteemDollars traded against USD and EUR on Kraken? I wonder why they have added Ethereum so early and haven't mentioned anything about SteemDollars yet? Do you know who to contact to discuss further steps?",
+      "category": "bitcoin",
+      "children": 2,
+      "created": "2016-08-19T07:38:09",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 1,
+      "is_paidout": false,
+      "json_metadata": {
+        "tags": [
+          "bitcoin"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 2715421335618,
+      "parent_author": "tracemayer",
+      "parent_permlink": "trace-mayer-is-now-on-steemit",
+      "payout": 2.229,
+      "payout_at": "2016-09-18T23:16:54",
+      "pending_payout_value": "2.229 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-tracemayer-trace-mayer-is-now-on-steemit-20160819t073809081z",
+      "post_id": 667117,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 13
+      },
+      "title": "RE: Trace Mayer Is Now On Steemit!",
+      "updated": "2016-08-19T07:38:09",
+      "url": "/bitcoin/@tracemayer/trace-mayer-is-now-on-steemit#@xeroc/re-tracemayer-trace-mayer-is-now-on-steemit-20160819t073809081z"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "1027582130730",
+          "voter": "samupaha"
+        },
+        {
+          "rshares": "956679556593",
+          "voter": "liondani"
+        },
+        {
+          "rshares": "2471447156",
+          "voter": "boy"
+        },
+        {
+          "rshares": "2999700170",
+          "voter": "bue-witness"
+        },
+        {
+          "rshares": "562186630",
+          "voter": "bunny"
+        },
+        {
+          "rshares": "42108016978",
+          "voter": "bue"
+        },
+        {
+          "rshares": "1324781813",
+          "voter": "mini"
+        },
+        {
+          "rshares": "170731788",
+          "voter": "moon"
+        },
+        {
+          "rshares": "497044136",
+          "voter": "healthcare"
+        },
+        {
+          "rshares": "734329420",
+          "voter": "daniel.pan"
+        },
+        {
+          "rshares": "230193744",
+          "voter": "helen.tan"
+        },
+        {
+          "rshares": "42634633164",
+          "voter": "karnal"
+        },
+        {
+          "rshares": "34788832018",
+          "voter": "fatboy"
+        },
+        {
+          "rshares": "251615009",
+          "voter": "steemuwe"
+        },
+        {
+          "rshares": "64715781",
+          "voter": "efrageek"
+        },
+        {
+          "rshares": "60300302",
+          "voter": "jtstreetman"
+        }
+      ],
+      "author": "samupaha",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "How familiar you are with Graphene, the codebase that powers Bitshares and Steem? I'm not a developer/coder, just a blockchain enthusiast and a big fan of @dan, so I might have little bit biased opinion... but I think Graphene is the best solution so far for the scalability problem.\n\nHere is some information about it from Bitshares website:\n- [Industrial Performance and Scalability](https://bitshares.org/technology/industrial-performance-and-scalability/)\n- [Delegated Proof-of-Stake Consensus](https://bitshares.org/technology/delegated-proof-of-stake-consensus/)\n\n@dan is great developer and blockchain designer, but there is one thing which he sucks: marketing. Graphene is amazing piece of technology but it's kind of a hidden gem. Nobody else is interested in it or understands it besides a few Bitshares/Steem core developers.\n\nI would love to see a chat between you and @dan discussing about scalability of blockchains. Maybe some cryptoshow could host that?",
+      "category": "bitcoin",
+      "children": 2,
+      "created": "2016-08-19T12:43:48",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 1,
+      "is_paidout": false,
+      "json_metadata": {
+        "links": [
+          "https://bitshares.org/technology/industrial-performance-and-scalability/"
+        ],
+        "tags": [
+          "bitcoin"
+        ],
+        "users": [
+          "dan"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 2113160215432,
+      "parent_author": "rogerkver",
+      "parent_permlink": "time-to-end-the-block-size-blockade-by-roger-ver",
+      "payout": 1.771,
+      "payout_at": "2016-09-19T12:02:39",
+      "pending_payout_value": "1.771 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-rogerkver-time-to-end-the-block-size-blockade-by-roger-ver-20160819t124348275z",
+      "post_id": 669377,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 16
+      },
+      "title": "RE: Time to End the Block-Size Blockade - by Roger Ver",
+      "updated": "2016-08-19T12:43:48",
+      "url": "/bitcoin/@rogerkver/time-to-end-the-block-size-blockade-by-roger-ver#@samupaha/re-rogerkver-time-to-end-the-block-size-blockade-by-roger-ver-20160819t124348275z"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "645854079926",
+          "voter": "smooth"
+        },
+        {
+          "rshares": "2472191516",
+          "voter": "boy"
+        },
+        {
+          "rshares": "3000640783",
+          "voter": "bue-witness"
+        },
+        {
+          "rshares": "562335213",
+          "voter": "bunny"
+        },
+        {
+          "rshares": "42155392242",
+          "voter": "bue"
+        },
+        {
+          "rshares": "1325170105",
+          "voter": "mini"
+        },
+        {
+          "rshares": "170766826",
+          "voter": "moon"
+        },
+        {
+          "rshares": "109927133776",
+          "voter": "smooth.witness"
+        },
+        {
+          "rshares": "497171691",
+          "voter": "healthcare"
+        },
+        {
+          "rshares": "737331782",
+          "voter": "daniel.pan"
+        },
+        {
+          "rshares": "230241395",
+          "voter": "helen.tan"
+        },
+        {
+          "rshares": "19196543129",
+          "voter": "mughat"
+        },
+        {
+          "rshares": "310988170411",
+          "voter": "innuendo"
+        },
+        {
+          "rshares": "24228965724",
+          "voter": "condra"
+        },
+        {
+          "rshares": "7725997711",
+          "voter": "manipulable"
+        },
+        {
+          "rshares": "912049125828",
+          "voter": "james212"
+        },
+        {
+          "rshares": "3096341221",
+          "voter": "teambitwala"
+        },
+        {
+          "rshares": "60955961",
+          "voter": "siren"
+        }
+      ],
+      "author": "demotruk",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "How do we know that you're Amir Taaki?",
+      "category": "bitcoin",
+      "children": 6,
+      "created": "2016-08-19T21:21:06",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 1,
+      "is_paidout": false,
+      "json_metadata": {
+        "tags": [
+          "bitcoin"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 2084278555240,
+      "parent_author": "amirtaaki",
+      "parent_permlink": "developer-dark-wallet-amir-taaki-now-on-steemit",
+      "payout": 1.653,
+      "payout_at": "2016-09-19T23:02:12",
+      "pending_payout_value": "1.653 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-amirtaaki-developer-dark-wallet-amir-taaki-now-on-steemit-20160819t212107623z",
+      "post_id": 675698,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 18
+      },
+      "title": "RE: Developer Dark Wallet Amir Taaki, now on Steemit!",
+      "updated": "2016-08-19T21:21:06",
+      "url": "/bitcoin/@amirtaaki/developer-dark-wallet-amir-taaki-now-on-steemit#@demotruk/re-amirtaaki-developer-dark-wallet-amir-taaki-now-on-steemit-20160819t212107623z"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "2055498556840",
+          "voter": "samupaha"
+        },
+        {
+          "rshares": "-679813461",
+          "voter": "sergei"
+        },
+        {
+          "rshares": "7574507560",
+          "voter": "manipulable"
+        },
+        {
+          "rshares": "426902699",
+          "voter": "seraph"
+        },
+        {
+          "rshares": "227456104",
+          "voter": "celestial"
+        },
+        {
+          "rshares": "-50745876",
+          "voter": "anton333"
+        }
+      ],
+      "author": "siren",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "@ned @dantheman this appears to be fake. \nPlease consider removing your Upvotes. \n\n\"even gave the interview that led to the #1 trending post on Steemit a few days ago, so I decided to join and give it a try myself.\"\n....\n\nSame exact phrasing....\n\nhttps://steemit.com/bitcoin/@rogerkver/roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit",
+      "category": "bitcoin",
+      "children": 0,
+      "created": "2016-08-19T22:35:36",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 1,
+      "is_paidout": false,
+      "json_metadata": {
+        "links": [
+          "https://steemit.com/bitcoin/@rogerkver/roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit"
+        ],
+        "tags": [
+          "bitcoin"
+        ],
+        "users": [
+          "ned",
+          "dantheman"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 2062996863866,
+      "parent_author": "amirtaaki",
+      "parent_permlink": "developer-dark-wallet-amir-taaki-now-on-steemit",
+      "payout": 1.632,
+      "payout_at": "2016-09-19T23:02:12",
+      "pending_payout_value": "1.632 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-amirtaaki-developer-dark-wallet-amir-taaki-now-on-steemit-20160819t223557190z",
+      "post_id": 676497,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 6
+      },
+      "title": "RE: Developer Dark Wallet Amir Taaki, now on Steemit!",
+      "updated": "2016-08-19T22:35:36",
+      "url": "/bitcoin/@amirtaaki/developer-dark-wallet-amir-taaki-now-on-steemit#@siren/re-amirtaaki-developer-dark-wallet-amir-taaki-now-on-steemit-20160819t223557190z"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "1853565344",
+          "voter": "boy"
+        },
+        {
+          "rshares": "1897975764385",
+          "voter": "xeroc"
+        },
+        {
+          "rshares": "2249719257",
+          "voter": "bue-witness"
+        },
+        {
+          "rshares": "421638918",
+          "voter": "bunny"
+        },
+        {
+          "rshares": "31568371802",
+          "voter": "bue"
+        },
+        {
+          "rshares": "993566330",
+          "voter": "mini"
+        },
+        {
+          "rshares": "128048841",
+          "voter": "moon"
+        },
+        {
+          "rshares": "372783102",
+          "voter": "healthcare"
+        },
+        {
+          "rshares": "550743903",
+          "voter": "daniel.pan"
+        },
+        {
+          "rshares": "172645308",
+          "voter": "helen.tan"
+        },
+        {
+          "rshares": "3586519889",
+          "voter": "oululahti"
+        }
+      ],
+      "author": "xeroc",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "Veeery nice .. too bad my place is in the south of Germany :(",
+      "category": "bitcoin",
+      "children": 1,
+      "created": "2016-08-19T08:03:12",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 1,
+      "is_paidout": false,
+      "json_metadata": {
+        "tags": [
+          "bitcoin"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 1939873367079,
+      "parent_author": "mrs.steemit",
+      "parent_permlink": "my-first-time-at-the-bitcoin-exchange-meetup-bxb-to-talk-steemit-and-meet-some-awesome-steemers",
+      "payout": 1.542,
+      "payout_at": "2016-09-19T09:51:36",
+      "pending_payout_value": "1.542 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-mrssteemit-my-first-time-at-the-bitcoin-exchange-meetup-bxb-to-talk-steemit-and-meet-some-awesome-steemers-20160819t080312422z",
+      "post_id": 667275,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 11
+      },
+      "title": "RE: My first time at the Bitcoin Exchange Meetup (BXB) to talk Steemit and meet some awesome Steemers!",
+      "updated": "2016-08-19T08:03:12",
+      "url": "/bitcoin/@mrs.steemit/my-first-time-at-the-bitcoin-exchange-meetup-bxb-to-talk-steemit-and-meet-some-awesome-steemers#@xeroc/re-mrssteemit-my-first-time-at-the-bitcoin-exchange-meetup-bxb-to-talk-steemit-and-meet-some-awesome-steemers-20160819t080312422z"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "1443045077190",
+          "voter": "anonymous"
+        },
+        {
+          "rshares": "28827731919",
+          "voter": "merlinscat"
+        },
+        {
+          "rshares": "504149804",
+          "voter": "ashwim"
+        },
+        {
+          "rshares": "57330113",
+          "voter": "aavkc"
+        }
+      ],
+      "author": "cass",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "Why not thinking about doing a \"STEEM\" exclusive news series? I would love to see that coming :).",
+      "category": "bitcoin",
+      "children": 0,
+      "created": "2016-08-24T18:04:12",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 1,
+      "is_paidout": false,
+      "json_metadata": {
+        "tags": [
+          "bitcoin"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 1472434289026,
+      "parent_author": "shapeshiftio",
+      "parent_permlink": "extra-extra-read-all-about-it-coincap-io-releases-industry-news-service",
+      "payout": 1.103,
+      "payout_at": "2016-09-24T18:17:24",
+      "pending_payout_value": "1.103 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-shapeshiftio-extra-extra-read-all-about-it-coincap-io-releases-industry-news-service-20160824t180411505z",
+      "post_id": 733898,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 4
+      },
+      "title": "RE: \ud83d\udcf0  Extra! Extra! Read all about it! CoinCap.io Releases Industry News Service",
+      "updated": "2016-08-24T18:04:12",
+      "url": "/bitcoin/@shapeshiftio/extra-extra-read-all-about-it-coincap-io-releases-industry-news-service#@cass/re-shapeshiftio-extra-extra-read-all-about-it-coincap-io-releases-industry-news-service-20160824t180411505z"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "1423951351633",
+          "voter": "jamesc"
+        }
+      ],
+      "author": "rampant",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "most people are so used to being watched that they aren't used to freedom.  Also, I think that most people LIKE things being watched because \"terrorists\".  Personally, I'm a big fan of cash.",
+      "category": "bitcoin",
+      "children": 2,
+      "created": "2016-08-25T14:49:09",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 2,
+      "is_paidout": false,
+      "json_metadata": {
+        "tags": [
+          "bitcoin"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 1423951351633,
+      "parent_author": "jamesc",
+      "parent_permlink": "re-rampant-crypto-currency-just-got-mainstream-attention-and-control-20160825t144338123z",
+      "payout": 1.065,
+      "payout_at": "2016-09-25T15:04:18",
+      "pending_payout_value": "1.065 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-jamesc-re-rampant-crypto-currency-just-got-mainstream-attention-and-control-20160825t144842269z",
+      "post_id": 743228,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 1
+      },
+      "title": "RE: Crypto currency just got mainstream attention... and control",
+      "updated": "2016-08-25T14:49:09",
+      "url": "/bitcoin/@rampant/crypto-currency-just-got-mainstream-attention-and-control#@rampant/re-jamesc-re-rampant-crypto-currency-just-got-mainstream-attention-and-control-20160825t144842269z"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "642142186767",
+          "voter": "smooth"
+        },
+        {
+          "rshares": "1853568507",
+          "voter": "boy"
+        },
+        {
+          "rshares": "2249755107",
+          "voter": "bue-witness"
+        },
+        {
+          "rshares": "421638918",
+          "voter": "bunny"
+        },
+        {
+          "rshares": "31571021430",
+          "voter": "bue"
+        },
+        {
+          "rshares": "993580037",
+          "voter": "mini"
+        },
+        {
+          "rshares": "128048841",
+          "voter": "moon"
+        },
+        {
+          "rshares": "109636801482",
+          "voter": "smooth.witness"
+        },
+        {
+          "rshares": "372783102",
+          "voter": "healthcare"
+        },
+        {
+          "rshares": "550743903",
+          "voter": "daniel.pan"
+        },
+        {
+          "rshares": "172645308",
+          "voter": "helen.tan"
+        },
+        {
+          "rshares": "313255577116",
+          "voter": "blakemiles84"
+        },
+        {
+          "rshares": "112700770870",
+          "voter": "fabio"
+        },
+        {
+          "rshares": "4922084218",
+          "voter": "randyclemens"
+        }
+      ],
+      "author": "tracemayer",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "About halfway through it. Very creative and could be a very elegant solution to many problems. Extremely exciting.",
+      "category": "bitcoin",
+      "children": 0,
+      "created": "2016-08-19T02:35:30",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 5,
+      "is_paidout": false,
+      "json_metadata": {
+        "tags": [
+          "bitcoin"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 1220971205606,
+      "parent_author": "blakemiles84",
+      "parent_permlink": "re-tracemayer-re-lukestokes-re-fulltimegeek-re-tracemayer-trace-mayer-is-now-on-steemit-20160818t191048497z",
+      "payout": 0.777,
+      "payout_at": "2016-09-18T23:16:54",
+      "pending_payout_value": "0.777 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-blakemiles84-re-tracemayer-re-lukestokes-re-fulltimegeek-re-tracemayer-trace-mayer-is-now-on-steemit-20160819t023528910z",
+      "post_id": 664665,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 14
+      },
+      "title": "RE: Trace Mayer Is Now On Steemit!",
+      "updated": "2016-08-19T02:35:30",
+      "url": "/bitcoin/@tracemayer/trace-mayer-is-now-on-steemit#@tracemayer/re-blakemiles84-re-tracemayer-re-lukestokes-re-fulltimegeek-re-tracemayer-trace-mayer-is-now-on-steemit-20160819t023528910z"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "190842901929",
+          "voter": "liondani"
+        },
+        {
+          "rshares": "73774258210",
+          "voter": "the-ivor"
+        },
+        {
+          "rshares": "336027378996",
+          "voter": "blakemiles84"
+        },
+        {
+          "rshares": "910210497",
+          "voter": "leprechaun"
+        },
+        {
+          "rshares": "131370105186",
+          "voter": "chhayll"
+        },
+        {
+          "rshares": "4112821541",
+          "voter": "fulltimegeek"
+        },
+        {
+          "rshares": "454485233068",
+          "voter": "dollarvigilante"
+        },
+        {
+          "rshares": "2173038434",
+          "voter": "matherly"
+        },
+        {
+          "rshares": "6133545802",
+          "voter": "xbananax"
+        }
+      ],
+      "author": "tracemayer",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "A mind is like a parachute; they both have to be open to work. And what better way to understand something that to get practical experience by using it? That method sure helped me a lot with figuring out Bitcoin!",
+      "category": "bitcoin",
+      "children": 0,
+      "created": "2016-08-18T18:37:00",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 2,
+      "is_paidout": false,
+      "json_metadata": {
+        "tags": [
+          "bitcoin"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 1199829493663,
+      "parent_author": "fulltimegeek",
+      "parent_permlink": "re-tracemayer-trace-mayer-is-now-on-steemit-20160818t182501247z",
+      "payout": 0.761,
+      "payout_at": "2016-09-18T23:16:54",
+      "pending_payout_value": "0.761 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-fulltimegeek-re-tracemayer-trace-mayer-is-now-on-steemit-20160818t183659033z",
+      "post_id": 659191,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 9
+      },
+      "title": "RE: Trace Mayer Is Now On Steemit!",
+      "updated": "2016-08-18T18:37:00",
+      "url": "/bitcoin/@tracemayer/trace-mayer-is-now-on-steemit#@tracemayer/re-fulltimegeek-re-tracemayer-trace-mayer-is-now-on-steemit-20160818t183659033z"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "952411138142",
+          "voter": "james212"
+        },
+        {
+          "rshares": "88209808576",
+          "voter": "laonie"
+        },
+        {
+          "rshares": "13978935587",
+          "voter": "helikopterben"
+        },
+        {
+          "rshares": "54335918",
+          "voter": "singularity87"
+        }
+      ],
+      "author": "laonie",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "TomZ, Bitcoin Classic architect and coder joins Steemit too! Let welcome both of them together.\nhttps://steemit.com/bitcoin/@tomz/tomz-bitcoin-classic-architect-and-coder-joins-steemit",
+      "category": "bitcoin",
+      "children": 0,
+      "created": "2016-08-19T09:19:18",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 1,
+      "is_paidout": false,
+      "json_metadata": {
+        "links": [
+          "https://steemit.com/bitcoin/@tomz/tomz-bitcoin-classic-architect-and-coder-joins-steemit"
+        ],
+        "tags": [
+          "bitcoin"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 1054654218223,
+      "parent_author": "rogerkver",
+      "parent_permlink": "roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit",
+      "payout": 0.714,
+      "payout_at": "2016-09-19T10:05:33",
+      "pending_payout_value": "0.714 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-rogerkver-roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit-20160819t091921209z",
+      "post_id": 667794,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 4
+      },
+      "title": "RE: Roger Ver, The World's First Bitcoin Investor Is Now On Steemit!",
+      "updated": "2016-08-19T09:24:42",
+      "url": "/bitcoin/@rogerkver/roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit#@laonie/re-rogerkver-roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit-20160819t091921209z"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "1853552687",
+          "voter": "boy"
+        },
+        {
+          "rshares": "2249701327",
+          "voter": "bue-witness"
+        },
+        {
+          "rshares": "421636809",
+          "voter": "bunny"
+        },
+        {
+          "rshares": "31563815434",
+          "voter": "bue"
+        },
+        {
+          "rshares": "993561057",
+          "voter": "mini"
+        },
+        {
+          "rshares": "128048841",
+          "voter": "moon"
+        },
+        {
+          "rshares": "372782047",
+          "voter": "healthcare"
+        },
+        {
+          "rshares": "550741794",
+          "voter": "daniel.pan"
+        },
+        {
+          "rshares": "172645308",
+          "voter": "helen.tan"
+        },
+        {
+          "rshares": "812941284185",
+          "voter": "cryptogee"
+        },
+        {
+          "rshares": "159843656074",
+          "voter": "asmolokalo"
+        },
+        {
+          "rshares": "56436574",
+          "voter": "saintbitts"
+        }
+      ],
+      "author": "twitterbot",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "### ![rogerkver](https://pbs.twimg.com/profile_images/553695831782883328/IvKiS7WJ_normal.jpeg) **[Roger Ver](https://twitter.com/@rogerkver/status/766506616212422656)** tweeted @ 19 Aug 2016 - 05:26 UTC\n\n> \"Time to End the Block-Size Blockade\" is now on @Steemit \n[steemit.com/bitcoin/@roger...](https://t.co/cNmOX9YW8H) Thanks to @Anarchast @DragonAnarchist @SterlinLujan @BTCTN\n\n\n###### *Disclaimer: I am just a bot trying to be helpful.*",
+      "category": "bitcoin",
+      "children": 0,
+      "created": "2016-08-19T05:32:12",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 1,
+      "is_paidout": false,
+      "json_metadata": {},
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 1011147862137,
+      "parent_author": "rogerkver",
+      "parent_permlink": "time-to-end-the-block-size-blockade-by-roger-ver",
+      "payout": 0.693,
+      "payout_at": "2016-09-19T12:02:39",
+      "pending_payout_value": "0.693 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-time-to-end-the-block-size-blockade-by-roger-ver-20160819t053211",
+      "post_id": 666254,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 12
+      },
+      "title": "RE: Time to End the Block-Size Blockade - by Roger Ver",
+      "updated": "2016-08-19T05:32:12",
+      "url": "/bitcoin/@rogerkver/time-to-end-the-block-size-blockade-by-roger-ver#@twitterbot/re-time-to-end-the-block-size-blockade-by-roger-ver-20160819t053211"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "982917942682",
+          "voter": "samupaha"
+        }
+      ],
+      "author": "patrice",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "Please don't copy and paste articles. Use quotes from the articles and write your own comments. \n\nThanks!",
+      "category": "bitcoin",
+      "children": 0,
+      "created": "2016-08-19T04:39:33",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 1,
+      "is_paidout": false,
+      "json_metadata": {
+        "tags": [
+          "bitcoin"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 982917942682,
+      "parent_author": "henriquez147",
+      "parent_permlink": "bitcoin-price-watch-tonight-s-scalp-strategy",
+      "payout": 0.661,
+      "payout_at": "2016-09-19T10:52:57",
+      "pending_payout_value": "0.661 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-henriquez147-bitcoin-price-watch-tonight-s-scalp-strategy-20160819t043933597z",
+      "post_id": 665812,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 1
+      },
+      "title": "RE: Bitcoin Price Watch; Tonight\u2019s Scalp Strategy",
+      "updated": "2016-08-19T04:39:33",
+      "url": "/bitcoin/@henriquez147/bitcoin-price-watch-tonight-s-scalp-strategy#@patrice/re-henriquez147-bitcoin-price-watch-tonight-s-scalp-strategy-20160819t043933597z"
+    },
+    {
+      "active_votes": [
+        {
+          "rshares": "972675204911",
+          "voter": "james212"
+        }
+      ],
+      "author": "james212",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "Welcome Rodger, glad to have you here on Steemit. I look forward to following you.",
+      "category": "bitcoin",
+      "children": 0,
+      "created": "2016-08-19T10:53:21",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 1,
+      "is_paidout": false,
+      "json_metadata": {
+        "tags": [
+          "bitcoin"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 972675204911,
+      "parent_author": "rogerkver",
+      "parent_permlink": "roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit",
+      "payout": 0.648,
+      "payout_at": "2016-09-19T10:05:33",
+      "pending_payout_value": "0.648 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "re-rogerkver-roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit-20160819t105321731z",
+      "post_id": 668437,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": false,
+        "hide": false,
+        "total_votes": 1
+      },
+      "title": "RE: Roger Ver, The World's First Bitcoin Investor Is Now On Steemit!",
+      "updated": "2016-08-19T10:53:21",
+      "url": "/bitcoin/@rogerkver/roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit#@james212/re-rogerkver-roger-ver-the-world-s-first-bitcoin-investor-is-now-on-steemit-20160819t105321731z"
+    }
+  ]
+}

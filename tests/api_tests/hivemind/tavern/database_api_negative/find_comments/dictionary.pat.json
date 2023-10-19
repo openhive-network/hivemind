@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "Expected array of author+permlink pairs",
+  "message": "Invalid parameters"
+}

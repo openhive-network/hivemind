@@ -1,0 +1,5 @@
+{
+  "code": -32000,
+  "data": "UndefinedFunction: operator does not exist: character varying = integer\nLINE 1: SELECT id FROM hive_communities WHERE name = 789\n                                                   ^\nHINT:  No operator matches the given name and argument type(s). You might need to add explicit type casts.\n",
+  "message": "Server error"
+}

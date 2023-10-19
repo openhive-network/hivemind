@@ -1,0 +1,29 @@
+---
+  test_name: Hivemind database_api.list_votes holger80
+
+  marks:
+    - fullsynctest
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: database_api.list_votes holger80
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "database_api.list_votes"
+          params: {'limit': 1000, 'order': 'by_voter_comment', 'start': ['holger80', '', '']}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:has_valid_response
+          extra_kwargs:
+            method: "holger80"
+            directory: "database_api_patterns/list_votes"
+

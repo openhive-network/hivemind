@@ -1,0 +1,98 @@
+{
+  "id": 1,
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "active_votes": [
+        {
+          "rshares": "156169303711",
+          "voter": "kaylinart"
+        },
+        {
+          "rshares": "3849921158",
+          "voter": "spikykevin"
+        },
+        {
+          "rshares": "874849736",
+          "voter": "amor"
+        },
+        {
+          "rshares": "13980525417",
+          "voter": "deanliu"
+        },
+        {
+          "rshares": "7050373338",
+          "voter": "michaeldodridge"
+        },
+        {
+          "rshares": "128229975",
+          "voter": "jlwk0lb"
+        },
+        {
+          "rshares": "1310471124",
+          "voter": "sykochica"
+        },
+        {
+          "rshares": "562437412",
+          "voter": "velgelm"
+        },
+        {
+          "rshares": "7007754427",
+          "voter": "etcmike"
+        },
+        {
+          "rshares": "689630543",
+          "voter": "mister-t"
+        },
+        {
+          "rshares": "55228283",
+          "voter": "edgarsart"
+        }
+      ],
+      "author": "jlwk0lb",
+      "author_payout_value": "0.000 HBD",
+      "author_reputation": 25.0,
+      "beneficiaries": [],
+      "blacklists": [],
+      "body": "<html>\n<p><img src=\"https://img1.steemit.com/0x0/https://www.steemimg.com/images/2016/08/05/splash_cc9674.th.png\" width=\"160\" height=\"160\"/></p>\n<p>If you are the same as me you have probably spent a lot of time on Steemit just this week. That means you have probably read more articles/posts about emerging platform, that was completely not even part of your thinking a month or so ago. You are probably even DREAMING about Steemit!</p>\n<p><br></p>\n<p>It's infected your brain in more ways than one. That begs the question, as to why are we only reading about Steemit, why are our lives not being enriched by content that is suppose to be valuable to us as Humans?</p>\n<p><br></p>\n<p>Buzz is the word we are looking for here.</p>\n<p>Here Is How It Works.</p>\n<p>The Founders need to encourage new posts, so you may get an upvote from them. Reward you with your introduction and efforts. You are hooked!</p>\n<p><br></p>\n<p>The Whales and the Founders want to gain more attention on the platform - they are invested and they in turn protect their investments. So, naturally so - they are going to like anything that puts the platform into the public eye.</p>\n<p><br></p>\n<p>The authors who attempt to write compelling content need to re-invest into the system to power up their accounts so they begin to become a whale themselves. The Founders and The Whales love this! The system loves this!</p>\n<p><br></p>\n<p>Therefore anything to do with Steemit and the growth of Steemit, conversation about Steemit is what we are left with</p>\n<p>This is not changing anytime soon. Even this POST is an example of what I'm talking about.</p>\n<p><br></p>\n<p>The Premise</p>\n<p>The premise of this network is for content to be awarded upon providing value to the readers. Right now, the greatest value that can be provided to the community is that of spreading the word about the community. This is what the founders want, the whales and without you even knowing it. It is actually what you want.</p>\n<p><br></p>\n<p>So, spread the word. Post hot chicks, do games, do gimmicks - whatever works.</p>\n<p>But spread the word, it's in everyones best interest!</p>\n<p><br></p>\n<p><br></p>\n</html>",
+      "category": "steemit",
+      "children": 3,
+      "created": "2016-08-17T05:26:57",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 0,
+      "is_paidout": false,
+      "json_metadata": {
+        "image": [
+          "https://img1.steemit.com/0x0/https://www.steemimg.com/images/2016/08/05/splash_cc9674.th.png"
+        ],
+        "tags": [
+          "steemit",
+          "steem",
+          "craigrant",
+          "bitcoin",
+          "blockchain"
+        ]
+      },
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 191678725124,
+      "payout": 0.126,
+      "payout_at": "2016-09-17T07:14:30",
+      "pending_payout_value": "0.126 HBD",
+      "percent_steem_dollars": 10000,
+      "permlink": "4l4qsk-what-s-steemit-s-true-value",
+      "post_id": 637233,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "reblogs": 0,
+      "stats": {
+        "flag_weight": 0.0,
+        "gray": true,
+        "hide": false,
+        "total_votes": 11
+      },
+      "title": "What's Steemit's true value?",
+      "updated": "2016-08-17T05:26:57",
+      "url": "/steemit/@jlwk0lb/4l4qsk-what-s-steemit-s-true-value"
+    }
+  ]
+}

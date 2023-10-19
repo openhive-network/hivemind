@@ -1,0 +1,5 @@
+{
+  "code": -32000,
+  "data": "IndexError: list index out of range",
+  "message": "Server error"
+}

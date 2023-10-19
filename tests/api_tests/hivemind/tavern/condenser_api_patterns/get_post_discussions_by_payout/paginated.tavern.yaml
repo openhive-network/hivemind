@@ -1,0 +1,29 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest # unlike in old version where page defining post (last from previous page) was always part of new page (along with others with the same
+                  # payout, potentially making it impossible to move forward with pages), new version always skips it, also has defined order for posts with
+                  # the same payout (previously random)
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "condenser_api.get_post_discussions_by_payout"
+          params: {"start_author":"steemdrive","start_permlink":"steemdrive-new-zealand-s-first-billboard-campaign-auckland-the-city-of-sails","limit":2}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern
+          extra_kwargs:
+            ignore_tags: "<condenser posts>"

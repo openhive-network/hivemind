@@ -1,0 +1,2962 @@
+[
+  {
+    "active_votes": [
+      {
+        "rshares": 231815399848,
+        "voter": "anonymous"
+      },
+      {
+        "rshares": 1856124515188,
+        "voter": "badassmother"
+      },
+      {
+        "rshares": 1950776472028,
+        "voter": "xeroc"
+      },
+      {
+        "rshares": 466189427281,
+        "voter": "recursive2"
+      },
+      {
+        "rshares": 440845842,
+        "voter": "lee2"
+      },
+      {
+        "rshares": 26932369613,
+        "voter": "lee3"
+      },
+      {
+        "rshares": 8677356665,
+        "voter": "lee4"
+      },
+      {
+        "rshares": 22149156424,
+        "voter": "lee5"
+      },
+      {
+        "rshares": 24694558802,
+        "voter": "fkn"
+      },
+      {
+        "rshares": 468295495,
+        "voter": "paco-steem"
+      },
+      {
+        "rshares": 5641891453,
+        "voter": "spaninv"
+      },
+      {
+        "rshares": 31733693573,
+        "voter": "instructor2121"
+      },
+      {
+        "rshares": 319978787382,
+        "voter": "teamsteem"
+      },
+      {
+        "rshares": 32459455171,
+        "voter": "elishagh1"
+      },
+      {
+        "rshares": 584301957019,
+        "voter": "nanzo-scoop"
+      },
+      {
+        "rshares": 183455862202,
+        "voter": "steve-walschot"
+      },
+      {
+        "rshares": 177422979921,
+        "voter": "mummyimperfect"
+      },
+      {
+        "rshares": 1061309796,
+        "voter": "murh"
+      },
+      {
+        "rshares": 40553528416,
+        "voter": "ranko-k"
+      },
+      {
+        "rshares": 970610699889,
+        "voter": "cyber"
+      },
+      {
+        "rshares": 49581638772,
+        "voter": "ak2020"
+      },
+      {
+        "rshares": 61303208719,
+        "voter": "justtryme90"
+      },
+      {
+        "rshares": 35244223389,
+        "voter": "drinkzya"
+      },
+      {
+        "rshares": 3848697023555,
+        "voter": "satoshifund"
+      },
+      {
+        "rshares": 365370465,
+        "voter": "stiletto"
+      },
+      {
+        "rshares": 55960464168,
+        "voter": "thecryptodrive"
+      },
+      {
+        "rshares": 275083790158,
+        "voter": "trogdor"
+      },
+      {
+        "rshares": 5047565689,
+        "voter": "tee-em"
+      },
+      {
+        "rshares": 31346657524,
+        "voter": "michaelx"
+      },
+      {
+        "rshares": 203028922423,
+        "voter": "kimziv"
+      },
+      {
+        "rshares": 45359587433,
+        "voter": "honeythief"
+      },
+      {
+        "rshares": 75335893384,
+        "voter": "emily-cook"
+      },
+      {
+        "rshares": 34073741916,
+        "voter": "cryptoiskey"
+      },
+      {
+        "rshares": 484636799,
+        "voter": "mrhankeh"
+      },
+      {
+        "rshares": 36267999733,
+        "voter": "clement"
+      },
+      {
+        "rshares": 49807514764,
+        "voter": "isteemit"
+      },
+      {
+        "rshares": 68450624110,
+        "voter": "bacchist"
+      },
+      {
+        "rshares": 52094130602,
+        "voter": "venuspcs"
+      },
+      {
+        "rshares": 462747522217,
+        "voter": "roelandp"
+      },
+      {
+        "rshares": 5271256317,
+        "voter": "riscadox"
+      },
+      {
+        "rshares": 118094280271,
+        "voter": "furion"
+      },
+      {
+        "rshares": 578386960,
+        "voter": "barbara2"
+      },
+      {
+        "rshares": 642869652,
+        "voter": "ch0c0latechip"
+      },
+      {
+        "rshares": 594982040,
+        "voter": "doge4lyf"
+      },
+      {
+        "rshares": 14886225123,
+        "voter": "ausbitbank"
+      },
+      {
+        "rshares": 2531219186,
+        "voter": "steem1653"
+      },
+      {
+        "rshares": 185306737687,
+        "voter": "anyx"
+      },
+      {
+        "rshares": 80777327,
+        "voter": "snowden"
+      },
+      {
+        "rshares": 5250267854,
+        "voter": "thegoodguy"
+      },
+      {
+        "rshares": 13847065167,
+        "voter": "aaseb"
+      },
+      {
+        "rshares": 4209550858,
+        "voter": "karen13"
+      },
+      {
+        "rshares": 89580632,
+        "voter": "wildchild"
+      },
+      {
+        "rshares": 14455781997,
+        "voter": "nippel66"
+      },
+      {
+        "rshares": 4428694472,
+        "voter": "poseidon"
+      },
+      {
+        "rshares": 3709674578,
+        "voter": "bitcoiner"
+      },
+      {
+        "rshares": 30989849211,
+        "voter": "zaebars"
+      },
+      {
+        "rshares": 20026634941,
+        "voter": "positive"
+      },
+      {
+        "rshares": 799615699,
+        "voter": "raymonjohnstone"
+      },
+      {
+        "rshares": 50626015,
+        "voter": "steemchain"
+      },
+      {
+        "rshares": 34310997040,
+        "voter": "sisterholics"
+      },
+      {
+        "rshares": 4150694741,
+        "voter": "tygergamer"
+      },
+      {
+        "rshares": 674282213,
+        "voter": "fnait"
+      },
+      {
+        "rshares": 599033376,
+        "voter": "keepcalmand"
+      },
+      {
+        "rshares": 21249911268,
+        "voter": "sisters"
+      },
+      {
+        "rshares": 135241026997,
+        "voter": "steemdrive"
+      },
+      {
+        "rshares": 50580942653,
+        "voter": "gomeravibz"
+      },
+      {
+        "rshares": 2157263872,
+        "voter": "merej99"
+      },
+      {
+        "rshares": 1181429894047,
+        "voter": "laonie"
+      },
+      {
+        "rshares": 22969530313,
+        "voter": "laonie1"
+      },
+      {
+        "rshares": 23486336661,
+        "voter": "laonie2"
+      },
+      {
+        "rshares": 23494631758,
+        "voter": "laonie3"
+      },
+      {
+        "rshares": 41308723727,
+        "voter": "myfirst"
+      },
+      {
+        "rshares": 246291037911,
+        "voter": "somebody"
+      },
+      {
+        "rshares": 9208584487,
+        "voter": "flysaga"
+      },
+      {
+        "rshares": 5831884826,
+        "voter": "brendio"
+      },
+      {
+        "rshares": 54407421509,
+        "voter": "midnightoil"
+      },
+      {
+        "rshares": 4190432650,
+        "voter": "ullikume"
+      },
+      {
+        "rshares": 538023492,
+        "voter": "marinaz"
+      },
+      {
+        "rshares": 50577648,
+        "voter": "michellek"
+      },
+      {
+        "rshares": 23490308796,
+        "voter": "laonie4"
+      },
+      {
+        "rshares": 23488038283,
+        "voter": "laonie5"
+      },
+      {
+        "rshares": 23485060556,
+        "voter": "laonie6"
+      },
+      {
+        "rshares": 23480907119,
+        "voter": "laonie7"
+      },
+      {
+        "rshares": 3157899297,
+        "voter": "kurtbeil"
+      },
+      {
+        "rshares": 23477459041,
+        "voter": "laonie8"
+      },
+      {
+        "rshares": 23474757706,
+        "voter": "laonie9"
+      },
+      {
+        "rshares": 2370331931,
+        "voter": "steemleak"
+      },
+      {
+        "rshares": 136086029693,
+        "voter": "xiaohui"
+      },
+      {
+        "rshares": 88206053,
+        "voter": "bigsambucca"
+      },
+      {
+        "rshares": 6630568148,
+        "voter": "elfkitchen"
+      },
+      {
+        "rshares": 99940391922,
+        "voter": "joele"
+      },
+      {
+        "rshares": 2354334523,
+        "voter": "paynode"
+      },
+      {
+        "rshares": 4254379739,
+        "voter": "xiaokongcom"
+      },
+      {
+        "rshares": 8576106418,
+        "voter": "xianjun"
+      },
+      {
+        "rshares": 72135954,
+        "voter": "stevescriber"
+      },
+      {
+        "rshares": 51247757,
+        "voter": "loli"
+      },
+      {
+        "rshares": 52419023,
+        "voter": "nano2nd"
+      },
+      {
+        "rshares": 576343622,
+        "voter": "microluck"
+      },
+      {
+        "rshares": 60225791,
+        "voter": "cryptoblu"
+      },
+      {
+        "rshares": 60219243,
+        "voter": "instructor"
+      },
+      {
+        "rshares": 802020725261,
+        "voter": "dollarvigilante"
+      },
+      {
+        "rshares": 3977281078,
+        "voter": "lamech-m"
+      },
+      {
+        "rshares": 23468551300,
+        "voter": "laonie10"
+      },
+      {
+        "rshares": 8536250240,
+        "voter": "garywilson"
+      },
+      {
+        "rshares": 50829277,
+        "voter": "bitchplease"
+      },
+      {
+        "rshares": 99130059443,
+        "voter": "barrycooper"
+      },
+      {
+        "rshares": 31611733517,
+        "voter": "hilarski"
+      },
+      {
+        "rshares": 2029369552,
+        "voter": "shadowspub"
+      },
+      {
+        "rshares": 8390958262,
+        "voter": "rimann"
+      },
+      {
+        "rshares": 56999917,
+        "voter": "rickmiller"
+      },
+      {
+        "rshares": 5401518277,
+        "voter": "nulliusinverba"
+      },
+      {
+        "rshares": 22792452702,
+        "voter": "mikehere"
+      },
+      {
+        "rshares": 22621847215,
+        "voter": "laonie11"
+      },
+      {
+        "rshares": 3411072843,
+        "voter": "xanoxt"
+      },
+      {
+        "rshares": 174778016,
+        "voter": "greatness"
+      },
+      {
+        "rshares": 26574132419,
+        "voter": "sponge-bob"
+      },
+      {
+        "rshares": 4044803243,
+        "voter": "l0k1"
+      },
+      {
+        "rshares": 50798127,
+        "voter": "freesteem"
+      },
+      {
+        "rshares": 2353724275,
+        "voter": "zettar"
+      },
+      {
+        "rshares": 1655277599,
+        "voter": "smisi"
+      },
+      {
+        "rshares": 53413720,
+        "voter": "lighter"
+      },
+      {
+        "rshares": 258239323,
+        "voter": "maarnio"
+      },
+      {
+        "rshares": 50931848,
+        "voter": "analyzethis"
+      },
+      {
+        "rshares": 5934390558,
+        "voter": "dexter-k"
+      },
+      {
+        "rshares": 51716816,
+        "voter": "doggnostic"
+      },
+      {
+        "rshares": 659649765,
+        "voter": "ct-gurus"
+      },
+      {
+        "rshares": 51449632,
+        "voter": "jenny-talls"
+      },
+      {
+        "rshares": 415654681468,
+        "voter": "charlieshrem"
+      },
+      {
+        "rshares": 63546443837,
+        "voter": "tracemayer"
+      },
+      {
+        "rshares": 26568286493,
+        "voter": "brains"
+      },
+      {
+        "rshares": 1702730509,
+        "voter": "alwayzgame"
+      },
+      {
+        "rshares": 1282974860,
+        "voter": "bitcoinparadise"
+      },
+      {
+        "rshares": 50528809,
+        "voter": "cwb"
+      },
+      {
+        "rshares": 2127783725,
+        "voter": "steemsquad"
+      },
+      {
+        "rshares": 61292139,
+        "voter": "inarix03"
+      },
+      {
+        "rshares": 431087473,
+        "voter": "littlemorelove"
+      },
+      {
+        "rshares": 51636819,
+        "voter": "mbizryu0"
+      },
+      {
+        "rshares": 51631638,
+        "voter": "archij"
+      },
+      {
+        "rshares": 51530815,
+        "voter": "movie7283"
+      },
+      {
+        "rshares": 51527606,
+        "voter": "ppcompp2"
+      },
+      {
+        "rshares": 51520427,
+        "voter": "jj1968"
+      },
+      {
+        "rshares": 51516489,
+        "voter": "cineger"
+      },
+      {
+        "rshares": 51497383,
+        "voter": "sksduddk"
+      },
+      {
+        "rshares": 51490214,
+        "voter": "jjc0719"
+      },
+      {
+        "rshares": 50233449,
+        "voter": "teemsteem"
+      },
+      {
+        "rshares": 50677982,
+        "voter": "sjytoy"
+      },
+      {
+        "rshares": 50676799,
+        "voter": "shy2675"
+      },
+      {
+        "rshares": 50675747,
+        "voter": "suance1009"
+      },
+      {
+        "rshares": 50674176,
+        "voter": "hasqmd"
+      },
+      {
+        "rshares": 50673722,
+        "voter": "fischer67"
+      },
+      {
+        "rshares": 50672116,
+        "voter": "elya1"
+      },
+      {
+        "rshares": 50632828,
+        "voter": "xclamp45"
+      },
+      {
+        "rshares": 50618471,
+        "voter": "likeagame1"
+      },
+      {
+        "rshares": 50616898,
+        "voter": "apple4006"
+      },
+      {
+        "rshares": 50615195,
+        "voter": "bigbell61"
+      },
+      {
+        "rshares": 50612850,
+        "voter": "dolpo777"
+      },
+      {
+        "rshares": 50611931,
+        "voter": "dongperi"
+      },
+      {
+        "rshares": 50610620,
+        "voter": "lion2byung"
+      },
+      {
+        "rshares": 50610002,
+        "voter": "cwj1973"
+      },
+      {
+        "rshares": 50609329,
+        "voter": "psj212"
+      },
+      {
+        "rshares": 50608661,
+        "voter": "owithed2"
+      },
+      {
+        "rshares": 50606929,
+        "voter": "fiself2"
+      },
+      {
+        "rshares": 50605131,
+        "voter": "trablinever1"
+      },
+      {
+        "rshares": 50603861,
+        "voter": "nuals1940"
+      },
+      {
+        "rshares": 50602310,
+        "voter": "fanceth2"
+      },
+      {
+        "rshares": 50355943,
+        "voter": "forea1995"
+      },
+      {
+        "rshares": 50354561,
+        "voter": "holow1968"
+      },
+      {
+        "rshares": 50353969,
+        "voter": "peaces1952"
+      },
+      {
+        "rshares": 50346496,
+        "voter": "himighar2"
+      },
+      {
+        "rshares": 50345607,
+        "voter": "aromese1974"
+      },
+      {
+        "rshares": 50344921,
+        "voter": "runis1943"
+      },
+      {
+        "rshares": 50344067,
+        "voter": "tong1962"
+      },
+      {
+        "rshares": 50340744,
+        "voter": "hishe1997"
+      },
+      {
+        "rshares": 1979857275,
+        "voter": "cwbrooch"
+      },
+      {
+        "rshares": 52329350,
+        "voter": "ninjapainter"
+      },
+      {
+        "rshares": 51393104,
+        "voter": "buit1989"
+      },
+      {
+        "rshares": 51389981,
+        "voter": "imadecoult1"
+      },
+      {
+        "rshares": 51387526,
+        "voter": "infees2"
+      },
+      {
+        "rshares": 51384095,
+        "voter": "suar1997"
+      },
+      {
+        "rshares": 51382067,
+        "voter": "sobsell93"
+      },
+      {
+        "rshares": 51380710,
+        "voter": "stroned96"
+      },
+      {
+        "rshares": 51378107,
+        "voter": "drethe"
+      },
+      {
+        "rshares": 51377505,
+        "voter": "qualwas"
+      },
+      {
+        "rshares": 51376367,
+        "voter": "phent1994"
+      },
+      {
+        "rshares": 51375075,
+        "voter": "baboyes"
+      },
+      {
+        "rshares": 51373532,
+        "voter": "whor1973"
+      },
+      {
+        "rshares": 51372739,
+        "voter": "youreforn"
+      },
+      {
+        "rshares": 51371902,
+        "voter": "voll1981"
+      },
+      {
+        "rshares": 51370717,
+        "voter": "copenty2"
+      },
+      {
+        "rshares": 51369717,
+        "voter": "maject2"
+      },
+      {
+        "rshares": 51367233,
+        "voter": "coust1997"
+      },
+      {
+        "rshares": 51366398,
+        "voter": "busionea84"
+      },
+      {
+        "rshares": 51365174,
+        "voter": "therver1"
+      },
+      {
+        "rshares": 51364022,
+        "voter": "appirdsmanne1990"
+      },
+      {
+        "rshares": 51362967,
+        "voter": "alienighted87"
+      },
+      {
+        "rshares": 51359746,
+        "voter": "anity1994"
+      },
+      {
+        "rshares": 59959066,
+        "voter": "themphe1"
+      },
+      {
+        "rshares": 51355864,
+        "voter": "abild1988"
+      },
+      {
+        "rshares": 51353540,
+        "voter": "spoll1973"
+      },
+      {
+        "rshares": 66162576,
+        "voter": "afteld1"
+      },
+      {
+        "rshares": 1630374239,
+        "voter": "rusteemitblog"
+      },
+      {
+        "rshares": 31008332335,
+        "voter": "goldmatters"
+      },
+      {
+        "rshares": 68608760,
+        "voter": "dealzgal"
+      },
+      {
+        "rshares": 64921864,
+        "voter": "storage"
+      },
+      {
+        "rshares": 55388665,
+        "voter": "blackmarket"
+      },
+      {
+        "rshares": 58454327,
+        "voter": "gifts"
+      },
+      {
+        "rshares": 93882016,
+        "voter": "expat"
+      },
+      {
+        "rshares": 188217107,
+        "voter": "techslut"
+      },
+      {
+        "rshares": 137659447,
+        "voter": "steemtrail"
+      },
+      {
+        "rshares": 3035584586,
+        "voter": "steemlift"
+      },
+      {
+        "rshares": 123580867,
+        "voter": "toddemaher1"
+      }
+    ],
+    "author": "charlieshrem",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 67.32,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "[![1427721443457173 (1).jpg](https://s15.postimg.org/e6gxjg8cb/1427721443457173_1.jpg)](https://postimg.org/image/5bg38xjjr/)\n\nThe day I went to prison I published an article Bitcoin for Prison. While I didn't get to read or see the article until someone mailed me a physical copy, I found out that my article had started a number of discussions and follow-on commentary.\n\nDuring my stay at Lewisburg Federal Prison Camp I observed many economic theories put into effect by inmates and the prison administration, including Gresham's law, hyperinflation, currency exchange, and others.\n\nThere are two markets in prison, the \"Administration Run Market\" (ARM) and the \"Inmate Run Market\" (IRM). \n\nFor the ARM, family and friends can add money to your account through Western Union, MoneyGram, or mailing a check. These funds get added to your account fairly quickly and can be used almost immediately, however with a strict spending limit. You get 300 minutes of phone use per month for about $70, and email costs about $0.05 a minute and is only available at specific times to specific people. Once a week you can shop in the commissary with a $360 a month spending limit. Further, certain products have limits of how much you can buy, for example the Mackerel (described below). Alternatively, the IRM is where you can buy sandwiches, wraps, pizzas, Italian ices, hire a personal trainer, get a haircut, pay someone to clean your cube, repair a watch, even inmate run caterers for your birthday or going home party. Additionally there were inmate run 'stores' which sold commissary items at a markup since you could only commissary shop once a week.\n\n[![mackerel-203x300.png](https://s18.postimg.org/pkn7zm1h5/mackerel_203x300.png)](https://postimg.org/image/iu6qq6eb9/)\n\nThe Mackerel (meaning literal packets of fish) is one of the competing currencies in the IRM. It has utility by being one of the best sources of protein on the compound. You can save it for a long time, the shelf life is a few years. The price is relatively the same across all prisons in the country, so even if you transfer prisons your property comes with you, including your Mackerel which is worth the same somewhere else. Unlike tunafish, chicken packets and protein bars, more people eat Mackerel. Those other food items can be used as currency as well, for example the guy who fixes your watch may only accept protein bars because he hates fish. There was even a form of digital currency being used, which I will discuss in another post.\n\n[![pzyQaHU.png](https://s15.postimg.org/tggsqn3uj/pzy_Qa_HU.png)](https://postimg.org/image/nfj3tkh87/)\n\nUtility and medium of exchange give it some value but what about scarcity ? If there is a virtually unlimited amount of Mackerel in the IRM, just like the Federal Reserve printing money, there is no scarcity and hyperinflation can occure if it is debased. \n\nUsing a simple equation, 467 (Number of Inmates) * 14 (Maximum Quantity Allowed to Purchase Per Inmate) * 52 (weeks, assuming every inmate buys the maximum mount of Mackerel every week)\n\nSo if in 2015 we assume that the Supply and Velocity grows at the exact same rate with the Price Level and Transactions unchanging, the amount of Mackerel would essentially double on an even inflation rate. This does not factor in the 3 year shelf life, where expired Mackerel becomes a secondary currency. I will discuss in my next post. \n\nI like to believe that the value of money is determined also psychological factors, like a commodity and not only by mechanical or mathematical factors. In prison many of these psychological factors come into play.\n\n[![1867-1967-Ten-10\u00a2-Cents-Commemorative-Centennial.jpg](https://s15.postimg.org/yqgpkthrv/1867_1967_Ten_10_Cents_Commemorative_Centennial.jpg)](https://postimg.org/image/ceiwrfinr/)\n\nMost people use Mackerel as a day-to-day currency for normal transactions, but for reasons I will explain in my next post, they are not the best long term store of value which is important for a currency. For longer term store of value, many inmates use stamps. Stamps have a set rate by the United States Postal Service and have similar characteristics as Mackerel aside for being edible. However, with the introduction of email on the compound many people stopped writing letters as email is cheaper and faster therefore reducing stamps ability to be a transactional currency as a majority of the inmates have no use for them. As a store of value they still hold weight because they are small and easy to store large amounts, while Mackerel is not.\n\nThe biggest value stamps have is that they can be mailed home and your family can redeem them for dollars as the local post office, but that feature can be stopped by better mail screening and overnight the stamp could lose its store of value utility. \n\nIn my next post I will discuss how currency exchangers work, what happens when the prison administration purposely floods the market, and how a secondary currency was created out of expired Mackerel called \u201cMoney Maks\u201d",
+    "category": "story",
+    "children": 2,
+    "created": "2016-09-15T19:39:15",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "https://s15.postimg.org/e6gxjg8cb/1427721443457173_1.jpg",
+        "https://s18.postimg.org/pkn7zm1h5/mackerel_203x300.png",
+        "https://s15.postimg.org/tggsqn3uj/pzy_Qa_HU.png",
+        "https://s15.postimg.org/yqgpkthrv/1867_1967_Ten_10_Cents_Commemorative_Centennial.jpg"
+      ],
+      "links": [
+        "https://postimg.org/image/5bg38xjjr/",
+        "https://postimg.org/image/iu6qq6eb9/",
+        "https://postimg.org/image/nfj3tkh87/",
+        "https://postimg.org/image/ceiwrfinr/"
+      ],
+      "tags": [
+        "story",
+        "life",
+        "bitcoin"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 16647533396431,
+    "payout": 18.922,
+    "payout_at": "2016-09-22T19:39:15",
+    "pending_payout_value": "18.922 HBD",
+    "percent_hbd": 10000,
+    "permlink": "mackerelcoin-and-my-socioeconomic-observations-from-prison-part-1-by-charlie-shrem",
+    "post_id": 1258012,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 211
+    },
+    "title": "MackerelCoin & My Socioeconomic Observations from Prison (Part 1 by Charlie Shrem)",
+    "updated": "2016-09-15T19:39:15",
+    "url": "/story/@charlieshrem/mackerelcoin-and-my-socioeconomic-observations-from-prison-part-1-by-charlie-shrem"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 231809639013,
+        "voter": "anonymous"
+      },
+      {
+        "rshares": 40041987828800,
+        "voter": "blocktrades"
+      },
+      {
+        "rshares": 3500585753,
+        "voter": "kenmonkey"
+      },
+      {
+        "rshares": 34979300821,
+        "voter": "altoz"
+      },
+      {
+        "rshares": 4698559215,
+        "voter": "alexft"
+      },
+      {
+        "rshares": 2733708608,
+        "voter": "steem1653"
+      },
+      {
+        "rshares": 124961861,
+        "voter": "cynetyc"
+      },
+      {
+        "rshares": 251367062418,
+        "voter": "nabilov"
+      },
+      {
+        "rshares": 8401059269,
+        "voter": "noodhoog"
+      },
+      {
+        "rshares": 3291087867,
+        "voter": "rossenpavlov"
+      },
+      {
+        "rshares": 51505575275,
+        "voter": "mandibil"
+      },
+      {
+        "rshares": 271440423,
+        "voter": "anomaly"
+      },
+      {
+        "rshares": 213847216,
+        "voter": "andrewrait"
+      },
+      {
+        "rshares": 1871969417,
+        "voter": "bapparabi"
+      },
+      {
+        "rshares": 160935948,
+        "voter": "greencycles"
+      },
+      {
+        "rshares": 154247502,
+        "voter": "dougkarr"
+      },
+      {
+        "rshares": 153227837,
+        "voter": "goodbible"
+      }
+    ],
+    "author": "groovedigital",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 50.68,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "<html>\n<p>https://www.youtube.com/watch?v=iJCi8yLN8_M</p>\n</html>",
+    "category": "life",
+    "children": 0,
+    "created": "2016-09-15T17:50:12",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "https://img.youtube.com/vi/iJCi8yLN8_M/0.jpg"
+      ],
+      "links": [
+        "https://www.youtube.com/watch?v=iJCi8yLN8_M"
+      ],
+      "tags": [
+        "life",
+        "comedy",
+        "film",
+        "art",
+        "funny"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 40637225037243,
+    "payout": 99.432,
+    "payout_at": "2016-09-22T17:50:12",
+    "pending_payout_value": "99.432 HBD",
+    "percent_hbd": 10000,
+    "permlink": "when-your-dad-works-in-hollywood",
+    "post_id": 1256746,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 17
+    },
+    "title": "When Your Dad Works In Hollywood",
+    "updated": "2016-09-15T17:50:12",
+    "url": "/life/@groovedigital/when-your-dad-works-in-hollywood"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 231809756793,
+        "voter": "anonymous"
+      },
+      {
+        "rshares": 40042090888143,
+        "voter": "blocktrades"
+      },
+      {
+        "rshares": 81790420316,
+        "voter": "acidsun"
+      },
+      {
+        "rshares": 1026087885,
+        "voter": "danielkt"
+      },
+      {
+        "rshares": 243749878708,
+        "voter": "nabilov"
+      },
+      {
+        "rshares": 5096232265,
+        "voter": "dmitriybtc"
+      },
+      {
+        "rshares": 3145812656,
+        "voter": "dmilash"
+      },
+      {
+        "rshares": 538023492,
+        "voter": "marinaz"
+      },
+      {
+        "rshares": 1446509276,
+        "voter": "future24"
+      },
+      {
+        "rshares": 4098512589,
+        "voter": "cmorton"
+      },
+      {
+        "rshares": 83101859,
+        "voter": "numberone"
+      },
+      {
+        "rshares": 5712937692,
+        "voter": "trev"
+      },
+      {
+        "rshares": 62351093,
+        "voter": "creatr"
+      },
+      {
+        "rshares": 116660687,
+        "voter": "jlufer"
+      },
+      {
+        "rshares": 53884613,
+        "voter": "jeff-kubitz"
+      },
+      {
+        "rshares": 5532993072,
+        "voter": "tanyabtc"
+      },
+      {
+        "rshares": 53671263,
+        "voter": "waldemar-kuhn"
+      },
+      {
+        "rshares": 271440423,
+        "voter": "anomaly"
+      },
+      {
+        "rshares": 6368721210,
+        "voter": "orcish"
+      },
+      {
+        "rshares": 4331450381,
+        "voter": "puffin"
+      },
+      {
+        "rshares": 3795767712,
+        "voter": "dresden"
+      }
+    ],
+    "author": "tanyabtc",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 57.51,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Jellyfish is a perfect example of one of the weirdest creatures out there. In real life they are definitely not the most pleasant thing to touch and being surrounded with.\n\nIt wasn't a surprise for me but jellyfish don't have brains. Instead, they have nerve nets which sense changes in the environment and coordinate the animal's responses.\n\nHowever if you eliminate all of the fluff that people are talking about them, you can come up with something interesting and even fun.\n\nThis drawing is created using my favorite style, I hope you'll love it.\n\nhttp://i349.photobucket.com/albums/q393/dmbaim/Art/jellyfish2_zpswbrk9ied.jpg\n\nhttp://i349.photobucket.com/albums/q393/dmbaim/Art/jellyfish3_zpsx0rcjvko.jpg\n\nhttp://i349.photobucket.com/albums/q393/dmbaim/Art/jellyfish1_zpsge408hgu.jpg\n\nhttp://i349.photobucket.com/albums/q393/dmbaim/Art/jellyfish4_zpsmctahaql.jpg\n\n***\n\n### <center>  Follow me for my future art work: [@tanyabtc](https://steemit.com/@tanyabtc) </center>",
+    "category": "art",
+    "children": 5,
+    "created": "2016-09-15T17:32:00",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "http://i349.photobucket.com/albums/q393/dmbaim/Art/jellyfish2_zpswbrk9ied.jpg",
+        "http://i349.photobucket.com/albums/q393/dmbaim/Art/jellyfish3_zpsx0rcjvko.jpg",
+        "http://i349.photobucket.com/albums/q393/dmbaim/Art/jellyfish1_zpsge408hgu.jpg",
+        "http://i349.photobucket.com/albums/q393/dmbaim/Art/jellyfish4_zpsmctahaql.jpg"
+      ],
+      "links": [
+        "https://steemit.com/@tanyabtc"
+      ],
+      "tags": [
+        "art",
+        "photography",
+        "life",
+        "nature",
+        "steemitartchallenge"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 40641175102128,
+    "payout": 99.269,
+    "payout_at": "2016-09-22T17:32:00",
+    "pending_payout_value": "99.269 HBD",
+    "percent_hbd": 10000,
+    "permlink": "jellyfish",
+    "post_id": 1256535,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 21
+    },
+    "title": "Jellyfish",
+    "updated": "2016-09-15T17:32:00",
+    "url": "/art/@tanyabtc/jellyfish"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 231809639013,
+        "voter": "anonymous"
+      },
+      {
+        "rshares": 40859141206977,
+        "voter": "blocktrades"
+      },
+      {
+        "rshares": 1912118346075,
+        "voter": "badassmother"
+      },
+      {
+        "rshares": 7113882084470,
+        "voter": "xeldal"
+      },
+      {
+        "rshares": 5763993012820,
+        "voter": "enki"
+      },
+      {
+        "rshares": 1304415071462,
+        "voter": "rossco99"
+      },
+      {
+        "rshares": 1577462576089,
+        "voter": "joseph"
+      },
+      {
+        "rshares": 651993277150,
+        "voter": "masteryoda"
+      },
+      {
+        "rshares": 446958795092,
+        "voter": "boatymcboatface"
+      },
+      {
+        "rshares": 9168101098,
+        "voter": "idol"
+      },
+      {
+        "rshares": 23383993964,
+        "voter": "wpalczynski"
+      },
+      {
+        "rshares": 5044693986,
+        "voter": "sakr"
+      },
+      {
+        "rshares": 1578030666,
+        "voter": "jocelyn"
+      },
+      {
+        "rshares": 14818192446,
+        "voter": "gregory-f"
+      },
+      {
+        "rshares": 74914583876,
+        "voter": "eeks"
+      },
+      {
+        "rshares": 1007941175,
+        "voter": "fkn"
+      },
+      {
+        "rshares": 8867224532,
+        "voter": "james-show"
+      },
+      {
+        "rshares": 1324875721,
+        "voter": "elishagh1"
+      },
+      {
+        "rshares": 7802860274,
+        "voter": "richman"
+      },
+      {
+        "rshares": 24193131603,
+        "voter": "acidyo"
+      },
+      {
+        "rshares": 313691550,
+        "voter": "coar"
+      },
+      {
+        "rshares": 1061234978,
+        "voter": "murh"
+      },
+      {
+        "rshares": 2057413439,
+        "voter": "error"
+      },
+      {
+        "rshares": 59950022330,
+        "voter": "theshell"
+      },
+      {
+        "rshares": 400880323222,
+        "voter": "taoteh1221"
+      },
+      {
+        "rshares": 410517349,
+        "voter": "applecrisp"
+      },
+      {
+        "rshares": 280737930617,
+        "voter": "trogdor"
+      },
+      {
+        "rshares": 5287820211,
+        "voter": "tee-em"
+      },
+      {
+        "rshares": 121383360964,
+        "voter": "geoffrey"
+      },
+      {
+        "rshares": 10684548905,
+        "voter": "kimziv"
+      },
+      {
+        "rshares": 30279968088,
+        "voter": "acassity"
+      },
+      {
+        "rshares": 45145254362,
+        "voter": "venuspcs"
+      },
+      {
+        "rshares": 7264907621,
+        "voter": "getssidetracked"
+      },
+      {
+        "rshares": 1414199127,
+        "voter": "trees"
+      },
+      {
+        "rshares": 197179742,
+        "voter": "strawhat"
+      },
+      {
+        "rshares": 1159208963,
+        "voter": "steemswede"
+      },
+      {
+        "rshares": 691425107,
+        "voter": "cryptochannel"
+      },
+      {
+        "rshares": 894044199,
+        "voter": "endgame"
+      },
+      {
+        "rshares": 4920266872,
+        "voter": "furion"
+      },
+      {
+        "rshares": 2834923420,
+        "voter": "steem1653"
+      },
+      {
+        "rshares": 25221166135,
+        "voter": "steemit-life"
+      },
+      {
+        "rshares": 13516878845,
+        "voter": "sitaru"
+      },
+      {
+        "rshares": 80777327,
+        "voter": "snowden"
+      },
+      {
+        "rshares": 14167503457,
+        "voter": "aaseb"
+      },
+      {
+        "rshares": 4209522316,
+        "voter": "karen13"
+      },
+      {
+        "rshares": 243749878708,
+        "voter": "nabilov"
+      },
+      {
+        "rshares": 677892916,
+        "voter": "luisucv34"
+      },
+      {
+        "rshares": 34761252099,
+        "voter": "creemej"
+      },
+      {
+        "rshares": 233065746,
+        "voter": "poseidon"
+      },
+      {
+        "rshares": 82781233416,
+        "voter": "thylbom"
+      },
+      {
+        "rshares": 32543319555,
+        "voter": "deanliu"
+      },
+      {
+        "rshares": 5428442637,
+        "voter": "rainchen"
+      },
+      {
+        "rshares": 204617448258,
+        "voter": "jl777"
+      },
+      {
+        "rshares": 103514864,
+        "voter": "pokemon"
+      },
+      {
+        "rshares": 817413671,
+        "voter": "positive"
+      },
+      {
+        "rshares": 6361356981,
+        "voter": "chloetaylor"
+      },
+      {
+        "rshares": 17267278949,
+        "voter": "proto"
+      },
+      {
+        "rshares": 1805641835,
+        "voter": "sisterholics"
+      },
+      {
+        "rshares": 61286903,
+        "voter": "reported"
+      },
+      {
+        "rshares": 8734133724,
+        "voter": "taker"
+      },
+      {
+        "rshares": 57607550,
+        "voter": "krushing"
+      },
+      {
+        "rshares": 63852353198,
+        "voter": "laonie"
+      },
+      {
+        "rshares": 24561889230,
+        "voter": "laoyao"
+      },
+      {
+        "rshares": 1332427399,
+        "voter": "myfirst"
+      },
+      {
+        "rshares": 12961212091,
+        "voter": "somebody"
+      },
+      {
+        "rshares": 484610059,
+        "voter": "flysaga"
+      },
+      {
+        "rshares": 2084691327,
+        "voter": "gmurph"
+      },
+      {
+        "rshares": 513517114,
+        "voter": "minnowsunited"
+      },
+      {
+        "rshares": 2863236010,
+        "voter": "midnightoil"
+      },
+      {
+        "rshares": 56653113,
+        "voter": "whatyouganjado"
+      },
+      {
+        "rshares": 3323984357,
+        "voter": "kurtbeil"
+      },
+      {
+        "rshares": 7161280807,
+        "voter": "xiaohui"
+      },
+      {
+        "rshares": 323406893,
+        "voter": "elfkitchen"
+      },
+      {
+        "rshares": 5855543935,
+        "voter": "oflyhigh"
+      },
+      {
+        "rshares": 63373184,
+        "voter": "makaveli"
+      },
+      {
+        "rshares": 223891286,
+        "voter": "xiaokongcom"
+      },
+      {
+        "rshares": 1780319109,
+        "voter": "future24"
+      },
+      {
+        "rshares": 7709317035,
+        "voter": "thebotkiller"
+      },
+      {
+        "rshares": 451324143,
+        "voter": "xianjun"
+      },
+      {
+        "rshares": 647921440,
+        "voter": "herbertmueller"
+      },
+      {
+        "rshares": 56109399,
+        "voter": "alexbones"
+      },
+      {
+        "rshares": 2022625104,
+        "voter": "chinadaily"
+      },
+      {
+        "rshares": 90172824082,
+        "voter": "serejandmyself"
+      },
+      {
+        "rshares": 163783062,
+        "voter": "nang1"
+      },
+      {
+        "rshares": 2982676167,
+        "voter": "netaterra"
+      },
+      {
+        "rshares": 52319145,
+        "voter": "dobbydaba"
+      },
+      {
+        "rshares": 22559404087,
+        "voter": "andrewawerdna"
+      },
+      {
+        "rshares": 77466140,
+        "voter": "ozertayiz"
+      },
+      {
+        "rshares": 4633082667,
+        "voter": "steemitpatina"
+      },
+      {
+        "rshares": 55922029,
+        "voter": "salebored"
+      },
+      {
+        "rshares": 2196862373,
+        "voter": "runridefly"
+      },
+      {
+        "rshares": 115288806334,
+        "voter": "shenanigator"
+      },
+      {
+        "rshares": 1709331623,
+        "voter": "funkywanderer"
+      },
+      {
+        "rshares": 4594182561,
+        "voter": "richardcrill"
+      },
+      {
+        "rshares": 79155262951,
+        "voter": "markrmorrisjr"
+      },
+      {
+        "rshares": 55917888,
+        "voter": "bitdrone"
+      },
+      {
+        "rshares": 55908853,
+        "voter": "sleepcult"
+      },
+      {
+        "rshares": 27677639861,
+        "voter": "sponge-bob"
+      },
+      {
+        "rshares": 12031039232,
+        "voter": "doitvoluntarily"
+      },
+      {
+        "rshares": 67696453939,
+        "voter": "thecyclist"
+      },
+      {
+        "rshares": 646493719,
+        "voter": "kev7000"
+      },
+      {
+        "rshares": 55266473,
+        "voter": "analyzethis"
+      },
+      {
+        "rshares": 27671309914,
+        "voter": "brains"
+      },
+      {
+        "rshares": 5866415576,
+        "voter": "burnin"
+      },
+      {
+        "rshares": 1352324852,
+        "voter": "bitcoinparadise"
+      },
+      {
+        "rshares": 4235074146,
+        "voter": "funnyman"
+      },
+      {
+        "rshares": 50193769,
+        "voter": "f1111111"
+      },
+      {
+        "rshares": 339287005,
+        "voter": "anomaly"
+      },
+      {
+        "rshares": 63405661,
+        "voter": "inarix03"
+      },
+      {
+        "rshares": 98545946,
+        "voter": "ola1"
+      },
+      {
+        "rshares": 4382226038,
+        "voter": "michelle.gent"
+      },
+      {
+        "rshares": 66935282,
+        "voter": "mari5555na"
+      },
+      {
+        "rshares": 31683945302,
+        "voter": "goldmatters"
+      },
+      {
+        "rshares": 155180811,
+        "voter": "majes"
+      },
+      {
+        "rshares": 71727340,
+        "voter": "dealzgal"
+      },
+      {
+        "rshares": 68013381,
+        "voter": "storage"
+      },
+      {
+        "rshares": 58460105,
+        "voter": "blackmarket"
+      },
+      {
+        "rshares": 61530871,
+        "voter": "gifts"
+      },
+      {
+        "rshares": 96643251,
+        "voter": "expat"
+      },
+      {
+        "rshares": 129609202,
+        "voter": "toddemaher1"
+      }
+    ],
+    "author": "markrmorrisjr",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 66.26,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "## In this episode, Joshua Claiborne stands trial for violation of the First Law ##\n\n**\u201cWhoa, whoa, whoa!\u201d Phil screamed, \u201cWhat the hell dude?\u201d**\n\n*The Reaper crumpled to the floor, arms flailing as Joshua rode it to the ground. Finally, the hands found the catches at either side of the helmet and popped it off. A black, shaggy head of hair emerged.* \n\n***If you've missed episodes, [visit my blog](https://steemit.com/@markrmorrisjr) to catch up. Be sure to follow  me for updates in your feed!***\n\n\u201cEmil?\u201d Stella said, \u201cMeet Joshua. Are you okay?\u201d\n\nEmil, the Reaper suit\u2019s operator laughed, \u201cYeah, I\u2019m fine, but that was awesome! Can you teach us that?\u201d\n\n\u201cMan! Now I have to rebuild this helmet,\u201d Phil held up a small remote. \u201cAll I had to do was push this button,\u201d he said, pressing it, as the suit powered down. \u201cWhat did you do?\u201d\n\n\u201cThe \u2018nerve\u2019 bundle that controls these things motor skills is on the very top of the skull, under a thin piece of sheet metal, puncture it, it collapses. You didn\u2019t know that?\u201d Joshua said. \n\n\u201cWell, it appears we may need you more than you need us,\u201d Stella said. \u201cSo, just say the word and we\u2019ll get you where you need to be. Meanwhile, my team will be working on your son\u2019s location.\u201d\n\nJoshua dropped the letter opener and walked to the stairs, \u201cFine, whatever you need to collect from my meeting, get it. Now, who\u2019s driving?\u201d With that, he walked up the stairs, he had no more time to waste. \n\n**The Mapleton courthouse sat on a hill in the center of the town, overlooking the area around for miles.** \n\n*Joshua insisted that the team Stella had sent stop 5 miles out and allow him to ride in on the electric trike alone, while they observed the meeting from a distance.* \n\nHe carried the tiny remote in his shirt pocket, a gift from Phil. \u201cThat\u2019s my only prototype, so don\u2019t lose it,\u201d he\u2019d said. \n\n![enter image description here](https://s12.postimg.org/siuqjuiz1/Untitled_36.jpg)\n\nFrom the end of Main Street, looking up toward the courthouse, Joshua counted at least six reapers. He wondered how far the signal from the remote would travel. \n\nHe thought about pressing it now, disarming his enemy, then walking in, but he\u2019d still have to deal with the six drivers, if they managed to escape the suits. \n\nBesides, Stella seemed to think there was some secret they were going to give away, although Joshua couldn\u2019t imagine it. \n\n*He checked his watch, ten minutes until his scheduled time and while he knew better than to be late, he had no intention of giving the Consensus one more second than he had to.* \n\nThe trike spun it\u2019s tires on a patch of loose gravel as he started back up. He decided a quick approach was best. He charged up the hill, jumping the \u201cMayor\u2019s\u201d parking barrier and rolling up to the foot of the front stairs, he cranked the accelerator and the trike rose up on its back wheel, popping the two front wheels, over the bottom step. \n\nThe machine had more than enough power to climb the steps and Joshua skidded to a stop outside the courthouse door. He stopped and turned back toward the town, the six Reapers swarming toward him up the steps. He powered down, swung his leg up and over the bike and opened the door. \n\n**The Reapers followed him into the hall as he approached the court room.** \n\nThe Magistrate sat behind the judge\u2019s bench and Joshua couldn\u2019t help but smirk at the insult to the very concept of actual justice that this thing represented. \n\n\u201cJoshua Claiborne, appearing as requested,\u201d Joshua said, standing directly in front of the Magistrate. \n\n![enter image description here](https://s12.postimg.org/6h4lvyh7x/judge.jpg)\n\n> \u201cYes, Mr. Claiborne, have a seat,\u201d A woman\u2019s face, projected on the face shield of the Magistrate said.\n\n\u201cI\u2019d rather stand,\u201d he said. \n\n> \u201cSuit yourself, may we have the room, please?\u201d she said, looking toward the reapers that had entered the back doors of the courtroom.\n\nThey left quietly. \n\n> \u201cMr. Claiborne, you\u2019re charged with violation of the first law, in so\n> much as you have encouraged and joined in the activity of settling\n> outside of Consensus approved areas, acted outside of the legal\n> jurisdiction of the council and on more than  one occasion, acted\n> against the best interest of Consensus, including attacking duly\n> authorized Magistrates in the course of their legally binding duties,\n> how do you plead?\u201d\n\n**The woman looked at Joshua, peering over a pair of short, square spectacles, like some sort of outdated stereotype.** \n\n\u201cNot guilty, by reason of illegitimacy of the currently established government and its ensigns. I am not, nor do I choose to become, subject to your law. I stand judged as innocent by natural law, insomuch as I have not caused harm to another human in aggression, damaged or stolen property, nor unnecessarily restricted the liberty of any other person. I recognize no other responsibility to my fellow man,\u201d Joshua said calmly. \n\n> \u201cBe that as it may, Mr. Claiborne, we are not here under the auspices of \u201cnatural law\u201d but rather, under the Council mandated authority of the Consensus and its Magisterial Ministry, of which I am a part and I assure you, you are subject to,\u201d\n\nThe woman intoned, her expression one of almost sheer boredom.\n\n> \u201cCourt finds the defendant guilty and remands the subject for immediate judicial murder.\u201d\n\nThe magistrate raised its arm and brought it down on the bench with a solid thud, that echoed through the court. Joshua felt his heart sink as the Reapers reentered the court and moved up to surround him. \n\n## Look for the upvote button below. If you liked the post, upvote and share! If you're not on Steemit yet, why not? You get free money for signing up! ##",
+    "category": "story",
+    "children": 2,
+    "created": "2016-09-15T16:54:06",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "https://s12.postimg.org/siuqjuiz1/Untitled_36.jpg",
+        "https://s12.postimg.org/6h4lvyh7x/judge.jpg"
+      ],
+      "links": [
+        "https://steemit.com/@markrmorrisjr"
+      ],
+      "tags": [
+        "story",
+        "fiction",
+        "anarchy",
+        "life",
+        "minnowsunited"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 62355283653318,
+    "payout": 226.397,
+    "payout_at": "2016-09-22T16:54:06",
+    "pending_payout_value": "226.397 HBD",
+    "percent_hbd": 10000,
+    "permlink": "original-fiction-anarchist-s-almanac-episode-15",
+    "post_id": 1256113,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 120
+    },
+    "title": "Original Fiction: Anarchist's Almanac, Episode 15",
+    "updated": "2016-09-15T16:54:06",
+    "url": "/story/@markrmorrisjr/original-fiction-anarchist-s-almanac-episode-15"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 31308460859447,
+        "voter": "smooth"
+      },
+      {
+        "rshares": 231810333637,
+        "voter": "anonymous"
+      },
+      {
+        "rshares": 1020236794603,
+        "voter": "liondani"
+      },
+      {
+        "rshares": 1950774078440,
+        "voter": "xeroc"
+      },
+      {
+        "rshares": 636514783207,
+        "voter": "masteryoda"
+      },
+      {
+        "rshares": 5943125371535,
+        "voter": "smooth.witness"
+      },
+      {
+        "rshares": 800066797130,
+        "voter": "steemrollin"
+      },
+      {
+        "rshares": 14982933604,
+        "voter": "eeks"
+      },
+      {
+        "rshares": 32368367444,
+        "voter": "instructor2121"
+      },
+      {
+        "rshares": 326639006522,
+        "voter": "teamsteem"
+      },
+      {
+        "rshares": 178446109019,
+        "voter": "steve-walschot"
+      },
+      {
+        "rshares": 313697862,
+        "voter": "coar"
+      },
+      {
+        "rshares": 1061253912,
+        "voter": "murh"
+      },
+      {
+        "rshares": 40553528416,
+        "voter": "ranko-k"
+      },
+      {
+        "rshares": 970586830705,
+        "voter": "cyber"
+      },
+      {
+        "rshares": 35244223389,
+        "voter": "drinkzya"
+      },
+      {
+        "rshares": 57203974765,
+        "voter": "thecryptodrive"
+      },
+      {
+        "rshares": 5287780547,
+        "voter": "tee-em"
+      },
+      {
+        "rshares": 31345579234,
+        "voter": "michaelx"
+      },
+      {
+        "rshares": 88062402472,
+        "voter": "razvanelulmarin"
+      },
+      {
+        "rshares": 34073699558,
+        "voter": "cryptoiskey"
+      },
+      {
+        "rshares": 484636799,
+        "voter": "mrhankeh"
+      },
+      {
+        "rshares": 37152547241,
+        "voter": "clement"
+      },
+      {
+        "rshares": 49807514764,
+        "voter": "isteemit"
+      },
+      {
+        "rshares": 68450553516,
+        "voter": "bacchist"
+      },
+      {
+        "rshares": 52093553829,
+        "voter": "venuspcs"
+      },
+      {
+        "rshares": 14885828588,
+        "voter": "ausbitbank"
+      },
+      {
+        "rshares": 2632467953,
+        "voter": "steem1653"
+      },
+      {
+        "rshares": 185292018100,
+        "voter": "anyx"
+      },
+      {
+        "rshares": 80777327,
+        "voter": "snowden"
+      },
+      {
+        "rshares": 629471993,
+        "voter": "luisucv34"
+      },
+      {
+        "rshares": 87223247,
+        "voter": "wildchild"
+      },
+      {
+        "rshares": 2726160685,
+        "voter": "the-future"
+      },
+      {
+        "rshares": 167307855189,
+        "voter": "blueorgy"
+      },
+      {
+        "rshares": 3709595271,
+        "voter": "bitcoiner"
+      },
+      {
+        "rshares": 30989825780,
+        "voter": "zaebars"
+      },
+      {
+        "rshares": 799615699,
+        "voter": "raymonjohnstone"
+      },
+      {
+        "rshares": 50626015,
+        "voter": "steemchain"
+      },
+      {
+        "rshares": 50626015,
+        "voter": "whalepool"
+      },
+      {
+        "rshares": 4233708636,
+        "voter": "tygergamer"
+      },
+      {
+        "rshares": 15951876294,
+        "voter": "clevecross"
+      },
+      {
+        "rshares": 138539449846,
+        "voter": "steemdrive"
+      },
+      {
+        "rshares": 50579614280,
+        "voter": "gomeravibz"
+      },
+      {
+        "rshares": 2157207095,
+        "voter": "merej99"
+      },
+      {
+        "rshares": 22969491561,
+        "voter": "laonie1"
+      },
+      {
+        "rshares": 23486297008,
+        "voter": "laonie2"
+      },
+      {
+        "rshares": 23494592105,
+        "voter": "laonie3"
+      },
+      {
+        "rshares": 5831750244,
+        "voter": "brendio"
+      },
+      {
+        "rshares": 416938566,
+        "voter": "gmurph"
+      },
+      {
+        "rshares": 50577648,
+        "voter": "michellek"
+      },
+      {
+        "rshares": 23490269143,
+        "voter": "laonie4"
+      },
+      {
+        "rshares": 23487998630,
+        "voter": "laonie5"
+      },
+      {
+        "rshares": 23485020903,
+        "voter": "laonie6"
+      },
+      {
+        "rshares": 23480867466,
+        "voter": "laonie7"
+      },
+      {
+        "rshares": 3323846130,
+        "voter": "kurtbeil"
+      },
+      {
+        "rshares": 23477419388,
+        "voter": "laonie8"
+      },
+      {
+        "rshares": 23474718053,
+        "voter": "laonie9"
+      },
+      {
+        "rshares": 2370262538,
+        "voter": "steemleak"
+      },
+      {
+        "rshares": 7991657587,
+        "voter": "mevilkingdom"
+      },
+      {
+        "rshares": 88206053,
+        "voter": "bigsambucca"
+      },
+      {
+        "rshares": 2343161589,
+        "voter": "paynode"
+      },
+      {
+        "rshares": 72135954,
+        "voter": "stevescriber"
+      },
+      {
+        "rshares": 51247757,
+        "voter": "loli"
+      },
+      {
+        "rshares": 52419023,
+        "voter": "nano2nd"
+      },
+      {
+        "rshares": 61430307,
+        "voter": "cryptoblu"
+      },
+      {
+        "rshares": 61423628,
+        "voter": "instructor"
+      },
+      {
+        "rshares": 802020725261,
+        "voter": "dollarvigilante"
+      },
+      {
+        "rshares": 4056826699,
+        "voter": "lamech-m"
+      },
+      {
+        "rshares": 23468511648,
+        "voter": "laonie10"
+      },
+      {
+        "rshares": 159631404,
+        "voter": "kamil5"
+      },
+      {
+        "rshares": 8706975244,
+        "voter": "garywilson"
+      },
+      {
+        "rshares": 50829277,
+        "voter": "bitchplease"
+      },
+      {
+        "rshares": 5831957227,
+        "voter": "trev"
+      },
+      {
+        "rshares": 99130059443,
+        "voter": "barrycooper"
+      },
+      {
+        "rshares": 32443492367,
+        "voter": "hilarski"
+      },
+      {
+        "rshares": 2029369552,
+        "voter": "shadowspub"
+      },
+      {
+        "rshares": 8558777427,
+        "voter": "rimann"
+      },
+      {
+        "rshares": 58139915,
+        "voter": "rickmiller"
+      },
+      {
+        "rshares": 5401518277,
+        "voter": "nulliusinverba"
+      },
+      {
+        "rshares": 22792452702,
+        "voter": "mikehere"
+      },
+      {
+        "rshares": 22621808463,
+        "voter": "laonie11"
+      },
+      {
+        "rshares": 3411072843,
+        "voter": "xanoxt"
+      },
+      {
+        "rshares": 4044651818,
+        "voter": "l0k1"
+      },
+      {
+        "rshares": 50798127,
+        "voter": "freesteem"
+      },
+      {
+        "rshares": 450072622,
+        "voter": "saramiller"
+      },
+      {
+        "rshares": 2353724275,
+        "voter": "zettar"
+      },
+      {
+        "rshares": 6066265903,
+        "voter": "dexter-k"
+      },
+      {
+        "rshares": 53871683,
+        "voter": "doggnostic"
+      },
+      {
+        "rshares": 674641805,
+        "voter": "ct-gurus"
+      },
+      {
+        "rshares": 53593366,
+        "voter": "jenny-talls"
+      },
+      {
+        "rshares": 415654681468,
+        "voter": "charlieshrem"
+      },
+      {
+        "rshares": 61826073622,
+        "voter": "tracemayer"
+      },
+      {
+        "rshares": 1386999849,
+        "voter": "bitcoinparadise"
+      },
+      {
+        "rshares": 2170339399,
+        "voter": "steemsquad"
+      },
+      {
+        "rshares": 52104641,
+        "voter": "vsmith08162016"
+      },
+      {
+        "rshares": 339288508,
+        "voter": "anomaly"
+      },
+      {
+        "rshares": 63405661,
+        "voter": "inarix03"
+      },
+      {
+        "rshares": 51238118,
+        "voter": "teemsteem"
+      },
+      {
+        "rshares": 50975390,
+        "voter": "steemprincess"
+      },
+      {
+        "rshares": 52329350,
+        "voter": "ninjapainter"
+      },
+      {
+        "rshares": 1630374239,
+        "voter": "rusteemitblog"
+      },
+      {
+        "rshares": 71727340,
+        "voter": "dealzgal"
+      },
+      {
+        "rshares": 68013381,
+        "voter": "storage"
+      },
+      {
+        "rshares": 58460105,
+        "voter": "blackmarket"
+      },
+      {
+        "rshares": 61530871,
+        "voter": "gifts"
+      },
+      {
+        "rshares": 99404487,
+        "voter": "expat"
+      },
+      {
+        "rshares": 140412636,
+        "voter": "steemtrail"
+      },
+      {
+        "rshares": 1593664040,
+        "voter": "steemlift"
+      },
+      {
+        "rshares": 132623369,
+        "voter": "toddemaher1"
+      }
+    ],
+    "author": "mevilkingdom",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 57.06,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "## Hi Steemians! The greatest thing about being a collector is that people always know what to buy for your birthday. Not perfume or cookware, but always things you love!\n\nHere are some pictures of what I received the last couple of times.\n\n----\n<center>![Picture 1](http://mandesevilkingdom.com/steemit/post6/DSC01422.JPG)</center>\n\nThese are all the gifts I received for my birthday this year. I got some cool dolls, chocolates, care bears, my little ponies and even a puzzle. What a lovely 27th birthday!\n\n___\n<center>![Picture 1](http://mandesevilkingdom.com/steemit/post6/DSC09982.JPG)</center>\n\nChristmas is only once a year, good thing for my family! Lots of dolls and some ponies. You can tell everyone is really supportive of my hobby.\n___\n<center>![Picture 1](http://mandesevilkingdom.com/steemit/post6/DSC05838.JPG)</center>\nThis is what **Sinterklaas** (he brings gifts on the 6th of December) brought me. Did you know I also collect Lego to some extent?\n___\n\n<center>![Picture 1](http://mandesevilkingdom.com/steemit/post6/DSC05066.JPG)</center>\nGifts from **Disneyland Paris**\n___\n<center>![Picture 1](http://mandesevilkingdom.com/steemit/post6/DSC05622.JPG)</center>\nEven more **Disneyland** gifts, this time for Christmas 2 years ago. Those cookies are just **THE BEST**!\nNot to mention that they're Mickey-shaped.\n\n___\n\nThank you very much for looking at my pictures! Don't forget to  **follow me** for more pictures!\n\n\n---- \n\n### Who is Mande Walschot?\n\n> Mande Walschot resides in Belgium and currently owns over 1,350 boxed My Little Ponies, around 500 boxed dolls, 52 polly pockets, 25 plush care bears, 30 Tsum Tsums, about 3,000 Pok\u00e9mon cards, around 200 comic books and lots of stuffed toys! [Gemr spotlight collection](https://blogadmin.gemr.com/blog/collector-spotlight-mande-walschot/)\n\nAlso seen on [national television](http://ringtv.be/nieuws/mande-uit-halle-heeft-grootste-poppenverzameling-uit-regio) and [newspapers](http://www.hln.be/regio/nieuws-uit-halle/mande-leeft-samen-met-1-357-pony-s-a2797213/).\n\n\nSister of @steve-walschot, the creator of SteemPay.io and vouched Steem applications developer and girlfriend of game-enthusiast @herrlonnie.",
+    "category": "life",
+    "children": 3,
+    "created": "2016-09-15T17:14:30",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "http://mandesevilkingdom.com/steemit/post6/DSC01422.JPG",
+        "http://mandesevilkingdom.com/steemit/post6/DSC09982.JPG",
+        "http://mandesevilkingdom.com/steemit/post6/DSC05838.JPG",
+        "http://mandesevilkingdom.com/steemit/post6/DSC05066.JPG",
+        "http://mandesevilkingdom.com/steemit/post6/DSC05622.JPG"
+      ],
+      "links": [
+        "https://blogadmin.gemr.com/blog/collector-spotlight-mande-walschot/",
+        "http://ringtv.be/nieuws/mande-uit-halle-heeft-grootste-poppenverzameling-uit-regio",
+        "http://www.hln.be/regio/nieuws-uit-halle/mande-leeft-samen-met-1-357-pony-s-a2797213/"
+      ],
+      "tags": [
+        "life",
+        "story",
+        "collector",
+        "toys",
+        "mandesevilkingdom"
+      ],
+      "users": [
+        "steve-walschot",
+        "herrlonnie"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 46309406304713,
+    "payout": 127.75,
+    "payout_at": "2016-09-22T17:14:30",
+    "pending_payout_value": "127.750 HBD",
+    "percent_hbd": 10000,
+    "permlink": "the-gift-of-family-stories-of-a-toy-collector-1",
+    "post_id": 1256335,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 109
+    },
+    "title": "The gift of family: Stories of a toy collector #1",
+    "updated": "2016-09-15T17:14:30",
+    "url": "/life/@mevilkingdom/the-gift-of-family-stories-of-a-toy-collector-1"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 231809773619,
+        "voter": "anonymous"
+      },
+      {
+        "rshares": 4134589909216,
+        "voter": "riverhead"
+      },
+      {
+        "rshares": 2006571575186,
+        "voter": "hr1"
+      },
+      {
+        "rshares": 1239194317889,
+        "voter": "rossco99"
+      },
+      {
+        "rshares": 2206071653405,
+        "voter": "wang"
+      },
+      {
+        "rshares": 22391622942,
+        "voter": "jaewoocho"
+      },
+      {
+        "rshares": 1534823711950,
+        "voter": "joseph"
+      },
+      {
+        "rshares": 621013263954,
+        "voter": "masteryoda"
+      },
+      {
+        "rshares": 8927357821,
+        "voter": "idol"
+      },
+      {
+        "rshares": 800261748895,
+        "voter": "steemrollin"
+      },
+      {
+        "rshares": 4839028197,
+        "voter": "sakr"
+      },
+      {
+        "rshares": 1536592488,
+        "voter": "jocelyn"
+      },
+      {
+        "rshares": 365729210153,
+        "voter": "craig-grant"
+      },
+      {
+        "rshares": 44948978408,
+        "voter": "eeks"
+      },
+      {
+        "rshares": 1007941175,
+        "voter": "fkn"
+      },
+      {
+        "rshares": 1324875721,
+        "voter": "elishagh1"
+      },
+      {
+        "rshares": 7803257741,
+        "voter": "richman"
+      },
+      {
+        "rshares": 313699965,
+        "voter": "coar"
+      },
+      {
+        "rshares": 1061266533,
+        "voter": "murh"
+      },
+      {
+        "rshares": 2003359924,
+        "voter": "error"
+      },
+      {
+        "rshares": 58189176188,
+        "voter": "theshell"
+      },
+      {
+        "rshares": 223669021166,
+        "voter": "will-zewe"
+      },
+      {
+        "rshares": 85402720456,
+        "voter": "herzmeister"
+      },
+      {
+        "rshares": 275016906945,
+        "voter": "trogdor"
+      },
+      {
+        "rshares": 42740945757,
+        "voter": "kimziv"
+      },
+      {
+        "rshares": 4920595011,
+        "voter": "furion"
+      },
+      {
+        "rshares": 2632467953,
+        "voter": "steem1653"
+      },
+      {
+        "rshares": 2860912097,
+        "voter": "sveokla"
+      },
+      {
+        "rshares": 136322030,
+        "voter": "cynetyc"
+      },
+      {
+        "rshares": 13846432138,
+        "voter": "aaseb"
+      },
+      {
+        "rshares": 4209539443,
+        "voter": "karen13"
+      },
+      {
+        "rshares": 8926064181,
+        "voter": "noodhoog"
+      },
+      {
+        "rshares": 21565632626,
+        "voter": "artific"
+      },
+      {
+        "rshares": 932318275,
+        "voter": "poseidon"
+      },
+      {
+        "rshares": 81126757108,
+        "voter": "thylbom"
+      },
+      {
+        "rshares": 204618396015,
+        "voter": "jl777"
+      },
+      {
+        "rshares": 817413671,
+        "voter": "positive"
+      },
+      {
+        "rshares": 17267341753,
+        "voter": "proto"
+      },
+      {
+        "rshares": 7223043327,
+        "voter": "sisterholics"
+      },
+      {
+        "rshares": 1838905726,
+        "voter": "yoganarchista"
+      },
+      {
+        "rshares": 8734196526,
+        "voter": "taker"
+      },
+      {
+        "rshares": 255431411513,
+        "voter": "laonie"
+      },
+      {
+        "rshares": 7994964655,
+        "voter": "myfirst"
+      },
+      {
+        "rshares": 51848391811,
+        "voter": "somebody"
+      },
+      {
+        "rshares": 1938565243,
+        "voter": "flysaga"
+      },
+      {
+        "rshares": 1250819304,
+        "voter": "gmurph"
+      },
+      {
+        "rshares": 11453689270,
+        "voter": "midnightoil"
+      },
+      {
+        "rshares": 28648120983,
+        "voter": "xiaohui"
+      },
+      {
+        "rshares": 1293711711,
+        "voter": "elfkitchen"
+      },
+      {
+        "rshares": 895620436,
+        "voter": "xiaokongcom"
+      },
+      {
+        "rshares": 46605026907,
+        "voter": "eneismijmich"
+      },
+      {
+        "rshares": 1805414369,
+        "voter": "xianjun"
+      },
+      {
+        "rshares": 118221929,
+        "voter": "microluck"
+      },
+      {
+        "rshares": 2539918110,
+        "voter": "dinamitduo"
+      },
+      {
+        "rshares": 88481667,
+        "voter": "pompe72"
+      },
+      {
+        "rshares": 14946610388,
+        "voter": "machinelearning"
+      },
+      {
+        "rshares": 61087248,
+        "voter": "workout"
+      },
+      {
+        "rshares": 8856106682,
+        "voter": "onetree"
+      },
+      {
+        "rshares": 4900461398,
+        "voter": "richardcrill"
+      },
+      {
+        "rshares": 26571947789,
+        "voter": "sponge-bob"
+      },
+      {
+        "rshares": 27673075341,
+        "voter": "brains"
+      },
+      {
+        "rshares": 271441624,
+        "voter": "anomaly"
+      },
+      {
+        "rshares": 98577200,
+        "voter": "ola1"
+      },
+      {
+        "rshares": 1199700175,
+        "voter": "iuliuspro"
+      },
+      {
+        "rshares": 1259790018,
+        "voter": "aksinya"
+      },
+      {
+        "rshares": 164253196,
+        "voter": "computerscience"
+      },
+      {
+        "rshares": 8448674998,
+        "voter": "hanai"
+      }
+    ],
+    "author": "eneismijmich",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 62.59,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "You must have heard that  life is a journey, not a destination. This is the big truth that we, repeatedly, understand superficially. Often we are so focused on the goal, that we completely forget to enjoy the path.\n\nhttps://puu.sh/rbX2i/70e07ec186.png\n\nWhen we achieve the goal, we forget to enjoy it and immediately create a new goal. That is not life, this is racing with life. I am certain that you will not be happy, bur rather tired. Soul searches for the experience, while the mind and ego give signs if something is good or bad for us. Soul is completely indifferent. For the soul, every experience means celebration, while you are maybe crying because of the mind, to whom literally a lot of things does not make sense. \n\nThe same applies to the transformation called *death*. We celebrate resurrection as the greatest symbol of life, and then we are crying in the moment of someone's death. The mind is strange, isn't it?\n\nhttps://puu.sh/rbX1U/3cc83557c6.png\n\nRelax. It doesn't matter where you are in your level of expansion, you can't miss the road to home. While you are breathing, you are on the right track. Try to accept this moment as a moment in which there is no goal, and there is no end. The game never ends. This is excellent news. We came here to play, not to win. The game ends with victory, and God's Child in us still wants to play.\n\nOne beautiful wisdom reminds us: *\"Everything will be fine. If it isn't fine, then it isn't the end.\"* You always have the chance for new choices. This is very important to understand. You shouldn't hate the process just because you are not on your imaginary goal. You trust the process. You are exactly where your soul wants you to be. Don't let your mind tell you any different. \n\nhttps://puu.sh/rbXjG/ea493b7d14.png\n\nEverything is always a matter of the focus on things you have instead of the things you are missing. Today, again you are taking for granted the things that once were a goal. You forget to enjoy. Time is only an illusion of the mind. What if that is the point that you current process wants to teach you? If time is illusion, and it is, what's the hurry?\n\nhttps://puu.sh/rbWSn/313549d802.png\n\nTake a deep breath in and out. Experience life in the breath. The only goal is hiding in the breath of life.  Everything is good, just the way it is. Don't forget that nothing ever happens without the God's blessing. Don't forget that you are guided. And, the most important, don't forget that we would most certainly go wrong if we'd try to determine what is the best time for us. The one who sees the big picture knows where you're headed and where you want to arrive.\n\nhttps://puu.sh/rbWLA/86e34b50b7.png\n\nTrust the process. It is the true test of our faith and wisdom. And enjoy. Without it nothing makes sense, right?\nThe sentence that many repeat in the end of the road: *\"I should've enjoyed more!\"*\n\nAll our life is a mere blink of an eye in the eternity. It is too small for such amount of worry. The life is not a serious thing, just the opposite. Life is the experience game. The point is not in the destination. The journey is our only destination. Isn't it then wiser to enjoy right away?\n\nhttps://puu.sh/rbX8F/2ea42f6dc9.png\n\n*\"Success isn't measured by money or material things.*\n*Success is measured by the amount of joy you feel.\"*\n\nFor more awesome images check this guy: [Psychedelic Maniac](thepsychedelicmaniac.tumblr.com)",
+    "category": "mindfulness",
+    "children": 0,
+    "created": "2016-09-15T18:31:45",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "https://puu.sh/rbX2i/70e07ec186.png",
+        "https://puu.sh/rbX1U/3cc83557c6.png",
+        "https://puu.sh/rbXjG/ea493b7d14.png",
+        "https://puu.sh/rbWSn/313549d802.png",
+        "https://puu.sh/rbWLA/86e34b50b7.png",
+        "https://puu.sh/rbX8F/2ea42f6dc9.png"
+      ],
+      "links": [
+        "thepsychedelicmaniac.tumblr.com"
+      ],
+      "tags": [
+        "mindfulness",
+        "life",
+        "health",
+        "psychology",
+        "philosophy"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 14809262337539,
+    "payout": 15.259,
+    "payout_at": "2016-09-22T18:31:45",
+    "pending_payout_value": "15.259 HBD",
+    "percent_hbd": 10000,
+    "permlink": "4rgubt-journey-of-life",
+    "post_id": 1257256,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 67
+    },
+    "title": "Journey of life",
+    "updated": "2016-09-15T18:51:54",
+    "url": "/mindfulness/@eneismijmich/4rgubt-journey-of-life"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 231809756793,
+        "voter": "anonymous"
+      },
+      {
+        "rshares": 9865242777816,
+        "voter": "berniesanders"
+      },
+      {
+        "rshares": 73218523804,
+        "voter": "nextgenwitness"
+      },
+      {
+        "rshares": 244111745773,
+        "voter": "justin"
+      },
+      {
+        "rshares": 670306236660,
+        "voter": "silver"
+      },
+      {
+        "rshares": 1626597190919,
+        "voter": "silversteem"
+      },
+      {
+        "rshares": 1805647921101,
+        "voter": "nextgencrypto"
+      },
+      {
+        "rshares": 2206071238782,
+        "voter": "wang"
+      },
+      {
+        "rshares": 168110609178,
+        "voter": "steemservices"
+      },
+      {
+        "rshares": 10523039423,
+        "voter": "steemservices1"
+      },
+      {
+        "rshares": 5815231464,
+        "voter": "bentley"
+      },
+      {
+        "rshares": 1061283659,
+        "voter": "murh"
+      },
+      {
+        "rshares": 199249189310,
+        "voter": "the-alien"
+      },
+      {
+        "rshares": 4370748872,
+        "voter": "fubar-bdhr"
+      },
+      {
+        "rshares": 35503298931,
+        "voter": "anca3drandom"
+      },
+      {
+        "rshares": 13692618129,
+        "voter": "thecurator"
+      },
+      {
+        "rshares": 60180881035,
+        "voter": "thecyclist"
+      },
+      {
+        "rshares": 3752519126,
+        "voter": "gavicrane"
+      },
+      {
+        "rshares": 271441624,
+        "voter": "anomaly"
+      },
+      {
+        "rshares": 6368823978,
+        "voter": "orcish"
+      },
+      {
+        "rshares": 516546553,
+        "voter": "grisha-danunaher"
+      }
+    ],
+    "author": "gavicrane",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 55.5,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "https://s11.postimg.io/b3prm8c8j/13658487_167145253714835_2120112308_n.jpg\n\"Reaping samurai\" ink and watercolor 2016---\nGood afternoon steemit, I've started a new sketch book that I've been using for my painting guides on here, so I thought I'd share some of my favorite images from my early 2016 sketch book. \n[[If any of these images are intresting and you have a question about them or would like me to do a guide on the effect, please let me know]]\n\n\nhttps://scontent-iad3-1.xx.fbcdn.net/v/t34.0-12/14349021_10202094280675368_232067415_n.jpg?oh=1dc9b910b80dec4563998a4e09207e9b&oe=57DDB98C\n\"Mua'chai\" watercolor 2016\nhttps://scontent-iad3-1.xx.fbcdn.net/v/t34.0-12/14348940_10202094280435362_714766386_n.jpg?oh=67cad0f5c19e532122ac4f07701a47f4&oe=57DC87AC\n\"Demon school girl self defense technique #1\"  watercolor 2016\nhttps://scontent-iad3-1.xx.fbcdn.net/v/t34.0-12/14349044_10202094279475338_1919828752_n.jpg?oh=3b32c5a87fac888a585dd6178f6063be&oe=57DD972B\n\"Gunami\" watercolor and markers 2016\nhttps://scontent-iad3-1.xx.fbcdn.net/v/t34.0-12/14341557_10202094279835347_1447452659_n.jpg?oh=07402d4729ca82c45ed60a91f612ff00&oe=57DC921D\n\"Nug\" watercolor 2016\nhttps://scontent-iad3-1.xx.fbcdn.net/v/t34.0-12/14383452_10202094280075353_1948917659_n.jpg?oh=ea970142045f7f5556b2651183ff14dc&oe=57DDC720\n\"Gunmen roll\" markers 2016\nhttps://scontent-iad3-1.xx.fbcdn.net/v/t34.0-12/14349101_10202094281475388_984093380_n.jpg?oh=2cc4c934936fc1a6f64e3083d1b46251&oe=57DCBA12\n\"Upskirt\" watercolor 2016\nhttps://scontent-iad3-1.xx.fbcdn.net/v/t34.0-12/14383479_10202094281995401_180492323_n.jpg?oh=c473347749c230ef874bc7a86227abfa&oe=57DD964C\n\"Sushi\" ink 2016\nhttps://scontent-iad3-1.xx.fbcdn.net/v/t34.0-12/14341654_10202094282595416_1956679206_n.jpg?oh=ae6b3d2eead014702651e8ac2992c76f&oe=57DCD933\n\"Sushi girl\" ink 2016\nhttps://scontent-iad3-1.xx.fbcdn.net/v/t34.0-12/14383350_10202094283555440_1405254054_n.jpg?oh=d1fddd46cff58320a4db54553007f0f7&oe=57DCD84D\n\"4th type glow\" ink 2016\nhttps://scontent-iad3-1.xx.fbcdn.net/v/t34.0-12/14365268_10202094291035627_1939261453_n.jpg?oh=0c5ccf78315a810bf9e35141b8667fd9&oe=57DDD7EF\n\"Yellow night\" ink on acrylic 2016\nhttps://scontent-iad3-1.xx.fbcdn.net/v/t34.0-0/p280x280/14356025_10202094295955750_708260188_n.jpg?oh=8fd748ee5ce04f1b38e918680ef25476&oe=57DDD849\n\"Insufferable\" ink 2016",
+    "category": "art",
+    "children": 1,
+    "created": "2016-09-15T17:36:06",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "https://s11.postimg.io/b3prm8c8j/13658487_167145253714835_2120112308_n.jpg",
+        "https://scontent-iad3-1.xx.fbcdn.net/v/t34.0-12/14349021_10202094280675368_232067415_n.jpg?oh=1dc9b910b80dec4563998a4e09207e9b&amp;oe=57DDB98C"
+      ],
+      "tags": [
+        "art",
+        "steemit",
+        "story",
+        "sketchbook",
+        "life"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 17232421622930,
+    "payout": 20.062,
+    "payout_at": "2016-09-22T17:36:06",
+    "pending_payout_value": "20.062 HBD",
+    "percent_hbd": 10000,
+    "permlink": "a-window-into-my-last-sketchbook-12-images",
+    "post_id": 1256586,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 21
+    },
+    "title": "A window into my last sketchbook [12 images]",
+    "updated": "2016-09-15T17:58:39",
+    "url": "/art/@gavicrane/a-window-into-my-last-sketchbook-12-images"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 4134632281224,
+        "voter": "riverhead"
+      },
+      {
+        "rshares": 2531219186,
+        "voter": "steem1653"
+      },
+      {
+        "rshares": 100126866,
+        "voter": "rusla"
+      },
+      {
+        "rshares": 56055247,
+        "voter": "whoknows"
+      },
+      {
+        "rshares": 123221500,
+        "voter": "ola1"
+      },
+      {
+        "rshares": 2337017256,
+        "voter": "ayim"
+      }
+    ],
+    "author": "ayim",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 53.99,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "<center>![](http://svmassagetherapy.com/blog/wp-content/uploads/2014/11/slumpshoulder.jpg)</center>\nHello Steemit, this might be something that can change your life.  Muscle pain is inevitable, it can be an old injury, or just something that suddenly start irritating you and it will not stop. Having over worked muscles or your posture compromised causes a lot of kinks and knots in our body.  Having deep tissue massage is great for alleviating pain. \n\n\n<h4>The benefits of have a deep tissue massage: </h4>\n* Increases blow flow in the body which causes healing to improve\n* Reduces inflammation\n* Loosen tight muscles cluster\n* Improve overall blood pressure \n* Breaks up scar tissue\n* Stress reliever. \n\n90 percent of the people who read this knows that massages are great. I'm an anomaly, I am not a fan of massages but I do believe in the benefits.  I do help out the family when I was younger when they asked for massages and I have a natural talent for it. They were confused and would ask how did I know what to do to fix their back. it still remains a mystery til this day. There are many reason why people can't get massages because of the inconvenience, money, or unavailability which brings me to...\n\n<center> <h3>Lacrosse ball</h3>\n![](http://d2ydh70d4b5xgv.cloudfront.net/images/7/7/mobilitas-mobility-peanut-the-original-double-lacrosse-ball-and-myofascial-1a1f82b10a664b959539aacdbdcf0a96.jpg)\n[Peanut Lacrosse ball](https://www.amazon.com/gp/product/B0140NJXY6/ref=as_li_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B0140NJXY6&linkCode=as2&tag=lasted-20&linkId=1edab9bdbe3612327d257f4edd57cfb5)\n</center>\nThis improve many of my family's lives when they started using it. My mother, dad, brother, and uncles all are a huge fan of these. The idea of lacrosse ball is to place it either on a wall and lean into or placed on the ground and lay on top of it to target stubborn pains and aches caused by tight muscles. It is used by many athletes but also adored by people that hate the idea of working out. The purpose (for example) is to place it somewhere on your back where it is the most uncomfortable and leave it there for around 20 - 30 seconds so that your muscle in that area would slowly release itself.  What I personally do is to put 2 of these under my desk roll my feet with them. \n<center> <h3>Foam roller</h3>\n![](https://images-na.ssl-images-amazon.com/images/I/71VxfEt9NtL._SL1500_.jpg)\n[Foam Roller](https://www.amazon.com/gp/product/B00KAEJ3V8/ref=as_li_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B00KAEJ3V8&linkCode=as2&tag=lasted-20&linkId=08ef65112539bb10114ba72a89ab1edd)</center>\nThey are great for the overall body. Less intense as the lacrosse ball but they can improve your posture as you roll on top. Here you also do the same thing as the lacrosse ball you lay on top of it and find a tender spot and hold it there for around 20 - 30 seconds if you can and move to the next spot. I don't advise rolling the lower back since your spine is already curve in and your creating more of a sway back. This improve circulation on your thighs, side torso, chest, or any part of your body that can rest on top of this.\n\n<center> <h3>Theracane</h3>\n![](https://images-na.ssl-images-amazon.com/images/I/31VpBRHxbUL.jpg)\n[Theracane](https://www.amazon.com/gp/product/B000PRMCJU/ref=as_li_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B000PRMCJU&linkCode=as2&tag=lasted-20&linkId=e0fcdc173eac78ceda3dccef5b82dcaf)\n</center>\n\nThis is the first thing I purchased when I had tense shoulders because I had a laptop bag which was a sling style bag. The uneven weight distribution caused intense pain and knots in my shoulder which I had no way of stretching it out. During that time I was a student living in the dorms. No car, not a lot of money,  and it was super inconvenient to travel one hour to see a physical therapist for a massage. This was introduced to me by my brother who has knots majority of his life because he had bad posture. I gave it a go and it worked! This is great for people who are in a chair and can't just lay down on the floor suddenly like in an office setting. This can be used when reading something on your computer or anything that doesn't requires hands you can start using this to help reduce the pain on your shoulder and neck. \n\nThese three products I always use if I feel that my muscles are tight or overworked that particular day. They are always in hands reach and has improved my over knot issues. Have a great day Steemit, hope this helps!",
+    "category": "life",
+    "children": 0,
+    "created": "2016-09-15T18:53:51",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "http://svmassagetherapy.com/blog/wp-content/uploads/2014/11/slumpshoulder.jpg",
+        "http://d2ydh70d4b5xgv.cloudfront.net/images/7/7/mobilitas-mobility-peanut-the-original-double-lacrosse-ball-and-myofascial-1a1f82b10a664b959539aacdbdcf0a96.jpg",
+        "https://images-na.ssl-images-amazon.com/images/I/71VxfEt9NtL._SL1500_.jpg",
+        "https://images-na.ssl-images-amazon.com/images/I/31VpBRHxbUL.jpg"
+      ],
+      "links": [
+        "https://www.amazon.com/gp/product/B0140NJXY6/ref=as_li_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B0140NJXY6&linkCode=as2&tag=lasted-20&linkId=1edab9bdbe3612327d257f4edd57cfb5",
+        "https://www.amazon.com/gp/product/B00KAEJ3V8/ref=as_li_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B00KAEJ3V8&linkCode=as2&tag=lasted-20&linkId=08ef65112539bb10114ba72a89ab1edd",
+        "https://www.amazon.com/gp/product/B000PRMCJU/ref=as_li_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B000PRMCJU&linkCode=as2&tag=lasted-20&linkId=e0fcdc173eac78ceda3dccef5b82dcaf"
+      ],
+      "tags": [
+        "life",
+        "story",
+        "fitness",
+        "health",
+        "blog"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 4139779921279,
+    "payout": 1.845,
+    "payout_at": "2016-09-22T18:53:51",
+    "pending_payout_value": "1.845 HBD",
+    "percent_hbd": 10000,
+    "permlink": "fixing-posture-part-5-massages",
+    "post_id": 1257499,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 6
+    },
+    "title": "Fixing Posture - Part 5: Massages",
+    "updated": "2016-09-15T18:57:33",
+    "url": "/life/@ayim/fixing-posture-part-5-massages"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 4134640392195,
+        "voter": "riverhead"
+      },
+      {
+        "rshares": 2531219186,
+        "voter": "steem1653"
+      },
+      {
+        "rshares": 4597948653,
+        "voter": "gustavopasquini"
+      },
+      {
+        "rshares": 232757631,
+        "voter": "sergey44"
+      },
+      {
+        "rshares": 275446808,
+        "voter": "cris.emilia"
+      },
+      {
+        "rshares": 1335239332,
+        "voter": "future24"
+      },
+      {
+        "rshares": 191761463,
+        "voter": "abnerpasquini"
+      },
+      {
+        "rshares": 83629379486,
+        "voter": "serejandmyself"
+      },
+      {
+        "rshares": 163701239,
+        "voter": "steemit-recipes"
+      },
+      {
+        "rshares": 17024381094,
+        "voter": "bluehorseshoe"
+      },
+      {
+        "rshares": 98577200,
+        "voter": "ola1"
+      },
+      {
+        "rshares": 6654826634,
+        "voter": "dresden"
+      }
+    ],
+    "author": "gustavopasquini",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 56.39,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "https://gustavopasquini.files.wordpress.com/2016/09/untitled-design-24.png?w=1000\n\n> ### Traditional Brazilian Desserte to bring exquisite recipes to your fine dining table for special ocacsions.\n\n# INGREDIENTS\n\n> 2 bananas\n\n> 1 tablespoon melted margarine soup\n\n> 1/2 teaspoon brown sugar soup\n\n> 1/2 teaspoon ground cinnamon tea\n\n> 8 sheets of pasta for pastel\n\n> frying oil\n\n\n# PREPARATION\n\n### 1. Cut the banana into slices .\n\n### 2. in a bowl, mix with margarine, sugar and cinnamon .\n\n### 3. divide that filling in pastel masses and close with a fork .\n\n### 4. fry in hot oil, drain on absorbent paper and serve .\n\n-----------------------------------------------------------------------------------------------------------------------------------------------------------\n\n\nhttps://img1.steemit.com/0x0/http://gustavopasquini.com/wp-content/uploads/2016/07/2-1.png\n\n# About Me\n\n### In 2012 I began my cooking journey in Brasil and studied at \u201cSenac, Juiz de Fora\u201d, in Minas Gerais, developing my basic culinary techniques.\n\n### Later I worked in a local restaurant, and rose to a role in management, helping to increase the clientele base. I then discovered a refined bistro called \u201cAssunta\u201d in Minas Gerais and cooked as a Chef de parti. In this place I became sure of what I wanted for my life. Learning an important chef\u2019s culinary art at that time aroused my desire to live abroad; learn English and improve my culinary techniques.\n\n### Following this experience I traveled to Ireland in Europe and began working in an Irish restaurant as a Kitchen Porter and later working as a Chef de Parti.\n\n### Having met my girlfriend, I embarked on the third part of journey to Thailand in 2014 where I gained an Asian cooking experience and improved my International culinary techniques. In Bangkok I had the privilege of undertaking a course in one of the most prestigious international networks of French cuisine; \u201cLe Cordon Bleu\u201d.\n\n### Having completed the Advanced cooking level there I traveled to Italy and learnt more about Mediterranean cooking and then returned to Brasil, where I\u2019m now based.\n\nhttps://img1.steemit.com/0x0/https://gustavopasquini.files.wordpress.com/2016/01/logo_transparent.png?w=465\n\n-----------------------------------------------------------------------------------------------------------------------------------------------------------\n\n\n> ### [ Chef Recipes Site ](https://gustavopasquini.com)\n\n> ### [ Chef Recipes Shop ](https://gustavopasquini-shop.com)\n\n> ### [Blog Post ](https://gustavopasquini.wordpress.com/2016/09/15/pastel-of-banana-with-chocolate/)\n\n> ### [Recipe Site ](http://www.tudogostoso.com.br/receita/1660-pastel-de-banana.html)\n\n-----------------------------------------------------------------------------------------------------------------------------------------------------------",
+    "category": "food",
+    "children": 4,
+    "created": "2016-09-15T18:52:15",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "https://gustavopasquini.files.wordpress.com/2016/09/untitled-design-24.png?w=1000",
+        "https://img1.steemit.com/0x0/http://gustavopasquini.com/wp-content/uploads/2016/07/2-1.png",
+        "https://img1.steemit.com/0x0/https://gustavopasquini.files.wordpress.com/2016/01/logo_transparent.png?w=465"
+      ],
+      "links": [
+        "https://gustavopasquini.com",
+        "https://gustavopasquini-shop.com",
+        "https://gustavopasquini.wordpress.com/2016/09/15/pastel-of-banana-with-chocolate/",
+        "http://www.tudogostoso.com.br/receita/1660-pastel-de-banana.html"
+      ],
+      "tags": [
+        "food",
+        "health",
+        "recipes",
+        "curie",
+        "life"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 4251375630921,
+    "payout": 1.927,
+    "payout_at": "2016-09-22T18:52:15",
+    "pending_payout_value": "1.927 HBD",
+    "percent_hbd": 10000,
+    "permlink": "pastel-of-banana-with-chocolate",
+    "post_id": 1257478,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 12
+    },
+    "title": "Pastel of Banana with Chocolate",
+    "updated": "2016-09-15T18:52:57",
+    "url": "/food/@gustavopasquini/pastel-of-banana-with-chocolate"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 1856124515188,
+        "voter": "badassmother"
+      },
+      {
+        "rshares": 1511911763,
+        "voter": "fkn"
+      },
+      {
+        "rshares": 1987313581,
+        "voter": "elishagh1"
+      },
+      {
+        "rshares": 1061309796,
+        "voter": "murh"
+      },
+      {
+        "rshares": 10685732759,
+        "voter": "kimziv"
+      },
+      {
+        "rshares": 7380892516,
+        "voter": "furion"
+      },
+      {
+        "rshares": 13847065167,
+        "voter": "aaseb"
+      },
+      {
+        "rshares": 233089182,
+        "voter": "poseidon"
+      },
+      {
+        "rshares": 1226120506,
+        "voter": "positive"
+      },
+      {
+        "rshares": 1805841949,
+        "voter": "sisterholics"
+      },
+      {
+        "rshares": 63861075353,
+        "voter": "laonie"
+      },
+      {
+        "rshares": 2665078950,
+        "voter": "myfirst"
+      },
+      {
+        "rshares": 12962686205,
+        "voter": "somebody"
+      },
+      {
+        "rshares": 484662341,
+        "voter": "flysaga"
+      },
+      {
+        "rshares": 2863548500,
+        "voter": "midnightoil"
+      },
+      {
+        "rshares": 7162422615,
+        "voter": "xiaohui"
+      },
+      {
+        "rshares": 485163523,
+        "voter": "elfkitchen"
+      },
+      {
+        "rshares": 223914723,
+        "voter": "xiaokongcom"
+      },
+      {
+        "rshares": 451374022,
+        "voter": "xianjun"
+      },
+      {
+        "rshares": 82361209107,
+        "voter": "markrmorrisjr"
+      }
+    ],
+    "author": "markrmorrisjr",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 66.26,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "## In this episode, a hot Aedapt girl helps Jack escape Killer giant Cockroaches! ##\n\n**Jake was peering through cracks between the plaster laths back into the room where they guard stood.** \n\n![enter image description here](https://s22.postimg.org/d4vifrmo1/Madison.jpg)\n***Missed an episode? Great more great reading for you [on my blog](https://steemit.com/@markrmorrisjr)! Be sure to follow me for awesome daily updates in your feed and leave me comments. I love comments!***\n\n\u201cNo, we\u2019re not that smart when we\u2019re under. We can really only do what we hear them telling us to do.\u201d Jake whispered, calmly as the big guard moved within inches of the wall, snorting. The guard turned, blasted a hole in the ceiling with his gun and charged back into the hall. \n\n*They heard him blasting the door of the next room open.*\n\n\u201cWe can\u2019t stay here. I\u2019m guessing you\u2019ve got this one on a signal blocker and there\u2019s not much time.\u201d \n\nThe girl turned and ran to a corner, where an iron hand rail rose up out of the floor in a curve. She disappeared through the floor and as Jack followed, he found a narrow, spiraling stair that led below. \n\nHe lost his footing and slid down the stairs, narrowly missing the girl. She stood in the room below, with ear to the door that led into the hall.\n\n![enter image description here](https://s16.postimg.org/90derv079/spiral_stair.jpg)\n\n*Jake followed close behind. The girl with the violet eyes opened the door and stepped out into the hall with the awakened Nosher right behind her and Jack bringing up the rear. Jack had no idea what to do next, but the girl seemed to be in her element, and willing to help.*\n\n**Hopefully, she was not leading them into more danger.** \n\nHe followed her past one door, and into the darkened room where they had first started. It was empty, which could only mean one thing. The Noshers who had recently occupied it were upstairs right now with the ugly guard. They were looking for Jack and the others and would soon head back down.\n\n\u201cShouldn\u2019t we just get out of here?\u201d Jack said. He stood with his back to the wall and the door opened a crack so that one eye could see down the hall toward the upper stairs.\n\n\u201cNot without these,\u201d the girl walked to where the guard had been and pointed up at the weapons, suspended above. She ran a hand along the doorframe, \u201cIt ought to be along here somewhere.\u201d She said.\n\n**\u201cWhat is?\u201d Jack hissed, shifting as her body pressed against his.** \n\nShe ran her hand along the top of the doorframe. He froze; she smelled good. It had been a long time since a girl had gotten this close to him, junior prom, in fact. He did not have a lot of time for dating with his work schedule. \n\n*To top it off, the smell of burnt fries that clung to him even after an hour in the shower was hardly an aphrodisiac.*\n\nThe girl put one hand on his chest and stood on tiptoe, pressing tight against him. \u201cOh, don\u2019t kid yourself; you just happened to be in my way.\u201d She laughed, scornfully, and pressed a hidden button at the top right corner of the door. Weapons rained down with a crash, and she quickly chose two handguns, handing one to Jack. \n\nShe pressed the button again, and the remaining weapons zipped back up into position. Jack had to grip the gun in his hand firmly to keep it from joining them.\n\n![enter image description here](https://s13.postimg.org/xp1l7jjyv/guns.jpg)\n\n**\u201cElectro magnet,\u201d she said and opened the door, moving out, weapon first.**\n\n\u201cI knew that,\u201d Jack said. He flattened himself against the hallway wall, like a TV detective. The magnet had occurred to him, but in his addled state, he had not really grasped the concept. Mostly he just did not like the idea of her being smarter than he was. \n\n\u201cKeep up\u201d he hissed to Jake, who had managed to grab a revolver.\nThe three moved quickly down the hall and turned toward the front door. The two roaches Jack had seen earlier, peered out from either side. \n\n**They had weapons leveled in his direction.**\n\n*The girl crouched and moved forward as if she were still a Nosher. It worked. Jack followed suit, and Jake did his best. His human consciousness was getting stronger by the minute.* \n\nHe had even started getting color back in his cheeks, and Jack was beginning to notice that the man seemed oddly familiar, the more human he became. \u201cCould be a side effect of this Nosher thinking,\" he guessed.\n\n\u201cThey're right behind us,\u201d the girl hissed to one of the roaches. \u201cBlast the next thing that comes down those stairs, you got me?\u201d \n\n**The bug clicked and hissed.** \n\n*Jack assumed it was a yes, because the two giant insects moved in and took up positions on either side of the hall.*\n\nJack bolted out the door and was relieved to see the Rabbit zip up just in time. Phineas sat behind the wheel, and the Things were nowhere in sight. Behind them, they heard the roaches open fire, and then a huge blast echoed down the hall. \n\n![enter image description here](https://s13.postimg.org/4klau8zdj/phin_rabbit.jpg)\n\nA gust of wind barreled out the door, raining cockroach guts over the three escaping figures. Jake stumbled, and Jack picked him up and shoved him into the back seat of the Rabbit.\n\nHe turned back to let the girl in, but she was gone. Phineas stood up on the running board, slapping the roof of the vehicle furiously. \u201cGet in the car! Let\u2019s go man!\u201d\n\n*By the time Jack had slid into the passenger seat, Phineas had the Rabbit patching out. They were up to top speed in a matter of seconds.*\n\n**\u201cFind a me a safe dime!\u201d Phineas yelled, standing as he worked the pedals and tried to see over the steering wheel at the same time.**\n\n\u201cWhat?\u201d Jack yelled over the whine of the engine.\n\n\u201cDime, a dimension, get us out of here.\u201d Phineas pleaded.\n\nJack opened the glove compartment and fiddled with the controls, but nothing happened.\n\n**\u201cDamn, guess I have to do everything, Phineas grumbled, \u201chere, take the wheel.\u201d** \n\n*The Leprechaun ducked under Jack\u2019s arms as he grabbed the steering wheel from his position in the passenger\u2019s seat.* \n\nPhineas leaned across the stick shift, his feet working the pedals as he started manipulating the glovebox controls. Jack\u2019s view through the windshield changed every few seconds. It was making steering from the passenger\u2019s seat even more of a challenge.\n\n*Meanwhile, Jake hunkered down in the back seat. From where Jack sat, he was not looking so good. He wondered how much time they had left.*\n\nJack swerved to miss a slow-moving vehicle that had just appeared as they shifted dimensions. Finally, Phineas settled for one that put them on a narrow two-lane country road. \n\nThe town disappeared, replaced by rows of fences. Phineas braked and turned off onto the shoulder of the road, rolling to a stop.\n\nJack\u2019s heartbeat slowly returned to normal. Meanwhile, Jake sounded like he was winding up in the back seat, his voice rolling into a high-pitched whine, perforated with short puffs of breath, like a woman in labor on a late-night sitcom.\n\n**\u201cYou okay, back there?\u201d Jack asked, climbing out onto the shoulder.** \n\nJake launched himself out of the back seat, landed face down in a shallow ditch, and promptly lost the entire contents of his stomach in a single \n\n\u201cralph\u201d.\n--------\n\nJack turned away, pulling his elbow up over his nose to avoid the horrendous smell of vomit. Meanwhile, Phineas dove around the hood of the car and into the ditch, pawing through the puke as if he was panning for gold. \n\n*A few seconds later, he came up for air, triumphantly holding the thumb drive.*\n\nHe stood, wiping his hands on Jake\u2019s jacket, and then looked at his watch. \u201cIt\u2019s past time,\u201d He said, pulling the transmitter from the man\u2019s neck. Jake lolled into the ditch; his eyes fluttered, and Phineas shoved Jack toward the driver\u2019s seat.\n\n**\u201cLet\u2019s go. We don\u2019t want to be here when they come to collect him.\u201d He said, climbing into the passenger\u2019s seat.**\n\n***Will Jake see the girl again? What about his Nosher friend, what becomes of him? Will they ever get the smell out of the ALICE? Stay tuned!***\n\n## Look for the upvote button below. If you liked the post, upvote and share! If you're not on Steemit yet, why not? You get free money for signing up! ##",
+    "category": "story",
+    "children": 0,
+    "created": "2016-09-15T19:40:48",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "https://s22.postimg.org/d4vifrmo1/Madison.jpg",
+        "https://s16.postimg.org/90derv079/spiral_stair.jpg",
+        "https://s13.postimg.org/xp1l7jjyv/guns.jpg",
+        "https://s13.postimg.org/4klau8zdj/phin_rabbit.jpg"
+      ],
+      "links": [
+        "https://steemit.com/@markrmorrisjr"
+      ],
+      "tags": [
+        "story",
+        "life",
+        "fiction",
+        "anarchy",
+        "minnowsunited"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 2069384927746,
+    "payout": 0.691,
+    "payout_at": "2016-09-22T19:40:48",
+    "pending_payout_value": "0.691 HBD",
+    "percent_hbd": 10000,
+    "permlink": "original-fiction-jacked-book-one-the-origin-dime-chronicles-episode-10",
+    "post_id": 1258030,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 20
+    },
+    "title": "Original Fiction: JACKED Book One, The Origin Dime Chronicles, Episode 10",
+    "updated": "2016-09-15T19:40:48",
+    "url": "/story/@markrmorrisjr/original-fiction-jacked-book-one-the-origin-dime-chronicles-episode-10"
+  }
+]

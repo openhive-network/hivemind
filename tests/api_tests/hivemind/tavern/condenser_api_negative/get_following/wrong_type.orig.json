@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "invalid follow_type `wrong_type`",
+  "message": "Invalid parameters"
+}

@@ -1,0 +1,29 @@
+---
+  test_name: Hivemind tags_api.get_discussion vaneaventuras
+
+  marks:
+    - fullsynctest
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: tags_api.get_discussion vaneaventuras
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "tags_api.get_discussion"
+          params: {'author': 'vaneaventuras', 'permlink': 'eng-sp-make-up-challenge-week-15-social-glam-colorful-make-up'}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:has_valid_response
+          extra_kwargs:
+            method: "vaneaventuras"
+            directory: "tags_api_patterns/get_discussion"
+

@@ -1,0 +1,32 @@
+---
+test_name: Hivemind
+
+marks:
+  - patterntest # since comment is not a root only empty result is possible (note that unlike fat node now only posts with specified root are returned)
+
+includes:
+  - !include ../../../common.yaml
+
+stages:
+  - name: test
+    request:
+      url: "{service.proto:s}://{service.server:s}:{service.port}/"
+      method: POST
+      headers:
+        content-type: application/json
+      json:
+        jsonrpc: "2.0"
+        id: 1
+        method: "database_api.list_comments"
+        params:
+          {
+            "start": ["vi1son", "re-givemeyoursteem-winners-of-steemit-food-challenge-3-desserts-to-die-for-20160828t172955785z", "", ""],
+            "limit": 10,
+            "order": "by_root",
+          }
+    response:
+      status_code: 200
+      verify_response_with:
+        function: validate_response:compare_response_with_pattern
+        extra_kwargs:
+          ignore_tags: "<database posts>"

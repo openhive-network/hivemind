@@ -1,0 +1,212 @@
+[
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 1205753119776,
+        "rshares": 2897105713,
+        "voter": "cashbandicoot"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2518982758,
+        "rshares": 230270829,
+        "voter": "valeri"
+      },
+      {
+        "percent": "10000",
+        "reputation": 31143223609,
+        "rshares": 66492707,
+        "voter": "trytostopme"
+      },
+      {
+        "percent": "10000",
+        "reputation": 982331434653,
+        "rshares": 109229309,
+        "voter": "rusla"
+      },
+      {
+        "percent": "10000",
+        "reputation": 923173552,
+        "rshares": 51712697,
+        "voter": "the-ultimatum"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 154192801,
+        "voter": "waves-social"
+      }
+    ],
+    "author": "trytostopme",
+    "author_reputation": 31143223609,
+    "beneficiaries": [],
+    "body": "![FinTech3](https://anonimag.es/i/5a492a6a7abb3596a1984993ba879925.jpg)\n_(Image source: @the-ultimatum)_\n\n# **HOW-TO: REMOTELY SHUTDOWN A COMPUTER ON A SHARED NETWORK**\nRecently I was hanging at a local java joint, enjoying the complimentary Wi-Fi.  There, I was with fifteen other souls, all of us intently hammering away at solving the world\u2019s problems in a nice quite \u201cstudy-hall\u201d environment.  Suddenly the placid quietude was shattered by one person initiating a video conference with several colleagues, sans headphones.  She and her colleagues talked and laughed loudly; completely oblivious to the fact that they were disrupting everyone around them.\n\nFrom the dark looks, loud sighs and other non-verbal communication, it was obvious that everyone was annoyed.  I managed to survive about seven minutes of her auditory assault before summoning the will to approach her with a bleeding edge new concept\u2026 headphones.  I have captured the essence of the exchange below.\n\n\u2022\t**the-ultimatum** (**TU**)\n\u2022\t**Rude Shrew** (**RS**)\n\n> \u2022\t**TU**: \u201cWould you like to borrow these?\u201d\n \n_I extend my arm out revealing a set of headphones with a built in mic._\n> \u2022\t**RS**: [incoherent stammering while she tried to ignore me.  She responds to her colleagues]\n\n_I sweep the room with my extended arm_\n> \u2022\t**TU**: \u201cWe are all trying to work\u2026 you are more than welcome to these\u201d\n\n_She turns to me with a look of utter confusion_\n> \u2022\t**RS**: \u201cI don\u2019t know how to use those.\u201d\n\n_A lifetime of training in self-control is being challenged in this solitary moment.  A look of incredulity sweeps over my face_\n> \u2022\t**TU**: \u201cYou don\u2019t know how to plug-in and put on headphones\u2026?\u201d\n\n_[End of conversation.]_\n\n**As she continued to interrupt everyone I started to do some research and below is the content of this post.**\n\n**A Step-by-Step Guide to: Remotely Shutdown a Computer on a Shared Network**\nFollowing the steps & screenshots below you will find a very fast very simple way to boot users off a shared network or play pranks on your friends. \n\n\u2022\tFind the **cmd** prompt & _run as admin_\n\u2022\tType the command: **net view**\n\nThis will show you all the names of computers on the same network. The hardest part is targeting your subject\u2019s computer name. Trial and error.\n\n![CMD](https://anonimag.es/i/aacbbb1c18515bf66837d975858fee63.jpg)\n\nOnce you have chosen your subject follow the next steps:\n\u2022\tType the command: **ping [comp. name]**\n\n![PING](https://anonimag.es/i/0713224e9d0de131e979b0aa33ead35f.jpg)\n\n\u2022\tType the command: **shutdown -i**\n\n![SDi](https://anonimag.es/i/a3f83e1d32b2e6d54c9b0bdfa0fcb0ca.jpg)\n\nIn the **command prompt**:\n\u2022\tLeft click\n\u2022\tSelect _mark_\n\u2022\tCopy IP Address (e.g. _fe80::ddc9:3651:2554:3a93%2_)\n\nIn the **shutdown -i** pane follow these steps:\n\u2022\tPaste into _ADD_\n\u2022\tChoose _Shutdown_\n\u2022\tLeave Checked _Warn users of the action_\n\u2022\tSet the _Warn users of the action_ timer to a desired time.\n\u2022\tUncheck _Planned_\n\u2022\tChoose option _Security issue (unplanned)_\n\u2022\tType in your own _Comment_ (e.g. \"Your computer has been locked. Goodbye.\")\n\u2022\tClick _OK_\n\n![RemoteSD](https://anonimag.es/i/1abc1c79a33194a68792b5e88aa8d3b7.jpg)\n\nIf everything goes according to plan you should be able to watch your subject squirm in discomfort while the 15 second timer counts down and you and those around you are able to go back to working in peace. \n\n# **FOR EDUCATIONAL PURPOSES ONLY**\n\nWritten by: @the-ultimatum \n_https://twitter.com/WavesIs_\nEdited by: @cerberus65\nPublished by: @trytostopme",
+    "body_length": 3482,
+    "cashout_time": "2016-09-22T19:11:39",
+    "category": "story",
+    "children": 0,
+    "created": "2016-09-15T19:11:39",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"story\",\"hacking\",\"life\",\"steemit\"],\"users\":[\"the-ultimatum\",\"cerberus65\",\"trytostopme\"],\"image\":[\"https://anonimag.es/i/5a492a6a7abb3596a1984993ba879925.jpg\",\"https://anonimag.es/i/aacbbb1c18515bf66837d975858fee63.jpg\",\"https://anonimag.es/i/0713224e9d0de131e979b0aa33ead35f.jpg\",\"https://anonimag.es/i/a3f83e1d32b2e6d54c9b0bdfa0fcb0ca.jpg\",\"https://anonimag.es/i/1abc1c79a33194a68792b5e88aa8d3b7.jpg\"],\"links\":[\"https://twitter.com/WavesIs\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-15T19:11:39",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 3509004056,
+    "parent_author": "",
+    "parent_permlink": "story",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "how-to-remotely-shutdown-a-computer-on-a-shared-network",
+    "post_id": 1257711,
+    "promoted": "1.000 HBD",
+    "replies": [],
+    "root_title": "How-to: Remotely Shutdown a Computer on a Shared Network",
+    "title": "How-to: Remotely Shutdown a Computer on a Shared Network",
+    "total_payout_value": "0.000 HBD",
+    "url": "/story/@trytostopme/how-to-remotely-shutdown-a-computer-on-a-shared-network"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 2170055933924,
+        "rshares": 1861066361,
+        "voter": "jackgallenhall"
+      },
+      {
+        "percent": "10000",
+        "reputation": 982331434653,
+        "rshares": 109229309,
+        "voter": "rusla"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1502200909130,
+        "rshares": 98583209,
+        "voter": "ola1"
+      },
+      {
+        "percent": "10000",
+        "reputation": 16572462573,
+        "rshares": 12452663543,
+        "voter": "exploretraveler"
+      }
+    ],
+    "author": "jackgallenhall",
+    "author_reputation": 2170055933924,
+    "beneficiaries": [],
+    "body": "<html>\n<p>https://youtu.be/LB32fl1iExA</p>\n</html>",
+    "body_length": 50,
+    "cashout_time": "2016-09-22T19:11:00",
+    "category": "steemit",
+    "children": 1,
+    "created": "2016-09-15T19:11:00",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"steemit\",\"steem\"],\"image\":[\"https://img.youtube.com/vi/LB32fl1iExA/0.jpg\"],\"links\":[\"https://youtu.be/LB32fl1iExA\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-15T19:11:00",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 14521542422,
+    "parent_author": "",
+    "parent_permlink": "steemit",
+    "pending_payout_value": "0.003 HBD",
+    "percent_hbd": 10000,
+    "permlink": "steemit-for-dummies-how-to-transfer-steem-dollars-to-bittrex-video",
+    "post_id": 1257703,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Steemit For Dummies - How To Transfer Steem Dollars To Bittrex Video",
+    "title": "Steemit For Dummies - How To Transfer Steem Dollars To Bittrex Video",
+    "total_payout_value": "0.000 HBD",
+    "url": "/steemit/@jackgallenhall/steemit-for-dummies-how-to-transfer-steem-dollars-to-bittrex-video"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 7767180487460,
+        "rshares": 12687826828,
+        "voter": "gargon"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1955505384817,
+        "rshares": 3084409460,
+        "voter": "pgarcgo"
+      },
+      {
+        "percent": "10000",
+        "reputation": 982331434653,
+        "rshares": 109229309,
+        "voter": "rusla"
+      },
+      {
+        "percent": "4200",
+        "reputation": 3521631459073,
+        "rshares": 3363381107,
+        "voter": "betamusic"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1516224068896,
+        "rshares": 1883541074,
+        "voter": "juliamateo"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1502200909130,
+        "rshares": 98582007,
+        "voter": "ola1"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 51782882,
+        "voter": "javiergg"
+      },
+      {
+        "percent": "10000",
+        "reputation": 889436,
+        "rshares": 51422448,
+        "voter": "cuvi"
+      },
+      {
+        "percent": "10000",
+        "reputation": 858672756,
+        "rshares": 1822707064,
+        "voter": "bapparabi"
+      }
+    ],
+    "author": "juliamateo",
+    "author_reputation": 1516224068896,
+    "beneficiaries": [],
+    "body": "Bueno, como la mayor\u00eda de los que me sigue sabe... tengo un canal en youtube. Para fomentar que la gente escriba en espa\u00f1ol en esa incre\u00edble red social, he decidido propocionarla en mi canal de youtube!\nOs dejo aqu\u00ed el v\u00eddeo que hice! Un abrazo\nJulia\nhttps://www.youtube.com/watch?v=joHQB8Uq8Oc\nPRIMERAS REACCIONES ENTRE MIS SEGUIDORES\nhttps://s16.postimg.org/nha1k530l/Captura_de_pantalla_2016_09_15_a_las_21_22_54.png\nhttps://s17.postimg.org/csovsbcdb/Captura_de_pantalla_2016_09_15_a_las_21_23_03.png\nhttps://s15.postimg.org/m5euvbkbv/Captura_de_pantalla_2016_09_15_a_las_21_24_01.png",
+    "body_length": 587,
+    "cashout_time": "2016-09-22T19:10:39",
+    "category": "spanish",
+    "children": 0,
+    "created": "2016-09-15T19:10:39",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"spanish\",\"steemit\",\"life\",\"youtube\",\"teenager\"],\"image\":[\"https://img.youtube.com/vi/joHQB8Uq8Oc/0.jpg\"],\"links\":[\"https://www.youtube.com/watch?v=joHQB8Uq8Oc\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-15T19:29:12",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 23152882179,
+    "parent_author": "",
+    "parent_permlink": "spanish",
+    "pending_payout_value": "0.005 HBD",
+    "percent_hbd": 10000,
+    "permlink": "promociono-steemit-en-mi-canal-de-youtube",
+    "post_id": 1257699,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "PROMOCIONO Steemit en mi CANAL DE YOUTUBE",
+    "title": "PROMOCIONO Steemit en mi CANAL DE YOUTUBE",
+    "total_payout_value": "0.000 HBD",
+    "url": "/spanish/@juliamateo/promociono-steemit-en-mi-canal-de-youtube"
+  }
+]

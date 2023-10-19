@@ -1,0 +1,28 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest
+    # Communities not implemented under 5 mln blocks, but some were created by mock mechanism, therefore they are in result.
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.list_communities"
+          params: {"last":"hive-171487", "limit":1}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern
+          extra_kwargs:
+            ignore_tags: "<bridge communities>"

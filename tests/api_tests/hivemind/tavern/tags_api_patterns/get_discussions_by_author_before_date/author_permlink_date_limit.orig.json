@@ -1,0 +1,190 @@
+[
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "93765183",
+        "voter": "gandalf"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "503120540",
+        "voter": "paco-steem"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "5941196935",
+        "voter": "spaninv"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "9975325205",
+        "voter": "johnerfx"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "382763916645",
+        "voter": "taoteh1221"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "393291314",
+        "voter": "stiletto"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "867516503",
+        "voter": "johnerminer"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "2480411371",
+        "voter": "gary-smith"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "49812626493",
+        "voter": "gtg"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "7921157988",
+        "voter": "dasha"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "30256483332",
+        "voter": "r4fken"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "4368322380",
+        "voter": "thegoodguy"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "1775754972",
+        "voter": "screasey"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "14634652647",
+        "voter": "artakan"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "539611572",
+        "voter": "qonq99"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "4923096406",
+        "voter": "fishborne"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "1377860390",
+        "voter": "steeminer"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "726277176",
+        "voter": "spinner"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "16175410131",
+        "voter": "thebluepanda"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "2362437240",
+        "voter": "ullikume"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "2988929662",
+        "voter": "mione"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "851733457",
+        "voter": "steeminion"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "14814536032",
+        "voter": "sponge-bob"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "512292840",
+        "voter": "kev7000"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "289407830",
+        "voter": "steeminnow"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": "11301045003",
+        "voter": "brains"
+      }
+    ],
+    "author": "gtg",
+    "author_reputation": 3920426655270,
+    "beneficiaries": [],
+    "body": "Suppose your miner node found `pow2`, but your `total_missed` count increased, instead of generating a block.\n\nIf this happens, double check your keys used in the `config.ini` file.\n\n```\nwitness = \"minerwitness\"\n\nminer = [\"minerwitness\",\"WIF_ACTIVE_PRIVATE_KEY\"]\nminer = [\"miner1\",\"WIF_ACTIVE_PRIVATE_KEY\"]\nminer = [\"miner2\",\"WIF_ACTIVE_PRIVATE_KEY\"]\nminer = [\"miner3\",\"WIF_ACTIVE_PRIVATE_KEY\"]\n\nmining-threads = 4\n\nprivate-key = WIF_SIGNING_PRIVATE_KEY\n```\n\nUsing keys without paying attention to their roles is a common mistake. @artakan [found out](https://steemit.com/mining/@artakan/important-info-for-steem-miner-do-not-use-your-steemit-com-account \"@artakan - Do not use your steemit.com account for mining\")\nthat issues with missing blocks tend to happen when you are using an account that was created through [steemit.com](https://steemit.com/ \"Blogging is the new mining\") but seems to work for the mined account.\n\nSo erroneous configuration might work for your mined account by pure coincidence. In other words, the same key has been defined for all roles, so:  `WIF_ACTIVE_PRIVATE_KEY` is exactly the same as `WIF_SIGNING_PRIVATE_KEY`.\n\n![witness](https://grey.house/img/witness2.jpg)\n\nIf you believe this idea is of use and value to Steem, please vote for me as a [witness](https://steemit.com/witness-category/@gtg/witness-gtg \"witness-gtg\")\neither on [Steemit's Witnesses List](https://steemit.com/~witnesses \"Witnesses\") \nor by using your `cli_wallet` command:\n`vote_for_witness \"YOURACCOUNT\" \"gtg\" true true`",
+    "body_length": 1525,
+    "cashout_time": "2016-09-21T13:01:45",
+    "category": "mining",
+    "children": 6,
+    "created": "2016-08-21T12:29:18",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"mining\",\"steem\",\"steem-mining\"],\"users\":[\"artakan\"],\"links\":[\"https:\\/\\/steemit.com\\/mining\\/@artakan\\/important-info-for-steem-miner-do-not-use-your-steemit-com-account\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-08-21T13:02:30",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 568650179247,
+    "parent_author": "",
+    "parent_permlink": "mining",
+    "pending_payout_value": "0.432 HBD",
+    "percent_steem_dollars": 10000,
+    "permlink": "missing-rewards-while-mining",
+    "post_id": 693716,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Missing rewards while mining - common mistake with keys",
+    "title": "Missing rewards while mining - common mistake with keys",
+    "total_payout_value": "0.000 HBD",
+    "url": "/mining/@gtg/missing-rewards-while-mining"
+  }
+]

@@ -1,0 +1,33 @@
+Check `readme.txt` first
+
+post_id  author         permlink                                                                                            
+-------  -------------  ----------------------------------------------------------------------------------------------------
+ 834376  gavvet         telescopic-tour-featuring-luision-as-author                                                         
+ 823675  gavvet         chronicles-of-alan-army-day-s-final                                                                 
+ 823386  gavvet         selfie-with-the-partial-solar-eclipse-featuring-tim-beck-as-author                                  
+ 815301  berniesanders  please-stop-sending-sbd-asking-me-to-look-at-your-links                                             
+ 814031  gavvet         re-evaluating-the-star-of-bethlehem-part-1-featuring-new-author-vuyusile                            
+ 811048  gavvet         the-state-of-steemit-com-growth                                                                     
+ 802704  ratel          what-is-smart-lens                                                                                  
+ 799582  gavvet         maybe-my-daughter-just-doesn-t-like-me-featuring-hanshotfirst-as-author                             
+ 788913  gavvet         anger-a-self-administered-poison                                                                    
+ 788251  gavvet         chronicles-of-alan-another-reason-i-do-not-drink-featuring-awgbibb-as-author                        
+ 787754  gavvet         journey-to-the-tolbachik-the-story-with-original-pictures-part-1-puteshestvie-na-tolbachik-featuring
+ 779009  ratel          kak-ya-stal-zhertvoi-moshennikov-dvazhdy-za-den                                                     
+ 765614  btcturbo       pazl-wings-seriya-3-kak-rabotayut-zayavki-na-sozdanie-dao                                           
+ 765193  gavvet         fire-walking-i-ve-done-it                                                                           
+ 764951  gavvet         knights-of-the-sea-greates-battleships-of-ww-ii-rycari-morya-linkory-vtoroi-mirovoi-featuring-burmik
+ 757009  gavvet         lyrics-from-alan-stalker-featuring-awgbibb-as-author                                                
+ 756589  gavvet         the-life-of-an-ambivert-featuring-sauravrungta-as-author                                            
+ 744234  gavvet         steel-birds-the-main-planes-fighters-of-ww-ii-part-ii-eng-rus-featuring-burmik123-as-author         
+ 743882  gavvet         i-think-you-re-crazy-for-making-me-write-an-essay-telling-you-who-i-think-i-am-featuring-author-john
+ 733930  gavvet         i-always-had-a-fantasy-of-being-a-chef-jeg-har-alltid-hatt-en-fantasi-om-a-vaere-en-kokk-featuring-n
+
+
+Following records don't exist in pattern.
+[`gavvet`, `i-think-you-re-crazy-for-making-me-write-an-essay-telling-you-who-i-think-i-am-featuring-author-john`]
+[`gavvet`, `i-always-had-a-fantasy-of-being-a-chef-jeg-har-alltid-hatt-en-fantasi-om-a-vaere-en-kokk-featuring-n`]
+
+It's caused by lack of reblog for the account `jamesc`, therefore instead of above records, there are following records in pattern 
+[`charleshosk`, 'my-thoughts-on-ross`]
+[`dantheman`, `why-do-we-fight-to-change-the-world`]

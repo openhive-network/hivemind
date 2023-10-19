@@ -1,0 +1,28 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest # see also tag_all.tavern.yaml; ignoreall ignores gavvet (mock data)
+
+  includes:
+    - !include ../../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.get_ranked_posts"
+          params: {"sort":"hot","tag":"","observer":"ignoreall","limit":3,
+                   "start_author":"dollarvigilante","start_permlink":"another-billionaire-warns-of-catastrophic-depths-not-seen-in-5-000-years-and-emphasizes-gold"}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern
+          extra_kwargs:
+            ignore_tags: "<bridge posts>"

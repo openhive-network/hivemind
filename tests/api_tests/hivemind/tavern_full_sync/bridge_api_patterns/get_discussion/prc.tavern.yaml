@@ -1,0 +1,28 @@
+---
+  test_name: Hivemind bridge_api.get_discussion prc
+
+  marks:
+    - fullsynctest # slow call - 2.324s
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: bridge_api.get_discussion prc
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.get_discussion"
+          params: {'author': 'prc', 'permlink': 'introducing-dsound-a-decentralized-sound-platform-using-steem-and-ipfs'}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:has_valid_response
+          extra_kwargs:
+            method: "prc"
+            directory: "bridge_api_patterns/get_discussion"

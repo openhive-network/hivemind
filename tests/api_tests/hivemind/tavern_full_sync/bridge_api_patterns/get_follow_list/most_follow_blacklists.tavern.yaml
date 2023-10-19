@@ -1,0 +1,29 @@
+---
+  test_name: Hivemind bridge.get_follow_list most follow blacklists
+  # new function - SQL can be used to get freshest most follow blacklists
+  # SELECT  COUNT(id) as record_count, follower FROM hive_follows WHERE follow_blacklists GROUP BY(follower) ORDER BY record_count DESC LIMIT 3;
+  marks:
+    - fullsynctest
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: bridge.get_follow_list most most follow blacklists
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.get_follow_list"
+          params: {observer: "jes2850"}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:has_valid_response
+          extra_kwargs:
+            method: "most_follow_blacklists"
+            directory: "bridge_api_patterns/get_follow_list"

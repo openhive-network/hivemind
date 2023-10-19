@@ -1,0 +1,25 @@
+{
+  "code": -32000,
+  "data": {
+    "code": 7,
+    "message": "Bad Cast",
+    "name": "bad_cast_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "variant.cpp",
+          "hostname": "",
+          "level": "error",
+          "line": 478,
+          "method": "as_string",
+          "timestamp": "2020-10-12T16:30:50"
+        },
+        "data": {
+          "type": "array_type"
+        },
+        "format": "Invalid cast from ${type} to string"
+      }
+    ]
+  },
+  "message": "Bad Cast:Invalid cast from array_type to string"
+}

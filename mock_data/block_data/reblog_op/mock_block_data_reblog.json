@@ -1,0 +1,1303 @@
+{
+  "4998001": {
+    "transactions": [
+      {
+        "ref_block_num": 100000,
+        "ref_block_prefix": 0,
+        "expiration": "2020-03-23T12:08:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "funny"
+              ],
+              "id": "follow",
+              "json": "[\"reblog\",{\"account\":\"funny\",\"author\":\"steemit\",\"permlink\":\"fi\nrst'%@post\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "funny"
+              ],
+              "id": "follow",
+              "json": "[\"reblog\",{\"account\":\"funny\",\"author\":\"steemit\",\"permlink\":\"firstpost\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "funny"
+              ],
+              "id": "follow",
+              "json": "[\"reblog\",{\"account\":\"funny\",\"author\":\"steak\",\"permlink\":\"streak-test\"}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "funny"
+              ],
+              "id": "follow",
+              "json": "[\"reblog\",{\"account\":\"funny\",\"author\":\"dollarvigilante\",\"permlink\":\"another-billionaire-warns-of-catastrophic-depths-not-seen-in-5-000-years-and-emphasizes-gold\"}]"
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "test-reblog-01",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "test-reblog-02",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "test-reblog-03",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "test-reblog-04",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "test-reblog-05",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "test-reblog-06",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "test-creator",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "test-follower",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "account_create_operation",
+            "value": {
+              "creator": "test-safari",
+              "new_account_name": "test-muter",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "",
+              "author": "test-reblog-01",
+              "permlink": "parrot-01",
+              "title": "I love parrots 01",
+              "body": "tell me about parrots 01",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "",
+              "author": "test-reblog-02",
+              "permlink": "parrot-02",
+              "title": "I love parrots 02",
+              "body": "tell me about parrots 02",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "",
+              "author": "test-reblog-03",
+              "permlink": "parrot-03",
+              "title": "I love parrots 03",
+              "body": "tell me about parrots 03",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "",
+              "author": "test-reblog-04",
+              "permlink": "parrot-04",
+              "title": "I love parrots 04",
+              "body": "tell me about parrot 04",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "",
+              "author": "test-reblog-05",
+              "permlink": "parrot-05",
+              "title": "I love parrots 05",
+              "body": "tell me about parrot 05",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "",
+              "author": "test-reblog-06",
+              "permlink": "parrot-06",
+              "title": "I love parrots 06",
+              "body": "tell me about parrot 06",
+              "json_metadata": "{}"
+            }
+          }
+        ],
+        "extensions": [],
+        "signatures": [
+          ""
+        ]
+      }
+    ]
+  },
+  "4998002": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-117600",
+              "author": "test-safari",
+              "permlink": "reblogged-and-recreated",
+              "title": "Reblog delete recreate",
+              "body": "This test is reblogged after creation, deleted, then recreated - all in the same block for good measure. Test checks if reblog survives recreation (it should not).",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-117600",
+              "author": "test-safari",
+              "permlink": "reblogged-and-edited",
+              "title": "Reblog edit",
+              "body": "This test is reblogged after creation, then edited - all in the same block for good measure. Test checks if reblog survives edit (it should).",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-01"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-01\",\"author\":\"test-reblog-02\",\"permlink\":\"parrot-02\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-01"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-01\",\"author\":\"test-reblog-03\",\"permlink\":\"parrot-03\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-01"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-01\",\"author\":\"test-reblog-04\",\"permlink\":\"parrot-04\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-01"
+              ],
+              "id": "reblog",
+              "json": "{\"delete\":\"delete\",\"account\":\"test-reblog-01\",\"author\":\"test-reblog-04\",\"permlink\":\"parrot-04\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-01"
+              ],
+              "id": "reblog",
+              "json": "{\"delete\":\"delete\",\"account\":\"test-reblog-01\",\"author\":\"test-reblog-03\",\"permlink\":\"parrot-03\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-01"
+              ],
+              "id": "reblog",
+              "json": "{\"delete\":\"delete\",\"account\":\"test-reblog-01\",\"author\":\"test-reblog-02\",\"permlink\":\"parrot-02\"}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998003": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-02"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-02\",\"author\":\"test-reblog-01\",\"permlink\":\"parrot-01\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-02"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-02\",\"author\":\"test-reblog-02\",\"permlink\":\"parrot-02\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-02"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-02\",\"author\":\"test-reblog-03\",\"permlink\":\"parrot-03\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-03"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-03\",\"author\":\"test-reblog-02\",\"permlink\":\"parrot-02\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-03"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-03\",\"author\":\"test-reblog-03\",\"permlink\":\"parrot-03\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-03"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-03\",\"author\":\"test-reblog-04\",\"permlink\":\"parrot-04\"}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "test-reblog-01",
+              "parent_permlink": "parrot-01",
+              "author": "test-creator",
+              "permlink": "re-parrot-reblog-01",
+              "title": "",
+              "body": "comment for parrot-01",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "test-reblog-02",
+              "parent_permlink": "parrot-02",
+              "author": "test-creator",
+              "permlink": "re-parrot-reblog-02",
+              "title": "",
+              "body": "comment for parrot-02",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-03"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-03\",\"author\":\"test-creator\",\"permlink\":\"reblogged-post\"}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998004": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-04"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-04\",\"author\":\"test-reblog-04\",\"permlink\":\"parrot-04\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-05"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-05\",\"author\":\"test-reblog-05\",\"permlink\":\"parrot-05\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-06"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-06\",\"author\":\"test-reblog-06\",\"permlink\":\"parrot-06\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-06"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-06\",\"author\":\"test-reblog-06\",\"permlink\":\"parrot-06\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-04"
+              ],
+              "id": "reblog",
+              "json": "{\"delete\":\"delete\",\"account\":\"test-reblog-04\",\"author\":\"test-reblog-04\",\"permlink\":\"parrot-04\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-06"
+              ],
+              "id": "reblog",
+              "json": "{\"delete\":\"delete\",\"account\":\"test-reblog-06\",\"author\":\"test-reblog-06\",\"permlink\":\"parrot-06\"}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998005": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "agartha"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"agartha\",\"author\":\"test-safari\",\"permlink\":\"reblogged-and-recreated\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "agartha"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"agartha\",\"author\":\"test-safari\",\"permlink\":\"reblogged-and-edited\"}"
+            }
+          },
+          {
+            "type": "delete_comment_operation",
+            "value": {
+              "author": "test-safari",
+              "permlink": "reblogged-and-recreated"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-117600",
+              "author": "test-safari",
+              "permlink": "reblogged-and-recreated",
+              "title": "The post was deleted and permlink reused",
+              "body": "This post should not be reblogged because even though it reuses permlink of reblogged post, it is separate new post.",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "hive-117600",
+              "author": "test-safari",
+              "permlink": "reblogged-and-edited",
+              "title": "The post was edited",
+              "body": "This post should remain reblogged even though its content was replaced.",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-05"
+              ],
+              "id": "reblog",
+              "json": "{\"delete\":\"delete\",\"account\":\"test-reblog-05\",\"author\":\"test-reblog-05\",\"permlink\":\"parrot-05\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-06"
+              ],
+              "id": "reblog",
+              "json": "{\"delete\":\"delete\",\"account\":\"test-reblog-06\",\"author\":\"test-reblog-05\",\"permlink\":\"parrot-05\"}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998006": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-04"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-04\",\"author\":\"test-reblog-04\",\"permlink\":\"parrot-04\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-05"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-05\",\"author\":\"test-reblog-05\",\"permlink\":\"parrot-05\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-06"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-06\",\"author\":\"test-reblog-06\",\"permlink\":\"parrot-06\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-06"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-06\",\"author\":\"test-reblog-05\",\"permlink\":\"parrot-05\"}"
+            }
+          },
+          {
+            "type": "delete_comment_operation",
+            "value": {
+              "author": "test-reblog-04",
+              "permlink": "parrot-04"
+            }
+          },
+          {
+            "type": "delete_comment_operation",
+            "value": {
+              "author": "test-reblog-05",
+              "permlink": "parrot-05"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998007": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "delete_comment_operation",
+            "value": {
+              "author": "test-reblog-06",
+              "permlink": "parrot-06"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "",
+              "author": "test-reblog-01",
+              "permlink": "monkey-01",
+              "title": "I love monkeys 01",
+              "body": "tell me about monkeys 01",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "test-reblog-01",
+              "parent_permlink": "monkey-01",
+              "author": "test-creator",
+              "permlink": "re-monkey-01",
+              "title": "",
+              "body": "this is my comment for monkey-01 post",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "test-creator",
+              "parent_permlink": "re-monkey-01",
+              "author": "test-creator",
+              "permlink": "re-re-monkey-01",
+              "title": "",
+              "body": "this is my comment for comment for monkey-01 post",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "",
+              "author": "test-reblog-01",
+              "permlink": "monkey-02",
+              "title": "I love monkeys 02",
+              "body": "tell me about monkeys 02",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "",
+              "author": "test-reblog-01",
+              "permlink": "monkey-03",
+              "title": "I love monkeys 03",
+              "body": "tell me about monkeys 03",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "",
+              "author": "test-reblog-01",
+              "permlink": "monkey-04",
+              "title": "I love monkeys 04",
+              "body": "tell me about monkeys 04",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "comment_operation",
+            "value": {
+              "parent_author": "",
+              "parent_permlink": "",
+              "author": "test-reblog-01",
+              "permlink": "monkey-05",
+              "title": "I love monkeys 05",
+              "body": "tell me about monkeys 05",
+              "json_metadata": "{}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-01"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-01\",\"author\":\"test-reblog-01\",\"permlink\":\"monkey-01\"}"
+            }
+          },
+          {
+            "type": "delete_comment_operation",
+            "value": {
+              "author": "test-reblog-01",
+              "permlink": "monkey-01"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998008": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-01"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-01\",\"author\":\"test-reblog-01\",\"permlink\":\"monkey-02\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-03"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-03\",\"author\":\"test-reblog-01\",\"permlink\":\"monkey-02\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-04"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-04\",\"author\":\"test-reblog-01\",\"permlink\":\"monkey-02\"}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998009": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "delete_comment_operation",
+            "value": {
+              "author": "test-reblog-01",
+              "permlink": "monkey-02"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-03"
+              ],
+              "id": "reblog",
+              "json": "{\"delete\":\"delete\",\"account\":\"test-reblog-03\",\"author\":\"test-reblog-04\",\"permlink\":\"parrot-04\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-01"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-01\",\"author\":\"test-reblog-01\",\"permlink\":\"monkey-03\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-02"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-02\",\"author\":\"test-reblog-01\",\"permlink\":\"monkey-03\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-03"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-03\",\"author\":\"test-reblog-01\",\"permlink\":\"monkey-03\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-04"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-04\",\"author\":\"test-reblog-01\",\"permlink\":\"monkey-03\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-05"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-05\",\"author\":\"test-reblog-01\",\"permlink\":\"monkey-03\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-05"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-05\",\"author\":\"test-reblog-01\",\"permlink\":\"monkey-04\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-05"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-05\",\"author\":\"test-reblog-01\",\"permlink\":\"monkey-05\"}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998010": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-05"
+              ],
+              "id": "reblog",
+              "json": "{\"delete\":\"delete\",\"account\":\"test-reblog-05\",\"author\":\"test-reblog-01\",\"permlink\":\"monkey-04\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-05"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-05\",\"author\":\"test-reblog-01\",\"permlink\":\"monkey-04\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-05"
+              ],
+              "id": "reblog",
+              "json": "{\"delete\":\"delete\",\"account\":\"test-reblog-05\",\"author\":\"test-reblog-01\",\"permlink\":\"monkey-04\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-05"
+              ],
+              "id": "reblog",
+              "json": "{\"delete\":\"delete\",\"account\":\"test-reblog-05\",\"author\":\"test-reblog-01\",\"permlink\":\"monkey-04\"}"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-reblog-05"
+              ],
+              "id": "reblog",
+              "json": "{\"account\":\"test-reblog-05\",\"author\":\"test-creator\",\"permlink\":\"reblogged-post\"}"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998011": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "delete_comment_operation",
+            "value": {
+              "author": "test-reblog-01",
+              "permlink": "monkey-04"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998012": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+        ]
+      }
+    ]
+  }
+}

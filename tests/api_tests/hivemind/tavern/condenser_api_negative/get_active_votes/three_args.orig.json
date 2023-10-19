@@ -1,0 +1,25 @@
+{
+  "code": -32003,
+  "data": {
+    "code": 10,
+    "message": "Assert Exception",
+    "name": "assert_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "condenser_api.cpp",
+          "hostname": "",
+          "level": "error",
+          "line": 1266,
+          "method": "get_active_votes",
+          "timestamp": "2020-09-14T18:32:20"
+        },
+        "data": {
+          "n": 3
+        },
+        "format": "args.size() == 2: Expected #s argument(s), was ${n}"
+      }
+    ]
+  },
+  "message": "Assert Exception:args.size() == 2: Expected #s argument(s), was 3"
+}

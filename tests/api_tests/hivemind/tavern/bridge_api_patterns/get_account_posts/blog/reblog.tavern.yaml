@@ -1,0 +1,34 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest # test-safari only has reblogs and replies, no top posts; original had less reblogs, most likely a bug
+                  # also old HM produced overlapping pages
+
+  includes:
+    - !include ../../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.get_account_posts"
+          params: {
+            "sort":"blog",
+            "account":"test-safari",
+            "limit":3,
+            "start_author":"atle-v",
+            "start_permlink":"sunday-picnic"
+          }
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern
+          extra_kwargs:
+            ignore_tags: "<bridge posts>"

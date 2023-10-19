@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "Expecting 3 arguments in 'start' array: voter, optional page start author and permlink",
+  "message": "Invalid parameters"
+}

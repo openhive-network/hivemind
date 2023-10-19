@@ -1,0 +1,23 @@
+{
+  "code": -32003,
+  "data": {
+    "code": 10,
+    "message": "Assert Exception",
+    "name": "assert_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "database_api.cpp",
+          "hostname": "",
+          "level": "error",
+          "line": 1156,
+          "method": "find_comments",
+          "timestamp": "2020-09-29T15:43:22"
+        },
+        "data": {},
+        "format": "args.comments.size() <= DATABASE_API_SINGLE_QUERY_LIMIT: "
+      }
+    ]
+  },
+  "message": "Assert Exception:args.comments.size() <= DATABASE_API_SINGLE_QUERY_LIMIT: "
+}

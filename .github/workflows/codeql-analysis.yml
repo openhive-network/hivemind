@@ -1,0 +1,50 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ develop, g-maintenance ]
+
+jobs:
+  analyze:
+    name: Analyze
+    
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ 'ubuntu-20.04', 'ubuntu-22.04']
+        language: [ 'python' ]
+        python-version: ['3.8', '3.10']
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - run: |
+        git fetch --prune --unshallow
+        ./scripts/ci/fix_ci_tag.sh
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip setuptools wheel
+        python3 -m pip install --no-cache-dir --verbose --user .
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+        setup-python-dependencies: false
+        config-file: ./.github/codeql-config.yml
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2

@@ -1,0 +1,142 @@
+{
+  "4998008": {
+    "virtual_operations": [
+      {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "voter": "alice",
+          "author": "test-creator",
+          "permlink": "pinpost1",
+          "weight": 300,
+          "rshares": 30000000,
+          "total_vote_weight": 300,
+          "pending_payout": {
+            "amount": "3",
+            "precision": 3,
+            "nai": "@@000000013"
+          }
+        }
+      },
+      {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "voter": "alice",
+          "author": "test-creator",
+          "permlink": "nonpinpost1",
+          "weight": 400,
+          "rshares": 40000000,
+          "total_vote_weight": 400,
+          "pending_payout": {
+            "amount": "4",
+            "precision": 3,
+            "nai": "@@000000013"
+          }
+        }
+      },
+      {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "voter": "alice",
+          "author": "test-creator",
+          "permlink": "pinpost5",
+          "weight": 100,
+          "rshares": 11000000,
+          "total_vote_weight": 100,
+          "pending_payout": {
+            "amount": "1",
+            "precision": 3,
+            "nai": "@@000000013"
+          }
+        }
+      },
+      {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "voter": "alice",
+          "author": "test-creator",
+          "permlink": "pinpost11",
+          "weight": 500,
+          "rshares": 50000000,
+          "total_vote_weight": 500,
+          "pending_payout": {
+            "amount": "5",
+            "precision": 3,
+            "nai": "@@000000013"
+          }
+        }
+      },
+      {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "voter": "alice",
+          "author": "test-creator",
+          "permlink": "nonpinpost3",
+          "weight": 200,
+          "rshares": 20000000,
+          "total_vote_weight": 200,
+          "pending_payout": {
+            "amount": "2",
+            "precision": 3,
+            "nai": "@@000000013"
+          }
+        }
+      }
+    ]
+  },
+  "4998011": {
+    "virtual_operations": [
+      {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "voter": "alice",
+          "author": "blocktrades",
+          "permlink": "crocodile01",
+          "weight": 400,
+          "rshares": 40000000,
+          "total_vote_weight": 400,
+          "pending_payout": {
+            "amount": "4",
+            "precision": 3,
+            "nai": "@@000000013"
+          }
+        }
+      },
+      {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "voter": "alice",
+          "author": "ignoreall",
+          "permlink": "regular-post",
+          "weight": 100,
+          "rshares": 11000000,
+          "total_vote_weight": 100,
+          "pending_payout": {
+            "amount": "1",
+            "precision": 3,
+            "nai": "@@000000013"
+          }
+        }
+      }
+    ]
+  },
+  "4998012": {
+    "virtual_operations": [
+      {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "voter": "ignoreall",
+          "author": "agartha",
+          "permlink": "regular-post",
+          "weight": 200,
+          "rshares": 20000000,
+          "total_vote_weight": 200,
+          "pending_payout": {
+            "amount": "2",
+            "precision": 3,
+            "nai": "@@000000013"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,1 @@
+Alias for condenser_api.get_post_discussions_by_payout

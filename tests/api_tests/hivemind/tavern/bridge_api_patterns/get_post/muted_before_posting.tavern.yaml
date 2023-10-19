@@ -1,0 +1,28 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest # alice muted before posting in this commmunity but at the end she is a member - mock_data (hive-171487)
+                  # comment muted and then unmuted
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.get_post"
+          params: {"author":"alice", "permlink":"My-first-post-hive-1"}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern
+          extra_kwargs:
+            ignore_tags: "<bridge post>"

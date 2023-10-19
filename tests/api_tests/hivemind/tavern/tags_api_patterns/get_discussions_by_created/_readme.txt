@@ -1,0 +1,1 @@
+Alias for condenser_api.get_discussions_by_created

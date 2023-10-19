@@ -1,0 +1,26 @@
+{
+  "code": -32003,
+  "data": {
+    "code": 10,
+    "message": "Assert Exception",
+    "name": "assert_exception",
+    "stack": [
+      {
+        "context": {
+          "file": "database_api.cpp",
+          "hostname": "",
+          "level": "error",
+          "line": 1215,
+          "method": "votes_impl",
+          "timestamp": "2020-09-10T17:35:29"
+        },
+        "data": {
+          "a": "",
+          "p": "tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours"
+        },
+        "format": "comment != nullptr: Could not find comment ${a}/${p}."
+      }
+    ]
+  },
+  "message": "Assert Exception:comment != nullptr: Could not find comment /tldr-an-exploration-in-steem-botting-what-i-learned-since-it-s-inception-and-downfall-over-the-course-of-20-hours."
+}

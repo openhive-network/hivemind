@@ -1,0 +1,180 @@
+1. reblog followed at some distance by reblog-delete, but in the same pack of blocks during initial sync
+2. like above but both in the same block, during initial and (second test) live sync
+3. like 1. followed by renewed reblog of the same post, still in the same pack of blocks
+4. like 2. followed by renewed reblog of the same post, still in the same live block
+5. reblog then reblog-delete during initial sync but in separate packs of blocks
+6. reblog during initial sync, reblog-delete during live sync
+7. both reblog and reblog-delete in separate live blocks
+8. reblog/reblog-delete authorized by someone other than blogger (two versions: unrelated account or post author that is not the same account as blogger)
+9. reblog-delete of post that never existed (reblogged or not)
+A. reblog-delete of post that was deleted in the same pack of initial sync blocks (reblogged or not)
+B. reblog-delete of post that was deleted in different packs of initial sync blocks (reblogged or not)
+C. reblog-delete of post in live block while delete was in initial sync (reblogged or not)
+D. reblog-delete of post that was deleted in same live block (reblogged or not)
+E. reblog-delete of post that was deleted in different live blocks (reblogged or not)
+F. two reblogs of the same post in separate packs of blocks followed by reblog-delete in the same pack of blocks that last reblog
+
+flow:
+
+block 4990000:
+create account test-116-01, test-116-02, test-116-03, test-116-04, test-116-05
+post test-116-01/test-116-01
+post test-116-02/test-116-02-1
+post test-116-02/test-116-02-F
+post test-116-03/test-116-03-2a
+post test-116-03/test-116-03-3
+post test-116-03/test-116-03-5
+post test-116-04/test-116-04-2b
+post test-116-04/test-116-04-6
+post test-116-05/test-116-05-4
+post test-116-05/test-116-05-7
+post test-116-05/test-116-05-8a
+post test-116-05/test-116-05-8b
+post test-116-05/test-116-05-8c
+post test-116-05/test-116-05-8d
+post test-116-05/test-116-05-Aa
+post test-116-05/test-116-05-Ab
+post test-116-05/test-116-05-Ba
+post test-116-05/test-116-05-Bb
+post test-116-05/test-116-05-Ca
+post test-116-05/test-116-05-Cb
+post test-116-05/test-116-05-Da
+post test-116-05/test-116-05-Db
+post test-116-05/test-116-05-Ea
+post test-116-05/test-116-05-Eb
+
+block 4990100:
+reblog test-116-01 -> test-116-02/test-116-02-1
+delete post test-116-05/test-116-05-Ba
+delete post test-116-05/test-116-05-Bb
+delete post test-116-05/test-116-05-Ca
+delete post test-116-05/test-116-05-Cb
+
+block 4990200:
+delete reblog test-116-01 -> test-116-02/test-116-02-1
+
+block 4991000:
+reblog test-116-02 -> test-116-03/test-116-03-2a
+delete reblog test-116-02 -> test-116-03/test-116-03-2a
+
+block 4992100:
+reblog test-116-01 -> test-116-03/test-116-03-3
+
+block 4992200:
+delete reblog test-116-01 -> test-116-03/test-116-03-3
+
+block 4992300:
+reblog test-116-01 -> test-116-03/test-116-03-3
+
+block 4993100:
+reblog test-116-02 -> test-116-03/test-116-03-5
+
+block 4994200:
+delete reblog test-116-02 -> test-116-03/test-116-03-5
+
+block 4995100:
+reblog test-116-02 -> test-116-04/test-116-04-6
+
+block 4996100:
+reblog test-116-02 -> test-116-05/test-116-05-Ba
+delete reblog test-116-02 -> test-116-05/test-116-05-Ba
+delete reblog test-116-02 -> test-116-05/test-116-05-Bb
+reblog test-116-04 -> test-116-02/test-116-02-F
+
+block 4997100:
+delete post test-116-05/test-116-05-Aa
+delete post test-116-05/test-116-05-Ab
+reblog test-116-04 -> test-116-02/test-116-02-F
+
+block 4997200:
+reblog test-116-02 -> test-116-05/test-116-05-Aa
+delete reblog test-116-02 -> test-116-05/test-116-05-Aa
+delete reblog test-116-02 -> test-116-05/test-116-05-Ab
+delete reblog test-116-04 -> test-116-02/test-116-02-F
+
+live block 5000011:
+reblog test-116-03 -> test-116-04/test-116-04-2b
+delete reblog test-116-03 -> test-116-04/test-116-04-2b
+
+live block 5000012:
+reblog test-116-03 -> test-116-05/test-116-05-4
+delete reblog test-116-03 -> test-116-05/test-116-05-4
+reblog test-116-03 -> test-116-05/test-116-05-4
+
+live block 5000013:
+delete reblog test-116-02 -> test-116-04/test-116-04-6
+
+live block 5000014:
+reblog test-116-02 -> test-116-05/test-116-05-7
+
+live block 5000015:
+delete reblog test-116-02 -> test-116-05/test-116-05-7
+
+live block 5000016:
+reblog test-116-02 -> test-116-05/test-116-05-8a signed by test-116-03
+reblog test-116-02 -> test-116-05/test-116-05-8b signed by test-116-05
+
+live block 5000017:
+reblog test-116-04 -> test-116-05/test-116-05-8c
+reblog test-116-04 -> test-116-05/test-116-05-8d
+
+live block 5000018:
+delete reblog test-116-04 -> test-116-05/test-116-05-8c signed by test-116-02
+delete reblog test-116-04 -> test-116-05/test-116-05-8d signed by test-116-05
+
+live block 5000019:
+reblog test-116-02 -> test-116-05/test-116-05-9a nonexisting post
+
+live block 5000020:
+delete reblog test-116-02 -> test-116-05/test-116-05-9a nonexisting post
+delete reblog test-116-02 -> test-116-05/test-116-05-9b nonexisting post
+
+live block 5000021:
+delete comment test-116-05/test-116-05-Da
+delete comment test-116-05/test-116-05-Db
+reblog test-116-03 -> test-116-05/test-116-05-Da
+delete reblog test-116-03 -> test-116-05/test-116-05-Da
+delete reblog test-116-03 -> test-116-05/test-116-05-Db
+
+live block 5000022:
+delete comment test-116-05/test-116-05-Ea
+delete comment test-116-05/test-116-05-Eb
+
+live block 5000023:
+reblog test-116-03 -> test-116-05/test-116-05-Ea
+delete reblog test-116-03 -> test-116-05/test-116-05-Ea
+delete reblog test-116-03 -> test-116-05/test-116-05-Eb
+
+live block 5000024:
+reblog test-116-03 -> test-116-05/test-116-05-Ca
+delete reblog test-116-03 -> test-116-05/test-116-05-Ca
+delete reblog test-116-03 -> test-116-05/test-116-05-Cb
+
+remaining blogs:
+test-116-01:
+post test-116-01/test-116-01
+-> test-116-03/test-116-03-3
+
+test-116-02:
+post test-116-02/test-116-02-1
+post test-116-02/test-116-02-F
+
+test-116-03:
+post test-116-03/test-116-03-2a
+post test-116-03/test-116-03-3
+post test-116-03/test-116-03-5
+-> test-116-05/test-116-05-4
+
+test-116-04:
+post test-116-04/test-116-04-2b
+post test-116-04/test-116-04-6
+-> test-116-05/test-116-05-8c
+-> test-116-05/test-116-05-8d
+
+test-116-05:
+post test-116-05/test-116-05-4
+post test-116-05/test-116-05-7
+post test-116-05/test-116-05-8a
+post test-116-05/test-116-05-8b
+post test-116-05/test-116-05-8c
+post test-116-05/test-116-05-8d

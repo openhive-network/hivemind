@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "`call` requires condenser_api",
+  "message": "Invalid parameters"
+}

@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "Unsupported follow_type, valid values: blacklisted, follow_blacklist, muted, follow_muted",
+  "message": "Invalid parameters"
+}

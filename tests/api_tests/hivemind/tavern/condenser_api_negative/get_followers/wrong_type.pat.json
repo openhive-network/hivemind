@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "Unsupported follow type, valid types: blog, ignore",
+  "message": "Invalid parameters"
+}

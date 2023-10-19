@@ -1,0 +1,1468 @@
+{
+  "4998001": {
+    "transactions": [
+      {
+        "ref_block_num": 100000,
+        "ref_block_prefix": 0,
+        "expiration": "2020-03-23T12:08:00",
+        "operations": [
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "tester1",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "tester2",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "tester3",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "tester4",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "tester5",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "spaminator",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "hivewatchers",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "buildawhale",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "redeemer",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "",
+              "extensions": []
+            }
+          },
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "ignoreall",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"blacklist_description\":\"People I don't like\",\"muted_list_description\":\"People that need to STFU\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "blacklisttester",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"blacklist_description\":\"blacklist for tests\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "mutetester",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"muted_list_description\":\"account with muted list\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "followtest",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"tester user that follow muted and blacklist, and ignores blacklists some accounts directly.\"}}",
+              "extensions": []
+            }
+          },
+          {
+            "type": "create_claimed_account_operation",
+            "value": {
+              "creator": "esteemapp",
+              "new_account_name": "bugtester",
+              "owner": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "active": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "posting": {
+                "weight_threshold": 1,
+                "account_auths": [],
+                "key_auths": [
+                  [
+                    "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+                    1
+                  ]
+                ]
+              },
+              "memo_key": "STM8JH4fTJr73FQimysjmXCEh2UvRwZsG6ftjxsVTmYCeEehZgh25",
+              "json_metadata": "{\"profile\":{\"about\":\"tester user that test if follow ignore and reset_muted_list in one block has correct results.\"}}",
+              "extensions": []
+            }
+          }
+        ],
+        "extensions": [],
+        "signatures": [
+          ""
+        ]
+      }
+    ]
+  },
+  "4998002": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester3\", \"tester4\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"t'es'ter3\", \"<html><body><p>PPPPP</p></body></html>\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester7\", \"<script>alert('hello world');</script>\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester3\", \"tester4\"],\"what\":[\"blogo-doggo\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "bugtester"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"bugtester\",\"following\":[\"funny\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "bugtester"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"bugtester\",\"following\":[\"funny\"],\"what\":[\"reset_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "bugtester"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"bugtester\",\"following\":[\"nkdk\",\"steemit\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "blacklisttester"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"blacklisttester\",\"following\":[\"nkdk\",\"steemit\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "mutetester"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"mutetester\",\"following\":[\"steemit\",\"funny\",\"peerplays\",\"skapaneas\",\"the-alien\",\"powerup\",\"lukmarcus\",\"simgregg\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "funny"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"funny\",\"following\":[\"blacklisttester\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "funny"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"funny\",\"following\":[\"mutetester\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "bugtester"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"bugtester\",\"following\":[\"gtg\",\"stan\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "bugtester"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"bugtester\",\"following\":[\"gtg\",\"stan\"],\"what\":[\"reset_muted_list\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "bugtester"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"bugtester\",\"following\":[\"admin\",\"roadscape\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "bugtester"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"bugtester\",\"following\":[\"blacklisttester\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "followtest"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"followtest\",\"following\":[\"mutetester\"],\"what\":[\"follow_muted\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "followtest"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"followtest\",\"following\":[\"blacklisttester\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "te'%@ter1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"te'%@ter1\",\"following\":[\"tester3\", \"tester4\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester5\",\"following\":[\"tester4\"],\"what\":[\"blacklist\"]}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998003": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester3\", \"tester4\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"t'es'ter3\", \"<html><body><p>PPPPP</p></body></html>\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester3\", \"gtg\"],\"what\":[\"blogo-doggo\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "te'%@ter1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"te'%@ter1\",\"following\":[\"gtg\", \"tester4\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "{\"t\":\"t\"}"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":{\"tester1\":\"tester1\"},\"following\":{\"gtg\":\"gtg\"},\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":{\"gtg\":\"gtg\"},\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester3\", [\"gtg\"]],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":[\"tester1\"],\"following\":[\"tester3\", [\"gtg\"]],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "[\"tester1\"]"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":[\"tester1\"],\"following\":[\"tester3\", {\"gtg\":\"gtg\"}],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester3\", {\"gtg\":\"gtg\"}],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":[\"tester7\", \"<script>alert('hello world');</script>\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "followtest"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"followtest\",\"following\":[\"gtg\",\"roadscape\",\"admin\",\"cryptos\"],\"what\":[\"blacklist\"]}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998004": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "spaminator"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"spaminator\",\"following\":[\"lyubovbar\",\"zaitsevalesyaa\",\"kingscrown\",\"trevonjb\",\"craig-grant\",\"ned\",\"mindhunter\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "hivewatchers"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"hivewatchers\",\"following\":[\"lyubovbar\",\"rkpl\",\"blendplayz\",\"renzoarg\",\"kingscrown\",\"forevergala\",\"machinelearning\",\"ola1\",\"steembeast\",\"ekremi12\",\"steem4lyf\",\"caitlinm\",\"bruno1122\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "buildawhale"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"buildawhale\",\"following\":[\"zaitsevalesyaa\",\"trevonjb\",\"earnest\",\"wildchild\",\"craig-grant\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "redeemer"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"redeemer\",\"following\":[\"zaitsevalesyaa\",\"trevonjb\",\"craig-grant\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignoreall"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignoreall\",\"following\":[\"gtg\",\"alice\",\"davr86\"],\"what\":[\"blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "ignoreall"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"ignoreall\",\"following\":[\"gtg\",\"alice\",\"davr86\",\"fyrstikken\",\"gavvet\",\"ooak\",\"kental\",\"r4fken\",\"roland.haynes\",\"agartha\",\"feline1991\"],\"what\":[\"ignore\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "followtest"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"followtest\",\"following\":[\"admin\",\"roadscape\",\"dollarvigilante\",\"nonlinearone\",\"juanmiguelsalas\",\"laonie\",\"cheetah\"],\"what\":[\"ignore\"]}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998005": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"blacklist\"]}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998006": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "alice"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"alice\",\"following\":[\"spaminator\",\"hivewatchers\",\"buildawhale\",\"redeemer\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "alice"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"alice\",\"following\":\"ignoreall\",\"what\":[\"follow_muted\"]}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998007": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"unblacklist\"]}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998008": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"unfollow_blacklist\"]}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998009": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"follow_muted\"]}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998010": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"unfollow_muted\"]}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998011": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"reset_blacklist\"]}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998012": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"reset_following_list\"]}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998013": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"reset_follow_blacklist\"]}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998014": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"reset_follow_muted_list\"]}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998015": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"reset_all_lists\"]}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998016": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester3\",\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"reset_all_lists\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester1"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester1\",\"following\":\"tester2\",\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester2"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester2\",\"following\":[\"tester3\", \"tester4\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester3"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester3\",\"following\":[\"tester4\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester4"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester4\",\"following\":[\"tester5\", \"tester1\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester5\",\"following\":[\"tester1\", \"tester2\", \"tester3\"],\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-follower"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"test-follower\",\"following\":\"test-creator\",\"what\":[\"blog\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "test-muter"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"test-muter\",\"following\":\"test-creator\",\"what\":[\"ignore\"]}]"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "4998017": {
+    "transactions": [
+      {
+        "ref_block_num": 100001,
+        "ref_block_prefix": 1,
+        "expiration": "2020-03-23T12:17:00",
+        "operations": [
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester5\",\"following\":[\"tester4\"],\"what\":[\"follow_blacklist\"]}]"
+            }
+          },
+          {
+            "type": "custom_json_operation",
+            "value": {
+              "required_auths": [],
+              "required_posting_auths": [
+                "tester5"
+              ],
+              "id": "follow",
+              "json": "[\"follow\",{\"follower\":\"tester5\",\"following\":[\"tester4\"],\"what\":[\"follow_muted\"]}]"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

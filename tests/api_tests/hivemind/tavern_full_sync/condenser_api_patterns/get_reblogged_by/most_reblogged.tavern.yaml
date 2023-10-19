@@ -1,0 +1,28 @@
+---
+  test_name: Hivemind condenser_api.get_reblogged_by most reblogged
+  # SELECT  COUNT(*) as record_count, post_id FROM hive_feed_cache GROUP BY(post_id) ORDER BY record_count DESC LIMIT 3;
+  marks:
+    - fullsynctest
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: get_reblogged_by most reblogged
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "condenser_api.get_reblogged_by"
+          params: {"author":"taverngames","permlink":"new-steem-based-gaming-platform-taverngames-io"}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:has_valid_response
+          extra_kwargs:
+            method: "most_reblogged"
+            directory: "condenser_api_patterns/get_reblogged_by"

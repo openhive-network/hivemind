@@ -1,0 +1,29 @@
+{
+  "error": {
+    "code": -32000,
+    "data": {
+      "code": 13,
+      "message": "basic_string::at: __n (which is 0) >= this->size() (which is 0)",
+      "name": "St12out_of_range",
+      "stack": [
+        {
+          "context": {
+            "file": "time.cpp",
+            "hostname": "",
+            "level": "warn",
+            "line": 48,
+            "method": "from_iso_string",
+            "timestamp": "2020-09-29T13:04:44"
+          },
+          "data": {
+            "what": "basic_string::at: __n (which is 0) >= this->size() (which is 0)"
+          },
+          "format": "${what}: unable to convert ISO-formatted string to fc::time_point_sec"
+        }
+      ]
+    },
+    "message": "basic_string::at: __n (which is 0) >= this->size() (which is 0):basic_string::at: __n (which is 0) >= this->size() (which is 0): unable to convert ISO-formatted string to fc::time_point_sec"
+  },
+  "id": 1,
+  "jsonrpc": "2.0"
+}

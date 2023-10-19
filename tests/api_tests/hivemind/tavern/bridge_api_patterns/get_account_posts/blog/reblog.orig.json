@@ -1,0 +1,137 @@
+[
+  {
+    "active_votes": [
+      {
+        "rshares": "128594988",
+        "voter": "sergey44"
+      },
+      {
+        "rshares": "59129076",
+        "voter": "atle-v"
+      }
+    ],
+    "author": "atle-v",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 25.0,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "<html>\n<h1>A beautiful day in September</h1>\n<p>We went for a Sunday picnic in the nice weather on September 4 and it was so beautiful that I would like to share some pictures and a video with you good Steemit people.</p>\n<p><img src=\"http://home.lyse.net/atlev/steemit/Artikkel%204/20160904_135701.jpg\"/></p>\n<p>September is the beginning of fall here and the days are getting shorter and colder, but there can be some very nice and warm days too and this was one of those days.</p>\n<p>Being from Budapest, Anita knows what warm is, and what she felt that Sunday, she said, she'd been missing all summer. When the warm air gently stroked her cheek, it reminded her of spring in Hungary.</p>\n<p>Karoline does not like the car seat very much, so we don\u2019t go very far. We drove about 16 km from our house to a place I used to spend a lot of time growing up. From where we parked the car to where we had our picnic, is just a small walk in very flat terrain. It was so peaceful and quiet; we could hear the small bells on the sheep, and a stream and the nice breeze.</p>\n<p>I apologieses for my heavy breathing that is audible in the video. I was filming and taking pictures with my phone.</p>\n</html>",
+    "category": "photography",
+    "children": 1,
+    "created": "2016-09-13T14:50:06",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "http://home.lyse.net/atlev/steemit/Artikkel%204/20160904_135701.jpg"
+      ],
+      "tags": [
+        "photography",
+        "life",
+        "picnic",
+        "family",
+        "beautiful"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 187724064,
+    "payout": 0.0,
+    "payout_at": "2016-10-14T14:55:09",
+    "pending_payout_value": "0.000 HBD",
+    "percent_steem_dollars": 10000,
+    "permlink": "sunday-picnic",
+    "post_id": 940665,
+    "promoted": "0.000 HBD",
+    "reblogged_by": [
+      "test-safari"
+    ],
+    "replies": [],
+    "reblogs": 1,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 2
+    },
+    "title": "Sunday picnic",
+    "updated": "2016-09-14T12:19:21",
+    "url": "/photography/@atle-v/sunday-picnic"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": "2233757397",
+        "voter": "bitland"
+      },
+      {
+        "rshares": "230234023",
+        "voter": "keyser"
+      },
+      {
+        "rshares": "706494264",
+        "voter": "wuyueling"
+      },
+      {
+        "rshares": "415840834",
+        "voter": "runrudy"
+      },
+      {
+        "rshares": "59566200",
+        "voter": "serikus"
+      }
+    ],
+    "author": "iamwne",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 25.0,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "http://img12.deviantart.net/c221/i/2016/089/2/5/speeder_concept_by_ehrendreich-d9x2n88.jpg\n\n**Process And Technique**\n\nI am constantly trying to grow as an artist. This often means using new techniques and tools. This time I have begin experimenting with Pixar Subdivsion Surface modeling. This was the first time that I had really used this method. It is great a making some rather complex forms with very little base geometry. Pretty powerful stuff. Not sure how well executed this model is but I thought it was an interesting start.\n\nThe geometric features in the front grate and along the side was from a displacement texture that was made in Zbrush. It is a, \"greeble\" generator and is great for scifi features like panels and such. The overall geometry was modeled in Modo. I tend to move in and out of Modo. For my main 3D tool I use 3DS Max. But Modo just has some interesting modeling tools that I rediscover from time to time.\n\nhttp://img04.deviantart.net/0859/i/2016/089/0/1/speeder_concept_1_by_ehrendreich-d9x2nla.jpg\n\n\n**The Concept**\n\nThe concept is something like the Star Wars land speeder. Luke's was more of a wreck. I was going for more of a \"downtown\" ride. Something more like a 70's Caddy or Lincoln. It was a interesting process to use the Pixar Subs it not only produces optimal geometry but can be fast to model with when you get used to it. \n\nhttp://img09.deviantart.net/d13f/i/2016/089/b/5/speeder_concept_3_by_ehrendreich-d9x2nnm.jpg\n\n\n**How Do You Get Into It**\n\nOkay I have to admit it was a good question that came from a posting someone made on my Deviant Art page http://ehrendreich.deviantart.com/art/Speeder-Concept-1-599746798 The poster notices that there are no door seams. Oops I noticed that now. That I no longer have the scene files that I originally used to make this. \n\nhttp://img06.deviantart.net/8099/i/2016/089/e/f/speeder_concept_4_by_ehrendreich-d9x2nrb.jpg",
+    "category": "art",
+    "children": 3,
+    "created": "2016-09-08T20:29:24",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "http://img12.deviantart.net/c221/i/2016/089/2/5/speeder_concept_by_ehrendreich-d9x2n88.jpg",
+        "http://img04.deviantart.net/0859/i/2016/089/0/1/speeder_concept_1_by_ehrendreich-d9x2nla.jpg",
+        "http://img09.deviantart.net/d13f/i/2016/089/b/5/speeder_concept_3_by_ehrendreich-d9x2nnm.jpg",
+        "http://img06.deviantart.net/8099/i/2016/089/e/f/speeder_concept_4_by_ehrendreich-d9x2nrb.jpg"
+      ],
+      "links": [
+        "http://ehrendreich.deviantart.com/art/Speeder-Concept-1-599746798"
+      ],
+      "tags": [
+        "art",
+        "animation",
+        "effects",
+        "photography"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 3645892718,
+    "payout": 0.0,
+    "payout_at": "2016-10-09T20:54:54",
+    "pending_payout_value": "0.000 HBD",
+    "percent_steem_dollars": 10000,
+    "permlink": "conceptualizing-a-scifi-land-speeder",
+    "post_id": 895907,
+    "promoted": "0.000 HBD",
+    "reblogged_by": [
+      "test-safari"
+    ],
+    "replies": [],
+    "reblogs": 1,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 5
+    },
+    "title": "Conceptualizing A SciFi Land Speeder",
+    "updated": "2016-09-08T20:29:24",
+    "url": "/art/@iamwne/conceptualizing-a-scifi-land-speeder"
+  }
+]

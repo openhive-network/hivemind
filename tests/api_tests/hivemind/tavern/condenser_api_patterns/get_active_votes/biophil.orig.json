@@ -1,0 +1,26 @@
+[
+  {
+    "percent": 10000,
+    "reputation": 0,
+    "rshares": 0,
+    "time": "2016-08-20T02:59:39",
+    "voter": "endgame",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 0,
+    "rshares": "28030089381",
+    "time": "2016-07-19T20:00:30",
+    "voter": "biophil",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 0,
+    "rshares": 52512184,
+    "time": "2016-07-19T20:01:15",
+    "voter": "seagul",
+    "weight": "5970197932869"
+  }
+]

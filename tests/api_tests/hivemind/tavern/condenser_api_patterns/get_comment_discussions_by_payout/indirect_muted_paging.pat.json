@@ -1,0 +1,710 @@
+[
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 83122046,
+        "rshares": 17387563883098,
+        "voter": "itsascam"
+      },
+      {
+        "percent": "500",
+        "reputation": 70486968186347,
+        "rshares": 2478143633692,
+        "voter": "blocktrades"
+      },
+      {
+        "percent": "10000",
+        "reputation": 19032535635212,
+        "rshares": 17508649345673,
+        "voter": "steemed"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1214229078,
+        "rshares": 2472598979,
+        "voter": "boy"
+      },
+      {
+        "percent": "10000",
+        "reputation": 4712949449,
+        "rshares": 3001139259,
+        "voter": "bue-witness"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1789951494550,
+        "rshares": 562419226,
+        "voter": "bunny"
+      },
+      {
+        "percent": "10000",
+        "reputation": 103443134841,
+        "rshares": 42178757456,
+        "voter": "bue"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 1325381537,
+        "voter": "mini"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 170789230,
+        "voter": "moon"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 497247302,
+        "voter": "healthcare"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 737445199,
+        "voter": "daniel.pan"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 230273601,
+        "voter": "helen.tan"
+      },
+      {
+        "percent": "10000",
+        "reputation": 8079179261851,
+        "rshares": 38894121671,
+        "voter": "claudiop63"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2288762261504,
+        "rshares": 7143405548,
+        "voter": "goose"
+      }
+    ],
+    "author": "thylbom",
+    "author_reputation": 843226172873,
+    "beneficiaries": [],
+    "body": "I definitely agree that the password recovery problem is a good one to work on. People who have been involved in crypto for some time are almost instinctively aware of the importance of safeguarding private keys, but \"mainstream\" adopters are accustomed to a world of hand-holding where the powers that be can bail you out if you are careless, stupid, forgetful or unlucky. If a method can be devised to facilitate recovery without sacrificing security, it can avoid problems of negative user experience that could hurt the platform's prospects for widespread adaption.",
+    "body_length": 569,
+    "cashout_time": "2016-08-26T21:34:42",
+    "category": "witness-category",
+    "children": 1,
+    "created": "2016-08-19T21:34:42",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "json_metadata": "{\"tags\":[\"witness-category\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-08-19T21:34:57",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 37471570441471,
+    "parent_author": "blocktrades",
+    "parent_permlink": "blocktrades-witness-report-for-3rd-week-of-august",
+    "pending_payout_value": "204.392 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-blocktrades-blocktrades-witness-report-for-3rd-week-of-august-20160819t213441316z",
+    "post_id": 896287,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "BlockTrades Witness Report for 3rd Week of August",
+    "title": "",
+    "total_payout_value": "0.000 HBD",
+    "url": "/witness-category/@blocktrades/blocktrades-witness-report-for-3rd-week-of-august#@thylbom/re-blocktrades-blocktrades-witness-report-for-3rd-week-of-august-20160819t213441316z"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 1915876518994,
+        "rshares": 727407423660,
+        "voter": "erath"
+      },
+      {
+        "percent": "100",
+        "reputation": 32455846463901,
+        "rshares": 644958517124,
+        "voter": "smooth"
+      },
+      {
+        "percent": "49",
+        "reputation": 85602977273,
+        "rshares": 28855608662,
+        "voter": "anonymous"
+      },
+      {
+        "percent": "4900",
+        "reputation": 8151223409709,
+        "rshares": 8486664643623,
+        "voter": "rainman"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3894279128605,
+        "rshares": 6370652360778,
+        "voter": "wackou"
+      },
+      {
+        "percent": "10000",
+        "reputation": 428017035820,
+        "rshares": 82613356260,
+        "voter": "friend5"
+      },
+      {
+        "percent": "10000",
+        "reputation": 9800209121307,
+        "rshares": 6571978360124,
+        "voter": "roadscape"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1214229078,
+        "rshares": 2470238755,
+        "voter": "boy"
+      },
+      {
+        "percent": "10000",
+        "reputation": 4712949449,
+        "rshares": 2998129153,
+        "voter": "bue-witness"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1789951494550,
+        "rshares": 567603623,
+        "voter": "bunny"
+      },
+      {
+        "percent": "10000",
+        "reputation": 103443134841,
+        "rshares": 41948298509,
+        "voter": "bue"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 1324164960,
+        "voter": "mini"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 170709221,
+        "voter": "moon"
+      },
+      {
+        "percent": "10000",
+        "reputation": 28971806962251,
+        "rshares": 1813610822120,
+        "voter": "joseph"
+      },
+      {
+        "percent": "100",
+        "reputation": 83941319998,
+        "rshares": 108871922542,
+        "voter": "smooth.witness"
+      },
+      {
+        "percent": "10000",
+        "reputation": 158487994237,
+        "rshares": 51208392605,
+        "voter": "twiceuponatime"
+      },
+      {
+        "percent": "5200",
+        "reputation": 1082239289637,
+        "rshares": 139867989371,
+        "voter": "indominon"
+      },
+      {
+        "percent": "10000",
+        "reputation": 23744414677575,
+        "rshares": 2942087618871,
+        "voter": "onceuponatime"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1829863145814,
+        "rshares": 728571343037,
+        "voter": "marginal"
+      },
+      {
+        "percent": "9700",
+        "reputation": 82600290949846,
+        "rshares": 937174079758,
+        "voter": "cass"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2369366055877,
+        "rshares": 76036949216,
+        "voter": "vault"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 496873319,
+        "voter": "healthcare"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 725575461,
+        "voter": "daniel.pan"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 230145753,
+        "voter": "helen.tan"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1914970430304,
+        "rshares": 410807696946,
+        "voter": "chryspano"
+      },
+      {
+        "percent": "10000",
+        "reputation": 15755437221598,
+        "rshares": 9521769889,
+        "voter": "acidyo"
+      },
+      {
+        "percent": "10000",
+        "reputation": 562223585509,
+        "rshares": 19196002726,
+        "voter": "mughat"
+      },
+      {
+        "percent": "10000",
+        "reputation": 9084038135515,
+        "rshares": 47541496466,
+        "voter": "nphacker"
+      },
+      {
+        "percent": "10000",
+        "reputation": 9389887938261,
+        "rshares": 3892379945,
+        "voter": "kennyskitchen"
+      },
+      {
+        "percent": "10000",
+        "reputation": 5260794316761,
+        "rshares": 129268320437,
+        "voter": "schro"
+      },
+      {
+        "percent": "10000",
+        "reputation": 22794273843250,
+        "rshares": 92995154682,
+        "voter": "thedashguy"
+      },
+      {
+        "percent": "10000",
+        "reputation": 36884147263377,
+        "rshares": 213701132994,
+        "voter": "lukestokes"
+      },
+      {
+        "percent": "10000",
+        "reputation": 17777496768,
+        "rshares": 276395602,
+        "voter": "carlgetalada"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2632946346,
+        "rshares": 28736613783,
+        "voter": "catchfire"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1613752018459,
+        "rshares": 5894409181,
+        "voter": "quintanilla"
+      },
+      {
+        "percent": "10000",
+        "reputation": 25984358555464,
+        "rshares": 41089533337,
+        "voter": "bacchist"
+      },
+      {
+        "percent": "10000",
+        "reputation": 40255997582,
+        "rshares": 8483258053,
+        "voter": "cannav"
+      },
+      {
+        "percent": "10000",
+        "reputation": 13090894039053,
+        "rshares": 65583674268,
+        "voter": "discombobulated"
+      },
+      {
+        "percent": "10000",
+        "reputation": 9859494596,
+        "rshares": 1259117194,
+        "voter": "chrisj"
+      },
+      {
+        "percent": "10000",
+        "reputation": 5183116321161,
+        "rshares": 3704243578,
+        "voter": "krystle"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1403427793295,
+        "rshares": 14629758637,
+        "voter": "artakan"
+      },
+      {
+        "percent": "10000",
+        "reputation": 9734558763221,
+        "rshares": 6012406044,
+        "voter": "phenom"
+      },
+      {
+        "percent": "10000",
+        "reputation": 45712131677758,
+        "rshares": 17402129371,
+        "voter": "crazymumzysa"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1624945721527,
+        "rshares": 4183080661,
+        "voter": "bbrewer"
+      },
+      {
+        "percent": "10000",
+        "reputation": 568560955800,
+        "rshares": 35472659687,
+        "voter": "fatboy"
+      },
+      {
+        "percent": "10000",
+        "reputation": 5571312226030,
+        "rshares": 3978086691,
+        "voter": "beanz"
+      },
+      {
+        "percent": "10000",
+        "reputation": 106557133024,
+        "rshares": 22725564707,
+        "voter": "solidgold"
+      },
+      {
+        "percent": "10000",
+        "reputation": 8806485920347,
+        "rshares": 24344116072,
+        "voter": "jasonstaggers"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3679188122176,
+        "rshares": 6603057948,
+        "voter": "najoh"
+      },
+      {
+        "percent": "10000",
+        "reputation": 6181438509962,
+        "rshares": 12993857503,
+        "voter": "capitalism"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2832097256429,
+        "rshares": 4872113322,
+        "voter": "satoshifpv"
+      },
+      {
+        "percent": "10000",
+        "reputation": 6364644439603,
+        "rshares": 2818362970,
+        "voter": "aboundlessworld"
+      },
+      {
+        "percent": "10000",
+        "reputation": 11122126920308,
+        "rshares": 2636752145,
+        "voter": "oflyhigh"
+      },
+      {
+        "percent": "10000",
+        "reputation": 6380056335097,
+        "rshares": 3558963294,
+        "voter": "randyclemens"
+      },
+      {
+        "percent": "10000",
+        "reputation": 661944466048,
+        "rshares": 377494461,
+        "voter": "alifton"
+      },
+      {
+        "percent": "10000",
+        "reputation": 15841196427096,
+        "rshares": 26914242849,
+        "voter": "bitcalm"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2721887929533,
+        "rshares": 1692339912,
+        "voter": "davidbrogan"
+      },
+      {
+        "percent": "10000",
+        "reputation": 797336799,
+        "rshares": 56779364,
+        "voter": "negoshi"
+      },
+      {
+        "percent": "10000",
+        "reputation": 97476072754,
+        "rshares": 50997147,
+        "voter": "david.prochnow"
+      },
+      {
+        "percent": "10000",
+        "reputation": 6483658953,
+        "rshares": 50258926,
+        "voter": "doze49"
+      },
+      {
+        "percent": "10000",
+        "reputation": 269520578215,
+        "rshares": 61941319,
+        "voter": "fraterralph"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 52891748,
+        "voter": "onlyspeakslies"
+      }
+    ],
+    "author": "lukestokes",
+    "author_reputation": 36884147263377,
+    "beneficiaries": [],
+    "body": "`dictatorship`,  `hindenburg`, `titanic` and a hitler meme are all a bit too over the top for me. I'm glad you're voicing your concerns, but a \"Dan must be stopped\" call to action against the very person who created what we are all enjoying isn't (IMO) the best approach for having a respectful dialogue about the issue. It seems many are already discussing the issue on github and voicing their disapproval there. We'll see where it goes from here, and it's definitely something to keep an eye on. For that, I thank you, but I won't give you my vote on this post because I think the tone is counter productive to a rational, open conversation about the issue. I may be wrong and maybe a more alarmist tone is called for. As with many things, we shall see over time.",
+    "body_length": 766,
+    "cashout_time": "2016-08-24T04:58:03",
+    "category": "steem",
+    "children": 38,
+    "created": "2016-08-17T04:58:03",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "json_metadata": "{\"tags\":[\"steem\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-08-17T12:34:09",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 31034930180364,
+    "parent_author": "bacchist",
+    "parent_permlink": "dan-needs-to-be-stopped",
+    "pending_payout_value": "164.026 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-bacchist-dan-needs-to-be-stopped-20160817t045803929z",
+    "post_id": 847282,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Dan needs to be stopped",
+    "title": "",
+    "total_payout_value": "0.000 HBD",
+    "url": "/steem/@bacchist/dan-needs-to-be-stopped#@lukestokes/re-bacchist-dan-needs-to-be-stopped-20160817t045803929z"
+  },
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 145171381514207,
+        "rshares": 28300878156066,
+        "voter": "dantheman"
+      },
+      {
+        "percent": "100",
+        "reputation": 32455846463901,
+        "rshares": 636585679281,
+        "voter": "smooth"
+      },
+      {
+        "percent": "10000",
+        "reputation": 3894279128605,
+        "rshares": 6549727125575,
+        "voter": "wackou"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1214229078,
+        "rshares": 3099954800,
+        "voter": "boy"
+      },
+      {
+        "percent": "10000",
+        "reputation": 4712949449,
+        "rshares": 3763461212,
+        "voter": "bue-witness"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1789951494550,
+        "rshares": 690406462,
+        "voter": "bunny"
+      },
+      {
+        "percent": "10000",
+        "reputation": 103443134841,
+        "rshares": 54138246944,
+        "voter": "bue"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 1661302953,
+        "voter": "mini"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 213684579,
+        "voter": "moon"
+      },
+      {
+        "percent": "10000",
+        "reputation": 8980249791516,
+        "rshares": 251709705259,
+        "voter": "lovejoy"
+      },
+      {
+        "percent": "10000",
+        "reputation": 9028537022578,
+        "rshares": 2511125853605,
+        "voter": "recursive"
+      },
+      {
+        "percent": "100",
+        "reputation": 83941319998,
+        "rshares": 114398906816,
+        "voter": "smooth.witness"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 622843501,
+        "voter": "healthcare"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 967387415,
+        "voter": "daniel.pan"
+      },
+      {
+        "percent": "10000",
+        "reputation": 0,
+        "rshares": 288174518,
+        "voter": "helen.tan"
+      },
+      {
+        "percent": "10000",
+        "reputation": 9090232372242,
+        "rshares": 71291626568,
+        "voter": "eric-boucher"
+      },
+      {
+        "percent": "10000",
+        "reputation": 642608867428,
+        "rshares": 5223833163,
+        "voter": "christoryan"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2632564148,
+        "rshares": 4999497773,
+        "voter": "zelgald1"
+      },
+      {
+        "percent": "10000",
+        "reputation": 2798458785,
+        "rshares": 63437792,
+        "voter": "tommycordero"
+      },
+      {
+        "percent": "10000",
+        "reputation": 855097842923,
+        "rshares": 11501604178,
+        "voter": "darrantrute"
+      },
+      {
+        "percent": "10000",
+        "reputation": 949895649943,
+        "rshares": 615797359,
+        "voter": "nebcat"
+      },
+      {
+        "percent": "10000",
+        "reputation": 988835724525,
+        "rshares": 381939549,
+        "voter": "kiwideb"
+      },
+      {
+        "percent": "10000",
+        "reputation": 353288883728,
+        "rshares": 444650943,
+        "voter": "floweroflife"
+      },
+      {
+        "percent": "10000",
+        "reputation": 1586351489943,
+        "rshares": 807251193,
+        "voter": "kingarbinv"
+      },
+      {
+        "percent": "10000",
+        "reputation": 8189791438741,
+        "rshares": 10978877529,
+        "voter": "skypilot"
+      },
+      {
+        "percent": "10000",
+        "reputation": 35511792131,
+        "rshares": 2610482432,
+        "voter": "robcichocki"
+      }
+    ],
+    "author": "recursive",
+    "author_reputation": 9028537022578,
+    "beneficiaries": [],
+    "body": "> This state of being creates a paradox for those with aims to change the world. If you are at complete peace with the way things are, then what motive is there to change the world? On what basis should you choose to act? This is the very heart of economics, the study of human action. This is the root of my current internal conflict.\n\nMahayana (Great Vehicle) buddhism may have an answer to that apparent conflict you are experiencing. According to the Mahayana tradition, true enlightenment cannot be reached merely by cultivating inner peace and eliminating delusions and suffering in isolation of other people, because doing so remains a selfish endeavor that implies that one hasn't truly reached the state of selflessness that underlies enlightenment. \n\nInstead, at some point along the path to enlightenment, one realizes that one's true nature is that of being conscious: a pure form of benevolent consciousness without shape and boundaries, and that permeates all that is. At that point, one doesn't seek anymore to deliver from suffering that fictious \"ego\" entity that has long been identified as a delusion, but instead seeks to deliver all of consciousness from suffering, including all sentient beings. This intrinsic benevolence of consciousness is what we call \"compassion\", and is the central tenet of Mahayana tradition. It is both the ultimate goal and the mean to reach that goal. By cultivating compassion, one reveals his compassionate nature, and this compassion is what will eventually lead to a contradiction with the ego and materialistic delusions, and their dissolution. \n\nFrom that perspective, he who seeks enlightenment will first accept reality as it is, and reach what first feels as a form of blissful and permanent internal peace (this is typically what Hinayana / Small Vehicule buddhism think is enlightenment, and this includes some famous western self-help authors), but will soon realize that there is one type of suffering that transcends attachment and the delusion of self and that can't be addressed by meditation and spiritual practice alone but on the contrary become more and more sharp: the suffering of seeing others suffering within this reality. This is because suffering is a noble truth, a truth that can't be denied, ignored or accepted but simply acknowledged as being true. This leads to a paradox where embracing reality leads to embracing a form of suffering that can only be eliminated by altering reality which cannot be achieved if one simply embraces reality. The only solution to this apparent paradox is to realize that reality is impermanent and can be embraced while being altered. It should be accepted in the present so that one may live free from delusions and attachment, and reduce suffering to the prime denominator of the quintessential and universally experienced suffering of being alive, while being actively shaped with all one's will and energy into a future reality where other sentient beings suffer less.\n\nUnder the mahayana assumption that consciousness is intrinsically benevolent and unable not to experience compassion as it gets closer to enlightenment, acting with all one's will and energy against the corruption that permeates reality and increases suffering of other sentient beings is not only consistent, but the one and only true way to enlightenment.\n\nArguably, government is one such big chunk of pervasive corruption that has spread like weed in our consensual reality, and creates an inordinate amount of suffering. From that perspective, being anarchist isn't only a political view, it is a statement of compassion. Ask the Dalai Lama what he thinks about governments...",
+    "body_length": 3669,
+    "cashout_time": "2016-09-08T18:48:39",
+    "category": "philosophy",
+    "children": 1,
+    "created": "2016-09-01T18:48:39",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "json_metadata": "{\"tags\":[\"philosophy\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-09-01T19:11:48",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 38538789887465,
+    "parent_author": "dantheman",
+    "parent_permlink": "why-do-we-fight-to-change-the-world",
+    "pending_payout_value": "160.617 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-dantheman-why-do-we-fight-to-change-the-world-20160901t184948317z",
+    "post_id": 1088540,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Why do we fight to change the world?",
+    "title": "",
+    "total_payout_value": "0.000 HBD",
+    "url": "/philosophy/@dantheman/why-do-we-fight-to-change-the-world#@recursive/re-dantheman-why-do-we-fight-to-change-the-world-20160901t184948317z"
+  }
+]

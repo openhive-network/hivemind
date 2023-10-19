@@ -1,0 +1,102 @@
+{
+	"4000001": {
+		"transactions": [
+			{
+				"ref_block_num": 100000,
+				"ref_block_prefix": 1,
+				"expiration": "2020-03-23T12:17:00",
+				"operations": [
+					{
+						"type": "transfer_operation",
+						"value": {
+							"from": "gtg",
+							"to": "null", 
+							"amount": {"amount":"20","precision":3,"nai":"@@000000013"},
+							"memo": "@alice/firstpost______20"
+						}
+					}
+				]
+			}
+		]
+	},
+	"4010001": {
+		"transactions": [
+			{
+				"ref_block_num": 100001,
+				"ref_block_prefix": 1,
+				"expiration": "2020-03-23T12:17:00",
+				"operations": [
+					{
+						"type": "comment_operation",
+						"value": {
+							"parent_author": "",
+							"parent_permlink": "",
+							"author": "alice",
+							"permlink": "firstpost______20",
+							"title": "firstpost______20",
+							"body": "XXXXXX",
+							"json_metadata": "{}"
+						}
+					},
+					{
+						"type": "delete_comment_operation",
+						"value": {
+							"author": "alice",
+							"permlink": "firstpost______20"
+						}
+					},
+					{
+						"type": "transfer_operation",
+						"value": {
+							"from": "gtg",
+							"to": "null", 
+							"amount": {"amount":"20","precision":3,"nai":"@@000000013"},
+							"memo": "@alice/firstpost______20"
+						}
+					}
+				]
+			}
+		]
+	},
+	"4020001": {
+		"transactions": [
+			{
+				"ref_block_num": 100003,
+				"ref_block_prefix": 1,
+				"expiration": "2020-03-23T12:17:00",
+				"operations": [
+					{
+						"type": "transfer_operation",
+						"value": {
+							"from": "gtg",
+							"to": "null", 
+							"amount": {"amount":"20","precision":3,"nai":"@@000000013"},
+							"memo": "@alice/firstpost______20"
+						}
+					},
+					{
+						"type": "comment_operation",
+						"value": {
+							"parent_author": "",
+							"parent_permlink": "",
+							"author": "alice",
+							"permlink": "firstpost______20",
+							"title": "firstpost______20",
+							"body": "XXXXXX",
+							"json_metadata": "{}"
+						}
+					},
+					{
+						"type": "transfer_operation",
+						"value": {
+							"from": "gtg",
+							"to": "null", 
+							"amount": {"amount":"20","precision":3,"nai":"@@000000013"},
+							"memo": "@alice/firstpost______20"
+						}
+					}
+				]
+			}
+		]
+	}
+}

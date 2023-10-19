@@ -1,0 +1,27 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest # due to controversial changes cutting out observer related functionality this test is currenttly not filtering muted "peerplays"
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "condenser_api.get_discussions_by_feed"
+          params: {"tag":"bartcant","start_author":"churdtzu","start_permlink":"impossible-a-conversation-with-a-statist-about-starting-a-business","limit":19, "observer":"followtest"}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern
+          extra_kwargs:
+            ignore_tags: "<condenser posts>"

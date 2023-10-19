@@ -1,0 +1,29 @@
+---
+  test_name: Hivemind condenser_api.get_discussions_by_blog tag_yetaras
+
+  marks:
+    - fullsynctest
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: condenser_api.get_discussions_by_blog tag_yetaras
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "condenser_api.get_discussions_by_blog"
+          params: [{'limit': 50, 'tag': 'yetaras'}]
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:has_valid_response
+          extra_kwargs:
+            method: "tag_yetaras"
+            directory: "condenser_api_patterns/get_discussions_by_blog"
+

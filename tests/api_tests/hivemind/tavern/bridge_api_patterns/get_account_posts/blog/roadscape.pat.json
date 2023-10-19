@@ -1,0 +1,911 @@
+[
+  {
+    "active_votes": [
+      {
+        "rshares": 4411289809404,
+        "voter": "steempty"
+      },
+      {
+        "rshares": 1667937846097,
+        "voter": "abit"
+      },
+      {
+        "rshares": 782125910000,
+        "voter": "xeroc"
+      },
+      {
+        "rshares": 736398782172,
+        "voter": "bhuz"
+      },
+      {
+        "rshares": 22265563736,
+        "voter": "pheonike"
+      },
+      {
+        "rshares": 21527959171,
+        "voter": "proctologic"
+      },
+      {
+        "rshares": 10867553434,
+        "voter": "markopaasila"
+      },
+      {
+        "rshares": 5997837661,
+        "voter": "anon"
+      },
+      {
+        "rshares": 157002590505,
+        "voter": "tuck-fheman"
+      },
+      {
+        "rshares": 75404199956,
+        "voter": "clains"
+      },
+      {
+        "rshares": 6491864928,
+        "voter": "ash"
+      },
+      {
+        "rshares": 586492942,
+        "voter": "valtr"
+      },
+      {
+        "rshares": 559198351,
+        "voter": "bob-the-poster"
+      },
+      {
+        "rshares": 569061369,
+        "voter": "andzzz"
+      },
+      {
+        "rshares": 540223785,
+        "voter": "nenad-ristic"
+      },
+      {
+        "rshares": 549682516,
+        "voter": "sandwich"
+      },
+      {
+        "rshares": 528505497,
+        "voter": "vato"
+      },
+      {
+        "rshares": 5540626956,
+        "voter": "steemship"
+      },
+      {
+        "rshares": 1868688481,
+        "voter": "bitcoin-dood"
+      },
+      {
+        "rshares": 1046663538,
+        "voter": "murh"
+      },
+      {
+        "rshares": 179016850,
+        "voter": "hakise"
+      },
+      {
+        "rshares": 222604413,
+        "voter": "vianhandika"
+      },
+      {
+        "rshares": 407942226,
+        "voter": "geronimo"
+      },
+      {
+        "rshares": 2946725576,
+        "voter": "darkb4dawn"
+      },
+      {
+        "rshares": 0,
+        "voter": "drsamkhan"
+      },
+      {
+        "rshares": 0,
+        "voter": "olesia83"
+      },
+      {
+        "rshares": 0,
+        "voter": "ameanderingmind"
+      }
+    ],
+    "author": "roadscape",
+    "author_payout_value": "3.744 HBD",
+    "author_reputation": 60.92,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Updates to [steemd.com](https://steemd.com) this week include:\n\n - Content folding (truncate long posts, click-to-reveal)\n - Compatibility with steemit.com URL structure\n - Design tweaks ('tightening up' and cleanup)\n - Cleanup of the \"advanced mode\" post command\n\nFor an example, see the changes in effect here:  \n[steemd.com/trending/crypto-news](https://steemd.com/trending/crypto-news)\n\nI'm supposedly on vacation but couldn't resist ;)",
+    "category": "steemd",
+    "children": 9,
+    "created": "2016-05-11T14:35:39",
+    "curator_payout_value": "3.743 HBD",
+    "depth": 0,
+    "is_paidout": true,
+    "json_metadata": {},
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 7912855349564,
+    "payout": 7.487,
+    "payout_at": "2016-08-21T15:28:42",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "2hhykq-steemd",
+    "post_id": 4598,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 24
+    },
+    "title": "Steemd.com update #2: content folding, UI & URL schema improvements",
+    "updated": "2016-05-11T14:35:39",
+    "url": "/steemd/@roadscape/2hhykq-steemd"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 18224194061409,
+        "voter": "dantheman"
+      },
+      {
+        "rshares": 2603246000000,
+        "voter": "fminerten"
+      },
+      {
+        "rshares": 2583596000000,
+        "voter": "steempty"
+      },
+      {
+        "rshares": 16593109000000,
+        "voter": "rainman"
+      },
+      {
+        "rshares": 30005989000000,
+        "voter": "berniesanders"
+      },
+      {
+        "rshares": 404933417277,
+        "voter": "berkah"
+      },
+      {
+        "rshares": 170226000000,
+        "voter": "dele-puppy"
+      },
+      {
+        "rshares": 138567000000,
+        "voter": "xeldal"
+      },
+      {
+        "rshares": 79912000000,
+        "voter": "adol"
+      },
+      {
+        "rshares": 5068237000000,
+        "voter": "enki"
+      },
+      {
+        "rshares": 213556575420,
+        "voter": "lafona"
+      },
+      {
+        "rshares": 766236000000,
+        "voter": "justin"
+      },
+      {
+        "rshares": 586974215542,
+        "voter": "abit"
+      },
+      {
+        "rshares": 1227190710944,
+        "voter": "nextgencrypto"
+      },
+      {
+        "rshares": 477042000000,
+        "voter": "roadscape"
+      },
+      {
+        "rshares": 735198355400,
+        "voter": "xeroc"
+      },
+      {
+        "rshares": 15180000000,
+        "voter": "steem-id"
+      },
+      {
+        "rshares": 520816000000,
+        "voter": "clayop"
+      },
+      {
+        "rshares": 623977138207,
+        "voter": "joseph"
+      },
+      {
+        "rshares": 645189730432,
+        "voter": "bhuz"
+      },
+      {
+        "rshares": 138837000000,
+        "voter": "au1nethyb1"
+      },
+      {
+        "rshares": 106805300,
+        "voter": "chocolate"
+      },
+      {
+        "rshares": 15839589237,
+        "voter": "rnglab"
+      },
+      {
+        "rshares": 24091658001,
+        "voter": "pfunk"
+      },
+      {
+        "rshares": 157536000,
+        "voter": "esteem"
+      },
+      {
+        "rshares": 7685088000,
+        "voter": "markopaasila"
+      },
+      {
+        "rshares": 304011361,
+        "voter": "goddamnit"
+      },
+      {
+        "rshares": 1236785788,
+        "voter": "anon"
+      },
+      {
+        "rshares": 366872167,
+        "voter": "code"
+      },
+      {
+        "rshares": 7767970766,
+        "voter": "rimantas"
+      },
+      {
+        "rshares": 48450890914,
+        "voter": "tuck-fheman"
+      },
+      {
+        "rshares": 692450944,
+        "voter": "hcf27"
+      },
+      {
+        "rshares": 327144256,
+        "voter": "yes"
+      },
+      {
+        "rshares": 705432940,
+        "voter": "steemrollin"
+      },
+      {
+        "rshares": 654456107,
+        "voter": "fusan"
+      },
+      {
+        "rshares": 587877239,
+        "voter": "linouxis9"
+      },
+      {
+        "rshares": -577546826,
+        "voter": "yakoza"
+      },
+      {
+        "rshares": 586492942,
+        "voter": "valtr"
+      },
+      {
+        "rshares": 10109821626,
+        "voter": "noaommerrr"
+      },
+      {
+        "rshares": 24251402483,
+        "voter": "idealist"
+      },
+      {
+        "rshares": 1831314712,
+        "voter": "bitcoin-dood"
+      },
+      {
+        "rshares": 226763397,
+        "voter": "b4bb4r-5h3r"
+      },
+      {
+        "rshares": 222604413,
+        "voter": "vianhandika"
+      },
+      {
+        "rshares": 407942226,
+        "voter": "geronimo"
+      },
+      {
+        "rshares": 2946725576,
+        "voter": "darkb4dawn"
+      },
+      {
+        "rshares": 0,
+        "voter": "drsamkhan"
+      }
+    ],
+    "author": "roadscape",
+    "author_payout_value": "281.444 HBD",
+    "author_reputation": 60.92,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Check it out! Example page: [@roadscape](https://steemd.com/@roadscape) \n\nAlso, in case you missed it: a new [witnesses page](https://steemd.com/witnesses). \n\nAnd finally, steemd.com is SSL-enabled.",
+    "category": "steemd",
+    "children": 2,
+    "created": "2016-04-25T00:55:15",
+    "curator_payout_value": "281.441 HBD",
+    "depth": 0,
+    "is_paidout": true,
+    "json_metadata": {},
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 81971187294200,
+    "payout": 562.885,
+    "payout_at": "2016-08-21T15:28:39",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "steemd",
+    "post_id": 751,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 45
+    },
+    "title": "Steemd.com updates: account pages & transaction history",
+    "updated": "2016-04-25T00:55:15",
+    "url": "/steemd/@roadscape/steemd"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": -19371283264908,
+        "voter": "dantheman"
+      },
+      {
+        "rshares": 16267754799951,
+        "voter": "rainman"
+      },
+      {
+        "rshares": 14110110000000,
+        "voter": "summon"
+      },
+      {
+        "rshares": 34607140386391,
+        "voter": "blocktrades"
+      },
+      {
+        "rshares": 47756400000000,
+        "voter": "ned"
+      },
+      {
+        "rshares": 435517000000,
+        "voter": "riverhead"
+      },
+      {
+        "rshares": 1853610000000,
+        "voter": "wackou"
+      },
+      {
+        "rshares": 3111074434246,
+        "voter": "badassmother"
+      },
+      {
+        "rshares": 43318000000,
+        "voter": "xeldal"
+      },
+      {
+        "rshares": 4968859000000,
+        "voter": "enki"
+      },
+      {
+        "rshares": 6044380771538,
+        "voter": "fuzzyvest"
+      },
+      {
+        "rshares": 1227190710944,
+        "voter": "nextgencrypto"
+      },
+      {
+        "rshares": 276117181692,
+        "voter": "liondani"
+      },
+      {
+        "rshares": 891812324134,
+        "voter": "roadscape"
+      },
+      {
+        "rshares": 31848000000,
+        "voter": "jabbasteem"
+      },
+      {
+        "rshares": 6730871256923,
+        "voter": "steemit200"
+      },
+      {
+        "rshares": 260000000,
+        "voter": "clayop"
+      },
+      {
+        "rshares": 613511982001,
+        "voter": "joseph"
+      },
+      {
+        "rshares": 1343000000,
+        "voter": "steemian"
+      },
+      {
+        "rshares": 3148385110635,
+        "voter": "au1nethyb1"
+      },
+      {
+        "rshares": 102445900,
+        "voter": "chocolate"
+      },
+      {
+        "rshares": 15839589237,
+        "voter": "rnglab"
+      },
+      {
+        "rshares": 601589768845,
+        "voter": "benjojo"
+      },
+      {
+        "rshares": 201677323621,
+        "voter": "boatymcboatface"
+      },
+      {
+        "rshares": 87939300,
+        "voter": "officialfuzzy"
+      },
+      {
+        "rshares": 24604246469,
+        "voter": "pfunk"
+      },
+      {
+        "rshares": 680689408461,
+        "voter": "onceuponatime"
+      },
+      {
+        "rshares": 82385000,
+        "voter": "officialinfotech"
+      },
+      {
+        "rshares": 160818000,
+        "voter": "esteem"
+      },
+      {
+        "rshares": 19199000000,
+        "voter": "cass"
+      },
+      {
+        "rshares": 9947146755,
+        "voter": "pheonike"
+      },
+      {
+        "rshares": 8410446863,
+        "voter": "proctologic"
+      },
+      {
+        "rshares": 4771882263,
+        "voter": "idol"
+      },
+      {
+        "rshares": 310344931,
+        "voter": "goddamnit"
+      },
+      {
+        "rshares": 1262552159,
+        "voter": "anon"
+      },
+      {
+        "rshares": 374515337,
+        "voter": "code"
+      },
+      {
+        "rshares": 7145909711,
+        "voter": "tuck-fheman"
+      },
+      {
+        "rshares": 1312221336,
+        "voter": "orwell"
+      },
+      {
+        "rshares": 868263163,
+        "voter": "yes"
+      },
+      {
+        "rshares": 666038493,
+        "voter": "bangking"
+      },
+      {
+        "rshares": 641623635,
+        "voter": "fusan"
+      },
+      {
+        "rshares": 11683040118,
+        "voter": "chitty"
+      },
+      {
+        "rshares": 600385265,
+        "voter": "linouxis9"
+      },
+      {
+        "rshares": 537421795,
+        "voter": "mf-tzo"
+      },
+      {
+        "rshares": 917009105,
+        "voter": "pstrident"
+      },
+      {
+        "rshares": 102609608,
+        "voter": "jocelyn"
+      },
+      {
+        "rshares": 546646706,
+        "voter": "edilliam"
+      },
+      {
+        "rshares": 12662734282,
+        "voter": "mod-tamichh"
+      },
+      {
+        "rshares": 515316583,
+        "voter": "carlos-cabeza"
+      },
+      {
+        "rshares": 338307272,
+        "voter": "cryptorune"
+      },
+      {
+        "rshares": 1831314712,
+        "voter": "bitcoin-dood"
+      },
+      {
+        "rshares": 512906025404,
+        "voter": "hipster"
+      },
+      {
+        "rshares": 298370695,
+        "voter": "jerome-colley"
+      },
+      {
+        "rshares": 348926414,
+        "voter": "yoona-lee"
+      },
+      {
+        "rshares": 1449870891,
+        "voter": "murh"
+      },
+      {
+        "rshares": 275355553,
+        "voter": "b4bb4r-5h3r"
+      },
+      {
+        "rshares": 334540572,
+        "voter": "jordi-kicken"
+      },
+      {
+        "rshares": 313374645,
+        "voter": "aaron-brodie"
+      },
+      {
+        "rshares": 284660589,
+        "voter": "zhuvazhuva"
+      },
+      {
+        "rshares": 222604413,
+        "voter": "vianhandika"
+      },
+      {
+        "rshares": 0,
+        "voter": "jesse5th"
+      },
+      {
+        "rshares": 407942226,
+        "voter": "geronimo"
+      },
+      {
+        "rshares": 0,
+        "voter": "alfar"
+      },
+      {
+        "rshares": 715577545,
+        "voter": "e-steem"
+      },
+      {
+        "rshares": 3006862833,
+        "voter": "darkb4dawn"
+      },
+      {
+        "rshares": 112239775,
+        "voter": "ginglebug"
+      },
+      {
+        "rshares": 0,
+        "voter": "agussudaryanto"
+      },
+      {
+        "rshares": 0,
+        "voter": "gammagooblin"
+      },
+      {
+        "rshares": 0,
+        "voter": "mightypenguin"
+      },
+      {
+        "rshares": 52136318,
+        "voter": "margarita7"
+      },
+      {
+        "rshares": 0,
+        "voter": "redax"
+      },
+      {
+        "rshares": 0,
+        "voter": "joangalvero"
+      },
+      {
+        "rshares": 0,
+        "voter": "piphunters"
+      },
+      {
+        "rshares": 0,
+        "voter": "mishman55"
+      },
+      {
+        "rshares": 0,
+        "voter": "olesia83"
+      },
+      {
+        "rshares": 0,
+        "voter": "tmp-sg"
+      },
+      {
+        "rshares": 0,
+        "voter": "cgi"
+      },
+      {
+        "rshares": 0,
+        "voter": "matejm67"
+      },
+      {
+        "rshares": 0,
+        "voter": "jameshowarrd"
+      },
+      {
+        "rshares": 0,
+        "voter": "fer32p"
+      },
+      {
+        "rshares": 0,
+        "voter": "roger.steemit"
+      },
+      {
+        "rshares": 0,
+        "voter": "bonitaxm"
+      },
+      {
+        "rshares": 0,
+        "voter": "zhurley"
+      }
+    ],
+    "author": "roadscape",
+    "author_payout_value": "642.637 HBD",
+    "author_reputation": 60.92,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Hi all! I'd appreciate your vote for witness **roadscape** -- I'm a BitShares witness, a delegate prior to that, and I built [cryptofresh.com](https://cryptofresh.com/). The BitShares blockchain has tremendous technical depth and for months I've worked with it (mostly thru API), exploring, sharing findings, and providing basic [APIs](https://cryptofresh.com/api/docs). I plan to do something similar with [steemd.com](http://steemd.com/), as Steem runs on the same underlying toolkit.  \n\nSteem combines several personal interests. For instance, you can see where I had started creating a social network on top of BitShares: [cryptofresh.com/posts](https://cryptofresh.com/posts). It may not look like much but it's the tip of the iceberg of possibilities I had mapped out. So reading the Steem whitepaper, I saw familiar ideas.. taken to a new level, on a dedicated chain. I'm happy to see such a capable team working on these problems, and I'm very much looking forward to being involved!  \n\nSeed node: **seed.steemd.com:34191** (**162.213.199.171:34191**)",
+    "category": "witness-category",
+    "children": 6,
+    "created": "2016-04-21T00:09:00",
+    "curator_payout_value": "642.610 HBD",
+    "depth": 0,
+    "is_paidout": true,
+    "json_metadata": {},
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 124878427836345,
+    "payout": 1285.247,
+    "payout_at": "2016-08-21T15:29:00",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "witness-roadscape",
+    "post_id": 471,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 3.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 65
+    },
+    "title": "Witness roadscape",
+    "updated": "2016-04-21T00:10:24",
+    "url": "/witness-category/@roadscape/witness-roadscape"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 5217000000,
+        "voter": "fmooo"
+      },
+      {
+        "rshares": 16265859000000,
+        "voter": "rainman"
+      },
+      {
+        "rshares": 600119000000,
+        "voter": "berniesanders"
+      },
+      {
+        "rshares": 100000000,
+        "voter": "donalddrumpf"
+      },
+      {
+        "rshares": -936400000000,
+        "voter": "ned"
+      },
+      {
+        "rshares": 48857000000,
+        "voter": "puppies"
+      },
+      {
+        "rshares": 5178000000,
+        "voter": "nextgenwitness"
+      },
+      {
+        "rshares": 103341000000,
+        "voter": "lafona"
+      },
+      {
+        "rshares": 319505000000,
+        "voter": "lafona5"
+      },
+      {
+        "rshares": 211000000,
+        "voter": "salvation"
+      },
+      {
+        "rshares": 2000000,
+        "voter": "taylorswift"
+      },
+      {
+        "rshares": 26000000,
+        "voter": "steemian"
+      },
+      {
+        "rshares": 8005000000,
+        "voter": "markopaasila"
+      },
+      {
+        "rshares": 47481873096,
+        "voter": "tuck-fheman"
+      },
+      {
+        "rshares": 1284883392,
+        "voter": "orwell"
+      },
+      {
+        "rshares": 641623635,
+        "voter": "fusan"
+      },
+      {
+        "rshares": 612384366,
+        "voter": "tetete"
+      },
+      {
+        "rshares": 1793940942,
+        "voter": "bitcoin-dood"
+      },
+      {
+        "rshares": 0,
+        "voter": "murh"
+      },
+      {
+        "rshares": 361324200,
+        "voter": "robi-rusmana"
+      },
+      {
+        "rshares": 4537047102,
+        "voter": "stellabelle"
+      },
+      {
+        "rshares": 2946725576,
+        "voter": "darkb4dawn"
+      },
+      {
+        "rshares": 0,
+        "voter": "seyacat"
+      },
+      {
+        "rshares": 0,
+        "voter": "olesia83"
+      }
+    ],
+    "author": "roadscape",
+    "author_payout_value": "13.474 HBD",
+    "author_reputation": 60.92,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Explore the chain at http://steemd.com/",
+    "category": "news",
+    "children": 2,
+    "created": "2016-04-12T04:37:42",
+    "curator_payout_value": "13.474 HBD",
+    "depth": 0,
+    "is_paidout": true,
+    "json_metadata": {},
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 16479679802309,
+    "payout": 26.948,
+    "payout_at": "2016-08-13T00:29:33",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "steem-explorer",
+    "post_id": 97,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 2.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 21
+    },
+    "title": "STEEM Explorer",
+    "updated": "2016-04-12T04:37:42",
+    "url": "/news/@roadscape/steem-explorer"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 641623635,
+        "voter": "fusan"
+      }
+    ],
+    "author": "roadscape",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 60.92,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "<script>alert('warning: injection');</script>",
+    "category": "random",
+    "children": 3,
+    "created": "2016-04-11T05:24:36",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": true,
+    "json_metadata": {},
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 641623635,
+    "payout": 0.0,
+    "payout_at": "2016-08-23T19:49:54",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "script-check",
+    "post_id": 80,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 1
+    },
+    "title": "Script Check",
+    "updated": "2016-04-11T05:24:36",
+    "url": "/random/@roadscape/script-check"
+  }
+]

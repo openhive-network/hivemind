@@ -1,0 +1,1003 @@
+{
+  "anduweb/re-james-show-re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t152721627z": {
+    "active_votes": [],
+    "author": "anduweb",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 59.97,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "so you're actually being sarcastic and mocking the witness work effort compared to the reward?",
+    "category": "steemit",
+    "children": 1,
+    "created": "2016-09-15T15:27:21",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 4,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "james-show",
+    "parent_permlink": "re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t151935895z",
+    "payout": 0.0,
+    "payout_at": "2016-09-22T15:27:21",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-james-show-re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t152721627z",
+    "post_id": 1255184,
+    "promoted": "0.000 HBD",
+    "replies": [
+      "james-show/re-anduweb-re-james-show-re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t153824927z"
+    ],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "updated": "2016-09-15T15:27:21",
+    "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@anduweb/re-james-show-re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t152721627z"
+  },
+  "anduweb/re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150846594z": {
+    "active_votes": [],
+    "author": "anduweb",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 59.97,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": ">They run a software on a $30/mo server and update it every month!!!\n\nIs that 30 bucks per month or am I misunderstanding it? I'm not sure that's the cost you meant to say as if it is, then with a cost of 360$/year, they get (at the current Steem price) 270,000$/year. That's a hefty difference I'd say.",
+    "category": "steemit",
+    "children": 3,
+    "created": "2016-09-15T15:08:45",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "james-show",
+    "parent_permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t143734725z",
+    "payout": 0.0,
+    "payout_at": "2016-09-22T15:08:45",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150846594z",
+    "post_id": 1254971,
+    "promoted": "0.000 HBD",
+    "replies": [
+      "james-show/re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t151935895z"
+    ],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "updated": "2016-09-15T15:11:06",
+    "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@anduweb/re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150846594z"
+  },
+  "chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts": {
+    "active_votes": [
+      {
+        "rshares": 260759456870,
+        "voter": "anonymous"
+      },
+      {
+        "rshares": 1000247174970,
+        "voter": "liondani"
+      },
+      {
+        "rshares": 2499163613408,
+        "voter": "wang"
+      },
+      {
+        "rshares": 240330548082,
+        "voter": "steem-id"
+      },
+      {
+        "rshares": 475628473771,
+        "voter": "recursive2"
+      },
+      {
+        "rshares": 472006981666,
+        "voter": "recursive3"
+      },
+      {
+        "rshares": 763857767753,
+        "voter": "pfunk"
+      },
+      {
+        "rshares": 296881292110,
+        "voter": "chitty"
+      },
+      {
+        "rshares": 83863091297,
+        "voter": "kingscrown"
+      },
+      {
+        "rshares": 8060487813,
+        "voter": "james-show"
+      },
+      {
+        "rshares": 9536766402,
+        "voter": "richman"
+      },
+      {
+        "rshares": 7190961568,
+        "voter": "acidyo"
+      },
+      {
+        "rshares": 9856837839,
+        "voter": "kefkius"
+      },
+      {
+        "rshares": 313666285,
+        "voter": "coar"
+      },
+      {
+        "rshares": 1414832011,
+        "voter": "murh"
+      },
+      {
+        "rshares": 365694018,
+        "voter": "cjley"
+      },
+      {
+        "rshares": 138525309,
+        "voter": "cm-steem"
+      },
+      {
+        "rshares": 26801301088,
+        "voter": "wongshiying"
+      },
+      {
+        "rshares": 6652542986,
+        "voter": "grandpere"
+      },
+      {
+        "rshares": 124413223430,
+        "voter": "geoffrey"
+      },
+      {
+        "rshares": 89592123518,
+        "voter": "gtg"
+      },
+      {
+        "rshares": 32211980436,
+        "voter": "acassity"
+      },
+      {
+        "rshares": 3989420423,
+        "voter": "michaellamden68"
+      },
+      {
+        "rshares": 60617919425,
+        "voter": "good-karma"
+      },
+      {
+        "rshares": 17903672525,
+        "voter": "konstantin"
+      },
+      {
+        "rshares": 20001325476,
+        "voter": "elyaque"
+      },
+      {
+        "rshares": 404056893,
+        "voter": "trees"
+      },
+      {
+        "rshares": 59153922,
+        "voter": "strawhat"
+      },
+      {
+        "rshares": 190141904,
+        "voter": "cryptochannel"
+      },
+      {
+        "rshares": 823134851306,
+        "voter": "slowwalker"
+      },
+      {
+        "rshares": 540925276501,
+        "voter": "neoxian"
+      },
+      {
+        "rshares": 189028418953,
+        "voter": "anyx"
+      },
+      {
+        "rshares": 18015034525,
+        "voter": "steemit-life"
+      },
+      {
+        "rshares": 81460328375,
+        "voter": "ntomaino"
+      },
+      {
+        "rshares": 6676256917,
+        "voter": "juvyjabian"
+      },
+      {
+        "rshares": 21106789378,
+        "voter": "artific"
+      },
+      {
+        "rshares": 36804159219,
+        "voter": "creemej"
+      },
+      {
+        "rshares": 2083366228,
+        "voter": "iamwne"
+      },
+      {
+        "rshares": 9812740236,
+        "voter": "rpf"
+      },
+      {
+        "rshares": 3787192761,
+        "voter": "azurejasper"
+      },
+      {
+        "rshares": 33625206883,
+        "voter": "deanliu"
+      },
+      {
+        "rshares": 1272268035,
+        "voter": "quigua"
+      },
+      {
+        "rshares": 7325198948,
+        "voter": "chloetaylor"
+      },
+      {
+        "rshares": 9103870896,
+        "voter": "royalmacro"
+      },
+      {
+        "rshares": 16001073584,
+        "voter": "michaeldodridge"
+      },
+      {
+        "rshares": 921893579,
+        "voter": "metaflute"
+      },
+      {
+        "rshares": 5995156919,
+        "voter": "oflyhigh"
+      },
+      {
+        "rshares": 41958980038,
+        "voter": "nonlinearone"
+      },
+      {
+        "rshares": 8877383949,
+        "voter": "thebotkiller"
+      },
+      {
+        "rshares": 3209483791,
+        "voter": "fingolfin"
+      },
+      {
+        "rshares": 2131756804,
+        "voter": "chinadaily"
+      },
+      {
+        "rshares": 308507108,
+        "voter": "steevc"
+      },
+      {
+        "rshares": 736031742,
+        "voter": "freeinthought"
+      },
+      {
+        "rshares": 1858743392,
+        "voter": "mindhunter"
+      },
+      {
+        "rshares": 4506850608,
+        "voter": "funnyman"
+      },
+      {
+        "rshares": 407083055,
+        "voter": "anomaly"
+      },
+      {
+        "rshares": 24844680347,
+        "voter": "blacktier"
+      },
+      {
+        "rshares": 238444867,
+        "voter": "sjamayee"
+      },
+      {
+        "rshares": 716952989,
+        "voter": "reddust"
+      }
+    ],
+    "author": "chitty",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 66.16,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Top 19 witnesses get paid way too much, I feel like I am stating the obvious here and it wouldn\u00b4t really be that important if we weren\u00b4t trying to build a more balanced voting/reward system.\n\nIt\u2019s like we are rowing both ways, on one side we are discussing changes in the code to reduce some big whale\u00b4s influence but on the other the system is giving around 1,370 SP per day to 19 users, yeah that\u00b4s right 1,370 SP per day!, this amount is unreachable even for the most prolific bloggers on Steemit and the gap between witnesses and normal users is growing each day. \n\n![](https://s18.postimg.org/qv4sjw8s9/shutterstock109187921.jpg)\n\nPlease don\u00b4t get me wrong this is not an attack on witnesses, I believe most witnesses are doing a great job, they not only maintain the network they also contribute with countless projects and tools. \n\nSo I am not against top witnesses getting paid, I just don\u00b4t think their SP daily payout is sustainable in the long term. \n\n## Possible Solutions\n\nI see two possible solutions to the problem and they would both be very easy to implement:\n\n1.-  It would be better if witnesses were getting a bigger percentage of liquid Steem, instead of 100% in Steem Power. This would not only reduce their SP daily growth it will also add selling pressure to steem, thus contributing to more people buying large amounts of steem for cheap.\n\n2.- Change the current DPOS system so that at least 38 witnesses were finding consecutive blocks. This would be only a partial solution in my opinion, it will reduce top witnesses payout but it would probably still be too much. It would also help out some backup witnesses that are having a hard time maintaining their nodes which are getting more expensive as the specs needed become more demanding. \n\nIt is weird that I have not read anything about this issue on steemit, maybe I have missed it or maybe it is because nobody wants to write controversial posts. Either way I would like to make it perfectly clear that this **IS NOT AN ATTACK ON WITNESSES OR WHALES**, it is my very humble proposal to improve SP distribution, something that would benefit the whole community.\n\n## I would love to read your thoughts on this matter?",
+    "category": "steemit",
+    "children": 19,
+    "created": "2016-09-15T13:03:24",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "https://s18.postimg.org/qv4sjw8s9/shutterstock109187921.jpg"
+      ],
+      "tags": [
+        "steemit",
+        "witness-category",
+        "steem"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 8409327015131,
+    "payout": 5.658,
+    "payout_at": "2016-09-22T13:03:24",
+    "pending_payout_value": "5.658 HBD",
+    "percent_hbd": 10000,
+    "permlink": "a-balanced-voting-system-is-impossible-with-current-witness-s-payouts",
+    "post_id": 1253573,
+    "promoted": "0.000 HBD",
+    "replies": [
+      "elyaque/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t131057772z",
+      "geoffrey/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t133342451z",
+      "pfunk/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t142327466z",
+      "james-show/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t143734725z",
+      "geoffrey/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t145632528z",
+      "mindhunter/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t152941035z"
+    ],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 59
+    },
+    "title": "A balanced voting system is impossible with current witness\u2019s payouts.",
+    "updated": "2016-09-15T13:03:24",
+    "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts"
+  },
+  "chitty/re-geoffrey-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150136790z": {
+    "active_votes": [],
+    "author": "chitty",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 66.16,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "This is a good proposal, one possible issue I see is that there are some large holders that could have a top witness and vote for another account that he owns and place it on the top 100 slots... and since you can not downvote witnesses vote there would be nothing you can do about it.",
+    "category": "steemit",
+    "children": 0,
+    "created": "2016-09-15T15:01:36",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "geoffrey",
+    "parent_permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t145632528z",
+    "payout": 0.0,
+    "payout_at": "2016-09-22T15:01:36",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-geoffrey-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150136790z",
+    "post_id": 1254883,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "updated": "2016-09-15T15:01:36",
+    "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@chitty/re-geoffrey-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150136790z"
+  },
+  "chitty/re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t145703205z": {
+    "active_votes": [],
+    "author": "chitty",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 66.16,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "hehe I actually think some of them do a great job, @roadscape runs steemd.com a site that I visit every single day, @jesta has a couple of great projects too. \n\nThe problem is not the payout, the issue is that get it all in SP and SP gives users voting influence... they get more voting influence everyday and the gap between them and other users gets bigger and bigger... if this continues our votes will be worth penauts in a couple of months.",
+    "category": "steemit",
+    "children": 1,
+    "created": "2016-09-15T14:57:06",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit"
+      ],
+      "users": [
+        "roadscape",
+        "jesta"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "james-show",
+    "parent_permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t143734725z",
+    "payout": 0.0,
+    "payout_at": "2016-09-22T14:57:06",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t145703205z",
+    "post_id": 1254821,
+    "promoted": "0.000 HBD",
+    "replies": [
+      "james-show/re-chitty-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150610313z"
+    ],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "updated": "2016-09-15T14:57:54",
+    "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@chitty/re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t145703205z"
+  },
+  "chitty/re-pfunk-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t143016089z": {
+    "active_votes": [],
+    "author": "chitty",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 66.16,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Thanks for this info. I believe this is not only unfair to you but it can also do great harm to the platform. A top 19 witness can get up to 500k SP per year, their votes will be more and more meaningful, while the rest of the users will see their voting power reduced over time...",
+    "category": "steemit",
+    "children": 0,
+    "created": "2016-09-15T14:30:15",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "pfunk",
+    "parent_permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t142327466z",
+    "payout": 0.0,
+    "payout_at": "2016-09-22T14:30:15",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-pfunk-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t143016089z",
+    "post_id": 1254513,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "updated": "2016-09-15T14:30:54",
+    "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@chitty/re-pfunk-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t143016089z"
+  },
+  "elyaque/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t131057772z": {
+    "active_votes": [
+      {
+        "rshares": 31585597770,
+        "voter": "chitty"
+      }
+    ],
+    "author": "elyaque",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 59.12,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Like the idea that they get paid from the liquid Steem.",
+    "category": "steemit",
+    "children": 0,
+    "created": "2016-09-15T13:11:00",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 31585597770,
+    "parent_author": "chitty",
+    "parent_permlink": "a-balanced-voting-system-is-impossible-with-current-witness-s-payouts",
+    "payout": 0.007,
+    "payout_at": "2016-09-22T13:11:00",
+    "pending_payout_value": "0.007 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t131057772z",
+    "post_id": 1253639,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 1
+    },
+    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "updated": "2016-09-15T13:11:00",
+    "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@elyaque/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t131057772z"
+  },
+  "geoffrey/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t133342451z": {
+    "active_votes": [
+      {
+        "rshares": 1000247174970,
+        "voter": "liondani"
+      },
+      {
+        "rshares": 230920556481,
+        "voter": "steem-id"
+      },
+      {
+        "rshares": 81261464654,
+        "voter": "pfunk"
+      },
+      {
+        "rshares": 145293507646,
+        "voter": "chitty"
+      }
+    ],
+    "author": "geoffrey",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 58.93,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "I completely agree with you.  In the past I would have suggested adding more miner witnesses, somewhere between 2-5, in addition to expanding the rotating constant witnesses.  This could better distribute rewards, and encourage mining as more than just a costly hobby.  The current domination of the mining queue by one (possibly two) users makes this a bad idea, though.",
+    "category": "steemit",
+    "children": 0,
+    "created": "2016-09-15T13:33:36",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 1457722703751,
+    "parent_author": "chitty",
+    "parent_permlink": "a-balanced-voting-system-is-impossible-with-current-witness-s-payouts",
+    "payout": 0.431,
+    "payout_at": "2016-09-22T13:33:36",
+    "pending_payout_value": "0.431 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t133342451z",
+    "post_id": 1253870,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 4
+    },
+    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "updated": "2016-09-15T14:47:15",
+    "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@geoffrey/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t133342451z"
+  },
+  "geoffrey/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t145632528z": {
+    "active_votes": [
+      {
+        "rshares": 230920556481,
+        "voter": "steem-id"
+      },
+      {
+        "rshares": 284298500346,
+        "voter": "chitty"
+      },
+      {
+        "rshares": 121379981624,
+        "voter": "geoffrey"
+      },
+      {
+        "rshares": 189028418953,
+        "voter": "anyx"
+      }
+    ],
+    "author": "geoffrey",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 58.93,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "I have two proposals to decrease the amount of influence top witnesses gain each day:\n1) Implement a tier system, in place of the current winner-take-all system:\n   * The top 20 witnesses get a fixed percentage of rounds (let's say 50% to be generous).  The 20th slot no longer rotates among the remaining witnesses, but instead among the top 20.\n   * The top 21-50th witnesses get a smaller percentage, lets say 25% of rounds.  This could be randomly divided among these 30 folks, so each round allocated to them would be divided among 19 of these witnesses.\n   * The remaining 51-100+ witnesses would get the remaining 25% of votes (or it could be divided up even more fine-grained).   The same system would be used where 19 of them will witness when this slot is allocated a round.  \n        * Of course there are top 100 witnesses who don't run active nodes, but a git proposal is in place to address that, by removing them from the witness queue if they've been missing blocks until they update their signing key.\n2) 90% (or some amount adjusted for the exchange value of Steem) of top 19 witness' blocks go unrewarded.  Instead of getting 1300 or however many SP a day, they'd only get 130, and the rest of their blocks would give them 0 monetary reward.  At current prices this would be enough for them to live off of and not have to do any other work than contribute to the Steem platform, but not cause them to overtake all active accounts in terms of vote weight.  As statisticians commonly say: \"there's no such thing as a free lunch\" (TINSTAAFL).",
+    "category": "steemit",
+    "children": 1,
+    "created": "2016-09-15T14:56:33",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 825627457404,
+    "parent_author": "chitty",
+    "parent_permlink": "a-balanced-voting-system-is-impossible-with-current-witness-s-payouts",
+    "payout": 0.223,
+    "payout_at": "2016-09-22T14:56:33",
+    "pending_payout_value": "0.223 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t145632528z",
+    "post_id": 1254812,
+    "promoted": "0.000 HBD",
+    "replies": [
+      "chitty/re-geoffrey-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150136790z"
+    ],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 4
+    },
+    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "updated": "2016-09-15T14:56:48",
+    "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@geoffrey/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t145632528z"
+  },
+  "james-show/re-anduweb-re-james-show-re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t153824927z": {
+    "active_votes": [],
+    "author": "james-show",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 58.33,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Sorry, not a native speaker here ([for additional reference check this post of mine](https://steemit.com/stats/@james-show/js-index-update-for-09-14#@james-show/re-chryspano-re-james-show-js-index-update-for-09-14-20160915t122218091z)) , but I was using the word \"cabal\" above/below  honestly hoping it has no positive meaning in English.",
+    "category": "steemit",
+    "children": 0,
+    "created": "2016-09-15T15:38:24",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 5,
+    "is_paidout": false,
+    "json_metadata": {
+      "links": [
+        "https://steemit.com/stats/@james-show/js-index-update-for-09-14#@james-show/re-chryspano-re-james-show-js-index-update-for-09-14-20160915t122218091z"
+      ],
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "anduweb",
+    "parent_permlink": "re-james-show-re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t152721627z",
+    "payout": 0.0,
+    "payout_at": "2016-09-22T15:38:24",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-anduweb-re-james-show-re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t153824927z",
+    "post_id": 1255294,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "updated": "2016-09-15T15:38:24",
+    "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@james-show/re-anduweb-re-james-show-re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t153824927z"
+  },
+  "james-show/re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t151935895z": {
+    "active_votes": [],
+    "author": "james-show",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 58.33,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "They might need the $100/mo or even the $500/mo servers in the near future(6 to 36 months from now) . Plus they MUST check their text messages regularly (they are notified this way for urgent changes/forks/updates). So, it is hard  / demanding job... totally worth paying a solid 1 Mil USD salary to such brave, hard to find man, IMHO. :)\n_sorry if the sarcasm does not come  easy in text_",
+    "category": "steemit",
+    "children": 2,
+    "created": "2016-09-15T15:19:36",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 3,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "anduweb",
+    "parent_permlink": "re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150846594z",
+    "payout": 0.0,
+    "payout_at": "2016-09-22T15:19:36",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t151935895z",
+    "post_id": 1255101,
+    "promoted": "0.000 HBD",
+    "replies": [
+      "anduweb/re-james-show-re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t152721627z"
+    ],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "updated": "2016-09-15T15:23:36",
+    "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@james-show/re-anduweb-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t151935895z"
+  },
+  "james-show/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t143734725z": {
+    "active_votes": [
+      {
+        "rshares": 65293776,
+        "voter": "freebornangel"
+      }
+    ],
+    "author": "james-show",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 58.33,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Their pay was cut from $1,972,800 annually 2 mo. ago to the meager $276,192 now. I think you should leave the cabal of Dan's friend alone!!!\nDo you even know what a hard job they have? They run a software on a $30/mo server and update it every month!!!",
+    "category": "steemit",
+    "children": 6,
+    "created": "2016-09-15T14:37:33",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 65293776,
+    "parent_author": "chitty",
+    "parent_permlink": "a-balanced-voting-system-is-impossible-with-current-witness-s-payouts",
+    "payout": 0.0,
+    "payout_at": "2016-09-22T14:37:33",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t143734725z",
+    "post_id": 1254593,
+    "promoted": "0.000 HBD",
+    "replies": [
+      "chitty/re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t145703205z",
+      "anduweb/re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150846594z"
+    ],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 1
+    },
+    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "updated": "2016-09-15T14:37:33",
+    "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@james-show/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t143734725z"
+  },
+  "james-show/re-chitty-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150610313z": {
+    "active_votes": [],
+    "author": "james-show",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 58.33,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Yes, pay in liquid cash will be better for them (they can always power up if they wish after all)!\n But do not forget to advocate some of those pay cuts to be offset somehow... once you have started the honorable journey of their difference, that is.",
+    "category": "steemit",
+    "children": 0,
+    "created": "2016-09-15T15:06:12",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 3,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "chitty",
+    "parent_permlink": "re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t145703205z",
+    "payout": 0.0,
+    "payout_at": "2016-09-22T15:06:12",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-chitty-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150610313z",
+    "post_id": 1254938,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "updated": "2016-09-15T15:06:12",
+    "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@james-show/re-chitty-re-james-show-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t150610313z"
+  },
+  "liondani/re-pfunk-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t185447275z": {
+    "active_votes": [],
+    "author": "liondani",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 66.09,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "It's more close to 20-30 times at the position mentioned.",
+    "category": "steemit",
+    "children": 0,
+    "created": "2016-09-15T18:54:45",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "pfunk",
+    "parent_permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t142327466z",
+    "payout": 0.0,
+    "payout_at": "2016-09-22T18:54:45",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-pfunk-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t185447275z",
+    "post_id": 1257511,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "updated": "2016-09-15T18:54:45",
+    "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@liondani/re-pfunk-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t185447275z"
+  },
+  "mindhunter/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t152941035z": {
+    "active_votes": [],
+    "author": "mindhunter",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 56.17,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Not shit Sherlock! Come join the revolution baby! https://steemit.com/steemit/@mindhunter/is-smooth-the-morpheus-of-steemit-let-him-kick-whale-ass-sounds-like-a-good-post-headline",
+    "category": "steemit",
+    "children": 0,
+    "created": "2016-09-15T15:29:45",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "links": [
+        "https://steemit.com/steemit/@mindhunter/is-smooth-the-morpheus-of-steemit-let-him-kick-whale-ass-sounds-like-a-good-post-headline"
+      ],
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "chitty",
+    "parent_permlink": "a-balanced-voting-system-is-impossible-with-current-witness-s-payouts",
+    "payout": 0.0,
+    "payout_at": "2016-09-22T15:29:45",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t152941035z",
+    "post_id": 1255212,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 0
+    },
+    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "updated": "2016-09-15T15:29:45",
+    "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@mindhunter/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t152941035z"
+  },
+  "pfunk/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t142327466z": {
+    "active_votes": [
+      {
+        "rshares": 290603380713,
+        "voter": "chitty"
+      },
+      {
+        "rshares": 189028418953,
+        "voter": "anyx"
+      }
+    ],
+    "author": "pfunk",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 70.07,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Based on my own block generation, [sitting at position #24 currently](https://steemit.com/~witnesses): I can say that the difference in block generation and thus SP rewards for running a Steem node is about 22 times less than if I was at position #19.\n\nEdit: I r dum at math, fixed the ratio to 22x.",
+    "category": "steemit",
+    "children": 2,
+    "created": "2016-09-15T14:24:09",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "links": [
+        "https://steemit.com/~witnesses"
+      ],
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 479631799666,
+    "parent_author": "chitty",
+    "parent_permlink": "a-balanced-voting-system-is-impossible-with-current-witness-s-payouts",
+    "payout": 0.12,
+    "payout_at": "2016-09-22T14:24:09",
+    "pending_payout_value": "0.120 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t142327466z",
+    "post_id": 1254442,
+    "promoted": "0.000 HBD",
+    "replies": [
+      "chitty/re-pfunk-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t143016089z",
+      "liondani/re-pfunk-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t185447275z"
+    ],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 2
+    },
+    "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
+    "updated": "2016-09-15T14:34:12",
+    "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@pfunk/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t142327466z"
+  }
+}

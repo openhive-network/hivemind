@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "account not found: `invalid_account`",
+  "message": "Invalid parameters"
+}

@@ -1,0 +1,28 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest # alice follows mute list of ignoreall who ignores r4fken (mock data); see also no_observer_paging
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "condenser_api.get_comment_discussions_by_payout"
+          params: {"observer":"alice","limit":3,
+                   "start_author":"anyx","start_permlink":"re-dopezzz123-why-muscles-get-sore-20160815t225638685z"}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern
+          extra_kwargs:
+            ignore_tags: "<condenser posts>"

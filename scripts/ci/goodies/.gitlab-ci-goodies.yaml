@@ -1,0 +1,154 @@
+# Useful snippets for Gitlab CI, but not used currently.
+
+.postgres-10: &postgres-10
+  name: hivemind/postgres:10
+  alias: db
+  command: [
+      "postgres",
+      "-c", "shared_preload_libraries=pg_stat_statements,pg_qualstats",
+      "-c", "track_functions=pl",
+      "-c", "track_io_timing=on",
+      "-c", "track_activity_query_size=2048",
+      "-c", "pg_stat_statements.max=10000",
+      "-c", "pg_stat_statements.track=all",
+      "-c", "max_connections=100",
+      "-c", "shared_buffers=2GB",
+      "-c", "effective_cache_size=6GB",
+      "-c", "maintenance_work_mem=512MB",
+      "-c", "checkpoint_completion_target=0.9",
+      "-c", "wal_buffers=16MB",
+      "-c", "default_statistics_target=100",
+      "-c", "random_page_cost=1.1",
+      "-c", "effective_io_concurrency=200",
+      "-c", "work_mem=5242kB",
+      "-c", "min_wal_size=2GB",
+      "-c", "max_wal_size=8GB",
+      "-c", "max_worker_processes=4",
+      "-c", "max_parallel_workers_per_gather=2",
+      "-c", "max_parallel_workers=4",
+      ]
+
+.postgres-12: &postgres-12
+  name: hivemind/postgres:12
+  alias: db
+  command: [
+      "postgres",
+      "-c", "shared_preload_libraries=pg_stat_statements,pg_qualstats",
+      "-c", "track_functions=pl",
+      "-c", "track_io_timing=on",
+      "-c", "track_activity_query_size=2048",
+      "-c", "pg_stat_statements.max=10000",
+      "-c", "pg_stat_statements.track=all",
+      "-c", "max_connections=100",
+      "-c", "shared_buffers=2GB",
+      "-c", "effective_cache_size=6GB",
+      "-c", "maintenance_work_mem=512MB",
+      "-c", "checkpoint_completion_target=0.9",
+      "-c", "wal_buffers=16MB",
+      "-c", "default_statistics_target=100",
+      "-c", "random_page_cost=1.1",
+      "-c", "effective_io_concurrency=200",
+      "-c", "work_mem=5242kB",
+      "-c", "min_wal_size=2GB",
+      "-c", "max_wal_size=8GB",
+      "-c", "max_worker_processes=4",
+      "-c", "max_parallel_workers_per_gather=2",
+      "-c", "max_parallel_workers=4",
+      ]
+
+.setup-setuptools: &setup-setuptools
+  - python -m venv .venv
+  - source .venv/bin/activate
+  - time pip install --upgrade pip setuptools wheel
+  - pip --version
+  - easy_install --version
+  - wheel version
+  - pipenv --version
+  - poetry --version
+  - time python setup.py develop
+
+.setup-setuptools-no-venv: &setup-setuptools-no-venv
+  # No virtual environment here.
+  # Setuptools will install all dependencies to PYTHONUSERBASE directory.
+  - export PYTHONUSERBASE=./local-site
+  - time pip install --upgrade pip setuptools wheel
+  - pip --version
+  - easy_install --version
+  - wheel version
+  - pipenv --version
+  - poetry --version
+  - mkdir -p `python -m site --user-site`
+  - python setup.py install --user --force
+  - ln -sf ./local-site/bin/hive "$HIVEMIND_EXEC_NAME"
+
+.setup-pipenv: &setup-pipenv
+  ## Note, that Pipfile must exist.
+  ## `--sequential` is slower, but doesn't emit messages about errors
+  ## and need to repeat install.
+  ## - pipenv sync --dev --bare --sequential
+  ## It's faster than `--sequential`, but emits messages about errors
+  ## and a need to repeat install, sometimes. However seems these
+  ## errors are negligible.
+  - time pipenv sync --dev --bare
+  - source .venv/bin/activate
+  - pip --version
+  - easy_install --version
+  - wheel version
+  - pipenv --version
+  - poetry --version
+
+
+##### Jobs #####
+
+.build-egg:
+  stage: build
+  needs: []
+  script:
+    - python setup.py bdist_egg
+    - ls -l dist/*
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 7 days
+  tags:
+    - hivemind-light-job
+
+.build-wheel:
+  stage: build
+  needs: []
+  script:
+    - python setup.py bdist_wheel
+    - ls -l dist/*
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 7 days
+  tags:
+    - hivemind-light-job
+
+# Postgres as docker service
+.hivemind-sync-postgres-as-service:
+  # <<: *default-rules
+  stage: data-supply
+  services:
+    - *postgres-10
+    # - *postgres-12
+  needs: []
+  script:
+    # - *hive-sync-script-common
+    # - ./scripts/ci/dump-db.sh
+  artifacts:
+    paths:
+      - hivemind-sync.log
+      - pg-stats
+      - pg-dump-${HIVEMIND_DB_NAME}
+    expire_in: 7 hours
+  tags:
+    - hivemind-heavy-job
+
+# Test job doing nothing (for debugging CI)
+.just-a-test:
+  stage: e2e-test
+  extends: .e2e-test-common
+  script:
+    - echo "Run some tests"

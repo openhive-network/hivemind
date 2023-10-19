@@ -1,0 +1,33 @@
+{
+  "300": {
+    "virtual_operations": [
+      {
+        "type": "producer_reward_operation",
+        "value": {
+          "producer": "tester1",
+          "vesting_shares": {
+            "amount": "1000000",
+            "precision": 6,
+            "nai": "@@000000037"
+          }
+        }
+      },
+      {
+        "type": "effective_comment_vote_operation",
+        "value": {
+          "voter": "ignoreall",
+          "author": "agartha",
+          "permlink": "regular-post",
+          "weight": 200,
+          "rshares": 20000000,
+          "total_vote_weight": 200,
+          "pending_payout": {
+            "amount": "2",
+            "precision": 3,
+            "nai": "@@000000013"
+          }
+        }
+      }
+    ]
+  }
+}

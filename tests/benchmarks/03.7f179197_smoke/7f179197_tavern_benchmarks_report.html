@@ -1,0 +1,76 @@
+<html>
+  <head>
+  <meta charset="UTF-8">
+    <style>
+      table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+      }
+      th, td {
+        padding: 15px;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8">
+      $(document).ready( function () {
+        $('#benchmarks').DataTable({"aLengthMenu": [[10, 25, 50, 100, 1000, 10000, -1], [10, 25, 50, 100, 1000, 10000, "All"]]});
+      } );
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  </head>
+  <body>
+    <table id="benchmarks">
+      <thead>
+        <tr><th>Test name</th><th>Response mean size [kB]</th><th>Response ref size [kB]</th><th>Min time [ms]</th><th>Max time [ms]</th><th>Mean time [ms]</th><th>Median time [ms]</th><th>Reference (pure requests call) [ms]</th><th>\[ {\vert} {T_{mean} - T_{ref} \over T_{ref}} {\lvert} \cdot 100 \] [%]</th><th>\[ {\vert} {T_{median} - T_{ref} \over T_{ref}} {\lvert} \cdot 100 \] [%]</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>bridge_api_patterns/get_account_posts/comments/min_limit.tavern.yaml</td><td>1.3</td><td>1.3</td><td>352.9158</td><td>421.7923</td><td>375.6061</td><td>365.7296</td><td>346.9511</td><td>8.2591</td><td>5.4124</td></tr>
+        <tr><td>bridge_api_patterns/get_account_posts/comments/max_limit.tavern.yaml</td><td>126.1</td><td>126.0</td><td>435.9321</td><td>522.3513</td><td>461.4916</td><td>449.9235</td><td>426.4183</td><td>8.2251</td><td>5.5122</td></tr>
+        <tr><td>bridge_api_patterns/get_account_posts/feed/min_limit.tavern.yaml</td><td>6.9</td><td>1.3</td><td>446.6176</td><td>541.4762</td><td>465.2365</td><td>453.2097</td><td>432.3149</td><td>7.6152</td><td>4.8333</td></tr>
+        <tr><td>bridge_api_patterns/get_account_posts/feed/max_limit.tavern.yaml</td><td>682.8</td><td>679.3</td><td>611.7969</td><td>672.9094</td><td>637.3619</td><td>640.2942</td><td>561.8382</td><td>13.4422</td><td>13.9642</td></tr>
+        <tr><td>bridge_api_patterns/get_account_posts/feed/observer_alice.tavern.yaml</td><td>91.6</td><td>91.5</td><td>457.5740</td><td>588.0652</td><td>489.3630</td><td>477.9209</td><td>447.7298</td><td>9.2987</td><td>6.7431</td></tr>
+        <tr><td>bridge_api_patterns/get_account_posts/feed/paginated.tavern.yaml</td><td>91.6</td><td>91.5</td><td>459.8518</td><td>509.5377</td><td>479.0957</td><td>476.7666</td><td>445.6378</td><td>7.5079</td><td>6.9852</td></tr>
+        <tr><td>bridge_api_patterns/get_account_posts/posts/gtg.tavern.yaml</td><td>670.2</td><td>670.1</td><td>204.7374</td><td>362.8377</td><td>310.7744</td><td>326.9653</td><td>155.5110</td><td>99.8408</td><td>110.2522</td></tr>
+        <tr><td>bridge_api_patterns/get_discussion/steemit.tavern.yaml</td><td>598.1</td><td>598.1</td><td>294.3463</td><td>632.7157</td><td>346.4005</td><td>312.0707</td><td>260.3460</td><td>33.0539</td><td>19.8677</td></tr>
+        <tr><td>bridge_api_patterns/get_account_posts/blog/max_limit.tavern.yaml</td><td>2236.6</td><td>2236.6</td><td>624.0842</td><td>2866.9905</td><td>876.3354</td><td>655.4052</td><td>475.5740</td><td>84.2690</td><td>37.8135</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/muted/mutes_indirect_tag_paginated.tavern.yaml</td><td>0.1</td><td>0.0</td><td>5.4994</td><td>717.3459</td><td>416.1664</td><td>661.2724</td><td>583.0305</td><td>28.6201</td><td>13.4199</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/muted/mutes_indirect_tag.tavern.yaml</td><td>0.1</td><td>0.0</td><td>614.1067</td><td>719.2237</td><td>663.0722</td><td>658.2696</td><td>582.9278</td><td>13.7486</td><td>12.9247</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/muted/tag_life.tavern.yaml</td><td>0.1</td><td>0.0</td><td>609.9794</td><td>654.1675</td><td>635.4151</td><td>643.9288</td><td>580.6035</td><td>9.4405</td><td>10.9068</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/payout/max_limit.tavern.yaml</td><td>2134.8</td><td>2134.7</td><td>603.4950</td><td>711.6401</td><td>662.3409</td><td>657.9866</td><td>426.9443</td><td>55.1352</td><td>54.1153</td></tr>
+        <tr><td>bridge_api_patterns/get_ranked_posts/trending/max_limit.tavern.yaml</td><td>2034.9</td><td>2029.1</td><td>497.4368</td><td>632.7415</td><td>581.2684</td><td>597.2479</td><td>348.4065</td><td>66.8363</td><td>71.4227</td></tr>
+        <tr><td>bridge_api_patterns/post_notifications/first.tavern.yaml</td><td>0.1</td><td>0.0</td><td>295.0113</td><td>538.5317</td><td>432.4233</td><td>498.7080</td><td>516.2525</td><td>16.2380</td><td>3.3984</td></tr>
+        <tr><td>bridge_api_patterns/post_notifications/account_permlink_last_it_votes.tavern.yaml</td><td>0.1</td><td>0.0</td><td>498.8614</td><td>582.5969</td><td>529.5981</td><td>525.8578</td><td>506.6824</td><td>4.5227</td><td>3.7845</td></tr>
+        <tr><td>bridge_api_patterns/post_notifications/account_permlink.tavern.yaml</td><td>0.1</td><td>0.0</td><td>294.8457</td><td>589.0172</td><td>456.2995</td><td>503.8434</td><td>498.0180</td><td>8.3769</td><td>1.1697</td></tr>
+        <tr><td>condenser_api_patterns/get_blog/page_last.tavern.yaml</td><td>322.7</td><td>322.6</td><td>252.6224</td><td>401.0398</td><td>330.9030</td><td>325.7712</td><td>118.6984</td><td>178.7764</td><td>174.4530</td></tr>
+        <tr><td>condenser_api_patterns/get_blog/page_mid.tavern.yaml</td><td>550.2</td><td>550.1</td><td>320.1816</td><td>456.0941</td><td>383.2517</td><td>363.5199</td><td>145.0020</td><td>164.3078</td><td>150.6999</td></tr>
+        <tr><td>condenser_api_patterns/get_blog/page_0.tavern.yaml</td><td>708.9</td><td>708.8</td><td>341.6870</td><td>632.6487</td><td>401.7354</td><td>383.4788</td><td>170.9055</td><td>135.0629</td><td>124.3806</td></tr>
+        <tr><td>condenser_api_patterns/get_blog/max_limit.tavern.yaml</td><td>852.9</td><td>852.8</td><td>539.3350</td><td>880.7624</td><td>602.4196</td><td>578.7701</td><td>302.2242</td><td>99.3287</td><td>91.5036</td></tr>
+        <tr><td>condenser_api_patterns/get_discussions_by_comments/cheetah.tavern.yaml</td><td>23.6</td><td>23.5</td><td>369.2374</td><td>390.3110</td><td>377.4617</td><td>375.6677</td><td>370.3707</td><td>1.9146</td><td>1.4302</td></tr>
+        <tr><td>condenser_api_patterns/get_discussions_by_comments/null_limit.tavern.yaml</td><td>23.6</td><td>0.1</td><td>368.5903</td><td>395.9125</td><td>381.3411</td><td>380.9619</td><td>8.8175</td><td>4224.8174</td><td>4220.5169</td></tr>
+        <tr><td>condenser_api_patterns/get_discussions_by_comments/truncated.tavern.yaml</td><td>20.0</td><td>19.9</td><td>368.1934</td><td>390.8697</td><td>376.9852</td><td>374.5501</td><td>366.8763</td><td>2.7554</td><td>2.0917</td></tr>
+        <tr><td>condenser_api_patterns/get_discussions_by_hot/max_limit.tavern.yaml</td><td>1645.5</td><td>1676.8</td><td>320.8040</td><td>476.8527</td><td>362.2353</td><td>345.6047</td><td>228.7855</td><td>58.3297</td><td>51.0606</td></tr>
+        <tr><td>condenser_api_patterns/get_discussions_by_trending/max_limit.tavern.yaml</td><td>2968.4</td><td>2958.5</td><td>588.3607</td><td>746.2032</td><td>637.1203</td><td>626.0976</td><td>392.2502</td><td>62.4270</td><td>59.6169</td></tr>
+        <tr><td>condenser_api_patterns/get_following/blog/defaults.tavern.yaml</td><td>76.6</td><td>76.5</td><td>442.1988</td><td>529.5002</td><td>466.9736</td><td>458.2573</td><td>438.1441</td><td>6.5799</td><td>4.5905</td></tr>
+        <tr><td>condenser_api_patterns/get_state/blocktrades.tavern.yaml</td><td>1334.9</td><td>1334.8</td><td>331.2445</td><td>407.0469</td><td>378.6531</td><td>384.8590</td><td>208.8914</td><td>81.2679</td><td>84.2387</td></tr>
+        <tr><td>condenser_api_patterns/get_state/blog_roadscape.tavern.yaml</td><td>871.6</td><td>871.6</td><td>226.6044</td><td>693.4373</td><td>334.2777</td><td>304.7465</td><td>153.0569</td><td>118.4010</td><td>99.1067</td></tr>
+        <tr><td>condenser_api_patterns/get_state/steemit_permlink.tavern.yaml</td><td>814.2</td><td>814.2</td><td>758.3727</td><td>846.7638</td><td>788.2570</td><td>779.7475</td><td>686.9425</td><td>14.7486</td><td>13.5099</td></tr>
+        <tr><td>database_api_patterns/find_comments/1000_pairs.tavern.yaml</td><td>1654.1</td><td>1654.1</td><td>277.9768</td><td>816.5770</td><td>355.2332</td><td>300.0929</td><td>206.1488</td><td>72.3188</td><td>45.5710</td></tr>
+        <tr><td>database_api_patterns/list_comments/by_cashout_time/first_date.tavern.yaml<br/>Parameters: {"jsonrpc": "2.0", "id": "1", "method": "database_api.list_comments", "params": {"start": ["1970-01-01T00:00:00", "", ""], "limit": "10", "order": "by_cashout_time"}}</td><td>23.1</td><td>21.1</td><td>516.5976</td><td>22921.6060</td><td bgcolor="red">2789.8961</td><td>524.5028</td><td>505.8329</td><td>451.5450</td><td>3.6909</td></tr>
+        <tr><td>database_api_patterns/list_comments/by_cashout_time/date.tavern.yaml<br/>Parameters: {"jsonrpc": "2.0", "id": "1", "method": "database_api.list_comments", "params": {"start": ["2016-01-08 01:01:01", "", ""], "limit": "10", "order": "by_cashout_time"}}</td><td>23.1</td><td>21.1</td><td>505.5734</td><td>23880.0720</td><td bgcolor="red">2854.2298</td><td>515.5414</td><td>500.4914</td><td>470.2855</td><td>3.0070</td></tr>
+        <tr><td>database_api_patterns/list_comments/by_cashout_time/author_permlink.tavern.yaml<br/>Parameters: {"jsonrpc": "2.0", "id": "1", "method": "database_api.list_comments", "params": {"start": ["2016-01-08T01:01:01", "ethereumnews", "what-is-ethereum"], "limit": "10", "order": "by_cashout_time"}}</td><td>23.1</td><td>21.1</td><td>512.0123</td><td>23947.8054</td><td bgcolor="red">2865.5094</td><td>519.6518</td><td>502.2875</td><td>470.4919</td><td>3.4570</td></tr>
+        <tr><td>database_api_patterns/list_comments/by_cashout_time/all_data.tavern.yaml<br/>Parameters: {"jsonrpc": "2.0", "id": "1", "method": "database_api.list_comments", "params": {"start": ["1969-12-31T23:59:59", "proskynneo", "steemit-firstpost-1"], "limit": "10", "order": "by_cashout_time"}}</td><td>11.3</td><td>11.3</td><td>598.4308</td><td>24091.4290</td><td bgcolor="red">2975.6909</td><td>621.1618</td><td>579.9171</td><td>413.1235</td><td>7.1122</td></tr>
+        <tr><td>database_api_patterns/list_comments/by_cashout_time/all_params_blank_category.tavern.yaml<br/>Parameters: {"jsonrpc": "2.0", "id": "1", "method": "database_api.list_comments", "params": {"start": ["1969-12-31T23:59:59", "xeroc", "how-to-monitor-an-account-on-steem"], "limit": "10", "order": "by_cashout_time"}}</td><td>25.1</td><td>25.1</td><td>598.6911</td><td>24091.3391</td><td bgcolor="red">2975.7244</td><td>622.2816</td><td>583.1739</td><td>410.2636</td><td>6.7060</td></tr>
+        <tr><td>database_api_patterns/list_comments/by_cashout_time/second.tavern.yaml</td><td>23.0</td><td>21.1</td><td>522.7736</td><td>631.3188</td><td>574.0915</td><td>582.1537</td><td>503.5021</td><td>14.0197</td><td>15.6209</td></tr>
+        <tr><td>database_api_patterns/list_comments/by_cashout_time/max_cashout_time.tavern.yaml</td><td>12.3</td><td>12.3</td><td>600.7988</td><td>744.1752</td><td>649.6665</td><td>618.9944</td><td>584.3441</td><td>11.1788</td><td>5.9298</td></tr>
+        <tr><td>database_api_patterns/list_comments/by_cashout_time/future_date.tavern.yaml</td><td>11.5</td><td>11.4</td><td>598.9221</td><td>749.2755</td><td>667.5760</td><td>658.3374</td><td>578.8752</td><td>15.3230</td><td>13.7270</td></tr>
+        <tr><td>database_api_patterns/list_comments/by_cashout_time/very_future_date.tavern.yaml</td><td>11.5</td><td>11.4</td><td>601.6001</td><td>706.3556</td><td>653.7496</td><td>652.9460</td><td>585.0499</td><td>11.7425</td><td>11.6052</td></tr>
+        <tr><td>database_api_patterns/list_comments/by_last_update/author_permlink.tavern.yaml</td><td>21.4</td><td>21.4</td><td>368.3397</td><td>897.2437</td><td>432.3328</td><td>382.2082</td><td>366.0363</td><td>18.1120</td><td>4.4181</td></tr>
+        <tr><td>database_api_patterns/list_comments/by_last_update/date.tavern.yaml</td><td>21.4</td><td>21.4</td><td>362.6803</td><td>407.4807</td><td>377.1563</td><td>375.2413</td><td>364.0274</td><td>3.6066</td><td>3.0805</td></tr>
+        <tr><td>database_api_patterns/list_comments/by_last_update/string_limit.tavern.yaml</td><td>21.7</td><td>21.7</td><td>355.8524</td><td>385.2949</td><td>371.1233</td><td>372.3769</td><td>367.8703</td><td>0.8843</td><td>1.2251</td></tr>
+      </tbody>
+    </table>
+  </body>
+</html>

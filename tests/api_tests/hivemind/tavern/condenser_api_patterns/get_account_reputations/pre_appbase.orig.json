@@ -1,0 +1,9 @@
+{
+  "error": {
+    "code": -32000,
+    "data": "ApiError: unknown method: condenser_api.get_account_reputations",
+    "message": "Server error"
+  },
+  "id": 1,
+  "jsonrpc": "2.0"
+}

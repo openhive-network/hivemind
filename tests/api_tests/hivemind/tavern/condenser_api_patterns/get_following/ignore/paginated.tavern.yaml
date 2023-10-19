@@ -1,0 +1,25 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest # original always included page defining account in results (and order of follows created in the same time was basically random), that was corrected
+
+  includes:
+    - !include ../../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "condenser_api.get_following"
+          params: {"account":"morganpearl","start":"cryptos","follow_type":"ignore","limit":3}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern

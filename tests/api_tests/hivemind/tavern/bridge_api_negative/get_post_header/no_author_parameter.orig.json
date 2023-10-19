@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "'author' parameter lacking default value",
+  "message": "Invalid parameters"
+}

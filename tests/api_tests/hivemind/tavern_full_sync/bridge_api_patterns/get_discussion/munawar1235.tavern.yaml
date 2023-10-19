@@ -1,0 +1,28 @@
+---
+  test_name: Hivemind bridge_api.get_discussion munawar1235
+
+  marks:
+    - fullsynctest
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: bridge_api.get_discussion munawar1235
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.get_discussion"
+          params: {'author': 'munawar1235', 'permlink': 'why-water-pollution-should-matter-to-all-of-us'}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:has_valid_response
+          extra_kwargs:
+            method: "munawar1235"
+            directory: "bridge_api_patterns/get_discussion"

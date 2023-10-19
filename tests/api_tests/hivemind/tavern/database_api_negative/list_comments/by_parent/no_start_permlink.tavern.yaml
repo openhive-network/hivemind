@@ -1,0 +1,33 @@
+---
+test_name: Hivemind
+
+marks:
+  - patterntest # child_author, child_permlink are optional (but only when both are skipped)
+  - negative
+
+includes:
+  - !include ../../../common.yaml
+
+stages:
+  - name: test
+    request:
+      url: "{service.proto:s}://{service.server:s}:{service.port}/"
+      method: POST
+      headers:
+        content-type: application/json
+      json:
+        jsonrpc: "2.0"
+        id: 1
+        method: "database_api.list_comments"
+        params:
+          {
+            "start": ["knozaki2015", "re-givemeyoursteem-winners-of-steemit-food-challenge-3-desserts-to-die-for-20160828t181032961z", "givemeyoursteem", ""],
+            "limit": 10,
+            "order": "by_parent",
+          }
+    response:
+      status_code: 200
+      verify_response_with:
+        function: validate_response:compare_response_with_pattern
+        extra_kwargs:
+          error_response: true

@@ -1,0 +1,9 @@
+{
+  "database_head_block": 5000024,
+  "database_patch_date": "2021-01-15 14:41:31.108021",
+  "database_patched_to_revision": "6d58301a",
+  "database_schema_version": 34,
+  "hivemind_git_date": "2021-01-15 14:41:04 +0100",
+  "hivemind_git_rev": "6d58301a",
+  "hivemind_version": "1.24rc0"
+}

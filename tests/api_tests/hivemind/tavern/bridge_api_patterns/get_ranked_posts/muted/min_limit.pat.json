@@ -1,0 +1,95 @@
+[
+  {
+    "active_votes": [
+      {
+        "rshares": 17735315160760,
+        "voter": "itsascam"
+      },
+      {
+        "rshares": 17865766992651,
+        "voter": "steemed"
+      },
+      {
+        "rshares": 3091007147,
+        "voter": "boy"
+      },
+      {
+        "rshares": 3751778512,
+        "voter": "bue-witness"
+      },
+      {
+        "rshares": 703064185,
+        "voter": "bunny"
+      },
+      {
+        "rshares": 52778799199,
+        "voter": "bue"
+      },
+      {
+        "rshares": 1656856120,
+        "voter": "mini"
+      },
+      {
+        "rshares": 213490026,
+        "voter": "moon"
+      },
+      {
+        "rshares": 621592296,
+        "voter": "healthcare"
+      },
+      {
+        "rshares": 923609344,
+        "voter": "daniel.pan"
+      },
+      {
+        "rshares": 287848982,
+        "voter": "helen.tan"
+      },
+      {
+        "rshares": 27692743706,
+        "voter": "r4fken"
+      }
+    ],
+    "author": "r4fken",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": -5.58,
+    "beneficiaries": [],
+    "blacklists": [
+      "reputation-0"
+    ],
+    "body": "Do I understand correctly that you're referencing the initial \"mining\" by a select group of devs and friends, resulting in \"overwhelming control\" by means of vests now?\nOr am I just imagining things? :)",
+    "category": "philosophy",
+    "children": 0,
+    "created": "2016-08-20T09:06:27",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "philosophy"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 35692802942928,
+    "parent_author": "steemed",
+    "parent_permlink": "re-dantheman-our-corrupt-sense-of-fairness-20160820t035220528z",
+    "payout": 196.246,
+    "payout_at": "2016-08-27T09:06:27",
+    "pending_payout_value": "196.246 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-steemed-re-dantheman-our-corrupt-sense-of-fairness-20160820t090630202z",
+    "post_id": 903105,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": true,
+      "hide": false,
+      "total_votes": 12
+    },
+    "title": "RE: Our Corrupt Sense of Fairness",
+    "updated": "2016-08-20T09:07:12",
+    "url": "/philosophy/@dantheman/our-corrupt-sense-of-fairness#@r4fken/re-steemed-re-dantheman-our-corrupt-sense-of-fairness-20160820t090630202z"
+  }
+]

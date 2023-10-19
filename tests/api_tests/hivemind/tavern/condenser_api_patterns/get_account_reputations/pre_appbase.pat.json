@@ -1,0 +1,402 @@
+[
+  {
+    "account": "a-0",
+    "reputation": 0
+  },
+  {
+    "account": "a-1",
+    "reputation": 0
+  },
+  {
+    "account": "a-a",
+    "reputation": 0
+  },
+  {
+    "account": "a-big-sceret",
+    "reputation": 0
+  },
+  {
+    "account": "a-cat-named-joe",
+    "reputation": 0
+  },
+  {
+    "account": "a-f",
+    "reputation": 0
+  },
+  {
+    "account": "a-h",
+    "reputation": 0
+  },
+  {
+    "account": "a-k11u",
+    "reputation": 0
+  },
+  {
+    "account": "a-luigh",
+    "reputation": 0
+  },
+  {
+    "account": "a-m3001",
+    "reputation": 93113319
+  },
+  {
+    "account": "a-man",
+    "reputation": 92076663
+  },
+  {
+    "account": "a-pile-of-steem",
+    "reputation": 0
+  },
+  {
+    "account": "a-spears",
+    "reputation": 37040190
+  },
+  {
+    "account": "a-z",
+    "reputation": 0
+  },
+  {
+    "account": "a001",
+    "reputation": 0
+  },
+  {
+    "account": "a0047a",
+    "reputation": 0
+  },
+  {
+    "account": "a007",
+    "reputation": 0
+  },
+  {
+    "account": "a0487987",
+    "reputation": 0
+  },
+  {
+    "account": "a0de6qzchbut",
+    "reputation": 0
+  },
+  {
+    "account": "a100",
+    "reputation": 0
+  },
+  {
+    "account": "a10cwarhog",
+    "reputation": 0
+  },
+  {
+    "account": "a10inchcock",
+    "reputation": 0
+  },
+  {
+    "account": "a11at",
+    "reputation": -980601486666
+  },
+  {
+    "account": "a11stabilizer",
+    "reputation": 5228846
+  },
+  {
+    "account": "a12inchcock",
+    "reputation": 0
+  },
+  {
+    "account": "a13inchcock",
+    "reputation": 0
+  },
+  {
+    "account": "a13xz",
+    "reputation": 4739863
+  },
+  {
+    "account": "a14inchcock",
+    "reputation": 0
+  },
+  {
+    "account": "a1962w",
+    "reputation": 0
+  },
+  {
+    "account": "a1a",
+    "reputation": 47186230
+  },
+  {
+    "account": "a1i-00ba0eb5",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-01e13986",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-03a7078f",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-04a70788",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-04ba0eb1",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-05a70789",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-06a7078a",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-06ba0eb3",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-06e13981",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-07a7078b",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-07ba0eb2",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-07e13980",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-0b6eb596",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-0f6eb592",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-106eb58d",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-107e64e9",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-10ba0ea5",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-10e23a97",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-111d3fc9",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-11ba0ea4",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-121d3fca",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-137e64ea",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-13e23a94",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-16ba0ea3",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-16e23a91",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-172e8d9b",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-176eb58a",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-17ba0ea2",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-17e23a90",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-182f8c94",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-188530ad",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-19571a91",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-19a70795",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-19bb0eac",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-1a8530af",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-1ae18298",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-1b2f8c97",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-1b7e64e2",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-1b8530ae",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-1d7f65e4",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-211c3ef9",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-216ccfad",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-221c3efa",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-231c3efb",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-286db6b5",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-296db6b4",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-29e182ab",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-2a4fe79f",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-2a6db6b7",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-2b6db6b6",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-2c511ca4",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-2fe182ad",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-34e182b6",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-34e487b6",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-35b112b9",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-374fe782",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-39982f8c",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-412f8ccd",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-42e281c0",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-439522f6",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-43c3a0c1",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-458530f0",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-45a33fcf",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-483192d5",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-4b1c3e93",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-4b9a2ffe",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-4c1c3e94",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-4ccfacce",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-4d1c3e95",
+    "reputation": 0
+  },
+  {
+    "account": "a1i-4dcfaccf",
+    "reputation": 0
+  }
+]

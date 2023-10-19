@@ -1,0 +1,586 @@
+[
+  {
+    "percent": 10000,
+    "reputation": 83122046,
+    "rshares": 17073275387190,
+    "time": "2016-07-04T12:05:36",
+    "voter": "itsascam",
+    "weight": 388911115399159558
+  },
+  {
+    "percent": 10000,
+    "reputation": 43394593255,
+    "rshares": 2104504548894,
+    "time": "2016-07-04T12:05:39",
+    "voter": "steemroller",
+    "weight": 26604201324278296
+  },
+  {
+    "percent": 10000,
+    "reputation": 0,
+    "rshares": 1711313683087,
+    "time": "2016-07-04T12:21:51",
+    "voter": "disney",
+    "weight": 41693996748054139
+  },
+  {
+    "percent": 10000,
+    "reputation": 19032535635212,
+    "rshares": 15879088924683,
+    "time": "2016-07-04T12:05:33",
+    "voter": "steemed",
+    "weight": 1891384739889263395
+  },
+  {
+    "percent": 10000,
+    "reputation": 0,
+    "rshares": 3132248933242,
+    "time": "2016-07-04T11:59:27",
+    "voter": "lafona-miner",
+    "weight": 647652949158589794
+  },
+  {
+    "percent": 10000,
+    "reputation": 9111465318256,
+    "rshares": 363849693306,
+    "time": "2016-07-04T11:58:48",
+    "voter": "lafona",
+    "weight": 107663871393335681
+  },
+  {
+    "percent": 10000,
+    "reputation": 14756948501919,
+    "rshares": 5546655918596,
+    "time": "2016-07-05T07:31:51",
+    "voter": "fuzzyvest",
+    "weight": 64483932369600937
+  },
+  {
+    "percent": 10000,
+    "reputation": 16685610555705,
+    "rshares": 20070233210045,
+    "time": "2016-07-04T14:07:18",
+    "voter": "tombstone",
+    "weight": 366629006206026086
+  },
+  {
+    "percent": 10000,
+    "reputation": 2827502899317,
+    "rshares": 1036137475696,
+    "time": "2016-07-04T16:53:48",
+    "voter": "ihashfury",
+    "weight": 13302555408796585
+  },
+  {
+    "percent": 10000,
+    "reputation": -37765249963674,
+    "rshares": 6081349345579,
+    "time": "2016-07-04T12:19:27",
+    "voter": "wang",
+    "weight": 161315843181641408
+  },
+  {
+    "percent": 10000,
+    "reputation": 89703349977794,
+    "rshares": 1674260893154,
+    "time": "2016-07-08T12:52:12",
+    "voter": "xeroc",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 59074616588451,
+    "rshares": 2443327173913,
+    "time": "2016-07-04T12:47:39",
+    "voter": "complexring",
+    "weight": 64042166956337054
+  },
+  {
+    "percent": 10000,
+    "reputation": 28971806962251,
+    "rshares": 874089887520,
+    "time": "2016-07-04T15:09:45",
+    "voter": "joseph",
+    "weight": 11511987345061241
+  },
+  {
+    "percent": 10000,
+    "reputation": 71087197697999,
+    "rshares": 469882876120,
+    "time": "2016-07-04T12:21:51",
+    "voter": "benjojo",
+    "weight": 11956983110196715
+  },
+  {
+    "percent": 10000,
+    "reputation": 2802091583976,
+    "rshares": 19857474388,
+    "time": "2016-07-04T14:29:33",
+    "voter": "proctologic",
+    "weight": 264788886361786
+  },
+  {
+    "percent": 10000,
+    "reputation": 147478489309626,
+    "rshares": 576997378826,
+    "time": "2016-07-04T17:42:12",
+    "voter": "tuck-fheman",
+    "weight": 7252400952065147
+  },
+  {
+    "percent": 10000,
+    "reputation": 5992588876858,
+    "rshares": 17001056544,
+    "time": "2016-07-04T12:10:45",
+    "voter": "hcf27",
+    "weight": 320611453191220
+  },
+  {
+    "percent": 10000,
+    "reputation": 6977251504339,
+    "rshares": 2044400735,
+    "time": "2016-07-06T04:50:09",
+    "voter": "dedriss",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 37454101478493,
+    "rshares": 172673276101,
+    "time": "2016-07-04T12:10:54",
+    "voter": "chitty",
+    "weight": 3276572795693180
+  },
+  {
+    "percent": 10000,
+    "reputation": 1529396926746,
+    "rshares": 6220334363,
+    "time": "2016-07-04T22:49:39",
+    "voter": "jabberw0cky",
+    "weight": 77560160490447
+  },
+  {
+    "percent": 10000,
+    "reputation": 4013874407471,
+    "rshares": 77259213582,
+    "time": "2016-07-04T12:01:51",
+    "voter": "linouxis9",
+    "weight": 16509277834707921
+  },
+  {
+    "percent": 10000,
+    "reputation": 59130509872662,
+    "rshares": 376392019415,
+    "time": "2016-07-04T12:25:36",
+    "voter": "kencode",
+    "weight": 10109552457561521
+  },
+  {
+    "percent": 10000,
+    "reputation": 2520096511491,
+    "rshares": 670969655,
+    "time": "2016-07-04T19:16:06",
+    "voter": "daowisp",
+    "weight": 8367180587812
+  },
+  {
+    "percent": 10000,
+    "reputation": 3120299664537,
+    "rshares": 13934586736,
+    "time": "2016-07-04T18:18:42",
+    "voter": "valtr",
+    "weight": 173801221766361
+  },
+  {
+    "percent": 10000,
+    "reputation": 1118904717803,
+    "rshares": 466994730769,
+    "time": "2016-07-06T03:29:27",
+    "voter": "noaommerrr",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 194727158609,
+    "rshares": 1185022227,
+    "time": "2016-07-05T06:31:24",
+    "voter": "pstrident",
+    "weight": 14770124953016
+  },
+  {
+    "percent": 10000,
+    "reputation": 4668084943,
+    "rshares": 549680715,
+    "time": "2016-07-04T15:32:42",
+    "voter": "finfree",
+    "weight": 7155334400700
+  },
+  {
+    "percent": 10000,
+    "reputation": 596707334180,
+    "rshares": 3570648887,
+    "time": "2016-07-04T12:09:27",
+    "voter": "ppitonak",
+    "weight": 61135412185319
+  },
+  {
+    "percent": 10000,
+    "reputation": 2830877880805,
+    "rshares": 148127077400,
+    "time": "2016-07-04T12:00:27",
+    "voter": "vato",
+    "weight": 23842697425956307
+  },
+  {
+    "percent": 10000,
+    "reputation": 1404519920935,
+    "rshares": 1179176903,
+    "time": "2016-07-05T00:53:09",
+    "voter": "kenmonkey",
+    "weight": 14701517285122
+  },
+  {
+    "percent": 10000,
+    "reputation": 2211182103876,
+    "rshares": 20813077087,
+    "time": "2016-07-04T12:40:06",
+    "voter": "grumpymutt",
+    "weight": 571469089456422
+  },
+  {
+    "percent": 10000,
+    "reputation": 9600934617910,
+    "rshares": 5455173390,
+    "time": "2016-07-04T16:40:33",
+    "voter": "jademont",
+    "weight": 71005723438892
+  },
+  {
+    "percent": 10000,
+    "reputation": 0,
+    "rshares": 478869244,
+    "time": "2016-07-10T14:59:51",
+    "voter": "nagnegil",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 376960001789,
+    "rshares": 4695812009,
+    "time": "2016-07-04T12:25:09",
+    "voter": "spaninv",
+    "weight": 125086360241158
+  },
+  {
+    "percent": 10000,
+    "reputation": 4599317604,
+    "rshares": 1687897052,
+    "time": "2016-07-23T14:26:18",
+    "voter": "bladetrigger",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 6703300627334,
+    "rshares": 442600711,
+    "time": "2016-07-04T13:00:36",
+    "voter": "jonnybitcoin",
+    "weight": 11077339555316
+  },
+  {
+    "percent": 10000,
+    "reputation": 348876921907,
+    "rshares": 568272305,
+    "time": "2016-07-04T20:30:51",
+    "voter": "n25052016",
+    "weight": 7086401542114
+  },
+  {
+    "percent": 10000,
+    "reputation": 14968641922913,
+    "rshares": 29760077641,
+    "time": "2016-07-09T08:24:21",
+    "voter": "oaldamster",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 22378434861462,
+    "rshares": 196675036300,
+    "time": "2016-07-04T12:27:12",
+    "voter": "stino-san",
+    "weight": 5422948523430524
+  },
+  {
+    "percent": 3301,
+    "reputation": 2902053059801,
+    "rshares": 8335917188,
+    "time": "2016-08-30T19:51:15",
+    "voter": "murh",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 2510175673478,
+    "rshares": 4164164809,
+    "time": "2016-07-05T05:58:21",
+    "voter": "dking7334",
+    "weight": 51905786598828
+  },
+  {
+    "percent": 10000,
+    "reputation": 64573188744746,
+    "rshares": 16412278964,
+    "time": "2016-07-04T12:01:03",
+    "voter": "dragonslayer109",
+    "weight": 2998597435197534
+  },
+  {
+    "percent": 10000,
+    "reputation": 11765473490257,
+    "rshares": 5771943611,
+    "time": "2016-07-05T01:27:21",
+    "voter": "justtryme90",
+    "weight": 71955837935141
+  },
+  {
+    "percent": 10000,
+    "reputation": 159873051060,
+    "rshares": 726493764,
+    "time": "2016-07-10T06:36:18",
+    "voter": "yuda-susanto",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 475074648083,
+    "rshares": 340590165,
+    "time": "2016-07-04T14:58:21",
+    "voter": "robi-rusmana",
+    "weight": 4538370009317
+  },
+  {
+    "percent": 10000,
+    "reputation": 0,
+    "rshares": 352260399,
+    "time": "2016-07-04T12:25:12",
+    "voter": "stiletto",
+    "weight": 9399026859023
+  },
+  {
+    "percent": 10000,
+    "reputation": 2429242458900,
+    "rshares": 16278002737,
+    "time": "2016-07-04T14:49:36",
+    "voter": "crypto-fan",
+    "weight": 216953127184371
+  },
+  {
+    "percent": 10000,
+    "reputation": 10018533695,
+    "rshares": 310977000,
+    "time": "2016-07-04T17:07:00",
+    "voter": "dzham",
+    "weight": 3938297850273
+  },
+  {
+    "percent": 10000,
+    "reputation": -69986735459,
+    "rshares": 3481997948,
+    "time": "2016-07-04T12:54:03",
+    "voter": "timur-yusupov",
+    "weight": 87154006963901
+  },
+  {
+    "percent": 10000,
+    "reputation": 5886979119053,
+    "rshares": 20160795088,
+    "time": "2016-07-09T14:30:54",
+    "voter": "geoffrey",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 0,
+    "rshares": 285680547,
+    "time": "2016-07-04T21:55:06",
+    "voter": "zach-steen",
+    "weight": 3562397422678
+  },
+  {
+    "percent": 10000,
+    "reputation": 10374460,
+    "rshares": 243186163,
+    "time": "2016-07-04T21:40:27",
+    "voter": "alex-hulsmeier",
+    "weight": 3032519104357
+  },
+  {
+    "percent": 10000,
+    "reputation": 712701798830,
+    "rshares": 6083149748,
+    "time": "2016-07-04T13:34:03",
+    "voter": "graystone",
+    "weight": 152206881302407
+  },
+  {
+    "percent": 10000,
+    "reputation": 18458799241134,
+    "rshares": 3838303085,
+    "time": "2016-07-04T13:09:12",
+    "voter": "karnal",
+    "weight": 96056860204948
+  },
+  {
+    "percent": 10000,
+    "reputation": 2758500001611,
+    "rshares": 27855261,
+    "time": "2016-07-05T12:19:30",
+    "voter": "fuck.off",
+    "weight": 302062214127
+  },
+  {
+    "percent": 10000,
+    "reputation": 1019011681813,
+    "rshares": 26946469,
+    "time": "2016-07-05T12:20:48",
+    "voter": "iloveporn",
+    "weight": 292207087254
+  },
+  {
+    "percent": 10000,
+    "reputation": 1557874437556,
+    "rshares": 26211978,
+    "time": "2016-07-05T12:02:39",
+    "voter": "the.bot",
+    "weight": 284242653513
+  },
+  {
+    "percent": 10000,
+    "reputation": 4081412,
+    "rshares": 255986215,
+    "time": "2016-07-04T13:00:09",
+    "voter": "raptorak",
+    "weight": 6406864332112
+  },
+  {
+    "percent": 10000,
+    "reputation": 6105332515536,
+    "rshares": 265981051,
+    "time": "2016-07-04T12:07:42",
+    "voter": "primus",
+    "weight": 3929323897785
+  },
+  {
+    "percent": 10000,
+    "reputation": 0,
+    "rshares": 255164875,
+    "time": "2016-07-04T12:37:18",
+    "voter": "korisa",
+    "weight": 7008964263329
+  },
+  {
+    "percent": 10000,
+    "reputation": 40015434379,
+    "rshares": 249654337,
+    "time": "2016-07-04T13:13:36",
+    "voter": "diabalos",
+    "weight": 6247345732873
+  },
+  {
+    "percent": 10000,
+    "reputation": 476904340100,
+    "rshares": 435557733,
+    "time": "2016-07-18T05:55:39",
+    "voter": "endgame",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 80753905287,
+    "rshares": 196944953,
+    "time": "2016-07-23T15:17:30",
+    "voter": "sudnokpok",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 1193366475012,
+    "rshares": 0,
+    "time": "2016-08-30T19:50:39",
+    "voter": "madhatting",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 1619941675,
+    "rshares": 112152017,
+    "time": "2016-08-01T09:39:39",
+    "voter": "quigonjinn",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 702602138233,
+    "rshares": 117882668,
+    "time": "2016-07-20T19:47:24",
+    "voter": "alekst",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 59110845037,
+    "rshares": 110181194,
+    "time": "2016-07-15T17:10:57",
+    "voter": "turretkilo",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 6985921192853,
+    "rshares": 65089496512,
+    "time": "2016-07-15T20:10:42",
+    "voter": "johnsmith",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 936775537,
+    "rshares": 126889938,
+    "time": "2016-07-29T19:43:45",
+    "voter": "psixto",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 50308101136,
+    "rshares": 106865097,
+    "time": "2016-07-22T20:29:36",
+    "voter": "ap2002",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 4321340596238,
+    "rshares": 21856133,
+    "time": "2016-07-24T13:19:48",
+    "voter": "asdes",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": -1237258815752,
+    "rshares": 29309339,
+    "time": "2016-07-29T10:31:09",
+    "voter": "admin2017",
+    "weight": 0
+  },
+  {
+    "percent": 10000,
+    "reputation": 20919704572,
+    "rshares": 3424657,
+    "time": "2016-08-07T07:49:45",
+    "voter": "deejayehn",
+    "weight": 0
+  }
+]

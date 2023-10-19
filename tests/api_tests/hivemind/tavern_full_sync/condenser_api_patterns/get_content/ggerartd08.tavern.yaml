@@ -1,0 +1,29 @@
+---
+  test_name: Hivemind condenser_api.get_content ggerartd08
+
+  marks:
+    - fullsynctest
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: get_content ggerartd08
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "condenser_api.get_content"
+          params: ['ggerartd08', 'esp-en-la-mejor-app-para-el-venezolano-hoy-en-dia-the-best-app-for-the-venezuelan-today']
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:has_valid_response
+          extra_kwargs:
+            method: "ggerartd08"
+            directory: "condenser_api_patterns/get_content"
+

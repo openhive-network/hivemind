@@ -1,0 +1,451 @@
+[
+  {
+    "active_votes": [
+      {
+        "rshares": 2233757397,
+        "voter": "bitland"
+      },
+      {
+        "rshares": 230234023,
+        "voter": "keyser"
+      },
+      {
+        "rshares": 706494264,
+        "voter": "wuyueling"
+      },
+      {
+        "rshares": 415840834,
+        "voter": "runrudy"
+      },
+      {
+        "rshares": 59566200,
+        "voter": "serikus"
+      }
+    ],
+    "author": "iamwne",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 55.49,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "http://img12.deviantart.net/c221/i/2016/089/2/5/speeder_concept_by_ehrendreich-d9x2n88.jpg\n\n**Process And Technique**\n\nI am constantly trying to grow as an artist. This often means using new techniques and tools. This time I have begin experimenting with Pixar Subdivsion Surface modeling. This was the first time that I had really used this method. It is great a making some rather complex forms with very little base geometry. Pretty powerful stuff. Not sure how well executed this model is but I thought it was an interesting start.\n\nThe geometric features in the front grate and along the side was from a displacement texture that was made in Zbrush. It is a, \"greeble\" generator and is great for scifi features like panels and such. The overall geometry was modeled in Modo. I tend to move in and out of Modo. For my main 3D tool I use 3DS Max. But Modo just has some interesting modeling tools that I rediscover from time to time.\n\nhttp://img04.deviantart.net/0859/i/2016/089/0/1/speeder_concept_1_by_ehrendreich-d9x2nla.jpg\n\n\n**The Concept**\n\nThe concept is something like the Star Wars land speeder. Luke's was more of a wreck. I was going for more of a \"downtown\" ride. Something more like a 70's Caddy or Lincoln. It was a interesting process to use the Pixar Subs it not only produces optimal geometry but can be fast to model with when you get used to it. \n\nhttp://img09.deviantart.net/d13f/i/2016/089/b/5/speeder_concept_3_by_ehrendreich-d9x2nnm.jpg\n\n\n**How Do You Get Into It**\n\nOkay I have to admit it was a good question that came from a posting someone made on my Deviant Art page http://ehrendreich.deviantart.com/art/Speeder-Concept-1-599746798 The poster notices that there are no door seams. Oops I noticed that now. That I no longer have the scene files that I originally used to make this. \n\nhttp://img06.deviantart.net/8099/i/2016/089/e/f/speeder_concept_4_by_ehrendreich-d9x2nrb.jpg",
+    "category": "art",
+    "children": 3,
+    "created": "2016-09-08T20:29:24",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "http://img12.deviantart.net/c221/i/2016/089/2/5/speeder_concept_by_ehrendreich-d9x2n88.jpg",
+        "http://img04.deviantart.net/0859/i/2016/089/0/1/speeder_concept_1_by_ehrendreich-d9x2nla.jpg",
+        "http://img09.deviantart.net/d13f/i/2016/089/b/5/speeder_concept_3_by_ehrendreich-d9x2nnm.jpg",
+        "http://img06.deviantart.net/8099/i/2016/089/e/f/speeder_concept_4_by_ehrendreich-d9x2nrb.jpg"
+      ],
+      "links": [
+        "http://ehrendreich.deviantart.com/art/Speeder-Concept-1-599746798"
+      ],
+      "tags": [
+        "art",
+        "animation",
+        "effects",
+        "photography"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 3645892718,
+    "payout": 0.001,
+    "payout_at": "2016-09-15T20:29:24",
+    "pending_payout_value": "0.001 HBD",
+    "percent_hbd": 10000,
+    "permlink": "conceptualizing-a-scifi-land-speeder",
+    "post_id": 1176607,
+    "promoted": "0.000 HBD",
+    "reblogged_by": [
+      "test-safari"
+    ],
+    "replies": [],
+    "reblogs": 1,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 5
+    },
+    "title": "Conceptualizing A SciFi Land Speeder",
+    "updated": "2016-09-08T20:29:24",
+    "url": "/art/@iamwne/conceptualizing-a-scifi-land-speeder"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 5283473327347,
+        "voter": "riverhead"
+      },
+      {
+        "rshares": 2483294789,
+        "voter": "boy"
+      },
+      {
+        "rshares": 3015024269,
+        "voter": "bue-witness"
+      },
+      {
+        "rshares": 547206592,
+        "voter": "bunny"
+      },
+      {
+        "rshares": 54836620030,
+        "voter": "bue"
+      },
+      {
+        "rshares": 1330648952,
+        "voter": "mini"
+      },
+      {
+        "rshares": 213794688,
+        "voter": "moon"
+      },
+      {
+        "rshares": 499997788,
+        "voter": "healthcare"
+      },
+      {
+        "rshares": 973121873,
+        "voter": "daniel.pan"
+      },
+      {
+        "rshares": 200789786404,
+        "voter": "gardenlady"
+      },
+      {
+        "rshares": 288353305,
+        "voter": "helen.tan"
+      },
+      {
+        "rshares": 26767597085,
+        "voter": "james-show"
+      },
+      {
+        "rshares": 1426340725,
+        "voter": "murh"
+      },
+      {
+        "rshares": 12432839327,
+        "voter": "andu"
+      },
+      {
+        "rshares": 5601455557,
+        "voter": "micheletrainer"
+      },
+      {
+        "rshares": 503533647000,
+        "voter": "neoxian"
+      },
+      {
+        "rshares": 25656362306,
+        "voter": "strangerarray"
+      },
+      {
+        "rshares": 13048862368,
+        "voter": "meesterboom"
+      },
+      {
+        "rshares": 1592466374,
+        "voter": "tinyhomeliving"
+      },
+      {
+        "rshares": 2552685431,
+        "voter": "sgnsteems"
+      },
+      {
+        "rshares": 143138765143,
+        "voter": "opheliafu"
+      },
+      {
+        "rshares": 6302461097,
+        "voter": "all-of-us"
+      },
+      {
+        "rshares": 1963818123,
+        "voter": "vlad"
+      },
+      {
+        "rshares": 9095676197,
+        "voter": "fishborne"
+      },
+      {
+        "rshares": 21624175748,
+        "voter": "prufarchy"
+      },
+      {
+        "rshares": 2232355921,
+        "voter": "ace108"
+      },
+      {
+        "rshares": 3021463052,
+        "voter": "phoenixmaid"
+      },
+      {
+        "rshares": 114993452,
+        "voter": "bullionstackers"
+      },
+      {
+        "rshares": 6840836999,
+        "voter": "sykochica"
+      },
+      {
+        "rshares": 18734127315,
+        "voter": "reneenouveau"
+      },
+      {
+        "rshares": 22018255202,
+        "voter": "amy-goodrich"
+      },
+      {
+        "rshares": 6072778282,
+        "voter": "kryptik"
+      },
+      {
+        "rshares": 106214338,
+        "voter": "future24"
+      },
+      {
+        "rshares": 21490659308,
+        "voter": "hanshotfirst"
+      },
+      {
+        "rshares": 39694111926,
+        "voter": "bitcalm"
+      },
+      {
+        "rshares": 60785727,
+        "voter": "ajavajive"
+      },
+      {
+        "rshares": 1021606816,
+        "voter": "runridefly"
+      },
+      {
+        "rshares": 771001724,
+        "voter": "goldstein"
+      },
+      {
+        "rshares": 9068270563,
+        "voter": "goose"
+      },
+      {
+        "rshares": 4858706260,
+        "voter": "gringalicious"
+      },
+      {
+        "rshares": 52032356,
+        "voter": "stir"
+      },
+      {
+        "rshares": 53417623,
+        "voter": "lexikon082"
+      }
+    ],
+    "author": "meesterboom",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 61.17,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "http://i.imgur.com/wQhulkH.jpg\n## How many times have you cut your finger with a knife in the kitchen?\n\n## Have you always wanted to chop with a knife like those chefs on the tv?\n\n## Do you crave to learn the dark arts of the ninja?\n\n## *Then read on...*\n\nI make a lot of food, if you follow me you might have noticed ;0)\n\nOne of the most useful things that a friend taught me and no it wasn't the *don't touch your nethers after chopping a habanero* was how to use a chefs knife without cutting yourself and in the process chop really fast!!!\n\nIt's really simple and once you learn you will become a chopping machine.. a chopping ninja!!\n\nSo let's go. Firstly you will need a big, heavy, sharp chefs knife. Like so\n\nhttp://i.imgur.com/P5AUOVq.jpg\n\nNow this is quite simple but best demonstrated by seeing so I have made a couple of videos! The end of the first being the most ***ninja***\n\nEssentially you want to hold your fingers pointing down to the veg, making a 'wall' for the knife to slide down. This way nothing is in front of the blade but the veg.\n\nhttp://i.imgur.com/2YVcaJ5.jpg\n\nhttp://i.imgur.com/abf8XEy.jpg\n\nAnd to demonstrate in a better way here are a couple of short videos.\n\nhttps://youtu.be/Ye5QLcEG35I\n\nAnd one more for the lolz!\n\nhttps://youtu.be/UYr4DhiDy8g\n\nLet me know what you think! And remember.. You are ***ninja*** now.",
+    "category": "food",
+    "children": 15,
+    "created": "2016-09-08T19:36:39",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "http://i.imgur.com/wQhulkH.jpg",
+        "http://i.imgur.com/P5AUOVq.jpg",
+        "http://i.imgur.com/2YVcaJ5.jpg",
+        "http://i.imgur.com/abf8XEy.jpg",
+        "https://img.youtube.com/vi/Ye5QLcEG35I/0.jpg",
+        "https://img.youtube.com/vi/UYr4DhiDy8g/0.jpg"
+      ],
+      "links": [
+        "https://youtu.be/Ye5QLcEG35I",
+        "https://youtu.be/UYr4DhiDy8g"
+      ],
+      "tags": [
+        "food",
+        "life",
+        "skillz",
+        "blog"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 6459399945382,
+    "payout": 5.888,
+    "payout_at": "2016-09-15T19:36:39",
+    "pending_payout_value": "5.888 HBD",
+    "percent_hbd": 10000,
+    "permlink": "chop-veggies-like-a-ninja-it-s-easy",
+    "post_id": 1175966,
+    "promoted": "0.000 HBD",
+    "reblogged_by": [
+      "test-safari"
+    ],
+    "replies": [],
+    "reblogs": 1,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 42
+    },
+    "title": "Chop veggies like a ninja it's easy!!",
+    "updated": "2016-09-08T19:36:39",
+    "url": "/food/@meesterboom/chop-veggies-like-a-ninja-it-s-easy"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 27255267301,
+        "voter": "ratel"
+      },
+      {
+        "rshares": 581218698,
+        "voter": "svamiva"
+      },
+      {
+        "rshares": 2593410614,
+        "voter": "alexft"
+      },
+      {
+        "rshares": 9861245659,
+        "voter": "romait"
+      },
+      {
+        "rshares": 62887677303,
+        "voter": "lehard"
+      },
+      {
+        "rshares": 268840530,
+        "voter": "lexus083"
+      },
+      {
+        "rshares": 6413695158,
+        "voter": "smolalit"
+      },
+      {
+        "rshares": 361947925,
+        "voter": "kellywin21"
+      },
+      {
+        "rshares": 5576305202,
+        "voter": "sharker"
+      },
+      {
+        "rshares": 8902151171,
+        "voter": "fishborne"
+      },
+      {
+        "rshares": 18150655919,
+        "voter": "carlidos"
+      },
+      {
+        "rshares": 11194023167,
+        "voter": "crypto.owl"
+      },
+      {
+        "rshares": 231254136,
+        "voter": "alexbezimeni"
+      },
+      {
+        "rshares": 170287271,
+        "voter": "kibela"
+      },
+      {
+        "rshares": 123410225,
+        "voter": "ap2002"
+      },
+      {
+        "rshares": 982306236,
+        "voter": "fooblic"
+      },
+      {
+        "rshares": 58933010,
+        "voter": "sijoittaja"
+      },
+      {
+        "rshares": 62179775,
+        "voter": "evgenyche"
+      },
+      {
+        "rshares": 51510158,
+        "voter": "stanislav1"
+      },
+      {
+        "rshares": 3457634605,
+        "voter": "ekaterina4ka"
+      },
+      {
+        "rshares": 521560776,
+        "voter": "grisha-danunaher"
+      },
+      {
+        "rshares": 157466875,
+        "voter": "anyuta312"
+      },
+      {
+        "rshares": 159596355,
+        "voter": "irensche"
+      },
+      {
+        "rshares": 68971389,
+        "voter": "serikus"
+      }
+    ],
+    "author": "smolalit",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 50.83,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Science too can be beautiful.\n>\u041d\u0430\u0443\u043a\u0430 \u0442\u043e\u0436\u0435 \u043c\u043e\u0436\u0435\u0442 \u0431\u044b\u0442\u044c \u043f\u0440\u0435\u043a\u0440\u0430\u0441\u043d\u043e\u0439.\n\n<center>![](https://ipfs.pics/ipfs/Qmdr3TXnYv86QkaCqPz7uHZurCAy2JPQfBeV3RY2iykPRy)</center>\n\n*performed by the author\n\u0430\u0432\u0442\u043e\u0440\u0441\u043a\u0438\u0439 \u0444\u0440\u0430\u043a\u0442\u0430\u043b*",
+    "category": "art",
+    "children": 5,
+    "created": "2016-09-08T19:12:18",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "https://ipfs.pics/ipfs/Qmdr3TXnYv86QkaCqPz7uHZurCAy2JPQfBeV3RY2iykPRy"
+      ],
+      "tags": [
+        "art",
+        "photography",
+        "science",
+        "ru"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 160091549458,
+    "payout": 0.058,
+    "payout_at": "2016-09-15T19:12:18",
+    "pending_payout_value": "0.058 HBD",
+    "percent_hbd": 10000,
+    "permlink": "simple-fractal-prostoi-fraktal",
+    "post_id": 1175624,
+    "promoted": "0.000 HBD",
+    "reblogged_by": [
+      "test-safari"
+    ],
+    "replies": [],
+    "reblogs": 1,
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 24
+    },
+    "title": "Fractal - mood (\u0424\u0440\u0430\u043a\u0442\u0430\u043b-\u043d\u0430\u0441\u0442\u0440\u043e\u0435\u043d\u0438\u0435)",
+    "updated": "2016-09-08T19:32:18",
+    "url": "/art/@smolalit/simple-fractal-prostoi-fraktal"
+  }
+]

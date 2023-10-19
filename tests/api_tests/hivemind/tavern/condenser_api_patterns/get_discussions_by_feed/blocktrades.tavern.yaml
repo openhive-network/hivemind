@@ -1,0 +1,29 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest # tag is not a tag but account whose feed we are looking at (set of posts created/reblogged by those followed by selected account)
+                  # there can be no nonempty results for not-up-to-date HM because it only gives posts that were created/reblogged within last month (no param to change it)
+                  # original produced overlapping pages
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "condenser_api.get_discussions_by_feed"
+          params: {"tag":"blocktrades","start_author":"michelle.gent","start_permlink":"dusty-the-demon-hunter-part-4","limit":10}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern
+          extra_kwargs:
+            ignore_tags: "<condenser posts>"

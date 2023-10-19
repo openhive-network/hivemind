@@ -1,0 +1,40 @@
+[
+  {
+    "active_votes": [
+      {
+        "percent": "10000",
+        "reputation": 842609,
+        "rshares": 53926980,
+        "voter": "simgregg"
+      }
+    ],
+    "author": "simgregg",
+    "author_reputation": 842609,
+    "beneficiaries": [],
+    "body": "Krew tych, co kochali Ojczyzn\u0119, jak naw\u00f3z dzia\u0142a na nasze pokolenie,\nBo cho\u0107 z\u0142amani i w ziemi\u0119 g\u0142\u0119boko pogrzebani - s\u0105 jak nasienie -\nWolno\u015bci, kt\u00f3ra w nas wci\u0105\u017c zdechn\u0105\u0107 nie chce, lecz tchn\u0105\u0107 na nowo.\nCho\u0107 nas zaora\u0107 chc\u0105, nasz\u0105 dusz\u0119 przemieli\u0107 jak zesch\u0142e pole,\nMy wci\u0105\u017c pod skorup\u0105, jak lawa, t\u0119tni\u0105c\u0105 i \u017cyw\u0105 mamy Wol\u0119 -\nBy \u017cy\u0107, gdzie B\u00f3g \u017cy\u0107 da\u0142 przez wieki, i stworzy\u0142 na nowo.\n\nPolska - to tak \u0142atwo si\u0119 m\u00f3wi, i ci\u0119\u017cko umiera. Lecz trudniej - \u017cyje -\nDla Polski, by nie tylko sia\u0107 to ziarno, i \u0142ama\u0107, ale i zbiera\u0107.\nGdy odessano nam ju\u017c z cia\u0142a dusz\u0119 i ducha, gdy\u015bmy jak lalki si\u0119 stali -\nNa sznurkach cudzej historii - Za co umiera\u0107? Ile krew warta\nNa gie\u0142dzie Lucyfera?\n\nGdy dusza rwie si\u0119 do Ciebie, Bo\u017ce, a cia\u0142o gnije w tym padole,\nPoka\u017c, ile wolno mi Polski kocha\u0107, a ile jej odda\u0107 w niewol\u0119?\nBo wyznaczy\u0142e\u015b ludom ich miejsce na ziemi, wi\u0119c i zabra\u0107 mo\u017cesz,\nLecz czy je wr\u00f3cisz, je\u015bli narody wr\u00f3c\u0105 do Ciebie w pokorze?\nCzy te\u017c jeste\u015bmy jak Izrael, wygnani za sw\u0105 twardo\u015b\u0107 serca,\nZa szale\u0144stwo pychy, kt\u00f3ra przed upadkiem zmierzcha?\n\nKrew tych, co cia\u0142a swe jak nasienie w\u0142o\u017cyli do ziemi,\nB\u0119dzie ros\u0105 na Polski odrodzeniu. Je\u015bli tylko nasze serca zmieni -\nTa sprawiedliwo\u015b\u0107 Boga, jak kwa\u015bny deszcz spuszczony,\nGdy trzeba by\u0142o sia\u0107, a my\u015bmy tylko zbierali plony.",
+    "body_length": 1273,
+    "cashout_time": "2016-08-25T21:19:45",
+    "category": "polska",
+    "children": 1,
+    "created": "2016-08-18T21:19:45",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "json_metadata": "{\"tags\":[\"polska\",\"wolnosc\",\"ojczyzna\",\"patriotyzm\",\"wiersz\"]}",
+    "last_payout": "1969-12-31T23:59:59",
+    "last_update": "2016-08-18T21:19:45",
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 53926980,
+    "parent_author": "",
+    "parent_permlink": "polska",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "nasienie-wolnosci",
+    "post_id": 877989,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "root_title": "Nasienie Wolno\u015bci",
+    "title": "Nasienie Wolno\u015bci",
+    "total_payout_value": "0.000 HBD",
+    "url": "/polska/@simgregg/nasienie-wolnosci"
+  }
+]

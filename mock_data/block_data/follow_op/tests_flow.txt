@@ -1,0 +1,166 @@
+Tests use mainly flw0..flw9 accounts. Follower with no following and list reset tests use flw0x..flw9x accounts.
+Scenarios marked with XY where X indicates flwX as follower and flwY as following accounts. Each scenario uses different pair.
+Tests use bridge.get_relationship_between_accounts with unofficial extra parameter 'debug': true
+
+Tests for validation (unless marked otherwise the result should be no change in relation between accounts):
+block 2010000, time 2016-06-03T08:19:06
+01. missing 'what'
+02. 'what' not a list
+-3. missing 'follower'
+0x-. empty 'following' list in regular operation (like 'ignore'; use 'reset_all_lists' and check relation with 'null' account, look especially at 'created_at' - it would be set to time of b2010000 if that operation had any effect)
+1x-. missing 'following' in list reset when it is ignored (empty operation like 0x-)
+2x-. empty 'following' string in regular operation (like 'blacklist' - empty operation like 0x-)
+3x-. empty 'following' string in list reset when it is ignored - should actually work ('created_at' will show that this relation was first created in this block)
+04. 'what' containing more than one element - the second and further ignored
+05. 'what' element not a string
+06. unknown state - potential future alias: 'mute'
+07. unknown state - potential future alias: 'unmute'
+08. unknown state - potential future alias: 'unignore'
+09. unknown state - potential future alias: 'unfollow'
+10. unknown state: 'invalid'
+-0. not existing 'follower' account
+12. not signed 'follower' (impersonation)
+4x-. only not existing 'following's (one would suffice) - same as empty list
+13. self-follow in a list containing more
+22. only self-follow
+
+Tests for setting of single flags in a pack of initial blocks:
+block 2020000, time 2016-06-03T16:41:06
+14. 'blog'
+15. 'follow'
+16. 'ignore'
+17. 'blacklist'
+18. 'follow_blacklist'
+19. 'follow_muted'
+20. '' (shows only because of 'debug' - similar in other cases below)
+21. 'unblacklist'
+23. 'unfollow_blacklist'
+24. 'unfollow_muted'
+5x-. 'reset_blacklist' (no effect - even though the account is used in later tests, 'created_at' shows that this operation was completely empty, see also 0x-)
+6x-. 'reset_following_list' (see 5x- above)
+7x-. 'reset_muted_list' (see 5x- above)
+8x-. 'reset_follow_blacklist' (artificial relation to 'null' account - compare with 3x- that tests 'reset_all_lists')
+9x-. 'reset_follow_muted_list' (similar to 8x- and 3x-)
+
+Tests for setting multiple flags in separate packs of initial blocks:
+block 2030000, time 2016-06-04T01:04:36
+-> block 2040000, time 2016-06-04T09:32:33
+25. 'blog' -> 'follow' (changes 'block_num' only - that is the only result showing when operation does not override existing flags/state)
+26. 'blog' -> 'ignore' (overrides 'blog')
+27. 'blog' -> '' (blog canceled)
+28. 'blog' -> 'blacklist' (couple examples - the state-vs-flag interaction is the same regardless of flag)
+29. 'blog' -> 'follow_blacklist'
+30. 'blog' -> 'follow_muted'
+31. 'ignore' -> 'follow' (overrides 'ignore')
+32. 'ignore' -> 'ignore'
+34. 'ignore' -> '' (ignore canceled)
+35. 'ignore' -> 'unblacklist'
+36. 'ignore' -> 'follow_blacklist'
+37. 'ignore' -> 'unfollow_blacklist'
+38. 'blacklist' -> 'follow'
+39. 'blacklist' -> 'ignore'
+40. 'blacklist' -> ''
+41. 'blacklist' -> 'blacklist'
+42. 'blacklist' -> 'unblacklist' (blacklist canceled)
+43. 'blacklist' -> 'unfollow_blacklist'
+45. 'blacklist' -> 'follow_muted'
+46. 'follow_blacklist' -> 'blog'
+47. 'follow_blacklist' -> 'ignore'
+48. 'follow_blacklist' -> ''
+49. 'follow_blacklist' -> 'blacklist'
+50. 'follow_blacklist' -> 'follow_blacklist'
+51. 'follow_blacklist' -> 'unfollow_blacklist' (blacklist follow canceled)
+52. 'follow_blacklist' -> 'follow_muted'
+53. 'follow_muted' -> 'follow'
+54. 'follow_muted' -> 'ignore'
+56. 'follow_muted' -> ''
+57. 'follow_muted' -> 'unblacklist'
+58. 'follow_muted' -> 'follow_blacklist'
+59. 'follow_muted' -> 'follow_muted'
+60. 'follow_muted' -> 'unfollow_muted' (muted follow canceled)
+
+Tests for setting multiple flags in the same pack of initial blocks (they could be even in the same block, but it is better when they are in separate so
+effects of earlier operations leave a trace in form of 'created_at' even if their main effect is canceled by later one); some cases add more flags
+in initial or live blocks later:
+block 2050000, time 2016-06-04T17:54:00 and
++ block 2050001, time 2016-06-04T17:54:03 followed by
+-> block 2060000, time 2016-06-05 02:16:36 or
+=> block 5000010, time 2016-09-15 19:47:51 
+61. 'follow' + 'blog'                        -> 'blacklist'
+62. 'follow' + 'ignore' (overrides 'follow') => 'unblacklist'
+63. 'follow' + '' (follow canceled)
+64. 'follow' + 'blacklist'                   -> 'follow_blacklist'
+65. 'follow' + 'follow_blacklist'            => 'follow_muted'
+67. 'follow' + 'unfollow_blacklist'
+68. 'follow' + 'follow_muted'                -> 'unfollow_blacklist'
+69. 'ignore' + 'blog' (overrides 'ignore')   => 'unfollow_muted'
+70. 'ignore' + 'ignore'
+71. 'ignore' + '' (ignore canceled)
+72. 'ignore' + 'blacklist'                   -> 'unfollow_muted'
+73. 'ignore' + 'follow_blacklist'            => 'follow_muted'
+74. 'ignore' + 'follow_muted'                -> 'blacklist'
+75. 'ignore' + 'unfollow_muted'
+76. 'blacklist' + 'blog'                     => 'blacklist'
+78. 'blacklist' + 'ignore'                   -> 'unfollow_blacklist'
+79. 'blacklist' + ''
+80. 'blacklist' + 'blacklist'
+81. 'blacklist' + 'unblacklist' (blacklist canceled)
+82. 'blacklist' + 'follow_blacklist'         => 'ignore'
+83. 'blacklist' + 'unfollow_blacklist'
+84. 'follow_blacklist' + 'blog'              -> 'unblacklist'
+85. 'follow_blacklist' + 'ignore'            => 'unblacklist'
+86. 'follow_blacklist' + ''
+87. 'follow_blacklist' + 'unblacklist'
+89. 'follow_blacklist' + 'follow_blacklist'
+90. 'follow_blacklist' + 'unfollow_blackist' (blacklist follow canceled)
+91. 'follow_blacklist' + 'follow_muted'      -> ''
+92. 'follow_muted' + 'blog'                  => 'blacklist'
+93. 'follow_muted' + 'ignore'                -> 'follow_blacklist'
+94. 'follow_muted' + ''
+95. 'follow_muted' + 'blacklist'             => 'unfollow_blacklist'
+96. 'follow_muted' + 'follow_blacklist'      -> 'blog'
+97. 'follow_muted' + 'follow_muted'
+98. 'follow_muted' + 'unfollow_muted' (muted follow canceled)
+
+Tests for list resets. They first assign multiple flags/state to various pairs of accounts (x accounts as followers) - in the same or different packs of
+blocks - then they call list resets. Finally some tests set some flags again in the same block as reset to show that order of operations is preserved even
+though list reset and flag setting are executed in completely different ways.
+(3x, 8x and 9x already have relations to 'null' from previous tests, so they are not touched), X = 0x, 1x, 2x, 4x, 5x, 6x
+    block 2070000, time 2016-06-05 10:37:48
+X0. 'blog' + 'follow_blacklist'
+X1. 'ignore' + 'blacklist'
+X2. 'follow_blacklist' + 'follow_muted'
+ -> block 2080000, time 2016-06-05 18:59:36
+X3. 'blog' + 'follow_blacklist'
+X4. 'ignore' + 'blacklist'
+X5. 'follow_blacklist' + 'follow_muted'
+Ox9. 'blacklist'+'reset_blacklist'+'blacklist' (resets half of X1 and X4, also 0x9 but that is restored right away)
+1x9. 'follow'+'reset_following_list'+'blog' (resets half of X0 and X3, also 1x9 but that is restored right away)
+2x9. 'ignore'+'reset_muted_list'+'ignore' (resets half of X1 and X4, also 2x9 but that is restored right away)
+4x9. 'follow_blacklist'+'reset_follow_blacklist'+'follow_blacklist'+'unfollow_blacklist'on'null' (resets half of X2 and X5, sets 'follow_blacklist' on 'null' but that is negated, also 4x9 but that is restored right away)
+5x9. 'follow_muted'+'unfollow_muted'on'null'+'reset_follow_muted_list'+'follow_muted' (resets half of X2 and X5, sets 'follow_muted' on 'null' which is not negated by earlier operation, also 5x9 but that is restored right away)
+6x9. 'follow'+'blacklist'+'follow_blacklist'+'unfollow_blacklist'on'null'+'follow_muted'+'reset_all_lists'+'ignore'+'blacklist'+'follow_blacklist'+'follow_muted'+'unfollow_muted'on'null' (resets X0-X5, sets 'follow_blacklist'+'follow_muted' on 'null' - first not negated by earlier operation, second negated by later one, also 6x9 but that is restored right away except 'blog' is replaced by 'ignore')
+X6. 'blog' + 'follow_blacklist'
+X7. 'ignore' + 'blacklist'
+X8. 'follow_blacklist' + 'follow_muted'
+
+Test for multiple list resets on the same follower (7x - last one remaining that has no relation to 'null' yet).
+    block 2090000, time 2016-06-06T03:21:54
+7x0. 'blog'
+7x1. 'ignore'
+7x2. 'blacklist'
+7x3. 'follow_blacklist'
+7x4. 'follow_muted'
+7x5. 'blog'
+7x6. 'ignore'
+7x7. 'blacklist'
+7x8. 'follow_blacklist'
+7x9. 'follow_muted'
+ + block 2090001, time 2016-06-06T03:21:57
+7x-. 'reset_following_list' + 'reset_follow_muted_list' + 'reset_muted_list' + 'reset_blacklist' + 'unfollow_muted'on'null' + 'reset_follow_muted_list' (following of blacklists not reset; following mutes reset twice just in case and to show it restores relation to 'null')
+ + block 2090002, time 2016-06-06T03:22:00
+7x0. 'blog'
+7x1. 'ignore'
+7x2. 'blacklist'
+7x3. 'follow_blacklist'
+7x4. 'follow_muted'

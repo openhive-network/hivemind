@@ -1,0 +1,28 @@
+---
+  test_name: Hivemind
+
+  marks:
+    - patterntest # alice follow buildawhale list of blacklists {craig-grant ,earnest, trevonjb, wildchild, zaitsevalesyaa}
+    # buildawhale was created after 5mln blocks - is not in result
+
+  includes:
+    - !include ../../common.yaml
+
+  stages:
+    - name: test
+      request:
+        url: "{service.proto:s}://{service.server:s}:{service.port}/"
+        method: POST
+        headers:
+          content-type: application/json
+        json:
+          jsonrpc: "2.0"
+          id: 1
+          method: "bridge.get_discussion"
+          params: {"author": "zaitsevalesyaa", "permlink": "good-afternoon-allow-me-to-get-acquainted-with-everyone-and-introduce-yourself", "observer": "buildawhale"}
+      response:
+        status_code: 200
+        verify_response_with:
+          function: validate_response:compare_response_with_pattern
+          extra_kwargs:
+            ignore_tags: "<bridge discussion>"

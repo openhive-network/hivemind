@@ -1,0 +1,266 @@
+stages:
+  - build
+  - test
+  - data-supply
+  - deploy
+  - e2e-test
+  - benchmark-tests
+  - post-deploy
+
+variables:
+  GIT_DEPTH: 1
+  LC_ALL: "C"
+  GIT_STRATEGY: clone
+  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_COMMIT_REF_SLUG/$CI_CONCURRENT_ID/project-name
+
+  HIVEMIND_SOURCE_HIVED_URL: $HIVEMIND_SOURCE_HIVED_URL
+  HIVEMIND_DB_NAME: "hive_${CI_COMMIT_REF_SLUG}"
+  HIVEMIND_HTTP_PORT: $((HIVEMIND_HTTP_PORT + CI_CONCURRENT_ID))
+  # Configured at gitlab repository settings side
+  POSTGRES_USER: $HIVEMIND_POSTGRES_USER
+  POSTGRES_PASSWORD: $HIVEMIND_POSTGRES_PASSWORD
+  POSTGRES_HOST_AUTH_METHOD: trust
+  # official way to provide password to psql: http://www.postgresql.org/docs/9.3/static/libpq-envars.html
+  PGPASSWORD: $HIVEMIND_POSTGRES_PASSWORD
+
+
+default:
+  before_script:
+    - pwd
+    - echo "CI_NODE_TOTAL is $CI_NODE_TOTAL"
+    - echo "CI_NODE_INDEX is $CI_NODE_INDEX"
+    - echo "CI_CONCURRENT_ID is $CI_CONCURRENT_ID"
+    - echo "CI_COMMIT_REF_SLUG is $CI_COMMIT_REF_SLUG"
+
+hivemind_build:
+  stage: build
+  script:
+    - pip3 install --user --upgrade pip setuptools
+    - git fetch --tags
+    - git tag -f ci_implicit_tag
+    - echo $PYTHONUSERBASE
+    - "python3 setup.py bdist_egg"
+    - ls -l dist/*
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
+  tags:
+     - hivemind
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+      when: always
+
+hivemind_sync:
+  stage: data-supply
+  environment:
+      name: "hive sync built from branch $CI_COMMIT_REF_NAME targeting database $HIVEMIND_DB_NAME"
+  needs:
+    - job: hivemind_build
+      artifacts: true
+  variables:
+    GIT_STRATEGY: none
+    PYTHONUSERBASE: ./local-site
+  script:
+    - pip3 install --user --upgrade pip setuptools
+    # WARNING!!! temporarily hardcoded 5000017 instead $HIVEMIND_MAX_BLOCK
+    # revert that change when $HIVEMIND_MAX_BLOCK will be set to 5000017
+    - scripts/ci_sync.sh "$HIVEMIND_DB_NAME" "$HIVEMIND_POSTGRESQL_CONNECTION_STRING" "$HIVEMIND_SOURCE_HIVED_URL" 5000017 $HIVEMIND_HTTP_PORT
+  artifacts:
+    paths:
+      - hivemind-sync.log
+    expire_in: 1 week
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: manual
+    - when: on_success
+  tags:
+     - hivemind
+
+hivemind_start_server:
+  stage: deploy
+  environment:
+    name: "hive serve built from branch $CI_COMMIT_REF_NAME exposed on port $HIVEMIND_HTTP_PORT"
+    url: "http://hive-4.pl.syncad.com:$HIVEMIND_HTTP_PORT"
+    on_stop: hivemind_stop_server
+  needs:
+    - job: hivemind_build
+      artifacts: true
+#    - job: hivemind_sync
+#      artifacts: true
+  variables:
+    GIT_STRATEGY: none
+    PYTHONUSERBASE: ./local-site
+  script:
+    - scripts/ci_start_server.sh "$HIVEMIND_DB_NAME" "$HIVEMIND_POSTGRESQL_CONNECTION_STRING" "$HIVEMIND_SOURCE_HIVED_URL" $HIVEMIND_HTTP_PORT
+  artifacts:
+    paths:
+      - hive_server.pid
+    expire_in: 1 week
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: manual
+    - when: on_success
+
+  tags:
+     - hivemind
+
+hivemind_stop_server:
+  stage: post-deploy
+  environment:
+    name: "hive serve built from branch $CI_COMMIT_REF_NAME exposed on port $HIVEMIND_HTTP_PORT"
+    action: stop
+  variables:
+    GIT_STRATEGY: none
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+  script:
+    - scripts/ci_stop_server.sh hive_server.pid
+  needs:
+    - job: hivemind_start_server
+      artifacts: true
+  tags:
+     - hivemind
+  artifacts:
+    paths:
+      - hive_server.log
+
+.hivemind_start_api_smoketest: &common_api_smoketest_job
+  stage: e2e-test
+  environment: hive-4.pl.syncad.com
+  needs:
+    - job: hivemind_start_server
+      artifacts: true
+  variables:
+    GIT_STRATEGY: none
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: manual
+    - when: on_success
+  tags:
+     - hivemind
+
+bridge_api_smoketest:
+  <<: *common_api_smoketest_job
+  script:
+    - scripts/ci_start_api_smoketest.sh localhost "$HIVEMIND_HTTP_PORT" bridge_api_patterns/ api_smoketest_bridge.xml
+  artifacts:
+    reports:
+      junit: api_smoketest_bridge.xml
+
+bridge_api_smoketest_negative:
+  <<: *common_api_smoketest_job
+  script:
+    - scripts/ci_start_api_smoketest.sh localhost "$HIVEMIND_HTTP_PORT" bridge_api_negative/ api_smoketest_bridge_negative.xml
+  artifacts:
+    reports:
+      junit: api_smoketest_bridge_negative.xml
+
+condenser_api_smoketest:
+  <<: *common_api_smoketest_job
+  script:
+    - scripts/ci_start_api_smoketest.sh localhost "$HIVEMIND_HTTP_PORT" condenser_api_patterns/ api_smoketest_condenser_api.xml
+  artifacts:
+    reports:
+      junit: api_smoketest_condenser_api.xml
+
+condenser_api_smoketest_negative:
+  <<: *common_api_smoketest_job
+  script:
+    - scripts/ci_start_api_smoketest.sh localhost "$HIVEMIND_HTTP_PORT" condenser_api_negative/ api_smoketest_condenser_api_negative.xml
+  artifacts:
+    reports:
+      junit: api_smoketest_condenser_api_negative.xml
+
+database_api_smoketest:
+  <<: *common_api_smoketest_job
+  script:
+    - scripts/ci_start_api_smoketest.sh localhost "$HIVEMIND_HTTP_PORT" database_api_patterns/ api_smoketest_database_api.xml
+  artifacts:
+    reports:
+      junit: api_smoketest_database_api.xml
+
+database_api_smoketest_negative:
+  <<: *common_api_smoketest_job
+  script:
+    - scripts/ci_start_api_smoketest.sh localhost "$HIVEMIND_HTTP_PORT" database_api_negative/ api_smoketest_database_api_negative.xml
+  artifacts:
+    reports:
+      junit: api_smoketest_database_api_negative.xml
+
+follow_api_smoketest:
+  <<: *common_api_smoketest_job
+  script:
+    - scripts/ci_start_api_smoketest.sh localhost "$HIVEMIND_HTTP_PORT" follow_api_patterns/ api_smoketest_follow_api.xml
+  artifacts:
+    reports:
+      junit: api_smoketest.xml
+
+follow_api_smoketest_negative:
+  <<: *common_api_smoketest_job
+  script:
+    - scripts/ci_start_api_smoketest.sh localhost "$HIVEMIND_HTTP_PORT" follow_api_negative/ api_smoketest_follow_api_negative.xml
+  artifacts:
+    reports:
+      junit: api_smoketest_follow_api_negative.xml
+
+tags_api_smoketest:
+  <<: *common_api_smoketest_job
+  script:
+    - scripts/ci_start_api_smoketest.sh localhost "$HIVEMIND_HTTP_PORT" tags_api_patterns/ api_smoketest_tags_api.xml
+  artifacts:
+    reports:
+      junit: api_smoketest_tags_api.xml
+
+tags_api_smoketest_negative:
+  <<: *common_api_smoketest_job
+  script:
+    - scripts/ci_start_api_smoketest.sh localhost "$HIVEMIND_HTTP_PORT" tags_api_negative/ api_smoketest_tags_api_negative.xml
+
+mock_tests:
+  <<: *common_api_smoketest_job
+  script:
+    - scripts/ci_start_api_smoketest.sh localhost "$HIVEMIND_HTTP_PORT" mock_tests/ api_smoketest_mock_tests.xml
+
+api_smoketest_benchmark:
+  stage: benchmark-tests
+  environment: hive-4.pl.syncad.com
+  needs:
+    - job: hivemind_start_server
+      artifacts: true
+  allow_failure: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: manual
+    - when: on_success
+  tags:
+     - hivemind
+  script:
+    - ./scripts/ci_start_api_benchmarks.sh localhost $HIVEMIND_HTTP_PORT 5 auto $CI_PROJECT_DIR/tests/api_tests/hivemind/tavern
+  artifacts:
+    when: always
+    paths:
+      - tavern_benchmarks_report.html
+      - request_process_times.log
