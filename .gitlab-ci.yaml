@@ -17,7 +17,7 @@ variables:
   HAF_ADMIN_POSTGRES_URL: postgresql://haf_admin@haf-instance:5432/haf_block_log
   DATA_CACHE_HAF_PREFIX: "/cache/replay_data_haf"
   BLOCK_LOG_SOURCE_DIR_5M: /blockchain/block_log_5m
-  DATA_CACHE_HIVEMIND: "/cache/replay_data_hivemind_$CI_COMMIT_SHA"
+  DATA_CACHE_HIVEMIND: "/cache/replay_data_hivemind_$CI_PIPELINE_ID"
   # FF:
   FF_NETWORK_PER_BUILD: 1
   # GIT:
