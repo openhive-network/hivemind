@@ -1,7 +1,7 @@
-#!/bin/bash 
+#!/bin/bash
 
-set -e 
-set -o pipefail 
+set -e
+set -o pipefail
 
 echo "Usage ./db_upgrade.sh <postgresql_url>"
 rm -f ./upgrade.log
@@ -26,6 +26,7 @@ for sql in postgres_handle_view_changes.sql \
           payout_stats_view.sql \
           update_hive_posts_mentions.sql \
           mutes.sql \
+          bridge_get_reblog_count.sql \
           bridge_get_ranked_post_type.sql \
           bridge_get_ranked_post_for_communities.sql \
           bridge_get_ranked_post_for_observer_communities.sql \

@@ -641,6 +641,7 @@ def setup(db):
         "payout_stats_view.sql",
         "update_hive_posts_mentions.sql",
         "mutes.sql",
+        "bridge_get_reblog_count.sql",
         "bridge_get_ranked_post_type.sql",
         "bridge_get_ranked_post_for_communities.sql",
         "bridge_get_ranked_post_for_observer_communities.sql",
