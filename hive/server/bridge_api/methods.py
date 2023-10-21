@@ -459,5 +459,5 @@ async def _follow_contexts(db, accounts, observer_id, include_mute=False):
 
 @return_error_info
 async def count_reblogs(db, post_id: int):
-    sql = f"""SELECT count(*) FROM {SCHEMA_NAME}.hive_reblogs WHERE post_id = :post_id"""
+    sql = f"""SELECT * FROM {SCHEMA_NAME}.get_reblog_count(:post_id)"""
     return await db.query_one(sql, post_id=post_id)
