@@ -26,7 +26,7 @@ END
 $function$;
 
 DROP TYPE IF EXISTS hivemind_app.process_community_post_result;
-CREATE TYPE process_community_post_result AS (
+CREATE TYPE hivemind_app.process_community_post_result AS (
     is_muted bool,
     community_id integer -- hivemind_app.hive_posts.community_id%TYPE
 );
