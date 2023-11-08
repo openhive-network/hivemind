@@ -25,10 +25,15 @@ BEGIN
 END
 $function$;
 
+DROP TYPE IF EXISTS hivemind_app.process_community_post_result;
+CREATE TYPE process_community_post_result AS (
+    is_muted bool,
+    community_id integer -- hivemind_app.hive_posts.community_id%TYPE
+);
 
 DROP FUNCTION IF EXISTS hivemind_app.process_community_post;
 CREATE OR REPLACE FUNCTION hivemind_app.process_community_post(_block_num hivemind_app.hive_posts.block_num%TYPE, _community_support_start_block hivemind_app.hive_posts.block_num%TYPE, _parent_permlink hivemind_app.hive_permlink_data.permlink%TYPE, _author_id hivemind_app.hive_posts.author_id%TYPE, _is_comment bool, _is_parent_muted bool, _community_id hivemind_app.hive_posts.community_id%TYPE)
-RETURNS TABLE(is_muted bool, community_id hivemind_app.hive_posts.community_id%TYPE)
+RETURNS hivemind_app.process_community_post_result
 LANGUAGE plpgsql
 as
     $$
@@ -75,10 +80,9 @@ BEGIN
             END IF;
         END IF;
 
-        RETURN QUERY SELECT __is_muted, __community_id;
+        RETURN (__is_muted, __community_id)::hivemind_app.process_community_post_result;
     END;
-$$;
-
+$$ STABLE;
 
 DROP FUNCTION IF EXISTS hivemind_app.process_hive_post_operation;
 ;
@@ -109,17 +113,17 @@ ON CONFLICT DO NOTHING
 ;
 IF _parent_author != '' THEN
   RETURN QUERY INSERT INTO hivemind_app.hive_posts as hp
-  (parent_id, depth, community_id, category_id,
-    root_id, is_muted, is_valid,
+  (parent_id, depth, is_muted, community_id, category_id,
+    root_id, is_valid,
     author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted, block_num, block_num_created)
-  SELECT php.id AS parent_id, php.depth + 1 AS depth,
-      pcp.community_id AS community_id,
+      SELECT
+      php.id AS parent_id, php.depth + 1 AS depth,
+      (hivemind_app.process_community_post(_block_num, _community_support_start_block, _parent_permlink, ha.id, TRUE, php.is_muted, php.community_id)).*,
       COALESCE(php.category_id, (select hcg.id from hivemind_app.hive_category_data hcg where hcg.category = _parent_permlink)) AS category_id,
       (CASE(php.root_id)
           WHEN 0 THEN php.id
           ELSE php.root_id
         END) AS root_id,
-      pcp.is_muted AS is_muted,
       php.is_valid AS is_valid,
       ha.id AS author_id, hpd.id AS permlink_id, _date AS created_at,
       _date AS updated_at,
@@ -130,7 +134,6 @@ IF _parent_author != '' THEN
   FROM hivemind_app.hive_accounts ha,
         hivemind_app.hive_permlink_data hpd,
         hivemind_app.hive_posts php
-  CROSS JOIN LATERAL hivemind_app.process_community_post(_block_num, _community_support_start_block, _parent_permlink, ha.id, TRUE, php.is_muted, php.community_id) pcp
   INNER JOIN hivemind_app.hive_accounts pha ON pha.id = php.author_id
   INNER JOIN hivemind_app.hive_permlink_data phpd ON phpd.id = php.permlink_id
   WHERE pha.name = _parent_author AND phpd.permlink = _parent_permlink AND
@@ -153,16 +156,16 @@ ELSE
   ;
 
   RETURN QUERY INSERT INTO hivemind_app.hive_posts as hp
-  (parent_id, depth, community_id, category_id,
-    root_id, is_muted, is_valid,
+  (parent_id, depth, is_muted, community_id, category_id,
+    root_id, is_valid,
     author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,
     active, payout_at, cashout_time, counter_deleted, block_num, block_num_created,
     tags_ids)
   SELECT 0 AS parent_id, 0 AS depth,
-      pcp.community_id AS community_id,
+       (hivemind_app.process_community_post(_block_num, _community_support_start_block, _parent_permlink, ha.id, FALSE, FALSE, NULL)).*,
       (SELECT hcg.id FROM hivemind_app.hive_category_data hcg WHERE hcg.category = _parent_permlink) AS category_id,
       0 as root_id, -- will use id as root one if no parent
-      pcp.is_muted AS is_muted, true AS is_valid,
+      true AS is_valid,
       ha.id AS author_id, hpd.id AS permlink_id, _date AS created_at,
       _date AS updated_at,
       hivemind_app.calculate_time_part_of_hot(_date) AS sc_hot,
@@ -174,7 +177,6 @@ ELSE
           FROM hivemind_app.prepare_tags( ARRAY_APPEND(_metadata_tags, _parent_permlink ) )
         ) as tags_ids
   FROM hivemind_app.hive_accounts ha,
-       hivemind_app.process_community_post(_block_num, _community_support_start_block, _parent_permlink, ha.id, FALSE, FALSE, NULL) pcp,
        hivemind_app.hive_permlink_data hpd
   WHERE ha.name = _author and hpd.permlink = _permlink
 
