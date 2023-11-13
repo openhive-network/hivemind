@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 
 def init_argparse(args: Sequence[str]) -> configargparse.Namespace:
     parser = configargparse.ArgumentParser(
-        description="Helper script to automatically change the block number in the provided mock file via --mock-file-path to allow you to append extra ops and test indexing functions granularly without having to resync an entire db / updating your mocks files",
+        description="Helper script to automatically change the block number in the provided mock file via --mock-block-data-paths to allow you to append extra ops and test indexing functions granularly without having to resync an entire db / updating your mocks files",
         formatter_class=configargparse.RawTextHelpFormatter
     )
 
