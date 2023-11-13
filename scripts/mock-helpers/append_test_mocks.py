@@ -5,13 +5,15 @@ import sys
 from typing import Sequence
 import configargparse
 from hive.db.adapter import Db
-import subprocess
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
 def init_argparse(args: Sequence[str]) -> configargparse.Namespace:
-    parser = configargparse.ArgumentParser(formatter_class=configargparse.RawTextHelpFormatter)
+    parser = configargparse.ArgumentParser(
+        description="Helper script to automatically change the block number in the provided mock file via --mock-file-path to allow you to append extra ops and test indexing functions granularly without having to resync an entire db / updating your mocks files",
+        formatter_class=configargparse.RawTextHelpFormatter
+    )
 
     add = parser.add_argument
     add('--database-url', env_var='DATABASE_URL', type=str, required=True, help='database connection url')
@@ -48,8 +50,6 @@ def main():
 
     except Exception as e:
         log.error(f"An error occurred: {e}")
-
-
 
 if __name__ == "__main__":
     main()
