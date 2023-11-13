@@ -54,12 +54,16 @@ BEGIN
             __community_id := NULL;
         ELSE
             IF _is_comment = TRUE THEN
-                SELECT type_id, id INTO __community_type_id, __community_id from hivemind_app.hive_communities where id = _community_id;
+                SELECT type_id, id, beneficiaries_settings INTO __community_type_id, __community_id, __beneficiaries_settings from hivemind_app.hive_communities where id = _community_id;
             ELSE
                 SELECT type_id, id, beneficiaries_settings INTO __community_type_id, __community_id, __beneficiaries_settings from hivemind_app.hive_communities where name = _parent_permlink;
             END IF;
 
-            -- __is_muted can be TRUE here if it's a comment and its parent is muted
+
+           -- If beneficiaries are not empty, we don't process anything else right now and set the post to muted.
+           -- We'll unmute if the beneficiaries are correct at the related comment_options op
+           -- IF __beneficiaries_settings = '[]' THEN
+           -- _is_muted can be TRUE here if it's a comment and its parent is muted
             IF _is_parent_muted = TRUE THEN
                 __is_muted := TRUE;
             ELSEIF __community_id IS NOT NULL THEN
