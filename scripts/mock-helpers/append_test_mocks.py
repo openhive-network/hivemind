@@ -18,7 +18,7 @@ def init_argparse(args: Sequence[str]) -> configargparse.Namespace:
 
     add = parser.add_argument
     add('--database-url', env_var='DATABASE_URL', type=str, required=True, help='database connection url')
-    add('--mock-block-data-paths', type=str, required=True, help='location of the mock file to update')
+    add('--mock-block-data-paths', type=str, required=True, help='location of the mock path containing mocked_dev_ops.json')
 
     return parser.parse_args(args)
 
@@ -33,8 +33,8 @@ def main():
     log.info(f'Last block in hivemind: {last_block_in_hivemind["last_imported_block_num"]}')
 
     new_block = int(last_block_in_hivemind["last_imported_block_num"]) + 1
-    mock_file = args.mock_block_data_paths + "/mocked_dev_ops.json"
-    
+    mock_file = os.path.join(args.mock_block_data_paths, "mocked_dev_ops.json")
+
     try:
         with open(mock_file, 'r') as file:
             data = json.load(file)
