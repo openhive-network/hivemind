@@ -5,6 +5,7 @@ import sys
 from typing import Sequence
 import configargparse
 from hive.db.adapter import Db
+from hive.indexer.mocking import populate_haf_with_mocked_data
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
@@ -17,8 +18,7 @@ def init_argparse(args: Sequence[str]) -> configargparse.Namespace:
 
     add = parser.add_argument
     add('--database-url', env_var='DATABASE_URL', type=str, required=True, help='database connection url')
-    add('--mock-file-path', type=str, required=True, help='location of the mock file to update')
-    add('--populate-mocks-script-path', type=str, required=True, help='location of the populate mocks script')
+    add('--mock-block-data-paths', type=str, required=True, help='location of the mock file to update')
 
     return parser.parse_args(args)
 
@@ -33,20 +33,20 @@ def main():
     log.info(f'Last block in hivemind: {last_block_in_hivemind["last_imported_block_num"]}')
 
     new_block = int(last_block_in_hivemind["last_imported_block_num"]) + 1
-
+    mock_file = args.mock_block_data_paths + "/mocked_dev_ops.json"
+    
     try:
-        with open(args.mock_file_path, 'r') as file:
+        with open(mock_file, 'r') as file:
             data = json.load(file)
-
-        # Assuming there is only one key at the top level
-        old_key = next(iter(data))
-        data[new_block] = data.pop(old_key)
-
-        with open(args.mock_file_path, 'w') as file:
+            # Assuming there is only one key at the top level
+            old_key = next(iter(data))
+            data[new_block] = data.pop(old_key)
+        with open(mock_file, 'w') as file:
             json.dump(data, file, indent=4)
+
         log.info(f"Mocks updated with new block number: {new_block}")
-        mock_data_dir = os.path.dirname(args.mock_file_path)
-        log.info(f"Populate mocks by calling python3 {args.populate_mocks_script_path} --database-url {args.database_url} --mock-block-data-paths {mock_data_dir}")
+        log.info(f"Populating mocks")
+        populate_haf_with_mocked_data.main()
 
     except Exception as e:
         log.error(f"An error occurred: {e}")
