@@ -29,7 +29,7 @@ variables:
 
 include:
   - project: hive/haf
-    ref: 8a5bdf1a273e2fcf20353c73c50fea84970b8885 # develop
+    ref: 9aa55020b9cddaed0f320d2da4ea22a6ef494069 # develop
     file: /scripts/ci-helpers/prepare_data_image_job.yml
 
 workflow:
