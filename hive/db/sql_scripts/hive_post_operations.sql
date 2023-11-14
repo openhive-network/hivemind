@@ -46,7 +46,6 @@ declare
         __community_type_council CONSTANT SMALLINT := 3;
         __is_muted bool := TRUE;
         __beneficiaries_settings json := '[]';
-        __is_parent_muted bool := FALSE;
         __community_id hivemind_app.hive_posts.community_id%TYPE;
 BEGIN
         IF _block_num < _community_support_start_block THEN
