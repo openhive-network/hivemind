@@ -32,6 +32,12 @@ include:
     ref: 9aa55020b9cddaed0f320d2da4ea22a6ef494069 # develop
     file: /scripts/ci-helpers/prepare_data_image_job.yml
 
+  - project: 'hive/common-ci-configuration'
+    ref: 7c58303ffb61d91ef9662ec20e7b498bc6f62b8f
+    file:
+    - '/templates/base.gitlab-ci.yml'
+
+
 workflow:
   rules:
     - if: '$CI_MERGE_REQUEST_IID'
@@ -299,6 +305,7 @@ cleanup_haf_cache_manual:
     - data-cache-storage
 
 download_await:
+  extends: .job-defaults
   image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.8-slim-2
   stage: prepare
   variables:
@@ -316,6 +323,7 @@ download_await:
     - data-cache-storage
 
 sync:
+  extends: .job-defaults
   image: 
     name: $HIVEMIND_IMAGE
     entrypoint: [""]
