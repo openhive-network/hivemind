@@ -1,0 +1,18 @@
+{
+    "5000027": {
+        "virtual_operations": [
+            {
+                "type": "comment_reward",
+                "value": {
+                    "author": "jouchelle",
+                    "permlink": "test",
+                    "payout": "29.019 HBD",
+                    "author_rewards": "4",
+                    "total_payout_value": "0.000 HBD",
+                    "curator_payout_value": "14.483 HBD",
+                    "beneficiary_payout_value": "14.533 HBD"
+                }
+            }
+        ]
+    }
+}
