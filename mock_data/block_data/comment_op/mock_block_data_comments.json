@@ -54,12 +54,66 @@
 							"author": "jouchelle",
 							"permlink": "test-beneficiaries",
 							"title": "Testing",
-							"body": "Much testing such wow",
+							"body": "Much testing",
 							"json_metadata": "{}"
 						}
+					},
+					{
+						"ref_block_num": 100000,
+						"ref_block_prefix": 1,
+						"expiration": "2020-03-23T12:17:00",
+						"operations": [
+							{
+								"type": "comment_options_operation",
+								"value": {
+									"author": "jouchelle",
+									"permlink": "test-beneficiaries",
+									"max_accepted_payout": {
+										"amount": "1000000000",
+										"nai": "@@000000013",
+										"precision": 3
+									},
+									"percent_hbd": 10000,
+									"allow_votes": true,
+									"allow_curation_rewards": true,
+									"extensions": [
+										{
+											"type": "comment_payout_beneficiaries",
+											"value": {
+												"beneficiaries": [
+													{
+														"account": "amering",
+														"weight": 400
+													},
+													{
+														"account": "batel1",
+														"weight": 6800
+													},
+													{
+														"account": "cloop3",
+														"weight": 2000
+													},
+													{
+														"account": "faddy3",
+														"weight": 600
+													},
+													{
+														"account": "fminerten5",
+														"weight": 200
+													}
+												]
+											}
+										}
+									]
+								}
+							}
+						]
 					}
 				]
 			}
 		]
+	},
+	"5000000": {
+		"transactions": []
 	}
 }

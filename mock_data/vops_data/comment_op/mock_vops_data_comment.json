@@ -2,15 +2,31 @@
   "5000000": {
     "virtual_operations": [
       {
-        "type": "comment_reward",
+        "type": "comment_reward_operation",
         "value": {
           "author": "jouchelle",
           "permlink": "test-beneficiaries",
-          "payout": "29.019 HBD",
-          "author_rewards": "4",
-          "total_payout_value": "0.000 HBD",
-          "curator_payout_value": "14.483 HBD",
-          "beneficiary_payout_value": "14.533 HBD"
+          "author_rewards": 13,
+          "beneficiary_payout_value": {
+            "amount": "14483",
+            "nai": "@@000000013",
+            "precision": 3
+          },
+          "curator_payout_value": {
+            "amount": "14533",
+            "nai": "@@000000013",
+            "precision": 3
+          },
+          "payout": {
+            "amount": "29019",
+            "nai": "@@000000013",
+            "precision": 3
+          },
+          "total_payout_value": {
+            "amount": "0",
+            "nai": "@@000000013",
+            "precision": 3
+          }
         }
       }
     ]
