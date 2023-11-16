@@ -30,10 +30,10 @@
     "permlink": "re-nkdk-thermosolar-hive-healthy-bees-healthy-honey-20160512t184719257z",
     "post_id": 5272,
     "promoted": "0.000 HBD",
+    "reblogs": 0,
     "replies": [
       "nkdk/re-dan-re-nkdk-thermosolar-hive-healthy-bees-healthy-honey-20160512t184719257z-20160512t223048126z"
     ],
-    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -72,8 +72,8 @@
     "permlink": "re-dan-re-nkdk-thermosolar-hive-healthy-bees-healthy-honey-20160512t184719257z-20160512t223048126z",
     "post_id": 5423,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -140,7 +140,7 @@
       }
     ],
     "author": "nkdk",
-    "author_payout_value": "2.364 HBD",
+    "author_payout_value": "2.366 HBD",
     "author_reputation": 65.67,
     "beneficiaries": [],
     "blacklists": [
@@ -156,18 +156,18 @@
     "json_metadata": {},
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 5950701177965,
-    "payout": 4.728,
+    "payout": 4.73,
     "payout_at": "2016-08-03T00:00:06",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "thermosolar-hive-healthy-bees-healthy-honey",
     "post_id": 5234,
     "promoted": "0.000 HBD",
+    "reblogs": 0,
     "replies": [
       "steemrollin/re-nkdk-thermosolar-hive-healthy-bees-healthy-honey-20160512t173714892z",
       "dan/re-nkdk-thermosolar-hive-healthy-bees-healthy-honey-20160512t184719257z"
     ],
-    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -190,7 +190,7 @@
       }
     ],
     "author": "steemrollin",
-    "author_payout_value": "0.010 HBD",
+    "author_payout_value": "0.012 HBD",
     "author_reputation": 68.72,
     "beneficiaries": [],
     "blacklists": [],
@@ -206,17 +206,17 @@
     "net_rshares": 71669806277,
     "parent_author": "nkdk",
     "parent_permlink": "thermosolar-hive-healthy-bees-healthy-honey",
-    "payout": 0.021,
+    "payout": 0.023,
     "payout_at": "2016-08-03T00:00:06",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-nkdk-thermosolar-hive-healthy-bees-healthy-honey-20160512t173714892z",
     "post_id": 5241,
     "promoted": "0.000 HBD",
+    "reblogs": 0,
     "replies": [
       "valtr/re-steemrollin-re-nkdk-thermosolar-hive-healthy-bees-healthy-honey-20160512t173714892z-20160512t183537447z"
     ],
-    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -258,8 +258,8 @@
     "permlink": "re-steemrollin-re-nkdk-thermosolar-hive-healthy-bees-healthy-honey-20160512t173714892z-20160512t183537447z",
     "post_id": 5270,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

@@ -66,11 +66,11 @@
     "permlink": "firstpost",
     "post_id": 2,
     "promoted": "0.000 HBD",
+    "reblogs": 0,
     "replies": [
       "kingtylervvs/re-admin-firstpost-20160717t193811098z",
       "gopher/re-admin-firstpost-20160718t195306992z"
     ],
-    "reblogs": 0,
     "stats": {
       "flag_weight": 2.0,
       "gray": false,
@@ -116,8 +116,8 @@
     "permlink": "re-steemit-firstpost-20160726t035722561z",
     "post_id": 366098,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -163,8 +163,8 @@
     "permlink": "re-red-steemit-firstpost-2-20160713t083846149z",
     "post_id": 92974,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -211,7 +211,7 @@
       }
     ],
     "author": "business",
-    "author_payout_value": "0.036 HBD",
+    "author_payout_value": "0.037 HBD",
     "author_reputation": 60.11,
     "beneficiaries": [],
     "blacklists": [],
@@ -231,15 +231,15 @@
     "net_rshares": 316866774269,
     "parent_author": "steemit",
     "parent_permlink": "firstpost",
-    "payout": 0.036,
+    "payout": 0.037,
     "payout_at": "2016-08-24T19:59:42",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-steemit-firstpost-20160713t082910980z",
     "post_id": 92903,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -289,8 +289,8 @@
     "permlink": "re-steemit-firstpost-20160810t083336206z",
     "post_id": 721016,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -340,8 +340,8 @@
     "permlink": "re-steemit-firstpost-20160801t184846033z",
     "post_id": 540797,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -402,8 +402,8 @@
     "permlink": "re-steemit-firstpost-20160811t225325571z",
     "post_id": 754693,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -449,8 +449,8 @@
     "permlink": "re-steemit-firstpost-20160818t030224104z",
     "post_id": 864415,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -504,8 +504,8 @@
     "permlink": "re-steemit-firstpost-20160721t223937736z",
     "post_id": 260426,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -555,8 +555,8 @@
     "permlink": "re-admin-firstpost-20160718t195306992z",
     "post_id": 172339,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -600,10 +600,10 @@
     "permlink": "re-steemit-firstpost-20160718t195806340z",
     "post_id": 172415,
     "promoted": "0.000 HBD",
+    "reblogs": 0,
     "replies": [
       "steemuwe/re-gopher-re-steemit-firstpost-20160720t183548381z"
     ],
-    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -653,8 +653,8 @@
     "permlink": "re-steemit-firstpost-20160801t232001768z",
     "post_id": 547508,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -704,10 +704,10 @@
     "permlink": "re-kewpiedoll-re-intelliguy-re-kewpiedoll-re-steemit-firstpost-20160721t053330322z",
     "post_id": 239195,
     "promoted": "0.000 HBD",
+    "reblogs": 0,
     "replies": [
       "kewpiedoll/re-intelliguy-re-kewpiedoll-re-intelliguy-re-kewpiedoll-re-steemit-firstpost-20160721t140220709z"
     ],
-    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -748,10 +748,10 @@
     "permlink": "re-kewpiedoll-re-steemit-firstpost-20160720t215823622z",
     "post_id": 230821,
     "promoted": "0.000 HBD",
+    "reblogs": 0,
     "replies": [
       "kewpiedoll/re-intelliguy-re-kewpiedoll-re-steemit-firstpost-20160721t052821990z"
     ],
-    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -792,8 +792,8 @@
     "permlink": "re-steemit-firstpost-20160824t093007335z",
     "post_id": 964408,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -843,8 +843,8 @@
     "permlink": "re-steemit-firstpost-20160807t215340468z",
     "post_id": 670574,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -879,7 +879,7 @@
       }
     ],
     "author": "jennamarbles",
-    "author_payout_value": "0.024 HBD",
+    "author_payout_value": "0.026 HBD",
     "author_reputation": 57.93,
     "beneficiaries": [],
     "blacklists": [],
@@ -905,15 +905,15 @@
     "net_rshares": 18569578234,
     "parent_author": "steemit",
     "parent_permlink": "firstpost",
-    "payout": 0.027,
+    "payout": 0.029,
     "payout_at": "2016-08-24T19:59:42",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-steemit-firstpost-20160719t210752086z",
     "post_id": 199181,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -967,8 +967,8 @@
     "permlink": "re-steemit-firstpost-20160722t225246211z",
     "post_id": 284527,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1022,8 +1022,8 @@
     "permlink": "re-steemit-firstpost-20160725t221949749z",
     "post_id": 359333,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1073,8 +1073,8 @@
     "permlink": "re-intelliguy-re-kewpiedoll-re-intelliguy-re-kewpiedoll-re-steemit-firstpost-20160721t140220709z",
     "post_id": 247613,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1126,10 +1126,10 @@
     "permlink": "re-intelliguy-re-kewpiedoll-re-steemit-firstpost-20160721t052821990z",
     "post_id": 239135,
     "promoted": "0.000 HBD",
+    "reblogs": 0,
     "replies": [
       "intelliguy/re-kewpiedoll-re-intelliguy-re-kewpiedoll-re-steemit-firstpost-20160721t053330322z"
     ],
-    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1186,10 +1186,10 @@
     "permlink": "re-steemit-firstpost-20160720t210201326z",
     "post_id": 229482,
     "promoted": "0.000 HBD",
+    "reblogs": 0,
     "replies": [
       "intelliguy/re-kewpiedoll-re-steemit-firstpost-20160720t215823622z"
     ],
-    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1235,8 +1235,8 @@
     "permlink": "re-admin-firstpost-20160717t193811098z",
     "post_id": 151464,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1299,10 +1299,10 @@
     "permlink": "re-steemit-firstpost-20160720t121101482z",
     "post_id": 217597,
     "promoted": "0.000 HBD",
+    "reblogs": 0,
     "replies": [
       "yonuts/re-kingtylervvs-re-steemit-firstpost-20160729t180621248z"
     ],
-    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1343,8 +1343,8 @@
     "permlink": "re-steemit-firstpost-20160726t035056026z",
     "post_id": 365968,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1398,8 +1398,8 @@
     "permlink": "re-steemit-firstpost-20160722t201007967z",
     "post_id": 280969,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1450,7 +1450,7 @@
       }
     ],
     "author": "proskynneo",
-    "author_payout_value": "1.058 HBD",
+    "author_payout_value": "1.059 HBD",
     "author_reputation": 57.56,
     "beneficiaries": [],
     "blacklists": [],
@@ -1466,15 +1466,15 @@
     "net_rshares": 3584929959220,
     "parent_author": "steemit",
     "parent_permlink": "firstpost",
-    "payout": 2.117,
+    "payout": 2.118,
     "payout_at": "2016-08-24T19:59:42",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "steemit-firstpost-1",
     "post_id": 3,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1548,11 +1548,11 @@
     "permlink": "steemit-firstpost-2",
     "post_id": 4,
     "promoted": "0.000 HBD",
+    "reblogs": 0,
     "replies": [
       "steem-id/re-red-steemit-firstpost-2",
       "business/re-red-steemit-firstpost-2-20160713t083846149z"
     ],
-    "reblogs": 0,
     "stats": {
       "flag_weight": 2.0,
       "gray": false,
@@ -1598,8 +1598,8 @@
     "permlink": "re-steemit-firstpost-20160804t061605576z",
     "post_id": 596138,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1657,8 +1657,8 @@
     "permlink": "re-steemit-firstpost-20160824t025355199z",
     "post_id": 961148,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 1.0,
       "gray": false,
@@ -1704,8 +1704,8 @@
     "permlink": "re-steemit-firstpost-20160721t233702742z",
     "post_id": 261571,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1747,8 +1747,8 @@
     "permlink": "re-red-steemit-firstpost-2",
     "post_id": 116,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -2167,7 +2167,7 @@
       }
     ],
     "author": "steemit",
-    "author_payout_value": "0.942 HBD",
+    "author_payout_value": "-0.635 HBD",
     "author_reputation": 35.01,
     "beneficiaries": [],
     "blacklists": [],
@@ -2181,13 +2181,14 @@
     "json_metadata": {},
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 3060564548625,
-    "payout": 1.698,
+    "payout": 0.121,
     "payout_at": "2016-08-24T19:59:42",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "firstpost",
     "post_id": 1,
     "promoted": "0.000 HBD",
+    "reblogs": 1,
     "replies": [
       "admin/firstpost",
       "proskynneo/steemit-firstpost-1",
@@ -2216,7 +2217,6 @@
       "rittr/re-steemit-firstpost-20160824t025355199z",
       "jack8831/re-steemit-firstpost-20160824t093007335z"
     ],
-    "reblogs": 1,
     "stats": {
       "flag_weight": 2.0,
       "gray": false,
@@ -2265,8 +2265,8 @@
     "permlink": "re-gopher-re-steemit-firstpost-20160720t183548381z",
     "post_id": 225799,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -2337,8 +2337,8 @@
     "permlink": "re-steemit-firstpost-20160813t143213453z",
     "post_id": 782950,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -2379,8 +2379,8 @@
     "permlink": "re-kingtylervvs-re-steemit-firstpost-20160729t180621248z",
     "post_id": 470778,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -2421,8 +2421,8 @@
     "permlink": "re-steemit-firstpost-20160723t130259286z",
     "post_id": 296193,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

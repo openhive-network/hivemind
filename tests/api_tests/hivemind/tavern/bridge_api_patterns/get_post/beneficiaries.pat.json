@@ -26,10 +26,10 @@
     }
   ],
   "blacklists": [],
-  "body": "Much testing such wow",
+  "body": "Much testing",
   "category": "tag",
   "children": 0,
-  "created": "2016-09-15T19:48:36",
+  "created": "2016-09-08T18:55:18",
   "curator_payout_value": "0.000 HBD",
   "depth": 0,
   "is_paidout": false,
@@ -37,11 +37,11 @@
   "max_accepted_payout": "1000000.000 HBD",
   "net_rshares": 0,
   "payout": 29.019,
-  "payout_at": "2016-09-22T19:48:36",
+  "payout_at": "2016-09-15T18:55:18",
   "pending_payout_value": "29.019 HBD",
   "percent_hbd": 10000,
   "permlink": "test-beneficiaries",
-  "post_id": 1258131,
+  "post_id": 1175427,
   "promoted": "0.000 HBD",
   "reblogs": 0,
   "replies": [],
@@ -52,6 +52,6 @@
     "total_votes": 0
   },
   "title": "Testing",
-  "updated": "2016-09-15T19:48:42",
+  "updated": "2016-09-08T18:55:18",
   "url": "/tag/@jouchelle/test-beneficiaries"
 }

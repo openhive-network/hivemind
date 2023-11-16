@@ -1,55 +1,15 @@
 [
   {
-    "date": "2016-08-27T00:38:12",
-    "id": 1416733,
-    "msg": "@joseph voted on your post ($7.17)",
-    "score": 75,
-    "type": "vote",
-    "url": "@pharesim/witness-post"
-  },
-  {
     "date": "2016-08-24T19:54:27",
-    "id": 1338423,
+    "id": 1218117,
     "msg": "@alitas replied to your post",
     "score": 50,
     "type": "reply",
     "url": "@alitas/re-pharesim-witness-post-20160824t195426389z"
   },
   {
-    "date": "2016-07-07T01:13:18",
-    "id": 46405,
-    "msg": "@donkeypong voted on your post ($25.67)",
-    "score": 100,
-    "type": "vote",
-    "url": "@pharesim/witness-post"
-  },
-  {
-    "date": "2016-07-06T02:32:12",
-    "id": 40973,
-    "msg": "@sean-king voted on your post ($11.59)",
-    "score": 100,
-    "type": "vote",
-    "url": "@pharesim/witness-post"
-  },
-  {
-    "date": "2016-06-30T12:17:18",
-    "id": 22231,
-    "msg": "@chitty voted on your post ($0.14)",
-    "score": 50,
-    "type": "vote",
-    "url": "@pharesim/witness-post"
-  },
-  {
-    "date": "2016-06-30T04:59:54",
-    "id": 21704,
-    "msg": "@newyo voted on your post ($10.84)",
-    "score": 100,
-    "type": "vote",
-    "url": "@pharesim/witness-post"
-  },
-  {
     "date": "2016-06-27T04:44:39",
-    "id": 16441,
+    "id": 14556,
     "msg": "@steemed replied to your post",
     "score": 70,
     "type": "reply",
@@ -57,9 +17,9 @@
   },
   {
     "date": "2016-06-26T18:52:18",
-    "id": 15750,
-    "msg": "@steempty voted on your post ($74.39)",
-    "score": 100,
+    "id": 13981,
+    "msg": "@steempty voted on your post ($0.04)",
+    "score": 25,
     "type": "vote",
     "url": "@pharesim/witness-post"
   }

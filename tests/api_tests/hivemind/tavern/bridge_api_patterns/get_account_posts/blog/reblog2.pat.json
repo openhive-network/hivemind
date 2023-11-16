@@ -1723,9 +1723,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 113678589859762,
-    "payout": 1360.485,
+    "payout": 1360.486,
     "payout_at": "2016-09-09T19:33:57",
-    "pending_payout_value": "1360.485 HBD",
+    "pending_payout_value": "1360.486 HBD",
     "percent_hbd": 10000,
     "permlink": "announcing-steem-0-14-0-release-candidate",
     "post_id": 1102424,
@@ -1733,8 +1733,8 @@
     "reblogged_by": [
       "jamesc"
     ],
-    "replies": [],
     "reblogs": 1,
+    "replies": [],
     "stats": {
       "flag_weight": 1.0,
       "gray": false,
@@ -2350,9 +2350,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 46881004978754,
-    "payout": 234.631,
+    "payout": 234.633,
     "payout_at": "2016-09-09T21:00:06",
-    "pending_payout_value": "234.631 HBD",
+    "pending_payout_value": "234.633 HBD",
     "percent_hbd": 10000,
     "permlink": "impossible-a-conversation-with-a-statist-about-starting-a-business",
     "post_id": 1103442,
@@ -2360,8 +2360,8 @@
     "reblogged_by": [
       "jamesc"
     ],
-    "replies": [],
     "reblogs": 1,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -3642,9 +3642,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 136634688365940,
-    "payout": 2018.855,
+    "payout": 2018.856,
     "payout_at": "2016-09-08T16:33:36",
-    "pending_payout_value": "2018.855 HBD",
+    "pending_payout_value": "2018.856 HBD",
     "percent_hbd": 10000,
     "permlink": "peerplays-status-udate-09-01-2016",
     "post_id": 1086632,
@@ -3652,8 +3652,8 @@
     "reblogged_by": [
       "jamesc"
     ],
-    "replies": [],
     "reblogs": 1,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,

@@ -208,13 +208,13 @@
     "pending_payout_value": "7.819 HBD",
     "percent_hbd": 10000,
     "permlink": "melting-rock",
-    "post_id": 1243749,
+    "post_id": 1243750,
     "promoted": "0.000 HBD",
     "reblogged_by": [
       "test-safari"
     ],
-    "replies": [],
     "reblogs": 1,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -302,18 +302,18 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 204191386170,
-    "payout": 0.043,
+    "payout": 0.044,
     "payout_at": "2016-09-20T20:15:00",
-    "pending_payout_value": "0.043 HBD",
+    "pending_payout_value": "0.044 HBD",
     "percent_hbd": 10000,
     "permlink": "lscottphotos-texture-photography-5-original-photos",
-    "post_id": 1235799,
+    "post_id": 1235800,
     "promoted": "0.000 HBD",
     "reblogged_by": [
       "test-safari"
     ],
-    "replies": [],
     "reblogs": 1,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -366,13 +366,13 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "sunday-picnic",
-    "post_id": 1232383,
+    "post_id": 1232384,
     "promoted": "0.000 HBD",
     "reblogged_by": [
       "test-safari"
     ],
-    "replies": [],
     "reblogs": 1,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -442,13 +442,13 @@
     "pending_payout_value": "0.001 HBD",
     "percent_hbd": 10000,
     "permlink": "conceptualizing-a-scifi-land-speeder",
-    "post_id": 1176607,
+    "post_id": 1176608,
     "promoted": "0.000 HBD",
     "reblogged_by": [
       "test-safari"
     ],
-    "replies": [],
     "reblogs": 1,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -664,18 +664,18 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 6459399945382,
-    "payout": 5.888,
+    "payout": 5.889,
     "payout_at": "2016-09-15T19:36:39",
-    "pending_payout_value": "5.888 HBD",
+    "pending_payout_value": "5.889 HBD",
     "percent_hbd": 10000,
     "permlink": "chop-veggies-like-a-ninja-it-s-easy",
-    "post_id": 1175966,
+    "post_id": 1175967,
     "promoted": "0.000 HBD",
     "reblogged_by": [
       "test-safari"
     ],
-    "replies": [],
     "reblogs": 1,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -815,13 +815,13 @@
     "pending_payout_value": "0.058 HBD",
     "percent_hbd": 10000,
     "permlink": "simple-fractal-prostoi-fraktal",
-    "post_id": 1175624,
+    "post_id": 1175625,
     "promoted": "0.000 HBD",
     "reblogged_by": [
       "test-safari"
     ],
-    "replies": [],
     "reblogs": 1,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -3096,9 +3096,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 195806721769401,
-    "payout": 4144.598,
+    "payout": 4144.599,
     "payout_at": "2016-09-07T13:26:39",
-    "pending_payout_value": "4144.598 HBD",
+    "pending_payout_value": "4144.599 HBD",
     "percent_hbd": 10000,
     "permlink": "a-geek-in-prison-a-life-series-by-charlie-shrem-part-3-i-m-actually-in-prison",
     "post_id": 1070638,
@@ -3106,8 +3106,8 @@
     "reblogged_by": [
       "test-safari"
     ],
-    "replies": [],
     "reblogs": 1,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -6577,8 +6577,8 @@
     "reblogged_by": [
       "test-safari"
     ],
-    "replies": [],
     "reblogs": 1,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

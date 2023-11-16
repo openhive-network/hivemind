@@ -735,15 +735,15 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 80964590737004,
-    "payout": 988.456,
+    "payout": 988.457,
     "payout_at": "2016-08-23T18:11:03",
-    "pending_payout_value": "988.456 HBD",
+    "pending_payout_value": "988.457 HBD",
     "percent_hbd": 10000,
     "permlink": "heavy-duty-witness-node-infrastructure",
     "post_id": 838527,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -810,15 +810,15 @@
     "net_rshares": 6544938101244,
     "parent_author": "jesta",
     "parent_permlink": "re-gtg-heavy-duty-witness-node-infrastructure-20160816t191107309z",
-    "payout": 10.116,
+    "payout": 10.117,
     "payout_at": "2016-08-23T20:18:57",
-    "pending_payout_value": "10.116 HBD",
+    "pending_payout_value": "10.117 HBD",
     "percent_hbd": 10000,
     "permlink": "re-jesta-re-gtg-heavy-duty-witness-node-infrastructure-20160816t201857176z",
     "post_id": 840712,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -963,15 +963,15 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 568650179247,
-    "payout": 0.432,
+    "payout": 0.433,
     "payout_at": "2016-08-28T12:29:18",
-    "pending_payout_value": "0.432 HBD",
+    "pending_payout_value": "0.433 HBD",
     "percent_hbd": 10000,
     "permlink": "missing-rewards-while-mining",
     "post_id": 919311,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1019,10 +1019,10 @@
     "pending_payout_value": "0.281 HBD",
     "percent_hbd": 10000,
     "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t141551322z",
-    "post_id": 1254336,
+    "post_id": 1254337,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1074,15 +1074,15 @@
     "net_rshares": 420278288470,
     "parent_author": "ash",
     "parent_permlink": "steemit-chat-stats-and-rules",
-    "payout": 0.277,
+    "payout": 0.278,
     "payout_at": "2016-08-28T14:30:51",
-    "pending_payout_value": "0.277 HBD",
+    "pending_payout_value": "0.278 HBD",
     "percent_hbd": 10000,
     "permlink": "re-ash-steemit-chat-stats-and-rules-20160821t143046855z",
     "post_id": 920538,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1092,6 +1092,62 @@
     "title": "RE: Steemit.chat - Stats & Rules",
     "updated": "2016-08-21T14:30:51",
     "url": "/steemit-chat/@ash/steemit-chat-stats-and-rules#@gtg/re-ash-steemit-chat-stats-and-rules-20160821t143046855z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 79431791489,
+        "voter": "derekareith"
+      },
+      {
+        "rshares": 12165573676,
+        "voter": "picokernel"
+      }
+    ],
+    "author": "gtg",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 57.34,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "@djm34 if you don't trust @picokernel (no need to) you are free to make your own statement that you would send some amount directly to a winner. Anyway as you can see in comments, @complexring, well known and reputable witness already said to donate his 250 SBD as a part of the bounty.",
+    "category": "steem",
+    "children": 6,
+    "created": "2016-08-30T16:11:12",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steem"
+      ],
+      "users": [
+        "djm34",
+        "picokernel",
+        "complexring"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 91597365165,
+    "parent_author": "djm34",
+    "parent_permlink": "re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t155929474z",
+    "payout": 0.039,
+    "payout_at": "2016-09-06T16:11:12",
+    "pending_payout_value": "0.039 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-djm34-re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t161109296z",
+    "post_id": 1057820,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 2
+    },
+    "title": "RE: [Bounty] Community bounty for open source GPU miner.",
+    "updated": "2016-08-30T16:11:12",
+    "url": "/steem/@picokernel/bounty-community-bounty-for-open-source-gpu-miner#@gtg/re-djm34-re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t161109296z"
   },
   {
     "active_votes": [
@@ -1139,8 +1195,8 @@
     "permlink": "re-artakan-important-info-for-steem-miner-do-not-use-your-steemit-com-account-20160821t123356072z",
     "post_id": 919363,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1150,62 +1206,6 @@
     "title": "RE: [Solved] Important info for STEEM miners,  Steemit.com accounts (coming from facebook or reddit) seem to loose the 'Generated blocks'",
     "updated": "2016-08-21T12:33:57",
     "url": "/mining/@artakan/important-info-for-steem-miner-do-not-use-your-steemit-com-account#@gtg/re-artakan-important-info-for-steem-miner-do-not-use-your-steemit-com-account-20160821t123356072z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 79431791489,
-        "voter": "derekareith"
-      },
-      {
-        "rshares": 12165573676,
-        "voter": "picokernel"
-      }
-    ],
-    "author": "gtg",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 57.34,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "@djm34 if you don't trust @picokernel (no need to) you are free to make your own statement that you would send some amount directly to a winner. Anyway as you can see in comments, @complexring, well known and reputable witness already said to donate his 250 SBD as a part of the bounty.",
-    "category": "steem",
-    "children": 6,
-    "created": "2016-08-30T16:11:12",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 2,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "steem"
-      ],
-      "users": [
-        "djm34",
-        "picokernel",
-        "complexring"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 91597365165,
-    "parent_author": "djm34",
-    "parent_permlink": "re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t155929474z",
-    "payout": 0.037,
-    "payout_at": "2016-09-06T16:11:12",
-    "pending_payout_value": "0.037 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-djm34-re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t161109296z",
-    "post_id": 1057820,
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 2
-    },
-    "title": "RE: [Bounty] Community bounty for open source GPU miner.",
-    "updated": "2016-08-30T16:11:12",
-    "url": "/steem/@picokernel/bounty-community-bounty-for-open-source-gpu-miner#@gtg/re-djm34-re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t161109296z"
   },
   {
     "active_votes": [
@@ -1248,8 +1248,8 @@
     "permlink": "re-skypilot-my-first-real-post-was-a-success-and-i-would-like-to-share-the-story-20160827t111440904z",
     "post_id": 1011534,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1291,10 +1291,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-chitty-re-gtg-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t184349883z",
-    "post_id": 1257386,
+    "post_id": 1257400,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1333,10 +1333,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-arcange-re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t141107191z",
-    "post_id": 1254286,
+    "post_id": 1254287,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1375,10 +1375,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t131924290z",
-    "post_id": 1253719,
+    "post_id": 1253720,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1423,10 +1423,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t130410195z",
-    "post_id": 1253585,
+    "post_id": 1253586,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1465,10 +1465,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gamer00-hi-i-m-jaro-and-this-is-my-introductory-verification-post-20160915t071902704z",
-    "post_id": 1251610,
+    "post_id": 1251611,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1507,10 +1507,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t071444722z",
-    "post_id": 1251591,
+    "post_id": 1251592,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1551,8 +1551,8 @@
     "permlink": "re-eleanorp-the-best-adventures-start-with-rabbit-holes-eleanor-20160907t185449429z",
     "post_id": 1162358,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1593,8 +1593,8 @@
     "permlink": "re-lara2016-my-favorite-cat-20160907t184824412z",
     "post_id": 1162279,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1643,8 +1643,8 @@
     "permlink": "re-dan-wilson-i-m-an-english-teacher-in-beijing-my-introduction-to-steemit-and-verification-20160907t184055495z",
     "post_id": 1162194,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1688,8 +1688,8 @@
     "permlink": "re-cwbrooch-teacher-story-teller-cat-lover-about-me-20160904t093005596z",
     "post_id": 1120694,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1730,8 +1730,8 @@
     "permlink": "re-amcq-hello-steemit-i-m-alex-a-new-member-of-the-steemit-team-20160831t205719836z",
     "post_id": 1076080,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1776,8 +1776,8 @@
     "permlink": "re-djm34-re-gtg-re-djm34-re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t184729782z",
     "post_id": 1059890,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
