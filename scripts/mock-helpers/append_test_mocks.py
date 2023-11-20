@@ -19,6 +19,7 @@ def init_argparse(args: Sequence[str]) -> configargparse.Namespace:
     add = parser.add_argument
     add('--database-url', env_var='DATABASE_URL', type=str, required=True, help='database connection url')
     add('--mock-block-data-paths', type=str, required=True, help='location of the mock path containing mocked_dev_ops.json')
+    add('--mock-vops-data-paths', type=str, required=True, help='location of the vops mock path containing mocked_dev_ops.json')
 
     return parser.parse_args(args)
 
@@ -33,15 +34,24 @@ def main():
     log.info(f'Last block in hivemind: {last_block_in_hivemind["last_imported_block_num"]}')
 
     new_block = int(last_block_in_hivemind["last_imported_block_num"]) + 1
-    mock_file = os.path.join(args.mock_block_data_paths, "mocked_dev_ops.json")
+    mock_file_ops = os.path.join(args.mock_block_data_paths, "mocked_dev_ops.json")
+    mock_file_vops = os.path.join(args.mock_vops_data_paths, "mocked_dev_vops.json")
 
     try:
-        with open(mock_file, 'r') as file:
+        with open(mock_file_ops, 'r') as file:
             data = json.load(file)
             # Assuming there is only one key at the top level
             old_key = next(iter(data))
             data[new_block] = data.pop(old_key)
-        with open(mock_file, 'w') as file:
+        with open(mock_file_ops, 'w') as file:
+            json.dump(data, file, indent=4)
+
+        with open(mock_file_vops, 'r') as file:
+            data = json.load(file)
+            # Assuming there is only one key at the top level
+            old_key = next(iter(data))
+            data[new_block] = data.pop(old_key)
+        with open(mock_file_vops, 'w') as file:
             json.dump(data, file, indent=4)
 
         log.info(f"Mocks updated with new block number: {new_block}")
