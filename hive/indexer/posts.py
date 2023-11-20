@@ -274,9 +274,9 @@ class Posts(DbAdapterHolder):
                 author_rewards = value['author_rewards']
                 total_payout_value = value['total_payout_value']
                 curator_payout_value = value['curator_payout_value']
-                # beneficiary_payout_value = value['beneficiary_payout_value']
+                beneficiary_payout_value = value['beneficiary_payout_value']
 
-                payout = sum([sbd_amount(total_payout_value), sbd_amount(value['payout'])])
+                payout = sum([sbd_amount(total_payout_value), sbd_amount(curator_payout_value), sbd_amount(beneficiary_payout_value)])
                 pending_payout = 0
                 last_payout_at = date
 
