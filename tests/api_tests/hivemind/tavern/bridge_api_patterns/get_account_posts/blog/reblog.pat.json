@@ -58,7 +58,7 @@
     "pending_payout_value": "0.001 HBD",
     "percent_hbd": 10000,
     "permlink": "conceptualizing-a-scifi-land-speeder",
-    "post_id": 1176608,
+    "post_id": 1176607,
     "promoted": "0.000 HBD",
     "reblogged_by": [
       "test-safari"
@@ -280,12 +280,12 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 6459399945382,
-    "payout": 5.889,
+    "payout": 10.35,
     "payout_at": "2016-09-15T19:36:39",
-    "pending_payout_value": "5.889 HBD",
+    "pending_payout_value": "10.350 HBD",
     "percent_hbd": 10000,
     "permlink": "chop-veggies-like-a-ninja-it-s-easy",
-    "post_id": 1175967,
+    "post_id": 1175966,
     "promoted": "0.000 HBD",
     "reblogged_by": [
       "test-safari"
@@ -426,12 +426,12 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 160091549458,
-    "payout": 0.058,
+    "payout": 0.106,
     "payout_at": "2016-09-15T19:12:18",
-    "pending_payout_value": "0.058 HBD",
+    "pending_payout_value": "0.106 HBD",
     "percent_hbd": 10000,
     "permlink": "simple-fractal-prostoi-fraktal",
-    "post_id": 1175625,
+    "post_id": 1175624,
     "promoted": "0.000 HBD",
     "reblogged_by": [
       "test-safari"

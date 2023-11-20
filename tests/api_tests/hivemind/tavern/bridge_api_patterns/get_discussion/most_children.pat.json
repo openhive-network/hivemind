@@ -24764,7 +24764,7 @@
       }
     ],
     "author": "rolypoli20",
-    "author_payout_value": "-0.884 HBD",
+    "author_payout_value": "34.230 HBD",
     "author_reputation": 47.01,
     "beneficiaries": [],
     "blacklists": [],
@@ -24789,7 +24789,7 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 12515976958896,
-    "payout": 7.955,
+    "payout": 43.069,
     "payout_at": "2016-08-27T01:14:00",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,

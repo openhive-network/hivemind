@@ -439,9 +439,9 @@
     "net_rshares": 77833655363992,
     "parent_author": "steemdrive",
     "parent_permlink": "steemdrive-first-steemit-billboard-to-hit-usa-in-chicago-illinios-vote-for-the-american-dream",
-    "payout": 852.568,
+    "payout": 1601.446,
     "payout_at": "2016-08-31T16:43:21",
-    "pending_payout_value": "852.568 HBD",
+    "pending_payout_value": "1601.446 HBD",
     "percent_hbd": 10000,
     "permlink": "re-steemdrive-steemdrive-first-steemit-billboard-to-hit-usa-in-chicago-illinios-vote-for-the-american-dream-20160824t164320100z",
     "post_id": 969222,
@@ -790,9 +790,9 @@
     "net_rshares": 59091129639172,
     "parent_author": "dennygalindo",
     "parent_permlink": "re-charlieshrem-charlie-shrem-is-now-on-steemit-20160816t185037477z",
-    "payout": 545.732,
+    "payout": 955.224,
     "payout_at": "2016-08-23T18:55:27",
-    "pending_payout_value": "545.732 HBD",
+    "pending_payout_value": "955.224 HBD",
     "percent_hbd": 10000,
     "permlink": "re-dennygalindo-re-charlieshrem-charlie-shrem-is-now-on-steemit-20160816t185524881z",
     "post_id": 839376,
@@ -952,9 +952,9 @@
     "net_rshares": 44306411360842,
     "parent_author": "dopezzz123",
     "parent_permlink": "why-muscles-get-sore",
-    "payout": 312.867,
+    "payout": 603.917,
     "payout_at": "2016-08-22T22:50:42",
-    "pending_payout_value": "312.867 HBD",
+    "pending_payout_value": "603.917 HBD",
     "percent_hbd": 10000,
     "permlink": "re-dopezzz123-why-muscles-get-sore-20160815t225039946z",
     "post_id": 825301,
@@ -1098,9 +1098,9 @@
     "net_rshares": 41197240982229,
     "parent_author": "steemdrive",
     "parent_permlink": "steemdrive-first-steemit-billboard-to-hit-usa-in-chicago-illinios-vote-for-the-american-dream",
-    "payout": 249.516,
+    "payout": 438.206,
     "payout_at": "2016-08-31T16:23:00",
-    "pending_payout_value": "249.516 HBD",
+    "pending_payout_value": "438.206 HBD",
     "percent_hbd": 10000,
     "permlink": "re-steemdrive-steemdrive-first-steemit-billboard-to-hit-usa-in-chicago-illinios-vote-for-the-american-dream-20160824t162300868z",
     "post_id": 968991,
@@ -1276,9 +1276,9 @@
     "net_rshares": 36507001147810,
     "parent_author": "smooth",
     "parent_permlink": "re-steemapp-introducing-steemy-fully-native-ios-android-apps-for-steem-20160816t042406700z",
-    "payout": 227.844,
+    "payout": 398.906,
     "payout_at": "2016-08-23T04:52:51",
-    "pending_payout_value": "227.844 HBD",
+    "pending_payout_value": "398.906 HBD",
     "percent_hbd": 10000,
     "permlink": "re-smooth-re-steemapp-introducing-steemy-fully-native-ios-android-apps-for-steem-20160816t045252952z",
     "post_id": 829291,
@@ -1294,113 +1294,6 @@
     "title": "RE: [Introducing Steemy] - Fully Native iOS/Android apps for STEEM",
     "updated": "2016-08-16T14:16:24",
     "url": "/steemit/@steemapp/introducing-steemy-fully-native-ios-android-apps-for-steem#@steemapp/re-smooth-re-steemapp-introducing-steemy-fully-native-ios-android-apps-for-steem-20160816t045252952z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 17735818038199,
-        "voter": "itsascam"
-      },
-      {
-        "rshares": 2091363547583,
-        "voter": "steemroller"
-      },
-      {
-        "rshares": 17881645967595,
-        "voter": "steemed"
-      },
-      {
-        "rshares": 2473129069,
-        "voter": "boy"
-      },
-      {
-        "rshares": 3001847911,
-        "voter": "bue-witness"
-      },
-      {
-        "rshares": 562495952,
-        "voter": "bunny"
-      },
-      {
-        "rshares": 42273561181,
-        "voter": "bue"
-      },
-      {
-        "rshares": 1325647967,
-        "voter": "mini"
-      },
-      {
-        "rshares": 170794809,
-        "voter": "moon"
-      },
-      {
-        "rshares": 115426377545,
-        "voter": "stan"
-      },
-      {
-        "rshares": 497314258,
-        "voter": "healthcare"
-      },
-      {
-        "rshares": 741745834,
-        "voter": "daniel.pan"
-      },
-      {
-        "rshares": 230286157,
-        "voter": "helen.tan"
-      },
-      {
-        "rshares": 17452286451,
-        "voter": "marklyford"
-      },
-      {
-        "rshares": -118201007,
-        "voter": "cyonic"
-      },
-      {
-        "rshares": 1259875358,
-        "voter": "shadowspub"
-      }
-    ],
-    "author": "michaelx",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 60.67,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "It doesn't matter at all in the big picture, when company accounts are used to censor any conversation (as they have been doing and will likely continue to do) they please, regardless of community voting consensus.  \n\nThis has already been proven by the actions of management using those accounts for this purpose.\n\nAnyone believing Steemit as it exists currently to be a censorship free platform for free speech is sadly mistaken.",
-    "category": "philosophy",
-    "children": 0,
-    "created": "2016-08-20T21:35:15",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 5,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "philosophy"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 37894124714862,
-    "parent_author": "stellabelle",
-    "parent_permlink": "re-steemed-re-dantheman-re-steemed-re-dantheman-our-corrupt-sense-of-fairness-20160820t150054378z",
-    "payout": 218.511,
-    "payout_at": "2016-08-27T21:35:15",
-    "pending_payout_value": "218.511 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-stellabelle-re-steemed-re-dantheman-re-steemed-re-dantheman-our-corrupt-sense-of-fairness-20160820t213500128z",
-    "post_id": 911742,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 16
-    },
-    "title": "RE: Our Corrupt Sense of Fairness",
-    "updated": "2016-08-20T21:35:15",
-    "url": "/philosophy/@dantheman/our-corrupt-sense-of-fairness#@michaelx/re-stellabelle-re-steemed-re-dantheman-re-steemed-re-dantheman-our-corrupt-sense-of-fairness-20160820t213500128z"
   },
   {
     "active_votes": [
@@ -1563,9 +1456,9 @@
     "net_rshares": 36212532174065,
     "parent_author": "jamtaylor",
     "parent_permlink": "steemit-photo-challenge-4-winners-announcement-guest-judge-condra",
-    "payout": 218.337,
+    "payout": 385.355,
     "payout_at": "2016-08-22T14:23:27",
-    "pending_payout_value": "218.337 HBD",
+    "pending_payout_value": "385.355 HBD",
     "percent_hbd": 10000,
     "permlink": "re-jamtaylor-steemit-photo-challenge-4-winners-announcement-guest-judge-condra-20160815t142348222z",
     "post_id": 817343,
@@ -1581,6 +1474,113 @@
     "title": "RE: \ud83d\udcf7  Steemit Photo Challenge #4 \u2014 WINNERS ANNOUNCEMENT! Guest Judge: @condra",
     "updated": "2016-08-15T14:23:27",
     "url": "/steemitphotochallenge/@jamtaylor/steemit-photo-challenge-4-winners-announcement-guest-judge-condra#@condra/re-jamtaylor-steemit-photo-challenge-4-winners-announcement-guest-judge-condra-20160815t142348222z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 17735818038199,
+        "voter": "itsascam"
+      },
+      {
+        "rshares": 2091363547583,
+        "voter": "steemroller"
+      },
+      {
+        "rshares": 17881645967595,
+        "voter": "steemed"
+      },
+      {
+        "rshares": 2473129069,
+        "voter": "boy"
+      },
+      {
+        "rshares": 3001847911,
+        "voter": "bue-witness"
+      },
+      {
+        "rshares": 562495952,
+        "voter": "bunny"
+      },
+      {
+        "rshares": 42273561181,
+        "voter": "bue"
+      },
+      {
+        "rshares": 1325647967,
+        "voter": "mini"
+      },
+      {
+        "rshares": 170794809,
+        "voter": "moon"
+      },
+      {
+        "rshares": 115426377545,
+        "voter": "stan"
+      },
+      {
+        "rshares": 497314258,
+        "voter": "healthcare"
+      },
+      {
+        "rshares": 741745834,
+        "voter": "daniel.pan"
+      },
+      {
+        "rshares": 230286157,
+        "voter": "helen.tan"
+      },
+      {
+        "rshares": 17452286451,
+        "voter": "marklyford"
+      },
+      {
+        "rshares": -118201007,
+        "voter": "cyonic"
+      },
+      {
+        "rshares": 1259875358,
+        "voter": "shadowspub"
+      }
+    ],
+    "author": "michaelx",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 60.67,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "It doesn't matter at all in the big picture, when company accounts are used to censor any conversation (as they have been doing and will likely continue to do) they please, regardless of community voting consensus.  \n\nThis has already been proven by the actions of management using those accounts for this purpose.\n\nAnyone believing Steemit as it exists currently to be a censorship free platform for free speech is sadly mistaken.",
+    "category": "philosophy",
+    "children": 0,
+    "created": "2016-08-20T21:35:15",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 5,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "philosophy"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 37894124714862,
+    "parent_author": "stellabelle",
+    "parent_permlink": "re-steemed-re-dantheman-re-steemed-re-dantheman-our-corrupt-sense-of-fairness-20160820t150054378z",
+    "payout": 382.336,
+    "payout_at": "2016-08-27T21:35:15",
+    "pending_payout_value": "382.336 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-stellabelle-re-steemed-re-dantheman-re-steemed-re-dantheman-our-corrupt-sense-of-fairness-20160820t213500128z",
+    "post_id": 911742,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 16
+    },
+    "title": "RE: Our Corrupt Sense of Fairness",
+    "updated": "2016-08-20T21:35:15",
+    "url": "/philosophy/@dantheman/our-corrupt-sense-of-fairness#@michaelx/re-stellabelle-re-steemed-re-dantheman-re-steemed-re-dantheman-our-corrupt-sense-of-fairness-20160820t213500128z"
   },
   {
     "active_votes": [
@@ -1698,9 +1698,9 @@
     "net_rshares": 35935996353857,
     "parent_author": "jamtaylor",
     "parent_permlink": "steemit-photo-challenge-4-winners-announcement-guest-judge-condra",
-    "payout": 215.094,
+    "payout": 378.304,
     "payout_at": "2016-08-22T16:39:03",
-    "pending_payout_value": "215.094 HBD",
+    "pending_payout_value": "378.304 HBD",
     "percent_hbd": 10000,
     "permlink": "re-jamtaylor-steemit-photo-challenge-4-winners-announcement-guest-judge-condra-20160815t163904911z",
     "post_id": 819415,
@@ -1801,9 +1801,9 @@
     "net_rshares": 35682478060776,
     "parent_author": "blocktalk",
     "parent_permlink": "blocktalk-with-nexus-colin-cantrell-question-thread",
-    "payout": 212.372,
+    "payout": 371.954,
     "payout_at": "2016-08-22T19:46:09",
-    "pending_payout_value": "212.372 HBD",
+    "pending_payout_value": "371.954 HBD",
     "percent_hbd": 10000,
     "permlink": "re-blocktalk-with-nexus-colin-cantrell-question-thread-20160815t194601",
     "post_id": 822333,
@@ -1819,6 +1819,109 @@
     "title": "RE: #Blocktalk with Nexus' Colin Cantrell [Question Thread]",
     "updated": "2016-08-15T19:46:09",
     "url": "/blocktalk/@blocktalk/blocktalk-with-nexus-colin-cantrell-question-thread#@cheetah/re-blocktalk-with-nexus-colin-cantrell-question-thread-20160815t194601"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 29186049220380,
+        "voter": "berniesanders"
+      },
+      {
+        "rshares": 623996958321,
+        "voter": "justin"
+      },
+      {
+        "rshares": 4855865727368,
+        "voter": "nextgencrypto"
+      },
+      {
+        "rshares": 154146763309,
+        "voter": "jamtaylor"
+      },
+      {
+        "rshares": -5787205072,
+        "voter": "zebbra2014"
+      },
+      {
+        "rshares": 106890789634,
+        "voter": "anyx"
+      },
+      {
+        "rshares": 9733889143,
+        "voter": "senseiteekay"
+      },
+      {
+        "rshares": 9400027589,
+        "voter": "shredlord"
+      },
+      {
+        "rshares": 61646469732,
+        "voter": "cheetah"
+      },
+      {
+        "rshares": 219824678620,
+        "voter": "originate"
+      },
+      {
+        "rshares": 685101796,
+        "voter": "metaflute"
+      },
+      {
+        "rshares": 394148198,
+        "voter": "theconnoisseur"
+      },
+      {
+        "rshares": 32404401324,
+        "voter": "thecurator"
+      },
+      {
+        "rshares": 16011014560,
+        "voter": "someguy123"
+      },
+      {
+        "rshares": 188226473,
+        "voter": "andyinspace"
+      }
+    ],
+    "author": "anyx",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 64.71,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "This user is a serial plagiarist who has taken to spinning articles to plagiarize, instead of providing sources and discussion.\n\n!cheetah ban",
+    "category": "workout",
+    "children": 1,
+    "created": "2016-08-15T22:56:39",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "workout"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 35271450211375,
+    "parent_author": "dopezzz123",
+    "parent_permlink": "why-muscles-get-sore",
+    "payout": 368.58,
+    "payout_at": "2016-08-22T22:56:39",
+    "pending_payout_value": "368.580 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-dopezzz123-why-muscles-get-sore-20160815t225638685z",
+    "post_id": 825380,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 15
+    },
+    "title": "RE: Why Muscles Get Sore",
+    "updated": "2016-08-15T22:56:39",
+    "url": "/workout/@dopezzz123/why-muscles-get-sore#@anyx/re-dopezzz123-why-muscles-get-sore-20160815t225638685z"
   },
   {
     "active_votes": [
@@ -1908,9 +2011,9 @@
     "net_rshares": 37005362856363,
     "parent_author": "gmalhotra",
     "parent_permlink": "re-clayop-is-bitcoin-a-ponzi-too-a-simple-explanation-about-where-does-money-come-from-for-dummies-20160820t025813753z",
-    "payout": 210.102,
+    "payout": 367.684,
     "payout_at": "2016-08-27T03:22:36",
-    "pending_payout_value": "210.102 HBD",
+    "pending_payout_value": "367.684 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gmalhotra-re-clayop-is-bitcoin-a-ponzi-too-a-simple-explanation-about-where-does-money-come-from-for-dummies-20160820t032236858z",
     "post_id": 900162,
@@ -1926,109 +2029,6 @@
     "title": "RE: Is Bitcoin a Ponzi too? A Simple Explanation about Where Does Money Come From for Dummies",
     "updated": "2016-08-20T03:22:36",
     "url": "/steemit/@clayop/is-bitcoin-a-ponzi-too-a-simple-explanation-about-where-does-money-come-from-for-dummies#@knircky/re-gmalhotra-re-clayop-is-bitcoin-a-ponzi-too-a-simple-explanation-about-where-does-money-come-from-for-dummies-20160820t032236858z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 29186049220380,
-        "voter": "berniesanders"
-      },
-      {
-        "rshares": 623996958321,
-        "voter": "justin"
-      },
-      {
-        "rshares": 4855865727368,
-        "voter": "nextgencrypto"
-      },
-      {
-        "rshares": 154146763309,
-        "voter": "jamtaylor"
-      },
-      {
-        "rshares": -5787205072,
-        "voter": "zebbra2014"
-      },
-      {
-        "rshares": 106890789634,
-        "voter": "anyx"
-      },
-      {
-        "rshares": 9733889143,
-        "voter": "senseiteekay"
-      },
-      {
-        "rshares": 9400027589,
-        "voter": "shredlord"
-      },
-      {
-        "rshares": 61646469732,
-        "voter": "cheetah"
-      },
-      {
-        "rshares": 219824678620,
-        "voter": "originate"
-      },
-      {
-        "rshares": 685101796,
-        "voter": "metaflute"
-      },
-      {
-        "rshares": 394148198,
-        "voter": "theconnoisseur"
-      },
-      {
-        "rshares": 32404401324,
-        "voter": "thecurator"
-      },
-      {
-        "rshares": 16011014560,
-        "voter": "someguy123"
-      },
-      {
-        "rshares": 188226473,
-        "voter": "andyinspace"
-      }
-    ],
-    "author": "anyx",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 64.71,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "This user is a serial plagiarist who has taken to spinning articles to plagiarize, instead of providing sources and discussion.\n\n!cheetah ban",
-    "category": "workout",
-    "children": 1,
-    "created": "2016-08-15T22:56:39",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 1,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "workout"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 35271450211375,
-    "parent_author": "dopezzz123",
-    "parent_permlink": "why-muscles-get-sore",
-    "payout": 208.152,
-    "payout_at": "2016-08-22T22:56:39",
-    "pending_payout_value": "208.152 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-dopezzz123-why-muscles-get-sore-20160815t225638685z",
-    "post_id": 825380,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 15
-    },
-    "title": "RE: Why Muscles Get Sore",
-    "updated": "2016-08-15T22:56:39",
-    "url": "/workout/@dopezzz123/why-muscles-get-sore#@anyx/re-dopezzz123-why-muscles-get-sore-20160815t225638685z"
   },
   {
     "active_votes": [
@@ -2110,9 +2110,9 @@
     "net_rshares": 37471570441471,
     "parent_author": "blocktrades",
     "parent_permlink": "blocktrades-witness-report-for-3rd-week-of-august",
-    "payout": 204.394,
+    "payout": 357.793,
     "payout_at": "2016-08-26T21:34:42",
-    "pending_payout_value": "204.394 HBD",
+    "pending_payout_value": "357.793 HBD",
     "percent_hbd": 10000,
     "permlink": "re-blocktrades-blocktrades-witness-report-for-3rd-week-of-august-20160819t213441316z",
     "post_id": 896287,
@@ -2128,6 +2128,224 @@
     "title": "RE: BlockTrades Witness Report for 3rd Week of August",
     "updated": "2016-08-19T21:34:57",
     "url": "/witness-category/@blocktrades/blocktrades-witness-report-for-3rd-week-of-august#@thylbom/re-blocktrades-blocktrades-witness-report-for-3rd-week-of-august-20160819t213441316z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 28300878156066,
+        "voter": "dantheman"
+      },
+      {
+        "rshares": 636585679281,
+        "voter": "smooth"
+      },
+      {
+        "rshares": 6549727125575,
+        "voter": "wackou"
+      },
+      {
+        "rshares": 3099954800,
+        "voter": "boy"
+      },
+      {
+        "rshares": 3763461212,
+        "voter": "bue-witness"
+      },
+      {
+        "rshares": 690406462,
+        "voter": "bunny"
+      },
+      {
+        "rshares": 54138246944,
+        "voter": "bue"
+      },
+      {
+        "rshares": 1661302953,
+        "voter": "mini"
+      },
+      {
+        "rshares": 213684579,
+        "voter": "moon"
+      },
+      {
+        "rshares": 251709705259,
+        "voter": "lovejoy"
+      },
+      {
+        "rshares": 2511125853605,
+        "voter": "recursive"
+      },
+      {
+        "rshares": 114398906816,
+        "voter": "smooth.witness"
+      },
+      {
+        "rshares": 622843501,
+        "voter": "healthcare"
+      },
+      {
+        "rshares": 967387415,
+        "voter": "daniel.pan"
+      },
+      {
+        "rshares": 288174518,
+        "voter": "helen.tan"
+      },
+      {
+        "rshares": 71291626568,
+        "voter": "eric-boucher"
+      },
+      {
+        "rshares": 5223833163,
+        "voter": "christoryan"
+      },
+      {
+        "rshares": 4999497773,
+        "voter": "zelgald1"
+      },
+      {
+        "rshares": 63437792,
+        "voter": "tommycordero"
+      },
+      {
+        "rshares": 11501604178,
+        "voter": "darrantrute"
+      },
+      {
+        "rshares": 615797359,
+        "voter": "nebcat"
+      },
+      {
+        "rshares": 381939549,
+        "voter": "kiwideb"
+      },
+      {
+        "rshares": 444650943,
+        "voter": "floweroflife"
+      },
+      {
+        "rshares": 807251193,
+        "voter": "kingarbinv"
+      },
+      {
+        "rshares": 10978877529,
+        "voter": "skypilot"
+      },
+      {
+        "rshares": 2610482432,
+        "voter": "robcichocki"
+      }
+    ],
+    "author": "recursive",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 60.6,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "> This state of being creates a paradox for those with aims to change the world. If you are at complete peace with the way things are, then what motive is there to change the world? On what basis should you choose to act? This is the very heart of economics, the study of human action. This is the root of my current internal conflict.\n\nMahayana (Great Vehicle) buddhism may have an answer to that apparent conflict you are experiencing. According to the Mahayana tradition, true enlightenment cannot be reached merely by cultivating inner peace and eliminating delusions and suffering in isolation of other people, because doing so remains a selfish endeavor that implies that one hasn't truly reached the state of selflessness that underlies enlightenment. \n\nInstead, at some point along the path to enlightenment, one realizes that one's true nature is that of being conscious: a pure form of benevolent consciousness without shape and boundaries, and that permeates all that is. At that point, one doesn't seek anymore to deliver from suffering that fictious \"ego\" entity that has long been identified as a delusion, but instead seeks to deliver all of consciousness from suffering, including all sentient beings. This intrinsic benevolence of consciousness is what we call \"compassion\", and is the central tenet of Mahayana tradition. It is both the ultimate goal and the mean to reach that goal. By cultivating compassion, one reveals his compassionate nature, and this compassion is what will eventually lead to a contradiction with the ego and materialistic delusions, and their dissolution. \n\nFrom that perspective, he who seeks enlightenment will first accept reality as it is, and reach what first feels as a form of blissful and permanent internal peace (this is typically what Hinayana / Small Vehicule buddhism think is enlightenment, and this includes some famous western self-help authors), but will soon realize that there is one type of suffering that transcends attachment and the delusion of self and that can't be addressed by meditation and spiritual practice alone but on the contrary become more and more sharp: the suffering of seeing others suffering within this reality. This is because suffering is a noble truth, a truth that can't be denied, ignored or accepted but simply acknowledged as being true. This leads to a paradox where embracing reality leads to embracing a form of suffering that can only be eliminated by altering reality which cannot be achieved if one simply embraces reality. The only solution to this apparent paradox is to realize that reality is impermanent and can be embraced while being altered. It should be accepted in the present so that one may live free from delusions and attachment, and reduce suffering to the prime denominator of the quintessential and universally experienced suffering of being alive, while being actively shaped with all one's will and energy into a future reality where other sentient beings suffer less.\n\nUnder the mahayana assumption that consciousness is intrinsically benevolent and unable not to experience compassion as it gets closer to enlightenment, acting with all one's will and energy against the corruption that permeates reality and increases suffering of other sentient beings is not only consistent, but the one and only true way to enlightenment.\n\nArguably, government is one such big chunk of pervasive corruption that has spread like weed in our consensual reality, and creates an inordinate amount of suffering. From that perspective, being anarchist isn't only a political view, it is a statement of compassion. Ask the Dalai Lama what he thinks about governments...",
+    "category": "philosophy",
+    "children": 1,
+    "created": "2016-09-01T18:48:39",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "philosophy"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 38538789887465,
+    "parent_author": "dantheman",
+    "parent_permlink": "why-do-we-fight-to-change-the-world",
+    "payout": 307.07,
+    "payout_at": "2016-09-08T18:48:39",
+    "pending_payout_value": "307.070 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-dantheman-why-do-we-fight-to-change-the-world-20160901t184948317z",
+    "post_id": 1088540,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 26
+    },
+    "title": "RE: Why do we fight to change the world?",
+    "updated": "2016-09-01T19:11:48",
+    "url": "/philosophy/@dantheman/why-do-we-fight-to-change-the-world#@recursive/re-dantheman-why-do-we-fight-to-change-the-world-20160901t184948317z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 31543759293106,
+        "voter": "val-a"
+      },
+      {
+        "rshares": 22090812048,
+        "voter": "domino"
+      },
+      {
+        "rshares": 28897024316,
+        "voter": "zaebars"
+      },
+      {
+        "rshares": 1953557909,
+        "voter": "andreynoch"
+      },
+      {
+        "rshares": 1708472880,
+        "voter": "litrbooh"
+      },
+      {
+        "rshares": 1188786726,
+        "voter": "nonamer"
+      },
+      {
+        "rshares": 53257299,
+        "voter": "shvedas"
+      }
+    ],
+    "author": "val-a",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 52.49,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "\u041f\u0440\u043e\u0447\u0438\u0442\u0430\u0439\u0442\u0435 \u0435\u0449\u0435 \u0440\u0430\u0437 \u0432\u043d\u0438\u043c\u0430\u0442\u0435\u043b\u044c\u043d\u043e \u043e\u043f\u0440\u0435\u0434\u0435\u043b\u0435\u043d\u0438\u0435 \u043f\u0438\u0440\u0430\u043c\u0438\u0434\u044b:\n> \u0414\u043e\u0445\u043e\u0434 _\u043f\u0435\u0440\u0432\u044b\u043c_ _\u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430\u043c_ \u043f\u0438\u0440\u0430\u043c\u0438\u0434\u044b \u0432\u044b\u043f\u043b\u0430\u0447\u0438\u0432\u0430\u0435\u0442\u0441\u044f \u0437\u0430 \u0441\u0447\u0435\u0442 \u0432\u043a\u043b\u0430\u0434\u043e\u0432 \u043f\u043e\u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0438\u0445 \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u043e\u0432.\n\n\u041a\u043b\u044e\u0447\u0435\u0432\u044b\u0435 \u0441\u043b\u043e\u0432\u0430 _\u043f\u0435\u0440\u0432\u044b\u043c_ \u0438 _\u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430\u043c_ (\u043f\u043e\u0434 \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430\u043c\u0438 \u043f\u043e\u0434\u0440\u0430\u0437\u0443\u043c\u0435\u0432\u0430\u044e\u0442\u0441\u044f \u0438\u043d\u0432\u0435\u0441\u0442\u043e\u0440\u044b), \u0430 \u0432 \u0441\u043b\u0443\u0447\u0430\u0435 \u0421\u0442\u0438\u043c\u0430 \u0434\u043e\u0445\u043e\u0434 \u043f\u043e\u043b\u0443\u0447\u0430\u044e\u0442 \u043d\u0435 \u0438\u043d\u0432\u0435\u0441\u0442\u043e\u0440\u044b, \u0430 \u0430\u0432\u0442\u043e\u0440\u044b \u043e\u0442 \u043a\u043e\u0442\u043e\u0440\u044b\u0445 \u043d\u0435 \u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044f \u043d\u0438 \u043a\u043e\u043f\u0435\u0439\u043a\u0438 \u0438\u043d\u0432\u0435\u0441\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u043f\u0440\u0435\u0436\u0434\u0435 \u043e\u043d\u0438 \u043d\u0430\u0447\u043d\u0443\u0442 \u043f\u043e\u043b\u0443\u0447\u0430\u0442\u044c \u0434\u043e\u0445\u043e\u0434. \u0418\u043d\u0432\u0435\u0441\u0442\u043e\u0440\u044b \u0442\u0435\u043e\u0440\u0435\u0442\u0438\u0447\u0435\u0441\u043a\u0438 \u043c\u043e\u0433\u0443\u0442 \u043f\u043e\u043b\u0443\u0447\u0438\u0442\u044c \u0434\u043e\u0445\u043e\u0434, \u0435\u0441\u043b\u0438 \u0446\u0435\u043d\u0430  STEEM, SP \u0438\u043b\u0438 SD \u0432\u044b\u0440\u0430\u0441\u0442\u0435\u0442, \u043d\u043e \u044d\u0442\u043e\u0433\u043e \u0438\u043c \u043d\u0438\u043a\u0442\u043e \u043d\u0435 \u043e\u0431\u0435\u0449\u0430\u0435\u0442 (\u0432 \u043e\u0442\u043b\u0438\u0447\u0438\u0438 \u043e\u0442 \u043f\u0438\u0440\u0430\u043c\u0438\u0434). \u041a \u0442\u043e\u043c\u0443 \u0436\u0435 \u0430\u0432\u0442\u043e\u0440\u0430\u043c \u0432\u044b\u043f\u043b\u0430\u0447\u0438\u0432\u0430\u0435\u0442\u0441\u044f \u0433\u043e\u043d\u043e\u0440\u0430\u0440 \u043d\u0435 \u0441 \u0434\u0435\u043d\u0435\u0433 \u043d\u043e\u0432\u044b\u0445 \u0438\u043d\u0432\u0435\u0441\u0442\u043e\u0440\u043e\u0432, \u0430 \u0440\u0430\u0437\u043c\u044b\u0442\u0438\u0435\u043c \u0434\u043e\u043b\u0438 \u0432\u0441\u0435\u0445 \u043f\u0440\u0435\u0434\u044b\u0434\u0443\u0449\u0438\u0445 \u0438\u043d\u0432\u0435\u0441\u0442\u043e\u0440\u043e\u0432 \u0432 STEEM \u0438\u043b\u0438 \u0432 SP, \u0432 \u0442\u043e\u043c \u0447\u0438\u0441\u043b\u0435 \u0438 \u0434\u043e\u043b\u0438 \u043a\u0438\u0442\u043e\u0432. \u0414\u043e\u0445\u043e\u0434 \u043a\u0438\u0442\u043e\u0432, \u0438\u043b\u0438 \u043b\u044e\u0431\u043e\u0433\u043e, \u043a\u0442\u043e \u0438\u043d\u0432\u0435\u0441\u0442\u0438\u0440\u043e\u0432\u0430\u043b \u043d\u0430 \u043d\u0430\u0447\u0430\u043b\u044c\u043d\u043e\u043c \u044d\u0442\u0430\u043f\u0435 \u0437\u0430\u0432\u0438\u0441\u0438\u0442 \u043e\u0442 \u043d\u043e\u0432\u044b\u0445 \u0438\u043d\u0432\u0435\u0441\u0442\u0438\u0446\u0438\u0439 \u0432 \u0442\u043e\u0439 \u0436\u0435 \u0441\u0442\u0435\u043f\u0435\u043d\u0438 \u043a\u0430\u043a \u0438 \u0432 \u043b\u044e\u0431\u043e\u0439 \u0434\u0440\u0443\u0433\u043e\u0439 \u043a\u0440\u0438\u043f\u0442\u043e\u0432\u0430\u043b\u044e\u0442\u0435.\n\n\u0412\u043c\u0435\u0441\u0442\u043e \u0441\u0440\u0430\u0432\u043d\u0435\u043d\u0438\u044f \u0441 \u043f\u0440\u0438\u0440\u0430\u043c\u0438\u0434\u043e\u0439, \u043f\u0440\u043e\u0434\u0443\u043a\u0442\u0438\u0432\u043d\u0435\u0435 \u0441\u0440\u0430\u0432\u043d\u0438\u0442\u044c \u0441 \u043e\u0431\u044b\u043a\u043d\u043e\u0432\u0435\u043d\u043d\u044b\u043c \u0441\u0442\u0430\u0440\u0442\u0430\u043f\u043e\u043c, \u0432\u043e\u0437\u044c\u043c\u0438\u0442\u0435 \u043d\u0430\u043f\u0440\u0438\u043c\u0435\u0440 \u0422\u0432\u0438\u0442\u0435\u0440 - \u043f\u043e \u0431\u043e\u043b\u044c\u0448\u043e\u043c\u0443 \u0441\u0447\u0435\u0442\u0443 \u043e\u043d\u0438, \u044f\u0432\u043b\u044f\u0441\u044c \u0443\u0431\u044b\u0442\u043e\u0447\u043d\u043e\u0439 \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0435\u0439 (\u0434\u0430 \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0438 10 \u043b\u0435\u0442 \u0438 \u043e\u043d\u0430 \u0434\u043e \u0441\u0438\u0445 \u043f\u043e\u0440 \u0443\u0431\u044b\u0442\u043e\u0447\u043d\u0430), \u043f\u043b\u0430\u0442\u044f\u0442 \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f\u043c (\u043d\u0435 \u043d\u0430\u043f\u0440\u044f\u043c\u0443\u044e, \u0430 \u043a\u043e\u0441\u0432\u0435\u043d\u043d\u043e, \u043d\u0430\u043f\u0440\u0438\u043c\u0435\u0440 \u043e\u043f\u043b\u0430\u0447\u0438\u0432\u0430\u044f \u0441\u0435\u0440\u0432\u0435\u0440\u0430 \u0432 \u0434\u0430\u0442\u0430\u0446\u0435\u043d\u0442\u0440\u0435) \u043f\u0440\u043e\u0434\u0430\u0432\u0430\u044f \u0434\u043e\u043b\u044e/\u0430\u043a\u0446\u0438\u0438 \u0444\u0430\u0443\u043d\u0434\u0435\u0440\u043e\u0432 \u0438\u043d\u0432\u0435\u0441\u0442\u043e\u0440\u0430\u043c. \u041f\u043e\u0447\u0435\u043c\u0443 \u0430\u043a\u0446\u0438\u0438 \u0442\u0432\u0438\u0442\u0435\u0440\u0430 \u0441\u0442\u043e\u044f\u0442 \u0431\u043e\u043b\u044c\u0448\u0435 \u043d\u0443\u043b\u044f? \u041f\u043e\u0447\u0435\u043c\u0443 \u0422\u0432\u0438\u0442\u0435\u0440 \u043d\u0438\u043a\u0442\u043e \u043d\u0435 \u043d\u0430\u0437\u044b\u0432\u0430\u0435\u0442 \u0444\u0438\u043d\u0430\u043d\u0441\u043e\u0432\u043e\u0439 \u043f\u0438\u0440\u0430\u043c\u0438\u0434\u043e\u0439?\n\n\u0418\u043b\u0438 \u0441\u0440\u0430\u0432\u043d\u0438\u0442\u0435 \u0441\u0442\u0438\u043c \u0441 \u0431\u0438\u0442\u043a\u043e\u0438\u043d\u043e\u043c - \u0441 \u0442\u0430\u043a\u0438\u043c \u0436\u0435 \u0443\u0441\u043f\u0435\u0445\u043e\u043c \u0438 \u0431\u0438\u0442\u043a\u043e\u0438\u043d \u043c\u043e\u0436\u043d\u043e \u043d\u0430\u0437\u0432\u0430\u0442\u044c \u0444\u0438\u043d\u0430\u043d\u0441\u043e\u0432\u043e\u0439 \u043f\u0438\u0440\u0430\u043c\u0438\u0434\u043e\u0439 - \u0432\u0435\u0434\u044c \u043f\u043b\u0430\u0442\u0438\u0442 \u0436\u0435 \u043c\u0430\u0439\u043d\u0435\u0440\u0430\u043c \u0434\u0435\u043d\u044c\u0433\u0430\u043c\u0438 \u0438\u043d\u0432\u0435\u0441\u0442\u043e\u0440\u043e\u0432.\n\n(p.s. \u043f\u0440\u043e\u0433\u043e\u043b\u043e\u0441\u0443\u044e \u0437\u0430 \u0441\u0435\u0431\u044f, \u0447\u0442\u043e \u0431\u044b \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u044c \u043a\u0430\u043a \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c SP \u0434\u043b\u044f \u0440\u0435\u043a\u043b\u0430\u043c\u044b \u0441\u043e\u0431\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0445 \u043f\u043e\u0441\u0442\u043e\u0432)",
+    "category": "ru-steemit",
+    "children": 12,
+    "created": "2016-08-24T03:37:03",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "ru-steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 31599651204284,
+    "parent_author": "litrbooh",
+    "parent_permlink": "budushee-steemit-nuzhna-li-reklama-v-steemit",
+    "payout": 299.593,
+    "payout_at": "2016-08-31T03:37:03",
+    "pending_payout_value": "299.593 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-litrbooh-budushee-steemit-nuzhna-li-reklama-v-steemit-20160824t033703760z",
+    "post_id": 961525,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 7
+    },
+    "title": "RE: \u0411\u0443\u0434\u0443\u0449\u0435\u0435 STEEMIT. \u041d\u0443\u0436\u043d\u0430 \u043b\u0438 \u0440\u0435\u043a\u043b\u0430\u043c\u0430 \u0432 STEEMIT?",
+    "updated": "2016-08-24T03:37:03",
+    "url": "/ru-steemit/@litrbooh/budushee-steemit-nuzhna-li-reklama-v-steemit#@val-a/re-litrbooh-budushee-steemit-nuzhna-li-reklama-v-steemit-20160824t033703760z"
   },
   {
     "active_votes": [
@@ -2401,9 +2619,9 @@
     "net_rshares": 31034930180364,
     "parent_author": "bacchist",
     "parent_permlink": "dan-needs-to-be-stopped",
-    "payout": 164.027,
+    "payout": 288.511,
     "payout_at": "2016-08-24T04:58:03",
-    "pending_payout_value": "164.027 HBD",
+    "pending_payout_value": "288.511 HBD",
     "percent_hbd": 10000,
     "permlink": "re-bacchist-dan-needs-to-be-stopped-20160817t045803929z",
     "post_id": 847282,
@@ -2419,224 +2637,6 @@
     "title": "RE: Dan needs to be stopped",
     "updated": "2016-08-17T12:34:09",
     "url": "/steem/@bacchist/dan-needs-to-be-stopped#@lukestokes/re-bacchist-dan-needs-to-be-stopped-20160817t045803929z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 28300878156066,
-        "voter": "dantheman"
-      },
-      {
-        "rshares": 636585679281,
-        "voter": "smooth"
-      },
-      {
-        "rshares": 6549727125575,
-        "voter": "wackou"
-      },
-      {
-        "rshares": 3099954800,
-        "voter": "boy"
-      },
-      {
-        "rshares": 3763461212,
-        "voter": "bue-witness"
-      },
-      {
-        "rshares": 690406462,
-        "voter": "bunny"
-      },
-      {
-        "rshares": 54138246944,
-        "voter": "bue"
-      },
-      {
-        "rshares": 1661302953,
-        "voter": "mini"
-      },
-      {
-        "rshares": 213684579,
-        "voter": "moon"
-      },
-      {
-        "rshares": 251709705259,
-        "voter": "lovejoy"
-      },
-      {
-        "rshares": 2511125853605,
-        "voter": "recursive"
-      },
-      {
-        "rshares": 114398906816,
-        "voter": "smooth.witness"
-      },
-      {
-        "rshares": 622843501,
-        "voter": "healthcare"
-      },
-      {
-        "rshares": 967387415,
-        "voter": "daniel.pan"
-      },
-      {
-        "rshares": 288174518,
-        "voter": "helen.tan"
-      },
-      {
-        "rshares": 71291626568,
-        "voter": "eric-boucher"
-      },
-      {
-        "rshares": 5223833163,
-        "voter": "christoryan"
-      },
-      {
-        "rshares": 4999497773,
-        "voter": "zelgald1"
-      },
-      {
-        "rshares": 63437792,
-        "voter": "tommycordero"
-      },
-      {
-        "rshares": 11501604178,
-        "voter": "darrantrute"
-      },
-      {
-        "rshares": 615797359,
-        "voter": "nebcat"
-      },
-      {
-        "rshares": 381939549,
-        "voter": "kiwideb"
-      },
-      {
-        "rshares": 444650943,
-        "voter": "floweroflife"
-      },
-      {
-        "rshares": 807251193,
-        "voter": "kingarbinv"
-      },
-      {
-        "rshares": 10978877529,
-        "voter": "skypilot"
-      },
-      {
-        "rshares": 2610482432,
-        "voter": "robcichocki"
-      }
-    ],
-    "author": "recursive",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 60.6,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "> This state of being creates a paradox for those with aims to change the world. If you are at complete peace with the way things are, then what motive is there to change the world? On what basis should you choose to act? This is the very heart of economics, the study of human action. This is the root of my current internal conflict.\n\nMahayana (Great Vehicle) buddhism may have an answer to that apparent conflict you are experiencing. According to the Mahayana tradition, true enlightenment cannot be reached merely by cultivating inner peace and eliminating delusions and suffering in isolation of other people, because doing so remains a selfish endeavor that implies that one hasn't truly reached the state of selflessness that underlies enlightenment. \n\nInstead, at some point along the path to enlightenment, one realizes that one's true nature is that of being conscious: a pure form of benevolent consciousness without shape and boundaries, and that permeates all that is. At that point, one doesn't seek anymore to deliver from suffering that fictious \"ego\" entity that has long been identified as a delusion, but instead seeks to deliver all of consciousness from suffering, including all sentient beings. This intrinsic benevolence of consciousness is what we call \"compassion\", and is the central tenet of Mahayana tradition. It is both the ultimate goal and the mean to reach that goal. By cultivating compassion, one reveals his compassionate nature, and this compassion is what will eventually lead to a contradiction with the ego and materialistic delusions, and their dissolution. \n\nFrom that perspective, he who seeks enlightenment will first accept reality as it is, and reach what first feels as a form of blissful and permanent internal peace (this is typically what Hinayana / Small Vehicule buddhism think is enlightenment, and this includes some famous western self-help authors), but will soon realize that there is one type of suffering that transcends attachment and the delusion of self and that can't be addressed by meditation and spiritual practice alone but on the contrary become more and more sharp: the suffering of seeing others suffering within this reality. This is because suffering is a noble truth, a truth that can't be denied, ignored or accepted but simply acknowledged as being true. This leads to a paradox where embracing reality leads to embracing a form of suffering that can only be eliminated by altering reality which cannot be achieved if one simply embraces reality. The only solution to this apparent paradox is to realize that reality is impermanent and can be embraced while being altered. It should be accepted in the present so that one may live free from delusions and attachment, and reduce suffering to the prime denominator of the quintessential and universally experienced suffering of being alive, while being actively shaped with all one's will and energy into a future reality where other sentient beings suffer less.\n\nUnder the mahayana assumption that consciousness is intrinsically benevolent and unable not to experience compassion as it gets closer to enlightenment, acting with all one's will and energy against the corruption that permeates reality and increases suffering of other sentient beings is not only consistent, but the one and only true way to enlightenment.\n\nArguably, government is one such big chunk of pervasive corruption that has spread like weed in our consensual reality, and creates an inordinate amount of suffering. From that perspective, being anarchist isn't only a political view, it is a statement of compassion. Ask the Dalai Lama what he thinks about governments...",
-    "category": "philosophy",
-    "children": 1,
-    "created": "2016-09-01T18:48:39",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 1,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "philosophy"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 38538789887465,
-    "parent_author": "dantheman",
-    "parent_permlink": "why-do-we-fight-to-change-the-world",
-    "payout": 160.619,
-    "payout_at": "2016-09-08T18:48:39",
-    "pending_payout_value": "160.619 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-dantheman-why-do-we-fight-to-change-the-world-20160901t184948317z",
-    "post_id": 1088540,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 26
-    },
-    "title": "RE: Why do we fight to change the world?",
-    "updated": "2016-09-01T19:11:48",
-    "url": "/philosophy/@dantheman/why-do-we-fight-to-change-the-world#@recursive/re-dantheman-why-do-we-fight-to-change-the-world-20160901t184948317z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 31543759293106,
-        "voter": "val-a"
-      },
-      {
-        "rshares": 22090812048,
-        "voter": "domino"
-      },
-      {
-        "rshares": 28897024316,
-        "voter": "zaebars"
-      },
-      {
-        "rshares": 1953557909,
-        "voter": "andreynoch"
-      },
-      {
-        "rshares": 1708472880,
-        "voter": "litrbooh"
-      },
-      {
-        "rshares": 1188786726,
-        "voter": "nonamer"
-      },
-      {
-        "rshares": 53257299,
-        "voter": "shvedas"
-      }
-    ],
-    "author": "val-a",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 52.49,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "\u041f\u0440\u043e\u0447\u0438\u0442\u0430\u0439\u0442\u0435 \u0435\u0449\u0435 \u0440\u0430\u0437 \u0432\u043d\u0438\u043c\u0430\u0442\u0435\u043b\u044c\u043d\u043e \u043e\u043f\u0440\u0435\u0434\u0435\u043b\u0435\u043d\u0438\u0435 \u043f\u0438\u0440\u0430\u043c\u0438\u0434\u044b:\n> \u0414\u043e\u0445\u043e\u0434 _\u043f\u0435\u0440\u0432\u044b\u043c_ _\u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430\u043c_ \u043f\u0438\u0440\u0430\u043c\u0438\u0434\u044b \u0432\u044b\u043f\u043b\u0430\u0447\u0438\u0432\u0430\u0435\u0442\u0441\u044f \u0437\u0430 \u0441\u0447\u0435\u0442 \u0432\u043a\u043b\u0430\u0434\u043e\u0432 \u043f\u043e\u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0438\u0445 \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u043e\u0432.\n\n\u041a\u043b\u044e\u0447\u0435\u0432\u044b\u0435 \u0441\u043b\u043e\u0432\u0430 _\u043f\u0435\u0440\u0432\u044b\u043c_ \u0438 _\u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430\u043c_ (\u043f\u043e\u0434 \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430\u043c\u0438 \u043f\u043e\u0434\u0440\u0430\u0437\u0443\u043c\u0435\u0432\u0430\u044e\u0442\u0441\u044f \u0438\u043d\u0432\u0435\u0441\u0442\u043e\u0440\u044b), \u0430 \u0432 \u0441\u043b\u0443\u0447\u0430\u0435 \u0421\u0442\u0438\u043c\u0430 \u0434\u043e\u0445\u043e\u0434 \u043f\u043e\u043b\u0443\u0447\u0430\u044e\u0442 \u043d\u0435 \u0438\u043d\u0432\u0435\u0441\u0442\u043e\u0440\u044b, \u0430 \u0430\u0432\u0442\u043e\u0440\u044b \u043e\u0442 \u043a\u043e\u0442\u043e\u0440\u044b\u0445 \u043d\u0435 \u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044f \u043d\u0438 \u043a\u043e\u043f\u0435\u0439\u043a\u0438 \u0438\u043d\u0432\u0435\u0441\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u043f\u0440\u0435\u0436\u0434\u0435 \u043e\u043d\u0438 \u043d\u0430\u0447\u043d\u0443\u0442 \u043f\u043e\u043b\u0443\u0447\u0430\u0442\u044c \u0434\u043e\u0445\u043e\u0434. \u0418\u043d\u0432\u0435\u0441\u0442\u043e\u0440\u044b \u0442\u0435\u043e\u0440\u0435\u0442\u0438\u0447\u0435\u0441\u043a\u0438 \u043c\u043e\u0433\u0443\u0442 \u043f\u043e\u043b\u0443\u0447\u0438\u0442\u044c \u0434\u043e\u0445\u043e\u0434, \u0435\u0441\u043b\u0438 \u0446\u0435\u043d\u0430  STEEM, SP \u0438\u043b\u0438 SD \u0432\u044b\u0440\u0430\u0441\u0442\u0435\u0442, \u043d\u043e \u044d\u0442\u043e\u0433\u043e \u0438\u043c \u043d\u0438\u043a\u0442\u043e \u043d\u0435 \u043e\u0431\u0435\u0449\u0430\u0435\u0442 (\u0432 \u043e\u0442\u043b\u0438\u0447\u0438\u0438 \u043e\u0442 \u043f\u0438\u0440\u0430\u043c\u0438\u0434). \u041a \u0442\u043e\u043c\u0443 \u0436\u0435 \u0430\u0432\u0442\u043e\u0440\u0430\u043c \u0432\u044b\u043f\u043b\u0430\u0447\u0438\u0432\u0430\u0435\u0442\u0441\u044f \u0433\u043e\u043d\u043e\u0440\u0430\u0440 \u043d\u0435 \u0441 \u0434\u0435\u043d\u0435\u0433 \u043d\u043e\u0432\u044b\u0445 \u0438\u043d\u0432\u0435\u0441\u0442\u043e\u0440\u043e\u0432, \u0430 \u0440\u0430\u0437\u043c\u044b\u0442\u0438\u0435\u043c \u0434\u043e\u043b\u0438 \u0432\u0441\u0435\u0445 \u043f\u0440\u0435\u0434\u044b\u0434\u0443\u0449\u0438\u0445 \u0438\u043d\u0432\u0435\u0441\u0442\u043e\u0440\u043e\u0432 \u0432 STEEM \u0438\u043b\u0438 \u0432 SP, \u0432 \u0442\u043e\u043c \u0447\u0438\u0441\u043b\u0435 \u0438 \u0434\u043e\u043b\u0438 \u043a\u0438\u0442\u043e\u0432. \u0414\u043e\u0445\u043e\u0434 \u043a\u0438\u0442\u043e\u0432, \u0438\u043b\u0438 \u043b\u044e\u0431\u043e\u0433\u043e, \u043a\u0442\u043e \u0438\u043d\u0432\u0435\u0441\u0442\u0438\u0440\u043e\u0432\u0430\u043b \u043d\u0430 \u043d\u0430\u0447\u0430\u043b\u044c\u043d\u043e\u043c \u044d\u0442\u0430\u043f\u0435 \u0437\u0430\u0432\u0438\u0441\u0438\u0442 \u043e\u0442 \u043d\u043e\u0432\u044b\u0445 \u0438\u043d\u0432\u0435\u0441\u0442\u0438\u0446\u0438\u0439 \u0432 \u0442\u043e\u0439 \u0436\u0435 \u0441\u0442\u0435\u043f\u0435\u043d\u0438 \u043a\u0430\u043a \u0438 \u0432 \u043b\u044e\u0431\u043e\u0439 \u0434\u0440\u0443\u0433\u043e\u0439 \u043a\u0440\u0438\u043f\u0442\u043e\u0432\u0430\u043b\u044e\u0442\u0435.\n\n\u0412\u043c\u0435\u0441\u0442\u043e \u0441\u0440\u0430\u0432\u043d\u0435\u043d\u0438\u044f \u0441 \u043f\u0440\u0438\u0440\u0430\u043c\u0438\u0434\u043e\u0439, \u043f\u0440\u043e\u0434\u0443\u043a\u0442\u0438\u0432\u043d\u0435\u0435 \u0441\u0440\u0430\u0432\u043d\u0438\u0442\u044c \u0441 \u043e\u0431\u044b\u043a\u043d\u043e\u0432\u0435\u043d\u043d\u044b\u043c \u0441\u0442\u0430\u0440\u0442\u0430\u043f\u043e\u043c, \u0432\u043e\u0437\u044c\u043c\u0438\u0442\u0435 \u043d\u0430\u043f\u0440\u0438\u043c\u0435\u0440 \u0422\u0432\u0438\u0442\u0435\u0440 - \u043f\u043e \u0431\u043e\u043b\u044c\u0448\u043e\u043c\u0443 \u0441\u0447\u0435\u0442\u0443 \u043e\u043d\u0438, \u044f\u0432\u043b\u044f\u0441\u044c \u0443\u0431\u044b\u0442\u043e\u0447\u043d\u043e\u0439 \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0435\u0439 (\u0434\u0430 \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0438 10 \u043b\u0435\u0442 \u0438 \u043e\u043d\u0430 \u0434\u043e \u0441\u0438\u0445 \u043f\u043e\u0440 \u0443\u0431\u044b\u0442\u043e\u0447\u043d\u0430), \u043f\u043b\u0430\u0442\u044f\u0442 \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f\u043c (\u043d\u0435 \u043d\u0430\u043f\u0440\u044f\u043c\u0443\u044e, \u0430 \u043a\u043e\u0441\u0432\u0435\u043d\u043d\u043e, \u043d\u0430\u043f\u0440\u0438\u043c\u0435\u0440 \u043e\u043f\u043b\u0430\u0447\u0438\u0432\u0430\u044f \u0441\u0435\u0440\u0432\u0435\u0440\u0430 \u0432 \u0434\u0430\u0442\u0430\u0446\u0435\u043d\u0442\u0440\u0435) \u043f\u0440\u043e\u0434\u0430\u0432\u0430\u044f \u0434\u043e\u043b\u044e/\u0430\u043a\u0446\u0438\u0438 \u0444\u0430\u0443\u043d\u0434\u0435\u0440\u043e\u0432 \u0438\u043d\u0432\u0435\u0441\u0442\u043e\u0440\u0430\u043c. \u041f\u043e\u0447\u0435\u043c\u0443 \u0430\u043a\u0446\u0438\u0438 \u0442\u0432\u0438\u0442\u0435\u0440\u0430 \u0441\u0442\u043e\u044f\u0442 \u0431\u043e\u043b\u044c\u0448\u0435 \u043d\u0443\u043b\u044f? \u041f\u043e\u0447\u0435\u043c\u0443 \u0422\u0432\u0438\u0442\u0435\u0440 \u043d\u0438\u043a\u0442\u043e \u043d\u0435 \u043d\u0430\u0437\u044b\u0432\u0430\u0435\u0442 \u0444\u0438\u043d\u0430\u043d\u0441\u043e\u0432\u043e\u0439 \u043f\u0438\u0440\u0430\u043c\u0438\u0434\u043e\u0439?\n\n\u0418\u043b\u0438 \u0441\u0440\u0430\u0432\u043d\u0438\u0442\u0435 \u0441\u0442\u0438\u043c \u0441 \u0431\u0438\u0442\u043a\u043e\u0438\u043d\u043e\u043c - \u0441 \u0442\u0430\u043a\u0438\u043c \u0436\u0435 \u0443\u0441\u043f\u0435\u0445\u043e\u043c \u0438 \u0431\u0438\u0442\u043a\u043e\u0438\u043d \u043c\u043e\u0436\u043d\u043e \u043d\u0430\u0437\u0432\u0430\u0442\u044c \u0444\u0438\u043d\u0430\u043d\u0441\u043e\u0432\u043e\u0439 \u043f\u0438\u0440\u0430\u043c\u0438\u0434\u043e\u0439 - \u0432\u0435\u0434\u044c \u043f\u043b\u0430\u0442\u0438\u0442 \u0436\u0435 \u043c\u0430\u0439\u043d\u0435\u0440\u0430\u043c \u0434\u0435\u043d\u044c\u0433\u0430\u043c\u0438 \u0438\u043d\u0432\u0435\u0441\u0442\u043e\u0440\u043e\u0432.\n\n(p.s. \u043f\u0440\u043e\u0433\u043e\u043b\u043e\u0441\u0443\u044e \u0437\u0430 \u0441\u0435\u0431\u044f, \u0447\u0442\u043e \u0431\u044b \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u044c \u043a\u0430\u043a \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c SP \u0434\u043b\u044f \u0440\u0435\u043a\u043b\u0430\u043c\u044b \u0441\u043e\u0431\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0445 \u043f\u043e\u0441\u0442\u043e\u0432)",
-    "category": "ru-steemit",
-    "children": 12,
-    "created": "2016-08-24T03:37:03",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 1,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "ru-steemit"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 31599651204284,
-    "parent_author": "litrbooh",
-    "parent_permlink": "budushee-steemit-nuzhna-li-reklama-v-steemit",
-    "payout": 149.955,
-    "payout_at": "2016-08-31T03:37:03",
-    "pending_payout_value": "149.955 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-litrbooh-budushee-steemit-nuzhna-li-reklama-v-steemit-20160824t033703760z",
-    "post_id": 961525,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 7
-    },
-    "title": "RE: \u0411\u0443\u0434\u0443\u0449\u0435\u0435 STEEMIT. \u041d\u0443\u0436\u043d\u0430 \u043b\u0438 \u0440\u0435\u043a\u043b\u0430\u043c\u0430 \u0432 STEEMIT?",
-    "updated": "2016-08-24T03:37:03",
-    "url": "/ru-steemit/@litrbooh/budushee-steemit-nuzhna-li-reklama-v-steemit#@val-a/re-litrbooh-budushee-steemit-nuzhna-li-reklama-v-steemit-20160824t033703760z"
   },
   {
     "active_votes": [
@@ -3246,9 +3246,9 @@
     "net_rshares": 42304792392028,
     "parent_author": "steemitblog",
     "parent_permlink": "announcing-steem-0-14-0-release-candidate",
-    "payout": 144.083,
+    "payout": 266.204,
     "payout_at": "2016-09-09T21:16:27",
-    "pending_payout_value": "144.083 HBD",
+    "pending_payout_value": "266.204 HBD",
     "percent_hbd": 10000,
     "permlink": "re-steemitblog-announcing-steem-0-14-0-release-candidate-20160902t211609578z",
     "post_id": 1103662,
@@ -3337,9 +3337,9 @@
     "net_rshares": 30158646716022,
     "parent_author": "senderos",
     "parent_permlink": "the-nightmare-song",
-    "payout": 132.547,
+    "payout": 231.961,
     "payout_at": "2016-08-30T01:17:00",
-    "pending_payout_value": "132.547 HBD",
+    "pending_payout_value": "231.961 HBD",
     "percent_hbd": 10000,
     "permlink": "re-senderos-the-nightmare-song-20160823t011659950z",
     "post_id": 944109,
@@ -3466,12 +3466,12 @@
     "net_rshares": 40084767746965,
     "parent_author": "luminousvisions",
     "parent_permlink": "re-ned-re-steemship-open-letter-to-ned-and-dan-you-badly-need-a-communications-community-content-expert-and-i-hereby-nominate-stellabelle-or-20160911t021909082z",
-    "payout": 131.348,
+    "payout": 229.947,
     "payout_at": "2016-09-18T03:56:51",
-    "pending_payout_value": "131.348 HBD",
+    "pending_payout_value": "229.947 HBD",
     "percent_hbd": 10000,
     "permlink": "re-luminousvisions-re-ned-re-steemship-open-letter-to-ned-and-dan-you-badly-need-a-communications-community-content-expert-and-i-hereby-nominate-stellabelle-or-20160911t035652062z",
-    "post_id": 1204437,
+    "post_id": 1204436,
     "promoted": "0.000 HBD",
     "reblogs": 0,
     "replies": [],
@@ -3484,101 +3484,6 @@
     "title": "RE: Open Letter to Ned and Dan: You Badly Need a Communications/Community/Content Expert and I Hereby Nominate @stellabelle or @donkeypong For That Job",
     "updated": "2016-09-11T06:14:27",
     "url": "/steemit/@steemship/open-letter-to-ned-and-dan-you-badly-need-a-communications-community-content-expert-and-i-hereby-nominate-stellabelle-or#@luminousvisions/re-luminousvisions-re-ned-re-steemship-open-letter-to-ned-and-dan-you-badly-need-a-communications-community-content-expert-and-i-hereby-nominate-stellabelle-or-20160911t035652062z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 35321225455025,
-        "voter": "jamesc"
-      },
-      {
-        "rshares": 3104786127,
-        "voter": "boy"
-      },
-      {
-        "rshares": 3769614077,
-        "voter": "bue-witness"
-      },
-      {
-        "rshares": 684099809,
-        "voter": "bunny"
-      },
-      {
-        "rshares": 54952584675,
-        "voter": "bue"
-      },
-      {
-        "rshares": 1663623227,
-        "voter": "mini"
-      },
-      {
-        "rshares": 213807099,
-        "voter": "moon"
-      },
-      {
-        "rshares": 625076388,
-        "voter": "healthcare"
-      },
-      {
-        "rshares": 973278654,
-        "voter": "daniel.pan"
-      },
-      {
-        "rshares": 288376577,
-        "voter": "helen.tan"
-      },
-      {
-        "rshares": 64567952685,
-        "voter": "cheetah"
-      },
-      {
-        "rshares": 100261624,
-        "voter": "cheetah43"
-      },
-      {
-        "rshares": 141949259,
-        "voter": "cheetah44"
-      },
-      {
-        "rshares": 121089288,
-        "voter": "cheetah45"
-      }
-    ],
-    "author": "cheetah",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 64.17,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Warning! This user is on my black list, likely as a known plagiarist, spammer or ID thief. Please be cautious with this post!\nTo get off this list, please chat with us in the #steemitabuse-appeals channel in [steemit.chat](http://steemit.chat).",
-    "category": "nsfw",
-    "children": 0,
-    "created": "2016-09-06T06:15:21",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 1,
-    "is_paidout": false,
-    "json_metadata": {},
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 35452431954514,
-    "parent_author": "tatyanasvitsa",
-    "parent_permlink": "the-real-story-lesbian-love",
-    "payout": 127.206,
-    "payout_at": "2016-09-13T06:15:21",
-    "pending_payout_value": "127.206 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-the-real-story-lesbian-love-20160906t061516",
-    "post_id": 1143693,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 14
-    },
-    "title": "RE: The real story lesbian love!",
-    "updated": "2016-09-06T06:15:21",
-    "url": "/nsfw/@tatyanasvitsa/the-real-story-lesbian-love#@cheetah/re-the-real-story-lesbian-love-20160906t061516"
   },
   {
     "active_votes": [
@@ -3683,9 +3588,9 @@
     "net_rshares": 33807216655501,
     "parent_author": "ned",
     "parent_permlink": "increasing-curation-demand-for-steem-power-and-community-interaction",
-    "payout": 116.933,
+    "payout": 204.637,
     "payout_at": "2016-09-15T05:07:51",
-    "pending_payout_value": "116.933 HBD",
+    "pending_payout_value": "204.637 HBD",
     "percent_hbd": 10000,
     "permlink": "re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160908t050749903z",
     "post_id": 1168454,
@@ -3701,5 +3606,79 @@
     "title": "RE: Increasing Curation, Demand for Steem Power and Community Interaction",
     "updated": "2016-09-08T20:47:24",
     "url": "/steem/@ned/increasing-curation-demand-for-steem-power-and-community-interaction#@dana-edwards/re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160908t050749903z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 28480806497948,
+        "voter": "jamesc"
+      },
+      {
+        "rshares": 95922137592,
+        "voter": "limitless"
+      },
+      {
+        "rshares": 5705296565,
+        "voter": "logic"
+      },
+      {
+        "rshares": 19336421000,
+        "voter": "hanshotfirst"
+      },
+      {
+        "rshares": 4237453811,
+        "voter": "canadian-coconut"
+      },
+      {
+        "rshares": 86947484,
+        "voter": "skeptic"
+      },
+      {
+        "rshares": 540384409,
+        "voter": "lifeworship"
+      }
+    ],
+    "author": "akareyon",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 58.64,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "No upvote from me :)\n\nAllow me to explain: \n\na good \"debunking\" takes the claim of evidence, assumes the strongest interpretation of the argument, explains the background behind these ideas and then presents solid counterarguments, evidence to the contrary and sound reasoning. \n\nA gish gallop of links to heavily biased sites such as \"rationalwiki.org\" dismissing whole theories instead of addressing simple claims of evidence openly and honestly does not an argument make. \n\n\"Conspiracy theorists\" will not take you seriously because you do not address their arguments and dismiss you. Most of them will not even bother to click on rationalwiki links simply because all their \"debunkings\" use the same faulty logic and bad and dishonest argumentation. Meanwhile, \"conventional wisdomists\" will pat your back in thanks for reinforcing their beliefs. Nothing has been won this way, quite the contrary, instead of helping those who are maybe just stuck in the wrong loop, you alienate them even further. \n\nI summary, you are doing the scientific method, curious inquiry and intellectually honest open-mindedness a huge disfavor with this sort of post, it can only serve to solidify the beliefs of those who have already formed their opinion and are unwilling to change it. Someone on the fence trying to form an informed and educated opinion will not be swayed either way, because there are hardly any news or arguments in the links that have not already  been addressed and refuted by the peddlers of the conspiracy theories.\n\nDisclaimer: I am not a flatearther (although I am sure that in a serious, honest, open and fairly moderated debate, I could show many a rotundist the end of his wisdom) and I know nothing about gold and silver, but the first sentence of the video on **vaccines** was a slap in the face of everyone who has to braincells to rub together and tries to educate himself objectively and honestly. \n\n\"**There is no debate to have:** Vaccines don't cause autism and save millions of lives per year.\" Wow, much argument, so convince! And then it continues with cheap appeals to authority, misrepresentations and distortions of the actual arguments of antivaccine activists and to psychopathologize all those whose lifes took a turn for the worse just hours after they received their oh so healthy shots. I call it \"coincidience theorizing\". \n\nMy intentions are sometimes misunderstood, so let me clarify: I am not here to fight you, or to defend any particular theory. I am here to help you make a better argument to achieve your stated goal to dispel myths and misconceptions with the scientific method: \n\n> it is impoartant that we try to keep each other informed and educated, as much as possible, and in sustainable way. By keeping ourselves scientifically literate we directly improve the quality of life of all others in our society (and humanity as a whole).\n\nI agree with that. But then you continue to call everything that is not \"received wisdom\" \"bullshit\", \"quack\" and \"crap\"; that is as if I had begun my post by calling you a sheeple!\n\n I am sure you can do better, [here is some inspiration](https://steemit.com/flatearth/@akareyon/how-to-refute-a-claim-of-evidence-for-a-conspiracy-theory-case-study-a-perspective-on-flat-earth) :)",
+    "category": "science",
+    "children": 4,
+    "created": "2016-08-28T16:57:51",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "links": [
+        "https://steemit.com/flatearth/@akareyon/how-to-refute-a-claim-of-evidence-for-a-conspiracy-theory-case-study-a-perspective-on-flat-earth"
+      ],
+      "tags": [
+        "science"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 28606635138809,
+    "parent_author": "logic",
+    "parent_permlink": "steemit-quack-busters-pick-of-the-best-worst-pseudoscientific-posts-issue-1",
+    "payout": 196.873,
+    "payout_at": "2016-09-04T16:57:51",
+    "pending_payout_value": "196.873 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-logic-steemit-quack-busters-pick-of-the-best-worst-pseudoscientific-posts-issue-1-20160828t165754581z",
+    "post_id": 1029102,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 7
+    },
+    "title": "RE: Steemit Quack Busters - Pick of The Best (Worst?) Pseudoscientific Posts - Issue #1",
+    "updated": "2016-08-28T17:02:27",
+    "url": "/science/@logic/steemit-quack-busters-pick-of-the-best-worst-pseudoscientific-posts-issue-1#@akareyon/re-logic-steemit-quack-busters-pick-of-the-best-worst-pseudoscientific-posts-issue-1-20160828t165754581z"
   }
 ]

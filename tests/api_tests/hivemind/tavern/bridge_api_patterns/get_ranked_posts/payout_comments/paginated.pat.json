@@ -2,6 +2,113 @@
   {
     "active_votes": [
       {
+        "rshares": 17735818038199,
+        "voter": "itsascam"
+      },
+      {
+        "rshares": 2091363547583,
+        "voter": "steemroller"
+      },
+      {
+        "rshares": 17881645967595,
+        "voter": "steemed"
+      },
+      {
+        "rshares": 2473129069,
+        "voter": "boy"
+      },
+      {
+        "rshares": 3001847911,
+        "voter": "bue-witness"
+      },
+      {
+        "rshares": 562495952,
+        "voter": "bunny"
+      },
+      {
+        "rshares": 42273561181,
+        "voter": "bue"
+      },
+      {
+        "rshares": 1325647967,
+        "voter": "mini"
+      },
+      {
+        "rshares": 170794809,
+        "voter": "moon"
+      },
+      {
+        "rshares": 115426377545,
+        "voter": "stan"
+      },
+      {
+        "rshares": 497314258,
+        "voter": "healthcare"
+      },
+      {
+        "rshares": 741745834,
+        "voter": "daniel.pan"
+      },
+      {
+        "rshares": 230286157,
+        "voter": "helen.tan"
+      },
+      {
+        "rshares": 17452286451,
+        "voter": "marklyford"
+      },
+      {
+        "rshares": -118201007,
+        "voter": "cyonic"
+      },
+      {
+        "rshares": 1259875358,
+        "voter": "shadowspub"
+      }
+    ],
+    "author": "michaelx",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 60.67,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "It doesn't matter at all in the big picture, when company accounts are used to censor any conversation (as they have been doing and will likely continue to do) they please, regardless of community voting consensus.  \n\nThis has already been proven by the actions of management using those accounts for this purpose.\n\nAnyone believing Steemit as it exists currently to be a censorship free platform for free speech is sadly mistaken.",
+    "category": "philosophy",
+    "children": 0,
+    "created": "2016-08-20T21:35:15",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 5,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "philosophy"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 37894124714862,
+    "parent_author": "stellabelle",
+    "parent_permlink": "re-steemed-re-dantheman-re-steemed-re-dantheman-our-corrupt-sense-of-fairness-20160820t150054378z",
+    "payout": 382.336,
+    "payout_at": "2016-08-27T21:35:15",
+    "pending_payout_value": "382.336 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-stellabelle-re-steemed-re-dantheman-re-steemed-re-dantheman-our-corrupt-sense-of-fairness-20160820t213500128z",
+    "post_id": 911742,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 16
+    },
+    "title": "RE: Our Corrupt Sense of Fairness",
+    "updated": "2016-08-20T21:35:15",
+    "url": "/philosophy/@dantheman/our-corrupt-sense-of-fairness#@michaelx/re-stellabelle-re-steemed-re-dantheman-re-steemed-re-dantheman-our-corrupt-sense-of-fairness-20160820t213500128z"
+  },
+  {
+    "active_votes": [
+      {
         "rshares": 29864685009305,
         "voter": "berniesanders"
       },
@@ -115,9 +222,9 @@
     "net_rshares": 35935996353857,
     "parent_author": "jamtaylor",
     "parent_permlink": "steemit-photo-challenge-4-winners-announcement-guest-judge-condra",
-    "payout": 215.094,
+    "payout": 378.304,
     "payout_at": "2016-08-22T16:39:03",
-    "pending_payout_value": "215.094 HBD",
+    "pending_payout_value": "378.304 HBD",
     "percent_hbd": 10000,
     "permlink": "re-jamtaylor-steemit-photo-challenge-4-winners-announcement-guest-judge-condra-20160815t163904911z",
     "post_id": 819415,
@@ -133,108 +240,5 @@
     "title": "RE: \ud83d\udcf7  Steemit Photo Challenge #4 \u2014 WINNERS ANNOUNCEMENT! Guest Judge: @condra",
     "updated": "2016-08-15T16:52:30",
     "url": "/steemitphotochallenge/@jamtaylor/steemit-photo-challenge-4-winners-announcement-guest-judge-condra#@blueorgy/re-jamtaylor-steemit-photo-challenge-4-winners-announcement-guest-judge-condra-20160815t163904911z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 29864685009305,
-        "voter": "berniesanders"
-      },
-      {
-        "rshares": 639212703934,
-        "voter": "justin"
-      },
-      {
-        "rshares": 4968734358586,
-        "voter": "nextgencrypto"
-      },
-      {
-        "rshares": 11700424464,
-        "voter": "by24seven"
-      },
-      {
-        "rshares": 18794778971,
-        "voter": "ozzy-vega"
-      },
-      {
-        "rshares": 106925555861,
-        "voter": "anyx"
-      },
-      {
-        "rshares": 278001908,
-        "voter": "mirrax"
-      },
-      {
-        "rshares": 17506904849,
-        "voter": "keithsmih"
-      },
-      {
-        "rshares": 20129459504,
-        "voter": "cheetah"
-      },
-      {
-        "rshares": 100129802,
-        "voter": "cheetah33"
-      },
-      {
-        "rshares": 403314436,
-        "voter": "theconnoisseur"
-      },
-      {
-        "rshares": 100111679,
-        "voter": "cheetah34"
-      },
-      {
-        "rshares": 33194586794,
-        "voter": "thecurator"
-      },
-      {
-        "rshares": 198033574,
-        "voter": "alorya"
-      },
-      {
-        "rshares": 360071237,
-        "voter": "seraph"
-      },
-      {
-        "rshares": 154615872,
-        "voter": "celestial"
-      }
-    ],
-    "author": "cheetah",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 64.17,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Hi! I am a content-detection robot. This post is to help manual curators; I have NOT flagged you.\nHere is similar content:\nhttp://www.youtube.com/watch?v=Jetfhhkg_YU",
-    "category": "blocktalk",
-    "children": 4,
-    "created": "2016-08-15T19:46:09",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 1,
-    "is_paidout": false,
-    "json_metadata": {},
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 35682478060776,
-    "parent_author": "blocktalk",
-    "parent_permlink": "blocktalk-with-nexus-colin-cantrell-question-thread",
-    "payout": 212.372,
-    "payout_at": "2016-08-22T19:46:09",
-    "pending_payout_value": "212.372 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-blocktalk-with-nexus-colin-cantrell-question-thread-20160815t194601",
-    "post_id": 822333,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 16
-    },
-    "title": "RE: #Blocktalk with Nexus' Colin Cantrell [Question Thread]",
-    "updated": "2016-08-15T19:46:09",
-    "url": "/blocktalk/@blocktalk/blocktalk-with-nexus-colin-cantrell-question-thread#@cheetah/re-blocktalk-with-nexus-colin-cantrell-question-thread-20160815t194601"
   }
 ]

@@ -350,7 +350,7 @@
     }
   ],
   "author": "gtg",
-  "author_payout_value": "-231.620 HBD",
+  "author_payout_value": "471.468 HBD",
   "author_reputation": 57.34,
   "beneficiaries": [],
   "blacklists": [],
@@ -371,7 +371,7 @@
   },
   "max_accepted_payout": "1000000.000 HBD",
   "net_rshares": 61504610477823,
-  "payout": 0.259,
+  "payout": 703.347,
   "payout_at": "2016-09-05T05:17:57",
   "pending_payout_value": "0.000 HBD",
   "percent_hbd": 10000,

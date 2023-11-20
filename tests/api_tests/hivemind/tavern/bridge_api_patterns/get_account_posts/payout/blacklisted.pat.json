@@ -1818,9 +1818,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 142622262080342,
-    "payout": 2638.338,
+    "payout": 5261.36,
     "payout_at": "2016-08-25T22:30:39",
-    "pending_payout_value": "2638.338 HBD",
+    "pending_payout_value": "5261.360 HBD",
     "percent_hbd": 10000,
     "permlink": "the-first-phase-of-the-steem-faq-and-wikee-consolidation-of-knowledge",
     "post_id": 879051,
@@ -3833,9 +3833,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 130442641566665,
-    "payout": 1566.474,
+    "payout": 3113.236,
     "payout_at": "2016-09-11T16:17:12",
-    "pending_payout_value": "1566.474 HBD",
+    "pending_payout_value": "3113.236 HBD",
     "percent_hbd": 10000,
     "permlink": "it-s-time-for-a-steem-bounty-system",
     "post_id": 1123999,
@@ -5588,9 +5588,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 21098346399884,
-    "payout": 47.466,
+    "payout": 94.679,
     "payout_at": "2016-09-14T15:44:51",
-    "pending_payout_value": "47.466 HBD",
+    "pending_payout_value": "94.679 HBD",
     "percent_hbd": 10000,
     "permlink": "increasing-curation-demand-for-steem-power-and-community-interaction",
     "post_id": 1160045,
@@ -5999,9 +5999,9 @@
     "net_rshares": 16765551014207,
     "parent_author": "stellabelle",
     "parent_permlink": "2-problems-plaguing-steemit-that-synereo-has-already-solved",
-    "payout": 38.897,
+    "payout": 73.826,
     "payout_at": "2016-09-04T20:18:30",
-    "pending_payout_value": "38.897 HBD",
+    "pending_payout_value": "73.826 HBD",
     "percent_hbd": 10000,
     "permlink": "re-stellabelle-2-problems-plaguing-steemit-that-synereo-has-already-solved-20160828t201832222z",
     "post_id": 1032097,
@@ -6278,9 +6278,9 @@
     "net_rshares": 11240484704021,
     "parent_author": "ned",
     "parent_permlink": "it-s-time-for-a-steem-bounty-system",
-    "payout": 17.386,
+    "payout": 31.245,
     "payout_at": "2016-09-11T16:25:09",
-    "pending_payout_value": "17.386 HBD",
+    "pending_payout_value": "31.245 HBD",
     "percent_hbd": 10000,
     "permlink": "re-ned-it-s-time-for-a-steem-bounty-system-20160904t162508788z",
     "post_id": 1124062,
@@ -6373,9 +6373,9 @@
     "net_rshares": 10927572645058,
     "parent_author": "smooth",
     "parent_permlink": "re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t172838500z",
-    "payout": 14.923,
+    "payout": 26.121,
     "payout_at": "2016-09-15T02:00:54",
-    "pending_payout_value": "14.923 HBD",
+    "pending_payout_value": "26.121 HBD",
     "percent_hbd": 10000,
     "permlink": "re-smooth-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160908t020053530z",
     "post_id": 1167016,
@@ -6520,12 +6520,12 @@
     "net_rshares": 6046290261344,
     "parent_author": "roelandp",
     "parent_permlink": "save-the-date-steemfest-1-11-12-13-november-2016-amsterdam-nl",
-    "payout": 3.53,
+    "payout": 6.25,
     "payout_at": "2016-09-19T22:51:12",
-    "pending_payout_value": "3.530 HBD",
+    "pending_payout_value": "6.250 HBD",
     "percent_hbd": 10000,
     "permlink": "re-roelandp-save-the-date-steemfest-1-11-12-13-november-2016-amsterdam-nl-20160912t225113855z",
-    "post_id": 1225446,
+    "post_id": 1225445,
     "promoted": "0.000 HBD",
     "reblogs": 0,
     "replies": [],
@@ -6538,6 +6538,89 @@
     "title": "RE: [save the date] SteemFest 1 - 11/12/13 November 2016 - Amsterdam, NL",
     "updated": "2016-09-12T22:51:12",
     "url": "/steemfest/@roelandp/save-the-date-steemfest-1-11-12-13-november-2016-amsterdam-nl#@ned/re-roelandp-save-the-date-steemfest-1-11-12-13-november-2016-amsterdam-nl-20160912t225113855z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 645000653012,
+        "voter": "smooth"
+      },
+      {
+        "rshares": 108724030320,
+        "voter": "sandra"
+      },
+      {
+        "rshares": 896189649784,
+        "voter": "liondani"
+      },
+      {
+        "rshares": 108945696308,
+        "voter": "smooth.witness"
+      },
+      {
+        "rshares": 979085414070,
+        "voter": "cass"
+      },
+      {
+        "rshares": 17230662101,
+        "voter": "frankjones"
+      },
+      {
+        "rshares": 19878403232,
+        "voter": "ausbitbank"
+      },
+      {
+        "rshares": 12109418933,
+        "voter": "senseiteekay"
+      },
+      {
+        "rshares": 3558963294,
+        "voter": "randyclemens"
+      },
+      {
+        "rshares": 249984051,
+        "voter": "jaggs"
+      }
+    ],
+    "author": "ned",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 62.11,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "I'll send you 399 Steem for nedscott",
+    "category": "steem",
+    "children": 2,
+    "created": "2016-08-18T01:04:00",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 4,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steem"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 2790972875105,
+    "parent_author": "nedscott",
+    "parent_permlink": "re-danlarimer-re-lukestokes-re-bacchist-dan-needs-to-be-stopped-20160817t155117289z",
+    "payout": 3.303,
+    "payout_at": "2016-08-25T01:04:00",
+    "pending_payout_value": "3.303 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-nedscott-re-danlarimer-re-lukestokes-re-bacchist-dan-needs-to-be-stopped-20160818t010401711z",
+    "post_id": 862975,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 10
+    },
+    "title": "RE: Dan needs to be stopped",
+    "updated": "2016-08-18T01:04:00",
+    "url": "/steem/@bacchist/dan-needs-to-be-stopped#@ned/re-nedscott-re-danlarimer-re-lukestokes-re-bacchist-dan-needs-to-be-stopped-20160818t010401711z"
   },
   {
     "active_votes": [
@@ -6613,44 +6696,8 @@
   {
     "active_votes": [
       {
-        "rshares": 645000653012,
-        "voter": "smooth"
-      },
-      {
-        "rshares": 108724030320,
-        "voter": "sandra"
-      },
-      {
-        "rshares": 896189649784,
-        "voter": "liondani"
-      },
-      {
-        "rshares": 108945696308,
-        "voter": "smooth.witness"
-      },
-      {
-        "rshares": 979085414070,
-        "voter": "cass"
-      },
-      {
-        "rshares": 17230662101,
-        "voter": "frankjones"
-      },
-      {
-        "rshares": 19878403232,
-        "voter": "ausbitbank"
-      },
-      {
-        "rshares": 12109418933,
-        "voter": "senseiteekay"
-      },
-      {
-        "rshares": 3558963294,
-        "voter": "randyclemens"
-      },
-      {
-        "rshares": 249984051,
-        "voter": "jaggs"
+        "rshares": 1277271704936,
+        "voter": "ned"
       }
     ],
     "author": "ned",
@@ -6658,28 +6705,32 @@
     "author_reputation": 62.11,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "I'll send you 399 Steem for nedscott",
-    "category": "steem",
-    "children": 2,
-    "created": "2016-08-18T01:04:00",
+    "body": "Okay the title alone reminded me of Donnie Darko so much I had to make this comment. Reading the rest now.. :) \n\nhttp://cache.gawkerassets.com/assets/images/17/2011/05/500x_0800-donnie-darko-fear-love.jpg\n\nhttp://25.media.tumblr.com/tumblr_m8v0lbq9Uw1rp26cno1_500.gif",
+    "category": "life",
+    "children": 0,
+    "created": "2016-09-07T01:55:18",
     "curator_payout_value": "0.000 HBD",
-    "depth": 4,
+    "depth": 1,
     "is_paidout": false,
     "json_metadata": {
+      "image": [
+        "http://cache.gawkerassets.com/assets/images/17/2011/05/500x_0800-donnie-darko-fear-love.jpg",
+        "http://25.media.tumblr.com/tumblr_m8v0lbq9Uw1rp26cno1_500.gif"
+      ],
       "tags": [
-        "steem"
+        "life"
       ]
     },
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 2790972875105,
-    "parent_author": "nedscott",
-    "parent_permlink": "re-danlarimer-re-lukestokes-re-bacchist-dan-needs-to-be-stopped-20160817t155117289z",
-    "payout": 2.199,
-    "payout_at": "2016-08-25T01:04:00",
-    "pending_payout_value": "2.199 HBD",
+    "net_rshares": 1277271704936,
+    "parent_author": "modprobe",
+    "parent_permlink": "are-my-actions-born-out-of-love-or-fear",
+    "payout": 1.21,
+    "payout_at": "2016-09-14T01:55:18",
+    "pending_payout_value": "1.210 HBD",
     "percent_hbd": 10000,
-    "permlink": "re-nedscott-re-danlarimer-re-lukestokes-re-bacchist-dan-needs-to-be-stopped-20160818t010401711z",
-    "post_id": 862975,
+    "permlink": "re-modprobe-are-my-actions-born-out-of-love-or-fear-20160907t015517135z",
+    "post_id": 1153898,
     "promoted": "0.000 HBD",
     "reblogs": 0,
     "replies": [],
@@ -6687,11 +6738,580 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
-      "total_votes": 10
+      "total_votes": 1
     },
-    "title": "RE: Dan needs to be stopped",
-    "updated": "2016-08-18T01:04:00",
-    "url": "/steem/@bacchist/dan-needs-to-be-stopped#@ned/re-nedscott-re-danlarimer-re-lukestokes-re-bacchist-dan-needs-to-be-stopped-20160818t010401711z"
+    "title": "RE: Are my actions born out of Love or Fear?",
+    "updated": "2016-09-07T01:56:33",
+    "url": "/life/@modprobe/are-my-actions-born-out-of-love-or-fear#@ned/re-modprobe-are-my-actions-born-out-of-love-or-fear-20160907t015517135z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 63322868126,
+        "voter": "jason"
+      },
+      {
+        "rshares": 23624734486,
+        "voter": "tuck-fheman"
+      },
+      {
+        "rshares": 50203093578,
+        "voter": "noisy"
+      },
+      {
+        "rshares": 571378515026,
+        "voter": "kevinwong"
+      },
+      {
+        "rshares": 11804887986,
+        "voter": "jako"
+      },
+      {
+        "rshares": 477715956999,
+        "voter": "neoxian"
+      },
+      {
+        "rshares": 965698411,
+        "voter": "jsteck"
+      },
+      {
+        "rshares": 3860285221,
+        "voter": "adamt"
+      },
+      {
+        "rshares": 34028907805,
+        "voter": "cryptos"
+      },
+      {
+        "rshares": 5114715856,
+        "voter": "renzoarg"
+      },
+      {
+        "rshares": 54757736,
+        "voter": "nelyp"
+      }
+    ],
+    "author": "ned",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 62.11,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "The expected result of the change in target votes from 40 to 5 is less discrepancy between top paid posts and the long tail of paid posts by decentralizing the Steem Power allocated by each voter, primarily whales and bots.  Under these rules, a person voting once per day at full power will have greater value than it would under current rules.  The target votes per day had been changed once before from 10 to 40, however, voting regeneration had also been changed (from one day to five).  Changing from 40 target votes to 5 without changing regeneration days allows Steem to ease into more optimal ratios for quality curation. \n\nThe Revoking Voting Permission was a simple upgrade allowing anyone who sees regulatory risk in the ability to use voting power to remove voting power from their stake.  We do not expect this to be a feature used by most users, and it may not be used at all.  We have no plans at this time to bring this change to the Steemit UI.",
+    "category": "steem",
+    "children": 34,
+    "created": "2016-09-02T20:06:48",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steem"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 1242074421230,
+    "parent_author": "neoxian",
+    "parent_permlink": "re-steemitblog-announcing-steem-0-14-0-release-candidate-20160902t194135381z",
+    "payout": 1.196,
+    "payout_at": "2016-09-09T20:06:48",
+    "pending_payout_value": "1.196 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-neoxian-re-steemitblog-announcing-steem-0-14-0-release-candidate-20160902t200650312z",
+    "post_id": 1102851,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 11
+    },
+    "title": "RE: Announcing Steem 0.14.0 Release Candidate",
+    "updated": "2016-09-02T20:06:48",
+    "url": "/steem/@steemitblog/announcing-steem-0-14-0-release-candidate#@ned/re-neoxian-re-steemitblog-announcing-steem-0-14-0-release-candidate-20160902t200650312z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 1277353482596,
+        "voter": "ned"
+      },
+      {
+        "rshares": -3397907101,
+        "voter": "highasfuck"
+      },
+      {
+        "rshares": 2482756481,
+        "voter": "boy"
+      },
+      {
+        "rshares": 3014336974,
+        "voter": "bue-witness"
+      },
+      {
+        "rshares": 552758807,
+        "voter": "bunny"
+      },
+      {
+        "rshares": 43775912044,
+        "voter": "bue"
+      },
+      {
+        "rshares": 1330398573,
+        "voter": "mini"
+      },
+      {
+        "rshares": 171028234,
+        "voter": "moon"
+      },
+      {
+        "rshares": 499932694,
+        "voter": "healthcare"
+      },
+      {
+        "rshares": 778377318,
+        "voter": "daniel.pan"
+      },
+      {
+        "rshares": 230670122,
+        "voter": "helen.tan"
+      },
+      {
+        "rshares": 14365791262,
+        "voter": "razvanelulmarin"
+      },
+      {
+        "rshares": 1023095518,
+        "voter": "r4fken"
+      }
+    ],
+    "author": "ned",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 62.11,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Hopefully we hear from them if it does.",
+    "category": "steem",
+    "children": 2,
+    "created": "2016-09-07T16:14:09",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steem"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 1342180633522,
+    "parent_author": "funnyman",
+    "parent_permlink": "re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t161251851z",
+    "payout": 1.187,
+    "payout_at": "2016-09-14T16:14:09",
+    "pending_payout_value": "1.187 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-funnyman-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t161409009z",
+    "post_id": 1160378,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 13
+    },
+    "title": "RE: Increasing Curation, Demand for Steem Power and Community Interaction",
+    "updated": "2016-09-07T16:14:09",
+    "url": "/steem/@ned/increasing-curation-demand-for-steem-power-and-community-interaction#@ned/re-funnyman-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t161409009z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 376227404992,
+        "voter": "anonymous"
+      },
+      {
+        "rshares": 3726258345,
+        "voter": "boy"
+      },
+      {
+        "rshares": 4524187098,
+        "voter": "bue-witness"
+      },
+      {
+        "rshares": 820992009,
+        "voter": "bunny"
+      },
+      {
+        "rshares": 66066900217,
+        "voter": "bue"
+      },
+      {
+        "rshares": 1996581297,
+        "voter": "mini"
+      },
+      {
+        "rshares": 256574080,
+        "voter": "moon"
+      },
+      {
+        "rshares": 1131944841451,
+        "voter": "cass"
+      },
+      {
+        "rshares": 750147236,
+        "voter": "healthcare"
+      },
+      {
+        "rshares": 1168047386,
+        "voter": "daniel.pan"
+      },
+      {
+        "rshares": 346061156,
+        "voter": "helen.tan"
+      },
+      {
+        "rshares": 28389597372,
+        "voter": "catchfire"
+      }
+    ],
+    "author": "ned",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 62.11,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "No one meant any offense anywhere - If Val's response was emotional as he was trying to protect me then that's on me. \n\nI was trying to make the case that curation can get better. Any whale of the same size can do the same thing nextgencrypto is doing, but instead most are not voting and using that as a community benefitting strategy. I hope you see that.\n\nWe can do better on community engagement for proposed changes. Let's do better.\n\nI appreciate you, richard and the community for bringing all the time and work that you are",
+    "category": "steemit",
+    "children": 0,
+    "created": "2016-09-11T02:31:03",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 3,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 1616217592639,
+    "parent_author": "donkeypong",
+    "parent_permlink": "re-ned-re-steemship-open-letter-to-ned-and-dan-you-badly-need-a-communications-community-content-expert-and-i-hereby-nominate-stellabelle-or-20160911t012508091z",
+    "payout": 1.182,
+    "payout_at": "2016-09-18T02:31:03",
+    "pending_payout_value": "1.182 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-donkeypong-re-ned-re-steemship-open-letter-to-ned-and-dan-you-badly-need-a-communications-community-content-expert-and-i-hereby-nominate-stellabelle-or-20160911t023103853z",
+    "post_id": 1203673,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 12
+    },
+    "title": "RE: Open Letter to Ned and Dan: You Badly Need a Communications/Community/Content Expert and I Hereby Nominate @stellabelle or @donkeypong For That Job",
+    "updated": "2016-09-11T02:33:30",
+    "url": "/steemit/@steemship/open-letter-to-ned-and-dan-you-badly-need-a-communications-community-content-expert-and-i-hereby-nominate-stellabelle-or#@ned/re-donkeypong-re-ned-re-steemship-open-letter-to-ned-and-dan-you-badly-need-a-communications-community-content-expert-and-i-hereby-nominate-stellabelle-or-20160911t023103853z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 120821000745,
+        "voter": "sandra"
+      },
+      {
+        "rshares": 17042955024,
+        "voter": "fury"
+      },
+      {
+        "rshares": 974949220726,
+        "voter": "liondani"
+      },
+      {
+        "rshares": 64581526409,
+        "voter": "jason"
+      },
+      {
+        "rshares": 84749209777,
+        "voter": "unosuke"
+      },
+      {
+        "rshares": 17291880144,
+        "voter": "acidyo"
+      },
+      {
+        "rshares": 10330180192,
+        "voter": "benjiberigan"
+      }
+    ],
+    "author": "ned",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 62.11,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Yep there's no doubt about it.  We have some good plans for blockchain-based identity I'm looking forward to sharing.",
+    "category": "synereo",
+    "children": 0,
+    "created": "2016-08-29T20:24:21",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 3,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "synereo"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 1289765973017,
+    "parent_author": "liondani",
+    "parent_permlink": "re-ned-re-stellabelle-2-problems-plaguing-steemit-that-synereo-has-already-solved-20160829t181122096z",
+    "payout": 1.168,
+    "payout_at": "2016-09-05T20:24:21",
+    "pending_payout_value": "1.168 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-liondani-re-ned-re-stellabelle-2-problems-plaguing-steemit-that-synereo-has-already-solved-20160829t202421695z",
+    "post_id": 1046244,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 7
+    },
+    "title": "RE: 2 Problems Plaguing Steemit That Synereo Could Potentially Solve",
+    "updated": "2016-08-29T20:24:21",
+    "url": "/synereo/@stellabelle/2-problems-plaguing-steemit-that-synereo-has-already-solved#@ned/re-liondani-re-ned-re-stellabelle-2-problems-plaguing-steemit-that-synereo-has-already-solved-20160829t202421695z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 1118955545691,
+        "voter": "samupaha"
+      },
+      {
+        "rshares": 2495694596,
+        "voter": "psychonaut"
+      },
+      {
+        "rshares": 4013672849,
+        "voter": "jako"
+      },
+      {
+        "rshares": 79984614609,
+        "voter": "sigmajin"
+      },
+      {
+        "rshares": 20639407371,
+        "voter": "akareyon"
+      },
+      {
+        "rshares": 7637977460,
+        "voter": "gomeravibz"
+      }
+    ],
+    "author": "ned",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 62.11,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Essentially the 40 to 5 change increases the degree of competition between voters and therefore it should reduce whale trails.  It may not be the only solution possible. We have some other ideas on the table, such as removing voting power from Stake that is powering down, as well as adding delegated voting pools and peer-to-peer vote delegation.  With each proposed solution there are potential drawbacks, or the community may decide it's not what is wanted, but we are actively working to find these solutions and upgrade user experience.",
+    "category": "steem",
+    "children": 13,
+    "created": "2016-09-02T21:11:18",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steem"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 1233726912576,
+    "parent_author": "carlidos",
+    "parent_permlink": "re-steemitblog-announcing-steem-0-14-0-release-candidate-20160902t205636747z",
+    "payout": 1.152,
+    "payout_at": "2016-09-09T21:11:18",
+    "pending_payout_value": "1.152 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-carlidos-re-steemitblog-announcing-steem-0-14-0-release-candidate-20160902t211119406z",
+    "post_id": 1103594,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 6
+    },
+    "title": "RE: Announcing Steem 0.14.0 Release Candidate",
+    "updated": "2016-09-02T21:12:00",
+    "url": "/steem/@steemitblog/announcing-steem-0-14-0-release-candidate#@ned/re-carlidos-re-steemitblog-announcing-steem-0-14-0-release-candidate-20160902t211119406z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": -6795814202,
+        "voter": "highasfuck"
+      },
+      {
+        "rshares": 947376283195,
+        "voter": "liondani"
+      },
+      {
+        "rshares": 75386389898,
+        "voter": "aizensou"
+      },
+      {
+        "rshares": 228677801639,
+        "voter": "wingz"
+      },
+      {
+        "rshares": 14365816692,
+        "voter": "razvanelulmarin"
+      },
+      {
+        "rshares": 2046191036,
+        "voter": "r4fken"
+      },
+      {
+        "rshares": 4050521206,
+        "voter": "owdy"
+      }
+    ],
+    "author": "ned",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 62.11,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Thanks for your response - I believe there's some merit in what you've written but I can't say I fully understand what your suggestions are.",
+    "category": "steem",
+    "children": 17,
+    "created": "2016-09-07T16:35:12",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steem"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 1265107189464,
+    "parent_author": "nextgencrypto",
+    "parent_permlink": "re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t162503606z",
+    "payout": 1.096,
+    "payout_at": "2016-09-14T16:35:12",
+    "pending_payout_value": "1.096 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-nextgencrypto-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t163512347z",
+    "post_id": 1160619,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 7
+    },
+    "title": "RE: Increasing Curation, Demand for Steem Power and Community Interaction",
+    "updated": "2016-09-07T16:35:12",
+    "url": "/steem/@ned/increasing-curation-demand-for-steem-power-and-community-interaction#@ned/re-nextgencrypto-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t163512347z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 3094880891,
+        "voter": "boy"
+      },
+      {
+        "rshares": 4508127595,
+        "voter": "bue-witness"
+      },
+      {
+        "rshares": 844428018,
+        "voter": "bunny"
+      },
+      {
+        "rshares": 53357743051,
+        "voter": "bue"
+      },
+      {
+        "rshares": 1658770758,
+        "voter": "mini"
+      },
+      {
+        "rshares": 256270593,
+        "voter": "moon"
+      },
+      {
+        "rshares": 746554395,
+        "voter": "healthcare"
+      },
+      {
+        "rshares": 951041143,
+        "voter": "daniel.pan"
+      },
+      {
+        "rshares": 345557113,
+        "voter": "helen.tan"
+      },
+      {
+        "rshares": 284602544117,
+        "voter": "craig-grant"
+      },
+      {
+        "rshares": 481113279456,
+        "voter": "dana-edwards"
+      }
+    ],
+    "author": "ned",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 62.11,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Good analysis.  A few of us recently also looked into capping curation rewards however found it has weaknesses that allow whales to game the rewards.  We haven't recently looked as deep into capping the total blog post rewards.  If a large group of steemers see a net benefit but it also seems to be a divisive issue, then it could be proposed to move to the new system for only a short period of time (e.g. 2 weeks) as a trial period.",
+    "category": "steemit",
+    "children": 6,
+    "created": "2016-08-25T04:14:18",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 831479197130,
+    "parent_author": "dana-edwards",
+    "parent_permlink": "why-a-steem-power-reward-cap-would-be-as-controversial-as-the-block-size-cap-in-bitcoin",
+    "payout": 0.903,
+    "payout_at": "2016-09-01T04:14:18",
+    "pending_payout_value": "0.903 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-dana-edwards-why-a-steem-power-reward-cap-would-be-as-controversial-as-the-block-size-cap-in-bitcoin-20160825t041419160z",
+    "post_id": 977725,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 11
+    },
+    "title": "RE: Why a Steem Power reward cap would be as controversial as the block size cap in Bitcoin [FAIRNESS vs FREEDOM?]",
+    "updated": "2016-08-25T04:14:18",
+    "url": "/steemit/@dana-edwards/why-a-steem-power-reward-cap-would-be-as-controversial-as-the-block-size-cap-in-bitcoin#@ned/re-dana-edwards-why-a-steem-power-reward-cap-would-be-as-controversial-as-the-block-size-cap-in-bitcoin-20160825t041419160z"
   },
   {
     "active_votes": [
@@ -6791,626 +7411,6 @@
   {
     "active_votes": [
       {
-        "rshares": 120821000745,
-        "voter": "sandra"
-      },
-      {
-        "rshares": 17042955024,
-        "voter": "fury"
-      },
-      {
-        "rshares": 974949220726,
-        "voter": "liondani"
-      },
-      {
-        "rshares": 64581526409,
-        "voter": "jason"
-      },
-      {
-        "rshares": 84749209777,
-        "voter": "unosuke"
-      },
-      {
-        "rshares": 17291880144,
-        "voter": "acidyo"
-      },
-      {
-        "rshares": 10330180192,
-        "voter": "benjiberigan"
-      }
-    ],
-    "author": "ned",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 62.11,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Yep there's no doubt about it.  We have some good plans for blockchain-based identity I'm looking forward to sharing.",
-    "category": "synereo",
-    "children": 0,
-    "created": "2016-08-29T20:24:21",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 3,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "synereo"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 1289765973017,
-    "parent_author": "liondani",
-    "parent_permlink": "re-ned-re-stellabelle-2-problems-plaguing-steemit-that-synereo-has-already-solved-20160829t181122096z",
-    "payout": 0.705,
-    "payout_at": "2016-09-05T20:24:21",
-    "pending_payout_value": "0.705 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-liondani-re-ned-re-stellabelle-2-problems-plaguing-steemit-that-synereo-has-already-solved-20160829t202421695z",
-    "post_id": 1046244,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 7
-    },
-    "title": "RE: 2 Problems Plaguing Steemit That Synereo Could Potentially Solve",
-    "updated": "2016-08-29T20:24:21",
-    "url": "/synereo/@stellabelle/2-problems-plaguing-steemit-that-synereo-has-already-solved#@ned/re-liondani-re-ned-re-stellabelle-2-problems-plaguing-steemit-that-synereo-has-already-solved-20160829t202421695z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 376227404992,
-        "voter": "anonymous"
-      },
-      {
-        "rshares": 3726258345,
-        "voter": "boy"
-      },
-      {
-        "rshares": 4524187098,
-        "voter": "bue-witness"
-      },
-      {
-        "rshares": 820992009,
-        "voter": "bunny"
-      },
-      {
-        "rshares": 66066900217,
-        "voter": "bue"
-      },
-      {
-        "rshares": 1996581297,
-        "voter": "mini"
-      },
-      {
-        "rshares": 256574080,
-        "voter": "moon"
-      },
-      {
-        "rshares": 1131944841451,
-        "voter": "cass"
-      },
-      {
-        "rshares": 750147236,
-        "voter": "healthcare"
-      },
-      {
-        "rshares": 1168047386,
-        "voter": "daniel.pan"
-      },
-      {
-        "rshares": 346061156,
-        "voter": "helen.tan"
-      },
-      {
-        "rshares": 28389597372,
-        "voter": "catchfire"
-      }
-    ],
-    "author": "ned",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 62.11,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "No one meant any offense anywhere - If Val's response was emotional as he was trying to protect me then that's on me. \n\nI was trying to make the case that curation can get better. Any whale of the same size can do the same thing nextgencrypto is doing, but instead most are not voting and using that as a community benefitting strategy. I hope you see that.\n\nWe can do better on community engagement for proposed changes. Let's do better.\n\nI appreciate you, richard and the community for bringing all the time and work that you are",
-    "category": "steemit",
-    "children": 0,
-    "created": "2016-09-11T02:31:03",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 3,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "steemit"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 1616217592639,
-    "parent_author": "donkeypong",
-    "parent_permlink": "re-ned-re-steemship-open-letter-to-ned-and-dan-you-badly-need-a-communications-community-content-expert-and-i-hereby-nominate-stellabelle-or-20160911t012508091z",
-    "payout": 0.674,
-    "payout_at": "2016-09-18T02:31:03",
-    "pending_payout_value": "0.674 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-donkeypong-re-ned-re-steemship-open-letter-to-ned-and-dan-you-badly-need-a-communications-community-content-expert-and-i-hereby-nominate-stellabelle-or-20160911t023103853z",
-    "post_id": 1203674,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 12
-    },
-    "title": "RE: Open Letter to Ned and Dan: You Badly Need a Communications/Community/Content Expert and I Hereby Nominate @stellabelle or @donkeypong For That Job",
-    "updated": "2016-09-11T02:33:30",
-    "url": "/steemit/@steemship/open-letter-to-ned-and-dan-you-badly-need-a-communications-community-content-expert-and-i-hereby-nominate-stellabelle-or#@ned/re-donkeypong-re-ned-re-steemship-open-letter-to-ned-and-dan-you-badly-need-a-communications-community-content-expert-and-i-hereby-nominate-stellabelle-or-20160911t023103853z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 1118955545691,
-        "voter": "samupaha"
-      },
-      {
-        "rshares": 2495694596,
-        "voter": "psychonaut"
-      },
-      {
-        "rshares": 4013672849,
-        "voter": "jako"
-      },
-      {
-        "rshares": 79984614609,
-        "voter": "sigmajin"
-      },
-      {
-        "rshares": 20639407371,
-        "voter": "akareyon"
-      },
-      {
-        "rshares": 7637977460,
-        "voter": "gomeravibz"
-      }
-    ],
-    "author": "ned",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 62.11,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Essentially the 40 to 5 change increases the degree of competition between voters and therefore it should reduce whale trails.  It may not be the only solution possible. We have some other ideas on the table, such as removing voting power from Stake that is powering down, as well as adding delegated voting pools and peer-to-peer vote delegation.  With each proposed solution there are potential drawbacks, or the community may decide it's not what is wanted, but we are actively working to find these solutions and upgrade user experience.",
-    "category": "steem",
-    "children": 13,
-    "created": "2016-09-02T21:11:18",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 2,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "steem"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 1233726912576,
-    "parent_author": "carlidos",
-    "parent_permlink": "re-steemitblog-announcing-steem-0-14-0-release-candidate-20160902t205636747z",
-    "payout": 0.657,
-    "payout_at": "2016-09-09T21:11:18",
-    "pending_payout_value": "0.657 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-carlidos-re-steemitblog-announcing-steem-0-14-0-release-candidate-20160902t211119406z",
-    "post_id": 1103594,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 6
-    },
-    "title": "RE: Announcing Steem 0.14.0 Release Candidate",
-    "updated": "2016-09-02T21:12:00",
-    "url": "/steem/@steemitblog/announcing-steem-0-14-0-release-candidate#@ned/re-carlidos-re-steemitblog-announcing-steem-0-14-0-release-candidate-20160902t211119406z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 1277353482596,
-        "voter": "ned"
-      },
-      {
-        "rshares": -3397907101,
-        "voter": "highasfuck"
-      },
-      {
-        "rshares": 2482756481,
-        "voter": "boy"
-      },
-      {
-        "rshares": 3014336974,
-        "voter": "bue-witness"
-      },
-      {
-        "rshares": 552758807,
-        "voter": "bunny"
-      },
-      {
-        "rshares": 43775912044,
-        "voter": "bue"
-      },
-      {
-        "rshares": 1330398573,
-        "voter": "mini"
-      },
-      {
-        "rshares": 171028234,
-        "voter": "moon"
-      },
-      {
-        "rshares": 499932694,
-        "voter": "healthcare"
-      },
-      {
-        "rshares": 778377318,
-        "voter": "daniel.pan"
-      },
-      {
-        "rshares": 230670122,
-        "voter": "helen.tan"
-      },
-      {
-        "rshares": 14365791262,
-        "voter": "razvanelulmarin"
-      },
-      {
-        "rshares": 1023095518,
-        "voter": "r4fken"
-      }
-    ],
-    "author": "ned",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 62.11,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Hopefully we hear from them if it does.",
-    "category": "steem",
-    "children": 2,
-    "created": "2016-09-07T16:14:09",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 2,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "steem"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 1342180633522,
-    "parent_author": "funnyman",
-    "parent_permlink": "re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t161251851z",
-    "payout": 0.655,
-    "payout_at": "2016-09-14T16:14:09",
-    "pending_payout_value": "0.655 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-funnyman-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t161409009z",
-    "post_id": 1160378,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 13
-    },
-    "title": "RE: Increasing Curation, Demand for Steem Power and Community Interaction",
-    "updated": "2016-09-07T16:14:09",
-    "url": "/steem/@ned/increasing-curation-demand-for-steem-power-and-community-interaction#@ned/re-funnyman-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t161409009z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 63322868126,
-        "voter": "jason"
-      },
-      {
-        "rshares": 23624734486,
-        "voter": "tuck-fheman"
-      },
-      {
-        "rshares": 50203093578,
-        "voter": "noisy"
-      },
-      {
-        "rshares": 571378515026,
-        "voter": "kevinwong"
-      },
-      {
-        "rshares": 11804887986,
-        "voter": "jako"
-      },
-      {
-        "rshares": 477715956999,
-        "voter": "neoxian"
-      },
-      {
-        "rshares": 965698411,
-        "voter": "jsteck"
-      },
-      {
-        "rshares": 3860285221,
-        "voter": "adamt"
-      },
-      {
-        "rshares": 34028907805,
-        "voter": "cryptos"
-      },
-      {
-        "rshares": 5114715856,
-        "voter": "renzoarg"
-      },
-      {
-        "rshares": 54757736,
-        "voter": "nelyp"
-      }
-    ],
-    "author": "ned",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 62.11,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "The expected result of the change in target votes from 40 to 5 is less discrepancy between top paid posts and the long tail of paid posts by decentralizing the Steem Power allocated by each voter, primarily whales and bots.  Under these rules, a person voting once per day at full power will have greater value than it would under current rules.  The target votes per day had been changed once before from 10 to 40, however, voting regeneration had also been changed (from one day to five).  Changing from 40 target votes to 5 without changing regeneration days allows Steem to ease into more optimal ratios for quality curation. \n\nThe Revoking Voting Permission was a simple upgrade allowing anyone who sees regulatory risk in the ability to use voting power to remove voting power from their stake.  We do not expect this to be a feature used by most users, and it may not be used at all.  We have no plans at this time to bring this change to the Steemit UI.",
-    "category": "steem",
-    "children": 34,
-    "created": "2016-09-02T20:06:48",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 2,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "steem"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 1242074421230,
-    "parent_author": "neoxian",
-    "parent_permlink": "re-steemitblog-announcing-steem-0-14-0-release-candidate-20160902t194135381z",
-    "payout": 0.648,
-    "payout_at": "2016-09-09T20:06:48",
-    "pending_payout_value": "0.648 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-neoxian-re-steemitblog-announcing-steem-0-14-0-release-candidate-20160902t200650312z",
-    "post_id": 1102851,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 11
-    },
-    "title": "RE: Announcing Steem 0.14.0 Release Candidate",
-    "updated": "2016-09-02T20:06:48",
-    "url": "/steem/@steemitblog/announcing-steem-0-14-0-release-candidate#@ned/re-neoxian-re-steemitblog-announcing-steem-0-14-0-release-candidate-20160902t200650312z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 1277271704936,
-        "voter": "ned"
-      }
-    ],
-    "author": "ned",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 62.11,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Okay the title alone reminded me of Donnie Darko so much I had to make this comment. Reading the rest now.. :) \n\nhttp://cache.gawkerassets.com/assets/images/17/2011/05/500x_0800-donnie-darko-fear-love.jpg\n\nhttp://25.media.tumblr.com/tumblr_m8v0lbq9Uw1rp26cno1_500.gif",
-    "category": "life",
-    "children": 0,
-    "created": "2016-09-07T01:55:18",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 1,
-    "is_paidout": false,
-    "json_metadata": {
-      "image": [
-        "http://cache.gawkerassets.com/assets/images/17/2011/05/500x_0800-donnie-darko-fear-love.jpg",
-        "http://25.media.tumblr.com/tumblr_m8v0lbq9Uw1rp26cno1_500.gif"
-      ],
-      "tags": [
-        "life"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 1277271704936,
-    "parent_author": "modprobe",
-    "parent_permlink": "are-my-actions-born-out-of-love-or-fear",
-    "payout": 0.612,
-    "payout_at": "2016-09-14T01:55:18",
-    "pending_payout_value": "0.612 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-modprobe-are-my-actions-born-out-of-love-or-fear-20160907t015517135z",
-    "post_id": 1153898,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 1
-    },
-    "title": "RE: Are my actions born out of Love or Fear?",
-    "updated": "2016-09-07T01:56:33",
-    "url": "/life/@modprobe/are-my-actions-born-out-of-love-or-fear#@ned/re-modprobe-are-my-actions-born-out-of-love-or-fear-20160907t015517135z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": -6795814202,
-        "voter": "highasfuck"
-      },
-      {
-        "rshares": 947376283195,
-        "voter": "liondani"
-      },
-      {
-        "rshares": 75386389898,
-        "voter": "aizensou"
-      },
-      {
-        "rshares": 228677801639,
-        "voter": "wingz"
-      },
-      {
-        "rshares": 14365816692,
-        "voter": "razvanelulmarin"
-      },
-      {
-        "rshares": 2046191036,
-        "voter": "r4fken"
-      },
-      {
-        "rshares": 4050521206,
-        "voter": "owdy"
-      }
-    ],
-    "author": "ned",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 62.11,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Thanks for your response - I believe there's some merit in what you've written but I can't say I fully understand what your suggestions are.",
-    "category": "steem",
-    "children": 17,
-    "created": "2016-09-07T16:35:12",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 2,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "steem"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 1265107189464,
-    "parent_author": "nextgencrypto",
-    "parent_permlink": "re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t162503606z",
-    "payout": 0.608,
-    "payout_at": "2016-09-14T16:35:12",
-    "pending_payout_value": "0.608 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-nextgencrypto-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t163512347z",
-    "post_id": 1160619,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 7
-    },
-    "title": "RE: Increasing Curation, Demand for Steem Power and Community Interaction",
-    "updated": "2016-09-07T16:35:12",
-    "url": "/steem/@ned/increasing-curation-demand-for-steem-power-and-community-interaction#@ned/re-nextgencrypto-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t163512347z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 3094880891,
-        "voter": "boy"
-      },
-      {
-        "rshares": 4508127595,
-        "voter": "bue-witness"
-      },
-      {
-        "rshares": 844428018,
-        "voter": "bunny"
-      },
-      {
-        "rshares": 53357743051,
-        "voter": "bue"
-      },
-      {
-        "rshares": 1658770758,
-        "voter": "mini"
-      },
-      {
-        "rshares": 256270593,
-        "voter": "moon"
-      },
-      {
-        "rshares": 746554395,
-        "voter": "healthcare"
-      },
-      {
-        "rshares": 951041143,
-        "voter": "daniel.pan"
-      },
-      {
-        "rshares": 345557113,
-        "voter": "helen.tan"
-      },
-      {
-        "rshares": 284602544117,
-        "voter": "craig-grant"
-      },
-      {
-        "rshares": 481113279456,
-        "voter": "dana-edwards"
-      }
-    ],
-    "author": "ned",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 62.11,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Good analysis.  A few of us recently also looked into capping curation rewards however found it has weaknesses that allow whales to game the rewards.  We haven't recently looked as deep into capping the total blog post rewards.  If a large group of steemers see a net benefit but it also seems to be a divisive issue, then it could be proposed to move to the new system for only a short period of time (e.g. 2 weeks) as a trial period.",
-    "category": "steemit",
-    "children": 6,
-    "created": "2016-08-25T04:14:18",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 1,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "steemit"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 831479197130,
-    "parent_author": "dana-edwards",
-    "parent_permlink": "why-a-steem-power-reward-cap-would-be-as-controversial-as-the-block-size-cap-in-bitcoin",
-    "payout": 0.514,
-    "payout_at": "2016-09-01T04:14:18",
-    "pending_payout_value": "0.514 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-dana-edwards-why-a-steem-power-reward-cap-would-be-as-controversial-as-the-block-size-cap-in-bitcoin-20160825t041419160z",
-    "post_id": 977725,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 11
-    },
-    "title": "RE: Why a Steem Power reward cap would be as controversial as the block size cap in Bitcoin [FAIRNESS vs FREEDOM?]",
-    "updated": "2016-08-25T04:14:18",
-    "url": "/steemit/@dana-edwards/why-a-steem-power-reward-cap-would-be-as-controversial-as-the-block-size-cap-in-bitcoin#@ned/re-dana-edwards-why-a-steem-power-reward-cap-would-be-as-controversial-as-the-block-size-cap-in-bitcoin-20160825t041419160z"
-  },
-  {
-    "active_votes": [
-      {
         "rshares": 20235811951,
         "voter": "proctologic"
       },
@@ -7444,9 +7444,9 @@
     "net_rshares": 280298885518,
     "parent_author": "fyrstikken",
     "parent_permlink": "29zext-crypto-land-a-comedy-by-fyrstikken",
-    "payout": 0.164,
+    "payout": 0.289,
     "payout_at": "2016-08-27T02:25:30",
-    "pending_payout_value": "0.164 HBD",
+    "pending_payout_value": "0.289 HBD",
     "percent_hbd": 10000,
     "permlink": "re-fyrstikken-29zext-crypto-land-a-comedy-by-fyrstikken-20160820t022532747z",
     "post_id": 899673,
@@ -7578,12 +7578,12 @@
     "net_rshares": 433530703862,
     "parent_author": "steemship",
     "parent_permlink": "open-letter-to-ned-and-dan-you-badly-need-a-communications-community-content-expert-and-i-hereby-nominate-stellabelle-or",
-    "payout": 0.142,
+    "payout": 0.254,
     "payout_at": "2016-09-18T01:12:54",
-    "pending_payout_value": "0.142 HBD",
+    "pending_payout_value": "0.254 HBD",
     "percent_hbd": 10000,
     "permlink": "re-steemship-open-letter-to-ned-and-dan-you-badly-need-a-communications-community-content-expert-and-i-hereby-nominate-stellabelle-or-20160911t011254010z",
-    "post_id": 1202935,
+    "post_id": 1202934,
     "promoted": "0.000 HBD",
     "reblogs": 0,
     "replies": [],

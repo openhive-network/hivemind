@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "date": "2016-07-07T01:13:18",
+    "id": 47247,
+    "msg": "@donkeypong voted on your post ($12.85)",
+    "score": 100,
+    "type": "vote",
+    "url": "@pharesim/witness-post"
+  },
+  {
+    "date": "2016-06-26T18:52:18",
+    "id": 15840,
+    "msg": "@steempty voted on your post ($37.26)",
+    "score": 100,
+    "type": "vote",
+    "url": "@pharesim/witness-post"
+  }
+]
