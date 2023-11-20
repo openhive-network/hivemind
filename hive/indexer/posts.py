@@ -271,12 +271,12 @@ class Posts(DbAdapterHolder):
                 if author is None:
                     author = value['author']
                     permlink = value['permlink']
-                payout = sbd_amount(value['payout'])
                 author_rewards = value['author_rewards']
                 total_payout_value = value['total_payout_value']
                 curator_payout_value = value['curator_payout_value']
                 # beneficiary_payout_value = value['beneficiary_payout_value']
 
+                payout = sum([sbd_amount(total_payout_value), sbd_amount(value['payout'])])
                 pending_payout = 0
                 last_payout_at = date
 
