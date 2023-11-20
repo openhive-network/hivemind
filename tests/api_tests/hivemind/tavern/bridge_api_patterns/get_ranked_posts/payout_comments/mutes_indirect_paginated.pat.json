@@ -6,113 +6,6 @@
         "voter": "itsascam"
       },
       {
-        "rshares": 2050320927937,
-        "voter": "steemroller"
-      },
-      {
-        "rshares": 17506821189546,
-        "voter": "steemed"
-      },
-      {
-        "rshares": 2472687085,
-        "voter": "boy"
-      },
-      {
-        "rshares": 3001252537,
-        "voter": "bue-witness"
-      },
-      {
-        "rshares": 562430414,
-        "voter": "bunny"
-      },
-      {
-        "rshares": 42191835467,
-        "voter": "bue"
-      },
-      {
-        "rshares": 1325422094,
-        "voter": "mini"
-      },
-      {
-        "rshares": 170789230,
-        "voter": "moon"
-      },
-      {
-        "rshares": 497255693,
-        "voter": "healthcare"
-      },
-      {
-        "rshares": 737466177,
-        "voter": "daniel.pan"
-      },
-      {
-        "rshares": 230274999,
-        "voter": "helen.tan"
-      },
-      {
-        "rshares": 5163277168,
-        "voter": "christoryan"
-      },
-      {
-        "rshares": 4146107046,
-        "voter": "fishborne"
-      },
-      {
-        "rshares": 100022771,
-        "voter": "darkstar1o9"
-      },
-      {
-        "rshares": 58035101,
-        "voter": "aaronjwhite"
-      }
-    ],
-    "author": "knircky",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 56.69,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Nope a stock is not a ponzu scheme and steem is not either.\n\nI am sick of people that cannot understand how things calling them Ponzi schemes, so they can sound smarter than they are.",
-    "category": "steemit",
-    "children": 10,
-    "created": "2016-08-20T03:22:36",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 2,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "steemit"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 37005362856363,
-    "parent_author": "gmalhotra",
-    "parent_permlink": "re-clayop-is-bitcoin-a-ponzi-too-a-simple-explanation-about-where-does-money-come-from-for-dummies-20160820t025813753z",
-    "payout": 367.684,
-    "payout_at": "2016-08-27T03:22:36",
-    "pending_payout_value": "367.684 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-gmalhotra-re-clayop-is-bitcoin-a-ponzi-too-a-simple-explanation-about-where-does-money-come-from-for-dummies-20160820t032236858z",
-    "post_id": 900162,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 16
-    },
-    "title": "RE: Is Bitcoin a Ponzi too? A Simple Explanation about Where Does Money Come From for Dummies",
-    "updated": "2016-08-20T03:22:36",
-    "url": "/steemit/@clayop/is-bitcoin-a-ponzi-too-a-simple-explanation-about-where-does-money-come-from-for-dummies#@knircky/re-gmalhotra-re-clayop-is-bitcoin-a-ponzi-too-a-simple-explanation-about-where-does-money-come-from-for-dummies-20160820t032236858z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 17387563883098,
-        "voter": "itsascam"
-      },
-      {
         "rshares": 2478143633692,
         "voter": "blocktrades"
       },
@@ -186,9 +79,9 @@
     "net_rshares": 37471570441471,
     "parent_author": "blocktrades",
     "parent_permlink": "blocktrades-witness-report-for-3rd-week-of-august",
-    "payout": 357.793,
+    "payout": 204.392,
     "payout_at": "2016-08-26T21:34:42",
-    "pending_payout_value": "357.793 HBD",
+    "pending_payout_value": "204.392 HBD",
     "percent_hbd": 10000,
     "permlink": "re-blocktrades-blocktrades-witness-report-for-3rd-week-of-august-20160819t213441316z",
     "post_id": 896287,
@@ -204,6 +97,297 @@
     "title": "RE: BlockTrades Witness Report for 3rd Week of August",
     "updated": "2016-08-19T21:34:57",
     "url": "/witness-category/@blocktrades/blocktrades-witness-report-for-3rd-week-of-august#@thylbom/re-blocktrades-blocktrades-witness-report-for-3rd-week-of-august-20160819t213441316z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 727407423660,
+        "voter": "erath"
+      },
+      {
+        "rshares": 644958517124,
+        "voter": "smooth"
+      },
+      {
+        "rshares": 28855608662,
+        "voter": "anonymous"
+      },
+      {
+        "rshares": 8486664643623,
+        "voter": "rainman"
+      },
+      {
+        "rshares": 6370652360778,
+        "voter": "wackou"
+      },
+      {
+        "rshares": 82613356260,
+        "voter": "friend5"
+      },
+      {
+        "rshares": 6571978360124,
+        "voter": "roadscape"
+      },
+      {
+        "rshares": 2470238755,
+        "voter": "boy"
+      },
+      {
+        "rshares": 2998129153,
+        "voter": "bue-witness"
+      },
+      {
+        "rshares": 567603623,
+        "voter": "bunny"
+      },
+      {
+        "rshares": 41948298509,
+        "voter": "bue"
+      },
+      {
+        "rshares": 1324164960,
+        "voter": "mini"
+      },
+      {
+        "rshares": 170709221,
+        "voter": "moon"
+      },
+      {
+        "rshares": 1813610822120,
+        "voter": "joseph"
+      },
+      {
+        "rshares": 108871922542,
+        "voter": "smooth.witness"
+      },
+      {
+        "rshares": 51208392605,
+        "voter": "twiceuponatime"
+      },
+      {
+        "rshares": 139867989371,
+        "voter": "indominon"
+      },
+      {
+        "rshares": 2942087618871,
+        "voter": "onceuponatime"
+      },
+      {
+        "rshares": 728571343037,
+        "voter": "marginal"
+      },
+      {
+        "rshares": 937174079758,
+        "voter": "cass"
+      },
+      {
+        "rshares": 76036949216,
+        "voter": "vault"
+      },
+      {
+        "rshares": 496873319,
+        "voter": "healthcare"
+      },
+      {
+        "rshares": 725575461,
+        "voter": "daniel.pan"
+      },
+      {
+        "rshares": 230145753,
+        "voter": "helen.tan"
+      },
+      {
+        "rshares": 410807696946,
+        "voter": "chryspano"
+      },
+      {
+        "rshares": 9521769889,
+        "voter": "acidyo"
+      },
+      {
+        "rshares": 19196002726,
+        "voter": "mughat"
+      },
+      {
+        "rshares": 47541496466,
+        "voter": "nphacker"
+      },
+      {
+        "rshares": 3892379945,
+        "voter": "kennyskitchen"
+      },
+      {
+        "rshares": 129268320437,
+        "voter": "schro"
+      },
+      {
+        "rshares": 92995154682,
+        "voter": "thedashguy"
+      },
+      {
+        "rshares": 213701132994,
+        "voter": "lukestokes"
+      },
+      {
+        "rshares": 276395602,
+        "voter": "carlgetalada"
+      },
+      {
+        "rshares": 28736613783,
+        "voter": "catchfire"
+      },
+      {
+        "rshares": 5894409181,
+        "voter": "quintanilla"
+      },
+      {
+        "rshares": 41089533337,
+        "voter": "bacchist"
+      },
+      {
+        "rshares": 8483258053,
+        "voter": "cannav"
+      },
+      {
+        "rshares": 65583674268,
+        "voter": "discombobulated"
+      },
+      {
+        "rshares": 1259117194,
+        "voter": "chrisj"
+      },
+      {
+        "rshares": 3704243578,
+        "voter": "krystle"
+      },
+      {
+        "rshares": 14629758637,
+        "voter": "artakan"
+      },
+      {
+        "rshares": 6012406044,
+        "voter": "phenom"
+      },
+      {
+        "rshares": 17402129371,
+        "voter": "crazymumzysa"
+      },
+      {
+        "rshares": 4183080661,
+        "voter": "bbrewer"
+      },
+      {
+        "rshares": 35472659687,
+        "voter": "fatboy"
+      },
+      {
+        "rshares": 3978086691,
+        "voter": "beanz"
+      },
+      {
+        "rshares": 22725564707,
+        "voter": "solidgold"
+      },
+      {
+        "rshares": 24344116072,
+        "voter": "jasonstaggers"
+      },
+      {
+        "rshares": 6603057948,
+        "voter": "najoh"
+      },
+      {
+        "rshares": 12993857503,
+        "voter": "capitalism"
+      },
+      {
+        "rshares": 4872113322,
+        "voter": "satoshifpv"
+      },
+      {
+        "rshares": 2818362970,
+        "voter": "aboundlessworld"
+      },
+      {
+        "rshares": 2636752145,
+        "voter": "oflyhigh"
+      },
+      {
+        "rshares": 3558963294,
+        "voter": "randyclemens"
+      },
+      {
+        "rshares": 377494461,
+        "voter": "alifton"
+      },
+      {
+        "rshares": 26914242849,
+        "voter": "bitcalm"
+      },
+      {
+        "rshares": 1692339912,
+        "voter": "davidbrogan"
+      },
+      {
+        "rshares": 56779364,
+        "voter": "negoshi"
+      },
+      {
+        "rshares": 50997147,
+        "voter": "david.prochnow"
+      },
+      {
+        "rshares": 50258926,
+        "voter": "doze49"
+      },
+      {
+        "rshares": 61941319,
+        "voter": "fraterralph"
+      },
+      {
+        "rshares": 52891748,
+        "voter": "onlyspeakslies"
+      }
+    ],
+    "author": "lukestokes",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 66.1,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "`dictatorship`,  `hindenburg`, `titanic` and a hitler meme are all a bit too over the top for me. I'm glad you're voicing your concerns, but a \"Dan must be stopped\" call to action against the very person who created what we are all enjoying isn't (IMO) the best approach for having a respectful dialogue about the issue. It seems many are already discussing the issue on github and voicing their disapproval there. We'll see where it goes from here, and it's definitely something to keep an eye on. For that, I thank you, but I won't give you my vote on this post because I think the tone is counter productive to a rational, open conversation about the issue. I may be wrong and maybe a more alarmist tone is called for. As with many things, we shall see over time.",
+    "category": "steem",
+    "children": 38,
+    "created": "2016-08-17T04:58:03",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steem"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 31034930180364,
+    "parent_author": "bacchist",
+    "parent_permlink": "dan-needs-to-be-stopped",
+    "payout": 164.026,
+    "payout_at": "2016-08-24T04:58:03",
+    "pending_payout_value": "164.026 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-bacchist-dan-needs-to-be-stopped-20160817t045803929z",
+    "post_id": 847282,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 62
+    },
+    "title": "RE: Dan needs to be stopped",
+    "updated": "2016-08-17T12:34:09",
+    "url": "/steem/@bacchist/dan-needs-to-be-stopped#@lukestokes/re-bacchist-dan-needs-to-be-stopped-20160817t045803929z"
   },
   {
     "active_votes": [
@@ -333,9 +517,9 @@
     "net_rshares": 38538789887465,
     "parent_author": "dantheman",
     "parent_permlink": "why-do-we-fight-to-change-the-world",
-    "payout": 307.07,
+    "payout": 160.617,
     "payout_at": "2016-09-08T18:48:39",
-    "pending_payout_value": "307.070 HBD",
+    "pending_payout_value": "160.617 HBD",
     "percent_hbd": 10000,
     "permlink": "re-dantheman-why-do-we-fight-to-change-the-world-20160901t184948317z",
     "post_id": 1088540,

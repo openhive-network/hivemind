@@ -1008,7 +1008,7 @@
       }
     ],
     "author": "kingtylervvs",
-    "author_payout_value": "0.078 HBD",
+    "author_payout_value": "0.039 HBD",
     "author_reputation": 47.93,
     "beneficiaries": [],
     "blacklists": [],
@@ -1033,7 +1033,7 @@
     "net_rshares": 26190175100,
     "parent_author": "steemit",
     "parent_permlink": "firstpost",
-    "payout": 0.078,
+    "payout": 0.039,
     "payout_at": "2016-08-24T19:59:42",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,

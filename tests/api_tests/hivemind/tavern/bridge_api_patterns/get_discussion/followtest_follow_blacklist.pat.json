@@ -140,7 +140,7 @@
       }
     ],
     "author": "nkdk",
-    "author_payout_value": "4.730 HBD",
+    "author_payout_value": "2.364 HBD",
     "author_reputation": 65.67,
     "beneficiaries": [],
     "blacklists": [
@@ -156,7 +156,7 @@
     "json_metadata": {},
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 5950701177965,
-    "payout": 7.094,
+    "payout": 4.728,
     "payout_at": "2016-08-03T00:00:06",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
@@ -190,7 +190,7 @@
       }
     ],
     "author": "steemrollin",
-    "author_payout_value": "0.022 HBD",
+    "author_payout_value": "0.010 HBD",
     "author_reputation": 68.72,
     "beneficiaries": [],
     "blacklists": [],
@@ -206,7 +206,7 @@
     "net_rshares": 71669806277,
     "parent_author": "nkdk",
     "parent_permlink": "thermosolar-hive-healthy-bees-healthy-honey",
-    "payout": 0.033,
+    "payout": 0.021,
     "payout_at": "2016-08-03T00:00:06",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,

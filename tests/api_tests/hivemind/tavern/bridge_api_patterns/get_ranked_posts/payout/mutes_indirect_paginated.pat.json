@@ -2,1372 +2,6 @@
   {
     "active_votes": [
       {
-        "rshares": 16915101346845,
-        "voter": "itsascam"
-      },
-      {
-        "rshares": 318229133824,
-        "voter": "anonymous"
-      },
-      {
-        "rshares": 13346218924674,
-        "voter": "rainman"
-      },
-      {
-        "rshares": 11825349099945,
-        "voter": "berniesanders"
-      },
-      {
-        "rshares": 1990859153081,
-        "voter": "steemroller"
-      },
-      {
-        "rshares": 73329875219,
-        "voter": "donaldtrump"
-      },
-      {
-        "rshares": 17867311580177,
-        "voter": "steemed"
-      },
-      {
-        "rshares": 3289620094713,
-        "voter": "pharesim"
-      },
-      {
-        "rshares": 5550135241263,
-        "voter": "kushed"
-      },
-      {
-        "rshares": 146637010796,
-        "voter": "svk"
-      },
-      {
-        "rshares": 3104291349,
-        "voter": "boy"
-      },
-      {
-        "rshares": 3768993679,
-        "voter": "bue-witness"
-      },
-      {
-        "rshares": 684025370,
-        "voter": "bunny"
-      },
-      {
-        "rshares": 7571856816568,
-        "voter": "complexring"
-      },
-      {
-        "rshares": 54886685162,
-        "voter": "bue"
-      },
-      {
-        "rshares": 1663384384,
-        "voter": "mini"
-      },
-      {
-        "rshares": 4758824095544,
-        "voter": "witness.svk"
-      },
-      {
-        "rshares": 213796245,
-        "voter": "moon"
-      },
-      {
-        "rshares": 1847861219649,
-        "voter": "joseph"
-      },
-      {
-        "rshares": 74889040980,
-        "voter": "aizensou"
-      },
-      {
-        "rshares": 213043223889,
-        "voter": "b0y2k"
-      },
-      {
-        "rshares": 10562129416,
-        "voter": "idol"
-      },
-      {
-        "rshares": 625011253,
-        "voter": "healthcare"
-      },
-      {
-        "rshares": 46247052093,
-        "voter": "stoner19"
-      },
-      {
-        "rshares": 973154576,
-        "voter": "daniel.pan"
-      },
-      {
-        "rshares": 7859123838,
-        "voter": "woo7739"
-      },
-      {
-        "rshares": 23196758112,
-        "voter": "lobotony"
-      },
-      {
-        "rshares": 312088747958,
-        "voter": "chitty"
-      },
-      {
-        "rshares": 288356419,
-        "voter": "helen.tan"
-      },
-      {
-        "rshares": 1741272428,
-        "voter": "jocelyn"
-      },
-      {
-        "rshares": 79785618296,
-        "voter": "edgeland"
-      },
-      {
-        "rshares": 58901303342,
-        "voter": "lovelace"
-      },
-      {
-        "rshares": 16990038657,
-        "voter": "jademont"
-      },
-      {
-        "rshares": 433348204760,
-        "voter": "eeks"
-      },
-      {
-        "rshares": 19219258488,
-        "voter": "fkn"
-      },
-      {
-        "rshares": 437186804,
-        "voter": "paco-steem"
-      },
-      {
-        "rshares": 4894564489,
-        "voter": "spaninv"
-      },
-      {
-        "rshares": 25282564970,
-        "voter": "elishagh1"
-      },
-      {
-        "rshares": 10276682555,
-        "voter": "richman"
-      },
-      {
-        "rshares": 1009949475,
-        "voter": "weenfan"
-      },
-      {
-        "rshares": 143474566462,
-        "voter": "steve-walschot"
-      },
-      {
-        "rshares": 491004536,
-        "voter": "coar"
-      },
-      {
-        "rshares": 1426434133,
-        "voter": "murh"
-      },
-      {
-        "rshares": 231946989226,
-        "voter": "sascha"
-      },
-      {
-        "rshares": 2371910543,
-        "voter": "error"
-      },
-      {
-        "rshares": 990454523809,
-        "voter": "cyber"
-      },
-      {
-        "rshares": 10881925220,
-        "voter": "aizen01"
-      },
-      {
-        "rshares": 6488753407,
-        "voter": "aizen02"
-      },
-      {
-        "rshares": 7239441975,
-        "voter": "aizen06"
-      },
-      {
-        "rshares": 6414165703,
-        "voter": "aizen16"
-      },
-      {
-        "rshares": 5842555313,
-        "voter": "aizen36"
-      },
-      {
-        "rshares": 9045476546,
-        "voter": "zebbra2014"
-      },
-      {
-        "rshares": 94742737947,
-        "voter": "eric-boucher"
-      },
-      {
-        "rshares": 8277566784,
-        "voter": "badger311"
-      },
-      {
-        "rshares": 8567535889,
-        "voter": "badger313"
-      },
-      {
-        "rshares": 8531753799,
-        "voter": "badger312"
-      },
-      {
-        "rshares": 8824957277,
-        "voter": "badger316"
-      },
-      {
-        "rshares": 8944485771,
-        "voter": "badger319"
-      },
-      {
-        "rshares": 8853961578,
-        "voter": "badger3101"
-      },
-      {
-        "rshares": 8317596424,
-        "voter": "badger3111"
-      },
-      {
-        "rshares": 8868767821,
-        "voter": "badger3121"
-      },
-      {
-        "rshares": 8484864626,
-        "voter": "badger3131"
-      },
-      {
-        "rshares": 8590790659,
-        "voter": "badger3141"
-      },
-      {
-        "rshares": 8567661825,
-        "voter": "badger3171"
-      },
-      {
-        "rshares": 8378856070,
-        "voter": "badger3181"
-      },
-      {
-        "rshares": 8953723365,
-        "voter": "badger3191"
-      },
-      {
-        "rshares": 8378696159,
-        "voter": "badger3112"
-      },
-      {
-        "rshares": 8713219999,
-        "voter": "badger3132"
-      },
-      {
-        "rshares": 8588877453,
-        "voter": "badger3162"
-      },
-      {
-        "rshares": 8815418946,
-        "voter": "badger3113"
-      },
-      {
-        "rshares": 8472911151,
-        "voter": "badger3123"
-      },
-      {
-        "rshares": 8594278643,
-        "voter": "badger3133"
-      },
-      {
-        "rshares": 8939030633,
-        "voter": "badger3153"
-      },
-      {
-        "rshares": 8623775580,
-        "voter": "badger3163"
-      },
-      {
-        "rshares": 8653716672,
-        "voter": "badger3193"
-      },
-      {
-        "rshares": 8604293455,
-        "voter": "badger3114"
-      },
-      {
-        "rshares": 8514925856,
-        "voter": "badger3124"
-      },
-      {
-        "rshares": 8419643769,
-        "voter": "badger3144"
-      },
-      {
-        "rshares": 8342949563,
-        "voter": "badger3154"
-      },
-      {
-        "rshares": 8212807363,
-        "voter": "badger3164"
-      },
-      {
-        "rshares": 8538403324,
-        "voter": "badger3174"
-      },
-      {
-        "rshares": 8813363121,
-        "voter": "badger3194"
-      },
-      {
-        "rshares": 8711686485,
-        "voter": "badger3105"
-      },
-      {
-        "rshares": 8656291179,
-        "voter": "badger3135"
-      },
-      {
-        "rshares": 8258123647,
-        "voter": "badger3145"
-      },
-      {
-        "rshares": 8830660827,
-        "voter": "badger3155"
-      },
-      {
-        "rshares": 8529393936,
-        "voter": "badger3175"
-      },
-      {
-        "rshares": 8309797529,
-        "voter": "badger3195"
-      },
-      {
-        "rshares": 7958566161,
-        "voter": "badger3106"
-      },
-      {
-        "rshares": 8761916218,
-        "voter": "badger3116"
-      },
-      {
-        "rshares": 8808969794,
-        "voter": "badger3126"
-      },
-      {
-        "rshares": 8442934028,
-        "voter": "badger3136"
-      },
-      {
-        "rshares": 8096117635,
-        "voter": "badger3146"
-      },
-      {
-        "rshares": 8323464145,
-        "voter": "badger3156"
-      },
-      {
-        "rshares": 8535260751,
-        "voter": "badger3166"
-      },
-      {
-        "rshares": 8451691587,
-        "voter": "badger3176"
-      },
-      {
-        "rshares": 8583776222,
-        "voter": "badger3186"
-      },
-      {
-        "rshares": 8618878210,
-        "voter": "badger3196"
-      },
-      {
-        "rshares": 8547737829,
-        "voter": "badger3107"
-      },
-      {
-        "rshares": 8304717802,
-        "voter": "badger315"
-      },
-      {
-        "rshares": 8791468179,
-        "voter": "badger318"
-      },
-      {
-        "rshares": 8840149394,
-        "voter": "badger3151"
-      },
-      {
-        "rshares": 8518691453,
-        "voter": "badger3161"
-      },
-      {
-        "rshares": 8773071440,
-        "voter": "badger3122"
-      },
-      {
-        "rshares": 8711071387,
-        "voter": "badger3142"
-      },
-      {
-        "rshares": 8929845340,
-        "voter": "badger3152"
-      },
-      {
-        "rshares": 8246163207,
-        "voter": "badger3172"
-      },
-      {
-        "rshares": 8749886555,
-        "voter": "badger3182"
-      },
-      {
-        "rshares": 8509911969,
-        "voter": "badger3192"
-      },
-      {
-        "rshares": 8426126419,
-        "voter": "badger3143"
-      },
-      {
-        "rshares": 8684199182,
-        "voter": "badger3173"
-      },
-      {
-        "rshares": 8396290921,
-        "voter": "badger3104"
-      },
-      {
-        "rshares": 8113786122,
-        "voter": "badger3134"
-      },
-      {
-        "rshares": 8513046286,
-        "voter": "badger3184"
-      },
-      {
-        "rshares": 8451317712,
-        "voter": "badger3115"
-      },
-      {
-        "rshares": 8915479859,
-        "voter": "badger3165"
-      },
-      {
-        "rshares": 8548447203,
-        "voter": "badger3185"
-      },
-      {
-        "rshares": 8609244540,
-        "voter": "badger314"
-      },
-      {
-        "rshares": 8839335558,
-        "voter": "badger317"
-      },
-      {
-        "rshares": 8582675460,
-        "voter": "badger3102"
-      },
-      {
-        "rshares": 8544860218,
-        "voter": "badger3103"
-      },
-      {
-        "rshares": 8473237642,
-        "voter": "badger3125"
-      },
-      {
-        "rshares": 8440010331,
-        "voter": "badger3183"
-      },
-      {
-        "rshares": 139978569127,
-        "voter": "coinbitgold"
-      },
-      {
-        "rshares": 341225233,
-        "voter": "stiletto"
-      },
-      {
-        "rshares": 53652979111,
-        "voter": "juanmiguelsalas"
-      },
-      {
-        "rshares": 20442481697,
-        "voter": "ratel"
-      },
-      {
-        "rshares": 78557455679,
-        "voter": "herzmeister"
-      },
-      {
-        "rshares": 31290973763,
-        "voter": "michaelx"
-      },
-      {
-        "rshares": 198704340883,
-        "voter": "kimziv"
-      },
-      {
-        "rshares": 12323692314,
-        "voter": "primus"
-      },
-      {
-        "rshares": 484320925,
-        "voter": "mrhankeh"
-      },
-      {
-        "rshares": 25256193686,
-        "voter": "djm34"
-      },
-      {
-        "rshares": 7378292471,
-        "voter": "dasha"
-      },
-      {
-        "rshares": 162824487120,
-        "voter": "dashpaymag"
-      },
-      {
-        "rshares": 56991239380,
-        "voter": "asmolokalo"
-      },
-      {
-        "rshares": 18214221278,
-        "voter": "konstantin"
-      },
-      {
-        "rshares": 315933979792,
-        "voter": "fabio"
-      },
-      {
-        "rshares": 505898823,
-        "voter": "chamviet"
-      },
-      {
-        "rshares": 1602309809,
-        "voter": "endgame"
-      },
-      {
-        "rshares": 61997908056,
-        "voter": "furion"
-      },
-      {
-        "rshares": 6100392404,
-        "voter": "owdy"
-      },
-      {
-        "rshares": 463427059,
-        "voter": "barbara2"
-      },
-      {
-        "rshares": 514901036,
-        "voter": "ch0c0latechip"
-      },
-      {
-        "rshares": 476563702,
-        "voter": "doge4lyf"
-      },
-      {
-        "rshares": 4640994714,
-        "voter": "on0tole"
-      },
-      {
-        "rshares": 1137775118,
-        "voter": "steem1653"
-      },
-      {
-        "rshares": 259566753,
-        "voter": "losos"
-      },
-      {
-        "rshares": 66978870,
-        "voter": "cynetyc"
-      },
-      {
-        "rshares": 17416243057,
-        "voter": "sebastien"
-      },
-      {
-        "rshares": 16823179482,
-        "voter": "toxonaut"
-      },
-      {
-        "rshares": 5013218518,
-        "voter": "thegoodguy"
-      },
-      {
-        "rshares": 242148482,
-        "voter": "danielkt"
-      },
-      {
-        "rshares": 2218353977,
-        "voter": "incomemonthly"
-      },
-      {
-        "rshares": 16325429579,
-        "voter": "senseiteekay"
-      },
-      {
-        "rshares": 20339906378,
-        "voter": "meiisheree"
-      },
-      {
-        "rshares": 237985094,
-        "voter": "zoicneo"
-      },
-      {
-        "rshares": 288459888579,
-        "voter": "nabilov"
-      },
-      {
-        "rshares": 5704856035,
-        "voter": "juvyjabian"
-      },
-      {
-        "rshares": 147987029631,
-        "voter": "bonface"
-      },
-      {
-        "rshares": 371229720595,
-        "voter": "knozaki2015"
-      },
-      {
-        "rshares": 6854219330,
-        "voter": "lichtblick"
-      },
-      {
-        "rshares": 89569037,
-        "voter": "wildchild"
-      },
-      {
-        "rshares": 4373926290,
-        "voter": "r-niki09"
-      },
-      {
-        "rshares": 235150660,
-        "voter": "keyser"
-      },
-      {
-        "rshares": 13797703272,
-        "voter": "nippel66"
-      },
-      {
-        "rshares": 23473679958,
-        "voter": "phenom"
-      },
-      {
-        "rshares": 1687010517,
-        "voter": "iamwne"
-      },
-      {
-        "rshares": 33532193249,
-        "voter": "royaltiffany"
-      },
-      {
-        "rshares": 3403211870,
-        "voter": "tarindel"
-      },
-      {
-        "rshares": 141336726,
-        "voter": "bento"
-      },
-      {
-        "rshares": 13785815958,
-        "voter": "hagie"
-      },
-      {
-        "rshares": 1729295455,
-        "voter": "tokyodude"
-      },
-      {
-        "rshares": 7072481705,
-        "voter": "lostnuggett"
-      },
-      {
-        "rshares": 15572019789,
-        "voter": "positive"
-      },
-      {
-        "rshares": 117711994,
-        "voter": "charbelnamm"
-      },
-      {
-        "rshares": 19392057072,
-        "voter": "krabgat"
-      },
-      {
-        "rshares": 639310915,
-        "voter": "curator"
-      },
-      {
-        "rshares": 4313998732,
-        "voter": "ace108"
-      },
-      {
-        "rshares": 30805419602,
-        "voter": "sisterholics"
-      },
-      {
-        "rshares": 9645029542,
-        "voter": "logic"
-      },
-      {
-        "rshares": 525805405,
-        "voter": "fnait"
-      },
-      {
-        "rshares": 479775663,
-        "voter": "keepcalmand"
-      },
-      {
-        "rshares": 2795368670,
-        "voter": "nelu.ceban"
-      },
-      {
-        "rshares": 30824381157,
-        "voter": "smailer"
-      },
-      {
-        "rshares": 156341247,
-        "voter": "steemster1"
-      },
-      {
-        "rshares": 52207362,
-        "voter": "reported"
-      },
-      {
-        "rshares": 6967318973,
-        "voter": "uwe69"
-      },
-      {
-        "rshares": 998445518,
-        "voter": "metaflute"
-      },
-      {
-        "rshares": 3660923882,
-        "voter": "litrbooh"
-      },
-      {
-        "rshares": 448704085,
-        "voter": "bento04"
-      },
-      {
-        "rshares": 752395200,
-        "voter": "bento03"
-      },
-      {
-        "rshares": 239327469,
-        "voter": "bento02"
-      },
-      {
-        "rshares": 551011953,
-        "voter": "bento01"
-      },
-      {
-        "rshares": 1649142041,
-        "voter": "coinbar"
-      },
-      {
-        "rshares": 61911147,
-        "voter": "sharon"
-      },
-      {
-        "rshares": 51206711,
-        "voter": "krushing"
-      },
-      {
-        "rshares": 63085782,
-        "voter": "lillianjones"
-      },
-      {
-        "rshares": 1045455111357,
-        "voter": "laonie"
-      },
-      {
-        "rshares": 222083480819,
-        "voter": "ozchartart"
-      },
-      {
-        "rshares": 5095811646,
-        "voter": "croatia"
-      },
-      {
-        "rshares": 65269444,
-        "voter": "vladimirputin"
-      },
-      {
-        "rshares": 24597854453,
-        "voter": "rawnetics"
-      },
-      {
-        "rshares": 65262109,
-        "voter": "angelamerkel"
-      },
-      {
-        "rshares": 8141319134,
-        "voter": "fintech-jesus"
-      },
-      {
-        "rshares": 9022928561,
-        "voter": "jadefalke"
-      },
-      {
-        "rshares": 81779629,
-        "voter": "bento06"
-      },
-      {
-        "rshares": 37829674433,
-        "voter": "myfirst"
-      },
-      {
-        "rshares": 238579353441,
-        "voter": "somebody"
-      },
-      {
-        "rshares": 8924454917,
-        "voter": "flysaga"
-      },
-      {
-        "rshares": 26513532941,
-        "voter": "kental"
-      },
-      {
-        "rshares": 12254005752,
-        "voter": "gmurph"
-      },
-      {
-        "rshares": 12614950441,
-        "voter": "poeticsnake"
-      },
-      {
-        "rshares": 607790652,
-        "voter": "minnowsunited"
-      },
-      {
-        "rshares": 52714679714,
-        "voter": "midnightoil"
-      },
-      {
-        "rshares": 72933738628,
-        "voter": "mibenkito"
-      },
-      {
-        "rshares": 1017496122,
-        "voter": "altucher"
-      },
-      {
-        "rshares": 3991168336,
-        "voter": "ullikume"
-      },
-      {
-        "rshares": 65981016,
-        "voter": "elena000"
-      },
-      {
-        "rshares": 50065542,
-        "voter": "whatyouganjado"
-      },
-      {
-        "rshares": 62034512,
-        "voter": "nickola"
-      },
-      {
-        "rshares": 101510243,
-        "voter": "timferriss"
-      },
-      {
-        "rshares": 104630645,
-        "voter": "darrenrowse"
-      },
-      {
-        "rshares": 120737929619,
-        "voter": "xiaohui"
-      },
-      {
-        "rshares": 21020067568,
-        "voter": "jphamer1"
-      },
-      {
-        "rshares": 102832176474,
-        "voter": "joele"
-      },
-      {
-        "rshares": 69909225,
-        "voter": "makaveli"
-      },
-      {
-        "rshares": 1332538563,
-        "voter": "paynode"
-      },
-      {
-        "rshares": 4123576495,
-        "voter": "xiaokongcom"
-      },
-      {
-        "rshares": 63570195,
-        "voter": "msjennifer"
-      },
-      {
-        "rshares": 59738641,
-        "voter": "ciao"
-      },
-      {
-        "rshares": 57914427,
-        "voter": "steemo"
-      },
-      {
-        "rshares": 179226664,
-        "voter": "pcashmore"
-      },
-      {
-        "rshares": 8309619685,
-        "voter": "xianjun"
-      },
-      {
-        "rshares": 57765027,
-        "voter": "steema"
-      },
-      {
-        "rshares": 59587705,
-        "voter": "andrew.sullivan"
-      },
-      {
-        "rshares": 1044976210,
-        "voter": "brianclark"
-      },
-      {
-        "rshares": 830764868,
-        "voter": "daniel.kahneman"
-      },
-      {
-        "rshares": 232725559,
-        "voter": "tucker.max"
-      },
-      {
-        "rshares": 740095712,
-        "voter": "darren.rowse"
-      },
-      {
-        "rshares": 55673058,
-        "voter": "chris.dunn"
-      },
-      {
-        "rshares": 74480084,
-        "voter": "confucius"
-      },
-      {
-        "rshares": 3113858752,
-        "voter": "bledarus"
-      },
-      {
-        "rshares": 1177219949,
-        "voter": "pat.flynn"
-      },
-      {
-        "rshares": 50027573,
-        "voter": "loli"
-      },
-      {
-        "rshares": 50010551,
-        "voter": "alexbones"
-      },
-      {
-        "rshares": 1222353190,
-        "voter": "mattmarshall"
-      },
-      {
-        "rshares": 437440834,
-        "voter": "timothysykes"
-      },
-      {
-        "rshares": 8884315766,
-        "voter": "mione"
-      },
-      {
-        "rshares": 106798811,
-        "voter": "patflynn"
-      },
-      {
-        "rshares": 58653788,
-        "voter": "jarvis"
-      },
-      {
-        "rshares": 545497701,
-        "voter": "microluck"
-      },
-      {
-        "rshares": 896089582,
-        "voter": "andrewsullivan"
-      },
-      {
-        "rshares": 56726999,
-        "voter": "fortuner"
-      },
-      {
-        "rshares": 58555241,
-        "voter": "saveliy"
-      },
-      {
-        "rshares": 488694258,
-        "voter": "harvey.levin"
-      },
-      {
-        "rshares": 56593235,
-        "voter": "johnbyrd"
-      },
-      {
-        "rshares": 56575537,
-        "voter": "thomasaustin"
-      },
-      {
-        "rshares": 56573535,
-        "voter": "thermor"
-      },
-      {
-        "rshares": 56585538,
-        "voter": "ficholl"
-      },
-      {
-        "rshares": 56566121,
-        "voter": "widell"
-      },
-      {
-        "rshares": 56161396,
-        "voter": "revelbrooks"
-      },
-      {
-        "rshares": 194599083,
-        "voter": "rand.fishkin"
-      },
-      {
-        "rshares": 65827060361,
-        "voter": "justinlaak"
-      },
-      {
-        "rshares": 124775533,
-        "voter": "claudia"
-      },
-      {
-        "rshares": 15480761015,
-        "voter": "mikemacintire"
-      },
-      {
-        "rshares": 77446334,
-        "voter": "ozertayiz"
-      },
-      {
-        "rshares": 1688638686,
-        "voter": "imag1ne"
-      },
-      {
-        "rshares": 54999739,
-        "voter": "curpose"
-      },
-      {
-        "rshares": 50215700,
-        "voter": "salebored"
-      },
-      {
-        "rshares": 58068998,
-        "voter": "lsd123452"
-      },
-      {
-        "rshares": 55678144,
-        "voter": "apeiron8"
-      },
-      {
-        "rshares": 6772453295,
-        "voter": "einsteinpotsdam"
-      },
-      {
-        "rshares": 55085378,
-        "voter": "troich"
-      },
-      {
-        "rshares": 50326099,
-        "voter": "bitdrone"
-      },
-      {
-        "rshares": 50317967,
-        "voter": "sleepcult"
-      },
-      {
-        "rshares": 53966805,
-        "voter": "crion"
-      },
-      {
-        "rshares": 163826775,
-        "voter": "greatness"
-      },
-      {
-        "rshares": 53622549,
-        "voter": "hitherise"
-      },
-      {
-        "rshares": 53613607,
-        "voter": "wiss"
-      },
-      {
-        "rshares": 9279312943,
-        "voter": "ghasemkiani"
-      },
-      {
-        "rshares": 54362089,
-        "voter": "stroully"
-      },
-      {
-        "rshares": 1588537725,
-        "voter": "maryfromsochi"
-      },
-      {
-        "rshares": 45829898335,
-        "voter": "zahnspange"
-      },
-      {
-        "rshares": 54019345,
-        "voter": "thadm"
-      },
-      {
-        "rshares": 54017499,
-        "voter": "prof"
-      },
-      {
-        "rshares": 1186064946,
-        "voter": "zettar"
-      },
-      {
-        "rshares": 56897224,
-        "voter": "lighter"
-      },
-      {
-        "rshares": 52560790,
-        "voter": "yorsens"
-      },
-      {
-        "rshares": 177501015,
-        "voter": "harveylevin"
-      },
-      {
-        "rshares": 53331040,
-        "voter": "bane"
-      },
-      {
-        "rshares": 53324520,
-        "voter": "vive"
-      },
-      {
-        "rshares": 53318865,
-        "voter": "coad"
-      },
-      {
-        "rshares": 53003720,
-        "voter": "sofa"
-      },
-      {
-        "rshares": 122807239,
-        "voter": "gary.vaynerchuk"
-      },
-      {
-        "rshares": 54556846761,
-        "voter": "tracemayer"
-      },
-      {
-        "rshares": 405105947,
-        "voter": "jessicanicklos"
-      },
-      {
-        "rshares": 51994517,
-        "voter": "ailo"
-      },
-      {
-        "rshares": 25194714533,
-        "voter": "vermillion666"
-      },
-      {
-        "rshares": 50852949,
-        "voter": "gregorygarcia"
-      },
-      {
-        "rshares": 51384223,
-        "voter": "timothy.sykes"
-      },
-      {
-        "rshares": 2510932025,
-        "voter": "ekaterinka"
-      },
-      {
-        "rshares": 51470533,
-        "voter": "eavy"
-      },
-      {
-        "rshares": 51484593,
-        "voter": "roto"
-      },
-      {
-        "rshares": 52381149,
-        "voter": "everittdmickey"
-      },
-      {
-        "rshares": 94703214,
-        "voter": "mlialen"
-      },
-      {
-        "rshares": 52648858,
-        "voter": "psyduck"
-      },
-      {
-        "rshares": 1322972059,
-        "voter": "kreet"
-      },
-      {
-        "rshares": 51439735,
-        "voter": "stringer"
-      },
-      {
-        "rshares": 50938725,
-        "voter": "haved"
-      },
-      {
-        "rshares": 328958967,
-        "voter": "lloyddavis"
-      },
-      {
-        "rshares": 50708837,
-        "voter": "ardly"
-      },
-      {
-        "rshares": 50704078,
-        "voter": "yotoh"
-      },
-      {
-        "rshares": 50433760,
-        "voter": "morse"
-      },
-      {
-        "rshares": 50372583,
-        "voter": "carre"
-      },
-      {
-        "rshares": 3710639173,
-        "voter": "dodders007"
-      },
-      {
-        "rshares": 543618786,
-        "voter": "grisha-danunaher"
-      },
-      {
-        "rshares": 77637243,
-        "voter": "igtes"
-      },
-      {
-        "rshares": 157689742,
-        "voter": "buffett"
-      },
-      {
-        "rshares": 111492251,
-        "voter": "siniceku"
-      },
-      {
-        "rshares": 165371002,
-        "voter": "cebymaster"
-      },
-      {
-        "rshares": 144383385,
-        "voter": "kalipo"
-      },
-      {
-        "rshares": 143130125,
-        "voter": "iceet"
-      },
-      {
-        "rshares": 143075506,
-        "voter": "james93"
-      },
-      {
-        "rshares": 145950604,
-        "voter": "kurjik7"
-      },
-      {
-        "rshares": 85691759,
-        "voter": "mikerano"
-      }
-    ],
-    "author": "aizensou",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 62.0,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "<html><b>Attention: This post has been written by @maryfromsochi</b>\n<p>I fell in love with Barcelona at first sight. And I got over &nbsp;our break-up very hard. I noticed that almost everyone who visited Barcelona wants to go back to this city. I'm not an exception. Barcelona means incredible Gaudi\u0092s architecture, green parks on the Montjuic where you can find parrots instead of pigeons, it means beaches with endless sea and just a fantastic atmosphere, without which your inner peace seems impossible.</p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/08/2248a52.jpg\" width=\"801\" height=\"375\"/></p>\n<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;Today I want to tell you about the places you must visit in Barcelona.</p>\n<p><del>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</del></p>\n<h3><strong>Park Guell</strong></h3>\n<p><em>Everyone knows that one of the main attractions of Barcelona is the architecture of Antonio Gaudi, the brilliant and unusual artist who is completely different from his colleagues. His creations decorate Barcelona. There\u0092s even a separate park - &nbsp;the Park Guell, which impresses with its scale and imagination.</em></p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/08/rH5cwzae5cw10bb8.jpg\" width=\"795\" height=\"391\"/></p>\n<p><em>This park was initially conceived by the industrialist Guell as a good &nbsp;business project. He was planning to sell houses in the park. But the local inhabitants decided that the portions of the land were too far from the center and no one wanted to buy the buildings. As a result, it was sold nothing but two houses which were bought by Guell and Gaudi. But, if they lived today, they would be amazed to the success of their own &nbsp;project. Now there\u0092re long lines in the&nbsp;Park Guell and sometimes you have to buy tickets previously.</em></p>\n<p><del>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</del></p>\n<h3><strong>Sagrada Familia (Temple Expiatori de la Sagrada Familia)</strong></h3>\n<p><em>Construction of the park started in 1882 and at present time the process of building hasn\u0092t stopped yet.</em></p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/08/FYysH3DFd4Q31ea9.jpg\" width=\"794\" height=\"452\"/></p>\n<p><em>The Spanish Government estimates that it will have been completed only by 2026! This slowness is due to the fact that construction is carried out exclusively on the donations of parishioners. And the number of &nbsp;parishioners is unbelievable. We lined up to the box office and stood there an hour and a half. &nbsp;In the ticket booth we were &nbsp;told that there were tickets only for day after tomorrow! But even if you do not get inside, you should just come to the famous temple and enjoy its grandeur. Having seen &nbsp;it up close, I involuntarily opened my mouth and pulled out the sounds of delight! That was probably the most impressive sight in a long time.</em></p>\n<p><del>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</del></p>\n<h3><strong>Restaurant \u00ab7 Doors\u00bb (7 Portes)</strong></h3>\n<p><em>Here is everything that you need to try if you are in Barcelona: paella of seafood and excellent sangria.</em></p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/08/2W8SW9UnCsU6f61d.jpg\" width=\"799\" height=\"516\"/></p>\n<p><em>This restaurant has been working since 1836 and its visitors deserve a separate discussion. Che Guevara, Woody Allen, Marquez and other famous people dined here.</em></p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/08/ahSwb1gfCms93feb.jpg\" width=\"800\" height=\"520\"/></p>\n<p><em>You can sit right at the table where they were drinking wine. Prices, service and atmosphere - everything is fine. After a hot and tiring walk - that's all you need! Moreover, the prices of food are even cheaper than those in snack bars by the sea.</em></p>\n<p><del>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</del></p>\n<h3><strong>Boqueria Market</strong></h3>\n<p><em>It is the most famous and ancient market of Barcelona. It has existed since 1217. And you will find it anyway, even if you\u0092re not planning to visit it. It is located next to the main pedestrian Rambla. This market is quite expensive, but here you can find everything you can dream of: the famous ham, fresh oysters and mussels .. mmm ... For 1 euro you can buy fresh juice from papaya and coconut. And at the market entrance there\u0092s a window full of &nbsp;cut fruit (they are sold with a fork)! In this market I spent more than one hour \u0085</em></p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/08/AXmDsWzFjUE50fbb.jpg\" width=\"801\" height=\"300\"/></p>\n<p><del>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</del></p>\n<h3><strong>Montjuic</strong></h3>\n<p><em>It\u0092s one of my favorite places I\u0092ve ever &nbsp;visited. And I wouldn't mind &nbsp;moving there. Montjuic - a mountain in Barcelona. There you can see the most famous fountain with color backlight, which attracts more and more tourists every evening. Just above the fountain - The National Art Museum of Catalonia (MNAC), and even higher - Montjuic treasure,its parks and the museum of the famous Catalan artist Joan Miro. This is the best museum I have ever visited in my life.</em></p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/08/YfRIvOvv-AY86b35.jpg\" width=\"800\" height=\"600\"/></p>\n<p><em>And it is not because of the paintings, the reason is the building itself with its terrace, overlooking Barcelona. I want to live in this museum!!!!</em></p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/08/uCwQaYhktIc73c38.jpg\" width=\"801\" height=\"500\"/></p>\n<p><em>On Montjuic there are also several theaters, one of which is open and resembles a Greek one!</em></p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/08/J9FeZZQywMof029a.jpg\" width=\"800\" height=\"227\"/></p>\n<h3><em>In general, I can talk about this mountain endlessly! It is a delight!</em></h3>\n<p><del>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</del></p>\n<p>In the next post I will tell you about the most interesting places outside of Barcelona: the mountain of Montserrat and the park Port Aventura. They stole my heart forever. )</p>\n<p><img src=\"https://www.steemimg.com/images/2016/09/08/Ot3oZH_FYPo6015e.jpg\" width=\"720\" height=\"670\"/></p>\n<h3><code><em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;And remember\u0085 travelling is the best of pleasures! &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</em></code></h3>\n</html>\n\n___________________________________________________________________________\n<b>Attention: This post has been written by @maryfromsochi</b>\n\n@knozaki2015 features authors and artist to promote them and a diversity of content. \n@aizensou is helping with promoting new authors, so we can feature even more new authors!\n\nPlease note that translating software has been used for this post. The author is not a native English speaker.\n**The author will receive 100% of the STEEM Dollars from this post**\n\nDon't just follow me, follow the author as well, if you like this post @maryfromsochi",
-    "category": "travel",
-    "children": 36,
-    "created": "2016-09-09T10:24:18",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 0,
-    "is_paidout": false,
-    "json_metadata": {
-      "image": [
-        "https://www.steemimg.com/images/2016/09/08/2248a52.jpg",
-        "https://www.steemimg.com/images/2016/09/08/rH5cwzae5cw10bb8.jpg",
-        "https://www.steemimg.com/images/2016/09/08/FYysH3DFd4Q31ea9.jpg",
-        "https://www.steemimg.com/images/2016/09/08/2W8SW9UnCsU6f61d.jpg",
-        "https://www.steemimg.com/images/2016/09/08/ahSwb1gfCms93feb.jpg",
-        "https://www.steemimg.com/images/2016/09/08/AXmDsWzFjUE50fbb.jpg",
-        "https://www.steemimg.com/images/2016/09/08/YfRIvOvv-AY86b35.jpg",
-        "https://www.steemimg.com/images/2016/09/08/uCwQaYhktIc73c38.jpg",
-        "https://www.steemimg.com/images/2016/09/08/J9FeZZQywMof029a.jpg",
-        "https://www.steemimg.com/images/2016/09/08/Ot3oZH_FYPo6015e.jpg"
-      ],
-      "tags": [
-        "travel",
-        "photography",
-        "minnowsunite",
-        "steemsquad",
-        "life"
-      ],
-      "users": [
-        "maryfromsochi",
-        "knozaki2015",
-        "aizensou"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 93653324911798,
-    "payout": 1535.062,
-    "payout_at": "2016-09-16T10:24:18",
-    "pending_payout_value": "1535.062 HBD",
-    "percent_hbd": 10000,
-    "permlink": "top-5-places-in-barcelona-featuring-maryfromsochi-as-author",
-    "post_id": 1182722,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 326
-    },
-    "title": "Top 5 Places in Barcelona (featuring @maryfromsochi as author)",
-    "updated": "2016-09-09T10:24:18",
-    "url": "/travel/@aizensou/top-5-places-in-barcelona-featuring-maryfromsochi-as-author"
-  },
-  {
-    "active_votes": [
-      {
         "rshares": 28078695107280,
         "voter": "dantheman"
       },
@@ -3326,9 +1960,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 90347178073809,
-    "payout": 1488.393,
+    "payout": 749.459,
     "payout_at": "2016-09-16T19:39:15",
-    "pending_payout_value": "1488.393 HBD",
+    "pending_payout_value": "749.459 HBD",
     "percent_hbd": 10000,
     "permlink": "justification-for-104-week-power-down",
     "post_id": 1187991,
@@ -4462,9 +3096,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 90080272382094,
-    "payout": 1425.897,
+    "payout": 744.724,
     "payout_at": "2016-09-16T16:19:27",
-    "pending_payout_value": "1425.897 HBD",
+    "pending_payout_value": "744.724 HBD",
     "percent_hbd": 10000,
     "permlink": "steemit-sponsoring-the-compass-cup-team-event",
     "post_id": 1185974,
@@ -4480,5 +3114,617 @@
     "title": "Steemit sponsoring The Compass Cup Team event",
     "updated": "2016-09-09T16:19:27",
     "url": "/motocross/@b0y2k/steemit-sponsoring-the-compass-cup-team-event"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 32214619982370,
+        "voter": "smooth"
+      },
+      {
+        "rshares": 405065040297,
+        "voter": "anonymous"
+      },
+      {
+        "rshares": 41026309403672,
+        "voter": "blocktrades"
+      },
+      {
+        "rshares": 582218213149,
+        "voter": "samupaha"
+      },
+      {
+        "rshares": 704854546302,
+        "voter": "abit"
+      },
+      {
+        "rshares": 994810727008,
+        "voter": "liondani"
+      },
+      {
+        "rshares": 3104801605,
+        "voter": "boy"
+      },
+      {
+        "rshares": 3769632651,
+        "voter": "bue-witness"
+      },
+      {
+        "rshares": 684099809,
+        "voter": "bunny"
+      },
+      {
+        "rshares": 7312197342416,
+        "voter": "complexring"
+      },
+      {
+        "rshares": 54957669647,
+        "voter": "bue"
+      },
+      {
+        "rshares": 1663630967,
+        "voter": "mini"
+      },
+      {
+        "rshares": 213807099,
+        "voter": "moon"
+      },
+      {
+        "rshares": 85982645999,
+        "voter": "aizensou"
+      },
+      {
+        "rshares": 515648786041,
+        "voter": "masteryoda"
+      },
+      {
+        "rshares": 709998844557,
+        "voter": "pfunk"
+      },
+      {
+        "rshares": 625076388,
+        "voter": "healthcare"
+      },
+      {
+        "rshares": 973281749,
+        "voter": "daniel.pan"
+      },
+      {
+        "rshares": 21343623298,
+        "voter": "hcf27"
+      },
+      {
+        "rshares": 2426805237,
+        "voter": "konelectric"
+      },
+      {
+        "rshares": 306658189276,
+        "voter": "chitty"
+      },
+      {
+        "rshares": 288376577,
+        "voter": "helen.tan"
+      },
+      {
+        "rshares": 73536772482,
+        "voter": "easteagle13"
+      },
+      {
+        "rshares": 1031904899,
+        "voter": "weenfan"
+      },
+      {
+        "rshares": 152055548417,
+        "voter": "steve-walschot"
+      },
+      {
+        "rshares": 1412886635,
+        "voter": "murh"
+      },
+      {
+        "rshares": 11133889002,
+        "voter": "andu"
+      },
+      {
+        "rshares": 24091288723,
+        "voter": "thecryptofiend"
+      },
+      {
+        "rshares": 234345612809,
+        "voter": "wingz"
+      },
+      {
+        "rshares": 50302545642,
+        "voter": "juanmiguelsalas"
+      },
+      {
+        "rshares": 55800613659,
+        "voter": "thecryptodrive"
+      },
+      {
+        "rshares": 200441000586,
+        "voter": "will-zewe"
+      },
+      {
+        "rshares": 32984901470,
+        "voter": "michaelx"
+      },
+      {
+        "rshares": 83163055701,
+        "voter": "razvanelulmarin"
+      },
+      {
+        "rshares": 510500434,
+        "voter": "mrhankeh"
+      },
+      {
+        "rshares": 57884449332,
+        "voter": "isteemit"
+      },
+      {
+        "rshares": 362176333,
+        "voter": "chetlanin"
+      },
+      {
+        "rshares": 67353282904,
+        "voter": "asmolokalo"
+      },
+      {
+        "rshares": 34170954091,
+        "voter": "good-karma"
+      },
+      {
+        "rshares": 14850848642,
+        "voter": "yogi.artist"
+      },
+      {
+        "rshares": 29062494099,
+        "voter": "picokernel"
+      },
+      {
+        "rshares": 92176103615,
+        "voter": "sigmajin"
+      },
+      {
+        "rshares": 1401033821,
+        "voter": "mixa"
+      },
+      {
+        "rshares": 55815725,
+        "voter": "cynetyc"
+      },
+      {
+        "rshares": 208190403393,
+        "voter": "jesta"
+      },
+      {
+        "rshares": 40299083676,
+        "voter": "biophil"
+      },
+      {
+        "rshares": 91926117,
+        "voter": "wildchild"
+      },
+      {
+        "rshares": 12572461566,
+        "voter": "benjiberigan"
+      },
+      {
+        "rshares": 6881333551,
+        "voter": "lostnuggett"
+      },
+      {
+        "rshares": 9677212516,
+        "voter": "fishborne"
+      },
+      {
+        "rshares": 282703543,
+        "voter": "sergey44"
+      },
+      {
+        "rshares": 41702622538,
+        "voter": "claudiop63"
+      },
+      {
+        "rshares": 31991934687,
+        "voter": "smailer"
+      },
+      {
+        "rshares": 115870395,
+        "voter": "bullionstackers"
+      },
+      {
+        "rshares": 5954618152,
+        "voter": "jed78"
+      },
+      {
+        "rshares": 128937261861,
+        "voter": "shaka"
+      },
+      {
+        "rshares": 134442862919,
+        "voter": "steemdrive"
+      },
+      {
+        "rshares": 972844351,
+        "voter": "metaflute"
+      },
+      {
+        "rshares": 35209586477,
+        "voter": "gomeravibz"
+      },
+      {
+        "rshares": 5840737760,
+        "voter": "theprophet0"
+      },
+      {
+        "rshares": 38495853751,
+        "voter": "rampant"
+      },
+      {
+        "rshares": 6056502236,
+        "voter": "brendio"
+      },
+      {
+        "rshares": 6756876509,
+        "voter": "minion"
+      },
+      {
+        "rshares": 1513301848,
+        "voter": "paynode"
+      },
+      {
+        "rshares": 60961853,
+        "voter": "rinaa"
+      },
+      {
+        "rshares": 59697439,
+        "voter": "ritadey"
+      },
+      {
+        "rshares": 63395582,
+        "voter": "apastor777"
+      },
+      {
+        "rshares": 21518849060,
+        "voter": "hanshotfirst"
+      },
+      {
+        "rshares": 58977371,
+        "voter": "jers"
+      },
+      {
+        "rshares": 58969965,
+        "voter": "nyoba"
+      },
+      {
+        "rshares": 52467942,
+        "voter": "loli"
+      },
+      {
+        "rshares": 56076164,
+        "voter": "nano2nd"
+      },
+      {
+        "rshares": 98480938019,
+        "voter": "serejandmyself"
+      },
+      {
+        "rshares": 610226658,
+        "voter": "wuyueling"
+      },
+      {
+        "rshares": 8040569415,
+        "voter": "craigwilliamz"
+      },
+      {
+        "rshares": 29668457522,
+        "voter": "daut44"
+      },
+      {
+        "rshares": 2000037840,
+        "voter": "cryptoeasy"
+      },
+      {
+        "rshares": 103448387465,
+        "voter": "shenanigator"
+      },
+      {
+        "rshares": 126592690,
+        "voter": "kreativ"
+      },
+      {
+        "rshares": 5097949261,
+        "voter": "l0k1"
+      },
+      {
+        "rshares": 397589256,
+        "voter": "steemorama"
+      },
+      {
+        "rshares": 15941029835,
+        "voter": "bluehorseshoe"
+      },
+      {
+        "rshares": 54986542,
+        "voter": "gardataur"
+      },
+      {
+        "rshares": 54933903,
+        "voter": "got"
+      },
+      {
+        "rshares": 54902054,
+        "voter": "dawnkiller"
+      },
+      {
+        "rshares": 57680750429,
+        "voter": "tracemayer"
+      },
+      {
+        "rshares": 1347192291,
+        "voter": "bitcoinparadise"
+      },
+      {
+        "rshares": 53925871,
+        "voter": "predko777"
+      },
+      {
+        "rshares": 97090801,
+        "voter": "positivesteem"
+      },
+      {
+        "rshares": 88742390,
+        "voter": "inarix03"
+      },
+      {
+        "rshares": 53735837,
+        "voter": "drac59"
+      },
+      {
+        "rshares": 322942107,
+        "voter": "robotev2"
+      },
+      {
+        "rshares": 50244478,
+        "voter": "mirety"
+      },
+      {
+        "rshares": 69976038,
+        "voter": "piphunters"
+      },
+      {
+        "rshares": 2836212288,
+        "voter": "ltm"
+      },
+      {
+        "rshares": 52664616,
+        "voter": "elpablopino"
+      },
+      {
+        "rshares": 175862306,
+        "voter": "darkminded153"
+      },
+      {
+        "rshares": 521874035,
+        "voter": "grisha-danunaher"
+      },
+      {
+        "rshares": 108213067,
+        "voter": "siniceku"
+      },
+      {
+        "rshares": 114163607,
+        "voter": "kalipo"
+      },
+      {
+        "rshares": 158914655,
+        "voter": "messi10"
+      },
+      {
+        "rshares": 158910852,
+        "voter": "sunny1"
+      },
+      {
+        "rshares": 158907943,
+        "voter": "sidd"
+      },
+      {
+        "rshares": 158904739,
+        "voter": "anil12"
+      },
+      {
+        "rshares": 158901681,
+        "voter": "ronney"
+      },
+      {
+        "rshares": 158267372,
+        "voter": "me86ljj3wy"
+      },
+      {
+        "rshares": 158265123,
+        "voter": "yc521pfi3x"
+      },
+      {
+        "rshares": 158262346,
+        "voter": "csg0q82iul"
+      },
+      {
+        "rshares": 158234006,
+        "voter": "ljkvnzgpvq"
+      },
+      {
+        "rshares": 158231877,
+        "voter": "wstqotyddi"
+      },
+      {
+        "rshares": 158230192,
+        "voter": "ufvosobdfb"
+      },
+      {
+        "rshares": 158228488,
+        "voter": "glxmgiqrgj"
+      },
+      {
+        "rshares": 158219074,
+        "voter": "rsgmslegyx"
+      },
+      {
+        "rshares": 158211582,
+        "voter": "nkroyzrjgf"
+      },
+      {
+        "rshares": 155107759,
+        "voter": "wandaham"
+      },
+      {
+        "rshares": 158209558,
+        "voter": "imoqhlzemr"
+      },
+      {
+        "rshares": 158207874,
+        "voter": "qiqyyqvzhj"
+      },
+      {
+        "rshares": 158203971,
+        "voter": "aonmenmbic"
+      },
+      {
+        "rshares": 158192224,
+        "voter": "alexurex"
+      },
+      {
+        "rshares": 158186686,
+        "voter": "ashbuille"
+      },
+      {
+        "rshares": 158183923,
+        "voter": "auberenne"
+      },
+      {
+        "rshares": 158176291,
+        "voter": "belialis"
+      },
+      {
+        "rshares": 158172542,
+        "voter": "boyaconehou"
+      },
+      {
+        "rshares": 158169693,
+        "voter": "brandmar"
+      },
+      {
+        "rshares": 158165782,
+        "voter": "breageoa"
+      },
+      {
+        "rshares": 158156198,
+        "voter": "canixfuny"
+      },
+      {
+        "rshares": 158153164,
+        "voter": "cassachex"
+      },
+      {
+        "rshares": 158150021,
+        "voter": "ceticalwo"
+      },
+      {
+        "rshares": 158147243,
+        "voter": "commenth"
+      },
+      {
+        "rshares": 158144137,
+        "voter": "cootekel"
+      },
+      {
+        "rshares": 158140507,
+        "voter": "dinexavi"
+      },
+      {
+        "rshares": 158137183,
+        "voter": "footidie"
+      },
+      {
+        "rshares": 158134585,
+        "voter": "gwenood"
+      },
+      {
+        "rshares": 158131515,
+        "voter": "headlinez"
+      },
+      {
+        "rshares": 158128326,
+        "voter": "insellias"
+      },
+      {
+        "rshares": 158125936,
+        "voter": "janetekitan"
+      },
+      {
+        "rshares": 158122441,
+        "voter": "kluglainno"
+      },
+      {
+        "rshares": 158120034,
+        "voter": "lullishoi"
+      },
+      {
+        "rshares": 145646637,
+        "voter": "roger.steemit"
+      }
+    ],
+    "author": "sigmajin",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 61.43,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "People often notice the many similarities between me and Jesus.  Today, I will attempt to explain the voting power changes coming on the 13th in a parable, just like Jesus would.  \n\nGoing into this, I\u200b want to correct an error in my earlier post on the subject.  In my earlier post, I misunderstood some graphs on the white paper and assumed that the vote target was a \"sweet spot\" and that going above or below it would result in a penalty to voting power.  This, in fact, is not true.  You are only penalized for casting too few votes, not for casting too many.  If you cast more than the target number of votes, your decreased voting power will be entirely offset by your increased number of actual votes.  \n\nYou can read some of the discussion that led to this post [here](https://steemit.com/steem-help/@biophil/announcement-all-votes-will-be-up-to-8-times-more-powerful-in-new-hard-fork) and [here](https://steemit.com/steem/@sigmajin/what-every-user-should-know-about-the-upcoming-change-in-voting)\n\n## <center> **The 5 Curating Brothers** </center>\nImagine for a moment that there are 5 brothers.  These five brothers do all of the curating on steemit.  They all have the same amount of steem power.  In this theoretical steemit system, the total daily reward pool  is $8,500.\n<center>http://www.msnbc.com/sites/msnbc/files/styles/ratio--3-2--830x553/public/articles/155658114.jpg </center>\n* **Andy** devotes the most time to his curating duties.   He casts the target 40 votes per day.\n\n* **Ben** is not as good as Andy at managing his time and his votes, but he still tries.  He casts 30 votes a day.\n\n* **Carl** doesn't have very much time to delegate to curating.  He casts 20 votes a day\n\n* **David** Has even less time.  He casts 10 votes a day.\n\n* **Frank** barely has any time to devote to curation, he casts 5 votes a day.\n\nIn total, 85 votes are cast every day to award $8500.  Each vote, therefore, is worth $100.\n\n# <center> Brothers Vote Value At the 40 Vote per Day Target</center>\nX | votes cast per day | Median Vote strength | Adjusted Votes Per Day|  total value cast per day\n------------ | ------------- | -------------  | -------------   | -------------\nAndy | 40 | 1 |40 | $4000\nBen | 30| 1 | 30 | $3000\nCarl | 20 | 1 |20 | $2000\nDavid | 10 | 1 |10 | $1000\nFrank | 5 | 1 | 5| $500\n**Total** | **85** | **1** | **85** |**$8500**\n\nNote that, for a fixed amount of steem power and reward pool, Andy is unique in that he cannot earn more money by voting more.  He wouldn't lose money, but the change to his voting power would make any vote above 40 a wipe.  He actually _can_ lose money by clumping his votes.  Ideally, at 40 votes, he should be able to cast every single one of his 40 votes at 100% power by spacing his votes at 36-minute intervals through the day.  If there was a super-Andy who cast 80 votes per day, his adjusted vote value would be the same as Andy's, because he would be unable to cast his full 80 votes and also wait long enough to cast them all at 100%.\n\n# <center> Brothers Vote Value at the 5 vote per day target </center>\nX | votes cast per day |Median Vote Value | Adjusted  |  total value cast per day\n------------ | ------------- | -------------  | -------------  | -------------\nAndy | 40 | .125 | 5 |$1700\nBen | 30| .166 | 5| $1700\nCarl | 20 | .25 |  5 |$1700\nDavid | 10 | .50  |5 | $1700\nFrank | 5 | 1 |5 |$1700\n**Total** | **85** | **.29** | **25**|**$8500**\n\nNotice that, because they are above the vote target, Andy, Ben, Carl, and David all have median vote values below 1.0 Just like Super Andy in the previous example, the \"extra\" votes that they cast above the target threshold attenuate their voting power.  Andy could bring his voting down to 5/day  (just like frank) and be able to cast 100% votes, but it wouldn't really make a difference.  He is not being penalized for casting too many votes.\n\nNote here that the monetary value  of a single 100% vote did go up.  \n<center>\nTo begin with, it was \n<center>\n` 8500 / 85 =100 `\n\nAfter the target change, it is \n\n` 8500 /25 = $340 `\n</center>\nIn this particular case, it went up just over  200%.   However, this increase was insufficient to make up for the 87% decrease in the number of votes that could be cast.  The farther away each brother was from actually casting the maximum number of votes, the less his average influence was effected.\n\nTo use shennanigator's model, if you could cast 40 100% votes per day worth 10 cents each before the change, after the change you would be able to cast 5 100% votes worth 34 cents after the change.\n\nHere are the before and after numbers for the total $ influence exerted by the  brothers.\nx  | 40 vote target  | 5 vote target | %  gain/loss\n------------ | ------------- | -------------| -------------\nAndy | $4000  |$1700 |-57.5%\nBen | $3000  |$1700 |-10%\nCarl | $2000  |$1700 | -15%\nDavid| $1000  |$1700 | +70%\nFrank | $500  |$1700 | +240%\n\n# Lowering the Bar Does not Improve Participation(it just improves how many get over the bar)\n\nBiophil wrote in my previous thread\n> It just depends on total voter participation; if participation goes up (a good thing), the increase won't be 8x. If it goes down (a bad thing), the increase will actually be more than 8x. It's very difficult to predict.\n\nThis is somewhat misleading.  Imagine a classroom with 40 students in it.  At the end of the year, 4 students are scheduled to be awarded a certificate for perfect attendance.  On the very last day, the principal comes into the classroom and announces that, in addition to the 4 students who actually have perfect attendance, 10 students who have been absent 2 days or less will also get the certificate. \n<center>\nhttps://anticap.files.wordpress.com/2011/08/lowering-the-bar.jpg\n</center>\nBy doing this, the principal has not, in fact, increased attendance.  He has merely increased the superficial appearance of attendance by rewarding imperfect attendance the same way he rewards perfect attendance.   In the same sense, the 5-day target does not increase participation.  It merely gives the same reward to lower participation as it does to higher.\n\nIn fact, it disincentivizes high participation.  In the new system, there is less reason for andy to take the time to read and vote on 40 posts.  He can still do so, but why should  he?  He can be like frank, put in much less work, and get the same level of influence.\n\n# I heard the new voting target is helping fight bots... how is it doing that?\n\nIt's really not.  At least, not directly.  It does hurt bots (because most bots are Andys, though I would argue that most Andys are not bots).  Basically, if you're a high power frank, this new target helps you at the expense of _all_ andy's, bots included.  When we say this decreases the influence of bots, what we really mean is that it decreases the influence of _all_ very active curators.\n#  <center>  Which brother are you?  </center>\nIf you look at the charts above, it becomes clear that there are two factors that influence how the change to a 5 vote target will affect each individual voter.\n\n1.  How close are you to optimal voting right now?  If you're an andy or a ben, you're probably going to see a decrease in influence.\n2.  How close is everybody else?  If you're currently  a more optimal voter than average, this will definitely hurt you.  If you're a less optimal voter, this will definitely help you.  \n<center>\n</center>\nIn a world where every poster was an andy, this change would have precisely the type of cosmetic effect @shenanigator and others have described.  If everyone on steemit were a Frank or a Dave, and there were only a few Andy's, this vote would decrease the voting power of the andy's significantly.\n\nAt the end of the day, what you need to take away from this and my other post on the topic is that this change is not cosmetic, or a \"bug fix\", or a way to give users two dollar bills for 8 quarters.  It is a very real re-distribution of influence with very real consequences to active curators.  We should look long and hard at the effects of this redistribution when it happens, because its very possible that some of the best curators here will, to coin a phrase, get Franked in the Andy.",
+    "category": "steem-help",
+    "children": 35,
+    "created": "2016-09-09T22:04:57",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "http://www.msnbc.com/sites/msnbc/files/styles/ratio--3-2--830x553/public/articles/155658114.jpg",
+        "https://anticap.files.wordpress.com/2011/08/lowering-the-bar.jpg"
+      ],
+      "links": [
+        "https://steemit.com/steem-help/@biophil/announcement-all-votes-will-be-up-to-8-times-more-powerful-in-new-hard-fork",
+        "https://steemit.com/steem/@sigmajin/what-every-user-should-know-about-the-upcoming-change-in-voting"
+      ],
+      "tags": [
+        "steem-help",
+        "steemit",
+        "voting",
+        "voting-power",
+        "curation"
+      ],
+      "users": [
+        "shenanigator"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 87238164893138,
+    "payout": 718.152,
+    "payout_at": "2016-09-16T22:04:57",
+    "pending_payout_value": "718.152 HBD",
+    "percent_hbd": 10000,
+    "permlink": "the-tale-of-the-5-brothers-a-voting-power-parable",
+    "post_id": 1189569,
+    "promoted": "25.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 139
+    },
+    "title": "The Tale of the 5 Brothers -- A Voting Power Parable",
+    "updated": "2016-09-10T07:49:03",
+    "url": "/steem-help/@sigmajin/the-tale-of-the-5-brothers-a-voting-power-parable"
   }
 ]

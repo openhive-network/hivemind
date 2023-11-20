@@ -460,7 +460,7 @@
       }
     ],
     "author": "cryptos",
-    "author_payout_value": "0.400 HBD",
+    "author_payout_value": "0.224 HBD",
     "author_reputation": 60.81,
     "beneficiaries": [],
     "blacklists": [
@@ -490,7 +490,7 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 476557078432,
-    "payout": 0.4,
+    "payout": 0.224,
     "payout_at": "2016-08-27T05:12:33",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
@@ -3352,7 +3352,7 @@
       }
     ],
     "author": "knozaki2015",
-    "author_payout_value": "0.117 HBD",
+    "author_payout_value": "0.058 HBD",
     "author_reputation": 69.9,
     "beneficiaries": [],
     "blacklists": [],
@@ -3372,7 +3372,7 @@
     "net_rshares": 121613986422,
     "parent_author": "cryptos",
     "parent_permlink": "re-knozaki2015-re-cryptos-re-knozaki2015-re-cryptos-getting-started-mining-steem-on-windows-20160730t143643564z",
-    "payout": 0.124,
+    "payout": 0.065,
     "payout_at": "2016-08-27T05:12:33",
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,

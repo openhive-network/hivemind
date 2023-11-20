@@ -1381,9 +1381,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 88937265388567,
-    "payout": 2153.061,
+    "payout": 1083.292,
     "payout_at": "2016-08-26T21:21:00",
-    "pending_payout_value": "2153.061 HBD",
+    "pending_payout_value": "1083.292 HBD",
     "percent_hbd": 10000,
     "permlink": "blocktrades-witness-report-for-3rd-week-of-august",
     "post_id": 896102,
@@ -2633,9 +2633,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 69528308094633,
-    "payout": 983.098,
+    "payout": 493.573,
     "payout_at": "2016-09-08T00:16:15",
-    "pending_payout_value": "983.098 HBD",
+    "pending_payout_value": "493.573 HBD",
     "percent_hbd": 10000,
     "permlink": "witness-report-for-blocktrades-for-last-week-of-august",
     "post_id": 1078306,
@@ -2720,9 +2720,9 @@
     "net_rshares": 17027754719031,
     "parent_author": "egjoshslim",
     "parent_permlink": "a-request-to-blocktrades-please-allow-us-too-trade-steem-and-steem-dollars-for-other-currencies",
-    "payout": 66.644,
+    "payout": 38.098,
     "payout_at": "2016-09-06T14:23:15",
-    "pending_payout_value": "66.644 HBD",
+    "pending_payout_value": "38.098 HBD",
     "percent_hbd": 10000,
     "permlink": "re-egjoshslim-a-request-to-blocktrades-please-allow-us-too-trade-steem-and-steem-dollars-for-other-currencies-20160830t142318352z",
     "post_id": 1056595,
@@ -2843,9 +2843,9 @@
     "net_rshares": 8650297331852,
     "parent_author": "dollarvigilante",
     "parent_permlink": "the-great-steemit-debate-tone-vays-vs-jeff-berwick-ponzi-scheme-or-paradigm-shift",
-    "payout": 24.466,
+    "payout": 13.974,
     "payout_at": "2016-08-26T03:06:18",
-    "pending_payout_value": "24.466 HBD",
+    "pending_payout_value": "13.974 HBD",
     "percent_hbd": 10000,
     "permlink": "re-dollarvigilante-the-great-steemit-debate-tone-vays-vs-jeff-berwick-ponzi-scheme-or-paradigm-shift-20160819t030618512z",
     "post_id": 882503,
@@ -2902,9 +2902,9 @@
     "net_rshares": 4665975967738,
     "parent_author": "pjheinz",
     "parent_permlink": "re-blocktrades-blocktrades-witness-report-for-3rd-week-of-august-20160820t013910937z",
-    "payout": 9.299,
+    "payout": 5.312,
     "payout_at": "2016-08-27T02:49:42",
-    "pending_payout_value": "9.299 HBD",
+    "pending_payout_value": "5.312 HBD",
     "percent_hbd": 10000,
     "permlink": "re-pjheinz-re-blocktrades-blocktrades-witness-report-for-3rd-week-of-august-20160820t024946321z",
     "post_id": 899871,
@@ -3105,9 +3105,9 @@
     "net_rshares": 3593432043002,
     "parent_author": "charlieshrem",
     "parent_permlink": "how-to-live-completely-off-steem-using-a-virtual-and-physical-debit-card-topped-up-with-steem",
-    "payout": 3.899,
+    "payout": 2.222,
     "payout_at": "2016-09-17T17:29:33",
-    "pending_payout_value": "3.899 HBD",
+    "pending_payout_value": "2.222 HBD",
     "percent_hbd": 10000,
     "permlink": "re-charlieshrem-how-to-live-completely-off-steem-using-a-virtual-and-physical-debit-card-topped-up-with-steem-20160910t172944767z",
     "post_id": 1198358,
@@ -3188,9 +3188,9 @@
     "net_rshares": 1081582366389,
     "parent_author": "bacchist",
     "parent_permlink": "dan-needs-to-be-stopped",
-    "payout": 1.349,
+    "payout": 0.791,
     "payout_at": "2016-08-24T04:24:15",
-    "pending_payout_value": "1.349 HBD",
+    "pending_payout_value": "0.791 HBD",
     "percent_hbd": 10000,
     "permlink": "re-bacchist-dan-needs-to-be-stopped-20160817t042416831z",
     "post_id": 846962,
@@ -3247,9 +3247,9 @@
     "net_rshares": 1092349638625,
     "parent_author": "ekaterina4ka",
     "parent_permlink": "knitting-needles-my-passion-post-3-vyazanie-spicami-moe-uvlechenie-post-3",
-    "payout": 1.189,
+    "payout": 0.678,
     "payout_at": "2016-09-05T12:59:06",
-    "pending_payout_value": "1.189 HBD",
+    "pending_payout_value": "0.678 HBD",
     "percent_hbd": 10000,
     "permlink": "re-ekaterina4ka-knitting-needles-my-passion-post-3-vyazanie-spicami-moe-uvlechenie-post-3-20160829t125910851z",
     "post_id": 1040800,
@@ -3265,97 +3265,6 @@
     "title": "RE: Knitting needles , my passion . Post 3. \u0412\u044f\u0437\u0430\u043d\u0438\u0435 \u0441\u043f\u0438\u0446\u0430\u043c\u0438, \u043c\u043e\u0435 \u0443\u0432\u043b\u0435\u0447\u0435\u043d\u0438\u0435. \u041f\u043e\u0441\u0442 3.",
     "updated": "2016-08-29T12:59:06",
     "url": "/photography/@ekaterina4ka/knitting-needles-my-passion-post-3-vyazanie-spicami-moe-uvlechenie-post-3#@blocktrades/re-ekaterina4ka-knitting-needles-my-passion-post-3-vyazanie-spicami-moe-uvlechenie-post-3-20160829t125910851z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 28919306117,
-        "voter": "anonymous"
-      },
-      {
-        "rshares": 285888450840,
-        "voter": "summon"
-      },
-      {
-        "rshares": 141659074264,
-        "voter": "abit"
-      },
-      {
-        "rshares": 379817495257,
-        "voter": "blakemiles84"
-      },
-      {
-        "rshares": 52046303958,
-        "voter": "thecryptodrive"
-      },
-      {
-        "rshares": 5358743729,
-        "voter": "jed78"
-      },
-      {
-        "rshares": 125403919271,
-        "voter": "steemdrive"
-      },
-      {
-        "rshares": 5187068127,
-        "voter": "theprophet0"
-      },
-      {
-        "rshares": 5934593929,
-        "voter": "brendio"
-      },
-      {
-        "rshares": 53638070,
-        "voter": "nano2nd"
-      },
-      {
-        "rshares": 5200938035,
-        "voter": "englishtchrivy"
-      },
-      {
-        "rshares": 4931741643,
-        "voter": "ats-david"
-      }
-    ],
-    "author": "blocktrades",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 68.63,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Beyond that, let's just add more reasons for people to participate on the platform, regardless of their SP.",
-    "category": "steem",
-    "children": 0,
-    "created": "2016-09-07T17:48:24",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 4,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "steem"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 1040401273240,
-    "parent_author": "timcliff",
-    "parent_permlink": "re-ned-re-nextgencrypto-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t165805379z",
-    "payout": 0.75,
-    "payout_at": "2016-09-14T17:48:24",
-    "pending_payout_value": "0.750 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-timcliff-re-ned-re-nextgencrypto-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t174828393z",
-    "post_id": 1161506,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 12
-    },
-    "title": "RE: Increasing Curation, Demand for Steem Power and Community Interaction",
-    "updated": "2016-09-07T17:48:24",
-    "url": "/steem/@ned/increasing-curation-demand-for-steem-power-and-community-interaction#@blocktrades/re-timcliff-re-ned-re-nextgencrypto-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t174828393z"
   },
   {
     "active_votes": [
@@ -3573,6 +3482,97 @@
   {
     "active_votes": [
       {
+        "rshares": 28919306117,
+        "voter": "anonymous"
+      },
+      {
+        "rshares": 285888450840,
+        "voter": "summon"
+      },
+      {
+        "rshares": 141659074264,
+        "voter": "abit"
+      },
+      {
+        "rshares": 379817495257,
+        "voter": "blakemiles84"
+      },
+      {
+        "rshares": 52046303958,
+        "voter": "thecryptodrive"
+      },
+      {
+        "rshares": 5358743729,
+        "voter": "jed78"
+      },
+      {
+        "rshares": 125403919271,
+        "voter": "steemdrive"
+      },
+      {
+        "rshares": 5187068127,
+        "voter": "theprophet0"
+      },
+      {
+        "rshares": 5934593929,
+        "voter": "brendio"
+      },
+      {
+        "rshares": 53638070,
+        "voter": "nano2nd"
+      },
+      {
+        "rshares": 5200938035,
+        "voter": "englishtchrivy"
+      },
+      {
+        "rshares": 4931741643,
+        "voter": "ats-david"
+      }
+    ],
+    "author": "blocktrades",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 68.63,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Beyond that, let's just add more reasons for people to participate on the platform, regardless of their SP.",
+    "category": "steem",
+    "children": 0,
+    "created": "2016-09-07T17:48:24",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 4,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steem"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 1040401273240,
+    "parent_author": "timcliff",
+    "parent_permlink": "re-ned-re-nextgencrypto-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t165805379z",
+    "payout": 0.446,
+    "payout_at": "2016-09-14T17:48:24",
+    "pending_payout_value": "0.446 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-timcliff-re-ned-re-nextgencrypto-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t174828393z",
+    "post_id": 1161506,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 12
+    },
+    "title": "RE: Increasing Curation, Demand for Steem Power and Community Interaction",
+    "updated": "2016-09-07T17:48:24",
+    "url": "/steem/@ned/increasing-curation-demand-for-steem-power-and-community-interaction#@blocktrades/re-timcliff-re-ned-re-nextgencrypto-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t174828393z"
+  },
+  {
+    "active_votes": [
+      {
         "rshares": 109788753375,
         "voter": "sandra"
       },
@@ -3602,9 +3602,9 @@
     "net_rshares": 265950398229,
     "parent_author": "maxrubin",
     "parent_permlink": "how-to-use-this-website",
-    "payout": 0.258,
+    "payout": 0.162,
     "payout_at": "2016-08-24T03:03:15",
-    "pending_payout_value": "0.258 HBD",
+    "pending_payout_value": "0.162 HBD",
     "percent_hbd": 10000,
     "permlink": "re-maxrubin-how-to-use-this-website-20160817t030316689z",
     "post_id": 846145,
@@ -3665,9 +3665,9 @@
     "net_rshares": 227779591946,
     "parent_author": "bacchist",
     "parent_permlink": "re-blakemiles84-re-bacchist-dan-needs-to-be-stopped-20160817t040203025z",
-    "payout": 0.198,
+    "payout": 0.135,
     "payout_at": "2016-08-24T04:25:42",
-    "pending_payout_value": "0.198 HBD",
+    "pending_payout_value": "0.135 HBD",
     "percent_hbd": 10000,
     "permlink": "re-bacchist-re-blakemiles84-re-bacchist-dan-needs-to-be-stopped-20160817t042543912z",
     "post_id": 846980,
@@ -3683,65 +3683,6 @@
     "title": "RE: Dan needs to be stopped",
     "updated": "2016-08-17T04:25:42",
     "url": "/steem/@bacchist/dan-needs-to-be-stopped#@blocktrades/re-bacchist-re-blakemiles84-re-bacchist-dan-needs-to-be-stopped-20160817t042543912z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 118298510314,
-        "voter": "demotruk"
-      },
-      {
-        "rshares": 37876462359,
-        "voter": "mynameisbrian"
-      },
-      {
-        "rshares": 1127269373,
-        "voter": "kollapsik"
-      },
-      {
-        "rshares": 9551786749,
-        "voter": "luminousvisions"
-      }
-    ],
-    "author": "blocktrades",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 68.63,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Dan would probably be ordering a coke.",
-    "category": "steemit",
-    "children": 4,
-    "created": "2016-09-01T18:45:57",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 1,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "steemit"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 166854028795,
-    "parent_author": "mynameisbrian",
-    "parent_permlink": "satoshi-nakamoto-dan-larimer-and-vitalik-buterin-walk-into-a-bar",
-    "payout": 0.123,
-    "payout_at": "2016-09-08T18:45:57",
-    "pending_payout_value": "0.123 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-mynameisbrian-satoshi-nakamoto-dan-larimer-and-vitalik-buterin-walk-into-a-bar-20160901t184605661z",
-    "post_id": 1088507,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 4
-    },
-    "title": "RE: Satoshi Nakamoto, @dan Larimer, and Vitalik Buterin walk into a bar...",
-    "updated": "2016-09-01T18:45:57",
-    "url": "/steemit/@mynameisbrian/satoshi-nakamoto-dan-larimer-and-vitalik-buterin-walk-into-a-bar#@blocktrades/re-mynameisbrian-satoshi-nakamoto-dan-larimer-and-vitalik-buterin-walk-into-a-bar-20160901t184605661z"
   },
   {
     "active_votes": [
@@ -3895,6 +3836,65 @@
     "title": "RE: WARNING: How I lost Bitcoins using a paper wallet",
     "updated": "2016-08-16T19:09:09",
     "url": "/bitcoin/@michaelmatthews/warning-how-i-lost-bitcoins-using-a-paper-wallet#@blocktrades/re-michaelmatthews-warning-how-i-lost-bitcoins-using-a-paper-wallet-20160816t190720317z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 118298510314,
+        "voter": "demotruk"
+      },
+      {
+        "rshares": 37876462359,
+        "voter": "mynameisbrian"
+      },
+      {
+        "rshares": 1127269373,
+        "voter": "kollapsik"
+      },
+      {
+        "rshares": 9551786749,
+        "voter": "luminousvisions"
+      }
+    ],
+    "author": "blocktrades",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 68.63,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Dan would probably be ordering a coke.",
+    "category": "steemit",
+    "children": 4,
+    "created": "2016-09-01T18:45:57",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 166854028795,
+    "parent_author": "mynameisbrian",
+    "parent_permlink": "satoshi-nakamoto-dan-larimer-and-vitalik-buterin-walk-into-a-bar",
+    "payout": 0.065,
+    "payout_at": "2016-09-08T18:45:57",
+    "pending_payout_value": "0.065 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-mynameisbrian-satoshi-nakamoto-dan-larimer-and-vitalik-buterin-walk-into-a-bar-20160901t184605661z",
+    "post_id": 1088507,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 4
+    },
+    "title": "RE: Satoshi Nakamoto, @dan Larimer, and Vitalik Buterin walk into a bar...",
+    "updated": "2016-09-01T18:45:57",
+    "url": "/steemit/@mynameisbrian/satoshi-nakamoto-dan-larimer-and-vitalik-buterin-walk-into-a-bar#@blocktrades/re-mynameisbrian-satoshi-nakamoto-dan-larimer-and-vitalik-buterin-walk-into-a-bar-20160901t184605661z"
   },
   {
     "active_votes": [
@@ -4521,108 +4521,6 @@
   {
     "active_votes": [
       {
-        "rshares": 41182815711,
-        "voter": "ranko-k"
-      },
-      {
-        "rshares": 4970667525,
-        "voter": "on0tole"
-      },
-      {
-        "rshares": 33342464349,
-        "voter": "smailer"
-      }
-    ],
-    "author": "blocktrades",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 68.63,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Dang, and yet somehow, my \"random voting\" is somehow missing this post.. No doubt you will get lucky next time.",
-    "category": "blocktrades",
-    "children": 1,
-    "created": "2016-09-07T03:52:00",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 1,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "blocktrades"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 79495947585,
-    "parent_author": "ranko-k",
-    "parent_permlink": "blocktrades-voting-pattern",
-    "payout": 0.048,
-    "payout_at": "2016-09-14T03:52:00",
-    "pending_payout_value": "0.048 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-ranko-k-blocktrades-voting-pattern-20160907t035201614z",
-    "post_id": 1154793,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 3
-    },
-    "title": "RE: Blocktrades Voting Pattern",
-    "updated": "2016-09-07T03:52:00",
-    "url": "/blocktrades/@ranko-k/blocktrades-voting-pattern#@blocktrades/re-ranko-k-blocktrades-voting-pattern-20160907t035201614z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 54597858386,
-        "voter": "furion"
-      }
-    ],
-    "author": "blocktrades",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 68.63,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Dan and I were discussing some ideas related to security of liquid funds yesterday. It's always good to get additional input.",
-    "category": "steemit",
-    "children": 1,
-    "created": "2016-08-18T19:51:54",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 1,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "steemit"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 54597858386,
-    "parent_author": "furion",
-    "parent_permlink": "security-feature-proposal-to-reduce-the-risks-in-a-bitfinex-scenario-for-steem-and-sbd",
-    "payout": 0.046,
-    "payout_at": "2016-08-25T19:51:54",
-    "pending_payout_value": "0.046 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-furion-security-feature-proposal-to-reduce-the-risks-in-a-bitfinex-scenario-for-steem-and-sbd-20160818t195155768z",
-    "post_id": 876621,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 1
-    },
-    "title": "RE: Security Feature Proposal to reduce the risks in a Bitfinex Scenario for STEEM and SBD",
-    "updated": "2016-08-18T19:51:54",
-    "url": "/steemit/@furion/security-feature-proposal-to-reduce-the-risks-in-a-bitfinex-scenario-for-steem-and-sbd#@blocktrades/re-furion-security-feature-proposal-to-reduce-the-risks-in-a-bitfinex-scenario-for-steem-and-sbd-20160818t195155768z"
-  },
-  {
-    "active_votes": [
-      {
         "rshares": 89555263007,
         "voter": "sigmajin"
       },
@@ -4673,6 +4571,108 @@
     "title": "RE: BlockTrades Witness Report for 3rd Week of August",
     "updated": "2016-08-22T03:37:12",
     "url": "/witness-category/@blocktrades/blocktrades-witness-report-for-3rd-week-of-august#@blocktrades/re-sigmajin-re-complexring-re-blocktrades-re-pjheinz-re-blocktrades-blocktrades-witness-report-for-3rd-week-of-august-20160822t033722659z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 41182815711,
+        "voter": "ranko-k"
+      },
+      {
+        "rshares": 4970667525,
+        "voter": "on0tole"
+      },
+      {
+        "rshares": 33342464349,
+        "voter": "smailer"
+      }
+    ],
+    "author": "blocktrades",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 68.63,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Dang, and yet somehow, my \"random voting\" is somehow missing this post.. No doubt you will get lucky next time.",
+    "category": "blocktrades",
+    "children": 1,
+    "created": "2016-09-07T03:52:00",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "blocktrades"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 79495947585,
+    "parent_author": "ranko-k",
+    "parent_permlink": "blocktrades-voting-pattern",
+    "payout": 0.026,
+    "payout_at": "2016-09-14T03:52:00",
+    "pending_payout_value": "0.026 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-ranko-k-blocktrades-voting-pattern-20160907t035201614z",
+    "post_id": 1154793,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 3
+    },
+    "title": "RE: Blocktrades Voting Pattern",
+    "updated": "2016-09-07T03:52:00",
+    "url": "/blocktrades/@ranko-k/blocktrades-voting-pattern#@blocktrades/re-ranko-k-blocktrades-voting-pattern-20160907t035201614z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 54597858386,
+        "voter": "furion"
+      }
+    ],
+    "author": "blocktrades",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 68.63,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Dan and I were discussing some ideas related to security of liquid funds yesterday. It's always good to get additional input.",
+    "category": "steemit",
+    "children": 1,
+    "created": "2016-08-18T19:51:54",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 54597858386,
+    "parent_author": "furion",
+    "parent_permlink": "security-feature-proposal-to-reduce-the-risks-in-a-bitfinex-scenario-for-steem-and-sbd",
+    "payout": 0.025,
+    "payout_at": "2016-08-25T19:51:54",
+    "pending_payout_value": "0.025 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-furion-security-feature-proposal-to-reduce-the-risks-in-a-bitfinex-scenario-for-steem-and-sbd-20160818t195155768z",
+    "post_id": 876621,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 1
+    },
+    "title": "RE: Security Feature Proposal to reduce the risks in a Bitfinex Scenario for STEEM and SBD",
+    "updated": "2016-08-18T19:51:54",
+    "url": "/steemit/@furion/security-feature-proposal-to-reduce-the-risks-in-a-bitfinex-scenario-for-steem-and-sbd#@blocktrades/re-furion-security-feature-proposal-to-reduce-the-risks-in-a-bitfinex-scenario-for-steem-and-sbd-20160818t195155768z"
   },
   {
     "active_votes": [

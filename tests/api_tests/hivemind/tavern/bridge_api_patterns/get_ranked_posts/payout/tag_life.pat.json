@@ -1487,9 +1487,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 108787384193818,
-    "payout": 2139.357,
+    "payout": 1108.987,
     "payout_at": "2016-09-16T21:27:24",
-    "pending_payout_value": "2139.357 HBD",
+    "pending_payout_value": "1108.987 HBD",
     "percent_hbd": 10000,
     "permlink": "you-are-what-your-friends-are",
     "post_id": 1189192,
@@ -3514,9 +3514,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 112321864637654,
-    "payout": 2139.333,
+    "payout": 1105.591,
     "payout_at": "2016-09-16T19:54:42",
-    "pending_payout_value": "2139.333 HBD",
+    "pending_payout_value": "1105.591 HBD",
     "percent_hbd": 10000,
     "permlink": "the-evolution-of-virtual-economies-and-their-future-global-impact-on-the-world",
     "post_id": 1188109,
@@ -4961,9 +4961,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 79516305749148,
-    "payout": 1138.045,
+    "payout": 583.871,
     "payout_at": "2016-09-16T23:28:33",
-    "pending_payout_value": "1138.045 HBD",
+    "pending_payout_value": "583.871 HBD",
     "percent_hbd": 10000,
     "permlink": "find-your-why-self-discovery-and-finding-your-purpose-in-life",
     "post_id": 1190300,
@@ -5354,9 +5354,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 66340438171102,
-    "payout": 748.646,
+    "payout": 402.068,
     "payout_at": "2016-09-16T19:06:42",
-    "pending_payout_value": "748.646 HBD",
+    "pending_payout_value": "402.068 HBD",
     "percent_hbd": 10000,
     "permlink": "dance-of-little-spider",
     "post_id": 1187654,
@@ -5372,6 +5372,718 @@
     "title": "Dance of little spider!",
     "updated": "2016-09-09T19:52:48",
     "url": "/life/@celebr1ty/dance-of-little-spider"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 16576852964856,
+        "voter": "itsascam"
+      },
+      {
+        "rshares": 1951046575975,
+        "voter": "steemroller"
+      },
+      {
+        "rshares": 71863429726,
+        "voter": "donaldtrump"
+      },
+      {
+        "rshares": 17511385410342,
+        "voter": "steemed"
+      },
+      {
+        "rshares": 5550135241263,
+        "voter": "kushed"
+      },
+      {
+        "rshares": 157782618184,
+        "voter": "ozmaster"
+      },
+      {
+        "rshares": 3104274241,
+        "voter": "boy"
+      },
+      {
+        "rshares": 3768967241,
+        "voter": "bue-witness"
+      },
+      {
+        "rshares": 684023815,
+        "voter": "bunny"
+      },
+      {
+        "rshares": 7423404572906,
+        "voter": "complexring"
+      },
+      {
+        "rshares": 54879922251,
+        "voter": "bue"
+      },
+      {
+        "rshares": 1663376608,
+        "voter": "mini"
+      },
+      {
+        "rshares": 213796245,
+        "voter": "moon"
+      },
+      {
+        "rshares": 1805167482038,
+        "voter": "joseph"
+      },
+      {
+        "rshares": 74948725012,
+        "voter": "aizensou"
+      },
+      {
+        "rshares": 3649701681493,
+        "voter": "au1nethyb1"
+      },
+      {
+        "rshares": 877671040455,
+        "voter": "boombastic"
+      },
+      {
+        "rshares": 118397897437,
+        "voter": "mrs.agsexplorer"
+      },
+      {
+        "rshares": 2154708395,
+        "voter": "bingo-1"
+      },
+      {
+        "rshares": 10557955624,
+        "voter": "idol"
+      },
+      {
+        "rshares": 625011253,
+        "voter": "healthcare"
+      },
+      {
+        "rshares": 973151466,
+        "voter": "daniel.pan"
+      },
+      {
+        "rshares": 26057305221,
+        "voter": "dedriss"
+      },
+      {
+        "rshares": 288356419,
+        "voter": "helen.tan"
+      },
+      {
+        "rshares": 24301983295,
+        "voter": "yefet"
+      },
+      {
+        "rshares": 1740752416,
+        "voter": "jocelyn"
+      },
+      {
+        "rshares": 79785618296,
+        "voter": "edgeland"
+      },
+      {
+        "rshares": 57723398885,
+        "voter": "lovelace"
+      },
+      {
+        "rshares": 19215299249,
+        "voter": "fkn"
+      },
+      {
+        "rshares": 25942522195,
+        "voter": "elishagh1"
+      },
+      {
+        "rshares": 10276395225,
+        "voter": "richman"
+      },
+      {
+        "rshares": 723394303430,
+        "voter": "nanzo-scoop"
+      },
+      {
+        "rshares": 1075815746,
+        "voter": "weenfan"
+      },
+      {
+        "rshares": 490963482,
+        "voter": "coar"
+      },
+      {
+        "rshares": 1426406765,
+        "voter": "murh"
+      },
+      {
+        "rshares": 2371363162,
+        "voter": "error"
+      },
+      {
+        "rshares": 1014021436859,
+        "voter": "cyber"
+      },
+      {
+        "rshares": 8112030649,
+        "voter": "badger311"
+      },
+      {
+        "rshares": 8396200372,
+        "voter": "badger313"
+      },
+      {
+        "rshares": 8361133925,
+        "voter": "badger312"
+      },
+      {
+        "rshares": 8648473333,
+        "voter": "badger316"
+      },
+      {
+        "rshares": 8765611257,
+        "voter": "badger319"
+      },
+      {
+        "rshares": 8676897547,
+        "voter": "badger3101"
+      },
+      {
+        "rshares": 8151259697,
+        "voter": "badger3111"
+      },
+      {
+        "rshares": 8691407666,
+        "voter": "badger3121"
+      },
+      {
+        "rshares": 8315182535,
+        "voter": "badger3131"
+      },
+      {
+        "rshares": 8418990047,
+        "voter": "badger3141"
+      },
+      {
+        "rshares": 8396323790,
+        "voter": "badger3171"
+      },
+      {
+        "rshares": 8211294150,
+        "voter": "badger3181"
+      },
+      {
+        "rshares": 8774664098,
+        "voter": "badger3191"
+      },
+      {
+        "rshares": 8211137437,
+        "voter": "badger3112"
+      },
+      {
+        "rshares": 8538970800,
+        "voter": "badger3132"
+      },
+      {
+        "rshares": 8417115105,
+        "voter": "badger3162"
+      },
+      {
+        "rshares": 8639125768,
+        "voter": "badger3113"
+      },
+      {
+        "rshares": 8303468129,
+        "voter": "badger3123"
+      },
+      {
+        "rshares": 8422408271,
+        "voter": "badger3133"
+      },
+      {
+        "rshares": 8760265222,
+        "voter": "badger3153"
+      },
+      {
+        "rshares": 8451315269,
+        "voter": "badger3163"
+      },
+      {
+        "rshares": 8480657540,
+        "voter": "badger3193"
+      },
+      {
+        "rshares": 8432222787,
+        "voter": "badger3114"
+      },
+      {
+        "rshares": 8344642540,
+        "voter": "badger3124"
+      },
+      {
+        "rshares": 8251266095,
+        "voter": "badger3144"
+      },
+      {
+        "rshares": 8176105773,
+        "voter": "badger3154"
+      },
+      {
+        "rshares": 8048566417,
+        "voter": "badger3164"
+      },
+      {
+        "rshares": 8367650458,
+        "voter": "badger3174"
+      },
+      {
+        "rshares": 8637111059,
+        "voter": "badger3194"
+      },
+      {
+        "rshares": 8537467956,
+        "voter": "badger3105"
+      },
+      {
+        "rshares": 8483180556,
+        "voter": "badger3135"
+      },
+      {
+        "rshares": 8092976375,
+        "voter": "badger3145"
+      },
+      {
+        "rshares": 8654062811,
+        "voter": "badger3155"
+      },
+      {
+        "rshares": 8358821259,
+        "voter": "badger3175"
+      },
+      {
+        "rshares": 8143616780,
+        "voter": "badger3195"
+      },
+      {
+        "rshares": 7799410039,
+        "voter": "badger3106"
+      },
+      {
+        "rshares": 8586693095,
+        "voter": "badger3116"
+      },
+      {
+        "rshares": 8632805599,
+        "voter": "badger3126"
+      },
+      {
+        "rshares": 8274090549,
+        "voter": "badger3136"
+      },
+      {
+        "rshares": 7934210483,
+        "voter": "badger3146"
+      },
+      {
+        "rshares": 8157010063,
+        "voter": "badger3156"
+      },
+      {
+        "rshares": 8364570737,
+        "voter": "badger3166"
+      },
+      {
+        "rshares": 8282672957,
+        "voter": "badger3176"
+      },
+      {
+        "rshares": 8412115898,
+        "voter": "badger3186"
+      },
+      {
+        "rshares": 8446515847,
+        "voter": "badger3196"
+      },
+      {
+        "rshares": 8376798274,
+        "voter": "badger3107"
+      },
+      {
+        "rshares": 8138638648,
+        "voter": "badger315"
+      },
+      {
+        "rshares": 8615654017,
+        "voter": "badger318"
+      },
+      {
+        "rshares": 8663361608,
+        "voter": "badger3151"
+      },
+      {
+        "rshares": 8348332825,
+        "voter": "badger3161"
+      },
+      {
+        "rshares": 8597625212,
+        "voter": "badger3122"
+      },
+      {
+        "rshares": 8536865161,
+        "voter": "badger3142"
+      },
+      {
+        "rshares": 8751263635,
+        "voter": "badger3152"
+      },
+      {
+        "rshares": 8081255144,
+        "voter": "badger3172"
+      },
+      {
+        "rshares": 8574904025,
+        "voter": "badger3182"
+      },
+      {
+        "rshares": 8339728931,
+        "voter": "badger3192"
+      },
+      {
+        "rshares": 8257619091,
+        "voter": "badger3143"
+      },
+      {
+        "rshares": 8510530400,
+        "voter": "badger3173"
+      },
+      {
+        "rshares": 8228380304,
+        "voter": "badger3104"
+      },
+      {
+        "rshares": 7951525600,
+        "voter": "badger3134"
+      },
+      {
+        "rshares": 8342800561,
+        "voter": "badger3184"
+      },
+      {
+        "rshares": 8282306559,
+        "voter": "badger3115"
+      },
+      {
+        "rshares": 8737185463,
+        "voter": "badger3165"
+      },
+      {
+        "rshares": 8377493460,
+        "voter": "badger3185"
+      },
+      {
+        "rshares": 8437074851,
+        "voter": "badger314"
+      },
+      {
+        "rshares": 8662564048,
+        "voter": "badger317"
+      },
+      {
+        "rshares": 8411037152,
+        "voter": "badger3102"
+      },
+      {
+        "rshares": 8373978215,
+        "voter": "badger3103"
+      },
+      {
+        "rshares": 8303788091,
+        "voter": "badger3125"
+      },
+      {
+        "rshares": 8271225325,
+        "voter": "badger3183"
+      },
+      {
+        "rshares": 5923268326,
+        "voter": "mark-waser"
+      },
+      {
+        "rshares": 198685573120,
+        "voter": "kimziv"
+      },
+      {
+        "rshares": 12323656870,
+        "voter": "primus"
+      },
+      {
+        "rshares": 25256240290,
+        "voter": "djm34"
+      },
+      {
+        "rshares": 7378267599,
+        "voter": "dasha"
+      },
+      {
+        "rshares": 159568362205,
+        "voter": "dashpaymag"
+      },
+      {
+        "rshares": 61985726190,
+        "voter": "furion"
+      },
+      {
+        "rshares": 463366412,
+        "voter": "barbara2"
+      },
+      {
+        "rshares": 514828258,
+        "voter": "ch0c0latechip"
+      },
+      {
+        "rshares": 476503055,
+        "voter": "doge4lyf"
+      },
+      {
+        "rshares": 1137576053,
+        "voter": "steem1653"
+      },
+      {
+        "rshares": 5119748393,
+        "voter": "thegoodguy"
+      },
+      {
+        "rshares": 3541275000,
+        "voter": "karen13"
+      },
+      {
+        "rshares": 273277789180,
+        "voter": "nabilov"
+      },
+      {
+        "rshares": 4137398348,
+        "voter": "oululahti"
+      },
+      {
+        "rshares": 3573045902,
+        "voter": "tarindel"
+      },
+      {
+        "rshares": 172156110763,
+        "voter": "jl777"
+      },
+      {
+        "rshares": 23710186833,
+        "voter": "steemed-open"
+      },
+      {
+        "rshares": 15568757850,
+        "voter": "positive"
+      },
+      {
+        "rshares": 9482726248,
+        "voter": "fishborne"
+      },
+      {
+        "rshares": 14671164279,
+        "voter": "proto"
+      },
+      {
+        "rshares": 639294741,
+        "voter": "curator"
+      },
+      {
+        "rshares": 30802752786,
+        "voter": "sisterholics"
+      },
+      {
+        "rshares": 1674416218,
+        "voter": "alex.chien"
+      },
+      {
+        "rshares": 525732627,
+        "voter": "fnait"
+      },
+      {
+        "rshares": 479715016,
+        "voter": "keepcalmand"
+      },
+      {
+        "rshares": 7417397768,
+        "voter": "taker"
+      },
+      {
+        "rshares": 1045364415921,
+        "voter": "laonie"
+      },
+      {
+        "rshares": 21154154829,
+        "voter": "rawnetics"
+      },
+      {
+        "rshares": 39131477597,
+        "voter": "myfirst"
+      },
+      {
+        "rshares": 245003950194,
+        "voter": "somebody"
+      },
+      {
+        "rshares": 17327320500,
+        "voter": "sunshine"
+      },
+      {
+        "rshares": 9164864605,
+        "voter": "flysaga"
+      },
+      {
+        "rshares": 54134508203,
+        "voter": "midnightoil"
+      },
+      {
+        "rshares": 3990648293,
+        "voter": "ullikume"
+      },
+      {
+        "rshares": 120728381233,
+        "voter": "xiaohui"
+      },
+      {
+        "rshares": 4123242796,
+        "voter": "xiaokongcom"
+      },
+      {
+        "rshares": 40298988190,
+        "voter": "eneismijmich"
+      },
+      {
+        "rshares": 8533447655,
+        "voter": "xianjun"
+      },
+      {
+        "rshares": 51566384,
+        "voter": "sijoittaja"
+      },
+      {
+        "rshares": 560217246,
+        "voter": "microluck"
+      },
+      {
+        "rshares": 4096430254,
+        "voter": "onetree"
+      },
+      {
+        "rshares": 948829161,
+        "voter": "runridefly"
+      },
+      {
+        "rshares": 52894610,
+        "voter": "antoninaral1965"
+      },
+      {
+        "rshares": 1653932598,
+        "voter": "davidjkelley"
+      },
+      {
+        "rshares": 15514574124,
+        "voter": "digital-wisdom"
+      },
+      {
+        "rshares": 3859577072,
+        "voter": "ethical-ai"
+      },
+      {
+        "rshares": 5661661621,
+        "voter": "jwaser"
+      },
+      {
+        "rshares": 2667370611,
+        "voter": "bwaser"
+      },
+      {
+        "rshares": 459120073,
+        "voter": "jessicanicklos"
+      },
+      {
+        "rshares": 2394301868,
+        "voter": "ellepdub"
+      },
+      {
+        "rshares": 9744098987,
+        "voter": "herpetologyguy"
+      },
+      {
+        "rshares": 4800843442,
+        "voter": "morgan.waser"
+      },
+      {
+        "rshares": 10565721146,
+        "voter": "livingthedream"
+      },
+      {
+        "rshares": 3952637380,
+        "voter": "dodders007"
+      },
+      {
+        "rshares": 3678089785,
+        "voter": "strong-ai"
+      },
+      {
+        "rshares": 155836763,
+        "voter": "siniceku"
+      },
+      {
+        "rshares": 56431137,
+        "voter": "serikus"
+      },
+      {
+        "rshares": 108895284,
+        "voter": "autodafe"
+      }
+    ],
+    "author": "livingthedream",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 59.73,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "<html>\n<p>I wrote a few days ago about always trying to fit in. Always choosing the things that fits what society tells me I should do rather than what I want to do. Oh, he\u2019s an attractive chap that likes sports. He needs to fit in with the \u2018in\u2019 crowd. So that was my slot. I\u2019d slot in where society told me like a little robot that I was.&nbsp;</p>\n<p><img src=\"https://cdn.pbrd.co/images/W3h5E4mI.jpg\" width=\"3888\" height=\"2027\"/></p>\n<p>Truth be told I\u2019d have rather hung out with the uber geeks. Where they\u2019d be talking about their newest adventure on their latest RPG. Or the newest thing to hit telly. Back in my day it was either Star Trek or Stargate SG-1. I just really wanted to sit at their table and talk geek.&nbsp;</p>\n<p>But society told me that I shouldn\u2019t be sitting at their table, and that I should be sitting with the people that talk sports and chat to girls and care who said what to who about whom. It was all rather tiring. I didn\u2019t have enough time in the day about all that.&nbsp;</p>\n<p>And it followed me when I left High School, truth be told I thought it would end, but in true group fashion I somehow always ended up with the popular people. I never really wanted to but I had a face that fitted and a slender body to match. It\u2019s funny actually. How physical appearance weights a great deal on how you\u2019re perceived in this world. Some might deny it, but it\u2019s true. My greatest gift, yet equally my biggest flaw&nbsp;</p>\n<p>I thank society inwardly now. For making Facebook cool, for bringing all social media to the forefront and making it a regular day to day thing. I no longer have to hide my sordid little secret. And if I spent excessive amount of time on here then no-one bats an eyelid. It\u2019s awesome.&nbsp;</p>\n<p><img src=\"https://cdn.pbrd.co/images/W4VPkaQG.jpg\" width=\"960\" height=\"640\"/></p>\n<p>I can play games now, with my friends. And none of them will look at me as if I\u2019ve just wet farted in St Pauls when I ask them if they\u2019d like a multiplayer on Call of Duty, or Fifa, or something equally as heart stopping.</p>\n<p>&nbsp;And no-one will look at me strange ever again when I talk to them about the good old days when I\u2019d use Match.com to try and find a potential lady friend. Everyone does that now, it\u2019s not seen as bat shit crazy like it used to be.&nbsp;</p>\n<p>So I guess I finally slot in now. Not completely. I mean I\u2019ve came out the closet with my geekery, and my friends, they\u2019re just happy they have someone to fix their tech stuff when they need it, but I still get topics that go way over others head. At least they accept it now.&nbsp;</p>\n<p>Finally</p>\n<p>Have you ever had any experiences like such?</p>\n</html>",
+    "category": "life",
+    "children": 5,
+    "created": "2016-09-09T08:16:06",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "https://cdn.pbrd.co/images/W3h5E4mI.jpg",
+        "https://cdn.pbrd.co/images/W4VPkaQG.jpg"
+      ],
+      "tags": [
+        "life",
+        "society",
+        "culture",
+        "geek"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 61143257712703,
+    "payout": 357.714,
+    "payout_at": "2016-09-16T08:16:06",
+    "pending_payout_value": "357.714 HBD",
+    "percent_hbd": 10000,
+    "permlink": "fitting-in-to-society-s-strange-standards",
+    "post_id": 1181949,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 166
+    },
+    "title": "Fitting in to Society's strange standards",
+    "updated": "2016-09-09T08:18:30",
+    "url": "/life/@livingthedream/fitting-in-to-society-s-strange-standards"
   },
   {
     "active_votes": [
@@ -6285,9 +6997,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 59385333141950,
-    "payout": 672.129,
+    "payout": 347.025,
     "payout_at": "2016-09-16T14:05:24",
-    "pending_payout_value": "672.129 HBD",
+    "pending_payout_value": "347.025 HBD",
     "percent_hbd": 10000,
     "permlink": "paradoxes-of-professionalism-paradoks-professionalizma-featuring-smolalit-as-author",
     "post_id": 1184485,
@@ -6303,718 +7015,6 @@
     "title": "Paradoxes of Professionalism / \u041f\u0430\u0440\u0430\u0434\u043e\u043a\u0441 \u043f\u0440\u043e\u0444\u0435\u0441\u0441\u0438\u043e\u043d\u0430\u043b\u0438\u0437\u043c\u0430 (featuring @smolalit as author)",
     "updated": "2016-09-09T14:05:24",
     "url": "/life/@terrycraft/paradoxes-of-professionalism-paradoks-professionalizma-featuring-smolalit-as-author"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 16576852964856,
-        "voter": "itsascam"
-      },
-      {
-        "rshares": 1951046575975,
-        "voter": "steemroller"
-      },
-      {
-        "rshares": 71863429726,
-        "voter": "donaldtrump"
-      },
-      {
-        "rshares": 17511385410342,
-        "voter": "steemed"
-      },
-      {
-        "rshares": 5550135241263,
-        "voter": "kushed"
-      },
-      {
-        "rshares": 157782618184,
-        "voter": "ozmaster"
-      },
-      {
-        "rshares": 3104274241,
-        "voter": "boy"
-      },
-      {
-        "rshares": 3768967241,
-        "voter": "bue-witness"
-      },
-      {
-        "rshares": 684023815,
-        "voter": "bunny"
-      },
-      {
-        "rshares": 7423404572906,
-        "voter": "complexring"
-      },
-      {
-        "rshares": 54879922251,
-        "voter": "bue"
-      },
-      {
-        "rshares": 1663376608,
-        "voter": "mini"
-      },
-      {
-        "rshares": 213796245,
-        "voter": "moon"
-      },
-      {
-        "rshares": 1805167482038,
-        "voter": "joseph"
-      },
-      {
-        "rshares": 74948725012,
-        "voter": "aizensou"
-      },
-      {
-        "rshares": 3649701681493,
-        "voter": "au1nethyb1"
-      },
-      {
-        "rshares": 877671040455,
-        "voter": "boombastic"
-      },
-      {
-        "rshares": 118397897437,
-        "voter": "mrs.agsexplorer"
-      },
-      {
-        "rshares": 2154708395,
-        "voter": "bingo-1"
-      },
-      {
-        "rshares": 10557955624,
-        "voter": "idol"
-      },
-      {
-        "rshares": 625011253,
-        "voter": "healthcare"
-      },
-      {
-        "rshares": 973151466,
-        "voter": "daniel.pan"
-      },
-      {
-        "rshares": 26057305221,
-        "voter": "dedriss"
-      },
-      {
-        "rshares": 288356419,
-        "voter": "helen.tan"
-      },
-      {
-        "rshares": 24301983295,
-        "voter": "yefet"
-      },
-      {
-        "rshares": 1740752416,
-        "voter": "jocelyn"
-      },
-      {
-        "rshares": 79785618296,
-        "voter": "edgeland"
-      },
-      {
-        "rshares": 57723398885,
-        "voter": "lovelace"
-      },
-      {
-        "rshares": 19215299249,
-        "voter": "fkn"
-      },
-      {
-        "rshares": 25942522195,
-        "voter": "elishagh1"
-      },
-      {
-        "rshares": 10276395225,
-        "voter": "richman"
-      },
-      {
-        "rshares": 723394303430,
-        "voter": "nanzo-scoop"
-      },
-      {
-        "rshares": 1075815746,
-        "voter": "weenfan"
-      },
-      {
-        "rshares": 490963482,
-        "voter": "coar"
-      },
-      {
-        "rshares": 1426406765,
-        "voter": "murh"
-      },
-      {
-        "rshares": 2371363162,
-        "voter": "error"
-      },
-      {
-        "rshares": 1014021436859,
-        "voter": "cyber"
-      },
-      {
-        "rshares": 8112030649,
-        "voter": "badger311"
-      },
-      {
-        "rshares": 8396200372,
-        "voter": "badger313"
-      },
-      {
-        "rshares": 8361133925,
-        "voter": "badger312"
-      },
-      {
-        "rshares": 8648473333,
-        "voter": "badger316"
-      },
-      {
-        "rshares": 8765611257,
-        "voter": "badger319"
-      },
-      {
-        "rshares": 8676897547,
-        "voter": "badger3101"
-      },
-      {
-        "rshares": 8151259697,
-        "voter": "badger3111"
-      },
-      {
-        "rshares": 8691407666,
-        "voter": "badger3121"
-      },
-      {
-        "rshares": 8315182535,
-        "voter": "badger3131"
-      },
-      {
-        "rshares": 8418990047,
-        "voter": "badger3141"
-      },
-      {
-        "rshares": 8396323790,
-        "voter": "badger3171"
-      },
-      {
-        "rshares": 8211294150,
-        "voter": "badger3181"
-      },
-      {
-        "rshares": 8774664098,
-        "voter": "badger3191"
-      },
-      {
-        "rshares": 8211137437,
-        "voter": "badger3112"
-      },
-      {
-        "rshares": 8538970800,
-        "voter": "badger3132"
-      },
-      {
-        "rshares": 8417115105,
-        "voter": "badger3162"
-      },
-      {
-        "rshares": 8639125768,
-        "voter": "badger3113"
-      },
-      {
-        "rshares": 8303468129,
-        "voter": "badger3123"
-      },
-      {
-        "rshares": 8422408271,
-        "voter": "badger3133"
-      },
-      {
-        "rshares": 8760265222,
-        "voter": "badger3153"
-      },
-      {
-        "rshares": 8451315269,
-        "voter": "badger3163"
-      },
-      {
-        "rshares": 8480657540,
-        "voter": "badger3193"
-      },
-      {
-        "rshares": 8432222787,
-        "voter": "badger3114"
-      },
-      {
-        "rshares": 8344642540,
-        "voter": "badger3124"
-      },
-      {
-        "rshares": 8251266095,
-        "voter": "badger3144"
-      },
-      {
-        "rshares": 8176105773,
-        "voter": "badger3154"
-      },
-      {
-        "rshares": 8048566417,
-        "voter": "badger3164"
-      },
-      {
-        "rshares": 8367650458,
-        "voter": "badger3174"
-      },
-      {
-        "rshares": 8637111059,
-        "voter": "badger3194"
-      },
-      {
-        "rshares": 8537467956,
-        "voter": "badger3105"
-      },
-      {
-        "rshares": 8483180556,
-        "voter": "badger3135"
-      },
-      {
-        "rshares": 8092976375,
-        "voter": "badger3145"
-      },
-      {
-        "rshares": 8654062811,
-        "voter": "badger3155"
-      },
-      {
-        "rshares": 8358821259,
-        "voter": "badger3175"
-      },
-      {
-        "rshares": 8143616780,
-        "voter": "badger3195"
-      },
-      {
-        "rshares": 7799410039,
-        "voter": "badger3106"
-      },
-      {
-        "rshares": 8586693095,
-        "voter": "badger3116"
-      },
-      {
-        "rshares": 8632805599,
-        "voter": "badger3126"
-      },
-      {
-        "rshares": 8274090549,
-        "voter": "badger3136"
-      },
-      {
-        "rshares": 7934210483,
-        "voter": "badger3146"
-      },
-      {
-        "rshares": 8157010063,
-        "voter": "badger3156"
-      },
-      {
-        "rshares": 8364570737,
-        "voter": "badger3166"
-      },
-      {
-        "rshares": 8282672957,
-        "voter": "badger3176"
-      },
-      {
-        "rshares": 8412115898,
-        "voter": "badger3186"
-      },
-      {
-        "rshares": 8446515847,
-        "voter": "badger3196"
-      },
-      {
-        "rshares": 8376798274,
-        "voter": "badger3107"
-      },
-      {
-        "rshares": 8138638648,
-        "voter": "badger315"
-      },
-      {
-        "rshares": 8615654017,
-        "voter": "badger318"
-      },
-      {
-        "rshares": 8663361608,
-        "voter": "badger3151"
-      },
-      {
-        "rshares": 8348332825,
-        "voter": "badger3161"
-      },
-      {
-        "rshares": 8597625212,
-        "voter": "badger3122"
-      },
-      {
-        "rshares": 8536865161,
-        "voter": "badger3142"
-      },
-      {
-        "rshares": 8751263635,
-        "voter": "badger3152"
-      },
-      {
-        "rshares": 8081255144,
-        "voter": "badger3172"
-      },
-      {
-        "rshares": 8574904025,
-        "voter": "badger3182"
-      },
-      {
-        "rshares": 8339728931,
-        "voter": "badger3192"
-      },
-      {
-        "rshares": 8257619091,
-        "voter": "badger3143"
-      },
-      {
-        "rshares": 8510530400,
-        "voter": "badger3173"
-      },
-      {
-        "rshares": 8228380304,
-        "voter": "badger3104"
-      },
-      {
-        "rshares": 7951525600,
-        "voter": "badger3134"
-      },
-      {
-        "rshares": 8342800561,
-        "voter": "badger3184"
-      },
-      {
-        "rshares": 8282306559,
-        "voter": "badger3115"
-      },
-      {
-        "rshares": 8737185463,
-        "voter": "badger3165"
-      },
-      {
-        "rshares": 8377493460,
-        "voter": "badger3185"
-      },
-      {
-        "rshares": 8437074851,
-        "voter": "badger314"
-      },
-      {
-        "rshares": 8662564048,
-        "voter": "badger317"
-      },
-      {
-        "rshares": 8411037152,
-        "voter": "badger3102"
-      },
-      {
-        "rshares": 8373978215,
-        "voter": "badger3103"
-      },
-      {
-        "rshares": 8303788091,
-        "voter": "badger3125"
-      },
-      {
-        "rshares": 8271225325,
-        "voter": "badger3183"
-      },
-      {
-        "rshares": 5923268326,
-        "voter": "mark-waser"
-      },
-      {
-        "rshares": 198685573120,
-        "voter": "kimziv"
-      },
-      {
-        "rshares": 12323656870,
-        "voter": "primus"
-      },
-      {
-        "rshares": 25256240290,
-        "voter": "djm34"
-      },
-      {
-        "rshares": 7378267599,
-        "voter": "dasha"
-      },
-      {
-        "rshares": 159568362205,
-        "voter": "dashpaymag"
-      },
-      {
-        "rshares": 61985726190,
-        "voter": "furion"
-      },
-      {
-        "rshares": 463366412,
-        "voter": "barbara2"
-      },
-      {
-        "rshares": 514828258,
-        "voter": "ch0c0latechip"
-      },
-      {
-        "rshares": 476503055,
-        "voter": "doge4lyf"
-      },
-      {
-        "rshares": 1137576053,
-        "voter": "steem1653"
-      },
-      {
-        "rshares": 5119748393,
-        "voter": "thegoodguy"
-      },
-      {
-        "rshares": 3541275000,
-        "voter": "karen13"
-      },
-      {
-        "rshares": 273277789180,
-        "voter": "nabilov"
-      },
-      {
-        "rshares": 4137398348,
-        "voter": "oululahti"
-      },
-      {
-        "rshares": 3573045902,
-        "voter": "tarindel"
-      },
-      {
-        "rshares": 172156110763,
-        "voter": "jl777"
-      },
-      {
-        "rshares": 23710186833,
-        "voter": "steemed-open"
-      },
-      {
-        "rshares": 15568757850,
-        "voter": "positive"
-      },
-      {
-        "rshares": 9482726248,
-        "voter": "fishborne"
-      },
-      {
-        "rshares": 14671164279,
-        "voter": "proto"
-      },
-      {
-        "rshares": 639294741,
-        "voter": "curator"
-      },
-      {
-        "rshares": 30802752786,
-        "voter": "sisterholics"
-      },
-      {
-        "rshares": 1674416218,
-        "voter": "alex.chien"
-      },
-      {
-        "rshares": 525732627,
-        "voter": "fnait"
-      },
-      {
-        "rshares": 479715016,
-        "voter": "keepcalmand"
-      },
-      {
-        "rshares": 7417397768,
-        "voter": "taker"
-      },
-      {
-        "rshares": 1045364415921,
-        "voter": "laonie"
-      },
-      {
-        "rshares": 21154154829,
-        "voter": "rawnetics"
-      },
-      {
-        "rshares": 39131477597,
-        "voter": "myfirst"
-      },
-      {
-        "rshares": 245003950194,
-        "voter": "somebody"
-      },
-      {
-        "rshares": 17327320500,
-        "voter": "sunshine"
-      },
-      {
-        "rshares": 9164864605,
-        "voter": "flysaga"
-      },
-      {
-        "rshares": 54134508203,
-        "voter": "midnightoil"
-      },
-      {
-        "rshares": 3990648293,
-        "voter": "ullikume"
-      },
-      {
-        "rshares": 120728381233,
-        "voter": "xiaohui"
-      },
-      {
-        "rshares": 4123242796,
-        "voter": "xiaokongcom"
-      },
-      {
-        "rshares": 40298988190,
-        "voter": "eneismijmich"
-      },
-      {
-        "rshares": 8533447655,
-        "voter": "xianjun"
-      },
-      {
-        "rshares": 51566384,
-        "voter": "sijoittaja"
-      },
-      {
-        "rshares": 560217246,
-        "voter": "microluck"
-      },
-      {
-        "rshares": 4096430254,
-        "voter": "onetree"
-      },
-      {
-        "rshares": 948829161,
-        "voter": "runridefly"
-      },
-      {
-        "rshares": 52894610,
-        "voter": "antoninaral1965"
-      },
-      {
-        "rshares": 1653932598,
-        "voter": "davidjkelley"
-      },
-      {
-        "rshares": 15514574124,
-        "voter": "digital-wisdom"
-      },
-      {
-        "rshares": 3859577072,
-        "voter": "ethical-ai"
-      },
-      {
-        "rshares": 5661661621,
-        "voter": "jwaser"
-      },
-      {
-        "rshares": 2667370611,
-        "voter": "bwaser"
-      },
-      {
-        "rshares": 459120073,
-        "voter": "jessicanicklos"
-      },
-      {
-        "rshares": 2394301868,
-        "voter": "ellepdub"
-      },
-      {
-        "rshares": 9744098987,
-        "voter": "herpetologyguy"
-      },
-      {
-        "rshares": 4800843442,
-        "voter": "morgan.waser"
-      },
-      {
-        "rshares": 10565721146,
-        "voter": "livingthedream"
-      },
-      {
-        "rshares": 3952637380,
-        "voter": "dodders007"
-      },
-      {
-        "rshares": 3678089785,
-        "voter": "strong-ai"
-      },
-      {
-        "rshares": 155836763,
-        "voter": "siniceku"
-      },
-      {
-        "rshares": 56431137,
-        "voter": "serikus"
-      },
-      {
-        "rshares": 108895284,
-        "voter": "autodafe"
-      }
-    ],
-    "author": "livingthedream",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 59.73,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "<html>\n<p>I wrote a few days ago about always trying to fit in. Always choosing the things that fits what society tells me I should do rather than what I want to do. Oh, he\u2019s an attractive chap that likes sports. He needs to fit in with the \u2018in\u2019 crowd. So that was my slot. I\u2019d slot in where society told me like a little robot that I was.&nbsp;</p>\n<p><img src=\"https://cdn.pbrd.co/images/W3h5E4mI.jpg\" width=\"3888\" height=\"2027\"/></p>\n<p>Truth be told I\u2019d have rather hung out with the uber geeks. Where they\u2019d be talking about their newest adventure on their latest RPG. Or the newest thing to hit telly. Back in my day it was either Star Trek or Stargate SG-1. I just really wanted to sit at their table and talk geek.&nbsp;</p>\n<p>But society told me that I shouldn\u2019t be sitting at their table, and that I should be sitting with the people that talk sports and chat to girls and care who said what to who about whom. It was all rather tiring. I didn\u2019t have enough time in the day about all that.&nbsp;</p>\n<p>And it followed me when I left High School, truth be told I thought it would end, but in true group fashion I somehow always ended up with the popular people. I never really wanted to but I had a face that fitted and a slender body to match. It\u2019s funny actually. How physical appearance weights a great deal on how you\u2019re perceived in this world. Some might deny it, but it\u2019s true. My greatest gift, yet equally my biggest flaw&nbsp;</p>\n<p>I thank society inwardly now. For making Facebook cool, for bringing all social media to the forefront and making it a regular day to day thing. I no longer have to hide my sordid little secret. And if I spent excessive amount of time on here then no-one bats an eyelid. It\u2019s awesome.&nbsp;</p>\n<p><img src=\"https://cdn.pbrd.co/images/W4VPkaQG.jpg\" width=\"960\" height=\"640\"/></p>\n<p>I can play games now, with my friends. And none of them will look at me as if I\u2019ve just wet farted in St Pauls when I ask them if they\u2019d like a multiplayer on Call of Duty, or Fifa, or something equally as heart stopping.</p>\n<p>&nbsp;And no-one will look at me strange ever again when I talk to them about the good old days when I\u2019d use Match.com to try and find a potential lady friend. Everyone does that now, it\u2019s not seen as bat shit crazy like it used to be.&nbsp;</p>\n<p>So I guess I finally slot in now. Not completely. I mean I\u2019ve came out the closet with my geekery, and my friends, they\u2019re just happy they have someone to fix their tech stuff when they need it, but I still get topics that go way over others head. At least they accept it now.&nbsp;</p>\n<p>Finally</p>\n<p>Have you ever had any experiences like such?</p>\n</html>",
-    "category": "life",
-    "children": 5,
-    "created": "2016-09-09T08:16:06",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 0,
-    "is_paidout": false,
-    "json_metadata": {
-      "image": [
-        "https://cdn.pbrd.co/images/W3h5E4mI.jpg",
-        "https://cdn.pbrd.co/images/W4VPkaQG.jpg"
-      ],
-      "tags": [
-        "life",
-        "society",
-        "culture",
-        "geek"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 61143257712703,
-    "payout": 664.57,
-    "payout_at": "2016-09-16T08:16:06",
-    "pending_payout_value": "664.570 HBD",
-    "percent_hbd": 10000,
-    "permlink": "fitting-in-to-society-s-strange-standards",
-    "post_id": 1181949,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 166
-    },
-    "title": "Fitting in to Society's strange standards",
-    "updated": "2016-09-09T08:18:30",
-    "url": "/life/@livingthedream/fitting-in-to-society-s-strange-standards"
   },
   {
     "active_votes": [
@@ -7376,9 +7376,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 57034892709151,
-    "payout": 561.185,
+    "payout": 299.384,
     "payout_at": "2016-09-16T21:00:27",
-    "pending_payout_value": "561.185 HBD",
+    "pending_payout_value": "299.384 HBD",
     "percent_hbd": 10000,
     "permlink": "branding-project-m-i-a-off-the-grid-living",
     "post_id": 1188912,
@@ -7791,9 +7791,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 52736269098395,
-    "payout": 447.1,
+    "payout": 250.867,
     "payout_at": "2016-09-16T14:31:09",
-    "pending_payout_value": "447.100 HBD",
+    "pending_payout_value": "250.867 HBD",
     "percent_hbd": 10000,
     "permlink": "conclusion-la-gonave-haiti-a-vision-of-regeneration-for-a-degraded-land-and-impoverished-people-proposal",
     "post_id": 1184780,
@@ -8281,9 +8281,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 51504615203394,
-    "payout": 432.123,
+    "payout": 246.722,
     "payout_at": "2016-09-16T08:01:45",
-    "pending_payout_value": "432.123 HBD",
+    "pending_payout_value": "246.722 HBD",
     "percent_hbd": 10000,
     "permlink": "why-are-we-hating-so-much-right-now",
     "post_id": 1181858,
@@ -8873,9 +8873,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 46664029470673,
-    "payout": 383.972,
+    "payout": 207.989,
     "payout_at": "2016-09-16T12:53:06",
-    "pending_payout_value": "383.972 HBD",
+    "pending_payout_value": "207.989 HBD",
     "percent_hbd": 10000,
     "permlink": "dogs-aren-t-dangerous-general-woundwort-watership-down-strong-opinions-on-vaccines",
     "post_id": 1183844,
@@ -9474,9 +9474,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 39590359431821,
-    "payout": 296.493,
+    "payout": 154.235,
     "payout_at": "2016-09-16T15:01:06",
-    "pending_payout_value": "296.493 HBD",
+    "pending_payout_value": "154.235 HBD",
     "percent_hbd": 10000,
     "permlink": "i-asked-35-people-what-they-were-afraid-of-and-here-s-what-they-answered",
     "post_id": 1185061,
@@ -9633,9 +9633,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 39829314183785,
-    "payout": 259.177,
+    "payout": 148.08,
     "payout_at": "2016-09-16T18:32:06",
-    "pending_payout_value": "259.177 HBD",
+    "pending_payout_value": "148.080 HBD",
     "percent_hbd": 10000,
     "permlink": "fixing-posture-part-2-static-holds-lower-body",
     "post_id": 1187338,
@@ -10126,9 +10126,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 38029265529764,
-    "payout": 210.775,
+    "payout": 111.985,
     "payout_at": "2016-09-16T18:11:24",
-    "pending_payout_value": "210.775 HBD",
+    "pending_payout_value": "111.985 HBD",
     "percent_hbd": 10000,
     "permlink": "the-impressive-difference-between-bees-and-wasps-bees-vs-wasps",
     "post_id": 1187119,
@@ -10747,9 +10747,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 32058545242288,
-    "payout": 182.126,
+    "payout": 102.123,
     "payout_at": "2016-09-16T16:23:18",
-    "pending_payout_value": "182.126 HBD",
+    "pending_payout_value": "102.123 HBD",
     "percent_hbd": 10000,
     "permlink": "the-other-side-of-the-coin",
     "post_id": 1186011,
@@ -11215,9 +11215,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 31007526496518,
-    "payout": 177.099,
+    "payout": 101.088,
     "payout_at": "2016-09-16T13:51:42",
-    "pending_payout_value": "177.099 HBD",
+    "pending_payout_value": "101.088 HBD",
     "percent_hbd": 10000,
     "permlink": "my-life-is-in-shambles-and-here-s-why",
     "post_id": 1184347,
@@ -11279,9 +11279,9 @@
     "net_rshares": 29258371728701,
     "parent_author": "benjojo",
     "parent_permlink": "re-richardcrill-re-benjojo-re-richardcrill-re-benjojo-dogs-aren-t-dangerous-general-woundwort-watership-down-strong-opinions-on-vaccines-20160909t133521068z",
-    "payout": 149.702,
+    "payout": 85.545,
     "payout_at": "2016-09-17T04:22:57",
-    "pending_payout_value": "149.702 HBD",
+    "pending_payout_value": "85.545 HBD",
     "percent_hbd": 10000,
     "permlink": "re-benjojo-re-richardcrill-re-benjojo-re-richardcrill-re-benjojo-dogs-aren-t-dangerous-general-woundwort-watership-down-strong-opinions-on-vaccines-20160910t042259127z",
     "post_id": 1192178,
@@ -11530,9 +11530,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 26405166717765,
-    "payout": 131.683,
+    "payout": 75.193,
     "payout_at": "2016-09-16T23:28:24",
-    "pending_payout_value": "131.683 HBD",
+    "pending_payout_value": "75.193 HBD",
     "percent_hbd": 10000,
     "permlink": "thinking-about-life-without-my-parents-in-it",
     "post_id": 1190299,
@@ -12130,9 +12130,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 22533783599997,
-    "payout": 93.623,
+    "payout": 50.977,
     "payout_at": "2016-09-17T06:25:54",
-    "pending_payout_value": "93.623 HBD",
+    "pending_payout_value": "50.977 HBD",
     "percent_hbd": 10000,
     "permlink": "the-secret-formula-how-to-be-successful-in-this-unstable-and-unclear-world",
     "post_id": 1192963,
@@ -12152,561 +12152,201 @@
   {
     "active_votes": [
       {
-        "rshares": 347173593016,
-        "voter": "anonymous"
+        "rshares": 10512800200441,
+        "voter": "berniesanders"
       },
       {
-        "rshares": 2326424326392,
-        "voter": "badassmother"
+        "rshares": 64045087118,
+        "voter": "nextgenwitness"
       },
       {
-        "rshares": 4685305057344,
-        "voter": "wang"
+        "rshares": 7126422138279,
+        "voter": "xeldal"
       },
       {
-        "rshares": 5798010881362,
-        "voter": "steemit200"
+        "rshares": 228767259080,
+        "voter": "justin"
       },
       {
-        "rshares": 1784932104281,
-        "voter": "xeroc"
+        "rshares": 1816803228958,
+        "voter": "nextgencrypto"
       },
       {
-        "rshares": 3189151833058,
-        "voter": "au1nethyb1"
+        "rshares": 134446486890,
+        "voter": "steemservices"
       },
       {
-        "rshares": 425140695448,
-        "voter": "boatymcboatface"
+        "rshares": 813859288534,
+        "voter": "boombastic"
       },
       {
-        "rshares": 427084891,
-        "voter": "paco-steem"
+        "rshares": 7904802535,
+        "voter": "bingo-0"
       },
       {
-        "rshares": 4773314660,
-        "voter": "spaninv"
+        "rshares": 2008495522,
+        "voter": "bingo-1"
       },
       {
-        "rshares": 30331628965,
-        "voter": "instructor2121"
-      },
-      {
-        "rshares": 24369423739,
-        "voter": "james-show"
-      },
-      {
-        "rshares": 151583846883,
-        "voter": "steve-walschot"
-      },
-      {
-        "rshares": 1412765133,
+        "rshares": 1412901491,
         "voter": "murh"
       },
       {
-        "rshares": 40829201139,
-        "voter": "ranko-k"
+        "rshares": 398672078047,
+        "voter": "kaylinart"
       },
       {
-        "rshares": 333315839,
-        "voter": "stiletto"
+        "rshares": 322721726,
+        "voter": "garagebill"
       },
       {
-        "rshares": 24531687872,
-        "voter": "ratel"
+        "rshares": 12334296214,
+        "voter": "primus"
       },
       {
-        "rshares": 54538482985,
-        "voter": "thecryptodrive"
+        "rshares": 7571817406,
+        "voter": "dasha"
       },
       {
-        "rshares": 331960517,
-        "voter": "johnchang"
+        "rshares": 11044178476,
+        "voter": "missjessica"
       },
       {
-        "rshares": 32980901583,
-        "voter": "michaelx"
-      },
-      {
-        "rshares": 167288113658,
-        "voter": "ikigai"
-      },
-      {
-        "rshares": 510500434,
-        "voter": "mrhankeh"
-      },
-      {
-        "rshares": 57883462951,
-        "voter": "isteemit"
-      },
-      {
-        "rshares": 69749994712,
-        "voter": "bacchist"
-      },
-      {
-        "rshares": 248682104929,
-        "voter": "asmolokalo"
-      },
-      {
-        "rshares": 62067915608,
-        "voter": "lehard"
-      },
-      {
-        "rshares": 10594488718,
-        "voter": "seanmchughart"
-      },
-      {
-        "rshares": 6172849512,
-        "voter": "owdy"
-      },
-      {
-        "rshares": 11322065823,
-        "voter": "anasya"
-      },
-      {
-        "rshares": 386509119,
-        "voter": "denaver"
-      },
-      {
-        "rshares": 1206848597,
-        "voter": "dicov"
-      },
-      {
-        "rshares": 1024249182,
-        "voter": "steem1653"
-      },
-      {
-        "rshares": 4588097450,
-        "voter": "thegoodguy"
-      },
-      {
-        "rshares": 242148482,
-        "voter": "danielkt"
-      },
-      {
-        "rshares": 3320415923,
-        "voter": "karen13"
-      },
-      {
-        "rshares": 1312455034,
-        "voter": "jrd8526"
-      },
-      {
-        "rshares": 14800232794,
-        "voter": "jaycobbell"
-      },
-      {
-        "rshares": 8217441887,
-        "voter": "noodhoog"
-      },
-      {
-        "rshares": 4121232121,
-        "voter": "dcryptogold"
-      },
-      {
-        "rshares": 36642314967,
-        "voter": "condra"
-      },
-      {
-        "rshares": 33856179150,
-        "voter": "creemej"
-      },
-      {
-        "rshares": 94283196,
-        "voter": "wildchild"
-      },
-      {
-        "rshares": 3868061659,
-        "voter": "maximkichev"
-      },
-      {
-        "rshares": 6288016365,
-        "voter": "smolalit"
-      },
-      {
-        "rshares": 4085961690,
+        "rshares": 4170107543,
         "voter": "fubar-bdhr"
       },
       {
-        "rshares": 15657517875,
-        "voter": "heimindanger"
+        "rshares": 134797415,
+        "voter": "jevgenz"
       },
       {
-        "rshares": 3574266008,
-        "voter": "tarindel"
+        "rshares": 1558117641,
+        "voter": "alex.chien"
       },
       {
-        "rshares": 5465250982,
-        "voter": "sharker"
+        "rshares": 115958450,
+        "voter": "bullionstackers"
       },
       {
-        "rshares": 172173179708,
-        "voter": "jl777"
+        "rshares": 22591968345,
+        "voter": "amy-goodrich"
       },
       {
-        "rshares": 36210053260,
-        "voter": "zaebars"
+        "rshares": 20998987648,
+        "voter": "cryptos"
       },
       {
-        "rshares": 56769423538,
-        "voter": "arcurus"
+        "rshares": 8004776126,
+        "voter": "mione"
       },
       {
-        "rshares": 14672456640,
-        "voter": "proto"
+        "rshares": 13687990052,
+        "voter": "thecurator"
       },
       {
-        "rshares": 614745323,
-        "voter": "curator"
+        "rshares": 925730676,
+        "voter": "telos"
       },
       {
-        "rshares": 14666743831,
-        "voter": "michaeldodridge"
+        "rshares": 70955443,
+        "voter": "nomadnessie"
       },
       {
-        "rshares": 2874485070,
-        "voter": "tygergamer"
+        "rshares": 10196026285,
+        "voter": "etcmike"
       },
       {
-        "rshares": 41421053882,
-        "voter": "celebr1ty"
+        "rshares": 8522073653,
+        "voter": "ironwood"
       },
       {
-        "rshares": 2440072883,
-        "voter": "belkins"
+        "rshares": 10074682624,
+        "voter": "ghasemkiani"
       },
       {
-        "rshares": 3089466096,
-        "voter": "glitterpig"
+        "rshares": 92318739472,
+        "voter": "thecyclist"
       },
       {
-        "rshares": 5502258898,
-        "voter": "jed78"
+        "rshares": 1327657229,
+        "voter": "codylang"
       },
       {
-        "rshares": 131406453131,
-        "voter": "steemdrive"
+        "rshares": 4513810274,
+        "voter": "jillwirt"
       },
       {
-        "rshares": 3511498418,
-        "voter": "litrbooh"
+        "rshares": 1610026744,
+        "voter": "bontonstory"
       },
       {
-        "rshares": 6888349735,
-        "voter": "taker"
+        "rshares": 53002346,
+        "voter": "mari5555na"
       },
       {
-        "rshares": 3321239318,
-        "voter": "nekromarinist"
+        "rshares": 1552552609,
+        "voter": "dakini-dion"
       },
       {
-        "rshares": 4758388007,
-        "voter": "theprophet0"
+        "rshares": 4932119985,
+        "voter": "ekaterina4ka"
       },
       {
-        "rshares": 1601829968,
-        "voter": "whitemike313"
+        "rshares": 161727291,
+        "voter": "crimson"
       },
       {
-        "rshares": 22881105991,
-        "voter": "laonie1"
+        "rshares": 157630085,
+        "voter": "bartajulia"
       },
       {
-        "rshares": 23393092791,
-        "voter": "laonie2"
-      },
-      {
-        "rshares": 23401643941,
-        "voter": "laonie3"
-      },
-      {
-        "rshares": 16983484245,
-        "voter": "sunshine"
-      },
-      {
-        "rshares": 3992439196,
-        "voter": "ullikume"
-      },
-      {
-        "rshares": 23397587590,
-        "voter": "laonie4"
-      },
-      {
-        "rshares": 23395950753,
-        "voter": "laonie5"
-      },
-      {
-        "rshares": 23393389902,
-        "voter": "laonie6"
-      },
-      {
-        "rshares": 23390356020,
-        "voter": "laonie7"
-      },
-      {
-        "rshares": 23386687943,
-        "voter": "laonie8"
-      },
-      {
-        "rshares": 2957861982,
-        "voter": "uuuhha"
-      },
-      {
-        "rshares": 23385030322,
-        "voter": "laonie9"
-      },
-      {
-        "rshares": 1392445186,
-        "voter": "paynode"
-      },
-      {
-        "rshares": 10773908902,
-        "voter": "gargon"
-      },
-      {
-        "rshares": 2384874656,
-        "voter": "pgarcgo"
-      },
-      {
-        "rshares": 2076128892,
-        "voter": "natalymaty"
-      },
-      {
-        "rshares": 982306236,
-        "voter": "fooblic"
-      },
-      {
-        "rshares": 57741424,
-        "voter": "nyoba"
-      },
-      {
-        "rshares": 11781169302,
-        "voter": "borran"
-      },
-      {
-        "rshares": 66124624,
-        "voter": "stevescriber"
-      },
-      {
-        "rshares": 3277746055,
-        "voter": "bledarus"
-      },
-      {
-        "rshares": 52467942,
-        "voter": "loli"
-      },
-      {
-        "rshares": 54857117,
-        "voter": "nano2nd"
-      },
-      {
-        "rshares": 58970189,
-        "voter": "party1998"
-      },
-      {
-        "rshares": 222804436,
-        "voter": "party1999"
-      },
-      {
-        "rshares": 59006436,
-        "voter": "cryptoblu"
-      },
-      {
-        "rshares": 59000019,
-        "voter": "instructor"
-      },
-      {
-        "rshares": 678719129546,
-        "voter": "dollarvigilante"
-      },
-      {
-        "rshares": 1449248223,
-        "voter": "anotherjoe"
-      },
-      {
-        "rshares": 91269679229,
-        "voter": "serejandmyself"
-      },
-      {
-        "rshares": 3235108884,
-        "voter": "macartem"
-      },
-      {
-        "rshares": 13661225365,
-        "voter": "gvargas123"
-      },
-      {
-        "rshares": 8932458959,
-        "voter": "jaredcwillis"
-      },
-      {
-        "rshares": 23379015823,
-        "voter": "laonie10"
-      },
-      {
-        "rshares": 80733148936,
-        "voter": "barrycooper"
-      },
-      {
-        "rshares": 15683322646,
-        "voter": "mikemacintire"
-      },
-      {
-        "rshares": 3161180932,
-        "voter": "hilarski"
-      },
-      {
-        "rshares": 7674971846,
-        "voter": "craigwilliamz"
-      },
-      {
-        "rshares": 55845079,
-        "voter": "rickmiller"
-      },
-      {
-        "rshares": 23033260844,
-        "voter": "laonie11"
-      },
-      {
-        "rshares": 5439270557,
-        "voter": "nadin3"
-      },
-      {
-        "rshares": 1620308480,
-        "voter": "maryfromsochi"
-      },
-      {
-        "rshares": 405872365,
-        "voter": "steemorama"
-      },
-      {
-        "rshares": 585057593,
-        "voter": "winglessss"
-      },
-      {
-        "rshares": 1229611802,
-        "voter": "sci"
-      },
-      {
-        "rshares": 368669102855,
-        "voter": "charlieshrem"
-      },
-      {
-        "rshares": 59228184621,
-        "voter": "tracemayer"
-      },
-      {
-        "rshares": 55766382,
-        "voter": "justforfun"
-      },
-      {
-        "rshares": 1445562934,
-        "voter": "bitcoinparadise"
-      },
-      {
-        "rshares": 97194046,
-        "voter": "inarix03"
-      },
-      {
-        "rshares": 336398028,
-        "voter": "robotev2"
-      },
-      {
-        "rshares": 54578876,
-        "voter": "lexikon082"
-      },
-      {
-        "rshares": 50233449,
-        "voter": "teemsteem"
-      },
-      {
-        "rshares": 50975390,
-        "voter": "steemprincess"
-      },
-      {
-        "rshares": 691571670,
-        "voter": "dikanevroman"
-      },
-      {
-        "rshares": 157266009,
-        "voter": "cruise"
-      },
-      {
-        "rshares": 1410951549,
-        "voter": "rusteemitblog"
-      },
-      {
-        "rshares": 160906489,
-        "voter": "touchboarder"
-      },
-      {
-        "rshares": 159030388,
-        "voter": "clutchcable"
-      },
-      {
-        "rshares": 158764954,
-        "voter": "thelon"
-      },
-      {
-        "rshares": 130506461,
-        "voter": "insight2incite"
-      },
-      {
-        "rshares": 14155378651,
-        "voter": "goldmatters"
+        "rshares": 154401682,
+        "voter": "sleepyheadd07"
       }
     ],
-    "author": "lehard",
+    "author": "jillwirt",
     "author_payout_value": "0.000 HBD",
-    "author_reputation": 63.6,
+    "author_reputation": 57.8,
     "beneficiaries": [],
     "blacklists": [],
-    "body": "<html>\n<p>https://i.imgsafe.org/2fcd074bd9.jpg</p>\n<p>What I want to say is that results surprise me, I have mixed feelings from the first days. Joy, shock, surprise and disappointment, everything got mixed up. The most surprising thing for me was that my articles in Russian get more than the ones in English. I haven't realized yet myself who votes for them and why. So, let's find it out together.</p>\n<p>My English is not good, I write an article in Russian, and after that I send it to a translator. After I have posted my first article, in one of the chats I've been asked to give more details, how much I paid the translators, editors, what other costs I had. People also asked me about other difficulties I faced during the experiment. I will tell you about it in this post.</p>\n<p>Let me start explaining things one after another. I have articles in both languages, so, of course, I decided to post both variants. I saw other people posting bilingual articles, but I find this option more suitable for articles with little text and many pages. As for my articles, they have a lot of text and I think it's more comfortable to read them when they are written separately in each language. It's very interesting to know what you think about it. Let discuss it in the comments.</p>\n<p>I never wrote in such a high pace - one article per day. And, honestly, I don't know, if I cope with it. To put myself in conditions, where I have to work in a high pace, was one of the reasons to start this experiment. Yesterday I almost failed my schedule. I finished the article only by the evening, and it also needed to be translated. But I was lucky, @xanoxt came to rescue me. Due to our time difference, he finished translating at 5 am only, and I am very thankful for that.</p>\n<h2>3 days - 3 articles, the results are the following:</h2>\n<table>\n  <tr>\n    <td>Article</td>\n    <td>Payout</td>\n    <td>SD</td>\n    <td>SP</td>\n  </tr>\n  <tr>\n    <td>Is it possible to make money on Steemit? 30 Days Steemit Experiment [EN]</td>\n    <td>$57.92</td>\n    <td>26.699</td>\n    <td>33.097</td>\n  </tr>\n  <tr>\n    <td>Is it possible to make money on Steemit? 30 Days Steemit Experiment [RU]</td>\n    <td>$41.23</td>\n    <td>18.162</td>\n    <td>22.637</td>\n </tr>\n  <tr>\n    <td>I am an idiot! Cashing on Steemit. Is it the most Important? [EN]</td>\n    <td>$55.47</td>\n    <td>35.846</td>\n    <td>44.692</td>\n </tr>\n  <tr>\n    <td>I am an idiot! Cashing on Steemit. Is it the most Important? [RU]</td>\n    <td>$80.91</td>\n    <td>24.569</td>\n    <td>30.640</td>\n </tr>\n  <tr>\n    <td>How to Foster a Vegetable, an Instruction [EN]*</td>\n    <td>$7.78</td>\n    <td>-</td>\n    <td>-</td>\n </tr>\n  <tr>\n    <td>How to Foster a Vegetable, an Instruction [RU]*</td>\n    <td>$22.49</td>\n    <td>-</td>\n    <td>-</td>\n </tr>\n</table>\n<p><em>*For the article \"How to Foster a Vegetable, an Instruction\" at the time of publication are not payout</em></p>\n<h3>Now let's talk about things that are most interesting for me personally. Who are those people who vote for me?</h3>\n<p>From the 1 article on EN - $57.92</p>\n<ul>\n <li>@wang (470,788 SP) </li>\n <li>@bitcoin2016 (300,310 SP)</li>\n <li>@apple (125,630 SP)</li>\n <li>@steemit200 (405,282 SP)</li>\n <li>@au1nethyb1 (301,061 SP)</li>\n</ul>\n<p>From the 1 article on RU - $41.23</p>\n<ul>\n <li>@testdrive (90,675 SP) </li>\n <li>@paladin (274,434 SP)</li>\n <li>@steemit200 (405,282 SP)</li>\n <li>@badassmother (182,448 SP)</li>\n <li>@au1nethyb1 (301,061 SP)</li>\n</ul>\n<p>From the 2 article on EN - $55.47</p>\n<ul>\n <li>@freedom (377,100 SP)</li>\n <li>@skywalker (450,584 SP)</li>\n <li>@steemit200 (405,282 SP)</li>\n <li>@badassmother (182,448 SP)</li>\n <li>@au1nethyb1 (301,061 SP)</li>\n <li>@rossco99 (105,766 SP)</li>\n</ul>\n<p>From the 2 article on RU - $80.91</p>\n<ul>\n <li>@wang (470,788 SP)</li>\n <li>@paladin (274,434 SP)</li>\n <li>@alphabet (233,520 SP)</li>\n <li>@rossco99 (105,766 SP)</li>\n <li>@satoshifund (247,061 SP)</li>\n <li>@complexring (477,325 SP)</li>\n</ul>\n<p>From the 3 article on EN - $7.78</p>\n<ul>\n <li>@wang (470,788 SP)</li>\n <li>@anonymous (93,043 SP)</li>\n</ul>\n<p>From the 3 article on RU - $22.49</p>\n<ul>\n <li>@au1nethyb1 (301,061 SP)</li>\n <li>@badassmother (182,448 SP)</li>\n <li>@rossco99 (105,766 SP)</li>\n <li>@gavvet (75,168 SP)</li>\n <li>@pharesim (622,313 SP)</li>\n</ul>\n<h3>What conclusions can be made from it?</h3>\n<p>Obviously, the same accounts @wang, @steemit200, @au1nethyb1, @badassmother, @rossco99 have been voting for me for these 3 days. It's cool and shitty at the same time. It's cool, because it gives visibility to my posts, and other people can notice me, also I can earn a bit and, at least, pay off my costs on a translator.</p>\n<p>Of course, I appreciate what these users did for me. I really want to know who these people are. Do they speak Russian? Do they read my articles or just use some kind of a smart algorithm, part of which I became, in voting?</p>\n<p>Dear whales, if you are real and you are reading my articles at the moment, I would like to get to know you. If it's possible, please let me now in the comments, who you are and why you support my posts. Or you can privately text me on steemit.chat.</p>\n<p>This uncertainty freaks me out. If the main income from my posts is made by my regular readers who really care what I write about, it gives me confidence and stability. If it's all about the algorithms, well\u2026 the algorithms may change at any moment.</p>\n<h2>Comments</h2>\n<p>My posts in Russian are also commented more often. It seems to me that even my posts in English have more comments from the Russian guys))) I think it's because I am quite active in Russian chats and I mostly leave comments on the Russian-speaking segment of Steemit. I am much obliged to everyone for the support and feedback.</p>\n<h2>Expenses</h2>\n<p>Once again I'd like to quote the questions from @primus, \"How much did you pay the translators and editors? What other costs did you have?\" People also asked me about other difficulties I faced during the experiment.</p>\n<p>I have the two types of expenses - time and payments to translators. I am not a professional writer, I write the articles on my own and don't have any editors. I have two friends, they also write on Steemit, we exchange the articles with each other before translating and posting. It helps to get the first feedback and correct some details. I have already told you that I spend a lot of time on an article, so don't get surprised by the numbers.</p>\n<p><table>\n  <tr>\n    <td>Article</td>\n    <td>Time<br>to write</td>\n    <td>Translation<br>costs</td>\n </tr>\n  <tr>\n    <td>Is it possible to make money on Steemit? 30 Days Steemit Experiment</td>\n    <td>2 days</td>\n    <td>$13,50</td>\n  </tr>\n  <tr>\n    <td>I am an idiot! Cashing on Steemit. Is it the most Important? </td>\n    <td>5 hours</td>\n    <td>$11,70</td>\n </tr>\n  <tr>\n    <td>How to Foster a Vegetable, an Instruction </td>\n    <td>5 hours</td>\n    <td>payment on the fact</td>\n </tr>\n</table></p>\n<p>To promote my first two articles I spent 20 dollars on each one. It didn't bring any results in my case. I guess it's too early to calculate the profit right now, I will give you more details after 7 days of posting.</p>\n<p>As for difficulties, the first one I had was finding a translator who would do his job well and quickly. Good professionals are often busy for days ahead, so you need to have several people to work with. For all the time I have worked with 6 people, I order regularly from two of them.</p>\n<p>I suppose, the main difficulty, not only for me, but for the most of Steemit users, is to make your article noticeable.&nbsp;</p>\n<h2>Conclusions</h2>\n<p>In general, I am happy about the results of the first 3 days. I get upvoted regularly by the small whales, but I do realize that everything may change, maybe after posting this article and such statistics.</p>\n</html>",
+    "body": "I like your face! If your skin ever needs exfoliation, this is the recipe for you and super simple to make! I used to do a natural facial cleanser with just coconut oil and honey, and occasionally add brown sugar for exfoliation. This recipe contains lots of powerful nutrients that will leave your skin feeling fresh and rejuvenated! I found this recipe through [Sweet Simple Living](http://sweetsimpleliving.com/index.php/2015/09/01/aloe-green-tea-face-scrub/) blog. I am not affiliated with the blog, or any of the products I am using. This is something that I stumbled upon while perusing the many tunnels of Pinterest, and I really liked it so I'm passing it along to you guys!\n\n<a href=\"http://imgur.com/6m31z0l\"><img src=\"http://i.imgur.com/6m31z0lh.jpg\" title=\"source: imgur.com\" /></a>\n\n**Aloe and Green Tea Face Scrub:**\n- 1/3 cup Coconut Oil ( I melted my coconut oil to measure it, but the consistency was too liquidy with the other ingredients, so I cooled it and it turned out much better)\n- 1/4 cup Sugar\n- 1 Tbs. Aloe Vera Gelly\n- 2 Green Tea Bags\n- 3-4 drops Vitamin E Oil \n- 5-6 drops Tea Tree Oil\n\n<a href=\"http://imgur.com/6oh3x8K\"><img src=\"http://i.imgur.com/6oh3x8Kh.jpg\" title=\"source: imgur.com\" /></a>\n\nCoconut oil is naturally anti-bacterial and anti-fungal, and also a great moisturizer. Aloe Vera is an anti-inflammatory ingredient and also promotes new cell growth. Sugar is for the exfoliation. Green tea has anti-aging properties to reduce wrinkles and sun damage (I love this part because I am in the sun ALL THE TIME!). Vitamin E oils work to block free radicals in your body that cause aging. Tea Tree oil is used to fight acne (I do develop the occasional breakout every now and then, so having the extra fighting power is great!). \n\nYou don't have to scrub hard because the sugar will do the work for you!\n<a href=\"http://imgur.com/Bu1wrem\"><img src=\"http://i.imgur.com/Bu1wremh.jpg\" title=\"source: imgur.com\" /></a>\n<a href=\"http://imgur.com/xlcBRWU\"><img src=\"http://i.imgur.com/xlcBRWUh.jpg\" title=\"source: imgur.com\" /></a>\n\nLeft my skin feeling extra smooth and smelling like cookies!\n<a href=\"http://imgur.com/jVezSCh\"><img src=\"http://i.imgur.com/jVezSChh.jpg\" title=\"source: imgur.com\" /></a>\n\nTry it! Really easy and you can save the leftovers for later!\n\nUse this scrub once a week to exfoliate. If you want just a simple day to day cleanser without the sugar to exfoliate, use only coconut oil and honey!\n\nJill",
     "category": "life",
-    "children": 6,
-    "created": "2016-09-09T19:10:42",
+    "children": 9,
+    "created": "2016-09-10T05:39:51",
     "curator_payout_value": "0.000 HBD",
     "depth": 0,
     "is_paidout": false,
     "json_metadata": {
       "image": [
-        "https://i.imgsafe.org/2fcd074bd9.jpg"
+        "http://i.imgur.com/6m31z0lh.jpg",
+        "http://i.imgur.com/6oh3x8Kh.jpg",
+        "http://i.imgur.com/Bu1wremh.jpg",
+        "http://i.imgur.com/xlcBRWUh.jpg",
+        "http://i.imgur.com/jVezSChh.jpg"
+      ],
+      "links": [
+        "http://sweetsimpleliving.com/index.php/2015/09/01/aloe-green-tea-face-scrub/",
+        "http://imgur.com/6m31z0l",
+        "http://imgur.com/6oh3x8K",
+        "http://imgur.com/Bu1wrem",
+        "http://imgur.com/xlcBRWU",
+        "http://imgur.com/jVezSCh"
       ],
       "tags": [
         "life",
-        "experiment",
-        ""
-      ],
-      "users": [
-        "xanoxt",
-        "wang",
-        "bitcoin2016",
-        "apple",
-        "steemit200",
-        "au1nethyb1",
-        "testdrive",
-        "paladin",
-        "badassmother",
-        "freedom",
-        "skywalker",
-        "rossco99",
-        "alphabet",
-        "satoshifund",
-        "complexring",
-        "anonymous",
-        "gavvet",
-        "pharesim",
-        "primus"
+        "health",
+        "environment",
+        "beauty"
       ]
     },
     "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 21882065053592,
-    "payout": 92.535,
-    "payout_at": "2016-09-16T19:10:42",
-    "pending_payout_value": "92.535 HBD",
+    "net_rshares": 21346248820335,
+    "payout": 48.384,
+    "payout_at": "2016-09-17T05:39:51",
+    "pending_payout_value": "48.384 HBD",
     "percent_hbd": 10000,
-    "permlink": "my-30-days-experiment-on-steemit-results-of-the-first-3-days",
-    "post_id": 1187704,
+    "permlink": "an-environmentalists-diary-part-2-diy-aloe-and-green-tea-face-scrub",
+    "post_id": 1192637,
     "promoted": "0.000 HBD",
     "reblogs": 0,
     "replies": [],
@@ -12714,11 +12354,11 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
-      "total_votes": 126
+      "total_votes": 38
     },
-    "title": "My 30 days experiment on Steemit. Results of the first 3 days",
-    "updated": "2016-09-09T20:47:48",
-    "url": "/life/@lehard/my-30-days-experiment-on-steemit-results-of-the-first-3-days"
+    "title": "An Environmentalists' Diary; Part 2: DIY Aloe and Green Tea Face Scrub",
+    "updated": "2016-09-10T05:39:51",
+    "url": "/life/@jillwirt/an-environmentalists-diary-part-2-diy-aloe-and-green-tea-face-scrub"
   },
   {
     "active_votes": [
@@ -13148,9 +12788,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 21561094790851,
-    "payout": 90.764,
+    "payout": 47.92,
     "payout_at": "2016-09-16T14:50:57",
-    "pending_payout_value": "90.764 HBD",
+    "pending_payout_value": "47.920 HBD",
     "percent_hbd": 10000,
     "permlink": "20-questions-with-mrs-steemit",
     "post_id": 1184973,

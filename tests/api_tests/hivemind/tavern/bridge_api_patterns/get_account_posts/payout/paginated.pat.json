@@ -577,108 +577,6 @@
   {
     "active_votes": [
       {
-        "rshares": 41182815711,
-        "voter": "ranko-k"
-      },
-      {
-        "rshares": 4970667525,
-        "voter": "on0tole"
-      },
-      {
-        "rshares": 33342464349,
-        "voter": "smailer"
-      }
-    ],
-    "author": "blocktrades",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 68.63,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Dang, and yet somehow, my \"random voting\" is somehow missing this post.. No doubt you will get lucky next time.",
-    "category": "blocktrades",
-    "children": 1,
-    "created": "2016-09-07T03:52:00",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 1,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "blocktrades"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 79495947585,
-    "parent_author": "ranko-k",
-    "parent_permlink": "blocktrades-voting-pattern",
-    "payout": 0.048,
-    "payout_at": "2016-09-14T03:52:00",
-    "pending_payout_value": "0.048 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-ranko-k-blocktrades-voting-pattern-20160907t035201614z",
-    "post_id": 1154793,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 3
-    },
-    "title": "RE: Blocktrades Voting Pattern",
-    "updated": "2016-09-07T03:52:00",
-    "url": "/blocktrades/@ranko-k/blocktrades-voting-pattern#@blocktrades/re-ranko-k-blocktrades-voting-pattern-20160907t035201614z"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 54597858386,
-        "voter": "furion"
-      }
-    ],
-    "author": "blocktrades",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 68.63,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "Dan and I were discussing some ideas related to security of liquid funds yesterday. It's always good to get additional input.",
-    "category": "steemit",
-    "children": 1,
-    "created": "2016-08-18T19:51:54",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 1,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "steemit"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 54597858386,
-    "parent_author": "furion",
-    "parent_permlink": "security-feature-proposal-to-reduce-the-risks-in-a-bitfinex-scenario-for-steem-and-sbd",
-    "payout": 0.046,
-    "payout_at": "2016-08-25T19:51:54",
-    "pending_payout_value": "0.046 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-furion-security-feature-proposal-to-reduce-the-risks-in-a-bitfinex-scenario-for-steem-and-sbd-20160818t195155768z",
-    "post_id": 876621,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 1
-    },
-    "title": "RE: Security Feature Proposal to reduce the risks in a Bitfinex Scenario for STEEM and SBD",
-    "updated": "2016-08-18T19:51:54",
-    "url": "/steemit/@furion/security-feature-proposal-to-reduce-the-risks-in-a-bitfinex-scenario-for-steem-and-sbd#@blocktrades/re-furion-security-feature-proposal-to-reduce-the-risks-in-a-bitfinex-scenario-for-steem-and-sbd-20160818t195155768z"
-  },
-  {
-    "active_votes": [
-      {
         "rshares": 89555263007,
         "voter": "sigmajin"
       },
@@ -729,6 +627,108 @@
     "title": "RE: BlockTrades Witness Report for 3rd Week of August",
     "updated": "2016-08-22T03:37:12",
     "url": "/witness-category/@blocktrades/blocktrades-witness-report-for-3rd-week-of-august#@blocktrades/re-sigmajin-re-complexring-re-blocktrades-re-pjheinz-re-blocktrades-blocktrades-witness-report-for-3rd-week-of-august-20160822t033722659z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 41182815711,
+        "voter": "ranko-k"
+      },
+      {
+        "rshares": 4970667525,
+        "voter": "on0tole"
+      },
+      {
+        "rshares": 33342464349,
+        "voter": "smailer"
+      }
+    ],
+    "author": "blocktrades",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 68.63,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Dang, and yet somehow, my \"random voting\" is somehow missing this post.. No doubt you will get lucky next time.",
+    "category": "blocktrades",
+    "children": 1,
+    "created": "2016-09-07T03:52:00",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "blocktrades"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 79495947585,
+    "parent_author": "ranko-k",
+    "parent_permlink": "blocktrades-voting-pattern",
+    "payout": 0.026,
+    "payout_at": "2016-09-14T03:52:00",
+    "pending_payout_value": "0.026 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-ranko-k-blocktrades-voting-pattern-20160907t035201614z",
+    "post_id": 1154793,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 3
+    },
+    "title": "RE: Blocktrades Voting Pattern",
+    "updated": "2016-09-07T03:52:00",
+    "url": "/blocktrades/@ranko-k/blocktrades-voting-pattern#@blocktrades/re-ranko-k-blocktrades-voting-pattern-20160907t035201614z"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 54597858386,
+        "voter": "furion"
+      }
+    ],
+    "author": "blocktrades",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 68.63,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "Dan and I were discussing some ideas related to security of liquid funds yesterday. It's always good to get additional input.",
+    "category": "steemit",
+    "children": 1,
+    "created": "2016-08-18T19:51:54",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 54597858386,
+    "parent_author": "furion",
+    "parent_permlink": "security-feature-proposal-to-reduce-the-risks-in-a-bitfinex-scenario-for-steem-and-sbd",
+    "payout": 0.025,
+    "payout_at": "2016-08-25T19:51:54",
+    "pending_payout_value": "0.025 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-furion-security-feature-proposal-to-reduce-the-risks-in-a-bitfinex-scenario-for-steem-and-sbd-20160818t195155768z",
+    "post_id": 876621,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 1
+    },
+    "title": "RE: Security Feature Proposal to reduce the risks in a Bitfinex Scenario for STEEM and SBD",
+    "updated": "2016-08-18T19:51:54",
+    "url": "/steemit/@furion/security-feature-proposal-to-reduce-the-risks-in-a-bitfinex-scenario-for-steem-and-sbd#@blocktrades/re-furion-security-feature-proposal-to-reduce-the-risks-in-a-bitfinex-scenario-for-steem-and-sbd-20160818t195155768z"
   },
   {
     "active_votes": [

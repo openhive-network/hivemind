@@ -735,9 +735,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 80964590737004,
-    "payout": 1733.51,
+    "payout": 988.456,
     "payout_at": "2016-08-23T18:11:03",
-    "pending_payout_value": "1733.510 HBD",
+    "pending_payout_value": "988.456 HBD",
     "percent_hbd": 10000,
     "permlink": "heavy-duty-witness-node-infrastructure",
     "post_id": 838527,
@@ -810,9 +810,9 @@
     "net_rshares": 6544938101244,
     "parent_author": "jesta",
     "parent_permlink": "re-gtg-heavy-duty-witness-node-infrastructure-20160816t191107309z",
-    "payout": 17.811,
+    "payout": 10.116,
     "payout_at": "2016-08-23T20:18:57",
-    "pending_payout_value": "17.811 HBD",
+    "pending_payout_value": "10.116 HBD",
     "percent_hbd": 10000,
     "permlink": "re-jesta-re-gtg-heavy-duty-witness-node-infrastructure-20160816t201857176z",
     "post_id": 840712,
@@ -963,9 +963,9 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 568650179247,
-    "payout": 0.786,
+    "payout": 0.432,
     "payout_at": "2016-08-28T12:29:18",
-    "pending_payout_value": "0.786 HBD",
+    "pending_payout_value": "0.432 HBD",
     "percent_hbd": 10000,
     "permlink": "missing-rewards-while-mining",
     "post_id": 919311,
@@ -981,66 +981,6 @@
     "title": "Missing rewards while mining - common mistake with keys",
     "updated": "2016-08-21T13:02:30",
     "url": "/mining/@gtg/missing-rewards-while-mining"
-  },
-  {
-    "active_votes": [
-      {
-        "rshares": 347121336514,
-        "voter": "ash"
-      },
-      {
-        "rshares": 1015832036,
-        "voter": "johnerminer"
-      },
-      {
-        "rshares": 48992052363,
-        "voter": "gtg"
-      },
-      {
-        "rshares": 23149067557,
-        "voter": "firepower"
-      }
-    ],
-    "author": "gtg",
-    "author_payout_value": "0.000 HBD",
-    "author_reputation": 57.34,
-    "beneficiaries": [],
-    "blacklists": [],
-    "body": "I am keeping an eye on #introduceyourself channel, as a place where newcomers can promote their introduction posts without being flooded by other random links.\nRules are simple: post link to your introduction, talk with other newcomers. When you are no longer newcomer, curate others, encourage them to enjoy this platform.\n\n_**introduce:**_\n> to present to a particular group of individuals\n> or to the general public for or as if **for the first time** by a formal act\n\nplease, do not abuse this tag or channel\n\n**gandalf** on steemit.chat",
-    "category": "steemit-chat",
-    "children": 0,
-    "created": "2016-08-21T14:30:51",
-    "curator_payout_value": "0.000 HBD",
-    "depth": 1,
-    "is_paidout": false,
-    "json_metadata": {
-      "tags": [
-        "introduceyourself",
-        "steemit-chat"
-      ]
-    },
-    "max_accepted_payout": "1000000.000 HBD",
-    "net_rshares": 420278288470,
-    "parent_author": "ash",
-    "parent_permlink": "steemit-chat-stats-and-rules",
-    "payout": 0.529,
-    "payout_at": "2016-08-28T14:30:51",
-    "pending_payout_value": "0.529 HBD",
-    "percent_hbd": 10000,
-    "permlink": "re-ash-steemit-chat-stats-and-rules-20160821t143046855z",
-    "post_id": 920538,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
-    "stats": {
-      "flag_weight": 0.0,
-      "gray": false,
-      "hide": false,
-      "total_votes": 4
-    },
-    "title": "RE: Steemit.chat - Stats & Rules",
-    "updated": "2016-08-21T14:30:51",
-    "url": "/steemit-chat/@ash/steemit-chat-stats-and-rules#@gtg/re-ash-steemit-chat-stats-and-rules-20160821t143046855z"
   },
   {
     "active_votes": [
@@ -1096,6 +1036,66 @@
   {
     "active_votes": [
       {
+        "rshares": 347121336514,
+        "voter": "ash"
+      },
+      {
+        "rshares": 1015832036,
+        "voter": "johnerminer"
+      },
+      {
+        "rshares": 48992052363,
+        "voter": "gtg"
+      },
+      {
+        "rshares": 23149067557,
+        "voter": "firepower"
+      }
+    ],
+    "author": "gtg",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 57.34,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "I am keeping an eye on #introduceyourself channel, as a place where newcomers can promote their introduction posts without being flooded by other random links.\nRules are simple: post link to your introduction, talk with other newcomers. When you are no longer newcomer, curate others, encourage them to enjoy this platform.\n\n_**introduce:**_\n> to present to a particular group of individuals\n> or to the general public for or as if **for the first time** by a formal act\n\nplease, do not abuse this tag or channel\n\n**gandalf** on steemit.chat",
+    "category": "steemit-chat",
+    "children": 0,
+    "created": "2016-08-21T14:30:51",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 1,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "introduceyourself",
+        "steemit-chat"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 420278288470,
+    "parent_author": "ash",
+    "parent_permlink": "steemit-chat-stats-and-rules",
+    "payout": 0.277,
+    "payout_at": "2016-08-28T14:30:51",
+    "pending_payout_value": "0.277 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-ash-steemit-chat-stats-and-rules-20160821t143046855z",
+    "post_id": 920538,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": false,
+      "hide": false,
+      "total_votes": 4
+    },
+    "title": "RE: Steemit.chat - Stats & Rules",
+    "updated": "2016-08-21T14:30:51",
+    "url": "/steemit-chat/@ash/steemit-chat-stats-and-rules#@gtg/re-ash-steemit-chat-stats-and-rules-20160821t143046855z"
+  },
+  {
+    "active_votes": [
+      {
         "rshares": 9975325205,
         "voter": "johnerfx"
       },
@@ -1132,9 +1132,9 @@
     "net_rshares": 59659471891,
     "parent_author": "artakan",
     "parent_permlink": "important-info-for-steem-miner-do-not-use-your-steemit-com-account",
-    "payout": 0.078,
+    "payout": 0.039,
     "payout_at": "2016-08-28T12:33:57",
-    "pending_payout_value": "0.078 HBD",
+    "pending_payout_value": "0.039 HBD",
     "percent_hbd": 10000,
     "permlink": "re-artakan-important-info-for-steem-miner-do-not-use-your-steemit-com-account-20160821t123356072z",
     "post_id": 919363,
@@ -1188,9 +1188,9 @@
     "net_rshares": 91597365165,
     "parent_author": "djm34",
     "parent_permlink": "re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t155929474z",
-    "payout": 0.076,
+    "payout": 0.037,
     "payout_at": "2016-09-06T16:11:12",
-    "pending_payout_value": "0.076 HBD",
+    "pending_payout_value": "0.037 HBD",
     "percent_hbd": 10000,
     "permlink": "re-djm34-re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t161109296z",
     "post_id": 1057820,
@@ -1241,9 +1241,9 @@
     "net_rshares": 56150216349,
     "parent_author": "skypilot",
     "parent_permlink": "my-first-real-post-was-a-success-and-i-would-like-to-share-the-story",
-    "payout": 0.056,
+    "payout": 0.028,
     "payout_at": "2016-09-03T11:14:45",
-    "pending_payout_value": "0.056 HBD",
+    "pending_payout_value": "0.028 HBD",
     "percent_hbd": 10000,
     "permlink": "re-skypilot-my-first-real-post-was-a-success-and-i-would-like-to-share-the-story-20160827t111440904z",
     "post_id": 1011534,
