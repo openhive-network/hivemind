@@ -1,5 +1,8 @@
 [
   {
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4923120466666,
@@ -901,9 +904,6 @@
     "percent_hbd": 10000,
     "permlink": "blocktrades-adds-support-for-steem-dollars-greater-than-bitcoin-and-more",
     "post_id": 58260,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -915,6 +915,9 @@
     "url": "/bitshares/@blocktrades/blocktrades-adds-support-for-steem-dollars-greater-than-bitcoin-and-more"
   },
   {
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4921550602200,
@@ -1388,9 +1391,6 @@
     "percent_hbd": 10000,
     "permlink": "bitcoin-payments-accepted-in-20s-soon-to-be-6s",
     "post_id": 51772,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
     "stats": {
       "flag_weight": 3.0,
       "gray": false,
@@ -1402,6 +1402,9 @@
     "url": "/blocktrades/@blocktrades/bitcoin-payments-accepted-in-20s-soon-to-be-6s"
   },
   {
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4921550602200,
@@ -1887,9 +1890,6 @@
     "percent_hbd": 10000,
     "permlink": "introducing-the-latest-dollar-stable-coin-trade-usdlabor",
     "post_id": 50564,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,

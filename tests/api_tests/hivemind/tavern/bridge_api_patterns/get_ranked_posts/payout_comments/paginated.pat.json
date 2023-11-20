@@ -1,5 +1,8 @@
 [
   {
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 29864685009305,
@@ -121,9 +124,6 @@
     "percent_hbd": 10000,
     "permlink": "re-jamtaylor-steemit-photo-challenge-4-winners-announcement-guest-judge-condra-20160815t163904911z",
     "post_id": 819415,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -135,6 +135,9 @@
     "url": "/steemitphotochallenge/@jamtaylor/steemit-photo-challenge-4-winners-announcement-guest-judge-condra#@blueorgy/re-jamtaylor-steemit-photo-challenge-4-winners-announcement-guest-judge-condra-20160815t163904911z"
   },
   {
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 29864685009305,
@@ -224,9 +227,6 @@
     "percent_hbd": 10000,
     "permlink": "re-blocktalk-with-nexus-colin-cantrell-question-thread-20160815t194601",
     "post_id": 822333,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

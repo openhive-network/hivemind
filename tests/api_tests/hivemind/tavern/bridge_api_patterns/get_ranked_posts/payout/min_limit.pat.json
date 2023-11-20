@@ -1,5 +1,8 @@
 [
   {
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 13532558624996,
@@ -1562,9 +1565,6 @@
     "percent_hbd": 10000,
     "permlink": "steemmag-steemit-s-weekend-digest-9-of-community-curation-and-reputation-chats-with-a-whale-steemit-chat-lead-moderators-a-day",
     "post_id": 1192096,
-    "promoted": "0.000 HBD",
-    "reblogs": 0,
-    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

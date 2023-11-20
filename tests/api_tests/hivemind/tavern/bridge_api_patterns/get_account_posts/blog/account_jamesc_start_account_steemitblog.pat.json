@@ -1,5 +1,8 @@
 [
   {
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 1,
     "active_votes": [
       {
         "rshares": 28327484456007,
@@ -610,12 +613,9 @@
     "percent_hbd": 10000,
     "permlink": "impossible-a-conversation-with-a-statist-about-starting-a-business",
     "post_id": 1103442,
-    "promoted": "0.000 HBD",
     "reblogged_by": [
       "jamesc"
     ],
-    "reblogs": 1,
-    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -627,6 +627,9 @@
     "url": "/anarchism/@churdtzu/impossible-a-conversation-with-a-statist-about-starting-a-business"
   },
   {
+    "promoted": "1.000 HBD",
+    "replies": [],
+    "reblogs": 1,
     "active_votes": [
       {
         "rshares": 713849744184,
@@ -1902,12 +1905,9 @@
     "percent_hbd": 10000,
     "permlink": "peerplays-status-udate-09-01-2016",
     "post_id": 1086632,
-    "promoted": "1.000 HBD",
     "reblogged_by": [
       "jamesc"
     ],
-    "reblogs": 1,
-    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -1919,6 +1919,9 @@
     "url": "/peerplays/@peerplays/peerplays-status-udate-09-01-2016"
   },
   {
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 1,
     "active_votes": [
       {
         "rshares": 7408961356962,
@@ -3503,12 +3506,9 @@
     "percent_hbd": 10000,
     "permlink": "my-thoughts-on-ross",
     "post_id": 1087480,
-    "promoted": "0.000 HBD",
     "reblogged_by": [
       "jamesc"
     ],
-    "reblogs": 1,
-    "replies": [],
     "stats": {
       "flag_weight": 1.0,
       "gray": false,
