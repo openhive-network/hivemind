@@ -1,8 +1,5 @@
 [
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 231815399848,
@@ -887,7 +884,10 @@
     "pending_payout_value": "18.922 HBD",
     "percent_hbd": 10000,
     "permlink": "mackerelcoin-and-my-socioeconomic-observations-from-prison-part-1-by-charlie-shrem",
-    "post_id": 1258026,
+    "post_id": 1258012,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -899,9 +899,6 @@
     "url": "/story/@charlieshrem/mackerelcoin-and-my-socioeconomic-observations-from-prison-part-1-by-charlie-shrem"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 1912208431174,
@@ -1638,7 +1635,10 @@
     "pending_payout_value": "17.360 HBD",
     "percent_hbd": 10000,
     "permlink": "artificial-intelligence-has-made-usd21-307-in-blogging-rewards-what-is-the-future-of-ai-on-steemit",
-    "post_id": 1257053,
+    "post_id": 1257039,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1650,9 +1650,6 @@
     "url": "/ai/@stellabelle/artificial-intelligence-has-made-usd21-307-in-blogging-rewards-what-is-the-future-of-ai-on-steemit"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 2099331201615,
@@ -2394,7 +2391,10 @@
     "pending_payout_value": "11.485 HBD",
     "percent_hbd": 10000,
     "permlink": "the-gem-followers-pick-week1-day2",
-    "post_id": 1253027,
+    "post_id": 1253026,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -2406,9 +2406,6 @@
     "url": "/hidden-gems/@dragonslayer109/the-gem-followers-pick-week1-day2"
   },
   {
-    "promoted": "6.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 3662817493706,
@@ -3373,6 +3370,9 @@
     "percent_hbd": 10000,
     "permlink": "minnow-and-data-a-steemit-tale-part-2",
     "post_id": 1246471,
+    "promoted": "6.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -3384,9 +3384,6 @@
     "url": "/steemit/@stellabelle/minnow-and-data-a-steemit-tale-part-2"
   },
   {
-    "promoted": "3.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 494679319738,
@@ -4477,6 +4474,9 @@
     "percent_hbd": 10000,
     "permlink": "minnow-and-data-a-steemit-tale-part-1",
     "post_id": 1246064,
+    "promoted": "3.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -4488,9 +4488,6 @@
     "url": "/steemit/@stellabelle/minnow-and-data-a-steemit-tale-part-1"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 55453018357,
@@ -6354,6 +6351,9 @@
     "percent_hbd": 10000,
     "permlink": "steemit-exclusive-flippin-out-original-song-i-wrote-on-house-arrest-by-charlie-shrem",
     "post_id": 1245517,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -6365,9 +6365,6 @@
     "url": "/music/@charlieshrem/steemit-exclusive-flippin-out-original-song-i-wrote-on-house-arrest-by-charlie-shrem"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4574343150157,
@@ -7139,6 +7136,9 @@
     "percent_hbd": 10000,
     "permlink": "the-gem-followers-pick-week1-day1",
     "post_id": 1243698,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -7150,9 +7150,6 @@
     "url": "/hidden-gems/@dragonslayer109/the-gem-followers-pick-week1-day1"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 28655823905500,
@@ -9547,6 +9544,9 @@
     "percent_hbd": 10000,
     "permlink": "a-geek-in-prison-a-life-series-by-charlie-shrem-part-4-unit-life-and-the-shrempresso",
     "post_id": 1234984,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -9558,9 +9558,6 @@
     "url": "/story/@charlieshrem/a-geek-in-prison-a-life-series-by-charlie-shrem-part-4-unit-life-and-the-shrempresso"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 28655707819469,
@@ -10644,6 +10641,9 @@
     "percent_hbd": 10000,
     "permlink": "steem-0-14-1-released-hardfork-postponed-until-9-20-2016",
     "post_id": 1232362,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 2.0,
       "gray": false,
@@ -10655,9 +10655,6 @@
     "url": "/steem/@steemitblog/steem-0-14-1-released-hardfork-postponed-until-9-20-2016"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 480253576002,
@@ -11361,6 +11358,9 @@
     "percent_hbd": 10000,
     "permlink": "the-weekly-gem-followers-pick-week-1",
     "post_id": 1229646,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -11372,9 +11372,6 @@
     "url": "/hidden-gems/@dragonslayer109/the-weekly-gem-followers-pick-week-1"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 466039142469,
@@ -12174,6 +12171,9 @@
     "percent_hbd": 10000,
     "permlink": "progression-painting-inspired-by-a-photo-and-a-poem-by-kate-cloud",
     "post_id": 1226624,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -12185,9 +12185,6 @@
     "url": "/art/@katecloud/progression-painting-inspired-by-a-photo-and-a-poem-by-kate-cloud"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 2001603815383,
@@ -12934,6 +12931,9 @@
     "percent_hbd": 10000,
     "permlink": "the-weekly-gem-followers-pick-guide-for-those-chosen",
     "post_id": 1221701,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -12945,9 +12945,6 @@
     "url": "/hidden-gems/@dragonslayer109/the-weekly-gem-followers-pick-guide-for-those-chosen"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 494163189061,
@@ -13606,6 +13603,9 @@
     "percent_hbd": 10000,
     "permlink": "the-weekly-gem-followers-pick-system-behind-the-pick",
     "post_id": 1220614,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -13617,9 +13617,6 @@
     "url": "/hidden-gems/@dragonslayer109/the-weekly-gem-followers-pick-system-behind-the-pick"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 508066983116,
@@ -14374,6 +14371,9 @@
     "percent_hbd": 10000,
     "permlink": "progression-drawing-of-a-lab-and-a-poem-by-kate-cloud",
     "post_id": 1215777,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -14385,9 +14385,6 @@
     "url": "/art/@katecloud/progression-drawing-of-a-lab-and-a-poem-by-kate-cloud"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 493904355833,
@@ -15569,6 +15566,9 @@
     "percent_hbd": 10000,
     "permlink": "next-gen-social-media-survival-guide",
     "post_id": 1213857,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -15580,9 +15580,6 @@
     "url": "/social-media/@stellabelle/next-gen-social-media-survival-guide"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 521894932858,
@@ -16620,6 +16617,9 @@
     "percent_hbd": 10000,
     "permlink": "progression-painting-of-a-mandala-and-a-poem-the-moon-by-kate-cloud",
     "post_id": 1203111,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -16631,9 +16631,6 @@
     "url": "/art/@katecloud/progression-painting-of-a-mandala-and-a-poem-the-moon-by-kate-cloud"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 521760067740,
@@ -18918,6 +18915,9 @@
     "percent_hbd": 10000,
     "permlink": "how-to-live-completely-off-steem-using-a-virtual-and-physical-debit-card-topped-up-with-steem",
     "post_id": 1198186,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -18929,9 +18929,6 @@
     "url": "/steem/@charlieshrem/how-to-live-completely-off-steem-using-a-virtual-and-physical-debit-card-topped-up-with-steem"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 535682620622,
@@ -19955,6 +19952,9 @@
     "percent_hbd": 10000,
     "permlink": "my-1st-woodburning-and-a-poem-by-kate-cloud",
     "post_id": 1189453,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -19966,9 +19966,6 @@
     "url": "/art/@katecloud/my-1st-woodburning-and-a-poem-by-kate-cloud"
   },
   {
-    "promoted": "1.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 28078695107280,
@@ -21935,6 +21932,9 @@
     "percent_hbd": 10000,
     "permlink": "justification-for-104-week-power-down",
     "post_id": 1187991,
+    "promoted": "1.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -21946,9 +21946,6 @@
     "url": "/steem/@dantheman/justification-for-104-week-power-down"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 197345244541,
@@ -23104,6 +23101,9 @@
     "percent_hbd": 10000,
     "permlink": "steem-0-14-0-released",
     "post_id": 1187187,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

@@ -1,8 +1,5 @@
 [
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 1,
     "active_votes": [
       {
         "rshares": 28327242617121,
@@ -1732,9 +1729,12 @@
     "percent_hbd": 10000,
     "permlink": "announcing-steem-0-14-0-release-candidate",
     "post_id": 1102424,
+    "promoted": "0.000 HBD",
     "reblogged_by": [
       "jamesc"
     ],
+    "replies": [],
+    "reblogs": 1,
     "stats": {
       "flag_weight": 1.0,
       "gray": false,
@@ -1746,9 +1746,6 @@
     "url": "/steem/@steemitblog/announcing-steem-0-14-0-release-candidate"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 1,
     "active_votes": [
       {
         "rshares": 28327484456007,
@@ -2359,9 +2356,12 @@
     "percent_hbd": 10000,
     "permlink": "impossible-a-conversation-with-a-statist-about-starting-a-business",
     "post_id": 1103442,
+    "promoted": "0.000 HBD",
     "reblogged_by": [
       "jamesc"
     ],
+    "replies": [],
+    "reblogs": 1,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -2373,9 +2373,6 @@
     "url": "/anarchism/@churdtzu/impossible-a-conversation-with-a-statist-about-starting-a-business"
   },
   {
-    "promoted": "1.000 HBD",
-    "replies": [],
-    "reblogs": 1,
     "active_votes": [
       {
         "rshares": 713849744184,
@@ -3651,9 +3648,12 @@
     "percent_hbd": 10000,
     "permlink": "peerplays-status-udate-09-01-2016",
     "post_id": 1086632,
+    "promoted": "1.000 HBD",
     "reblogged_by": [
       "jamesc"
     ],
+    "replies": [],
+    "reblogs": 1,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,

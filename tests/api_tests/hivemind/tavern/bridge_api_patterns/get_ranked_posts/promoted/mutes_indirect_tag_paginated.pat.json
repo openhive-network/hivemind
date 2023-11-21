@@ -1,8 +1,5 @@
 [
   {
-    "promoted": "138.990 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 535956001874,
@@ -1205,6 +1202,9 @@
     "percent_hbd": 10000,
     "permlink": "when-concerning-steemit-i-ve-come-to-realize-i-m-too-old-for-this",
     "post_id": 1201660,
+    "promoted": "138.990 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1216,9 +1216,6 @@
     "url": "/philosophy/@tuck-fheman/when-concerning-steemit-i-ve-come-to-realize-i-m-too-old-for-this"
   },
   {
-    "promoted": "121.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 6861504603453,
@@ -1745,6 +1742,9 @@
     "percent_hbd": 10000,
     "permlink": "steemit-tutorial-8-getting-more-attention-by-using-the-promote-button-video",
     "post_id": 1070097,
+    "promoted": "121.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1756,9 +1756,6 @@
     "url": "/steemit/@marketingmonk/steemit-tutorial-8-getting-more-attention-by-using-the-promote-button-video"
   },
   {
-    "promoted": "110.001 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 12795811535287,
@@ -2145,6 +2142,9 @@
     "percent_hbd": 10000,
     "permlink": "the-only-index-you-should-know-to-successfully-buy-and-sell-steem-introducing-the-js-index",
     "post_id": 1066139,
+    "promoted": "110.001 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

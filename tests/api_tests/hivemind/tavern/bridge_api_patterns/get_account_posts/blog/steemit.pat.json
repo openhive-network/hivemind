@@ -1,8 +1,5 @@
 [
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 1,
     "active_votes": [
       {
         "rshares": 375241000000,
@@ -430,6 +427,9 @@
     "percent_hbd": 10000,
     "permlink": "firstpost",
     "post_id": 1,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 1,
     "stats": {
       "flag_weight": 2.0,
       "gray": false,

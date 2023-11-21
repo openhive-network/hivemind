@@ -1,8 +1,5 @@
 [
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4556805763203,
@@ -1390,6 +1387,9 @@
     "percent_hbd": 10000,
     "permlink": "blocktrades-witness-report-for-3rd-week-of-august",
     "post_id": 896102,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,

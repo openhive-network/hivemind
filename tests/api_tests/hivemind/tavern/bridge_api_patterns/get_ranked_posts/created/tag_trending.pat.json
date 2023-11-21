@@ -1,8 +1,5 @@
 [
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 7312372401189,
@@ -150,7 +147,10 @@
     "pending_payout_value": "5.192 HBD",
     "percent_hbd": 10000,
     "permlink": "cn-september-15-happy-mid-autumn-festival",
-    "post_id": 1252989,
+    "post_id": 1252988,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -162,9 +162,6 @@
     "url": "/cn/@oflyhigh/cn-september-15-happy-mid-autumn-festival"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 154351206,
@@ -195,7 +192,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 0,
     "permlink": "new-bug-on-the-iphone-makes-that-users-receive-emails-from-1970",
-    "post_id": 1252396,
+    "post_id": 1252395,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -207,9 +207,6 @@
     "url": "/trending/@trick0102/new-bug-on-the-iphone-makes-that-users-receive-emails-from-1970"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 16922057624,
@@ -334,6 +331,9 @@
     "percent_hbd": 10000,
     "permlink": "a-sidecar-twist-coctails",
     "post_id": 1248518,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -345,9 +345,6 @@
     "url": "/life/@skapaneas/a-sidecar-twist-coctails"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 7146278150613,
@@ -492,6 +489,9 @@
     "percent_hbd": 10000,
     "permlink": "cn-september-14",
     "post_id": 1242484,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -503,9 +503,6 @@
     "url": "/cn/@oflyhigh/cn-september-14"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 7122973115175,
@@ -667,6 +664,9 @@
     "percent_hbd": 10000,
     "permlink": "cn-september-13-30",
     "post_id": 1231495,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

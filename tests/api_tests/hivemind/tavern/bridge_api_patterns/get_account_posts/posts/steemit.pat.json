@@ -1,8 +1,5 @@
 [
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [],
     "author": "steemit",
     "author_payout_value": "0.000 HBD",
@@ -24,7 +21,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "muted-in-this-community",
-    "post_id": 1256862,
+    "post_id": 1256861,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -36,9 +36,6 @@
     "url": "/hive-198723/@steemit/muted-in-this-community"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 1,
     "active_votes": [
       {
         "rshares": 375241000000,
@@ -466,6 +463,9 @@
     "percent_hbd": 10000,
     "permlink": "firstpost",
     "post_id": 1,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 1,
     "stats": {
       "flag_weight": 2.0,
       "gray": false,

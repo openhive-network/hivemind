@@ -1,8 +1,5 @@
 [
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 591936986472,
@@ -1362,6 +1359,9 @@
     "percent_hbd": 10000,
     "permlink": "steemstats-0-3-5-improved-post-inspector-fixes-and-prep-for-0-14-0",
     "post_id": 1182225,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1373,9 +1373,6 @@
     "url": "/steemstats/@jesta/steemstats-0-3-5-improved-post-inspector-fixes-and-prep-for-0-14-0"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 13477926522085,
@@ -2513,6 +2510,9 @@
     "percent_hbd": 10000,
     "permlink": "anarchapulco-is-one-of-the-most-world-changing-conferences-ever",
     "post_id": 1188968,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

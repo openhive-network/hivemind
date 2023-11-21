@@ -1,8 +1,5 @@
 [
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 15699644918310,
@@ -744,6 +741,9 @@
     "percent_hbd": 10000,
     "permlink": "heavy-duty-witness-node-infrastructure",
     "post_id": 838527,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -755,9 +755,6 @@
     "url": "/witness-category/@gtg/heavy-duty-witness-node-infrastructure"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 6327963918037,
@@ -819,6 +816,9 @@
     "percent_hbd": 10000,
     "permlink": "re-jesta-re-gtg-heavy-duty-witness-node-infrastructure-20160816t201857176z",
     "post_id": 840712,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -830,9 +830,6 @@
     "url": "/witness-category/@gtg/heavy-duty-witness-node-infrastructure#@gtg/re-jesta-re-gtg-heavy-duty-witness-node-infrastructure-20160816t201857176z"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 93765183,
@@ -972,6 +969,9 @@
     "percent_hbd": 10000,
     "permlink": "missing-rewards-while-mining",
     "post_id": 919311,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -983,9 +983,6 @@
     "url": "/mining/@gtg/missing-rewards-while-mining"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 1000247174970,
@@ -1022,7 +1019,10 @@
     "pending_payout_value": "0.281 HBD",
     "percent_hbd": 10000,
     "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t141551322z",
-    "post_id": 1254337,
+    "post_id": 1254336,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1034,9 +1034,6 @@
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@gtg/re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t141551322z"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 347121336514,
@@ -1083,6 +1080,9 @@
     "percent_hbd": 10000,
     "permlink": "re-ash-steemit-chat-stats-and-rules-20160821t143046855z",
     "post_id": 920538,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1094,9 +1094,6 @@
     "url": "/steemit-chat/@ash/steemit-chat-stats-and-rules#@gtg/re-ash-steemit-chat-stats-and-rules-20160821t143046855z"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 9975325205,
@@ -1141,6 +1138,9 @@
     "percent_hbd": 10000,
     "permlink": "re-artakan-important-info-for-steem-miner-do-not-use-your-steemit-com-account-20160821t123356072z",
     "post_id": 919363,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1152,9 +1152,6 @@
     "url": "/mining/@artakan/important-info-for-steem-miner-do-not-use-your-steemit-com-account#@gtg/re-artakan-important-info-for-steem-miner-do-not-use-your-steemit-com-account-20160821t123356072z"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 79431791489,
@@ -1197,6 +1194,9 @@
     "percent_hbd": 10000,
     "permlink": "re-djm34-re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t161109296z",
     "post_id": 1057820,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1208,9 +1208,6 @@
     "url": "/steem/@picokernel/bounty-community-bounty-for-open-source-gpu-miner#@gtg/re-djm34-re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t161109296z"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 56150216349,
@@ -1250,6 +1247,9 @@
     "percent_hbd": 10000,
     "permlink": "re-skypilot-my-first-real-post-was-a-success-and-i-would-like-to-share-the-story-20160827t111440904z",
     "post_id": 1011534,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1261,9 +1261,6 @@
     "url": "/introduceyourself/@skypilot/my-first-real-post-was-a-success-and-i-would-like-to-share-the-story#@gtg/re-skypilot-my-first-real-post-was-a-success-and-i-would-like-to-share-the-story-20160827t111440904z"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [],
     "author": "gtg",
     "author_payout_value": "0.000 HBD",
@@ -1294,7 +1291,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-chitty-re-gtg-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t184349883z",
-    "post_id": 1257400,
+    "post_id": 1257386,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1306,9 +1306,6 @@
     "url": "/steemit/@chitty/a-balanced-voting-system-is-impossible-with-current-witness-s-payouts#@gtg/re-chitty-re-gtg-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t184349883z"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [],
     "author": "gtg",
     "author_payout_value": "0.000 HBD",
@@ -1336,7 +1333,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-arcange-re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t141107191z",
-    "post_id": 1254287,
+    "post_id": 1254286,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1348,9 +1348,6 @@
     "url": "/stats/@arcange/steemsql-com-a-deep-analysis-of-steemians-gratefulness#@gtg/re-arcange-re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t141107191z"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [],
     "author": "gtg",
     "author_payout_value": "0.000 HBD",
@@ -1378,7 +1375,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t131924290z",
-    "post_id": 1253720,
+    "post_id": 1253719,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1390,9 +1390,6 @@
     "url": "/stats/@arcange/steemsql-com-a-deep-analysis-of-steemians-gratefulness#@gtg/re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t131924290z"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [],
     "author": "gtg",
     "author_payout_value": "0.000 HBD",
@@ -1426,7 +1423,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t130410195z",
-    "post_id": 1253586,
+    "post_id": 1253585,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1438,9 +1438,6 @@
     "url": "/stats/@arcange/steemsql-com-a-deep-analysis-of-steemians-gratefulness#@gtg/re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t130410195z"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [],
     "author": "gtg",
     "author_payout_value": "0.000 HBD",
@@ -1468,7 +1465,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gamer00-hi-i-m-jaro-and-this-is-my-introductory-verification-post-20160915t071902704z",
-    "post_id": 1251611,
+    "post_id": 1251610,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1480,9 +1480,6 @@
     "url": "/introducemyself/@gamer00/hi-i-m-jaro-and-this-is-my-introductory-verification-post#@gtg/re-gamer00-hi-i-m-jaro-and-this-is-my-introductory-verification-post-20160915t071902704z"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [],
     "author": "gtg",
     "author_payout_value": "0.000 HBD",
@@ -1510,7 +1507,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t071444722z",
-    "post_id": 1251592,
+    "post_id": 1251591,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1522,9 +1522,6 @@
     "url": "/introducemyself/@woman-onthe-wing/introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle#@gtg/re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t071444722z"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [],
     "author": "gtg",
     "author_payout_value": "0.000 HBD",
@@ -1553,6 +1550,9 @@
     "percent_hbd": 10000,
     "permlink": "re-eleanorp-the-best-adventures-start-with-rabbit-holes-eleanor-20160907t185449429z",
     "post_id": 1162358,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1564,9 +1564,6 @@
     "url": "/introduceyourself/@eleanorp/the-best-adventures-start-with-rabbit-holes-eleanor#@gtg/re-eleanorp-the-best-adventures-start-with-rabbit-holes-eleanor-20160907t185449429z"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [],
     "author": "gtg",
     "author_payout_value": "0.000 HBD",
@@ -1595,6 +1592,9 @@
     "percent_hbd": 10000,
     "permlink": "re-lara2016-my-favorite-cat-20160907t184824412z",
     "post_id": 1162279,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1606,9 +1606,6 @@
     "url": "/introduceyourself/@lara2016/my-favorite-cat#@gtg/re-lara2016-my-favorite-cat-20160907t184824412z"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 327852156,
@@ -1645,6 +1642,9 @@
     "percent_hbd": 10000,
     "permlink": "re-dan-wilson-i-m-an-english-teacher-in-beijing-my-introduction-to-steemit-and-verification-20160907t184055495z",
     "post_id": 1162194,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1656,9 +1656,6 @@
     "url": "/introduceyourself/@dan-wilson/i-m-an-english-teacher-in-beijing-my-introduction-to-steemit-and-verification#@gtg/re-dan-wilson-i-m-an-english-teacher-in-beijing-my-introduction-to-steemit-and-verification-20160907t184055495z"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [],
     "author": "gtg",
     "author_payout_value": "0.000 HBD",
@@ -1690,6 +1687,9 @@
     "percent_hbd": 10000,
     "permlink": "re-cwbrooch-teacher-story-teller-cat-lover-about-me-20160904t093005596z",
     "post_id": 1120694,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1701,9 +1701,6 @@
     "url": "/introduceyourself/@cwbrooch/teacher-story-teller-cat-lover-about-me#@gtg/re-cwbrooch-teacher-story-teller-cat-lover-about-me-20160904t093005596z"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [],
     "author": "gtg",
     "author_payout_value": "0.000 HBD",
@@ -1732,6 +1729,9 @@
     "percent_hbd": 10000,
     "permlink": "re-amcq-hello-steemit-i-m-alex-a-new-member-of-the-steemit-team-20160831t205719836z",
     "post_id": 1076080,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1743,9 +1743,6 @@
     "url": "/introduceyourself/@amcq/hello-steemit-i-m-alex-a-new-member-of-the-steemit-team#@gtg/re-amcq-hello-steemit-i-m-alex-a-new-member-of-the-steemit-team-20160831t205719836z"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [],
     "author": "gtg",
     "author_payout_value": "0.000 HBD",
@@ -1778,6 +1775,9 @@
     "percent_hbd": 10000,
     "permlink": "re-djm34-re-gtg-re-djm34-re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t184729782z",
     "post_id": 1059890,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

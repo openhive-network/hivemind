@@ -1,8 +1,5 @@
 [
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 2475545095,
@@ -74,6 +71,9 @@
     "percent_hbd": 10000,
     "permlink": "re-complexring-preview-of-custom-steemit-com-skins-by-maximkichev-20160824t220504965z",
     "post_id": 973569,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -85,9 +85,6 @@
     "url": "/skins/@complexring/preview-of-custom-steemit-com-skins-by-maximkichev#@cryptocurrency1/re-complexring-preview-of-custom-steemit-com-skins-by-maximkichev-20160824t220504965z"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": -25419129621778,
@@ -392,6 +389,9 @@
     "percent_hbd": 10000,
     "permlink": "my-1000th-post-and-other-steemit-achievements",
     "post_id": 925023,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": true,
@@ -403,9 +403,6 @@
     "url": "/steemit/@r4fken/my-1000th-post-and-other-steemit-achievements"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 1730545983153,
@@ -485,6 +482,9 @@
     "percent_hbd": 10000,
     "permlink": "re-jvper-international-money-transfer-provider-started-using-steem-20160823t142700478z",
     "post_id": 951445,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": true,

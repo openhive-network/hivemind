@@ -1,8 +1,5 @@
 [
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 1,
     "active_votes": [
       {
         "rshares": 2233757397,
@@ -62,9 +59,12 @@
     "percent_hbd": 10000,
     "permlink": "conceptualizing-a-scifi-land-speeder",
     "post_id": 1176607,
+    "promoted": "0.000 HBD",
     "reblogged_by": [
       "test-safari"
     ],
+    "replies": [],
+    "reblogs": 1,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -76,9 +76,6 @@
     "url": "/art/@iamwne/conceptualizing-a-scifi-land-speeder"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 1,
     "active_votes": [
       {
         "rshares": 5283473327347,
@@ -289,9 +286,12 @@
     "percent_hbd": 10000,
     "permlink": "chop-veggies-like-a-ninja-it-s-easy",
     "post_id": 1175966,
+    "promoted": "0.000 HBD",
     "reblogged_by": [
       "test-safari"
     ],
+    "replies": [],
+    "reblogs": 1,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -303,9 +303,6 @@
     "url": "/food/@meesterboom/chop-veggies-like-a-ninja-it-s-easy"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 1,
     "active_votes": [
       {
         "rshares": 27255267301,
@@ -435,9 +432,12 @@
     "percent_hbd": 10000,
     "permlink": "simple-fractal-prostoi-fraktal",
     "post_id": 1175624,
+    "promoted": "0.000 HBD",
     "reblogged_by": [
       "test-safari"
     ],
+    "replies": [],
+    "reblogs": 1,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

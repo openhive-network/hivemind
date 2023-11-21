@@ -1,8 +1,5 @@
 [
   {
-    "promoted": "1.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 28078695107280,
@@ -1969,6 +1966,9 @@
     "percent_hbd": 10000,
     "permlink": "justification-for-104-week-power-down",
     "post_id": 1187991,
+    "promoted": "1.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1980,9 +1980,6 @@
     "url": "/steem/@dantheman/justification-for-104-week-power-down"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 16576852964856,
@@ -3105,6 +3102,9 @@
     "percent_hbd": 10000,
     "permlink": "steemit-sponsoring-the-compass-cup-team-event",
     "post_id": 1185974,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -3116,9 +3116,6 @@
     "url": "/motocross/@b0y2k/steemit-sponsoring-the-compass-cup-team-event"
   },
   {
-    "promoted": "25.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 32214619982370,
@@ -3717,6 +3714,9 @@
     "percent_hbd": 10000,
     "permlink": "the-tale-of-the-5-brothers-a-voting-power-parable",
     "post_id": 1189569,
+    "promoted": "25.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

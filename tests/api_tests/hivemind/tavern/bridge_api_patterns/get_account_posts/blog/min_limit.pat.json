@@ -1,8 +1,5 @@
 [
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 93765183,
@@ -142,6 +139,9 @@
     "percent_hbd": 10000,
     "permlink": "missing-rewards-while-mining",
     "post_id": 919311,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

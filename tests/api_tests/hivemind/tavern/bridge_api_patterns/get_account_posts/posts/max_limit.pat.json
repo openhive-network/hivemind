@@ -1,8 +1,5 @@
 [
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [],
     "author": "blocktrades",
     "author_payout_value": "0.000 HBD",
@@ -28,7 +25,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "crocodile03",
-    "post_id": 1256965,
+    "post_id": 1256956,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -40,9 +40,6 @@
     "url": "/hive-135485/@blocktrades/crocodile03"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [],
     "author": "blocktrades",
     "author_payout_value": "0.000 HBD",
@@ -68,7 +65,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "crocodile02",
-    "post_id": 1256963,
+    "post_id": 1256954,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -80,9 +80,6 @@
     "url": "/hive-135485/@blocktrades/crocodile02"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 40000000,
@@ -113,7 +110,10 @@
     "pending_payout_value": "0.004 HBD",
     "percent_hbd": 10000,
     "permlink": "crocodile01",
-    "post_id": 1256962,
+    "post_id": 1256953,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -125,9 +125,6 @@
     "url": "/hive-135485/@blocktrades/crocodile01"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4452133129964,
@@ -1366,6 +1363,9 @@
     "percent_hbd": 10000,
     "permlink": "witness-report-for-blocktrades-for-last-week-of-august",
     "post_id": 1078306,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -1377,9 +1377,6 @@
     "url": "/witness-category/@blocktrades/witness-report-for-blocktrades-for-last-week-of-august"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4556805763203,
@@ -2767,6 +2764,9 @@
     "percent_hbd": 10000,
     "permlink": "blocktrades-witness-report-for-3rd-week-of-august",
     "post_id": 896102,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -2778,9 +2778,6 @@
     "url": "/witness-category/@blocktrades/blocktrades-witness-report-for-3rd-week-of-august"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 37246275498465,
@@ -3719,6 +3716,9 @@
     "percent_hbd": 10000,
     "permlink": "blocktrades-witness-report-for-2nd-week-of-august",
     "post_id": 769702,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -3730,9 +3730,6 @@
     "url": "/witness-category/@blocktrades/blocktrades-witness-report-for-2nd-week-of-august"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4661504057727,
@@ -5093,6 +5090,9 @@
     "percent_hbd": 10000,
     "permlink": "how-to-buy-crypto-in-20-seconds-with-your-bitcoin-litecoin-etc",
     "post_id": 606656,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -5104,9 +5104,6 @@
     "url": "/crypto-news/@blocktrades/how-to-buy-crypto-in-20-seconds-with-your-bitcoin-litecoin-etc"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4713847500582,
@@ -6304,6 +6301,9 @@
     "percent_hbd": 10000,
     "permlink": "updates-to-bitshares-withdrawal-functionality-new-release-of-bitshares-gui-wallet",
     "post_id": 586340,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -6315,9 +6315,6 @@
     "url": "/bitshares/@blocktrades/updates-to-bitshares-withdrawal-functionality-new-release-of-bitshares-gui-wallet"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 17145462813774,
@@ -7736,6 +7733,9 @@
     "percent_hbd": 10000,
     "permlink": "important-news-about-using-eth-and-etc-from-vitalik",
     "post_id": 374204,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -7747,9 +7747,6 @@
     "url": "/ether/@blocktrades/important-news-about-using-eth-and-etc-from-vitalik"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4766146767681,
@@ -8805,6 +8802,9 @@
     "percent_hbd": 10000,
     "permlink": "blocktrades-has-re-enabled-steem-dollars-to-bitcoin-pair",
     "post_id": 210850,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -8816,9 +8816,6 @@
     "url": "/blocktrades/@blocktrades/blocktrades-has-re-enabled-steem-dollars-to-bitcoin-pair"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 24923560486005,
@@ -10327,6 +10324,9 @@
     "percent_hbd": 10000,
     "permlink": "steem-deposits-withdrawals-re-enabled-on-openledger-for-decentralized-trading",
     "post_id": 117822,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 1.0,
       "gray": false,
@@ -10338,9 +10338,6 @@
     "url": "/steem/@blocktrades/steem-deposits-withdrawals-re-enabled-on-openledger-for-decentralized-trading"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 22496772677147,
@@ -11471,6 +11468,9 @@
     "percent_hbd": 10000,
     "permlink": "exchange-help-how-to-reliably-broadcast-transactions",
     "post_id": 101597,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -11482,9 +11482,6 @@
     "url": "/steem/@blocktrades/exchange-help-how-to-reliably-broadcast-transactions"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4870814423020,
@@ -11892,6 +11889,9 @@
     "percent_hbd": 10000,
     "permlink": "notifications-when-steem-account-receives-money-from-someone",
     "post_id": 76090,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -11903,9 +11903,6 @@
     "url": "/steem/@blocktrades/notifications-when-steem-account-receives-money-from-someone"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4870814423020,
@@ -12380,6 +12377,9 @@
     "percent_hbd": 10000,
     "permlink": "limited-time-sale-high-steem-power-accounts-for-serious-investors-only",
     "post_id": 71871,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 2.0,
       "gray": false,
@@ -12391,9 +12391,6 @@
     "url": "/bitcoin/@blocktrades/limited-time-sale-high-steem-power-accounts-for-serious-investors-only"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4923120466666,
@@ -13295,6 +13292,9 @@
     "percent_hbd": 10000,
     "permlink": "blocktrades-adds-support-for-steem-dollars-greater-than-bitcoin-and-more",
     "post_id": 58260,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -13306,9 +13306,6 @@
     "url": "/bitshares/@blocktrades/blocktrades-adds-support-for-steem-dollars-greater-than-bitcoin-and-more"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4921550602200,
@@ -13782,6 +13779,9 @@
     "percent_hbd": 10000,
     "permlink": "bitcoin-payments-accepted-in-20s-soon-to-be-6s",
     "post_id": 51772,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 3.0,
       "gray": false,
@@ -13793,9 +13793,6 @@
     "url": "/blocktrades/@blocktrades/bitcoin-payments-accepted-in-20s-soon-to-be-6s"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4921550602200,
@@ -14281,6 +14278,9 @@
     "percent_hbd": 10000,
     "permlink": "introducing-the-latest-dollar-stable-coin-trade-usdlabor",
     "post_id": 50564,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -14292,9 +14292,6 @@
     "url": "/blocktrades/@blocktrades/introducing-the-latest-dollar-stable-coin-trade-usdlabor"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 5183335208700,
@@ -14774,6 +14771,9 @@
     "percent_hbd": 10000,
     "permlink": "blocktrades-supports-buyingselling-dao-coins-without-exchange-risk",
     "post_id": 17942,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -14785,9 +14785,6 @@
     "url": "/bitcny/@blocktrades/blocktrades-supports-buyingselling-dao-coins-without-exchange-risk"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 5183335208700,
@@ -15148,6 +15145,9 @@
     "percent_hbd": 10000,
     "permlink": "dao-gateway-on-openledger-is-fully-operational",
     "post_id": 16647,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -15159,9 +15159,6 @@
     "url": "/openledger/@blocktrades/dao-gateway-on-openledger-is-fully-operational"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": -19003214240677,
@@ -15492,6 +15489,9 @@
     "percent_hbd": 10000,
     "permlink": "blocktrades-wants-to-buy-your-digixdao-dgd",
     "post_id": 11103,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -15503,9 +15503,6 @@
     "url": "/blocktrades/@blocktrades/blocktrades-wants-to-buy-your-digixdao-dgd"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 19001918024605,
@@ -15927,6 +15924,9 @@
     "percent_hbd": 10000,
     "permlink": "blocktrades-now-offering-steem-power-for-cryptocurrency",
     "post_id": 10122,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -15938,9 +15938,6 @@
     "url": "/blocktrades/@blocktrades/blocktrades-now-offering-steem-power-for-cryptocurrency"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4728548617800,
@@ -16160,6 +16157,9 @@
     "percent_hbd": 10000,
     "permlink": "bug-in-web-wallets-implementation-of-memo-encryptiondecryption-fix-available-but-will-break-some-legacy",
     "post_id": 8135,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -16171,9 +16171,6 @@
     "url": "/bitshares/@blocktrades/bug-in-web-wallets-implementation-of-memo-encryptiondecryption-fix-available-but-will-break-some-legacy"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 19377197038064,
@@ -16449,6 +16446,9 @@
     "percent_hbd": 10000,
     "permlink": "i-find-steemit-posts-with-summariesanalysis-of-3rd-party-content-more-compelling",
     "post_id": 6310,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -16460,9 +16460,6 @@
     "url": "/steem/@blocktrades/i-find-steemit-posts-with-summariesanalysis-of-3rd-party-content-more-compelling"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4728548617800,
@@ -16634,6 +16631,9 @@
     "percent_hbd": 10000,
     "permlink": "confirmation-of-accounts-i-control-on-bitcointalkbitsharestalk",
     "post_id": 3562,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -16645,9 +16645,6 @@
     "url": "/account-linking/@blocktrades/confirmation-of-accounts-i-control-on-bitcointalkbitsharestalk"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4728548617800,
@@ -17015,6 +17012,9 @@
     "percent_hbd": 10000,
     "permlink": "tax-issues-facing-us-based-cryptocurrency-holders-and-miners-part-1-capital-gainslosses-for-crypto",
     "post_id": 3362,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -17026,9 +17026,6 @@
     "url": "/crypto-regulation/@blocktrades/tax-issues-facing-us-based-cryptocurrency-holders-and-miners-part-1-capital-gainslosses-for-crypto"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4728548617800,
@@ -17408,6 +17405,9 @@
     "percent_hbd": 10000,
     "permlink": "tax-issues-facing-us-based-cryptocurrency-holders-and-miners-intro-and-irs-guidelines",
     "post_id": 3360,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -17419,9 +17419,6 @@
     "url": "/crypto-regulation/@blocktrades/tax-issues-facing-us-based-cryptocurrency-holders-and-miners-intro-and-irs-guidelines"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4632047625600,
@@ -17581,6 +17578,9 @@
     "percent_hbd": 10000,
     "permlink": "original-posting-date-last-comment-date-or-both-on-steem-recenttrending-topic-summaries",
     "post_id": 3097,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -17592,9 +17592,6 @@
     "url": "/steem/@blocktrades/original-posting-date-last-comment-date-or-both-on-steem-recenttrending-topic-summaries"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4632047625600,
@@ -17822,6 +17819,9 @@
     "percent_hbd": 10000,
     "permlink": "is-vote-changing-an-important-feature-for-steem",
     "post_id": 2987,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 3.0,
       "gray": false,
@@ -17833,9 +17833,6 @@
     "url": "/steem/@blocktrades/is-vote-changing-an-important-feature-for-steem"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 18985829097485,
@@ -18243,6 +18240,9 @@
     "percent_hbd": 10000,
     "permlink": "openledger-pre-sale-of-dao-tokens-is-now-live",
     "post_id": 2076,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 3.0,
       "gray": false,
@@ -18254,9 +18254,6 @@
     "url": "/crypto-news/@blocktrades/openledger-pre-sale-of-dao-tokens-is-now-live"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4900000000,
@@ -19108,6 +19105,9 @@
     "percent_hbd": 10000,
     "permlink": "-blocktrades-adds-support-for-directly-buyingselling-steem",
     "post_id": 1863,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,

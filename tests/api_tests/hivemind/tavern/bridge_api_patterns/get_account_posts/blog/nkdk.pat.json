@@ -1,8 +1,5 @@
 [
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": -18995393857212,
@@ -30,6 +27,9 @@
     "percent_hbd": 10000,
     "permlink": "magenta-ball",
     "post_id": 5239,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 3.0,
       "gray": false,
@@ -41,9 +41,6 @@
     "url": "/gif/@nkdk/magenta-ball"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 2916665887200,
@@ -119,6 +116,9 @@
     "percent_hbd": 10000,
     "permlink": "thermosolar-hive-healthy-bees-healthy-honey",
     "post_id": 5234,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -130,9 +130,6 @@
     "url": "/video/@nkdk/thermosolar-hive-healthy-bees-healthy-honey"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": -47756400000000,
@@ -160,6 +157,9 @@
     "percent_hbd": 10000,
     "permlink": "muere-ahogado-en-arenas-al-intentar-rescatar-a-su-perro",
     "post_id": 5218,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,

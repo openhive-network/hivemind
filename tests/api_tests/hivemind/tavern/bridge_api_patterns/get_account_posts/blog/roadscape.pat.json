@@ -1,8 +1,5 @@
 [
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 4411289809404,
@@ -134,6 +131,9 @@
     "percent_hbd": 10000,
     "permlink": "2hhykq-steemd",
     "post_id": 4598,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -145,9 +145,6 @@
     "url": "/steemd/@roadscape/2hhykq-steemd"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 18224194061409,
@@ -355,6 +352,9 @@
     "percent_hbd": 10000,
     "permlink": "steemd",
     "post_id": 751,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -366,9 +366,6 @@
     "url": "/steemd/@roadscape/steemd"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": -19371283264908,
@@ -724,6 +721,9 @@
     "percent_hbd": 10000,
     "permlink": "witness-roadscape",
     "post_id": 471,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 3.0,
       "gray": false,
@@ -735,9 +735,6 @@
     "url": "/witness-category/@roadscape/witness-roadscape"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 5217000000,
@@ -857,6 +854,9 @@
     "percent_hbd": 10000,
     "permlink": "steem-explorer",
     "post_id": 97,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 2.0,
       "gray": false,
@@ -868,9 +868,6 @@
     "url": "/news/@roadscape/steem-explorer"
   },
   {
-    "promoted": "0.000 HBD",
-    "replies": [],
-    "reblogs": 0,
     "active_votes": [
       {
         "rshares": 641623635,
@@ -898,6 +895,9 @@
     "percent_hbd": 10000,
     "permlink": "script-check",
     "post_id": 80,
+    "promoted": "0.000 HBD",
+    "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
