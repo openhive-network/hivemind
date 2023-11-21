@@ -1,11 +1,5 @@
 {
-  "id": 1,
-  "jsonrpc": "2.0",
-  "result": {
-    "blacklists": false,
-    "follows": false,
-    "follows_blacklists": false,
-    "follows_muted": false,
-    "ignores": false
-  }
+  "code": -32602,
+  "data": "invalid account char",
+  "message": "Invalid parameters"
 }
