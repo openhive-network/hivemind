@@ -58,7 +58,7 @@ setup() {
   log "setup" "Setting up the database..."
   cd /home/hivemind/app
   ./setup_postgres.sh --postgres-url="${POSTGRES_ADMIN_URL}"
-  ./setup_db.sh --postgres-url="${POSTGRES_ADMIN_URL}"
+  ./install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}"
   if [[ "$ADD_MOCKS" == "true" ]]; then
     log "setup" "Adding mocks to database..."
     # shellcheck source=/dev/null
