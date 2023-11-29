@@ -73,6 +73,8 @@ class DbState:
             return
         cls._after_massive_sync(current_imported_block)
         cls._is_massive_sync = False
+        if hasattr(cls,'_original_synchronous_commit_mode'):
+            cls.db().query_no_return(f"SET synchronous_commit = {cls._original_synchronous_commit_mode}")
         log.info("[MASSIVE] Massive sync complete!")
 
     @classmethod
@@ -262,6 +264,8 @@ class DbState:
     @classmethod
     def before_massive_sync(cls, last_imported_block: int, hived_head_block: int):
         """Disables non-critical indexes for faster sync, as well as foreign key constraints."""
+        cls._original_synchronous_commit_mode = cls.db().query_one("SELECT current_setting('synchronous_commit');")
+        cls.db().query_no_return("SET synchronous_commit = OFF;")
 
         cls._is_massive_sync = True
         to_sync = hived_head_block - last_imported_block
