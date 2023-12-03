@@ -12,6 +12,7 @@ from jsonrpcserver import async_dispatch as dispatch
 from jsonrpcserver.methods import Methods
 import simplejson
 from sqlalchemy.exc import OperationalError
+import psycopg2
 
 from hive.conf import SCHEMA_NAME
 from hive.server.bridge_api import methods as bridge_api
@@ -245,7 +246,12 @@ def run_server(conf):
     async def show_info(app):
         from hive.utils.misc import show_app_version, BlocksInfo, PatchLevelInfo
 
-        last = await app['db'].query_one(f"SELECT num FROM {SCHEMA_NAME}.get_head_state();")
+        while True:
+            try:
+                last = await app['db'].query_one(f"SELECT num FROM {SCHEMA_NAME}.get_head_state();")
+                break
+            except psycopg2.errors.UndefinedFunction:
+                time.sleep(5)
         last_imported = await app['db'].query_one(f"SELECT last_imported_block_num FROM {SCHEMA_NAME}.hive_state;")
         last_completed = await app['db'].query_one(f"SELECT last_completed_block_num FROM {SCHEMA_NAME}.hive_state;")
 
