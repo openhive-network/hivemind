@@ -65,7 +65,8 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      pinned.source
+      pinned.source,
+      hp.muted_reasons
   FROM pinned,
   LATERAL hivemind_app.get_post_view_by_id(pinned.id) hp
   ORDER BY hp.id DESC
@@ -148,7 +149,8 @@ SELECT
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      trends.source
+      trends.source,
+      hp.muted_reasons
   FROM trends,
   LATERAL hivemind_app.get_post_view_by_id(trends.id) hp
   ORDER BY trends.trend DESC, trends.id DESC
@@ -228,7 +230,8 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      promoted.source
+      promoted.source,
+      hp.muted_reasons
   FROM promoted,
   LATERAL hivemind_app.get_post_view_by_id(promoted.id) hp
   ORDER BY promoted.promoted DESC, promoted.id DESC
@@ -310,7 +313,8 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      payout.source
+      payout.source,
+      hp.muted_reasons
   FROM payout,
   LATERAL hivemind_app.get_post_view_by_id(payout.id) hp
   ORDER BY payout.total_payout DESC, payout.id DESC
@@ -390,7 +394,8 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      payout.source
+      payout.source,
+      hp.muted_reasons
   FROM payout,
   LATERAL hivemind_app.get_post_view_by_id(payout.id) hp
   ORDER BY payout.total_payout DESC, payout.id DESC
@@ -472,7 +477,8 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      payout.source
+      payout.source,
+      hp.muted_reasons
   FROM payout,
   LATERAL hivemind_app.get_post_view_by_id(payout.id) hp
   ORDER BY payout.total_payout DESC, payout.id DESC
@@ -551,7 +557,8 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      hot.source
+      hot.source,
+      hp.muted_reasons
   FROM hot,
   LATERAL hivemind_app.get_post_view_by_id(hot.id) hp
   ORDER BY hot.hot DESC, hot.id DESC
@@ -641,7 +648,8 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      created.source
+      created.source,
+      hp.muted_reasons
   FROM created,
   LATERAL hivemind_app.get_post_view_by_id(created.id) hp
   ORDER BY created.id DESC

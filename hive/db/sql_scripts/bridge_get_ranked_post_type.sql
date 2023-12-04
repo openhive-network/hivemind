@@ -37,7 +37,8 @@ CREATE TYPE hivemind_app.bridge_api_post AS (
     is_pinned BOOLEAN,
     curator_payout_value VARCHAR,
     is_muted BOOLEAN,
-    blacklists TEXT
+    blacklists TEXT,
+    muted_reasons JSON
 );
 
 DROP TYPE IF EXISTS hivemind_app.bridge_api_post_reblogs CASCADE;
@@ -80,7 +81,8 @@ CREATE TYPE hivemind_app.bridge_api_post_reblogs AS (
     is_pinned BOOLEAN,
     curator_payout_value VARCHAR,
     is_muted BOOLEAN,
-    reblogged_by VARCHAR[]
+    reblogged_by VARCHAR[],
+    muted_reasons JSON
 );
 
 DROP TYPE IF EXISTS hivemind_app.bridge_api_post_discussion CASCADE;
@@ -124,5 +126,6 @@ CREATE TYPE hivemind_app.bridge_api_post_discussion AS (
     curator_payout_value VARCHAR,
     is_muted BOOLEAN,
     parent_id INTEGER,
-    blacklists TEXT
+    blacklists TEXT,
+    muted_reasons JSON
 );
