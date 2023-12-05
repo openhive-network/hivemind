@@ -78,7 +78,7 @@ workflow:
     echo -e "\e[0Ksection_end:$(date +%s):login\r\e[0K"
     echo -e "\e[0Ksection_start:$(date +%s):build[collapsed=true]\r\e[0KBuilding Hivemind Docker image..."
     ./scripts/ci-helpers/build_instance.sh \
-      "$CI_COMMIT_SHA" \
+      "$CI_COMMIT_SHORT_SHA" \
       "$CI_PROJECT_DIR" \
       "$CI_REGISTRY_IMAGE" \
       --dot-env-filename=hivemind_image.env \
