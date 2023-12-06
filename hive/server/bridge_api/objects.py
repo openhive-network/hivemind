@@ -9,7 +9,7 @@ from hive.utils.account import safe_db_profile_metadata
 from hive.utils.normalize import rep_log10, sbd_amount
 
 ROLES = {-2: 'muted', 0: 'guest', 2: 'member', 4: 'mod', 6: 'admin', 8: 'owner'}
-MUTED_REASONS = {'MUTED_ROLE_COMMUNITY': 0, 'MUTED_REPUTATION': 1}
+MUTED_REASONS = {'MUTED_ROLE_COMMUNITY': 0, 'MUTED_REPUTATION': 1, 'MUTED_COMMUNITY_MODERATION': 2, 'MUTED_COMMUNITY_TYPE': 3,  'MUTED_PARENT': 4}
 
 log = logging.getLogger(__name__)
 

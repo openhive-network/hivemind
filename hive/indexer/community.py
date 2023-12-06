@@ -35,6 +35,8 @@ TYPE_JOURNAL = 2
 TYPE_COUNCIL = 3
 valid_types = [TYPE_TOPIC, TYPE_JOURNAL, TYPE_COUNCIL]
 
+MUTED_REASONS = {'MUTED_ROLE_COMMUNITY': 0, 'MUTED_REPUTATION': 1, 'MUTED_COMMUNITY_MODERATION': 2, 'MUTED_COMMUNITY_TYPE': 3,  'MUTED_PARENT': 4}
+
 # https://en.wikipedia.org/wiki/ISO_639-1
 LANGS = (
     "ab,aa,af,ak,sq,am,ar,an,hy,as,av,ae,ay,az,bm,ba,eu,be,bn,bh,bi,"
@@ -396,8 +398,9 @@ class CommunityOp:
 
         # Post-level actions
         elif action == 'mutePost':
+            # 3 is MUTED_COMMUNITY_MODERATION
             DB.query(
-                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '1'
+                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '1', muted_reasons = (muted_reasons::jsonb || '[3]'::jsonb)::json 
                          WHERE id = :post_id""",
                 **params,
             )
@@ -405,7 +408,7 @@ class CommunityOp:
 
         elif action == 'unmutePost':
             DB.query(
-                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '0'
+                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '0', muted_reasons = '[]'::json
                          WHERE id = :post_id""",
                 **params,
             )

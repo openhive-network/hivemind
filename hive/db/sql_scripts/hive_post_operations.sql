@@ -28,7 +28,8 @@ $function$;
 DROP TYPE IF EXISTS hivemind_app.process_community_post_result CASCADE;
 CREATE TYPE hivemind_app.process_community_post_result AS (
     is_muted bool,
-    community_id integer -- hivemind_app.hive_posts.community_id%TYPE
+    community_id integer, -- hivemind_app.hive_posts.community_id%TYPE
+    muted_reasons JSON
 );
 
 DROP FUNCTION IF EXISTS hivemind_app.process_community_post;
@@ -44,8 +45,9 @@ declare
         __community_type_topic CONSTANT SMALLINT := 1;
         __community_type_journal CONSTANT SMALLINT := 2;
         __community_type_council CONSTANT SMALLINT := 3;
-        __is_muted bool := TRUE;
+        __is_muted BOOL := TRUE;
         __community_id hivemind_app.hive_posts.community_id%TYPE;
+        __muted_reasons JSON := '[]';
 BEGIN
         IF _block_num < _community_support_start_block THEN
             __is_muted := FALSE;
@@ -60,7 +62,11 @@ BEGIN
             -- __is_muted can be TRUE here if it's a comment and its parent is muted
             IF _is_parent_muted = TRUE THEN
                 __is_muted := TRUE;
-            ELSEIF __community_id IS NOT NULL THEN
+                -- 4 is MUTED_PARENT, see community.py for the ENUM definition
+                __muted_reasons := '[4]';
+            END IF;
+
+            IF __community_id IS NOT NULL THEN
                 IF __community_type_id = __community_type_topic THEN
                     __is_muted := FALSE;
                 ELSE
@@ -72,6 +78,9 @@ BEGIN
                             __is_muted := FALSE;
                         ELSIF __community_type_id = __community_type_council AND __role_id IS NOT NULL AND __role_id >= __member_role THEN
                             __is_muted := FALSE;
+                        ELSE
+                            -- This means the post was muted because of community reasons, so we append MUTED_COMMUNITY_TYPE (3) to __muted_reasons see community.py for the ENUM definition
+                            __muted_reasons := (__muted_reasons::jsonb || '[3]'::jsonb)::json;
                         END IF;
                     END IF;
                 END IF;
@@ -80,7 +89,7 @@ BEGIN
             END IF;
         END IF;
 
-        RETURN (__is_muted, __community_id)::hivemind_app.process_community_post_result;
+        RETURN (__is_muted, __community_id, __muted_reasons)::hivemind_app.process_community_post_result;
     END;
 $$ STABLE;
 
@@ -115,7 +124,7 @@ IF _parent_author != '' THEN
   RETURN QUERY INSERT INTO hivemind_app.hive_posts as hp
   (parent_id, depth, community_id, category_id,
     root_id, is_muted, is_valid,
-    author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted, block_num, block_num_created)
+    author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons)
       SELECT
           s.parent_id,
           s.depth,
@@ -135,7 +144,8 @@ IF _parent_author != '' THEN
           s.cashout_time,
           s.counter_deleted,
           s.block_num,
-          s.block_num_created
+          s.block_num_created,
+          (s.composite).muted_reasons
       FROM (
                SELECT
                    hivemind_app.process_community_post(_block_num, _community_support_start_block, _parent_permlink, ha.id, TRUE, php.is_muted, php.community_id) as composite,
@@ -182,7 +192,7 @@ ELSE
     root_id, is_muted, is_valid,
     author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,
     active, payout_at, cashout_time, counter_deleted, block_num, block_num_created,
-    tags_ids)
+    tags_ids, muted_reasons)
   SELECT
         s.parent_id,
         s.depth,
@@ -203,7 +213,8 @@ ELSE
         s.counter_deleted,
         s.block_num,
         s.block_num_created,
-        s.tags_ids
+        s.tags_ids,
+        (s.composite).muted_reasons
   FROM (
         SELECT
             hivemind_app.process_community_post(_block_num, _community_support_start_block, _parent_permlink, ha.id, FALSE,FALSE, NULL) as composite,
