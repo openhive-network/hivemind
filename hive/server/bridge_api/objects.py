@@ -9,6 +9,7 @@ from hive.utils.account import safe_db_profile_metadata
 from hive.utils.normalize import rep_log10, sbd_amount
 
 ROLES = {-2: 'muted', 0: 'guest', 2: 'member', 4: 'mod', 6: 'admin', 8: 'owner'}
+MUTED_REASONS = {'MUTED_ROLE_COMMUNITY': 0, 'MUTED_REPUTATION': 1}
 
 log = logging.getLogger(__name__)
 
@@ -41,6 +42,13 @@ def append_statistics_to_post(post, row, is_pinned):
             post['author_title'] = ''
 
     post['stats']['gray'] = row['is_grayed'] or row['is_muted'] or (row['role_id'] == -2)
+
+    post['stats']['muted_reasons'] = row['muted_reasons']
+    if row['is_grayed']:
+        post['stats']['muted_reasons'].append(MUTED_REASONS['MUTED_REPUTATION'])
+    if row['role_id'] == -2:
+        post['stats']['muted_reasons'].append(MUTED_REASONS['MUTED_ROLE_COMMUNITY'])
+
     if is_pinned:
         post['stats']['is_pinned'] = True
     return post
