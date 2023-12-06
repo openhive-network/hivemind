@@ -72,8 +72,8 @@ BEGIN
                         ELSIF __community_type_id = __community_type_council AND __role_id IS NOT NULL AND __role_id >= __member_role THEN
                             __is_muted := FALSE;
                         ELSE
-                            -- This means the post was muted because of community reasons, so we append MUTED_COMMUNITY_TYPE (3) to __muted_reasons see community.py for the ENUM definition
-                            __muted_reasons := (__muted_reasons::jsonb || '[3]'::jsonb)::json;
+                            -- This means the post was muted because of community reasons, 1 is MUTED_COMMUNITY_TYPE see community.py for the ENUM definition
+                            __muted_reasons := '[1]';
                         END IF;
                     END IF;
                 END IF;
@@ -84,8 +84,8 @@ BEGIN
             -- __is_muted can be TRUE here if it's a comment and its parent is muted
             IF _is_parent_muted = TRUE THEN
                 __is_muted := TRUE;
-                -- 4 is MUTED_PARENT, see community.py for the ENUM definition
-                __muted_reasons := '[4]';
+                -- 2 is MUTED_PARENT, see community.py for the ENUM definition
+                __muted_reasons := (__muted_reasons::jsonb || '[2]'::jsonb)::json;
             END IF;
 
         END IF;

@@ -4,12 +4,12 @@ import logging
 
 import ujson as json
 
+from hive.indexer.community import MUTED_REASONS
 from hive.server.common.helpers import get_hive_accounts_info_view_query_string, json_date
 from hive.utils.account import safe_db_profile_metadata
 from hive.utils.normalize import rep_log10, sbd_amount
 
 ROLES = {-2: 'muted', 0: 'guest', 2: 'member', 4: 'mod', 6: 'admin', 8: 'owner'}
-MUTED_REASONS = {'MUTED_ROLE_COMMUNITY': 0, 'MUTED_REPUTATION': 1, 'MUTED_COMMUNITY_MODERATION': 2, 'MUTED_COMMUNITY_TYPE': 3,  'MUTED_PARENT': 4}
 
 log = logging.getLogger(__name__)
 
