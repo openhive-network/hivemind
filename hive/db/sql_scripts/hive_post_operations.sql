@@ -59,13 +59,6 @@ BEGIN
                 SELECT type_id, id INTO __community_type_id, __community_id from hivemind_app.hive_communities where name = _parent_permlink;
             END IF;
 
-            -- __is_muted can be TRUE here if it's a comment and its parent is muted
-            IF _is_parent_muted = TRUE THEN
-                __is_muted := TRUE;
-                -- 4 is MUTED_PARENT, see community.py for the ENUM definition
-                __muted_reasons := '[4]';
-            END IF;
-
             IF __community_id IS NOT NULL THEN
                 IF __community_type_id = __community_type_topic THEN
                     __is_muted := FALSE;
@@ -87,6 +80,14 @@ BEGIN
             ELSE
                 __is_muted := FALSE;
             END IF;
+
+            -- __is_muted can be TRUE here if it's a comment and its parent is muted
+            IF _is_parent_muted = TRUE THEN
+                __is_muted := TRUE;
+                -- 4 is MUTED_PARENT, see community.py for the ENUM definition
+                __muted_reasons := '[4]';
+            END IF;
+
         END IF;
 
         RETURN (__is_muted, __community_id, __muted_reasons)::hivemind_app.process_community_post_result;

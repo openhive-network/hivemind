@@ -398,9 +398,9 @@ class CommunityOp:
 
         # Post-level actions
         elif action == 'mutePost':
-            # 3 is MUTED_COMMUNITY_MODERATION
+            # 2 is MUTED_COMMUNITY_MODERATION
             DB.query(
-                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '1', muted_reasons = (muted_reasons::jsonb || '[3]'::jsonb)::json 
+                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '1', muted_reasons = (muted_reasons::jsonb || '[2]'::jsonb)::json 
                          WHERE id = :post_id""",
                 **params,
             )
@@ -408,8 +408,7 @@ class CommunityOp:
 
         elif action == 'unmutePost':
             DB.query(
-                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '0', muted_reasons = '[]'::json
-                         WHERE id = :post_id""",
+                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '0', muted_reasons = '[]'::json WHERE id = :post_id""",
                 **params,
             )
             self._notify('unmute_post', payload=self.notes)
