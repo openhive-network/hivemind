@@ -400,7 +400,7 @@ class CommunityOp:
         elif action == 'mutePost':
             # 0 is MUTED_COMMUNITY_MODERATION
             DB.query(
-                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '1', muted_reasons = (muted_reasons::jsonb || '[0]'::jsonb)::json 
+                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '1',  muted_reasons = '[0]'::json
                          WHERE id = :post_id""",
                 **params,
             )

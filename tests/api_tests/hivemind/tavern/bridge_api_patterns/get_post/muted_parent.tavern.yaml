@@ -19,7 +19,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.get_post"
-          params: {"author":"wang", "permlink":"farewell-so-much-hate"}
+          params: {"author":"test-creator", "permlink":"re-community-135485-comment"}
       response:
         status_code: 200
         verify_response_with:

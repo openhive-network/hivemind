@@ -4,7 +4,6 @@
   marks:
     - patterntest
 
-
   includes:
     - !include ../../common.yaml
 
@@ -18,11 +17,11 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "bridge.get_post"
-          params: {"author":"wang", "permlink":"farewell-so-much-hate"}
+          method: "bridge.list_muted_reasons_enum"
+          params: {}
       response:
         status_code: 200
         verify_response_with:
           function: validate_response:compare_response_with_pattern
           extra_kwargs:
-            ignore_tags: "<bridge post>"
+            ignore_tags: "<bridge communities>"

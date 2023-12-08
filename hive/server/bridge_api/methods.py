@@ -464,5 +464,5 @@ async def count_reblogs(db, post_id: int):
     return await db.query_one(sql, post_id=post_id)
 
 @return_error_info
-async def list_muted_reason_enum(db):
+async def list_muted_reasons_enum(db):
     return MUTED_REASONS

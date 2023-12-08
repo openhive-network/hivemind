@@ -19,7 +19,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.get_post"
-          params: {"author":"wang", "permlink":"farewell-so-much-hate"}
+          params: {"author":"notmember", "permlink":"notmember-hive-111119-changed-type-3"}
       response:
         status_code: 200
         verify_response_with:
