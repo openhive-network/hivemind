@@ -291,12 +291,13 @@
     "permlink": "how-to-carve-an-apple-leaf",
     "post_id": 1253160,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 61
     },
     "title": "How to Carve an Apple Leaf",
@@ -1481,12 +1482,13 @@
     "permlink": "anwen-meditates-a-steemit-health-channel-sun-salutation-a-or-surya-namaskara-a",
     "post_id": 1244811,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 283
     },
     "title": "Anwen Meditates - A Steemit Health Channel // Sun Salutation A or Surya Namaskara A",

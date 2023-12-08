@@ -24,12 +24,13 @@
   "permlink": "testing6",
   "post_id": 760852,
   "promoted": "0.000 HBD",
+  "reblogs": 0,
   "replies": [],
-    "reblogs": 0,
   "stats": {
     "flag_weight": 0.0,
     "gray": false,
     "hide": false,
+    "muted_reasons": [],
     "total_votes": 0
   },
   "title": "RE: testing7",

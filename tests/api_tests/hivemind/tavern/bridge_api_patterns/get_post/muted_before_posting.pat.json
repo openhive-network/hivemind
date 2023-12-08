@@ -24,14 +24,15 @@
   "pending_payout_value": "0.000 HBD",
   "percent_hbd": 10000,
   "permlink": "My-first-post-hive-1",
-  "post_id": 1256866,
+  "post_id": 1256872,
   "promoted": "0.000 HBD",
-  "replies": [],
   "reblogs": 0,
+  "replies": [],
   "stats": {
     "flag_weight": 0.0,
     "gray": false,
     "hide": false,
+    "muted_reasons": [],
     "total_votes": 0
   },
   "title": "Hello",

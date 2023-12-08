@@ -1360,12 +1360,13 @@
     "permlink": "steemstats-0-3-5-improved-post-inspector-fixes-and-prep-for-0-14-0",
     "post_id": 1182225,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 331
     },
     "title": "steemstats 0.3.5 - improved post inspector, fixes and prep for 0.14.0",
@@ -2511,12 +2512,13 @@
     "permlink": "anarchapulco-is-one-of-the-most-world-changing-conferences-ever",
     "post_id": 1188968,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 273
     },
     "title": "Anarchapulco is One of the Most World Changing Conferences Ever",

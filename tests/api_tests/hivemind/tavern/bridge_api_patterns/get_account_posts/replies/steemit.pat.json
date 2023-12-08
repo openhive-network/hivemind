@@ -29,12 +29,13 @@
     "permlink": "re-steemit-firstpost-20160824t093007335z",
     "post_id": 964408,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "RE: Welcome to Steem!",
@@ -88,12 +89,13 @@
     "permlink": "re-steemit-firstpost-20160824t025355199z",
     "post_id": 961148,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 1.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 4
     },
     "title": "RE: Welcome to Steem!",
@@ -135,12 +137,13 @@
     "permlink": "re-steemit-firstpost-20160818t030224104z",
     "post_id": 864415,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "RE: Welcome to Steem!",
@@ -207,12 +210,15 @@
     "permlink": "re-steemit-firstpost-20160813t143213453z",
     "post_id": 782950,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 6
     },
     "title": "RE: Welcome to Steem!",
@@ -269,12 +275,13 @@
     "permlink": "re-steemit-firstpost-20160811t225325571z",
     "post_id": 754693,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 4
     },
     "title": "RE: Welcome to Steem!",
@@ -320,12 +327,13 @@
     "permlink": "re-steemit-firstpost-20160810t083336206z",
     "post_id": 721016,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "RE: Welcome to Steem!",
@@ -371,12 +379,13 @@
     "permlink": "re-steemit-firstpost-20160807t215340468z",
     "post_id": 670574,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "RE: Welcome to Steem!",
@@ -418,12 +427,15 @@
     "permlink": "re-steemit-firstpost-20160804t061605576z",
     "post_id": 596138,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 0
     },
     "title": "RE: Welcome to Steem!",
@@ -469,12 +481,13 @@
     "permlink": "re-steemit-firstpost-20160801t232001768z",
     "post_id": 547508,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "RE: Welcome to Steem!",
@@ -520,12 +533,13 @@
     "permlink": "re-steemit-firstpost-20160801t184846033z",
     "post_id": 540797,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "RE: Welcome to Steem!",
@@ -567,12 +581,13 @@
     "permlink": "re-steemit-firstpost-20160726t035722561z",
     "post_id": 366098,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "RE: Welcome to Steem!",
@@ -609,12 +624,13 @@
     "permlink": "re-steemit-firstpost-20160726t035056026z",
     "post_id": 365968,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "RE: Welcome to Steem!",
@@ -664,12 +680,13 @@
     "permlink": "re-steemit-firstpost-20160725t221949749z",
     "post_id": 359333,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 3
     },
     "title": "RE: Welcome to Steem!",
@@ -706,12 +723,13 @@
     "permlink": "re-steemit-firstpost-20160723t130259286z",
     "post_id": 296193,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "RE: Welcome to Steem!",
@@ -761,12 +779,13 @@
     "permlink": "re-steemit-firstpost-20160722t225246211z",
     "post_id": 284527,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 3
     },
     "title": "RE: Welcome to Steem!",
@@ -816,12 +835,13 @@
     "permlink": "re-steemit-firstpost-20160722t201007967z",
     "post_id": 280969,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 3
     },
     "title": "RE: Welcome to Steem!",
@@ -863,12 +883,13 @@
     "permlink": "re-steemit-firstpost-20160721t233702742z",
     "post_id": 261571,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "RE: Welcome to Steem!",
@@ -918,12 +939,13 @@
     "permlink": "re-steemit-firstpost-20160721t223937736z",
     "post_id": 260426,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 3
     },
     "title": "RE: Welcome to Steem!",
@@ -976,12 +998,13 @@
     "permlink": "re-steemit-firstpost-20160720t210201326z",
     "post_id": 229482,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 3
     },
     "title": "RE: Welcome to Steem!",
@@ -1040,12 +1063,13 @@
     "permlink": "re-steemit-firstpost-20160720t121101482z",
     "post_id": 217597,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 4
     },
     "title": "RE: Welcome to Steem!",

@@ -30,15 +30,16 @@
     "pending_payout_value": "0.005 HBD",
     "percent_hbd": 10000,
     "permlink": "pinpost11",
-    "post_id": 1256941,
+    "post_id": 1256949,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
       "is_pinned": true,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "Pinpost 11",

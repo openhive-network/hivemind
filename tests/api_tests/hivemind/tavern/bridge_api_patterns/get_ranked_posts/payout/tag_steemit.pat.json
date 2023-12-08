@@ -1279,12 +1279,13 @@
     "permlink": "federating-and-growing-the-italian-speaking-community-featuring-claudiop63-as-author",
     "post_id": 1185568,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 309
     },
     "title": "Federating and Growing the Italian-Speaking Community! (featuring @claudiop63 as author)",
@@ -1938,12 +1939,13 @@
     "permlink": "ann-steemy-mobile-app-beta-available-for-ios-android",
     "post_id": 1186153,
     "promoted": "110.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 3.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 151
     },
     "title": "[ANN] Steemy Mobile App - Beta Available for iOS/Android",
@@ -2248,12 +2250,13 @@
     "permlink": "steemit-account-verification-verifying-third-party-social-network-accounts-and-websites",
     "post_id": 1191842,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 63
     },
     "title": "Steemit Account Verification - Verifying Third Party Social Network Accounts and Websites",
@@ -2803,12 +2806,13 @@
     "permlink": "dealing-with-variance-in-commerce-and-steemit-the-merchant-approach",
     "post_id": 1186647,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 127
     },
     "title": "Dealing with variance in commerce and Steemit: \"The merchant approach\"",
@@ -3046,12 +3050,13 @@
     "permlink": "origami-flower-for-all",
     "post_id": 1185100,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 47
     },
     "title": "Origami flower for all",

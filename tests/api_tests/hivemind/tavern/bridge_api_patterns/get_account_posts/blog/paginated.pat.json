@@ -276,12 +276,13 @@
     "permlink": "i-find-steemit-posts-with-summariesanalysis-of-3rd-party-content-more-compelling",
     "post_id": 6310,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 61
     },
     "title": "I find steemit posts with summaries/analysis of 3rd party content more compelling",
@@ -461,12 +462,13 @@
     "permlink": "confirmation-of-accounts-i-control-on-bitcointalkbitsharestalk",
     "post_id": 3562,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 37
     },
     "title": "Confirmation of accounts I control on bitcointalk/bitsharestalk.org",
@@ -842,12 +844,13 @@
     "permlink": "tax-issues-facing-us-based-cryptocurrency-holders-and-miners-part-1-capital-gainslosses-for-crypto",
     "post_id": 3362,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 86
     },
     "title": "Tax Issues facing US-based Cryptocurrency Holders and Miners: Part 1 Capital Gains/Losses for Crypto",
@@ -1235,12 +1238,13 @@
     "permlink": "tax-issues-facing-us-based-cryptocurrency-holders-and-miners-intro-and-irs-guidelines",
     "post_id": 3360,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 89
     },
     "title": "Tax Issues facing US-based Cryptocurrency Holders and Miners: Intro and IRS Guidelines",
@@ -1408,12 +1412,13 @@
     "permlink": "original-posting-date-last-comment-date-or-both-on-steem-recenttrending-topic-summaries",
     "post_id": 3097,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 34
     },
     "title": "Original posting date, Last comment date, or both on STEEM recent/trending topic summaries?",
@@ -1649,12 +1654,13 @@
     "permlink": "is-vote-changing-an-important-feature-for-steem",
     "post_id": 2987,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 3.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 51
     },
     "title": "Is vote changing an important feature for STEEM?",
@@ -2070,12 +2076,13 @@
     "permlink": "openledger-pre-sale-of-dao-tokens-is-now-live",
     "post_id": 2076,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 3.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 96
     },
     "title": "OpenLedger pre-sale of DAO tokens is now live!",
@@ -2935,12 +2942,13 @@
     "permlink": "-blocktrades-adds-support-for-directly-buyingselling-steem",
     "post_id": 1863,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 196
     },
     "title": "BlockTrades adds support for directly buying/selling STEEM",

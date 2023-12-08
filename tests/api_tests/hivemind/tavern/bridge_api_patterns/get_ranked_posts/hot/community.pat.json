@@ -23,13 +23,16 @@
     "permlink": "spider02",
     "post_id": 1256958,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
       "is_pinned": true,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "powerful spider 02",
@@ -60,13 +63,14 @@
     "permlink": "spider01",
     "post_id": 1256957,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
       "is_pinned": true,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "powerful spider 01",
@@ -97,13 +101,14 @@
     "permlink": "anaconda02",
     "post_id": 1256956,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
       "is_pinned": true,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "powerful snake 02",
@@ -134,13 +139,14 @@
     "permlink": "anaconda01",
     "post_id": 1256955,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
       "is_pinned": true,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "powerful snake 01",
@@ -171,12 +177,13 @@
     "permlink": "reblogged-and-recreated",
     "post_id": 1256896,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 1,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "The post was deleted and permlink reused",
@@ -207,12 +214,13 @@
     "permlink": "muted-and-recreated",
     "post_id": 1256894,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "The post was deleted and permlink reused",
@@ -243,12 +251,13 @@
     "permlink": "reblogged-and-edited",
     "post_id": 1256858,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 1,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "The post was edited",
@@ -277,14 +286,17 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "muted-and-edited",
-    "post_id": 1256850,
+    "post_id": 1256856,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "The post was edited",
@@ -313,15 +325,18 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "secrets5",
-    "post_id": 1256847,
+    "post_id": 1256853,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
       "is_pinned": true,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "I love secrets 05",
@@ -350,15 +365,16 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "secrets4",
-    "post_id": 1256846,
+    "post_id": 1256852,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
       "is_pinned": true,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "I love secrets 04",

@@ -29,6 +29,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        1
+      ],
       "total_votes": 0
     },
     "title": "notmember This post will BE muted",
@@ -44,7 +47,7 @@
     "blacklists": [],
     "body": "community is now type 3, ismember This post will not be muted",
     "category": "hive-111119",
-    "children": 3,
+    "children": 4,
     "created": "2016-09-15T19:47:54",
     "curator_payout_value": "0.000 HBD",
     "depth": 0,
@@ -65,6 +68,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "ismember This post will not be muted",
@@ -101,6 +105,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        1
+      ],
       "total_votes": 0
     },
     "title": "notmember This post will BE muted",
@@ -137,6 +144,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "ismember This post will not be muted",
@@ -173,6 +181,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        1
+      ],
       "total_votes": 0
     },
     "title": "notmember This post will BE muted",
@@ -209,6 +220,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "community type 2, ismember This post will not be muted",
@@ -245,6 +257,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "notmember This post will not be muted",
@@ -281,6 +294,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "ismember This post will not be muted",
@@ -344,6 +358,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "ICONOMI - why we need found management explained on graphs.",
@@ -422,6 +437,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "Origami Part 11, the model of Skeleton hands.",
@@ -481,6 +497,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "Rangers' record in one-run games nearing truly historic level",
@@ -533,6 +550,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "I hack Monero (Xmr) ?",
@@ -593,6 +611,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "My day hospital",
@@ -654,6 +673,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "Shot From Around The Block On An iPhone!",
@@ -725,6 +745,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "Russian Roulette - a Memoir [Part 2] - Under-the-table Tactics",
@@ -859,6 +880,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 20
     },
     "title": "Original Fiction: JACKED Book One, The Origin Dime Chronicles, Episode 10",
@@ -914,6 +936,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "So, Uh... Vape Tricks Are Cool Now?",
@@ -964,6 +987,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "COVER YOUR LAPTOP -and phone- CAMERA -   Comey;  DIR OF THE FBI DOES",
@@ -1863,6 +1887,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 211
     },
     "title": "MackerelCoin & My Socioeconomic Observations from Prison (Part 1 by Charlie Shrem)",
@@ -1936,6 +1961,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "The Oil Market [2/3]",
@@ -1991,6 +2017,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "[recipe] pickled ginger for sushi",
@@ -2112,6 +2139,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 18
     },
     "title": "Drew an avatar/signature for my posts!",
@@ -2159,6 +2187,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "Water Liberty, bringing it back to its primordial clean and pristine state",
@@ -2227,6 +2256,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 3
     },
     "title": "I made these animations by tracing from video - and found out later it's called \"rotoscoping\"",
@@ -2290,6 +2320,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 3
     },
     "title": "Are we Resonance Beings of Frequency?",
@@ -2350,6 +2381,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 3
     },
     "title": "Night sketch - Funny bird",
@@ -2414,6 +2446,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 3
     },
     "title": "Conservapedia and the age of the Earth",
@@ -2534,6 +2567,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 18
     },
     "title": "Please identify your sexuell orientation:",
@@ -2615,6 +2649,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 5
     },
     "title": "A pancake pie with cherry!  It's very delicious!!! \u0411\u043b\u0438\u043d\u043d\u044b\u0439 \u0442\u043e\u0440\u0442 \u0441 \u0432\u0438\u0448\u043d\u0435\u0439! \u041e\u0447\u0435\u043d\u044c,\u043e\u0447\u0435\u043d\u044c \u0432\u043a\u0443\u0441\u043d\u044b\u0439!!!",
@@ -2747,6 +2782,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 10
     },
     "title": "Crowdsales Monitor - August  2016",
@@ -2834,6 +2870,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 8
     },
     "title": "How to make a good picture of the moon? My guide and photos...",
@@ -2889,6 +2926,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "\"Experiment\" Number One in Steemit Posting - Results:  The Market Gets what it Wants!",
@@ -2965,6 +3003,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 3
     },
     "title": "Sunrise Over Buccaneer Bay - my personal story behind the shot and how positivity kept me going through challenging times",
@@ -3017,6 +3056,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "spiral black [original poem]",
@@ -3077,6 +3117,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "\"Connections\" (Original image)",
@@ -3134,6 +3175,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "5 tiki cocktails you can make at home",
@@ -3211,6 +3253,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 7
     },
     "title": "The history of Danna a dog abandoned saved by Steemit",
@@ -3260,6 +3303,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": ":)",
@@ -3325,6 +3369,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 3
     },
     "title": "A Steemit Original - A Lifetime of Seeking Happiness - Chapter 2 - Part 3",
@@ -3374,6 +3419,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "Nothing more beautiful than the eyes of a dog. #In Looking for Family",
@@ -3433,6 +3479,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "The protocols of the learned elders of Zion",
@@ -3492,6 +3539,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "Nexpaq the new Project Ara for every phone",
@@ -3562,6 +3610,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 4
     },
     "title": "As we have held photoshoots in black-and-white colors",
@@ -3622,6 +3671,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 3
     },
     "title": "girl",
@@ -3681,6 +3731,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "Hillary Clinton's SCHEMES leaked-- man is KILLED for leaking incriminating proof to the public.",
@@ -3848,6 +3899,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 27
     },
     "title": "Forest at the Ammersee",
@@ -4017,6 +4069,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 29
     },
     "title": "Chicken fillet with breadcrumbs) recipe specially for Steemit",
@@ -4081,6 +4134,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "Dudu Hoffman - Feche os Olhos",
@@ -4157,6 +4211,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 7
     },
     "title": "I, Witness (Original)",
@@ -4255,6 +4310,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 11
     },
     "title": "New 'Introduce Yourself' post, with more info about me and more pictures with me!",
@@ -4325,6 +4381,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 5
     },
     "title": "droopy the dog animation",
@@ -4384,6 +4441,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "Four Horsemen by Renegade Inc. Economists shows how the world works",
@@ -4448,6 +4506,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 4
     },
     "title": "Environment #10 - cloud (\u041e\u043a\u0440\u0443\u0436\u0430\u044e\u0449\u0430\u044f \u0441\u0440\u0435\u0434\u0430 \u211610 - \u043e\u0431\u043b\u0430\u043a\u0430)",
@@ -4531,6 +4590,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 5
     },
     "title": "The Art of Origami - bird swan.",
@@ -4610,6 +4670,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 7
     },
     "title": "Two in the blue - Vasocongestion (destroyer of men)",
@@ -4660,6 +4721,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "spam",
@@ -4710,6 +4772,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "Bail-in rules ignored by media / Globalists cause crisis, offer non-solution solution, Soviet style mental illness / Sanders lost Kentucky votes",
@@ -4795,6 +4858,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 9
     },
     "title": "Just Picked and Pulled These Beautiful Organic Vegetables to Add to My Soup",
@@ -4854,6 +4918,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 3
     },
     "title": "Addicted (Original Poem)",
@@ -5066,6 +5131,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 41
     },
     "title": "[Short Story] Debut: A nightmarish vignette about trying to find meaning and warmth in the world between birth, and death.",
@@ -5125,6 +5191,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "No Make Up... Tiny Haul | Mashi",
@@ -5208,6 +5275,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 6
     },
     "title": "How-to: Remotely Shutdown a Computer on a Shared Network",
@@ -5272,6 +5340,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 4
     },
     "title": "Steemit For Dummies - How To Transfer Steem Dollars To Bittrex Video",
@@ -5359,6 +5428,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 9
     },
     "title": "PROMOCIONO Steemit en mi CANAL DE YOUTUBE",
@@ -5536,6 +5606,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 28
     },
     "title": "Pearl the whale: A sculpture with process pictures by @skapaneas (original own work)",
@@ -5594,6 +5665,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "world biggest pronzy site HashOcean taken $44m and gone",
@@ -5734,6 +5806,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 22
     },
     "title": "IZZY THE DOG #4",
@@ -5980,6 +6053,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 48
     },
     "title": "NaNoWriMo!!!! 6 weeks away! Come join a Steemit writing team!",
@@ -6033,6 +6107,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 3
     },
     "title": "Don Diablo - Hexagon Radio Episode 085",
@@ -6219,6 +6294,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 33
     },
     "title": "Bitcoin Double-Spending Tool provided As A Service by Hackers",
@@ -6272,6 +6348,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "What is Blokcheyn?",
@@ -6321,6 +6398,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "PCSO Lotto results September 15, 2016: Superlotto 6/49: 31-21-02-25-15-19 Lotto 6/42: 33-07-38-02-42-18 6D: 2-6-5-4-6-2 3D: 7-4-0 2D: 24-09",
@@ -6396,6 +6474,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 6
     },
     "title": "The US War On Terror Has Cost $5 Trillion And Increased Terrorism By 6,500% - Made the american ruling class very wealthy",
@@ -6465,6 +6544,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 5
     },
     "title": "Steemit - What is Steem? Should You Invest Some Ether Video",
@@ -6520,6 +6600,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "Snowden Live - Quote from Ed Snowden",
@@ -6595,6 +6676,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 3
     },
     "title": "An economic slowdown and the \"deepening\" of our human capital; how steemit can be our salvation",
@@ -6791,6 +6873,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 37
     },
     "title": "Amazing Color Correction video. Before and after [My original work]",
@@ -6896,6 +6979,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 10
     },
     "title": "Word Hijacking 4.0: - Thanks to my friends in slack the words today are ORGANIC, GMO, TROLL and HIJACKING",
@@ -7006,6 +7090,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 14
     },
     "title": "Life is All About Being Healthy, Feeling Good, and Spreading Happiness and Well-Being!",
@@ -7145,6 +7230,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 23
     },
     "title": "The SurveyMonkey scammer is back on Twitter - now for DECENT",
@@ -7226,6 +7312,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 10
     },
     "title": "Test",
@@ -7309,6 +7396,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 4
     },
     "title": "Basil planting and my spontaneous STEEMART. Full moon is watching me :)",
@@ -7796,6 +7884,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 110
     },
     "title": "Spaghetti Squash 'Burrito' Bowl",
@@ -7847,6 +7936,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "X - Y - Z - 4TH DIMENSION",
@@ -7934,6 +8024,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 10
     },
     "title": "Pay me 100% in Steem Power. When submit a story!",
@@ -8005,6 +8096,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 6
     },
     "title": "Eating a 7 Month Old Cinnabun!",
@@ -8132,6 +8224,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 20
     },
     "title": "How Does Steemit Work Steemit Blogging Basics and Advanced Training  Video",
@@ -8216,6 +8309,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 8
     },
     "title": "Recruiting New AltMiners for Gridcoin, Staking Giveaway for First 5 To Create Wallet and Post",
@@ -8341,6 +8435,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 19
     },
     "title": "Salt mines.",
@@ -8436,6 +8531,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 6
     },
     "title": "Are Steem, Bitcoin, etc.. Obvious Pre-cursors to The Mark of the Beast?",
@@ -8499,6 +8595,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 3
     },
     "title": "Cool new creative Music Video by Two of the Greatest Dj's/Producers of our current time!",
@@ -8544,6 +8641,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "Depression",
@@ -8593,6 +8691,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "32 Random Questions Tag | Mashiface",
@@ -8693,6 +8792,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 13
     },
     "title": "Do you trust government companies? Explaining the private sector benefits.",
@@ -8773,6 +8873,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 6
     },
     "title": "Fixing Posture - Part 5: Massages",
@@ -9032,6 +9133,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 49
     },
     "title": "Bringing worlds and characters to life; an ode to the Steemit creators!",
@@ -9093,6 +9195,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 3
     },
     "title": "Steemit Led Tittle Video",
@@ -9181,6 +9284,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 10
     },
     "title": "STEEM FEST uk. Has this been done yet? If not anyone interested?",
@@ -9285,6 +9389,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 12
     },
     "title": "Pastel of Banana with Chocolate",
@@ -9334,6 +9439,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "Stream of Consciousness #3, automatic writing. Topic: rules, productivity & freedom",

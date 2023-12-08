@@ -297,12 +297,13 @@
     "permlink": "steemit-account-verification-verifying-third-party-social-network-accounts-and-websites",
     "post_id": 1191842,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 63
     },
     "title": "Steemit Account Verification - Verifying Third Party Social Network Accounts and Websites",
@@ -852,12 +853,13 @@
     "permlink": "dealing-with-variance-in-commerce-and-steemit-the-merchant-approach",
     "post_id": 1186647,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 127
     },
     "title": "Dealing with variance in commerce and Steemit: \"The merchant approach\"",

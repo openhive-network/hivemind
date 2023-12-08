@@ -102,12 +102,13 @@
     "permlink": "alien-or-plant",
     "post_id": 1256778,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 16
     },
     "title": "Alien or plant?",
@@ -160,12 +161,13 @@
     "permlink": "flyer-promo-in-amsterdam-for-steemfest-and-steemit",
     "post_id": 1256768,
     "promoted": "0.200 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "Flyer-Promo in Amsterdam for SteemFest and Steemit",

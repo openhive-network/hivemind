@@ -132,12 +132,13 @@
     "permlink": "2hhykq-steemd",
     "post_id": 4598,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 24
     },
     "title": "Steemd.com update #2: content folding, UI & URL schema improvements",
@@ -353,12 +354,13 @@
     "permlink": "steemd",
     "post_id": 751,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 45
     },
     "title": "Steemd.com updates: account pages & transaction history",
@@ -722,12 +724,13 @@
     "permlink": "witness-roadscape",
     "post_id": 471,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 3.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 65
     },
     "title": "Witness roadscape",
@@ -855,12 +858,13 @@
     "permlink": "steem-explorer",
     "post_id": 97,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 2.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 21
     },
     "title": "STEEM Explorer",
@@ -896,12 +900,13 @@
     "permlink": "script-check",
     "post_id": 80,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "Script Check",

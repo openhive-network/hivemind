@@ -146,12 +146,13 @@
     "permlink": "fixing-posture-part-2-static-holds-lower-body",
     "post_id": 1187338,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 26
     },
     "title": "Fixing Posture - Part 2: Static Holds (lower body)",
@@ -767,12 +768,13 @@
     "permlink": "the-other-side-of-the-coin",
     "post_id": 1186011,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 140
     },
     "title": "The other side of the coin",
@@ -1235,12 +1237,13 @@
     "permlink": "my-life-is-in-shambles-and-here-s-why",
     "post_id": 1184347,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 104
     },
     "title": "My Life is in Shambles and Here's Why",

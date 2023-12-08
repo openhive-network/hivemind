@@ -1203,12 +1203,13 @@
     "permlink": "when-concerning-steemit-i-ve-come-to-realize-i-m-too-old-for-this",
     "post_id": 1201660,
     "promoted": "138.990 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 287
     },
     "title": "When Concerning Steemit, I've Come To Realize ... I'm Too Old For This",
@@ -1569,12 +1570,13 @@
     "permlink": "unreleased-steal-cut-of-slient-hill-no-its-real",
     "post_id": 1094654,
     "promoted": "121.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 76
     },
     "title": "Unreleased steal cut of Slient Hill? No, its REAL!",
@@ -2109,12 +2111,13 @@
     "permlink": "steemit-tutorial-8-getting-more-attention-by-using-the-promote-button-video",
     "post_id": 1070097,
     "promoted": "121.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 120
     },
     "title": "Steemit Tutorial 8: Getting More Attention By Using The Promote Button [VIDEO]",

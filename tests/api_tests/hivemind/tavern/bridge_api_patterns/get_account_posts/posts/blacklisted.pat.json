@@ -1742,12 +1742,13 @@
     "permlink": "increasing-curation-demand-for-steem-power-and-community-interaction",
     "post_id": 1160045,
     "promoted": "500.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 426
     },
     "title": "Increasing Curation, Demand for Steem Power and Community Interaction",
@@ -3757,12 +3758,13 @@
     "permlink": "it-s-time-for-a-steem-bounty-system",
     "post_id": 1123999,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 492
     },
     "title": "It's Time for a Steem Bounty System!",
@@ -5595,12 +5597,13 @@
     "permlink": "the-first-phase-of-the-steem-faq-and-wikee-consolidation-of-knowledge",
     "post_id": 879051,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 446
     },
     "title": "The first phase of the Steem FAQ and Wikee: Consolidation of Knowledge",
@@ -6319,12 +6322,13 @@
     "permlink": "steemit-quoted-in-breitbart",
     "post_id": 45321,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 168
     },
     "title": "Steemit Quoted in Breitbart",
@@ -6532,12 +6536,13 @@
     "permlink": "test-post",
     "post_id": 38298,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 42
     },
     "title": "Test Post",
@@ -6885,12 +6890,13 @@
     "permlink": "rfd-the-steem-tree",
     "post_id": 28210,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 65
     },
     "title": "[RFD] A Steemit Design",
@@ -7307,12 +7313,13 @@
     "permlink": "100000-steem-power-for-trade",
     "post_id": 21140,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 85
     },
     "title": "100,000 Steem Power for Trade",
@@ -7370,12 +7377,13 @@
     "permlink": "tags",
     "post_id": 10062,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 5
     },
     "title": "tags",
@@ -7523,12 +7531,13 @@
     "permlink": "slack",
     "post_id": 4259,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 29
     },
     "title": "Slack",
@@ -7712,12 +7721,13 @@
     "permlink": "steem-intro-video-script",
     "post_id": 2688,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 30
     },
     "title": "Steem intro video script",
@@ -7933,12 +7943,13 @@
     "permlink": "community-manager-job-posting",
     "post_id": 2686,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 37
     },
     "title": "Community Manager Job Posting",
@@ -8326,12 +8337,13 @@
     "permlink": "lessons-from-a-few-days-and-a-few-mistakes",
     "post_id": 1542,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 81
     },
     "title": "Lessons from a few days and a few mistakes",
@@ -8643,12 +8655,13 @@
     "permlink": "long-live-vests-",
     "post_id": 545,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 62
     },
     "title": "Long live Vests ... Vests are dead ...",
@@ -8808,12 +8821,13 @@
     "permlink": "prediction-voter-perceived-value",
     "post_id": 337,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 24
     },
     "title": "[PREDICTION] Voter Perceived Value",
@@ -8965,12 +8979,13 @@
     "permlink": "one-small-step-for-steem-one-giant-leap-for-steemkind",
     "post_id": 193,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 28
     },
     "title": "one small step for steem, one giant leap for steemkind",

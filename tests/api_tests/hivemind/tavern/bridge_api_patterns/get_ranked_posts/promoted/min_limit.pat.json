@@ -1744,12 +1744,13 @@
     "permlink": "increasing-curation-demand-for-steem-power-and-community-interaction",
     "post_id": 1160045,
     "promoted": "500.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 426
     },
     "title": "Increasing Curation, Demand for Steem Power and Community Interaction",

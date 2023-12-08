@@ -378,12 +378,13 @@
   "permlink": "witness-gtg",
   "post_id": 624896,
   "promoted": "0.000 HBD",
-  "replies": [],
   "reblogs": 0,
+  "replies": [],
   "stats": {
     "flag_weight": 0.0,
     "gray": false,
     "hide": false,
+    "muted_reasons": [],
     "total_votes": 87
   },
   "title": "Witness \"gtg\"",

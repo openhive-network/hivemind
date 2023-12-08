@@ -29,6 +29,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        1
+      ],
       "total_votes": 0
     },
     "title": "notmember This post will BE muted",
@@ -44,7 +47,7 @@
     "blacklists": [],
     "body": "community is now type 3, ismember This post will not be muted",
     "category": "hive-111119",
-    "children": 3,
+    "children": 4,
     "created": "2016-09-15T19:47:54",
     "curator_payout_value": "0.000 HBD",
     "depth": 0,
@@ -65,6 +68,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "ismember This post will not be muted",
@@ -101,6 +105,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        1
+      ],
       "total_votes": 0
     },
     "title": "notmember This post will BE muted",
@@ -137,6 +144,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "ismember This post will not be muted",
@@ -173,6 +181,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        1
+      ],
       "total_votes": 0
     },
     "title": "notmember This post will BE muted",
@@ -209,6 +220,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "community type 2, ismember This post will not be muted",
@@ -245,6 +257,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "notmember This post will not be muted",
@@ -281,6 +294,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "ismember This post will not be muted",
@@ -344,6 +358,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "ICONOMI - why we need found management explained on graphs.",
@@ -422,6 +437,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "Origami Part 11, the model of Skeleton hands.",
@@ -481,6 +497,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "Rangers' record in one-run games nearing truly historic level",
@@ -541,6 +558,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "My day hospital",
@@ -602,6 +620,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "Shot From Around The Block On An iPhone!",
@@ -673,6 +692,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "Russian Roulette - a Memoir [Part 2] - Under-the-table Tactics",
@@ -807,6 +827,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 20
     },
     "title": "Original Fiction: JACKED Book One, The Origin Dime Chronicles, Episode 10",
@@ -862,6 +883,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "So, Uh... Vape Tricks Are Cool Now?",
@@ -912,6 +934,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "COVER YOUR LAPTOP -and phone- CAMERA -   Comey;  DIR OF THE FBI DOES",
@@ -1811,6 +1834,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 211
     },
     "title": "MackerelCoin & My Socioeconomic Observations from Prison (Part 1 by Charlie Shrem)",
@@ -1884,6 +1908,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 1
     },
     "title": "The Oil Market [2/3]",
@@ -1939,6 +1964,7 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 2
     },
     "title": "[recipe] pickled ginger for sushi",

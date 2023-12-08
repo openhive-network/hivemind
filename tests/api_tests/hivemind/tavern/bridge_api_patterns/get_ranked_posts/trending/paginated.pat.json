@@ -519,12 +519,13 @@
     "permlink": "original-fiction-anarchist-s-almanac-episode-15",
     "post_id": 1256113,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 120
     },
     "title": "Original Fiction: Anarchist's Almanac, Episode 15",
@@ -1604,12 +1605,13 @@
     "permlink": "title-steel-monsters-tank-destroyers-of-ww-ii-eng-ua-featuring-burmik123-as-author",
     "post_id": 1255423,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 257
     },
     "title": "Steel monsters. Tank Destroyers of WW II. ENG\\UA (featuring @burmik123 as author)",

@@ -122,12 +122,13 @@
     "permlink": "re-jamtaylor-steemit-photo-challenge-4-winners-announcement-guest-judge-condra-20160815t163904911z",
     "post_id": 819415,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 21
     },
     "title": "RE: \ud83d\udcf7  Steemit Photo Challenge #4 \u2014 WINNERS ANNOUNCEMENT! Guest Judge: @condra",
@@ -225,12 +226,13 @@
     "permlink": "re-blocktalk-with-nexus-colin-cantrell-question-thread-20160815t194601",
     "post_id": 822333,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 16
     },
     "title": "RE: #Blocktalk with Nexus' Colin Cantrell [Question Thread]",

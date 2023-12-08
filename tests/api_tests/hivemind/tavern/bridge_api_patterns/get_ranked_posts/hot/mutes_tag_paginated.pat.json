@@ -414,12 +414,13 @@
     "permlink": "the-old-dog-experiments-the-great-tomato-science-challenge-store-bought-vs-garden-grown",
     "post_id": 1254979,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 93
     },
     "title": "The Old Dog Experiments: The Great Tomato Science Challenge. Store Bought Vs Garden Grown!",
@@ -816,12 +817,13 @@
     "permlink": "steemit-b-day-movie-review-contest-update",
     "post_id": 1254275,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 86
     },
     "title": "Steemit B'Day Movie Review Contest Update!",
@@ -1111,12 +1113,13 @@
     "permlink": "origami-flowers",
     "post_id": 1256018,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
+      "muted_reasons": [],
       "total_votes": 61
     },
     "title": "Origami flowers",
