@@ -147,7 +147,7 @@ Please take care to set correct file permissions in order to provide write acces
 
 ```bash
 cd /storage1/haf-data-dir/
-../hivemind/haf/scripts/run_hived_img.sh registry.gitlab.syncad.com/hive/haf/instance:instance-<tag> --name=haf-mainnet-instance  --data-dir="$(pwd)" <hived-options>
+../hivemind/haf/scripts/run_hived_img.sh registry.gitlab.syncad.com/hive/haf/instance:<tag> --name=haf-mainnet-instance  --data-dir="$(pwd)" <hived-options>
 ```
 
 For example, for testing purposes (assuming block_log file has been put into data-dir), you can spawn a 5M block replay to prepare a HAF database for further quick testing:
