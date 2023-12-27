@@ -4697,17 +4697,6 @@
                 "hive-199999"
               ],
               "id": "community",
-              "json": "[\"setUserTitle\",{\"community\":\"hive-199999\",\"account\":\"notmember\",\"title\":\"Not set\"}]"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "hive-199999"
-              ],
-              "id": "community",
               "json": "[\"setUserTitle\",{\"community\":\"hive-199999\",\"account\":\"ismember\",\"title\":\"Is set\"}]"
             }
           },
@@ -4720,17 +4709,6 @@
               ],
               "id": "community",
               "json": "[\"setRole\",{\"community\":\"hive-199999\",\"account\":\"ismember\",\"role\":\"mod\"}]"
-            }
-          },
-          {
-            "type": "custom_json_operation",
-            "value": {
-              "required_auths": [],
-              "required_posting_auths": [
-                "hive-199999"
-              ],
-              "id": "community",
-              "json": "[\"setRole\",{\"community\":\"hive-199999\",\"account\":\"notmember\",\"role\":\"mod\"}]"
             }
           },
           {
