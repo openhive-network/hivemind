@@ -1,0 +1,57 @@
+{
+"promoted": "0.000 HBD",
+"replies": [],
+"reblogs": 0,
+"active_votes": [],
+"author": "jouchelle",
+"author_payout_value": "0.000 HBD",
+"author_reputation": 25,
+"beneficiaries": [
+{
+"account": "amering",
+"weight": 400
+},
+{
+"account": "batel1",
+"weight": 6800
+},
+{
+"account": "cloop3",
+"weight": 2000
+},
+{
+"account": "faddy3",
+"weight": 600
+},
+{
+"account": "fminerten5",
+"weight": 200
+}
+],
+"blacklists": [],
+"body": "Much testing",
+"category": "tag",
+"children": 0,
+"created": "2016-09-15T06:49:42",
+"curator_payout_value": "0.000 HBD",
+"depth": 0,
+"is_paidout": false,
+"json_metadata": {},
+"max_accepted_payout": "1000000.000 HBD",
+"net_rshares": 0,
+"payout": 29.016,
+"payout_at": "2016-09-22T06:49:42",
+"pending_payout_value": "29.016 HBD",
+"percent_hbd": 10000,
+"permlink": "test-beneficiaries",
+"post_id": 1251466,
+"stats": {
+"flag_weight": 0.0,
+"gray": false,
+"hide": false,
+"total_votes": 0
+},
+"title": "Testing",
+"updated": "2016-09-15T06:49:42",
+"url": "/tag/@jouchelle/test-beneficiaries"
+}
