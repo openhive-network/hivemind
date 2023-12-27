@@ -34,6 +34,20 @@ def parse_op(op):
         return 'delete_comment_operation(`{}` -> `{}`, `{}`, `{}`)'.format(op['value']['voter'], op['value']['author'], op['value']['permlink'], op['value']['weight'])
     elif op['type'] == 'create_claimed_account_operation':
         return 'create_claimed_account_operation(`{}` -> `{}`)'.format(op['value']['creator'], op['value']['new_account_name'])
+    elif op['type'] == 'comment_options_operation':
+        max_accepted_payout = '{} {} (precision: {})'.format(op['value']['max_accepted_payout']['amount'],
+                                                             op['value']['max_accepted_payout']['nai'],
+                                                             op['value']['max_accepted_payout']['precision'])
+        beneficiaries = ', '.join(['{} (weight: {})'.format(b['account'], b['weight'])
+                                   for b in op['value']['extensions'][0]['value']['beneficiaries']])
+        return 'comment_options_operation( `{}`, `{}` -> max_accepted_payout: `{}`, percent_hbd: `{}`, allow_votes: `{}`, allow_curation_rewards: `{}`, beneficiaries: `{}`)'.format(
+            op['value']['author'],
+            op['value']['permlink'],
+            max_accepted_payout,
+            op['value']['percent_hbd'],
+            op['value']['allow_votes'],
+            op['value']['allow_curation_rewards'],
+            beneficiaries)
     else:
         raise 'operation type not known'
 
@@ -47,7 +61,12 @@ if __name__ == "__main__":
 
     for block_id in data:
         flow_str += '***block {}***\n'.format(block_id)
-        operations = data[block_id]['transactions'][0]['operations']
-        for op in operations:
-            flow_str += parse_op(op) + '\n'
+        transactions = data[block_id]['transactions']
+        if transactions:  # Check if transactions list is not empty
+            operations = transactions[0]['operations']
+            for op in operations:
+                flow_str += parse_op(op) + '\n'
+        else:
+            flow_str += 'No transactions in this block.\n'
     print(flow_str)
+

@@ -1,0 +1,6 @@
+***block 4984621***
+account_create_operation( `jouchelle` )
+comment_operation( `tag`, `jouchelle`,`test-beneficiaries`)
+comment_options_operation( `jouchelle`, `test-beneficiaries` -> max_accepted_payout: `1000000000 @@000000013 (precision: 3)`, percent_hbd: `10000`, allow_votes: `True`, allow_curation_rewards: `True`, beneficiaries: `amering (weight: 400), batel1 (weight: 6800), cloop3 (weight: 2000), faddy3 (weight: 600), fminerten5 (weight: 200)`)
+***block 5000000***
+No transactions in this block. This is present so that the vops in community_op gets added
