@@ -694,7 +694,6 @@ def setup(db):
         "update_table_statistics.sql",
         "upgrade/update_db_patchlevel.sql",  # Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
         "hafapp_api.sql",
-        "community_helpers.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
