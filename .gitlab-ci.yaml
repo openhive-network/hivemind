@@ -29,13 +29,8 @@ variables:
 
 include:
   - project: hive/haf
-    ref: 9aa55020b9cddaed0f320d2da4ea22a6ef494069 # develop
-    file: /scripts/ci-helpers/prepare_data_image_job.yml
-
-  - project: 'hive/common-ci-configuration'
-    ref: 7c58303ffb61d91ef9662ec20e7b498bc6f62b8f
-    file:
-    - '/templates/base.gitlab-ci.yml'
+    ref: f28da7101e47f767b19fcf6cc16544773f83c802 # develop
+    file: /scripts/ci-helpers/prepare_data_image_job.yml # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
 
 
 workflow:
@@ -358,6 +353,7 @@ sync:
         DATADIR: $DATA_CACHE_HIVEMIND_DATADIR
         SHM_DIR: $DATA_CACHE_HIVEMIND_SHM_DIR
         LOG_FILE: $CI_JOB_NAME.log
+        PGCTLTIMEOUT: 600 # give PostgreSQL more time to start if GitLab shut it down improperly after the replay job
       command: ["--replay-blockchain", "--stop-replay-at-block=5000000"]
   variables:
     GIT_STRATEGY: none
@@ -429,10 +425,7 @@ e2e_benchmark:
         SHM_DIR: $DATA_CACHE_HIVEMIND_SHM_DIR
         LOG_FILE: $CI_JOB_NAME.log
         PGCTLTIMEOUT: 600 # give PostgreSQL more time to start if GitLab shut it down improperly after the sync job
-      entrypoint:
-        - bash
-        - -c
-        - echo PGCTLTIMEOUT = ${PGCTLTIMEOUT} | sudo tee -a /etc/postgresql/14/main/environment && /home/haf_admin/docker_entrypoint.sh --replay-blockchain --stop-replay-at-block=5000000
+      command: ["--replay-blockchain", "--stop-replay-at-block=5000000"]
     - name: $HIVEMIND_IMAGE
       alias: hivemind-smoketest # cannot be a variable
       entrypoint:
