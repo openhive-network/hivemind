@@ -196,6 +196,9 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
 
                 operations = operations[0]
 
+                # MICKIEWICZ@NOTE najlepiej bezposrednio zapytać HAF-a o te dane w takim formacie, zamiast
+                # pobierac to na kilku watkach a potem tutaj w pytonie żonglowac tymi dictami
+                # jedynym powodem obecnej implementacji było zachowanie mozliwości pytania noda (get_block) i haf-a
                 block_operation_idx = 0
                 for block_data in blocks_data[0]:
                     new_block = BlockHiveDb(
@@ -232,6 +235,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
                                 return
                             break
                         except queue.Full:
+                            # MICKIEWICZ@NOTICE moze lepiej poczekać dłuższą chwile aż hivemind zeżre troche z kolejek
                             continue
         except:
             set_exception_thrown()

@@ -120,10 +120,12 @@ class SyncHiveDb:
             if self._ubound - self._lbound > 100:
                 # mode with detached indexes and context
                 log.info("[MASSIVE] *** MASSIVE blocks processing ***")
+                # MICKIEWICZ@NOTE: ten commit jest niepotrzebny, a nawet może naszkodzić
                 self._db.query("COMMIT")  # in massive we re not operating in same transaction as app_next_block query
 
                 DbLiveContextHolder.set_live_context(False)
                 Blocks.setup_own_db_access(shared_db_adapter=self._db)
+                # MICKIEWICZ@NOTE: dlaczego provider jest tworzony każdorazowo
                 self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
                     conf=self._conf,
                     databases=MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db),

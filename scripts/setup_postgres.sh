@@ -33,7 +33,7 @@ supplement_builtin_roles() {
   psql $pg_access -v ON_ERROR_STOP=on -c 'GRANT hivemind TO haf_app_admin;'
 }
 
-POSTGRES_HOST="/var/run/postgresql"
+POSTGRES_HOST="localhost"
 POSTGRES_PORT=5432
 POSTGRES_URL=""
 

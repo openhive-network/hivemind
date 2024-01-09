@@ -515,6 +515,7 @@ def drop_fk(db):
     for table in build_metadata().sorted_tables:
         for fk in table.foreign_keys:
             sql = f"""ALTER TABLE {SCHEMA_NAME}.{table.name} DROP CONSTRAINT IF EXISTS {fk.name}"""
+            log.info(f"MICKIEWICZ fk query: {sql}")
             db.query_no_return(sql)
     db.query_no_return("COMMIT")
 
