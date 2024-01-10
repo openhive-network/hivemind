@@ -128,9 +128,10 @@ class SyncHiveDb:
                 # MICKIEWICZ@NOTE: dlaczego provider jest tworzony każdorazowo
                 self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
                     conf=self._conf,
-                    databases=MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db),
+                    databases=MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db), # MICKIEWICZ@NOTE shared
                 )
 
+                # MICKIEWICZ@NOTE dlaczego to jest robione setem skoro zawsze inny obiekt to wykonuje, przenies do __init__
                 self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._ubound)
 
                 DbState.before_massive_sync(self._lbound, self._ubound)
@@ -147,6 +148,7 @@ class SyncHiveDb:
                 DbState.finish_massive_sync(current_imported_block=last_imported_block)
                 context_attach(db=self._db, block_number=last_imported_block)
                 Blocks.close_own_db_access()
+                # MICKIEWICZ@NOTE bazy zamykane explicite
                 self._massive_blocks_data_provider.close_databases()
 
                 active_connections_after_massive = self._get_active_db_connections()
@@ -167,7 +169,7 @@ class SyncHiveDb:
                 Blocks.setup_own_db_access(shared_db_adapter=self._db)
                 self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
                     conf=self._conf,
-                    databases=MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db, shared=True),
+                    databases=MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db, shared=True), # MICKIEWICZ@NOTE shared jest niepotrzebne bo na globalu DbAdapterHolder jest DbLiveContextHolder
                 )
 
                 self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._lbound)

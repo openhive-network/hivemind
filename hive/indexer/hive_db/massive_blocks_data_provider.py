@@ -81,6 +81,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
     class Databases:
         def __init__(self, db_root: Db, shared: bool = False):
             self._db_root = db_root
+            # MICKIEWICZ@NOTE użyj DbLiveContextHolder zamiast parametru shared
             self._db_operations = db_root.clone('MassiveBlocksProvider_OperationsData') if not shared else None
             self._db_blocks_data = db_root.clone('MassiveBlocksProvider_BlocksData') if not shared else None
 
@@ -118,6 +119,9 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         self._operations_queue = queue.Queue(maxsize=self._operations_queue_size)
         self._blocks_data_queue = queue.Queue(maxsize=self._blocks_data_queue_size)
 
+        # MICKIEWICZ@NOTE each instation creates thread pool, and never close it (shutdown)
+        # zgofnie z dokumentacja https://docs.python.org/3/library/concurrent.futures.html tylko
+        # użycie witha zapewnia prawidłowe czyszczenie thread pool-a i zamkniecie wątków
         self._thread_pool = (
             external_thread_pool if external_thread_pool else MassiveBlocksDataProviderHiveDb.create_thread_pool()
         )
