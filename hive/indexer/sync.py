@@ -177,6 +177,7 @@ class SyncHiveDb:
                 self._massive_blocks_data_provider.start_without_threading()
                 blocks = self._massive_blocks_data_provider.get(number_of_blocks=1)
                 Blocks.process_multi(blocks, is_massive_sync=False)
+                Blocks.close_own_db_access()
 
                 active_connections_after_live = self._get_active_db_connections()
                 self._assert_connections_closed(active_connections_before, active_connections_after_live)

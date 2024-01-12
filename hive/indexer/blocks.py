@@ -9,6 +9,7 @@ from typing import Tuple
 
 from hive.conf import Conf, SCHEMA_NAME
 from hive.db.adapter import Db
+from hive.indexer.db_adapter_holder import DbLiveContextHolder
 from hive.indexer.accounts import Accounts
 from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
 from hive.indexer.custom_op import CustomOp
@@ -83,11 +84,24 @@ class Blocks:
         Reblog.setup_own_db_access(shared_db_adapter, "Reblog")
         Notify.setup_own_db_access(shared_db_adapter, "Notify")
         Accounts.setup_own_db_access(shared_db_adapter, "Accounts")
-        PayoutStats.setup_own_db_access(shared_db_adapter, "PayoutStats")
-        Mentions.setup_own_db_access(shared_db_adapter, "Mentions")
+
+        if DbLiveContextHolder.is_live_context():
+            # Mentions is refreshed in parallel with PayoutStats so the DB must be cloned
+            db_for_payoutstats = shared_db_adapter.clone( "PayoutStats" )
+            PayoutStats.setup_own_db_access(db_for_payoutstats, "PayoutStats")
+            db_for_mentions = shared_db_adapter.clone( "Mentions" )
+            Mentions.setup_own_db_access(db_for_mentions, "Mentions")
+        else:
+            Mentions.setup_own_db_access(shared_db_adapter, "Mentions")
+            PayoutStats.setup_own_db_access(shared_db_adapter, "PayoutStats")
 
     @staticmethod
     def close_own_db_access() -> None:
+        if DbLiveContextHolder.is_live_context():
+            PayoutStats.close_own_db_access()
+            Mentions.close_own_db_access()
+            return
+
         PostDataCache.close_own_db_access()
         Reputations.close_own_db_access()
         Votes.close_own_db_access()
@@ -241,8 +255,31 @@ class Blocks:
             log.info("[SINGLE] hourly stats")
             log.info("[SINGLE] filling payout_stats_view executed")
             with ThreadPoolExecutor(max_workers=2) as executor:
-                executor.submit(PayoutStats.generate)
-                executor.submit(Mentions.refresh)
+                # Tricky situation: Before HAF, payouts and mentions refreshing were done in separate threads.
+                # With HAF, the entire block processing loop, from app_next_block call to flushing the last table,
+                # must be done in one transaction. However, a transaction can only include statements from one thread.
+                # Fortunately, payouts view and mentions refresh are triggered once every 1200 blocks but computed for
+                # the state of the current block - 1 since current block data are not yet committed.
+                # If the main thread's commit fails after refreshing payouts and mentions, HAF will break with an error,
+                # and current block data will be discarded. Payouts and mentions will be in a consistent state
+                # with the last committed block, ensuring hivemind stops in a consistent state.
+                # If either Payouts or Mentions fails, hivemind will break with an exception. If either but not both
+                # commit successfully, payouts or mentions become inconsistent with the current block number.
+                # However, after restarting hivemind, they immediately become refreshed because the block triggering
+                # the refresh will be processed first.
+
+                payout_future = executor.submit(PayoutStats.generate, separate_transaction=True)
+                mentions_future = executor.submit(Mentions.refresh, separate_transaction=True)
+                payout_exception = payout_future.exception()
+                mentions_exception = mentions_future.exception()
+
+                if payout_exception:
+                    raise payout_exception;
+
+                if mentions_exception:
+                    raise  mentions_exception
+
+
         elif block_num % 200 == 0:  # 10min
             log.info("[SINGLE] 10min")
             log.info("[SINGLE] updating communities posts and rank")
