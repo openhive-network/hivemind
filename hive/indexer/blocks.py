@@ -224,6 +224,7 @@ class Blocks:
                 cls.on_live_blocks_processed(first_block)
                 cls._periodic_actions(blocks[0])
 
+        # MICKIEWICZ@NOTE PROBLEM: it commits event when it not open a transaction
         DB.query("COMMIT")
 
         if is_massive_sync:
