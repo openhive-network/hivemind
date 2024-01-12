@@ -511,23 +511,30 @@ def teardown(db):
 
 
 def drop_fk(db):
-    db.query_no_return("START TRANSACTION")
+    transaction_already_started = db.is_trx_active();
+    if not transaction_already_started:
+        db.query_no_return("START TRANSACTION")
     for table in build_metadata().sorted_tables:
         for fk in table.foreign_keys:
             sql = f"""ALTER TABLE {SCHEMA_NAME}.{table.name} DROP CONSTRAINT IF EXISTS {fk.name}"""
             log.info(f"MICKIEWICZ fk query: {sql}")
             db.query_no_return(sql)
-    db.query_no_return("COMMIT")
+    if not transaction_already_started:
+        db.query_no_return("COMMIT")
 
 
 def create_fk(db):
     from sqlalchemy.schema import AddConstraint
 
-    db.query_no_return("START TRANSACTION")
+    transaction_already_started = db.is_trx_active();
+    if not transaction_already_started:
+        db.query_no_return("START TRANSACTION")
     for table in build_metadata().sorted_tables:
         for fk in table.foreign_keys:
             db.query_no_return(AddConstraint(fk.constraint), is_prepared=True)
-    db.query_no_return("COMMIT")
+
+    if not transaction_already_started:
+        db.query_no_return("COMMIT")
 
 
 def setup(db):

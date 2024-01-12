@@ -120,8 +120,6 @@ class SyncHiveDb:
             if self._ubound - self._lbound > 100:
                 # mode with detached indexes and context
                 log.info("[MASSIVE] *** MASSIVE blocks processing ***")
-                # MICKIEWICZ@NOTE: ten commit jest niepotrzebny, a nawet może naszkodzić
-                self._db.query("COMMIT")  # in massive we re not operating in same transaction as app_next_block query
 
                 DbLiveContextHolder.set_live_context(False)
                 Blocks.setup_own_db_access(shared_db_adapter=self._db)
@@ -136,6 +134,7 @@ class SyncHiveDb:
 
                 DbState.before_massive_sync(self._lbound, self._ubound)
 
+                # detach below will also execute commit
                 context_detach(db=self._db)
                 log.info(f"[MASSIVE] Attempting to process block range: <{self._lbound}:{self._ubound}>")
                 self._catchup_irreversible_block(is_massive_sync=True)
