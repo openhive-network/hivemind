@@ -240,9 +240,8 @@ class Blocks:
             log.info(f"head block {block_num} @ {block.get_date()}")
             log.info("[SINGLE] hourly stats")
             log.info("[SINGLE] filling payout_stats_view executed")
-            with ThreadPoolExecutor(max_workers=2) as executor:
-                executor.submit(PayoutStats.generate)
-                executor.submit(Mentions.refresh)
+            PayoutStats.generate()
+            Mentions.refresh()
         elif block_num % 200 == 0:  # 10min
             log.info("[SINGLE] 10min")
             log.info("[SINGLE] updating communities posts and rank")
