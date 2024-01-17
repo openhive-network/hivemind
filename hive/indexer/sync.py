@@ -85,8 +85,22 @@ class SyncHiveDb:
     def run(self) -> None:
         start_time = perf()
         is_in_live_sync = False
+        force_massive_sync = False
 
         log.info(f"Using HAF database as block data provider, pointed by url: '{self._conf.get('database_url')}'")
+
+        if not Blocks.is_consistency():
+            # here we are sure that massive sync was broken, because in live sync
+            # only fully processed blocks are committed, and broken live is always consistent
+            # Now we are restarting, and we need to continue massive sync to complete it
+            # we have two situations:
+            if self._query_for_app_irreversible_block() > Blocks.last_imported():
+                # still we have some irreversible blocks to process ahead of our context
+                force_massive_sync = True
+            else:
+                # all irreversible block are processed
+                DbState._after_massive_sync(current_imported_block=Blocks.last_imported())
+                assert Blocks.is_consistency()
 
         while True:
             if not can_continue_thread():
@@ -116,8 +130,9 @@ class SyncHiveDb:
             log.info(f"target_head_block: {self._ubound}")
             log.info(f"test_max_block: {self._last_block_to_process}")
 
-            if self._ubound - self._lbound > 100:
+            if self._ubound - self._lbound > 100 or force_massive_sync:
                 # mode with detached indexes and context
+                force_massive_sync = False;
                 log.info("[MASSIVE] *** MASSIVE blocks processing ***")
                 self._db.query("COMMIT")  # in massive we re not operating in same transaction as app_next_block query
 
@@ -168,10 +183,6 @@ class SyncHiveDb:
                 )
 
                 self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._lbound)
-
-                if not Blocks.is_consistency():
-                    DbState._after_massive_sync(current_imported_block=Blocks.last_imported())
-                assert Blocks.is_consistency()
 
                 log.info(f"[SINGLE] Attempting to process first block in range: <{self._lbound}:{self._ubound}>")
                 self._massive_blocks_data_provider.start_without_threading()
@@ -366,3 +377,7 @@ class SyncHiveDb:
         )
 
         assert set(connections_before) == set(connections_after), assert_message
+    def _query_for_app_irreversible_block(self) -> int:
+        irreversible_block = self._db.query_row(f"SELECT * FROM hive.app_get_irreversible_block()")['app_get_irreversible_block']
+        log.info(f"HAF is on irreversible block: {irreversible_block}")
+        return irreversible_block
