@@ -174,6 +174,7 @@ class SyncHiveDb:
                 self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._lbound)
 
                 if not Blocks.is_consistency():
+                    # MICKIEWICZ@NOTE ztobi commita app_next_blokowi jeszcze przed przetworzeniem bloku
                     DbState._after_massive_sync(current_imported_block=Blocks.last_imported())
                 assert Blocks.is_consistency()
 
