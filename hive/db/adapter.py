@@ -7,6 +7,7 @@ from time import perf_counter as perf
 from funcy.seqs import first
 import sqlalchemy
 
+
 from hive.db.autoexplain_controller import AutoExplainWrapper
 from hive.utils.stats import Stats
 
@@ -88,15 +89,8 @@ class Db:
         try:
             for item in self._conn:
                 log.info(f"Closing database connection: '{item['name']}'")
-                # According to doc, detach method should remove connection from its uderlying connection pool
-                # https://docs.sqlalchemy.org/en/14/core/connections.html#sqlalchemy.engine.Connection.detach
-                # This can be a fix for random failures occuring at finishing massive sync, where multiple connections are closed and final checks against pg_stat_activity to verify connections really closed.
-                # See also this issue: https://gitlab.syncad.com/hive/hivemind/-/issues/207
-                item['connection'].detach() # be sure it will be not pooled anymore
                 item['connection'].close()
-            self._engine.dispose()
             self._conn = []
-            assert self._engine.pool.checkedin() == 0, f'All connections of {self.name} should be closed!'
         except Exception as ex:
             log.exception(f"Error during connections closing: {ex}")
             raise ex
@@ -122,11 +116,11 @@ class Db:
     def engine(self):
         """Lazy-loaded SQLAlchemy engine."""
         if self._engine is None:
+            from sqlalchemy.pool import NullPool
             self._engine = sqlalchemy.create_engine(
                 self._url,
                 isolation_level="READ UNCOMMITTED",  # only supported in mysql
-                pool_size=Db.max_connections,
-                pool_recycle=3600,
+                poolclass=NullPool,
                 echo=False,
                 connect_args={'application_name': f'hivemind_{self.name}'},
             )
