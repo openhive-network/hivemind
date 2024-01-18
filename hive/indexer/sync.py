@@ -176,7 +176,10 @@ class SyncHiveDb:
                 log.info(f"[SINGLE] Attempting to process first block in range: <{self._lbound}:{self._ubound}>")
                 self._massive_blocks_data_provider.start_without_threading()
                 blocks = self._massive_blocks_data_provider.get(number_of_blocks=1)
-                Blocks.process_multi(blocks, is_massive_sync=False)
+                if not can_continue_thread():
+                    self._db.query_no_return("ROLLBACK")
+                else:
+                    Blocks.process_multi(blocks, is_massive_sync=False)
 
                 active_connections_after_live = self._get_active_db_connections()
                 self._assert_connections_closed(active_connections_before, active_connections_after_live)

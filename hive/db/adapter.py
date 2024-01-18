@@ -275,6 +275,6 @@ class Db:
         action = sql.strip()[0:6].strip()
         if action == 'SELECT':
             return False
-        if action in ['DELETE', 'UPDATE', 'INSERT', 'COMMIT', 'START', 'ALTER', 'TRUNCA', 'CREATE', 'DROP I', 'DROP T']:
+        if action in ['DELETE', 'UPDATE', 'INSERT', 'COMMIT', 'START', 'ALTER', 'TRUNCA', 'CREATE', 'DROP I', 'DROP T', 'ROLLBACK']:
             return True
         raise Exception(f"unknown action: {sql}")
