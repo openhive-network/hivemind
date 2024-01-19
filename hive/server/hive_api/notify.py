@@ -2,7 +2,7 @@
 import logging
 
 from hive.conf import SCHEMA_NAME
-from hive.indexer.notify import NotifyType
+from hive.server.common.notify_type import NotifyType
 from hive.server.common.helpers import (
     json_date,
     return_error_info,

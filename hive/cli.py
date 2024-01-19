@@ -47,13 +47,6 @@ def run():
             conf.generate_completion()
             return
 
-        # Calculation of number of maximum connection and closing a database
-        # In next step the database will be opened with correct number of connections
-        Db.set_max_connections(conf.db())
-        conf.disconnect()
-
-        Db.set_shared_instance(conf.db())
-
         pid_file_name = conf.pid_file()
         if pid_file_name is not None:
             fh = open(pid_file_name, 'w')
@@ -81,6 +74,12 @@ def launch_mode(mode, conf):
         run_server(conf=conf)
 
     elif mode == 'sync':
+        # Calculation of number of maximum connection and closing a database
+        # In next step the database will be opened with correct number of connections
+        Db.set_max_connections(conf.db())
+        conf.disconnect()
+
+        Db.set_shared_instance(conf.db())
         from hive.indexer.sync import SyncHiveDb
 
         with SyncHiveDb(conf=conf) as sync:
