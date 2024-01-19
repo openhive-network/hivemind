@@ -1,54 +1,16 @@
 """Handle notifications"""
-
-from enum import IntEnum
 import logging
 
 from hive.conf import SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
+from hive.server.common.notify_type import NotifyType
 
 # pylint: disable=too-many-lines,line-too-long
 
 log = logging.getLogger(__name__)
 DB = Db.instance()
-
-
-class NotifyType(IntEnum):
-    """Labels for notify `type_id` field."""
-
-    # active
-    new_community = 1
-    set_role = 2
-    set_props = 3
-    set_label = 4
-    mute_post = 5
-    unmute_post = 6
-    pin_post = 7
-    unpin_post = 8
-    flag_post = 9
-    error = 10
-    subscribe = 11
-
-    reply = 12
-    reply_comment = 13
-    reblog = 14
-    follow = 15
-    mention = 16
-    vote = 17
-
-    # inactive
-    # vote_comment = 16
-
-    # update_account = 19
-    # receive = 20
-    # send = 21
-
-    # reward = 22
-    # power_up = 23
-    # power_down = 24
-    # message = 25
-
 
 class Notify(DbAdapterHolder):
     """Handles writing notifications/messages."""
