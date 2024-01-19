@@ -3,6 +3,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 import logging
+import time
 from time import perf_counter as perf
 from typing import Iterable, Tuple
 
@@ -161,9 +162,7 @@ class SyncHiveDb:
                 Blocks.close_own_db_access()
                 self._massive_blocks_data_provider.close_databases()
 
-                active_connections_after_massive = self._get_active_db_connections()
-                self._assert_connections_closed(active_connections_before, active_connections_after_massive)
-
+                self._wait_for_connections_closed(active_connections_before)
             else:
                 # mode with attached indexes and context
                 log.info("[SINGLE] *** SINGLE block processing***")
@@ -381,3 +380,21 @@ class SyncHiveDb:
         irreversible_block = self._db.query_row(f"SELECT * FROM hive.app_get_irreversible_block()")['app_get_irreversible_block']
         log.info(f"HAF is on irreversible block: {irreversible_block}")
         return irreversible_block
+    def _wait_for_connections_closed(self, connections_before: Iterable) -> None:
+        active_connections = []
+        for it in range(1,11):
+            active_connections = self._get_active_db_connections()
+            if set(connections_before) == set(active_connections):
+                return
+
+            log.info(
+                f'Some db connections used in '
+                f'{"LIVE" if DbLiveContextHolder.is_live_context() else "MASSIVE"} sync were not closed!\n'
+                f'before: {connections_before}\n'
+                f'after: {active_connections}\n'
+                f'try: {it}'
+            )
+
+            time.sleep(0.1)
+
+        self._assert_connections_closed(connections_before, active_connections)
