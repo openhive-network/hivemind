@@ -11,8 +11,11 @@ def prepare_app_context(db: Db) -> None:
     ctx_present = db.query_one(f"SELECT hive.app_context_exists('{SCHEMA_NAME}') as ctx_present;")
     if not ctx_present:
         log.info(f"No application context present. Attempting to create a '{SCHEMA_NAME}' context...")
-        db.query_no_return(f"SELECT hive.app_create_context('{SCHEMA_NAME}');")
+        db.query_no_return(f"SELECT hive.app_create_context('{SCHEMA_NAME}',FALSE);") #is-forking=FALSE, only process irreversible blocks
         log.info("Application context creation done.")
+    else:
+        db.query_no_return(f"SELECT hive.app_context_set_non_forking('{SCHEMA_NAME}');") #if existing context, make it non-forking
+
 
 
 def context_detach(db: Db) -> None:
@@ -29,7 +32,6 @@ def context_detach(db: Db) -> None:
 
 def context_attach(db: Db, block_number: int) -> None:
     is_attached = db.query_one(f"SELECT hive.app_context_is_attached('{SCHEMA_NAME}')")
-
     if is_attached:
         log.info("Context already attached - attaching skipped.")
         return
