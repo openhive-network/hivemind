@@ -14,7 +14,10 @@ def prepare_app_context(db: Db) -> None:
         db.query_no_return(f"SELECT hive.app_create_context('{SCHEMA_NAME}',FALSE);") #is-forking=FALSE, only process irreversible blocks
         log.info("Application context creation done.")
     else:
+        log.info(f"Found existing context, set to non-forking.")
         db.query_no_return(f"SELECT hive.app_context_set_non_forking('{SCHEMA_NAME}');") #if existing context, make it non-forking
+        is_forking = db.query_one(f"SELECT hive.app_is_forking('{SCHEMA_NAME}') as is_forking;")
+        log.info(f"is_forking={is_forking}")
 
 
 
