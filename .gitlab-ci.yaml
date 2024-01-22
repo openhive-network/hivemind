@@ -347,6 +347,7 @@ sync:
       variables:
         PG_ACCESS: "
          host    haf_block_log    haf_app_admin    all    trust\n
+         host    haf_block_log    hivemind         all    trust\n
          host    haf_block_log    haf_admin        all    trust\n
          "
         DATA_SOURCE: $DATA_CACHE_HAF
@@ -419,6 +420,7 @@ e2e_benchmark:
       variables:
         PG_ACCESS: "
          host    haf_block_log    haf_app_admin    all    trust\n
+         host    haf_block_log    hivemind         all    trust\n
          host    haf_block_log    haf_admin        all    trust\n
          "
         DATADIR: $DATA_CACHE_HIVEMIND_DATADIR
