@@ -33,7 +33,7 @@ class DbState:
     _is_massive_sync = True
 
     @classmethod
-    def initialize(cls):
+    def initialize(cls, enter_massive: bool):
         """Perform startup database checks.
 
         1) Load schema if needed
@@ -41,18 +41,19 @@ class DbState:
         3) Check if massive sync has completed
         """
 
-        log.info("[MASSIVE] Welcome to hive!")
+        log.info("Welcome to hive!")
 
         # create db schema if needed
         if not cls._is_schema_loaded():
-            log.info("[MASSIVE] Create db schema...")
+            log.info("Create db schema...")
             db_setup = cls.db().clone('setup')
             setup(db=db_setup)
             db_setup.close()
 
         # check if massive sync complete
-        cls._is_massive_sync = True
-        log.info("[MASSIVE] Continue with massive sync...")
+        cls._is_massive_sync = enter_massive
+        if enter_massive:
+          log.info("[MASSIVE] Continue with massive sync...")
 
     @classmethod
     def teardown(cls):

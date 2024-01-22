@@ -37,10 +37,10 @@ log = logging.getLogger(__name__)
 
 
 class SyncHiveDb:
-    def __init__(self, conf: Conf):
+    def __init__(self, conf: Conf, enter_sync: bool):
         self._conf = conf
         self._db = conf.db()
-
+        self._enter_sync = enter_sync
         # Might be lower or higher than actual block number stored in HAF database
         self._last_block_to_process = self._conf.get('test_max_block')
 
@@ -50,13 +50,15 @@ class SyncHiveDb:
         self._databases = None
 
     def __enter__(self):
-        log.info("Entering HAF mode synchronization")
+        if self._enter_sync:
+          log.info("Entering HAF mode synchronization")
+
         set_custom_signal_handlers()
 
         Blocks.setup(conf=self._conf)
 
         Community.start_block = self._conf.get("community_start_block")
-        DbState.initialize()
+        DbState.initialize(self._enter_sync)
 
         self._show_info(self._db)
 
@@ -69,7 +71,9 @@ class SyncHiveDb:
         return self
 
     def __exit__(self, exc_type, value, traceback):
-        log.info("Exiting HAF mode synchronization")
+        if self._enter_sync:
+          log.info("Exiting HAF mode synchronization")
+
         Blocks.setup_own_db_access(shared_db_adapter=self._db)  # needed for PayoutStats.generate
         PayoutStats.generate(separate_transaction=True)
 
@@ -82,6 +86,10 @@ class SyncHiveDb:
         Blocks.close_own_db_access()
         if self._databases:
             self._databases.close()
+
+    def build_database_schema(self) -> None:
+        # whole code building it is already placed inside __enter__ handler, here was added only explicit messaging
+        log.info("Attempting to build Hivemind database schema if needed")
 
     def run(self) -> None:
         start_time = perf()
