@@ -10,7 +10,6 @@ from hive.conf import Conf
 from hive.db.adapter import Db
 from hive.utils.stats import PrometheusClient
 
-
 def setup_logging(conf):
     """Setup logging with timestamps"""
 
@@ -70,8 +69,19 @@ def launch_mode(mode, conf):
     """Launch a routine as indicated by `mode`."""
     if mode == 'server':
         from hive.server.serve import run_server
-
         run_server(conf=conf)
+
+    elif mode == 'build_schema':
+        # Calculation of number of maximum connection and closing a database
+        # In next step the database will be opened with correct number of connections
+        Db.set_max_connections(conf.db())
+        conf.disconnect()
+
+        Db.set_shared_instance(conf.db())
+
+        from hive.indexer.sync import SyncHiveDb
+        with SyncHiveDb(conf=conf, enter_sync = False) as schema_builder:
+            schema_builder.build_database_schema()
 
     elif mode == 'sync':
         # Calculation of number of maximum connection and closing a database
@@ -81,8 +91,7 @@ def launch_mode(mode, conf):
 
         Db.set_shared_instance(conf.db())
         from hive.indexer.sync import SyncHiveDb
-
-        with SyncHiveDb(conf=conf) as sync:
+        with SyncHiveDb(conf=conf, enter_sync = True) as sync:
             sync.run()
 
     elif mode == 'status':
@@ -91,7 +100,7 @@ def launch_mode(mode, conf):
         print(DbState.status())
 
     else:
-        raise Exception(f"unknown run mode {mode}")
+        raise Exception(f"unknown run mode {mode}. Accepted run modes are: `build_schema', `sync', `server', `status'")
 
 
 if __name__ == '__main__':
