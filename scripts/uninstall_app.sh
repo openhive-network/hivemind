@@ -61,8 +61,8 @@ POSTGRES_ACCESS_ADMIN=${POSTGRES_URL:-"postgresql://$POSTGRES_USER@$POSTGRES_HOS
 uninstall_app() {
     psql "$POSTGRES_ACCESS_ADMIN" -v "ON_ERROR_STOP=ON" -c "do \$\$ BEGIN if hive.app_context_exists('hivemind_app') THEN perform hive.app_remove_context('hivemind_app'); end if; END \$\$"
     psql "$POSTGRES_ACCESS_ADMIN" -v "ON_ERROR_STOP=ON" -c "DROP SCHEMA IF EXISTS hivemind_app CASCADE;"
-    psql "$POSTGRES_ACCESS_ADMIN" -v "ON_ERROR_STOP=ON" -c "DROP OWNED BY hivemind"
-    psql "$POSTGRES_ACCESS_ADMIN" -v "ON_ERROR_STOP=ON" -c "DROP ROLE hivemind"
+    psql "$POSTGRES_ACCESS_ADMIN" -v "ON_ERROR_STOP=ON" -c "DROP OWNED BY hivemind CASCADE" || true
+    psql "$POSTGRES_ACCESS_ADMIN" -v "ON_ERROR_STOP=ON" -c "DROP ROLE IF EXISTS hivemind"
 }
 
 uninstall_app
