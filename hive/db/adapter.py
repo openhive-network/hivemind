@@ -251,7 +251,7 @@ class Db:
         if sql == 'START TRANSACTION':
             assert not self._trx_active
             self._trx_active = True
-        elif sql == 'COMMIT':
+        elif sql == 'COMMIT' or sql == 'ROLLBACK':
             assert self._trx_active
             self._trx_active = False
 
