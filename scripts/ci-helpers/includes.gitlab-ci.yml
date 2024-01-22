@@ -1,0 +1,8 @@
+include:
+  - project: hive/haf
+    ref: 6d163d7dd3e994978a1d1c2598e45ad0a707bd2c # develop
+    file: /scripts/ci-helpers/prepare_data_image_job.yml # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
+  - project: 'hive/common-ci-configuration'
+    ref: 69a155cc9861188941a3f1a31db049ecc71e8de0
+    file:
+      - /templates/dynamic_tag_jobs.gitlab-ci.yml
