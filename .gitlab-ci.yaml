@@ -13,7 +13,7 @@ variables:
   RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME: hivemind-benchmark
   RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME: hivemind-smoketest
   # HAF
-  HAF_POSTGRES_URL: postgresql://haf_app_admin@haf-instance:5432/haf_block_log
+  HAF_POSTGRES_URL: postgresql://hivemind@haf-instance:5432/haf_block_log
   HAF_ADMIN_POSTGRES_URL: postgresql://haf_admin@haf-instance:5432/haf_block_log
   DATA_CACHE_HAF_PREFIX: "/cache/replay_data_haf"
   BLOCK_LOG_SOURCE_DIR_5M: /blockchain/block_log_5m
