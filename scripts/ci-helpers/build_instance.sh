@@ -62,6 +62,9 @@ done
 [[ -z "$SRCROOTDIR" ]] && printf "Missing argument #2 - source directory path\n\n" && print_help && exit 1
 [[ -z "$REGISTRY" ]] && printf "Missing argument #3 - target container registry URL\n\n" && print_help && exit 1
 
+# Supplement a registry path by trailing slash (if needed)
+[[ "${REGISTRY}" != */ ]] && REGISTRY="${REGISTRY}/"
+
 printf "Moving into source root directory: %s\n" "$SRCROOTDIR"
 
 pushd "$SRCROOTDIR"
@@ -71,7 +74,7 @@ pwd
 
 CI_IMAGE_TAG=${CI_IMAGE_TAG:-"python-3.8-slim-1"} # see scripts/ci/build_ci_base_image.sh for the current tag
 BUILD_OPTIONS=("--platform=linux/amd64" "--target=instance" "--progress=plain")
-TAG="$REGISTRY/instance:$BUILD_IMAGE_TAG"
+TAG="${REGISTRY}instance:$BUILD_IMAGE_TAG"
 
 # On CI push the images to the registry
 if [[ -n "${CI:-}" ]]; then
@@ -81,7 +84,7 @@ else
 fi
 
 docker buildx build "${BUILD_OPTIONS[@]}" \
-  --build-context "runtime=docker-image://${REGISTRY}/runtime:${CI_IMAGE_TAG}" \
+  --build-context "runtime=docker-image://${REGISTRY}runtime:${CI_IMAGE_TAG}" \
   --tag "$TAG" \
   --file Dockerfile .
 
