@@ -84,6 +84,13 @@ class Db:
 
         return cloned
 
+    def impersonated_clone(self, name, role):
+        role_url=self._engine.url.set(username=role)
+
+        cloned = Db(role_url, name, self.__autoexplain)
+
+        return cloned
+
     def close(self):
         """Close connection."""
         try:
