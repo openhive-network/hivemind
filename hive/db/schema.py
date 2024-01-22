@@ -12,6 +12,8 @@ from sqlalchemy.types import TEXT
 from sqlalchemy.types import VARCHAR
 
 from hive.conf import SCHEMA_NAME
+from hive.conf import SCHEMA_OWNER_NAME
+
 from hive.indexer.hive_db.haf_functions import context_attach, context_detach, prepare_app_context
 
 log = logging.getLogger(__name__)
@@ -529,14 +531,15 @@ def create_fk(db):
     db.query_no_return("COMMIT")
 
 
-def setup(db):
+def setup(db, admin_db):
     """Creates all tables and seed data"""
 
     sql = """SELECT * FROM pg_extension WHERE extname='intarray'"""
-    assert db.query_row(sql), "The database requires created 'intarray' extension"
+    assert admin_db.query_row(sql), "The database requires created 'intarray' extension"
 
     # create schema and aux functions
-    db.query(f'CREATE SCHEMA IF NOT EXISTS {SCHEMA_NAME};')
+    admin_db.query(f'CREATE SCHEMA IF NOT EXISTS {SCHEMA_NAME} AUTHORIZATION {SCHEMA_OWNER_NAME};')
+
     prepare_app_context(db=db)
     build_metadata().create_all(db.engine())
 
