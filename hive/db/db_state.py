@@ -10,7 +10,11 @@ from typing import Optional
 
 import sqlalchemy
 
-from hive.conf import SCHEMA_NAME
+from hive.conf import (
+   SCHEMA_NAME
+  ,SCHEMA_OWNER_NAME
+  )
+
 from hive.db.adapter import Db
 from hive.db.schema import build_metadata, setup, teardown
 from hive.indexer.auto_db_disposer import AutoDbDisposer
@@ -46,9 +50,11 @@ class DbState:
         # create db schema if needed
         if not cls._is_schema_loaded():
             log.info("Create db schema...")
-            db_setup = cls.db().clone('setup')
-            setup(db=db_setup)
-            db_setup.close()
+            db_setup_admin = cls.db().clone('setup_admin')
+            db_setup_owner = cls.db().impersonated_clone('setup_owner', SCHEMA_OWNER_NAME)
+            setup(admin_db=db_setup_admin, db=db_setup_owner)
+            db_setup_admin.close()
+            db_setup_owner.close()
 
         # check if massive sync complete
         cls._is_massive_sync = enter_massive
