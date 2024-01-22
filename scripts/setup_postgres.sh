@@ -46,7 +46,7 @@ while [ $# -gt 0 ]; do
         POSTGRES_PORT="${1#*=}"
         ;;
     --postgres-url=*)
-        POSTGRES_URL="${1#*=}"
+        export POSTGRES_URL="${1#*=}"
         ;;
     --help)
         print_help

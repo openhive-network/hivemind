@@ -10,7 +10,7 @@ function log () {
     echo "[Entrypoint] $timestamp INFO  [$category] (main) $message"
 }
 
-log "global" "Hivemind arguments: $*"
+log "global" "Parameters passed directly to Hivemind docker entrypoint: $*"
 
 COMMAND="$1"
 HIVEMIND_ARGS=()
@@ -22,10 +22,15 @@ POSTGRES_ADMIN_URL=${POSTGRES_ADMIN_URL:-}
 while [ $# -gt 0 ]; do
   case "$1" in
     --database-url=*)
-        POSTGRES_URL="${1#*=}"
+        export POSTGRES_URL="${1#*=}"
         ;;
     --database-admin-url=*)
-        POSTGRES_ADMIN_URL="${1#*=}"
+        export POSTGRES_ADMIN_URL="${1#*=}"
+        ;;
+    # Added for compatibility with other app setup
+    --postgres-url=*)
+        export POSTGRES_URL="${1#*=}"
+        export POSTGRES_ADMIN_URL="${1#*=}"
         ;;
     --add-mocks=*)
         ADD_MOCKS="${1#*=}"
@@ -39,18 +44,20 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-log "global" "Hivemind arguments: ${HIVEMIND_ARGS[*]}"
+log "global" "Collected Hivemind arguments: ${HIVEMIND_ARGS[*]}"
 log "global" "Using PostgreSQL instance: $POSTGRES_URL"
+log "global" "Using PostgreSQL Admin URL: $POSTGRES_ADMIN_URL"
 
 run_hive() {
+  local db_url=${1:-"${POSTGRES_URL}"}
   # shellcheck source=/dev/null
   source /home/hivemind/.hivemind-venv/bin/activate
   if [[ -n "$LOG_PATH" ]]; then
     log "run_hive" "Starting Hivemind with log $LOG_PATH"
-    hive "${HIVEMIND_ARGS[@]}" --database-url="${POSTGRES_URL}" 2>&1 | tee -i "$LOG_PATH"
+    hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}" 2>&1 | tee -i "$LOG_PATH"
   else
     log "run_hive" "Starting Hivemind..."
-    hive "${HIVEMIND_ARGS[@]}" --database-url="${POSTGRES_URL}"
+    hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}"
   fi
 }
 
@@ -65,12 +72,27 @@ setup() {
     source /home/hivemind/.hivemind-venv/bin/activate
     ci/add-mocks-to-db.sh --postgres-url="${POSTGRES_ADMIN_URL}"
     deactivate
-  fi 
+  fi
+
+  HIVEMIND_ARGS=("build_schema")
+  run_hive "${POSTGRES_ADMIN_URL}"
+}
+
+uninstall_app() {
+  log "setup" "Cleaning up an application specific contents located in the database: ${POSTGRES_ADMIN_URL}"
+  cd /home/hivemind/app
+  ./uninstall_app.sh --postgres-url="${POSTGRES_ADMIN_URL}"
 }
 
 case "$COMMAND" in
     setup)
       setup
+      ;;
+    install_app)
+      setup
+      ;;
+    uninstall_app)
+      uninstall_app
       ;;
     *)
       run_hive
