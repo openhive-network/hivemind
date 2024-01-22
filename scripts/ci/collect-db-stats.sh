@@ -8,6 +8,7 @@ collect_db_stats() {
 
     mkdir -p pg-stats
     DIR=$PWD/pg-stats
+    echo "Saving stats to directory ${DIR}"
 
     psql "${HAF_ADMIN_POSTGRES_URL}"\
          << EOF
