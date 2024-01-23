@@ -63,6 +63,7 @@ while [ $# -gt 0 ]; do
         ;;
     --postgres-url=*)
         POSTGRES_URL="${1#*=}"
+        add_hivemind_arg "--postgres-url=${POSTGRES_URL}"
         ;;
     --http-server-port=*)
         HTTP_ENDPOINT="${1#*=}"
