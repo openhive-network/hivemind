@@ -11,7 +11,7 @@ def prepare_app_context(db: Db) -> None:
     ctx_present = db.query_one(f"SELECT hive.app_context_exists('{SCHEMA_NAME}') as ctx_present;")
     if not ctx_present:
         log.info(f"No application context present. Attempting to create a '{SCHEMA_NAME}' context...")
-        db.query_no_return(f"SELECT hive.app_create_context('{SCHEMA_NAME}');")
+        db.query_no_return(f"SELECT hive.app_create_context('{SCHEMA_NAME}', true, true);")
         log.info("Application context creation done.")
 
 
