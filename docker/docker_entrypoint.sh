@@ -54,7 +54,7 @@ run_hive() {
   source /home/hivemind/.hivemind-venv/bin/activate
   if [[ -n "$LOG_PATH" ]]; then
     log "run_hive" "Starting Hivemind with log $LOG_PATH"
-    exec hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}" 2>&1 | tee -i "$LOG_PATH"
+    exec hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
   else
     log "run_hive" "Starting Hivemind..."
     exec hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}"
