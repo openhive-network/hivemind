@@ -185,18 +185,18 @@ Entering application main loop...
 
 #### Running Hivemind instance container
 
-The built Hivemind instance requires a preconfigured HAF database to store its data. You  can perform them with `setup` command before starting the sync.
+The built Hivemind instance requires a preconfigured HAF database to store its data. You  can perform them with `install_app` command before starting the sync.
 
 The commands below assume that the running HAF container has IP: 172.17.0.2
 
 ```bash
 # Set-up Database
-../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local setup \
+../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local install_app \
    --database-admin-url="postgresql://haf_admin@172.17.0.2/haf_block_log" # haf_admin access URL
 
 # Run the sync
 ../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local sync \
-   --database-url="postgresql://haf_app_admin@172.17.0.2:5432/haf_block_log"
+   --database-url="postgresql://hivemind@172.17.0.2:5432/haf_block_log"
 ```
 
 ## Updating from an existing hivemind database
