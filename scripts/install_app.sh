@@ -61,7 +61,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ -z "$POSTGRES_URL" ]; then
-  POSTGRES_ACCESS="postgresql://haf_app_admin@$POSTGRES_HOST:$POSTGRES_PORT/haf_block_log"
+  POSTGRES_ACCESS="postgresql://haf_admin@$POSTGRES_HOST:$POSTGRES_PORT/haf_block_log"
 else
   POSTGRES_ACCESS=$POSTGRES_URL
 fi
