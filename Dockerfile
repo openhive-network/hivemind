@@ -31,7 +31,6 @@ RUN <<EOF
   DEBIAN_FRONTEND=noniteractive apt-get clean && rm -rf /var/lib/apt/lists/*
   
   /root/setup_os.sh --haf-admin-account="haf_admin"
-  useradd -ms /bin/bash -c "HAF application admin account" -u 4001 -U "haf_app_admin" --groups users
   # This user needs UID of 1000 to be able to save logs to cache when run in CI
   useradd -ms /bin/bash -c "Hivemind service account" -u 1000 "hivemind" --groups users
 EOF
@@ -76,7 +75,7 @@ ARG HTTP_PORT=8080
 ENV HTTP_PORT=${HTTP_PORT}
 
 # Lets use by default host address from default docker bridge network
-ARG POSTGRES_URL="postgresql://haf_app_admin@172.17.0.1/haf_block_log"
+ARG POSTGRES_URL="postgresql://hivemind@172.17.0.1/haf_block_log"
 ENV POSTGRES_URL=${POSTGRES_URL}
 
 ARG POSTGRES_ADMIN_URL="postgresql://haf_admin@172.17.0.1:5432/haf_block_log"
