@@ -30,7 +30,7 @@ print_help () {
 supplement_builtin_roles() {
   local pg_access="$1"
   echo "Attempting to supplement definition of hivemind builtin roles..."
-  psql $pg_access -v ON_ERROR_STOP=on -c 'GRANT hivemind TO haf_app_admin;'
+  psql $pg_access -v ON_ERROR_STOP=on -c 'GRANT hivemind TO haf_admin;'
 }
 
 POSTGRES_HOST="/var/run/postgresql"
@@ -69,7 +69,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ -z "$POSTGRES_URL" ]; then
-  POSTGRES_ACCESS="postgresql://haf_app_admin@${POSTGRES_HOST}:${POSTGRES_PORT}/haf_block_log"
+  POSTGRES_ACCESS="postgresql://haf_admin@${POSTGRES_HOST}:${POSTGRES_PORT}/haf_block_log"
 else
   POSTGRES_ACCESS=$POSTGRES_URL
 fi
