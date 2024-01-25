@@ -349,7 +349,6 @@ sync:
       alias: haf-instance
       variables:
         PG_ACCESS: "
-         host    haf_block_log    haf_app_admin    all    trust\n
          host    haf_block_log    hivemind         all    trust\n
          host    haf_block_log    haf_admin        all    trust\n
          "
@@ -422,7 +421,6 @@ e2e_benchmark:
       alias: haf-instance
       variables:
         PG_ACCESS: "
-         host    haf_block_log    haf_app_admin    all    trust\n
          host    haf_block_log    hivemind         all    trust\n
          host    haf_block_log    haf_admin        all    trust\n
          "
