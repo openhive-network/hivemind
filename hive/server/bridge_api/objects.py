@@ -49,6 +49,9 @@ def append_statistics_to_post(post, row, is_pinned):
     if row['role_id'] == -2:
         post['stats']['muted_reasons'].append(MUTED_REASONS['MUTED_ROLE_COMMUNITY'])
 
+    if len(post['stats']['muted_reasons']) == 0:
+        del post['stats']['muted_reasons'] # We do not want to bloat the output with empty arrays
+
     if is_pinned:
         post['stats']['is_pinned'] = True
     return post
