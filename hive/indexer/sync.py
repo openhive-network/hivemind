@@ -108,6 +108,7 @@ class SyncHiveDb:
                 force_massive_sync = True
             else:
                 # all irreversible block are processed
+                log.info( "After restarting needs to finish processing already synced irreversible blocks" )
                 DbState._after_massive_sync(current_imported_block=Blocks.last_imported())
                 assert Blocks.is_consistency()
 

@@ -20,11 +20,13 @@ def set_custom_signal_handlers():
     global default_sigterm_handler
     default_sigint_handler = signal(SIGINT, custom_signals_handler)
     default_sigterm_handler = signal(SIGTERM, custom_signals_handler)
+    log.info( "Custom signals handlers are installed" )
 
 
 def restore_default_signal_handlers():
     signal(SIGINT, default_sigint_handler)
     signal(SIGTERM, default_sigterm_handler)
+    log.info( "Custom signals handlers are un-installed" )
 
 
 def custom_signals_handler(signal, frame):
