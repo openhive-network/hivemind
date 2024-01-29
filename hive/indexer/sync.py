@@ -143,7 +143,12 @@ class SyncHiveDb:
                 # mode with detached indexes and context
                 force_massive_sync = False;
                 log.info("[MASSIVE] *** MASSIVE blocks processing ***")
-                self._db.query("COMMIT")  # in massive we re not operating in same transaction as app_next_block query
+                # we ar going to detach context, it would be safer to cancel context changes
+                # - in case of any fail, during restart we do not omit block already set with app_next_block
+                # - detach will make commit on its own
+                # we will set current block arbitrary during re-attaching the context
+                self._db.query_no_return("ROLLBACK")
+                context_detach(db=self._db)
 
                 DbLiveContextHolder.set_live_context(False)
                 Blocks.setup_own_db_access(shared_db_adapter=self._db)
@@ -156,7 +161,6 @@ class SyncHiveDb:
 
                 DbState.before_massive_sync(self._lbound, self._ubound)
 
-                context_detach(db=self._db)
                 log.info(f"[MASSIVE] Attempting to process block range: <{self._lbound}:{self._ubound}>")
                 self._catchup_irreversible_block(is_massive_sync=True)
 
