@@ -268,7 +268,7 @@ BEGIN
     LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __account_id AND blacklist.blacklisted_id = hp.author_id)
     WHERE hs.account_id = __account_id 
       AND NOT hp.is_paidout 
-      AND hp.payout_at BETWEEN head_block_time + interval '12 hours' AND __head_block_time + interval '36 hours'
+      AND hp.payout_at BETWEEN __head_block_time + interval '12 hours' AND __head_block_time + interval '36 hours'
       AND ( __post_id = 0 OR (hp.payout + hp.pending_payout) < __payout_limit 
 	                  OR ((hp.payout + hp.pending_payout) = __payout_limit AND hp.id < __post_id) )
       AND (NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp.author_id))
