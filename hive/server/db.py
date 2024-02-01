@@ -9,7 +9,7 @@ from sqlalchemy.engine.url import make_url
 
 from hive.utils.stats import Stats
 
-logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
+logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
 log = logging.getLogger(__name__)
 
 
