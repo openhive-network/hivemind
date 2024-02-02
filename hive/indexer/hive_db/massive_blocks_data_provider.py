@@ -82,7 +82,9 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         def __init__(self, db_root: Db, shared: bool = False):
             self._db_root = db_root
             self._db_operations = db_root.clone('MassiveBlocksProvider_OperationsData') if not shared else None
+            logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
             self._db_blocks_data = db_root.clone('MassiveBlocksProvider_BlocksData') if not shared else None
+            # logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 
             assert self._db_root
 

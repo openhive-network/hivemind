@@ -11,7 +11,7 @@ import sqlalchemy
 from hive.db.autoexplain_controller import AutoExplainWrapper
 from hive.utils.stats import Stats
 
-logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
+logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 
 log = logging.getLogger(__name__)
 
