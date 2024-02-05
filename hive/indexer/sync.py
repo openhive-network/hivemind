@@ -267,7 +267,7 @@ class SyncHiveDb:
         num = 0
         time_start = OPSM.start()
         rate = {}
-        LIMIT_FOR_PROCESSED_BLOCKS = 1000
+        LIMIT_FOR_PROCESSED_BLOCKS = 100 #DLN reduced from 1000
 
         rate = minmax(rate, 0, 1.0, 0)
 
