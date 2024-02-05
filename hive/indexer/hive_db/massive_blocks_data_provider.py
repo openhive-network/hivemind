@@ -47,24 +47,17 @@ class BlocksDataFromDbProvider:
 
     def thread_body_get_data(self, queue_for_data):
         try:
-            for block in range(self._lbound, self._ubound + 1, self._blocks_per_request):
+            while True:
                 if not can_continue_thread():
                     break
-                last = min([block + self._blocks_per_request - 1, self._ubound])
 
-                stmt = text(self._sql_query).bindparams(first=block, last=last)
+                stmt = text(self._sql_query).bindparams(first=25000000, last=25000000+100)
 
                 data_rows = self._db.query_all(stmt, is_prepared=True)
 
-                if not data_rows:
-                    log.warning(f'DATA ROWS ARE EMPTY! query: {stmt.compile(compile_kwargs={"literal_binds": True})}')
+                assert data_rows
 
-                while can_continue_thread():
-                    try:
-                        queue_for_data.put(data_rows, True, 1)
-                        break
-                    except queue.Full:
-                        continue
+
         except:
             set_exception_thrown()
             raise
@@ -125,7 +118,7 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
         )
 
         self._operations_provider = BlocksDataFromDbProvider(
-            sql_query=OPERATIONS_QUERY,
+            sql_query=BLOCKS_QUERY,
             db=databases.get_operations(),
             blocks_per_request=self._blocks_per_query,
             external_thread_pool=self._thread_pool,

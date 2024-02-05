@@ -277,9 +277,9 @@ class DbState:
         cls._is_massive_sync = True
         to_sync = hived_head_block - last_imported_block
 
-        if to_sync < SYNCED_BLOCK_LIMIT:
-            log.info("[MASSIVE] Skipping pre-massive sync hooks")
-            return
+        # if to_sync < SYNCED_BLOCK_LIMIT:
+        #    log.info("[MASSIVE] Skipping pre-massive sync hooks")
+        #    return
 
 
         log.info("Dropping foreign keys")

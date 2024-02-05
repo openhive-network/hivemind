@@ -64,7 +64,7 @@ class SyncHiveDb:
 
         self._check_log_explain_queries()
 
-        context_attach(db=self._db, block_number=Blocks.last_imported())
+        # context_attach(db=self._db, block_number=Blocks.last_imported())
 
         Accounts.load_ids()  # prefetch id->name and id->rank memory maps
 
@@ -81,7 +81,7 @@ class SyncHiveDb:
         log.info(f'LAST IMPORTED BLOCK IS: {last_imported_block}')
         log.info(f'LAST COMPLETED BLOCK IS: {Blocks.last_completed()}')
 
-        context_attach(db=self._db, block_number=last_imported_block)
+        #context_attach(db=self._db, block_number=last_imported_block)
 
         Blocks.close_own_db_access()
         if self._databases:
@@ -138,6 +138,7 @@ class SyncHiveDb:
 
             log.info(f"target_head_block: {self._ubound}")
             log.info(f"test_max_block: {self._last_block_to_process}")
+            force_massive_sync = True
 
             if self._ubound - self._lbound > 100 or force_massive_sync:
                 # mode with detached indexes and context
@@ -203,10 +204,10 @@ class SyncHiveDb:
                 self._assert_connections_closed(active_connections_before, active_connections_after_live)
 
     def _query_for_app_next_block(self) -> Tuple[int, int]:
-        log.info("Querying for next block for app context...")
-        lbound, ubound = self._db.query_row(f"SELECT * FROM hive.app_next_block('{SCHEMA_NAME}')")
-        log.info(f"Next block range from hive.app_next_block is: <{lbound}:{ubound}>")
-        return lbound, ubound
+        #log.info("Querying for next block for app context...")
+        #lbound, ubound = self._db.query_row(f"SELECT * FROM hive.app_next_block('{SCHEMA_NAME}')")
+        #log.info(f"Next block range from hive.app_next_block is: <{lbound}:{ubound}>")
+        return 1, 10000000
 
     def _catchup_irreversible_block(self, is_massive_sync: bool = False) -> None:
         assert self._massive_blocks_data_provider is not None
