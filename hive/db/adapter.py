@@ -23,7 +23,7 @@ class Db:
 
     # maximum number of connections that is required so as to execute some tasks concurrently
     necessary_connections = 15
-    max_connections = 1
+    max_connections = 1 #start out by assuming only one connection available
 
     @classmethod
     def instance(cls):
@@ -53,7 +53,7 @@ class Db:
     def __init__(self, url, name, enable_autoexplain=False):
         """Initialize an instance.
 
-        No work is performed here. Some modues might initialize an
+        No work is performed here. Some modules might initialize an
         instance before config is loaded.
         """
         assert url, (
