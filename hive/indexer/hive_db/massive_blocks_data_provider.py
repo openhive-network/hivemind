@@ -26,6 +26,7 @@ class BlocksDataFromDbProvider:
         sql_query: str,
         db: Db,
         blocks_per_request: int,
+        strict: bool,
         external_thread_pool: Optional[ThreadPoolExecutor] = None,
     ):
         """
@@ -40,6 +41,7 @@ class BlocksDataFromDbProvider:
         self._thread_pool = external_thread_pool if external_thread_pool else ThreadPoolExecutor(1)
         self._blocks_per_request = blocks_per_request
         self._sql_query = sql_query
+        self._strict = strict
 
     def update_sync_block_range(self, lbound: int, ubound: int) -> None:
         self._lbound = lbound
@@ -57,7 +59,10 @@ class BlocksDataFromDbProvider:
                 data_rows = self._db.query_all(stmt, is_prepared=True)
 
                 if not data_rows:
-                    log.warning(f'DATA ROWS ARE EMPTY! query: {stmt.compile(compile_kwargs={"literal_binds": True})}')
+                    if self._strict:
+                        assert data_rows, f'DATA ROWS ARE EMPTY! query: {stmt.compile(compile_kwargs={"literal_binds": True})}'
+                    else:
+                        log.warning(f'DATA ROWS ARE EMPTY! query: {stmt.compile(compile_kwargs={"literal_binds": True})}')
 
                 while can_continue_thread():
                     try:
@@ -126,12 +131,17 @@ class MassiveBlocksDataProviderHiveDb(BlocksProviderBase):
             sql_query=OPERATIONS_QUERY,
             db=databases.get_operations(),
             blocks_per_request=self._blocks_per_query,
+            strict = False,
             external_thread_pool=self._thread_pool,
         )
+
+        # Because HAF returns range of available blocks, it is impossible
+        # to get empty results for asking for blocks
         self._blocks_data_provider = BlocksDataFromDbProvider(
             sql_query=BLOCKS_QUERY,
             db=databases.get_blocks_data(),
             blocks_per_request=self._blocks_per_query,
+            strict = True,
             external_thread_pool=self._thread_pool,
         )
 
