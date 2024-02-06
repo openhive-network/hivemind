@@ -64,7 +64,8 @@ class SyncHiveDb:
 
         self._check_log_explain_queries()
 
-        context_attach(db=self._db, block_number=Blocks.last_imported())
+        if self._enter_sync:
+            context_attach(db=self._db, block_number=Blocks.last_imported())
 
         Accounts.load_ids()  # prefetch id->name and id->rank memory maps
 
@@ -75,13 +76,15 @@ class SyncHiveDb:
           log.info("Exiting HAF mode synchronization")
 
         Blocks.setup_own_db_access(shared_db_adapter=self._db)  # needed for PayoutStats.generate
-        #PayoutStats.generate(separate_transaction=True)
+
+        PayoutStats.generate(separate_transaction=True)
 
         last_imported_block = Blocks.last_imported()
         log.info(f'LAST IMPORTED BLOCK IS: {last_imported_block}')
         log.info(f'LAST COMPLETED BLOCK IS: {Blocks.last_completed()}')
 
-        context_attach(db=self._db, block_number=last_imported_block)
+        if self._enter_sync:
+            context_attach(db=self._db, block_number=last_imported_block)
 
         Blocks.close_own_db_access()
         if self._databases:
