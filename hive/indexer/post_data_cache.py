@@ -48,12 +48,6 @@ class PostDataCache(DbAdapterHolder):
         if cls._data:
             values_insert = []
             values_update = []
-            cls.beginTx()
-            sql = f"""
-                INSERT INTO 
-                    {SCHEMA_NAME}.hive_post_data (id, title, preview, img_url, body, json) 
-                VALUES 
-            """
             for k, data in cls._data.items():
                 title = 'NULL' if data['title'] is None else f"{escape_characters(data['title'])}"
                 body = 'NULL' if data['body'] is None else f"{escape_characters(data['body'])}"
@@ -66,11 +60,12 @@ class PostDataCache(DbAdapterHolder):
                 else:
                     values_update.append(value)
 
+            cls.beginTx()
             if len(values_insert) > 0:
                 sql = f"""
-                    INSERT INTO 
-                        {SCHEMA_NAME}.hive_post_data (id, title, preview, img_url, body, json) 
-                    VALUES 
+                    INSERT INTO
+                        {SCHEMA_NAME}.hive_post_data (id, title, preview, img_url, body, json)
+                    VALUES
                 """
                 sql += ','.join(values_insert)
                 if print_query:
@@ -80,7 +75,7 @@ class PostDataCache(DbAdapterHolder):
 
             if len(values_update) > 0:
                 sql = f"""
-                    UPDATE {SCHEMA_NAME}.hive_post_data AS hpd SET 
+                    UPDATE {SCHEMA_NAME}.hive_post_data AS hpd SET
                         title = COALESCE( data_source.title, hpd.title ),
                         preview = COALESCE( data_source.preview, hpd.preview ),
                         img_url = COALESCE( data_source.img_url, hpd.img_url ),
