@@ -91,6 +91,7 @@ SHELL ["/bin/bash", "-c"]
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/dist /home/hivemind/dist 
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/.hivemind-venv /home/hivemind/.hivemind-venv 
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/docker/docker_entrypoint.sh .
+COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/docker/block-processing-healthcheck.sh .
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/scripts /home/hivemind/app
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/haf/scripts/create_haf_app_role.sh /home/hivemind/haf/scripts/create_haf_app_role.sh
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/haf/scripts/common.sh /home/hivemind/haf/scripts/common.sh

@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# save off the time the container started, for use in the health check
+date --utc --iso-8601=seconds > /tmp/container_startup_time.txt
+
 # Logger function
 function log () {
     local -r category=$1
