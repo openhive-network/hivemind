@@ -336,6 +336,7 @@ sync:
   image: 
     name: $HIVEMIND_IMAGE
     entrypoint: [""]
+  timeout: 1 hour 30 minutes
   stage: sync
   interruptible: true
   needs:
