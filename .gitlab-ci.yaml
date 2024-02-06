@@ -32,7 +32,7 @@ variables:
 
 include:
   - project: hive/haf
-    ref: 14d41aad6ba7fcdeac767334ac1538c73ff0d976 # develop
+    ref: 469518d99b549b3d177a0cc523f1e30048150dbc # develop
     file: /scripts/ci-helpers/prepare_data_image_job.yml # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
 
 
