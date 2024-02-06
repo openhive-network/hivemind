@@ -68,6 +68,7 @@ def run():
 def launch_mode(mode, conf):
     """Launch a routine as indicated by `mode`."""
     if mode == 'server':
+        Db.set_shared_instance(conf.db())
         from hive.server.serve import run_server
         run_server(conf=conf)
 
