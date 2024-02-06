@@ -57,7 +57,7 @@ class BlocksDataFromDbProvider:
                 data_rows = self._db.query_all(stmt, is_prepared=True)
 
                 if not data_rows:
-                    log.warning(f'DATA ROWS ARE EMPTY! query: {stmt.compile(compile_kwargs={"literal_binds": True})}')
+                    log.warning(f'No rows returned for query: {stmt.compile(compile_kwargs={"literal_binds": True})}')
 
                 while can_continue_thread():
                     try:
