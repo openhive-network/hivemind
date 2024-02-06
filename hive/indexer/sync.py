@@ -75,7 +75,7 @@ class SyncHiveDb:
           log.info("Exiting HAF mode synchronization")
 
         Blocks.setup_own_db_access(shared_db_adapter=self._db)  # needed for PayoutStats.generate
-        PayoutStats.generate(separate_transaction=True)
+        #PayoutStats.generate(separate_transaction=True)
 
         last_imported_block = Blocks.last_imported()
         log.info(f'LAST IMPORTED BLOCK IS: {last_imported_block}')
