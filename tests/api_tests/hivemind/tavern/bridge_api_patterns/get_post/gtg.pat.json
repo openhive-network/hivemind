@@ -741,13 +741,12 @@
   "permlink": "heavy-duty-witness-node-infrastructure",
   "post_id": 838527,
   "promoted": "0.000 HBD",
-  "reblogs": 0,
   "replies": [],
+  "reblogs": 0,
   "stats": {
     "flag_weight": 0.0,
     "gray": false,
     "hide": false,
-    "muted_reasons": [],
     "total_votes": 177
   },
   "title": "Heavy duty witness node infrastructure",

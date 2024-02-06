@@ -23,17 +23,14 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "after-member-comment-to-please-comment-hive2-02",
-    "post_id": 1256981,
+    "post_id": 1256968,
     "promoted": "0.000 HBD",
-    "reblogs": 0,
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
-      "muted_reasons": [
-        0
-      ],
       "total_votes": 0
     },
     "title": "RE: Comment my post02",
@@ -64,17 +61,14 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "after-muted-comment-to-please-comment-hive2-02",
-    "post_id": 1256926,
+    "post_id": 1256918,
     "promoted": "0.000 HBD",
-    "reblogs": 0,
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
-      "muted_reasons": [
-        0
-      ],
       "total_votes": 0
     },
     "title": "RE: Comment my post02",
@@ -105,17 +99,14 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "comment-to-please-comment-hive2-02",
-    "post_id": 1256880,
+    "post_id": 1256876,
     "promoted": "0.000 HBD",
-    "reblogs": 0,
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
-      "muted_reasons": [
-        0
-      ],
       "total_votes": 0
     },
     "title": "RE: Comment my post02",
@@ -144,19 +135,18 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "please-comment-hive2-02",
-    "post_id": 1256867,
+    "post_id": 1256861,
     "promoted": "0.000 HBD",
-    "reblogs": 0,
     "replies": [
       "alice/comment-to-please-comment-hive2-02",
       "alice/after-muted-comment-to-please-comment-hive2-02",
       "alice/after-member-comment-to-please-comment-hive2-02"
     ],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
-      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "Comment my post02",

@@ -1388,13 +1388,12 @@
     "permlink": "blocktrades-witness-report-for-3rd-week-of-august",
     "post_id": 896102,
     "promoted": "0.000 HBD",
-    "reblogs": 0,
     "replies": [],
+    "reblogs": 0,
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
       "hide": false,
-      "muted_reasons": [],
       "total_votes": 339
     },
     "title": "BlockTrades Witness Report for 3rd Week of August",

@@ -21,15 +21,14 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "parrot-03",
-    "post_id": 1256845,
+    "post_id": 1256851,
     "promoted": "0.000 HBD",
-    "reblogs": 2,
     "replies": [],
+    "reblogs": 2,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
-      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "I love parrots 03",

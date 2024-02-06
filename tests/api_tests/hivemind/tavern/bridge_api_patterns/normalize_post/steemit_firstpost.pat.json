@@ -427,13 +427,12 @@
   "permlink": "firstpost",
   "post_id": 1,
   "promoted": "0.000 HBD",
-  "reblogs": 1,
   "replies": [],
+  "reblogs": 1,
   "stats": {
     "flag_weight": 2.0,
     "gray": false,
     "hide": false,
-    "muted_reasons": [],
     "total_votes": 92
   },
   "title": "Welcome to Steem!",

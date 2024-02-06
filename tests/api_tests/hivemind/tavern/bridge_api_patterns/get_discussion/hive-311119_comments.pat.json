@@ -32,7 +32,6 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
-      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "ismember This post will not be muted",
@@ -73,7 +72,6 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
-      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "RE: ismember This post will not be muted",
@@ -112,7 +110,6 @@
       "flag_weight": 0.0,
       "gray": false,
       "hide": false,
-      "muted_reasons": [],
       "total_votes": 0
     },
     "title": "RE: ismember This post will not be muted",
@@ -151,9 +148,6 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
-      "muted_reasons": [
-        1
-      ],
       "total_votes": 0
     },
     "title": "RE: ismember This post will not be muted",

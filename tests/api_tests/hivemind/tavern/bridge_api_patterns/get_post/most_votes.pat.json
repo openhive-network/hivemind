@@ -4023,13 +4023,12 @@
   "permlink": "piston-web-first-open-source-steem-gui---searching-for-alpha-testers",
   "post_id": 276497,
   "promoted": "0.000 HBD",
-  "reblogs": 0,
   "replies": [],
+  "reblogs": 0,
   "stats": {
     "flag_weight": 1.0,
     "gray": false,
     "hide": false,
-    "muted_reasons": [],
     "total_votes": 1565
   },
   "title": "[piston.web] First Open Source Steem GUI - Searching for alpha testers",
