@@ -308,8 +308,6 @@ class SyncHiveDb:
                 block_start = perf()
                 Blocks.process_multi(blocks, is_massive_sync)
                 block_end = perf()
-                #update last_active_at directly since we don't advance current_block_num in massive_sync (until whole indexer gets re-write)
-                self._db.query_no_return(f"SELECT hive.set_last_active_at('hivemind_app');");
 
                 timer.batch_lap()
                 timer.batch_finish(len(blocks))
