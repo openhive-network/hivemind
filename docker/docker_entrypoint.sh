@@ -18,6 +18,7 @@ ADD_MOCKS=${ADD_MOCKS:-false}
 LOG_PATH=${LOG_PATH:-}
 POSTGRES_URL=${POSTGRES_URL:-}
 POSTGRES_ADMIN_URL=${POSTGRES_ADMIN_URL:-}
+INSTALL_APP=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -38,8 +39,11 @@ while [ $# -gt 0 ]; do
     --add-mocks)
         ADD_MOCKS=true
         ;;
+    --install-app)
+        INSTALL_APP=1
+        ;;
     *)
-        HIVEMIND_ARGS+=("$1") 
+        HIVEMIND_ARGS+=("$1")
   esac
   shift
 done
@@ -54,10 +58,10 @@ run_hive() {
   source /home/hivemind/.hivemind-venv/bin/activate
   if [[ -n "$LOG_PATH" ]]; then
     log "run_hive" "Starting Hivemind with log $LOG_PATH"
-    exec hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
+    hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
   else
     log "run_hive" "Starting Hivemind..."
-    exec hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}"
+    hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}"
   fi
 }
 
@@ -93,6 +97,18 @@ case "$COMMAND" in
       ;;
     uninstall_app)
       uninstall_app
+      ;;
+    sync)
+      if [ "${INSTALL_APP}" -eq 1 ]; then
+        log "global" "Running install_app step because it was requested via the --install-app argument"
+        SAVED_HIVEMIND_ARGS=("${HIVEMIND_ARGS[@]}")
+        setup
+        HIVEMIND_ARGS=("${SAVED_HIVEMIND_ARGS[@]}")
+        log "global" "Done running install_app, now running the block processor"
+        echo ""
+        echo ""
+      fi
+      run_hive
       ;;
     *)
       run_hive
