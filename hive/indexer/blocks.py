@@ -214,7 +214,7 @@ class Blocks:
         if is_massive_sync:
             DB.query("START TRANSACTION")
             #update last_active_at directly since we don't advance current_block_num in massive_sync (until whole indexer gets re-write)
-            DB.query_no_return(f"SELECT hive.set_last_active_at('hivemind_app');");
+            DB.query_no_return(f"SELECT hive.update_last_active_at('hivemind_app');");
 
         first_block, last_num = cls.process_blocks(blocks)
 
