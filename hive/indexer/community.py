@@ -35,8 +35,6 @@ TYPE_JOURNAL = 2
 TYPE_COUNCIL = 3
 valid_types = [TYPE_TOPIC, TYPE_JOURNAL, TYPE_COUNCIL]
 
-MUTED_REASONS = {'MUTED_COMMUNITY_MODERATION': 0, 'MUTED_COMMUNITY_TYPE': 1, 'MUTED_PARENT': 2, 'MUTED_REPUTATION': 3,  'MUTED_ROLE_COMMUNITY': 4}
-
 # https://en.wikipedia.org/wiki/ISO_639-1
 LANGS = (
     "ab,aa,af,ak,sq,am,ar,an,hy,as,av,ae,ay,az,bm,ba,eu,be,bn,bh,bi,"

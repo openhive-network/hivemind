@@ -1,6 +1,6 @@
 """Bridge API public endpoints for posts"""
 from hive.conf import SCHEMA_NAME
-from hive.indexer.community import MUTED_REASONS
+from hive.server.common.mute_reasons import MUTED_REASONS
 from hive.server.bridge_api.objects import _bridge_post_object, append_statistics_to_post, load_profiles
 from hive.server.common.helpers import (
     check_community,

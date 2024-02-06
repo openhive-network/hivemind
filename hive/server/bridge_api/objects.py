@@ -4,7 +4,7 @@ import logging
 
 import ujson as json
 
-from hive.indexer.community import MUTED_REASONS
+from hive.server.common.mute_reasons import MUTED_REASONS
 from hive.server.common.helpers import get_hive_accounts_info_view_query_string, json_date
 from hive.utils.account import safe_db_profile_metadata
 from hive.utils.normalize import rep_log10, sbd_amount
