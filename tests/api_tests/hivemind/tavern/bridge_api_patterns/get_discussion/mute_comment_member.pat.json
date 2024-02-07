@@ -23,14 +23,17 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "after-member-comment-to-please-comment-hive3-02",
-    "post_id": 1256971,
+    "post_id": 1256985,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "RE: Comment my post02",
@@ -61,14 +64,17 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "after-muted-comment-to-please-comment-hive3-02",
-    "post_id": 1256921,
+    "post_id": 1256930,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "RE: Comment my post02",
@@ -99,14 +105,17 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "comment-to-please-comment-hive3-02",
-    "post_id": 1256879,
+    "post_id": 1256884,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "RE: Comment my post02",
@@ -135,14 +144,14 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "please-comment-hive3-02",
-    "post_id": 1256864,
+    "post_id": 1256869,
     "promoted": "0.000 HBD",
+    "reblogs": 0,
     "replies": [
       "alice/comment-to-please-comment-hive3-02",
       "alice/after-muted-comment-to-please-comment-hive3-02",
       "alice/after-member-comment-to-please-comment-hive3-02"
     ],
-    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

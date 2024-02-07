@@ -70,12 +70,15 @@
     "permlink": "the-ramblings-of-a-devil",
     "post_id": 1050094,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 7
     },
     "title": "The Ramblings Of a Devil",
@@ -167,12 +170,15 @@
     "permlink": "for-those-curious-about-my-whereabouts",
     "post_id": 1188925,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 10
     },
     "title": "For those curious about my whereabouts",
@@ -231,12 +237,15 @@
     "permlink": "inspiring-story-watch-this-touch-my-heart",
     "post_id": 1034727,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 4
     },
     "title": "Inspiring Story (Watch this)  - TOUCH my heart",
