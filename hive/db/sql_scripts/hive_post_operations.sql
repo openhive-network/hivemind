@@ -25,12 +25,28 @@ BEGIN
 END
 $function$;
 
+
+CREATE OR REPLACE FUNCTION encode_bitwise_mask(muted_reasons INT[])
+    RETURNS INT AS $$
+DECLARE
+    mask INT := 0;
+    number INT;
+BEGIN
+    FOREACH number IN ARRAY muted_reasons
+        LOOP
+            mask := mask | (1 << number);
+        END LOOP;
+    RETURN mask;
+END;
+$$ LANGUAGE plpgsql;
+
 DROP TYPE IF EXISTS hivemind_app.process_community_post_result CASCADE;
 CREATE TYPE hivemind_app.process_community_post_result AS (
     is_muted bool,
     community_id integer, -- hivemind_app.hive_posts.community_id%TYPE
-    muted_reasons JSON
+    muted_reasons INTEGER
 );
+
 
 DROP FUNCTION IF EXISTS hivemind_app.process_community_post;
 CREATE OR REPLACE FUNCTION hivemind_app.process_community_post(_block_num hivemind_app.hive_posts.block_num%TYPE, _community_support_start_block hivemind_app.hive_posts.block_num%TYPE, _parent_permlink hivemind_app.hive_permlink_data.permlink%TYPE, _author_id hivemind_app.hive_posts.author_id%TYPE, _is_comment bool, _is_parent_muted bool, _community_id hivemind_app.hive_posts.community_id%TYPE)
@@ -47,8 +63,10 @@ declare
         __community_type_council CONSTANT SMALLINT := 3;
         __is_muted BOOL := TRUE;
         __community_id hivemind_app.hive_posts.community_id%TYPE;
-        __muted_reasons JSON := '[]';
+        __muted_reasons INTEGER[] := ARRAY[]::INTEGER[];
 BEGIN
+
+    __muted_reasons := ARRAY[1];
         IF _block_num < _community_support_start_block THEN
             __is_muted := FALSE;
             __community_id := NULL;
@@ -73,7 +91,7 @@ BEGIN
                             __is_muted := FALSE;
                         ELSE
                             -- This means the post was muted because of community reasons, 1 is MUTED_COMMUNITY_TYPE see community.py for the ENUM definition
-                            __muted_reasons := '[1]';
+                            __muted_reasons := ARRAY[1];
                         END IF;
                     END IF;
                 END IF;
@@ -85,12 +103,12 @@ BEGIN
             IF _is_parent_muted = TRUE THEN
                 __is_muted := TRUE;
                 -- 2 is MUTED_PARENT, see community.py for the ENUM definition
-                __muted_reasons := (__muted_reasons::jsonb || '[2]'::jsonb)::json;
+                __muted_reasons := array_append(__muted_reasons, 2);
             END IF;
 
         END IF;
 
-        RETURN (__is_muted, __community_id, __muted_reasons)::hivemind_app.process_community_post_result;
+        RETURN (__is_muted, __community_id, encode_bitwise_mask(__muted_reasons))::hivemind_app.process_community_post_result;
     END;
 $$ STABLE;
 

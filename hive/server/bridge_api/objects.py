@@ -4,7 +4,7 @@ import logging
 
 import ujson as json
 
-from hive.server.common.mute_reasons import MUTED_REASONS
+from hive.server.common.mute_reasons import MUTED_REASONS, decode_bitwise_mask
 from hive.server.common.helpers import get_hive_accounts_info_view_query_string, json_date
 from hive.utils.account import safe_db_profile_metadata
 from hive.utils.normalize import rep_log10, sbd_amount
@@ -43,7 +43,7 @@ def append_statistics_to_post(post, row, is_pinned):
 
     post['stats']['gray'] = row['is_grayed'] or row['is_muted'] or (row['role_id'] == -2)
 
-    post['stats']['muted_reasons'] = row['muted_reasons']
+    post['stats']['muted_reasons'] = decode_bitwise_mask(row['muted_reasons'])
     if row['is_grayed']:
         post['stats']['muted_reasons'].append(MUTED_REASONS['MUTED_REPUTATION'])
     if row['role_id'] == -2:
