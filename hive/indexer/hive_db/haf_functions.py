@@ -39,7 +39,7 @@ def context_attach(db: Db, block_number: int) -> None:
         #Update last_active_at to avoid context being detached by auto-detacher prior to call to next_app_block.
         #This is a workaround for current flaws in transaction management in hivemind, so it can be removed
         #once transaction management is properly done (i.e. transactions should start/end when hivemind is consistent with a block)
-        self._db.query_no_return(f"SELECT hive.app_update_last_active_at('{SCHEMA_NAME}')");
+        db.query_no_return(f"SELECT hive.app_update_last_active_at('{SCHEMA_NAME}')");
         log.info("Context already attached - attaching skipped, but last_active_at updated.")
         return
 
