@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-# save off the time the container started, for use in the health check
-date --utc --iso-8601=seconds > /tmp/container_startup_time.txt
+# clear out block processing startup time recorded by previous runs
+rm -f /tmp/block_processing_startup_time.txt
 
 # Logger function
 function log () {
@@ -111,6 +111,8 @@ case "$COMMAND" in
         echo ""
         echo ""
       fi
+      # save off the time the block processor started, for use in the health check
+      date --utc --iso-8601=seconds > /tmp/block_processing_startup_time.txt
       run_hive
       ;;
     *)

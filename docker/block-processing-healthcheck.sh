@@ -17,11 +17,16 @@ POSTGRES_ACCESS=${HEALTHCHECK_POSTGRES_URL:-"postgresql://$postgres_user@$postgr
 # - hivemind's head block has caught up to haf's irreversible block
 #   (so we don't mark hivemind as unhealthy if HAF stops getting blocks)
 #
-# This check needs to know when the container started, so the docker entrypoint
+# This check needs to know when the block processing started, so the docker entrypoint
 # must write this to a file like:
-#   date --utc --iso-8601=seconds > /tmp/container_startup_time.txt
+#   date --utc --iso-8601=seconds > /tmp/block_processing_startup_time.txt
 
-STARTUP_TIME="$(cat /tmp/container_startup_time.txt)"
+if [ ! -f "/tmp/block_processing_startup_time.txt" ]; then
+  echo "file /tmp/block_processing_startup_time.txt does not exist, which means block"
+  echo "processing hasn't started yet"
+  exit 1
+fi
+STARTUP_TIME="$(cat /tmp/block_processing_startup_time.txt)"
 CHECK="SET TIME ZONE 'UTC'; \
        SELECT ((now() - (SELECT last_active_at FROM hive.contexts WHERE name = 'hivemind_app')) < interval '1 minute' \
                AND (SELECT last_active_at FROM hive.contexts WHERE name = 'hivemind_app') > '${STARTUP_TIME}'::timestamp) OR \
