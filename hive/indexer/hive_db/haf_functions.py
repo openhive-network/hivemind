@@ -36,7 +36,11 @@ def context_detach(db: Db) -> None:
 def context_attach(db: Db, block_number: int) -> None:
     is_attached = db.query_one(f"SELECT hive.app_context_is_attached('{SCHEMA_NAME}')")
     if is_attached:
-        log.info("Context already attached - attaching skipped.")
+        #Update last_active_at to avoid context being detached by auto-detacher prior to call to next_app_block.
+        #This is a workaround for current flaws in transaction management in hivemind, so it can be removed
+        #once transaction management is properly done (i.e. transactions should start/end when hivemind is consistent with a block)
+        self._db.query_no_return(f"SELECT hive.app_update_last_active_at('{SCHEMA_NAME}')");
+        log.info("Context already attached - attaching skipped, but last_active_at updated.")
         return
 
     log.info(f"Trying to attach app context with block number: {block_number}")
