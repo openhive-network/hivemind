@@ -33,8 +33,6 @@ TRUNCATE TABLE hivemind_app.hive_db_vacuum_needed;
 
 --- Changes done in index hive_posts_community_id_id_idx overwritted by MR 575 (see below)
 
-DROP INDEX IF EXISTS hivemind_app.hive_posts_community_id_is_pinned_idx;
-
 CREATE INDEX IF NOT EXISTS hivemind_app.hive_posts_community_id_is_pinned_idx
     ON hivemind_app.hive_posts USING btree
     (community_id ASC NULLS LAST)
@@ -44,8 +42,6 @@ CREATE INDEX IF NOT EXISTS hivemind_app.hive_posts_community_id_is_pinned_idx
 --- End of MR https://gitlab.syncad.com/hive/hivemind/-/merge_requests/574
 
 --- Begin of MR https://gitlab.syncad.com/hive/hivemind/-/merge_requests/575 --- 
-
-DROP INDEX IF EXISTS hivemind_app.hive_posts_community_id_id_idx;
 
 CREATE INDEX IF NOT EXISTS hivemind_app.hive_posts_community_id_id_idx
     ON hivemind_app.hive_posts USING btree
@@ -68,36 +64,26 @@ CREATE INDEX IF NOT EXISTS hivemind_app.hive_posts_community_id_not_is_paidout_i
   WHERE NOT is_paidout AND depth = 0 AND counter_deleted = 0
   ;
 
-DROP INDEX IF EXISTS hivemind_app.hive_posts_author_id_id_idx;
-
 CREATE INDEX IF NOT EXISTS hivemind_app.hive_posts_author_id_id_idx
   ON hivemind_app.hive_posts USING btree
   (author_id, id DESC)
   WHERE counter_deleted = 0
   ;
 
-DROP INDEX IF EXISTS hivemind_app.hive_follows_following_state_idx;
-
 CREATE INDEX IF NOT EXISTS hivemind_app.hive_follows_following_state_idx
   ON hivemind_app.hive_follows USING btree
   (following, state)
   ;
-
-DROP INDEX IF EXISTS hivemind_app.hive_follows_follower_state_idx;
 
 CREATE INDEX IF NOT EXISTS hivemind_app.hive_follows_follower_state_idx
   ON hivemind_app.hive_follows USING btree
   (follower, state)
   ;
 
-DROP INDEX IF EXISTS hivemind_app.hive_follows_follower_following_state_idx;
-
 CREATE INDEX IF NOT EXISTS hivemind_app.hive_follows_follower_following_state_idx
   ON hivemind_app.hive_follows USING btree
   (follower, following, state)
   ;
-
-DROP INDEX IF EXISTS hivemind_app.hive_feed_cache_account_id_created_at_post_id_idx;
 
 --- Dedicated index to bridge_get_account_posts_by_blog
 CREATE INDEX IF NOT EXISTS hivemind_app.hive_feed_cache_account_id_created_at_post_id_idx
@@ -106,8 +92,3 @@ CREATE INDEX IF NOT EXISTS hivemind_app.hive_feed_cache_account_id_created_at_po
   ;
 
 --- End of MR https://gitlab.syncad.com/hive/hivemind/-/merge_requests/575 --- 
-
---- Supplement for https://gitlab.syncad.com/hive/hivemind/-/merge_requests/575 --- 
-DROP INDEX IF EXISTS hive_follows_ix5a;
-DROP INDEX IF EXISTS hive_follows_ix5b;
---- End of supplement for https://gitlab.syncad.com/hive/hivemind/-/merge_requests/575 --- 
