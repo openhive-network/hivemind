@@ -20,10 +20,10 @@ BEGIN
       blacklist.source
     FROM hivemind_app.live_posts_comments_view hp -- is this really supported for comments (maybe pinning is prevented?)?
     JOIN hivemind_app.hive_communities hc ON hc.id = hp.community_id
-    LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp.author_id)
+    LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (__observer_id != 0 AND blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp.author_id)
     WHERE hc.name = _community AND hp.is_pinned
       AND (__post_id = 0 OR hp.id < __post_id)
-      AND (NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp.author_id))
+      AND (__observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp.author_id))
     ORDER BY hp.id DESC
     LIMIT _limit
   )
