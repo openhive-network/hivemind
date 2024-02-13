@@ -424,7 +424,7 @@ BEGIN
     FROM hivemind_app.live_posts_comments_view hp1
     JOIN hivemind_app.hive_communities hc ON hp1.community_id = hc.id
     JOIN hivemind_app.hive_accounts_view ha ON hp1.author_id = ha.id
-    LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
+    LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (__observer_id != 0 AND blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE hc.name = _community
       AND NOT hp1.is_paidout 
       AND ha.is_grayed 
