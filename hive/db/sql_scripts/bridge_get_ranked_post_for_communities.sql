@@ -576,20 +576,32 @@ BEGIN
   END IF;
   RETURN QUERY
   --- Very close related to hive_posts_community_id_not_is_pinned_idx PARTIAL index. Please adjust when any condition will be changed.
-  WITH created as MATERIALIZED -- bridge_get_ranked_post_by_created_for_community
+  WITH community_data AS MATERIALIZED -- bridge_get_ranked_post_by_created_for_community
   (
-    SELECT
-      hp1.id,
-      blacklist.source
+    SELECT hc.id
+    FROM hivemind_app.hive_communities hc
+    WHERE hc.name = _community
+  )
+ ,base_data AS MATERIALIZED
+  (
+  SELECT
+    hp1.community_id,
+    hp1.id,
+    hp1.author_id
     FROM hivemind_app.live_posts_view hp1
-    JOIN hivemind_app.hive_communities hc ON hp1.community_id = hc.id
-    LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (__observer_id != 0 AND blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
-    WHERE hc.name = _community 
+    WHERE hp1.community_id = (SELECT c.id FROM community_data c)
       AND ( NOT _bridge_api OR NOT hp1.is_pinned ) -- concatenated with bridge_get_ranked_post_pinned_for_community when called for bridge_api
       AND ( __post_id = 0 OR hp1.id < __post_id )
       AND (__observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
-    ORDER BY hp1.id DESC
+    ORDER BY hp1.community_id ASC, hp1.id DESC --intentionally added community_id to the `order by` to force using hive_posts_community_id_not_is_pinned_idx
     LIMIT _limit
+  ),
+  created AS
+  (
+  SELECT d.id,
+         blacklist.source
+  FROM base_data d
+  LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (__observer_id != 0 AND blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = d.author_id)
   )
   SELECT
       hp.id,
@@ -633,7 +645,7 @@ BEGIN
   FROM created,
   LATERAL hivemind_app.get_post_view_by_id(created.id) hp
   ORDER BY created.id DESC
-  LIMIT _limit;
+  ;
 END
 $function$
 language plpgsql STABLE;
