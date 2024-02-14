@@ -16,7 +16,7 @@ from hive.conf import (
   )
 
 from hive.db.adapter import Db
-from hive.db.schema import build_metadata, setup, teardown
+from hive.db.schema import build_metadata, setup, setup_runtime_code, teardown
 from hive.indexer.auto_db_disposer import AutoDbDisposer
 from hive.server.common.payout_stats import PayoutStats
 from hive.utils.communities_rank import update_communities_posts_and_rank
@@ -47,14 +47,19 @@ class DbState:
 
         log.info("Welcome to hive!")
 
+        db_setup_owner = cls.db().impersonated_clone('setup_owner', SCHEMA_OWNER_NAME)
+
         # create db schema if needed
         if not cls._is_schema_loaded():
             log.info("Create db schema...")
             db_setup_admin = cls.db().clone('setup_admin')
-            db_setup_owner = cls.db().impersonated_clone('setup_owner', SCHEMA_OWNER_NAME)
+
             setup(admin_db=db_setup_admin, db=db_setup_owner)
             db_setup_admin.close()
-            db_setup_owner.close()
+
+        setup_runtime_code(db=db_setup_owner)
+
+        db_setup_owner.close()
 
         # check if massive sync complete
         cls._is_massive_sync = enter_massive
