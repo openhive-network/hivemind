@@ -623,10 +623,9 @@ def setup(db, admin_db):
     """
     db.query_no_return(sql)
 
-    # max_time_stamp definition moved into utility_functions.sql
+    context_attach(db=db, block_number=0)
 
-    # get_discussion definition moved to bridge_get_discussion.sql
-
+def setup_runtime_code(db):
     sql_scripts = [
         "utility_functions.sql",
         "hive_accounts_view.sql",
@@ -714,7 +713,6 @@ def setup(db, admin_db):
     from hive.version import GIT_REVISION
 
     db.query_no_return(sql.format(GIT_REVISION))
-    context_attach(db=db, block_number=0)
 
 
 def reset_autovac(db):
