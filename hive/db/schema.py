@@ -342,6 +342,7 @@ def build_metadata():
           sa.text('account_id, created_at DESC, post_id DESC')),
     )
 
+    #remove last_completed_block_num soon (replaced by current_block_num)
     sa.Table(
         'hive_state',
         metadata,

@@ -388,9 +388,7 @@ class DbState:
     def _finish_blocks_consistency_flag(cls, db, last_imported_block, current_imported_block):
         with AutoDbDisposer(db, "finish_blocks_consistency_flag") as db_mgr:
             time_start = perf_counter()
-            #cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
-            db_mgr.db.query_no_return(f"SELECT {SCHEMA_NAME}.update_last_completed_block({current_imported_block});");
-            db_mgr.db.query_no_return(f"SELECT hive.app_set_current_block_num('hivemind_app', {current_imported_block});");
+            db_mgr.db.query_no_return(f"SELECT hive.app_set_current_block_num({SCHEMA_NAME},{current_imported_block});");
             log.info("[MASSIVE] update_last_completed_block executed in %.4fs", perf_counter() - time_start)
 
     @classmethod

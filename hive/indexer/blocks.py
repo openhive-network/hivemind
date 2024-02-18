@@ -120,7 +120,7 @@ class Blocks:
         Get hivemind_app last block that was completed.
         (block is considered as completed when all update queries were run with this block number)
         """
-        sql = f"SELECT last_completed_block_num FROM {SCHEMA_NAME}.hive_state;"
+        sql = f"SELECT hive.app_get_current_block_num({SCHEMA_NAME});"
         return DB.query_one(sql) or 0
 
     @staticmethod
