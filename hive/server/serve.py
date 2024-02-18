@@ -253,7 +253,7 @@ def run_server(conf):
             except psycopg2.errors.UndefinedFunction:
                 time.sleep(5)
         last_imported = await app['db'].query_one(f"SELECT last_imported_block_num FROM {SCHEMA_NAME}.hive_state;")
-        last_completed = await app['db'].query_one(f"SELECT hive.app_get_current_block_num({SCHEMA_NAME});")
+        last_completed = await app['db'].query_one(f"SELECT hive.app_get_current_block_num('{SCHEMA_NAME}');")
 
         blocks_info = BlocksInfo(last, last_imported, last_completed)
 
