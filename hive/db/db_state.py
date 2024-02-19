@@ -389,7 +389,7 @@ class DbState:
         with AutoDbDisposer(db, "finish_blocks_consistency_flag") as db_mgr:
             time_start = perf_counter()
             db_mgr.db.query_no_return(f"SELECT hive.app_set_current_block_num('{SCHEMA_NAME}',{current_imported_block});");
-            log.info("[MASSIVE] update_last_completed_block executed in %.4fs", perf_counter() - time_start)
+            log.info("[MASSIVE] hive.app_set_current_block_num executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_notification_cache(cls, db):

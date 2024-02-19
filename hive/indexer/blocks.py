@@ -438,7 +438,7 @@ class Blocks:
             f"SELECT {SCHEMA_NAME}.update_notification_cache({block_number}, {block_number}, {is_hour_action})",
             f"SELECT {SCHEMA_NAME}.update_follow_count({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_account_reputations({block_number}, {block_number}, False)",
-            f"SELECT {SCHEMA_NAME}.update_last_completed_block({block_number})",
+            f"SELECT {SCHEMA_NAME}.app_set_current_block_num('{SCHEMA_NAME}', {block_number})",
         ]
 
         for query in queries:
