@@ -65,8 +65,6 @@ declare
         __community_id hivemind_app.hive_posts.community_id%TYPE;
         __muted_reasons INTEGER[] := ARRAY[]::INTEGER[];
 BEGIN
-
-    __muted_reasons := ARRAY[1];
         IF _block_num < _community_support_start_block THEN
             __is_muted := FALSE;
             __community_id := NULL;

@@ -13,7 +13,7 @@ from hive.db.adapter import Db
 from hive.indexer.accounts import Accounts
 from hive.indexer.notify import Notify
 from hive.server.common.helpers import check_community
-from hive.server.common.mute_reasons import decode_bitwise_mask, encode_bitwise_mask
+from hive.server.common.mute_reasons import encode_bitwise_mask
 
 log = logging.getLogger(__name__)
 

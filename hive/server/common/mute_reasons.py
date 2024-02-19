@@ -1,8 +1,6 @@
 """muted reasons enum to be used across hivemind"""
 
-MUTED_REASONS = {'MUTED_COMMUNITY_MODERATION': 0, 'MUTED_COMMUNITY_TYPE': 1, 'MUTED_PARENT': 2, 'MUTED_REPUTATION': 3,
-                 'MUTED_ROLE_COMMUNITY': 4}
-
+MUTED_REASONS = {'MUTED_COMMUNITY_MODERATION': 0, 'MUTED_COMMUNITY_TYPE': 1, 'MUTED_PARENT': 2, 'MUTED_REPUTATION': 3, 'MUTED_ROLE_COMMUNITY': 4}
 
 def encode_bitwise_mask(muted_reasons):
     mask = 0
