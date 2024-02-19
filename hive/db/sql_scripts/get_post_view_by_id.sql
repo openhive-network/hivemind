@@ -64,7 +64,7 @@ CREATE TYPE hivemind_app.get_post_view_by_id_return_t AS(
   community_title character varying(32),
   community_name character varying(16) COLLATE pg_catalog."C",
   block_num integer,
-  muted_reasons JSON
+  muted_reasons INTEGER
 );
 
 CREATE OR REPLACE FUNCTION hivemind_app.get_post_view_by_id(_id hivemind_app.hive_posts.id%TYPE) RETURNS SETOF hivemind_app.get_post_view_by_id_return_t
