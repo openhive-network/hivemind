@@ -40,7 +40,7 @@ CREATE TYPE hivemind_app.database_api_post AS (
   abs_rshares NUMERIC,
   active TIMESTAMP,
   author_rewards BIGINT,
-  muted_reasons JSON
+  muted_reasons INTEGER
 );
 
 DROP FUNCTION IF EXISTS hivemind_app.list_comments_by_permlink(character varying, character varying, int);
