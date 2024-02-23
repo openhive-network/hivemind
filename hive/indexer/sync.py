@@ -65,7 +65,7 @@ class SyncHiveDb:
         self._check_log_explain_queries()
 
         if self._enter_sync:
-            context_attach(db=self._db, block_number=Blocks.last_imported())
+            context_attach(db=self._db)
             Accounts.load_ids()  # prefetch id->name and id->rank memory maps
 
         return self
@@ -80,7 +80,7 @@ class SyncHiveDb:
             log.info(f'LAST IMPORTED BLOCK IS: {last_imported_block}')
             log.info(f'LAST COMPLETED BLOCK IS: {Blocks.last_completed()}')
 
-            context_attach(db=self._db, block_number=last_imported_block)
+            context_attach(db=self._db)
 
             Blocks.close_own_db_access()
 
@@ -143,6 +143,9 @@ class SyncHiveDb:
                 # mode with detached indexes and context
                 force_massive_sync = False;
                 log.info("[MASSIVE] *** MASSIVE blocks processing ***")
+                self._db.query_no_return("ROLLBACK")  # revert changes in context made by hive.app_next_block
+                self._db.query("START TRANSACTION")
+                context_detach(db=self._db)
                 self._db.query("COMMIT")  # in massive we re not operating in same transaction as app_next_block query
 
                 DbLiveContextHolder.set_live_context(False)
@@ -156,7 +159,6 @@ class SyncHiveDb:
 
                 DbState.before_massive_sync(self._lbound, self._ubound)
 
-                context_detach(db=self._db)
                 log.info(f"[MASSIVE] Attempting to process block range: <{self._lbound}:{self._ubound}>")
                 self._catchup_irreversible_block(is_massive_sync=True)
 
@@ -166,7 +168,7 @@ class SyncHiveDb:
 
                 last_imported_block = Blocks.last_imported()
                 DbState.finish_massive_sync(current_imported_block=last_imported_block)
-                context_attach(db=self._db, block_number=last_imported_block)
+                context_attach(db=self._db)
                 Blocks.close_own_db_access()
                 self._massive_blocks_data_provider.close_databases()
 

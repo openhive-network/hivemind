@@ -623,7 +623,7 @@ def setup(db, admin_db):
     """
     db.query_no_return(sql)
 
-    context_attach(db=db, block_number=0)
+    context_attach(db=db)
 
 def setup_runtime_code(db):
     sql_scripts = [
