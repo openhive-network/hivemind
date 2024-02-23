@@ -12,19 +12,25 @@ BEGIN
   __hive_tag = ARRAY_APPEND( __hive_tag, hivemind_app.find_tag_id( _tag, True ));
   __observer_id = hivemind_app.find_account_id(_observer, True);
   RETURN QUERY
-  WITH created AS MATERIALIZED -- bridge_get_ranked_post_by_created_for_tag
+  WITH data_source AS MATERIALIZED
   (
     SELECT
       hp1.id,
-      blacklist.source
+      hp1.author_id
     FROM hivemind_app.live_posts_view hp1
     JOIN hivemind_app.hive_accounts_view ha ON hp1.author_id = ha.id
-    LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
     WHERE hp1.tags_ids @> __hive_tag
-      AND ( __post_id = 0 OR hp1.id < __post_id )
-      AND NOT ha.is_grayed AND (NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
-    ORDER BY hp1.id DESC
+          AND ( __post_id = 0 OR hp1.id < __post_id )
+          AND NOT ha.is_grayed
+          AND (__observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
+    ORDER BY hp1.id + 10 DESC --- important to force using int-array index specific to tags_ids column
     LIMIT _limit
+  ),
+  created AS MATERIALIZED
+  (
+    SELECT ds.id, ds.author_id, blacklist.source
+    FROM data_source ds
+    LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (__observer_id != 0 AND blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = ds.author_id)
   )
   SELECT
       hp.id,
@@ -68,7 +74,7 @@ BEGIN
   FROM created,
   LATERAL hivemind_app.get_post_view_by_id(created.id) hp
   ORDER BY created.id DESC
-  LIMIT _limit;
+  ;
 END
 $function$
 language plpgsql STABLE;
