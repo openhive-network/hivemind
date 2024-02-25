@@ -5,11 +5,11 @@ AS
 $function$
 DECLARE
   __post_id INT;
-  __hive_tag INT[];
+  __hive_tag INT;
   __observer_id INT;
 BEGIN
   __post_id = hivemind_app.find_comment_id( _author, _permlink, True );
-  __hive_tag = ARRAY_APPEND( __hive_tag, hivemind_app.find_tag_id( _tag, True ));
+  __hive_tag = hivemind_app.find_tag_id( _tag, True );
   __observer_id = hivemind_app.find_account_id(_observer, True);
   RETURN QUERY
   WITH data_source AS MATERIALIZED
@@ -19,11 +19,11 @@ BEGIN
       hp1.author_id
     FROM hivemind_app.live_posts_view hp1
     JOIN hivemind_app.hive_accounts_view ha ON hp1.author_id = ha.id
-    WHERE hp1.tags_ids @> __hive_tag
+    WHERE hp1.tags_ids @@ __hive_tag::text::query_int
           AND ( __post_id = 0 OR hp1.id < __post_id )
           AND NOT ha.is_grayed
           AND (__observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
-    ORDER BY hp1.id + 10 DESC --- important to force using int-array index specific to tags_ids column
+    ORDER BY hp1.id DESC
     LIMIT _limit
   ),
   created AS MATERIALIZED
@@ -77,7 +77,9 @@ BEGIN
   ;
 END
 $function$
-language plpgsql STABLE;
+language plpgsql STABLE
+set plan_cache_mode=force_custom_plan
+;
 
 DROP FUNCTION IF EXISTS hivemind_app.bridge_get_ranked_post_by_hot_for_tag;
 CREATE FUNCTION hivemind_app.bridge_get_ranked_post_by_hot_for_tag( in _tag VARCHAR, in _author VARCHAR, in _permlink VARCHAR, in _limit SMALLINT, in _observer VARCHAR )
