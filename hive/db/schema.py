@@ -184,7 +184,10 @@ def build_metadata():
             postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0"),
         ),
         sa.Index(
-            'hive_posts_tags_ids_idx', 'tags_ids', postgresql_using="gin", postgresql_ops={'tags_ids': 'gin__int_ops'}
+            'hive_posts_tags_ids_live_post_cond_idx', 'tags_ids', postgresql_using="gin", postgresql_ops={'tags_ids': 'gin__int_ops'}, postgresql_where=sql_text("depth = 0 AND counter_deleted = 0")
+        ),
+        sa.Index(
+            'hive_posts_tags_ids_live_cond_idx', 'tags_ids', postgresql_using="gin", postgresql_ops={'tags_ids': 'gin__int_ops'}, postgresql_where=sql_text("counter_deleted = 0")
         ),
     )
 
