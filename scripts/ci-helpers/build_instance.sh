@@ -75,6 +75,7 @@ pwd
 CI_IMAGE_TAG=${CI_IMAGE_TAG:-"python-3.8-slim-1"} # see scripts/ci/build_ci_base_image.sh for the current tag
 BUILD_OPTIONS=("--platform=linux/amd64" "--target=instance" "--progress=plain")
 TAG="${REGISTRY}instance:$BUILD_IMAGE_TAG"
+MINIMAL_TAG="${REGISTRY}minimal-instance:$BUILD_IMAGE_TAG"
 
 # On CI push the images to the registry
 if [[ -n "${CI:-}" ]]; then
@@ -123,6 +124,13 @@ docker buildx build "${BUILD_OPTIONS[@]}" \
   --build-arg GIT_LAST_COMMIT_DATE="$GIT_LAST_COMMIT_DATE" \
   --tag "$TAG" \
   --file Dockerfile .
+
+# Since CI pushes the image directly to the registry, it needs to be pulled to be tagged
+if [[ -n "${CI:-}" ]]; then
+ docker pull "$TAG"
+fi
+
+docker tag "$TAG" "$MINIMAL_TAG"
 
 [[ -n "${DOT_ENV_FILENAME:-}" ]] && echo "${DOTENV_VAR_NAME:-IMAGE}=$TAG" > "$DOT_ENV_FILENAME"
 
