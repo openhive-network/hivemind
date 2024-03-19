@@ -114,7 +114,6 @@ def build_metadata():
         sa.Column('beneficiaries', sa.JSON, nullable=False, server_default='[]'),
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.Column('block_num_created', sa.Integer, nullable=False),
-        sa.Column('tags_ids', sa.ARRAY(sa.Integer), nullable=True),
         sa.ForeignKeyConstraint(['author_id'], ['hive_accounts.id'], name='hive_posts_fk1', deferrable=True, postgresql_not_valid=True),
         sa.ForeignKeyConstraint(['root_id'], ['hive_posts.id'], name='hive_posts_fk2', deferrable=True, postgresql_not_valid=True),
         sa.ForeignKeyConstraint(['parent_id'], ['hive_posts.id'], name='hive_posts_fk3', deferrable=True, postgresql_not_valid=True),
@@ -182,13 +181,7 @@ def build_metadata():
             'hive_posts_category_id_payout_plus_pending_payout_depth_idx',
             sa.text('category_id, (payout+pending_payout), depth'),
             postgresql_where=sql_text("NOT is_paidout AND counter_deleted = 0"),
-        ),
-        sa.Index(
-            'hive_posts_tags_ids_live_post_cond_idx', 'tags_ids', postgresql_using="gin", postgresql_ops={'tags_ids': 'gin__int_ops'}, postgresql_where=sql_text("depth = 0 AND counter_deleted = 0")
-        ),
-        sa.Index(
-            'hive_posts_tags_ids_live_cond_idx', 'tags_ids', postgresql_using="gin", postgresql_ops={'tags_ids': 'gin__int_ops'}, postgresql_where=sql_text("counter_deleted = 0")
-        ),
+        )
     )
 
     sa.Table(
@@ -259,6 +252,19 @@ def build_metadata():
             'rshares',
             'is_effective',
         ),  # this index is needed by update_posts_rshares procedure.
+    )
+
+
+    sa.Table(
+        'hive_post_tags',
+        metadata,
+        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
+        sa.Column('post_id', sa.Integer, nullable=False),
+        sa.Column('tag_id', sa.Integer, nullable=False),
+        sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_post_tags_fk1', deferrable=True, postgresql_not_valid=True),
+        sa.ForeignKeyConstraint(['tag_id'], ['hive_tag_data.id'], name='hive_post_tags_fk2', deferrable=True, postgresql_not_valid=True),
+        sa.Index('hive_post_tags_idx', 'post_id', 'tag_id', postgresql_using="btree"),
+        sa.Index('hive_post_tags_tag_id_post_id_idx', 'tag_id', sa.text('post_id DESC'), postgresql_using="btree")
     )
 
     sa.Table(
@@ -733,6 +739,7 @@ def reset_autovac(db):
     autovac_config = {  # vacuum  analyze
         'hive_accounts': (50000, 100000),
         'hive_posts': (2500, 10000),
+        'hive_post_tags': (5000, 10000),
         'hive_follows': (5000, 5000),
         'hive_feed_cache': (5000, 5000),
         'hive_reblogs': (5000, 5000),
@@ -765,6 +772,7 @@ def set_logged_table_attribute(db, logged):
     logged_config = [
         'hive_accounts',
         'hive_permlink_data',
+        'hive_post_tags',
         'hive_posts',
         'hive_post_data',
         'hive_votes',

@@ -1,2 +1,2 @@
- ALTER TABLE hivemind_app.hive_posts ALTER COLUMN tags_ids SET STATISTICS 1000;
+SELECT 'Only artificial query to allow to execute empty file';
 

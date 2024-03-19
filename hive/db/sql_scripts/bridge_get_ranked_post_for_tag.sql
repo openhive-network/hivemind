@@ -18,8 +18,9 @@ BEGIN
       hp1.id,
       hp1.author_id
     FROM hivemind_app.live_posts_view hp1
+    JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp1.id
     JOIN hivemind_app.hive_accounts_view ha ON hp1.author_id = ha.id
-    WHERE hp1.tags_ids @@ __hive_tag::text::query_int
+    WHERE hpt.tag_id = __hive_tag
           AND ( __post_id = 0 OR hp1.id < __post_id )
           AND NOT ha.is_grayed
           AND (__observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
@@ -89,14 +90,14 @@ $function$
 DECLARE
   __post_id INT;
   __hot_limit FLOAT;
-  __hive_tag INT[];
+  __hive_tag INT;
   __observer_id INT;
 BEGIN
   __post_id = hivemind_app.find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
       SELECT hp.sc_hot INTO __hot_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
   END IF;
-  __hive_tag = ARRAY_APPEND( __hive_tag, hivemind_app.find_tag_id( _tag, True ));
+  __hive_tag = hivemind_app.find_tag_id( _tag, True );
   __observer_id = hivemind_app.find_account_id(_observer, True);
   RETURN QUERY
   WITH hot AS MATERIALIZED -- bridge_get_ranked_post_by_hot_for_tag
@@ -106,8 +107,9 @@ BEGIN
       hp1.sc_hot as hot,
       blacklist.source
     FROM hivemind_app.live_posts_view hp1
+    JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp1.id
     LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
-    WHERE hp1.tags_ids @> __hive_tag
+    WHERE hpt.tag_id = __hive_tag
       AND NOT hp1.is_paidout
       AND ( __post_id = 0 OR hp1.sc_hot < __hot_limit OR ( hp1.sc_hot = __hot_limit AND hp1.id < __post_id ) )
       AND (NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp1.author_id))
@@ -169,14 +171,14 @@ $function$
 DECLARE
   __post_id INT;
   __payout_limit hivemind_app.hive_posts.payout%TYPE;
-  __hive_tag INT[];
+  __hive_tag INT;
   __observer_id INT;
 BEGIN
   __post_id = hivemind_app.find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
       SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
   END IF;
-  __hive_tag = ARRAY_APPEND( __hive_tag, hivemind_app.find_tag_id( _tag, True ) );
+  __hive_tag = hivemind_app.find_tag_id( _tag, True );
   __observer_id = hivemind_app.find_account_id(_observer, True);
   RETURN QUERY
   WITH payout AS MATERIALIZED -- bridge_get_ranked_post_by_muted_for_tag
@@ -186,9 +188,10 @@ BEGIN
       (hp1.payout + hp1.pending_payout) as total_payout,
       blacklist.source
     FROM hivemind_app.live_posts_comments_view hp1
+    JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp1.id
     JOIN hivemind_app.hive_accounts_view ha ON hp1.author_id = ha.id
     LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
-    WHERE hp1.tags_ids @> __hive_tag
+    WHERE hpt.tag_id = __hive_tag
       AND NOT hp1.is_paidout 
       AND ha.is_grayed AND (hp1.payout + hp1.pending_payout) > 0
       AND ( __post_id = 0 OR (hp1.payout + hp1.pending_payout) < __payout_limit 
@@ -416,14 +419,14 @@ $function$
 DECLARE
   __post_id INT;
   __promoted_limit hivemind_app.hive_posts.promoted%TYPE;
-  __hive_tag INT[];
+  __hive_tag INT;
   __observer_id INT;
 BEGIN
   __post_id = hivemind_app.find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
       SELECT hp.promoted INTO __promoted_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
   END IF;
-  __hive_tag = ARRAY_APPEND( __hive_tag,  hivemind_app.find_tag_id( _tag, True ) );
+  __hive_tag = hivemind_app.find_tag_id( _tag, True );
   __observer_id = hivemind_app.find_account_id(_observer, True);
   RETURN QUERY
   WITH promoted AS MATERIALIZED -- bridge_get_ranked_post_by_promoted_for_tag
@@ -433,8 +436,9 @@ BEGIN
       hp1.promoted,
       blacklist.source
     FROM hivemind_app.live_posts_comments_view hp1 -- maybe should be live_posts_view? no, you can promote replies too (probably no one uses it nowadays anyway)
+    JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp1.id
     LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
-    WHERE hp1.tags_ids @> __hive_tag
+    WHERE hpt.tag_id = __hive_tag
       AND NOT hp1.is_paidout
       AND hp1.promoted > 0
       AND ( __post_id = 0 OR hp1.promoted < __promoted_limit
@@ -498,14 +502,14 @@ $function$
 DECLARE
   __post_id INT;
   __trending_limit FLOAT;
-  __hive_tag INT[];
+  __hive_tag INT;
   __observer_id INT;
 BEGIN
   __post_id = hivemind_app.find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
       SELECT hp.sc_trend INTO __trending_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
   END IF;
-  __hive_tag = ARRAY_APPEND( __hive_tag, hivemind_app.find_tag_id( _tag, True ));
+  __hive_tag = hivemind_app.find_tag_id( _tag, True );
   __observer_id = hivemind_app.find_account_id(_observer, True);
   RETURN QUERY
   WITH trends AS MATERIALIZED -- bridge_get_ranked_post_by_trends_for_tag
@@ -515,8 +519,9 @@ BEGIN
       hp1.sc_trend as trend,
       blacklist.source
     FROM hivemind_app.live_posts_view hp1
+    JOIN hivemind_app.hive_post_tags hpt ON hpt.post_id = hp1.id
     LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp1.author_id)
-    WHERE hp1.tags_ids @> __hive_tag
+    WHERE hpt.tag_id = __hive_tag
       AND NOT hp1.is_paidout
       AND ( __post_id = 0 OR hp1.sc_trend < __trending_limit
                           OR (hp1.sc_trend = __trending_limit AND hp1.id < __post_id) )
