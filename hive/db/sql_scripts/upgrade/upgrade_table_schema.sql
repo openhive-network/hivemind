@@ -42,3 +42,15 @@ CREATE INDEX IF NOT EXISTS hive_posts_tags_ids_live_cond_idx
 ;
 
 DROP INDEX IF EXISTS hive_posts_tags_ids_idx;
+DROP INDEX IF EXISTS hive_posts_tags_ids_live_post_cond_idx;
+DROP INDEX IF EXISTS hive_posts_tags_ids_live_cond_idx;
+
+CREATE TABLE IF NOT EXISTS hivemind_app.hive_post_tags (
+    post_id INT NOT NULL
+  , tag_id INT
+  , CONSTRAINT hive_post_tags_fk1 FOREIGN KEY( post_id ) REFERENCES hivemind_app.hive_posts(id) DEFERRABLE
+  , CONSTRAINT hive_post_tags_fk2 FOREIGN KEY( tag_id ) REFERENCES hivemind_app.hive_tag_data(id) DEFERRABLE
+) INHERITS(hive.hivemind_app);
+
+
+
