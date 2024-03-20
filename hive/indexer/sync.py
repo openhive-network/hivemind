@@ -162,11 +162,15 @@ class SyncHiveDb:
                 log.info(f"[MASSIVE] Attempting to process block range: <{self._lbound}:{self._ubound}>")
                 self._catchup_irreversible_block(is_massive_sync=True)
 
+                last_imported_block = Blocks.last_imported()
+
                 if not can_continue_thread():
                     restore_default_signal_handlers()
+                    self._db.query_no_return(
+                        f"SELECT hive.app_set_current_block_num('hivemind_app', {last_imported_block});"
+                    )
                     return
 
-                last_imported_block = Blocks.last_imported()
                 DbState.finish_massive_sync(current_imported_block=last_imported_block)
                 context_attach(db=self._db)
                 Blocks.close_own_db_access()
