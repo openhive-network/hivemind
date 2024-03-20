@@ -198,8 +198,7 @@ BEGIN
                     s.cashout_time,
                     s.counter_deleted,
                     s.block_num,
-                    s.block_num_created,
-                    s.tags_ids
+                    s.block_num_created
                 FROM (
                          SELECT
                              hivemind_app.process_community_post(_block_num, _community_support_start_block, _parent_permlink, ha.id, FALSE,FALSE, NULL) as composite,
@@ -213,11 +212,7 @@ BEGIN
                              hivemind_app.calculate_time_part_of_trending(_date) AS sc_trend,
                              _date AS active, (_date + INTERVAL '7 days') AS payout_at, (_date + INTERVAL '7 days') AS cashout_time,
                              0 AS counter_deleted,
-                             _block_num as block_num, _block_num as block_num_created,
-                             (
-                                 SELECT ARRAY_AGG( prepare_tags )
-                                 FROM hivemind_app.prepare_tags( ARRAY_APPEND(_metadata_tags, _parent_permlink ) )
-                             ) as tags_ids
+                             _block_num as block_num, _block_num as block_num_created
                          FROM
                              hivemind_app.hive_accounts ha,
                              hivemind_app.hive_permlink_data hpd
@@ -267,10 +262,9 @@ BEGIN
             ) -- WITH deleted_post_tags
                , inserts_to_posts_and_tags AS MATERIALIZED (
                 INSERT INTO hivemind_app.hive_post_tags(post_id, tag_id)
-                    SELECT ip.id, UNNEST(pdi.tags_ids)
+                    SELECT ip.id, tags.prepare_tags
                     FROM inserted_post as ip
-                    JOIN posts_data_to_insert as pdi ON TRUE
-                    WHERE CARDINALITY( pdi.tags_ids ) != 0
+                    JOIN ( SELECT prepare_tags FROM hivemind_app.prepare_tags( ARRAY_APPEND(_metadata_tags, _parent_permlink ) ) ) as tags ON TRUE
             )
             SELECT
                 ip.is_new_post,
