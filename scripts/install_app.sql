@@ -1,6 +1,4 @@
 -- Script contains all ADMINISTRATIVE steps required to setup a target database for Hivemind App
-CREATE EXTENSION IF NOT EXISTS intarray;
-
 DO $$
 DECLARE
 __version INT;
