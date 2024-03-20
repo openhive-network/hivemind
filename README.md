@@ -51,13 +51,6 @@ developers with a more flexible/extensible alternative to the raw hived API.
 Hivemind is a [HAF](https://gitlab.syncad.com/hive/haf)-based application. To work properly it requires an existing
 and working HAF database.
 
-Hivemind also requires the postgresql `intarray` extension to be installed. The postgresql user who has `CREATE`
-privilege can load the module with following command:
-
-```postgresql
-CREATE EXTENSION IF NOT EXISTS intarray;
-```
-
 Clone the hivemind repository with its submodules:
 
 ```bash

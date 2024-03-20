@@ -543,9 +543,6 @@ def create_fk(db):
 def setup(db, admin_db):
     """Creates all tables and seed data"""
 
-    sql = """SELECT * FROM pg_extension WHERE extname='intarray'"""
-    assert admin_db.query_row(sql), "The database requires created 'intarray' extension"
-
     # create schema and aux functions
     admin_db.query(f'CREATE SCHEMA IF NOT EXISTS {SCHEMA_NAME} AUTHORIZATION {SCHEMA_OWNER_NAME};')
 
