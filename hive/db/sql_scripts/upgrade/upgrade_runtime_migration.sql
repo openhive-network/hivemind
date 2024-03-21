@@ -13,8 +13,3 @@ ON hivemind_app.hive_post_tags USING btree(post_id, tag_id)
 TABLESPACE haf_tablespace
 ;
 
-CREATE INDEX IF NOT EXISTS hive_post_tags_tag_id_post_id_idx
-ON hivemind_app.hive_post_tags USING btree(tag_id, post_id DESC)
-TABLESPACE haf_tablespace
-;
-

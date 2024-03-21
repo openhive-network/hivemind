@@ -51,5 +51,6 @@ CREATE TABLE IF NOT EXISTS hivemind_app.hive_post_tags (
   , CONSTRAINT hive_post_tags_fk2 FOREIGN KEY( tag_id ) REFERENCES hivemind_app.hive_tag_data(id) DEFERRABLE
 ) INHERITS(hive.hivemind_app);
 
-
+CREATE UNIQUE INDEX IF NOT EXISTS hive_post_tags_tag_id_post_id_idx
+    ON hivemind_app.hive_post_tags USING btree (tag_id, post_id DESC);
 

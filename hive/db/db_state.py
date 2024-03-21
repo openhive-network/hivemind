@@ -135,7 +135,6 @@ class DbState:
             'hive_posts_author_id_created_at_id_idx',
             'hive_posts_author_id_id_idx',
             'hive_posts_api_helper_author_s_permlink_idx',
-            'hive_post_tags_tag_id_post_id_idx',
             'hive_votes_voter_id_last_update_idx',
             'hive_votes_block_num_idx',
             'hive_subscriptions_block_num_idx',
