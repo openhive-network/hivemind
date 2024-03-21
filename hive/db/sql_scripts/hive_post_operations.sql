@@ -259,11 +259,13 @@ BEGIN
                 DELETE FROM hivemind_app.hive_post_tags hpt
                     USING inserted_post as ip
                     WHERE NOT ip.is_new_post AND hpt.post_id = ip.id
+                    RETURNING *
             ) -- WITH deleted_post_tags
                , inserts_to_posts_and_tags AS MATERIALIZED (
                 INSERT INTO hivemind_app.hive_post_tags(post_id, tag_id)
                     SELECT ip.id, tags.prepare_tags
                     FROM inserted_post as ip
+                    LEFT JOIN deleted_post_tags as dpt ON dpt.post_id = 0 -- there is no post 0, this is only to force execute the deleted_post_tags CTE
                     JOIN ( SELECT prepare_tags FROM hivemind_app.prepare_tags( ARRAY_APPEND(_metadata_tags, _parent_permlink ) ) ) as tags ON TRUE
             )
             SELECT

@@ -254,7 +254,6 @@ def build_metadata():
         ),  # this index is needed by update_posts_rshares procedure.
     )
 
-
     sa.Table(
         'hive_post_tags',
         metadata,
@@ -263,8 +262,7 @@ def build_metadata():
         sa.Column('tag_id', sa.Integer, nullable=False),
         sa.ForeignKeyConstraint(['post_id'], ['hive_posts.id'], name='hive_post_tags_fk1', deferrable=True, postgresql_not_valid=True),
         sa.ForeignKeyConstraint(['tag_id'], ['hive_tag_data.id'], name='hive_post_tags_fk2', deferrable=True, postgresql_not_valid=True),
-        sa.Index('hive_post_tags_idx', 'post_id', 'tag_id', postgresql_using="btree"),
-        sa.Index('hive_post_tags_tag_id_post_id_idx', 'tag_id', sa.text('post_id DESC'), postgresql_using="btree")
+        sa.Index('hive_post_tags_idx', 'post_id', 'tag_id', postgresql_using='btree')
     )
 
     sa.Table(
@@ -627,6 +625,13 @@ def setup(db, admin_db):
             patched_to_revision TEXT
           );
     """
+    db.query_no_return(sql)
+
+    # sqlalchemy doesn't allow to use DESC in CreateUnique
+    sql = f"""
+        CREATE UNIQUE INDEX IF NOT EXISTS hive_post_tags_tag_id_post_id_idx
+        ON {SCHEMA_NAME}.hive_post_tags USING btree (tag_id, post_id DESC)
+        """
     db.query_no_return(sql)
 
     context_attach(db=db)
