@@ -709,8 +709,14 @@ def setup_runtime_code(db):
     sql = f"""
           INSERT INTO {SCHEMA_NAME}.hive_db_patch_level
           (patch_date, patched_to_revision)
+          select ds.patch_date, ds.patch_revision
+          from
+          (
           values
-          (now(), '{{}}');
+          (now(), '{{}}')
+          ) ds (patch_date, patch_revision)
+          WHERE NOT EXISTS (SELECT NULL FROM hivemind_app.hive_db_patch_level hpl WHERE hpl.patched_to_revision = ds.patch_revision);
+          ;
           """
 
     from hive.version import GIT_REVISION
