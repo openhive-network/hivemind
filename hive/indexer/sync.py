@@ -37,10 +37,12 @@ log = logging.getLogger(__name__)
 
 
 class SyncHiveDb:
-    def __init__(self, conf: Conf, enter_sync: bool):
+    def __init__(self, conf: Conf, enter_sync: bool, upgrade_schema: bool):
         self._conf = conf
         self._db = conf.db()
         self._enter_sync = enter_sync
+        self._upgrade_schema = upgrade_schema
+
         # Might be lower or higher than actual block number stored in HAF database
         self._last_block_to_process = self._conf.get('test_max_block')
 
@@ -58,7 +60,7 @@ class SyncHiveDb:
         Blocks.setup(conf=self._conf)
 
         Community.start_block = self._conf.get("community_start_block")
-        DbState.initialize(self._enter_sync)
+        DbState.initialize(self._enter_sync, self._upgrade_schema)
 
         self._show_info(self._db)
 
