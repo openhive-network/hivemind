@@ -731,6 +731,28 @@ def setup_runtime_code(db):
 
     db.query_no_return(sql.format(GIT_REVISION))
 
+def perform_db_upgrade(db, admin_db):
+    sql_scripts_dir_path = Path(__file__).parent /'sql_scripts'
+
+    sql_scripts = [
+        "postgres_handle_view_changes.sql",
+        "upgrade/upgrade_table_schema.sql",
+        "upgrade/upgrade_runtime_migration.sql"
+    ]
+
+    sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
+    for script in sql_scripts:
+        execute_sql_script(admin_db.query_no_return, sql_scripts_dir_path / script)
+
+    log.info(f"Database schema upgrade completed.")
+
+    needs_vacuum = admin_db.query_one('SELECT COALESCE((SELECT hd.vacuum_needed FROM hivemind_app.hive_db_vacuum_needed hd WHERE hd.vacuum_needed LIMIT 1), False) AS needs_vacuum')
+
+    if needs_vacuum:
+         log.info(f"Attempting to run VACUUM FULL on upgraded database")
+         admin_db.query_no_return("VACUUM FULL VERBOSE ANALYZE;")
+    else:
+        log.info(f"Skipping VACUUM FULL on upgraded database (no vacuum request)")
 
 def reset_autovac(db):
     """Initializes/resets per-table autovacuum/autoanalyze params.

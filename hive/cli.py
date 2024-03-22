@@ -80,7 +80,19 @@ def launch_mode(mode, conf):
         Db.set_shared_instance(conf.db())
 
         from hive.indexer.sync import SyncHiveDb
-        with SyncHiveDb(conf=conf, enter_sync = False) as schema_builder:
+        with SyncHiveDb(conf=conf, enter_sync = False, upgrade_schema = False) as schema_builder:
+            schema_builder.build_database_schema()
+
+    elif mode == 'upgrade_schema':
+        # Calculation of number of maximum connection and closing a database
+        # In next step the database will be opened with correct number of connections
+        Db.set_max_connections(conf.db())
+        conf.disconnect()
+
+        Db.set_shared_instance(conf.db())
+
+        from hive.indexer.sync import SyncHiveDb
+        with SyncHiveDb(conf=conf, enter_sync = False, upgrade_schema = True) as schema_builder:
             schema_builder.build_database_schema()
 
     elif mode == 'sync':
@@ -91,7 +103,7 @@ def launch_mode(mode, conf):
 
         Db.set_shared_instance(conf.db())
         from hive.indexer.sync import SyncHiveDb
-        with SyncHiveDb(conf=conf, enter_sync = True) as sync:
+        with SyncHiveDb(conf=conf, enter_sync = True, upgrade_schema = False) as sync:
             sync.run()
 
     elif mode == 'status':

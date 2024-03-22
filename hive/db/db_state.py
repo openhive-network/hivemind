@@ -16,7 +16,7 @@ from hive.conf import (
   )
 
 from hive.db.adapter import Db
-from hive.db.schema import build_metadata, setup, setup_runtime_code, teardown
+from hive.db.schema import build_metadata, perform_db_upgrade, setup, setup_runtime_code, teardown
 from hive.indexer.auto_db_disposer import AutoDbDisposer
 from hive.server.common.payout_stats import PayoutStats
 from hive.utils.communities_rank import update_communities_posts_and_rank
@@ -37,7 +37,7 @@ class DbState:
     _is_massive_sync = True
 
     @classmethod
-    def initialize(cls, enter_massive: bool):
+    def initialize(cls, enter_massive: bool, schema_upgrade: bool):
         """Perform startup database checks.
 
         1) Load schema if needed
@@ -56,6 +56,12 @@ class DbState:
 
             setup(admin_db=db_setup_admin, db=db_setup_owner)
             db_setup_admin.close()
+        elif schema_upgrade == True:
+            log.info("Attempting to perform db schema upgrade...")
+            db_setup_admin = cls.db().clone('setup_admin')
+            perform_db_upgrade(admin_db=db_setup_admin, db=db_setup_owner)
+            db_setup_admin.close()
+            log.info("Database schema upgrade finished")
 
         setup_runtime_code(db=db_setup_owner)
 
