@@ -740,11 +740,7 @@ def reset_autovac(db):
 
     autovac_config = {  # vacuum  analyze
         'hive_accounts': (50000, 100000),
-        'hive_posts': (2500, 10000),
-        'hive_post_tags': (5000, 10000),
-        'hive_follows': (5000, 5000),
         'hive_feed_cache': (5000, 5000),
-        'hive_reblogs': (5000, 5000),
         'hive_payments': (5000, 5000),
     }
 
