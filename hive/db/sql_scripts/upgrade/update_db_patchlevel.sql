@@ -1,3 +1,5 @@
+SET ROLE hivemind;
+
 START TRANSACTION;
 
 insert into hivemind_app.hive_db_patch_level
@@ -11,3 +13,5 @@ values
 where not exists (select null from hivemind_app.hive_db_patch_level hpl where hpl.patched_to_revision = ds.patch_revision);
 
 COMMIT;
+
+RESET ROLE;

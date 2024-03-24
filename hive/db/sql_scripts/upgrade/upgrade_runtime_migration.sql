@@ -1,8 +1,6 @@
+SET ROLE hivemind;
+
 --- Put runtime data migration code here
-
---- Must be at the end
-TRUNCATE TABLE hivemind_app.hive_db_data_migration;
-
 
 INSERT INTO hivemind_app.hive_post_tags(post_id, tag_id)
 SELECT id, unnest(tags_ids)
@@ -13,3 +11,7 @@ ON hivemind_app.hive_post_tags USING btree(post_id, tag_id)
 TABLESPACE haf_tablespace
 ;
 
+--- Must be at the end
+TRUNCATE TABLE hivemind_app.hive_db_data_migration;
+
+RESET ROLE;
