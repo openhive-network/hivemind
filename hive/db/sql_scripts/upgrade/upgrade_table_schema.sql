@@ -11,13 +11,6 @@ DROP TABLE IF EXISTS hivemind_app.hive_db_data_migration;
 
 SET ROLE hivemind;
 
-CREATE TABLE IF NOT EXISTS hivemind_app.hive_db_patch_level
-(
-  level SERIAL NOT NULL PRIMARY KEY,
-  patch_date timestamp without time zone NOT NULL,
-  patched_to_revision TEXT
-);
-
 CREATE TABLE IF NOT EXISTS hivemind_app.hive_db_data_migration
 (
   migration varchar(128) not null
