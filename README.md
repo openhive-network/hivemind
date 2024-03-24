@@ -195,8 +195,8 @@ The commands below assume that the running HAF container has IP: 172.17.0.2
 ## Updating from an existing hivemind database
 
 ```bash
-cd hivemind/hive/db/sql_scripts
-./db_upgrade.sh *user-name* hive
+../hivemind/scripts/run_instance.sh registry.gitlab.syncad.com/hive/hivemind/instance:local install_app --upgrade-schema \
+   --database-admin-url="postgresql://haf_admin@172.17.0.2/haf_block_log" # haf_admin access URL
 ```
 
 (where *user-name* is your database login name)
