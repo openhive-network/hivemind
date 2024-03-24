@@ -25,20 +25,6 @@ TRUNCATE TABLE hivemind_app.hive_db_vacuum_needed;
 
 --- Put schema upgrade code here.
 
-CREATE INDEX IF NOT EXISTS hive_posts_tags_ids_live_post_cond_idx
-  ON hivemind_app.hive_posts USING gin
-  (tags_ids gin__int_ops)
-  TABLESPACE haf_tablespace
-  WHERE counter_deleted = 0 AND depth = 0
-;
-
-CREATE INDEX IF NOT EXISTS hive_posts_tags_ids_live_cond_idx
-  ON hivemind_app.hive_posts USING gin
-  (tags_ids gin__int_ops)
-  TABLESPACE haf_tablespace
-  WHERE counter_deleted = 0
-;
-
 DROP INDEX IF EXISTS hive_posts_tags_ids_idx;
 DROP INDEX IF EXISTS hive_posts_tags_ids_live_post_cond_idx;
 DROP INDEX IF EXISTS hive_posts_tags_ids_live_cond_idx;
