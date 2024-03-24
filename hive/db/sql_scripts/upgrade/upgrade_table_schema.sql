@@ -5,6 +5,12 @@ BEGIN
   ASSERT (SELECT setting FROM pg_settings where name='jit' and source='database')::BOOLEAN = False, 'Bad optimizer settings, use install_app.sh script to setup target database correctly';
 END$$;
 
+-- In case such tables have been created directly by admin, drop them first to allow correct creation and access during upgrade process.
+DROP TABLE IF EXISTS hivemind_app.hive_db_vacuum_needed;
+DROP TABLE IF EXISTS hivemind_app.hive_db_data_migration;
+
+SET ROLE hivemind;
+
 CREATE TABLE IF NOT EXISTS hivemind_app.hive_db_patch_level
 (
   level SERIAL NOT NULL PRIMARY KEY,
@@ -54,3 +60,5 @@ CREATE TABLE IF NOT EXISTS hivemind_app.hive_post_tags (
 CREATE UNIQUE INDEX IF NOT EXISTS hive_post_tags_tag_id_post_id_idx
     ON hivemind_app.hive_post_tags USING btree (tag_id, post_id DESC);
 
+
+RESET ROLE;
