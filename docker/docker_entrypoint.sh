@@ -22,6 +22,7 @@ LOG_PATH=${LOG_PATH:-}
 POSTGRES_URL=${POSTGRES_URL:-}
 POSTGRES_ADMIN_URL=${POSTGRES_ADMIN_URL:-}
 INSTALL_APP=0
+DO_SCHEMA_UPGRADE=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -44,6 +45,10 @@ while [ $# -gt 0 ]; do
         ;;
     --install-app)
         INSTALL_APP=1
+        ;;
+    --upgrade-schema)
+        INSTALL_APP=1
+        DO_SCHEMA_UPGRADE=1
         ;;
     *)
         HIVEMIND_ARGS+=("$1")
@@ -81,7 +86,12 @@ setup() {
     deactivate
   fi
 
-  HIVEMIND_ARGS=("build_schema")
+  if [ "${DO_SCHEMA_UPGRADE}" -eq 1 ]; then
+    HIVEMIND_ARGS=("upgrade_schema")
+  else
+    HIVEMIND_ARGS=("build_schema")
+  fi
+
   run_hive "${POSTGRES_ADMIN_URL}"
 }
 
