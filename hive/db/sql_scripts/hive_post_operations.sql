@@ -255,18 +255,24 @@ BEGIN
                             block_num = _block_num
                         RETURNING (xmax = 0) as is_new_post, hp.id, hp.author_id, hp.permlink_id, _parent_permlink as post_category, hp.parent_id, hp.community_id, hp.is_valid, hp.is_muted, hp.depth
                 ) -- WITH inserted_post
+            , tagsid_and_posts AS MATERIALIZED (
+                SELECT prepare_tags FROM hivemind_app.prepare_tags( ARRAY_APPEND(_metadata_tags, _parent_permlink ) )
+            ) -- WITH tagsid_and_posts
                , deleted_post_tags AS MATERIALIZED (
-                DELETE FROM hivemind_app.hive_post_tags hpt
-                    USING inserted_post as ip
-                    WHERE NOT ip.is_new_post AND hpt.post_id = ip.id
-                    RETURNING *
+                DELETE FROM hivemind_app.hive_post_tags hp
+                    USING hivemind_app.hive_post_tags as hpt
+                    JOIN inserted_post as ip ON hpt.post_id = ip.id AND NOT ip.is_new_post
+                    LEFT JOIN tagsid_and_posts as tap ON tap.prepare_tags = hpt.tag_id
+                    WHERE hpt.post_id = hp.post_id AND tap.prepare_tags IS NULL
+                    RETURNING hpt.post_id
             ) -- WITH deleted_post_tags
                , inserts_to_posts_and_tags AS MATERIALIZED (
                 INSERT INTO hivemind_app.hive_post_tags(post_id, tag_id)
                     SELECT ip.id, tags.prepare_tags
                     FROM inserted_post as ip
                     LEFT JOIN deleted_post_tags as dpt ON dpt.post_id = 0 -- there is no post 0, this is only to force execute the deleted_post_tags CTE
-                    JOIN ( SELECT prepare_tags FROM hivemind_app.prepare_tags( ARRAY_APPEND(_metadata_tags, _parent_permlink ) ) ) as tags ON TRUE
+                    JOIN tagsid_and_posts as tags ON TRUE
+                ON CONFLICT DO NOTHING
             )
             SELECT
                 ip.is_new_post,
