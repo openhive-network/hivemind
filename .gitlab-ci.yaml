@@ -33,7 +33,7 @@ variables:
 include:
   - template: Workflows/Branch-Pipelines.gitlab-ci.yml
   - project: hive/haf
-    ref: 988f804191708ad83812851f9d6f0790b18fc608
+    ref: 7bb7aab44a7083994c36f040e84d501c11afc159 # develop
     file: /scripts/ci-helpers/prepare_data_image_job.yml # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
 
 
@@ -524,9 +524,11 @@ e2e_benchmark:
   tags:
     - data-cache-storage
 
-publish_instance_image:
+build_and_publish_image:
   stage: publish
   extends: .publish_docker_image_template
+  before_script:
+    - !reference [.publish_docker_image_template, before_script]
   script:
     - |
       TAG=$(echo "$CI_COMMIT_TAG" | sed 's/[!+]/-/g')
