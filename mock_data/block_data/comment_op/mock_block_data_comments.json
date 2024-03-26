@@ -55,7 +55,7 @@
 							"permlink": "test-beneficiaries",
 							"title": "Testing",
 							"body": "Much testing",
-							"json_metadata": "{}"
+							"json_metadata": "{\"tags\":[\"taverntest\",\"TavernTest\",\"# TavernTest\",\"taverntest\"]}"
 						}
 					},
 					{
@@ -105,6 +105,29 @@
 				]
 			}
 		]
+	},
+	"4984622": {
+			"transactions": [
+				{
+					"ref_block_num": 100000,
+					"ref_block_prefix": 1,
+					"expiration": "2020-03-23T12:17:03",
+					"operations": [
+						{
+							"type": "comment_operation",
+							"value": {
+								"parent_author": "",
+								"parent_permlink": "tag",
+								"author": "jouchelle",
+								"permlink": "test-beneficiaries",
+								"title": "Testing",
+								"body": "Much testing",
+								"json_metadata": "{\"tags\":[\"taverntest\",\"TavernTest\",\"# TavernTest\",\"taverntest\"]}"
+							}
+						}
+					]
+				}
+			]
 	},
 	"5000000": {
 		"transactions": []
