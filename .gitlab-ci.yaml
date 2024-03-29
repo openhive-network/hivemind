@@ -31,17 +31,11 @@ variables:
   CI_DEBUG_SERVICES: "false" #All the service logs should be saved as artifacts, so it's fine to turn this off.
 
 include:
+  - template: Workflows/Branch-Pipelines.gitlab-ci.yml
   - project: hive/haf
     ref: e988b4e0d221f4b8efcad2bc2e1b587e4c227669 # master
     file: /scripts/ci-helpers/prepare_data_image_job.yml # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
 
-
-workflow:
-  rules:
-    - if: '$CI_MERGE_REQUEST_IID'
-    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
-      when: never 
-    - if: '$CI_COMMIT_BRANCH || $CI_COMMIT_TAG'
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| ANCHORS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -545,8 +539,6 @@ Trigger benchmark-results-collector:
     - job: e2e_benchmark
       artifacts: true # Even though variables.env is not a regular artifact, but a dotenv report, this still needs to be set to true
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: on_success
     - if: '$CI_COMMIT_BRANCH == "develop"'
