@@ -115,7 +115,7 @@ class DbState:
             'hive_feed_cache_created_at_idx',
             'hive_feed_cache_post_id_idx',
             'hive_feed_cache_account_id_created_at_post_id_idx',
-            'hive_follows_following_state_idx',  # (following, state, created_at, follower)
+            'hive_follows_following_state_id_idx',  # (following, state, id)
             'hive_follows_follower_state_idx',  # (follower, state, created_at, following)
             'hive_follows_follower_following_state_idx',
             'hive_follows_block_num_idx',
