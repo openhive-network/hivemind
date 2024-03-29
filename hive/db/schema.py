@@ -288,7 +288,7 @@ def build_metadata():
         sa.Column('follow_muted', BOOLEAN, nullable=False, server_default='0'),
         sa.Column('block_num', sa.Integer, nullable=False),
         sa.UniqueConstraint('following', 'follower', name='hive_follows_ux1'),  # core
-        sa.Index('hive_follows_following_state_idx', 'following', 'state'),
+        sa.Index('hive_follows_following_state_id_idx', 'following', 'state', 'id'), # index used by condenser_get_followers
         sa.Index('hive_follows_follower_state_idx', 'follower', 'state'),
         sa.Index('hive_follows_follower_following_state_idx', 'follower', 'following', 'state'),
         sa.Index('hive_follows_block_num_idx', 'block_num'),
