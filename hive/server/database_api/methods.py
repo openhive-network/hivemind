@@ -268,7 +268,6 @@ def api_vote_info(rows, votes_presentation):
     return ret
 
 
-@return_error_info
 async def find_votes_impl(db, author: str, permlink: str, votes_presentation, limit: int = 1000):
     sql = f"SELECT * FROM {SCHEMA_NAME}.find_votes(:author,:permlink,:limit)"
     rows = await db.query_all(sql, author=author, permlink=permlink, limit=limit)
