@@ -119,7 +119,6 @@ async def get_content(context, author: str, permlink: str, observer=None):
     return await _get_content_impl(db, True, author, permlink, observer)
 
 
-@return_error_info
 async def _get_content_impl(db, fat_node_style, author: str, permlink: str, observer=None):
     """Get a single post object."""
     valid_account(author)
@@ -145,7 +144,6 @@ async def get_content_replies(context, author: str, permlink: str):
     return await _get_content_replies_impl(db, True, author, permlink)
 
 
-@return_error_info
 async def _get_content_replies_impl(db, fat_node_style, author: str, permlink: str):
     """Get a list of post objects based on parent."""
     valid_account(author)
