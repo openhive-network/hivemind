@@ -21,6 +21,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.find_comment_id(
   in _check boolean)
 RETURNS INT
 LANGUAGE 'plpgsql'
+SET log_min_messages=FATAL
 AS
 $function$
 DECLARE
@@ -61,6 +62,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.find_account_id(
   in _check boolean)
 RETURNS INT
 LANGUAGE 'plpgsql'
+SET log_min_messages=FATAL
 AS
 $function$
 DECLARE
@@ -85,6 +87,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.find_tag_id(
 )
 RETURNS INTEGER
 LANGUAGE 'plpgsql' STABLE
+SET log_min_messages=FATAL
 AS
 $function$
 DECLARE
@@ -109,6 +112,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.find_category_id(
 )
 RETURNS INTEGER
 LANGUAGE 'plpgsql' STABLE
+SET log_min_messages=FATAL
 AS
 $function$
 DECLARE
@@ -133,6 +137,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.find_community_id(
 )
 RETURNS INTEGER
 LANGUAGE 'plpgsql' STABLE
+SET log_min_messages=FATAL
 AS
 $function$
 DECLARE
