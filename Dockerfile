@@ -2,6 +2,10 @@
 # Base docker file having defined environment for build and run of a Hivemind instance.
 # Use scripts/ci/build_ci_base_image.sh to build a new version of the CI base image. It must be properly tagged and pushed to the container registry.
 
+ARG POSTGREST_VERSION=v12.0.2
+
+FROM postgrest/postgrest:${POSTGREST_VERSION} AS pure_postgrest
+
 FROM --platform=$BUILDPLATFORM python:3.8-slim as runtime
 
 ARG TARGETPLATFORM
@@ -96,11 +100,18 @@ ARG HTTP_PORT=8080
 ENV HTTP_PORT=${HTTP_PORT}
 
 # Lets use by default host address from default docker bridge network
-ARG POSTGRES_URL="postgresql://hivemind@172.17.0.1/haf_block_log"
+ARG POSTGRES_URL="postgresql://hivemind@haf-instance:5432/haf_block_log"
 ENV POSTGRES_URL=${POSTGRES_URL}
 
 ARG POSTGRES_ADMIN_URL="postgresql://haf_admin@172.17.0.1:5432/haf_block_log"
 ENV POSTGRES_ADMIN_URL=${POSTGRES_ADMIN_URL}
+
+ARG USE_POSTGREST=1
+ENV USE_POSTGREST=${USE_POSTGREST}
+
+ENV PGRST_DB_SCHEMA="hivemind_endpoints"
+ENV PGRST_DB_ANON_ROLE="hivemind"
+ENV PGRST_DB_ROOT_SPEC="home"
 
 ENV LANG=en_US.UTF-8
 
@@ -109,6 +120,7 @@ WORKDIR /home/hivemind
 
 SHELL ["/bin/bash", "-c"] 
 
+COPY --chmod=755 --from=pure_postgrest /bin/postgrest /usr/local/bin
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/dist /home/hivemind/dist 
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/.hivemind-venv /home/hivemind/.hivemind-venv 
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/docker/docker_entrypoint.sh .
