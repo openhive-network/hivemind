@@ -5,5 +5,5 @@
   variables:
     service:
       proto: http
-      server: localhost
+      server: "{tavern.env_vars.HIVEMIND_ADDRESS}"
       port: 3000
