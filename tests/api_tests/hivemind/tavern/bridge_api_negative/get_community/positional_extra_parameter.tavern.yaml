@@ -6,7 +6,7 @@
     - negative
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../common_postgrest.yaml
 
   stages:
     - name: test
@@ -19,7 +19,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.get_community"
-          params: ["hive-117600", blocktrades", "valid"]
+          params: ["hive-117600", "blocktrades", "valid"]
       response:
         status_code: 200
         verify_response_with:
