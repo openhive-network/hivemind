@@ -546,6 +546,8 @@ def setup(db, admin_db):
 
     # create schema and aux functions
     admin_db.query(f'CREATE SCHEMA IF NOT EXISTS {SCHEMA_NAME} AUTHORIZATION {SCHEMA_OWNER_NAME};')
+    admin_db.query(f'CREATE SCHEMA IF NOT EXISTS hivemind_helpers AUTHORIZATION {SCHEMA_OWNER_NAME};')
+    admin_db.query(f'CREATE SCHEMA IF NOT EXISTS hivemind_endpoints AUTHORIZATION {SCHEMA_OWNER_NAME};')
 
     prepare_app_context(db=db)
     build_metadata().create_all(db.engine())
@@ -565,6 +567,22 @@ def setup(db, admin_db):
         db.query(sql)
 
     context_detach(db=db)
+
+    sqls = [
+        f"DROP TYPE IF EXISTS hivemind_helpers.unit_type CASCADE",
+        f"CREATE TYPE hivemind_helpers.unit_type AS ENUM( 'HBD', 'HIVE', 'VESTS')",
+        f"""
+          CREATE TABLE IF NOT EXISTS hivemind_helpers.nai_map 
+          (
+            name hivemind_helpers.unit_type NOT NULL,
+            nai TEXT NOT NULL,
+            precision INT NOT NULL
+          )    
+        """,
+        f"INSERT INTO hivemind_helpers.nai_map VALUES ('HBD','@@000000013', 3), ('HIVE','@@000000021', 3), ('VESTS','@@000000037', 3)",
+    ]
+    for sql in sqls:
+        db.query(sql)
 
     # default rows
     sqls = [
@@ -707,6 +725,12 @@ def setup_runtime_code(db):
         "follows.sql",
         "is_superuser.sql",
         "update_hive_blocks_consistency_flag.sql",
+        "common_sql/helpers.sql",
+        "hive_api_sql/common.sql",
+        "hive_api_sql/community.sql",
+        "hive_api_sql/notify.sql",
+        "home.sql",
+        "exceptions.sql",
         "update_table_statistics.sql",
         "upgrade/update_db_patchlevel.sql",  # Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
         "hafapp_api.sql",
