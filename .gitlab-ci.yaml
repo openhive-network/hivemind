@@ -86,6 +86,12 @@ include:
     cat hivemind_image.env
     echo -e "\e[0Ksection_end:$(date +%s):build\r\e[0K"
 
+.postgrest-script: &postgrest-script
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):postgrest[collapsed=true]\r\e[0KRunning postgrest setup..."
+    ./scripts/ci/start_postgrest.sh --postgres-url="${HAF_POSTGRES_URL}" 
+    echo -e "\e[0Ksection_end:$(date +%s):postgrest\r\e[0K"
+
 .bridge_api_smoketest-script: &bridge_api_smoketest-script
   - |
     echo -e "\e[0Ksection_start:$(date +%s):bridge_api_smoketest[collapsed=true]\r\e[0KRunning bridge API smoketest..."
@@ -370,6 +376,7 @@ sync:
     DATA_CACHE_HAF: "${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
     DATA_CACHE_HIVEMIND_DATADIR: "${DATA_CACHE_HIVEMIND}/datadir"
     DATA_CACHE_HIVEMIND_SHM_DIR: "${DATA_CACHE_HIVEMIND_DATADIR}/blockchain"
+    USE_POSTGREST: 1
   script:
     - |
       sleep 20s
@@ -468,6 +475,7 @@ e2e_benchmark:
       SMOKETEST_AWAIT_URL="tcp://${RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}"
       echo "Waiting for Hivemind smoketest server to start running on ${SMOKETEST_AWAIT_URL}"
       "${DATA_CACHE_HAF}/await" -t 10m "${SMOKETEST_AWAIT_URL}" -- echo "Hivemind smoketest instance is running"
+    - *postgrest-script
     - *bridge_api_smoketest-script
     - *bridge_api_smoketest_negative-script
     - *condenser_api_smoketest-script
