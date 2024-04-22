@@ -1,0 +1,9 @@
+---
+  name: Common test values
+  description: Common values for tests
+
+  variables:
+    service:
+      proto: http
+      server: localhost
+      port: 3000
