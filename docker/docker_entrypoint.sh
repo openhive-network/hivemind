@@ -60,7 +60,8 @@ log "global" "Collected Hivemind arguments: ${HIVEMIND_ARGS[*]}"
 log "global" "Using PostgreSQL instance: $POSTGRES_URL"
 log "global" "Using PostgreSQL Admin URL: $POSTGRES_ADMIN_URL"
 
-run_hive() {
+
+run_hive_no_exec() {
   local db_url=${1:-"${POSTGRES_URL}"}
   # shellcheck source=/dev/null
   source /home/hivemind/.hivemind-venv/bin/activate
@@ -70,6 +71,19 @@ run_hive() {
   else
     log "run_hive" "Starting Hivemind..."
     hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}"
+  fi
+}
+
+run_hive() {
+  local db_url=${1:-"${POSTGRES_URL}"}
+  # shellcheck source=/dev/null
+  source /home/hivemind/.hivemind-venv/bin/activate
+  if [[ -n "$LOG_PATH" ]]; then
+    log "run_hive" "Starting Hivemind with log $LOG_PATH"
+    exec hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
+  else
+    log "run_hive" "Starting Hivemind..."
+    exec hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}"
   fi
 }
 
@@ -92,7 +106,7 @@ setup() {
     HIVEMIND_ARGS=("build_schema")
   fi
 
-  run_hive "${POSTGRES_ADMIN_URL}"
+  run_hive_no_exec "${POSTGRES_ADMIN_URL}"
 }
 
 uninstall_app() {
