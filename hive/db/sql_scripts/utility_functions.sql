@@ -21,7 +21,6 @@ CREATE OR REPLACE FUNCTION hivemind_app.find_comment_id(
   in _check boolean)
 RETURNS INT
 LANGUAGE 'plpgsql'
-SET log_min_messages=FATAL
 AS
 $function$
 DECLARE
@@ -62,7 +61,6 @@ CREATE OR REPLACE FUNCTION hivemind_app.find_account_id(
   in _check boolean)
 RETURNS INT
 LANGUAGE 'plpgsql'
-SET log_min_messages=FATAL
 AS
 $function$
 DECLARE
@@ -87,7 +85,6 @@ CREATE OR REPLACE FUNCTION hivemind_app.find_tag_id(
 )
 RETURNS INTEGER
 LANGUAGE 'plpgsql' STABLE
-SET log_min_messages=FATAL
 AS
 $function$
 DECLARE
@@ -112,7 +109,6 @@ CREATE OR REPLACE FUNCTION hivemind_app.find_category_id(
 )
 RETURNS INTEGER
 LANGUAGE 'plpgsql' STABLE
-SET log_min_messages=FATAL
 AS
 $function$
 DECLARE
@@ -137,7 +133,6 @@ CREATE OR REPLACE FUNCTION hivemind_app.find_community_id(
 )
 RETURNS INTEGER
 LANGUAGE 'plpgsql' STABLE
-SET log_min_messages=FATAL
 AS
 $function$
 DECLARE
@@ -239,9 +234,9 @@ DECLARE
     __created_at timestamp := '1970-01-01 00:00:00'::timestamp;
     __record     hivemind_app.head_state;
 BEGIN
-    SELECT current_block_num INTO __num FROM hive.hivemind_app_context_data_view;
+    SELECT current_block_num INTO __num FROM hivemind_app.context_data_view;
     IF __num > 0 THEN
-        SELECT created_at INTO __created_at FROM hive.hivemind_app_blocks_view WHERE num = __num;
+        SELECT created_at INTO __created_at FROM hivemind_app.blocks_view WHERE num = __num;
     ELSE
         -- MIGHT BE NULL
         __num = 0;

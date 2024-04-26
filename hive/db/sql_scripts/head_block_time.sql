@@ -11,7 +11,7 @@ $BODY$
 
 DROP FUNCTION IF EXISTS hivemind_app.block_before_head CASCADE;
 CREATE OR REPLACE FUNCTION hivemind_app.block_before_head( in _time INTERVAL )
-RETURNS hive.hivemind_app_blocks_view.num%TYPE
+RETURNS hivemind_app.blocks_view.num%TYPE
 LANGUAGE 'sql' STABLE
 AS
 $BODY$

@@ -1,7 +1,7 @@
-DROP FUNCTION IF EXISTS hivemind_app.update_follow_count(hive.hivemind_app_blocks_view.num%TYPE, hive.hivemind_app_blocks_view.num%TYPE);
+DROP FUNCTION IF EXISTS hivemind_app.update_follow_count(hivemind_app.blocks_view.num%TYPE, hivemind_app.blocks_view.num%TYPE);
 CREATE OR REPLACE FUNCTION hivemind_app.update_follow_count(
-  in _first_block hive.hivemind_app_blocks_view.num%TYPE,
-  in _last_block hive.hivemind_app_blocks_view.num%TYPE
+  in _first_block hivemind_app.blocks_view.num%TYPE,
+  in _last_block hivemind_app.blocks_view.num%TYPE
 )
 RETURNS VOID
 LANGUAGE 'plpgsql'
