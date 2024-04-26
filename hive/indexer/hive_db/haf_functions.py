@@ -11,7 +11,7 @@ def prepare_app_context(db: Db) -> None:
     ctx_present = db.query_one(f"SELECT hive.app_context_exists('{SCHEMA_NAME}') as ctx_present;")
     if not ctx_present:
         log.info(f"No application context present. Attempting to create a '{SCHEMA_NAME}' context...")
-        db.query_no_return(f"SELECT hive.app_create_context('{SCHEMA_NAME}',FALSE);") #is-forking=FALSE, only process irreversible blocks
+        db.query_no_return(f"SELECT hive.app_create_context('{SCHEMA_NAME}', '{SCHEMA_NAME}', FALSE);") #is-forking=FALSE, only process irreversible blocks
         log.info("Application context creation done.")
     else:
         log.info(f"Found existing context, set to non-forking.")

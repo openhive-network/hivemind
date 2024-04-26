@@ -1,7 +1,7 @@
 DROP FUNCTION IF EXISTS hivemind_app.update_posts_rshares;
 CREATE OR REPLACE FUNCTION hivemind_app.update_posts_rshares(
-    _first_block hive.hivemind_app_blocks_view.num%TYPE
-  , _last_block hive.hivemind_app_blocks_view.num%TYPE
+    _first_block hivemind_app.blocks_view.num%TYPE
+  , _last_block hivemind_app.blocks_view.num%TYPE
 )
 RETURNS VOID
 LANGUAGE 'plpgsql'

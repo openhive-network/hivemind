@@ -23,7 +23,7 @@ BEGIN
 
   RETURN QUERY -- enum_operations4hivemind
     SELECT ho.id, ho.block_num, ho.op_type_id, ho.op_type_id >= 50 AS is_virtual, ho.body::VARCHAR
-    FROM hive.hivemind_app_operations_view ho
+    FROM hivemind_app.operations_view ho
     WHERE ho.block_num BETWEEN _first_block AND _last_block
           AND (ho.op_type_id < 50
                OR ho.op_type_id in (51, 53, 61, 72, 73)
@@ -56,7 +56,7 @@ SELECT -- hivemind_app.hive_api_hivemind_blocks
      , hb.hash
      , hb.prev as prev
      , to_char( created_at,  'YYYY-MM-DDThh24:MI:SS' ) as date
-FROM hive.hivemind_app_blocks_view hb
+FROM hivemind_app.blocks_view hb
 WHERE hb.num BETWEEN _first_block AND _last_block
 ORDER by hb.num
 ;

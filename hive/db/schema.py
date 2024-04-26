@@ -561,7 +561,7 @@ def setup(db, admin_db):
         if table.name in ('hive_db_patch_level',):
             continue
 
-        sql = f'ALTER TABLE {SCHEMA_NAME}.{table.name} INHERIT hive.{SCHEMA_NAME};'
+        sql = f'ALTER TABLE {SCHEMA_NAME}.{table.name} INHERIT {SCHEMA_NAME}.{SCHEMA_NAME};'
         db.query(sql)
 
     context_detach(db=db)
