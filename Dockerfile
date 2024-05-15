@@ -39,6 +39,8 @@ RUN <<EOF
   useradd -ms /bin/bash -c "Hivemind service account" -u 1000 "hivemind" --groups users
 EOF
 
+COPY --chmod=755 --from=pure_postgrest /bin/postgrest /usr/local/bin
+
 SHELL ["/bin/bash", "-c"] 
 
 FROM runtime AS ci-base-image
@@ -120,7 +122,6 @@ WORKDIR /home/hivemind
 
 SHELL ["/bin/bash", "-c"] 
 
-COPY --chmod=755 --from=pure_postgrest /bin/postgrest /usr/local/bin
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/dist /home/hivemind/dist 
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/.hivemind-venv /home/hivemind/.hivemind-venv 
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/docker/docker_entrypoint.sh .
