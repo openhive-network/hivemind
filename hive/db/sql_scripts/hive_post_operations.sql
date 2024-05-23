@@ -25,11 +25,28 @@ BEGIN
 END
 $function$;
 
+
+CREATE OR REPLACE FUNCTION encode_bitwise_mask(muted_reasons INT[])
+    RETURNS INT AS $$
+DECLARE
+    mask INT := 0;
+    number INT;
+BEGIN
+    FOREACH number IN ARRAY muted_reasons
+        LOOP
+            mask := mask | (1 << number);
+        END LOOP;
+    RETURN mask;
+END;
+$$ LANGUAGE plpgsql;
+
 DROP TYPE IF EXISTS hivemind_app.process_community_post_result CASCADE;
 CREATE TYPE hivemind_app.process_community_post_result AS (
     is_muted bool,
-    community_id integer -- hivemind_app.hive_posts.community_id%TYPE
+    community_id integer, -- hivemind_app.hive_posts.community_id%TYPE
+    muted_reasons INTEGER
 );
+
 
 DROP FUNCTION IF EXISTS hivemind_app.process_community_post;
 CREATE OR REPLACE FUNCTION hivemind_app.process_community_post(_block_num hivemind_app.hive_posts.block_num%TYPE, _community_support_start_block hivemind_app.hive_posts.block_num%TYPE, _parent_permlink hivemind_app.hive_permlink_data.permlink%TYPE, _author_id hivemind_app.hive_posts.author_id%TYPE, _is_comment bool, _is_parent_muted bool, _community_id hivemind_app.hive_posts.community_id%TYPE)
@@ -44,8 +61,9 @@ declare
         __community_type_topic CONSTANT SMALLINT := 1;
         __community_type_journal CONSTANT SMALLINT := 2;
         __community_type_council CONSTANT SMALLINT := 3;
-        __is_muted bool := TRUE;
+        __is_muted BOOL := TRUE;
         __community_id hivemind_app.hive_posts.community_id%TYPE;
+        __muted_reasons INTEGER[] := ARRAY[]::INTEGER[];
 BEGIN
         IF _block_num < _community_support_start_block THEN
             __is_muted := FALSE;
@@ -57,10 +75,7 @@ BEGIN
                 SELECT type_id, id INTO __community_type_id, __community_id from hivemind_app.hive_communities where name = _parent_permlink;
             END IF;
 
-            -- __is_muted can be TRUE here if it's a comment and its parent is muted
-            IF _is_parent_muted = TRUE THEN
-                __is_muted := TRUE;
-            ELSEIF __community_id IS NOT NULL THEN
+            IF __community_id IS NOT NULL THEN
                 IF __community_type_id = __community_type_topic THEN
                     __is_muted := FALSE;
                 ELSE
@@ -72,15 +87,26 @@ BEGIN
                             __is_muted := FALSE;
                         ELSIF __community_type_id = __community_type_council AND __role_id IS NOT NULL AND __role_id >= __member_role THEN
                             __is_muted := FALSE;
+                        ELSE
+                            -- This means the post was muted because of community reasons, 1 is MUTED_COMMUNITY_TYPE see community.py for the ENUM definition
+                            __muted_reasons := ARRAY[1];
                         END IF;
                     END IF;
                 END IF;
             ELSE
                 __is_muted := FALSE;
             END IF;
+
+            -- __is_muted can be TRUE here if it's a comment and its parent is muted
+            IF _is_parent_muted = TRUE THEN
+                __is_muted := TRUE;
+                -- 2 is MUTED_PARENT, see community.py for the ENUM definition
+                __muted_reasons := array_append(__muted_reasons, 2);
+            END IF;
+
         END IF;
 
-        RETURN (__is_muted, __community_id)::hivemind_app.process_community_post_result;
+        RETURN (__is_muted, __community_id, encode_bitwise_mask(__muted_reasons))::hivemind_app.process_community_post_result;
     END;
 $$ STABLE;
 
@@ -115,7 +141,7 @@ IF _parent_author != '' THEN
   RETURN QUERY INSERT INTO hivemind_app.hive_posts as hp
   (parent_id, depth, community_id, category_id,
     root_id, is_muted, is_valid,
-    author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted, block_num, block_num_created)
+    author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons)
       SELECT
           s.parent_id,
           s.depth,
@@ -135,7 +161,8 @@ IF _parent_author != '' THEN
           s.cashout_time,
           s.counter_deleted,
           s.block_num,
-          s.block_num_created
+          s.block_num_created,
+          (s.composite).muted_reasons
       FROM (
                SELECT
                    hivemind_app.process_community_post(_block_num, _community_support_start_block, _parent_permlink, ha.id, TRUE, php.is_muted, php.community_id) as composite,
@@ -182,7 +209,7 @@ ELSE
     root_id, is_muted, is_valid,
     author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,
     active, payout_at, cashout_time, counter_deleted, block_num, block_num_created,
-    tags_ids)
+    tags_ids, muted_reasons)
   SELECT
         s.parent_id,
         s.depth,
@@ -203,7 +230,8 @@ ELSE
         s.counter_deleted,
         s.block_num,
         s.block_num_created,
-        s.tags_ids
+        s.tags_ids,
+        (s.composite).muted_reasons
   FROM (
         SELECT
             hivemind_app.process_community_post(_block_num, _community_support_start_block, _parent_permlink, ha.id, FALSE,FALSE, NULL) as composite,

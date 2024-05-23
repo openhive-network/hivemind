@@ -2,179 +2,181 @@
   {
     "active_votes": [
       {
-        "rshares": "20736048327416",
+        "rshares": 20736048327416,
         "voter": "dantheman"
       },
       {
-        "rshares": "2472573792",
+        "rshares": 2472573792,
         "voter": "boy"
       },
       {
-        "rshares": "3001108476",
+        "rshares": 3001108476,
         "voter": "bue-witness"
       },
       {
-        "rshares": "562413629",
+        "rshares": 562413629,
         "voter": "bunny"
       },
       {
-        "rshares": "42176902013",
+        "rshares": 42176902013,
         "voter": "bue"
       },
       {
-        "rshares": "1325367544",
+        "rshares": 1325367544,
         "voter": "mini"
       },
       {
-        "rshares": "170787830",
+        "rshares": 170787830,
         "voter": "moon"
       },
       {
-        "rshares": "497243104",
+        "rshares": 497243104,
         "voter": "healthcare"
       },
       {
-        "rshares": "737438203",
+        "rshares": 737438203,
         "voter": "daniel.pan"
       },
       {
-        "rshares": "230272201",
+        "rshares": 230272201,
         "voter": "helen.tan"
       },
       {
-        "rshares": "5072953140",
+        "rshares": 5072953140,
         "voter": "holabebe"
       },
       {
-        "rshares": "1799587902",
+        "rshares": 1799587902,
         "voter": "murh"
       },
       {
-        "rshares": "115361382518",
+        "rshares": 115361382518,
         "voter": "bravenewcoin"
       },
       {
-        "rshares": "166899192",
+        "rshares": 166899192,
         "voter": "soupernerd"
       },
       {
-        "rshares": "5429807428",
+        "rshares": 5429807428,
         "voter": "qamarpinkpanda"
       },
       {
-        "rshares": "4494852918",
+        "rshares": 4494852918,
         "voter": "aaseb"
       },
       {
-        "rshares": "2162953561",
+        "rshares": 2162953561,
         "voter": "the-future"
       },
       {
-        "rshares": "289441856",
+        "rshares": 289441856,
         "voter": "illlefr4u"
       },
       {
-        "rshares": "11382937008",
+        "rshares": 11382937008,
         "voter": "pinkisland"
       },
       {
-        "rshares": "3420690714",
+        "rshares": 3420690714,
         "voter": "pigatron"
       },
       {
-        "rshares": "163854600",
+        "rshares": 163854600,
         "voter": "weenis"
       },
       {
-        "rshares": "309113169",
+        "rshares": 309113169,
         "voter": "jonaswakefield"
       },
       {
-        "rshares": "984803370",
+        "rshares": 984803370,
         "voter": "jsantana"
       },
       {
-        "rshares": "61805391",
+        "rshares": 61805391,
         "voter": "cehuneke"
       },
       {
-        "rshares": "6199940304",
+        "rshares": 6199940304,
         "voter": "craigwilliamz"
       },
       {
-        "rshares": "57122450",
+        "rshares": 57122450,
         "voter": "thebrickranger"
       },
       {
-        "rshares": "57108081",
+        "rshares": 57108081,
         "voter": "vbrasher"
       },
       {
-        "rshares": "2980829211",
+        "rshares": 2980829211,
         "voter": "ashleywilliamz"
       },
       {
-        "rshares": "57736694",
+        "rshares": 57736694,
         "voter": "abbywilliamz"
       },
       {
-        "rshares": "57604403",
+        "rshares": 57604403,
         "voter": "colleenwilliamz"
       },
       {
-        "rshares": "3202748238",
+        "rshares": 3202748238,
         "voter": "luminousvisions"
       },
       {
-        "rshares": "57682239",
+        "rshares": 57682239,
         "voter": "canadian-coconut"
       },
       {
-        "rshares": "381198814",
+        "rshares": 381198814,
         "voter": "ghasemkiani"
       },
       {
-        "rshares": "54839161",
+        "rshares": 54839161,
         "voter": "cyborg"
       },
       {
-        "rshares": "50931848",
+        "rshares": 50931848,
         "voter": "analyzethis"
       },
       {
-        "rshares": "51780266",
+        "rshares": 51780266,
         "voter": "roadhog"
       },
       {
-        "rshares": "52777051",
+        "rshares": 52777051,
         "voter": "doggnostic"
       },
       {
-        "rshares": "52504270",
+        "rshares": 52504270,
         "voter": "jenny-talls"
       },
       {
-        "rshares": "54522752",
+        "rshares": 54522752,
         "voter": "robovirtuoso"
       },
       {
-        "rshares": "50090625",
+        "rshares": 50090625,
         "voter": "birdiewonder"
       },
       {
-        "rshares": "1092907021",
+        "rshares": 1092907021,
         "voter": "robotev"
       },
       {
-        "rshares": "51074637",
+        "rshares": 51074637,
         "voter": "goaldigger"
       }
     ],
     "author": "craigwilliamz",
     "author_payout_value": "0.000 HBD",
-    "author_reputation": 25.0,
+    "author_reputation": -0.27,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "reputation-0"
+    ],
     "body": "![The Crown Family Photo](http://steemit-dub.s3.amazonaws.com/alex/the-crown-family1.png 'The Crown Family Photo')\n\nMy Family is Pretty Cool\n-\n![Family](http://steemit-dub.s3.amazonaws.com/family-800.jpg 'Family')\n\nMy favorite people in the world are my children. They are kind, generous, full of life, fun to be around and crazy creative. They are really cool people.\n\nWe have four children, Alex, Ashley, Abby and Austin. My wife's idea to name them all \"A\" names. They are referred to as the \"A Team\".\n\nWe have a close family. We argue very little and maintain open communication. We have treated them like people from early on and they have behaved as such.\n\n![Guitar](http://steemit-dub.s3.amazonaws.com/alex/guitar.png 'Guitar')\n\n\n\nAn Eye Opening Experience\n-\nA few weeks ago I was in Dallas visiting a friend whom I had not seen in many years. There were other people there as well that I had also not seen in a very long time. I struck up a conversation with one of them and the discussion of family ensued. He told me about his children and what it had been like for him to become a father. He has a wonderful family with children that are still very young. When the time came for me to share about my children, I began listing off what each one was doing from the oldest to the youngest. Before I could get to the youngest one, his mouth was gaped open and he burst out, \"What are you feeding them!\" We had a big laugh as I told him about the youngest and expanded on our philosophy of family.\n\nWe have had many compliments on our children throughout their life. Even today, the people with whom they interact; family, friends and the people who work with them in stage productions, make a point of complimenting them. I am around them all the time, and many of their friends are homeschooled as well so sometimes I forget how special they are and the impact they have on others.\n\n![Railroad tracks](http://steemit-dub.s3.amazonaws.com/alex/alex-railroad-tracks-600.jpg 'Railroad tracks')\n\nWhy Am I Sharing\n-\nI hope to convey a few things here. First, if you are considering homeschooling and have reservations, may these stories encourage you. If you already homeschool and wonder if it is all worth it, maybe our stories will give you hope and encouragement as well.\n\nAnd lastly, I am proud of them and want to share their success with you.\n\n![Sis](http://steemit-dub.s3.amazonaws.com/alex/children-800.jpg 'Children')\n\nWhy We Homeschool\n-\nMy personal experience in public schools was a nightmare. I moved a lot when I was young and changed schools every three to six months. During one stretch of five years, I switched schools nineteen times. I did not build long term relationships and being the new kid all the time often created struggles with teachers.\n\nThere is a very long story to my history so I will not get into that here. It is however, the main reason I became excited about homeschooling when my wife suggested it.\n\nOur Oldest Child Alex\n-\n![Alex](http://steemit-dub.s3.amazonaws.com/alexthrowback.jpg 'Alex')\n\nAlex has always been intelligent as I believe all children are. He had memorized many of the family members phone numbers and home addresses by the time he was six. We started him off in Montessori school at age four where he attended three years. We would have kept him in Montessori but they did not offer classes above six years old. \n\nAt that time my wife was still concerned about her ability to homeschool so we enrolled him in a Christian private school for one year. After that, she had researched enough to build her confidence. She was ready to go. (As the years went by, she found out that she was more than capable. We are guides.)\n\nPre-Teen\n-\n![Sis](http://steemit-dub.s3.amazonaws.com/alex/alex-littlekid1.jpeg 'Alex and Sister')\n\nAlex took two years of Latin and one year of Japanese. He acted in plays and did what most children do, play a lot.\n\nTeen Years\n-\n![Sis](http://steemit-dub.s3.amazonaws.com/ateam.jpg 'Alex and Sister')\n\nMany people will tell you that you will have to deal with the teenage years. \"Brace yourself,\" they will say. \"You will become their enemy!\" We did not experience this with Alex or our other children. Alex would come to me for advice about issues him and his friends were discussing. When he would share how I reacted to some of our serious conversations, his friends were astonished and would respond with descriptions of their parents exploding if they attempted to have the same discussions with their parents.\n\nKeeping your cool when one of your children comes to you with a confession is a sure way to have them trust you with other issues of concern.\n\nDuring his teen years, Alex took CLEP tests and earned twelve college hours.\n\nAt sixteen, he began to gain interest in programming. I had introduced it to him when he was nine but he wasn't interested. Then again around eleven but still no interest. At sixteen, the interest was all his. Had I forced him to do it earlier, he may have never liked it.\n\n![Graduation](http://steemit-dub.s3.amazonaws.com/alex/graduation.jpg 'Graduation')\n\nBecoming an Adult\n-\n![Alex](http://steemit-dub.s3.amazonaws.com/alex/alex-adult1.jpeg 'Alex')\n\nOne his eighteenth birthday, he begin working his first job as a software developer. He was hired as an apprentice and was promoted to junior developer after only three months. At that time, he began mentoring two of his friends. Within a few months he had taken on a third person to mentor. Within a year or so, each of them have now changed their path and work as software developers. It has significantly changed their lives. Alex just recently began mentoring another friend. Pretty cool to pass forward. He had received help from some of my co-workers early on which made all the difference in his progression.\n\nHe now speaks French and Mandarin and has aspirations to learn many more. He has traveled to seven countries and has an arrangement with his employer to work from anywhere in the world as long as he is at the office for part of the year.\n\n![Alex](http://steemit-dub.s3.amazonaws.com/alex/amsterdamcollage.jpg 'Alex')\n\nHe gives technical talks at local meet ups, plays both acoustic and electric guitar, has never met a stranger and has made no enemies.\n\nHe is an inspiration to others, his family and siblings. The bar has been set high but the other children have many interests and accomplishments of their own. I'll share those in subsequent posts.\n\n![Leon](http://steemit-dub.s3.amazonaws.com/alex/leoncollage.jpg 'Leon')\n\nWhat was our part?\n-\nMy wife has worked hard to keep them supplied with good school material, staying compliant with state requirements and providing some structure for learning. We never set up a school room like environment. There are never set hours of study. Homeschooling hours vary depending on the age of the child and what they are working on at that phase of their education. I would say that most of the time they spend less time doing actual school work and the rest of the time exploring, using their imagination and focusing their energy on things they are interested in.\n\nFor Alex, that was a foreign language. Other times it was memorizing all the Pokemon cards and building decks and playing in tournaments. Alex said one of the things that has helped him so much in learning new things was the fact that he had memorized so much Pokemon data. He developed the ability to store and retrieve things in his mind.\n\nThe simple fact is\u2026 we didn't do it. Alex did. He deserves all the credit. He did all the work. We provided the canvas, the paint and the paintbrushes. \n\nConclusion\n-\nI feel we have a pretty cool family. There are many ways to raise your children. The most important thing is to love them unconditionally, give them room to grow and treat them as you would your very best friend. They are people and are smarter than most give them credit.\n\nI hope I have been able to convey how proud we are of Alex. These are but a few highlights of his life as he is only twenty-one. There is so much in store for him.\n\nI am so grateful that as much as possible we have given Alex the opportunity to live life on his own terms and he has flourished.",
     "category": "life",
     "children": 3,
@@ -196,19 +198,22 @@
     },
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 20952886915040,
-    "payout": 28.712,
-    "payout_at": "2016-09-17T02:57:45",
-    "pending_payout_value": "28.712 HBD",
-    "percent_steem_dollars": 10000,
+    "payout": 45.82,
+    "payout_at": "2016-08-24T02:23:30",
+    "pending_payout_value": "45.820 HBD",
+    "percent_hbd": 10000,
     "permlink": "how-to-raise-fantastic-children-part-1",
-    "post_id": 635822,
+    "post_id": 845689,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 42
     },
     "title": "How to Raise Fantastic Children - Part 1",
@@ -218,139 +223,141 @@
   {
     "active_votes": [
       {
-        "rshares": "11357569835389",
+        "rshares": 11357569835389,
         "voter": "berniesanders"
       },
       {
-        "rshares": "86746642898",
+        "rshares": 86746642898,
         "voter": "nextgenwitness"
       },
       {
-        "rshares": "273812540770",
+        "rshares": 273812540770,
         "voter": "justin"
       },
       {
-        "rshares": "552847788283",
+        "rshares": 552847788283,
         "voter": "silver"
       },
       {
-        "rshares": "1251914367375",
+        "rshares": 1251914367375,
         "voter": "silversteem"
       },
       {
-        "rshares": "1930805191057",
+        "rshares": 1930805191057,
         "voter": "nextgencrypto"
       },
       {
-        "rshares": "190090757518",
+        "rshares": 190090757518,
         "voter": "steemservices"
       },
       {
-        "rshares": "957733653490",
+        "rshares": 957733653490,
         "voter": "boombastic"
       },
       {
-        "rshares": "8536011764",
+        "rshares": 8536011764,
         "voter": "bingo-0"
       },
       {
-        "rshares": "2238572115",
+        "rshares": 2238572115,
         "voter": "bingo-1"
       },
       {
-        "rshares": "429169643",
+        "rshares": 429169643,
         "voter": "scientihark"
       },
       {
-        "rshares": "2144600092",
+        "rshares": 2144600092,
         "voter": "murh"
       },
       {
-        "rshares": "64184842487",
+        "rshares": 64184842487,
         "voter": "beerbloke"
       },
       {
-        "rshares": "9651283220",
+        "rshares": 9651283220,
         "voter": "romait"
       },
       {
-        "rshares": "1090790161",
+        "rshares": 1090790161,
         "voter": "gidlark"
       },
       {
-        "rshares": "96663454240",
+        "rshares": 96663454240,
         "voter": "rubybian"
       },
       {
-        "rshares": "504731722",
+        "rshares": 504731722,
         "voter": "jillfeint"
       },
       {
-        "rshares": "24388027122",
+        "rshares": 24388027122,
         "voter": "creemej"
       },
       {
-        "rshares": "1680830998",
+        "rshares": 1680830998,
         "voter": "the-future"
       },
       {
-        "rshares": "1487880898",
+        "rshares": 1487880898,
         "voter": "iamwne"
       },
       {
-        "rshares": "1819480598",
+        "rshares": 1819480598,
         "voter": "alex.chien"
       },
       {
-        "rshares": "5328526582",
+        "rshares": 5328526582,
         "voter": "shortcut"
       },
       {
-        "rshares": "8943159633",
+        "rshares": 8943159633,
         "voter": "gargon"
       },
       {
-        "rshares": "607950836",
+        "rshares": 607950836,
         "voter": "future24"
       },
       {
-        "rshares": "15277887140",
+        "rshares": 15277887140,
         "voter": "thecurator"
       },
       {
-        "rshares": "90179446",
+        "rshares": 90179446,
         "voter": "michelnilles"
       },
       {
-        "rshares": "56326177",
+        "rshares": 56326177,
         "voter": "kaosdlanor"
       },
       {
-        "rshares": "425810977",
+        "rshares": 425810977,
         "voter": "thefeature"
       },
       {
-        "rshares": "56770700",
+        "rshares": 56770700,
         "voter": "elsievr"
       },
       {
-        "rshares": "50663058",
+        "rshares": 50663058,
         "voter": "champ333"
       },
       {
-        "rshares": "170136269",
+        "rshares": 170136269,
         "voter": "terrano"
       },
       {
-        "rshares": "51239204",
+        "rshares": 51239204,
         "voter": "spinx"
       }
     ],
     "author": "spinx",
     "author_payout_value": "0.000 HBD",
-    "author_reputation": 25.0,
+    "author_reputation": -1.16,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "reputation-0"
+    ],
     "body": "<html>\n<p><img src=\"http://i64.tinypic.com/2ceg9qa.jpg\"/></p>\n<p><br></p>\n<p>One of the few precious truths I learned is life is not about waiting for the storm to pass, it is about learning to dance in...</p>\n<p><strong>The Rain</strong></p>\n<p>A ray of sunshine does not always mean happiness nor does a drop of rain mean total loneliness. Through time writers of all kinds being the sensitive, emotional and deep people that they are, have always associated the rain with loneliness. Today, whenever a cold wind blows through an open window or an empty space on a street, we are swept with its glum, warning us of a heavy feeling, reminding us of what we have lost, memories that are only too sad we almost wish could bury everything in a shroud of oblivion. Regrets come again, as well as faces of people from the past as a teardrop suddenly threatens to fall anytime from already lost and almost hollow eyes. The cold brought by the rain along with the dark clouds lurking outside makes us want to wrap our arms protectively around ourselves to keep us warm or to shut out any sad thoughts that dare to overstep the arms engulfing our curled bodies.</p>\n<p><img src=\"http://i63.tinypic.com/6iwlyw.jpg\"/></p>\n<p><br></p>\n<p>But its not always like that. Not if we can help it, no. The Rain is perceived negatively most of the time but we can care enough to see beyond what is often seen. GO, outside on an early September morning and you will see that the rain leaves a magnificent dew drenched flower or a grass all the more alive as the sunlight hits the few drops left from last night's rain. All for you to behold. See that under umbrellas are faces of people smiling and radiant as you meet them on the street. Really, the rain cant be that bad. Not at all. It is natures gift, a gift from the Almighty. And after a rain, what do the heavens hold for you? An array of colors painting the sky and we know it as rainbow. Just as we know that after the tears, laughter comes, making us very much worthy of the joy because of what we have gone through.</p>\n<p><img src=\"http://i64.tinypic.com/fnzjtl.jpg\"/></p>\n<p><br></p>\n<p>All our days cannot simply be filled with sunshine and it cannot be simply all laughter and smiles. We have to grow as a person just as the rain lets the flowers in the meadow bloom and grow. The flowers need the rain just as much as they need sunshine. Same is true with people. We need to be happy just as we need to be lonely so that we can grow as a person. Then can we only bring ourselves to realize that the bad is not so bad afer all as long as we allow the growth it brings to us as individuals.</p>\n<p><img src=\"http://i63.tinypic.com/16kp014.jpg\"/></p>\n<p><br></p>\n<p>You cannot escape the rain, nor chase it away. Dare to hear its pitter patter rhythm as something which can never be a hindrance for you to see things in a different and brighter way no matter how dark the clouds and heavy the downpour. It is as inevitable as the troubles we come across. Learn from the rain because it is the law of nature. Learn from loneliness or troubles because... It is the law of life.</p>\n<p><br></p>\n<p><br></p>\n<p>(c) to the owner of the picture I used...</p>\n</html>",
     "category": "life",
     "children": 5,
@@ -375,18 +382,21 @@
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 16847399101862,
     "payout": 18.413,
-    "payout_at": "2016-09-29T09:39:45",
+    "payout_at": "2016-09-05T07:57:36",
     "pending_payout_value": "18.413 HBD",
-    "percent_steem_dollars": 10000,
+    "percent_hbd": 10000,
     "permlink": "the-rain-it-is-the-law-of-life",
-    "post_id": 787056,
+    "post_id": 1038470,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 32
     },
     "title": "The Rain - It is the law of life",
@@ -396,135 +406,137 @@
   {
     "active_votes": [
       {
-        "rshares": "4335459431",
+        "rshares": 4335459431,
         "voter": "boy"
       },
       {
-        "rshares": "5262854785",
+        "rshares": 5262854785,
         "voter": "bue-witness"
       },
       {
-        "rshares": "975716806",
+        "rshares": 975716806,
         "voter": "bunny"
       },
       {
-        "rshares": "75169356896",
+        "rshares": 75169356896,
         "voter": "bue"
       },
       {
-        "rshares": "2323555627",
+        "rshares": 2323555627,
         "voter": "mini"
       },
       {
-        "rshares": "299045636",
+        "rshares": 299045636,
         "voter": "moon"
       },
       {
-        "rshares": "1288478836630",
+        "rshares": 1288478836630,
         "voter": "steempower"
       },
       {
-        "rshares": "871313105",
+        "rshares": 871313105,
         "voter": "healthcare"
       },
       {
-        "rshares": "1353232348",
+        "rshares": 1353232348,
         "voter": "daniel.pan"
       },
       {
-        "rshares": "403253136",
+        "rshares": 403253136,
         "voter": "helen.tan"
       },
       {
-        "rshares": "1764827120",
+        "rshares": 1764827120,
         "voter": "coar"
       },
       {
-        "rshares": "2501114696",
+        "rshares": 2501114696,
         "voter": "murh"
       },
       {
-        "rshares": "1289763894",
+        "rshares": 1289763894,
         "voter": "alexft"
       },
       {
-        "rshares": "2814342601",
+        "rshares": 2814342601,
         "voter": "pigatto"
       },
       {
-        "rshares": "1965737119",
+        "rshares": 1965737119,
         "voter": "lostnuggett"
       },
       {
-        "rshares": "403833324",
+        "rshares": 403833324,
         "voter": "ladypenelope1"
       },
       {
-        "rshares": "4016798395",
+        "rshares": 4016798395,
         "voter": "beanz"
       },
       {
-        "rshares": "12555413808",
+        "rshares": 12555413808,
         "voter": "sunshine"
       },
       {
-        "rshares": "10069561477",
+        "rshares": 10069561477,
         "voter": "jphamer1"
       },
       {
-        "rshares": "104709921",
+        "rshares": 104709921,
         "voter": "future24"
       },
       {
-        "rshares": "1880413517",
+        "rshares": 1880413517,
         "voter": "bledarus"
       },
       {
-        "rshares": "71365686",
+        "rshares": 71365686,
         "voter": "thegoldencookie"
       },
       {
-        "rshares": "5584217100",
+        "rshares": 5584217100,
         "voter": "solarguy"
       },
       {
-        "rshares": "79783107300",
+        "rshares": 79783107300,
         "voter": "icfiedler"
       },
       {
-        "rshares": "3785284659",
+        "rshares": 3785284659,
         "voter": "trev"
       },
       {
-        "rshares": "11682660949",
+        "rshares": 11682660949,
         "voter": "mandibil"
       },
       {
-        "rshares": "60127610",
+        "rshares": 60127610,
         "voter": "norene"
       },
       {
-        "rshares": "50264719",
+        "rshares": 50264719,
         "voter": "drinkthemilk"
       },
       {
-        "rshares": "50259197",
+        "rshares": 50259197,
         "voter": "getmyhand"
       },
       {
-        "rshares": "50254033",
+        "rshares": 50254033,
         "voter": "lookatme"
       },
       {
-        "rshares": "51239204",
+        "rshares": 51239204,
         "voter": "spinx"
       }
     ],
     "author": "spinx",
     "author_payout_value": "0.000 HBD",
-    "author_reputation": 25.0,
+    "author_reputation": -1.16,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "reputation-0"
+    ],
     "body": "<html>\n<p><img src=\"http://i67.tinypic.com/sg1gfm.jpg\"/></p>\n<p><br></p>\n<p>&nbsp;A boy went to war in 1914 and left his bike chained to a tree. He never came home &amp; the family left the bike there as a memorial to the fallen soldier.&nbsp;</p>\n</html>",
     "category": "life",
     "children": 1,
@@ -544,18 +556,21 @@
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 1520007920729,
     "payout": 0.992,
-    "payout_at": "2016-09-28T14:08:12",
+    "payout_at": "2016-09-04T13:58:00",
     "pending_payout_value": "0.992 HBD",
-    "percent_steem_dollars": 10000,
+    "percent_hbd": 10000,
     "permlink": "bike-chained-to-a-tree",
-    "post_id": 777632,
+    "post_id": 1026780,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 31
     },
     "title": "Bike chained to a tree....",
@@ -565,68 +580,68 @@
   {
     "active_votes": [
       {
-        "rshares": "-2506269319430",
+        "rshares": -2506269319430,
         "voter": "adm"
       },
       {
-        "rshares": "-791454853526",
+        "rshares": -791454853526,
         "voter": "pfunk"
       },
       {
-        "rshares": "10808029947",
+        "rshares": 10808029947,
         "voter": "bryner"
       },
       {
-        "rshares": "138566922574",
+        "rshares": 138566922574,
         "voter": "dragonslayer109"
       },
       {
-        "rshares": "95546345",
+        "rshares": 95546345,
         "voter": "irit"
       },
       {
-        "rshares": "20251556990",
+        "rshares": 20251556990,
         "voter": "samether"
       },
       {
-        "rshares": "169004163",
+        "rshares": 169004163,
         "voter": "joseph.kalu"
       },
       {
-        "rshares": "9309662294",
+        "rshares": 9309662294,
         "voter": "rpf"
       },
       {
-        "rshares": "55100682",
+        "rshares": 55100682,
         "voter": "randal"
       },
       {
-        "rshares": "193323069000",
+        "rshares": 193323069000,
         "voter": "asksisk"
       },
       {
-        "rshares": "515647475",
+        "rshares": 515647475,
         "voter": "alwayzgame"
       },
       {
-        "rshares": "54007264",
+        "rshares": 54007264,
         "voter": "alwayzgamez"
       },
       {
-        "rshares": "53741955",
+        "rshares": 53741955,
         "voter": "diliph"
       },
       {
-        "rshares": "52883107",
+        "rshares": 52883107,
         "voter": "steem4lyf"
       }
     ],
     "author": "steem4lyf",
     "author_payout_value": "0.000 HBD",
-    "author_reputation": 25.0,
+    "author_reputation": 0.54,
     "beneficiaries": [],
     "blacklists": [
-      "hivewatchers"
+      "reputation-0"
     ],
     "body": "https://i.imgsafe.org/a633508263.jpg\n**There's no good way to introduce myself. I'm a 20 year-old woman, I\u2019m between the cracks, I\u2019m a slave, forced into whoring myself, a victim of what is usually called \u201chuman trafficking.\u201d There's no way I can escape from this without harm coming to my family, I\u2019m not here for pity. This is the life I'm stuck in, and I'm making the best of it, day by day. The last year, though has been much better than expected.\nI began reading this reddit with interest in 2012, and in 2013 (first buy was at $43), began coordinating meets downtown with people selling local. (Nice guys, every one of them wanted to rescue me, really sweet (if any of you are reading this, thank you)) and I'd exchange a small portion of my night's cash for bitcoins.\nI had one seller who began to meet me regularly, act like an ordinary John on until we got to the room, and then just educate me for the hour about bitcoin. These sessions are some of my happiest memories from the past 2 years. He even paid/tipped me for my time after teaching me! Some in cash, only a little in bitcoin: kept the management from growing suspicious. always still mostly taking home cash) I trusted him enough to hold my bitcoin for me, to keep any evidence of what I was doing off my phone. He was truly a good samaritan. In this way I managed to put about 10% of my earnings away every month. I don't have to tell you how smart and lucky I felt come December.\nI sent 22 BTC home that month (around $750 exchange rate) to help pay off a portion of my parent's debt. If this was taken home as cash, almost 2/3 of it would have gone to management \"expenses.\" Once I've finished covering their debt, I plan to save to purchase my freedom and be through with the business. This should be in about a year. I've recently begin to understand basic margin trading, and I suspect that, even with my extremely limited computer access, I could turn a profit on the bitcoin i already have by opening a 3:1 buy when I feel btc has dipped close to low.\nI had some rare free time and II wanted to thank you, users of this subreddit, for helping educate me about bitcoin and, in turn, helping me to get my parent's life back on track as soon as possible. If I'm living a different life in a year, I'll have you all to thank. I bet this all sounds tragic, but it\u2019s reality, and I'm doing much better than I ever imagined. I thought you would be happy to know how it has has positively affected my life & my parents.**\n\nFrom 2014 it was a whole new kind of experience it was a smooth sailing until my mom got admitted for breast cancer\ni will be posting about myself a lot over here about what all i have went through in the next post\n\nhere is the link to my reddit story which was well received by the wonderful community  \n**https://www.reddit.com/r/Bitcoin/comments/2keueb/my_thanks_to_you_all_bitcoin_has_changed_my_life/**\n\ni would love to stay here and be a part of this community\nLets steem!!",
     "category": "introduceyourself",
@@ -650,18 +665,21 @@
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": -2924469001160,
     "payout": 0.241,
-    "payout_at": "2016-09-22T14:03:15",
+    "payout_at": "2016-08-29T03:09:06",
     "pending_payout_value": "0.241 HBD",
-    "percent_steem_dollars": 10000,
+    "percent_hbd": 10000,
     "permlink": "in-2014-bitcoin-changed-my-life-2016-steem-will",
-    "post_id": 701651,
+    "post_id": 929253,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 3.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 14
     },
     "title": "In 2014 bitcoin changed my life, 2016 Steem will ?",
@@ -671,107 +689,109 @@
   {
     "active_votes": [
       {
-        "rshares": "2469900939",
+        "rshares": 2469900939,
         "voter": "boy"
       },
       {
-        "rshares": "2997709013",
+        "rshares": 2997709013,
         "voter": "bue-witness"
       },
       {
-        "rshares": "567535492",
+        "rshares": 567535492,
         "voter": "bunny"
       },
       {
-        "rshares": "41929125264",
+        "rshares": 41929125264,
         "voter": "bue"
       },
       {
-        "rshares": "1323993212",
+        "rshares": 1323993212,
         "voter": "mini"
       },
       {
-        "rshares": "170692188",
+        "rshares": 170692188,
         "voter": "moon"
       },
       {
-        "rshares": "495397702",
+        "rshares": 495397702,
         "voter": "healthcare"
       },
       {
-        "rshares": "725486038",
+        "rshares": 725486038,
         "voter": "daniel.pan"
       },
       {
-        "rshares": "230121623",
+        "rshares": 230121623,
         "voter": "helen.tan"
       },
       {
-        "rshares": "15183691707",
+        "rshares": 15183691707,
         "voter": "sandwich"
       },
       {
-        "rshares": "206610576856",
+        "rshares": 206610576856,
         "voter": "camilla"
       },
       {
-        "rshares": "1798543004",
+        "rshares": 1798543004,
         "voter": "murh"
       },
       {
-        "rshares": "8581043882",
+        "rshares": 8581043882,
         "voter": "somedude"
       },
       {
-        "rshares": "7564740887",
+        "rshares": 7564740887,
         "voter": "kaylinart"
       },
       {
-        "rshares": "29039092103",
+        "rshares": 29039092103,
         "voter": "sean-king"
       },
       {
-        "rshares": "-39426704645",
+        "rshares": -39426704645,
         "voter": "bacchist"
       },
       {
-        "rshares": "-1524450144",
+        "rshares": -1524450144,
         "voter": "roninwoods"
       },
       {
-        "rshares": "10188492819",
+        "rshares": 10188492819,
         "voter": "williambanks"
       },
       {
-        "rshares": "154876729",
+        "rshares": 154876729,
         "voter": "naomi-louise"
       },
       {
-        "rshares": "191677129",
+        "rshares": 191677129,
         "voter": "veralynn"
       },
       {
-        "rshares": "562473006",
+        "rshares": 562473006,
         "voter": "velgelm"
       },
       {
-        "rshares": "-212718844",
+        "rshares": -212718844,
         "voter": "anxietymaven"
       },
       {
-        "rshares": "6538151337",
+        "rshares": 6538151337,
         "voter": "sethlinson"
       },
       {
-        "rshares": "58175511",
+        "rshares": 58175511,
         "voter": "feminism"
       }
     ],
     "author": "feminism",
     "author_payout_value": "0.000 HBD",
-    "author_reputation": 25.0,
+    "author_reputation": -4.68,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "reputation-0"
+    ],
     "body": "https://s3.amazonaws.com/WisdomPlanet/wisdomtimes/wp-content/uploads/2012/04/Qualities-of-a-mother-and-her-transformation.jpg\n\n\"The evolution of a Mother, in spite of its half\u2212humorous, half\u2212sacrilegious sound, is a serious study in Biology. Even on its physical side this was the most stupendous task Evolution ever undertook. It began when the first bud burst from the first plant\u2212cell, and was only completed when the last and most elaborately wrought pinnacle of the temple of Nature crowned the animal creation.\n\nWhat was that pinnacle? There is no more instructive question in science. For the answer brings into relief one of the expression\u2212points of Nature one of these great teleological notes of which the natural order is so full, and of which this is by far the most impressive. Run the eye for a moment up the scale of animal life. At the bottom are the first animals, the Protozoa. The Coelenterates follow, then in mixed array, the Echinoderms, Worms, and Molluscs. Above these come the Pisces, then the Amphibia, then the Reptilia, then the Aves, then What? The Mammalia, THE MOTHERS. There the series stops. Nature has never made anything since.\n\nIs it too much to say that the one motive of organic Nature was to make Mothers? It is at least certain that this was the chief thing she did. Ask the Zoologist what, judging from science alone, Nature aspired to from the first, he could but answer Mammalia Mothers. In as real a sense as a factory is meant to turn out locomotives or clocks, the machinery of Nature is designed in the last resort to turn out Mothers. You will find Mothers in lower Nature at every stage of imperfection; you will see attempts being made to get at better types; you find old ideas abandoned and higher models coming to the front. And when you get to the top you find the last great act was but to present to the world a physiologically perfect type. It is a fact which no human Mother can regard without awe, which no man can realize without a new reverence for woman and a new belief in the higher meaning of Nature, that the goal of the whole plant and animal kingdoms seems to have been the creation of a family, which the very naturalist has had to call Mammalia.\n\nThat care for others, from which the Mammalia take their name, though reaching its highest expression there, is introduced into Nature in cruder forms almost from the dawn of life. In the vegetable kingdom, from the motherlessness of the early Cryptogams, we rise to find a first maternity foreshadowed in the flowering tree. It elaborates a seed or nut or fruit with infinite precaution, surrounding the embryo with coat after coat of protective substance, and storing around it the richest foods for its future use. And rudimentary though the manifestation be, when we remember that this is not an incident in the tree\u2019s life but its whole blossom and crown, it is impossible but to think of this solicitude and Motherhood together. So exalted in the tree\u2019s life is this provision for others that the Botanist, like the Zoologist, places the mothering plants at the top of his department of Nature. His highest division is the Phanerogams named, literally, in terms of their reproductive specialization.\n\nCrossing into the animal kingdom we observe the same motherless beginning, the same cared\u2212for end. All elementary animals are orphans; they know neither home nor care; the earth is their only mother or theinhospitable sea; they waken to isolation, to apathy, to the attentions only of those who seek their doom. But as we draw nearer the apex of the animal kingdom, the spectacle of a protective Maternity looms into view. At whatprecise point it begins it is difficult to say. But that it does not begin at once, that there is a long and gradual Evolution of Maternity, is clear. From casual observation, and from popular books, it might be inferred that care of offspring we cannot yet speak of affection is characteristic of the whole field of Nature. On the contrary, it is doubtful whether in the Invertebrate half of Nature it exists at all. If it does it is very rare; and in the Vertebrates it is met with only exceptionally till we reach the two highest classes. What does exist, and sometimes in marvellous perfection, is care for eggs; but that is a wholly different thing, both in its physical and psychical aspect, from love of offspring. The truth is, Nature so made animals in the early days that they did not need Mothers. The moment they were born they looked after themselves, and were perfectly able to look after themselves. Mothers in these days would have been a superfluity. All that Nature worked at at that dawning date was Maternity in a physical sense Motherhood came as a later and a rarer growth. The children of those days were not really children at all; they were only offspring, springers off, deserters from home. At one bound they were out into life on their own account, and she who beg at them knew them no more. That early world, therefore, for millions and millions of years was a bleak and loveless world. It was a world without children and a world without Mothers. It is good to realize how heartless Nature was till these arrived.\n\nIn the lower reaches of Nature, things remain still unchanged. The rule is not that the Mother ignores, but that she never sees her child. The land\u2212crabs of the West Indies descend from their homes in the mountains once a year, march in procession to the sea, commit their eggs to the waves, and come away. The burying\u2212beetles deposit their fragile capsules in the dead carcase of a mouse or bird, plant all together in the earth, and leave them to their fate. Myriads of other creatures are born into the world, and ordained so to be born, whose Mothers are dead before they begin to live. The moment of birth with the Ephemeridae is also the moment of death. These are not cases nevertheless where there has been no care. On the contrary, there is a solicitude for the egg of the most extreme kind for its being placed exactly in the right spot, at the right time, protected from the weather, shielded from enemies, and provided with a first supply of food. The butterfly places the eggs of its young on the very leaf which the coming caterpillar likes the most, and on the under side of the leaf, where they will be least exposed a case which illustrates in a palpable way the essential difference between Motherhood and Maternity. Maternity here, in the restricted sense of merely adequate physical care, is carried to its utmost perfection. Everything that can be done for the egg is done. Motherhood, on the other hand, is non\u2212existent, is even an anatomical impossibility. If a butterfly could live till its egg was hatched which does not happen it would see no butterfly come out of the egg, no airy likeness of itself, but an earth\u2212bound caterpillar. If it recognized this creature as its child, it could never play the Mother to it. The anatomical form is so different that were it starving it could not feed it, were it threatened it could not save it, nor is it possible to see any direction in which it could be of the slightest use to it. It is obvious that Nature never intended to make a Mother here; that all that she desired as yet was to perfect the first maternal instinct. And the tragedy of the situation is that on that day when its training to be a true Mother should begin, the butterfly passes out of the world.\n....\"\n\nFrom:\nTHE LOWELL LECTURES ON THE ASCENT OF MAN\nby HENRY DRUMMOND\nhttp://www.searchengine.org.uk/ebooks/12/4.pdf",
     "category": "life",
     "children": 33,
@@ -794,18 +814,21 @@
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 296217622808,
     "payout": 0.189,
-    "payout_at": "2016-09-17T20:03:39",
+    "payout_at": "2016-08-24T15:09:30",
     "pending_payout_value": "0.189 HBD",
-    "percent_steem_dollars": 10000,
+    "percent_hbd": 10000,
     "permlink": "the-evolution-of-a-mother",
-    "post_id": 642406,
+    "post_id": 853960,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 1.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 24
     },
     "title": "#PayItForward - THE EVOLUTION OF A MOTHER",
@@ -815,84 +838,84 @@
   {
     "active_votes": [
       {
-        "rshares": "-1403541182854",
+        "rshares": -1403541182854,
         "voter": "adm"
       },
       {
-        "rshares": "78372372021",
+        "rshares": 78372372021,
         "voter": "acidsun"
       },
       {
-        "rshares": "82977696946",
+        "rshares": 82977696946,
         "voter": "kingscrown"
       },
       {
-        "rshares": "365542712",
+        "rshares": 365542712,
         "voter": "alextsvirko"
       },
       {
-        "rshares": "29721396596",
+        "rshares": 29721396596,
         "voter": "r4fken"
       },
       {
-        "rshares": "4343474936",
+        "rshares": 4343474936,
         "voter": "on0tole"
       },
       {
-        "rshares": "-29540023021",
+        "rshares": -29540023021,
         "voter": "condra"
       },
       {
-        "rshares": "2865743759",
+        "rshares": 2865743759,
         "voter": "kell234"
       },
       {
-        "rshares": "2389737018",
+        "rshares": 2389737018,
         "voter": "herverisson"
       },
       {
-        "rshares": "3384146535",
+        "rshares": 3384146535,
         "voter": "maximkichev"
       },
       {
-        "rshares": "13819671543",
+        "rshares": 13819671543,
         "voter": "fleuri"
       },
       {
-        "rshares": "1359081241",
+        "rshares": 1359081241,
         "voter": "litrbooh"
       },
       {
-        "rshares": "-13354036389",
+        "rshares": -13354036389,
         "voter": "reneenouveau"
       },
       {
-        "rshares": "68059409",
+        "rshares": 68059409,
         "voter": "always1success"
       },
       {
-        "rshares": "24218007313",
+        "rshares": 24218007313,
         "voter": "xtester"
       },
       {
-        "rshares": "173881122",
+        "rshares": 173881122,
         "voter": "caitlinm"
       },
       {
-        "rshares": "88473285",
+        "rshares": 88473285,
         "voter": "erikkartmen"
       },
       {
-        "rshares": "283515000",
+        "rshares": 283515000,
         "voter": "ashwim"
       }
     ],
     "author": "caitlinm",
     "author_payout_value": "0.000 HBD",
-    "author_reputation": 25.0,
+    "author_reputation": 0.81,
     "beneficiaries": [],
     "blacklists": [
-      "hivewatchers"
+      "reputation-0"
     ],
     "body": "Hi peeps! I had some spare time today, so I decided to do something different. Here's the result! :)\n\nWhen \u0455\u043e you are feeling h\u0430\u0440\u0440\u0443 \u0443\u043eur **\u0435m\u043et\u0456\u043en\u0430l w\u0435ll b\u0435\u0456ng** \u0456\u0455 l\u043e\u043ek\u0435d after. Life is \u0440r\u0435tt\u0443 good. And this \u0441\u043euld b\u0435 b\u0435\u0441\u0430u\u0455\u0435 you feed \u0443\u043eur\u0455\u0435lf w\u0456th \u0435x\u0441\u0456t\u0456ng hobbies. On th\u0435 \u043eth\u0435r hand if \u0443\u043eu \u0430r\u0435 f\u0435\u0435l\u0456ng d\u0435\u0440r\u0435\u0455\u0455\u0435d, b\u043egg\u0435d down with w\u043erk \u0430nd ju\u0455t blahhh, th\u0435n reassess \u0443\u043eur l\u0456f\u0435 \u0430nd th\u0456nk about engrossing yourself \u0456n a hobby. **Let's h\u0430v\u0435 a l\u043e\u043ek at thr\u0435\u0435!**\n\n![Three types of hobbies](http://www.threethriftyguys.com/wp-content/uploads/2014/09/3-types-of-hobbies.jpg)\n\n### FIRSTLY: MU\u0405\u0406\u0421\u0410L EN\u0421\u041eUNT\u0415R:\n\nMu\u0455\u0456\u0441 \u0456\u0455 \u0440\u0430rt of \u0435v\u0435r\u0443d\u0430\u0443 l\u0456v\u0456ng. Y\u043eu h\u0435\u0430r \u0456t \u043en the r\u0430d\u0456\u043e, t\u0435l\u0435v\u0456\u0455\u0456\u043en, Y\u043euTub\u0435, iPods, m\u043ev\u0456\u0435\u0455, mu\u0455\u0456\u0441\u0430l theatre, \u0441\u0435ll \u0440h\u043en\u0435\u0455, CD\u0455, DVDS \u0430nd m\u043er\u0435.\n\nThe mu\u0455\u0456\u0441\u0456\u0430n\u0455 \u0443\u043eu hear h\u0430d t\u043e \u0455t\u0430rt fr\u043em th\u0435 beginning. An \u0435x\u0441\u0456t\u0456ng h\u043ebb\u0443 \u0441\u043euld b\u0435 t\u043e **l\u0435\u0430rn an \u0456n\u0455trum\u0435nt**. M\u0430\u0443b\u0435 \u0443\u043eu will l\u0456k\u0435 \u0456t \u0455\u043e mu\u0441h that \u0440\u0435\u043e\u0440l\u0435 will b\u0435 listening to you \u0435v\u0435r\u0443 wh\u0435r\u0435.\n\n![Girl playing guitar](http://www.ebesucher.com/content/images/familie/frueherziehung.jpg)\n\nY\u043eu could b\u0435 thinking \u0430b\u043eut wh\u0456\u0441h \u0456n\u0455trum\u0435nt to l\u0435\u0430rn. W\u0435ll, this d\u0435\u0440\u0435nd\u0455 \u043en a numb\u0435r \u043ef factors including \u0443\u043eur musical t\u0430\u0455t\u0435 \u0430nd what \u0456n\u0455trum\u0435nt w\u043euld \u0455u\u0456t th\u0430t t\u0430\u0455t\u0435, th\u0435 \u0455\u0456z\u0435 \u0430nd \u0455\u043eund \u043ef the instrument, your budget. M\u0430\u0443b\u0435 you have \u0430n instrument l\u0443\u0456ng around your house which could have \u0430n airing \u043er a fr\u0456\u0435nd who \u0441\u043euld lend \u0443\u043eu \u043en\u0435. For \u0456n\u0455t\u0430n\u0441\u0435, if \u0443\u043eu w\u043euld l\u0456k\u0435 t\u043e play the melodic l\u0456n\u0435\u0455 \u0456n \u0430n orchestra th\u0435n th\u0435r\u0435 is n\u043e \u0440\u043e\u0456nt \u0456n l\u0435\u0430rn\u0456ng a b\u0430\u0455\u0455 \u0456n\u0455trum\u0435nt like a b\u0430\u0455\u0455\u043e\u043en or double b\u0430\u0455\u0455. Y\u043eu would \u0430\u0456m towards a higher \u0456n\u0455trum\u0435nt like the flut\u0435 \u043er violin. If \u0443\u043eu l\u0456k\u0435 metal see \u0443\u043eur\u0455\u0435lf h\u0435\u0430d butt\u0456ng \u0430w\u0430\u0443 \u0456n a m\u0435t\u0430l band th\u0435n there is n\u043e \u0440\u043e\u0456nt \u0456n l\u0435\u0430rn\u0456ng th\u0435 \u043eb\u043e\u0435. Y\u043eur instrument \u0441h\u043e\u0456\u0441\u0435\u0455 w\u043euld be guitar, b\u0430\u0455\u0455, drum\u0455, keyboard. M\u0430n\u0443 people start l\u0435\u0430rn\u0456ng th\u0435 ukul\u0435l\u0435 \u043er r\u0435\u0441\u043erd\u0435r \u0430nd th\u0435n m\u043ev\u0435 \u043ent\u043e \u0430n\u043eth\u0435r \u0456n\u0455trum\u0435nt. Many \u0440\u0435\u043e\u0440l\u0435 l\u0435\u0430rn the \u0440\u0456\u0430n\u043e because a piano l\u043e\u043ek\u0455 n\u0456\u0441\u0435 \u0456n a living r\u043e\u043em \u0430nd you can \u0441r\u0435\u0430t\u0435 g\u043e\u043ed \u0455\u043eund\u0455 r\u0456ght fr\u043em th\u0435 \u0455t\u0430rt. H\u043ew\u0435v\u0435r it \u0456\u0455 not \u0440\u043ert\u0430bl\u0435 t\u043e t\u0430k\u0435 \u0430w\u0430\u0443 w\u0456th you \u0430nd \u0456f \u0443\u043eu w\u0430nt to play \u0456n a mu\u0455\u0456\u0441\u0430l group l\u0456k\u0435 an orchestra th\u0435n you have t\u043e be a br\u0456ll\u0456\u0430nt player. But \u0456t is **gr\u0435\u0430t to r\u0435l\u0430x** \u043en \u0456n th\u0435 comfort \u043ef \u0443\u043eur \u043ewn home.\n\n### SECONDLY: CREATIVE C\u041eRN\u0415R:\n\nYou \u0441\u0430n \u0455\u0435\u0435 creations \u0435v\u0435r\u0443wh\u0435r\u0435. Sh\u043e\u0440\u0455 are full \u043ef them f\u043er \u0440\u0435\u043e\u0440l\u0435 t\u043e l\u043e\u043ek \u0430t, \u0440ur\u0441h\u0430\u0455\u0435 and \u0435nj\u043e\u0443 or give \u0430w\u0430\u0443 f\u043er someone \u0435l\u0455\u0435 to \u0435nj\u043e\u0443 \u0430nd people h\u0430d t\u043e create th\u0435m to b\u0435g\u0456n w\u0456th. S\u043e \u0430n\u043eth\u0435r \u0435x\u0441\u0456t\u0456ng h\u043ebb\u0443 w\u043euld be to g\u0435t \u0441r\u0435\u0430t\u0456v\u0435, l\u0456k\u0435 th\u0435 \u0440\u0435\u043e\u0440l\u0435 wh\u043e \u0441r\u0435\u0430t\u0435d products in th\u0435 shops, and t\u0430k\u0435 up a craft. There \u0430r\u0435 m\u0430n\u0443 crafts t\u043e choose fr\u043em like cross stitch, jewelry m\u0430k\u0456ng, l\u0435\u0430th\u0435r w\u043erk,\u00a0\u051bu\u0456lt\u0456ng, soap m\u0430k\u0456ng and th\u0435 list g\u043e\u0435\u0455 \u043en. Some t\u0456m\u0435 \u0456n \u0443\u043eur l\u0456f\u0435 \u0443\u043eu may h\u0430v\u0435 th\u043eught that you \u0441\u043euld m\u0430k\u0435 th\u0456\u0455. Well \u0456t \u0456\u0455 t\u0456m\u0435 to give \u0456t a try **in \u0443\u043eur \u0441r\u0435\u0430t\u0456v\u0435 \u0441\u043ern\u0435r**.\n\n![Eggs](http://homicraft.com/wp-content/uploads/2015/02/Easter-Crafts-for-Adults.jpg)\n\n### LASTLY: ONL\u0406N\u0415 GAMING:\n\nThe \u0456nt\u0435rn\u0435t \u0456\u0455 th\u0435 w\u0430\u0443 \u043ef *\"n\u043ew\"*.\u00a0Millions of people \u0430ll \u043ev\u0435r th\u0435 world \u0430r\u0435 u\u0455\u0456ng th\u0435\u0456r \u0441\u043em\u0440ut\u0435r\u0455 to go online for \u0455\u043em\u0435th\u0456ng, wh\u0435th\u0435r \u0456t b\u0435 \u0440\u0430\u0443\u0456ng a b\u0456ll, tr\u0430d\u0456ng \u0430t online \u0430u\u0441t\u0456\u043en sites l\u0456k\u0435 \u0435B\u0430\u0443 \u0430nd Tr\u0430d\u0435M\u0435, \u0455h\u043e\u0440\u0440\u0456ng, \u0441h\u0430tt\u0456ng \u043en Facebook \u043er ju\u0455t having a quiet g\u0430m\u0435 \u043ef \u0455\u0440\u0456d\u0435r \u0455\u043el\u0456t\u0430\u0456r\u0435. So \u0456f \u0443\u043eu have a computer th\u0435n a r\u0435l\u0430x\u0456ng th\u0456ng to do wh\u0435n \u0443\u043eu h\u0430v\u0435 a f\u0435w m\u0456nut\u0435\u0455 (\u043er l\u043eng\u0435r) \u0456\u0455 to \u0440l\u0430\u0443 g\u0430m\u0435\u0455 online. Y\u043eu g\u0435t a f\u0435w g\u0430m\u0435\u0455 w\u0456th your \u0441\u043em\u0440ut\u0435r \u0430nd \u0455\u043e \u0443\u043eu d\u043e n\u043et need th\u0435 internet but if you \u0430r\u0435 h\u043e\u043ek\u0435d u\u0440 t\u043e th\u0435 \u0456nt\u0435rn\u0435t then th\u0435 g\u0430m\u0435\u0455 are **endless**. Th\u0435r\u0435 \u0430r\u0435 \u0455\u043e many \u0441h\u043e\u0456\u0441\u0435\u0455 of g\u0430m\u0435\u0455 to choose and \u0455\u043e th\u0435r\u0435 \u0456\u0455 bound t\u043e b\u0435 \u0455\u043em\u0435 that w\u043euld \u0455u\u0456t \u0443\u043eur taste. M\u0430n\u0443 \u043ef the g\u0430m\u0435\u0455 are fr\u0435\u0435 \u0430nd \u0455\u043em\u0435 r\u0435\u051bu\u0456r\u0435 a payment \u0435\u0456th\u0435r a \u043en\u0435 \u043eff \u0440\u0430\u0443m\u0435nt \u043er a monthly subscription fee. Some \u0455\u0456t\u0435\u0455 offer a fr\u0435\u0435 tr\u0456\u0430l period f\u0456r\u0455t and then g\u0456v\u0435 \u0443\u043eu the \u043e\u0440t\u0456\u043en j\u043e\u0456n. The \u043enl\u0443 problem is that \u043enl\u0456n\u0435 g\u0430m\u0456ng \u0441\u0430n become **\u0430dd\u0456\u0441t\u0456v\u0435** \u0430nd hence you m\u0430\u0443 have less t\u0456m\u0435 t\u043e \u0440r\u0430\u0441t\u0456\u0455\u0435 \u0443\u043eur mu\u0455\u0456\u0441\u0430l \u0456n\u0455trum\u0435nt \u043er create that amazing something. Oh well!!\n\n![Gaming](https://iqglobal.intel.com/iq-content-library/wp-content/uploads/sites/18/2015/12/UB2-978x653.jpg)\n\nWh\u0435th\u0435r \u0443\u043eu \u0441h\u043e\u043e\u0455\u0435 to \u0440l\u0430\u0443 th\u0435 \u0440\u0456\u0430n\u043e, \u0441r\u0435\u0430t\u0435 a \u0441u\u0455h\u0456\u043en cover \u043er \u0456ndulg\u0435 \u0456n a l\u0456ttl\u0435 \u043enl\u0456n\u0435 \u0430dv\u0435ntur\u0435 game \u0456t d\u043e\u0435\u0455 not matter. As l\u043eng as one or m\u043er\u0435 \u043ef th\u0435 thr\u0435\u0435 exciting indoor hobbies \u0441\u0430n benefit \u0443\u043eur \u0435m\u043et\u0456\u043en\u0430l w\u0435ll b\u0435\u0456ng then \u0443\u043eu h\u0430v\u0435 **g\u0430\u0456n\u0435d \u0455\u043em\u0435th\u0456ng \u0440\u043e\u0455\u0456t\u0456v\u0435** \u0430nd r\u0435\u0430\u0440 th\u0435 r\u0435w\u0430rd\u0455 \u043ef a happy life.\n\nEnjoy!\n\n@caitlinm xXx",
     "category": "life",
@@ -919,18 +942,21 @@
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": -1202004442828,
     "payout": 0.152,
-    "payout_at": "2016-09-17T19:56:51",
+    "payout_at": "2016-08-24T18:57:18",
     "pending_payout_value": "0.152 HBD",
-    "percent_steem_dollars": 10000,
+    "percent_hbd": 10000,
     "permlink": "3-exciting-indoor-hobbies-for-the-benefit-of-your-emotional-wellbeing",
-    "post_id": 645139,
+    "post_id": 857380,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 2.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 18
     },
     "title": "3 exciting indoor hobbies for the benefit of your emotional wellbeing",
@@ -940,51 +966,328 @@
   {
     "active_votes": [
       {
-        "rshares": "8194130605",
+        "rshares": 6775073251,
+        "voter": "lichtblick"
+      },
+      {
+        "rshares": 3211703267,
+        "voter": "carlas10"
+      },
+      {
+        "rshares": 16098092613,
+        "voter": "persianqueen"
+      },
+      {
+        "rshares": 808472077,
+        "voter": "future24"
+      },
+      {
+        "rshares": 90179446,
+        "voter": "michelnilles"
+      },
+      {
+        "rshares": 2968751186,
+        "voter": "elewarne"
+      },
+      {
+        "rshares": 83942786,
+        "voter": "masonmiler"
+      },
+      {
+        "rshares": 53184488,
+        "voter": "weepee02"
+      },
+      {
+        "rshares": 52540431,
+        "voter": "nikoy"
+      },
+      {
+        "rshares": 60292454,
+        "voter": "spinx"
+      }
+    ],
+    "author": "spinx",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": -1.16,
+    "beneficiaries": [],
+    "blacklists": [
+      "reputation-0"
+    ],
+    "body": "<html>\n<p>I can say that my life is like the sport I used to play in school, the Archery. But in the better focus, I shoot arrows just enough to realize how hard it is to hit the bull's eye.</p>\n<p><img src=\"http://i64.tinypic.com/1zbyrnq.jpg\"/></p>\n<p>It is when I realized that indeed my life has a lot targets and bull's eye that more often than not I want to go back to the effortless way I spend my life before I involve myself in Archery. Yet it is a challenge to practice and aim at life's bull's eye.</p>\n<p><img src=\"http://i66.tinypic.com/34622x0.jpg\"/></p>\n<p>I am embarking on the road, a road unveiling the different aspects of my life that are new, thought provoking and anchored towards learning and living in its fullest sense.</p>\n<p>In my own understanding, life is merely about aiming accurate sight of dreams that depends on us and our experiences. Life is about the journey we all take and the steps we make to create a meaningful and significant journey.</p>\n<p><img src=\"http://i63.tinypic.com/288cya.jpg\"/></p>\n<p>My two years as a part of my school archery team has been to say wholeheartedly fulfilling in a sense that I never would thought that I am going to be sporty or whatever geezzz...</p>\n<p>I was once an ordinary student but I realized that somehow I need to move forward and try something else. We always know the best road of our lives but we follow only the road that we have become accustomed.</p>\n<p>My youthful mind and \"naning\"-self are the factors which hold my self -understanding back so I could not hit the eye of concentric targets of life.</p>\n<p>Each experiences in my life is very vital to my growth as a human which was never imposed to me until I opened my hands in order to take the change to accept new things my experiences has to offer.</p>\n<p>As an archer, I always focused my stance, bow arm, grip, sight, releasing and follow-through in successive shoots in order to achieve a good standard of accuracy. In every competition, never had I thought of hitting the bull's eye. I always focused my self to the process or the basic form of an archer, thereafter, the arrow will hit itself on the target depending on how focused the archer was.</p>\n<p><img src=\"http://i65.tinypic.com/51eo2o.jpg\"/></p>\n<p>As said, when you are moving toward an objective, it is very important to pay attention to the road. It is the road that teaches us the best way to get there.</p>\n<p>In the sports like archery, strong wind hinders us to hit the bull's eye. Like the blow of the wind, I used to believe that storms in the life hinder us in hitting out life's target. But it was all changed, in reality storms can change the wrong perspective we have in life and lift us up to where we should belong if we only take these storms as the wind beneath our wings.</p>\n<p><img src=\"http://i66.tinypic.com/989fee.jpg\"/></p>\n<p>I have found it in my journey and it has brought me to a new dimension, to greater heights, self awareness and self-revelation. It allowed me to hone my focus in life to better appreciate the experiences it brings.</p>\n<p><img src=\"http://i65.tinypic.com/346xcvr.jpg\"/></p>\n<p><br></p>\n<p>(c) to the owner of the picture I used......</p>\n<p><br></p>\n<p>Try to read my another post...</p>\n<p><strong>The Rain - It is the law of life</strong></p>\n<p>https://steemit.com/life/@spinx/the-rain-it-is-the-law-of-life</p>\n</html>",
+    "category": "life",
+    "children": 2,
+    "created": "2016-08-30T03:43:48",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "http://i64.tinypic.com/1zbyrnq.jpg",
+        "http://i66.tinypic.com/34622x0.jpg",
+        "http://i63.tinypic.com/288cya.jpg",
+        "http://i65.tinypic.com/51eo2o.jpg",
+        "http://i66.tinypic.com/989fee.jpg",
+        "http://i65.tinypic.com/346xcvr.jpg"
+      ],
+      "links": [
+        "https://steemit.com/life/@spinx/the-rain-it-is-the-law-of-life"
+      ],
+      "tags": [
+        "life",
+        "story",
+        "blog"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 30202231999,
+    "payout": 0.014,
+    "payout_at": "2016-09-06T03:43:48",
+    "pending_payout_value": "0.014 HBD",
+    "percent_hbd": 10000,
+    "permlink": "aiming-life-s-target",
+    "post_id": 1051261,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": true,
+      "hide": false,
+      "muted_reasons": [
+        3
+      ],
+      "total_votes": 10
+    },
+    "title": "..aiming life's target",
+    "updated": "2016-08-30T03:46:09",
+    "url": "/life/@spinx/aiming-life-s-target"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 31923352802,
         "voter": "r4fken"
       },
       {
-        "rshares": "-102855934",
+        "rshares": -435708310,
+        "voter": "quin"
+      },
+      {
+        "rshares": 178131954,
+        "voter": "caitlinm"
+      },
+      {
+        "rshares": -99913914,
+        "voter": "cheetah66"
+      },
+      {
+        "rshares": -99908222,
+        "voter": "cheetah67"
+      },
+      {
+        "rshares": -120605276,
+        "voter": "cheetah68"
+      },
+      {
+        "rshares": -124642423,
+        "voter": "cheetah69"
+      },
+      {
+        "rshares": -99819739,
+        "voter": "cheetah70"
+      },
+      {
+        "rshares": -99816536,
+        "voter": "cheetah71"
+      },
+      {
+        "rshares": -120423928,
+        "voter": "cheetah72"
+      }
+    ],
+    "author": "caitlinm",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 0.81,
+    "beneficiaries": [],
+    "blacklists": [
+      "reputation-0"
+    ],
+    "body": "Help me, please!",
+    "category": "steemit",
+    "children": 4,
+    "created": "2016-08-30T17:35:03",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "tags": [
+        "steemit",
+        "steem",
+        "life",
+        "voting",
+        "cheetah"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 30900646408,
+    "payout": 0.012,
+    "payout_at": "2016-09-06T17:35:03",
+    "pending_payout_value": "0.012 HBD",
+    "percent_hbd": 10000,
+    "permlink": "why-is-my-reputation-zero",
+    "post_id": 1058892,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": true,
+      "hide": false,
+      "muted_reasons": [
+        3
+      ],
+      "total_votes": 10
+    },
+    "title": "Why is my reputation zero?",
+    "updated": "2016-08-30T17:35:03",
+    "url": "/steemit/@caitlinm/why-is-my-reputation-zero"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 2882822416,
+        "voter": "carlos-cabeza"
+      },
+      {
+        "rshares": 93860239,
+        "voter": "michelnilles"
+      },
+      {
+        "rshares": 12086277767,
+        "voter": "hilarski"
+      },
+      {
+        "rshares": 60127610,
+        "voter": "norene"
+      },
+      {
+        "rshares": 53184488,
+        "voter": "weepee02"
+      },
+      {
+        "rshares": 51510226,
+        "voter": "nikoy"
+      },
+      {
+        "rshares": 60292454,
+        "voter": "spinx"
+      }
+    ],
+    "author": "spinx",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": -1.16,
+    "beneficiaries": [],
+    "blacklists": [
+      "reputation-0"
+    ],
+    "body": "<html>\n<p>There I was sitting here thinking, \"What could ever be as boring as an eternal mission?\"</p>\n<p><br></p>\n<p>Well, and unfortunate poor spirit, aint I? This is just as impossible. You see, the reason I was sent up here on Earth was to reap as many souls as possible by whatever means necessary. I wasnt the only one given with this kind of purpose though. A lot of us are. You see, my master needs as much backup as he can recruit so when the time comes, he can be able to fight Him on equal footing. Well, I dont know about that. Nevertheless, there I was, unbelievably displaying obedience to Satan.</p>\n<p><img src=\"http://i68.tinypic.com/28br3ar.jpg\"/></p>\n<p><br></p>\n<p>Before we were unleashed, the master had to properly sedate us first. It was at the graduating ceremony last month. He was our guest speaker. Oh, I could remeber how he talked at the ceremony!</p>\n<p>\"Good luck, my precious minions, for now you will be facing a world far better, far cooler and far more challenging, what with all the angels and saints wishing you ill wealth,\" he flashed his yellow, deformed teeth at us, \"Yes. Yes. I also bid you welcome. Today marks the day of your devil hood, the day you graduate, and the day you accept all holy things that will come your way.\"</p>\n<p><img src=\"http://i64.tinypic.com/2dboz91.jpg\"/></p>\n<p><br></p>\n<p>He droned on and on and on. He was ever the boring speaker but he had this grand gift of keeping us awake and silent. Something about his gloomy atmosphere kept us at the edge of our seats. Hell was already a terrifying place and Satan was an even more terrible company. We were afraid to letthat show on our faces so we had to keep it straight and hang on to his every word. But his next words sounded so significant that we couldnt avoid inching forward to listen.</p>\n<p>\"Before I release you from the Gates of Hell, I want you to remember one more important thing,\" he said with an air of terrror and grinned devilishly, sulfur fuming out of his mouth. Did I tell you he looked a lot like Mick Jagger? Well, he did. He donned this super rockstar attire that we couldnt help but admire his fashion sense.</p>\n<p>\"Evil acts are easy to instill when you don it with the guise of innocence and logic,\" he added with a lot of us clouded with great confusion.</p>\n<p><img src=\"http://i67.tinypic.com/5d2zyh.jpg\"/></p>\n<p><br></p>\n<p>We were all stumped about that. We really never understood what he meant.</p>\n<p>So, a day after that, he unlocked our chains and cuffs and what a cool sensation it was! I was running and laughing like never before! No! It was time to apply all my knowledge that I had learned at the School for III ang Nightmarish Scenarios (SINS).</p>\n<p>But even if I said that, I was up there, lazily lounging at a sofa on the rooftop someone from the apartments below had bothered to bring up. I really didnt get what Satan had told us. No. Not until I got to observe the senior devils and professionals at work. I wasnt sure if it really was their product but the signature was so clear.</p>\n<p>I saw how humans mistreat each other badly, cursing, swearing, wishing ill luck. Yes, I even had the pleasure of observing fight of one mother and son. He was very angry because she had not given him an allownace for the day. She refused to give him because they were so poor. So, the son stormed into the street and on his way to school, threw the sandwich her mommy had cared to make for him. A street kid happened upon the miserable sandwich and seeing it as a blessing, ate it. What he didnt know was a plastic sheet, you know, a piece of plastic cellophane, was accidentally included in the little snack. He spat it out and accidentally spat on the face of a biker boy who lost balance and swerved straight to the center of the street and got hit by a minibus which, ironically, tried to avoid it and hit a tree head on. A lot of people died that day.</p>\n<p>Is it a true story? What does it matter? You got the point. Even the smallest decisions could tumbledown the most unfavorable dominoes in the line.</p>\n<p><img src=\"http://i68.tinypic.com/2liex4x.jpg\"/></p>\n<p><br></p>\n<p>There are also those big corporate decisions decided upon by big dudes in the PitOHell Industry. Yes, one of its goals is to make humans think that population control should be valued over the sanctity of life. Right now, its been decided whether to revive death penalty or not. Well, if they do, there would definitely be a celebration in my place. There are thousands of reasons why the penalty should be revived, each thought of to be very logical and simple. The three that I know of are the three most logical and simple reasons.</p>\n<p>One: These people have sinned heavily. To invoke fear upon those who will attempt to do crime, these sinners must be punishable by death.</p>\n<p>Two: The population is booming. If they dont kill the criminals, where on earth would the good guys put the bad guys?</p>\n<p>And Three: The world is suffering from economic crisis. We really want to save as much rice, food, energy and money as possible. These people are consuming too much of our resources. Its time for a lay-off.</p>\n<p>Funny, isnt it? They treat their fellow humans as if they cant think, cant understand, as if they are brainless, emotionless, or soulness, as if theyre not humans at all but mere beasts, menace to the society. How ironic that the only solution they come up with to get rid of these killers is by killing them, making killers as well. The only difference this makes between the murderer and the executioner is license and a salary.</p>\n<p><img src=\"http://i65.tinypic.com/103iow2.jpg\"/></p>\n<p>There are so many unmentionables in the world, so many that dont neeed explaining, where the rich wage war and the poor die, where buildings and infrastructures are made for the sake of science but the human damage is still quite like it was before. Well, thats what we call 'occupational hazard.' Simple excuse.</p>\n<p><img src=\"http://i68.tinypic.com/20gzldx.jpg\"/></p>\n<p><br></p>\n<p>And thats when my master's quote surfaced as clear as a glass to me. I finally understood it.</p>\n<p>It is easy to reap weak souls when you hide your intentions behind beautiful benefits and insurances. Innocence, surely, is the best disguise. In the world of greed and power, nothing else could promise better harvest.</p>\n<p><img src=\"http://i64.tinypic.com/23u4myx.jpg\"/></p>\n<p><br></p>\n<p><br></p>\n<p>(C) to the owner of the picture, I used.....</p>\n<p><br></p>\n</html>",
+    "category": "life",
+    "children": 1,
+    "created": "2016-08-30T01:46:09",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "image": [
+        "http://i68.tinypic.com/28br3ar.jpg",
+        "http://i64.tinypic.com/2dboz91.jpg",
+        "http://i67.tinypic.com/5d2zyh.jpg",
+        "http://i68.tinypic.com/2liex4x.jpg",
+        "http://i65.tinypic.com/103iow2.jpg",
+        "http://i68.tinypic.com/20gzldx.jpg",
+        "http://i64.tinypic.com/23u4myx.jpg"
+      ],
+      "tags": [
+        "life",
+        "story",
+        "blog",
+        "fiction"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 15288075200,
+    "payout": 0.007,
+    "payout_at": "2016-09-06T01:46:09",
+    "pending_payout_value": "0.007 HBD",
+    "percent_hbd": 10000,
+    "permlink": "the-ramblings-of-a-devil",
+    "post_id": 1050094,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": true,
+      "hide": false,
+      "muted_reasons": [
+        3
+      ],
+      "total_votes": 7
+    },
+    "title": "The Ramblings Of a Devil",
+    "updated": "2016-08-30T01:46:09",
+    "url": "/life/@spinx/the-ramblings-of-a-devil"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 8194130605,
+        "voter": "r4fken"
+      },
+      {
+        "rshares": -102855934,
         "voter": "cheetah20"
       },
       {
-        "rshares": "-101859018",
+        "rshares": -101859018,
         "voter": "cheetah16"
       },
       {
-        "rshares": "-101857729",
+        "rshares": -101857729,
         "voter": "cheetah17"
       },
       {
-        "rshares": "-101760456",
+        "rshares": -101760456,
         "voter": "cheetah18"
       },
       {
-        "rshares": "-123906339",
+        "rshares": -123906339,
         "voter": "cheetah19"
       },
       {
-        "rshares": "-101135204",
+        "rshares": -101135204,
         "voter": "cheetah21"
       },
       {
-        "rshares": "-101333267",
+        "rshares": -101333267,
         "voter": "cheetah22"
       },
       {
-        "rshares": "10045300628",
+        "rshares": 10045300628,
         "voter": "gonzo"
       },
       {
-        "rshares": "54457374",
+        "rshares": 54457374,
         "voter": "ppan08162016"
       }
     ],
     "author": "r4fken",
     "author_payout_value": "0.000 HBD",
-    "author_reputation": 25.0,
+    "author_reputation": -5.58,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "reputation-0"
+    ],
     "body": "Here's the door:\n\n[![Screenshotfrom2016-09-0922-52-410b729.png](https://www.steemimg.com/images/2016/09/09/Screenshotfrom2016-09-0922-52-410b729.png)](https://www.steemimg.com/image/ukveU)\n\nIt's an old picture, but the door is still there. @sezi2u and @kingarbinv are herewith invited.\n\nidiots.",
     "category": "steemit",
     "children": 5,
@@ -1014,22 +1317,92 @@
     "max_accepted_payout": "1000000.000 HBD",
     "net_rshares": 17559180660,
     "payout": 0.002,
-    "payout_at": "2016-10-10T21:36:21",
+    "payout_at": "2016-09-16T21:01:45",
     "pending_payout_value": "0.002 HBD",
-    "percent_steem_dollars": 10000,
+    "percent_hbd": 10000,
     "permlink": "for-those-curious-about-my-whereabouts",
-    "post_id": 905662,
+    "post_id": 1188925,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 10
     },
     "title": "For those curious about my whereabouts",
     "updated": "2016-09-09T21:01:45",
     "url": "/steemit/@r4fken/for-those-curious-about-my-whereabouts"
+  },
+  {
+    "active_votes": [
+      {
+        "rshares": 2175825213,
+        "voter": "naturalista"
+      },
+      {
+        "rshares": 417966200,
+        "voter": "future24"
+      },
+      {
+        "rshares": 88339049,
+        "voter": "michelnilles"
+      },
+      {
+        "rshares": 50234514,
+        "voter": "spinx"
+      }
+    ],
+    "author": "spinx",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": -1.16,
+    "beneficiaries": [],
+    "blacklists": [
+      "reputation-0"
+    ],
+    "body": "<html>\n<p>![give](https://youtu.be/AagUAubL0y8)!</p>\n<p>I saw this video in my facebook news feed.&nbsp;</p>\n<p>I want to share this, how I feel when I watch this touching story of a boy. Its really broke my heart in the first minute in the video but in the last part made me amaze how destiny really amazing.</p>\n<p>(c) to owner of this video</p>\n<p><br></p>\n<p><br></p>\n</html>",
+    "category": "life",
+    "children": 0,
+    "created": "2016-08-29T00:07:36",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 0,
+    "is_paidout": false,
+    "json_metadata": {
+      "links": [
+        "https://youtu.be/AagUAubL0y8"
+      ],
+      "tags": [
+        "life",
+        "story",
+        "inspiring"
+      ]
+    },
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 2732364976,
+    "payout": 0.001,
+    "payout_at": "2016-09-05T00:07:36",
+    "pending_payout_value": "0.001 HBD",
+    "percent_hbd": 10000,
+    "permlink": "inspiring-story-watch-this-touch-my-heart",
+    "post_id": 1034727,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": true,
+      "hide": false,
+      "muted_reasons": [
+        3
+      ],
+      "total_votes": 4
+    },
+    "title": "Inspiring Story (Watch this)  - TOUCH my heart",
+    "updated": "2016-08-29T00:08:12",
+    "url": "/life/@spinx/inspiring-story-watch-this-touch-my-heart"
   }
 ]

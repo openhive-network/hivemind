@@ -395,3 +395,4 @@ comment_operation( `hive-111119`, `notmember`,`notmember-hive-111119-changed-typ
 comment_operation( `ismember-hive-111119-changed-type-3`, `ismember`,`re-ismember-hive-111119-changed-type-3`)
 comment_operation( `re-ismember-hive-111119-changed-type-3`, `ismember`,`re-re-ismember-hive-111119-changed-type-3`)
 comment_operation( `ismember-hive-111119-changed-type-3`, `notmember`,`re-2-ismember-hive-111119-changed-type-3`)
+comment_operation( `re-2-ismember-hive-111119-changed-type-3`, `notmember`,`re-re-2-ismember-hive-111119-changed-type-3`)

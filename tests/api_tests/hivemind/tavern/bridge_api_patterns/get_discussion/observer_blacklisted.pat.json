@@ -29,12 +29,15 @@
     "permlink": "re-good-afternoon-allow-me-to-get-acquainted-with-everyone-and-introduce-yourself-20160909t132507",
     "post_id": 1184111,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 0
     },
     "title": "RE: Good afternoon. Allow me to get acquainted with everyone and introduce yourself!",
@@ -71,12 +74,15 @@
     "permlink": "re-good-afternoon-allow-me-to-get-acquainted-with-everyone-and-introduce-yourself-20160909t132457",
     "post_id": 1184110,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 0
     },
     "title": "RE: Good afternoon. Allow me to get acquainted with everyone and introduce yourself!",
@@ -124,8 +130,8 @@
     "permlink": "re-zaitsevalesyaa-good-afternoon-allow-me-to-get-acquainted-with-everyone-and-introduce-yourself-20160909t164605817z",
     "post_id": 1186250,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -236,12 +242,12 @@
     "permlink": "good-afternoon-allow-me-to-get-acquainted-with-everyone-and-introduce-yourself",
     "post_id": 1184074,
     "promoted": "0.000 HBD",
+    "reblogs": 0,
     "replies": [
       "me-confucius/re-good-afternoon-allow-me-to-get-acquainted-with-everyone-and-introduce-yourself-20160909t132457",
       "jarvis/re-good-afternoon-allow-me-to-get-acquainted-with-everyone-and-introduce-yourself-20160909t132507",
       "projectnewbie/re-zaitsevalesyaa-good-afternoon-allow-me-to-get-acquainted-with-everyone-and-introduce-yourself-20160909t164605817z"
     ],
-    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

@@ -13,6 +13,7 @@ from hive.db.adapter import Db
 from hive.indexer.accounts import Accounts
 from hive.indexer.notify import Notify
 from hive.server.common.helpers import check_community
+from hive.server.common.mute_reasons import encode_bitwise_mask
 
 log = logging.getLogger(__name__)
 
@@ -335,6 +336,7 @@ class CommunityOp:
             notes=self.notes,
             title=self.title,
             block_num=self.block_num,
+            muted_reasons=encode_bitwise_mask([0]), # 0 is MUTED_COMMUNITY_MODERATION, used in the mutePost action
         )
 
         # Community-level commands
@@ -397,7 +399,7 @@ class CommunityOp:
         # Post-level actions
         elif action == 'mutePost':
             DB.query(
-                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '1'
+                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '1',  muted_reasons = :muted_reasons
                          WHERE id = :post_id""",
                 **params,
             )
@@ -405,8 +407,7 @@ class CommunityOp:
 
         elif action == 'unmutePost':
             DB.query(
-                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '0'
-                         WHERE id = :post_id""",
+                f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '0', muted_reasons = 0 WHERE id = :post_id""",
                 **params,
             )
             self._notify('unmute_post', payload=self.notes)

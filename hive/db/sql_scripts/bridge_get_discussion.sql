@@ -48,7 +48,8 @@ BEGIN
         hpv.curator_payout_value,
         hpv.is_muted,
         hpv.parent_id,
-        ds.source
+        ds.source,
+        hpv.muted_reasons
     FROM
     (
         WITH RECURSIVE child_posts (id, parent_id) AS MATERIALIZED

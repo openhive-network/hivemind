@@ -149,6 +149,7 @@ def build_methods():
                 bridge_api.get_relationship_between_accounts,
                 bridge_api.get_follow_list,
                 bridge_api.does_user_follow_any_lists,
+                bridge_api.list_muted_reasons_enum,
                 hive_api_notify.post_notifications,
                 hive_api_notify.account_notifications,
                 hive_api_notify.unread_notifications,

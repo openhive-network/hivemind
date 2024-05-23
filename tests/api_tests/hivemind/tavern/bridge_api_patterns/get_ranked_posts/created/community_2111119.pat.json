@@ -21,7 +21,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "notmember-hive-211119",
-    "post_id": 1258112,
+    "post_id": 1258113,
     "promoted": "0.000 HBD",
     "reblogs": 0,
     "replies": [],
@@ -29,6 +29,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        1
+      ],
       "total_votes": 0
     },
     "title": "notmember This post will BE muted",
@@ -57,7 +60,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "ismember-hive-211119",
-    "post_id": 1258111,
+    "post_id": 1258112,
     "promoted": "0.000 HBD",
     "reblogs": 0,
     "replies": [],
