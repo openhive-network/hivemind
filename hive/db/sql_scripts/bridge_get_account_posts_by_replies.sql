@@ -69,7 +69,8 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      replies.source
+      replies.source,
+      hp.muted_reasons
   FROM replies,
   LATERAL hivemind_app.get_post_view_by_id(replies.id) hp
   ORDER BY replies.id DESC
