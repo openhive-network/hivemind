@@ -2216,6 +2216,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 12
     },
     "title": "RE: Our Corrupt Sense of Fairness",

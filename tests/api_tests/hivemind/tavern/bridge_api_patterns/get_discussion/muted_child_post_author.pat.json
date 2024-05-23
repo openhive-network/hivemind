@@ -23,14 +23,17 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "comment-to-post-in-community-muted",
-    "post_id": 1256872,
+    "post_id": 1256877,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        4
+      ],
       "total_votes": 0
     },
     "title": "RE: steemit-will-comment-this-post",
@@ -59,12 +62,12 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "parent-post-for-muted-steemit",
-    "post_id": 1256858,
+    "post_id": 1256863,
     "promoted": "0.000 HBD",
+    "reblogs": 0,
     "replies": [
       "steemit/comment-to-post-in-community-muted"
     ],
-    "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

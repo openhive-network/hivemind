@@ -63,7 +63,8 @@ CREATE TYPE hivemind_app.get_post_view_by_id_return_t AS(
   role_id smallint,
   community_title character varying(32),
   community_name character varying(16) COLLATE pg_catalog."C",
-  block_num integer
+  block_num integer,
+  muted_reasons INTEGER
 );
 
 CREATE OR REPLACE FUNCTION hivemind_app.get_post_view_by_id(_id hivemind_app.hive_posts.id%TYPE) RETURNS SETOF hivemind_app.get_post_view_by_id_return_t
@@ -140,7 +141,8 @@ BEGIN
     hr.role_id,
     hc.title AS community_title,
     hc.name AS community_name,
-    hp.block_num
+    hp.block_num,
+    hp.muted_reasons
    FROM hivemind_app.hive_posts hp
      -- post data (6 joins)
      JOIN hivemind_app.hive_accounts_view ha_a ON ha_a.id = hp.author_id

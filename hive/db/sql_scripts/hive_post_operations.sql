@@ -25,10 +25,26 @@ BEGIN
 END
 $function$;
 
+
+CREATE OR REPLACE FUNCTION encode_bitwise_mask(muted_reasons INT[])
+    RETURNS INT AS $$
+DECLARE
+    mask INT := 0;
+    number INT;
+BEGIN
+    FOREACH number IN ARRAY muted_reasons
+        LOOP
+            mask := mask | (1 << number);
+        END LOOP;
+    RETURN mask;
+END;
+$$ LANGUAGE plpgsql;
+
 DROP TYPE IF EXISTS hivemind_app.process_community_post_result CASCADE;
 CREATE TYPE hivemind_app.process_community_post_result AS (
     is_muted bool,
-    community_id integer -- hivemind_app.hive_posts.community_id%TYPE
+    community_id integer, -- hivemind_app.hive_posts.community_id%TYPE
+    muted_reasons INTEGER
 );
 
 DROP FUNCTION IF EXISTS hivemind_app.process_community_post;
@@ -44,8 +60,9 @@ declare
         __community_type_topic CONSTANT SMALLINT := 1;
         __community_type_journal CONSTANT SMALLINT := 2;
         __community_type_council CONSTANT SMALLINT := 3;
-        __is_muted bool := TRUE;
+        __is_muted BOOL := TRUE;
         __community_id hivemind_app.hive_posts.community_id%TYPE;
+        __muted_reasons INTEGER[] := ARRAY[]::INTEGER[];
 BEGIN
         IF _block_num < _community_support_start_block THEN
             __is_muted := FALSE;
@@ -57,10 +74,7 @@ BEGIN
                 SELECT type_id, id INTO __community_type_id, __community_id from hivemind_app.hive_communities where name = _parent_permlink;
             END IF;
 
-            -- __is_muted can be TRUE here if it's a comment and its parent is muted
-            IF _is_parent_muted = TRUE THEN
-                __is_muted := TRUE;
-            ELSEIF __community_id IS NOT NULL THEN
+            IF __community_id IS NOT NULL THEN
                 IF __community_type_id = __community_type_topic THEN
                     __is_muted := FALSE;
                 ELSE
@@ -72,15 +86,26 @@ BEGIN
                             __is_muted := FALSE;
                         ELSIF __community_type_id = __community_type_council AND __role_id IS NOT NULL AND __role_id >= __member_role THEN
                             __is_muted := FALSE;
+                        ELSE
+                            -- This means the post was muted because of community reasons, 1 is MUTED_COMMUNITY_TYPE see community.py for the ENUM definition
+                            __muted_reasons := ARRAY[1];
                         END IF;
                     END IF;
                 END IF;
             ELSE
                 __is_muted := FALSE;
             END IF;
+
+            -- __is_muted can be TRUE here if it's a comment and its parent is muted
+            IF _is_parent_muted = TRUE THEN
+                __is_muted := TRUE;
+                -- 2 is MUTED_PARENT, see community.py for the ENUM definition
+                __muted_reasons := array_append(__muted_reasons, 2);
+            END IF;
+
         END IF;
 
-        RETURN (__is_muted, __community_id)::hivemind_app.process_community_post_result;
+        RETURN (__is_muted, __community_id, encode_bitwise_mask(__muted_reasons))::hivemind_app.process_community_post_result;
     END;
 $$ STABLE;
 

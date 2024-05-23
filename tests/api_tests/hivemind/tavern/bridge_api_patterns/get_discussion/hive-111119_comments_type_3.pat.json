@@ -8,7 +8,7 @@
     "blacklists": [],
     "body": "community is now type 3, ismember This post will not be muted",
     "category": "hive-111119",
-    "children": 3,
+    "children": 4,
     "created": "2016-09-15T19:47:54",
     "curator_payout_value": "0.000 HBD",
     "depth": 0,
@@ -21,7 +21,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "ismember-hive-111119-changed-type-3",
-    "post_id": 1258126,
+    "post_id": 1258127,
     "promoted": "0.000 HBD",
     "reblogs": 0,
     "replies": [
@@ -62,7 +62,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-ismember-hive-111119-changed-type-3",
-    "post_id": 1258128,
+    "post_id": 1258129,
     "promoted": "0.000 HBD",
     "reblogs": 0,
     "replies": [
@@ -102,7 +102,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-re-ismember-hive-111119-changed-type-3",
-    "post_id": 1258129,
+    "post_id": 1258130,
     "promoted": "0.000 HBD",
     "reblogs": 0,
     "replies": [],
@@ -125,7 +125,7 @@
     "blacklists": [],
     "body": "community is now type 3, notmember This comment will BE muted",
     "category": "hive-111119",
-    "children": 0,
+    "children": 1,
     "created": "2016-09-15T19:47:54",
     "curator_payout_value": "0.000 HBD",
     "depth": 1,
@@ -140,7 +140,50 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-2-ismember-hive-111119-changed-type-3",
-    "post_id": 1258130,
+    "post_id": 1258131,
+    "promoted": "0.000 HBD",
+    "reblogs": 0,
+    "replies": [
+      "notmember/re-re-2-ismember-hive-111119-changed-type-3"
+    ],
+    "stats": {
+      "flag_weight": 0.0,
+      "gray": true,
+      "hide": false,
+      "muted_reasons": [
+        1
+      ],
+      "total_votes": 0
+    },
+    "title": "RE: ismember This post will not be muted",
+    "updated": "2016-09-15T19:47:54",
+    "url": "/hive-111119/@ismember/ismember-hive-111119-changed-type-3#@notmember/re-2-ismember-hive-111119-changed-type-3"
+  },
+  "notmember/re-re-2-ismember-hive-111119-changed-type-3": {
+    "active_votes": [],
+    "author": "notmember",
+    "author_payout_value": "0.000 HBD",
+    "author_reputation": 25,
+    "beneficiaries": [],
+    "blacklists": [],
+    "body": "community is now type 3, and parent is muted This comment will BE muted (twice)",
+    "category": "hive-111119",
+    "children": 0,
+    "created": "2016-09-15T19:47:54",
+    "curator_payout_value": "0.000 HBD",
+    "depth": 2,
+    "is_paidout": false,
+    "json_metadata": {},
+    "max_accepted_payout": "1000000.000 HBD",
+    "net_rshares": 0,
+    "parent_author": "notmember",
+    "parent_permlink": "re-2-ismember-hive-111119-changed-type-3",
+    "payout": 0.0,
+    "payout_at": "2016-09-22T19:47:54",
+    "pending_payout_value": "0.000 HBD",
+    "percent_hbd": 10000,
+    "permlink": "re-re-2-ismember-hive-111119-changed-type-3",
+    "post_id": 1258132,
     "promoted": "0.000 HBD",
     "reblogs": 0,
     "replies": [],
@@ -148,10 +191,14 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        1,
+        2
+      ],
       "total_votes": 0
     },
     "title": "RE: ismember This post will not be muted",
     "updated": "2016-09-15T19:47:54",
-    "url": "/hive-111119/@ismember/ismember-hive-111119-changed-type-3#@notmember/re-2-ismember-hive-111119-changed-type-3"
+    "url": "/hive-111119/@ismember/ismember-hive-111119-changed-type-3#@notmember/re-re-2-ismember-hive-111119-changed-type-3"
   }
 }
