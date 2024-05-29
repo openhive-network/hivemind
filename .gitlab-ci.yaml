@@ -33,8 +33,11 @@ variables:
 include:
   - template: Workflows/Branch-Pipelines.gitlab-ci.yml
   - project: hive/haf
-    ref: 7bb7aab44a7083994c36f040e84d501c11afc159 # develop
+    ref: e9d964849997e0cb18903f0910c4bdb293997195 # develop
     file: /scripts/ci-helpers/prepare_data_image_job.yml # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
+  - project: hive/common-ci-configuration
+    ref: 91d072682e22869aea3acd7affa20db0f6a7a2c8
+    file: /templates/cache_cleanup.gitlab-ci.yml  
 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| ANCHORS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -293,22 +296,20 @@ prepare_hivemind_image:
   tags: *shared_tags
 
 cleanup_hivemind_haf_cache_manual:
-  extends: .cleanup_cache_manual
+  extends: .cleanup_cache_manual_template
   stage: cleanup
   variables:
     CLEANUP_PATH_PATTERN: "/cache/replay_data_hivemind_*"
-  resource_group: ${CI_COMMIT_SHA}
   tags:
     - data-cache-storage
 
 # This job cleans up both Hivemind-specific cache and cache shared between projects, so it should be used in emergencies only.
 # For example, if prepare_haf_data job fails in the same way in Hivemind and HAfAH.
 cleanup_haf_cache_manual:
-  extends: .cleanup_cache_manual
+  extends: .cleanup_cache_manual_template
   stage: cleanup
   variables:
     CLEANUP_PATH_PATTERN: "/cache/replay_data_hivemind_* /cache/replay_data_haf_*"
-  resource_group: ${CI_COMMIT_SHA}
   tags:
     - data-cache-storage
 

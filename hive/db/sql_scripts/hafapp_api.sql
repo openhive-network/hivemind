@@ -2,7 +2,7 @@ DROP TYPE IF EXISTS hivemind_app.hive_api_operation CASCADE;
 CREATE TYPE hivemind_app.hive_api_operation AS (
     id BIGINT,
     block_num INT,
-    operation_type_id SMALLINT,
+    operation_type_id INTEGER,
     is_virtual BOOLEAN,
     body VARCHAR
 );
