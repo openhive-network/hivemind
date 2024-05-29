@@ -59,6 +59,7 @@ VALUES
 
 class OperationBase:
     operation_id: Optional[int] = None
+    pos_in_block: Optional[int] = 1
 
     def __init__(self, block_number: int, body: dict):
         self._block_number = block_number
@@ -85,11 +86,17 @@ class OperationBase:
     def push(self) -> None:
         sql = """
 INSERT INTO 
-    hive.operations (id, block_num, trx_in_block, op_pos, op_type_id, timestamp, body_binary)
+    hive.operations (id, trx_in_block, op_pos, timestamp, body_binary)
 VALUES
-    (:id, :block_num, -2, -2, :op_type_id, now(), :body :: jsonb :: hive.operation);
+    (:id, -2, -2, now(), :body :: jsonb :: hive.operation);
 """
-        OperationBase.operation_id += 1
+        OperationBase.pos_in_block += 1
+
+        OperationBase.operation_id = Db.instance().query_one(sql='SELECT operation_id FROM hive.operation_id(:block_num, :op_type_id, :pos_in_block);',
+        block_num=self.block_number,
+        op_type_id=self.type.value,
+        pos_in_block=OperationBase.pos_in_block,
+        )
 
         log.info(
             f'Attempting to push mocked {self.__class__.__name__} - type: {self.type} id: {OperationBase.operation_id}'
@@ -98,8 +105,6 @@ VALUES
         Db.instance().query(
             sql=sql,
             id=OperationBase.operation_id,
-            block_num=self.block_number,
-            op_type_id=self.type.value,
             body=json.dumps(self.body),
         )
 
