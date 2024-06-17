@@ -118,6 +118,7 @@ COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/haf/scripts/cr
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/haf/scripts/common.sh /home/hivemind/haf/scripts/common.sh
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/mock_data/block_data /home/hivemind/app/mock_data/block_data
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/mock_data/vops_data /home/hivemind/app/mock_data/vops_data
+COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/reputation_tracker /home/hivemind/app/reputation_tracker
 
 # JSON rpc service
 EXPOSE ${HTTP_PORT}
