@@ -15,6 +15,8 @@ function log () {
 
 log "global" "Parameters passed directly to Hivemind docker entrypoint: $*"
 
+SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+
 COMMAND="$1"
 HIVEMIND_ARGS=()
 ADD_MOCKS=${ADD_MOCKS:-false}
@@ -23,6 +25,10 @@ POSTGRES_URL=${POSTGRES_URL:-}
 POSTGRES_ADMIN_URL=${POSTGRES_ADMIN_URL:-}
 INSTALL_APP=0
 DO_SCHEMA_UPGRADE=0
+DO_INSTALL_REPTRACKER=0
+REPTRACKER_SCHEMA=reptracker_app
+reptracker_dir="$SCRIPT_DIR/../reputation_tracker"
+
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -46,9 +52,15 @@ while [ $# -gt 0 ]; do
     --install-app)
         INSTALL_APP=1
         ;;
+    --reptracker-schema=*)
+        REPTRACKER_SCHEMA="${1#*=}"
+        ;;
     --upgrade-schema)
         INSTALL_APP=1
         DO_SCHEMA_UPGRADE=1
+        ;;
+    --only-hivemind=*)
+        SKIP_REPTRACKER=1
         ;;
     *)
         HIVEMIND_ARGS+=("$1")
@@ -92,6 +104,13 @@ setup() {
   cd /home/hivemind/app
   ./setup_postgres.sh --postgres-url="${POSTGRES_ADMIN_URL}"
   ./install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}"
+  
+  if [ "${SKIP_REPTRACKER}" -eq 0 ]; then
+    pushd "$reptracker_dir"
+    ./scripts/install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}" --schema="{$REPTRACKER_SCHEMA}"
+    popd
+  fi
+
   if [[ "$ADD_MOCKS" == "true" ]]; then
     log "setup" "Adding mocks to database..."
     # shellcheck source=/dev/null
@@ -113,6 +132,11 @@ uninstall_app() {
   log "setup" "Cleaning up an application specific contents located in the database: ${POSTGRES_ADMIN_URL}"
   cd /home/hivemind/app
   ./uninstall_app.sh --postgres-url="${POSTGRES_ADMIN_URL}"
+
+  if [ "${SKIP_REPTRACKER}" -eq 0 ]; then
+    "${SCRIPT_DIR}/../reputation_tracker/scripts/uninstall_app.sh" --postgres-url="${POSTGRES_ADMIN_URL}"
+  fi
+
 }
 
 case "$COMMAND" in
