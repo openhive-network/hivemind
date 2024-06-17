@@ -4,3 +4,6 @@
 [submodule "haf"]
 	path = haf
 	url = ../haf.git
+[submodule "reputation_tracker"]
+	path = reputation_tracker
+	url = ../reputation_tracker.git
