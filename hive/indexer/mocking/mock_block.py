@@ -86,9 +86,9 @@ class OperationBase:
     def push(self) -> None:
         sql = """
 INSERT INTO 
-    hive.operations (id, trx_in_block, op_pos, timestamp, body_binary)
+    hive.operations (id, trx_in_block, op_pos, body_binary)
 VALUES
-    (:id, -2, -2, now(), :body :: jsonb :: hive.operation);
+    (:id, -2, -2, :body :: jsonb :: hive.operation);
 """
         OperationBase.pos_in_block += 1
 
