@@ -25,9 +25,9 @@ POSTGRES_URL=${POSTGRES_URL:-}
 POSTGRES_ADMIN_URL=${POSTGRES_ADMIN_URL:-}
 INSTALL_APP=0
 DO_SCHEMA_UPGRADE=0
-DO_INSTALL_REPTRACKER=0
+SKIP_REPTRACKER=0
 REPTRACKER_SCHEMA=reptracker_app
-reptracker_dir="$SCRIPT_DIR/../reputation_tracker"
+reptracker_dir="$SCRIPT_DIR/app/reputation_tracker"
 
 
 while [ $# -gt 0 ]; do
@@ -103,14 +103,15 @@ setup() {
   log "setup" "Setting up the database..."
   cd /home/hivemind/app
   ./setup_postgres.sh --postgres-url="${POSTGRES_ADMIN_URL}"
-  ./install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}"
-  
+
   if [ "${SKIP_REPTRACKER}" -eq 0 ]; then
     pushd "$reptracker_dir"
-    ./scripts/install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}" --schema="{$REPTRACKER_SCHEMA}"
+    ./scripts/install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}" --schema="$REPTRACKER_SCHEMA" --is_forking="false" --is_attached="true"
     popd
   fi
 
+  ./install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}"
+  
   if [[ "$ADD_MOCKS" == "true" ]]; then
     log "setup" "Adding mocks to database..."
     # shellcheck source=/dev/null

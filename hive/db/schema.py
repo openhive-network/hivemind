@@ -662,7 +662,6 @@ def setup_runtime_code(db):
         "bridge_get_ranked_post_for_observer_communities.sql",
         "bridge_get_ranked_post_for_tag.sql",
         "bridge_get_ranked_post_for_all.sql",
-        "calculate_account_reputations.sql",
         "update_communities_rank.sql",
         "delete_hive_posts_mentions.sql",
         "notifications_view.sql",

@@ -13,6 +13,7 @@ import sqlalchemy
 from hive.conf import (
    SCHEMA_NAME
   ,SCHEMA_OWNER_NAME
+  ,REPTRACKER_SCHEMA_NAME
   )
 
 from hive.db.adapter import Db
@@ -430,14 +431,14 @@ class DbState:
     @classmethod
     def finish_account_reputations(cls, last_imported_block, current_imported_block):
         log.info(
-            f"Performing update_account_reputations on block range: {last_imported_block}:{current_imported_block}"
+            f"Performing reptracker_block_range_data on block range: {last_imported_block}:{current_imported_block}"
         )
 
         with AutoDbDisposer(cls.db(), "finish_account_reputations") as db_mgr:
             time_start = perf_counter()
-            sql = f"SELECT {SCHEMA_NAME}.update_account_reputations({last_imported_block}, {current_imported_block}, True);"
+            sql = f"SELECT {REPTRACKER_SCHEMA_NAME}.reptracker_block_range_data({last_imported_block}, {current_imported_block});"
             cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
-            log.info("[MASSIVE] update_account_reputations executed in %.4fs", perf_counter() - time_start)
+            log.info("[MASSIVE] reptracker_block_range_data executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_communities_posts_and_rank(cls, db):

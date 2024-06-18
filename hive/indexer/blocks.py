@@ -7,7 +7,7 @@ from pathlib import Path
 from time import perf_counter
 from typing import Tuple
 
-from hive.conf import Conf, SCHEMA_NAME, ONE_WEEK_IN_BLOCKS
+from hive.conf import Conf, SCHEMA_NAME, REPTRACKER_SCHEMA_NAME, ONE_WEEK_IN_BLOCKS
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 from hive.indexer.db_adapter_holder import DbAdapterHolder
@@ -22,7 +22,6 @@ from hive.indexer.payments import Payments
 from hive.indexer.post_data_cache import PostDataCache
 from hive.indexer.posts import Posts
 from hive.indexer.reblog import Reblog
-from hive.indexer.reputations import Reputations
 from hive.indexer.votes import Votes
 from hive.server.common.mentions import Mentions
 from hive.server.common.payout_stats import PayoutStats
@@ -54,7 +53,6 @@ class Blocks:
     _concurrent_flush = [
         ('Posts', Posts.flush, Posts),
         ('PostDataCache', PostDataCache.flush, PostDataCache),
-        ('Reputations', Reputations.flush, Reputations),
         ('Votes', Votes.flush, Votes),
         ('Follow', Follow.flush, Follow),
         ('Reblog', Reblog.flush, Reblog),
@@ -81,7 +79,6 @@ class Blocks:
             DbAdapterHolder.open_common_blocks_in_background_processing_db()
 
         PostDataCache.setup_own_db_access(shared_db_adapter, "PostDataCache")
-        Reputations.setup_own_db_access(shared_db_adapter, "Reputations")
         Votes.setup_own_db_access(shared_db_adapter, "Votes")
         Follow.setup_own_db_access(shared_db_adapter, "Follow")
         Posts.setup_own_db_access(shared_db_adapter, "Posts")
@@ -96,7 +93,6 @@ class Blocks:
         DbAdapterHolder.close_common_blocks_in_background_processing_db()
 
         PostDataCache.close_own_db_access()
-        Reputations.close_own_db_access()
         Votes.close_own_db_access()
         Follow.close_own_db_access()
         Posts.close_own_db_access()
@@ -213,6 +209,12 @@ class Blocks:
             log.error("exception encountered block %d", last_num + 1)
             raise e
 
+        sql_rep = f"""
+                SET SEARCH_PATH TO {REPTRACKER_SCHEMA_NAME};
+                SELECT {REPTRACKER_SCHEMA_NAME}.reptracker_block_range_data(:to_block, :from_block);
+                """
+        DB.query_no_return(sql_rep, to_block=first_block, from_block=last_num)
+
         # Follows flushing needs to be atomic because recounts are
         # expensive. So is tracking follows at all; hence we track
         # deltas in memory and update follow/er counts in bulk.
@@ -314,7 +316,6 @@ class Blocks:
                 comment_payout_ops[key][op_type] = (op_value, date)
 
             elif op_type == VirtualOperationType.EFFECTIVE_COMMENT_VOTE:
-                Reputations.process_vote(block_num, op_value)
                 # ABW: votes cast before HF1 (block 905693, timestamp 2016-04-25T17:30:00) have to be upscaled
                 # by 1mln - there is no need to scale it anywhere else because first payouts happened only after
                 # HF7; such scaling fixes some discrepancies in vote data of posts created before HF1
@@ -459,7 +460,7 @@ class Blocks:
             f"SELECT {SCHEMA_NAME}.update_hive_posts_mentions({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_notification_cache({block_number}, {block_number}, {is_hour_action})",
             f"SELECT {SCHEMA_NAME}.update_follow_count({block_number}, {block_number})",
-            f"SELECT {SCHEMA_NAME}.update_account_reputations({block_number}, {block_number}, False)",
+            f"SELECT {REPTRACKER_SCHEMA_NAME}.reptracker_block_range_data({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_last_completed_block({block_number})",
         ]
 
