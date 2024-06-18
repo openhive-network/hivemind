@@ -13,6 +13,7 @@ from hive.utils.stats import DbStats
 log = logging.getLogger(__name__)
 
 SCHEMA_NAME: Final[str] = 'hivemind_app'
+REPTRACKER_SCHEMA_NAME: Final[str] = 'reptracker_app'
 SCHEMA_OWNER_NAME: Final[str] = 'hivemind'
 
 def _sanitized_conf(parser):

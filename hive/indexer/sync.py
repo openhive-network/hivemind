@@ -7,7 +7,7 @@ import time
 from time import perf_counter as perf
 from typing import Iterable, Tuple
 
-from hive.conf import Conf, SCHEMA_NAME
+from hive.conf import Conf, SCHEMA_NAME, REPTRACKER_SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 from hive.indexer.accounts import Accounts
@@ -169,7 +169,7 @@ class SyncHiveDb:
                 if not can_continue_thread():
                     restore_default_signal_handlers()
                     self._db.query_no_return(
-                        f"SELECT hive.app_set_current_block_num('hivemind_app', {last_imported_block});"
+                        f"SELECT hive.app_set_current_block_num(ARRAY['hivemind_app', '{REPTRACKER_SCHEMA_NAME}'], {last_imported_block});"
                     )
                     return
 
@@ -212,7 +212,7 @@ class SyncHiveDb:
 
     def _query_for_app_next_block(self) -> Tuple[int, int]:
         log.info("Querying for next block for app context...")
-        lbound, ubound = self._db.query_row(f"SELECT * FROM hive.app_next_block('{SCHEMA_NAME}')")
+        lbound, ubound = self._db.query_row(f"SELECT * FROM hive.app_next_block(ARRAY['{SCHEMA_NAME}', '{REPTRACKER_SCHEMA_NAME}'])")
         log.info(f"Next block range from hive.app_next_block is: <{lbound}:{ubound}>")
         return lbound, ubound
 

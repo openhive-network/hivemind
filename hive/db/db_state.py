@@ -13,6 +13,7 @@ import sqlalchemy
 from hive.conf import (
    SCHEMA_NAME
   ,SCHEMA_OWNER_NAME
+  ,REPTRACKER_SCHEMA_NAME
   )
 
 from hive.db.adapter import Db
@@ -373,17 +374,17 @@ class DbState:
         PayoutStats.generate()
         log.info("[MASSIVE] payout_stats_view executed in %.4fs", perf_counter() - time_start)
 
-    @classmethod
+    @classmethod #deprecated
     def _finish_account_reputations(cls, db, last_imported_block, current_imported_block):
         log.info(
-            f"Performing update_account_reputations on block range: {last_imported_block}:{current_imported_block}"
+            f"Performing reptracker_block_range_data on block range: {last_imported_block}:{current_imported_block}"
         )
 
         with AutoDbDisposer(db, "finish_account_reputations") as db_mgr:
             time_start = perf_counter()
-            sql = f"SELECT {SCHEMA_NAME}.update_account_reputations({last_imported_block}, {current_imported_block}, True);"
+            sql = f"SELECT {REPTRACKER_SCHEMA_NAME}.reptracker_block_range_data({last_imported_block}, {current_imported_block});"
             cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
-            log.info("[MASSIVE] update_account_reputations executed in %.4fs", perf_counter() - time_start)
+            log.info("[MASSIVE] reptracker_block_range_data executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_communities_posts_and_rank(cls, db):
@@ -397,8 +398,8 @@ class DbState:
         with AutoDbDisposer(db, "finish_blocks_consistency_flag") as db_mgr:
             time_start = perf_counter()
             #cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
-            db_mgr.db.query_no_return(f"SELECT {SCHEMA_NAME}.update_last_completed_block({current_imported_block});");
-            db_mgr.db.query_no_return(f"SELECT hive.app_set_current_block_num('hivemind_app', {current_imported_block});");
+            db_mgr.db.query_no_return(f"SELECT {SCHEMA_NAME}.update_last_completed_block({current_imported_block});")
+            db_mgr.db.query_no_return(f"SELECT hive.app_set_current_block_num(ARRAY['hivemind_app', '{REPTRACKER_SCHEMA_NAME}'], {current_imported_block});")
             log.info("[MASSIVE] update_last_completed_block executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
@@ -511,8 +512,6 @@ class DbState:
             last_imported_block = current_imported_block
 
         synced_blocks = current_imported_block - last_imported_block
-
-        cls._finish_account_reputations(cls.db(), last_imported_block, current_imported_block)
 
         force_index_rebuild = False
         massive_sync_preconditions = False
