@@ -13,6 +13,7 @@ from hive.utils.stats import DbStats
 log = logging.getLogger(__name__)
 
 SCHEMA_NAME: Final[str] = 'hivemind_app'
+REPTRACKER_SCHEMA_NAME: Final[str] = 'reptracker_app'
 SCHEMA_OWNER_NAME: Final[str] = 'hivemind'
 ONE_WEEK_IN_BLOCKS = 7 * 24 * 1200
 

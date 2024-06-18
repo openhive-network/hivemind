@@ -67,3 +67,7 @@ else
 fi
 
 psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -f "${SCRIPTPATH}/install_app.sql"
+
+echo "Grant permissions to reptracker schema."
+psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -c "GRANT reptracker_owner TO hivemind;"
+psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -c "GRANT reptracker_user TO hivemind;"

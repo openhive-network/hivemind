@@ -7,7 +7,7 @@ import time
 from time import perf_counter as perf
 from typing import Iterable, Tuple
 
-from hive.conf import Conf, SCHEMA_NAME, ONE_WEEK_IN_BLOCKS
+from hive.conf import Conf, SCHEMA_NAME, REPTRACKER_SCHEMA_NAME, ONE_WEEK_IN_BLOCKS
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 from hive.indexer.accounts import Accounts
@@ -221,8 +221,8 @@ class SyncHiveDb:
         if self._max_batch:
             batch = self._max_batch
 
-        result = self._db.query_one( "CALL hive.app_next_iteration( _context => '{}', _blocks_range => (0,0), _limit => {}, _override_max_batch => {} )"
-                                     .format(SCHEMA_NAME, limit, batch)
+        result = self._db.query_one( "CALL hive.app_next_iteration( _context => ARRAY['{}', '{}'], _blocks_range => (0,0), _limit => {}, _override_max_batch => {} )"
+                                     .format(SCHEMA_NAME, REPTRACKER_SCHEMA_NAME, limit, batch)
                                     )
 
         self._db._trx_active=True
@@ -237,6 +237,7 @@ class SyncHiveDb:
 
         (lbound, ubound) = blocks_range
         log.info(f"Next block range from hive.app_next_iteration is: <{lbound}:{ubound}>")
+
         return lbound, ubound
 
     def _process_live_blocks(self, lbound, ubound, active_connections_before):
