@@ -176,7 +176,7 @@ class BlocksProviderBase(ABC):
         """Tool function to get elements from queue"""
         ret = []
         for element in range(number_of_elements):
-            while can_continue_thread():
+            while True:
                 try:
                     ret.append(data_queue.get(True, 1))
                     data_queue.task_done()

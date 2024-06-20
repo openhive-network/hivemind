@@ -14,6 +14,8 @@ log = logging.getLogger(__name__)
 
 SCHEMA_NAME: Final[str] = 'hivemind_app'
 SCHEMA_OWNER_NAME: Final[str] = 'hivemind'
+ONE_WEEK_IN_BLOCKS = 7 * 24 * 1200
+
 
 def _sanitized_conf(parser):
     """Formats parser config, redacting database url password."""
@@ -55,7 +57,7 @@ class Conf:
 
         # sync
         add('--max-workers', type=int, env_var='MAX_WORKERS', help='max workers for batch requests', default=6)
-        add('--max-batch', type=int, env_var='MAX_BATCH', help='max chunk size for batch requests', default=35)
+        add('--max-batch', type=int, env_var='MAX_BATCH', help='max chunk size for batch requests', default=None)
 
         # --sync-to-s3 seems to be unnecessary
         add(

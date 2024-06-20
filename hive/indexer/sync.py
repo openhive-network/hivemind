@@ -7,7 +7,7 @@ import time
 from time import perf_counter as perf
 from typing import Iterable, Tuple
 
-from hive.conf import Conf, SCHEMA_NAME
+from hive.conf import Conf, SCHEMA_NAME, ONE_WEEK_IN_BLOCKS
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 from hive.indexer.accounts import Accounts
@@ -15,7 +15,6 @@ from hive.indexer.block import BlocksProviderBase
 from hive.indexer.blocks import Blocks
 from hive.indexer.community import Community
 from hive.indexer.db_adapter_holder import DbLiveContextHolder
-from hive.indexer.hive_db.haf_functions import context_attach, context_detach
 from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
 from hive.server.common.payout_stats import PayoutStats
 from hive.signals import (
@@ -33,6 +32,8 @@ from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import WaitingStatusManager as WSM
 from hive.utils.timer import Timer
 
+import ast
+
 log = logging.getLogger(__name__)
 
 
@@ -45,11 +46,15 @@ class SyncHiveDb:
 
         # Might be lower or higher than actual block number stored in HAF database
         self._last_block_to_process = self._conf.get('test_max_block')
+        self._max_batch = conf.get('max_batch')
 
         self._massive_blocks_data_provider = None
         self._lbound = None
         self._ubound = None
         self._databases = None
+        self.time_start = None
+
+        self.rate = {}
 
     def __enter__(self):
         if self._enter_sync:
@@ -67,7 +72,6 @@ class SyncHiveDb:
         self._check_log_explain_queries()
 
         if self._enter_sync:
-            context_attach(db=self._db)
             Accounts.load_ids()  # prefetch id->name and id->rank memory maps
 
         return self
@@ -82,8 +86,6 @@ class SyncHiveDb:
             log.info(f'LAST IMPORTED BLOCK IS: {last_imported_block}')
             log.info(f'LAST COMPLETED BLOCK IS: {Blocks.last_completed()}')
 
-            context_attach(db=self._db)
-
             Blocks.close_own_db_access()
 
         if self._databases:
@@ -95,140 +97,152 @@ class SyncHiveDb:
 
     def run(self) -> None:
         start_time = perf()
-        is_in_live_sync = False
-        force_massive_sync = False
 
         log.info(f"Using HAF database as block data provider, pointed by url: '{self._conf.get('database_url')}'")
 
-        if not Blocks.is_consistency():
-            # here we are sure that massive sync was broken, because in live sync
-            # only fully processed blocks are committed, and broken live is always consistent
-            # Now we are restarting, and we need to continue massive sync to complete it
-            # we have two situations:
-            if self._query_for_app_irreversible_block() > Blocks.last_imported():
-                # still we have some irreversible blocks to process ahead of our context
-                force_massive_sync = True
-            else:
-                # all irreversible block are processed
-                DbState._after_massive_sync(current_imported_block=Blocks.last_imported())
-                assert Blocks.is_consistency()
+        self._massive_blocks_data_provider = None
+        active_connections_before = self._get_active_db_connections()
+        SyncHiveDb.time_start = OPSM.start()
 
+        self._create_massive_provider_if_no_exist()
         while True:
-            if not can_continue_thread():
-                restore_default_signal_handlers()
-                return
-
-            active_connections_before = self._get_active_db_connections()
-
             last_imported_block = Blocks.last_imported()
             log.info(f"Last imported block is: {last_imported_block}")
 
-            if self._last_block_to_process and ( last_imported_block >= self._last_block_to_process):
-                log.info(f"REACHED test_max_block of {self._last_block_to_process}")
-                return
-
-            self._db.query("START TRANSACTION")
+            # SqlAlchemy will not use autocommit when there is a pending transaction
+            # hive.app_next_iteration issues COMMIT, and autocommit is not desired
+            # because it save current block before the decision if new range of blocks will be processed or not
+            self._db.query_no_return( "START TRANSACTION" )
             self._lbound, self._ubound = self._query_for_app_next_block()
 
-            if self._last_block_to_process:
-                if self._ubound and self._ubound > self._last_block_to_process:
-                    self._ubound = self._last_block_to_process
+            if self._break_requested(last_imported_block, active_connections_before):
+                return
 
-            if not (self._lbound and self._ubound):
-                self._db.query("COMMIT")
+            if self._lbound is None:
                 continue
 
             log.info(f"target_head_block: {self._ubound}")
             log.info(f"test_max_block: {self._last_block_to_process}")
 
-            if self._ubound - self._lbound > 100 or force_massive_sync:
-                # mode with detached indexes and context
-                force_massive_sync = False;
-                log.info("[MASSIVE] *** MASSIVE blocks processing ***")
-                self._db.query_no_return("ROLLBACK")  # revert changes in context made by hive.app_next_block
-                self._db.query("START TRANSACTION")
-                context_detach(db=self._db)
-                self._db.query("COMMIT")  # in massive we re not operating in same transaction as app_next_block query
+            application_stage = self._db.query_one(f"SELECT hive.get_current_stage_name('{SCHEMA_NAME}')")
 
-                DbLiveContextHolder.set_live_context(False)
-                Blocks.setup_own_db_access(shared_db_adapter=self._db)
-                self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
-                    conf=self._conf,
-                    databases=MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db),
-                )
+            # we need to COMMIT here to unveil HAF context state to threads which
+            # will fill hivemind tables
+            self._db.query_no_return( "COMMIT" )
+            if application_stage == "MASSIVE_WITHOUT_INDEXES":
 
-                self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._ubound)
+                DbState.ensure_off_synchronous_commit()
+                DbState.ensure_fk_are_disabled()
+                DbState.ensure_indexes_are_disabled()
 
-                DbState.before_massive_sync(self._lbound, self._ubound)
+                self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
+            elif  application_stage == "MASSIVE_WITH_INDEXES":
+                DbState.ensure_off_synchronous_commit()
 
-                log.info(f"[MASSIVE] Attempting to process block range: <{self._lbound}:{self._ubound}>")
-                self._catchup_irreversible_block(is_massive_sync=True)
+                if Blocks.last_imported() - Blocks.last_completed() > ONE_WEEK_IN_BLOCKS:
+                    log.info( f"[MULTI] Switched to MASSIVE_WITH_INDEXES block processing mode after: {secs_to_str(perf() - start_time)}" )
+                    self.print_summary()
 
-                last_imported_block = Blocks.last_imported()
+                DbState.ensure_fk_are_disabled()
+                DbState.ensure_indexes_are_enabled()
 
-                if not can_continue_thread():
-                    restore_default_signal_handlers()
-                    self._db.query_no_return(
-                        f"SELECT hive.app_set_current_block_num('hivemind_app', {last_imported_block});"
-                    )
-                    return
+                self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
+            elif  application_stage ==  "live":
+                DbState.ensure_on_synchronous_commit()
+                DbState.ensure_indexes_are_enabled()
 
-                DbState.finish_massive_sync(current_imported_block=last_imported_block)
-                context_attach(db=self._db)
-                Blocks.close_own_db_access()
-                self._massive_blocks_data_provider.close_databases()
+                if DbState.ensure_finalize_massive_sync(last_imported_block, Blocks.last_completed()):
+                    self.print_summary()
+                    log.info( f"[SINGLE] Switched to single block processing mode after: {secs_to_str(perf() - start_time)}" )
 
-                self._wait_for_connections_closed(active_connections_before)
-            else:
-                # mode with attached indexes and context
+                DbState.ensure_fk_are_enabled()
+
                 log.info("[SINGLE] *** SINGLE block processing***")
                 log.info(f"[SINGLE] Current system time: {datetime.now().isoformat(sep=' ', timespec='milliseconds')}")
 
-                if not is_in_live_sync:
-                    is_in_live_sync = True
-                    log.info(
-                        f"[SINGLE] Switched to single block processing mode after: {secs_to_str(perf() - start_time)}"
-                    )
+                self._process_live_blocks(self._lbound, self._ubound, active_connections_before)
+            else:
+                self._on_stop_synchronization(active_connections_before)
+                assert False, f"Unknown application stage {application_stage}"
 
-                DbLiveContextHolder.set_live_context(True)
-                Blocks.setup_own_db_access(shared_db_adapter=self._db)
-                self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
-                    conf=self._conf,
-                    databases=MassiveBlocksDataProviderHiveDb.Databases(db_root=self._db, shared=True),
-                )
 
-                self._massive_blocks_data_provider.update_sync_block_range(self._lbound, self._lbound)
+    def _break_requested(self, last_imported_block, active_connections_before):
+        if not can_continue_thread():
+            restore_default_signal_handlers()
+            self._on_stop_synchronization(active_connections_before)
+            return True
 
-                log.info(f"[SINGLE] Attempting to process first block in range: <{self._lbound}:{self._ubound}>")
-                self._massive_blocks_data_provider.start_without_threading()
-                blocks = self._massive_blocks_data_provider.get(number_of_blocks=1)
-                if not can_continue_thread():
-                    self._db.query_no_return("ROLLBACK")
-                else:
-                    Blocks.process_multi(blocks, is_massive_sync=False)
+        if self._last_block_to_process and ( last_imported_block >= self._last_block_to_process):
+            log.info(f"REACHED test_max_block of {self._last_block_to_process}")
+            self._on_stop_synchronization(active_connections_before)
+            return True
 
-                active_connections_after_live = self._get_active_db_connections()
-                self._assert_connections_closed(active_connections_before, active_connections_after_live)
+        return False
 
     def _query_for_app_next_block(self) -> Tuple[int, int]:
         log.info("Querying for next block for app context...")
-        lbound, ubound = self._db.query_row(f"SELECT * FROM hive.app_next_block('{SCHEMA_NAME}')")
-        log.info(f"Next block range from hive.app_next_block is: <{lbound}:{ubound}>")
+        limit = "NULL"
+        batch = "NULL"
+        if self._last_block_to_process:
+            limit = self._last_block_to_process
+
+        if self._max_batch:
+            batch = self._max_batch
+
+        result = self._db.query_one( "CALL hive.app_next_iteration( _context => '{}', _blocks_range => (0,0), _limit => {}, _override_max_batch => {} )"
+                                     .format(SCHEMA_NAME, limit, batch)
+                                    )
+
+        self._db._trx_active=True
+        (lbound, ubound) = None, None
+        if result is None:
+            return lbound, ubound
+
+        blocks_range = ast.literal_eval(result)
+
+        (lbound, ubound) = blocks_range
+        log.info(f"Next block range from hive.app_next_iteration is: <{lbound}:{ubound}>")
         return lbound, ubound
 
-    def _catchup_irreversible_block(self, is_massive_sync: bool = False) -> None:
-        assert self._massive_blocks_data_provider is not None
+    def _process_live_blocks(self, lbound, ubound, active_connections_before):
+        log.info(f"[SINGLE] Attempting to process first block in range: <{self._lbound}:{self._ubound}>")
+        wait_blocks_time = WSM.start()
+        blocks = self._massive_blocks_data_provider.get_blocks(lbound, ubound)
+        WSM.wait_stat('block_consumer_block', WSM.stop(wait_blocks_time))
 
-        self._process_blocks_from_provider(
-            massive_block_provider=self._massive_blocks_data_provider,
-            is_massive_sync=is_massive_sync,
-            lbound=self._lbound,
-            ubound=self._ubound,
-        )
-        log.info(
-            f"Block range: <{self._lbound}:{self._ubound}> processing"
-            f" {'finished' if can_continue_thread() else 'interrupted'}"
-        )
+        if not DbLiveContextHolder.is_live_context():
+            DbLiveContextHolder.set_live_context(True)
+            Blocks.close_own_db_access()
+            self._wait_for_connections_closed(active_connections_before)
+            Blocks.setup_own_db_access(shared_db_adapter=self._db)
+
+        Blocks.process_multi(blocks, is_massive_sync=False)
+        active_connections_after_live = self._get_active_db_connections()
+        self._assert_connections_closed(active_connections_before, active_connections_after_live)
+
+    def _process_massive_blocks(self, lbound, ubound, active_connections_before):
+        wait_blocks_time = WSM.start()
+        blocks = self._massive_blocks_data_provider.get_blocks(lbound, ubound)
+        WSM.wait_stat('block_consumer_block', WSM.stop(wait_blocks_time))
+
+        if DbLiveContextHolder.is_live_context() or DbLiveContextHolder.is_live_context() is None:
+            DbLiveContextHolder.set_live_context(False)
+            Blocks.close_own_db_access()
+            self._wait_for_connections_closed(active_connections_before)
+            Blocks.setup_own_db_access(shared_db_adapter=self._db)
+
+        self._consume_massive_blocks(blocks, lbound, ubound)
+
+    def _on_stop_synchronization(self, active_connections_before):
+        self._db.query_no_return("ROLLBACK")
+        self.print_summary()
+
+    def _create_massive_provider_if_no_exist(self):
+        if not self._massive_blocks_data_provider:
+            self._massive_blocks_data_provider = MassiveBlocksDataProviderHiveDb(
+                conf=self._conf,
+                db_root=self._db
+            )
 
     def _check_log_explain_queries(self) -> None:
         if self._conf.get("log_explain_queries"):
@@ -265,34 +279,34 @@ class SyncHiveDb:
             log.exception("Exception caught during fetching blocks data")
             raise
 
-    @staticmethod
-    def _block_consumer(
-        blocks_data_provider: BlocksProviderBase, is_massive_sync: bool, lbound: int, ubound: int
-    ) -> int:
+
+    def print_summary(self):
+        if SyncHiveDb.time_start is None:
+            return
+
+        stop = OPSM.stop(SyncHiveDb.time_start)
+        log.info("=== TOTAL STATS ===")
+        wtm = WSM.log_global("Total waiting times")
+        ftm = FSM.log_global("Total flush times")
+        otm = OPSM.log_global("All operations present in the processed blocks")
+        ttm = ftm + otm + wtm
+        log.info("Elapsed time: %.4fs. Calculated elapsed time: %.4fs. Difference: %.4fs", stop, ttm, stop - ttm)
+
+        if self.rate:
+           log.info(
+               "Highest block processing rate: %.4f bps. %d:%d", self.rate['max'], self.rate['max_from'], self.rate['max_to']
+           )
+           log.info("Lowest block processing rate: %.4f bps. %d:%d", self.rate['min'], self.rate['min_from'], self.rate['min_to'])
+        log.info("=== TOTAL STATS ===")
+        self.rate = {}
+
+    def _consume_massive_blocks(self, blocks, lbound, ubound) -> int:
         from hive.utils.stats import minmax
 
         is_debug = log.isEnabledFor(10)
         num = 0
-        time_start = OPSM.start()
-        rate = {}
-        LIMIT_FOR_PROCESSED_BLOCKS = 1000
 
-        rate = minmax(rate, 0, 1.0, 0)
-
-        def print_summary():
-            stop = OPSM.stop(time_start)
-            log.info("=== TOTAL STATS ===")
-            wtm = WSM.log_global("Total waiting times")
-            ftm = FSM.log_global("Total flush times")
-            otm = OPSM.log_global("All operations present in the processed blocks")
-            ttm = ftm + otm + wtm
-            log.info("Elapsed time: %.4fs. Calculated elapsed time: %.4fs. Difference: %.4fs", stop, ttm, stop - ttm)
-            if rate:
-                log.info(
-                    "Highest block processing rate: %.4f bps. %d:%d", rate['max'], rate['max_from'], rate['max_to']
-                )
-                log.info("Lowest block processing rate: %.4f bps. %d:%d", rate['min'], rate['min_from'], rate['min_to'])
-            log.info("=== TOTAL STATS ===")
+        self.rate = minmax(self.rate, 0, 1.0, 0)
 
         try:
             Blocks.set_end_of_sync_lib(ubound)
@@ -300,21 +314,14 @@ class SyncHiveDb:
             timer = Timer(count, entity='block', laps=['rps', 'wps'])
 
             while lbound <= ubound:
-                number_of_blocks_to_proceed = min([LIMIT_FOR_PROCESSED_BLOCKS, ubound - lbound + 1])
+                number_of_blocks_to_proceed = ubound - lbound + 1
                 time_before_waiting_for_data = perf()
-
-                blocks = blocks_data_provider.get(number_of_blocks_to_proceed)
-
-                if not can_continue_thread():
-                    break
-
-                assert len(blocks) == number_of_blocks_to_proceed
 
                 to = min(lbound + number_of_blocks_to_proceed, ubound + 1)
                 timer.batch_start()
 
                 block_start = perf()
-                Blocks.process_multi(blocks, is_massive_sync)
+                Blocks.process_multi(blocks, True)
                 block_end = perf()
 
                 timer.batch_lap()
@@ -327,10 +334,10 @@ class SyncHiveDb:
                 )
 
                 log.info(timer.batch_status(prefix))
-                log.info(f"[MASSIVE] Time elapsed: {time_current - time_start}s")
+                log.info(f"[MASSIVE] Time elapsed: {time_current - SyncHiveDb.time_start}s")
                 log.info(f"[MASSIVE] Current system time: {datetime.now().isoformat(sep=' ', timespec='milliseconds')}")
                 log.info(log_memory_usage())
-                rate = minmax(rate, len(blocks), time_current - time_before_waiting_for_data, lbound)
+                self.rate = minmax(self.rate, len(blocks), time_current - time_before_waiting_for_data, lbound)
 
                 if block_end - block_start > 1.0 or is_debug:
                     otm = OPSM.log_current("Operations present in the processed blocks")
@@ -346,36 +353,12 @@ class SyncHiveDb:
                 PC.broadcast(BroadcastObject('sync_current_block', lbound, 'blocks'))
 
                 num = num + 1
-
-                if not can_continue_thread():
-                    break
         except Exception:
             log.exception("Exception caught during processing blocks...")
             set_exception_thrown()
-            print_summary()
             raise
 
-        print_summary()
         return num
-
-    @classmethod
-    def _process_blocks_from_provider(
-        cls, massive_block_provider: BlocksProviderBase, is_massive_sync: bool, lbound: int, ubound: int
-    ) -> None:
-        with ThreadPoolExecutor(max_workers=2) as pool:
-            block_data_provider_future = pool.submit(cls._blocks_data_provider, massive_block_provider)
-            block_consumer_future = pool.submit(
-                cls._block_consumer, massive_block_provider, is_massive_sync, lbound, ubound
-            )
-
-            consumer_exception = block_consumer_future.exception()
-            block_data_provider_exception = block_data_provider_future.exception()
-
-            if consumer_exception:
-                raise consumer_exception
-
-            if block_data_provider_exception:
-                raise block_data_provider_exception
 
     def _get_active_db_connections(self):
         sql = "SELECT application_name FROM pg_stat_activity WHERE application_name LIKE 'hivemind_%';"
@@ -392,10 +375,7 @@ class SyncHiveDb:
         )
 
         assert set(connections_before) == set(connections_after), assert_message
-    def _query_for_app_irreversible_block(self) -> int:
-        irreversible_block = self._db.query_row(f"SELECT * FROM hive.app_get_irreversible_block()")['app_get_irreversible_block']
-        log.info(f"HAF is on irreversible block: {irreversible_block}")
-        return irreversible_block
+
     def _wait_for_connections_closed(self, connections_before: Iterable) -> None:
         active_connections = []
         for it in range(1,11):
