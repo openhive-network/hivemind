@@ -7,7 +7,7 @@ from pathlib import Path
 from time import perf_counter
 from typing import Tuple
 
-from hive.conf import Conf, SCHEMA_NAME
+from hive.conf import Conf, SCHEMA_NAME, ONE_WEEK_IN_BLOCKS
 from hive.db.adapter import Db
 from hive.indexer.accounts import Accounts
 from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
@@ -138,7 +138,7 @@ class Blocks:
         else:
             # after HF17 all posts are paid after 7 days which means it is safe to assume that
             # posts created at or before LIB - 7days will be paidout at the end of massive sync
-            cls._last_safe_cashout_block = lib - 7 * 24 * 1200
+            cls._last_safe_cashout_block = lib - ONE_WEEK_IN_BLOCKS
         log.info(
             "End-of-sync LIB is set to %d, last block that guarantees cashout at end of sync is %d",
             lib,
@@ -211,8 +211,8 @@ class Blocks:
 
         time_start = OPSM.start()
 
+        DB.query("START TRANSACTION")
         if is_massive_sync:
-            DB.query("START TRANSACTION")
             #update last_active_at directly since we don't advance current_block_num in massive_sync (until whole indexer gets re-write)
             DB.query_no_return(f"SELECT hive.app_update_last_active_at('hivemind_app');");
 
