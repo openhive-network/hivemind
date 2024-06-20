@@ -4,7 +4,7 @@ log = logging.getLogger(__name__)
 
 
 class DbLiveContextHolder(object):
-    _live_context = False
+    _live_context = None
 
     @classmethod
     def set_live_context(cls, live_context):

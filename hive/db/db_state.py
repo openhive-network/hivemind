@@ -25,9 +25,6 @@ from hive.utils.stats import FinalOperationStatusManager as FOSM
 
 log = logging.getLogger(__name__)
 
-SYNCED_BLOCK_LIMIT = 7 * 24 * 1200  # 7 days
-
-
 class DbState:
     """Manages database state: sync status, migrations, etc."""
 
@@ -35,6 +32,12 @@ class DbState:
 
     # prop is true until massive sync complete
     _is_massive_sync = True
+    _indexes_were_disabled = False
+    _indexes_were_enabled = False
+    _fk_were_disabled = False
+    _fk_were_enabled = False
+    _original_synchronous_commit_mode = None
+    _reputations_were_recalculated = False
 
     @classmethod
     def initialize(cls, enter_massive: bool, schema_upgrade: bool):
@@ -84,16 +87,8 @@ class DbState:
             cls._db = Db.instance()
         return cls._db
 
-    @classmethod
-    def finish_massive_sync(cls, current_imported_block) -> None:
-        """Set status to massive sync complete."""
-        if not cls._is_massive_sync:
-            return
-        cls._after_massive_sync(current_imported_block)
-        cls._is_massive_sync = False
-        if hasattr(cls,'_original_synchronous_commit_mode'):
-            cls.db().query_no_return(f"SET synchronous_commit = {cls._original_synchronous_commit_mode}")
-        log.info("[MASSIVE] Massive sync complete!")
+
+
 
     @classmethod
     def is_massive_sync(cls):
@@ -281,19 +276,44 @@ class DbState:
         FOSM.clear()
         log.info(f"=== {action} INDEXES ===")
 
+
     @classmethod
-    def before_massive_sync(cls, last_imported_block: int, hived_head_block: int):
+    def ensure_off_synchronous_commit(cls):
+        if cls._original_synchronous_commit_mode is not None:
+            return
+
         """Disables non-critical indexes for faster sync, as well as foreign key constraints."""
         cls._original_synchronous_commit_mode = cls.db().query_one("SELECT current_setting('synchronous_commit');")
         cls.db().query_no_return("SET synchronous_commit = OFF;")
 
-        cls._is_massive_sync = True
-        to_sync = hived_head_block - last_imported_block
+        log.info("[MASSIVE] SET synchronous_commit = OFF")
 
-        if to_sync < SYNCED_BLOCK_LIMIT:
-            log.info("[MASSIVE] Skipping pre-massive sync hooks")
+    @classmethod
+    def ensure_on_synchronous_commit(cls):
+        if cls._original_synchronous_commit_mode is None:
             return
 
+        cls.db().query_no_return(f"SET synchronous_commit = {cls._original_synchronous_commit_mode}")
+        cls._original_synchronous_commit_mode = None
+
+        log.info("SET synchronous_commit = ON")
+
+    @classmethod
+    def ensure_indexes_are_disabled(cls):
+        if cls._indexes_were_disabled:
+            return
+
+        # is_pre_process, drop, create
+        cls.processing_indexes(True, True, False)
+
+        cls._indexes_were_disabled = True
+        cls._indexes_were_enabled = False
+        log.info("[MASSIVE] Indexes are disabled")
+
+    @classmethod
+    def ensure_fk_are_disabled(cls):
+        if cls._fk_were_disabled:
+            return
 
         log.info("Dropping foreign keys")
         from hive.db.schema import drop_fk
@@ -303,15 +323,48 @@ class DbState:
         elapsed_time = end_time - time_start
         log.info("Dropped foreign keys: %.4f s", elapsed_time)
 
-        # is_pre_process, drop, create
-        cls.processing_indexes(True, True, False)
+        cls._fk_were_disabled = True
+        cls._fk_were_enabled= False
 
+    @classmethod
+    def ensure_indexes_are_enabled(cls):
+        if cls._indexes_were_enabled:
+            return
 
-        # intentionally disabled since it needs a lot of WAL disk space when switching back to LOGGED
-        # set_logged_table_attribute(cls.db(), False)
+        start_time = perf_counter()
 
-        log.info("[MASSIVE] Finish pre-massive sync hooks")
+        log.info("Creating indexes: started")
+        cls.processing_indexes(False, False, True)
+        log.info("Creating indexes: finished")
 
+        cls._indexes_were_disabled = False
+        cls._indexes_were_enabled = True
+        log.info("Indexes are enabled")
+        end_time = perf_counter()
+        log.info("[MASSIVE] After massive sync actions done in %.4fs", end_time - start_time)
+
+    @classmethod
+    def ensure_fk_are_enabled(cls):
+        if cls._fk_were_enabled:
+            return
+
+        from hive.db.schema import create_fk
+
+        start_time_foreign_keys = perf_counter()
+        log.info("Recreating foreign keys")
+        create_fk(cls.db())
+        log.info(f"Foreign keys were recreated in {perf_counter() - start_time_foreign_keys:.3f}s")
+
+        cls._fk_were_disabled = False
+        cls._fk_were_enabled = True
+
+    @classmethod
+    def ensure_reputations_recalculated(cls, last_imported, last_completed):
+        if cls._reputations_were_recalculated:
+            return
+
+        cls.finish_account_reputations(last_imported, last_completed)
+        cls._reputations_were_recalculated = True
 
     @classmethod
     def _finish_hive_posts(cls, db, massive_sync_preconditions, last_imported_block, current_imported_block):
@@ -374,12 +427,12 @@ class DbState:
         log.info("[MASSIVE] payout_stats_view executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
-    def _finish_account_reputations(cls, db, last_imported_block, current_imported_block):
+    def finish_account_reputations(cls, last_imported_block, current_imported_block):
         log.info(
             f"Performing update_account_reputations on block range: {last_imported_block}:{current_imported_block}"
         )
 
-        with AutoDbDisposer(db, "finish_account_reputations") as db_mgr:
+        with AutoDbDisposer(cls.db(), "finish_account_reputations") as db_mgr:
             time_start = perf_counter()
             sql = f"SELECT {SCHEMA_NAME}.update_account_reputations({last_imported_block}, {current_imported_block}, True);"
             cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
@@ -398,7 +451,6 @@ class DbState:
             time_start = perf_counter()
             #cls._execute_query_with_modified_work_mem(db=db_mgr.db, sql=sql)
             db_mgr.db.query_no_return(f"SELECT {SCHEMA_NAME}.update_last_completed_block({current_imported_block});");
-            db_mgr.db.query_no_return(f"SELECT hive.app_set_current_block_num('hivemind_app', {current_imported_block});");
             log.info("[MASSIVE] update_last_completed_block executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
@@ -494,60 +546,17 @@ class DbState:
         log.info("=== FILLING FINAL DATA INTO TABLES ===")
 
     @classmethod
-    def _after_massive_sync(cls, current_imported_block: int) -> None:
-        """Re-creates non-core indexes for serving APIs after massive sync, as well as all foreign keys."""
-        from hive.indexer.blocks import Blocks
-
-        start_time = perf_counter()
-
-        last_imported_block = Blocks.last_completed()
-
-        log.info(
-            "[MASSIVE] Current imported block: %s. Last imported block: %s.",
-            current_imported_block,
-            last_imported_block,
-        )
-        if last_imported_block > current_imported_block:
-            last_imported_block = current_imported_block
-
-        synced_blocks = current_imported_block - last_imported_block
-
-        cls._finish_account_reputations(cls.db(), last_imported_block, current_imported_block)
-
-        force_index_rebuild = False
-        massive_sync_preconditions = False
-        if synced_blocks >= SYNCED_BLOCK_LIMIT:
-            force_index_rebuild = True
-            massive_sync_preconditions = True
-
-        # is_pre_process, drop, create
-        log.info("Creating indexes: started")
-        cls.processing_indexes(False, force_index_rebuild, True)
-        log.info("Creating indexes: finished")
-
-        # Update statistics and execution plans after index creation.
-        if massive_sync_preconditions:
-            cls._execute_query(db=cls.db(), sql="VACUUM (VERBOSE,ANALYZE)")
-
-        # all post-updates are executed in different threads: one thread per one table
-        log.info("Filling tables with final values: started")
-        cls._finish_all_tables(massive_sync_preconditions, last_imported_block, current_imported_block)
-        log.info("Filling tables with final values: finished")
-
-        if massive_sync_preconditions:
-            from hive.db.schema import create_fk
-
-            # intentionally disabled since it needs a lot of WAL disk space when switching back to LOGGED
-            # set_logged_table_attribute(cls.db(), True)
-            start_time_foreign_keys = perf_counter()
-            log.info("Recreating foreign keys")
-            create_fk(cls.db())
-            log.info(f"Foreign keys were recreated in {perf_counter() - start_time_foreign_keys:.3f}s")
+    def ensure_finalize_massive_sync(cls, last_imported_blocks, last_completed_blocks):
+        if last_imported_blocks > last_completed_blocks:
+            cls.ensure_reputations_recalculated(last_completed_blocks, last_imported_blocks)
 
             cls._execute_query(db=cls.db(), sql="VACUUM (VERBOSE,ANALYZE)")
+            cls._finish_all_tables(True, last_completed_blocks, last_imported_blocks)
+            cls._execute_query(db=cls.db(), sql="VACUUM (VERBOSE,ANALYZE)")
 
-        end_time = perf_counter()
-        log.info("[MASSIVE] After massive sync actions done in %.4fs", end_time - start_time)
+            log.info("[MASSIVE] Massive sync complete!")
+            return True
+        return False
 
     @staticmethod
     def status():

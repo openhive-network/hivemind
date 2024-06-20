@@ -1,6 +1,6 @@
 import logging
 
-from hive.conf import SCHEMA_NAME
+from hive.conf import SCHEMA_NAME, ONE_WEEK_IN_BLOCKS
 from hive.db.adapter import Db
 
 log = logging.getLogger(__name__)
@@ -10,8 +10,14 @@ def prepare_app_context(db: Db) -> None:
     log.info(f"Looking for '{SCHEMA_NAME}' context.")
     ctx_present = db.query_one(f"SELECT hive.app_context_exists('{SCHEMA_NAME}') as ctx_present;")
     if not ctx_present:
+        LIMIT_FOR_PROCESSED_BLOCKS = 1000
+        synchronization_stages = f"""ARRAY[
+              ( 'MASSIVE_WITHOUT_INDEXES', {ONE_WEEK_IN_BLOCKS}, {LIMIT_FOR_PROCESSED_BLOCKS} )
+            , ( 'MASSIVE_WITH_INDEXES', 101, {LIMIT_FOR_PROCESSED_BLOCKS} )
+            , hive.live_stage()
+        ]::hive.application_stages"""
         log.info(f"No application context present. Attempting to create a '{SCHEMA_NAME}' context...")
-        db.query_no_return(f"SELECT hive.app_create_context('{SCHEMA_NAME}', '{SCHEMA_NAME}', FALSE);") #is-forking=FALSE, only process irreversible blocks
+        db.query_no_return(f"SELECT hive.app_create_context('{SCHEMA_NAME}', '{SCHEMA_NAME}', _is_forking => FALSE, _stages => {synchronization_stages} );") #is-forking=FALSE, only process irreversible blocks
         log.info("Application context creation done.")
     else:
         log.info(f"Found existing context, set to non-forking.")
