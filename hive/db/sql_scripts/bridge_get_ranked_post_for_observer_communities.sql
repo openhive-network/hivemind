@@ -23,10 +23,10 @@ BEGIN
     (
       SELECT hp.id
       FROM hivemind_app.live_posts_view hp
-      JOIN hivemind_app.hive_accounts on (hp.author_id = hivemind_app.hive_accounts.id)
+      JOIN hivemind_app.hive_accounts_view har ON (hp.author_id = har.id) 
       WHERE hp.community_id = communities.community_id
+        AND NOT har.is_grayed
         AND (__post_id = 0 OR hp.id < __post_id)
-        AND hivemind_app.hive_accounts.reputation > '-464800000000'::bigint
         AND (NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __account_id AND muted_id = hp.author_id))
       ORDER BY id DESC
       LIMIT _limit

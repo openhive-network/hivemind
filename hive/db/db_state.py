@@ -145,7 +145,6 @@ class DbState:
             'hive_reblogs_created_at_idx',
             'hive_votes_voter_id_post_id_idx',
             'hive_votes_post_id_voter_id_idx',
-            'hive_reputation_data_block_num_idx',
             'hive_notification_cache_block_num_idx',
             'hive_notification_cache_dst_score_idx',
         ]
