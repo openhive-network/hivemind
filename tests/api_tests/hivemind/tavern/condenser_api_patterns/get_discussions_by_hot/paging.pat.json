@@ -3,7 +3,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 31307487536364,
         "voter": "smooth"
       },
@@ -45,7 +45,7 @@
       },
       {
         "percent": "10000",
-        "reputation": -37765249963674,
+        "reputation": -37765245816069,
         "rshares": 2206068741954,
         "voter": "wang"
       },
@@ -57,7 +57,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1534654466021,
         "voter": "joseph"
       },
@@ -99,7 +99,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 72112139588726,
+        "reputation": 72201797307702,
         "rshares": 800066797130,
         "voter": "steemrollin"
       },
@@ -165,13 +165,13 @@
       },
       {
         "percent": "1181",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 89897944197,
         "voter": "eeks"
       },
       {
         "percent": "600",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 1511911763,
         "voter": "fkn"
       },
@@ -201,7 +201,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 58571016273092,
+        "reputation": 58572043807747,
         "rshares": 584279800798,
         "voter": "nanzo-scoop"
       },
@@ -237,7 +237,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061264730,
         "voter": "murh"
       },
@@ -309,7 +309,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8397302485673,
+        "reputation": 8415040699805,
         "rshares": 219283354085,
         "voter": "will-zewe"
       },
@@ -363,7 +363,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 3708822694051,
+        "reputation": 3708827126655,
         "rshares": 75333038089,
         "voter": "emily-cook"
       },
@@ -387,13 +387,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 4276659410889,
+        "reputation": 4276689174787,
         "rshares": 3898829337,
         "voter": "michaellamden68"
       },
       {
         "percent": "10000",
-        "reputation": 6095326280934,
+        "reputation": 6223301979971,
         "rshares": 19975706505,
         "voter": "thebatchman"
       },
@@ -1505,7 +1505,7 @@
     "pending_payout_value": "274.303 HBD",
     "percent_hbd": 10000,
     "permlink": "why-you-don-t-want-to-kill-that-snake-in-your-yard-featuring-herpetologyguy-as-author",
-    "post_id": 1257146,
+    "post_id": 1257156,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Why You Don\u2019t Want to Kill that Snake in Your Yard (featuring @herpetologyguy as author)",
@@ -1523,7 +1523,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 70486968186347,
+        "reputation": 79911231029809,
         "rshares": 39227911522287,
         "voter": "blocktrades"
       },
@@ -1633,7 +1633,7 @@
     "pending_payout_value": "113.952 HBD",
     "percent_hbd": 10000,
     "permlink": "how-the-number-pi-sounds-on-a-piano",
-    "post_id": 1257348,
+    "post_id": 1257358,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "How The Number Pi Sounds On A Piano?",
@@ -1651,7 +1651,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 70486968186347,
+        "reputation": 79911231029809,
         "rshares": 39228026877320,
         "voter": "blocktrades"
       },
@@ -1701,7 +1701,7 @@
     "pending_payout_value": "94.307 HBD",
     "percent_hbd": 10000,
     "permlink": "how-to-make-paper-flowers",
-    "post_id": 1257375,
+    "post_id": 1257385,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "How to make Paper Flowers",

@@ -3,13 +3,13 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 145171381514207,
+        "reputation": 145256378570298,
         "rshares": 28370463371572,
         "voter": "dantheman"
       },
       {
         "percent": "10000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 31307487536364,
         "voter": "smooth"
       },
@@ -51,19 +51,19 @@
       },
       {
         "percent": "10000",
-        "reputation": -37765249963674,
+        "reputation": -37765245816069,
         "rshares": 2206068741954,
         "voter": "wang"
       },
       {
         "percent": "10000",
-        "reputation": 89703349977794,
+        "reputation": 91016606023399,
         "rshares": 1950753758979,
         "voter": "xeroc"
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1534707047296,
         "voter": "joseph"
       },
@@ -165,13 +165,13 @@
       },
       {
         "percent": "1225",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 104880949618,
         "voter": "eeks"
       },
       {
         "percent": "10000",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 24694558802,
         "voter": "fkn"
       },
@@ -201,7 +201,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 58571016273092,
+        "reputation": 58572043807747,
         "rshares": 584291107228,
         "voter": "nanzo-scoop"
       },
@@ -231,13 +231,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 60877390332151,
+        "reputation": 60877394467474,
         "rshares": 616864092786,
         "voter": "kevinwong"
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061266533,
         "voter": "murh"
       },
@@ -321,7 +321,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8397302485673,
+        "reputation": 8415040699805,
         "rshares": 219283354085,
         "voter": "will-zewe"
       },
@@ -393,7 +393,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 3708822694051,
+        "reputation": 3708827126655,
         "rshares": 75334808165,
         "voter": "emily-cook"
       },
@@ -429,7 +429,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 15603689614497,
+        "reputation": 15603693624194,
         "rshares": 60315479782,
         "voter": "good-karma"
       },
@@ -663,7 +663,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 4226573244868,
+        "reputation": 4226574982749,
         "rshares": 30989614870,
         "voter": "zaebars"
       },
@@ -2345,7 +2345,7 @@
     "pending_payout_value": "595.718 HBD",
     "percent_hbd": 10000,
     "permlink": "another-billionaire-warns-of-catastrophic-depths-not-seen-in-5-000-years-and-emphasizes-gold",
-    "post_id": 1257181,
+    "post_id": 1257191,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Another Billionaire Warns of Catastrophic Depths Not Seen in 5,000 Years - and Emphasizes Gold",
@@ -2357,7 +2357,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 31307487536364,
         "voter": "smooth"
       },
@@ -2399,7 +2399,7 @@
       },
       {
         "percent": "10000",
-        "reputation": -37765249963674,
+        "reputation": -37765245816069,
         "rshares": 2206068741954,
         "voter": "wang"
       },
@@ -2411,7 +2411,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1534654466021,
         "voter": "joseph"
       },
@@ -2453,7 +2453,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 72112139588726,
+        "reputation": 72201797307702,
         "rshares": 800066797130,
         "voter": "steemrollin"
       },
@@ -2519,13 +2519,13 @@
       },
       {
         "percent": "1181",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 89897944197,
         "voter": "eeks"
       },
       {
         "percent": "600",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 1511911763,
         "voter": "fkn"
       },
@@ -2555,7 +2555,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 58571016273092,
+        "reputation": 58572043807747,
         "rshares": 584279800798,
         "voter": "nanzo-scoop"
       },
@@ -2591,7 +2591,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061264730,
         "voter": "murh"
       },
@@ -2663,7 +2663,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8397302485673,
+        "reputation": 8415040699805,
         "rshares": 219283354085,
         "voter": "will-zewe"
       },
@@ -2717,7 +2717,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 3708822694051,
+        "reputation": 3708827126655,
         "rshares": 75333038089,
         "voter": "emily-cook"
       },
@@ -2741,13 +2741,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 4276659410889,
+        "reputation": 4276689174787,
         "rshares": 3898829337,
         "voter": "michaellamden68"
       },
       {
         "percent": "10000",
-        "reputation": 6095326280934,
+        "reputation": 6223301979971,
         "rshares": 19975706505,
         "voter": "thebatchman"
       },
@@ -3859,7 +3859,7 @@
     "pending_payout_value": "274.303 HBD",
     "percent_hbd": 10000,
     "permlink": "why-you-don-t-want-to-kill-that-snake-in-your-yard-featuring-herpetologyguy-as-author",
-    "post_id": 1257146,
+    "post_id": 1257156,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Why You Don\u2019t Want to Kill that Snake in Your Yard (featuring @herpetologyguy as author)",
@@ -3877,7 +3877,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 70486968186347,
+        "reputation": 79911231029809,
         "rshares": 39227911522287,
         "voter": "blocktrades"
       },
@@ -3987,7 +3987,7 @@
     "pending_payout_value": "113.952 HBD",
     "percent_hbd": 10000,
     "permlink": "how-the-number-pi-sounds-on-a-piano",
-    "post_id": 1257348,
+    "post_id": 1257358,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "How The Number Pi Sounds On A Piano?",
@@ -4005,7 +4005,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 70486968186347,
+        "reputation": 79911231029809,
         "rshares": 39228026877320,
         "voter": "blocktrades"
       },
@@ -4055,7 +4055,7 @@
     "pending_payout_value": "94.307 HBD",
     "percent_hbd": 10000,
     "permlink": "how-to-make-paper-flowers",
-    "post_id": 1257375,
+    "post_id": 1257385,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "How to make Paper Flowers",
@@ -4079,7 +4079,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 89703349977794,
+        "reputation": 91016606023399,
         "rshares": 1950776472028,
         "voter": "xeroc"
       },
@@ -4115,7 +4115,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 24694558802,
         "voter": "fkn"
       },
@@ -4151,7 +4151,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 58571016273092,
+        "reputation": 58572043807747,
         "rshares": 584301957019,
         "voter": "nanzo-scoop"
       },
@@ -4169,7 +4169,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061309796,
         "voter": "murh"
       },
@@ -4193,7 +4193,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 11765473490257,
+        "reputation": 11765528754092,
         "rshares": 61303208719,
         "voter": "justtryme90"
       },
@@ -4253,13 +4253,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 3708822694051,
+        "reputation": 3708827126655,
         "rshares": 75335893384,
         "voter": "emily-cook"
       },
       {
         "percent": "10000",
-        "reputation": 8166740506920,
+        "reputation": 8184947229099,
         "rshares": 34073741916,
         "voter": "cryptoiskey"
       },
@@ -4271,7 +4271,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 12656257002205,
+        "reputation": 12656810345430,
         "rshares": 36267999733,
         "voter": "clement"
       },
@@ -4295,7 +4295,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 57643429300793,
+        "reputation": 57646811477930,
         "rshares": 462747522217,
         "voter": "roelandp"
       },
@@ -4397,7 +4397,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 4226573244868,
+        "reputation": 4226574982749,
         "rshares": 30989849211,
         "voter": "zaebars"
       },
@@ -5353,7 +5353,7 @@
     "pending_payout_value": "18.922 HBD",
     "percent_hbd": 10000,
     "permlink": "mackerelcoin-and-my-socioeconomic-observations-from-prison-part-1-by-charlie-shrem",
-    "post_id": 1258017,
+    "post_id": 1258027,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "MackerelCoin & My Socioeconomic Observations from Prison (Part 1 by Charlie Shrem)",
@@ -5395,7 +5395,7 @@
       },
       {
         "percent": "10000",
-        "reputation": -37765249963674,
+        "reputation": -37765245816069,
         "rshares": 2059078537865,
         "voter": "wang"
       },
@@ -5407,7 +5407,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1491294220946,
         "voter": "joseph"
       },
@@ -5473,13 +5473,13 @@
       },
       {
         "percent": "781",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 59932650184,
         "voter": "eeks"
       },
       {
         "percent": "6900",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 17134999985,
         "voter": "fkn"
       },
@@ -5509,7 +5509,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061302586,
         "voter": "murh"
       },
@@ -6045,7 +6045,7 @@
     "pending_payout_value": "39.722 HBD",
     "percent_hbd": 10000,
     "permlink": "spaghetti-squash-burrito-bowl",
-    "post_id": 1257592,
+    "post_id": 1257602,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Spaghetti Squash 'Burrito' Bowl",
@@ -6069,7 +6069,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1534352192855,
         "voter": "joseph"
       },
@@ -6093,7 +6093,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 72112139588726,
+        "reputation": 72201797307702,
         "rshares": 816386307308,
         "voter": "steemrollin"
       },
@@ -6129,7 +6129,7 @@
       },
       {
         "percent": "737",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 59931939963,
         "voter": "eeks"
       },
@@ -6141,7 +6141,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 58571016273092,
+        "reputation": 58572043807747,
         "rshares": 584270995256,
         "voter": "nanzo-scoop"
       },
@@ -6159,13 +6159,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 60877390332151,
+        "reputation": 60877394467474,
         "rshares": 603741881611,
         "voter": "kevinwong"
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061259321,
         "voter": "murh"
       },
@@ -6195,7 +6195,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 11765473490257,
+        "reputation": 11765528754092,
         "rshares": 61300613738,
         "voter": "justtryme90"
       },
@@ -6237,7 +6237,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 3708822694051,
+        "reputation": 3708827126655,
         "rshares": 77083924707,
         "voter": "emily-cook"
       },
@@ -7169,7 +7169,7 @@
     "pending_payout_value": "217.281 HBD",
     "percent_hbd": 10000,
     "permlink": "the-daily-curie-14th-sept-15th-sept-2016",
-    "post_id": 1256782,
+    "post_id": 1256784,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "The Daily Curie (14th Sept - 15th Sept 2016)",
@@ -7187,7 +7187,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 70486968186347,
+        "reputation": 79911231029809,
         "rshares": 40042046720125,
         "voter": "blocktrades"
       },
@@ -7297,7 +7297,7 @@
     "pending_payout_value": "120.090 HBD",
     "percent_hbd": 10000,
     "permlink": "alien-or-plant",
-    "post_id": 1256778,
+    "post_id": 1256780,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Alien or plant?",
@@ -7309,7 +7309,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 31621188390159,
         "voter": "smooth"
       },
@@ -7327,7 +7327,7 @@
       },
       {
         "percent": "3300",
-        "reputation": 51047995307721,
+        "reputation": 51890713906913,
         "rshares": 3312854507128,
         "voter": "pharesim"
       },
@@ -7351,13 +7351,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 12481332844017,
+        "reputation": 12481333732559,
         "rshares": 1736291789819,
         "voter": "steemychicken1"
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1533973920081,
         "voter": "joseph"
       },
@@ -7393,7 +7393,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 72112139588726,
+        "reputation": 72201797307702,
         "rshares": 816386307308,
         "voter": "steemrollin"
       },
@@ -7435,13 +7435,13 @@
       },
       {
         "percent": "956",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 74914792736,
         "voter": "eeks"
       },
       {
         "percent": "6000",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 15119117634,
         "voter": "fkn"
       },
@@ -7459,7 +7459,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 58571016273092,
+        "reputation": 58572043807747,
         "rshares": 584250736753,
         "voter": "nanzo-scoop"
       },
@@ -7483,7 +7483,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061245798,
         "voter": "murh"
       },
@@ -7519,7 +7519,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 12584108052916,
+        "reputation": 12584108941458,
         "rshares": 76584409982,
         "voter": "noganoo"
       },
@@ -7609,7 +7609,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 3708822694051,
+        "reputation": 3708827126655,
         "rshares": 76017114668,
         "voter": "emily-cook"
       },
@@ -7639,7 +7639,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 6095326280934,
+        "reputation": 6223301979971,
         "rshares": 19975264794,
         "voter": "thebatchman"
       },
@@ -7897,7 +7897,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 4226573244868,
+        "reputation": 4226574982749,
         "rshares": 30989251579,
         "voter": "zaebars"
       },
@@ -8703,7 +8703,7 @@
     "pending_payout_value": "259.423 HBD",
     "percent_hbd": 10000,
     "permlink": "captured-by-time-an-original-novel-chapter-1",
-    "post_id": 1256447,
+    "post_id": 1256449,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "CAPTURED BY TIME (An Original Novel - Chapter 1)",
@@ -8763,7 +8763,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1534643949678,
         "voter": "joseph"
       },
@@ -8799,7 +8799,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 72112139588726,
+        "reputation": 72201797307702,
         "rshares": 800066797130,
         "voter": "steemrollin"
       },
@@ -8835,7 +8835,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 54345938068170,
+        "reputation": 54346161065641,
         "rshares": 374436234637,
         "voter": "craig-grant"
       },
@@ -8847,13 +8847,13 @@
       },
       {
         "percent": "1056",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 89897944197,
         "voter": "eeks"
       },
       {
         "percent": "4700",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 11591323519,
         "voter": "fkn"
       },
@@ -8883,7 +8883,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 58571016273092,
+        "reputation": 58572043807747,
         "rshares": 584279800798,
         "voter": "nanzo-scoop"
       },
@@ -8913,7 +8913,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061264730,
         "voter": "murh"
       },
@@ -8991,7 +8991,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 3708822694051,
+        "reputation": 3708827126655,
         "rshares": 75333038089,
         "voter": "emily-cook"
       },
@@ -9791,7 +9791,7 @@
     "pending_payout_value": "57.040 HBD",
     "percent_hbd": 10000,
     "permlink": "usdsteem-btc-daily-poloniex-bittrex-technical-analysis-market-report-update-46-glass-half-full-but-the-bottle-s-left-empty-sept",
-    "post_id": 1257120,
+    "post_id": 1257130,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "$STEEM/BTC Daily Poloniex+Bittrex Technical Analysis / Market Report Update #46, \"Glass half full, but the bottle\u2019s left empty\" Sept 15, 2016",
@@ -9809,7 +9809,7 @@
       },
       {
         "percent": "3300",
-        "reputation": 51047995307721,
+        "reputation": 51890713906913,
         "rshares": 3313249953310,
         "voter": "pharesim"
       },
@@ -9833,7 +9833,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1534717563460,
         "voter": "joseph"
       },
@@ -9893,13 +9893,13 @@
       },
       {
         "percent": "1131",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 89897956816,
         "voter": "eeks"
       },
       {
         "percent": "600",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 1511911763,
         "voter": "fkn"
       },
@@ -9929,7 +9929,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 58571016273092,
+        "reputation": 58572043807747,
         "rshares": 584291107228,
         "voter": "nanzo-scoop"
       },
@@ -9953,13 +9953,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 60877390332151,
+        "reputation": 60877394467474,
         "rshares": 603741881611,
         "voter": "kevinwong"
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061266533,
         "voter": "murh"
       },
@@ -10013,7 +10013,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8397302485673,
+        "reputation": 8415040699805,
         "rshares": 219283354085,
         "voter": "will-zewe"
       },
@@ -10055,7 +10055,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 3708822694051,
+        "reputation": 3708827126655,
         "rshares": 75334808165,
         "voter": "emily-cook"
       },
@@ -10067,7 +10067,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 6095326280934,
+        "reputation": 6223301979971,
         "rshares": 19975706505,
         "voter": "thebatchman"
       },
@@ -10849,7 +10849,7 @@
     "pending_payout_value": "44.396 HBD",
     "percent_hbd": 10000,
     "permlink": "the-strangest-building-in-berlin",
-    "post_id": 1257185,
+    "post_id": 1257195,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "SPOTTED #6 : The strangest Building in Berlin",
@@ -10867,7 +10867,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 70486968186347,
+        "reputation": 79911231029809,
         "rshares": 40041987828800,
         "voter": "blocktrades"
       },
@@ -10983,7 +10983,7 @@
     "pending_payout_value": "99.432 HBD",
     "percent_hbd": 10000,
     "permlink": "when-your-dad-works-in-hollywood",
-    "post_id": 1256746,
+    "post_id": 1256748,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "When Your Dad Works In Hollywood",
@@ -11001,7 +11001,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 70486968186347,
+        "reputation": 79911231029809,
         "rshares": 40042238111353,
         "voter": "blocktrades"
       },
@@ -11019,7 +11019,7 @@
       },
       {
         "percent": "10000",
-        "reputation": -37765249963674,
+        "reputation": -37765245816069,
         "rshares": 2205816409649,
         "voter": "wang"
       },
@@ -11031,13 +11031,13 @@
       },
       {
         "percent": "137",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 14982984990,
         "voter": "eeks"
       },
       {
         "percent": "400",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 1007941175,
         "voter": "fkn"
       },
@@ -11055,7 +11055,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061253912,
         "voter": "murh"
       },
@@ -11369,7 +11369,7 @@
     "pending_payout_value": "129.316 HBD",
     "percent_hbd": 10000,
     "permlink": "the-queen-of-amazon-drawing-a-visual-progression",
-    "post_id": 1256604,
+    "post_id": 1256606,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "The Queen of Amazon drawing: a visual progression.",
@@ -11381,7 +11381,7 @@
     "active_votes": [
       {
         "percent": "4000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 12523260993360,
         "voter": "smooth"
       },
@@ -11411,7 +11411,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061303487,
         "voter": "murh"
       },
@@ -11423,7 +11423,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8397302485673,
+        "reputation": 8415040699805,
         "rshares": 210512019921,
         "voter": "will-zewe"
       },
@@ -11581,7 +11581,7 @@
     "pending_payout_value": "16.476 HBD",
     "percent_hbd": 10000,
     "permlink": "steemit-girl-halo-beautiful-day",
-    "post_id": 1257404,
+    "post_id": 1257414,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "STEEMIT GIRL HALO \u2661  Beautiful Day",
@@ -11599,7 +11599,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 70486968186347,
+        "reputation": 79911231029809,
         "rshares": 40042164500412,
         "voter": "blocktrades"
       },
@@ -11685,7 +11685,7 @@
     "pending_payout_value": "99.113 HBD",
     "percent_hbd": 10000,
     "permlink": "new-mr-robot-episode-introduces-e-corp-s-new-ecoin",
-    "post_id": 1256568,
+    "post_id": 1256570,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "New Mr. Robot Episode Introduces E-Corp's New \"Ecoin\"",
@@ -11703,7 +11703,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 70486968186347,
+        "reputation": 79911231029809,
         "rshares": 40042090888143,
         "voter": "blocktrades"
       },
@@ -11843,7 +11843,7 @@
     "pending_payout_value": "99.269 HBD",
     "percent_hbd": 10000,
     "permlink": "jellyfish",
-    "post_id": 1256535,
+    "post_id": 1256537,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Jellyfish",
@@ -11861,7 +11861,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 70486968186347,
+        "reputation": 79911231029809,
         "rshares": 40859141206977,
         "voter": "blocktrades"
       },
@@ -11891,7 +11891,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1577462576089,
         "voter": "joseph"
       },
@@ -11939,13 +11939,13 @@
       },
       {
         "percent": "812",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 74914583876,
         "voter": "eeks"
       },
       {
         "percent": "300",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 1007941175,
         "voter": "fkn"
       },
@@ -11981,7 +11981,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061234978,
         "voter": "murh"
       },
@@ -12035,7 +12035,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 9434414518400,
+        "reputation": 9434501398789,
         "rshares": 30279968088,
         "voter": "acassity"
       },
@@ -12595,7 +12595,7 @@
     "pending_payout_value": "226.397 HBD",
     "percent_hbd": 10000,
     "permlink": "original-fiction-anarchist-s-almanac-episode-15",
-    "post_id": 1256113,
+    "post_id": 1256115,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Original Fiction: Anarchist's Almanac, Episode 15",
@@ -12607,7 +12607,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 31308460859447,
         "voter": "smooth"
       },
@@ -12619,13 +12619,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 36749432321730,
+        "reputation": 36760495244216,
         "rshares": 1020236794603,
         "voter": "liondani"
       },
       {
         "percent": "10000",
-        "reputation": 89703349977794,
+        "reputation": 91016606023399,
         "rshares": 1950774078440,
         "voter": "xeroc"
       },
@@ -12643,13 +12643,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 72112139588726,
+        "reputation": 72201797307702,
         "rshares": 800066797130,
         "voter": "steemrollin"
       },
       {
         "percent": "37",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 14982933604,
         "voter": "eeks"
       },
@@ -12679,7 +12679,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061253912,
         "voter": "murh"
       },
@@ -12727,7 +12727,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8166740506920,
+        "reputation": 8184947229099,
         "rshares": 34073699558,
         "voter": "cryptoiskey"
       },
@@ -12739,7 +12739,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 12656257002205,
+        "reputation": 12656810345430,
         "rshares": 37152547241,
         "voter": "clement"
       },
@@ -12817,7 +12817,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 4226573244868,
+        "reputation": 4226574982749,
         "rshares": 30989825780,
         "voter": "zaebars"
       },
@@ -13281,7 +13281,7 @@
     "pending_payout_value": "127.750 HBD",
     "percent_hbd": 10000,
     "permlink": "the-gift-of-family-stories-of-a-toy-collector-1",
-    "post_id": 1256335,
+    "post_id": 1256337,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "The gift of family: Stories of a toy collector #1",
@@ -13317,7 +13317,7 @@
       },
       {
         "percent": "10000",
-        "reputation": -37765249963674,
+        "reputation": -37765245816069,
         "rshares": 2206071653405,
         "voter": "wang"
       },
@@ -13329,7 +13329,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1534823711950,
         "voter": "joseph"
       },
@@ -13347,7 +13347,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 72112139588726,
+        "reputation": 72201797307702,
         "rshares": 800261748895,
         "voter": "steemrollin"
       },
@@ -13365,19 +13365,19 @@
       },
       {
         "percent": "10000",
-        "reputation": 54345938068170,
+        "reputation": 54346161065641,
         "rshares": 365729210153,
         "voter": "craig-grant"
       },
       {
         "percent": "425",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 44948978408,
         "voter": "eeks"
       },
       {
         "percent": "300",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 1007941175,
         "voter": "fkn"
       },
@@ -13401,7 +13401,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061266533,
         "voter": "murh"
       },
@@ -13419,7 +13419,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8397302485673,
+        "reputation": 8415040699805,
         "rshares": 223669021166,
         "voter": "will-zewe"
       },
@@ -13715,7 +13715,7 @@
     "pending_payout_value": "15.259 HBD",
     "percent_hbd": 10000,
     "permlink": "4rgubt-journey-of-life",
-    "post_id": 1257261,
+    "post_id": 1257271,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Journey of life",
@@ -13739,7 +13739,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1535071696382,
         "voter": "joseph"
       },
@@ -13757,19 +13757,19 @@
       },
       {
         "percent": "10000",
-        "reputation": 54345938068170,
+        "reputation": 54346161065641,
         "rshares": 374437048490,
         "voter": "craig-grant"
       },
       {
         "percent": "287",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 29966325092,
         "voter": "eeks"
       },
       {
         "percent": "600",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 1511911763,
         "voter": "fkn"
       },
@@ -13787,7 +13787,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 58571016273092,
+        "reputation": 58572043807747,
         "rshares": 584301957019,
         "voter": "nanzo-scoop"
       },
@@ -13805,7 +13805,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061283659,
         "voter": "murh"
       },
@@ -13835,7 +13835,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 3708822694051,
+        "reputation": 3708827126655,
         "rshares": 75335893384,
         "voter": "emily-cook"
       },
@@ -14041,7 +14041,7 @@
     "pending_payout_value": "6.848 HBD",
     "percent_hbd": 10000,
     "permlink": "bringing-characters-and-worlds-to-life-an-ode-to-the-steemit-creators",
-    "post_id": 1257502,
+    "post_id": 1257512,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Bringing worlds and characters to life; an ode to the Steemit creators!",

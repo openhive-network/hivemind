@@ -847,7 +847,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 11765473490257,
+        "reputation": 11765528754092,
         "rshares": 25204741266,
         "voter": "justtryme90"
       },
@@ -1076,7 +1076,7 @@
     "active_votes": [
       {
         "percent": "-100",
-        "reputation": 145171381514207,
+        "reputation": 145256378570298,
         "rshares": -376603000000,
         "voter": "dantheman"
       },
@@ -1094,7 +1094,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 89703349977794,
+        "reputation": 91016606023399,
         "rshares": 23446000000,
         "voter": "xeroc"
       },
@@ -1162,7 +1162,7 @@
     "active_votes": [
       {
         "percent": "100",
-        "reputation": 145171381514207,
+        "reputation": 145256378570298,
         "rshares": 375241000000,
         "voter": "dantheman"
       },
@@ -1174,13 +1174,13 @@
       },
       {
         "percent": "100",
-        "reputation": 13270505121655,
+        "reputation": 13270601846729,
         "rshares": 936400000000,
         "voter": "ned"
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 0,
         "voter": "murh"
       },
@@ -1248,7 +1248,7 @@
     "active_votes": [
       {
         "percent": "-100",
-        "reputation": 145171381514207,
+        "reputation": 145256378570298,
         "rshares": -375241000000,
         "voter": "dantheman"
       },

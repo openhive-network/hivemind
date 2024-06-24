@@ -3,13 +3,13 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 145171381514207,
+        "reputation": 145256378570298,
         "rshares": 28370463371572,
         "voter": "dantheman"
       },
       {
         "percent": "10000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 31307487536364,
         "voter": "smooth"
       },
@@ -51,19 +51,19 @@
       },
       {
         "percent": "10000",
-        "reputation": -37765249963674,
+        "reputation": -37765245816069,
         "rshares": 2206068741954,
         "voter": "wang"
       },
       {
         "percent": "10000",
-        "reputation": 89703349977794,
+        "reputation": 91016606023399,
         "rshares": 1950753758979,
         "voter": "xeroc"
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1534707047296,
         "voter": "joseph"
       },
@@ -165,13 +165,13 @@
       },
       {
         "percent": "1225",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 104880949618,
         "voter": "eeks"
       },
       {
         "percent": "10000",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 24694558802,
         "voter": "fkn"
       },
@@ -201,7 +201,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 58571016273092,
+        "reputation": 58572043807747,
         "rshares": 584291107228,
         "voter": "nanzo-scoop"
       },
@@ -231,13 +231,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 60877390332151,
+        "reputation": 60877394467474,
         "rshares": 616864092786,
         "voter": "kevinwong"
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061266533,
         "voter": "murh"
       },
@@ -321,7 +321,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8397302485673,
+        "reputation": 8415040699805,
         "rshares": 219283354085,
         "voter": "will-zewe"
       },
@@ -393,7 +393,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 3708822694051,
+        "reputation": 3708827126655,
         "rshares": 75334808165,
         "voter": "emily-cook"
       },
@@ -429,7 +429,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 15603689614497,
+        "reputation": 15603693624194,
         "rshares": 60315479782,
         "voter": "good-karma"
       },
@@ -663,7 +663,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 4226573244868,
+        "reputation": 4226574982749,
         "rshares": 30989614870,
         "voter": "zaebars"
       },
@@ -2345,7 +2345,7 @@
     "pending_payout_value": "595.718 HBD",
     "percent_hbd": 10000,
     "permlink": "another-billionaire-warns-of-catastrophic-depths-not-seen-in-5-000-years-and-emphasizes-gold",
-    "post_id": 1257189,
+    "post_id": 1257191,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Another Billionaire Warns of Catastrophic Depths Not Seen in 5,000 Years - and Emphasizes Gold",
@@ -2357,7 +2357,7 @@
     "active_votes": [
       {
         "percent": "100",
-        "reputation": 145171381514207,
+        "reputation": 145256378570298,
         "rshares": 375241000000,
         "voter": "dantheman"
       },
@@ -2393,7 +2393,7 @@
       },
       {
         "percent": "-100",
-        "reputation": 13270505121655,
+        "reputation": 13270601846729,
         "rshares": -936400000000,
         "voter": "ned"
       },
@@ -2417,7 +2417,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 36749432321730,
+        "reputation": 36760495244216,
         "rshares": 551390835500,
         "voter": "liondani"
       },
@@ -2429,7 +2429,7 @@
       },
       {
         "percent": "100",
-        "reputation": 89703349977794,
+        "reputation": 91016606023399,
         "rshares": 10772000000,
         "voter": "xeroc"
       },
@@ -2525,7 +2525,7 @@
       },
       {
         "percent": "1509",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1746058458,
         "voter": "murh"
       },
@@ -2555,7 +2555,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 1826252654620,
+        "reputation": 1826260651553,
         "rshares": 1742755097,
         "voter": "sunshinecrypto"
       },
@@ -3007,13 +3007,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 3750669747284,
+        "reputation": 3946129863300,
         "rshares": 270238182376,
         "voter": "pal"
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1060987563,
         "voter": "murh"
       },
@@ -3143,7 +3143,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 70486968186347,
+        "reputation": 79911231029809,
         "rshares": 40822566857571,
         "voter": "blocktrades"
       },
@@ -3191,7 +3191,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1060806418,
         "voter": "murh"
       },
@@ -3493,7 +3493,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 6029824012432,
+        "reputation": 6029864030540,
         "rshares": 17341335514,
         "voter": "frankjones"
       },
@@ -3549,7 +3549,7 @@
     "active_votes": [
       {
         "percent": "1000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 3160673077173,
         "voter": "smooth"
       },
@@ -3561,7 +3561,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 89703349977794,
+        "reputation": 91016606023399,
         "rshares": 1868338161806,
         "voter": "xeroc"
       },
@@ -3591,7 +3591,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1766943395,
         "voter": "murh"
       },
@@ -3645,7 +3645,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8166740506920,
+        "reputation": 8184947229099,
         "rshares": 36124272737,
         "voter": "cryptoiskey"
       },
@@ -3657,7 +3657,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 12656257002205,
+        "reputation": 12656810345430,
         "rshares": 40640081813,
         "voter": "clement"
       },
@@ -3669,7 +3669,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 2272555442064,
+        "reputation": 2272559498097,
         "rshares": 4080846603,
         "voter": "azaan"
       },
@@ -3771,7 +3771,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 4226573244868,
+        "reputation": 4226574982749,
         "rshares": 31569407639,
         "voter": "zaebars"
       },
@@ -3819,7 +3819,7 @@
       },
       {
         "percent": "10000",
-        "reputation": -4779249072914,
+        "reputation": -4779687139831,
         "rshares": 2614560885,
         "voter": "weenis"
       },
@@ -4425,7 +4425,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 77590508815145,
+        "reputation": 77603137281490,
         "rshares": 370784529065,
         "voter": "kaylinart"
       },
@@ -4764,7 +4764,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 124209883737229,
+        "reputation": 124431502021980,
         "rshares": 1296916063013,
         "voter": "steempower"
       },
@@ -4800,7 +4800,7 @@
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1425635859,
         "voter": "murh"
       },
@@ -4818,7 +4818,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 12656257002205,
+        "reputation": 12656810345430,
         "rshares": 42736904295,
         "voter": "clement"
       },
@@ -5597,7 +5597,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 77590508815145,
+        "reputation": 77603137281490,
         "rshares": 277904506235,
         "voter": "kaylinart"
       },
@@ -6265,7 +6265,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 77590508815145,
+        "reputation": 77603137281490,
         "rshares": 241429422235,
         "voter": "kaylinart"
       },
@@ -6791,7 +6791,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 77590508815145,
+        "reputation": 77603137281490,
         "rshares": 207585503034,
         "voter": "kaylinart"
       },
@@ -6937,7 +6937,7 @@
       },
       {
         "percent": "4500",
-        "reputation": 5009147934382,
+        "reputation": 5009162833307,
         "rshares": 14221150695,
         "voter": "danknugs"
       },
@@ -6997,7 +6997,7 @@
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1787488929,
         "voter": "murh"
       },
@@ -7211,7 +7211,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 3750669747284,
+        "reputation": 3946129863300,
         "rshares": 239228771917,
         "voter": "pal"
       },
@@ -7279,7 +7279,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 77590508815145,
+        "reputation": 77603137281490,
         "rshares": 215884541981,
         "voter": "kaylinart"
       },
@@ -7751,7 +7751,7 @@
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1802277891,
         "voter": "murh"
       },
@@ -8051,7 +8051,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 77590508815145,
+        "reputation": 77603137281490,
         "rshares": 226501311211,
         "voter": "kaylinart"
       },
@@ -9245,7 +9245,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 11765473490257,
+        "reputation": 11765528754092,
         "rshares": 11954382349,
         "voter": "justtryme90"
       },
@@ -9561,7 +9561,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 9131956116299,
+        "reputation": 9132439174346,
         "rshares": 109221510721,
         "voter": "omarb"
       },
@@ -9597,7 +9597,7 @@
       },
       {
         "percent": "100",
-        "reputation": -4779249072914,
+        "reputation": -4779687139831,
         "rshares": 55439062,
         "voter": "weenis"
       },
@@ -9627,7 +9627,7 @@
       },
       {
         "percent": "100",
-        "reputation": -3006894935427,
+        "reputation": -3006894837480,
         "rshares": 2846658,
         "voter": "steemit.tips"
       },
@@ -9911,7 +9911,7 @@
       },
       {
         "percent": "200",
-        "reputation": -4779249072914,
+        "reputation": -4779687139831,
         "rshares": 55437848,
         "voter": "weenis"
       },
@@ -9935,7 +9935,7 @@
       },
       {
         "percent": "200",
-        "reputation": -3006894935427,
+        "reputation": -3006894837480,
         "rshares": 1690483,
         "voter": "steemit.tips"
       },
@@ -10255,7 +10255,7 @@
       },
       {
         "percent": "200",
-        "reputation": -4779249072914,
+        "reputation": -4779687139831,
         "rshares": 55437848,
         "voter": "weenis"
       },
@@ -10279,7 +10279,7 @@
       },
       {
         "percent": "200",
-        "reputation": -3006894935427,
+        "reputation": -3006894837480,
         "rshares": 1690483,
         "voter": "steemit.tips"
       },
@@ -10563,7 +10563,7 @@
       },
       {
         "percent": "200",
-        "reputation": -4779249072914,
+        "reputation": -4779687139831,
         "rshares": 55427665,
         "voter": "weenis"
       },
@@ -10587,7 +10587,7 @@
       },
       {
         "percent": "200",
-        "reputation": -3006894935427,
+        "reputation": -3006894837480,
         "rshares": 1690483,
         "voter": "steemit.tips"
       },
@@ -11510,7 +11510,7 @@
     "active_votes": [
       {
         "percent": "1000",
-        "reputation": -3006894935427,
+        "reputation": -3006894837480,
         "rshares": 5199592,
         "voter": "steemit.tips"
       },
@@ -11622,7 +11622,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 15932269974,
+        "reputation": 4203705401,
         "rshares": 1258856,
         "voter": "fairider1"
       },
