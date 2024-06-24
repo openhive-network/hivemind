@@ -9,7 +9,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 70486968186347,
+        "reputation": 79911231029809,
         "rshares": 40039727156805,
         "voter": "blocktrades"
       },
@@ -87,13 +87,13 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061234978,
         "voter": "murh"
       },
       {
         "percent": "5000",
-        "reputation": 5888717170887,
+        "reputation": 5890875463678,
         "rshares": 33781972641,
         "voter": "ratel"
       },
@@ -551,7 +551,7 @@
     "pending_payout_value": "170.170 HBD",
     "percent_hbd": 10000,
     "permlink": "17-steem-tools-every-steemian-needs-to-know",
-    "post_id": 1256035,
+    "post_id": 1256037,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Steem Tools Every Steemian Needs To Know (Infographic)",

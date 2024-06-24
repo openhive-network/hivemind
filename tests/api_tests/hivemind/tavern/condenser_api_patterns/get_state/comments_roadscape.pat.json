@@ -222,7 +222,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 13823888326286,
+          "reputation": 13824194314492,
           "rshares": 14046189493625,
           "voter": "summon"
         },
@@ -288,7 +288,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 57643429300793,
+          "reputation": 57646811477930,
           "rshares": 214164598366,
           "voter": "roelandp"
         },
@@ -474,7 +474,7 @@
       "active_votes": [
         {
           "percent": "10000",
-          "reputation": 3750669747284,
+          "reputation": 3946129863300,
           "rshares": 191330751503,
           "voter": "pal"
         }

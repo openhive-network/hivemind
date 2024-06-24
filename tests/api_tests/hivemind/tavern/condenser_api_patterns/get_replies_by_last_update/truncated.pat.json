@@ -22,7 +22,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-chitty-re-gtg-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t185208490z",
-    "post_id": 1257474,
+    "post_id": 1257489,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "A balanced voting system is impossible with current witness\u2019s payouts.",
@@ -53,7 +53,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t150410237z",
-    "post_id": 1254914,
+    "post_id": 1254916,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Introduction post - Gold at the end of the rainbow... On the Emerald Isle",
@@ -65,7 +65,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 36749432321730,
+        "reputation": 36760495244216,
         "rshares": 1000247174970,
         "voter": "liondani"
       }
@@ -91,7 +91,7 @@
     "pending_payout_value": "0.271 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t142108544z",
-    "post_id": 1254398,
+    "post_id": 1254400,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "A balanced voting system is impossible with current witness\u2019s payouts.",
@@ -122,7 +122,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t132416244z",
-    "post_id": 1253767,
+    "post_id": 1253769,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "[STEEMSQL] A deep analysis of Steemians gratefulness",
@@ -153,7 +153,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t130619700z",
-    "post_id": 1253599,
+    "post_id": 1253601,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "[STEEMSQL] A deep analysis of Steemians gratefulness",
@@ -184,7 +184,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gtg-re-gamer00-hi-i-m-jaro-and-this-is-my-introductory-verification-post-20160915t075443671z",
-    "post_id": 1251777,
+    "post_id": 1251779,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Hi! I'm Jaro and this is my introductory verification post!",
@@ -369,7 +369,7 @@
       }
     ],
     "author": "complexring",
-    "author_reputation": 59074616588451,
+    "author_reputation": 59074854665271,
     "beneficiaries": [],
     "body": "I don't se",
     "body_length": 225,
@@ -965,7 +965,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 12481332844017,
+        "reputation": 12481333732559,
         "rshares": 1446333470877,
         "voter": "steemychicken1"
       },
@@ -1108,7 +1108,7 @@
   {
     "active_votes": [],
     "author": "thecryptofiend",
-    "author_reputation": 16234753830016,
+    "author_reputation": 16234761500024,
     "beneficiaries": [],
     "body": "Thanks for",
     "body_length": 55,
@@ -1319,7 +1319,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 36749432321730,
+        "reputation": 36760495244216,
         "rshares": 910501669843,
         "voter": "liondani"
       },
@@ -1512,7 +1512,7 @@
   {
     "active_votes": [],
     "author": "amartinezque",
-    "author_reputation": 11952915931943,
+    "author_reputation": 11952924307837,
     "beneficiaries": [],
     "body": "Cats, huma",
     "body_length": 84,

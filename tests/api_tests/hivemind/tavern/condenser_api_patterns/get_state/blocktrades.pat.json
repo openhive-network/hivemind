@@ -31,7 +31,7 @@
       "net_vesting_shares": 0,
       "post_count": 358,
       "recent_replies": [],
-      "reputation": 70486968186347,
+      "reputation": 79911231029809,
       "transfer_history": []
     }
   },
@@ -94,7 +94,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 949715155915,
+          "reputation": 951775033492,
           "rshares": 6933196684261,
           "voter": "steempty"
         },
@@ -112,7 +112,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 13823888326286,
+          "reputation": 13824194314492,
           "rshares": 13575130773408,
           "voter": "summon"
         },
@@ -124,13 +124,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 70486968186347,
+          "reputation": 79911231029809,
           "rshares": 41118308170729,
           "voter": "blocktrades"
         },
         {
           "percent": "10000",
-          "reputation": 13270505121655,
+          "reputation": 13270601846729,
           "rshares": 54778803267946,
           "voter": "ned"
         },
@@ -142,7 +142,7 @@
         },
         {
           "percent": "-10000",
-          "reputation": 51047995307721,
+          "reputation": 51890713906913,
           "rshares": -7045779576231,
           "voter": "pharesim"
         },
@@ -172,25 +172,25 @@
         },
         {
           "percent": "10000",
-          "reputation": 2827502899317,
+          "reputation": 2842806997450,
           "rshares": 997970858823,
           "voter": "ihashfury"
         },
         {
           "percent": "10000",
-          "reputation": 59074616588451,
+          "reputation": 59074854665271,
           "rshares": 1930856901658,
           "voter": "complexring"
         },
         {
           "percent": "10000",
-          "reputation": 9510507624851,
+          "reputation": 9604948798285,
           "rshares": 173324319565,
           "voter": "ajvest"
         },
         {
           "percent": "10000",
-          "reputation": 28971806962251,
+          "reputation": 28978580333608,
           "rshares": 632561405036,
           "voter": "joseph"
         },
@@ -250,7 +250,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 6977251504339,
+          "reputation": 6978993115613,
           "rshares": 2044400735,
           "voter": "dedriss"
         },
@@ -274,7 +274,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 9801987882919,
+          "reputation": 9822447992207,
           "rshares": 12283703833,
           "voter": "jupiter00000"
         },
@@ -340,13 +340,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 35537325381339,
+          "reputation": 36532493315717,
           "rshares": 449540364671,
           "voter": "hipster"
         },
         {
           "percent": "10000",
-          "reputation": 82831371778953,
+          "reputation": 82834521473976,
           "rshares": 1629640364,
           "voter": "cryptogee"
         },
@@ -370,7 +370,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 3750669747284,
+          "reputation": 3946129863300,
           "rshares": 222805053070,
           "voter": "pal"
         },
@@ -406,7 +406,7 @@
         },
         {
           "percent": "1133",
-          "reputation": 2902053059801,
+          "reputation": 2902189818091,
           "rshares": 1045269778,
           "voter": "murh"
         },
@@ -418,7 +418,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 11765473490257,
+          "reputation": 11765528754092,
           "rshares": 28279732029,
           "voter": "justtryme90"
         },
@@ -430,7 +430,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 475074648083,
+          "reputation": 475121039570,
           "rshares": 347685794,
           "voter": "robi-rusmana"
         },
@@ -454,13 +454,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 62345041692781,
+          "reputation": 62358569695987,
           "rshares": 86101838722,
           "voter": "hisnameisolllie"
         },
         {
           "percent": "10000",
-          "reputation": 8397302485673,
+          "reputation": 8415040699805,
           "rshares": 40442347539,
           "voter": "will-zewe"
         },
@@ -532,7 +532,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 5686398017254,
+          "reputation": 5686406558082,
           "rshares": 41677990195,
           "voter": "garycovington"
         },
@@ -700,7 +700,7 @@
         }
       ],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "I think most Bitcoin users will agree that one of the most annoying aspects of  buying things with Bitcoin is the slow confirmation times. Theoretically, on average it takes about 5 minutes for one bitcoin block confirmation and ~30 minutes (6 confirmations) for a payment to be \u201cfully confirmed\u201d. But practically speaking, it often takes much longer for just one confirmation nowadays, because blocks are starting to run out of room to fit all the transactions being created during the block interval and your transaction may not be included in the next block created after you broadcast your transaction. Now 30 minutes isn't that long compared to the time it takes to do a bank wire transfer (that takes days), but it is pretty slow compared to the time it takes to buy something with a credit card. \n\nBlockTrades acts as a \u201cbackend\u201d cryptocurrency converter for the BlockPay point-of-sales system and BlockPay recently asked us for ways that we could help them speed up acceptance of Bitcoin payments for the merchants they serve. Long term solutions include things like the lightning network (https://lightning.network/) or implementing a system that determines the \u201clikelihood\u201d that an unconfirmed transaction might never get double-spent, but we didn't have time to wait for or develop a system of this type, and we wanted something exceptionally fast.\n\nOur ultimate solution to this problem for now was to let merchants take the risk of a double-spend, similar to the way a merchant takes the risk of accepting a bad check. In essence, the merchant places a deposit with us to cover payments up to the amount it is willing to accept prior to the payments being confirmed.\n\nThe next question facing us was how to handle such deposits. We wanted merchants to be able to monitor and increase or decrease their deposit amount at any time. We also needed a simple way they could see whenever we had to debit from their deposit because of a double-spend by one of their customers. To solve this problem, we decided to take advantage of several features of the BitShares blockchain: a lightweight wallet accessible to the merchant via a web browser, fast transfers, and the ability to create \u201cuser-issued\u201d assets.\n\nWe recently created TRADE.USDLABOR as an IOU coin that people could purchase from us to pay for our software development services (https://steemit.com/blocktrades/@blocktrades/introducing-the-latest-dollar-stable-coin-trade-usdlabor). We realized we could also use this coin as our \u201csurety\u201d coin for deposits. Our customers (e.g. a merchant) can purchase TRADE.USDLABOR from us and hold it in their own wallet in an BitShares account specifically registered with us. \n\nWhenever we see an incoming Bitcoin transaction for a customer, we can very quickly check if they have enough TRADE.USDLABOR in their designated BitShares account to cover any potential loss if the Bitcoin transaction isn't confirmed. If there is enough available, we can temporarily \u201cclaim\u201d that amount of TRADE.USDLABOR from their account and send them whatever cryptocurrency that the Bitcoin was supposed to be exchanged for. Later, once the Bitcoin transaction is confirmed, we can restore to their BitShares account the amount of TRADE.USDLABOR we temporarily claimed. All this is possible because BitShares funds transfers are so fast (~1.5 seconds on average) and because we as the asset issuer for TRADE.USDLABOR have the ability to transfer it from any account to any account. The customer can monitor their current \u201cdeposit\u201d balance directly from their BitShares wallet and can easily increase or decrease the balance of TRADE.USDLABOR they hold as surety.\n\nAt this point, we've completed all the basic work for this system and it's functional as of today. Right now with a properly registered BitShares account and a suitable amount of TRADE.USDLABOR in the account, we can process a customer's Bitcoin input transaction and send output in about 20 seconds. With a few tweaks we should be able to cut that down to 6 seconds or less. One caveat: it's not yet possible to automatically register a BitShares account on our web site to act as a surety account, so at this time customers must send us a request via email to link their BitShares account to their BlockTrades account and send us a token micro-transfer to prove they own the BitShares account.",
       "body_length": 4349,
@@ -798,7 +798,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 949715155915,
+          "reputation": 951775033492,
           "rshares": 7010766428701,
           "voter": "steempty"
         },
@@ -828,13 +828,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 13823888326286,
+          "reputation": 13824194314492,
           "rshares": 13002026909607,
           "voter": "summon"
         },
         {
           "percent": "10000",
-          "reputation": 70486968186347,
+          "reputation": 79911231029809,
           "rshares": 42796580997026,
           "voter": "blocktrades"
         },
@@ -846,7 +846,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 42786247901122,
+          "reputation": 42796471440299,
           "rshares": 49271767394120,
           "voter": "dan"
         },
@@ -882,7 +882,7 @@
         },
         {
           "percent": "-10000",
-          "reputation": 51047995307721,
+          "reputation": 51890713906913,
           "rshares": -7045779576231,
           "voter": "pharesim"
         },
@@ -930,7 +930,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 2827502899317,
+          "reputation": 2842806997450,
           "rshares": 1000169428374,
           "voter": "ihashfury"
         },
@@ -942,13 +942,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 89703349977794,
+          "reputation": 91016606023399,
           "rshares": 1669351334307,
           "voter": "xeroc"
         },
         {
           "percent": "10000",
-          "reputation": 59074616588451,
+          "reputation": 59074854665271,
           "rshares": 2635783753412,
           "voter": "complexring"
         },
@@ -960,7 +960,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 28971806962251,
+          "reputation": 28978580333608,
           "rshares": 847304183451,
           "voter": "joseph"
         },
@@ -978,13 +978,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 124209883737229,
+          "reputation": 124431502021980,
           "rshares": 1039486850456,
           "voter": "steempower"
         },
         {
           "percent": "10000",
-          "reputation": 82600290949846,
+          "reputation": 82601368841663,
           "rshares": 578585955280,
           "voter": "cass"
         },
@@ -996,7 +996,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 147478489309626,
+          "reputation": 147486900180657,
           "rshares": 526875349127,
           "voter": "tuck-fheman"
         },
@@ -1014,25 +1014,25 @@
         },
         {
           "percent": "10000",
-          "reputation": 6977251504339,
+          "reputation": 6978993115613,
           "rshares": 2561158926,
           "voter": "dedriss"
         },
         {
           "percent": "10000",
-          "reputation": 72112139588726,
+          "reputation": 72201797307702,
           "rshares": 687960850774,
           "voter": "steemrollin"
         },
         {
           "percent": "10000",
-          "reputation": 5154121875287,
+          "reputation": 5154132562174,
           "rshares": 76622379129,
           "voter": "jwest40"
         },
         {
           "percent": "10000",
-          "reputation": 8963739580468,
+          "reputation": 8963841931238,
           "rshares": 126732139173,
           "voter": "team"
         },
@@ -1044,7 +1044,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 76462073287981,
+          "reputation": 76483781067970,
           "rshares": 249629404331,
           "voter": "ash"
         },
@@ -1080,13 +1080,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 9801987882919,
+          "reputation": 9822447992207,
           "rshares": 16741653669,
           "voter": "jupiter00000"
         },
         {
           "percent": "10000",
-          "reputation": 5047240025934,
+          "reputation": 5047255365950,
           "rshares": 56992537557,
           "voter": "jbrukh"
         },
@@ -1146,19 +1146,19 @@
         },
         {
           "percent": "10000",
-          "reputation": 54345938068170,
+          "reputation": 54346161065641,
           "rshares": 111188959317,
           "voter": "craig-grant"
         },
         {
           "percent": "10000",
-          "reputation": 4500464238667,
+          "reputation": 4500675789795,
           "rshares": 2542496307,
           "voter": "blackjincrypto"
         },
         {
           "percent": "10000",
-          "reputation": 5545238056434,
+          "reputation": 5547456266075,
           "rshares": 22149116192,
           "voter": "shawn-brewer"
         },
@@ -1206,13 +1206,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 12382143533351,
+          "reputation": 12389135148216,
           "rshares": 495505952281,
           "voter": "eeks"
         },
         {
           "percent": "10000",
-          "reputation": 35537325381339,
+          "reputation": 36532493315717,
           "rshares": 693716143477,
           "voter": "hipster"
         },
@@ -1236,7 +1236,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 122177444407384,
+          "reputation": 122201484625042,
           "rshares": 1147263452423,
           "voter": "cryptoctopus"
         },
@@ -1254,7 +1254,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 3750669747284,
+          "reputation": 3946129863300,
           "rshares": 262756247701,
           "voter": "pal"
         },
@@ -1284,7 +1284,7 @@
         },
         {
           "percent": "3301",
-          "reputation": 2902053059801,
+          "reputation": 2902189818091,
           "rshares": 1440150364,
           "voter": "murh"
         },
@@ -1296,13 +1296,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 18165011697633,
+          "reputation": 18165016808360,
           "rshares": 70681190430,
           "voter": "tinfoilfedora"
         },
         {
           "percent": "10000",
-          "reputation": 64573188744746,
+          "reputation": 64574014022519,
           "rshares": 24167822658,
           "voter": "dragonslayer109"
         },
@@ -1332,13 +1332,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 11765473490257,
+          "reputation": 11765528754092,
           "rshares": 4126366347,
           "voter": "justtryme90"
         },
         {
           "percent": "10000",
-          "reputation": 475074648083,
+          "reputation": 475121039570,
           "rshares": 272558919,
           "voter": "robi-rusmana"
         },
@@ -1362,13 +1362,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 57302509663422,
+          "reputation": 57302514009112,
           "rshares": 323007680115,
           "voter": "the-alien"
         },
         {
           "percent": "10000",
-          "reputation": 34935156153627,
+          "reputation": 34937962949900,
           "rshares": 189389130349,
           "voter": "churdtzu"
         },
@@ -1380,7 +1380,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 62345041692781,
+          "reputation": 62358569695987,
           "rshares": 127435841125,
           "voter": "hisnameisolllie"
         },
@@ -1392,7 +1392,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 5888717170887,
+          "reputation": 5890875463678,
           "rshares": 26601397337,
           "voter": "ratel"
         },
@@ -1410,7 +1410,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 8397302485673,
+          "reputation": 8415040699805,
           "rshares": 77604591309,
           "voter": "will-zewe"
         },
@@ -1434,13 +1434,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 77590508815145,
+          "reputation": 77603137281490,
           "rshares": 207391908258,
           "voter": "kaylinart"
         },
         {
           "percent": "10000",
-          "reputation": 13557964207046,
+          "reputation": 13557968552736,
           "rshares": 48927539333,
           "voter": "soulsistashakti"
         },
@@ -1452,7 +1452,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 1080779278094,
+          "reputation": 1080884169645,
           "rshares": 4904652764,
           "voter": "vdoh"
         },
@@ -1566,7 +1566,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 10280398557712,
+          "reputation": 10287019036104,
           "rshares": 141192726177,
           "voter": "nolimit"
         },
@@ -1578,7 +1578,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 1650586941376,
+          "reputation": 1651197641877,
           "rshares": 6808671721,
           "voter": "true-profit"
         },
@@ -1608,7 +1608,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 4288553026958,
+          "reputation": 4367883725556,
           "rshares": 70201860867,
           "voter": "grittenald"
         },
@@ -1620,31 +1620,31 @@
         },
         {
           "percent": "10000",
-          "reputation": 5686398017254,
+          "reputation": 5686406558082,
           "rshares": 41677990195,
           "voter": "garycovington"
         },
         {
           "percent": "10000",
-          "reputation": 6029824012432,
+          "reputation": 6029864030540,
           "rshares": 193653994,
           "voter": "frankjones"
         },
         {
           "percent": "10000",
-          "reputation": 6105332515536,
+          "reputation": 6105344565899,
           "rshares": 6014009165,
           "voter": "primus"
         },
         {
           "percent": "10000",
-          "reputation": 7460461625516,
+          "reputation": 7460707625838,
           "rshares": 3051900856,
           "voter": "blackmask"
         },
         {
           "percent": "10000",
-          "reputation": 12656257002205,
+          "reputation": 12656810345430,
           "rshares": 16288677873,
           "voter": "clement"
         },
@@ -1656,25 +1656,25 @@
         },
         {
           "percent": "10000",
-          "reputation": 9434414518400,
+          "reputation": 9434501398789,
           "rshares": 2760600807,
           "voter": "acassity"
         },
         {
           "percent": "10000",
-          "reputation": 321991793966,
+          "reputation": 321999985809,
           "rshares": 270082614,
           "voter": "renegadegaming"
         },
         {
           "percent": "10000",
-          "reputation": 457415896486,
+          "reputation": 457419942815,
           "rshares": 1256334059,
           "voter": "greatguardian100"
         },
         {
           "percent": "10000",
-          "reputation": 266686932322,
+          "reputation": 266705486097,
           "rshares": 251704361,
           "voter": "ucing"
         },
@@ -1686,13 +1686,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 4276659410889,
+          "reputation": 4276689174787,
           "rshares": 230786573,
           "voter": "michaellamden68"
         },
         {
           "percent": "10000",
-          "reputation": -5512986537,
+          "reputation": -5509300825,
           "rshares": 251269460,
           "voter": "ginaerdiana"
         },
@@ -1704,13 +1704,13 @@
         },
         {
           "percent": "10000",
-          "reputation": -747420700306,
+          "reputation": -747413096543,
           "rshares": 210106885,
           "voter": "rachelkieles"
         },
         {
           "percent": "10000",
-          "reputation": 670018199747,
+          "reputation": 670025922556,
           "rshares": 239486742,
           "voter": "spiry-btc"
         },
@@ -1728,7 +1728,7 @@
         },
         {
           "percent": "10000",
-          "reputation": -588733322947,
+          "reputation": -588715103277,
           "rshares": 231678627,
           "voter": "riot78"
         },
@@ -1968,7 +1968,7 @@
         },
         {
           "percent": "2000",
-          "reputation": -4779249072914,
+          "reputation": -4779687139831,
           "rshares": 54618548,
           "voter": "weenis"
         },
@@ -2022,7 +2022,7 @@
         }
       ],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "BlockTrades (https://blocktrades.us) is now accepting Steem Dollars as a means of purchasing other cryptocurrenicies including Bitcoin, BitShares, DAO, Dogecoin, Ether, and Litecoin. Other pairs will be added based on interest expressed by customers.\n\nWe expect that Bitcoin will be a popular early purchase with Steem Dollars, since Bitcoin is one of the easiest cryptocurrencies to convert to cash. If there is sufficient interest, we'll also add OPEN.USD and USD Tether, which can be exchanged 1-1 with US dollars on OpenLedger and Bitfinex, respectively.\n\nNote for new users: there are several tutorial posts under the blocktrades category that cover how to buy  bitcoin with Steem. Buying with Steem Dollars is essentially the same, just select Steem Dollars instead of Steem as your input, and when you transfer your funds, click on your Steem Dollars balance in your Steemit wallet instead of your Steem balance (example https://steemit.com/@myaccountname/transfers).",
       "body_length": 974,
@@ -2192,7 +2192,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 70486968186347,
+          "reputation": 79911231029809,
           "rshares": 41678097502806,
           "voter": "blocktrades"
         },
@@ -2204,19 +2204,19 @@
         },
         {
           "percent": "10000",
-          "reputation": 89703349977794,
+          "reputation": 91016606023399,
           "rshares": 1142837420586,
           "voter": "xeroc"
         },
         {
           "percent": "10000",
-          "reputation": 59074616588451,
+          "reputation": 59074854665271,
           "rshares": 3407586653172,
           "voter": "complexring"
         },
         {
           "percent": "10000",
-          "reputation": 28971806962251,
+          "reputation": 28978580333608,
           "rshares": 768211503834,
           "voter": "joseph"
         },
@@ -2234,7 +2234,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 82600290949846,
+          "reputation": 82601368841663,
           "rshares": 352265012784,
           "voter": "cass"
         },
@@ -2258,7 +2258,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 8963739580468,
+          "reputation": 8963841931238,
           "rshares": 128195526464,
           "voter": "team"
         },
@@ -2306,7 +2306,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 82831371778953,
+          "reputation": 82834521473976,
           "rshares": 647506363058,
           "voter": "cryptogee"
         },
@@ -2360,7 +2360,7 @@
         },
         {
           "percent": "3301",
-          "reputation": 2902053059801,
+          "reputation": 2902189818091,
           "rshares": 11114313557,
           "voter": "murh"
         },
@@ -2426,7 +2426,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 5888717170887,
+          "reputation": 5890875463678,
           "rshares": 35778168244,
           "voter": "ratel"
         },
@@ -2438,13 +2438,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 8397302485673,
+          "reputation": 8415040699805,
           "rshares": 166964276552,
           "voter": "will-zewe"
         },
         {
           "percent": "10000",
-          "reputation": 77590508815145,
+          "reputation": 77603137281490,
           "rshares": 189138297398,
           "voter": "kaylinart"
         },
@@ -2552,7 +2552,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 5686398017254,
+          "reputation": 5686406558082,
           "rshares": 46465449604,
           "voter": "garycovington"
         },
@@ -2564,7 +2564,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 8166740506920,
+          "reputation": 8184947229099,
           "rshares": 25358288704,
           "voter": "cryptoiskey"
         },
@@ -2576,13 +2576,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 8461965690396,
+          "reputation": 8461969810136,
           "rshares": 39230871856,
           "voter": "norbu"
         },
         {
           "percent": "10000",
-          "reputation": 4276659410889,
+          "reputation": 4276689174787,
           "rshares": 178662540,
           "voter": "michaellamden68"
         },
@@ -3590,7 +3590,7 @@
         }
       ],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "We disabled our Steem dollar to Bitcoin conversion pathway a few days ago because our wallet was occasionally reporting a Steem input twice (which would cause us to send out bitcoin twice). This wasn't happening very often, but it was potentially a serious concern, so we disabled Steem inputs until we had a workaround. I don't think this was a problem for other exchanges, as I believe they are relying on scanning blocks for transactions, whereas we poll the transaction history and it seems likely the bug is in the transaction history code.\n\nI'm happy to say we found a workaround: we're using what's called a \"delayed node\" that waits for about 30 seconds to allow the account history to \"settle down\" before we send an output, and we believe this should prevent the problem for now. As a longer term solution, we plan to investigate what's causing the false reports, but this gets us going for now. We had to make several fixes for the delayed node code to get it working on steem (this is technology developed originally with bitshares, but looks like it had never been tested with steem) and we'll submit our fixes to the steem repo.\n\nIf we don't detect any further problems, we expect to enable Steem to Bitcoin conversions soon as well.",
       "body_length": 1247,
@@ -3718,7 +3718,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 32455846463901,
+          "reputation": 32455850438813,
           "rshares": 28822772357466,
           "voter": "smooth"
         },
@@ -3754,7 +3754,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 70486968186347,
+          "reputation": 79911231029809,
           "rshares": 40279159024388,
           "voter": "blocktrades"
         },
@@ -3784,7 +3784,7 @@
         },
         {
           "percent": "-10000",
-          "reputation": 51047995307721,
+          "reputation": 51890713906913,
           "rshares": -7045800318375,
           "voter": "pharesim"
         },
@@ -3796,7 +3796,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 14756948501919,
+          "reputation": 14834390264135,
           "rshares": 5802465695828,
           "voter": "fuzzyvest"
         },
@@ -3844,7 +3844,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 59074616588451,
+          "reputation": 59074854665271,
           "rshares": 2977176396663,
           "voter": "complexring"
         },
@@ -3862,7 +3862,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 28971806962251,
+          "reputation": 28978580333608,
           "rshares": 526147147752,
           "voter": "joseph"
         },
@@ -3886,7 +3886,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 124209883737229,
+          "reputation": 124431502021980,
           "rshares": 67053787573,
           "voter": "steempower"
         },
@@ -3898,7 +3898,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 101807714979611,
+          "reputation": 101829024838797,
           "rshares": 66692000984,
           "voter": "pfunk"
         },
@@ -3910,7 +3910,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 2802091583976,
+          "reputation": 2802271039072,
           "rshares": 11428653326,
           "voter": "proctologic"
         },
@@ -3922,7 +3922,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 76462073287981,
+          "reputation": 76483781067970,
           "rshares": 8196857546,
           "voter": "ash"
         },
@@ -3970,13 +3970,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 4931834878069,
+          "reputation": 4931888829122,
           "rshares": 472615140,
           "voter": "fkn"
         },
         {
           "percent": "10000",
-          "reputation": 82831371778953,
+          "reputation": 82834521473976,
           "rshares": 1629640364,
           "voter": "cryptogee"
         },
@@ -4018,7 +4018,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 6580794427504,
+          "reputation": 6580945587589,
           "rshares": 9287275661,
           "voter": "hannixx42"
         },
@@ -4030,7 +4030,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 11952915931943,
+          "reputation": 11952924307837,
           "rshares": 421257221,
           "voter": "amartinezque"
         },
@@ -4048,7 +4048,7 @@
         },
         {
           "percent": "666",
-          "reputation": 2902053059801,
+          "reputation": 2902189818091,
           "rshares": 696750238,
           "voter": "murh"
         },
@@ -4114,7 +4114,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 12584108052916,
+          "reputation": 12584108941458,
           "rshares": 5180144664,
           "voter": "noganoo"
         },
@@ -4132,7 +4132,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 77590508815145,
+          "reputation": 77603137281490,
           "rshares": 202930258,
           "voter": "kaylinart"
         },
@@ -4168,7 +4168,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 5686398017254,
+          "reputation": 5686406558082,
           "rshares": 269063334,
           "voter": "garycovington"
         },
@@ -4282,7 +4282,7 @@
         }
       ],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "BlockTrades \"instant-exchange\" adds support for DAO. \n\nBlockTrades International Ltd has added DAO (http://daohub.org) to the list of cryptocurrencies that it buys and sells.  Unlike a traditional exchange, BlockTrades acts as an automated buyer and seller of coins based on prevailing market prices across multiple exchanges. Coins supported for DAO trading include: bitcoin, bitshares, bitCNY, bitUSD,  dash,  doge, ethereum, litecoin, nubits, openusd, peercoin, steem, and steempower.",
       "body_length": 487,
@@ -4314,7 +4314,7 @@
       "active_votes": [
         {
           "percent": "-10000",
-          "reputation": 145171381514207,
+          "reputation": 145256378570298,
           "rshares": -19003214240677,
           "voter": "dantheman"
         },
@@ -4440,13 +4440,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 13823888326286,
+          "reputation": 13824194314492,
           "rshares": 14110591454951,
           "voter": "summon"
         },
         {
           "percent": "10000",
-          "reputation": 70486968186347,
+          "reputation": 79911231029809,
           "rshares": 40279182992622,
           "voter": "blocktrades"
         },
@@ -4464,7 +4464,7 @@
         },
         {
           "percent": "-10000",
-          "reputation": 51047995307721,
+          "reputation": 51890713906913,
           "rshares": -7213536232808,
           "voter": "pharesim"
         },
@@ -4494,13 +4494,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 89703349977794,
+          "reputation": 91016606023399,
           "rshares": 490233359241,
           "voter": "xeroc"
         },
         {
           "percent": "10000",
-          "reputation": 59074616588451,
+          "reputation": 59074854665271,
           "rshares": 2573812264598,
           "voter": "complexring"
         },
@@ -4542,7 +4542,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 124209883737229,
+          "reputation": 124431502021980,
           "rshares": 46170951356,
           "voter": "steempower"
         },
@@ -4554,13 +4554,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 13437403349222,
+          "reputation": 13437407248241,
           "rshares": 63869787634,
           "voter": "pheonike"
         },
         {
           "percent": "10000",
-          "reputation": 2802091583976,
+          "reputation": 2802271039072,
           "rshares": 11428653326,
           "voter": "proctologic"
         },
@@ -4608,7 +4608,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 6580794427504,
+          "reputation": 6580945587589,
           "rshares": 5725987415,
           "voter": "hannixx42"
         },
@@ -4620,7 +4620,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 2902053059801,
+          "reputation": 2902189818091,
           "rshares": 7993186159,
           "voter": "murh"
         },
@@ -4638,7 +4638,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 77590508815145,
+          "reputation": 77603137281490,
           "rshares": 202930258,
           "voter": "kaylinart"
         },
@@ -4752,7 +4752,7 @@
         }
       ],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "BlockTrades adds DGD to list of supported cryptocurrencies, needs inventory\n\n\nBlockTrades International Ltd has added #Digix DGD (http://digix.io) to the list of cryptocurrencies that it buys and sells. BlockTrades is currently looking to expand its available inventory of DGD, and will pay for DGD in the following coin types: #bitcoin, #bitshares, #dash, #doge, #ether, #litecoin, #nubits, #openusd, #peercoin, #steem, and #steempower.",
       "body_length": 437,
@@ -4784,7 +4784,7 @@
       "active_votes": [
         {
           "percent": "10000",
-          "reputation": 70486968186347,
+          "reputation": 79911231029809,
           "rshares": 37246275498465,
           "voter": "blocktrades"
         },
@@ -4880,7 +4880,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 2802091583976,
+          "reputation": 2802271039072,
           "rshares": 27840374227,
           "voter": "proctologic"
         },
@@ -4952,7 +4952,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 4931834878069,
+          "reputation": 4931888829122,
           "rshares": 18403352211,
           "voter": "fkn"
         },
@@ -4964,7 +4964,7 @@
         },
         {
           "percent": "5800",
-          "reputation": 82831371778953,
+          "reputation": 82834521473976,
           "rshares": 435862114686,
           "voter": "cryptogee"
         },
@@ -5006,13 +5006,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 6580794427504,
+          "reputation": 6580945587589,
           "rshares": 57796756625,
           "voter": "hannixx42"
         },
         {
           "percent": "3301",
-          "reputation": 2902053059801,
+          "reputation": 2902189818091,
           "rshares": 1448535583,
           "voter": "murh"
         },
@@ -5072,7 +5072,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 77590508815145,
+          "reputation": 77603137281490,
           "rshares": 82250420312,
           "voter": "kaylinart"
         },
@@ -5132,7 +5132,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 6105332515536,
+          "reputation": 6105344565899,
           "rshares": 5974746657,
           "voter": "primus"
         },
@@ -5144,7 +5144,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 9434414518400,
+          "reputation": 9434501398789,
           "rshares": 18625906631,
           "voter": "acassity"
         },
@@ -5594,7 +5594,7 @@
         },
         {
           "percent": "1000",
-          "reputation": -4779249072914,
+          "reputation": -4779687139831,
           "rshares": 220003926,
           "voter": "weenis"
         },
@@ -6140,7 +6140,7 @@
         }
       ],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "<p>Christian Lains has asked all the witnesses to create a weekly report of our activities, so here's a short summary of BlockTrades' progress this week:\u00a0</p>\n<p><br />\nMost of our work this week was devoted to security and infrastructure improvements to the <a href=\"https://blocktrades.us\" rel=\"noopener\">BlockTrades </a>and OpenLedger transaction processing systems. We configured a couple of new servers as redundant backups using <a href=\"https://www.freebsd.org/doc/handbook/geom-mirror.html\" rel=\"noopener\">mirrored RAID</a> drives. We've unified the way we manage the cryptocurrency wallets and other processes between OpenLedger and BlockTrades to reduce our daily workload (which speeds up the rate at which we can handle customer problems). We also made security improvements to the way we handle our cold storage wallets and databases. We've added additional <a href=\"http://munin-monitoring.org/\" rel=\"noopener\">Munin </a>monitoring processes \u00a0to detect upcoming potential problems on our servers (for example, <a href=\"https://en.wikipedia.org/wiki/S.M.A.R.T.\" rel=\"noopener\">SMART detection</a> on drives to provide early alerts of impending drive failures).\u00a0</p>\n<p><br />\nOn the steem coding side of things, Dan Larimer told us that his steem client is still occasionally falling out of sync, so we're re-enabling compression of the log files so that he enable logging in his client and send them to us for analysis.\u00a0</p>\n<p><br />\nSupport-wise, we continue to assist new users in learning how to convert Steem Dollars to Bitcoin. We also gave assistance to some new users of our <a href=\"https://steemit.com/crypto-news/@blocktrades/how-to-buy-crypto-in-20-seconds-with-your-bitcoin-litecoin-etc\">\u201cfast-confirmation\u201d</a> feature that allows for rapid confirmations when buying cryptocurrencies such as Steem with Bitcoin.\u00a0</p>",
       "body_length": 1844,
@@ -6382,7 +6382,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 70486968186347,
+          "reputation": 79911231029809,
           "rshares": 39641608482099,
           "voter": "blocktrades"
         },
@@ -6514,7 +6514,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 68236886814465,
+          "reputation": 68522465130506,
           "rshares": 272861301658,
           "voter": "officialfuzzy"
         },
@@ -6550,7 +6550,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 8963739580468,
+          "reputation": 8963841931238,
           "rshares": 123803257480,
           "voter": "team"
         },
@@ -6604,7 +6604,7 @@
         },
         {
           "percent": "3000",
-          "reputation": 4931834878069,
+          "reputation": 4931888829122,
           "rshares": 7653549921,
           "voter": "fkn"
         },
@@ -6658,13 +6658,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 6580794427504,
+          "reputation": 6580945587589,
           "rshares": 60191398643,
           "voter": "hannixx42"
         },
         {
           "percent": "3301",
-          "reputation": 2902053059801,
+          "reputation": 2902189818091,
           "rshares": 1799526647,
           "voter": "murh"
         },
@@ -6694,7 +6694,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 9090232372242,
+          "reputation": 9095232035060,
           "rshares": 90244054421,
           "voter": "eric-boucher"
         },
@@ -6718,7 +6718,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 8397302485673,
+          "reputation": 8415040699805,
           "rshares": 184532344417,
           "voter": "will-zewe"
         },
@@ -6730,7 +6730,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 77590508815145,
+          "reputation": 77603137281490,
           "rshares": 169577529419,
           "voter": "kaylinart"
         },
@@ -6814,7 +6814,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 6105332515536,
+          "reputation": 6105344565899,
           "rshares": 7887900559,
           "voter": "primus"
         },
@@ -6838,7 +6838,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 8461965690396,
+          "reputation": 8461969810136,
           "rshares": 62349665000,
           "voter": "norbu"
         },
@@ -7396,7 +7396,7 @@
         },
         {
           "percent": "10000",
-          "reputation": -4779249072914,
+          "reputation": -4779687139831,
           "rshares": 218472801,
           "voter": "weenis"
         },
@@ -8206,7 +8206,7 @@
         }
       ],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "<html>\n<p>On the coding side of things, we made several <a href=\"https://github.com/steemit/steem/pulls\">pull requests</a> for features/fixes we recently made to the Steem client. Some I've mentioned previously, but one new one is the ability to send two transactions for the same amount of funds between the same pair of users in the same block. Previously the 2nd transaction would be rejected.</p>\n<p>This week we spent more time on business and design discussions versus coding work. Some proposals for changing features related to voting were discussed and ultimately rejected after soliciting community input (most notoriously, the vote nullification feature). Last I heard Dan was planning to go back to the drawing board on this issue, although I have hopes that some other features such as the ones below will take precedence for the near term.&nbsp;</p>\n<p>I've been pushing hard both publicly and behind the scenes for an introductory location where new users can get a nice introduction to the Steemit site and Steemit culture, and a recent post by Ned makes me think we're going to make some headway on this issue soon. I think this is critically important, not only so new users don't feel lost, but also to reduce friction between new and existing users and move us closer to a common ground about site usage.</p>\n<p>I also participated in some discussions about how to protect people from losing too much Steem in the event that a hacker manages to gain control of their account, as well as a feature for allowing a user to regain control of their Steem account if they lose their password. I think both of these features will be big selling points when making the case for Steem as a safe alternative to traditional money.&nbsp;</p>\n<p>I'm still arguing the case that a primary focus for the front-end developers for Steemit should be a feature that allows for new users who sign up via facebook to \u201cShare\u201d that they've signed up to Steemit as a means of viral advertising. If you agree or if you think there's other more important features that the GUI guys should focus on first, please leave a comment.&nbsp;</p>\n</html>",
       "body_length": 2140,
@@ -8244,7 +8244,7 @@
         }
       ],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "only crocodiles 01",
       "body_length": 18,
@@ -8264,7 +8264,7 @@
       "pending_payout_value": "0.004 HBD",
       "percent_hbd": 10000,
       "permlink": "crocodile01",
-      "post_id": 1256953,
+      "post_id": 1256963,
       "promoted": "0.000 HBD",
       "replies": [],
       "root_title": "powerful crocodile 01",
@@ -8275,7 +8275,7 @@
     "blocktrades/crocodile02": {
       "active_votes": [],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "only crocodiles 02",
       "body_length": 18,
@@ -8295,7 +8295,7 @@
       "pending_payout_value": "0.000 HBD",
       "percent_hbd": 10000,
       "permlink": "crocodile02",
-      "post_id": 1256954,
+      "post_id": 1256964,
       "promoted": "0.000 HBD",
       "replies": [],
       "root_title": "powerful crocodile 02",
@@ -8306,7 +8306,7 @@
     "blocktrades/crocodile03": {
       "active_votes": [],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "only crocodiles 03",
       "body_length": 18,
@@ -8326,7 +8326,7 @@
       "pending_payout_value": "0.000 HBD",
       "percent_hbd": 10000,
       "permlink": "crocodile03",
-      "post_id": 1256956,
+      "post_id": 1256966,
       "promoted": "0.000 HBD",
       "replies": [],
       "root_title": "powerful crocodile 03",
@@ -8458,7 +8458,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 70486968186347,
+          "reputation": 79911231029809,
           "rshares": 40279182992622,
           "voter": "blocktrades"
         },
@@ -8476,7 +8476,7 @@
         },
         {
           "percent": "-10000",
-          "reputation": 51047995307721,
+          "reputation": 51890713906913,
           "rshares": -7213536232808,
           "voter": "pharesim"
         },
@@ -8494,7 +8494,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 14756948501919,
+          "reputation": 14834390264135,
           "rshares": 5560696291835,
           "voter": "fuzzyvest"
         },
@@ -8506,7 +8506,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 2827502899317,
+          "reputation": 2842806997450,
           "rshares": 919102630911,
           "voter": "ihashfury"
         },
@@ -8518,13 +8518,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 89703349977794,
+          "reputation": 91016606023399,
           "rshares": 867219193419,
           "voter": "xeroc"
         },
         {
           "percent": "10000",
-          "reputation": 59074616588451,
+          "reputation": 59074854665271,
           "rshares": 2908550617485,
           "voter": "complexring"
         },
@@ -8548,7 +8548,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 124209883737229,
+          "reputation": 124431502021980,
           "rshares": 52636948521,
           "voter": "steempower"
         },
@@ -8560,19 +8560,19 @@
         },
         {
           "percent": "10000",
-          "reputation": 13437403349222,
+          "reputation": 13437407248241,
           "rshares": 102604816213,
           "voter": "pheonike"
         },
         {
           "percent": "10000",
-          "reputation": 2802091583976,
+          "reputation": 2802271039072,
           "rshares": 13872390776,
           "voter": "proctologic"
         },
         {
           "percent": "10000",
-          "reputation": 6977251504339,
+          "reputation": 6978993115613,
           "rshares": 638101164,
           "voter": "dedriss"
         },
@@ -8674,13 +8674,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 6580794427504,
+          "reputation": 6580945587589,
           "rshares": 9287275661,
           "voter": "hannixx42"
         },
         {
           "percent": "10000",
-          "reputation": 11952915931943,
+          "reputation": 11952924307837,
           "rshares": 421257221,
           "voter": "amartinezque"
         },
@@ -8698,7 +8698,7 @@
         },
         {
           "percent": "666",
-          "reputation": 2902053059801,
+          "reputation": 2902189818091,
           "rshares": 696750238,
           "voter": "murh"
         },
@@ -8764,7 +8764,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 587584054096,
+          "reputation": 587596496911,
           "rshares": 265446752,
           "voter": "omarbitcoin"
         },
@@ -8836,7 +8836,7 @@
         }
       ],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "Deposits and withdrawals of DAO are live on OpenLedger exchange\n\nDAO deposits and withdrawals from the distributed exchange (DEX), OpenLedger, have been fully functional without any hiccups for the past few hours. A number of customers who bought DAO during the pre-sale (via open.dao markets) have successfully withdrawn DAO to their ethereum wallets, and we've also had new deposits by those who've claimed DAO and are ready to trade it on the DEX. There are several active markets for DAO on OpenLedger:\n\nhttps://bitshares.openledger.info/#/market/OPEN.DAO_OPEN.ETH (DAO/Ether)\nhttps://bitshares.openledger.info/#/market/OPEN.DAO_OPEN.BTC (DAO/Bitcoin)\nhttps://bitshares.openledger.info/#/market/OPEN.DAO_BTS         (DAO/BitShares)\n\nSince OpenLedger is a decentralized exchange, you can also create your own \"active\" markets by finding others who are interested in trading between DAO and any other asset traded on the exchange.",
       "body_length": 932,
@@ -8868,7 +8868,7 @@
       "active_votes": [
         {
           "percent": "10000",
-          "reputation": 145171381514207,
+          "reputation": 145256378570298,
           "rshares": 22496772677147,
           "voter": "dantheman"
         },
@@ -8892,13 +8892,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 13823888326286,
+          "reputation": 13824194314492,
           "rshares": 8631234024519,
           "voter": "summon"
         },
         {
           "percent": "10000",
-          "reputation": 70486968186347,
+          "reputation": 79911231029809,
           "rshares": 42687530952817,
           "voter": "blocktrades"
         },
@@ -8940,7 +8940,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 89703349977794,
+          "reputation": 91016606023399,
           "rshares": 1533327363073,
           "voter": "xeroc"
         },
@@ -8952,7 +8952,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 9510507624851,
+          "reputation": 9604948798285,
           "rshares": 230391801530,
           "voter": "ajvest"
         },
@@ -8988,7 +8988,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 28971806962251,
+          "reputation": 28978580333608,
           "rshares": 395297785309,
           "voter": "joseph"
         },
@@ -9000,7 +9000,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 124209883737229,
+          "reputation": 124431502021980,
           "rshares": 1181907997104,
           "voter": "steempower"
         },
@@ -9024,7 +9024,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 6977251504339,
+          "reputation": 6978993115613,
           "rshares": 13390686881,
           "voter": "dedriss"
         },
@@ -9114,7 +9114,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 82831371778953,
+          "reputation": 82834521473976,
           "rshares": 663261418495,
           "voter": "cryptogee"
         },
@@ -9144,7 +9144,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 1228001853194,
+          "reputation": 1228115356382,
           "rshares": 12820008899,
           "voter": "fact"
         },
@@ -9174,7 +9174,7 @@
         },
         {
           "percent": "1133",
-          "reputation": 2902053059801,
+          "reputation": 2902189818091,
           "rshares": 1045288623,
           "voter": "murh"
         },
@@ -9192,7 +9192,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 18165011697633,
+          "reputation": 18165016808360,
           "rshares": 67798649483,
           "voter": "tinfoilfedora"
         },
@@ -9234,13 +9234,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 9090232372242,
+          "reputation": 9095232035060,
           "rshares": 90173623008,
           "voter": "eric-boucher"
         },
         {
           "percent": "10000",
-          "reputation": 475074648083,
+          "reputation": 475121039570,
           "rshares": 360644859,
           "voter": "robi-rusmana"
         },
@@ -9264,7 +9264,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 57302509663422,
+          "reputation": 57302514009112,
           "rshares": 341378070284,
           "voter": "the-alien"
         },
@@ -9276,7 +9276,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 11429090901893,
+          "reputation": 11429095247583,
           "rshares": 81525046682,
           "voter": "kenny-crane"
         },
@@ -9288,7 +9288,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 8397302485673,
+          "reputation": 8415040699805,
           "rshares": 139149984704,
           "voter": "will-zewe"
         },
@@ -9300,7 +9300,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 77590508815145,
+          "reputation": 77603137281490,
           "rshares": 157664138587,
           "voter": "kaylinart"
         },
@@ -9414,7 +9414,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 5686398017254,
+          "reputation": 5686406558082,
           "rshares": 46914555352,
           "voter": "garycovington"
         },
@@ -9426,7 +9426,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 12656257002205,
+          "reputation": 12656810345430,
           "rshares": 5726954128,
           "voter": "clement"
         },
@@ -9438,19 +9438,19 @@
         },
         {
           "percent": "10000",
-          "reputation": 457415896486,
+          "reputation": 457419942815,
           "rshares": 1552201321,
           "voter": "greatguardian100"
         },
         {
           "percent": "10000",
-          "reputation": 64453646210,
+          "reputation": 64489571424,
           "rshares": 320898869,
           "voter": "claudwars"
         },
         {
           "percent": "10000",
-          "reputation": 8461965690396,
+          "reputation": 8461969810136,
           "rshares": 28155650249,
           "voter": "norbu"
         },
@@ -9468,7 +9468,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 266686932322,
+          "reputation": 266705486097,
           "rshares": 1465684732,
           "voter": "ucing"
         },
@@ -9480,7 +9480,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 4276659410889,
+          "reputation": 4276689174787,
           "rshares": 295729718,
           "voter": "michaellamden68"
         },
@@ -10518,7 +10518,7 @@
         }
       ],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "This article is targeted at anyone looking to integrate STEEM with their exchange. Please read the [documentation on How to monitor an account for deposits](https://steem.io/documentation/how-monitor-account-deposits/).  \n\nAfter you understand how to monitor for deposits, then we can start monitoring for successful withdraws.\n\n## The Problem\n\nThis post was motivated by real world issues discovered by Blocktrades and Bittrex when processing withdraws.  The `cli_wallet` API for issuing a transfer will block until the local `steamed` instance receives a block containing the transaction or a block with a timestamp after the transaction has expired.  The default expiration is 30 seconds.\n\nThe problem is that just because the method returns it doesn\u2019t mean the transaction was irreversibly logged into the blockchain or that it failed. A block could become orphaned due to any number of issues.\n\n## The Solution\n\nYou must scan for withdraws just like you scan for deposits. In other words, only poll blocks that are older than the \u2018last_irreversible_block_num` (about 40 seconds old). Each block contains the transaction IDs that were confirmed.\n\nWhen you broadcast a transaction it will return the transaction ID, mark it as pending until your block scanner sees the withdraw.\n\n## How to Avoid Blocking \n\nYou can use the `cli_wallet` to broadcast your transaction, but that will normally block. If you pass \u2018false\u2019 as the last argument to the `transfer` call, then it will create and sign a transaction and return it (without broadcasting it).  You can then pass the transaction to steamd using the non-blocking broadcast method on the network api.",
       "body_length": 1653,
@@ -10766,7 +10766,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 70486968186347,
+          "reputation": 79911231029809,
           "rshares": 42274811566572,
           "voter": "blocktrades"
         },
@@ -10820,7 +10820,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 36749432321730,
+          "reputation": 36760495244216,
           "rshares": 742821270107,
           "voter": "liondani"
         },
@@ -10892,13 +10892,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 124209883737229,
+          "reputation": 124431502021980,
           "rshares": 1267005751780,
           "voter": "steempower"
         },
         {
           "percent": "10000",
-          "reputation": 18678729398345,
+          "reputation": 18765615277904,
           "rshares": 159073307035,
           "voter": "pairmike"
         },
@@ -10910,13 +10910,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 13437403349222,
+          "reputation": 13437407248241,
           "rshares": 246923840023,
           "voter": "pheonike"
         },
         {
           "percent": "10000",
-          "reputation": 2802091583976,
+          "reputation": 2802271039072,
           "rshares": 27609269388,
           "voter": "proctologic"
         },
@@ -10946,19 +10946,19 @@
         },
         {
           "percent": "10000",
-          "reputation": 72112139588726,
+          "reputation": 72201797307702,
           "rshares": 777439363287,
           "voter": "steemrollin"
         },
         {
           "percent": "10000",
-          "reputation": 5154121875287,
+          "reputation": 5154132562174,
           "rshares": 78101716387,
           "voter": "jwest40"
         },
         {
           "percent": "10000",
-          "reputation": 76462073287981,
+          "reputation": 76483781067970,
           "rshares": 332533889108,
           "voter": "ash"
         },
@@ -10970,7 +10970,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 59130509872662,
+          "reputation": 59130695956577,
           "rshares": 526888651894,
           "voter": "kencode"
         },
@@ -11036,7 +11036,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 34347753869675,
+          "reputation": 34398121533748,
           "rshares": 197308678744,
           "voter": "camilla"
         },
@@ -11054,7 +11054,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 4931834878069,
+          "reputation": 4931888829122,
           "rshares": 25850470703,
           "voter": "fkn"
         },
@@ -11108,7 +11108,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 6580794427504,
+          "reputation": 6580945587589,
           "rshares": 58895350211,
           "voter": "hannixx42"
         },
@@ -11120,7 +11120,7 @@
         },
         {
           "percent": "3301",
-          "reputation": 2902053059801,
+          "reputation": 2902189818091,
           "rshares": 1046586020,
           "voter": "murh"
         },
@@ -11186,7 +11186,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 46310579884676,
+          "reputation": 46311592664318,
           "rshares": 99994829461,
           "voter": "bravenewcoin"
         },
@@ -11270,7 +11270,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 6105332515536,
+          "reputation": 6105344565899,
           "rshares": 7811859223,
           "voter": "primus"
         },
@@ -11300,7 +11300,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 4276659410889,
+          "reputation": 4276689174787,
           "rshares": 734973483,
           "voter": "michaellamden68"
         },
@@ -11312,13 +11312,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 15603689614497,
+          "reputation": 15603693624194,
           "rshares": 3979222351,
           "voter": "good-karma"
         },
         {
           "percent": "10000",
-          "reputation": 57643429300793,
+          "reputation": 57646811477930,
           "rshares": 229637732509,
           "voter": "roelandp"
         },
@@ -12542,7 +12542,7 @@
         }
       ],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "BlockTrades has now enabled \u201cfast-confirmations\u201d for all cryptocurrencies, so you can send in bitcoin and get your Steem or other cryptocurrency purchase in about 20 seconds on average. This feature was primarily added to allow merchants to provide their customers with a way to rapidly pay for items in shops and restaurants using point-of-sales systems like BlockPay, but it can also be useful for regular BlockTrades customers who wish to make rapid purchases with Bitcoin, Litecoin, and other cryptocurrencies that don't normally confirm quickly. Many users probably won't take advantage of this capability, since it does require some initial setup and a surety deposit, but it may be of interest for active traders who want to capitalize on rapid price changes.\n\nThis purchase method is only available to users who have signed into blocktrades.us, so if you want to purchase STEEM using this method, you must go to https://blocktrades.us . Currently it will not work if you're purchasing Steem via the Steemit purchase dialog. Note that Steem and Steem Power prices are the same for either purchase method, it's just a difference in the user interface.\n\nFor anyone who wants to take advantage of the fast confirmation capability, follow the steps below:\n\n## Configure your BlockTrades account to enable fast confirmations\n\n1) Create a user account on http://blocktrades.us if you don't already have one. BlockTrades requires that you use a valid email address as your user account name. The email must be validated by replying to an automated email from BlockTrades. Only registered BlockTrades accounts can use the fast confirmation feature, because we need to be able to connect your input addresses to your BitShares account where your \u201csurety amount\u201d is stored.\n2) If you don't have a BitShares account yet, you will need to create one here: https://bitshares.openledger.info/#\n3) Buy enough TRADE.USDLABOR from blocktrades.us to cover the largest amount of bitcoin you want to be \u201cfast confirmed\u201d and have it sent to your BitShares account. For example, if you want to be able to fast confirm a 1 BTC purchase of Steem, purchase around 600 TRADE.USDLABOR (~1 BTC at current prices).\n4) Link your BitShares account to your BlockTrades.us account by sending a payment of 1 TRADE.USDLABOR from your BitShares account to the \u201cblocktrades\u201d BitShares account with your BlockTrades account name (email address) as the memo. Note: it is very important to put your BlockTrades account name in the memo field, otherwise the system will not know how to link your BitShares and BlockTrades accounts to allow fast confirmations.\n\n## Login to BlockTrades to get fast-confirmable payment addresses\n\nAfter you've configured your account using the above steps, you can  login to BlockTrades and request deposit payment addresses that are eligible for fast confirmations. Any payment address you obtain while logged into your BlockTrades account will fast confirm as long as you have a sufficient amount of TRADE.USDLABOR in your BitShares account to act as a surety for your unconfirmed payment. When you send to the payment address, BlockTrades will temporarily remove an equivalent amount of TRADE.USDLABOR and immediately send you the cryptocurrency you've purchased. Once your payment confirms normally on its blockchain, BlockTrades will return the TRADE.USDLABOR it temporarily removed.\n\n## Example of fast confirmation limits imposed by surety amount\n\nUser John purchases 600 TRADE.USDLABOR and links his BitShares account to his BlockTrades account by paying 1 TRADE.USDLABOR, leaving 599 TRADE.USDLABOR in his account that acts as a surety amount. John can now fast confirm multiple transactions up to a total equivalent value of 599 TRADE.USDLABOR at any given time. \n\nFor example, he can send in two 0.5 BTC payments for Steem and immediately receive the Steem for both transactions. If he sends in a third payment of 1 BTC before his first two payments have confirmed, he will have to wait till either the first two payments have confirmed and his surety has been returned (after which his 3rd payment will fast confirm) or until his third payment confirms normally. When he decides he no longer needs fast confirmations, he can use his TRADE.USDLABOR to purchase one or more of his favorite cryptocurrencies from BlockTrades (or trade it for something else on the BitShares decentralized exchange).\n\n**OK, that's all it takes to get fast confirms of Bitcoin, etc, on the BlockTrades website, but if you're a web coder that wants to integrate fast confirmations of crypto conversions into your web site, we've got an extra credit section just for you...**\n\n## Extra Credit for Web Coders Only: Fast-confirmations via the BlockTrades API\n\nAs mentioned earlier, currently users have to get their payment addresses from the BlockTrades web site in order for them to be fast-confirmable, but the BlockTrades API (application programming interface) allows for other web-based services to get fast confirmable payment addresses as well. The key is that the request for a payment address must be linked to a logged-in user's account. Here's how to do that via our API:\n\nFirst, make a POST request to https://blocktrades.us/api/v2/sessions with your BlockTrades username (email address) and password.  This will return a session token that is valid until the given \"expirationTime\" (currently a session token is good for 4 hours).  You can cache the session token and reuse it until it expires, or just create a new session for every request if that is easier for your web application.\n\n$ curl -H \"Content-Type: application/json\" -X POST --data '{\"email\": \"my_email@mycompany.com\", \"password\": \"thisisnotmyrealpassword\"}' https://blocktrades.us/api/v2/sessions\n{\n    \"token\": \"4310c7e7-dc44-498c-abc6-0d233d8eb55d\",\n    \"user\": {\n        \"email\": \"my_email@mycompany.com\",\n        \"userId\": \"bdbef475-0019-439a-95e6-d075d6621078\",\n        \"timeZone\": \"UTC\",\n        \"activated\": true,\n        \"creationTime\": \"2016-05-06T11:25:56.939913-04:00\",\n        \"lastModifiedTime\": \"2016-05-06T11:25:56.939913-04:00\",\n        \"lastLoginTime\": \"2016-07-29T17:48:26.473245-04:00\"\n    },\n    \"expirationTime\": \"2016-07-29T21:48:26.522779-04:00\"\n}\n\nThen, just include the token you received in the \"token\" field above as the \"sessionToken\" in your initiate-trade request:\n\n$ curl -H \"Content-Type: application/json\" -X POST --data '{\"inputCoinType\": \"btc\", \"outputCoinType\": \"steem\", \"outputAddress\": \"my_steem_account\", \"sessionToken\": \"4310c7e7-dc44-498c-abc6-0d233d8eb55d\"}' https://blocktrades.us/api/v2/simple-api/initiate-trade\n{\n  \"inputAddress\": \"18cER8mUensvWcDF29ZbNHMYEYo8XRTPGc\",\n  \"inputMemo\": null,\n  \"inputCoinType\": \"btc\",\n  \"outputAddress\": \"my_steem_account\",\n  \"outputCoinType\": \"steem\",\n  \"refundAddress\": null\n}\n\nRight now the result of the initiate-trade request is the same as when you don't specify a sessionToken, but if you give an invalid token you'll get a 400 error \"Bad Request: Invalid or expired session token xxxxxx\".\n\nFull documentation on the BlockTrades API is available here: https://blocktrades.us/api/v2/explorer/\n\nThe two calls required to get fast-confirmable addresses are documented here:\nhttps://blocktrades.us/api/v2/explorer/#!/sessions/createNewSession\nhttps://blocktrades.us/api/v2/explorer/#!/initiate-trade/create",
       "body_length": 7347,
@@ -12592,7 +12592,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 70486968186347,
+          "reputation": 79911231029809,
           "rshares": 41503279070960,
           "voter": "blocktrades"
         },
@@ -12622,7 +12622,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 89703349977794,
+          "reputation": 91016606023399,
           "rshares": 1987850568838,
           "voter": "xeroc"
         },
@@ -12634,13 +12634,13 @@
         },
         {
           "percent": "0",
-          "reputation": 59074616588451,
+          "reputation": 59074854665271,
           "rshares": 122566800116,
           "voter": "complexring"
         },
         {
           "percent": "10000",
-          "reputation": 9510507624851,
+          "reputation": 9604948798285,
           "rshares": 252280102781,
           "voter": "ajvest"
         },
@@ -12802,7 +12802,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 3750669747284,
+          "reputation": 3946129863300,
           "rshares": 280395053936,
           "voter": "pal"
         },
@@ -12832,13 +12832,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 6580794427504,
+          "reputation": 6580945587589,
           "rshares": 39800482377,
           "voter": "hannixx42"
         },
         {
           "percent": "3301",
-          "reputation": 2902053059801,
+          "reputation": 2902189818091,
           "rshares": 5914435217,
           "voter": "murh"
         },
@@ -12880,7 +12880,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 16234753830016,
+          "reputation": 16234761500024,
           "rshares": 14482555990,
           "voter": "thecryptofiend"
         },
@@ -12898,13 +12898,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 11765473490257,
+          "reputation": 11765528754092,
           "rshares": 18032559727,
           "voter": "justtryme90"
         },
         {
           "percent": "10000",
-          "reputation": 9090232372242,
+          "reputation": 9095232035060,
           "rshares": 94217032486,
           "voter": "eric-boucher"
         },
@@ -12976,13 +12976,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 62345041692781,
+          "reputation": 62358569695987,
           "rshares": 163815528652,
           "voter": "hisnameisolllie"
         },
         {
           "percent": "10000",
-          "reputation": 5888717170887,
+          "reputation": 5890875463678,
           "rshares": 48383672928,
           "voter": "ratel"
         },
@@ -13006,7 +13006,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 77590508815145,
+          "reputation": 77603137281490,
           "rshares": 182857841775,
           "voter": "kaylinart"
         },
@@ -13090,7 +13090,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 20692382318966,
+          "reputation": 20930194413051,
           "rshares": 190147604317,
           "voter": "mauricemikkers"
         },
@@ -13120,7 +13120,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 1012910736351,
+          "reputation": 1013099898480,
           "rshares": 10614159146,
           "voter": "vladon"
         },
@@ -13132,7 +13132,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 5686398017254,
+          "reputation": 5686406558082,
           "rshares": 46465449604,
           "voter": "garycovington"
         },
@@ -13144,7 +13144,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 6105332515536,
+          "reputation": 6105344565899,
           "rshares": 12923157136,
           "voter": "primus"
         },
@@ -13156,13 +13156,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 12656257002205,
+          "reputation": 12656810345430,
           "rshares": 29554903970,
           "voter": "clement"
         },
         {
           "percent": "10000",
-          "reputation": 6813289592775,
+          "reputation": 6813614027458,
           "rshares": 3348888962,
           "voter": "arcaneinfo"
         },
@@ -13180,13 +13180,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 4276659410889,
+          "reputation": 4276689174787,
           "rshares": 392936533,
           "voter": "michaellamden68"
         },
         {
           "percent": "10000",
-          "reputation": 2544044850677,
+          "reputation": 2544165885263,
           "rshares": 15854538739,
           "voter": "eindbas"
         },
@@ -13198,7 +13198,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 57643429300793,
+          "reputation": 57646811477930,
           "rshares": 194495872827,
           "voter": "roelandp"
         },
@@ -13294,7 +13294,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 20893567338,
+          "reputation": 20895890995,
           "rshares": 250505290,
           "voter": "yana"
         },
@@ -14134,7 +14134,7 @@
         },
         {
           "percent": "10000",
-          "reputation": -4779249072914,
+          "reputation": -4779687139831,
           "rshares": 304911791,
           "voter": "weenis"
         },
@@ -14338,7 +14338,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 15932269974,
+          "reputation": 4203705401,
           "rshares": 2517712,
           "voter": "fairider1"
         },
@@ -14404,7 +14404,7 @@
         },
         {
           "percent": "10000",
-          "reputation": -3006894935427,
+          "reputation": -3006894837480,
           "rshares": 61095209,
           "voter": "steemit.tips"
         },
@@ -14656,7 +14656,7 @@
         }
       ],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "Be careful when sending out ETH and ETC due to replay attacks, Vitalik shares information on how to protect against them, as well as future plans for ETH:\nhttps://blog.ethereum.org/2016/07/26/onward_from_the_hard_fork/",
       "body_length": 218,
@@ -14760,7 +14760,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 70486968186347,
+          "reputation": 79911231029809,
           "rshares": 41118308170729,
           "voter": "blocktrades"
         },
@@ -14778,7 +14778,7 @@
         },
         {
           "percent": "-10000",
-          "reputation": 51047995307721,
+          "reputation": 51890713906913,
           "rshares": -7213536232808,
           "voter": "pharesim"
         },
@@ -14808,7 +14808,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 2827502899317,
+          "reputation": 2842806997450,
           "rshares": 1016618755244,
           "voter": "ihashfury"
         },
@@ -14820,19 +14820,19 @@
         },
         {
           "percent": "10000",
-          "reputation": -37765249963674,
+          "reputation": -37765245816069,
           "rshares": 3394363490076,
           "voter": "wang"
         },
         {
           "percent": "10000",
-          "reputation": 89703349977794,
+          "reputation": 91016606023399,
           "rshares": 891079267575,
           "voter": "xeroc"
         },
         {
           "percent": "10000",
-          "reputation": 59074616588451,
+          "reputation": 59074854665271,
           "rshares": 2001648914090,
           "voter": "complexring"
         },
@@ -14844,13 +14844,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 9510507624851,
+          "reputation": 9604948798285,
           "rshares": 203076785600,
           "voter": "ajvest"
         },
         {
           "percent": "10000",
-          "reputation": 28971806962251,
+          "reputation": 28978580333608,
           "rshares": 629077997640,
           "voter": "joseph"
         },
@@ -14952,19 +14952,19 @@
         },
         {
           "percent": "10000",
-          "reputation": 124209883737229,
+          "reputation": 124431502021980,
           "rshares": 74673536161,
           "voter": "steempower"
         },
         {
           "percent": "10000",
-          "reputation": 13437403349222,
+          "reputation": 13437407248241,
           "rshares": 123166722929,
           "voter": "pheonike"
         },
         {
           "percent": "10000",
-          "reputation": 2802091583976,
+          "reputation": 2802271039072,
           "rshares": 16148303450,
           "voter": "proctologic"
         },
@@ -14988,13 +14988,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 6977251504339,
+          "reputation": 6978993115613,
           "rshares": 2044400735,
           "voter": "dedriss"
         },
         {
           "percent": "10000",
-          "reputation": 2294989396894,
+          "reputation": 2389440930393,
           "rshares": 663044169,
           "voter": "cryptoprometheus"
         },
@@ -15006,7 +15006,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 9801987882919,
+          "reputation": 9822447992207,
           "rshares": 607955421,
           "voter": "jupiter00000"
         },
@@ -15066,13 +15066,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 34347753869675,
+          "reputation": 34398121533748,
           "rshares": 482451525,
           "voter": "camilla"
         },
         {
           "percent": "10000",
-          "reputation": 45329454600539,
+          "reputation": 45329475243951,
           "rshares": 706496363,
           "voter": "jamtaylor"
         },
@@ -15102,7 +15102,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 82831371778953,
+          "reputation": 82834521473976,
           "rshares": 1629640364,
           "voter": "cryptogee"
         },
@@ -15114,7 +15114,7 @@
         },
         {
           "percent": "666",
-          "reputation": 2902053059801,
+          "reputation": 2902189818091,
           "rshares": 696750238,
           "voter": "murh"
         },
@@ -15126,7 +15126,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 64573188744746,
+          "reputation": 64574014022519,
           "rshares": 316662971,
           "voter": "dragonslayer109"
         },
@@ -15150,7 +15150,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 57302509663422,
+          "reputation": 57302514009112,
           "rshares": 5922998699,
           "voter": "the-alien"
         },
@@ -15162,7 +15162,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 62345041692781,
+          "reputation": 62358569695987,
           "rshares": 21454050939,
           "voter": "hisnameisolllie"
         },
@@ -15174,7 +15174,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 11429090901893,
+          "reputation": 11429095247583,
           "rshares": 6009855420,
           "voter": "kenny-crane"
         },
@@ -15366,7 +15366,7 @@
         }
       ],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "### Accepting Cryptocurency for Contract Payments\n\nOne of BlockTrades' primary businesses is software development services for other cryptocurrency companies. Naturally, these companies generally prefer to pay us in cryptocurrency instead of USD dollars, but we have to pay our sub-contractors in USD dollars, so figuring out how to price a contract in crypto has often been a headache for us for several reasons: 1) our customers don't always want to pay us in the same cryptocurrency (even the same customer sometimes wants to change what crypto they pay in), 2) the price of the cryptocurrency can fluctuate a lot against the dollar and this becomes a point of potential contention as to what exchange rate should be used, and 3) converting the crypto to dollars to pay our sub-contractors costs time and money. \n\nTo alleviate these problems, we've created our own \u201cdollar-stable\u201d IOU on the BitShares distributed exchange (DEX). BlockTrades' customers can purchase TRADE.USDLABOR from our site at https://blocktrades.us and use it to pay down any USD-denominated debts to BlockTrades. \n\nOur site dynamically computes the cost of TRADE.USDLABOR versus any cryptocurrency we accept as an alternative payment for USD-priced contracts. We use pricing and liquidity information from the same exchanges that we normally use to price cryptocurrency. We peg TRADE.USDLABOR against USD Tether and add a percentage fee to account for our conversion and bank wire costs. This allows a customer to purchase TRADE.USDLABOR whenever there's a favorable rate for their crypto of choice, and then later pay us the TRADE.USDLABOR on the contract payment date, allowing them to hedge their exchange rate risk if they want.\n\n### Dollar-hedging with TRADE.USDLABOR\n\nIn fact, we also allow customers to buy cryptocurrency with TRADE.USDLABOR (here we price using approximately a 1-1 match with USD Tether as we don't have any conversion costs). So it's possible for any of our customers to use TRADE.USDLABOR as a dollar-stable coin, regardless of whether they plan to purchase service work from us. Anyone can buy TRADE.USDLABOR from us or on the BitShares DEX, then later sell it back to us at our site or sell it to a 3rd party on the DEX.\n\n### More to come soon...\n\nIt's true that we originally created TRADE.USDLABOR as a means of pricing and accepting cryptocurrency for contract payments, but as shown above, we've already found other uses our customers can make of it, such as dollar-hedging. We recently found another great use for it, but I'll talk about that in a separate post on fast conversions for Bitcoin payments.",
       "body_length": 2613,
@@ -15440,19 +15440,19 @@
         },
         {
           "percent": "10000",
-          "reputation": 13823888326286,
+          "reputation": 13824194314492,
           "rshares": 10356286336616,
           "voter": "summon"
         },
         {
           "percent": "10000",
-          "reputation": 70486968186347,
+          "reputation": 79911231029809,
           "rshares": 42891305080685,
           "voter": "blocktrades"
         },
         {
           "percent": "10000",
-          "reputation": 82600290949846,
+          "reputation": 82601368841663,
           "rshares": 425850221742,
           "voter": "cass"
         },
@@ -15464,7 +15464,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 8963739580468,
+          "reputation": 8963841931238,
           "rshares": 126946989896,
           "voter": "team"
         },
@@ -15494,13 +15494,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 12382143533351,
+          "reputation": 12389135148216,
           "rshares": 0,
           "voter": "eeks"
         },
         {
           "percent": "10000",
-          "reputation": 4931834878069,
+          "reputation": 4931888829122,
           "rshares": 21596585267,
           "voter": "fkn"
         },
@@ -15536,7 +15536,7 @@
         },
         {
           "percent": "3301",
-          "reputation": 2902053059801,
+          "reputation": 2902189818091,
           "rshares": 696750238,
           "voter": "murh"
         },
@@ -15560,7 +15560,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 11765473490257,
+          "reputation": 11765528754092,
           "rshares": 6087407252,
           "voter": "justtryme90"
         },
@@ -15578,7 +15578,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 11429090901893,
+          "reputation": 11429095247583,
           "rshares": 83333949859,
           "voter": "kenny-crane"
         },
@@ -15590,7 +15590,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 8397302485673,
+          "reputation": 8415040699805,
           "rshares": 102694704958,
           "voter": "will-zewe"
         },
@@ -15602,7 +15602,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 77590508815145,
+          "reputation": 77603137281490,
           "rshares": 226288587157,
           "voter": "kaylinart"
         },
@@ -15680,19 +15680,19 @@
         },
         {
           "percent": "10000",
-          "reputation": 5686398017254,
+          "reputation": 5686406558082,
           "rshares": 41677990195,
           "voter": "garycovington"
         },
         {
           "percent": "10000",
-          "reputation": 6029824012432,
+          "reputation": 6029864030540,
           "rshares": 3897541304,
           "voter": "frankjones"
         },
         {
           "percent": "10000",
-          "reputation": 9434414518400,
+          "reputation": 9434501398789,
           "rshares": 12347264169,
           "voter": "acassity"
         },
@@ -15704,7 +15704,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 8461965690396,
+          "reputation": 8461969810136,
           "rshares": 19234445070,
           "voter": "norbu"
         },
@@ -16058,7 +16058,7 @@
         }
       ],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "If you're looking to make a serious investment in Steem right now, you've probably noticed it's difficult to buy a lot without driving the price up and increasing your entry basis. \n\nFor a limited time, BlockTrades has a solution: we are offering up for sale about half a dozen Steem accounts that have been pre-powered up with significant amounts of STEEM POWER from the early mining days of Steem. These accounts have current market valuations (as of July 9th) of between 10 and 45 BTC based on http://coinmarketcap.com valuations. We plan to sell at rates strictly based on prevailing Steem prices at time of sale with no discounts or premiums, but we reserve the right to terminate this offer at any time.\n\nAn example account for sale is:\n\nhttps://steemit.com/@ashleigh/transfers\n\nNote that these buys are handled manually, not via an automated purchase on https://blocktrades.us. We can be reached via any of the contact methods on our web site, or you can send a private message to \u201cblocktrades\u201d on steem.slack.com if you've signed up there.",
       "body_length": 1047,
@@ -16096,31 +16096,31 @@
         },
         {
           "percent": "10000",
-          "reputation": 13823888326286,
+          "reputation": 13824194314492,
           "rshares": 7995477515823,
           "voter": "summon"
         },
         {
           "percent": "10000",
-          "reputation": 70486968186347,
+          "reputation": 79911231029809,
           "rshares": 42952234790328,
           "voter": "blocktrades"
         },
         {
           "percent": "10000",
-          "reputation": 36749432321730,
+          "reputation": 36760495244216,
           "rshares": 628598357605,
           "voter": "liondani"
         },
         {
           "percent": "10000",
-          "reputation": 59074616588451,
+          "reputation": 59074854665271,
           "rshares": 3470679585413,
           "voter": "complexring"
         },
         {
           "percent": "10000",
-          "reputation": 12481332844017,
+          "reputation": 12481333732559,
           "rshares": 1311391571987,
           "voter": "steemychicken1"
         },
@@ -16138,7 +16138,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 13437403349222,
+          "reputation": 13437407248241,
           "rshares": 218616618459,
           "voter": "pheonike"
         },
@@ -16204,7 +16204,7 @@
         },
         {
           "percent": "666",
-          "reputation": 2902053059801,
+          "reputation": 2902189818091,
           "rshares": 696750238,
           "voter": "murh"
         },
@@ -16222,7 +16222,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 11765473490257,
+          "reputation": 11765528754092,
           "rshares": 2706009298,
           "voter": "justtryme90"
         },
@@ -16252,13 +16252,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 8397302485673,
+          "reputation": 8415040699805,
           "rshares": 128181198348,
           "voter": "will-zewe"
         },
         {
           "percent": "10000",
-          "reputation": 46310579884676,
+          "reputation": 46311592664318,
           "rshares": 51214727092,
           "voter": "bravenewcoin"
         },
@@ -16300,13 +16300,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 5686398017254,
+          "reputation": 5686406558082,
           "rshares": 46913335455,
           "voter": "garycovington"
         },
         {
           "percent": "10000",
-          "reputation": 9434414518400,
+          "reputation": 9434501398789,
           "rshares": 9026661733,
           "voter": "acassity"
         },
@@ -16660,7 +16660,7 @@
         }
       ],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "A couple of times we've needed to reach a new customer at BlockTrades, but we only have their account name and no other contact info. Steem already has a built-in system for sending memos with money transfers that we could use to send a message, but this requires the receiver to know that he/she needs to check their wallet transfers page. \n\nIt would be really handy if there was some kind of \"notification\" display in the upper right or left corner to let people know to check their wallet page when they get new transfers from people (as opposed to for curation/posting rewards) such as a count of transfers received since the last time the page was visited.On the same note, it would be nice to have a way to filter info on the transfers page by type of payment (transfer/curation/posting/powerdown).",
       "body_length": 804,
@@ -16692,7 +16692,7 @@
       "active_votes": [
         {
           "percent": "10000",
-          "reputation": 145171381514207,
+          "reputation": 145256378570298,
           "rshares": 24923560486005,
           "voter": "dantheman"
         },
@@ -16704,7 +16704,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 70486968186347,
+          "reputation": 79911231029809,
           "rshares": 42749043531836,
           "voter": "blocktrades"
         },
@@ -16716,7 +16716,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 36749432321730,
+          "reputation": 36760495244216,
           "rshares": 615554203351,
           "voter": "liondani"
         },
@@ -16728,37 +16728,37 @@
         },
         {
           "percent": "10000",
-          "reputation": 89703349977794,
+          "reputation": 91016606023399,
           "rshares": 1022696962860,
           "voter": "xeroc"
         },
         {
           "percent": "10000",
-          "reputation": 59074616588451,
+          "reputation": 59074854665271,
           "rshares": 5458495570698,
           "voter": "complexring"
         },
         {
           "percent": "10000",
-          "reputation": 9510507624851,
+          "reputation": 9604948798285,
           "rshares": 239998677227,
           "voter": "ajvest"
         },
         {
           "percent": "10000",
-          "reputation": 28971806962251,
+          "reputation": 28978580333608,
           "rshares": 519414279008,
           "voter": "joseph"
         },
         {
           "percent": "10000",
-          "reputation": 82600290949846,
+          "reputation": 82601368841663,
           "rshares": 588336164334,
           "voter": "cass"
         },
         {
           "percent": "10000",
-          "reputation": 2802091583976,
+          "reputation": 2802271039072,
           "rshares": 11819118767,
           "voter": "proctologic"
         },
@@ -16782,13 +16782,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 5154121875287,
+          "reputation": 5154132562174,
           "rshares": 70408516083,
           "voter": "jwest40"
         },
         {
           "percent": "10000",
-          "reputation": 76462073287981,
+          "reputation": 76483781067970,
           "rshares": 282284263897,
           "voter": "ash"
         },
@@ -16818,7 +16818,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 9801987882919,
+          "reputation": 9822447992207,
           "rshares": 15973818952,
           "voter": "jupiter00000"
         },
@@ -16866,7 +16866,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 45329454600539,
+          "reputation": 45329475243951,
           "rshares": 91278617469,
           "voter": "jamtaylor"
         },
@@ -16932,7 +16932,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 6580794427504,
+          "reputation": 6580945587589,
           "rshares": 55946622492,
           "voter": "hannixx42"
         },
@@ -16950,7 +16950,7 @@
         },
         {
           "percent": "3301",
-          "reputation": 2902053059801,
+          "reputation": 2902189818091,
           "rshares": 1045288623,
           "voter": "murh"
         },
@@ -16992,7 +16992,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 18165011697633,
+          "reputation": 18165016808360,
           "rshares": 70832513190,
           "voter": "tinfoilfedora"
         },
@@ -17010,19 +17010,19 @@
         },
         {
           "percent": "10000",
-          "reputation": 10395665548525,
+          "reputation": 10400089484356,
           "rshares": 224829598632,
           "voter": "billbutler"
         },
         {
           "percent": "10000",
-          "reputation": 11765473490257,
+          "reputation": 11765528754092,
           "rshares": 20368505640,
           "voter": "justtryme90"
         },
         {
           "percent": "10000",
-          "reputation": 475074648083,
+          "reputation": 475121039570,
           "rshares": 948663991,
           "voter": "robi-rusmana"
         },
@@ -17070,7 +17070,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 62345041692781,
+          "reputation": 62358569695987,
           "rshares": 171241664539,
           "voter": "hisnameisolllie"
         },
@@ -17082,7 +17082,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 77590508815145,
+          "reputation": 77603137281490,
           "rshares": 209725677928,
           "voter": "kaylinart"
         },
@@ -17238,7 +17238,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 5686398017254,
+          "reputation": 5686406558082,
           "rshares": 46914555352,
           "voter": "garycovington"
         },
@@ -17256,7 +17256,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 12656257002205,
+          "reputation": 12656810345430,
           "rshares": 9907426504,
           "voter": "clement"
         },
@@ -17280,7 +17280,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 457415896486,
+          "reputation": 457419942815,
           "rshares": 1587419900,
           "voter": "greatguardian100"
         },
@@ -17322,7 +17322,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 4276659410889,
+          "reputation": 4276689174787,
           "rshares": 211838241,
           "voter": "michaellamden68"
         },
@@ -17610,7 +17610,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 10069093677389,
+          "reputation": 10071311887030,
           "rshares": 39338185038,
           "voter": "mrwang"
         },
@@ -18906,7 +18906,7 @@
         }
       ],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "OpenLedger temporarily disabled Steem deposits and withdrawals during the hack of steemit, but it is once again accepting Steem deposits for trading against Bitcoin, BitShares, Ether, and other popular cryptocurrencies.",
       "body_length": 219,
@@ -19154,7 +19154,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 70486968186347,
+          "reputation": 79911231029809,
           "rshares": 42232057996286,
           "voter": "blocktrades"
         },
@@ -19238,7 +19238,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 59074616588451,
+          "reputation": 59074854665271,
           "rshares": 2559958956551,
           "voter": "complexring"
         },
@@ -19262,7 +19262,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 5009147934382,
+          "reputation": 5009162833307,
           "rshares": 21882076245,
           "voter": "danknugs"
         },
@@ -19322,7 +19322,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 13437403349222,
+          "reputation": 13437407248241,
           "rshares": 241552967295,
           "voter": "pheonike"
         },
@@ -19358,19 +19358,19 @@
         },
         {
           "percent": "10000",
-          "reputation": 72112139588726,
+          "reputation": 72201797307702,
           "rshares": 777252775971,
           "voter": "steemrollin"
         },
         {
           "percent": "10000",
-          "reputation": 8963739580468,
+          "reputation": 8963841931238,
           "rshares": 124627202993,
           "voter": "team"
         },
         {
           "percent": "10000",
-          "reputation": 76462073287981,
+          "reputation": 76483781067970,
           "rshares": 338943850082,
           "voter": "ash"
         },
@@ -19418,7 +19418,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 4500464238667,
+          "reputation": 4500675789795,
           "rshares": 19375120586,
           "voter": "blackjincrypto"
         },
@@ -19472,7 +19472,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 35537325381339,
+          "reputation": 36532493315717,
           "rshares": 882034494928,
           "voter": "hipster"
         },
@@ -19496,7 +19496,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 3750669747284,
+          "reputation": 3946129863300,
           "rshares": 224774361724,
           "voter": "pal"
         },
@@ -19508,7 +19508,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 1228001853194,
+          "reputation": 1228115356382,
           "rshares": 13559304555,
           "voter": "fact"
         },
@@ -19532,7 +19532,7 @@
         },
         {
           "percent": "3301",
-          "reputation": 2902053059801,
+          "reputation": 2902189818091,
           "rshares": 1394467935,
           "voter": "murh"
         },
@@ -19544,7 +19544,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 1496822110191,
+          "reputation": 1553837289007,
           "rshares": 24062838220,
           "voter": "james1337"
         },
@@ -19574,13 +19574,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 11429090901893,
+          "reputation": 11429095247583,
           "rshares": 106797571679,
           "voter": "kenny-crane"
         },
         {
           "percent": "10000",
-          "reputation": 46310579884676,
+          "reputation": 46311592664318,
           "rshares": 99994829461,
           "voter": "bravenewcoin"
         },
@@ -19592,7 +19592,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 2548112906179,
+          "reputation": 2548118379284,
           "rshares": 3124735082,
           "voter": "imyao"
         },
@@ -19682,7 +19682,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 6105332515536,
+          "reputation": 6105344565899,
           "rshares": 8118694381,
           "voter": "primus"
         },
@@ -19706,7 +19706,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 4276659410889,
+          "reputation": 4276689174787,
           "rshares": 1162899550,
           "voter": "michaellamden68"
         },
@@ -20684,7 +20684,7 @@
         }
       ],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "BlockTrades has made some improvements to the withdrawal/deposit functionality for the BitShares GUI wallet (several specifically for Steem users):\n\n* The user's browser now keeps a local cache of previous withdrawal addresses for each withdrawal wallet type to make it easier to make repeated withdrawals to the same destination. The withdrawal address defaults to the last withdrawal address used for that withdrawal wallet type and a drop-down can be used to select from previously used withdrawal addresses.\n* The wallet GUI directly queries for supported coin types from the OpenLedger API server, which enables addition of new coin types without requiring new updates to the wallet GUI code. This will make it easier and quicker for OpenLedger to add new coins to their gateway.\n* Memos can be added when withdrawing to a wallet type that supports memos (e.g. graphene-based chains such as MUSE and STEEM). This is particularly useful when you want to send Steem, Steem Dollars, or Muse from your BitShares wallet directly to an exchange that supports these coin types, because they require a memo to be included to credit a deposit properly. To encrypt the memo on a Steem withdrawal, place a # symbol in front of the memo.\nIt's also possible to add a memo when depositing from a graphene-based chain. For example, to receive a memo with your OPEN.STEEM, send from your Steem wallet with a memo like \u201copen.steem:my_bitshares_account_name:my_memo_text\u201d.\n* If you withdraw using the memo method to a Steem wallet, you can include an encrypted memo as follows: \u201csteem:my_steem_account_name:#my_memo_text\u201d.\n* The GUI will fall back to a backup server for withdrawals/deposit API calls if the primary server is not reachable.\n* Coin names are displayed alphabetically in the deposit/withdrawal drop-down lists.\n\nThe changes are live now on OpenLedger, although you made need to press F5 to refresh your browser in order to see them:\nhttps://bitshares.openledger.info/#/",
       "body_length": 1971,
@@ -20734,7 +20734,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 70486968186347,
+          "reputation": 79911231029809,
           "rshares": 41813188858620,
           "voter": "blocktrades"
         },
@@ -21040,7 +21040,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 9600934617910,
+          "reputation": 9600939862173,
           "rshares": 14840212671,
           "voter": "jademont"
         },
@@ -21082,7 +21082,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 6580794427504,
+          "reputation": 6580945587589,
           "rshares": 54399511314,
           "voter": "hannixx42"
         },
@@ -21094,7 +21094,7 @@
         },
         {
           "percent": "3301",
-          "reputation": 2902053059801,
+          "reputation": 2902189818091,
           "rshares": 1432167555,
           "voter": "murh"
         },
@@ -21112,7 +21112,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 11765473490257,
+          "reputation": 11765528754092,
           "rshares": 34628751942,
           "voter": "justtryme90"
         },
@@ -21154,7 +21154,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 8397302485673,
+          "reputation": 8415040699805,
           "rshares": 199384230823,
           "voter": "will-zewe"
         },
@@ -21166,13 +21166,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 2548112906179,
+          "reputation": 2548118379284,
           "rshares": 4123478215,
           "voter": "imyao"
         },
         {
           "percent": "10000",
-          "reputation": 77590508815145,
+          "reputation": 77603137281490,
           "rshares": 259753743155,
           "voter": "kaylinart"
         },
@@ -21190,7 +21190,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 6200536920826,
+          "reputation": 6203737922470,
           "rshares": 72536432323,
           "voter": "albertogm"
         },
@@ -21226,13 +21226,13 @@
         },
         {
           "percent": "10000",
-          "reputation": 9434414518400,
+          "reputation": 9434501398789,
           "rshares": 16019230638,
           "voter": "acassity"
         },
         {
           "percent": "10000",
-          "reputation": 8461965690396,
+          "reputation": 8461969810136,
           "rshares": 62313648137,
           "voter": "norbu"
         },
@@ -21544,7 +21544,7 @@
         },
         {
           "percent": "10000",
-          "reputation": 4226573244868,
+          "reputation": 4226574982749,
           "rshares": 27476233300,
           "voter": "zaebars"
         },
@@ -22522,7 +22522,7 @@
         }
       ],
       "author": "blocktrades",
-      "author_reputation": 70486968186347,
+      "author_reputation": 79911231029809,
       "beneficiaries": [],
       "body": "<html>\n<p>I had decided to stop posting these, since my last post was getting flack from some of the other witnesses (see comments in my previous witness post for details), but a couple of other people have since commented asking me to resume posting, so I've decided to start posting these again anyways. If other whales want to downvote these posts, so be it, I suppose my reputation score can stand the hit.</p>\n<p>Depending on how much I have to say at any given time, these posts may not be strictly weekly. Over the next two weeks, I have a really busy schedule related to <a href=\"http://www.peerplays.com/\">Peerplays project</a> deadlines, so I probably won't post during that time unless something important comes up.</p>\n<p>One thing I did like about making these posts weekly is it was a nice way to keep track of where my time goes. Two weeks have gone by, and it's already hard for me to remember exactly what we worked on during that time. I used to think I have a really great memory, but it seems to work better for facts/figures than for daily events, especially when my days tend to consist of jumping back and forth between a lot of different tasks. Sometimes I long for the days when I could just focus on one task for a long stretch of time. But it's hard to report on those tasks too, since then you sometimes struggle to say more than \u201ccontinued work on x\u201d unless you can figure out some nice way to describe your sub-goals in a way that makes sense to anyone besides yourself.</p>\n<h3>What I remember of the last week or so...</h3>\n<p>Not surprisingly, the thing I remember best is what I've done in the past few days. We've just added some new Steem-related trading pairs to <a href=\"https://blocktrades.us\">BlockTrades</a>:</p>\n<p>STEEM \u2192 ETH</p>\n<p>&nbsp;STEEM \u2192 DOGE&nbsp;</p>\n<p>STEEM \u2192 DASH&nbsp;</p>\n<p>STEEM \u2192 LTC&nbsp;</p>\n<p>(we already had the other direction for these pairs)<br>\nNew bidirectional paths for Steem Dollars:&nbsp;</p>\n<p>SBD &lt;-&gt;&nbsp;ETH</p>\n<p>SBD &lt;-&gt; DOGE</p>\n<p>SBD &lt;-&gt; DASH</p>\n<p>SBD &lt;-&gt; LTC<br>\nWe'll also be adding support for some new coins soon and we'll add Steem/SBD pairs for those coins too.</p>\n<h3>The Politics of Steem</h3>\n<p>On the political side of Steem, the debate continues as to where Steem and Steemit should \u201cgo\u201d next. I continue to oppose to what I consider premature \u201ctinkering\u201d to the voting and curation system. The most recent case of this is <a href=\"https://github.com/steemit/steem/issues/323\">https://github.com/steemit/steem/issues/323</a>. At the very least, as suggested by some other witnesses, I think the threshold for such a vote should be more than a majority (at least 2/3 of all witnesses, for example). I've also heard several other curation-related proposals which I don't think have yet made it to the stage of github issues, but I haven't heard any yet that I think have a solid story to support them: they seem more like experiments to me, and I think experimenting with the heart of the value proposition for Steem Power is a risky operation.</p>\n<p>Instead of tweaking the curation system, I'm still advocating for more changes to the front-end of Steemit. This is because I believe that Steem is first and foremost an open, decentralized social media platform and that the user experience is more important than the rewards system. The platform should be easier to join, doing things like adding images, audio, and video should be extremely easy for novice users, the tagging system should work better, there should be more ways for users to interact with each other, there should a clear place on the Steemit site to get help and find information about site usage, and the latest revision of the post editor feels terrible to me (this is the first big post I've made using this version so I hadn't noticed it till now, but ultimately I resorted to editing this post in a separate editor using raw HTML). Everyday billions of people use social media sites that are tightly controlled by the site owners and who pay nothing to their users. If we focus on adding the types of features those sites already have and keep our system open and free, with the chance for rewards, I think we're sitting on a winning combination.</p>\n<p>I do believe that the rewards system is an important force for attracting new users, but I think it's inevitable that not everyone is going to be able to make lots of money by authoring articles. First, most people aren't great writers (I hope this point isn't too controversial). Second, non-native English speakers are at a distinct disadvantage when trying to write English articles and the majority of powerful voters read English.</p>\n<p>One way that we can spread rewards around to users that aren't great English writers is to accept the idea that finding good articles and translating articles written in other languages is a useful function, as long as proper attribution is given to the original source. And if we're willing to give decent rewards to such posts, I think we will reduce the cases of unattributed copy-paste posting. Note, this doesn't require any changes to the code of Steem or Steemit, this is just a proposal for a cultural change.</p>\n<h3>Final Note</h3>\n<p>I met with the Steem team for lunch last week, and I was pleased to see they had added two new members to the team, including a new front-end web programmer. But I still think they can use more web guys, so if you're a skilled javascript programmer, I hope you will consider sending your resume to Ned. I think they generally favor employees who are willing to relocate, but if you're a rockstar maybe you can negotiate the point if it's an issue for you.</p>\n</html>",
       "body_length": 5709,

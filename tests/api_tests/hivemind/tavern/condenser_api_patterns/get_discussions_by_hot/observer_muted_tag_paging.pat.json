@@ -45,7 +45,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 124209883737229,
+        "reputation": 124431502021980,
         "rshares": 1304773172054,
         "voter": "steempower"
       },
@@ -99,13 +99,13 @@
       },
       {
         "percent": "335",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 29965767422,
         "voter": "eeks"
       },
       {
         "percent": "1100",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 3023823526,
         "voter": "fkn"
       },
@@ -123,7 +123,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061217841,
         "voter": "murh"
       },
@@ -147,7 +147,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 46310579884676,
+        "reputation": 46311592664318,
         "rshares": 138383979780,
         "voter": "bravenewcoin"
       },
@@ -171,7 +171,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 111391460708814,
+        "reputation": 111848537245261,
         "rshares": 377133557309,
         "voter": "fyrstikken"
       },
@@ -581,7 +581,7 @@
     "pending_payout_value": "20.756 HBD",
     "percent_hbd": 10000,
     "permlink": "the-old-dog-experiments-the-great-tomato-science-challenge-store-bought-vs-garden-grown",
-    "post_id": 1254979,
+    "post_id": 1254981,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "The Old Dog Experiments: The Great Tomato Science Challenge. Store Bought Vs Garden Grown!",
@@ -635,13 +635,13 @@
       },
       {
         "percent": "10000",
-        "reputation": -37765249963674,
+        "reputation": -37765245816069,
         "rshares": 2205769039995,
         "voter": "wang"
       },
       {
         "percent": "4000",
-        "reputation": 5009147934382,
+        "reputation": 5009162833307,
         "rshares": 12940564755,
         "voter": "danknugs"
       },
@@ -659,13 +659,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 45329454600539,
+        "reputation": 45329475243951,
         "rshares": 190467351752,
         "voter": "jamtaylor"
       },
       {
         "percent": "5600",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 14111176458,
         "voter": "fkn"
       },
@@ -713,13 +713,13 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061233175,
         "voter": "murh"
       },
       {
         "percent": "10000",
-        "reputation": 11765473490257,
+        "reputation": 11765528754092,
         "rshares": 64889355007,
         "voter": "justtryme90"
       },
@@ -737,7 +737,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8397302485673,
+        "reputation": 8415040699805,
         "rshares": 210512019921,
         "voter": "will-zewe"
       },
@@ -755,7 +755,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 9434414518400,
+        "reputation": 9434501398789,
         "rshares": 30279417098,
         "voter": "acassity"
       },
@@ -935,7 +935,7 @@
       },
       {
         "percent": "10000",
-        "reputation": -4779249072914,
+        "reputation": -4779687139831,
         "rshares": 2668449972,
         "voter": "weenis"
       },
@@ -1129,7 +1129,7 @@
     "pending_payout_value": "38.139 HBD",
     "percent_hbd": 10000,
     "permlink": "steemit-b-day-movie-review-contest-update",
-    "post_id": 1254275,
+    "post_id": 1254277,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Steemit B'Day Movie Review Contest Update!",
@@ -1141,7 +1141,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1577354372975,
         "voter": "joseph"
       },
@@ -1171,13 +1171,13 @@
       },
       {
         "percent": "381",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 29965808304,
         "voter": "eeks"
       },
       {
         "percent": "400",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 1007941175,
         "voter": "fkn"
       },
@@ -1195,7 +1195,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061245798,
         "voter": "murh"
       },
@@ -1527,7 +1527,7 @@
     "pending_payout_value": "1.083 HBD",
     "percent_hbd": 10000,
     "permlink": "origami-flowers",
-    "post_id": 1256018,
+    "post_id": 1256020,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Origami flowers",
