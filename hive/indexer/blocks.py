@@ -208,13 +208,6 @@ class Blocks:
         except Exception as e:
             log.error("exception encountered block %d", last_num + 1)
             raise e
-
-        sql_rep = f"""
-                SET SEARCH_PATH TO {REPTRACKER_SCHEMA_NAME};
-                SELECT {REPTRACKER_SCHEMA_NAME}.reptracker_block_range_data(:to_block, :from_block);
-                """
-        DB.query_no_return(sql_rep, to_block=first_block, from_block=last_num)
-
         # Follows flushing needs to be atomic because recounts are
         # expensive. So is tracking follows at all; hence we track
         # deltas in memory and update follow/er counts in bulk.
@@ -225,6 +218,7 @@ class Blocks:
     @classmethod
     def process_multi(cls, blocks, is_massive_sync: bool) -> None:
         """Batch-process blocks; wrapped in a transaction."""
+        DB.query_no_return(f"SET SEARCH_PATH TO {REPTRACKER_SCHEMA_NAME};")
 
         time_start = OPSM.start()
 
@@ -460,7 +454,6 @@ class Blocks:
             f"SELECT {SCHEMA_NAME}.update_hive_posts_mentions({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_notification_cache({block_number}, {block_number}, {is_hour_action})",
             f"SELECT {SCHEMA_NAME}.update_follow_count({block_number}, {block_number})",
-            f"SELECT {REPTRACKER_SCHEMA_NAME}.reptracker_block_range_data({block_number}, {block_number})",
             f"SELECT {SCHEMA_NAME}.update_last_completed_block({block_number})",
         ]
 
