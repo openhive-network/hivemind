@@ -41,7 +41,7 @@
     "pending_payout_value": "0.034 HBD",
     "percent_hbd": 10000,
     "permlink": "sandee-westgate-stencil",
-    "post_id": 1253497,
+    "post_id": 1253499,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Sandee Westgate stencil",
@@ -643,7 +643,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 3750669747284,
+        "reputation": 3946129863300,
         "rshares": 251809382315,
         "voter": "pal"
       },
@@ -729,7 +729,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 3750669747284,
+        "reputation": 3946129863300,
         "rshares": 246086441808,
         "voter": "pal"
       },

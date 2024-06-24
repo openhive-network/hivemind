@@ -3,7 +3,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 145171381514207,
+        "reputation": 145256378570298,
         "rshares": 29076116285844,
         "voter": "dantheman"
       },
@@ -15,7 +15,7 @@
       },
       {
         "percent": "4000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 12249790750218,
         "voter": "smooth"
       },
@@ -51,13 +51,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 18882858310850,
+        "reputation": 18908949217954,
         "rshares": 291376139059,
         "voter": "theoretical"
       },
       {
         "percent": "10000",
-        "reputation": -37765249963674,
+        "reputation": -37765245816069,
         "rshares": 3221249905075,
         "voter": "wang"
       },
@@ -69,7 +69,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 89703349977794,
+        "reputation": 91016606023399,
         "rshares": 1976851446664,
         "voter": "xeroc"
       },
@@ -177,7 +177,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 2802091583976,
+        "reputation": 2802271039072,
         "rshares": 9525703703,
         "voter": "proctologic"
       },
@@ -195,7 +195,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 6977251504339,
+        "reputation": 6978993115613,
         "rshares": 19750361301,
         "voter": "dedriss"
       },
@@ -237,19 +237,19 @@
       },
       {
         "percent": "10000",
-        "reputation": 54345938068170,
+        "reputation": 54346161065641,
         "rshares": 124844639748,
         "voter": "craig-grant"
       },
       {
         "percent": "10000",
-        "reputation": 6750806281574,
+        "reputation": 6750813654238,
         "rshares": 91933083849,
         "voter": "juanlibertad"
       },
       {
         "percent": "10000",
-        "reputation": 45329454600539,
+        "reputation": 45329475243951,
         "rshares": 159043307696,
         "voter": "jamtaylor"
       },
@@ -279,13 +279,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 684149825513,
         "voter": "eeks"
       },
       {
         "percent": "3000",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 7637369528,
         "voter": "fkn"
       },
@@ -297,7 +297,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 51874214963,
+        "reputation": 51881718543,
         "rshares": 426310899,
         "voter": "ereismatias"
       },
@@ -333,19 +333,19 @@
       },
       {
         "percent": "10000",
-        "reputation": 6580794427504,
+        "reputation": 6580945587589,
         "rshares": 60179883035,
         "voter": "hannixx42"
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1798062001,
         "voter": "murh"
       },
       {
         "percent": "10000",
-        "reputation": 64573188744746,
+        "reputation": 64574014022519,
         "rshares": 53638519898,
         "voter": "dragonslayer109"
       },
@@ -375,7 +375,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 62345041692781,
+        "reputation": 62358569695987,
         "rshares": 253721149118,
         "voter": "hisnameisolllie"
       },
@@ -393,13 +393,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 11429090901893,
+        "reputation": 11429095247583,
         "rshares": 109458926183,
         "voter": "kenny-crane"
       },
       {
         "percent": "10000",
-        "reputation": 5888717170887,
+        "reputation": 5890875463678,
         "rshares": 66622057055,
         "voter": "ratel"
       },
@@ -1215,7 +1215,7 @@
       },
       {
         "percent": "1500",
-        "reputation": -4779249072914,
+        "reputation": -4779687139831,
         "rshares": 110226192,
         "voter": "weenis"
       },
@@ -1953,7 +1953,7 @@
       }
     ],
     "author": "hisnameisolllie",
-    "author_reputation": 62345041692781,
+    "author_reputation": 62358569695987,
     "beneficiaries": [],
     "body": "http://i.imgsafe.org/4525336fda.png\n\nThere is an impending Curation Crisis coming. If you want to understand why this is happening, and how this is going to change the Curation landscape, read on..\n\n## The Curation Bot as we know them are about to Die!!\n\nhttp://i.imgsafe.org/43a841b768.jpg\n\nCuration Bots are at war. It's an interesting phenomenon to watch. For some time (well, Steemit's not been around too long, let's say 10 weeks) some Curation Bot's have been making spectacular returns, but that is about to come to an end.\n\n## The Original Curation Rewards Algorithm:\nIt was simple, the **Earlier** you vote, the higher the share of the Curation Rewards you received (it was still relative to your Voting Power just like today). This lead to some very successful Bot's instantly up-voting (a split second after posting) any content with certain tags, or by certain authors. Curation was simply a race to vote first. \n\n## The Curation Rewards Algorithm Today:\nThe Algorithm is just like before, however with the addition of a 30 minute window where, the earlier you vote, the higher the proportion of your curation reward goes to the Author. So, if you vote 1 second after a post (is posted) you will synthetically be giving ~99% of you curation reward to the author. This changes on a 'sliding scale' until, If you vote 1 second before the end of the 30 minute window, you will give the author ~1% of your Curation Rewards. \n\n## This Complicated Things.. Which was the point..\nSo, what time do the Bot's coders set their vote to come in.. 5mins? 10mins? 15mins? 20mins? 25mins? 30mins? There is a trade off whatever time they opt for. Too late, gives other users the time to up-vote before the Bot, and take more of the curation rewards. Too early, and the bot will be giving away too much of their curation reward to the Author. This was the aim of the developers, to even the playing field and give human users a chance against the bot\u2019s.\n\n**Well, this is where Game Theory comes into play.**\n\n## Let's talk about Steemit's favourite Bot.\n@wang is the original bot. But, he is hitting some problems, and unless he evolves, these problems won\u2019t go away. @wang is very successful, and kudos to the owner of that account. They seen a big opportunity, and first mover advantage ensured they were compensated for their work.\n\nWhen the Curation Algorithm changes came through, @wang set his vote to 15mins. Giving up 50% of the Cuartion Rewards, but still getting in nice and early.\n\nUnfortunately for @wang, his success will be his downfall. This is the killer for every successful bot on Steemit. The Steemit Blockchain provides complete transparency to a users actions. So, some other clever users are sat there watching @wang making up to 900 Steem per day, and thought, \"I want a bit of that...\"\n\nSo, they set up a bot to 'front run' @wang (vote just before @wang). They looked at who or what @wang was voting on, and set their bot to vote at 14mins. Over time, the number of users engaging in this activity increased, and @wang Curation Reward begins to fall. So he Drops to 13mins. And so, the cycle begins once more,\n\n@wang has gone from 15mins to 9mins over the last few weeks...This means that @wang is currently giving away over 70% of his curation rewards to Authors;\n\n9mins/30mins = 0.166666\n1-0.3 = 70%\n\n## Where does this end?\nI've been a futures trader from 8 years, and I've had to change my trading strategy too many times to count. I\u2019ve gone through 12month period of following a strategy which makes consistent money, but then, more users start to follow your lead, and eventually the [\u2018Edge\u2019](http://www.investopedia.com/articles/active-trading/022415/vital-importance-defining-your-trading-edge.asp) is gone. The money disappears, and you have to change your trading strategy to continue to make money. There is a term;\n\n**Adapt or Die**\n\nThis fit's the upcoming Curation shift nicely. \n\nIf there is one thing I know about, it\u2019s the life cycle of a market inefficiency. Here is how it goes. \n\nI see the Steemit Curation very similar to trading a Financial Market. There is money to be made by identifying inefficiencies (a post that should have more up-votes), however, it\u2019s currently too easy. There is only a finite pool of funds that can go to this type of Curation Behaviour, and as number of users following the same strategy increases, the rewards for each user will tend to zero over time\u2026 \n\n**A Fast Buck Never Lasts**\n\n## Adapt or Die - The Rise of the 'Black Box' Bot's and the **HUMAN** Being\n\nI believe that, the current bots will continue their race to the bottom until all the curation rewards (available to their strategy) will be neutralised. The bot\u2019s don\u2019t get bored, they don\u2019t need money to survive, they will keep going until their earnings hit zero. Now, here is how we all benefit from this phenomena\u2026\n\n**Black Box Bot\u2019s**\n\nhttp://i.imgsafe.org/432c16a4e7.jpeg\n\nBot\u2019s are going to be forced to become **Smarter** and **Darker** Beings. By Darker, I **Don\u2019t** mean Evil, I mean harder to predict, operating inside a black box. In order for a bot to survive, they are going to be forced to come up with a strategy which actually finds the best content before everyone else, but in a way that they cannot be \u2018Front Run\u2019. \n\nThis means that, they won\u2019t be up-voting certain authors work blind, they won\u2019t be upvoting key words or tags, this is too easy to replicate. They are going to have to create some kind of artificial intelligence in order to have any kind of longevity. This in turn will help un-discovered quality author become noticed, and even-out the playing field.\n\n**Currently Successful Authors will get a Larger Share of the Rewards...**\nAuthors are already earning a large percentage of Curation Rewards because of the Bot\u2019s voting activity. The race to the bottom will only extenuate this. Many authors are already being awarded with 70%+ of the curations rewards, and this is only set to increase.\n\n**The Human Touch**\n\nhttp://i.imgsafe.org/4332dc37ec.jpeg\n\nHuman\u2019s can change quicker than Bot\u2019s. It\u2019s time to stop following bot\u2019s and upvoting content blind, and time to get your hand dirty and discover new talent. The Bot\u2019s evolution will take some time, but I believe there will be a rise in successful quality human curators and the rewards they receive.    \n\n**End of the Self Fulfilling Prophesy** \n  \nhttp://i.imgsafe.org/433039d0d5.jpeg\n\nSome Bot\u2019s currently have a lot of power. When they vote, it carries a lot of weight. But, unless they begin to use it in a different manner, they will lose it. This power is valuable, where one vote from them comes, 50 more follow. However, if they are picking average content, and the 50 user on their 'back' stop making curation rewards, they will lose this power. It is in their interest to adapt, and use this power for good. I expect to begin to see a more human element to these Bot\u2019s moving forward\u2026 \n\n**Curation rewards become Economically Sensible**\nCurators add value, but the level of value varies when comparing a Bot to a human being. A human being reading through a post and making a judgement as to whether the author deserves a reward is certainly more valuable than a bot voting. \n\nBot\u2019s do add value. They attach themselves to previously successful authors, or topics. These criteria have essentially been decided by the communities past actions (likes/dislikes), so they are almost operating themselves as a indexing function for Steemit. This however, with the recent UI update, is no longer needed, and many users will be content to see rewards for such services falling, and this in turn opening the doors to Human Curators.\n\n\n## Summary\nExpect the Curation Rewards for Bot\u2019s to continue to fall over the coming weeks/months. The problem is, there will be **NO** need to turn them off until rewards hit zero, due to the very low marginal cost of them operating. This is why the race to the bottom is happening, and this is why it won\u2019t end.\n\nThis can only be a good thing for Steemit. This will force the Curation Bot\u2019s to improve, and become less predictable, which will in turn help discover new and exciting talent on the platform. \n\nIt will also open the door to super star human curators. Eventually these users will carry the same kind of weight (Power) that a vote from some of the most infamous curation bots do today\u2026\n\n**Sources**\nImages: http://www.freepik.com",
     "body_length": 8401,
@@ -2015,7 +2015,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 51047995307721,
+        "reputation": 51890713906913,
         "rshares": 8667622153228,
         "voter": "pharesim"
       },
@@ -2033,25 +2033,25 @@
       },
       {
         "percent": "10000",
-        "reputation": 12842871326086,
+        "reputation": 12936121919057,
         "rshares": 108309739769,
         "voter": "sandra"
       },
       {
         "percent": "5000",
-        "reputation": 18336382560162,
+        "reputation": 18436177070468,
         "rshares": 94385554160,
         "voter": "svk"
       },
       {
         "percent": "10000",
-        "reputation": 2827502899317,
+        "reputation": 2842806997450,
         "rshares": 911603989061,
         "voter": "ihashfury"
       },
       {
         "percent": "10000",
-        "reputation": -37765249963674,
+        "reputation": -37765245816069,
         "rshares": 3221240745960,
         "voter": "wang"
       },
@@ -2075,7 +2075,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 59074616588451,
+        "reputation": 59074854665271,
         "rshares": 3808051257110,
         "voter": "complexring"
       },
@@ -2165,13 +2165,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 13437403349222,
+        "reputation": 13437407248241,
         "rshares": 254579411441,
         "voter": "pheonike"
       },
       {
         "percent": "10000",
-        "reputation": 2802091583976,
+        "reputation": 2802271039072,
         "rshares": 10934258609,
         "voter": "proctologic"
       },
@@ -2183,7 +2183,7 @@
       },
       {
         "percent": "500",
-        "reputation": 147478489309626,
+        "reputation": 147486900180657,
         "rshares": 72112070874,
         "voter": "tuck-fheman"
       },
@@ -2195,13 +2195,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 6977251504339,
+        "reputation": 6978993115613,
         "rshares": 17615187106,
         "voter": "dedriss"
       },
       {
         "percent": "10000",
-        "reputation": 8963739580468,
+        "reputation": 8963841931238,
         "rshares": 134048171755,
         "voter": "team"
       },
@@ -2237,7 +2237,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 1466040354822,
+        "reputation": 1466233930388,
         "rshares": 11490736362,
         "voter": "valentino-romero"
       },
@@ -2249,13 +2249,13 @@
       },
       {
         "percent": "1000",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 2545784510,
         "voter": "fkn"
       },
       {
         "percent": "10000",
-        "reputation": 82831371778953,
+        "reputation": 82834521473976,
         "rshares": 701111783623,
         "voter": "cryptogee"
       },
@@ -2315,7 +2315,7 @@
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1798006911,
         "voter": "murh"
       },
@@ -2357,7 +2357,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 16234753830016,
+        "reputation": 16234761500024,
         "rshares": 15742846243,
         "voter": "thecryptofiend"
       },
@@ -2375,7 +2375,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 12584108052916,
+        "reputation": 12584108941458,
         "rshares": 74533499628,
         "voter": "noganoo"
       },
@@ -2387,7 +2387,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 200733663789408,
+        "reputation": 200746108503957,
         "rshares": 2277814575053,
         "voter": "stellabelle"
       },
@@ -2405,19 +2405,19 @@
       },
       {
         "percent": "10000",
-        "reputation": 62345041692781,
+        "reputation": 62358569695987,
         "rshares": 248746224626,
         "voter": "hisnameisolllie"
       },
       {
         "percent": "10000",
-        "reputation": 11429090901893,
+        "reputation": 11429095247583,
         "rshares": 109458508102,
         "voter": "kenny-crane"
       },
       {
         "percent": "10000",
-        "reputation": 8397302485673,
+        "reputation": 8415040699805,
         "rshares": 192428204060,
         "voter": "will-zewe"
       },
@@ -2507,13 +2507,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 111391460708814,
+        "reputation": 111848537245261,
         "rshares": 402496229371,
         "voter": "fyrstikken"
       },
       {
         "percent": "10000",
-        "reputation": 6767512298331,
+        "reputation": 6768145569029,
         "rshares": 41547379030,
         "voter": "treeshaface"
       },
@@ -2531,7 +2531,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 9434414518400,
+        "reputation": 9434501398789,
         "rshares": 19421139578,
         "voter": "acassity"
       },
@@ -2543,7 +2543,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 6813289592775,
+        "reputation": 6813614027458,
         "rshares": 5535227331,
         "voter": "arcaneinfo"
       },
@@ -2561,7 +2561,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 6095326280934,
+        "reputation": 6223301979971,
         "rshares": 19252927597,
         "voter": "thebatchman"
       },
@@ -2579,7 +2579,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 57643429300793,
+        "reputation": 57646811477930,
         "rshares": 280927973984,
         "voter": "roelandp"
       },
@@ -3263,7 +3263,7 @@
       },
       {
         "percent": "10000",
-        "reputation": -4779249072914,
+        "reputation": -4779687139831,
         "rshares": 1212464736,
         "voter": "weenis"
       },
@@ -3887,7 +3887,7 @@
       }
     ],
     "author": "fyrstikken",
-    "author_reputation": 111391460708814,
+    "author_reputation": 111848537245261,
     "beneficiaries": [],
     "body": "Many steemians have told me they  feel invisible on steemit, so I decided to create SteemSpeak voice-community and am inviting all steemians to join the global community of steemit loving sea-creatures of all size and shape!\n---\n<h1>Let Your Voice Be Heard</h1>\n\n<center>https://youtu.be/fpJcnakFcV0</center>\n\n<h1>It is like Speakers Corner in London!</h1>\nSteemSpeak is kind of a digital version of London\u2019s Speakers Corner, a place for you to be heard and broadcasted world wide.\n\nAt SteemSpeak, you get to talk about what you want to talk about, as long as it is steemit, crypto or world economy related... Or Funny & Interesting ... We have a great tolerance for topics in our General room!\n\n<h1>Talk about your Passion, your blog-posts and steemit</h1>\n\nFeel free to talk about your passion, your latest blogpost or just vent your emotions and let us enjoy the draaamaa :) \n\nWe have room for as many as 1,000 simultaneous users inside our virtual studio, but has for the time being throttled it down to 100 to manage the growth and user-verification.\n\n<h1>A Great Place for Debates!</h1>\n\nJust like Steemit, there is no censorship but the opinions of other people who might or might not agree with you and it is a great place for debates.\n\n<center><img src=\"https://stakepool.com/wp-content/uploads/2016/08/Screen-Shot-2016-08-17-at-05.56.26.png\"></center>\n\n<h1>But Wait, there is more</h1>\n\nAt SteemSpeak we have many rooms where you can collaborate with other steemians on steemit-projects. Maybe you want to interview someone or create a podcast? - On SteemSpeak that is super easy, just go to an empty room, tell your guests to join and click record. \nA Wav-file will then be produced on your local machine so you can edit it later and upload it to where you want and publish it on steemit.com later. Super effective and time saving using the best Opus Voice & Music codecs for best audio-results.\n\n<center>SteemSpeak.com was created by @fyrstikken & @thebatchman</center>\n\n<center><a href=\"http://steemspeak.com/\"><h1>What are you waiting for? Join steemspeak.com now! Run!! :)</h1></a></center>",
     "body_length": 2105,
@@ -3919,7 +3919,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 30946498845353,
         "voter": "smooth"
       },
@@ -3931,7 +3931,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 13823888326286,
+        "reputation": 13824194314492,
         "rshares": 14524314878197,
         "voter": "summon"
       },
@@ -4045,13 +4045,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 54345938068170,
+        "reputation": 54346161065641,
         "rshares": 124844367769,
         "voter": "craig-grant"
       },
       {
         "percent": "1000",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 3054928609,
         "voter": "fkn"
       },
@@ -4063,7 +4063,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 58571016273092,
+        "reputation": 58572043807747,
         "rshares": 581577016638,
         "voter": "nanzo-scoop"
       },
@@ -4087,13 +4087,13 @@
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1797998021,
         "voter": "murh"
       },
       {
         "percent": "10000",
-        "reputation": 64573188744746,
+        "reputation": 64574014022519,
         "rshares": 55262805283,
         "voter": "dragonslayer109"
       },
@@ -4123,7 +4123,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8397302485673,
+        "reputation": 8415040699805,
         "rshares": 183839382554,
         "voter": "will-zewe"
       },
@@ -4609,7 +4609,7 @@
       },
       {
         "percent": "5500",
-        "reputation": -4779249072914,
+        "reputation": -4779687139831,
         "rshares": 606232368,
         "voter": "weenis"
       },
@@ -5091,7 +5091,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 30946498845353,
         "voter": "smooth"
       },
@@ -5121,7 +5121,7 @@
       },
       {
         "percent": "10000",
-        "reputation": -37765249963674,
+        "reputation": -37765245816069,
         "rshares": 3221190833849,
         "voter": "wang"
       },
@@ -5169,7 +5169,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1727858428491,
         "voter": "joseph"
       },
@@ -5217,13 +5217,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 18678729398345,
+        "reputation": 18765615277904,
         "rshares": 162755691562,
         "voter": "pairmike"
       },
       {
         "percent": "10000",
-        "reputation": 82600290949846,
+        "reputation": 82601368841663,
         "rshares": 851328912273,
         "voter": "cass"
       },
@@ -5241,7 +5241,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8963739580468,
+        "reputation": 8963841931238,
         "rshares": 134048171755,
         "voter": "team"
       },
@@ -5289,13 +5289,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 54345938068170,
+        "reputation": 54346161065641,
         "rshares": 124844367769,
         "voter": "craig-grant"
       },
       {
         "percent": "10000",
-        "reputation": 87363750745142,
+        "reputation": 87379074008639,
         "rshares": 468430270315,
         "voter": "dana-edwards"
       },
@@ -5307,7 +5307,7 @@
       },
       {
         "percent": "3000",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 8146476291,
         "voter": "fkn"
       },
@@ -5331,7 +5331,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 58571016273092,
+        "reputation": 58572043807747,
         "rshares": 595761821922,
         "voter": "nanzo-scoop"
       },
@@ -5355,7 +5355,7 @@
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1798006911,
         "voter": "murh"
       },
@@ -5379,13 +5379,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 10395665548525,
+        "reputation": 10400089484356,
         "rshares": 217828581712,
         "voter": "billbutler"
       },
       {
         "percent": "10000",
-        "reputation": 200733663789408,
+        "reputation": 200746108503957,
         "rshares": 2192181569771,
         "voter": "stellabelle"
       },
@@ -5409,13 +5409,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 11429090901893,
+        "reputation": 11429095247583,
         "rshares": 109458403543,
         "voter": "kenny-crane"
       },
       {
         "percent": "10000",
-        "reputation": 8397302485673,
+        "reputation": 8415040699805,
         "rshares": 183839382554,
         "voter": "will-zewe"
       },
@@ -5493,13 +5493,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 12656257002205,
+        "reputation": 12656810345430,
         "rshares": 39514114572,
         "voter": "clement"
       },
       {
         "percent": "10000",
-        "reputation": 9434414518400,
+        "reputation": 9434501398789,
         "rshares": 18832620196,
         "voter": "acassity"
       },
@@ -5523,7 +5523,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 15603689614497,
+        "reputation": 15603693624194,
         "rshares": 4620983099,
         "voter": "good-karma"
       },
@@ -6003,7 +6003,7 @@
       },
       {
         "percent": "4100",
-        "reputation": -4779249072914,
+        "reputation": -4779687139831,
         "rshares": 606232368,
         "voter": "weenis"
       },
@@ -6711,7 +6711,7 @@
       }
     ],
     "author": "dana-edwards",
-    "author_reputation": 87363750745142,
+    "author_reputation": 87379074008639,
     "beneficiaries": [],
     "body": "[Series] Achieving financial independence with Steem Intro 1\n========\n\n![enter image description here](https://c2.staticflickr.com/8/7737/16709762303_1edf2026cb_b.jpg)\n\nThis will be a series of posts on how to achieve financial independence using Steem. This series of posts is for people who want to learn and discuss different ways to think about money, and for people who truly despise the 9-5 salary worker lifestyle. If you're trapped in a salary worker lifestyle and you want to find an alternative then this series of posts is about how we can help each other free ourselves from that. Let's escape the salary worker lifestyle and teach others.\n\n\n\nWhat does the salary worker lifestyle bring?\n--------------------\n\nhttps://youtu.be/FF4zlGfW7Ks\n\n\n\n - **Bosses.** Most people who have a salary job are employees and most employees have a boss.  \n - **Workplace politics.** Most people who have a salary job have to deal with the aspects such as workplace politics.  \n - **A slave to the clock.** Most people in this lifestyle do not get to set their own schedule. Their schedule is set by others and they have to work a certain amount of hours not just for the pay but to save face and or keep their jobs.\n - **Hard work can be discouraged.**  In salary work you can sometimes work very hard to make higher ups look good, who sometimes take the credit for your work as if it was theirs. You may see people who get raises for reasons other than merit.\n - **You have to go to work.** Not only are most salary workers a slave to the clock but they have to also go to some designated location just to work. In 2016 this makes little sense but it's tradition to go to work even when there are long traffic jams and lines to get coffee each morning. \n - **You have to choose between arbitrary \"full time\" and \"part time\".**  The amount of hours you get are designated by arbitrary meaningless concepts like full time and part time. In reality if we look at the animal kingdom there is no full and part time. If we look far back at human history these concepts didn't exist until fairly recently. \n\n\nThis isn't to discourage anyone who lives the salary worker lifestyle and who is happy with it. Some people for whatever reason are perfectly happy to live their lives working for others in this way. But if you are disgusted by this lifestyle then continue reading and have a look at this video below:\n\n\nThe salaryman lifestyle of Japan\n---------------\n\n\nhttps://youtu.be/po8IPh64rVM\n\n\n\nThe salaryman lifestyle of Japan may be an indicator of the extreme version of the salary worker lifestyle globally. Many milennials look at videos like this and think it is totally ridiculous to live like this no matter how much money people get paid. Why do they do it? Because they need stable income to support their families? So this lifestyle for many is just a sacrifice, a means to an end.\n\n\nhttps://youtu.be/NEdwrPwFo4Q\n\n\nJapan offers a social compact where salarymen work for a company and have a job for life. This is distinctly different from how it is in the United States and this might indicate why people in Japan are willing to make greater sacrifices for their jobs. The company which treats employees like a family encourages the salary worker culture. But what if you could make a living as a blogger, enjoy your family, and not have to make these kinds of sacrifices anymore?\n\n\nBloggers have to get paid\n----------\n\nIn order to free people it is important that bloggers can get paid. The key point is that they don't have to get paid a daily salary like a factory worker or salary worker. Bloggers need to get paid enough money to be financially independent, and how much that is, that minimum threshold, is a threshold which differs from location to location, from country to country. If you know a blogger is in the United States or Tokyo then you know the cost of living is high, so they will need to get more votes and rewards to reach financial independence than the bloggers in Nigeria. \n\nFor this reason we cannot know for certain what is a big or small payout to a particular blogger. Most people would assume 20,000  USD is a large payout for the average American and they would be absolutely right. In most places in the United States, 20,000 USD is a year salary. In New York 20,000 USD might be enough for a month or two. This is because the cost of living in New York city is extremely high and 20,000 in a month is typical for some classes of workers in New York.\n\nThe threshold for financial independence\n--------------\n\nThis threshold is slightly different for everybody. This threshold might not be entirely measured in a dollar amount. But the point is that once a person has wealth beyond this minimum threshold, they are able to live off their own wealth indefinitely. This could be the person who has enough dividend paying stocks to live off their dividend payments for the rest of their life while getting a reasonable income for their location, or it could be in the form of a mountain of Steem Power which can give them weekly payouts for the rest of their life.\n\nThis isn't to say Steem Power is something people **SHOULD** pursue exclusively and it's not to think of Steem Power as an investment. It's to think of Steem Power as a tool in the fight for financial independence and as anyone knows, it's important to be diversified in terms of income streams if the goal is financial independence. Each reader can decide on their own wealth threshold, and determine what forms are most convenient for them to express their wealth, but Steem Power is important because it allows bloggers to express their wealth in a way which encourages financial independence at least as of now.\n\n\nWhat are some of the benefits of the financially independent lifestyle?\n\n - **No bosses.**  No bosses, no bullshit, you're the boss of yourself if you choose to be or you can select someone to be the boss if you voluntarily want that. \n - **Your workplace is mobile.**  Your workplace revolves around you, and it could be your laptop, it could be your smart phone, it could be your tape recorder, it's ultimately something you can carry about. Steemit could be the closest thing to a workplace and you go to work simply logging in.\n - **Work as hard as you need to.**  No one is micromanaging you, or on your back telling you what to do and how to do it. You work as hard as you deem necessary to accomplish your goals. It helps to be a perfectionist but there is no quota system. \n - **You have time to enjoy your family.** Now you can be with the people you care about as often as you want. Your job is location independent so you can take them on vacations and tour the world while you work or you can work from home. \n - **You aren't a slave to the clock anymore.** You can work when you want, sleep when you want, party when you want, and record all of it to upload to your vlog.\n\n\nPromoting financial freedom while working to achieve it\n-------------------------------------------------------\n\nYou can make posts, vlogs, and show the differences between the salary worker lifestyle and the lifestyle of a financially independent blogger. Even if you haven't yet achieved financial independence, you can help document the process of achieving financial independence as a sort of lifestyle lifelogger.  For this reason the travel blogs are very important because it is what helps to wake people up who are in lifestyles they hate to discover that it's possible to travel for a living.\n\nWhen beautiful people **(notice I don't just say women!)** are posting travel pictures and talking about enjoying their life as a blogger, it is this which attracts many ordinary people who see how these people are enjoying themselves and who want to do the same. It's important that blogging remains fun and does not turn into something which resembles a salary job and in order to keep it fun it is important to remember that at this time being a professional blogger is considered an **alternative lifestyle** and is not mainstream. \n\nNormal people do not even know it's possible to have a career as a blogger and even if they think it is possible it's not currently associated with being financially independent. When people see that you can blog, go from rags to riches, or essentially become financially independent from the wage worker, then many people who currently are wage workers thinking it's the only noble way to make money will think to at least give it a try.\n\n\nShow the Steem culture\n---------------\n\n\nDid you know if you are self employed you can live in Japan quite easily? Japan offers a freelance VISA which means if you are successful on Steemit where you can make over $2500 a month then you can apply for this VISA. \n\nhttps://youtu.be/k0XavuFn_tA\n\n\nAnd from Japan you can be a Steem ambassador where you can be a journalist to show how people in Japan are using Steem, or promote Steem to Japanese youth who do not want to be salary workers. Indeed, many Japanese do not want to follow their parents and despise the salaryman culture but they do not yet know Steemit exists. If you're in Japan, or just interested, you can bring Steem culture to Japan.\n\nThe first generation of financially independent Steemians will be the people who help create and show Steem culture to the world. You will have the opportunity to live anywhere you want, to give people around the world hope, and to show how Steem changes lives. You'll be able to promote Steem while also promoting financial independence as a concept.\n\n\nI hope you enjoyed this post, if you did there are several others from [Extie DaSilva](https://steemit.com/@extie-dasilva) that you might like.\n-----------",
     "body_length": 9691,
@@ -6743,7 +6743,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 30946498845353,
         "voter": "smooth"
       },
@@ -6761,13 +6761,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 54345938068170,
+        "reputation": 54346161065641,
         "rshares": 124844367769,
         "voter": "craig-grant"
       },
       {
         "percent": "10000",
-        "reputation": 64573188744746,
+        "reputation": 64574014022519,
         "rshares": 61647538116,
         "voter": "dragonslayer109"
       },
@@ -6785,7 +6785,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 5888717170887,
+        "reputation": 5890875463678,
         "rshares": 65231105743,
         "voter": "ratel"
       },
@@ -6803,13 +6803,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 6095326280934,
+        "reputation": 6223301979971,
         "rshares": 19252927597,
         "voter": "thebatchman"
       },
       {
         "percent": "10000",
-        "reputation": 156169282296,
+        "reputation": 156173243631,
         "rshares": 291990822,
         "voter": "sonyanka"
       },
@@ -6995,7 +6995,7 @@
       },
       {
         "percent": "10000",
-        "reputation": -4779249072914,
+        "reputation": -4779687139831,
         "rshares": 1984033205,
         "voter": "weenis"
       },
@@ -7683,7 +7683,7 @@
       },
       {
         "percent": "1000",
-        "reputation": 147478489309626,
+        "reputation": 147486900180657,
         "rshares": 120183276530,
         "voter": "tuck-fheman"
       },
@@ -7719,13 +7719,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 8166740506920,
+        "reputation": 8184947229099,
         "rshares": 35004404650,
         "voter": "cryptoiskey"
       },
       {
         "percent": "10000",
-        "reputation": 9434414518400,
+        "reputation": 9434501398789,
         "rshares": 19421139578,
         "voter": "acassity"
       },
@@ -8135,7 +8135,7 @@
       },
       {
         "percent": "10000",
-        "reputation": -37765249963674,
+        "reputation": -37765245816069,
         "rshares": 3074286081144,
         "voter": "wang"
       },
@@ -8159,7 +8159,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 59074616588451,
+        "reputation": 59074854665271,
         "rshares": 3810663611390,
         "voter": "complexring"
       },
@@ -8213,7 +8213,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 147478489309626,
+        "reputation": 147486900180657,
         "rshares": 1081518630190,
         "voter": "tuck-fheman"
       },
@@ -8285,13 +8285,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 656783832492,
         "voter": "eeks"
       },
       {
         "percent": "3000",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 8146305436,
         "voter": "fkn"
       },
@@ -8327,13 +8327,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 6580794427504,
+        "reputation": 6580945587589,
         "rshares": 60179883035,
         "voter": "hannixx42"
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1438348589,
         "voter": "murh"
       },
@@ -8399,19 +8399,19 @@
       },
       {
         "percent": "10000",
-        "reputation": 5888717170887,
+        "reputation": 5890875463678,
         "rshares": 65229633367,
         "voter": "ratel"
       },
       {
         "percent": "10000",
-        "reputation": 8397302485673,
+        "reputation": 8415040699805,
         "rshares": 183762964941,
         "voter": "will-zewe"
       },
       {
         "percent": "10000",
-        "reputation": 77590508815145,
+        "reputation": 77603137281490,
         "rshares": 126850743531,
         "voter": "kaylinart"
       },
@@ -8501,13 +8501,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 36391001943292,
+        "reputation": 36392589114506,
         "rshares": 165872891302,
         "voter": "dashpaymag"
       },
       {
         "percent": "10000",
-        "reputation": 15603689614497,
+        "reputation": 15603693624194,
         "rshares": 4717253581,
         "voter": "good-karma"
       },
@@ -8891,7 +8891,7 @@
       },
       {
         "percent": "10000",
-        "reputation": -4779249072914,
+        "reputation": -4779687139831,
         "rshares": 2314705406,
         "voter": "weenis"
       },
@@ -9059,7 +9059,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 15932269974,
+        "reputation": 4203705401,
         "rshares": 65509261,
         "voter": "fairider1"
       },
@@ -9613,13 +9613,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 13823888326286,
+        "reputation": 13824194314492,
         "rshares": 14233828580633,
         "voter": "summon"
       },
       {
         "percent": "10000",
-        "reputation": -37765249963674,
+        "reputation": -37765245816069,
         "rshares": 3073814759956,
         "voter": "wang"
       },
@@ -9667,7 +9667,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 147478489309626,
+        "reputation": 147486900180657,
         "rshares": 1105548838969,
         "voter": "tuck-fheman"
       },
@@ -9703,7 +9703,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 656783832492,
         "voter": "eeks"
       },
@@ -9721,7 +9721,7 @@
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1438059401,
         "voter": "murh"
       },
@@ -9769,7 +9769,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 15603689614497,
+        "reputation": 15603693624194,
         "rshares": 4717253581,
         "voter": "good-karma"
       },
@@ -10105,7 +10105,7 @@
       },
       {
         "percent": "10000",
-        "reputation": -4779249072914,
+        "reputation": -4779687139831,
         "rshares": 2480025476,
         "voter": "weenis"
       },
@@ -10527,7 +10527,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 30298699884179,
         "voter": "smooth"
       },
@@ -10581,7 +10581,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1649881378604,
         "voter": "joseph"
       },
@@ -10653,7 +10653,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 54345938068170,
+        "reputation": 54346161065641,
         "rshares": 99863972983,
         "voter": "craig-grant"
       },
@@ -10677,13 +10677,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 656783832492,
         "voter": "eeks"
       },
       {
         "percent": "1000",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 3054447720,
         "voter": "fkn"
       },
@@ -10743,7 +10743,7 @@
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1438050852,
         "voter": "murh"
       },
@@ -10815,13 +10815,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 5888717170887,
+        "reputation": 5890875463678,
         "rshares": 65225548481,
         "voter": "ratel"
       },
       {
         "percent": "10000",
-        "reputation": 77590508815145,
+        "reputation": 77603137281490,
         "rshares": 126850562103,
         "voter": "kaylinart"
       },
@@ -10869,19 +10869,19 @@
       },
       {
         "percent": "10000",
-        "reputation": 9434414518400,
+        "reputation": 9434501398789,
         "rshares": 18827860040,
         "voter": "acassity"
       },
       {
         "percent": "10000",
-        "reputation": 6813289592775,
+        "reputation": 6813614027458,
         "rshares": 5643589521,
         "voter": "arcaneinfo"
       },
       {
         "percent": "10000",
-        "reputation": 4276659410889,
+        "reputation": 4276689174787,
         "rshares": 2343370053,
         "voter": "michaellamden68"
       },
@@ -10893,7 +10893,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 15603689614497,
+        "reputation": 15603693624194,
         "rshares": 4717253581,
         "voter": "good-karma"
       },
@@ -11391,7 +11391,7 @@
       },
       {
         "percent": "4100",
-        "reputation": -4779249072914,
+        "reputation": -4779687139831,
         "rshares": 881792535,
         "voter": "weenis"
       },

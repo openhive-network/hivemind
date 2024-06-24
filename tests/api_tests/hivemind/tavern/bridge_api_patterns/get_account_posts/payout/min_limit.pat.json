@@ -1360,7 +1360,7 @@
     ],
     "author": "blocktrades",
     "author_payout_value": "0.000 HBD",
-    "author_reputation": 68.63,
+    "author_reputation": 69.12,
     "beneficiaries": [],
     "blacklists": [],
     "body": "<html>\n<p>On the coding side of things, we made several <a href=\"https://github.com/steemit/steem/pulls\">pull requests</a> for features/fixes we recently made to the Steem client. Some I've mentioned previously, but one new one is the ability to send two transactions for the same amount of funds between the same pair of users in the same block. Previously the 2nd transaction would be rejected.</p>\n<p>This week we spent more time on business and design discussions versus coding work. Some proposals for changing features related to voting were discussed and ultimately rejected after soliciting community input (most notoriously, the vote nullification feature). Last I heard Dan was planning to go back to the drawing board on this issue, although I have hopes that some other features such as the ones below will take precedence for the near term.&nbsp;</p>\n<p>I've been pushing hard both publicly and behind the scenes for an introductory location where new users can get a nice introduction to the Steemit site and Steemit culture, and a recent post by Ned makes me think we're going to make some headway on this issue soon. I think this is critically important, not only so new users don't feel lost, but also to reduce friction between new and existing users and move us closer to a common ground about site usage.</p>\n<p>I also participated in some discussions about how to protect people from losing too much Steem in the event that a hacker manages to gain control of their account, as well as a feature for allowing a user to regain control of their Steem account if they lose their password. I think both of these features will be big selling points when making the case for Steem as a safe alternative to traditional money.&nbsp;</p>\n<p>I'm still arguing the case that a primary focus for the front-end developers for Steemit should be a feature that allows for new users who sign up via facebook to \u201cShare\u201d that they've signed up to Steemit as a means of viral advertising. If you agree or if you think there's other more important features that the GUI guys should focus on first, please leave a comment.&nbsp;</p>\n</html>",
@@ -1388,8 +1388,8 @@
     "permlink": "blocktrades-witness-report-for-3rd-week-of-august",
     "post_id": 896102,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,

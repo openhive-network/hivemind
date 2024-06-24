@@ -30,8 +30,8 @@
     "permlink": "re-liondani-28bdsg-matthew-silver-a-man-of-genius-20160508t034252022z",
     "post_id": 3354,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -68,8 +68,8 @@
     "permlink": "re-liondani-re-ash-peerplays-crowdsale-20160507t030942055z-20160507t080416322z",
     "post_id": 3117,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -115,8 +115,8 @@
     "permlink": "re-liondani-re-dantheman-re-liondani-steem-whitepaper-download-20160506t160758235z-20160506t161628124z-20160506t165847588z",
     "post_id": 2991,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -174,8 +174,8 @@
     "permlink": "re-liondani-steem-whitepaper-download-20160506t160758235z",
     "post_id": 2972,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -227,7 +227,7 @@
     ],
     "author": "blocktrades",
     "author_payout_value": "177.090 HBD",
-    "author_reputation": 68.63,
+    "author_reputation": 69.12,
     "beneficiaries": [],
     "blacklists": [],
     "body": "This question is not really as simple to answer as it might sound. The pricing algorithm is one of the most important parts of an \"instant exchange\" system such as BlockTrades, because it's a vulnerability point that can potentially be exploited by a clever hacker attempting market manipulation. I know of at least one instant exchange (not us) who suffered losses because of pricing problems. This is one of the reasons why we keep this code closed source. It's also not \"fixed in stone\" and we do occasionally make changes to the algorithm, although that doesn't happen very often.\n\nWe use a pretty complicated algorithm to compute our base rates (a good part of the computational load on BlockTrades is related to determining the correct price based on analysis of \"live\" markets across multiple exchanges and across hundreds of markets on those exchanges). By multiple markets, I mean we look across multiple buying paths to obtain the output coin with the input coin. For example, if a user wants to buy STEEM with Bitcoin, we not only look at direct markets such as Bitcoin->STEEM, we also look at indirect paths such as BitCoin->BitShares->Steem, Bitcoin->CNY->BitShares->Steem, and many more. Our spread is also affected by the liquidity we see on all these markets. For low-liquidity markets with high spreads, this is the dominant factor in the cost differential between buying and selling a particular pair of coins on BlockTrades. \n\nAfter we calculate the base spread, we can manually configure  a plus/minus adjustment to the spread on individual market pairs based on our desire to hold either coin in our inventory. The system can also makes dynamic adjustments to the spread we offer based on how much of both coins we currently hold and how much we want to hold.\n\nFinally, we also charge a fixed \"transaction fee\" which is basically the cost to send the output coin to a customer. This is a strictly nominal fee that we try to match to the price the output blockchain network charges us, typically 0.01 USD or less. The only reason we charge this fee is prevent an attack that tries to drain our inventory (this wouldn't gain the attacker anything even if we didn't protect against it, but some people will do anything for attention).",
@@ -249,8 +249,8 @@
     "permlink": "re-liondani-re-blocktrades--blocktrades-adds-support-for-directly-buyingselling-steem-20160505t163923579z-20160505t182852284z",
     "post_id": 2778,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -292,8 +292,8 @@
     "permlink": "re-liondani-give-us-your-ideas-and-be-the-reason-to-make-steemit-the-social-platform-that-20160505t120640030z",
     "post_id": 2681,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -330,8 +330,8 @@
     "permlink": "re-liondani-give-us-your-ideas-and-be-the-reason-to-make-steemit-the-social-platform-that-20160505t120339443z",
     "post_id": 2679,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -368,8 +368,8 @@
     "permlink": "re-liondani-give-us-your-ideas-and-be-the-reason-to-make-steemit-the-social-platform-that-20160505t113324573z",
     "post_id": 2672,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -415,8 +415,8 @@
     "permlink": "re-liondani-give-us-your-ideas-and-be-the-reason-to-make-steemit-the-social-platform-that-20160505t110631900z",
     "post_id": 2665,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -458,8 +458,8 @@
     "permlink": "re-liondani-give-us-your-ideas-and-be-the-reason-to-make-steemit-the-social-platform-that-20160505t110344797z",
     "post_id": 2663,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -501,8 +501,8 @@
     "permlink": "re-liondani-give-us-your-ideas-and-be-the-reason-to-make-steemit-the-social-platform-that-20160505t105638573z",
     "post_id": 2659,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,

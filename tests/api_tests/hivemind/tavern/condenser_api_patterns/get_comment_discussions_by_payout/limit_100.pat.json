@@ -261,7 +261,7 @@
     "pending_payout_value": "0.014 HBD",
     "percent_hbd": 10000,
     "permlink": "re-test-20160915t190252",
-    "post_id": 1257605,
+    "post_id": 1257620,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Test",
@@ -305,7 +305,7 @@
     "pending_payout_value": "0.013 HBD",
     "percent_hbd": 10000,
     "permlink": "re-oaldamster-re-achim86-test-20160915t155303746z",
-    "post_id": 1255478,
+    "post_id": 1255480,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "test",
@@ -933,13 +933,13 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 6813289592775,
+        "reputation": 6813614027458,
         "rshares": 5469062752,
         "voter": "arcaneinfo"
       }
     ],
     "author": "arcaneinfo",
-    "author_reputation": 6813289592775,
+    "author_reputation": 6813614027458,
     "beneficiaries": [],
     "body": "https://steemit.com/health/@arcaneinfo/virtual-reality-therapy-might-help-paralyzed-patients-walk-again\nHit the up-vote if you like plz!!!",
     "body_length": 138,
@@ -1104,7 +1104,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-achim86-test-20160915t070512394z",
-    "post_id": 1251538,
+    "post_id": 1251540,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "test",
@@ -2369,7 +2369,7 @@
   {
     "active_votes": [],
     "author": "dragonslayer109",
-    "author_reputation": 64573188744746,
+    "author_reputation": 64574014022519,
     "beneficiaries": [],
     "body": "but I really wanted to pic is amazing :D",
     "body_length": 40,
