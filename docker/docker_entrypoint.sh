@@ -135,7 +135,7 @@ uninstall_app() {
   ./uninstall_app.sh --postgres-url="${POSTGRES_ADMIN_URL}"
 
   if [ "${SKIP_REPTRACKER}" -eq 0 ]; then
-    "${SCRIPT_DIR}/../reputation_tracker/scripts/uninstall_app.sh" --postgres-url="${POSTGRES_ADMIN_URL}"
+    "${SCRIPT_DIR}/app/reputation_tracker/scripts/uninstall_app.sh" --postgres-url="${POSTGRES_ADMIN_URL}"
   fi
 
 }
