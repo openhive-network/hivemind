@@ -11,7 +11,7 @@ from sqlalchemy.types import SMALLINT
 from sqlalchemy.types import TEXT
 from sqlalchemy.types import VARCHAR
 
-from hive.conf import SCHEMA_NAME
+from hive.conf import SCHEMA_NAME, REPTRACKER_SCHEMA_NAME
 from hive.conf import SCHEMA_OWNER_NAME
 
 from hive.indexer.hive_db.haf_functions import context_attach, context_detach, prepare_app_context
@@ -34,8 +34,6 @@ def build_metadata():
         sa.Column('name', VARCHAR(16, collation='C'), nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
         # sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Column('reputation', sa.BigInteger, nullable=False, server_default='0'),
-        sa.Column('is_implicit', sa.Boolean, nullable=False, server_default='1'),
         sa.Column('followers', sa.Integer, nullable=False, server_default='0'),
         sa.Column('following', sa.Integer, nullable=False, server_default='0'),
         sa.Column('rank', sa.Integer, nullable=False, server_default='0'),
@@ -43,21 +41,6 @@ def build_metadata():
         sa.Column('posting_json_metadata', sa.Text),
         sa.Column('json_metadata', sa.Text),
         sa.UniqueConstraint('name', name='hive_accounts_ux1'),
-        sa.Index('hive_accounts_reputation_id_idx', sa.text('reputation DESC, id')),
-    )
-
-    sa.Table(
-        'hive_reputation_data',
-        metadata,
-        sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('author_id', sa.Integer, nullable=False),
-        sa.Column('voter_id', sa.Integer, nullable=False),
-        sa.Column('permlink', sa.String(255, collation='C'), nullable=False),
-        sa.Column('rshares', sa.BigInteger, nullable=False),
-        sa.Column('block_num', sa.Integer, nullable=False),
-        sa.Index('hive_reputation_data_author_permlink_voter_idx', 'author_id', 'permlink', 'voter_id'),
-        sa.Index('hive_reputation_data_block_num_idx', 'block_num'),
     )
 
     sa.Table(
@@ -619,6 +602,12 @@ def setup(db, admin_db):
 
     # database_api_vote, find_votes, list_votes_by_voter_comment, list_votes_by_comment_voter moved into database_api_list_votes.sql
 
+
+    sql = f"CREATE INDEX IF NOT EXISTS idx_reputation_on_account_reputations ON {REPTRACKER_SCHEMA_NAME}.account_reputations(reputation)"
+    db.query(sql)
+
+    # reputation removed from hive_accounts, index on reputation is created on reptracker's table
+
     sql = f"""
           CREATE TABLE IF NOT EXISTS {SCHEMA_NAME}.hive_db_patch_level
           (
@@ -784,7 +773,7 @@ ALTER TABLE {SCHEMA_NAME}.{table} SET (autovacuum_vacuum_scale_factor = 0,
 def set_fillfactor(db):
     """Initializes/resets FILLFACTOR for tables which are intesively updated"""
 
-    fillfactor_config = {'hive_posts': 70, 'hive_post_data': 70, 'hive_votes': 70, 'hive_reputation_data': 50}
+    fillfactor_config = {'hive_posts': 70, 'hive_post_data': 70, 'hive_votes': 70}
 
     for table, fillfactor in fillfactor_config.items():
         sql = f"ALTER TABLE {SCHEMA_NAME}.{table} SET (FILLFACTOR = {fillfactor});"
@@ -801,7 +790,6 @@ def set_logged_table_attribute(db, logged):
         'hive_posts',
         'hive_post_data',
         'hive_votes',
-        'hive_reputation_data',
     ]
 
     for table in logged_config:
