@@ -12,7 +12,7 @@ CREATE OR REPLACE VIEW hivemind_app.hive_accounts_info_view_lite
     ha.lastread_at,
     ha.posting_json_metadata,
     ha.json_metadata
-   FROM hivemind_app.hive_accounts ha
+   FROM hivemind_app.hive_accounts_view ha
    LEFT JOIN LATERAL
    ( 
      SELECT COUNT(1) AS post_count

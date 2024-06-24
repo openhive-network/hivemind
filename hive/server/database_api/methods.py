@@ -192,7 +192,7 @@ async def find_comments(context, comments: list):
           hp.id
         FROM
           {SCHEMA_NAME}.live_posts_comments_view hp
-        JOIN {SCHEMA_NAME}.hive_accounts_view ha_a ON ha_a.id = hp.author_id
+        JOIN {SCHEMA_NAME}.hive_accounts ha_a ON ha_a.id = hp.author_id
         JOIN {SCHEMA_NAME}.hive_permlink_data hpd_p ON hpd_p.id = hp.permlink_id
         JOIN (VALUES {{}}) AS t (author, permlink, number) ON ha_a.name = t.author AND hpd_p.permlink = t.permlink
         WHERE

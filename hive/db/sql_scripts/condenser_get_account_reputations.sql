@@ -7,7 +7,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.condenser_get_account_reputations(
 RETURNS TABLE
 (
     name hivemind_app.hive_accounts.name%TYPE,
-    reputation hivemind_app.hive_accounts.reputation%TYPE
+    reputation BIGINT
 )
 AS
 $function$
@@ -17,7 +17,7 @@ BEGIN
 
     RETURN QUERY SELECT
       ha.name, ha.reputation
-    FROM hivemind_app.hive_accounts ha
+    FROM hivemind_app.hive_accounts_view ha
     WHERE ha.name >= _account_lower_bound AND ha.id != 0 -- don't include artificial empty account
     ORDER BY name
     LIMIT _limit;
