@@ -153,7 +153,6 @@ class DbState:
             'hive_reblogs_created_at_idx',
             'hive_votes_voter_id_post_id_idx',
             'hive_votes_post_id_voter_id_idx',
-            'hive_reputation_data_block_num_idx',
             'hive_notification_cache_block_num_idx',
             'hive_notification_cache_dst_score_idx',
         ]
@@ -287,7 +286,21 @@ class DbState:
         """Disables non-critical indexes for faster sync, as well as foreign key constraints."""
         cls._original_synchronous_commit_mode = cls.db().query_one("SELECT current_setting('synchronous_commit');")
         cls.db().query_no_return("SET synchronous_commit = OFF;")
-
+        insert_rep_sql = f"""
+                            SET SEARCH_PATH TO {REPTRACKER_SCHEMA_NAME};
+                            WITH select_account_reputations AS MATERIALIZED
+                            (
+                            SELECT ha.id AS ha_id, 0, true, ar.account_id as ar_id
+                            FROM accounts_view ha
+                            LEFT JOIN account_reputations ar ON ar.account_id = ha.id
+                            )
+                            INSERT INTO account_reputations
+                            (account_id, reputation, is_implicit)
+                            SELECT sar.ha_id, 0, true
+                            FROM select_account_reputations sar
+                            WHERE sar.ar_id IS NULL;
+        """
+        cls.db().query_no_return(insert_rep_sql)
         cls._is_massive_sync = True
         to_sync = hived_head_block - last_imported_block
 

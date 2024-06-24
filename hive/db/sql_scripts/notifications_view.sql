@@ -15,7 +15,7 @@ from hivemind_app.hive_accounts ha
 left join 
 (
 	SELECT ha3.id, rank() OVER (ORDER BY ha3.reputation DESC) as account_rank
-    FROM hivemind_app.hive_accounts ha3
+    FROM hivemind_app.hive_accounts_view ha3
 	order by ha3.reputation desc
 	limit 150000
   -- Conditions above (related to rank.position) eliminates all records having rank > 100k. So with inclding some
