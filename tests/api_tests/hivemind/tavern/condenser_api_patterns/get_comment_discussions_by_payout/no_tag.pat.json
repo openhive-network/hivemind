@@ -3,7 +3,7 @@
     "active_votes": [
       {
         "percent": "300",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 1294968367268,
         "voter": "smooth"
       },
@@ -15,13 +15,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 13823888326286,
+        "reputation": 13824194314492,
         "rshares": 14409605494831,
         "voter": "summon"
       },
       {
         "percent": "10000",
-        "reputation": 70486968186347,
+        "reputation": 79911231029809,
         "rshares": 40261554792719,
         "voter": "blocktrades"
       },
@@ -57,7 +57,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 36749432321730,
+        "reputation": 36760495244216,
         "rshares": 948645888607,
         "voter": "liondani"
       },
@@ -87,13 +87,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 59074616588451,
+        "reputation": 59074854665271,
         "rshares": 5751660885474,
         "voter": "complexring"
       },
       {
         "percent": "10000",
-        "reputation": 12481332844017,
+        "reputation": 12481333732559,
         "rshares": 1644151280793,
         "voter": "steemychicken1"
       },
@@ -147,7 +147,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 76462073287981,
+        "reputation": 76483781067970,
         "rshares": 351517418935,
         "voter": "ash"
       },
@@ -189,7 +189,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 60877390332151,
+        "reputation": 60877394467474,
         "rshares": 491733834025,
         "voter": "kevinwong"
       },
@@ -231,13 +231,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 9090232372242,
+        "reputation": 9095232035060,
         "rshares": 73022585138,
         "voter": "eric-boucher"
       },
       {
         "percent": "10000",
-        "reputation": 11429090901893,
+        "reputation": 11429095247583,
         "rshares": 109636482823,
         "voter": "kenny-crane"
       },
@@ -249,7 +249,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 46310579884676,
+        "reputation": 46311592664318,
         "rshares": 117389810764,
         "voter": "bravenewcoin"
       },
@@ -261,7 +261,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 9131956116299,
+        "reputation": 9132439174346,
         "rshares": 128017998380,
         "voter": "omarb"
       },
@@ -273,7 +273,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8166740506920,
+        "reputation": 8184947229099,
         "rshares": 32961119819,
         "voter": "cryptoiskey"
       },
@@ -627,7 +627,7 @@
       }
     ],
     "author": "smooth",
-    "author_reputation": 32455846463901,
+    "author_reputation": 32455850438813,
     "beneficiaries": [],
     "body": "I will sponsor an additional 2000 SBD toward this campaign in addition to my vote on the post, plus any rewards on this comment.",
     "body_length": 128,
@@ -659,7 +659,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 30296554046147,
         "voter": "smooth"
       },
@@ -671,7 +671,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 13823888326286,
+        "reputation": 13824194314492,
         "rshares": 14368089454321,
         "voter": "summon"
       },
@@ -749,13 +749,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 68236886814465,
+        "reputation": 68522465130506,
         "rshares": 342922310367,
         "voter": "officialfuzzy"
       },
       {
         "percent": "9700",
-        "reputation": 82600290949846,
+        "reputation": 82601368841663,
         "rshares": 802009404542,
         "voter": "cass"
       },
@@ -839,7 +839,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 9434414518400,
+        "reputation": 9434501398789,
         "rshares": 17651204278,
         "voter": "acassity"
       },
@@ -1219,7 +1219,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 101807714979611,
+        "reputation": 101829024838797,
         "rshares": 664278529380,
         "voter": "pfunk"
       },
@@ -1243,7 +1243,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 77590508815145,
+        "reputation": 77603137281490,
         "rshares": 130506632815,
         "voter": "kaylinart"
       },
@@ -1359,7 +1359,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 70486968186347,
+        "reputation": 79911231029809,
         "rshares": 40261554792719,
         "voter": "blocktrades"
       },
@@ -1401,7 +1401,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 9090232372242,
+        "reputation": 9095232035060,
         "rshares": 71100938161,
         "voter": "eric-boucher"
       },
@@ -1413,7 +1413,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 46310579884676,
+        "reputation": 46311592664318,
         "rshares": 117389810764,
         "voter": "bravenewcoin"
       },
@@ -1541,7 +1541,7 @@
     "active_votes": [
       {
         "percent": "5000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 14824916004472,
         "voter": "smooth"
       },
@@ -1553,7 +1553,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 13823888326286,
+        "reputation": 13824194314492,
         "rshares": 14660905118594,
         "voter": "summon"
       },
@@ -1601,7 +1601,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 82600290949846,
+        "reputation": 82601368841663,
         "rshares": 733758489177,
         "voter": "cass"
       },
@@ -1977,7 +1977,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 45329454600539,
+        "reputation": 45329475243951,
         "rshares": 154121482815,
         "voter": "jamtaylor"
       },
@@ -1989,7 +1989,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 7603352468101,
+        "reputation": 7603683388512,
         "rshares": 39444938394,
         "voter": "tiffjane"
       },
@@ -2207,7 +2207,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 45329454600539,
+        "reputation": 45329475243951,
         "rshares": 147833075316,
         "voter": "jamtaylor"
       },
@@ -2567,7 +2567,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 45329454600539,
+        "reputation": 45329475243951,
         "rshares": 154146763309,
         "voter": "jamtaylor"
       },
@@ -2677,7 +2677,7 @@
       },
       {
         "percent": "500",
-        "reputation": 70486968186347,
+        "reputation": 79911231029809,
         "rshares": 2478143633692,
         "voter": "blocktrades"
       },
@@ -2897,7 +2897,7 @@
       },
       {
         "percent": "100",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 644958517124,
         "voter": "smooth"
       },
@@ -2969,7 +2969,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1813610822120,
         "voter": "joseph"
       },
@@ -3005,7 +3005,7 @@
       },
       {
         "percent": "9700",
-        "reputation": 82600290949846,
+        "reputation": 82601368841663,
         "rshares": 937174079758,
         "voter": "cass"
       },
@@ -3295,13 +3295,13 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 145171381514207,
+        "reputation": 145256378570298,
         "rshares": 28300878156066,
         "voter": "dantheman"
       },
       {
         "percent": "100",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 636585679281,
         "voter": "smooth"
       },
@@ -3385,7 +3385,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 9090232372242,
+        "reputation": 9095232035060,
         "rshares": 71291626568,
         "voter": "eric-boucher"
       },
@@ -3495,7 +3495,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 4226573244868,
+        "reputation": 4226574982749,
         "rshares": 28897024316,
         "voter": "zaebars"
       },
@@ -3605,7 +3605,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 59074616588451,
+        "reputation": 59074854665271,
         "rshares": 7221866970964,
         "voter": "complexring"
       },
@@ -3617,7 +3617,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 5009147934382,
+        "reputation": 5009162833307,
         "rshares": 30390370257,
         "voter": "danknugs"
       },
@@ -3683,7 +3683,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 101807714979611,
+        "reputation": 101829024838797,
         "rshares": 749198663628,
         "voter": "pfunk"
       },
@@ -3695,7 +3695,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 147478489309626,
+        "reputation": 147486900180657,
         "rshares": 1039484860678,
         "voter": "tuck-fheman"
       },
@@ -3725,7 +3725,7 @@
       },
       {
         "percent": "100",
-        "reputation": 76633033946568,
+        "reputation": 76664164382264,
         "rshares": 14796343926,
         "voter": "piedpiper"
       },
@@ -3737,13 +3737,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 715648773415,
         "voter": "eeks"
       },
       {
         "percent": "10000",
-        "reputation": 82831371778953,
+        "reputation": 82834521473976,
         "rshares": 854401132096,
         "voter": "cryptogee"
       },
@@ -3755,7 +3755,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 58571016273092,
+        "reputation": 58572043807747,
         "rshares": 726664133144,
         "voter": "nanzo-scoop"
       },
@@ -3773,7 +3773,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 6580794427504,
+        "reputation": 6580945587589,
         "rshares": 56779104986,
         "voter": "hannixx42"
       },
@@ -3791,7 +3791,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 60877390332151,
+        "reputation": 60877394467474,
         "rshares": 608622985586,
         "voter": "kevinwong"
       },
@@ -3809,7 +3809,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 16234753830016,
+        "reputation": 16234761500024,
         "rshares": 53884344664,
         "voter": "thecryptofiend"
       },
@@ -3821,7 +3821,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 200733663789408,
+        "reputation": 200746108503957,
         "rshares": 2264268111917,
         "voter": "stellabelle"
       },
@@ -3839,7 +3839,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 77590508815145,
+        "reputation": 77603137281490,
         "rshares": 306456223000,
         "voter": "kaylinart"
       },
@@ -3875,7 +3875,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8166740506920,
+        "reputation": 8184947229099,
         "rshares": 35291674341,
         "voter": "cryptoiskey"
       },
@@ -3899,7 +3899,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 57643429300793,
+        "reputation": 57646811477930,
         "rshares": 318074226526,
         "voter": "roelandp"
       },
@@ -3971,7 +3971,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 10069093677389,
+        "reputation": 10071311887030,
         "rshares": 40575184405,
         "voter": "mrwang"
       },
@@ -4569,7 +4569,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 31588356739639,
         "voter": "smooth"
       },
@@ -4635,19 +4635,19 @@
       },
       {
         "percent": "10000",
-        "reputation": 54345938068170,
+        "reputation": 54346161065641,
         "rshares": 394226217606,
         "voter": "craig-grant"
       },
       {
         "percent": "3000",
-        "reputation": 16234753830016,
+        "reputation": 16234761500024,
         "rshares": 24215364511,
         "voter": "thecryptofiend"
       },
       {
         "percent": "10000",
-        "reputation": 200733663789408,
+        "reputation": 200746108503957,
         "rshares": 2042269341790,
         "voter": "stellabelle"
       },

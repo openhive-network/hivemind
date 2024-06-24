@@ -29,7 +29,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "iconomi-why-we-need-found-management-explained-on-graphs",
-    "post_id": 1258096,
+    "post_id": 1258106,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "ICONOMI - why we need found management explained on graphs.",
@@ -67,7 +67,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "i-hack-monero-xmr",
-    "post_id": 1258070,
+    "post_id": 1258080,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "I hack Monero (Xmr) ?",
@@ -91,7 +91,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 89703349977794,
+        "reputation": 91016606023399,
         "rshares": 1950776472028,
         "voter": "xeroc"
       },
@@ -127,7 +127,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 24694558802,
         "voter": "fkn"
       },
@@ -163,7 +163,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 58571016273092,
+        "reputation": 58572043807747,
         "rshares": 584301957019,
         "voter": "nanzo-scoop"
       },
@@ -181,7 +181,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061309796,
         "voter": "murh"
       },
@@ -205,7 +205,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 11765473490257,
+        "reputation": 11765528754092,
         "rshares": 61303208719,
         "voter": "justtryme90"
       },
@@ -265,13 +265,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 3708822694051,
+        "reputation": 3708827126655,
         "rshares": 75335893384,
         "voter": "emily-cook"
       },
       {
         "percent": "10000",
-        "reputation": 8166740506920,
+        "reputation": 8184947229099,
         "rshares": 34073741916,
         "voter": "cryptoiskey"
       },
@@ -283,7 +283,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 12656257002205,
+        "reputation": 12656810345430,
         "rshares": 36267999733,
         "voter": "clement"
       },
@@ -307,7 +307,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 57643429300793,
+        "reputation": 57646811477930,
         "rshares": 462747522217,
         "voter": "roelandp"
       },
@@ -409,7 +409,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 4226573244868,
+        "reputation": 4226574982749,
         "rshares": 30989849211,
         "voter": "zaebars"
       },
@@ -1365,7 +1365,7 @@
     "pending_payout_value": "18.922 HBD",
     "percent_hbd": 10000,
     "permlink": "mackerelcoin-and-my-socioeconomic-observations-from-prison-part-1-by-charlie-shrem",
-    "post_id": 1258017,
+    "post_id": 1258027,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "MackerelCoin & My Socioeconomic Observations from Prison (Part 1 by Charlie Shrem)",
@@ -1383,13 +1383,13 @@
       },
       {
         "percent": "3500",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 8567499992,
         "voter": "fkn"
       },
       {
         "percent": "10000",
-        "reputation": 14848515958625,
+        "reputation": 14852909702528,
         "rshares": 83863566295,
         "voter": "kingscrown"
       },
@@ -1407,7 +1407,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061309796,
         "voter": "murh"
       },
@@ -1575,7 +1575,7 @@
       }
     ],
     "author": "kingscrown",
-    "author_reputation": 14848515958625,
+    "author_reputation": 14852909702528,
     "beneficiaries": [],
     "body": "## Since few days theres a video where hackers show casino on which they play and double-spend the money.\n\nhttps://www.youtube.com/watch?v=RtGzV_-agcI\n\nYet they went futher and put this as a service that anybody can use, they take 10% cut of the amount you use.\n\nhttp://www.glasshunt.co/exploits/bitcoin-double-spend\n\nSome users below video claim that tried this and it didnt work (so lost 10%).\n\n# It is worth noticing that this \"hack\" works only one zero-confirmation sites, which are rather rare or mostly non-existent now.\n\nAmanda made interview with the creators:\nhttps://www.youtube.com/watch?v=ysVCU1b-UBA",
     "body_length": 612,
@@ -1595,7 +1595,7 @@
     "pending_payout_value": "0.270 HBD",
     "percent_hbd": 10000,
     "permlink": "bitcoin-double-spending-tool-provided-as-a-service-by-hackers",
-    "post_id": 1257678,
+    "post_id": 1257688,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Bitcoin Double-Spending Tool provided As A Service by Hackers",
@@ -1633,7 +1633,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "what-is-blokcheyn",
-    "post_id": 1257664,
+    "post_id": 1257674,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "What is Blokcheyn?",
@@ -1671,7 +1671,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "sony-s-new-show-startup-gets-bitcoin-right-but-other-parts-of-the-program-can-use-some-work",
-    "post_id": 1257408,
+    "post_id": 1257418,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Sony\u2019s New Show \u2018Startup\u2019 Gets Bitcoin Right but other parts of the program can use some work",
@@ -1721,7 +1721,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 0,
     "permlink": "art-of-bitcoin-artist-ray-istre-looking-for-visual-ideas-for-steemit-art",
-    "post_id": 1257223,
+    "post_id": 1257233,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Art of Bitcoin Artist, Ray Istre, looking for visual ideas for Steemit Art",
@@ -1733,13 +1733,13 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 145171381514207,
+        "reputation": 145256378570298,
         "rshares": 28370463371572,
         "voter": "dantheman"
       },
       {
         "percent": "10000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 31307487536364,
         "voter": "smooth"
       },
@@ -1781,19 +1781,19 @@
       },
       {
         "percent": "10000",
-        "reputation": -37765249963674,
+        "reputation": -37765245816069,
         "rshares": 2206068741954,
         "voter": "wang"
       },
       {
         "percent": "10000",
-        "reputation": 89703349977794,
+        "reputation": 91016606023399,
         "rshares": 1950753758979,
         "voter": "xeroc"
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1534707047296,
         "voter": "joseph"
       },
@@ -1895,13 +1895,13 @@
       },
       {
         "percent": "1225",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 104880949618,
         "voter": "eeks"
       },
       {
         "percent": "10000",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 24694558802,
         "voter": "fkn"
       },
@@ -1931,7 +1931,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 58571016273092,
+        "reputation": 58572043807747,
         "rshares": 584291107228,
         "voter": "nanzo-scoop"
       },
@@ -1961,13 +1961,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 60877390332151,
+        "reputation": 60877394467474,
         "rshares": 616864092786,
         "voter": "kevinwong"
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061266533,
         "voter": "murh"
       },
@@ -2051,7 +2051,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8397302485673,
+        "reputation": 8415040699805,
         "rshares": 219283354085,
         "voter": "will-zewe"
       },
@@ -2123,7 +2123,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 3708822694051,
+        "reputation": 3708827126655,
         "rshares": 75334808165,
         "voter": "emily-cook"
       },
@@ -2159,7 +2159,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 15603689614497,
+        "reputation": 15603693624194,
         "rshares": 60315479782,
         "voter": "good-karma"
       },
@@ -2393,7 +2393,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 4226573244868,
+        "reputation": 4226574982749,
         "rshares": 30989614870,
         "voter": "zaebars"
       },
@@ -4075,7 +4075,7 @@
     "pending_payout_value": "595.718 HBD",
     "percent_hbd": 10000,
     "permlink": "another-billionaire-warns-of-catastrophic-depths-not-seen-in-5-000-years-and-emphasizes-gold",
-    "post_id": 1257181,
+    "post_id": 1257191,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Another Billionaire Warns of Catastrophic Depths Not Seen in 5,000 Years - and Emphasizes Gold",
@@ -4155,7 +4155,7 @@
     "pending_payout_value": "0.033 HBD",
     "percent_hbd": 10000,
     "permlink": "new-altcoins-on-exchanges-7-sept-13-15-2016",
-    "post_id": 1256738,
+    "post_id": 1256740,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "New altcoins on exchanges #7 Sept 13-15, 2016",
@@ -4205,7 +4205,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "how-to-exchange-bitcoin-btc-to-ripple-xrp",
-    "post_id": 1256681,
+    "post_id": 1256683,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Ripple Skyrocketed! Changelly Helps You to Buy it Instantly! - how to guide",

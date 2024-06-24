@@ -3,7 +3,7 @@
   "active_votes": [
     {
       "percent": -10000,
-      "reputation": 145171381514207,
+      "reputation": 145256378570298,
       "rshares": -17844523351797,
       "time": "2016-04-28T14:08:57",
       "voter": "dantheman",
@@ -43,7 +43,7 @@
     },
     {
       "percent": 10000,
-      "reputation": 13270505121655,
+      "reputation": 13270601846729,
       "rshares": 47756400000000,
       "time": "2016-04-22T12:54:24",
       "voter": "ned",
@@ -115,7 +115,7 @@
     },
     {
       "percent": 10000,
-      "reputation": 1357335712177,
+      "reputation": 1367922336040,
       "rshares": 31848000000,
       "time": "2016-04-22T14:27:24",
       "voter": "jabbasteem",
@@ -139,7 +139,7 @@
     },
     {
       "percent": -100,
-      "reputation": 89703349977794,
+      "reputation": 91016606023399,
       "rshares": -15642000000,
       "time": "2016-04-22T14:52:12",
       "voter": "xeroc",
@@ -163,7 +163,7 @@
     },
     {
       "percent": 10000,
-      "reputation": 28971806962251,
+      "reputation": 28978580333608,
       "rshares": 253289000000,
       "time": "2016-04-24T20:57:15",
       "voter": "joseph",
@@ -251,7 +251,7 @@
     },
     {
       "percent": 10000,
-      "reputation": 68236886814465,
+      "reputation": 68522465130506,
       "rshares": 86000000,
       "time": "2016-04-23T06:31:54",
       "voter": "officialfuzzy",
@@ -259,7 +259,7 @@
     },
     {
       "percent": 10000,
-      "reputation": 101807714979611,
+      "reputation": 101829024838797,
       "rshares": 23579069533,
       "time": "2016-04-29T16:09:39",
       "voter": "pfunk",
@@ -275,7 +275,7 @@
     },
     {
       "percent": 10000,
-      "reputation": 13437403349222,
+      "reputation": 13437407248241,
       "rshares": 8158000000,
       "time": "2016-04-25T05:18:45",
       "voter": "pheonike",
@@ -315,7 +315,7 @@
     },
     {
       "percent": 10000,
-      "reputation": 147478489309626,
+      "reputation": 147486900180657,
       "rshares": 7297950344,
       "time": "2016-04-27T07:27:27",
       "voter": "tuck-fheman",
@@ -419,7 +419,7 @@
     },
     {
       "percent": 3301,
-      "reputation": 2902053059801,
+      "reputation": 2902189818091,
       "rshares": 6955548432,
       "time": "2016-09-01T16:22:33",
       "voter": "murh",
@@ -459,7 +459,7 @@
     },
     {
       "percent": 10000,
-      "reputation": 7949210311767,
+      "reputation": 7949214602878,
       "rshares": 26879480257,
       "time": "2016-07-08T02:52:45",
       "voter": "talanhorne",
@@ -475,7 +475,7 @@
     },
     {
       "percent": 10000,
-      "reputation": 157647921272,
+      "reputation": 157657623280,
       "rshares": 243721839,
       "time": "2016-07-08T20:48:51",
       "voter": "sudisetan",
@@ -566,7 +566,7 @@
   "allow_replies": true,
   "allow_votes": true,
   "author": "ned",
-  "author_reputation": 13270505121655,
+  "author_reputation": 13270601846729,
   "author_rewards": 1016392,
   "beneficiaries": [],
   "body": "\nned [4/20/16] [1:12 PM] \n\nVESTS WILL BE HEREBY REFERRED TO AS STEEM POWER (SP) and moving from Steem to Steem Power will be referred to as \u201cpowering up\u201d; moving from Steem Power to Steem referred to as \u201cpowering down.\u201d For example, one can power down their Steem over a period of two years, yet one can power up their Steem instantly.  Powering up your Steem has several benefits, including automatic and recurring Steem rewards.  Additionally, Steem Power gives you voting power, which allows you to earn by casting votes on Steem, and because of this, Steem Power gives you the ability to earn more Steem Power and Steem Dollars. (edited)\n\n[1:13] \n\nSteemit.com and the Whitepaper will reflect these changes soon ..\n\nedit*",

@@ -3,7 +3,7 @@
     "active_votes": [
       {
         "percent": "-100",
-        "reputation": 13270505121655,
+        "reputation": 13270601846729,
         "rshares": -936400000000,
         "voter": "ned"
       },
@@ -51,7 +51,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 147478489309626,
+        "reputation": 147486900180657,
         "rshares": 47481873096,
         "voter": "tuck-fheman"
       },
@@ -95,7 +95,7 @@
     "active_votes": [
       {
         "percent": "-100",
-        "reputation": 145171381514207,
+        "reputation": 145256378570298,
         "rshares": -376603000000,
         "voter": "dantheman"
       },
@@ -107,13 +107,13 @@
       },
       {
         "percent": "-10000",
-        "reputation": 42786247901122,
+        "reputation": 42796471440299,
         "rshares": -46820000000000,
         "voter": "dan"
       },
       {
         "percent": "-100",
-        "reputation": 13270505121655,
+        "reputation": 13270601846729,
         "rshares": -936400000000,
         "voter": "ned"
       },
@@ -137,7 +137,7 @@
       },
       {
         "percent": "-100",
-        "reputation": 51047995307721,
+        "reputation": 51890713906913,
         "rshares": -47778000000,
         "voter": "pharesim"
       },

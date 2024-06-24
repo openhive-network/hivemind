@@ -45,7 +45,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 124209883737229,
+        "reputation": 124431502021980,
         "rshares": 1304773172054,
         "voter": "steempower"
       },
@@ -99,13 +99,13 @@
       },
       {
         "percent": "335",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 29965767422,
         "voter": "eeks"
       },
       {
         "percent": "1100",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 3023823526,
         "voter": "fkn"
       },
@@ -123,7 +123,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1061217841,
         "voter": "murh"
       },
@@ -147,7 +147,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 46310579884676,
+        "reputation": 46311592664318,
         "rshares": 138383979780,
         "voter": "bravenewcoin"
       },
@@ -171,7 +171,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 111391460708814,
+        "reputation": 111848537245261,
         "rshares": 377133557309,
         "voter": "fyrstikken"
       },
@@ -581,7 +581,7 @@
     "pending_payout_value": "20.756 HBD",
     "percent_hbd": 10000,
     "permlink": "the-old-dog-experiments-the-great-tomato-science-challenge-store-bought-vs-garden-grown",
-    "post_id": 1254979,
+    "post_id": 1254981,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "The Old Dog Experiments: The Great Tomato Science Challenge. Store Bought Vs Garden Grown!",
@@ -593,7 +593,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 949715155915,
+        "reputation": 951775033492,
         "rshares": 7403146775658,
         "voter": "steempty"
       },
@@ -667,7 +667,7 @@
     "pending_payout_value": "4.682 HBD",
     "percent_hbd": 10000,
     "permlink": "lessons-to-learn-from-the-2008-economic-crisis",
-    "post_id": 1255654,
+    "post_id": 1255656,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Lessons to Learn from the 2008 Economic Crisis",
@@ -679,7 +679,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 949715155915,
+        "reputation": 951775033492,
         "rshares": 7557379000151,
         "voter": "steempty"
       },
@@ -723,7 +723,7 @@
     "pending_payout_value": "4.875 HBD",
     "percent_hbd": 10000,
     "permlink": "productive-habits-that-can-help-you-become-a-successful-entrepreneur",
-    "post_id": 1255400,
+    "post_id": 1255402,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Productive Habits That Can Help You Become a Successful Entrepreneur",
