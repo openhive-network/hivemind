@@ -3,7 +3,7 @@
   "active_votes": [
     {
       "percent": 10000,
-      "reputation": 13270505121655,
+      "reputation": 13270601846729,
       "rshares": 46820000000000,
       "time": "2016-04-22T19:18:18",
       "voter": "ned",
@@ -75,7 +75,7 @@
     },
     {
       "percent": 10000,
-      "reputation": 101807714979611,
+      "reputation": 101829024838797,
       "rshares": 27395661465,
       "time": "2016-05-02T22:11:27",
       "voter": "pfunk",
@@ -123,7 +123,7 @@
     },
     {
       "percent": 3301,
-      "reputation": 2902053059801,
+      "reputation": 2902189818091,
       "rshares": 2169898948,
       "time": "2016-08-10T10:53:39",
       "voter": "murh",
@@ -155,7 +155,7 @@
     },
     {
       "percent": 1000,
-      "reputation": -4779249072914,
+      "reputation": -4779687139831,
       "rshares": 166415113,
       "time": "2016-08-10T10:53:39",
       "voter": "weenis",
@@ -179,7 +179,7 @@
     },
     {
       "percent": 1000,
-      "reputation": -3006894935427,
+      "reputation": -3006894837480,
       "rshares": 11386634,
       "time": "2016-08-10T10:53:51",
       "voter": "steemit.tips",

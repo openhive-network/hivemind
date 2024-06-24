@@ -9,13 +9,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 949715155915,
+        "reputation": 951775033492,
         "rshares": 7557283748521,
         "voter": "steempty"
       },
       {
         "percent": "10000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 30353591074372,
         "voter": "smooth"
       },
@@ -51,7 +51,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1731436913211,
         "voter": "joseph"
       },
@@ -141,7 +141,7 @@
       },
       {
         "percent": "860",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 74892417650,
         "voter": "eeks"
       },
@@ -165,7 +165,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 58571016273092,
+        "reputation": 58572043807747,
         "rshares": 581780723755,
         "voter": "nanzo-scoop"
       },
@@ -183,7 +183,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1414321499,
         "voter": "murh"
       },
@@ -219,7 +219,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 11765473490257,
+        "reputation": 11765528754092,
         "rshares": 69280498458,
         "voter": "justtryme90"
       },
@@ -693,7 +693,7 @@
       },
       {
         "percent": "2200",
-        "reputation": 6200536920826,
+        "reputation": 6203737922470,
         "rshares": 17023109715,
         "voter": "albertogm"
       },
@@ -735,19 +735,19 @@
       },
       {
         "percent": "10000",
-        "reputation": 3708822694051,
+        "reputation": 3708827126655,
         "rshares": 82866843499,
         "voter": "emily-cook"
       },
       {
         "percent": "10000",
-        "reputation": 112943056223182,
+        "reputation": 112943600972548,
         "rshares": 460191463095,
         "voter": "ericvancewalton"
       },
       {
         "percent": "10000",
-        "reputation": 36391001943292,
+        "reputation": 36392589114506,
         "rshares": 164474822116,
         "voter": "dashpaymag"
       },
@@ -1781,7 +1781,7 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 32455846463901,
+        "reputation": 32455850438813,
         "rshares": 31620020898591,
         "voter": "smooth"
       },
@@ -1805,7 +1805,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1661136127066,
         "voter": "joseph"
       },
@@ -1841,13 +1841,13 @@
       },
       {
         "percent": "400",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 29965426982,
         "voter": "eeks"
       },
       {
         "percent": "10000",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 25198529390,
         "voter": "fkn"
       },
@@ -1877,7 +1877,7 @@
       },
       {
         "percent": "5555",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1414819977,
         "voter": "murh"
       },
@@ -1907,7 +1907,7 @@
       },
       {
         "percent": "5000",
-        "reputation": 5888717170887,
+        "reputation": 5890875463678,
         "rshares": 33779153239,
         "voter": "ratel"
       },
@@ -2749,7 +2749,7 @@
     "pending_payout_value": "157.910 HBD",
     "percent_hbd": 10000,
     "permlink": "roll-guests-at-the-threshold",
-    "post_id": 1252951,
+    "post_id": 1252953,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "Roll Guests at the threshold!",
@@ -2767,7 +2767,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 70486968186347,
+        "reputation": 79911231029809,
         "rshares": 39228026877320,
         "voter": "blocktrades"
       },
@@ -2817,7 +2817,7 @@
     "pending_payout_value": "94.307 HBD",
     "percent_hbd": 10000,
     "permlink": "how-to-make-paper-flowers",
-    "post_id": 1257375,
+    "post_id": 1257385,
     "promoted": "0.000 HBD",
     "replies": [],
     "root_title": "How to make Paper Flowers",

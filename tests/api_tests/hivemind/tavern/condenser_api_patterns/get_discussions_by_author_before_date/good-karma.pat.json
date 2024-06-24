@@ -3,7 +3,7 @@
     "active_votes": [
       {
         "percent": "3800",
-        "reputation": 145171381514207,
+        "reputation": 145256378570298,
         "rshares": 10768240913245,
         "voter": "dantheman"
       },
@@ -15,7 +15,7 @@
       },
       {
         "percent": "3900",
-        "reputation": 13270505121655,
+        "reputation": 13270601846729,
         "rshares": 25538537120586,
         "voter": "ned"
       },
@@ -165,7 +165,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 12842871326086,
+        "reputation": 12936121919057,
         "rshares": 119662535657,
         "voter": "sandra"
       },
@@ -177,7 +177,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 2827502899317,
+        "reputation": 2842806997450,
         "rshares": 1108047128074,
         "voter": "ihashfury"
       },
@@ -219,7 +219,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 59074616588451,
+        "reputation": 59074854665271,
         "rshares": 7101083801995,
         "voter": "complexring"
       },
@@ -321,13 +321,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 12382143533351,
+        "reputation": 12389135148216,
         "rshares": 656423072090,
         "voter": "eeks"
       },
       {
         "percent": "2000",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 4019301455,
         "voter": "fkn"
       },
@@ -375,7 +375,7 @@
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1425387608,
         "voter": "murh"
       },
@@ -405,7 +405,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 46310579884676,
+        "reputation": 46311592664318,
         "rshares": 126960963703,
         "voter": "bravenewcoin"
       },
@@ -417,7 +417,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 77590508815145,
+        "reputation": 77603137281490,
         "rshares": 412016853327,
         "voter": "kaylinart"
       },
@@ -459,7 +459,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 12656257002205,
+        "reputation": 12656810345430,
         "rshares": 40065989897,
         "voter": "clement"
       },
@@ -471,13 +471,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 15603689614497,
+        "reputation": 15603693624194,
         "rshares": 28624805280,
         "voter": "good-karma"
       },
       {
         "percent": "10000",
-        "reputation": 57643429300793,
+        "reputation": 57646811477930,
         "rshares": 324273180497,
         "voter": "roelandp"
       },
@@ -903,7 +903,7 @@
       }
     ],
     "author": "good-karma",
-    "author_reputation": 15603689614497,
+    "author_reputation": 15603693624194,
     "beneficiaries": [],
     "body": "Recent major eSteem mobile app update is now available on iOS, Apple users as well. \n\nIn addition to [eSteem Android 1.2.0](https://steemit.com/esteem/@good-karma/esteem-android-update-1-2-0) changes, this version is the first one for iOS users to have push notifications.\n<center>https://s5.postimg.org/ai6338kxj/logo_and_apple_120.png</center>\n\n# What's new\n* First Notifications service on iOS for eSteem/Steem.\n* Landscape support\n* Save For Later Posting\n* Action in middle\n* Search feature is refined for better user experience\n* Voting and posting improvements\n\n# iOS Apple AppStore\nhttps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewSoftware?id=1141397898&mt=8\n\nif upgrade fails for unknow reason, please give it few hours, sometimes it takes upto 24 hours until update is distributed across Apple servers. Few users last time had upgrade issues, but after restart it got resolved.\n<center> https://img1.steemit.com/0x0/https://s5.postimg.org/z0otytxx3/notifications.png</center>\n<center>Enable notifications from [earlier post](https://steemit.com/steemmobile/@good-karma/push-notifications-bookmarks-esteem-mobile-app-update-1-1-6-ios-and-android)</center>\n# More exciting changes\nv1.2.1 is almost ready to push forward. Currently, doing few more tests, this version will also blow your mind with improvements and neat features that gives you joy while using it :-)\n\n# Feedbacks\nThank you for all users who are giving valuable feedback and with each new update, app is getting more stable.\niOS users, please give your feedback on this version so that v1.2.1 can include improvements. There are few  already been patched on v1.2.1 thanks to Android users, hope if we discover more iOS specific issues, that will get patched as well.\n\n## Follow @good-karma for future updates and don't hesitate to leave review on Google Play or iOS App Store.\n\n### EDIT: App is opensource and in case you are worried about your passwords please check \n\nCode: https://github.com/feruzm/esteem\nNote: [Are you concerned about your private key or password?](https://steemit.com/steemmobile/@good-karma/ios-android-first-opensource-steem-mobile-application-esteem-available-at-google-playstore-amazon-appstore-and-soon-apple) post about security.",
     "body_length": 2237,
@@ -935,7 +935,7 @@
     "active_votes": [
       {
         "percent": "1900",
-        "reputation": 13270505121655,
+        "reputation": 13270601846729,
         "rshares": 12769074279902,
         "voter": "ned"
       },
@@ -959,7 +959,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 36749432321730,
+        "reputation": 36760495244216,
         "rshares": 982668473368,
         "voter": "liondani"
       },
@@ -1019,7 +1019,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8963739580468,
+        "reputation": 8963841931238,
         "rshares": 134296646854,
         "voter": "team"
       },
@@ -1037,13 +1037,13 @@
       },
       {
         "percent": "1800",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 4045586173,
         "voter": "fkn"
       },
       {
         "percent": "10000",
-        "reputation": 35537325381339,
+        "reputation": 36532493315717,
         "rshares": 973967568018,
         "voter": "hipster"
       },
@@ -1061,7 +1061,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 3750669747284,
+        "reputation": 3946129863300,
         "rshares": 274489324994,
         "voter": "pal"
       },
@@ -1079,7 +1079,7 @@
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1424922683,
         "voter": "murh"
       },
@@ -1091,7 +1091,7 @@
       },
       {
         "percent": "2000",
-        "reputation": 5888717170887,
+        "reputation": 5890875463678,
         "rshares": 13618586203,
         "voter": "ratel"
       },
@@ -1109,13 +1109,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 1797275012018,
+        "reputation": 1797319074535,
         "rshares": 7514650045,
         "voter": "dasha"
       },
       {
         "percent": "10000",
-        "reputation": 15603689614497,
+        "reputation": 15603693624194,
         "rshares": 28269806831,
         "voter": "good-karma"
       },
@@ -1355,7 +1355,7 @@
       }
     ],
     "author": "good-karma",
-    "author_reputation": 15603689614497,
+    "author_reputation": 15603693624194,
     "beneficiaries": [],
     "body": "If you are crypto familiar guy these terms should be clear for you. But for ordinary users these terms are confusing and unclear, so in this post I try give my thoughts on them and why they are important. Disclaimer: I am not expert, but I share what I have learned through my experience...Reading [Dan's recent post](https://steemit.com/philosophy/@dantheman/why-do-we-fight-to-change-the-world) and following [Luke's vblog ](https://steemit.com/vlog/@lukestokes/on-nvc-whale-bashing-expectations-and-quitting-your-job), supporting openness, voluntarism, non-violence  society and community kept me thinking that it does change the world and I think every individual experience it (one way or another) but enlightenment doesn't come out if it's been put off...\n<center>http://cdn.tinybuddha.com/wp-content/uploads/2015/11/Skipping-Man.png</center>\n<center>[shutterstock](http://www.shutterstock.com/pic-259769255/stock-photo-free-and-happy-man.html?src=U9dSozpIdvOq7Wm7no18Gg-1-5)</center>\n# Open source\n\u2130veryone knows power of open source project. If you are developer, you know that open source initiative started with a birth of Linux project and it opened up a lot of doors and the very idea attracted dozen more initiatives/developers to take this path. Very dear crypto community is not far behind caught up and we started to see new waves of open source projects thriving and showing what can be achieved. But opensource projects doesn't entirely mean they are trust-less and decentralized...\nI think it is courage to make your project opensource, in a way you welcome any competitor or take challenges. I am very proud of making **eSteem** very first mobile application for Steem platform and open-sourcing it. Hope it sees more contribution so that developers can join and improve it.\n<center>https://s5.postimg.org/egu3ukut3/esteem_opensource.png</center>\n# Trust-less\n\u2110t is the type of app or services where user is not required to trust any party, not even **founders**, **developers**, etc. Well for start, it should be opensource so that anybody can review,  check and produce same product from same source code. And model of project shouldn't rely on any entity that require people to trust. I think achieving truly trust-less project is still difficult if not impossible. Even code itself requires trusting factor from users. I am sure very experienced developers here can give some insights on this, if I am wrong. In case of **eSteem**, you don't have to trust developer.\n\n# Decentralized\n\u2131or decentralized project to work properly, trust-less and opensource factors should be satisfied so that, nature of decentralization comes from users accepting/trusting project. And software is run with their own consensus so that they agree, no entity has advantage over other entity, running same software. So below images (B) shows that current decentralization cryto projects are better because they are combination of all three.\n<center>https://s5.postimg.org/ibxhx5dyv/2000px_Decentralization_diagram_svg.png</center>\n<center>[wiki](https://en.wikipedia.org/wiki/Decentralization)</center>\nThey are important because it brings freedom for people to choose. Opens new development doors, collaboration, and supports [The Sharing Economy](https://en.wikipedia.org/wiki/Sharing_economy).  \n\nSo I would encourage every projects to come opensource and work collaboratively if can.\n\nFollow @good-karma, for future updates on **eSteem** (the first Steem mobile app) development.",
     "body_length": 3485,
@@ -1387,7 +1387,7 @@
     "active_votes": [
       {
         "percent": "2900",
-        "reputation": 13270505121655,
+        "reputation": 13270601846729,
         "rshares": 19153542043036,
         "voter": "ned"
       },
@@ -1411,13 +1411,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 12842871326086,
+        "reputation": 12936121919057,
         "rshares": 114847486808,
         "voter": "sandra"
       },
       {
         "percent": "10000",
-        "reputation": 2827502899317,
+        "reputation": 2842806997450,
         "rshares": 993511680543,
         "voter": "ihashfury"
       },
@@ -1495,13 +1495,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 6977251504339,
+        "reputation": 6978993115613,
         "rshares": 23141700176,
         "voter": "dedriss"
       },
       {
         "percent": "10000",
-        "reputation": 8963739580468,
+        "reputation": 8963841931238,
         "rshares": 134207611453,
         "voter": "team"
       },
@@ -1513,7 +1513,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 35537325381339,
+        "reputation": 36532493315717,
         "rshares": 993844457161,
         "voter": "hipster"
       },
@@ -1531,19 +1531,19 @@
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1419053160,
         "voter": "murh"
       },
       {
         "percent": "10000",
-        "reputation": 10395665548525,
+        "reputation": 10400089484356,
         "rshares": 254741715405,
         "voter": "billbutler"
       },
       {
         "percent": "10000",
-        "reputation": 11765473490257,
+        "reputation": 11765528754092,
         "rshares": 42193730877,
         "voter": "justtryme90"
       },
@@ -1591,7 +1591,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8461965690396,
+        "reputation": 8461969810136,
         "rshares": 57217291390,
         "voter": "norbu"
       },
@@ -1603,13 +1603,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 15603689614497,
+        "reputation": 15603693624194,
         "rshares": 27277077603,
         "voter": "good-karma"
       },
       {
         "percent": "10000",
-        "reputation": 57643429300793,
+        "reputation": 57646811477930,
         "rshares": 311677346885,
         "voter": "roelandp"
       },
@@ -1987,7 +1987,7 @@
       }
     ],
     "author": "good-karma",
-    "author_reputation": 15603689614497,
+    "author_reputation": 15603693624194,
     "beneficiaries": [],
     "body": "<center>https://s5.postimg.org/rjbhp8zxz/logo_and_android_120.png</center>\nAndroid v1.2.0 update been pushed to Google Play and should be available in few hours. \n\n# What's new in this version\n\n* Save For Later Posting\n\nThis feature allows users to save their post for later submission, especially when you have long post you can just \"save\" and come back to continue your writing.\n* Action in middle\n\nEarlier @blakemiles84 made post about [ability to vote](https://steemit.com/steemit/@blakemiles84/steemit-idea-proposal-floating-upvote-button) or comment while reading long posts or comments. This is particularly useful feature for mobile users, so initial action in middle is implemented on this version.\n\n* Notifications improved \n\nNow if you are already surfing or reading, using app you won't be bothered by notifications, it will just show as toast message bottom of screen. But if app is in background you will still receive notifications.\n\n* Search feature is refined for better user experience.\n\n<center>https://s5.postimg.org/gl0872bcn/v1_2_0.png</center>\n\n# Google Play\n\nhttps://play.google.com/store/apps/details?id=com.netsolutions.esteem\nPlease, leave a feedback and review on Google Play as it will increase awareness and drive more users to the platform.\n\n### Next updates will come with more improvements on writing a post, sharing pictures and improving UX.\n\n# Interesting Facts or Stats\n\nSince the last update for Android, number of users using app is **750+** and increasing daily. **500** of them already using Push Notification feature, which means they have upgraded app version to the latest.\nMore detailed stats and charts on later posts.\n\n<center>https://s5.postimg.org/phb0b01yv/stats2_09_2016.jpg</center>\n\n# Follow, share, comment\n\n~ [Feruz](https://twitter.com/FeruzM) / @good-karma",
     "body_length": 1814,
@@ -2019,19 +2019,19 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 12842871326086,
+        "reputation": 12936121919057,
         "rshares": 118421595242,
         "voter": "sandra"
       },
       {
         "percent": "10000",
-        "reputation": 2827502899317,
+        "reputation": 2842806997450,
         "rshares": 991013934194,
         "voter": "ihashfury"
       },
       {
         "percent": "5000",
-        "reputation": 4931834878069,
+        "reputation": 4931888829122,
         "rshares": 11588696791,
         "voter": "fkn"
       },
@@ -2055,7 +2055,7 @@
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1432226213,
         "voter": "murh"
       },
@@ -2085,7 +2085,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 15603689614497,
+        "reputation": 15603693624194,
         "rshares": 26727912459,
         "voter": "good-karma"
       },
@@ -2325,7 +2325,7 @@
       }
     ],
     "author": "good-karma",
-    "author_reputation": 15603689614497,
+    "author_reputation": 15603693624194,
     "beneficiaries": [],
     "body": "Let's have some fun as well as make community app better. eSteem app is all about Steem and it provides some of the features which steemit.com doesn't have yet and complimentary community based app. As development continues I thought, perhaps community have better ideas for app logo and splash screen and I know a lot of talented people are here on Steemit. \n\n<center>https://s5.postimg.org/ep494f7qv/logo_and_contest.png</center>\n\n## Best logo voted or chosen by community will win the contest and have possibility to change eSteem app logo.\n\n### There is SBD price as well. You won't regret it, your logo might end up being face of the eSteem as well as get some extra 50 SBD (this is subject to increase if we really like it...)\n\n### Take a look at [What is eSteem?](https://steemit.com/steemit/@good-karma/what-is-steem-mobile-esteem) for what meaning logo should convey but not strictly.\n\nLet the contest begin... \ud83d\ude4c",
     "body_length": 921,
@@ -2363,13 +2363,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 12842871326086,
+        "reputation": 12936121919057,
         "rshares": 118418462494,
         "voter": "sandra"
       },
       {
         "percent": "10000",
-        "reputation": 2827502899317,
+        "reputation": 2842806997450,
         "rshares": 924031190912,
         "voter": "ihashfury"
       },
@@ -2393,7 +2393,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 10026510714787,
+        "reputation": 10115285417815,
         "rshares": 95870599024,
         "voter": "testz"
       },
@@ -2423,7 +2423,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 18678729398345,
+        "reputation": 18765615277904,
         "rshares": 163732627896,
         "voter": "pairmike"
       },
@@ -2453,7 +2453,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 9600934617910,
+        "reputation": 9600939862173,
         "rshares": 15147326440,
         "voter": "jademont"
       },
@@ -2471,7 +2471,7 @@
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1431680042,
         "voter": "murh"
       },
@@ -2519,7 +2519,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 15603689614497,
+        "reputation": 15603693624194,
         "rshares": 24517648451,
         "voter": "good-karma"
       },
@@ -2825,7 +2825,7 @@
       }
     ],
     "author": "good-karma",
-    "author_reputation": 15603689614497,
+    "author_reputation": 15603693624194,
     "beneficiaries": [],
     "body": "Midnight, we have got second major update for iOS AppStore with a lot more changes. From this version on iOS users can \n\n* Set profile pictures\n* Submit a post\n* Comment\n* Voting improvements\n* Layout changes\n* Follow/Unfollow users\n* Search specific tags/categories and open related posts\n* Search users, see their profiles\n* Change Voting weight\n* PIN code security\n* many more\n\n<center>https://s5.postimg.org/l58mgrqwn/logo_and_apple.png</center>\nIn next updates iOS users will get notifications and bookmarking and other [improvements from last post](https://steemit.com/steemmobile/@good-karma/push-notifications-bookmarks-esteem-mobile-app-update-1-1-6-ios-and-android)\n\n# Please leave a comment, feedback\niOS users, your feedback is valuable, since this is major update and fully functional app.\nThank you for the support!\n\n~ Feruz / @good-karma",
     "body_length": 852,
@@ -2863,7 +2863,7 @@
       },
       {
         "percent": "3000",
-        "reputation": 13270505121655,
+        "reputation": 13270601846729,
         "rshares": 20627905251154,
         "voter": "ned"
       },
@@ -2887,7 +2887,7 @@
       },
       {
         "percent": "7500",
-        "reputation": 18336382560162,
+        "reputation": 18436177070468,
         "rshares": 137520714395,
         "voter": "svk"
       },
@@ -2899,7 +2899,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 36749432321730,
+        "reputation": 36760495244216,
         "rshares": 918746263877,
         "voter": "liondani"
       },
@@ -2929,7 +2929,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 10026510714787,
+        "reputation": 10115285417815,
         "rshares": 95870468045,
         "voter": "testz"
       },
@@ -2965,7 +2965,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 2802091583976,
+        "reputation": 2802271039072,
         "rshares": 15405606665,
         "voter": "proctologic"
       },
@@ -2983,7 +2983,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8963739580468,
+        "reputation": 8963841931238,
         "rshares": 134108679839,
         "voter": "team"
       },
@@ -3013,7 +3013,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 35537325381339,
+        "reputation": 36532493315717,
         "rshares": 993844457161,
         "voter": "hipster"
       },
@@ -3025,7 +3025,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 3750669747284,
+        "reputation": 3946129863300,
         "rshares": 273642114361,
         "voter": "pal"
       },
@@ -3049,7 +3049,7 @@
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1788305838,
         "voter": "murh"
       },
@@ -3061,13 +3061,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 10395665548525,
+        "reputation": 10400089484356,
         "rshares": 249412785392,
         "voter": "billbutler"
       },
       {
         "percent": "10000",
-        "reputation": 11765473490257,
+        "reputation": 11765528754092,
         "rshares": 41737728268,
         "voter": "justtryme90"
       },
@@ -3103,7 +3103,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 9434414518400,
+        "reputation": 9434501398789,
         "rshares": 23613509404,
         "voter": "acassity"
       },
@@ -3115,13 +3115,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 15603689614497,
+        "reputation": 15603693624194,
         "rshares": 25007532817,
         "voter": "good-karma"
       },
       {
         "percent": "10000",
-        "reputation": 57643429300793,
+        "reputation": 57646811477930,
         "rshares": 305496314948,
         "voter": "roelandp"
       },
@@ -3757,7 +3757,7 @@
       }
     ],
     "author": "good-karma",
-    "author_reputation": 15603689614497,
+    "author_reputation": 15603693624194,
     "beneficiaries": [],
     "body": "<center>https://s5.postimg.org/ii6534gs7/feature_thumbnail.png</center>\nExcited to announce eSteem v1.1.6 updates, that is published today.  After [iOS v1.0.0 release](https://steemit.com/steemmobile/@good-karma/finally-esteem-is-on-ios-app-store-other-development-updates), I have pushed next batch of updates for iOS Appstore Review. Worked on AppStore screenshots as well so it is more attractive to new users.\n<center>https://s5.postimg.org/8n9xzs6if/screenshots.png</center>\n\n# New Features\n\ud83d\udd25 **New Push notifications**\nYou can now, not only publish/read/comment/transfer/vote but You can receive notifications when someone votes your content, comments on your posts, follow you.\n<center>https://s5.postimg.org/z0otytxx3/notifications.png</center>\n\ud83d\udd25 **New Bookmarks**\nWith users request, Bookmarking feature has been added, where you can save post for later read. It is super easy, you just open any post you want and bookmark it from top right corner. Remove bookmarking can be done from same page or menu has Bookmarks page where you can open post or swipe left to remove it from Bookmarks.\n<center>https://s5.postimg.org/jdxklgk53/bookmarks.png</center>\n\ud83d\udd25 **New added sort trend Promoted**\n<center>https://s5.postimg.org/lxt7fk7p3/promoted.png</center>\n# Improvements\n\ud83d\udd25 Login page refinement\n<center>https://s5.postimg.org/rai1tovlj/login.png</center>\n\ud83d\udd25 Profile picture, better formatting on blockchain, with consensus of some Steem devs!\n\ud83d\udd25 Markdown improvements\n\ud83d\udd25 Layout updates\n# iOS (v1.1.8)\nhttps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewSoftware?id=1141397898&mt=8\nVersion 1.1.5 was submitted for AppStore review on \ud83d\udd50_27th Aug 2016_, should be available soon after review is done. \n# Google Play (1.1.6)\nhttps://play.google.com/store/apps/details?id=com.netsolutions.esteem\n\n# Future plans\nMoving forward, focus will be to increase user base of the Steem platform as a whole. Enabling users to signup through app. Improvement on customized/personalized view and feel. Ability to make quick posts, promote content, give ability to cashout earned funds through @blocktrades or similar services, multiple language support, private messaging, support for WindowsPhone users, many more ideas.\n# Suggestions and Contributions\nPlease leave a comment and feedback. Project is [Opensource](https://github.com/feruzm/esteem), and you are invited to contribute anyway you can.\n\ud83d\udd4a **Follow** [me](https://steemit.com/@good-karma) for future updates, get in touch through steemit.chat #steemmobile or #esteem channel.\n\n# UPDATE\n## iOS AppStore new version is available. This version doesn't have bookmarking and notifications yet, though all other major functionalities are in this version... How exciting to get approval for new version and you can be sure that iOS updates will now be consistent. Please give your feedback as much as you can, as it helps development to keep implementing updates.",
     "body_length": 2905,
@@ -3789,7 +3789,7 @@
     "active_votes": [
       {
         "percent": "5100",
-        "reputation": 145171381514207,
+        "reputation": 145256378570298,
         "rshares": 14851662197952,
         "voter": "dantheman"
       },
@@ -3813,7 +3813,7 @@
       },
       {
         "percent": "6000",
-        "reputation": 13270505121655,
+        "reputation": 13270601846729,
         "rshares": 39963167655397,
         "voter": "ned"
       },
@@ -3837,7 +3837,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 12842871326086,
+        "reputation": 12936121919057,
         "rshares": 107371207628,
         "voter": "sandra"
       },
@@ -3849,7 +3849,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 2827502899317,
+        "reputation": 2842806997450,
         "rshares": 811197621631,
         "voter": "ihashfury"
       },
@@ -3873,7 +3873,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 89703349977794,
+        "reputation": 91016606023399,
         "rshares": 2018343962847,
         "voter": "xeroc"
       },
@@ -3897,7 +3897,7 @@
       },
       {
         "percent": "3300",
-        "reputation": 59074616588451,
+        "reputation": 59074854665271,
         "rshares": 2020346400216,
         "voter": "complexring"
       },
@@ -3927,7 +3927,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1998161418894,
         "voter": "joseph"
       },
@@ -3945,13 +3945,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 13437403349222,
+        "reputation": 13437407248241,
         "rshares": 255988247790,
         "voter": "pheonike"
       },
       {
         "percent": "10000",
-        "reputation": 2802091583976,
+        "reputation": 2802271039072,
         "rshares": 21159324769,
         "voter": "proctologic"
       },
@@ -3987,7 +3987,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8963739580468,
+        "reputation": 8963841931238,
         "rshares": 136503614301,
         "voter": "team"
       },
@@ -4005,7 +4005,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 25112072900487,
+        "reputation": 25112073789029,
         "rshares": 188022554811,
         "voter": "gardenlady"
       },
@@ -4041,13 +4041,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 14848515958625,
+        "reputation": 14852909702528,
         "rshares": 81926769193,
         "voter": "kingscrown"
       },
       {
         "percent": "10000",
-        "reputation": 51874214963,
+        "reputation": 51881718543,
         "rshares": 464205201,
         "voter": "ereismatias"
       },
@@ -4101,7 +4101,7 @@
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 2524837468,
         "voter": "murh"
       },
@@ -4149,7 +4149,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 10395665548525,
+        "reputation": 10400089484356,
         "rshares": 228511897173,
         "voter": "billbutler"
       },
@@ -4197,7 +4197,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 9131956116299,
+        "reputation": 9132439174346,
         "rshares": 130590326717,
         "voter": "omarb"
       },
@@ -4233,7 +4233,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 587584054096,
+        "reputation": 587596496911,
         "rshares": 13676822558,
         "voter": "omarbitcoin"
       },
@@ -4251,19 +4251,19 @@
       },
       {
         "percent": "10000",
-        "reputation": 112943056223182,
+        "reputation": 112943600972548,
         "rshares": 168259090889,
         "voter": "ericvancewalton"
       },
       {
         "percent": "10000",
-        "reputation": 1826252654620,
+        "reputation": 1826260651553,
         "rshares": 2935212438,
         "voter": "sunshinecrypto"
       },
       {
         "percent": "10000",
-        "reputation": 15603689614497,
+        "reputation": 15603693624194,
         "rshares": 7097170635,
         "voter": "good-karma"
       },
@@ -5367,7 +5367,7 @@
       }
     ],
     "author": "good-karma",
-    "author_reputation": 15603689614497,
+    "author_reputation": 15603693624194,
     "beneficiaries": [],
     "body": "I am very happy to announce that iOS review for eSteem is successfully done. Wow, after 18 days of review, back and forth. iOS version 1.0.0 is out on App Store.\nPlease bear in mind that iOS version is behind Android for features and improvements.\n<center>https://s5.postimg.org/iswg19tdj/Android_Apple_Logo_Vector.jpg</center>\n# What Version 1.0.0 had?\n* Reading\n* View mode (Card, Compact)\n* Filters (Sort by trend)\n* Search (user, tags/categories)\n* User profile pages\n* Follow lists\n* Market (internal market order list)\n* Settings to change connection server/node\n\nIf you have been following development, app now has a lot more functionalities and improvements. I will push those changes to iOS users soon. \n# iOS AppStore\nhttps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewSoftware?id=1141397898&mt=8\n# Google PlayStore\nhttps://play.google.com/store/apps/details?id=com.netsolutions.esteem\n\n# Android gets another update in couple hours v1.1.5.\n* New* Open mentioned Users or Tag/Categories on Post within app\n* New* Edit post\n* Markdown improvements (youtube, ordered list, unordered list fixes)\n* Fix connection issues while updating profile picture\n* Bug fixes\n\n### [Are you concerned about private key or passwords?](https://steemit.com/steemmobile/@good-karma/ios-android-first-opensource-steem-mobile-application-esteem-available-at-google-playstore-amazon-appstore-and-soon-apple)\n### [PIN code for extra security](https://steemit.com/steemit/@good-karma/esteem-mobile-app-update-v1-1-4)\n\nSource code: https://github.com/feruzm/esteem\n\n# iOS version 1.1.5 screenshots on my iPhone which will be sent to review next...\n![esteem](https://s5.postimg.org/vlkk174zb/IMG_0109.png)  ![esteem ios](https://s5.postimg.org/iioxhxerb/IMG_0110.png)  ![esteem](https://s5.postimg.org/qpgx9i4tz/IMG_0111.png)\n ![esteem](https://s5.postimg.org/qdzgwqodz/IMG_0112.png)  ![esteem](https://s5.postimg.org/67vyxusqf/IMG_0113.png)  ![esteem](https://s5.postimg.org/93924pwqf/IMG_0114.png)  ![esteem](https://s5.postimg.org/a6t6gohdj/IMG_0115.png) \n\n## Comments below and **FOLLOW** for future updates\n~ Feruz",
     "body_length": 2105,
@@ -5429,7 +5429,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 18336382560162,
+        "reputation": 18436177070468,
         "rshares": 184879154598,
         "voter": "svk"
       },
@@ -5441,7 +5441,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 36749432321730,
+        "reputation": 36760495244216,
         "rshares": 966124347164,
         "voter": "liondani"
       },
@@ -5495,7 +5495,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 28971806962251,
+        "reputation": 28978580333608,
         "rshares": 1949837362848,
         "voter": "joseph"
       },
@@ -5513,7 +5513,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 8963739580468,
+        "reputation": 8963841931238,
         "rshares": 133725960972,
         "voter": "team"
       },
@@ -5537,13 +5537,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 35537325381339,
+        "reputation": 36532493315717,
         "rshares": 993844457161,
         "voter": "hipster"
       },
       {
         "percent": "10000",
-        "reputation": 3750669747284,
+        "reputation": 3946129863300,
         "rshares": 266498372230,
         "voter": "pal"
       },
@@ -5561,7 +5561,7 @@
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1442001937,
         "voter": "murh"
       },
@@ -5579,7 +5579,7 @@
       },
       {
         "percent": "10000",
-        "reputation": 11765473490257,
+        "reputation": 11765528754092,
         "rshares": 42864868809,
         "voter": "justtryme90"
       },
@@ -5639,25 +5639,25 @@
       },
       {
         "percent": "10000",
-        "reputation": 6105332515536,
+        "reputation": 6105344565899,
         "rshares": 5695801176,
         "voter": "primus"
       },
       {
         "percent": "10000",
-        "reputation": 9434414518400,
+        "reputation": 9434501398789,
         "rshares": 23826803392,
         "voter": "acassity"
       },
       {
         "percent": "10000",
-        "reputation": 6095326280934,
+        "reputation": 6223301979971,
         "rshares": 19020023451,
         "voter": "thebatchman"
       },
       {
         "percent": "10000",
-        "reputation": 15603689614497,
+        "reputation": 15603693624194,
         "rshares": 5003761665,
         "voter": "good-karma"
       },
@@ -6011,7 +6011,7 @@
       }
     ],
     "author": "good-karma",
-    "author_reputation": 15603689614497,
+    "author_reputation": 15603693624194,
     "beneficiaries": [],
     "body": "<center>![Logo_eSteem_Steem_Mobile](https://s5.postimg.org/ojh3yie47/14719613303266367.gif)</center>\n\n# Introducing new changes\n* PIN Code for extra security\nIn Settings page user can choose their pincode for the app.\nOnce you set pincode, If app goes background or you restarted, it will ask for pincode before user can read or do any action. If pincode entered correct app will be unlocked, if fail to enter pincode more than 3 times, it will clear all user details from app and unlock app but you will have to relogin to start voting/commenting/posting, etc.\n\n* Submit a Story\nUsers now can not only read and comment, but Submit a Stories as well. This initial implementation works fully, all markdown is supported and shown as preview before publish. Including Images and Links also possible via toolbar or manually markdown, though for now toolbar only takes url of image. But I am working on improvement on this, just like profile Picture upload/capture/select, user will be able to do all that in story submission.\n\n* Vote Weight change\nIn Settings page, you can now set your default voting percentage, by default it is 100% which is equivalent of what steemit.com has. This will change all voting weight across app including **downvote**.\n\n* Comment edit, delete\nPrevious version only allow user to leave a comment, vote. From this version, there is extra functionalities like delete and edit your comment. Additional Errors are shown if editing/deleting is not possible.\n\n* Follow/Unfollow\nFollow page functionalities are now implemented, you can follow your followers, unfollow who you followed. Number of followers and followings.\n\n* App version\nBottom of side menu, user now can see app version for sending version related feedbacks.\n\n# Improvements\n* Profile picture change improved so that in case blockchain already has some json_metadata for your account, it will keep that info while adding profile picture info.\n* Other User profile page also shows their picture, posts, feed, etc. Did you know you can other user's profile, from Search or open from Follow page?! Check it out...\n* Many more improvement, [check commit log for more info](https://github.com/feruzm/esteem/commits/master)\n* Current version has support for **x86** devices along with **armv7** Android devices\n\n# Future plans\nNow that we have major functionality in place, we can concentrate on improving user experience further and as always your comments will be valuable...\n\n* Mute functionality\n* Edit/Delete Post functionalites (when allowed)\n* Push notifications\n* Private messaging\n* Multilingual\n* Read Later\n* Scheduled Post\n\n<center>![promo_logo_esteem](https://s5.postimg.org/crt8npjhz/promo_logo_big.png)</center>\n\n\n# Google PlayStore\n\nhttps://play.google.com/store/apps/details?id=com.netsolutions.esteem\n\n# iOS AppStore\nAppStore review is not done yet, but app is getting more functionality and I hope to push changes right after first review is done.\n### Few Screenshots...\n<a href='https://postimg.org/image/sh4dnx0xf/' target='_blank'><img src='https://s5.postimg.org/sh4dnx0xf/Screenshot_20160816_205838.png' border='0' alt=\"Screenshot_20160816-205838\"/></a><a href='https://postimg.org/image/66giny3n7/' target='_blank'><img src='https://s5.postimg.org/66giny3n7/Screenshot_20160816_205855.png' border='0' alt=\"Screenshot_20160816-205855\"/></a><a href='https://postimg.org/image/onaxerjlf/' target='_blank'><img src='https://s5.postimg.org/onaxerjlf/Screenshot_20160823_131250.png' border='0' alt=\"Screenshot_20160823-131250\"/></a><a href='https://postimg.org/image/zcom70veb/' target='_blank'><img src='https://s5.postimg.org/zcom70veb/Screenshot_20160823_132055.png' border='0' alt=\"Screenshot_20160823-132055\"/></a><a href='https://postimg.org/image/gye331j3n/' target='_blank'><img src='https://s5.postimg.org/gye331j3n/Screenshot_20160823_161021.png' border='0' alt=\"Screenshot_20160823-161021\"/></a><a href='https://postimg.org/image/y06x54xyr/' target='_blank'><img src='https://s5.postimg.org/y06x54xyr/Screenshot_20160823_161044.png' border='0' alt=\"Screenshot_20160823-161044\"/></a><a href='https://postimg.org/image/y2ve5pr03/' target='_blank'><img src='https://s5.postimg.org/y2ve5pr03/Screenshot_20160823_161216.png' border='0' alt=\"Screenshot_20160823-161216\"/></a>\n\n# Leave a comment\n\nLeave comments below what you think can be improved, what confused you, questions, concerns?!\nCheck my blog @good-karma for past development notes.\n\n**[Follow](https://steemit.com/@good-karma)** me for future updates, to contact/feedback, you can use #steemmobile or #esteem on steemit.chat as well.\n\nCheers,\n\n~ _Feruz_ / @good-karma",
     "body_length": 4634,
@@ -6043,13 +6043,13 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 12842871326086,
+        "reputation": 12936121919057,
         "rshares": 104827428238,
         "voter": "sandra"
       },
       {
         "percent": "10000",
-        "reputation": 35537325381339,
+        "reputation": 36532493315717,
         "rshares": 993844457161,
         "voter": "hipster"
       },
@@ -6067,13 +6067,13 @@
       },
       {
         "percent": "10000",
-        "reputation": 10395665548525,
+        "reputation": 10400089484356,
         "rshares": 212976871300,
         "voter": "billbutler"
       },
       {
         "percent": "10000",
-        "reputation": 11765473490257,
+        "reputation": 11765528754092,
         "rshares": 48263566264,
         "voter": "justtryme90"
       },
@@ -6151,7 +6151,7 @@
       }
     ],
     "author": "good-karma",
-    "author_reputation": 15603689614497,
+    "author_reputation": 15603693624194,
     "beneficiaries": [],
     "body": "In [my previous post about profile picture and profile page improvements](https://steemit.com/steemit/@good-karma/esteem-update-profile-pictures-elegant-profile-pages-easy-access-many-more) I have mentioned that commenting improvements. This version 1.1.2 which was just published on [Google playstore](https://play.google.com/store/apps/details?id=com.netsolutions.esteem) has that functionalities.\n<center>[![steem_code_onbb6de.th.png](https://www.steemimg.com/images/2016/08/10/steem_code_onbb6de.th.png)](https://www.steemimg.com/image/ZSCJi)</center>\n# Screencast to see it in action on Android device (1:44 min)\n<center>https://www.youtube.com/watch?v=BCXYw6N2nOA</center>\n# Changelog\n```* New commenting experience\n* Voting improved\n* Post content parsing improved, post links open externally, \n  image resizing should work better for tablet and larger screen mobile users.\n* Loading style change\n* Various bug fixes\n```\n<hr/>\n\n**Follow** for eSteem mobile app update posts and checkout https://steemit.com/@good-karma my blog for development posts.\n\nCheers,\n~Feruz",
     "body_length": 1072,
@@ -6183,19 +6183,19 @@
     "active_votes": [
       {
         "percent": "10000",
-        "reputation": 35537325381339,
+        "reputation": 36532493315717,
         "rshares": 973967568018,
         "voter": "hipster"
       },
       {
         "percent": "3301",
-        "reputation": 2902053059801,
+        "reputation": 2902189818091,
         "rshares": 1426450295,
         "voter": "murh"
       },
       {
         "percent": "10000",
-        "reputation": 10395665548525,
+        "reputation": 10400089484356,
         "rshares": 208003523717,
         "voter": "billbutler"
       },
@@ -6243,7 +6243,7 @@
       }
     ],
     "author": "good-karma",
-    "author_reputation": 15603689614497,
+    "author_reputation": 15603693624194,
     "beneficiaries": [],
     "body": "Just wanted to clarify few points about eSteem - Steem Mobile application project.\n\n**eSteem** is formerly known as _**Steem Mobile**_, [opensource application](https://github.com/feruzm/esteem) for mobile devices and tablets with support for iOS, Android, Windows Phones.\n\n# eSteem means two thing:\n\n* respect and admiration for the platform Steem\n* eSteem, electronic Steem ( just like email is being Electronic Mail )\n\nMore on development update is coming soon (1.1.2)\n<center>[![splash_cc9674.th.png](https://www.steemimg.com/images/2016/08/05/splash_cc9674.th.png)](https://www.steemimg.com/image/0kRwu)</center>\n# Have you missed previous development updates?\n* [eSteem - 1.1.1](https://steemit.com/steemit/@good-karma/esteem-update-profile-pictures-elegant-profile-pages-easy-access-many-more)\n* [eSteem - 1.0.1](https://steemit.com/steemit/@good-karma/steem-code-on-esteem-updates)\n* [Steem Mobile - eSteem 1.0.0](https://steemit.com/steemmobile/@good-karma/ios-android-first-opensource-steem-mobile-application-esteem-available-at-google-playstore-amazon-appstore-and-soon-apple)\n* [Steem Mobile - 0.0.4](https://steemit.com/steem/@good-karma/steem-mobile-beta-0-0-4-with-android-and-ios-new-features-voting-login-view-changes-and-a-lot-more-come-join-testing)\n* [Steem Mobile - 0.0.3](https://steemit.com/steem/@good-karma/steem-mobile-new-features-followers-following-comments-steemit-mobile-app-still-calling-for-beta-testers)\n* [Steem Mobile - 0.0.2](https://steemit.com/app/@good-karma/steem-mobile-first-steem-mobile-app-update-android-ios)\n* [Steem Mobile - 0.0.1](https://steemit.com/steemit/@good-karma/ann-steemit-mobile-app-android)\n<hr/>\n\n## Follow me to get updates\nClick on my name in post footer and **FOLLOW**\n\n### If you have design, feature suggestions please comment below and let me know.",
     "body_length": 1817,
