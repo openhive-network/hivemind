@@ -109,10 +109,6 @@ class SyncHiveDb:
             last_imported_block = Blocks.last_imported()
             log.info(f"Last imported block is: {last_imported_block}")
 
-            # SqlAlchemy will not use autocommit when there is a pending transaction
-            # hive.app_next_iteration issues COMMIT, and autocommit is not desired
-            # because it save current block before the decision if new range of blocks will be processed or not
-            self._db.query_no_return( "START TRANSACTION" )
             self._lbound, self._ubound = self._query_for_app_next_block()
 
             if self._break_requested(last_imported_block, active_connections_before):
@@ -126,9 +122,6 @@ class SyncHiveDb:
 
             application_stage = self._db.query_one(f"SELECT hive.get_current_stage_name('{SCHEMA_NAME}')")
 
-            # we need to COMMIT here to unveil HAF context state to threads which
-            # will fill hivemind tables
-            self._db.query_no_return( "COMMIT" )
             if application_stage == "MASSIVE_WITHOUT_INDEXES":
 
                 DbState.ensure_off_synchronous_commit()
@@ -191,6 +184,7 @@ class SyncHiveDb:
 
         result = self._db.query_one( "CALL hive.app_next_iteration( _context => '{}', _blocks_range => (0,0), _limit => {}, _override_max_batch => {} )"
                                      .format(SCHEMA_NAME, limit, batch)
+                                    , is_prepared = True
                                     )
 
         self._db._trx_active=True

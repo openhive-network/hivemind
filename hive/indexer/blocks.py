@@ -211,7 +211,6 @@ class Blocks:
 
         time_start = OPSM.start()
 
-        DB.query("START TRANSACTION")
         if is_massive_sync:
             #update last_active_at directly since we don't advance current_block_num in massive_sync (until whole indexer gets re-write)
             DB.query_no_return(f"SELECT hive.app_update_last_active_at('hivemind_app');");
@@ -226,10 +225,9 @@ class Blocks:
                 cls.on_live_blocks_processed(first_block)
                 cls._periodic_actions(blocks[0])
 
-        DB.query("COMMIT")
-
         if is_massive_sync:
             log.info("[PROCESS MULTI] Flushing data in N threads")
+            #DB.query("COMMIT") # unveil changes to threads
             cls.flush_data_in_n_threads()
 
         log.info(f"[PROCESS MULTI] {len(blocks)} blocks in {OPSM.stop(time_start) :.4f}s")
