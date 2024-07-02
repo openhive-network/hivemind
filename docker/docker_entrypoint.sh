@@ -59,7 +59,7 @@ while [ $# -gt 0 ]; do
         INSTALL_APP=1
         DO_SCHEMA_UPGRADE=1
         ;;
-    --only-hivemind=*)
+    --only-hivemind)
         SKIP_REPTRACKER=1
         ;;
     *)
