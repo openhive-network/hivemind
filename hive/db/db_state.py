@@ -110,7 +110,7 @@ class DbState:
         return out
 
     @classmethod
-    def _disableable_indexes(cls):
+    def disableable_indexes(cls):
         to_locate = [
             'hive_feed_cache_block_num_idx',
             'hive_feed_cache_created_at_idx',
@@ -171,6 +171,25 @@ class DbState:
         # ensure we found all the items we expected
         assert not to_locate, f"indexes not located: {to_locate}"
         return to_return
+
+    @classmethod
+    def _disableable_indexes(cls):
+        _indexes = cls.disableable_indexes()
+
+        metadata = sqlalchemy.MetaData(schema=REPTRACKER_SCHEMA_NAME)
+        rep = sqlalchemy.Table(
+            'account_reputations',
+            metadata,
+            sqlalchemy.Column('reputation', sqlalchemy.BigInteger, nullable=False, server_default='0'),
+        )
+
+        idx_reputation_on_account_reputations = sqlalchemy.Index('idx_reputation_on_account_reputations', rep.c.reputation)
+
+        if rep not in _indexes:
+            _indexes[rep] = []
+        _indexes[rep].append(idx_reputation_on_account_reputations)
+
+        return _indexes
 
     @classmethod
     def has_index(cls, db, idx_name):
