@@ -602,10 +602,6 @@ def setup(db, admin_db):
 
     # database_api_vote, find_votes, list_votes_by_voter_comment, list_votes_by_comment_voter moved into database_api_list_votes.sql
 
-
-    sql = f"CREATE INDEX IF NOT EXISTS idx_reputation_on_account_reputations ON {REPTRACKER_SCHEMA_NAME}.account_reputations(reputation)"
-    db.query(sql)
-
     # reputation removed from hive_accounts, index on reputation is created on reptracker's table
 
     sql = f"""
