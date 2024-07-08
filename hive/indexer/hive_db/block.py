@@ -34,31 +34,25 @@ class OperationHiveDb(Operation):
 
 
 class TransactionHiveDb(Transaction):
-    def __init__(self, block_num, operations, firts_operation_idx, operation_id_to_enum):
+    def __init__(self, block_num, operations, operation_id_to_enum):
         self._block_num = block_num
         self._operations = operations
-        self._first_operation_idx = firts_operation_idx
         self._operation_id_to_enum = operation_id_to_enum
 
     def get_id(self):
         return 0  # it is a fake transactions which returns all operations
 
     def get_next_operation(self):
-        if self._first_operation_idx is None:
+        if not self._operations:
             return None
 
-        for op_idx in range(self._first_operation_idx, len(self._operations)):
-            assert self._operations[op_idx]['block_num'] >= self._block_num
-
-            if self._operations[op_idx]['block_num'] > self._block_num:
-                break
-
-            operation_type = self._operation_id_to_enum(self._operations[op_idx]['operation_type_id'])
+        for operation in self._operations:
+            operation_type = self._operation_id_to_enum(operation['operation_type_id'])
             if type(operation_type) != OperationType:
                 continue
 
-            operation = OperationHiveDb(operation_type, self._operations[op_idx]['body'])
-            yield operation
+            ret_operation = OperationHiveDb(operation_type, operation['body'])
+            yield ret_operation
 
 
 class BlockHiveDb(Block):
@@ -69,7 +63,6 @@ class BlockHiveDb(Block):
         hash,
         previous_block_hash,
         operations,
-        first_operation_idx,
         opertion_id_to_enum,
     ):
 
@@ -78,25 +71,21 @@ class BlockHiveDb(Block):
         self._hash = hash.hex()
         self._prev_hash = previous_block_hash.hex()
         self._operations = operations
-        self._first_operation_idx = first_operation_idx
         self._operation_id_to_enum = opertion_id_to_enum
 
     def get_num(self):
         return self._num
 
     def get_next_vop(self):
-        if self._first_operation_idx is None:
+        if not self._operations or self._operations is None:
             return None
 
-        for virtual_op_idx in range(self._first_operation_idx, len(self._operations)):
-            if self._operations[virtual_op_idx]['block_num'] > self.get_num():
-                break
-
-            operation_type = self._operation_id_to_enum(self._operations[virtual_op_idx]['operation_type_id'])
+        for virtual_operation in self._operations:
+            operation_type = self._operation_id_to_enum(virtual_operation['operation_type_id'])
             if type(operation_type) != VirtualOperationType:
                 continue
 
-            virtual_op = VirtualOperationHiveDb(operation_type, self._operations[virtual_op_idx]['body'])
+            virtual_op = VirtualOperationHiveDb(operation_type, virtual_operation['body'])
             yield virtual_op
 
     def get_date(self):
@@ -109,9 +98,9 @@ class BlockHiveDb(Block):
         return self._prev_hash
 
     def get_next_transaction(self):
-        if self._first_operation_idx is None:
+        if not self._operations:
             return None
         trans = TransactionHiveDb(
-            self.get_num(), self._operations, self._first_operation_idx, self._operation_id_to_enum
+            self.get_num(), self._operations, self._operation_id_to_enum
         )
         yield trans
