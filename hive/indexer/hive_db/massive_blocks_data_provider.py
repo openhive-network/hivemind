@@ -111,7 +111,6 @@ class MassiveBlocksDataProviderHiveDb:
 
     def get_blocks(self, lbound, ubound):
         blocks = self._blocks_data_provider.get_data(lbound, ubound)
-        operations = self._operations_provider.get_data(lbound, ubound)
 
         try:
             blocks_to_process = []
@@ -122,28 +121,9 @@ class MassiveBlocksDataProviderHiveDb:
                     block_data['date'],
                     block_data['hash'],
                     block_data['prev'],
-                    None,
-                    None,
+                    block_data['operations'],
                     MassiveBlocksDataProviderHiveDb._operation_id_to_enum,
                 )
-
-                for idx in range(block_operation_idx, len(operations)):
-                    # find first the blocks' operation in the list
-                    if operations[idx]['block_num'] == block_data['num']:
-                        new_block = BlockHiveDb(
-                            block_data['num'],
-                            block_data['date'],
-                            block_data['hash'],
-                            block_data['prev'],
-                            operations,
-                            idx,
-                            MassiveBlocksDataProviderHiveDb._operation_id_to_enum,
-                        )
-                        block_operation_idx = idx
-                        break
-                    if operations[block_operation_idx]['block_num'] > block_data['num']:
-                        break
-
                 blocks_to_process.append( new_block )
 
             return blocks_to_process
