@@ -31,7 +31,7 @@ class DbState:
     _db = None
 
     # prop is true until massive sync complete
-    _is_massive_sync = True
+    _is_massive_sync = False
     _indexes_were_disabled = False
     _indexes_were_enabled = False
     _fk_were_disabled = False
@@ -70,11 +70,6 @@ class DbState:
 
         db_setup_owner.close()
 
-        # check if massive sync complete
-        cls._is_massive_sync = enter_massive
-        if enter_massive:
-          log.info("[MASSIVE] Continue with massive sync...")
-
     @classmethod
     def teardown(cls):
         """Drop all tables in db."""
@@ -88,7 +83,9 @@ class DbState:
         return cls._db
 
 
-
+    @classmethod
+    def set_massive_sync(cls, is_massive: bool):
+        cls._is_massive_sync = is_massive
 
     @classmethod
     def is_massive_sync(cls):
