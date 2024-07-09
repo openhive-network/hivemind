@@ -110,23 +110,4 @@ class MassiveBlocksDataProviderHiveDb:
         return MassiveBlocksDataProviderHiveDb._id_to_operation_type(id_)
 
     def get_blocks(self, lbound, ubound):
-        blocks = self._blocks_data_provider.get_data(lbound, ubound)
-
-        try:
-            blocks_to_process = []
-            block_operation_idx = 0
-            for block_data in blocks:
-                new_block = BlockHiveDb(
-                    block_data['num'],
-                    block_data['date'],
-                    block_data['hash'],
-                    block_data['prev'],
-                    block_data['operations'],
-                    MassiveBlocksDataProviderHiveDb._operation_id_to_enum,
-                )
-                blocks_to_process.append( new_block )
-
-            return blocks_to_process
-        except:
-            set_exception_thrown()
-            raise
+        return self._blocks_data_provider.get_data(lbound, ubound)
