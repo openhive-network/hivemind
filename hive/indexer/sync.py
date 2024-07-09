@@ -198,7 +198,10 @@ class SyncHiveDb:
         if result is None:
             return lbound, ubound
 
-        blocks_range = ast.literal_eval(result)
+        try:
+            blocks_range = ast.literal_eval(result)
+        except SyntaxError: #SqlAlchemy return (,) when OUT _blocks_range == NULL
+            return lbound, ubound
 
         (lbound, ubound) = blocks_range
         log.info(f"Next block range from hive.app_next_iteration is: <{lbound}:{ubound}>")
