@@ -97,7 +97,15 @@ class SyncHiveDb:
 
     def run(self) -> None:
         start_time = perf()
+        def report_enter_to_stage(current_stage) -> bool:
+            if report_enter_to_stage.prev_application_stage is None or report_enter_to_stage.prev_application_stage != current_stage:
+                log.info( f"Switched to {current_stage} block processing mode after: {secs_to_str(perf() - start_time)}" )
+                report_enter_to_stage.prev_application_stage = current_stage
+                return True
+            report_enter_to_stage.prev_application_stage = current_stage
+            return False
 
+        report_enter_to_stage.prev_application_stage = None
         log.info(f"Using HAF database as block data provider, pointed by url: '{self._conf.get('database_url')}'")
 
         self._massive_blocks_data_provider = None
@@ -130,6 +138,8 @@ class SyncHiveDb:
             # will fill hivemind tables
             self._db.query_no_return( "COMMIT" )
             if application_stage == "MASSIVE_WITHOUT_INDEXES":
+                DbState.set_massive_sync( True )
+                report_enter_to_stage(application_stage)
 
                 DbState.ensure_off_synchronous_commit()
                 DbState.ensure_fk_are_disabled()
@@ -137,23 +147,25 @@ class SyncHiveDb:
 
                 self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
             elif  application_stage == "MASSIVE_WITH_INDEXES":
-                DbState.ensure_off_synchronous_commit()
-
-                if Blocks.last_imported() - Blocks.last_completed() > ONE_WEEK_IN_BLOCKS:
-                    log.info( f"[MULTI] Switched to MASSIVE_WITH_INDEXES block processing mode after: {secs_to_str(perf() - start_time)}" )
+                DbState.set_massive_sync( True )
+                if report_enter_to_stage(application_stage):
                     self.print_summary()
+
+                DbState.ensure_off_synchronous_commit()
 
                 DbState.ensure_fk_are_disabled()
                 DbState.ensure_indexes_are_enabled()
 
                 self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
             elif  application_stage ==  "live":
+                DbState.set_massive_sync( False )
+                report_enter_to_stage(application_stage)
+
                 DbState.ensure_on_synchronous_commit()
                 DbState.ensure_indexes_are_enabled()
 
                 if DbState.ensure_finalize_massive_sync(last_imported_block, Blocks.last_completed()):
                     self.print_summary()
-                    log.info( f"[SINGLE] Switched to single block processing mode after: {secs_to_str(perf() - start_time)}" )
 
                 DbState.ensure_fk_are_enabled()
 
