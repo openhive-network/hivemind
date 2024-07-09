@@ -9,6 +9,7 @@ from typing import Tuple
 
 from hive.conf import Conf, SCHEMA_NAME, ONE_WEEK_IN_BLOCKS
 from hive.db.adapter import Db
+from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
 from hive.indexer.accounts import Accounts
 from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
 from hive.indexer.custom_op import CustomOp
@@ -27,6 +28,8 @@ from hive.utils.communities_rank import update_communities_posts_and_rank
 from hive.utils.stats import FlushStatusManager as FSM
 from hive.utils.stats import OPStatusManager as OPSM
 from hive.utils.timer import time_it
+
+
 
 log = logging.getLogger(__name__)
 
@@ -187,11 +190,19 @@ class Blocks:
         last_date = None
         first_block = -1
         try:
-            for block in blocks:
+            for block_raw in blocks:
+                hiveBlock = BlockHiveDb(
+                    block_raw['num'],
+                    block_raw['date'],
+                    block_raw['hash'],
+                    block_raw['prev'],
+                    block_raw['operations'],
+                    MassiveBlocksDataProviderHiveDb._operation_id_to_enum
+                )
                 if first_block == -1:
-                    first_block = block.get_num()
-                last_num = cls._process(block)
-                last_date = block.get_date()
+                    first_block = hiveBlock.get_num()
+                last_num = cls._process(hiveBlock)
+                last_date = hiveBlock.get_date()
         except Exception as e:
             log.error("exception encountered block %d", last_num + 1)
             raise e
@@ -235,8 +246,16 @@ class Blocks:
         log.info(f"[PROCESS MULTI] {len(blocks)} blocks in {OPSM.stop(time_start) :.4f}s")
 
     @classmethod
-    def _periodic_actions(cls, block: BlockHiveDb) -> None:
+    def _periodic_actions(cls, block_raw) -> None:
         """Actions performed at a given time, calculated on the basis of the current block number"""
+        block = BlockHiveDb(
+            block_raw['num'],
+            block_raw['date'],
+            block_raw['hash'],
+            block_raw['prev'],
+            block_raw['operations'],
+            MassiveBlocksDataProviderHiveDb._operation_id_to_enum
+        )
 
         if (block_num := block.get_num()) % 1200 == 0:  # 1hour
             log.info(f"head block {block_num} @ {block.get_date()}")

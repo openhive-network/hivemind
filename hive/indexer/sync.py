@@ -343,7 +343,7 @@ class SyncHiveDb:
 
                 prefix = (
                     "[MASSIVE]"
-                    f" Got block {min(lbound + number_of_blocks_to_proceed - 1, ubound)} @ {blocks[-1].get_date()}"
+                    f" Got block {min(lbound + number_of_blocks_to_proceed - 1, ubound)} @ {blocks[-1]['date']}"
                 )
 
                 log.info(timer.batch_status(prefix))
