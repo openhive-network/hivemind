@@ -242,8 +242,6 @@ class SyncHiveDb:
 
         if DbLiveContextHolder.is_live_context() or DbLiveContextHolder.is_live_context() is None:
             DbLiveContextHolder.set_live_context(False)
-            Blocks.close_own_db_access()
-            self._wait_for_connections_closed(active_connections_before)
             Blocks.setup_own_db_access(shared_db_adapter=self._db)
 
         self._consume_massive_blocks(blocks, lbound, ubound)
