@@ -34,6 +34,7 @@ from hive.utils.timer import time_it
 log = logging.getLogger(__name__)
 
 DB = Db.instance()
+OLD_DB = None
 
 
 def time_collector(f):
@@ -78,6 +79,10 @@ class Blocks:
 
     @staticmethod
     def setup_own_db_access(shared_db_adapter: Db) -> None:
+        global DB
+        global OLD_DB
+        OLD_DB = DB
+        DB = shared_db_adapter.clone( "Root database for massive sync" )
         PostDataCache.setup_own_db_access(shared_db_adapter, "PostDataCache")
         Reputations.setup_own_db_access(shared_db_adapter, "Reputations")
         Votes.setup_own_db_access(shared_db_adapter, "Votes")
@@ -91,6 +96,15 @@ class Blocks:
 
     @staticmethod
     def close_own_db_access() -> None:
+        global OLD_DB
+        global DB
+        if OLD_DB is not None:
+            if DB.is_trx_active():
+                DB.query_no_return( "COMMIT" )
+            DB.close()
+            DB = OLD_DB
+            OLD_DB =None
+
         PostDataCache.close_own_db_access()
         Reputations.close_own_db_access()
         Votes.close_own_db_access()
@@ -223,9 +237,6 @@ class Blocks:
         time_start = OPSM.start()
 
         DB.query("START TRANSACTION")
-        if is_massive_sync:
-            #update last_active_at directly since we don't advance current_block_num in massive_sync (until whole indexer gets re-write)
-            DB.query_no_return(f"SELECT hive.app_update_last_active_at('hivemind_app');");
 
         first_block, last_num = cls.process_blocks(blocks)
 
