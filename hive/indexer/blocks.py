@@ -99,8 +99,6 @@ class Blocks:
         global OLD_DB
         global DB
         if OLD_DB is not None:
-            if DB.is_trx_active():
-                DB.query_no_return( "COMMIT" )
             DB.close()
             DB = OLD_DB
             OLD_DB =None
@@ -236,8 +234,6 @@ class Blocks:
 
         time_start = OPSM.start()
 
-        DB.query("START TRANSACTION")
-
         first_block, last_num = cls.process_blocks(blocks)
 
         if not is_massive_sync:
@@ -247,8 +243,6 @@ class Blocks:
                 log.info("[PROCESS MULTI] Tables updating in live synchronization")
                 cls.on_live_blocks_processed(first_block)
                 cls._periodic_actions(blocks[0])
-
-        DB.query("COMMIT")
 
         if is_massive_sync:
             log.info("[PROCESS MULTI] Flushing data in N threads")
