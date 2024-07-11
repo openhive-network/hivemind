@@ -234,7 +234,15 @@ class Blocks:
 
         time_start = OPSM.start()
 
+        if is_massive_sync:
+            Accounts.beginTx()
+            Posts.beginTx()
+
         first_block, last_num = cls.process_blocks(blocks)
+
+        if is_massive_sync:
+            Accounts.commitTx()
+            Posts.commitTx()
 
         if not is_massive_sync:
             log.info("[PROCESS MULTI] Flushing data in 1 thread")
