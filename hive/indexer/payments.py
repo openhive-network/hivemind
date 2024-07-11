@@ -9,9 +9,6 @@ from hive.utils.normalize import parse_amount
 
 log = logging.getLogger(__name__)
 
-DB = Db.instance()
-
-
 class Payments:
     """Handles payments to update post promotion values."""
 
@@ -43,7 +40,7 @@ ON hp.author_id=vv.auth_id AND hp.permlink_id=vv.hpd_id
 RETURNING post_id
 """
 
-        post_id = DB.query_one(
+        post_id = Db.data_sync_instance().query_one(
             sql,
             _block_num=record['block_num'],
             _tx_idx=record['tx_idx'],
@@ -62,7 +59,7 @@ RETURNING post_id
         if amount != 0.0 and post_id is not None:
             # update post record
             sql = f"UPDATE {SCHEMA_NAME}.hive_posts SET promoted = promoted + :val WHERE id = :id"
-            DB.query(sql, val=amount, id=post_id)
+            Db.data_sync_instance().query(sql, val=amount, id=post_id)
 
     @classmethod
     def _validated(cls, op, tx_idx, num, date):

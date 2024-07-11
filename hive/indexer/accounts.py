@@ -10,9 +10,6 @@ from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
 
-DB = Db.instance()
-
-
 class Accounts(DbAdapterHolder):
     """Manages account id map, dirty queue, and `hive_accounts` table."""
 
@@ -21,6 +18,7 @@ class Accounts(DbAdapterHolder):
     inside_flush = False
 
     # name->id map
+    # name->id mapdb
     _ids = {}
 
     # in-mem id->rank map
@@ -57,7 +55,7 @@ class Accounts(DbAdapterHolder):
     def load_ids(cls):
         """Load a full (name: id) dict into memory."""
         assert not cls._ids, "id map already loaded"
-        cls._ids = dict(DB.query_all(f"SELECT name, id FROM {SCHEMA_NAME}.hive_accounts"))
+        cls._ids = dict(Db.data_sync_instance().query_all(f"SELECT name, id FROM {SCHEMA_NAME}.hive_accounts"))
 
     @classmethod
     def clear_ids(cls):
@@ -137,7 +135,7 @@ class Accounts(DbAdapterHolder):
                   RETURNING id
               """
 
-        new_id = DB.query_one(sql)
+        new_id = Db.data_sync_instance().query_one(sql)
         if new_id is None:
             return False
         cls._ids[name] = new_id
