@@ -9,6 +9,7 @@ from typing import Tuple
 
 from hive.conf import Conf, SCHEMA_NAME, ONE_WEEK_IN_BLOCKS
 from hive.db.adapter import Db
+from hive.db.db_state import DbState
 from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
 from hive.indexer.accounts import Accounts
 from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
@@ -32,9 +33,6 @@ from hive.utils.timer import time_it
 
 
 log = logging.getLogger(__name__)
-
-DB = Db.instance()
-
 
 def time_collector(f):
     start_time = FSM.start()
@@ -78,6 +76,9 @@ class Blocks:
 
     @staticmethod
     def setup_own_db_access(shared_db_adapter: Db) -> None:
+        if DbState.is_massive_sync():
+            Db.open_massive_instance()
+
         PostDataCache.setup_own_db_access(shared_db_adapter, "PostDataCache")
         Reputations.setup_own_db_access(shared_db_adapter, "Reputations")
         Votes.setup_own_db_access(shared_db_adapter, "Votes")
@@ -91,6 +92,8 @@ class Blocks:
 
     @staticmethod
     def close_own_db_access() -> None:
+        Db.close_massive_instance()
+
         PostDataCache.close_own_db_access()
         Reputations.close_own_db_access()
         Votes.close_own_db_access()
@@ -106,7 +109,7 @@ class Blocks:
     def head_num() -> int:
         """Get head block number from the application view (hive.hivemind_app_blocks_view)."""
         sql = f"SELECT num FROM {SCHEMA_NAME}.get_head_state();"
-        return DB.query_one(sql) or 0
+        return Db.instance().query_one(sql) or 0
 
     @staticmethod
     def last_imported() -> int:
@@ -115,7 +118,7 @@ class Blocks:
         (could not be completed yet! which means there were no update queries run with this block number)
         """
         sql = f"SELECT last_imported_block_num FROM {SCHEMA_NAME}.hive_state;"
-        return DB.query_one(sql) or 0
+        return Db.instance().query_one(sql) or 0
 
     @staticmethod
     def last_completed() -> int:
@@ -124,13 +127,13 @@ class Blocks:
         (block is considered as completed when all update queries were run with this block number)
         """
         sql = f"SELECT last_completed_block_num FROM {SCHEMA_NAME}.hive_state;"
-        return DB.query_one(sql) or 0
+        return Db.instance().query_one(sql) or 0
 
     @staticmethod
     def head_date() -> str:
         """Get hive's head block date."""
         sql = "SELECT head_block_time()"
-        return str(DB.query_one(sql) or '')
+        return str(Db.instance().query_one(sql) or '')
 
     @classmethod
     def set_end_of_sync_lib(cls, lib: int) -> None:
@@ -213,7 +216,7 @@ class Blocks:
 
         log.info("#############################################################################")
         sql = f'SELECT {SCHEMA_NAME}.update_last_imported_block(:last_num, :last_date);'
-        DB.query_no_return(sql, last_num=last_num, last_date=last_date)
+        Db.data_sync_instance().query_no_return(sql, last_num=last_num, last_date=last_date)
         return first_block, last_num
 
     @classmethod
@@ -222,12 +225,13 @@ class Blocks:
 
         time_start = OPSM.start()
 
-        DB.query("START TRANSACTION")
         if is_massive_sync:
-            #update last_active_at directly since we don't advance current_block_num in massive_sync (until whole indexer gets re-write)
-            DB.query_no_return(f"SELECT hive.app_update_last_active_at('hivemind_app');");
+            Db.data_sync_instance().query_no_return("START TRANSACTION")
 
         first_block, last_num = cls.process_blocks(blocks)
+
+        if is_massive_sync:
+            Db.data_sync_instance().query_no_return("COMMIT")
 
         if not is_massive_sync:
             log.info("[PROCESS MULTI] Flushing data in 1 thread")
@@ -236,8 +240,6 @@ class Blocks:
                 log.info("[PROCESS MULTI] Tables updating in live synchronization")
                 cls.on_live_blocks_processed(first_block)
                 cls._periodic_actions(blocks[0])
-
-        DB.query("COMMIT")
 
         if is_massive_sync:
             log.info("[PROCESS MULTI] Flushing data in N threads")
@@ -266,7 +268,7 @@ class Blocks:
         elif block_num % 200 == 0:  # 10min
             log.info("[SINGLE] 10min")
             log.info("[SINGLE] updating communities posts and rank")
-            update_communities_posts_and_rank(db=DB)
+            update_communities_posts_and_rank(db=Db.data_sync_instance())
 
     @classmethod
     def prepare_vops(cls, comment_payout_ops: dict, block: Block, date, block_num: int, is_safe_cashout: bool) -> dict:
@@ -462,7 +464,7 @@ class Blocks:
 
         for query in queries:
             time_start = perf_counter()
-            DB.query_no_return(query)
+            Db.data_sync_instance().query_no_return(query)
             log.info("%s executed in: %.4f s", query, perf_counter() - time_start)
 
     @staticmethod

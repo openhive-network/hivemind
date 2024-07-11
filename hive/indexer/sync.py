@@ -32,6 +32,8 @@ from hive.utils.stats import PrometheusClient as PC
 from hive.utils.stats import WaitingStatusManager as WSM
 from hive.utils.timer import Timer
 
+from concurrent.futures import as_completed, ThreadPoolExecutor
+
 import ast
 
 log = logging.getLogger(__name__)
@@ -54,6 +56,8 @@ class SyncHiveDb:
         self._databases = None
         self.time_start = None
 
+        self._massive_consume_blocks_futures = None
+        self._massive_consume_blocks_thread_pool = ThreadPoolExecutor(max_workers=1)
         self.rate = {}
 
     def __enter__(self):
@@ -79,7 +83,8 @@ class SyncHiveDb:
     def __exit__(self, exc_type, value, traceback):
         if self._enter_sync:
             log.info("Exiting HAF mode synchronization")
-            Blocks.setup_own_db_access(shared_db_adapter=self._db)  # needed for PayoutStats.generate
+            if not DbState.is_massive_sync():
+                Blocks.setup_own_db_access(shared_db_adapter=self._db)  # needed for PayoutStats.generate
             PayoutStats.generate(separate_transaction=True)
 
             last_imported_block = Blocks.last_imported()
@@ -120,6 +125,8 @@ class SyncHiveDb:
             # SqlAlchemy will not use autocommit when there is a pending transaction
             # hive.app_next_iteration issues COMMIT, and autocommit is not desired
             # because it save current block before the decision if new range of blocks will be processed or not
+            if self._db.is_trx_active():
+                self._db.query_no_return( "COMMIT" )
             self._db.query_no_return( "START TRANSACTION" )
             self._lbound, self._ubound = self._query_for_app_next_block()
 
@@ -136,7 +143,6 @@ class SyncHiveDb:
 
             # we need to COMMIT here to unveil HAF context state to threads which
             # will fill hivemind tables
-            self._db.query_no_return( "COMMIT" )
             if application_stage == "MASSIVE_WITHOUT_INDEXES":
                 DbState.set_massive_sync( True )
                 report_enter_to_stage(application_stage)
@@ -158,6 +164,7 @@ class SyncHiveDb:
 
                 self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
             elif  application_stage ==  "live":
+                self._wait_for_massive_consume() # wait for flushing massive data in thread
                 DbState.set_massive_sync( False )
                 report_enter_to_stage(application_stage)
 
@@ -177,14 +184,21 @@ class SyncHiveDb:
                 self._on_stop_synchronization(active_connections_before)
                 assert False, f"Unknown application stage {application_stage}"
 
+    def _wait_for_massive_consume(self):
+        if self._massive_consume_blocks_futures is None:
+            return
+        self._massive_consume_blocks_futures.result()
+        self._massive_consume_blocks_futures = None
 
     def _break_requested(self, last_imported_block, active_connections_before):
         if not can_continue_thread():
+            self._wait_for_massive_consume()
             restore_default_signal_handlers()
             self._on_stop_synchronization(active_connections_before)
             return True
 
         if self._last_block_to_process and ( last_imported_block >= self._last_block_to_process):
+            self._wait_for_massive_consume()
             log.info(f"REACHED test_max_block of {self._last_block_to_process}")
             self._on_stop_synchronization(active_connections_before)
             return True
@@ -240,11 +254,17 @@ class SyncHiveDb:
         blocks = self._massive_blocks_data_provider.get_blocks(lbound, ubound)
         WSM.wait_stat('block_consumer_block', WSM.stop(wait_blocks_time))
 
+        self._wait_for_massive_consume() # wait for finish previous consumption
+
         if DbLiveContextHolder.is_live_context() or DbLiveContextHolder.is_live_context() is None:
             DbLiveContextHolder.set_live_context(False)
             Blocks.setup_own_db_access(shared_db_adapter=self._db)
 
-        self._consume_massive_blocks(blocks, lbound, ubound)
+        #self._consume_massive_blocks(blocks, lbound, ubound)
+
+        self._massive_consume_blocks_futures =\
+            self._massive_consume_blocks_thread_pool.submit( self._consume_massive_blocks, blocks, lbound, ubound )
+
 
     def _on_stop_synchronization(self, active_connections_before):
         self._db.query_no_return("ROLLBACK")

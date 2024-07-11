@@ -9,8 +9,6 @@ from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.utils.normalize import escape_characters
 
 log = logging.getLogger(__name__)
-DB = Db.instance()
-
 
 class Reblog(DbAdapterHolder):
     """Class for reblog operations"""
@@ -61,7 +59,7 @@ class Reblog(DbAdapterHolder):
     def delete(cls, author, permlink, account):
         """Remove a reblog from hive_reblogs + feed from hive_feed_cache."""
         sql = f"SELECT {SCHEMA_NAME}.delete_reblog_feed_cache( (:author)::VARCHAR, (:permlink)::VARCHAR, (:account)::VARCHAR );"
-        status = DB.query_col(sql, author=author, permlink=permlink, account=account)
+        status = Db.data_sync_instance().query_col(sql, author=author, permlink=permlink, account=account)
         assert status is not None
         if status == 0:
             log.debug("reblog: post not found: %s/%s", author, permlink)

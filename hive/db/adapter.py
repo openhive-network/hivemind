@@ -20,6 +20,7 @@ class Db:
     """RDBMS adapter for hive. Handles connecting and querying."""
 
     _instance = None
+    _massive_instance = None
 
     # maximum number of connections that is required so as to execute some tasks concurrently
     necessary_connections = 15
@@ -30,6 +31,26 @@ class Db:
         """Get the shared instance."""
         assert cls._instance, 'set_shared_instance was never called'
         return cls._instance
+
+    @classmethod
+    def data_sync_instance(cls):
+        """Get the shared instance."""
+        if cls._massive_instance is not None:
+            return cls._massive_instance
+        return cls.instance()
+
+    @classmethod
+    def open_massive_instance(cls):
+        """Get the shared instance."""
+        assert cls._massive_instance is None, 'massive instance already opened'
+        cls._massive_instance = cls.instance().clone( "massive_instance" )
+
+    @classmethod
+    def close_massive_instance(cls):
+        """Get the shared instance."""
+        if cls._massive_instance is not None:
+            cls._massive_instance.close()
+            cls._massive_instance = None
 
     @classmethod
     def set_shared_instance(cls, db):

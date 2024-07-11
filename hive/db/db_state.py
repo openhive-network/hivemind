@@ -319,6 +319,7 @@ class DbState:
         end_time = perf_counter()
         elapsed_time = end_time - time_start
         log.info("Dropped foreign keys: %.4f s", elapsed_time)
+        cls.db().query_no_return( "COMMIT" )
 
         cls._fk_were_disabled = True
         cls._fk_were_enabled= False
@@ -351,6 +352,7 @@ class DbState:
         log.info("Recreating foreign keys")
         create_fk(cls.db())
         log.info(f"Foreign keys were recreated in {perf_counter() - start_time_foreign_keys:.3f}s")
+        cls.db().query_no_return( "COMMIT" )
 
         cls._fk_were_disabled = False
         cls._fk_were_enabled = True
@@ -545,6 +547,8 @@ class DbState:
     @classmethod
     def ensure_finalize_massive_sync(cls, last_imported_blocks, last_completed_blocks):
         if last_imported_blocks > last_completed_blocks:
+            if cls.db().is_trx_active():
+                cls.db().query_no_return("COMMIT")
             cls.ensure_reputations_recalculated(last_completed_blocks, last_imported_blocks)
 
             cls._execute_query(db=cls.db(), sql="VACUUM (VERBOSE,ANALYZE)")
