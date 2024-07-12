@@ -193,12 +193,16 @@ class SyncHiveDb:
     def _break_requested(self, last_imported_block, active_connections_before):
         if not can_continue_thread():
             self._wait_for_massive_consume()
+            self._db.query_no_return("ROLLBACK")
+            DbState.ensure_finalize_massive_sync(last_imported_block, Blocks.last_completed())
             restore_default_signal_handlers()
             self._on_stop_synchronization(active_connections_before)
             return True
 
         if self._last_block_to_process and ( last_imported_block >= self._last_block_to_process):
             self._wait_for_massive_consume()
+            self._db.query_no_return("ROLLBACK")
+            DbState.ensure_finalize_massive_sync(last_imported_block, Blocks.last_completed())
             log.info(f"REACHED test_max_block of {self._last_block_to_process}")
             self._on_stop_synchronization(active_connections_before)
             return True
@@ -267,7 +271,6 @@ class SyncHiveDb:
 
 
     def _on_stop_synchronization(self, active_connections_before):
-        self._db.query_no_return("ROLLBACK")
         self.print_summary()
 
     def _create_massive_provider_if_no_exist(self):
