@@ -31,27 +31,11 @@ class Posts(DbAdapterHolder):
     comment_payout_ops = {}
     _comment_payout_ops = []
 
-    _db_common_with_accounts = None
-
-    @classmethod
-    def set_db_common_with_accounts(cls, db: Db):
-        cls._db_common_with_accounts = db
-
-    @classmethod
-    def db_common_wit_accounts(cls):
-        if cls._db_common_with_accounts is None:
-            return cls.db
-        return cls._db_common_with_accounts
-
-    @classmethod
-    def reset_db_common_with_account(cls):
-        cls._db_common_with_accounts = None
-
     @classmethod
     def last_id(cls):
         """Get the last indexed post id."""
         sql = f"SELECT id FROM {SCHEMA_NAME}.hive_posts WHERE counter_deleted = 0 ORDER BY id DESC LIMIT 1;"
-        return cls.db_common_wit_accounts().query_one(sql) or 0
+        return Db.data_sync_instance().query_one(sql) or 0
 
     @classmethod
     def delete_op(cls, op, block_date):
@@ -87,7 +71,7 @@ class Posts(DbAdapterHolder):
             FROM {SCHEMA_NAME}.process_hive_post_operation((:author)::varchar, (:permlink)::varchar, (:parent_author)::varchar, (:parent_permlink)::varchar, (:date)::timestamp, (:community_support_start_block)::integer, (:block_num)::integer, (:tags)::VARCHAR[]);
             """
 
-        row = cls.db_common_wit_accounts().query_row(
+        row = Db.data_sync_instance().query_row(
             sql,
             author=op['author'],
             permlink=op['permlink'],
@@ -353,7 +337,7 @@ class Posts(DbAdapterHolder):
             sql += """ - 1)"""
         sql += f""" WHERE id = (SELECT parent_id FROM {SCHEMA_NAME}.hive_posts WHERE id = :child_id)"""
 
-        cls.db_common_wit_accounts().query(sql, child_id=child_id)
+        Db.data_sync_instance().query(sql, child_id=child_id)
 
     @classmethod
     def comment_options_op(cls, op):
@@ -382,7 +366,7 @@ class Posts(DbAdapterHolder):
             hp.author_id = (SELECT id FROM {SCHEMA_NAME}.hive_accounts WHERE name = :author) AND
             hp.permlink_id = (SELECT id FROM {SCHEMA_NAME}.hive_permlink_data WHERE permlink = :permlink)
         """
-        cls.db_common_wit_accounts().query(
+        Db.data_sync_instance().query(
             sql,
             author=op['author'],
             permlink=op['permlink'],
@@ -397,7 +381,7 @@ class Posts(DbAdapterHolder):
     def delete(cls, op, block_date):
         """Marks a post record as being deleted."""
         sql = f"SELECT {SCHEMA_NAME}.delete_hive_post((:author)::varchar, (:permlink)::varchar, (:block_num)::int, (:date)::timestamp);"
-        cls.db_common_wit_accounts().query_no_return(
+        Db.data_sync_instance().query_no_return(
             sql, author=op['author'], permlink=op['permlink'], block_num=op['block_num'], date=block_date
         )
         # all votes for that post that are still not pushed to DB have to be removed, since the same author/permlink

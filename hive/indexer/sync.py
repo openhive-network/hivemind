@@ -76,16 +76,15 @@ class SyncHiveDb:
         self._check_log_explain_queries()
 
         if self._enter_sync:
-            Accounts.setup_own_db_access( self._db, "load account ids" )
             Accounts.load_ids()  # prefetch id->name and id->rank memory maps
-            Accounts.close_own_db_access()
 
         return self
 
     def __exit__(self, exc_type, value, traceback):
         if self._enter_sync:
             log.info("Exiting HAF mode synchronization")
-            Blocks.setup_own_db_access(shared_db_adapter=self._db)  # needed for PayoutStats.generate
+            if not DbState.is_massive_sync():
+                Blocks.setup_own_db_access(shared_db_adapter=self._db)  # needed for PayoutStats.generate
             PayoutStats.generate(separate_transaction=True)
 
             last_imported_block = Blocks.last_imported()

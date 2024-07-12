@@ -547,6 +547,8 @@ class DbState:
     @classmethod
     def ensure_finalize_massive_sync(cls, last_imported_blocks, last_completed_blocks):
         if last_imported_blocks > last_completed_blocks:
+            if cls.db().is_trx_active():
+                cls.db().query_no_return("COMMIT")
             cls.ensure_reputations_recalculated(last_completed_blocks, last_imported_blocks)
 
             cls._execute_query(db=cls.db(), sql="VACUUM (VERBOSE,ANALYZE)")

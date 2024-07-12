@@ -12,8 +12,6 @@ from hive.indexer.reblog import Reblog
 from hive.utils.json import valid_command, valid_date, valid_keys, valid_op_json
 from hive.utils.normalize import load_json_key
 
-DB = Db.instance()
-
 log = logging.getLogger(__name__)
 
 
