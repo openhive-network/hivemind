@@ -319,7 +319,8 @@ class DbState:
         end_time = perf_counter()
         elapsed_time = end_time - time_start
         log.info("Dropped foreign keys: %.4f s", elapsed_time)
-        cls.db().query_no_return( "COMMIT" )
+        if cls.db().is_trx_active():
+            cls.db().query_no_return( "COMMIT" )
 
         cls._fk_were_disabled = True
         cls._fk_were_enabled= False
@@ -352,7 +353,8 @@ class DbState:
         log.info("Recreating foreign keys")
         create_fk(cls.db())
         log.info(f"Foreign keys were recreated in {perf_counter() - start_time_foreign_keys:.3f}s")
-        cls.db().query_no_return( "COMMIT" )
+        if cls.db().is_trx_active():
+            cls.db().query_no_return( "COMMIT" )
 
         cls._fk_were_disabled = False
         cls._fk_were_enabled = True
