@@ -50,6 +50,7 @@ class Db:
         """Get the shared instance."""
         if cls._massive_instance is not None:
             cls._massive_instance.close()
+            cls._massive_instance = None
 
     @classmethod
     def set_shared_instance(cls, db):
