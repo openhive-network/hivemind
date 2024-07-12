@@ -58,7 +58,7 @@ CREATE TYPE hivemind_app.hive_api_hivemind_blocks AS (
     hash BYTEA,
     prev BYTEA,
     date TEXT,
-    operations jsonb
+    operations jsonb[]
 );
 
 
@@ -73,12 +73,12 @@ BEGIN
              , hb.hash
              , hb.prev as prev
              , to_char( created_at,  'YYYY-MM-DDThh24:MI:SS' ) as date
-             , to_jsonb( oper.operations ) as operations
+             , oper.operations as operations
         FROM hivemind_app.blocks_view hb
                  LEFT JOIN (
             SELECT
                    op.block_num
-                 , ARRAY_AGG( op ORDER BY op.id ) as operations
+                 , ARRAY_AGG( to_jsonb(op) ORDER BY op.id ) as operations
             FROM
                 (SELECT
                      ho.id
