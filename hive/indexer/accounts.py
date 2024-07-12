@@ -27,6 +27,23 @@ class Accounts(DbAdapterHolder):
     # account core methods
     # --------------------
 
+    _db_common_with_posts = None
+
+    @classmethod
+    def set_db_common_with_posts(cls, db: Db):
+        cls._db_common_with_posts = db
+    
+    @classmethod
+    def db_common_with_posts(cls):
+        if cls._db_common_with_posts is None:
+            return cls.db
+        return cls._db_common_with_posts
+    
+    @classmethod
+    def reset_db_common_with_posts(cls):
+        cls._db_common_with_posts = None
+
+
     @classmethod
     def update_op(cls, update_operation, allow_change_posting):
         """Save json_metadata."""
@@ -55,7 +72,7 @@ class Accounts(DbAdapterHolder):
     def load_ids(cls):
         """Load a full (name: id) dict into memory."""
         assert not cls._ids, "id map already loaded"
-        cls._ids = dict(cls.db.query_all(f"SELECT name, id FROM {SCHEMA_NAME}.hive_accounts"))
+        cls._ids = dict(cls.db_common_with_posts().query_all(f"SELECT name, id FROM {SCHEMA_NAME}.hive_accounts"))
 
     @classmethod
     def clear_ids(cls):
@@ -135,7 +152,7 @@ class Accounts(DbAdapterHolder):
                   RETURNING id
               """
 
-        new_id = cls.db.query_one(sql)
+        new_id = cls.db_common_with_posts().query_one(sql)
         if new_id is None:
             return False
         cls._ids[name] = new_id

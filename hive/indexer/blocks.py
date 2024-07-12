@@ -9,6 +9,7 @@ from typing import Tuple
 
 from hive.conf import Conf, SCHEMA_NAME, ONE_WEEK_IN_BLOCKS
 from hive.db.adapter import Db
+from hive.db.db_state import DbState
 from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
 from hive.indexer.accounts import Accounts
 from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
@@ -82,6 +83,11 @@ class Blocks:
         global DB
         global OLD_DB
         OLD_DB = DB
+        if DbState.is_massive_sync():
+            accounts_and_post_shared_connection = shared_db_adapter.clone("accounts_and_post")
+            Posts.set_db_common_with_accounts(accounts_and_post_shared_connection)
+            Accounts.set_db_common_with_posts(accounts_and_post_shared_connection)
+
         DB = shared_db_adapter.clone( "Root database for massive sync" )
         PostDataCache.setup_own_db_access(shared_db_adapter, "PostDataCache")
         Reputations.setup_own_db_access(shared_db_adapter, "Reputations")
@@ -102,6 +108,12 @@ class Blocks:
             DB.close()
             DB = OLD_DB
             OLD_DB =None
+
+        if Posts.db_common_wit_accounts() is not None:
+            accounts_and_post_shared_connection = Posts.db_common_wit_accounts()
+            Posts.reset_db_common_with_account()
+            Accounts.reset_db_common_with_posts()
+            accounts_and_post_shared_connection.close()
 
         PostDataCache.close_own_db_access()
         Reputations.close_own_db_access()
@@ -235,14 +247,12 @@ class Blocks:
         time_start = OPSM.start()
 
         if is_massive_sync:
-            Accounts.beginTx()
-            Posts.beginTx()
+            Accounts.db_common_with_posts().query_no_return("START TRANSACTION")
 
         first_block, last_num = cls.process_blocks(blocks)
 
         if is_massive_sync:
-            Accounts.commitTx()
-            Posts.commitTx()
+            Accounts.db_common_with_posts().query_no_return("COMMIT")
 
         if not is_massive_sync:
             log.info("[PROCESS MULTI] Flushing data in 1 thread")
