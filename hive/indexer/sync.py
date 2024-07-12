@@ -194,7 +194,6 @@ class SyncHiveDb:
         if not can_continue_thread():
             self._wait_for_massive_consume()
             self._db.query_no_return("ROLLBACK")
-            DbState.ensure_finalize_massive_sync(last_imported_block, Blocks.last_completed())
             restore_default_signal_handlers()
             self._on_stop_synchronization(active_connections_before)
             return True
