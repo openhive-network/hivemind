@@ -31,10 +31,10 @@ def main():
     db = Db(url=args.database_url, name='mocker')
     Db.set_shared_instance(db)
 
-    last_block_in_hivemind = db.query_row("SELECT * FROM hivemind_app.hive_state LIMIT 1")
-    log.info(f'Last block in hivemind: {last_block_in_hivemind["last_imported_block_num"]}')
+    last_block_in_hivemind = db.query_row("SELECT hive.app_get_current_block_num( '{SCHEMA_NAME}' );")
+    log.info(f'Last block in hivemind: {last_block_in_hivemind}')
 
-    new_block = int(last_block_in_hivemind["last_imported_block_num"]) + 1
+    new_block = int(last_block_in_hivemind) + 1
     mock_file_ops = os.path.join(args.mock_block_data_paths, "mocked_dev_ops.json")
     mock_file_vops = os.path.join(args.mock_vops_data_paths, "mocked_dev_vops.json")
 

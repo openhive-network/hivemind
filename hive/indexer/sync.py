@@ -187,6 +187,7 @@ class SyncHiveDb:
     def _wait_for_massive_consume(self):
         if self._massive_consume_blocks_futures is None:
             return
+
         self._massive_consume_blocks_futures.result()
         self._massive_consume_blocks_futures = None
 
@@ -266,7 +267,7 @@ class SyncHiveDb:
         #self._consume_massive_blocks(blocks, lbound, ubound)
 
         self._massive_consume_blocks_futures =\
-            self._massive_consume_blocks_thread_pool.submit( self._consume_massive_blocks, blocks, lbound, ubound )
+            self._massive_consume_blocks_thread_pool.submit( self._consume_massive_blocks, blocks )
 
 
     def _on_stop_synchronization(self, active_connections_before):
@@ -335,8 +336,17 @@ class SyncHiveDb:
         log.info("=== TOTAL STATS ===")
         self.rate = {}
 
-    def _consume_massive_blocks(self, blocks, lbound, ubound) -> int:
+    def _consume_massive_blocks(self, blocks) -> int:
         from hive.utils.stats import minmax
+
+        if not blocks:
+            log.info("No blocks to consume")
+            return 0
+
+        lbound = blocks[ 0 ]['num']
+        ubound = blocks[ -1 ]['num']
+        orig_lbound = lbound
+        orig_ubound = ubound
 
         is_debug = log.isEnabledFor(10)
         num = 0
@@ -345,7 +355,7 @@ class SyncHiveDb:
 
         try:
             Blocks.set_end_of_sync_lib(ubound)
-            count = ubound - lbound + 1
+            count = len(blocks)
             timer = Timer(count, entity='block', laps=['rps', 'wps'])
 
             while lbound <= ubound:

@@ -117,7 +117,7 @@ class Blocks:
         Get hivemind_app last block that was imported.
         (could not be completed yet! which means there were no update queries run with this block number)
         """
-        sql = f"SELECT last_imported_block_num FROM {SCHEMA_NAME}.hive_state;"
+        sql = f"SELECT hive.app_get_current_block_num( '{SCHEMA_NAME}' )"
         return Db.instance().query_one(sql) or 0
 
     @staticmethod
@@ -215,8 +215,6 @@ class Blocks:
         # deltas in memory and update follow/er counts in bulk.
 
         log.info("#############################################################################")
-        sql = f'SELECT {SCHEMA_NAME}.update_last_imported_block(:last_num, :last_date);'
-        Db.data_sync_instance().query_no_return(sql, last_num=last_num, last_date=last_date)
         return first_block, last_num
 
     @classmethod

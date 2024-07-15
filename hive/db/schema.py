@@ -356,7 +356,6 @@ def build_metadata():
         'hive_state',
         metadata,
         sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
-        sa.Column('last_imported_block_num', sa.Integer, nullable=False),
         sa.Column('last_imported_block_date', sa.DateTime, nullable=False),
         sa.Column('last_completed_block_num', sa.Integer, nullable=False),
         sa.Column('db_version', sa.Integer, nullable=False),
@@ -569,7 +568,7 @@ def setup(db, admin_db):
 
     # default rows
     sqls = [
-        f"INSERT INTO {SCHEMA_NAME}.hive_state (last_imported_block_num, last_imported_block_date, last_completed_block_num, db_version) VALUES (1, '1970-01-01T00:00:00', 1, 0)",
+        f"INSERT INTO {SCHEMA_NAME}.hive_state (last_imported_block_date, last_completed_block_num, db_version) VALUES ('1970-01-01T00:00:00', 1, 0)",
         f"INSERT INTO {SCHEMA_NAME}.hive_permlink_data (id, permlink) VALUES (0, '')",
         f"INSERT INTO {SCHEMA_NAME}.hive_category_data (id, category) VALUES (0, '')",
         f"INSERT INTO {SCHEMA_NAME}.hive_tag_data (id, tag) VALUES (0, '')",
