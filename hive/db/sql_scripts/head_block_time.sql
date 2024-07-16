@@ -4,7 +4,7 @@ RETURNS TIMESTAMP
 LANGUAGE 'sql' STABLE
 AS
 $BODY$
-SELECT last_imported_block_date FROM hivemind_app.hive_state LIMIT 1
+    SELECT created_at FROM hivemind_app.blocks_view ORDER BY num DESC LIMIT 1;
 $BODY$
 ;
 
