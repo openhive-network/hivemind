@@ -4,7 +4,8 @@ RETURNS TIMESTAMP
 LANGUAGE 'sql' STABLE
 AS
 $BODY$
-    SELECT created_at FROM hivemind_app.blocks_view ORDER BY num DESC LIMIT 1;
+    SELECT created_at FROM hivemind_app.blocks_view
+    WHERE num = hive.app_get_current_block_num( 'hivemind_app' );
 $BODY$
 ;
 
