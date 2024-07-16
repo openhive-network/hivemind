@@ -188,14 +188,8 @@ class SyncHiveDb:
         if self._massive_consume_blocks_futures is None:
             return
 
-        if self._massive_consume_blocks_futures.done():
-            log.info( "MICKIEWICZ: previous consumption done" )
-        else:
-            log.info( "MICKIEWICZ: waiting for previous consumption" )
         self._massive_consume_blocks_futures.result()
         self._massive_consume_blocks_futures = None
-
-        log.info( "MICKIEWICZ: END of _wait_for_massive_consume" )
 
     def _break_requested(self, last_imported_block, active_connections_before):
         if not can_continue_thread():
@@ -354,8 +348,6 @@ class SyncHiveDb:
         orig_lbound = lbound
         orig_ubound = ubound
 
-        log.info(f"MICKIEWICZ START consume massive blocks in thread {orig_lbound}:{orig_ubound}")
-
         is_debug = log.isEnabledFor(10)
         num = 0
 
@@ -410,7 +402,7 @@ class SyncHiveDb:
             log.exception("Exception caught during processing blocks...")
             set_exception_thrown()
             raise
-        log.info(f"MICKIEWICZ END consume massive blocks in thread {orig_lbound}:{orig_ubound}")
+
         return num
 
     def _get_active_db_connections(self):
