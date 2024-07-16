@@ -15,5 +15,5 @@ RETURNS hivemind_app.blocks_view.num%TYPE
 LANGUAGE 'sql' STABLE
 AS
 $BODY$
-SELECT last_imported_block_num - CAST( extract(epoch from _time)/3 as INTEGER ) FROM hivemind_app.hive_state LIMIT 1
+    SELECT hive.app_get_current_block_num( 'hivemind_app' ) - CAST( extract(epoch from _time)/3 as INTEGER );
 $BODY$
