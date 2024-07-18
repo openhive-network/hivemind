@@ -354,7 +354,7 @@ class SyncHiveDb:
         self.rate = minmax(self.rate, 0, 1.0, 0)
 
         try:
-            Blocks.set_end_of_sync_lib(ubound)
+            Blocks.set_end_of_sync_lib()
             count = len(blocks)
             timer = Timer(count, entity='block', laps=['rps', 'wps'])
 

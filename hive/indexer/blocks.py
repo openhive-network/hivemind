@@ -136,7 +136,9 @@ class Blocks:
         return str(Db.instance().query_one(sql) or '')
 
     @classmethod
-    def set_end_of_sync_lib(cls, lib: int) -> None:
+    def set_end_of_sync_lib(cls) -> None:
+        sql = f"SELECT hive.app_get_irreversible_block( '{SCHEMA_NAME}' )"
+        lib = Db.instance().query_one(sql)
         """Set last block that guarantees cashout before end of sync based on LIB"""
         if lib < 10629455:
             # posts created before HF17 could stay unpaid forever
