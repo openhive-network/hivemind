@@ -141,8 +141,10 @@ class SyncHiveDb:
 
             application_stage = self._db.query_one(f"SELECT hive.get_current_stage_name('{SCHEMA_NAME}')")
 
-            # we need to COMMIT here to unveil HAF context state to threads which
-            # will fill hivemind tables
+            # this  commit is added here only to prevent error idle-in-transaction timeout
+            # it should be removed, but it requires to check any possible long-lasting actions
+            # so as quic workaround this COMMIT stays
+            self._db.query_no_return( "COMMIT" )
             if application_stage == "MASSIVE_WITHOUT_INDEXES":
                 DbState.set_massive_sync( True )
                 report_enter_to_stage(application_stage)
