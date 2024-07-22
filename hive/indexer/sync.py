@@ -33,6 +33,7 @@ from hive.utils.stats import WaitingStatusManager as WSM
 from hive.utils.timer import Timer
 
 from concurrent.futures import as_completed, ThreadPoolExecutor
+from math import ceil
 
 import ast
 
@@ -57,7 +58,9 @@ class SyncHiveDb:
         self.time_start = None
 
         self._massive_consume_blocks_futures = None
-        self._massive_consume_blocks_thread_pool = ThreadPoolExecutor(max_workers=1)
+        self.threads_for_get_blocks = 5
+        self._massive_consume_blocks_thread_pool = ThreadPoolExecutor(max_workers=self.threads_for_get_blocks + 1)
+        self.get_blocks_connections = []
         self.rate = {}
 
     def __enter__(self):
@@ -241,6 +244,12 @@ class SyncHiveDb:
 
     def _process_live_blocks(self, lbound, ubound, active_connections_before):
         log.info(f"[SINGLE] Attempting to process first block in range: <{self._lbound}:{self._ubound}>")
+
+        if self.get_blocks_connections:
+            for connection in self.get_blocks_connections:
+                connection.close()
+            self.get_blocks_connections = []
+
         wait_blocks_time = WSM.start()
         blocks = self._massive_blocks_data_provider.get_blocks(lbound, ubound)
         WSM.wait_stat('block_consumer_block', WSM.stop(wait_blocks_time))
@@ -257,6 +266,30 @@ class SyncHiveDb:
 
     def _process_massive_blocks(self, lbound, ubound, active_connections_before):
         wait_blocks_time = WSM.start()
+
+        if not self.get_blocks_connections:
+            for i in range(0, self.threads_for_get_blocks):
+                new_connection = self._db.clone( f"get_blocks_{i}" )
+                self.get_blocks_connections.append( new_connection )
+
+        block_chunk_size = ceil( (ubound - lbound)/self.threads_for_get_blocks )
+        get_block_futures = []
+        connection = 0
+        for start_block in range(lbound, ubound, block_chunk_size ):
+            get_block_futures.append(
+                self._massive_consume_blocks_thread_pool.submit(
+                self._massive_blocks_data_provider.get_blocks
+                , start_block
+                , min( start_block + block_chunk_size, ubound )
+                , self.get_blocks_connections[ connection ]
+                )
+            )
+            connection += 1
+        blocks = []
+        for future  in get_block_futures:
+            br = future.result()
+            blocks.append( future.result() )
+
         blocks = self._massive_blocks_data_provider.get_blocks(lbound, ubound)
         WSM.wait_stat('block_consumer_block', WSM.stop(wait_blocks_time))
 

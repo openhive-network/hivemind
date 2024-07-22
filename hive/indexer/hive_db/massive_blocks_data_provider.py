@@ -31,10 +31,11 @@ class BlocksDataFromDbProvider:
         self._sql_query = sql_query
         self._strict = strict
 
-    def get_data(self, lbound, ubound):
+    def get_data(self, lbound, ubound, alternative_db = None):
+        db = self._db if alternative_db is None else alternative_db
         try:
             stmt = text(self._sql_query).bindparams(first=lbound, last=ubound)
-            data_rows = self._db.query_all(stmt, is_prepared=True)
+            data_rows = db.query_all(stmt, is_prepared=True)
 
             if not data_rows:
                 msg = f'DATA ROWS ARE EMPTY! query: {stmt.compile(compile_kwargs={"literal_binds": True})}'
@@ -109,5 +110,5 @@ class MassiveBlocksDataProviderHiveDb:
             return vop
         return MassiveBlocksDataProviderHiveDb._id_to_operation_type(id_)
 
-    def get_blocks(self, lbound, ubound):
-        return self._blocks_data_provider.get_data(lbound, ubound)
+    def get_blocks(self, lbound, ubound, alternative_db = None):
+        return self._blocks_data_provider.get_data(lbound, ubound, alternative_db)
