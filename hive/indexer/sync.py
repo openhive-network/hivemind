@@ -58,7 +58,7 @@ class SyncHiveDb:
         self.time_start = None
 
         self._massive_consume_blocks_futures = None
-        self.threads_for_get_blocks = 5
+        self.threads_for_get_blocks = 4
         self._massive_consume_blocks_thread_pool = ThreadPoolExecutor(max_workers=self.threads_for_get_blocks + 1)
         self.get_blocks_connections = []
         self.rate = {}
@@ -245,7 +245,7 @@ class SyncHiveDb:
     def _process_live_blocks(self, lbound, ubound, active_connections_before):
         log.info(f"[SINGLE] Attempting to process first block in range: <{self._lbound}:{self._ubound}>")
 
-        if self.get_blocks_connections:
+        if len(self.get_blocks_connections) > 0:
             for connection in self.get_blocks_connections:
                 connection.close()
             self.get_blocks_connections = []
@@ -267,7 +267,7 @@ class SyncHiveDb:
     def _process_massive_blocks(self, lbound, ubound, active_connections_before):
         wait_blocks_time = WSM.start()
 
-        if not self.get_blocks_connections:
+        if len(self.get_blocks_connections) == 0:
             for i in range(0, self.threads_for_get_blocks):
                 new_connection = self._db.clone( f"get_blocks_{i}" )
                 self.get_blocks_connections.append( new_connection )
@@ -280,17 +280,15 @@ class SyncHiveDb:
                 self._massive_consume_blocks_thread_pool.submit(
                 self._massive_blocks_data_provider.get_blocks
                 , start_block
-                , min( start_block + block_chunk_size, ubound )
+                , min( start_block + block_chunk_size - 1, ubound )
                 , self.get_blocks_connections[ connection ]
                 )
             )
             connection += 1
         blocks = []
         for future  in get_block_futures:
-            br = future.result()
-            blocks.append( future.result() )
+            blocks.extend( future.result() )
 
-        blocks = self._massive_blocks_data_provider.get_blocks(lbound, ubound)
         WSM.wait_stat('block_consumer_block', WSM.stop(wait_blocks_time))
 
         self._wait_for_massive_consume() # wait for finish previous consumption
