@@ -55,7 +55,7 @@ class Accounts(DbAdapterHolder):
     def load_ids(cls):
         """Load a full (name: id) dict into memory."""
         assert not cls._ids, "id map already loaded"
-        cls._ids = dict(Db.data_sync_instance().query_all(f"SELECT name, id FROM {SCHEMA_NAME}.hive_accounts"))
+        cls._ids = dict(DbAdapterHolder.common_block_processing_db().query_all(f"SELECT name, id FROM {SCHEMA_NAME}.hive_accounts"))
 
     @classmethod
     def clear_ids(cls):
@@ -135,7 +135,7 @@ class Accounts(DbAdapterHolder):
                   RETURNING id
               """
 
-        new_id = Db.data_sync_instance().query_one(sql)
+        new_id = DbAdapterHolder.common_block_processing_db().query_one(sql)
         if new_id is None:
             return False
         cls._ids[name] = new_id

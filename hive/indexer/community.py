@@ -9,7 +9,7 @@ import re
 import ujson as json
 
 from hive.conf import SCHEMA_NAME
-from hive.db.adapter import Db
+from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.accounts import Accounts
 from hive.indexer.notify import Notify
 from hive.server.common.helpers import check_community
@@ -137,12 +137,12 @@ class Community:
         # insert community
         sql = f"""INSERT INTO {SCHEMA_NAME}.hive_communities (id, name, type_id, created_at, block_num)
                         VALUES (:id, :name, :type_id, :date, :block_num)"""
-        Db.data_sync_instance().query(sql, id=_id, name=name, type_id=type_id, date=block_date, block_num=block_num)
+        DbAdapterHolder.common_block_processing_db().query(sql, id=_id, name=name, type_id=type_id, date=block_date, block_num=block_num)
 
         # insert owner
         sql = f"""INSERT INTO {SCHEMA_NAME}.hive_roles (community_id, account_id, role_id, created_at)
                         VALUES (:community_id, :account_id, :role_id, :date)"""
-        Db.data_sync_instance().query(sql, community_id=_id, account_id=_id, role_id=Role.owner.value, date=block_date)
+        DbAdapterHolder.common_block_processing_db().query(sql, community_id=_id, account_id=_id, role_id=Role.owner.value, date=block_date)
 
     @classmethod
     def validated_id(cls, name):
@@ -168,7 +168,7 @@ class Community:
         if name in cls._ids:
             return cls._ids[name]
         sql = f"SELECT id FROM {SCHEMA_NAME}.hive_communities WHERE name = :name"
-        cid = Db.data_sync_instance().query_one(sql, name=name)
+        cid = DbAdapterHolder.common_block_processing_db().query_one(sql, name=name)
         if cid:
             cls._ids[name] = cid
             cls._names[cid] = name
@@ -179,7 +179,7 @@ class Community:
         if cid in cls._names:
             return cls._names[cid]
         sql = f"SELECT name FROM {SCHEMA_NAME}.hive_communities WHERE id = :id"
-        name = Db.data_sync_instance().query_one(sql, id=cid)
+        name = DbAdapterHolder.common_block_processing_db().query_one(sql, id=cid)
         if cid:
             cls._ids[name] = cid
             cls._names[cid] = name
@@ -188,7 +188,7 @@ class Community:
     @classmethod
     def get_all_muted(cls, community_id):
         """Return a list of all muted accounts."""
-        return Db.data_sync_instance().query_col(
+        return DbAdapterHolder.common_block_processing_db().query_col(
             f"""SELECT name FROM {SCHEMA_NAME}.hive_accounts
                                 WHERE id IN (SELECT account_id FROM {SCHEMA_NAME}.hive_roles
                                               WHERE community_id = :community_id
@@ -201,7 +201,7 @@ class Community:
         """Get user role within a specific community."""
 
         return (
-            Db.data_sync_instance().query_one(
+            DbAdapterHolder.common_block_processing_db().query_one(
                 f"""SELECT role_id FROM {SCHEMA_NAME}.hive_roles
                                     WHERE community_id = :community_id
                                       AND account_id = :account_id
@@ -337,32 +337,32 @@ class CommunityOp:
         # Community-level commands
         if action == 'updateProps':
             bind = ', '.join([k + " = :" + k for k in list(self.props.keys())])
-            Db.data_sync_instance().query(
+            DbAdapterHolder.common_block_processing_db().query(
                 f"UPDATE {SCHEMA_NAME}.hive_communities SET {bind} WHERE id = :id", id=self.community_id, **self.props
             )
             self._notify('set_props', payload=json.dumps(read_key_dict(self.op, 'props')))
 
         elif action == 'subscribe':
-            Db.data_sync_instance().query(
+            DbAdapterHolder.common_block_processing_db().query(
                 f"""INSERT INTO {SCHEMA_NAME}.hive_subscriptions
                                (account_id, community_id, created_at, block_num)
                         VALUES (:actor_id, :community_id, :date, :block_num)""",
                 **params,
             )
-            Db.data_sync_instance().query(
+            DbAdapterHolder.common_block_processing_db().query(
                 f"""UPDATE {SCHEMA_NAME}.hive_communities
                            SET subscribers = subscribers + 1
                          WHERE id = :community_id""",
                 **params,
             )
         elif action == 'unsubscribe':
-            Db.data_sync_instance().query(
+            DbAdapterHolder.common_block_processing_db().query(
                 f"""DELETE FROM {SCHEMA_NAME}.hive_subscriptions
                          WHERE account_id = :actor_id
                            AND community_id = :community_id""",
                 **params,
             )
-            Db.data_sync_instance().query(
+            DbAdapterHolder.common_block_processing_db().query(
                 f"""UPDATE {SCHEMA_NAME}.hive_communities
                            SET subscribers = subscribers - 1
                          WHERE id = :community_id""",
@@ -371,7 +371,7 @@ class CommunityOp:
 
         # Account-level actions
         elif action == 'setRole':
-            Db.data_sync_instance().query(
+            DbAdapterHolder.common_block_processing_db().query(
                 f"""INSERT INTO {SCHEMA_NAME}.hive_roles
                                (account_id, community_id, role_id, created_at)
                         VALUES (:account_id, :community_id, :role_id, :date)
@@ -381,7 +381,7 @@ class CommunityOp:
             )
             self._notify('set_role', payload=Role(self.role_id).name)
         elif action == 'setUserTitle':
-            Db.data_sync_instance().query(
+            DbAdapterHolder.common_block_processing_db().query(
                 f"""INSERT INTO {SCHEMA_NAME}.hive_roles
                                (account_id, community_id, title, created_at)
                         VALUES (:account_id, :community_id, :title, :date)
@@ -393,7 +393,7 @@ class CommunityOp:
 
         # Post-level actions
         elif action == 'mutePost':
-            Db.data_sync_instance().query(
+            DbAdapterHolder.common_block_processing_db().query(
                 f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '1'
                          WHERE id = :post_id""",
                 **params,
@@ -401,7 +401,7 @@ class CommunityOp:
             self._notify('mute_post', payload=self.notes)
 
         elif action == 'unmutePost':
-            Db.data_sync_instance().query(
+            DbAdapterHolder.common_block_processing_db().query(
                 f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_muted = '0'
                          WHERE id = :post_id""",
                 **params,
@@ -409,14 +409,14 @@ class CommunityOp:
             self._notify('unmute_post', payload=self.notes)
 
         elif action == 'pinPost':
-            Db.data_sync_instance().query(
+            DbAdapterHolder.common_block_processing_db().query(
                 f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_pinned = '1'
                          WHERE id = :post_id""",
                 **params,
             )
             self._notify('pin_post', payload=self.notes)
         elif action == 'unpinPost':
-            Db.data_sync_instance().query(
+            DbAdapterHolder.common_block_processing_db().query(
                 f"""UPDATE {SCHEMA_NAME}.hive_posts SET is_pinned = '0'
                          WHERE id = :post_id""",
                 **params,
@@ -501,7 +501,7 @@ class CommunityOp:
           JOIN {SCHEMA_NAME}.hive_permlink_data hpd ON hp.permlink_id=hpd.id
           WHERE author_id=:_author AND hpd.permlink=:_permlink
         """
-        result = Db.data_sync_instance().query_row(sql, _author=self.account_id, _permlink=_permlink)
+        result = DbAdapterHolder.common_block_processing_db().query_row(sql, _author=self.account_id, _permlink=_permlink)
         assert result, f'post does not exists {self.account}/{_permlink}'
         result = dict(result)
 
@@ -611,23 +611,23 @@ class CommunityOp:
         sql = f"""SELECT 1 FROM {SCHEMA_NAME}.hive_subscriptions
                   WHERE community_id = :community_id
                     AND account_id = :account_id"""
-        return bool(Db.data_sync_instance().query_one(sql, community_id=self.community_id, account_id=account_id))
+        return bool(DbAdapterHolder.common_block_processing_db().query_one(sql, community_id=self.community_id, account_id=account_id))
 
     def _muted(self):
         """Check post's muted status."""
         sql = f"SELECT is_muted FROM {SCHEMA_NAME}.hive_posts WHERE id = :id"
-        return bool(Db.data_sync_instance().query_one(sql, id=self.post_id))
+        return bool(DbAdapterHolder.common_block_processing_db().query_one(sql, id=self.post_id))
 
     def _parent_muted(self):
         """Check parent post's muted status."""
         parent_id = f"SELECT parent_id FROM {SCHEMA_NAME}.hive_posts WHERE id = :id"
         sql = f"SELECT is_muted FROM {SCHEMA_NAME}.hive_posts WHERE id = ({parent_id})"
-        return bool(Db.data_sync_instance().query_one(sql, id=self.post_id))
+        return bool(DbAdapterHolder.common_block_processing_db().query_one(sql, id=self.post_id))
 
     def _pinned(self):
         """Check post's pinned status."""
         sql = f"SELECT is_pinned FROM {SCHEMA_NAME}.hive_posts WHERE id = :id"
-        return bool(Db.data_sync_instance().query_one(sql, id=self.post_id))
+        return bool(DbAdapterHolder.common_block_processing_db().query_one(sql, id=self.post_id))
 
     def _flagged(self):
         """Check user's flag status."""
@@ -639,7 +639,7 @@ class CommunityOp:
                     AND type_id = :type_id
                     AND src_id = :src_id"""
         return bool(
-            Db.data_sync_instance().query_one(
+            DbAdapterHolder.common_block_processing_db().query_one(
                 sql,
                 community_id=self.community_id,
                 post_id=self.post_id,

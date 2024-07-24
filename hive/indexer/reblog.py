@@ -59,7 +59,7 @@ class Reblog(DbAdapterHolder):
     def delete(cls, author, permlink, account):
         """Remove a reblog from hive_reblogs + feed from hive_feed_cache."""
         sql = f"SELECT {SCHEMA_NAME}.delete_reblog_feed_cache( (:author)::VARCHAR, (:permlink)::VARCHAR, (:account)::VARCHAR );"
-        status = Db.data_sync_instance().query_col(sql, author=author, permlink=permlink, account=account)
+        status = DbAdapterHolder.common_block_processing_db().query_col(sql, author=author, permlink=permlink, account=account)
         assert status is not None
         if status == 0:
             log.debug("reblog: post not found: %s/%s", author, permlink)

@@ -10,6 +10,7 @@ from typing import Tuple
 from hive.conf import Conf, SCHEMA_NAME, ONE_WEEK_IN_BLOCKS
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
+from hive.indexer.db_adapter_holder import DbAdapterHolder
 from hive.indexer.hive_db.massive_blocks_data_provider import MassiveBlocksDataProviderHiveDb
 from hive.indexer.accounts import Accounts
 from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
@@ -77,7 +78,7 @@ class Blocks:
     @staticmethod
     def setup_own_db_access(shared_db_adapter: Db) -> None:
         if DbState.is_massive_sync():
-            Db.open_massive_instance()
+            DbAdapterHolder.open_common_blocks_in_background_processing_db()
 
         PostDataCache.setup_own_db_access(shared_db_adapter, "PostDataCache")
         Reputations.setup_own_db_access(shared_db_adapter, "Reputations")
@@ -92,7 +93,7 @@ class Blocks:
 
     @staticmethod
     def close_own_db_access() -> None:
-        Db.close_massive_instance()
+        DbAdapterHolder.close_common_blocks_in_background_processing_db()
 
         PostDataCache.close_own_db_access()
         Reputations.close_own_db_access()
@@ -226,12 +227,12 @@ class Blocks:
         time_start = OPSM.start()
 
         if is_massive_sync:
-            Db.data_sync_instance().query_no_return("START TRANSACTION")
+            DbAdapterHolder.common_block_processing_db().query_no_return("START TRANSACTION")
 
         first_block, last_num = cls.process_blocks(blocks)
 
         if is_massive_sync:
-            Db.data_sync_instance().query_no_return("COMMIT")
+            DbAdapterHolder.common_block_processing_db().query_no_return("COMMIT")
 
         if not is_massive_sync:
             log.info("[PROCESS MULTI] Flushing data in 1 thread")
@@ -268,7 +269,7 @@ class Blocks:
         elif block_num % 200 == 0:  # 10min
             log.info("[SINGLE] 10min")
             log.info("[SINGLE] updating communities posts and rank")
-            update_communities_posts_and_rank(db=Db.data_sync_instance())
+            update_communities_posts_and_rank(db=DbAdapterHolder.common_block_processing_db())
 
     @classmethod
     def prepare_vops(cls, comment_payout_ops: dict, block: Block, date, block_num: int, is_safe_cashout: bool) -> dict:
@@ -464,7 +465,7 @@ class Blocks:
 
         for query in queries:
             time_start = perf_counter()
-            Db.data_sync_instance().query_no_return(query)
+            DbAdapterHolder.common_block_processing_db().query_no_return(query)
             log.info("%s executed in: %.4f s", query, perf_counter() - time_start)
 
     @staticmethod
