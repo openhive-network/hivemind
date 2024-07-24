@@ -61,7 +61,7 @@ class Notify(DbAdapterHolder):
     def set_lastread(cls, account, date):
         """Update `lastread` column for a named account."""
         sql = f"UPDATE {SCHEMA_NAME}.hive_accounts SET lastread_at = :date WHERE name = :name"
-        Db.data_sync_instance().query(sql, date=date, name=account)
+        DbAdapterHolder.common_block_processing_db().query(sql, date=date, name=account)
 
     def to_db_values(self):
         """Generate a db row."""

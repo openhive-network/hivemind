@@ -2,6 +2,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
+from hive.db.adapter import Db
 
 class DbLiveContextHolder(object):
     _live_context = None
@@ -17,6 +18,7 @@ class DbLiveContextHolder(object):
 
 class DbAdapterHolder(object):
     db = None
+    _block_processing_thread_sync_db = None
 
     _inside_sync_tx = False
 
@@ -48,3 +50,23 @@ class DbAdapterHolder(object):
         if not DbLiveContextHolder.is_live_context():
             cls.db.query("COMMIT")
             cls._inside_sync_tx = False
+
+    @staticmethod
+    def common_block_processing_db():
+        """Get the shared instance."""
+        if DbAdapterHolder._block_processing_thread_sync_db is not None:
+            return DbAdapterHolder._block_processing_thread_sync_db
+        return Db.instance()
+
+    @staticmethod
+    def open_common_blocks_in_background_processing_db():
+        """Get the shared instance."""
+        assert DbAdapterHolder._block_processing_thread_sync_db is None, 'massive instance already opened'
+        DbAdapterHolder._block_processing_thread_sync_db = Db.instance().clone("massive_instance")
+
+    @staticmethod
+    def close_common_blocks_in_background_processing_db():
+        """Get the shared instance."""
+        if DbAdapterHolder._block_processing_thread_sync_db is not None:
+            DbAdapterHolder._block_processing_thread_sync_db.close()
+            DbAdapterHolder._block_processing_thread_sync_db = None
