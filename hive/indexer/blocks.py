@@ -218,8 +218,6 @@ class Blocks:
     @classmethod
     def process_multi(cls, blocks, is_massive_sync: bool) -> None:
         """Batch-process blocks; wrapped in a transaction."""
-        DB.query_no_return(f"SET SEARCH_PATH TO {REPTRACKER_SCHEMA_NAME};")
-
         time_start = OPSM.start()
 
         if is_massive_sync:
