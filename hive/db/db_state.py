@@ -13,6 +13,7 @@ import sqlalchemy
 from hive.conf import (
    SCHEMA_NAME
   ,SCHEMA_OWNER_NAME
+  ,ONE_WEEK_IN_BLOCKS
   )
 
 from hive.db.adapter import Db
@@ -553,9 +554,15 @@ class DbState:
                 cls.db().query_no_return("COMMIT")
             cls.ensure_reputations_recalculated(last_completed_blocks, last_imported_blocks)
 
-            cls._execute_query(db=cls.db(), sql="VACUUM (VERBOSE,ANALYZE)")
-            cls._finish_all_tables(True, last_completed_blocks, last_imported_blocks)
-            cls._execute_query(db=cls.db(), sql="VACUUM (VERBOSE,ANALYZE)")
+            is_initial_massive = (last_imported_blocks - last_completed_blocks) > ONE_WEEK_IN_BLOCKS
+
+            if is_initial_massive:
+                cls._execute_query(db=cls.db(), sql="VACUUM (VERBOSE,ANALYZE)")
+
+            cls._finish_all_tables( is_initial_massive, last_completed_blocks, last_imported_blocks)
+
+            if is_initial_massive:
+                cls._execute_query(db=cls.db(), sql="VACUUM (VERBOSE,ANALYZE)")
 
             log.info("[MASSIVE] Massive sync complete!")
             return True
