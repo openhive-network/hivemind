@@ -154,6 +154,9 @@ class SyncHiveDb:
                 DbState.ensure_indexes_are_disabled()
 
                 self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
+                
+                sql_rep = f"SET SEARCH_PATH TO '{REPTRACKER_SCHEMA_NAME}'; SELECT reptracker_process_blocks('{REPTRACKER_SCHEMA_NAME}', (:to_block, :from_block));"
+                self._db.query_no_return(sql_rep, to_block=self._lbound, from_block=self._ubound)
             elif  application_stage == "MASSIVE_WITH_INDEXES":
                 DbState.set_massive_sync( True )
                 if report_enter_to_stage(application_stage):
@@ -165,6 +168,8 @@ class SyncHiveDb:
                 DbState.ensure_indexes_are_enabled()
 
                 self._process_massive_blocks(self._lbound, self._ubound, active_connections_before)
+                sql_rep = f"SET SEARCH_PATH TO '{REPTRACKER_SCHEMA_NAME}'; SELECT reptracker_process_blocks('{REPTRACKER_SCHEMA_NAME}', (:to_block, :from_block));"
+                self._db.query_no_return(sql_rep, to_block=self._lbound, from_block=self._ubound)
             elif  application_stage ==  "live":
                 self._wait_for_massive_consume() # wait for flushing massive data in thread
                 DbState.set_massive_sync( False )
@@ -182,6 +187,8 @@ class SyncHiveDb:
                 log.info(f"[SINGLE] Current system time: {datetime.now().isoformat(sep=' ', timespec='milliseconds')}")
 
                 self._process_live_blocks(self._lbound, self._ubound, active_connections_before)
+                sql_rep = f"SET SEARCH_PATH TO '{REPTRACKER_SCHEMA_NAME}'; SELECT reptracker_process_blocks('{REPTRACKER_SCHEMA_NAME}', (:to_block, :from_block));"
+                self._db.query_no_return(sql_rep, to_block=self._lbound, from_block=self._ubound)
             else:
                 self._on_stop_synchronization(active_connections_before)
                 assert False, f"Unknown application stage {application_stage}"
@@ -221,7 +228,7 @@ class SyncHiveDb:
         if self._max_batch:
             batch = self._max_batch
 
-        result = self._db.query_one( "CALL hive.app_next_iteration( _context => ARRAY['{}', '{}'], _blocks_range => (0,0), _limit => {}, _override_max_batch => {} )"
+        result = self._db.query_one( "CALL hive.app_next_iteration( _contexts => ARRAY['{}', '{}']::hive.contexts_group, _blocks_range => (0,0), _limit => {}, _override_max_batch => {} )"
                                      .format(SCHEMA_NAME, REPTRACKER_SCHEMA_NAME, limit, batch)
                                     )
 
