@@ -39,7 +39,6 @@ class DbState:
     _fk_were_disabled = False
     _fk_were_enabled = False
     _original_synchronous_commit_mode = None
-    _reputations_were_recalculated = False
 
     @classmethod
     def initialize(cls, enter_massive: bool, schema_upgrade: bool):
@@ -378,14 +377,6 @@ class DbState:
 
         cls._fk_were_disabled = False
         cls._fk_were_enabled = True
-
-    @classmethod
-    def ensure_reputations_recalculated(cls, last_imported, last_completed):
-        if cls._reputations_were_recalculated:
-            return
-
-        cls.finish_account_reputations(last_imported, last_completed)
-        cls._reputations_were_recalculated = True
 
     @classmethod
     def _finish_hive_posts(cls, db, massive_sync_preconditions, last_imported_block, current_imported_block):

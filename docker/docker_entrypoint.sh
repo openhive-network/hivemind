@@ -106,7 +106,7 @@ setup() {
 
   if [ "${SKIP_REPTRACKER}" -eq 0 ]; then
     pushd "$reptracker_dir"
-    ./scripts/install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}" --schema="$REPTRACKER_SCHEMA" --is_forking="false" --is_attached="true"
+    ./scripts/install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}" --schema="$REPTRACKER_SCHEMA" --is_forking="false" 
     popd
   fi
 
