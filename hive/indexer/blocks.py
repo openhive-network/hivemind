@@ -16,6 +16,7 @@ from hive.indexer.accounts import Accounts
 from hive.indexer.block import Block, Operation, OperationType, Transaction, VirtualOperationType
 from hive.indexer.custom_op import CustomOp
 from hive.indexer.follow import Follow
+from hive.indexer.reputations import Reputations
 from hive.indexer.hive_db.block import BlockHiveDb
 from hive.indexer.notify import Notify
 from hive.indexer.payments import Payments
@@ -53,6 +54,7 @@ class Blocks:
     _concurrent_flush = [
         ('Posts', Posts.flush, Posts),
         ('PostDataCache', PostDataCache.flush, PostDataCache),
+        ('Reputations', Reputations.flush, Reputations),
         ('Votes', Votes.flush, Votes),
         ('Follow', Follow.flush, Follow),
         ('Reblog', Reblog.flush, Reblog),
@@ -79,6 +81,7 @@ class Blocks:
             DbAdapterHolder.open_common_blocks_in_background_processing_db()
 
         PostDataCache.setup_own_db_access(shared_db_adapter, "PostDataCache")
+        Reputations.setup_own_db_access(shared_db_adapter, "Reputations")
         Votes.setup_own_db_access(shared_db_adapter, "Votes")
         Follow.setup_own_db_access(shared_db_adapter, "Follow")
         Posts.setup_own_db_access(shared_db_adapter, "Posts")
@@ -93,6 +96,7 @@ class Blocks:
         DbAdapterHolder.close_common_blocks_in_background_processing_db()
 
         PostDataCache.close_own_db_access()
+        Reputations.close_own_db_access()
         Votes.close_own_db_access()
         Follow.close_own_db_access()
         Posts.close_own_db_access()
@@ -219,6 +223,10 @@ class Blocks:
     def process_multi(cls, blocks, is_massive_sync: bool) -> None:
         """Batch-process blocks; wrapped in a transaction."""
         time_start = OPSM.start()
+
+        if blocks:
+            Reputations._from_block = blocks[0][0]
+            Reputations._to_block = blocks[-1][0]
 
         if is_massive_sync:
             DbAdapterHolder.common_block_processing_db().query_no_return("START TRANSACTION")
