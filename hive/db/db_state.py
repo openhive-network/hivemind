@@ -550,8 +550,6 @@ class DbState:
         if last_imported_blocks > last_completed_blocks:
             if cls.db().is_trx_active():
                 cls.db().query_no_return("COMMIT")
-            cls.ensure_reputations_recalculated(last_completed_blocks, last_imported_blocks)
-
             is_initial_massive = (last_imported_blocks - last_completed_blocks) > ONE_WEEK_IN_BLOCKS
 
             if is_initial_massive:
