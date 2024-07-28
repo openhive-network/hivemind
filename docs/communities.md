@@ -132,7 +132,7 @@ Name reassignments result unpredictable and/or complex behavior, which is why in
 
 Core settings which will influence community logic and validation rules.
 
- - `reward_share`: (v1.5) dictionary mapping `account` to `percent`
+ - `reward_share`: (for future implementation) dictionary mapping `account` to `percent`
     - specifies required minimum beneficiary amount per post for it to be considered valid
     - can be blank or contain up to 8 entries
 
@@ -148,16 +148,16 @@ Can be stored as a JSON dictionary.
  - `flag_text`: custom text for reporting content
  - `settings': json dict; recognized keys:
    - `avatar_url` - same format as account avatars; usually rendered as a circle
-   - `cover_url` - same format as account covers; used as header background image
-   - `default_view` = `list | blog | grid` - default post display
-   - `bg_color`: background color - hex-encoded RGB value (e.g. `#EEDDCC`)
-   - `bg_color2`: background color - hex-encoded RGB value (if provided, creates a gradient)
+ - `type_id`: change the type of the community (1,2 or 3)
 
-Extra settings (v1.5)
+Extra settings (for future implementation)
 
  - `comment_display`: default comment display method (e.g. `votes`, `trending`, `age`, `forum`) 
  - `feed_display`: specify graphical layout in communities
-
+ - `cover_url` - same format as account covers; used as header background image
+ - `default_view` = `list | blog | grid` - default post display
+ - `bg_color`: background color - hex-encoded RGB value (e.g. `#EEDDCC`)
+ - `bg_color2`: background color - hex-encoded RGB value (if provided, creates a gradient)
 
 
 ## Registration
@@ -224,9 +224,9 @@ In addition to editing user roles (e.g. appointing mods), admins can define the 
 }]
 ```
 
-Valid keys are `title`, `about`, `lang`, `is_nsfw`, `description`, `flag_text`, `settings`.
+Valid keys are `title`, `about`, `lang`, `is_nsfw`, `description`, `flag_text`, `settings`, `type_id`.
 
-#### Set reward share (v1.5)
+#### Set reward share (for future implementation)
 
 ```
 ["setRewardShare", {
@@ -448,3 +448,44 @@ modlog
 1. Stratos subapp: Communities
 
    https://github.com/stratos-steem/stratos/wiki/Subapp:-Communities
+
+## Appendix D. Communities creation flow
+
+Creating a community is as simple as creating an account with the correct account name see [registration](#registration)
+but if you are creating an UI, it might make sense to include extra calls to fully customize the community in the same window.
+
+You mostly want to do those two calls, we'll take for example a community named: hive-135485
+- 
+### 1: set creator as admin:
+
+Set the creator account as admin, it will be an easier UX for him because he won't have to log into the community account
+```json
+{
+  "type": "custom_json_operation",
+  "value": {
+    "required_auths": [],
+    "required_posting_auths": [
+      "hive-135485"
+    ],
+    "id": "community",
+    "json": "[\"setRole\",{\"community\":\"hive-135485\",\"account\":\"creatoraccount\",\"role\":\"admin\"}]"
+  }
+}
+```
+
+### 2: set the community details:
+
+set the community various settings.
+```json
+{
+  "type": "custom_json_operation",
+  "value": {
+    "required_auths": [],
+    "required_posting_auths": [
+      "creatoraccount"
+    ],
+    "id": "community",
+    "json": "[\"updateProps\", {\"community\": \"hive-135485\", \"props\": {\"title\": \"World News\", \"about\": \"A place for major news from around the world.\", \"lang\": \"en\", \"is_nsfw\": false, \"description\": \"Welcome to World News. Here you can find major news updates from all around the globe. Please follow the rules and keep discussions respectful.\", \"flag_text\": \"Report inappropriate content.\", \"settings\": {\"avatar_url\": \"https://example.com/avatar.png\"}}}]"
+  }
+}
+```
