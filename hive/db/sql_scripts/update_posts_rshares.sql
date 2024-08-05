@@ -31,8 +31,8 @@ IF (_last_block - _first_block) > 10000 THEN
   SET
        abs_rshares = votes_rshares.abs_rshares
       ,vote_rshares = votes_rshares.rshares
-      ,sc_hot = CASE hp.is_paidout WHEN True Then 0 ELSE hivemind_app.calculate_hot( votes_rshares.rshares, hp.created_at) END
-      ,sc_trend = CASE hp.is_paidout WHEN True Then 0 ELSE hivemind_app.calculate_trending( votes_rshares.rshares, hp.created_at) END
+      ,sc_hot = CASE hp.is_paidout OR hp.parent_id > 0 WHEN True Then 0 ELSE hivemind_app.calculate_hot( votes_rshares.rshares, hp.created_at) END
+      ,sc_trend = CASE hp.is_paidout OR hp.parent_id > 0 WHEN True Then 0 ELSE hivemind_app.calculate_trending( votes_rshares.rshares, hp.created_at) END
       ,total_votes = votes_rshares.total_votes
       ,net_votes = votes_rshares.net_votes
   FROM votes_rshares_view votes_rshares
@@ -43,8 +43,8 @@ ELSE
   SET
       abs_rshares = votes_rshares.abs_rshares
      ,vote_rshares = votes_rshares.rshares
-     ,sc_hot = CASE hp.is_paidout WHEN True Then 0 ELSE hivemind_app.calculate_hot( votes_rshares.rshares, hp.created_at) END
-     ,sc_trend = CASE hp.is_paidout WHEN True Then 0 ELSE hivemind_app.calculate_trending( votes_rshares.rshares, hp.created_at) END
+     ,sc_hot = CASE hp.is_paidout OR hp.parent_id > 0 WHEN True Then 0 ELSE hivemind_app.calculate_hot( votes_rshares.rshares, hp.created_at) END
+     ,sc_trend = CASE hp.is_paidout OR hp.parent_id > 0 WHEN True Then 0 ELSE hivemind_app.calculate_trending( votes_rshares.rshares, hp.created_at) END
      ,total_votes = votes_rshares.total_votes
      ,net_votes = votes_rshares.net_votes
   FROM
