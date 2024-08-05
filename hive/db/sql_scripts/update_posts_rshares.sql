@@ -37,13 +37,7 @@ IF (_last_block - _first_block) > 10000 THEN
       ,net_votes = votes_rshares.net_votes
   FROM votes_rshares_view votes_rshares
   WHERE hp.id = votes_rshares.post_id
-  AND hp.counter_deleted = 0
-  AND (
-    hp.abs_rshares != votes_rshares.abs_rshares
-    OR hp.vote_rshares != votes_rshares.rshares
-    OR hp.total_votes != votes_rshares.total_votes
-    OR hp.net_votes != votes_rshares.net_votes
-  );
+  AND hp.counter_deleted = 0;
 ELSE
   UPDATE hivemind_app.hive_posts hp
   SET
