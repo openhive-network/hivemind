@@ -54,6 +54,14 @@ BEGIN
     ELSEIF __method_type = 'account_notifications' THEN
       SELECT hivemind_endpoints.account_notifications(__params, __json_type, __id) INTO __result;
     END IF;
+
+  ELSEIF __api_type = 'condenser_api' THEN
+    IF __method_type = 'get_following' THEN
+      SELECT hivemind_endpoints.get_following( __params, __json_type, __id) INTO __result;
+    ELSEIF __method_type = 'get_followers' THEN
+      SELECT hivemind_endpoints.get_followers( __params, __json_type, __id) INTO __result;
+    END IF;
+
 /*
   ELSEIF __api_type = 'block_api' THEN
     IF __method_type = 'get_block' THEN
@@ -204,4 +212,37 @@ BEGIN
   END;
 END
 $$
+;
+
+DROP FUNCTION IF EXISTS hivemind_endpoints.get_following;
+CREATE OR REPLACE FUNCTION hivemind_endpoints.get_following()
+RETURNS TEXT
+AS
+$$
+BEGIN
+    RETURN 'get_following HERE!';
+END
+$$
+LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS hivemind_endpoints.get_followers;
+CREATE OR REPLACE FUNCTION hivemind_endpoints.get_followers(
+    in "account" VARCHAR(50),
+    in "start" TEXT DEFAULT NULL,
+    in "type" VARCHAR(10),
+    in "limit" INT,
+)
+AS
+$BODY$
+DECLARE
+__account VARCHAR(50) = hivemind_helpers.valid_account(account, allow_empty=TRUE)
+__start TEXT DEFAULT NULL =
+__type VARCHAR(10) = hivemind_helpers.valid_follow_type(type)
+__limit INT = hivemind_helpers.valid_limit(_limit,1000,1000);
+
+BEGIN
+  RETURN (role, subscribed, title)::hivemind_helpers.community_context
+  FROM json_to_record(SELECT * FROM hivemind_app.condenser_get_followers(account, "start", "type", "limit"))
+
+  SELECT * FROM hivemind_app.condenser_get_followers( (:account)::VARCHAR, (:start)::VARCHAR, :type, :limit )
 ;
