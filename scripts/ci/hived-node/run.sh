@@ -16,4 +16,4 @@ docker run -d \
     -v $MYDIR/entrypoint.sh:$WORKDIR/entrypoint.sh \
     --entrypoint $WORKDIR/entrypoint.sh \
     $IMAGE \
-    --replay-blockchain --stop-replay-at-block 5000000
+    --replay-blockchain --stop-at-block 5000000
