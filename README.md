@@ -146,7 +146,7 @@ cd /storage1/haf-data-dir/
 For example, for testing purposes (assuming block_log file has been put into data-dir), you can spawn a 5M block replay to prepare a HAF database for further quick testing:
 
 ```bash
-../hivemind/haf/scripts/run_hived_img.sh registry.gitlab.syncad.com/hive/haf/instance:instance-v1.27.3.0 --name=haf-mainnet-instance  --data-dir="$(pwd)" --replay --stop-replay-at-block=5000000
+../hivemind/haf/scripts/run_hived_img.sh registry.gitlab.syncad.com/hive/haf/instance:instance-v1.27.3.0 --name=haf-mainnet-instance  --data-dir="$(pwd)" --replay --stop-at-block=5000000
 ```
 
 By examining hived.log file or using docker logs haf-mainnet-instance, you can examine state of the started instance. Once replay will be finished, you can continue and start the Hivemind sync process.
