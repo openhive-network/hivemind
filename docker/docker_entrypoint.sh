@@ -175,7 +175,7 @@ case "$COMMAND" in
       fi
       # save off the time the block processor started, for use in the health check
       date --utc --iso-8601=seconds > /tmp/block_processing_startup_time.txt
-      run_hive
+      run_hive "${POSTGRES_URL}"
       ;;
     postgrest-server)
       POSTGREST_SERVER=1
@@ -183,7 +183,7 @@ case "$COMMAND" in
       run_hive
       ;;
     *)
-      run_hive
+      run_hive "${POSTGRES_URL}"
 esac
 
 log "global" "Exiting docker entrypoint..."
