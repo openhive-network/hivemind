@@ -29,6 +29,7 @@ variables:
 
   # Other
   CI_DEBUG_SERVICES: "false" #All the service logs should be saved as artifacts, so it's fine to turn this off.
+  CI_IMAGE_TAG: "python-3.8-slim-6"
 
 include:
   - template: Workflows/Branch-Pipelines.gitlab-ci.yml
@@ -36,7 +37,7 @@ include:
     ref: d70a96320298d667cb668854cfed510c2a6c4499 # develop
     file: /scripts/ci-helpers/prepare_data_image_job.yml # implicitly pulls base.gitlab-ci.yml from common-ci-configuration
   - project: hive/common-ci-configuration
-    ref: 5a291802a3fef7ca756bfb3f3c07c23cbe523c48
+    ref: 1ce04340ebfe838fd7fa09aebdde3bd7e1218bce
     file: /templates/cache_cleanup.gitlab-ci.yml  
 
 
@@ -52,6 +53,16 @@ include:
 
 .check-timer: &check-timer
   - ./scripts/ci/timer.sh check
+
+# All jobs other than those necessary to build Hivemind Docker images need to extend this
+# template or include the following rules (if they need additional restrictions)
+.rules:
+  rules:
+    - if: $CI_PIPELINE_TRIGGERED
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "pipeline"
+      when: never
+    - when: on_success
 
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| ANCHORS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -288,7 +299,8 @@ include:
 # Build base images if they're missing from registry
 prepare_base_images:
   stage: build
-  extends: .docker_image_builder_job_template
+  extends: 
+    - .docker_image_builder_job_template
   before_script:
     - git config --global --add safe.directory $CI_PROJECT_DIR
   script:
@@ -297,7 +309,9 @@ prepare_base_images:
 
 prepare_haf_image:
   stage: build
-  extends: .prepare_haf_image
+  extends: 
+    - .prepare_haf_image
+    - .rules
   variables:
     SUBMODULE_DIR: "$CI_PROJECT_DIR/haf"
     REGISTRY_USER: "$HAF_IMG_BUILDER_USER"
@@ -307,7 +321,9 @@ prepare_haf_image:
   tags: *shared_tags
 
 prepare_haf_data:
-  extends: .prepare_haf_data_5m
+  extends: 
+    - .prepare_haf_data_5m
+    - .rules
   needs:
     - job: prepare_haf_image
       artifacts: true
@@ -338,26 +354,44 @@ prepare_hivemind_image:
   tags: *shared_tags
 
 cleanup_hivemind_haf_cache_manual:
-  extends: .cleanup_cache_manual_template
+  extends: 
+    - .cleanup_cache_manual_template
   stage: cleanup
   variables:
     CLEANUP_PATH_PATTERN: "/cache/replay_data_hivemind_*"
+  rules:
+    - if: $CI_PIPELINE_TRIGGERED
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "pipeline"
+      when: never
+    - when: manual
+      allow_failure: true
   tags:
     - data-cache-storage
 
 # This job cleans up both Hivemind-specific cache and cache shared between projects, so it should be used in emergencies only.
 # For example, if prepare_haf_data job fails in the same way in Hivemind and HAfAH.
 cleanup_haf_cache_manual:
-  extends: .cleanup_cache_manual_template
+  extends: 
+    - .cleanup_cache_manual_template
   stage: cleanup
   variables:
     CLEANUP_PATH_PATTERN: "/cache/replay_data_hivemind_* /cache/replay_data_haf_*"
+  rules:
+    - if: $CI_PIPELINE_TRIGGERED
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "pipeline"
+      when: never
+    - when: manual
+      allow_failure: true
   tags:
     - data-cache-storage
 
 download_await:
-  extends: .job-defaults
-  image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.8-slim-6
+  extends: 
+    - .job-defaults
+    - .rules
+  image: "${CI_REGISTRY_IMAGE}/ci-base-image:${CI_IMAGE_TAG}"
   stage: prepare
   variables:
     GIT_STRATEGY: none
@@ -374,7 +408,9 @@ download_await:
     - data-cache-storage
 
 sync:
-  extends: .job-defaults
+  extends: 
+    - .job-defaults
+    - .rules
   image: 
     name: $HIVEMIND_IMAGE
     entrypoint: [""]
@@ -456,7 +492,10 @@ sync:
     - data-cache-storage
 
 e2e_benchmark:
-  image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.8-slim-6
+  extends: 
+    - .job-defaults
+    - .rules
+  image: "${CI_REGISTRY_IMAGE}/ci-base-image:${CI_IMAGE_TAG}"
   stage: benchmark
   interruptible: true
   needs:
@@ -579,7 +618,10 @@ e2e_benchmark:
     - data-cache-storage
 
 e2e_benchmark_on_postgrest:
-  image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.8-slim-6
+  extends: 
+    - .job-defaults
+    - .rules
+  image: $CI_REGISTRY_IMAGE/ci-base-image:${CI_IMAGE_TAG}
   stage: benchmark
   interruptible: true
   needs:
@@ -721,6 +763,16 @@ build_and_publish_image:
     - |
       TAG=$(echo "$CI_COMMIT_TAG" | sed 's/[!+]/-/g')
       scripts/ci-helpers/build_and_publish_instance.sh --image-tag=$TAG
+  rules:
+    - if: "$CI_PIPELINE_TRIGGERED"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "pipeline"
+      when: never
+    - if: $CI_COMMIT_TAG && $CI_COMMIT_REF_PROTECTED == "true"
+      when: manual
+      allow_failure: true
+  #  - !reference [.rules, rules]
+  #  - !reference [.publish_docker_image_template, rules]
   tags: *shared_tags
 
 Trigger benchmark-results-collector:
@@ -729,6 +781,10 @@ Trigger benchmark-results-collector:
     - job: e2e_benchmark
       artifacts: true # Even though variables.env is not a regular artifact, but a dotenv report, this still needs to be set to true
   rules:
+    - if: "$CI_PIPELINE_TRIGGERED"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "pipeline"
+      when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: on_success
     - if: '$CI_COMMIT_BRANCH == "develop"'
