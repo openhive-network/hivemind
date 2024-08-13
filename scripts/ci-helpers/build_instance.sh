@@ -72,10 +72,27 @@ pwd
 
 "$SRCROOTDIR/scripts/ci/fix_ci_tag.sh"
 
-CI_IMAGE_TAG=${CI_IMAGE_TAG:-"python-3.8-slim-1"} # see scripts/ci/build_ci_base_image.sh for the current tag
+CI_IMAGE_TAG=${CI_IMAGE_TAG:-"python-3.8-slim-3"} # see scripts/ci/build_ci_base_image.sh for the current tag
 BUILD_OPTIONS=("--platform=linux/amd64" "--target=instance" "--progress=plain")
 TAG="${REGISTRY}instance:$BUILD_IMAGE_TAG"
 MINIMAL_TAG="${REGISTRY}minimal-instance:$BUILD_IMAGE_TAG"
+
+function image-exists() {
+  local image=$1
+  docker manifest inspect "$image" > /dev/null
+  return $?
+}
+
+function generate-env() {
+  [[ -n "${DOT_ENV_FILENAME:-}" ]] && echo "${DOTENV_VAR_NAME:-IMAGE}=$TAG" > "$DOT_ENV_FILENAME"
+}
+
+if [[ -n "${CI:-}" ]] && image-exists "$TAG"
+then
+    echo "Image $TAG already exists. Skipping build..."
+    generate-env
+    exit 0
+fi
 
 # On CI push the images to the registry
 if [[ -n "${CI:-}" ]]; then
@@ -132,6 +149,6 @@ fi
 
 docker tag "$TAG" "$MINIMAL_TAG"
 
-[[ -n "${DOT_ENV_FILENAME:-}" ]] && echo "${DOTENV_VAR_NAME:-IMAGE}=$TAG" > "$DOT_ENV_FILENAME"
+generate-env
 
 popd
