@@ -22,11 +22,12 @@ POSTGRES_ACCESS=${HEALTHCHECK_POSTGRES_URL:-"postgresql://$postgres_user@$postgr
 #   date --utc --iso-8601=seconds > /tmp/block_processing_startup_time.txt
 
 if [ ! -f "/tmp/block_processing_startup_time.txt" ]; then
-  echo "file /tmp/block_processing_startup_time.txt does not exist, which means block"
+  echo "File /tmp/block_processing_startup_time.txt does not exist, which means block"
   echo "processing hasn't started yet"
   exit 1
 fi
 STARTUP_TIME="$(cat /tmp/block_processing_startup_time.txt)"
+echo "Startup time: $STARTUP_TIME"
 CHECK="SET TIME ZONE 'UTC'; \
        SELECT ((now() - (SELECT last_active_at FROM hive.contexts WHERE name = 'hivemind_app')) < interval '1 minute' \
                AND (SELECT last_active_at FROM hive.contexts WHERE name = 'hivemind_app') > '${STARTUP_TIME}'::timestamp) OR \
