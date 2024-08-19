@@ -30,7 +30,7 @@ async def get_discussion(context, author: str, permlink: str, observer: str = ''
     root_post['active_votes'] = await find_votes_impl(
         db, rows[0]['author'], rows[0]['permlink'], VotesPresentation.BridgeApi
     )
-    root_post = append_statistics_to_post(root_post, rows[0], False)
+    root_post = append_statistics_to_post(root_post, rows[0], rows[0]['is_pinned'])
     root_post['replies'] = []
     root_post['reblogs'] = await count_reblogs(db, rows[0]['id'])
     all_posts[root_id] = root_post
@@ -46,7 +46,7 @@ async def get_discussion(context, author: str, permlink: str, observer: str = ''
         post['active_votes'] = await find_votes_impl(
             db, rows[index]['author'], rows[index]['permlink'], VotesPresentation.BridgeApi
         )
-        post = append_statistics_to_post(post, rows[index], False)
+        post = append_statistics_to_post(post, rows[index], rows[index]['is_pinned'])
         post['replies'] = []
         post['reblogs'] = await count_reblogs(db, rows[index]['id'])
         all_posts[post['post_id']] = post
