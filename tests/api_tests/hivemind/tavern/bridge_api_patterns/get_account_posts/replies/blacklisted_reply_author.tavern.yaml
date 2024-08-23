@@ -2,9 +2,9 @@
   test_name: Hivemind
 
   marks:
-    - patterntest # role of observer is not yet clear (ignored for the time being)
+    - patterntest
     # spaminator blacklists ned which reply to `liondani/give-us-your-ideas-and-be-the-reason-to-make-steemit-the-social-platform-that`
-    # replies start from next post
+    # blacklisted user's post should be visible
 
   includes:
     - !include ../../../common.yaml

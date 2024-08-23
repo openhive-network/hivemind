@@ -2,8 +2,7 @@
   test_name: Hivemind
 
   marks:
-    - patterntest # role of observer is not yet clear (ignored for the time being)
-                  # spaminator blacklists ned (mock data)
+    - patterntest # blacklisted post should be visited
 
   includes:
     - !include ../../../common.yaml

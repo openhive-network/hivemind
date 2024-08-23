@@ -2,7 +2,8 @@
   test_name: Hivemind
 
   marks:
-    - patterntest # blacklisted should be visible, no muted posts here
+    - patterntest
+    # morganpearl muted users chitty and arcange. Response should be the same as gtg observer + 4 more posts
   includes:
     - !include ../../../common.yaml
 
@@ -17,7 +18,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.get_account_posts"
-          params: {"sort":"comments", "account":"zaitsevalesyaa", "observer":"alice"}
+          params: {"sort":"replies","account":"gtg","observer":"morganpearl"}
       response:
         status_code: 200
         verify_response_with:

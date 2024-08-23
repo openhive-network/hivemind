@@ -2,7 +2,7 @@
   test_name: Hivemind
 
   marks:
-    - patterntest # blacklisted should be visible, no muted posts here
+    - patterntest # muted by observer should make posts grayed. Alice mutes herself
   includes:
     - !include ../../../common.yaml
 
@@ -17,7 +17,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.get_account_posts"
-          params: {"sort":"comments", "account":"zaitsevalesyaa", "observer":"alice"}
+          params: {"sort":"comments", "account":"alice", "observer":"alice", "limit":3}
       response:
         status_code: 200
         verify_response_with:

@@ -144,7 +144,7 @@
     "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
       "total_votes": 26
     },
@@ -899,7 +899,7 @@
     "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
       "total_votes": 177
     },
@@ -1291,7 +1291,7 @@
     "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
       "total_votes": 87
     },
@@ -1528,7 +1528,7 @@
     "reblogs": 0,
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
       "total_votes": 44
     },
