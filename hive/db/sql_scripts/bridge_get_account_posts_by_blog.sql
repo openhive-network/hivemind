@@ -5,6 +5,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.bridge_get_account_posts_by_blog(
   in _author VARCHAR,
   in _permlink VARCHAR,
   in _limit INTEGER,
+  in _observer VARCHAR,
   in _bridge_api BOOLEAN
 )
 RETURNS SETOF hivemind_app.bridge_api_post
@@ -14,7 +15,9 @@ DECLARE
   __post_id INTEGER;
   __account_id INTEGER;
   __created_at TIMESTAMP;
+  __observer_id INT;
 BEGIN
+  __observer_id = hivemind_app.find_account_id( _observer, True );
   __account_id = hivemind_app.find_account_id( _account, True );
   __post_id = hivemind_app.find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
@@ -29,8 +32,10 @@ BEGIN
   (
     SELECT 
       hfc.post_id,
-      hfc.created_at
+      hfc.created_at,
+      hfc.account_id
     FROM hivemind_app.hive_feed_cache hfc
+    LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (__observer_id != 0 AND blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hfc.account_id)
     WHERE hfc.account_id = __account_id
       AND ( __post_id = 0 OR hfc.created_at < __created_at
                           OR (hfc.created_at = __created_at AND hfc.post_id < __post_id) )
@@ -72,7 +77,11 @@ BEGIN
       hp.abs_rshares,
       hp.json,
       hp.is_hidden,
-      hp.is_grayed,
+      -- is grayed - if author is muted by observer, make post gray
+      CASE
+        WHEN hp.is_grayed = FALSE AND __observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = blog.account_id) THEN True
+        else hp.is_grayed
+      END,
       hp.total_votes,
       hp.sc_trend,
       hp.role_title,
