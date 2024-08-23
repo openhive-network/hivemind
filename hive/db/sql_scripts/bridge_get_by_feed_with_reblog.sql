@@ -1,6 +1,6 @@
 DROP FUNCTION IF EXISTS hivemind_app.bridge_get_by_feed_with_reblog;
 
-CREATE OR REPLACE FUNCTION hivemind_app.bridge_get_by_feed_with_reblog( IN _account VARCHAR, IN _author VARCHAR, IN _permlink VARCHAR, IN _limit INTEGER)
+CREATE OR REPLACE FUNCTION hivemind_app.bridge_get_by_feed_with_reblog( IN _account VARCHAR, IN _author VARCHAR, IN _permlink VARCHAR, IN _limit INTEGER, IN _observer VARCHAR)
     RETURNS SETOF hivemind_app.bridge_api_post_reblogs
     LANGUAGE 'plpgsql'
     STABLE 
@@ -11,8 +11,10 @@ DECLARE
   __cutoff INT;
   __account_id INT;
   __min_date TIMESTAMP;
+  __observer_id INT;
 BEGIN
   __account_id = hivemind_app.find_account_id( _account, True );
+  __observer_id = hivemind_app.find_account_id( _observer, True );
   __post_id = hivemind_app.find_comment_id( _author, _permlink, True );
   IF __post_id <> 0 THEN
     SELECT MIN(hfc.created_at) INTO __min_date
@@ -33,7 +35,9 @@ BEGIN
     FROM hivemind_app.hive_feed_cache hfc
     JOIN hivemind_app.hive_follows hf ON hfc.account_id = hf.following
     JOIN hivemind_app.hive_accounts ha ON ha.id = hf.following
+    LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (__observer_id != 0 AND blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hfc.account_id)
     WHERE hfc.block_num > __cutoff AND hf.state = 1 AND hf.follower = __account_id
+    AND (__observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hfc.account_id))
     GROUP BY hfc.post_id
     HAVING __post_id = 0 OR MIN(hfc.created_at) < __min_date OR ( MIN(hfc.created_at) = __min_date AND hfc.post_id < __post_id )
     ORDER BY min_created DESC, hfc.post_id DESC

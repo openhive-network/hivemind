@@ -381,19 +381,21 @@ async def get_discussions_by_blog(
     limit: int = 20,
     truncate_body: int = 0,
     filter_tags: list = None,
+    observer: str = None
 ):
     """Retrieve account's blog posts, including reblogs."""
     assert not filter_tags, 'filter_tags not supported'
     tag = valid_account(tag)
+    observer = valid_account(observer, allow_empty=True)
     start_author = valid_account(start_author, allow_empty=True)
     start_permlink = valid_permlink(start_permlink, allow_empty=True)
     limit = valid_limit(limit, 100, 20)
     truncate_body = valid_truncate(truncate_body)
 
-    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, False )"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, (:observer)::VARCHAR, False )"
 
     db = context['db']
-    result = await db.query_all(sql, account=tag, author=start_author, permlink=start_permlink, limit=limit)
+    result = await db.query_all(sql, account=tag, author=start_author, permlink=start_permlink, limit=limit, observer=observer)
     posts_by_id = []
 
     for row in result:
@@ -414,10 +416,10 @@ async def get_discussions_by_feed_impl(
     start_permlink: str = '',
     limit: int = 20,
     truncate_body: int = 0,
-    observer: str = None,
+    observer: str = '',
 ):
     """Get a list of posts for an account's feed."""
-    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_by_feed_with_reblog((:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER)"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_by_feed_with_reblog((:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, (:observer)::VARCHAR)"
     result = await db.query_all(
         sql, account=account, author=start_author, permlink=start_permlink, limit=limit, observer=observer
     )
@@ -473,10 +475,12 @@ async def get_discussions_by_comments(
     limit: int = 20,
     truncate_body: int = 0,
     filter_tags: list = None,
+    observer: str = None
 ):
     """Get comments by made by author."""
     assert not filter_tags, 'filter_tags not supported'
-    start_author = valid_account(start_author)
+    start_author = valid_account(start_author, allow_empty=True)
+    observer = valid_account(observer, allow_empty=True)
     start_permlink = valid_permlink(start_permlink, allow_empty=True)
     limit = valid_limit(limit, 100, 20)
     truncate_body = valid_truncate(truncate_body)
@@ -484,9 +488,9 @@ async def get_discussions_by_comments(
     posts = []
     db = context['db']
 
-    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_comments( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_comments( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
     result = await db.query_all(
-        sql, account=start_author, author=start_author if start_permlink else '', permlink=start_permlink, limit=limit
+        sql, account=start_author, author=start_author if start_permlink else '', permlink=start_permlink, limit=limit, observer=observer
     )
 
     for row in result:
@@ -503,7 +507,7 @@ async def get_discussions_by_comments(
 @return_error_info
 @nested_query_compat
 async def get_replies_by_last_update(
-    context, start_author: str, start_permlink: str = '', limit: int = 20, truncate_body: int = 0
+    context, start_author: str, start_permlink: str = '', limit: int = 20, truncate_body: int = 0, observer: str = None
 ):
     """Get all replies made to any of author's posts."""
     # despite the name time of last edit is not used, posts ranked by creation time (that is, their id)
@@ -518,6 +522,7 @@ async def get_replies_by_last_update(
         valid_permlink(start_permlink, allow_empty=True),
         valid_limit(limit, 100, 20),
         valid_truncate(truncate_body),
+        valid_account(observer, allow_empty=True),
     )
 
 

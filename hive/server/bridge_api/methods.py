@@ -310,24 +310,23 @@ async def get_account_posts(
     start_permlink = valid_permlink(start_permlink, allow_empty=True)
     observer = valid_account(observer, allow_empty=True)
     limit = valid_limit(limit, 100, 20)
-
     sql = None
     account_posts = True  # set when only posts (or reblogs) of given account are supposed to be in results
     if sort == 'blog':
-        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, True )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_blog( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, (:observer)::VARCHAR, True )"
     elif sort == 'feed':
-        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_by_feed_with_reblog((:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER)"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_by_feed_with_reblog((:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::INTEGER, (:observer)::VARCHAR)"
     elif sort == 'posts':
-        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_posts( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_posts( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
     elif sort == 'comments':
-        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_comments( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_comments( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
     elif sort == 'replies':
         account_posts = False
-        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_replies( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, True )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_replies( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR, True)"
     elif sort == 'payout':
-        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_payout( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT )"
+        sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_get_account_posts_by_payout( (:account)::VARCHAR, (:author)::VARCHAR, (:permlink)::VARCHAR, (:limit)::SMALLINT, (:observer)::VARCHAR )"
 
-    sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit)
+    sql_result = await db.query_all(sql, account=account, author=start_author, permlink=start_permlink, limit=limit, observer=observer)
     posts = []
 
     for row in sql_result:
