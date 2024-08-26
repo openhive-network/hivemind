@@ -159,6 +159,7 @@ class Blocks:
         completed_threads = 0
 
         pool = ThreadPoolExecutor(max_workers=len(cls._concurrent_flush))
+
         flush_futures = {
             pool.submit(time_collector, f): (description, c) for (description, f, c) in cls._concurrent_flush
         }
@@ -193,22 +194,16 @@ class Blocks:
     @classmethod
     def process_blocks(cls, blocks) -> Tuple[int, int]:
         last_num = 0
-        last_date = None
         first_block = -1
         try:
             for block_raw in blocks:
                 hiveBlock = BlockHiveDb(
-                    block_raw['num'],
-                    block_raw['date'],
-                    block_raw['hash'],
-                    block_raw['prev'],
-                    block_raw['operations'],
+                    block_raw,
                     MassiveBlocksDataProviderHiveDb._operation_id_to_enum
                 )
                 if first_block == -1:
                     first_block = hiveBlock.get_num()
                 last_num = cls._process(hiveBlock)
-                last_date = hiveBlock.get_date()
         except Exception as e:
             log.error("exception encountered block %d", last_num + 1)
             raise e
@@ -254,11 +249,7 @@ class Blocks:
     def _periodic_actions(cls, block_raw) -> None:
         """Actions performed at a given time, calculated on the basis of the current block number"""
         block = BlockHiveDb(
-            block_raw['num'],
-            block_raw['date'],
-            block_raw['hash'],
-            block_raw['prev'],
-            block_raw['operations'],
+            block_raw,
             MassiveBlocksDataProviderHiveDb._operation_id_to_enum
         )
 
