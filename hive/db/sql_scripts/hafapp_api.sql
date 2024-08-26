@@ -73,7 +73,7 @@ BEGIN
              , hb.hash
              , hb.prev as prev
              , to_char( created_at,  'YYYY-MM-DDThh24:MI:SS' ) as date
-             , oper.operations as operations
+             , COALESCE( oper.operations, '{}'::jsonb[] ) as operations
         FROM hivemind_app.blocks_view hb
                  LEFT JOIN (
             SELECT

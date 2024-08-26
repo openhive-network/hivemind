@@ -58,29 +58,22 @@ class TransactionHiveDb(Transaction):
 class BlockHiveDb(Block):
     def __init__(
         self,
-        num,
-        date,
-        hash,
-        previous_block_hash,
-        operations,
+        block_raw,
         opertion_id_to_enum,
     ):
-
-        self._num = num
-        self._date = date
-        self._hash = hash.hex()
-        self._prev_hash = previous_block_hash.hex()
-        self._operations = operations
+        self._raw_block = block_raw
+        self._num  = self._raw_block['num']
+        self._date = self._raw_block['date']
+        self._hash = self._raw_block['hash'].hex()
+        self._prev_hash = self._raw_block['prev'].hex()
         self._operation_id_to_enum = opertion_id_to_enum
 
     def get_num(self):
         return self._num
 
     def get_next_vop(self):
-        if not self._operations or self._operations is None:
-            return None
-
-        for virtual_operation in self._operations:
+        # WARNING: sql ensures that operations are never None, at least they are an empty array
+        for virtual_operation in self._raw_block['operations']:
             operation_type = self._operation_id_to_enum(virtual_operation['operation_type_id'])
             if type(operation_type) != VirtualOperationType:
                 continue
@@ -98,9 +91,10 @@ class BlockHiveDb(Block):
         return self._prev_hash
 
     def get_next_transaction(self):
-        if not self._operations:
+        if not self._raw_block:
             return None
+
         trans = TransactionHiveDb(
-            self.get_num(), self._operations, self._operation_id_to_enum
+            self.get_num(), self._raw_block['operations'], self._operation_id_to_enum
         )
         yield trans
