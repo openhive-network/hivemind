@@ -43,8 +43,6 @@ BEGIN
       SELECT hivemind_endpoints.list_pop_communities(__params, __json_type, __id) INTO __result;
     ELSEIF __method_type = 'list_all_subscriptions' THEN
       SELECT hivemind_endpoints.list_all_subscriptions(__params, __json_type, __id) INTO __result;
-    ELSEIF __method_type = 'list_all_subscriptions' THEN
-      SELECT hivemind_endpoints.list_all_subscriptions(__params, __json_type, __id) INTO __result;
     ELSEIF __method_type = 'list_subscribers' THEN
       SELECT hivemind_endpoints.list_subscribers(__params, __json_type, __id) INTO __result;
     ELSEIF __method_type = 'list_communities' THEN
