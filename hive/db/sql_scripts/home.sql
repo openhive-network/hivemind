@@ -69,6 +69,11 @@ BEGIN
     IF __method_type = 'get_follow_count' THEN
       PERFORM hivemind_utilities.validate_json_parameters(__json_type, __params, '{"account":"string"}', 1, 1, '["string"]');
       SELECT hivemind_endpoints.condenser_api_get_follow_count(_account => hivemind_utilities.parse_argument_from_json(__params, __json_type, 'account', 0, True)) INTO __result;
+
+    ELSEIF __method_type = 'get_reblogged_by' THEN
+      PERFORM hivemind_utilities.validate_json_parameters(__json_type, __params, '{"author":"string","permlink":"string"}', 2, 2, '["string","string"]');
+      SELECT hivemind_endpoints.condenser_api_get_reblogged_by(_author => hivemind_utilities.parse_argument_from_json(__params, __json_type, 'author', 0, True),
+                                                               _permlink => hivemind_utilities.parse_argument_from_json(__params, __json_type, 'permlink', 1, True)) INTO __result;
     END IF;
   END IF;
 /*
