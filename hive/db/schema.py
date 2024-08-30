@@ -725,6 +725,7 @@ def setup_runtime_code(db):
         "utilities/find_account_id.sql",
         "condenser_api/condenser_api_get_follow_count.sql",
         "utilities/find_comment_id.sql",
+        "utilities/valid_permink.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
