@@ -720,6 +720,7 @@ def setup_runtime_code(db):
         "hafapp_api.sql",
         "utilities/exceptions.sql",
         "utilities/validate_json_parameters.sql",
+        "utilities/parse_argument_from_json.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
