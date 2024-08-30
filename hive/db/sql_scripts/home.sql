@@ -64,6 +64,13 @@ BEGIN
     ELSEIF __method_type = 'account_notifications' THEN
       SELECT hivemind_endpoints.account_notifications(__params, __json_type, __id) INTO __result;
     END IF;
+
+  ELSEIF __api_type = 'condenser_api' THEN
+    IF __method_type = 'get_follow_count' THEN
+      PERFORM hivemind_utilities.validate_json_parameters(__json_type, __params, '{"account":"string"}', 1, 1, '["string"]');
+      SELECT hivemind_endpoints.condenser_api_get_follow_count(_account => hivemind_utilities.parse_argument_from_json(__params, __json_type, 'account', 0, True)) INTO __result;
+    END IF;
+  END IF;
 /*
   ELSEIF __api_type = 'block_api' THEN
     IF __method_type = 'get_block' THEN
@@ -74,7 +81,6 @@ BEGIN
       SELECT hivemind_endpoints.call_get_block_range( __params, __json_type, __id) INTO __result;
     END IF;
 */
-  END IF;
 
   IF __result IS NULL THEN
     RETURN hivemind_helpers.raise_exception(-32601, 'Method not found', __method, __id);
