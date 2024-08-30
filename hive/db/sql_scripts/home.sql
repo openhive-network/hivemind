@@ -16,6 +16,8 @@ DECLARE
   __method_type TEXT;
   __is_legacy_style BOOLEAN;
   __json_type TEXT;
+  __exception_message TEXT;
+  __exception JSONB;
 BEGIN
   __jsonrpc = (__request_data->>'jsonrpc');
   __method = (__request_data->>'method');
@@ -75,6 +77,16 @@ BEGIN
   ELSE
     RETURN __result::JSONB;
   END IF;
+  EXCEPTION
+    WHEN raise_exception THEN
+      __exception = SQLERRM;
+      __exception = jsonb_set(__exception, '{id}', __id::jsonb);
+      RETURN __exception ;
+    WHEN invalid_text_representation THEN
+      RETURN hivemind_helpers.raise_uint_exception(_id);
+    WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS __exception_message = message_text;
+      RETURN hivemind_helpers.raise_operation_param(__exception_message, _id);
 END
 $$
 ;
