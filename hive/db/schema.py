@@ -530,6 +530,7 @@ def setup(db, admin_db):
     admin_db.query(f'CREATE SCHEMA IF NOT EXISTS {SCHEMA_NAME} AUTHORIZATION {SCHEMA_OWNER_NAME};')
     admin_db.query(f'CREATE SCHEMA IF NOT EXISTS hivemind_helpers AUTHORIZATION {SCHEMA_OWNER_NAME};')
     admin_db.query(f'CREATE SCHEMA IF NOT EXISTS hivemind_endpoints AUTHORIZATION {SCHEMA_OWNER_NAME};')
+    admin_db.query(f'CREATE SCHEMA IF NOT EXISTS hivemind_utilities AUTHORIZATION {SCHEMA_OWNER_NAME};')
 
     prepare_app_context(db=db)
     build_metadata().create_all(db.engine())
@@ -717,6 +718,7 @@ def setup_runtime_code(db):
         "update_table_statistics.sql",
         "upgrade/update_db_patchlevel.sql",  # Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
         "hafapp_api.sql",
+        "utilities/exceptions.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
