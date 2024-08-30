@@ -719,6 +719,7 @@ def setup_runtime_code(db):
         "upgrade/update_db_patchlevel.sql",  # Additionally execute db patchlevel import to mark (already done) upgrade changes and avoid its reevaluation during next upgrade.
         "hafapp_api.sql",
         "utilities/exceptions.sql",
+        "utilities/validate_json_parameters.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
