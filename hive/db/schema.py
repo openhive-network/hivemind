@@ -723,6 +723,7 @@ def setup_runtime_code(db):
         "utilities/parse_argument_from_json.sql",
         "utilities/valid_account.sql",
         "utilities/find_account_id.sql",
+        "condenser_api/condenser_api_get_follow_count.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
