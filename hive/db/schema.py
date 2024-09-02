@@ -725,6 +725,7 @@ def setup_runtime_code(db):
         "postgrest/utilities/valid_number.sql",
         "postgrest/utilities/valid_tag.sql",
         "postgrest/utilities/find_category_id.sql",
+        "postgrest/condenser_api/condenser_api_get_trending_tags.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
