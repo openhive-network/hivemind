@@ -171,7 +171,7 @@ LANGUAGE 'plpgsql'
 AS
 $$
 BEGIN
-  RETURN hivemind_utilities.raise_exception(-32602,'Invalid parameters',_exception_message, NULL, _id);
+  RETURN hivemind_utilities.raise_exception(-32602,'Invalid parameters',_exception_message, _id);
 END
 $$
 ;
