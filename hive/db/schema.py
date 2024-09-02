@@ -722,6 +722,7 @@ def setup_runtime_code(db):
         "postgrest/utilities/find_comment_id.sql",
         "postgrest/utilities/valid_permink.sql",
         "postgrest/condenser_api/condenser_api_get_reblogged_by.sql",
+        "postgrest/utilities/valid_number.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
