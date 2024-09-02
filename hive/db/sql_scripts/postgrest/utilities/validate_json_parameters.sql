@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_utilities.validate_json_parameters;
-CREATE OR REPLACE FUNCTION hivemind_utilities.validate_json_parameters(IN _json_type TEXT, IN _params JSON, IN _expected_params_for_object JSON, IN _expected_json_array_min_len INT, IN _expected_json_array_max_len INT, IN _expected_json_types_for_array JSON)
+CREATE OR REPLACE FUNCTION hivemind_utilities.validate_json_parameters(IN _json_is_object BOOLEAN, IN _params JSON, IN _expected_params_for_object JSON, IN _expected_json_array_min_len INT, IN _expected_json_array_max_len INT, IN _expected_json_types_for_array JSON)
 RETURNS JSON
 LANGUAGE 'plpgsql'
 AS
@@ -10,7 +10,7 @@ passed_type_to_check TEXT;
 expected_type_to_check TEXT;
 array_idx INT := 0;
 BEGIN
-  IF _json_type = 'object' THEN
+  IF _json_is_object THEN
     FOR passed_arg_key IN SELECT key FROM json_each(_params) LOOP
       IF _expected_params_for_object->passed_arg_key IS NOT NULL THEN
         passed_type_to_check = json_typeof(_params->passed_arg_key);
@@ -22,7 +22,7 @@ BEGIN
         RAISE EXCEPTION '%', hivemind_utilities.raise_unexpected_keyword_exception(passed_arg_key);
       END IF;
     END LOOP;
-  ELSEIF _json_type = 'array' THEN
+  ELSE
     IF json_array_length(_params) > _expected_json_array_max_len THEN
       RAISE EXCEPTION '%', hivemind_utilities.raise_invalid_array_exception(True);
     ELSEIF json_array_length(_params) < _expected_json_array_min_len THEN
@@ -41,8 +41,6 @@ BEGIN
         END IF;
       END LOOP;
     END IF;
-  ELSE
-    RAISE EXCEPTION '%', hivemind_utilities.raise_invalid_json_format_exception('Invalid JSON format: ' || _json_type);
   END IF;
   RETURN NULL;
 END
