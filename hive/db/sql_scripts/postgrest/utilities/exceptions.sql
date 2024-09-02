@@ -175,3 +175,15 @@ BEGIN
 END
 $$
 ;
+
+DROP FUNCTION IF EXISTS hivemind_utilities.raise_category_not_exists_exception;
+CREATE OR REPLACE FUNCTION hivemind_utilities.raise_category_not_exists_exception(_category_name TEXT)
+RETURNS JSON
+LANGUAGE 'plpgsql'
+AS
+$$
+BEGIN
+  RETURN hivemind_utilities.raise_exception(-32602, 'Invalid parameters', 'Category ' || _category_name || ' does not exist');
+END
+$$
+;
