@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_utilities.raise_exception;
-CREATE OR REPLACE FUNCTION hivemind_utilities.raise_exception(_code INT, _message TEXT, _data TEXT = NULL, _id JSON = NULL, _no_data BOOLEAN = FALSE)
+CREATE OR REPLACE FUNCTION hivemind_utilities.raise_exception(_code INT, _message TEXT, _data TEXT = NULL, _id JSON = NULL)
 RETURNS JSON
 LANGUAGE 'plpgsql'
 AS
@@ -10,7 +10,7 @@ BEGIN
   FROM json_build_object(
     'jsonrpc', '2.0',
     'error',
-    CASE WHEN _no_data IS TRUE THEN
+    CASE WHEN _data IS NULL THEN
       json_build_object(
         'code', _code,
         'message', _message
@@ -24,6 +24,18 @@ BEGIN
     END,
     'id', _id -- this should be updated to right number in hivemind_endpoints.home when exception is caught
   ) error_json;
+END
+$$
+;
+
+DROP FUNCTION IF EXISTS hivemind_utilities.raise_method_not_found_exception;
+CREATE OR REPLACE FUNCTION hivemind_utilities.raise_method_not_found_exception(_method_name TEXT)
+RETURNS JSON
+LANGUAGE 'plpgsql'
+AS
+$$
+BEGIN
+  RETURN hivemind_utilities.raise_exception(-32601, 'Method not found ' || _method_name);
 END
 $$
 ;
@@ -111,7 +123,7 @@ LANGUAGE 'plpgsql'
 AS
 $$
 BEGIN
-  RETURN hivemind_helpers.raise_exception(-32602, 'Invalid parameters', 'got an unexpected keyword argument ' || _arg_name);
+  RETURN hivemind_utilities.raise_exception(-32602, 'Invalid parameters', 'got an unexpected keyword argument ' || _arg_name);
 END
 $$
 ;
@@ -136,6 +148,30 @@ AS
 $$
 BEGIN
   RETURN hivemind_utilities.raise_exception(-32602, 'Invalid parameters', _exception_message);
+END
+$$
+;
+
+DROP FUNCTION IF EXISTS hivemind_utilities.raise_uint_exception;
+CREATE OR REPLACE FUNCTION hivemind_utilities.raise_uint_exception(_id JSON)
+RETURNS JSON
+LANGUAGE 'plpgsql'
+AS
+$$
+BEGIN
+  RETURN hivemind_utilities.raise_exception(-32000, 'Parse Error:Couldn''t parse uint64_t', NULL, _id);
+END
+$$
+;
+
+DROP FUNCTION IF EXISTS hivemind_utilities.raise_operation_param_exception;
+CREATE OR REPLACE FUNCTION hivemind_utilities.raise_operation_param_exception(_exception_message TEXT, _id JSON)
+RETURNS JSON
+LANGUAGE 'plpgsql'
+AS
+$$
+BEGIN
+  RETURN hivemind_utilities.raise_exception(-32602,'Invalid parameters',_exception_message, NULL, _id);
 END
 $$
 ;
