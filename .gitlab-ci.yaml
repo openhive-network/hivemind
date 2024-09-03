@@ -344,7 +344,7 @@ cleanup_haf_cache_manual:
 
 download_await:
   extends: .job-defaults
-  image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.8-slim-5
+  image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.8-slim-6
   stage: prepare
   variables:
     GIT_STRATEGY: none
@@ -433,7 +433,7 @@ sync:
     - data-cache-storage
 
 e2e_benchmark:
-  image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.8-slim-5
+  image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.8-slim-6
   stage: benchmark
   interruptible: true
   needs:
@@ -556,7 +556,7 @@ e2e_benchmark:
     - data-cache-storage
 
 e2e_benchmark_on_postgrest:
-  image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.8-slim-5
+  image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.8-slim-6
   stage: benchmark
   interruptible: true
   needs:
