@@ -132,6 +132,7 @@ COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/haf/scripts/co
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/mock_data/block_data /home/hivemind/app/mock_data/block_data
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/mock_data/vops_data /home/hivemind/app/mock_data/vops_data
 COPY --from=builder --chown=hivemind:hivemind  --exclude=haf/* /home/hivemind/app/reputation_tracker /home/hivemind/app/reputation_tracker
+COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/postgrest.conf .
 
 # JSON rpc service
 EXPOSE ${HTTP_PORT}
