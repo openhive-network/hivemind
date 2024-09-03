@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "too many parts in path: `too/many/parts/in/path/argument/example/blabla`",
+  "message": "Invalid parameters"
+}
