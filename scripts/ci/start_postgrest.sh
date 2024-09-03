@@ -56,5 +56,4 @@ start_webserver() {
     postgrest postgrest.conf
 }
 
-start_webserver &
-
+start_webserver
