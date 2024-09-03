@@ -261,6 +261,13 @@ include:
     --http-server-port=${RUNNER_HIVEMIND_SERVER_HTTP_PORT} \
     --database-url="${HAF_POSTGRES_URL}"
 
+
+.hivemind-postgrest-serve-script: &hivemind-postgrest-serve-script
+  |
+  ${DATA_CACHE_HAF}/await -t 5m http://haf-instance:8091 -- echo "HAF ready" 2>&1 | tee -i "$AWAIT_LOG_PATH" && \
+  ${DATA_CACHE_HAF}/await -t 5m postgres://haf_admin@haf-instance:5432/haf_block_log#schemas=hivemind_app -- echo "Hivemind database found" 2>&1 | tee -a -i "$AWAIT_LOG_PATH" && \
+  ${WORKING_DIR}/docker_entrypoint.sh postgrest-server --webserver-port=${RUNNER_HIVEMIND_SERVER_HTTP_PORT}
+
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<| BASH SCRIPTS |<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>| JOBS |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
