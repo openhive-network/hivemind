@@ -65,6 +65,9 @@ BEGIN
       PERFORM hivemind_utilities.validate_json_parameters(__json_type_is_object, __params, '{"start_tag":"string","limit":"number"}', 0, 2, '["string","number"]');
       SELECT hivemind_endpoints.condenser_api_get_trending_tags(_start_tag => hivemind_utilities.parse_string_argument_from_json(__params, __json_type_is_object, 'start_tag', 0, False),
                                                                 _limit => hivemind_utilities.parse_integer_argument_from_json(__params, __json_type_is_object, 'limit', 1, False)) INTO __result;
+    ELSEIF __method_type = 'get_state' THEN
+      PERFORM hivemind_utilities.validate_json_parameters(__json_type_is_object, __params, '{"path":"string"}', 0, 1, '["string"]');
+      SELECT hivemind_endpoints.condenser_api_get_state(_path => hivemind_utilities.parse_string_argument_from_json(__params, __json_type_is_object, 'path', 0, False)) INTO __result;
     END IF;
   END IF;
 
