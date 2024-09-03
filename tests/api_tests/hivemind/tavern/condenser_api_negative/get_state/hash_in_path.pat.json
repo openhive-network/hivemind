@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "path contains hash mark (#)",
+  "message": "Invalid parameters"
+}
