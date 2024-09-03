@@ -72,7 +72,7 @@ pwd
 
 "$SRCROOTDIR/scripts/ci/fix_ci_tag.sh"
 
-CI_IMAGE_TAG=${CI_IMAGE_TAG:-"python-3.8-slim-1"} # see scripts/ci/build_ci_base_image.sh for the current tag
+CI_IMAGE_TAG=${CI_IMAGE_TAG:-"python-3.8-slim-6"} # see scripts/ci/build_ci_base_image.sh for the current tag
 BUILD_OPTIONS=("--platform=linux/amd64" "--target=instance" "--progress=plain")
 TAG="${REGISTRY}instance:$BUILD_IMAGE_TAG"
 MINIMAL_TAG="${REGISTRY}minimal-instance:$BUILD_IMAGE_TAG"
