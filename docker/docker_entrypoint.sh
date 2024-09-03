@@ -23,6 +23,7 @@ ADD_MOCKS=${ADD_MOCKS:-false}
 LOG_PATH=${LOG_PATH:-}
 POSTGRES_URL=${POSTGRES_URL:-}
 POSTGRES_ADMIN_URL=${POSTGRES_ADMIN_URL:-}
+POSTGREST_SERVER=0
 INSTALL_APP=0
 DO_SCHEMA_UPGRADE=0
 SKIP_REPTRACKER=0
@@ -62,6 +63,9 @@ while [ $# -gt 0 ]; do
     --only-hivemind)
         SKIP_REPTRACKER=1
         ;;
+    postgrest-server)
+        POSTGREST_SERVER=1
+        ;;
     *)
         HIVEMIND_ARGS+=("$1")
   esac
@@ -92,10 +96,20 @@ run_hive() {
   source /home/hivemind/.hivemind-venv/bin/activate
   if [[ -n "$LOG_PATH" ]]; then
     log "run_hive" "Starting Hivemind with log $LOG_PATH"
-    exec hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
+    if [[ "$POSTGREST_SERVER" = 1 ]]; then
+      echo "Running postgrest setup..."
+      exec "$SCRIPT_DIR/app/ci/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}"
+    else
+      exec hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
+    fi
   else
     log "run_hive" "Starting Hivemind..."
-    exec hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}"
+    if [[ "$POSTGREST_SERVER" = 1 ]]; then
+      echo "Running postgrest setup..."
+      exec "$SCRIPT_DIR/app/ci/start_postgrest.sh" "${HIVEMIND_ARGS[@]}" --postgres-url="${POSTGRES_URL}"
+    else
+      exec hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}"
+    fi
   fi
 }
 
