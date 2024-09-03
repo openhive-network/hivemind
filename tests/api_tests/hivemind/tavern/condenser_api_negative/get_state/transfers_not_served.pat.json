@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "transfers API not served here",
+  "message": "Invalid parameters"
+}
