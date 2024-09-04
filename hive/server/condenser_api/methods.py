@@ -479,7 +479,7 @@ async def get_discussions_by_comments(
 ):
     """Get comments by made by author."""
     assert not filter_tags, 'filter_tags not supported'
-    start_author = valid_account(start_author, allow_empty=True)
+    start_author = valid_account(start_author)
     observer = valid_account(observer, allow_empty=True)
     start_permlink = valid_permlink(start_permlink, allow_empty=True)
     limit = valid_limit(limit, 100, 20)
