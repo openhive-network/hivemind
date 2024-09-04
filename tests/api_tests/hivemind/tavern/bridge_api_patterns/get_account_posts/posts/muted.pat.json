@@ -110,7 +110,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Suppose your miner node found `pow2`, but your `total_missed` count increased, instead of generating a block.\n\nIf this happens, double check your keys used in the `config.ini` file.\n\n```\nwitness = \"minerwitness\"\n\nminer = [\"minerwitness\",\"WIF_ACTIVE_PRIVATE_KEY\"]\nminer = [\"miner1\",\"WIF_ACTIVE_PRIVATE_KEY\"]\nminer = [\"miner2\",\"WIF_ACTIVE_PRIVATE_KEY\"]\nminer = [\"miner3\",\"WIF_ACTIVE_PRIVATE_KEY\"]\n\nmining-threads = 4\n\nprivate-key = WIF_SIGNING_PRIVATE_KEY\n```\n\nUsing keys without paying attention to their roles is a common mistake. @artakan [found out](https://steemit.com/mining/@artakan/important-info-for-steem-miner-do-not-use-your-steemit-com-account \"@artakan - Do not use your steemit.com account for mining\")\nthat issues with missing blocks tend to happen when you are using an account that was created through [steemit.com](https://steemit.com/ \"Blogging is the new mining\") but seems to work for the mined account.\n\nSo erroneous configuration might work for your mined account by pure coincidence. In other words, the same key has been defined for all roles, so:  `WIF_ACTIVE_PRIVATE_KEY` is exactly the same as `WIF_SIGNING_PRIVATE_KEY`.\n\n![witness](https://grey.house/img/witness2.jpg)\n\nIf you believe this idea is of use and value to Steem, please vote for me as a [witness](https://steemit.com/witness-category/@gtg/witness-gtg \"witness-gtg\")\neither on [Steemit's Witnesses List](https://steemit.com/~witnesses \"Witnesses\") \nor by using your `cli_wallet` command:\n`vote_for_witness \"YOURACCOUNT\" \"gtg\" true true`",
     "category": "mining",
     "children": 6,
@@ -140,8 +142,8 @@
     "permlink": "missing-rewards-while-mining",
     "post_id": 919311,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -867,7 +869,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "As you know, witness nodes are an essential part of the STEEM universe.\n\nIf I have a witness node with as much as (or as little as) 3% of witness approval, I can choose the right time to shut it down, listen to my favourite music album, walk my cat, and then start it up again, most probably without missing a block.\nA full-time witness, or one of the top19 witnesses, needs to produce blocks 1600 times more frequently.\nMaintaining such a server in the long run is not an easy task.\n\nWitnesses are vulnerable to DDoS attacks. An attacker who knows the network location of your witness node can saturate your uplink to a level that makes you unable to produce blocks on time. Effectively, this means **voting the witness out using a network-level attack**. Finding the IP address of your witness node is easier than you might think. Even if you follow the guidelines for setting up your public seed node on a different machine than the one you used to get your witness running, your witness still needs to connect to other nodes in the network.\nSo what does this mean? Take a look at: http://seeds.quisquis.de/steem.html\n(service provided by cyrano.witness)\n\nDoes any of these IP addresses look familiar?\nThe attacker still doesn't know which of them is yours, right?\n\nAn attack that makes the target IP unavailable for 3 seconds? Not exactly a difficult thing to do, right? So the attacker needs to make a guess by choosing from a set of suspected IP addresses he has obtained. Guessing doesn't cost him much. Neither does a high volume, short period DDoS attack. After that, he can see that your `total_missed` count increases, and he knows he guessed correctly. And then you are out.\n\n![witness](https://grey.house/img/witness2.jpg)\n\n## A concept of infrastructure: ##\n\n2 witness nodes (primary and backup)\n4 dedicated seed nodes\n\nOne witness node has your current signing key and does its job. The other is for failover, backup purposes. For example, whenever you need to upgrade your witness binary, you do that on the backup witness node, then change your signing key, so the backup node and the primary node switch their roles.  \n**(Never leave your current signing key on two nodes at the same time!)**\n\nThese 4 seed nodes mentioned here only work on behalf of your witness i.e. they don\u2019t provide seed service on public network interfaces. \n_Your public seed node is not within the scope of this document._\n\nYour witness node connects **ONLY** to your seed nodes using VLAN or another private, low latency network solution of your choice. All other incoming/outgoing connections should be blocked except for the secure shell, preferably limited to access only from your IPs.\n\nEach seed node should be in a separate datacenter, ideally in a different part of the world, never in the same location as any of your (primary/backup) witness nodes. The purpose is to minimize the effects of a successful DDoS attack.\n\n_Please note that setting up all seed nodes in a single data center won\u2019t help. A DDoS attack targeted at that particular network will bring all your nodes down anyway._\n\n```\n                      +---+\n         +  +----+    |   |\n         |  |    |<-->| B |\n         +--+ S1 |<-->| i |\n         |  |    |<-->| g |\n         |  +----+    |   |\n+------+ |            | B |\n|      +-+  +----+    | a |\n| W(p) | |  |    |<-->| d |\n|      | +--+ S2 |<-->|   |\n+------+ |  |    |<-->| U |\n         |  +----+    | g |\n     VLAN|            | l |\n         |  +----+    | y |\n+------+ |  |    |<-->|   |\n|      | +--+ S3 |<-->| I |\n| W(b) | |  |    |<-->| n |\n|      +-+  +----+    | t |\n+------+ |            | e |\n         |  +----+    | r |\n         |  |    |<-->| n |\n         +--+ S4 |<-->| e |\n         |  |    |<-->| t |\n         +  +----+    |   |\n                      +---+\n```\n```\nW(p) - primary witness\nW(b) - backup witness\nS1-4 - seed nodes\n```\nOf course, you need to keep your seed nodes (at least one of them) running all the time, otherwise your witness will not be able to sync the blockchain.\nBut if you do the math, you will see that the odds that all your seed nodes stop working at the same time are much lower than the chances that this happens to your witness node. \n\n\nIf one of your seed nodes falls victim to a DDoS attack, you can, depending on the features offered by your infrastructure provider:\n- do nothing (until most of them are targeted at the same time)\n- change its external interface IP address, routing the old one to a black hole\n- set up a new, additional, temporary seed node somewhere else\n- replace that seed node with a new one in another location\n\nIf you believe this idea is of use and value to Steem, please vote for me as a [witness](https://steemit.com/witness-category/@gtg/witness-gtg \"witness-gtg\")\neither on [Steemit's Witnesses List](https://steemit.com/~witnesses \"Witnesses\") \nor by using your `cli_wallet` command:\n`vote_for_witness \"YOURACCOUNT\" \"gtg\" true true`",
     "category": "witness-category",
     "children": 14,
@@ -895,8 +899,8 @@
     "permlink": "heavy-duty-witness-node-infrastructure",
     "post_id": 838527,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1262,7 +1266,9 @@
     "author_payout_value": "703.088 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Hello, World!\n\nMy intention is not to make it into top 19. I could name many  other candidates (clearly more than 19) with greater commitment to steem(it) who are a lot more appropriate as witnesses, but I'm sure I can be useful as a backup witness.\n\nI introduced myself here:\nhttps://steemit.com/introduceyourself/@gtg/hello-world\nThose of you who use https://steemit.chat know me as **Gandalf**.\nFor some time, I\u2019ve been using my magic powers (mostly those related to security and infrastructure) to improve steemit. For example, I\u2019ve improved our \"Perfect\" Forward Secrecy and made our communication with site more secure.\n\nMy **seed node** (EU based):\n`seed-node = gtg.steem.house:2001`\nYou can also use it to rsync data dir\n`rsync -Pa rsync://gtg.steem.house/witness_node_data_dir .`\n\nMy **witness node** is on a separate data center (an EU-based one as well).\nIf you believe I can be of value to steemit, please vote for me:\n`vote_for_witness YOURACCOUNT gtg true true`\n\n![witness](https://grey.house/img/witness.jpg)",
     "category": "witness-category",
     "children": 7,
@@ -1287,8 +1293,8 @@
     "permlink": "witness-gtg",
     "post_id": 624896,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1498,7 +1504,9 @@
     "author_payout_value": "254.288 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "I'm Gandalf.\nThat's not my real name, but even my mom saved my number as ***Gandalf*** in her phone contact list.\nThat counts, right?\nI'm an IT Wizard, system admin, happily married, <strike>owner of a cat</strike>.\nOwned by a cat.\n\n![Nyunya](https://grey.house/img/niunia.jpg)\n\n**Nyunya** *(The Cat)* wants to watch everything I do, that's just her way of lending a helping paw. I\u2019m not sure if she is so fascinated by what I do or she wants to make sure I do it right.\n\nWhy am I here? What is my motivation?\nNot much different from that guiding my cat:\nCuriosity and to be a witness (node?) of what is emerging here.\n\nMay the STEEM be with you!",
     "category": "introduceyourself",
     "children": 3,
@@ -1524,8 +1532,8 @@
     "permlink": "hello-world",
     "post_id": 51402,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,

@@ -1790,7 +1790,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "https://www.riverscasino.com/pittsburgh/images/librariesprovider4/default-album/faq.jpg?sfvrsn=0\n\nMany have called for it, some have looked for it, and now we are going to create it.  **We need your help** creating the best **FAQ** and **Wikee** a cryptocurrency and/or social media site has ever had.  This will be for new users, journalists and more, so let's make FAQs and Wikees great again.  \n\nTo begin, let's do a few things in this post:\n\n***1/*** **Add your questions** about Steem and Steemit below that you believe are asked frequently.  (a/ Please only submit one question per high level comment. b/ Please submit *new* questions to the thread)\n\n***2/*** **Answer each others' questions** :)\n\n***3/*** **Link any articles** that are relevant to a Steem / Steemit Wikee.  (a/ Please submit the link with the following information and structure: *Subject / Date posted / Author / Link / One sentence description*.)\n\nA few users (I know of @someguy123 & @dragon) have begun Wiki projects.  This thread is meant to help them, Steemers and Steemitans alike take the Wikee and FAQ projects to the next level by consolidating the best information and getting the best answers.  I'll be watching this thread closely and answering questions along with some others on the Steemit team such as @dan and @theoretical to help pull out the best answers down to the technical level. \n\nFor time's sake, let's consider this a one month long project, although hopefully we can string together the most relevant questions answers and articles much sooner.\n\nThe FAQ and Wikee projects could use a lot of love.  Steemit is interested in hiring or supporting any entreprenuering Steemians to help with the task.  Please reach out to me on steemit.chat (@ned) if you are interested in helping :)",
     "category": "steem",
     "children": 499,
@@ -1825,8 +1827,8 @@
     "permlink": "the-first-phase-of-the-steem-faq-and-wikee-consolidation-of-knowledge",
     "post_id": 879051,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -3812,7 +3814,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "http://cliparts.co/cliparts/pc5/oGq/pc5oGqrRi.gif\n# Yep, **we have a big ecosystem to build** and it's not going to get built unless we build it together \n\nTo help get us all working together, let's use a bounty system to manage tasks and prioritize items that will bring the best returns to our community.  \n\n## Anyone is welcome to post #bounties - be they for marketing, software development or any other domain impacting Steem and Steemians.\n\n**Please follow the form:**\nComment1:  Task; Size of the Bounty; Milestones\nComments 2;3;4;5: Updates, submissions and responses \n\n*And if you have suggestions for bounties, but not enough tokens to see it through, then please feel free to PM me or anyone else with your ideas!*\n\n(Steemit.com will link to this post in the top right menu so that it is well monitored)\n\n#### Let's do this!",
     "category": "bounties",
     "children": 104,
@@ -3840,8 +3844,8 @@
     "permlink": "it-s-time-for-a-steem-bounty-system",
     "post_id": 1123999,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -5563,7 +5567,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "https://www.biznessapps.com/blog/wp-content/uploads/2013/12/shutterstock_148639682.png\n\n# Over the last few weeks I've been thinking about ways we could increase the demand for Steem Power, the quality of curated content and the incentives to participate as a Steem curator.\n\nHere are a couple ideas I have been kicking around. They're not fully mature and could use a good rinsing by the community.\n\n## Allow Steem holders to delegate their Steem Power voting rights to a **voting pool**\n\nA delegated voting pool could socialize voting power and individualize rewards.  One prime use for this could be the @steemit account.  @steemit could create a voting pool and invite anyone with a verified identity and good reputation to join the pool as a curator.  This could increase the number of unique curators, help bootstrap Steem as an identity database and give people even more incentives to sign up.\n\nTo show the numbers, an example would be Alice Bob and Charley each delegate their SP of 2, 3, and 7 to one voting pool.  Now they each have 4, 4, and 4 SP to be used to curate.  Better curation would earn them more curation rewards.  \n\nA side effect of delegated voting pools could be voting markets.  Any user would have the power to create a voting pool and these users could charge curators for participation. Some of the platform's whales could be interested in offering subscription models to minnows as a way to get more voting influence.\n\n## If powering down stake loses voting influence\n\nImagine that any stake being powered down would lose its rights to use voting influence.  This could make the system very clear in the regard that stake is either in or it is out.  Users could be able to choose any % of their stake to power down regardless of how many accounts they have and only the % stake that is powering down would lose voting influence.  Stopping a power down could return all voting rights.\n\nPerhaps the effect of this could be 1/ more interest to stay in the platform and 2/ more fluidity in the witness queue 3/ more fairness regarding the PoS nature of Steem 4/ more clarity from participants looking to exit the system\n\n## Combined effect?\nPerhaps these proposals could have a combined effect that increases the demand and fluidity of Steem Power while improving the curated experience for people visiting Steem based websites.\n\n#### What are your thoughts and questions?",
     "category": "steem",
     "children": 315,
@@ -5595,8 +5601,8 @@
     "permlink": "increasing-curation-demand-for-steem-power-and-community-interaction",
     "post_id": 1160045,
     "promoted": "500.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -5982,7 +5988,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Leah I understand your frustration:\n\nHowever saying that we have disregarded your safety is false\n\nWe cannot help what information people can find from other sources and post.\n\nWe can build the site to allow for muting.  If muting hasn't worked please accept my apology. We are working around the clock to move this website forward.\n\nTo give context to this situation, Dan responded to you personally, even offering that we would look into the identity of the offender and disclose that information law permitting, and the entire message thread considered, it appears your quotes are taken out of context.  Dan was only trying to help when he asked if you had responded to him.\n\nAs far as moving this platform forward, we are actively engaging in creative problem solving to improve the economics of post and curation rewards as well as turn Steemit from a blockchain-site into a thriving and personalized social media site.  More on that soon.\n\nAs far as comparisons to Synereo and other blockchain-based platforms for social networking, I would like to see more comparisons of the economics at the protocol and rewards levels.  This is the third comparison piece I've seen in three days and none have ventured to go so far as to compare the economic incentive models and friction points",
     "category": "synereo",
     "children": 78,
@@ -6006,8 +6014,8 @@
     "permlink": "re-stellabelle-2-problems-plaguing-steemit-that-synereo-has-already-solved-20160828t201832222z",
     "post_id": 1032097,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -6261,7 +6269,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "The first bounty is for .. you guessed it... a specially designed Bounty Management Forum :) \n\nTask:  Design, Build, Operate an open-source, open-data, independent website (or system that can be integrated into Steemit.com) for managing bounties.  \n\nMilestone 1: Design the bounty system with UI/UX and full specs for the engineering required.  Design must clearly demonstrate how bounty milestones will be rewarded; demonstrate how Steem and SBD will be integrated; show functional user experience; demonstrate the escrow process; demonstrate how tasks and updates will be recorded/monitored/and tracked.  \n\nMilestone 2: Engineer the website and system for bounty management.\n\nMilestone 3: Launch, host, operate the website; get it linked from Steemit.com and other Steem-based website menus\n\nBounties:\nMilestone 1 - 1000 SBD\nMilestone 2 - 2000 SBD\nMilestone 3 - 1000 SBD",
     "category": "bounties",
     "children": 21,
@@ -6285,8 +6295,8 @@
     "permlink": "re-ned-it-s-time-for-a-steem-bounty-system-20160904t162508788z",
     "post_id": 1124062,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -6356,7 +6366,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Thank you for your well reasoned response Smooth. Flagging to make sure the rewards pool is less affected as well",
     "category": "steem",
     "children": 0,
@@ -6380,8 +6392,8 @@
     "permlink": "re-smooth-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160908t020053530z",
     "post_id": 1167016,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -6503,7 +6515,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Awesome work, Roeland. This will be one for the record books.",
     "category": "steemfest",
     "children": 2,
@@ -6527,8 +6541,8 @@
     "permlink": "re-roelandp-save-the-date-steemfest-1-11-12-13-november-2016-amsterdam-nl-20160912t225113855z",
     "post_id": 1225445,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -6574,7 +6588,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Where does the money come from? This is a decentralized, incentivized content and curation ecosystem based on token seignorage with set and specific rules. The \"money\" at its base is actually a set of game tokens, which are distributed to creators and curators as rewards for successfully playing the game.  What makes the system robust, however, is that the tokens have a real-time value because they are traded on markets.  The markets allow the tokens to demonstrate their subjective value.  This way, when one has 1 Steem token, that person can know what the value of their token is worth to other people.  It's similar to how someone playing a video game could obtain a rare item by playing the game.  If they have that rare item, then they could potentially sell it on video game item markets.  Steem can be thought of as a game system for content, where the rewards people earn are video game tokens that have real market value and are easily tradable for bitcoin and USD.\n\nFurther background for understanding is that Steemit is a website much like Reddit, however, it is different in that it pulls its information from a blockchain and cryptocurrency database called Steem rather than a centralized, private database.  In this way, Steemit is also analogous to other blockchain-based businesses such as Blockchain.info, which pulls its data from the Bitcoin network. Regarding its difference from Steemit, Steem is a cryptocurrency and the blockchain database that rewards posters and voters for bringing new information to the community.  It is an independent entity from Steemit. The Steem networks' rewards paid to bloggers and curators is mining seignorage and it works the same way miners are paid to secure the Bitcoin network. Rewards paid to bloggers do not come from Steemit Inc nor from investment in Steemit Inc. There has been more than $3 million dollars worth of Steem tokens rewarded by the Steem blockchain to these creators and curators. Steemit does not and will not ever pay the contributors of the Steem network for curating and creating content. Steemit is not a middle man to any of the blockchain processes and the technology remains completely open source and transparent for anyone to audit and verify (Many software engineers are currently leveraging the open-source code to build their own applications on Steem. There are more than sixty so far.). Claims that there is somehow a scam or that money is from coming from new investment in Steemit are categorically false. Rather, the natural inclination of the platform Steem is to continue building and improving an incredibly exciting social media network that is decentralizing the value of the web and genuinely improving the lives of thousands of people around the world.",
     "category": "steem",
     "children": 0,
@@ -6598,8 +6614,8 @@
     "permlink": "re-neoxian-re-ned-the-first-phase-of-the-steem-faq-and-wikee-consolidation-of-knowledge-20160820t212456113z",
     "post_id": 911594,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -6657,7 +6673,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "I'll send you 399 Steem for nedscott",
     "category": "steem",
     "children": 2,
@@ -6681,8 +6699,8 @@
     "permlink": "re-nedscott-re-danlarimer-re-lukestokes-re-bacchist-dan-needs-to-be-stopped-20160818t010401711z",
     "post_id": 862975,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -6752,7 +6770,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Neat. Needs beauty and perhaps a few other UX elements to move onto the next milestone. How about a place for updates/submissions/managing the participants?",
     "category": "bounty",
     "children": 2,
@@ -6776,8 +6796,8 @@
     "permlink": "re-steve-walschot-application-for-bounty-system-by-ned-20160905t150554701z",
     "post_id": 1135101,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -6823,7 +6843,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Yep there's no doubt about it.  We have some good plans for blockchain-based identity I'm looking forward to sharing.",
     "category": "synereo",
     "children": 0,
@@ -6847,8 +6869,8 @@
     "permlink": "re-liondani-re-ned-re-stellabelle-2-problems-plaguing-steemit-that-synereo-has-already-solved-20160829t202421695z",
     "post_id": 1046244,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -6914,7 +6936,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "No one meant any offense anywhere - If Val's response was emotional as he was trying to protect me then that's on me. \n\nI was trying to make the case that curation can get better. Any whale of the same size can do the same thing nextgencrypto is doing, but instead most are not voting and using that as a community benefitting strategy. I hope you see that.\n\nWe can do better on community engagement for proposed changes. Let's do better.\n\nI appreciate you, richard and the community for bringing all the time and work that you are",
     "category": "steemit",
     "children": 0,
@@ -6938,8 +6962,8 @@
     "permlink": "re-donkeypong-re-ned-re-steemship-open-letter-to-ned-and-dan-you-badly-need-a-communications-community-content-expert-and-i-hereby-nominate-stellabelle-or-20160911t023103853z",
     "post_id": 1203673,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -6981,7 +7005,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Essentially the 40 to 5 change increases the degree of competition between voters and therefore it should reduce whale trails.  It may not be the only solution possible. We have some other ideas on the table, such as removing voting power from Stake that is powering down, as well as adding delegated voting pools and peer-to-peer vote delegation.  With each proposed solution there are potential drawbacks, or the community may decide it's not what is wanted, but we are actively working to find these solutions and upgrade user experience.",
     "category": "steem",
     "children": 13,
@@ -7005,8 +7031,8 @@
     "permlink": "re-carlidos-re-steemitblog-announcing-steem-0-14-0-release-candidate-20160902t211119406z",
     "post_id": 1103594,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -7076,7 +7102,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Hopefully we hear from them if it does.",
     "category": "steem",
     "children": 2,
@@ -7100,8 +7128,8 @@
     "permlink": "re-funnyman-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t161409009z",
     "post_id": 1160378,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -7163,7 +7191,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "The expected result of the change in target votes from 40 to 5 is less discrepancy between top paid posts and the long tail of paid posts by decentralizing the Steem Power allocated by each voter, primarily whales and bots.  Under these rules, a person voting once per day at full power will have greater value than it would under current rules.  The target votes per day had been changed once before from 10 to 40, however, voting regeneration had also been changed (from one day to five).  Changing from 40 target votes to 5 without changing regeneration days allows Steem to ease into more optimal ratios for quality curation. \n\nThe Revoking Voting Permission was a simple upgrade allowing anyone who sees regulatory risk in the ability to use voting power to remove voting power from their stake.  We do not expect this to be a feature used by most users, and it may not be used at all.  We have no plans at this time to bring this change to the Steemit UI.",
     "category": "steem",
     "children": 34,
@@ -7187,8 +7217,8 @@
     "permlink": "re-neoxian-re-steemitblog-announcing-steem-0-14-0-release-candidate-20160902t200650312z",
     "post_id": 1102851,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -7210,7 +7240,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Okay the title alone reminded me of Donnie Darko so much I had to make this comment. Reading the rest now.. :) \n\nhttp://cache.gawkerassets.com/assets/images/17/2011/05/500x_0800-donnie-darko-fear-love.jpg\n\nhttp://25.media.tumblr.com/tumblr_m8v0lbq9Uw1rp26cno1_500.gif",
     "category": "life",
     "children": 0,
@@ -7238,8 +7270,8 @@
     "permlink": "re-modprobe-are-my-actions-born-out-of-love-or-fear-20160907t015517135z",
     "post_id": 1153898,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -7285,7 +7317,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Thanks for your response - I believe there's some merit in what you've written but I can't say I fully understand what your suggestions are.",
     "category": "steem",
     "children": 17,
@@ -7309,8 +7343,8 @@
     "permlink": "re-nextgencrypto-re-ned-increasing-curation-demand-for-steem-power-and-community-interaction-20160907t163512347z",
     "post_id": 1160619,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -7372,7 +7406,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Good analysis.  A few of us recently also looked into capping curation rewards however found it has weaknesses that allow whales to game the rewards.  We haven't recently looked as deep into capping the total blog post rewards.  If a large group of steemers see a net benefit but it also seems to be a divisive issue, then it could be proposed to move to the new system for only a short period of time (e.g. 2 weeks) as a trial period.",
     "category": "steemit",
     "children": 6,
@@ -7396,8 +7432,8 @@
     "permlink": "re-dana-edwards-why-a-steem-power-reward-cap-would-be-as-controversial-as-the-block-size-cap-in-bitcoin-20160825t041419160z",
     "post_id": 977725,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -7427,7 +7463,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "lots of easter eggs in this one! nice",
     "category": "comedy",
     "children": 0,
@@ -7451,8 +7489,8 @@
     "permlink": "re-fyrstikken-29zext-crypto-land-a-comedy-by-fyrstikken-20160820t022532747z",
     "post_id": 899673,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -7558,7 +7596,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "I'll take this point about CURIE to say that it is essentially a Delegated Curation Guild.\n\nThe reason there are only one or two of these so far (Smooth and NGC)  is this:\n\nWhales that  *are not* voting a lot may be doing so as a means of abstaining from rewards and giving minnows a chance to grow influence.\n\nWhales that *are* voting a lot may be doing so as a means of projects like CURIE to give minnows a chance to grow influence.\n\nBoth parties are seeking the same goals of gamifying / growing the platform.\n\nIt just happens that the difference in means creates a strong cognitive dissonance between the two groups. \n\nDelegated Curation Guilds (DCGs) are potentially a solution to the cognitive dissonance by allowing both types of whales to continue doing (abstaining from voting, voting actively, or \u201chiring\u201d curators) what they were doing while bringing the available voting power into the market in either a profit seeking or altruistic manner.\n\nEdited to add the this:*\n\nRichard, no one meant any offense anywhere, including CURIE - If Val's response was emotional as trying to protect me then that's on me.   \n\nBy describing the Curation Guild I was trying to make the case that curation can get better. Any whale of the same size can do the same thing nextgencrypto is doing, but instead most are not voting and using that as a community benefitting strategy. I hope you see that.\n\nWe can do better on community engagement for proposed changes. Let's do better. (We are hiring: https://steemit.com/steemit/@steemitjobs/new-steemit-job-posting-community-and-social-media-manager)\n\nI appreciate Richard and the community for bringing all the time and work that you are",
     "category": "steemit",
     "children": 51,
@@ -7585,8 +7625,8 @@
     "permlink": "re-steemship-open-letter-to-ned-and-dan-you-badly-need-a-communications-community-content-expert-and-i-hereby-nominate-stellabelle-or-20160911t011254010z",
     "post_id": 1202934,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
