@@ -9,10 +9,16 @@ DECLARE
   __post_id INT;
   __payout_limit hivemind_app.hive_posts.payout%TYPE;
   __observer_id INT;
+  __posts_should_be_grayed BOOLEAN;
 BEGIN
   __account_id = hivemind_app.find_account_id( _account, True );
   __post_id = hivemind_app.find_comment_id( _author, _permlink, True );
   __observer_id = hivemind_app.find_account_id( _observer, True );
+  IF __observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = __account_id) THEN
+    __posts_should_be_grayed = True;
+  ELSE
+    __posts_should_be_grayed = False;
+  END IF;
   IF __post_id <> 0 THEN
       SELECT ( hp.payout + hp.pending_payout ) INTO __payout_limit FROM hivemind_app.hive_posts hp WHERE hp.id = __post_id;
   END IF;
@@ -63,10 +69,7 @@ BEGIN
       hp.json,
       hp.is_hidden,
       -- is grayed - if author is muted by observer, make post gray
-      CASE
-        WHEN hp.is_grayed = FALSE AND __observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = payouts.author_id) THEN True
-        else hp.is_grayed
-      END,
+      hp.is_grayed OR __posts_should_be_grayed,
       hp.total_votes,
       hp.sc_trend,
       hp.role_title,
