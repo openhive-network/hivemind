@@ -714,7 +714,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "As you know, witness nodes are an essential part of the STEEM universe.\n\nIf I have a witness node with as much as (or as little as) 3% of witness approval, I can choose the right time to shut it down, listen to my favourite music album, walk my cat, and then start it up again, most probably without missing a block.\nA full-time witness, or one of the top19 witnesses, needs to produce blocks 1600 times more frequently.\nMaintaining such a server in the long run is not an easy task.\n\nWitnesses are vulnerable to DDoS attacks. An attacker who knows the network location of your witness node can saturate your uplink to a level that makes you unable to produce blocks on time. Effectively, this means **voting the witness out using a network-level attack**. Finding the IP address of your witness node is easier than you might think. Even if you follow the guidelines for setting up your public seed node on a different machine than the one you used to get your witness running, your witness still needs to connect to other nodes in the network.\nSo what does this mean? Take a look at: http://seeds.quisquis.de/steem.html\n(service provided by cyrano.witness)\n\nDoes any of these IP addresses look familiar?\nThe attacker still doesn't know which of them is yours, right?\n\nAn attack that makes the target IP unavailable for 3 seconds? Not exactly a difficult thing to do, right? So the attacker needs to make a guess by choosing from a set of suspected IP addresses he has obtained. Guessing doesn't cost him much. Neither does a high volume, short period DDoS attack. After that, he can see that your `total_missed` count increases, and he knows he guessed correctly. And then you are out.\n\n![witness](https://grey.house/img/witness2.jpg)\n\n## A concept of infrastructure: ##\n\n2 witness nodes (primary and backup)\n4 dedicated seed nodes\n\nOne witness node has your current signing key and does its job. The other is for failover, backup purposes. For example, whenever you need to upgrade your witness binary, you do that on the backup witness node, then change your signing key, so the backup node and the primary node switch their roles.  \n**(Never leave your current signing key on two nodes at the same time!)**\n\nThese 4 seed nodes mentioned here only work on behalf of your witness i.e. they don\u2019t provide seed service on public network interfaces. \n_Your public seed node is not within the scope of this document._\n\nYour witness node connects **ONLY** to your seed nodes using VLAN or another private, low latency network solution of your choice. All other incoming/outgoing connections should be blocked except for the secure shell, preferably limited to access only from your IPs.\n\nEach seed node should be in a separate datacenter, ideally in a different part of the world, never in the same location as any of your (primary/backup) witness nodes. The purpose is to minimize the effects of a successful DDoS attack.\n\n_Please note that setting up all seed nodes in a single data center won\u2019t help. A DDoS attack targeted at that particular network will bring all your nodes down anyway._\n\n```\n                      +---+\n         +  +----+    |   |\n         |  |    |<-->| B |\n         +--+ S1 |<-->| i |\n         |  |    |<-->| g |\n         |  +----+    |   |\n+------+ |            | B |\n|      +-+  +----+    | a |\n| W(p) | |  |    |<-->| d |\n|      | +--+ S2 |<-->|   |\n+------+ |  |    |<-->| U |\n         |  +----+    | g |\n     VLAN|            | l |\n         |  +----+    | y |\n+------+ |  |    |<-->|   |\n|      | +--+ S3 |<-->| I |\n| W(b) | |  |    |<-->| n |\n|      +-+  +----+    | t |\n+------+ |            | e |\n         |  +----+    | r |\n         |  |    |<-->| n |\n         +--+ S4 |<-->| e |\n         |  |    |<-->| t |\n         +  +----+    |   |\n                      +---+\n```\n```\nW(p) - primary witness\nW(b) - backup witness\nS1-4 - seed nodes\n```\nOf course, you need to keep your seed nodes (at least one of them) running all the time, otherwise your witness will not be able to sync the blockchain.\nBut if you do the math, you will see that the odds that all your seed nodes stop working at the same time are much lower than the chances that this happens to your witness node. \n\n\nIf one of your seed nodes falls victim to a DDoS attack, you can, depending on the features offered by your infrastructure provider:\n- do nothing (until most of them are targeted at the same time)\n- change its external interface IP address, routing the old one to a black hole\n- set up a new, additional, temporary seed node somewhere else\n- replace that seed node with a new one in another location\n\nIf you believe this idea is of use and value to Steem, please vote for me as a [witness](https://steemit.com/witness-category/@gtg/witness-gtg \"witness-gtg\")\neither on [Steemit's Witnesses List](https://steemit.com/~witnesses \"Witnesses\") \nor by using your `cli_wallet` command:\n`vote_for_witness \"YOURACCOUNT\" \"gtg\" true true`",
     "category": "witness-category",
     "children": 14,
@@ -742,8 +744,8 @@
     "permlink": "heavy-duty-witness-node-infrastructure",
     "post_id": 838527,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -793,7 +795,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "It has already been tested in the wild on dedicated servers and VXLAN (however using only a minor block producer, not a full-time witness)\nBig infrastructure providers such as AWS or OVH have plenty usable features that could help (like multi-datacenter private networking), so deploying this won't be hard, but you are not limited to a single infrastructure provider. In more affordable solutions, where you don't have multiple physical network interfaces or multiple outbound routes you can even use OpenVPN, which adds only negligible latency and does its job.",
     "category": "witness-category",
     "children": 1,
@@ -817,8 +821,8 @@
     "permlink": "re-jesta-re-gtg-heavy-duty-witness-node-infrastructure-20160816t201857176z",
     "post_id": 840712,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -940,7 +944,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Suppose your miner node found `pow2`, but your `total_missed` count increased, instead of generating a block.\n\nIf this happens, double check your keys used in the `config.ini` file.\n\n```\nwitness = \"minerwitness\"\n\nminer = [\"minerwitness\",\"WIF_ACTIVE_PRIVATE_KEY\"]\nminer = [\"miner1\",\"WIF_ACTIVE_PRIVATE_KEY\"]\nminer = [\"miner2\",\"WIF_ACTIVE_PRIVATE_KEY\"]\nminer = [\"miner3\",\"WIF_ACTIVE_PRIVATE_KEY\"]\n\nmining-threads = 4\n\nprivate-key = WIF_SIGNING_PRIVATE_KEY\n```\n\nUsing keys without paying attention to their roles is a common mistake. @artakan [found out](https://steemit.com/mining/@artakan/important-info-for-steem-miner-do-not-use-your-steemit-com-account \"@artakan - Do not use your steemit.com account for mining\")\nthat issues with missing blocks tend to happen when you are using an account that was created through [steemit.com](https://steemit.com/ \"Blogging is the new mining\") but seems to work for the mined account.\n\nSo erroneous configuration might work for your mined account by pure coincidence. In other words, the same key has been defined for all roles, so:  `WIF_ACTIVE_PRIVATE_KEY` is exactly the same as `WIF_SIGNING_PRIVATE_KEY`.\n\n![witness](https://grey.house/img/witness2.jpg)\n\nIf you believe this idea is of use and value to Steem, please vote for me as a [witness](https://steemit.com/witness-category/@gtg/witness-gtg \"witness-gtg\")\neither on [Steemit's Witnesses List](https://steemit.com/~witnesses \"Witnesses\") \nor by using your `cli_wallet` command:\n`vote_for_witness \"YOURACCOUNT\" \"gtg\" true true`",
     "category": "mining",
     "children": 6,
@@ -970,8 +976,8 @@
     "permlink": "missing-rewards-while-mining",
     "post_id": 919311,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -997,7 +1003,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "IMHO, witnesses should - more than others - believe for a long term growth of Steem (as a platform), so Steem Power is appropriate in this case.",
     "category": "steemit",
     "children": 3,
@@ -1019,10 +1027,10 @@
     "pending_payout_value": "0.281 HBD",
     "percent_hbd": 10000,
     "permlink": "re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t141551322z",
-    "post_id": 1254336,
+    "post_id": 1254338,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1056,7 +1064,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "I am keeping an eye on #introduceyourself channel, as a place where newcomers can promote their introduction posts without being flooded by other random links.\nRules are simple: post link to your introduction, talk with other newcomers. When you are no longer newcomer, curate others, encourage them to enjoy this platform.\n\n_**introduce:**_\n> to present to a particular group of individuals\n> or to the general public for or as if **for the first time** by a formal act\n\nplease, do not abuse this tag or channel\n\n**gandalf** on steemit.chat",
     "category": "steemit-chat",
     "children": 0,
@@ -1081,8 +1091,8 @@
     "permlink": "re-ash-steemit-chat-stats-and-rules-20160821t143046855z",
     "post_id": 920538,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1112,7 +1122,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "There's nothing wrong with mining using your _\"steemit.com account\"_. It's **all about your keys** and using **proper miner configuration**. I tried to explain common mistake https://steemit.com/mining/@gtg/missing-rewards-while-mining",
     "category": "mining",
     "children": 0,
@@ -1139,8 +1151,8 @@
     "permlink": "re-artakan-important-info-for-steem-miner-do-not-use-your-steemit-com-account-20160821t123356072z",
     "post_id": 919363,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1166,7 +1178,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "@djm34 if you don't trust @picokernel (no need to) you are free to make your own statement that you would send some amount directly to a winner. Anyway as you can see in comments, @complexring, well known and reputable witness already said to donate his 250 SBD as a part of the bounty.",
     "category": "steem",
     "children": 6,
@@ -1195,8 +1209,8 @@
     "permlink": "re-djm34-re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t161109296z",
     "post_id": 1057820,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1218,7 +1232,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Hello @skypilot, welcome to steemit! I had no time to post a comment before, but when you get back to [steemit.chat](https://steemit.chat) you get an idea why ;-)\nI'm looking forward for your posts.\nGood luck!\n\nPS\nI encourage all of you to take a look from time to time at #introduceyourself category. Not at the top stories. Look at those that are earning a $0 or a bit less. Sometimes you might be really surprised about your findings.",
     "category": "introduceyourself",
     "children": 0,
@@ -1248,8 +1264,8 @@
     "permlink": "re-skypilot-my-first-real-post-was-a-success-and-i-would-like-to-share-the-story-20160827t111440904z",
     "post_id": 1011534,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1266,7 +1282,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Steem platform is currently very, very small. Witnesses plays very important role and it would get a lot harder when Steem would grow. Every minute they are in \"if\" condition.\nI like current scheme. I think it would make more sense over time.\nOf course, you are right, difference between potential earnings of top19 and backup witnesses is huge but so it is with their responsibilities.\nPlease take a look how many witnesses are really capable of running their nodes effectively.\nI'm not saying that backup witnesses have to set their feed price or take care about keeping their nodes up to date or online at all. They don't have to. That's why they shouldn't be overpaid.\n\nTaking a look at current top 100.\n47 of them (more than a half of backup witnesses) never set their feed price (some of them might not even know how to do that) or have it heavily outdated. 28 are not even able to generate blocks.\n\nYes, running a backup witness is not profitable and shouldn't be.\nYes, I'm a backup witness :-) (to those who do not know that)\n\n[Gandalf](https://steemit.com/@gtg) (\"gtg\")",
     "category": "steemit",
     "children": 1,
@@ -1291,10 +1309,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-chitty-re-gtg-re-chitty-a-balanced-voting-system-is-impossible-with-current-witness-s-payouts-20160915t184349883z",
-    "post_id": 1257386,
+    "post_id": 1257401,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1311,7 +1329,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "True, as well as encouraging others to try to do the same :-)",
     "category": "stats",
     "children": 0,
@@ -1333,10 +1353,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-arcange-re-gtg-re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t141107191z",
-    "post_id": 1254286,
+    "post_id": 1254288,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1353,7 +1373,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "I noticed that just after writing a comment (when went back to continue reading ... ) ___Thank you___ for pointing out. :-)",
     "category": "stats",
     "children": 2,
@@ -1375,10 +1397,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-arcange-re-gtg-re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t131924290z",
-    "post_id": 1253719,
+    "post_id": 1253721,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1395,7 +1417,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "@arcange, please do not underestimate ___\"Thank you\"___ while searching for ___\"Thanks\"___ ;-)\n\nThank you,\n[Gandalf](https://steemit.com/@gtg) (\"gtg\")",
     "category": "stats",
     "children": 4,
@@ -1423,10 +1447,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-arcange-steemsql-com-a-deep-analysis-of-steemians-gratefulness-20160915t130410195z",
-    "post_id": 1253585,
+    "post_id": 1253587,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1443,7 +1467,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Hello Jaro, welcome to Steemit! :-)",
     "category": "introducemyself",
     "children": 1,
@@ -1465,10 +1491,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-gamer00-hi-i-m-jaro-and-this-is-my-introductory-verification-post-20160915t071902704z",
-    "post_id": 1251610,
+    "post_id": 1251612,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1485,7 +1511,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Hello Joanna, welcome to Steemit! :-)",
     "category": "introducemyself",
     "children": 1,
@@ -1507,10 +1535,10 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-woman-onthe-wing-introduction-post-gold-at-the-end-of-the-rainbow-on-the-emerald-isle-20160915t071444722z",
-    "post_id": 1251591,
+    "post_id": 1251593,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1527,7 +1555,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Hello Eleanor, welcome to steemit! :-)",
     "category": "introduceyourself",
     "children": 0,
@@ -1551,8 +1581,8 @@
     "permlink": "re-eleanorp-the-best-adventures-start-with-rabbit-holes-eleanor-20160907t185449429z",
     "post_id": 1162358,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1569,7 +1599,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Hello Lara, hello Orange, welcome to steemit! :-)",
     "category": "introduceyourself",
     "children": 0,
@@ -1593,8 +1625,8 @@
     "permlink": "re-lara2016-my-favorite-cat-20160907t184824412z",
     "post_id": 1162279,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1616,7 +1648,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Hello @dan-wilson, welcome to steemit!\nDavida and Bowie are so cute :-)",
     "category": "introduceyourself",
     "children": 0,
@@ -1643,8 +1677,8 @@
     "permlink": "re-dan-wilson-i-m-an-english-teacher-in-beijing-my-introduction-to-steemit-and-verification-20160907t184055495z",
     "post_id": 1162194,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1661,7 +1695,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Hello @cwbrooch, welcome to steemit! :-)\n_\"Cat Lover\"_ sounds like an upvote! ;-)",
     "category": "introduceyourself",
     "children": 0,
@@ -1688,8 +1724,8 @@
     "permlink": "re-cwbrooch-teacher-story-teller-cat-lover-about-me-20160904t093005596z",
     "post_id": 1120694,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1706,7 +1742,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Hello Alex, welcome to steemit! :-)",
     "category": "introduceyourself",
     "children": 0,
@@ -1730,8 +1768,8 @@
     "permlink": "re-amcq-hello-steemit-i-m-alex-a-new-member-of-the-steemit-team-20160831t205719836z",
     "post_id": 1076080,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
@@ -1748,7 +1786,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 57.34,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Right, now I remember you, @djm34 from #mining :-) Good luck with getting a bounty!",
     "category": "steem",
     "children": 0,
@@ -1776,8 +1816,8 @@
     "permlink": "re-djm34-re-gtg-re-djm34-re-picokernel-bounty-community-bounty-for-open-source-gpu-miner-20160830t184729782z",
     "post_id": 1059890,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,

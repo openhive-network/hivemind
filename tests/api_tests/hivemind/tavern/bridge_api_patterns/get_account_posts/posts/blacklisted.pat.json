@@ -1710,7 +1710,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "https://www.biznessapps.com/blog/wp-content/uploads/2013/12/shutterstock_148639682.png\n\n# Over the last few weeks I've been thinking about ways we could increase the demand for Steem Power, the quality of curated content and the incentives to participate as a Steem curator.\n\nHere are a couple ideas I have been kicking around. They're not fully mature and could use a good rinsing by the community.\n\n## Allow Steem holders to delegate their Steem Power voting rights to a **voting pool**\n\nA delegated voting pool could socialize voting power and individualize rewards.  One prime use for this could be the @steemit account.  @steemit could create a voting pool and invite anyone with a verified identity and good reputation to join the pool as a curator.  This could increase the number of unique curators, help bootstrap Steem as an identity database and give people even more incentives to sign up.\n\nTo show the numbers, an example would be Alice Bob and Charley each delegate their SP of 2, 3, and 7 to one voting pool.  Now they each have 4, 4, and 4 SP to be used to curate.  Better curation would earn them more curation rewards.  \n\nA side effect of delegated voting pools could be voting markets.  Any user would have the power to create a voting pool and these users could charge curators for participation. Some of the platform's whales could be interested in offering subscription models to minnows as a way to get more voting influence.\n\n## If powering down stake loses voting influence\n\nImagine that any stake being powered down would lose its rights to use voting influence.  This could make the system very clear in the regard that stake is either in or it is out.  Users could be able to choose any % of their stake to power down regardless of how many accounts they have and only the % stake that is powering down would lose voting influence.  Stopping a power down could return all voting rights.\n\nPerhaps the effect of this could be 1/ more interest to stay in the platform and 2/ more fluidity in the witness queue 3/ more fairness regarding the PoS nature of Steem 4/ more clarity from participants looking to exit the system\n\n## Combined effect?\nPerhaps these proposals could have a combined effect that increases the demand and fluidity of Steem Power while improving the curated experience for people visiting Steem based websites.\n\n#### What are your thoughts and questions?",
     "category": "steem",
     "children": 315,
@@ -1742,8 +1744,8 @@
     "permlink": "increasing-curation-demand-for-steem-power-and-community-interaction",
     "post_id": 1160045,
     "promoted": "500.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -3729,7 +3731,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "http://cliparts.co/cliparts/pc5/oGq/pc5oGqrRi.gif\n# Yep, **we have a big ecosystem to build** and it's not going to get built unless we build it together \n\nTo help get us all working together, let's use a bounty system to manage tasks and prioritize items that will bring the best returns to our community.  \n\n## Anyone is welcome to post #bounties - be they for marketing, software development or any other domain impacting Steem and Steemians.\n\n**Please follow the form:**\nComment1:  Task; Size of the Bounty; Milestones\nComments 2;3;4;5: Updates, submissions and responses \n\n*And if you have suggestions for bounties, but not enough tokens to see it through, then please feel free to PM me or anyone else with your ideas!*\n\n(Steemit.com will link to this post in the top right menu so that it is well monitored)\n\n#### Let's do this!",
     "category": "bounties",
     "children": 104,
@@ -3757,8 +3761,8 @@
     "permlink": "it-s-time-for-a-steem-bounty-system",
     "post_id": 1123999,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -5560,7 +5564,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "https://www.riverscasino.com/pittsburgh/images/librariesprovider4/default-album/faq.jpg?sfvrsn=0\n\nMany have called for it, some have looked for it, and now we are going to create it.  **We need your help** creating the best **FAQ** and **Wikee** a cryptocurrency and/or social media site has ever had.  This will be for new users, journalists and more, so let's make FAQs and Wikees great again.  \n\nTo begin, let's do a few things in this post:\n\n***1/*** **Add your questions** about Steem and Steemit below that you believe are asked frequently.  (a/ Please only submit one question per high level comment. b/ Please submit *new* questions to the thread)\n\n***2/*** **Answer each others' questions** :)\n\n***3/*** **Link any articles** that are relevant to a Steem / Steemit Wikee.  (a/ Please submit the link with the following information and structure: *Subject / Date posted / Author / Link / One sentence description*.)\n\nA few users (I know of @someguy123 & @dragon) have begun Wiki projects.  This thread is meant to help them, Steemers and Steemitans alike take the Wikee and FAQ projects to the next level by consolidating the best information and getting the best answers.  I'll be watching this thread closely and answering questions along with some others on the Steemit team such as @dan and @theoretical to help pull out the best answers down to the technical level. \n\nFor time's sake, let's consider this a one month long project, although hopefully we can string together the most relevant questions answers and articles much sooner.\n\nThe FAQ and Wikee projects could use a lot of love.  Steemit is interested in hiring or supporting any entreprenuering Steemians to help with the task.  Please reach out to me on steemit.chat (@ned) if you are interested in helping :)",
     "category": "steem",
     "children": 499,
@@ -5595,8 +5601,8 @@
     "permlink": "the-first-phase-of-the-steem-faq-and-wikee-consolidation-of-knowledge",
     "post_id": 879051,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -6290,7 +6296,9 @@
     "author_payout_value": "41.873 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "<html>\n<p>More good news:  news site Breitbart (~9 million unique visitors per month) has picked up the quote from the International Business Times article in this story:  </p>\nhttp://www.breitbart.com/big-government/2016/06/27/bitcoin-good-gold-brexit/</p>\nTweet/Retweet!</p>\n\n</html>",
     "category": "steemit",
     "children": 53,
@@ -6319,8 +6327,8 @@
     "permlink": "steemit-quoted-in-breitbart",
     "post_id": 45321,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -6510,7 +6518,9 @@
     "author_payout_value": "0.886 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "<html><blockquote>Val, <strong>nicely done! &nbsp;</strong>This <em>editor </em>feels <del>great </del>awesome. <code>TEST QUOTE TEST</code></blockquote>\n<p>Val, nicely done! &nbsp;This editor feels awesome. TEST QUOTE TEST</p>\n<h1><br>\nHeader 1</h1>\n<p>Body</p>\n<h2>Header 2</h2>\n<p>Body</p>\n<h3>Header 3</h3>\n<pre><code>CODE CODE CODE</code></pre></html>",
     "category": "test",
     "children": 6,
@@ -6532,8 +6542,8 @@
     "permlink": "test-post",
     "post_id": 38298,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -6863,7 +6873,9 @@
     "author_payout_value": "37.937 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "[Request for designs] I just finished an interview where the writer afterwards asked for a design that shows the interconnected, socialmedianess of Steemit that we could use in the article he publishes.\n\nAny quality entries would be greatly appreciated!\n\nhttps://steemitup.eu/i/39455F518D302FA55AA65A85CB191CD1.jpg",
     "category": "design",
     "children": 13,
@@ -6885,8 +6897,8 @@
     "permlink": "rfd-the-steem-tree",
     "post_id": 28210,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -7280,7 +7292,9 @@
     "author_payout_value": "65.559 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "What would you trade for 100,000 Steem Power?  It could be anything .. crypto, clothing, car, watch, house or your time. Inspired by @hannixx42 and his invisible car. \n\nhttps://steemit.com/steem/@hannixx42/used-car-sale-contract",
     "category": "deals",
     "children": 50,
@@ -7307,8 +7321,8 @@
     "permlink": "100000-steem-power-for-trade",
     "post_id": 21140,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -7346,7 +7360,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "#test\n\n#spam #spam #spammm",
     "category": "spam",
     "children": 1,
@@ -7370,8 +7386,8 @@
     "permlink": "tags",
     "post_id": 10062,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -7505,7 +7521,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Join Slack http://steem.herokuapp.com\n\nhttp://steem.herokuapp.com",
     "category": "steem",
     "children": 12,
@@ -7523,8 +7541,8 @@
     "permlink": "slack",
     "post_id": 4259,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -7694,7 +7712,9 @@
     "author_payout_value": "0.000 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Calling anyone who can write a succinct, fun, perhaps sexy video script for Steem.  Please post entries below.\n\nSteemit dot com is the decentralized social media platform that pays you to have better conversations on just about anything!\n\nDiscussion on Steemit is powered by a unique digital currency that really rewards you for sharing great posts.  \n\nWhen you share something, Steemit uses the wisdom of the crowd to find the best content.  \n\nThe earlier you up-vote great posts and interesting comments, the more Steemit rewards you.  \n\nRewards are paid as Steem Dollars, which are virtual tokens worth about one U.S. dollar.  \n\nYou're also rewarded with Steem Power, a token that boosts your voting influence and ability to earn even more rewards.\n\nSteemit\u2019s digital currency is open to the public and fully transparent, so everyone can ensure it stays secure, reliable and safe for the community.  \n\nJoin in, share your favorite content and get free Steem Power by signing up today at Steemit dot com.",
     "category": "opportunities",
     "children": 7,
@@ -7712,8 +7732,8 @@
     "permlink": "steem-intro-video-script",
     "post_id": 2688,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -7915,7 +7935,9 @@
     "author_payout_value": "1.394 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "Steemit is looking to sponsor/hire Community Managers in major cities - I need to draft a job description that could be posted on Craigslist and other job boards.  What are some requirements we should look for? Or what would you post to draw interest from a crypto currency enthusiast?  Their role will include, but not be limited to, representing Steem and Steemit at cryptocurrency and social media events, hosting meetups and participating in online discussion.",
     "category": "opportunities",
     "children": 14,
@@ -7933,8 +7955,8 @@
     "permlink": "community-manager-job-posting",
     "post_id": 2686,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -8308,7 +8330,9 @@
     "author_payout_value": "14.280 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "It's been a little while that we've all been playing with Steemit.  It's been fun.  I am checking it more and more .. at this rate it may soon be like email for me. ;)\n\nThese lessons are less directly anecdotal and more the results of a few experiences .. here is what I've learned so far:\n\nTreat people on Steemit like you are at a dinner party or family gathering.  The Steemit dinner party is sometimes more like a masquerade, but nevertheless, everyone at the party is a person, and should be treated like one.  This means treat all people positively.\n\nDown-votes are like fines.  A down vote is brutally negative and should be reserved for blatantly negative posts and spam.  Using it on someone's post that is not brutally objectionable would amount to issuing a fine at a dinner party. Like, what? So that shouldn't happen.  I learned this lesson after I used a down vote today on a post that beat me to posting my own video.  Certainly could have handled that better by not voting .. letting poster know I would be posting later .. and carrying on.  \n\nMore positive votes, less problems.   My personal feeling is I am not voting enough but wish I were doing it more for more posts and people. I want to be more positive, especially after causing a negative interaction today.  Perhaps when the GUI allows us to weight our votes, similar to a five-star system, it will become easier to vote with.\n\nLooking forward to the coming days .. I really think we can drive a very positive ecosystem .. that encourages helping others .. complete thoughts .. less trolling .. identity .. and on and on.  Very exciting days ahead.",
     "category": "aceo",
     "children": 13,
@@ -8326,8 +8350,8 @@
     "permlink": "lessons-from-a-few-days-and-a-few-mistakes",
     "post_id": 1542,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -8625,7 +8649,9 @@
     "author_payout_value": "224.037 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "\nned [4/20/16] [1:12 PM] \n\nVESTS WILL BE HEREBY REFERRED TO AS STEEM POWER (SP) and moving from Steem to Steem Power will be referred to as \u201cpowering up\u201d; moving from Steem Power to Steem referred to as \u201cpowering down.\u201d For example, one can power down their Steem over a period of two years, yet one can power up their Steem instantly.  Powering up your Steem has several benefits, including automatic and recurring Steem rewards.  Additionally, Steem Power gives you voting power, which allows you to earn by casting votes on Steem, and because of this, Steem Power gives you the ability to earn more Steem Power and Steem Dollars. (edited)\n\n[1:13] \n\nSteemit.com and the Whitepaper will reflect these changes soon ..\n\nedit*",
     "category": "steem",
     "children": 9,
@@ -8643,8 +8669,8 @@
     "permlink": "long-live-vests-",
     "post_id": 545,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": false,
@@ -8790,7 +8816,9 @@
     "author_payout_value": "0.929 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "[PREDICTION] How Steem's Voters Will Perceive Post Value: \n\n1. Original content > copied\n2. Dialogue > monologue \n3. Identity > pseudo anonymity > anonymity \n4. Video > picture > text\n5. English > non-English\n6. SFW > NSFW\n7. Ideas > events > people\n8. Postitive > negative\n9. New info > info found elsewhere\n\n\n(check back 1 year from now)",
     "category": "steem",
     "children": 6,
@@ -8808,8 +8836,8 @@
     "permlink": "prediction-voter-perceived-value",
     "post_id": 337,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
@@ -8947,7 +8975,9 @@
     "author_payout_value": "0.786 HBD",
     "author_reputation": 62.11,
     "beneficiaries": [],
-    "blacklists": [],
+    "blacklists": [
+      "my blacklist"
+    ],
     "body": "http://s24.postimg.org/5wlxze75x/STEEM_logo_color_typo_pt.png",
     "category": "steem",
     "children": 5,
@@ -8965,8 +8995,8 @@
     "permlink": "one-small-step-for-steem-one-giant-leap-for-steemkind",
     "post_id": 193,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": false,
