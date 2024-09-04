@@ -80,7 +80,8 @@ CREATE TYPE hivemind_app.bridge_api_post_reblogs AS (
     is_pinned BOOLEAN,
     curator_payout_value VARCHAR,
     is_muted BOOLEAN,
-    reblogged_by VARCHAR[]
+    reblogged_by VARCHAR[],
+    blacklists TEXT
 );
 
 DROP TYPE IF EXISTS hivemind_app.bridge_api_post_discussion CASCADE;
