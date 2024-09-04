@@ -284,7 +284,7 @@ class SyncHiveDb:
 
     def _check_log_explain_queries(self) -> None:
         if self._conf.get("log_explain_queries"):
-            is_superuser = self._db.query_one("SELECT is_superuser()")
+            is_superuser = self._db.query_one("SELECT hivemind_app.is_superuser()")
             assert (
                 is_superuser
             ), 'The parameter --log_explain_queries=true can be used only when connect to the database with SUPERUSER privileges'
