@@ -33,7 +33,8 @@ BEGIN
     SELECT 
       hfc.post_id,
       hfc.created_at,
-      hfc.account_id
+      hfc.account_id,
+      blacklist.source
     FROM hivemind_app.hive_feed_cache hfc
     LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (__observer_id != 0 AND blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hfc.account_id)
     WHERE hfc.account_id = __account_id
@@ -90,7 +91,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      NULL
+      blog.source
     FROM blog,
     LATERAL hivemind_app.get_post_view_by_id(blog.post_id) hp
     ORDER BY blog.created_at DESC, blog.post_id DESC

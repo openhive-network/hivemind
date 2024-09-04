@@ -31,7 +31,8 @@ BEGIN
     SELECT 
       hfc.post_id, 
       MIN(hfc.created_at) as min_created, 
-      array_agg(ha.name) AS reblogged_by
+      array_agg(ha.name) AS reblogged_by,
+      array_agg(blacklist.source) as blacklist_source
     FROM hivemind_app.hive_feed_cache hfc
     JOIN hivemind_app.hive_follows hf ON hfc.account_id = hf.following
     JOIN hivemind_app.hive_accounts ha ON ha.id = hf.following
@@ -81,7 +82,8 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      feed.reblogged_by
+      feed.reblogged_by,
+      (SELECT array_to_string(feed.blacklist_source, ',', ''))
   FROM feed,
   LATERAL hivemind_app.get_post_view_by_id(feed.post_id) hp
   ORDER BY feed.min_created DESC, feed.post_id DESC

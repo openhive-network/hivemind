@@ -21,7 +21,8 @@ BEGIN
   (  
     SELECT 
       id, author_id,
-      (hp.payout + hp.pending_payout) as total_payout
+      (hp.payout + hp.pending_payout) as total_payout,
+      blacklist.source
     FROM hivemind_app.live_posts_comments_view hp
     LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (__observer_id != 0 AND blacklist.observer_id = __observer_id AND blacklist.blacklisted_id = hp.author_id)
     WHERE
@@ -74,7 +75,7 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      NULL
+      payouts.source
   FROM payouts,
   LATERAL hivemind_app.get_post_view_by_id(payouts.id) hp
   ORDER BY payouts.total_payout DESC, payouts.id DESC
