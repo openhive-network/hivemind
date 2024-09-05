@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_trending_tags;
-CREATE OR REPLACE FUNCTION hivemind_endpoints.condenser_api_get_trending_tags(IN _start_tag TEXT, IN _limit INT)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_trending_tags(IN _start_tag TEXT, IN _limit INT)
 RETURNS JSON
 LANGUAGE 'plpgsql'
 AS

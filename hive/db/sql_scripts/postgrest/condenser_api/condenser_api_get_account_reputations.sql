@@ -1,6 +1,6 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_account_reputations;
 -- this _fat_node_style is true for condenser api and false for follow api at the moment
-CREATE OR REPLACE FUNCTION hivemind_endpoints.condenser_api_get_account_reputations(IN _account_lower_bound TEXT, IN _limit INTEGER, IN _fat_node_style BOOLEAN)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_account_reputations(IN _account_lower_bound TEXT, IN _limit INTEGER, IN _fat_node_style BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 AS
