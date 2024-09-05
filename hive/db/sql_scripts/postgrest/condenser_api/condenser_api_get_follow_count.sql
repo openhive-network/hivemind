@@ -1,12 +1,15 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_follow_count;
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_follow_count(IN _account TEXT)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_follow_count(IN _json_is_object BOOLEAN, IN _method_is_call BOOLEAN, IN _params JSON)
 RETURNS JSON
 LANGUAGE 'plpgsql'
 AS
 $$
 DECLARE
+  _account TEXT;
   _account_id INT;
 BEGIN
+  PERFORM hivemind_utilities.validate_json_parameters(_json_is_object, _method_is_call, _params, '{"account"}', '{"string"}');
+  _account = hivemind_utilities.parse_string_argument_from_json(_params, _json_is_object, 'account', 0, True);
   _account_id = hivemind_utilities.find_account_id(hivemind_utilities.valid_account(_account, False), True);
   RETURN (
     SELECT to_json(row) FROM (

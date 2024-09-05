@@ -59,32 +59,23 @@ BEGIN
 
   IF __api_type = 'condenser_api' THEN
     IF __method_type = 'get_follow_count' THEN
-      PERFORM hivemind_utilities.validate_json_parameters(__json_with_params_is_object, __method_is_call, __params, '{"account"}', '{"string"}');
-      SELECT hivemind_endpoints.condenser_api_get_follow_count(_account => hivemind_utilities.parse_string_argument_from_json(__params, __json_with_params_is_object, 'account', 0, True)) INTO __result;
+      SELECT hivemind_endpoints.condenser_api_get_follow_count(__json_with_params_is_object, __method_is_call, __params) INTO __result;
 
     ELSEIF __method_type = 'get_reblogged_by' THEN
-      PERFORM hivemind_utilities.validate_json_parameters(__json_with_params_is_object, __method_is_call, __params, '{"author","permlink"}','{"string","string"}');
-      SELECT hivemind_endpoints.condenser_api_get_reblogged_by(_author => hivemind_utilities.parse_string_argument_from_json(__params, __json_with_params_is_object, 'author', 0, True),
-                                                               _permlink => hivemind_utilities.parse_string_argument_from_json(__params, __json_with_params_is_object, 'permlink', 1, True)) INTO __result;
+      SELECT hivemind_endpoints.condenser_api_get_reblogged_by(__json_with_params_is_object, __method_is_call, __params) INTO __result;
+
     ELSEIF __method_type = 'get_trending_tags' THEN
-      PERFORM hivemind_utilities.validate_json_parameters(__json_with_params_is_object, __method_is_call, __params, '{"start_tag","limit"}', '{"string","number"}');
-      SELECT hivemind_endpoints.condenser_api_get_trending_tags(_start_tag => hivemind_utilities.parse_string_argument_from_json(__params, __json_with_params_is_object, 'start_tag', 0, False),
-                                                                _limit => hivemind_utilities.parse_integer_argument_from_json(__params, __json_with_params_is_object, 'limit', 1, False)) INTO __result;
+      SELECT hivemind_endpoints.condenser_api_get_trending_tags(__json_with_params_is_object, __method_is_call, __params) INTO __result;
+
     ELSEIF __method_type = 'get_state' THEN
-      PERFORM hivemind_utilities.validate_json_parameters(__json_with_params_is_object, __method_is_call, __params, '{"path":"string"}', 0, 1, '["string"]');
-      SELECT hivemind_endpoints.condenser_api_get_state(_path => hivemind_utilities.parse_string_argument_from_json(__params, __json_with_params_is_object, 'path', 0, False)) INTO __result;
+      SELECT hivemind_endpoints.condenser_api_get_state(__json_with_params_is_object, __method_is_call, __params) INTO __result;
+
     ELSEIF __method_type = 'get_account_reputations' THEN
-      PERFORM hivemind_utilities.validate_json_parameters(__json_with_params_is_object, __method_is_call, __params, '{"account_lower_bound", "limit"}', '{"string", "number"}');
-      SELECT hivemind_endpoints.condenser_api_get_account_reputations(_account_lower_bound => hivemind_utilities.parse_string_argument_from_json(__params, __json_with_params_is_object, 'account_lower_bound', 0, False),
-                                                                _limit => hivemind_utilities.parse_integer_argument_from_json(__params, __json_with_params_is_object, 'limit', 1, False),
-                                                                _fat_node_style => True) INTO __result;
+      SELECT hivemind_endpoints.condenser_api_get_account_reputations(__json_with_params_is_object, __method_is_call, __params, /* _fat_node_style */ True) INTO __result;
     END IF;
   ELSEIF __api_type = 'follow_api' THEN
     IF __method_type = 'get_account_reputations' THEN
-      PERFORM hivemind_utilities.validate_json_parameters(__json_with_params_is_object, __method_is_call, __params, '{"account_lower_bound", "limit"}', '{"string", "number"}');
-      SELECT hivemind_endpoints.condenser_api_get_account_reputations(_account_lower_bound => hivemind_utilities.parse_string_argument_from_json(__params, __json_with_params_is_object, 'account_lower_bound', 0, False),
-                                                                _limit => hivemind_utilities.parse_integer_argument_from_json(__params, __json_with_params_is_object, 'limit', 1, False),
-                                                                _fat_node_style => False) INTO __result;
+      SELECT hivemind_endpoints.condenser_api_get_account_reputations(__json_with_params_is_object, __method_is_call, __params, /* _fat_node_style */ False) INTO __result;
     END IF;
   END IF;
 
