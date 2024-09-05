@@ -728,6 +728,7 @@ def setup_runtime_code(db):
         "postgrest/condenser_api/condenser_api_get_trending_tags.sql",
         "postgrest/utilities/get_state_tools.sql",
         "postgrest/condenser_api/condenser_api_get_state.sql",
+        "postgrest/condenser_api/condenser_api_get_account_reputations.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'

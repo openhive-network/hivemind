@@ -72,6 +72,18 @@ BEGIN
     ELSEIF __method_type = 'get_state' THEN
       PERFORM hivemind_utilities.validate_json_parameters(__json_with_params_is_object, __method_is_call, __params, '{"path":"string"}', 0, 1, '["string"]');
       SELECT hivemind_endpoints.condenser_api_get_state(_path => hivemind_utilities.parse_string_argument_from_json(__params, __json_with_params_is_object, 'path', 0, False)) INTO __result;
+    ELSEIF __method_type = 'get_account_reputations' THEN
+      PERFORM hivemind_utilities.validate_json_parameters(__json_with_params_is_object, __method_is_call, __params, '{"account_lower_bound", "limit"}', '{"string", "number"}');
+      SELECT hivemind_endpoints.condenser_api_get_account_reputations(_account_lower_bound => hivemind_utilities.parse_string_argument_from_json(__params, __json_with_params_is_object, 'account_lower_bound', 0, False),
+                                                                _limit => hivemind_utilities.parse_integer_argument_from_json(__params, __json_with_params_is_object, 'limit', 1, False),
+                                                                _fat_node_style => True) INTO __result;
+    END IF;
+  ELSEIF __api_type = 'follow_api' THEN
+    IF __method_type = 'get_account_reputations' THEN
+      PERFORM hivemind_utilities.validate_json_parameters(__json_with_params_is_object, __method_is_call, __params, '{"account_lower_bound", "limit"}', '{"string", "number"}');
+      SELECT hivemind_endpoints.condenser_api_get_account_reputations(_account_lower_bound => hivemind_utilities.parse_string_argument_from_json(__params, __json_with_params_is_object, 'account_lower_bound', 0, False),
+                                                                _limit => hivemind_utilities.parse_integer_argument_from_json(__params, __json_with_params_is_object, 'limit', 1, False),
+                                                                _fat_node_style => False) INTO __result;
     END IF;
   END IF;
 
