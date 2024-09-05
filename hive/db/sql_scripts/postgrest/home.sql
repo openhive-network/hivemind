@@ -14,7 +14,6 @@ DECLARE
   __result JSON;
   __api_type TEXT;
   __method_type TEXT;
-  __is_legacy_style BOOLEAN;
   __json_type_is_object BOOLEAN;
   __exception_message TEXT;
   __exception JSONB;
@@ -49,8 +48,6 @@ BEGIN
   ELSE
     RAISE EXCEPTION '%', hivemind_utilities.raise_invalid_json_format_exception('Invalid JSON format:' || json_typeof(__params)::text);
   END IF;
-
-  __is_legacy_style := __api_type = 'condenser_api';
 
   IF __api_type = 'condenser_api' THEN
     IF __method_type = 'get_follow_count' THEN
