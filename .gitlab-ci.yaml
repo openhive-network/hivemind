@@ -526,6 +526,131 @@ e2e_benchmark:
   tags:
     - data-cache-storage
 
+e2e_benchmark_on_postgrest:
+  image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.8-slim-5
+  stage: benchmark
+  interruptible: true
+  needs:
+    - job: prepare_haf_data
+      artifacts: true
+    - job: prepare_hivemind_image
+      artifacts: true
+    - job: download_await
+      artifacts: false
+    - job: sync
+      artifacts: true
+    - job: e2e_benchmark
+      artifacts: false
+  when: on_success
+  services:
+    - name: $HAF_IMAGE_NAME
+      alias: haf-instance
+      variables:
+        PG_ACCESS: "
+         host    haf_block_log    hivemind         all    trust\n
+         host    haf_block_log    haf_admin        all    trust\n
+         "
+        DATADIR: $DATA_CACHE_HIVEMIND_DATADIR
+        SHM_DIR: $DATA_CACHE_HIVEMIND_SHM_DIR
+        LOG_FILE: $CI_JOB_NAME.log
+        PGCTLTIMEOUT: 600 # give PostgreSQL more time to start if GitLab shut it down improperly after the sync job
+      command: ["--replay-blockchain", "--stop-at-block=5000000"]
+    - name: $HIVEMIND_IMAGE
+      alias: hivemind-smoketest # cannot be a variable
+      entrypoint:
+        - bash
+        - -c
+        - *hivemind-postgrest-serve-script
+      variables:
+        WORKING_DIR: /home/hivemind
+        LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/hivemind-server.log
+        AWAIT_LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/hivemind-server-await.log
+        REQUEST_PATH_LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/request_process_times_smoketests.log
+    - name: $HIVEMIND_IMAGE
+      alias: hivemind-benchmark # cannot be a variable
+      entrypoint:
+        - bash
+        - -c
+        - *hivemind-postgrest-serve-script
+      variables:
+        WORKING_DIR: /home/hivemind
+        LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/hivemind-benchmark-server.log
+        AWAIT_LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/hivemind-benchmark-server-await.log
+        REQUEST_PATH_LOG_PATH: $DATA_CACHE_HIVEMIND_DATADIR/request_process_times.log
+  variables:
+    HIVED_UID: $HIVED_UID
+    JOB_TOKEN: $CI_JOB_TOKEN
+    RUNNER_HIVEMIND_BENCHMARK_URL: http://$RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME
+    RUNNER_HIVEMIND_SMOKETEST_URL: http://$RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME
+    DATA_CACHE_HAF: "${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
+    DATA_CACHE_HIVEMIND_DATADIR: "${DATA_CACHE_HIVEMIND}/datadir"
+    DATA_CACHE_HIVEMIND_SHM_DIR: "${DATA_CACHE_HIVEMIND_DATADIR}/blockchain"
+  script:
+    - |
+      echo "HAF image name $HAF_IMAGE_NAME"
+      echo "Hivemind image name $HIVEMIND_IMAGE"
+      SMOKETEST_AWAIT_URL="tcp://${RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}"
+      echo "Waiting for Hivemind smoketest server to start running on ${SMOKETEST_AWAIT_URL}"
+      "${DATA_CACHE_HAF}/await" -t 10m "${SMOKETEST_AWAIT_URL}" -- echo "Hivemind smoketest instance is running"
+    - *bridge_api_smoketest-script
+    - *bridge_api_smoketest_negative-script
+    - *condenser_api_smoketest-script
+    - *condenser_api_smoketest_negative-script
+    - *database_api_smoketest-script
+    - *database_api_smoketest_negative-script
+    - *follow_api_smoketest-script
+    - *follow_api_smoketest_negative-script
+    - *tags_api_smoketest-script
+    - *tags_api_smoketest_negative-script
+    - *mock_tests-script
+    - *hive_api_smoketest-script
+    - |
+      BENCHMARK_AWAIT_URL="tcp://${RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}"
+      echo "Waiting for Hivemind benchmark server to start running on ${BENCHMARK_AWAIT_URL}"
+      "${DATA_CACHE_HAF}/await" -t 10m "${BENCHMARK_AWAIT_URL}" -- echo "Hivemind benchmark instance is running"
+    - *api-benchmark-script
+  after_script:
+    - |
+      echo -e "\e[0Ksection_start:$(date +%s):logs[collapsed=true]\r\e[0KCollecting logs..."
+      ls -lah "${DATA_CACHE_HIVEMIND_DATADIR}"
+      cp "${DATA_CACHE_HIVEMIND_DATADIR}/${CI_JOB_NAME}.log" "haf-$CI_JOB_NAME.log" || true
+      cp "${DATA_CACHE_HIVEMIND_DATADIR}/request_process_times_smoketests.log" request_process_times_smoketests.log || true
+      cp "${DATA_CACHE_HIVEMIND_DATADIR}/hivemind-server.log" hivemind-server.log || true
+      cp "${DATA_CACHE_HIVEMIND_DATADIR}/hivemind-server-await.log" hivemind-server-await.log || true
+      cp "${DATA_CACHE_HIVEMIND_DATADIR}/request_process_times.log" request_process_times.log || true
+      cp "${DATA_CACHE_HIVEMIND_DATADIR}/hivemind-benchmark-server.log" hivemind-benchmark-server.log || true
+      cp "${DATA_CACHE_HIVEMIND_DATADIR}/hivemind-benchmark-server-await.log" hivemind-benchmark-server-await.log || true
+      echo -e "\e[0Ksection_end:$(date +%s):logs\r\e[0K"
+    - |
+      echo -e "\e[0Ksection_start:$(date +%s):dotenv[collapsed=true]\r\e[0KPreparing dotenv file..."
+      {
+        echo "ARTIFACTS_JOB_ID=$CI_JOB_ID"
+        echo "APP_VERSION=$(python -c "with open('version.log') as f:  exec(f.read()); print(__version__)")"
+        echo "SERVER_NAME=$CI_RUNNER_DESCRIPTION"
+      } > variables.env
+      cat variables.env
+      echo -e "\e[0Ksection_end:$(date +%s):dotenv\r\e[0K"
+  artifacts:
+    when: always
+    expire_in: 7 days
+    reports:
+      junit: "*.xml"
+      dotenv: variables.env
+    paths:
+      - haf-$CI_JOB_NAME.log
+      - hivemind-sync.log
+      - hivemind-server.log
+      - hivemind-benchmark-server.log
+      - pg-stats
+      - tests/api_tests/hivemind/tavern/**/*.out.json
+      - request_process_times.log
+      - request_process_times_smoketests.log
+      - version.log
+      - hivemind-server-await.log
+      - hivemind-benchmark-server-await.log
+  tags:
+    - data-cache-storage
+
 build_and_publish_image:
   stage: publish
   extends: .publish_docker_image_template
