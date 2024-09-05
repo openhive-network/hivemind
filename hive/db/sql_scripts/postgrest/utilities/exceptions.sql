@@ -101,13 +101,13 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_utilities.raise_invalid_parameters_array_length_exception;
-CREATE OR REPLACE FUNCTION hivemind_utilities.raise_invalid_parameters_array_length_exception(in expected_count INTEGER, in parameters_count INTEGER)
+CREATE OR REPLACE FUNCTION hivemind_utilities.raise_invalid_parameters_array_length_exception(in expected_count INTEGER, in parameters_count INTEGER, in method_is_call BOOLEAN )
 RETURNS JSON
 LANGUAGE 'plpgsql'
 AS
 $$
 BEGIN
-  IF expected_count < parameters_count THEN
+  IF NOT method_is_call AND expected_count < parameters_count THEN
     RETURN hivemind_utilities.raise_exception(-32602, 'Invalid parameters', 'too many positional arguments');
   ELSE
     RETURN hivemind_utilities.raise_exception(-32602, 'Invalid parameters','expected ' || expected_count || ' params');
