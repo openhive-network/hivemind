@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_utilities.find_category_id CASCADE;
-CREATE OR REPLACE FUNCTION hivemind_utilities.find_category_id(
+CREATE FUNCTION hivemind_utilities.find_category_id(
     in _category_name hivemind_app.hive_category_data.category%TYPE,
     in _allow_empty BOOLEAN
 )
