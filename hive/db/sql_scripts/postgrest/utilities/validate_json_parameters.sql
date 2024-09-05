@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_utilities.validate_json_parameters;
-CREATE OR REPLACE FUNCTION hivemind_utilities.validate_json_parameters(IN _json_is_object BOOLEAN, IN _params JSON, IN _expected_params_names TEXT[], IN _expected_params_types TEXT[])
+CREATE OR REPLACE FUNCTION hivemind_utilities.validate_json_parameters(IN _json_is_object BOOLEAN, IN _method_is_call BOOLEAN, IN _params JSON, IN _expected_params_names TEXT[], IN _expected_params_types TEXT[])
 RETURNS JSON
 LANGUAGE 'plpgsql'
 AS
@@ -36,7 +36,7 @@ BEGIN
   ELSE
     expected_array_len = array_length(_expected_params_types, 1);
     IF json_array_length(_params) <> expected_array_len THEN
-      RAISE EXCEPTION '%', hivemind_utilities.raise_invalid_parameters_array_length_exception(expected_array_len, json_array_length(_params));
+      RAISE EXCEPTION '%', hivemind_utilities.raise_invalid_parameters_array_length_exception(expected_array_len, json_array_length(_params), _method_is_call);
     ELSE
       FOR array_idx IN 1..expected_array_len-1 LOOP
         IF _params->array_idx IS NOT NULL THEN
