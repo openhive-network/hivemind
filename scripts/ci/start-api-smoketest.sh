@@ -9,6 +9,7 @@ JUNITXML="$4"
 JOBS=${5:-"auto"}
 
 CHECK_METHODS="${6:-}"
+echo CHECK_METHODS: "${CHECK_METHODS}"
 
 if [ -n "$CHECK_METHODS" ]; then
   CHECK_METHODS=$(echo "$CHECK_METHODS" | tr -d ' ')
@@ -28,6 +29,7 @@ echo HIVEMIND_PORT: "${HIVEMIND_PORT}"
 echo TEST_GROUP: "${TEST_GROUP}"
 echo JUNITXML: "${JUNITXML}"
 echo JOBS: "${JOBS}"
+echo TEST_GROUP: "${TEST_GROUP}"
 
 echo "Starting tests on hivemind server running on ${HIVEMIND_ADDRESS}:${HIVEMIND_PORT}"
 
