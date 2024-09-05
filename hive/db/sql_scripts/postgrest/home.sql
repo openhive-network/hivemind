@@ -15,6 +15,7 @@ DECLARE
   __api_type TEXT;
   __method_type TEXT;
   __json_with_params_is_object BOOLEAN;
+  __method_is_call BOOLEAN;
   __exception_message TEXT;
   __exception JSONB;
 BEGIN
@@ -37,9 +38,11 @@ BEGIN
     __method_type = __params->>1;
     __params = __params->>2;
     __json_with_params_is_object = False;
+    __method_is_call = True;
   ELSE
     SELECT substring(__method FROM '^[^.]+') INTO __api_type;
     SELECT substring(__method FROM '[^.]+$') INTO __method_type;
+    __method_is_call = False;
     IF json_typeof(__params) = 'object' THEN
       __json_with_params_is_object = True;
     ELSEIF json_typeof(__params) = 'array' THEN
@@ -55,19 +58,19 @@ BEGIN
 
   IF __api_type = 'condenser_api' THEN
     IF __method_type = 'get_follow_count' THEN
-      PERFORM hivemind_utilities.validate_json_parameters(__json_with_params_is_object, __params, '{"account"}', '{"string"}');
+      PERFORM hivemind_utilities.validate_json_parameters(__json_with_params_is_object, __method_is_call, __params, '{"account"}', '{"string"}');
       SELECT hivemind_endpoints.condenser_api_get_follow_count(_account => hivemind_utilities.parse_string_argument_from_json(__params, __json_with_params_is_object, 'account', 0, True)) INTO __result;
 
     ELSEIF __method_type = 'get_reblogged_by' THEN
-      PERFORM hivemind_utilities.validate_json_parameters(__json_with_params_is_object, __params, '{"author","permlink"}','{"string","string"}');
+      PERFORM hivemind_utilities.validate_json_parameters(__json_with_params_is_object, __method_is_call, __params, '{"author","permlink"}','{"string","string"}');
       SELECT hivemind_endpoints.condenser_api_get_reblogged_by(_author => hivemind_utilities.parse_string_argument_from_json(__params, __json_with_params_is_object, 'author', 0, True),
                                                                _permlink => hivemind_utilities.parse_string_argument_from_json(__params, __json_with_params_is_object, 'permlink', 1, True)) INTO __result;
     ELSEIF __method_type = 'get_trending_tags' THEN
-      PERFORM hivemind_utilities.validate_json_parameters(__json_with_params_is_object, __params, '{"start_tag","limit"}', '{"string","number"}');
+      PERFORM hivemind_utilities.validate_json_parameters(__json_with_params_is_object, __method_is_call, __params, '{"start_tag","limit"}', '{"string","number"}');
       SELECT hivemind_endpoints.condenser_api_get_trending_tags(_start_tag => hivemind_utilities.parse_string_argument_from_json(__params, __json_with_params_is_object, 'start_tag', 0, False),
                                                                 _limit => hivemind_utilities.parse_integer_argument_from_json(__params, __json_with_params_is_object, 'limit', 1, False)) INTO __result;
     ELSEIF __method_type = 'get_state' THEN
-      PERFORM hivemind_utilities.validate_json_parameters(__json_with_params_is_object, __params, '{"path":"string"}', 0, 1, '["string"]');
+      PERFORM hivemind_utilities.validate_json_parameters(__json_with_params_is_object, __method_is_call, __params, '{"path":"string"}', 0, 1, '["string"]');
       SELECT hivemind_endpoints.condenser_api_get_state(_path => hivemind_utilities.parse_string_argument_from_json(__params, __json_with_params_is_object, 'path', 0, False)) INTO __result;
     END IF;
   END IF;
