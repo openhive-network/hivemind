@@ -1,9 +1,9 @@
 DROP FUNCTION IF EXISTS hivemind_utilities.find_account_id;
-CREATE OR REPLACE FUNCTION hivemind_utilities.find_account_id(
+CREATE FUNCTION hivemind_utilities.find_account_id(
   in _account hivemind_app.hive_accounts.name%TYPE,
   in _check boolean)
 RETURNS INT
-LANGUAGE 'plpgsql'
+LANGUAGE 'plpgsql' STABLE
 AS
 $function$
 DECLARE

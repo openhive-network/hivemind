@@ -1,10 +1,10 @@
 -- methods which are used only for condenser_api - get state
 
 DROP FUNCTION IF EXISTS hivemind_utilities.gs_normalize_path;
-CREATE OR REPLACE FUNCTION hivemind_utilities.gs_normalize_path(in _path TEXT)
+CREATE FUNCTION hivemind_utilities.gs_normalize_path(in _path TEXT)
 RETURNS RECORD
 LANGUAGE plpgsql
-STABLE
+IMMUTABLE
 AS
 $BODY$
 DECLARE
@@ -44,16 +44,16 @@ BEGIN
     END IF;
   END LOOP;
 
-  IF array_length(_parts, 1) = 4 AND _parts[4] = '' THEN
+  IF CARDINALITY(_parts) = 4 AND _parts[4] = '' THEN
     _parts = array_remove(_parts, _parts[4]);
   END IF;
 
-  IF array_length(_parts, 1) > 3 THEN
+  IF CARDINALITY(_parts) > 3 THEN
     RAISE EXCEPTION '%', hivemind_utilities.raise_parameter_validation_exception('too many parts in path:' || _path);
   END IF;
 
   LOOP
-    IF array_length(_parts, 1) < 3 THEN
+    IF CARDINALITY(_parts) < 3 THEN
     
       _parts = array_append(_parts, NULL);
     ELSE
@@ -68,7 +68,7 @@ $BODY$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_utilities.gs_get_hive_account_info_view_query_string;
-CREATE OR REPLACE FUNCTION hivemind_utilities.gs_gget_hive_account_info_view_query_string(IN _name TEXT)
+CREATE FUNCTION hivemind_utilities.gs_get_hive_account_info_view_query_string(IN _name TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
 STABLE

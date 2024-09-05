@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_state;
-CREATE OR REPLACE FUNCTION hivemind_endpoints.condenser_api_get_state(IN _path TEXT)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_state(IN _path TEXT)
 RETURNS JSON
 LANGUAGE 'plpgsql'
 AS
