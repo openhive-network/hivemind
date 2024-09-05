@@ -614,12 +614,14 @@ e2e_benchmark_on_postgrest:
     DATA_CACHE_HAF: "${DATA_CACHE_HAF_PREFIX}_${HAF_COMMIT}"
     DATA_CACHE_HIVEMIND_DATADIR: "${DATA_CACHE_HIVEMIND}/datadir"
     DATA_CACHE_HIVEMIND_SHM_DIR: "${DATA_CACHE_HIVEMIND_DATADIR}/blockchain"
-    COMPLETED_BRIDGE_API_METHODS: ""
-    COMPLETED_CONDENSER_API_METHODS: ""
-    COMPLETED_DATABASE_API_METHODS: ""
-    COMPLETED_FOLLOW_API_METHODS: ""
-    COMPLETED_TAGS_API_METHODS: ""
-    COMPLETED_HIVE_API_METHODS: ""
+    # TODO: As you complete the migration of methods to SQL, uncomment variables and add finished method names.
+    # Missing variable enables the entire test group.
+    COMPLETED_BRIDGE_API_METHODS: "get_community, get_community_context"
+    COMPLETED_CONDENSER_API_METHODS: "get_follow_count,  get_reblogged_by, get_trending_tags"
+    # COMPLETED_DATABASE_API_METHODS=""
+    # COMPLETED_FOLLOW_API_METHODS=""
+    # COMPLETED_TAGS_API_METHODS=""
+    # COMPLETED_HIVE_API_METHODS=""
   script:
     - |
       echo "HAF image name $HAF_IMAGE_NAME"
@@ -631,19 +633,12 @@ e2e_benchmark_on_postgrest:
     - *bridge_api_smoketest_negative-script
     - *condenser_api_smoketest-script
     - *condenser_api_smoketest_negative-script
-    - *database_api_smoketest-script
-    - *database_api_smoketest_negative-script
-    - *follow_api_smoketest-script
-    - *follow_api_smoketest_negative-script
-    - *tags_api_smoketest-script
-    - *tags_api_smoketest_negative-script
-    - *mock_tests-script
-    - *hive_api_smoketest-script
     - |
       BENCHMARK_AWAIT_URL="tcp://${RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}"
       echo "Waiting for Hivemind benchmark server to start running on ${BENCHMARK_AWAIT_URL}"
       "${DATA_CACHE_HAF}/await" -t 10m "${BENCHMARK_AWAIT_URL}" -- echo "Hivemind benchmark instance is running"
-    - *api-benchmark-script
+    # TODO: Uncomment anchors to enable a test group. To test only selected methods, add their names to the environment variable
+    # - *api-benchmark-script
   after_script:
     - |
       echo -e "\e[0Ksection_start:$(date +%s):logs[collapsed=true]\r\e[0KCollecting logs..."
