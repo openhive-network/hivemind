@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_utilities.valid_number;
-CREATE OR REPLACE FUNCTION hivemind_utilities.valid_number(  
+CREATE FUNCTION hivemind_utilities.valid_number(  
   _num INT, 
   _default_num INT, 
   _lbound INT DEFAULT NULL, 
@@ -8,7 +8,7 @@ CREATE OR REPLACE FUNCTION hivemind_utilities.valid_number(
 )
   RETURNS INT
   LANGUAGE plpgsql
-  STABLE
+  IMMUTABLE
 AS
 $BODY$
 BEGIN

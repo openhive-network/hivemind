@@ -1,7 +1,8 @@
 DROP FUNCTION IF EXISTS hivemind_utilities.raise_exception;
-CREATE OR REPLACE FUNCTION hivemind_utilities.raise_exception(_code INT, _message TEXT, _data TEXT = NULL, _id JSON = NULL)
+CREATE FUNCTION hivemind_utilities.raise_exception(_code INT, _message TEXT, _data TEXT = NULL, _id JSON = NULL)
 RETURNS JSON
 LANGUAGE 'plpgsql'
+IMMUTABLE
 AS
 $$
 BEGIN
@@ -29,9 +30,10 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_utilities.raise_method_not_found_exception;
-CREATE OR REPLACE FUNCTION hivemind_utilities.raise_method_not_found_exception(_method_name TEXT)
+CREATE FUNCTION hivemind_utilities.raise_method_not_found_exception(_method_name TEXT)
 RETURNS JSON
 LANGUAGE 'plpgsql'
+IMMUTABLE
 AS
 $$
 BEGIN
@@ -41,9 +43,10 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_utilities.raise_invalid_json_format_exception;
-CREATE OR REPLACE FUNCTION hivemind_utilities.raise_invalid_json_format_exception(_exception_message TEXT)
+CREATE FUNCTION hivemind_utilities.raise_invalid_json_format_exception(_exception_message TEXT)
 RETURNS JSON
 LANGUAGE 'plpgsql'
+IMMUTABLE
 AS
 $$
 BEGIN
@@ -53,9 +56,10 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_utilities.raise_parameter_validation_exception;
-CREATE OR REPLACE FUNCTION hivemind_utilities.raise_parameter_validation_exception(_exception_message TEXT)
+CREATE FUNCTION hivemind_utilities.raise_parameter_validation_exception(_exception_message TEXT)
 RETURNS JSON
 LANGUAGE 'plpgsql'
+IMMUTABLE
 AS
 $$
 BEGIN
@@ -65,9 +69,10 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_utilities.invalid_account_exception;
-CREATE OR REPLACE FUNCTION hivemind_utilities.invalid_account_exception(_exception_message TEXT)
+CREATE FUNCTION hivemind_utilities.invalid_account_exception(_exception_message TEXT)
 RETURNS JSON
 LANGUAGE 'plpgsql'
+IMMUTABLE
 AS
 $$
 BEGIN
@@ -77,9 +82,10 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_utilities.raise_post_deleted_exception;
-CREATE OR REPLACE FUNCTION hivemind_utilities.raise_post_deleted_exception(in _author TEXT, in _permlink TEXT, in _times INT)
+CREATE FUNCTION hivemind_utilities.raise_post_deleted_exception(in _author TEXT, in _permlink TEXT, in _times INT)
 RETURNS JSON
 LANGUAGE 'plpgsql'
+IMMUTABLE
 AS
 $$
 BEGIN
@@ -89,9 +95,10 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_utilities.raise_non_existing_post_exception;
-CREATE OR REPLACE FUNCTION hivemind_utilities.raise_non_existing_post_exception(in _author TEXT, in _permlink TEXT)
+CREATE FUNCTION hivemind_utilities.raise_non_existing_post_exception(in _author TEXT, in _permlink TEXT)
 RETURNS JSON
 LANGUAGE 'plpgsql'
+IMMUTABLE
 AS
 $$
 BEGIN
@@ -101,25 +108,27 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_utilities.raise_invalid_parameters_array_length_exception;
-CREATE OR REPLACE FUNCTION hivemind_utilities.raise_invalid_parameters_array_length_exception(in expected_count INTEGER, in parameters_count INTEGER, in method_is_call BOOLEAN )
+CREATE FUNCTION hivemind_utilities.raise_invalid_parameters_array_length_exception(in _expected_count INTEGER, in _parameters_count INTEGER, in _method_is_call BOOLEAN )
 RETURNS JSON
 LANGUAGE 'plpgsql'
+IMMUTABLE
 AS
 $$
 BEGIN
-  IF NOT method_is_call AND expected_count < parameters_count THEN
+  IF NOT _method_is_call AND _expected_count < _parameters_count THEN
     RETURN hivemind_utilities.raise_exception(-32602, 'Invalid parameters', 'too many positional arguments');
   ELSE
-    RETURN hivemind_utilities.raise_exception(-32602, 'Invalid parameters','expected ' || expected_count || ' params');
+    RETURN hivemind_utilities.raise_exception(-32602, 'Invalid parameters','expected ' || _expected_count || ' params');
   END IF;
 END
 $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_utilities.raise_unexpected_keyword_exception;
-CREATE OR REPLACE FUNCTION hivemind_utilities.raise_unexpected_keyword_exception(_arg_name TEXT)
+CREATE FUNCTION hivemind_utilities.raise_unexpected_keyword_exception(_arg_name TEXT)
 RETURNS TEXT
 LANGUAGE 'plpgsql'
+IMMUTABLE
 AS
 $$
 BEGIN
@@ -129,9 +138,10 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_utilities.raise_missing_required_argument_exception;
-CREATE OR REPLACE FUNCTION hivemind_utilities.raise_missing_required_argument_exception(_arg_name TEXT)
+CREATE FUNCTION hivemind_utilities.raise_missing_required_argument_exception(_arg_name TEXT)
 RETURNS TEXT
 LANGUAGE 'plpgsql'
+IMMUTABLE
 AS
 $$
 BEGIN
@@ -141,9 +151,10 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_utilities.raise_invalid_permlink_exception;
-CREATE OR REPLACE FUNCTION hivemind_utilities.raise_invalid_permlink_exception(_exception_message TEXT)
+CREATE FUNCTION hivemind_utilities.raise_invalid_permlink_exception(_exception_message TEXT)
 RETURNS TEXT
 LANGUAGE 'plpgsql'
+IMMUTABLE
 AS
 $$
 BEGIN
@@ -153,9 +164,10 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_utilities.raise_uint_exception;
-CREATE OR REPLACE FUNCTION hivemind_utilities.raise_uint_exception(_id JSON)
+CREATE FUNCTION hivemind_utilities.raise_uint_exception(_id JSON)
 RETURNS JSON
 LANGUAGE 'plpgsql'
+IMMUTABLE
 AS
 $$
 BEGIN
@@ -165,9 +177,10 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_utilities.raise_operation_param_exception;
-CREATE OR REPLACE FUNCTION hivemind_utilities.raise_operation_param_exception(_exception_message TEXT, _id JSON)
+CREATE FUNCTION hivemind_utilities.raise_operation_param_exception(_exception_message TEXT, _id JSON)
 RETURNS JSON
 LANGUAGE 'plpgsql'
+IMMUTABLE
 AS
 $$
 BEGIN
@@ -177,9 +190,10 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_utilities.raise_category_not_exists_exception;
-CREATE OR REPLACE FUNCTION hivemind_utilities.raise_category_not_exists_exception(_category_name TEXT)
+CREATE FUNCTION hivemind_utilities.raise_category_not_exists_exception(_category_name TEXT)
 RETURNS JSON
 LANGUAGE 'plpgsql'
+IMMUTABLE
 AS
 $$
 BEGIN

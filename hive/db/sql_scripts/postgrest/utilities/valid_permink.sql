@@ -1,11 +1,11 @@
 DROP FUNCTION IF EXISTS hivemind_utilities.valid_permlink;
-CREATE OR REPLACE FUNCTION hivemind_utilities.valid_permlink(
+CREATE FUNCTION hivemind_utilities.valid_permlink(
   _permlink TEXT,
   _allow_empty BOOLEAN DEFAULT FALSE
 )
   RETURNS TEXT
   LANGUAGE plpgsql
-  STABLE
+  IMMUTABLE
 AS
 $BODY$
 BEGIN

@@ -1,8 +1,8 @@
 DROP FUNCTION IF EXISTS hivemind_utilities.valid_tag;
-CREATE OR REPLACE FUNCTION hivemind_utilities.valid_tag(in _tag TEXT, _allow_empty BOOLEAN DEFAULT FALSE)
+CREATE FUNCTION hivemind_utilities.valid_tag(in _tag TEXT, _allow_empty BOOLEAN DEFAULT FALSE)
 RETURNS TEXT
 LANGUAGE plpgsql
-STABLE
+IMMUTABLE
 AS
 $BODY$
 BEGIN

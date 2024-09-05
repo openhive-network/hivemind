@@ -4,6 +4,7 @@ DROP FUNCTION IF EXISTS hivemind_utilities.parse_string_argument_from_json;
 CREATE FUNCTION hivemind_utilities.parse_string_argument_from_json(_params JSON, _json_is_object BOOLEAN, _arg_name TEXT, _arg_number INT, _exception_on_unset_field BOOLEAN)
 RETURNS TEXT
 LANGUAGE 'plpgsql'
+IMMUTABLE
 AS
 $$
 BEGIN
@@ -44,6 +45,7 @@ DROP FUNCTION IF EXISTS hivemind_utilities.parse_integer_argument_from_json;
 CREATE FUNCTION hivemind_utilities.parse_integer_argument_from_json(_params JSON, _json_is_object BOOLEAN, _arg_name TEXT, _arg_number INT, _exception_on_unset_field BOOLEAN)
 RETURNS INTEGER
 LANGUAGE 'plpgsql'
+IMMUTABLE
 AS
 $$
 BEGIN

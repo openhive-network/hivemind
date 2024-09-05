@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_follow_count;
-CREATE OR REPLACE FUNCTION hivemind_endpoints.condenser_api_get_follow_count(IN _account TEXT)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_follow_count(IN _account TEXT)
 RETURNS JSON
 LANGUAGE 'plpgsql'
 AS

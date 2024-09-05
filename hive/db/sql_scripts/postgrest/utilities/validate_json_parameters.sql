@@ -1,7 +1,8 @@
 DROP FUNCTION IF EXISTS hivemind_utilities.validate_json_parameters;
-CREATE OR REPLACE FUNCTION hivemind_utilities.validate_json_parameters(IN _json_is_object BOOLEAN, IN _method_is_call BOOLEAN, IN _params JSON, IN _expected_params_names TEXT[], IN _expected_params_types TEXT[])
+CREATE FUNCTION hivemind_utilities.validate_json_parameters(IN _json_is_object BOOLEAN, IN _method_is_call BOOLEAN, IN _params JSON, IN _expected_params_names TEXT[], IN _expected_params_types TEXT[])
 RETURNS JSON
 LANGUAGE 'plpgsql'
+IMMUTABLE
 AS
 $$
 DECLARE

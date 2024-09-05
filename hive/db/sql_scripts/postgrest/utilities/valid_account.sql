@@ -1,11 +1,11 @@
 DROP FUNCTION IF EXISTS hivemind_utilities.valid_account;
-CREATE OR REPLACE FUNCTION hivemind_utilities.valid_account(  
+CREATE FUNCTION hivemind_utilities.valid_account(  
   _name TEXT, 
   _allow_empty BOOLEAN DEFAULT FALSE
 )
   RETURNS TEXT
   LANGUAGE plpgsql
-  STABLE
+  IMMUTABLE
 AS
 $BODY$
 DECLARE
@@ -19,11 +19,11 @@ BEGIN
     RETURN _name;
   END IF;
 
-  IF LENGTH(_name) < 3 OR LENGTH(_name) > 16 THEN
+  IF LENGTH(_name) NOT BETWEEN 3 AND 16 THEN
       RAISE EXCEPTION '%', hivemind_utilities.invalid_account_exception('invalid account name length: `' || _name || '`');
   END IF;
 
-  IF SUBSTRING(_name FROM 1 FOR 1) = '@' THEN
+  IF LEFT(_name, 1) = '@' THEN
     RAISE EXCEPTION '%', hivemind_utilities.invalid_account_exception('invalid account name char `@`');
   END IF;
 

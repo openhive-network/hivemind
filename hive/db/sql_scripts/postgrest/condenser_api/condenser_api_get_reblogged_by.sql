@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_reblogged_by;
-CREATE OR REPLACE FUNCTION hivemind_endpoints.condenser_api_get_reblogged_by(IN _author TEXT, IN _permlink TEXT)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_reblogged_by(IN _author TEXT, IN _permlink TEXT)
 RETURNS JSON
 LANGUAGE 'plpgsql'
 AS
