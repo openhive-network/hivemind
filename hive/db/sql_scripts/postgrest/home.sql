@@ -67,6 +67,9 @@ BEGIN
     ELSEIF __method_type = 'get_trending_tags' THEN
       SELECT hivemind_endpoints.condenser_api_get_trending_tags(__json_with_params_is_object, __method_is_call, __params) INTO __result;
 
+    ELSEIF __method_type = 'get_blog' THEN
+      SELECT hivemind_endpoints.condenser_api_get_blog(__json_with_params_is_object, __method_is_call, __params, /* get_entries */ False) INTO __result;
+
     ELSEIF __method_type = 'get_state' THEN
       SELECT hivemind_endpoints.condenser_api_get_state(__json_with_params_is_object, __method_is_call, __params) INTO __result;
 
