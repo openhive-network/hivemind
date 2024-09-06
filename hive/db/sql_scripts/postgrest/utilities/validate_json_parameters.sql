@@ -35,7 +35,7 @@ BEGIN
       END IF;
     END LOOP;
   ELSE
-    expected_array_len = array_length(_expected_params_types, 1);
+    expected_array_len = CARDINALITY(_expected_params_types);
     IF json_array_length(_params) <> expected_array_len THEN
       RAISE EXCEPTION '%', hivemind_utilities.raise_invalid_parameters_array_length_exception(expected_array_len, json_array_length(_params), _method_is_call);
     ELSE
