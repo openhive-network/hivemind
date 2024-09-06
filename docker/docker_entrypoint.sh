@@ -63,9 +63,6 @@ while [ $# -gt 0 ]; do
     --only-hivemind)
         SKIP_REPTRACKER=1
         ;;
-    postgrest-server)
-        POSTGREST_SERVER=1
-        ;;
     *)
         HIVEMIND_ARGS+=("$1")
   esac
@@ -176,6 +173,11 @@ case "$COMMAND" in
       fi
       # save off the time the block processor started, for use in the health check
       date --utc --iso-8601=seconds > /tmp/block_processing_startup_time.txt
+      run_hive
+      ;;
+    postgrest-server)
+      POSTGREST_SERVER=1
+      HIVEMIND_ARGS=($(for i in "${HIVEMIND_ARGS[@]}"; do [[ "$i" != "postgrest-server" ]] && echo "$i"; done))
       run_hive
       ;;
     *)
