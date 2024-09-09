@@ -727,6 +727,7 @@ def setup_runtime_code(db):
         "postgrest/utilities/create_condenser_post_object.sql",
         "postgrest/condenser_api/condenser_api_get_blog.sql",
         "postgrest/condenser_api/condenser_api_get_content.sql",
+        "postgrest/utilities/valid_follow_type.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
