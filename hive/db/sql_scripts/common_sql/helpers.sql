@@ -1,31 +1,3 @@
-DROP FUNCTION IF EXISTS hivemind_helpers.valid_community;
-CREATE OR REPLACE FUNCTION hivemind_helpers.valid_community(
-  _name TEXT, 
-  allow_empty BOOLEAN DEFAULT FALSE
-)
-  RETURNS TEXT
-  LANGUAGE plpgsql
-  STABLE
-AS
-$BODY$
-BEGIN
-  IF _name IS NULL OR _name = '' THEN
-    IF NOT allow_empty THEN
-      RAISE EXCEPTION 'community name cannot be blank';
-    END IF;
-
-    RETURN _name;
-  END IF;
-
-  IF NOT hivemind_helpers.check_community(_name) THEN  
-	RAISE EXCEPTION 'given community name is not valid';
-  END IF;
-
-  RETURN _name;
-END;
-$BODY$
-;
-
 DROP FUNCTION IF EXISTS hivemind_helpers.valid_account;
 CREATE OR REPLACE FUNCTION hivemind_helpers.valid_account(  
   _name TEXT, 
