@@ -244,23 +244,6 @@ END;
 $BODY$
 ;
 
-DROP FUNCTION IF EXISTS hivemind_helpers.valid_limit;
-CREATE OR REPLACE FUNCTION hivemind_helpers.valid_limit(  
-  _limit NUMERIC, 
-  ubound INT,
-  default_num INT
-)
-  RETURNS INT
-  LANGUAGE plpgsql
-  STABLE
-AS
-$BODY$
-BEGIN
-  RETURN hivemind_helpers.valid_number(_limit, default_num, 'limit', 1, ubound);
-END;
-$BODY$
-;
-
 DROP FUNCTION IF EXISTS hivemind_helpers.valid_score;
 CREATE OR REPLACE FUNCTION hivemind_helpers.valid_score(  
   _score NUMERIC, 
