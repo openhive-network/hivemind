@@ -530,7 +530,7 @@ def setup(db, admin_db):
     admin_db.query(f'CREATE SCHEMA IF NOT EXISTS {SCHEMA_NAME} AUTHORIZATION {SCHEMA_OWNER_NAME};')
     admin_db.query(f'CREATE SCHEMA IF NOT EXISTS hivemind_helpers AUTHORIZATION {SCHEMA_OWNER_NAME};')
     admin_db.query(f'CREATE SCHEMA IF NOT EXISTS hivemind_endpoints AUTHORIZATION {SCHEMA_OWNER_NAME};')
-    admin_db.query(f'CREATE SCHEMA IF NOT EXISTS hivemind_utilities AUTHORIZATION {SCHEMA_OWNER_NAME};')
+    admin_db.query(f'CREATE SCHEMA IF NOT EXISTS hivemind_postgrest_utilities AUTHORIZATION {SCHEMA_OWNER_NAME};')
 
     prepare_app_context(db=db)
     build_metadata().create_all(db.engine())

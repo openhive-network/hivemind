@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS hivemind_utilities.find_comment_id;
-CREATE FUNCTION hivemind_utilities.find_comment_id(
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.find_comment_id;
+CREATE FUNCTION hivemind_postgrest_utilities.find_comment_id(
   in _author hivemind_app.hive_accounts.name%TYPE,
   in _permlink hivemind_app.hive_permlink_data.permlink%TYPE,
   in _check boolean)
@@ -28,9 +28,9 @@ BEGIN
         WHERE ha.name = _author AND hpd.permlink = _permlink
       );
       IF _post_id = 0 THEN
-        RAISE EXCEPTION '%', hivemind_utilities.raise_non_existing_post_exception(_author, _permlink);
+        RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_non_existing_post_exception(_author, _permlink);
       ELSE
-        RAISE EXCEPTION '%', hivemind_utilities.raise_post_deleted_exception(_author, _permlink, _post_id);
+        RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_post_deleted_exception(_author, _permlink, _post_id);
       END IF;
     END IF;
   END IF;
