@@ -1,7 +1,7 @@
 -- methods which are used only for condenser_api - get state
 
-DROP FUNCTION IF EXISTS hivemind_utilities.gs_normalize_path;
-CREATE FUNCTION hivemind_utilities.gs_normalize_path(in _path TEXT)
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.gs_normalize_path;
+CREATE FUNCTION hivemind_postgrest_utilities.gs_normalize_path(in _path TEXT)
 RETURNS RECORD
 LANGUAGE plpgsql
 IMMUTABLE
@@ -27,7 +27,7 @@ BEGIN
   END IF;
 
   IF position('#' IN _path) <> 0 THEN
-    RAISE EXCEPTION '%', hivemind_utilities.raise_parameter_validation_exception('path contains hash mark (#)');
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('path contains hash mark (#)');
   END IF;
 
   _modified_path = _path;
@@ -49,7 +49,7 @@ BEGIN
   END IF;
 
   IF CARDINALITY(_parts) > 3 THEN
-    RAISE EXCEPTION '%', hivemind_utilities.raise_parameter_validation_exception('too many parts in path:' || _path);
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('too many parts in path:' || _path);
   END IF;
 
   LOOP
@@ -67,8 +67,8 @@ END;
 $BODY$
 ;
 
-DROP FUNCTION IF EXISTS hivemind_utilities.gs_get_hive_account_info_view_query_string;
-CREATE FUNCTION hivemind_utilities.gs_get_hive_account_info_view_query_string(IN _name TEXT)
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.gs_get_hive_account_info_view_query_string;
+CREATE FUNCTION hivemind_postgrest_utilities.gs_get_hive_account_info_view_query_string(IN _name TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
 STABLE
@@ -98,7 +98,7 @@ _result = jsonb_set(_result, ('{' || _name || '}')::text[], (
 );
 
 IF _result->>_name IS NULL THEN
-  RAISE EXCEPTION '%', hivemind_utilities.invalid_account_exception('account not found: ' || _name);
+  RAISE EXCEPTION '%', hivemind_postgrest_utilities.invalid_account_exception('account not found: ' || _name);
 ELSE
   RETURN _result;
 END IF;

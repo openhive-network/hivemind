@@ -28,12 +28,12 @@ BEGIN
   SELECT NULL::JSON INTO __result;
 
   IF __jsonrpc != '2.0' OR __jsonrpc IS NULL OR __params IS NULL OR __id IS NULL OR __method IS NULL THEN
-    RAISE EXCEPTION '%', hivemind_utilities.raise_invalid_json_format_exception('Invalid JSON-RPC');
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_json_format_exception('Invalid JSON-RPC');
   END IF;
 
   if lower(__method) = 'call' THEN
     if json_array_length(__params) < 2 THEN
-      RAISE EXCEPTION '%', hivemind_utilities.raise_invalid_json_format_exception('Invalid JSON-RPC');
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_json_format_exception('Invalid JSON-RPC');
     END IF;
     __api_type = __params->>0;
     __method_type = __params->>1;
@@ -53,7 +53,7 @@ BEGIN
         __json_with_params_is_object = True;
       END IF;
     ELSE
-      RAISE EXCEPTION '%', hivemind_utilities.raise_invalid_json_format_exception('Invalid JSON format:' || json_typeof(__params)::text);
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_json_format_exception('Invalid JSON format:' || json_typeof(__params)::text);
     END IF;
   END IF;
 
@@ -80,7 +80,7 @@ BEGIN
   END IF;
 
   IF __result IS NULL THEN
-    RAISE EXCEPTION '%', hivemind_utilities.raise_method_not_found_exception(__method);
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method);
   ELSEIF __result->'error' IS NULL THEN
     RETURN jsonb_build_object(
       'jsonrpc', '2.0',
@@ -96,10 +96,10 @@ BEGIN
       __exception = jsonb_set(__exception, '{id}', __id::jsonb);
       RETURN __exception ;
     WHEN invalid_text_representation THEN
-      RETURN hivemind_utilities.raise_uint_exception(__id);
+      RETURN hivemind_postgrest_utilities.raise_uint_exception(__id);
     WHEN OTHERS THEN
       GET STACKED DIAGNOSTICS __exception_message = message_text;
-      RETURN hivemind_utilities.raise_operation_param_exception(__exception_message, __id);
+      RETURN hivemind_postgrest_utilities.raise_operation_param_exception(__exception_message, __id);
 END
 $$
 ;

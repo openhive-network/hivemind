@@ -10,12 +10,12 @@ _limit INT;
 _category_id INT;
 _payout_limit hivemind_app.hive_posts.payout%TYPE;
 BEGIN
-  PERFORM hivemind_utilities.validate_json_parameters(_json_is_object, _method_is_call, _params, '{"start_tag","limit"}', '{"string","number"}');
-  _start_tag = hivemind_utilities.parse_string_argument_from_json(_params, _json_is_object, 'start_tag', 0, False);
-  _limit = hivemind_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'limit', 1, False);
-  _start_tag = hivemind_utilities.valid_tag(_start_tag, True);
-  _limit = hivemind_utilities.valid_number(_limit, 250, 1, 250, 'limit');
-  _category_id = hivemind_utilities.find_category_id( _start_tag, True );
+  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _method_is_call, _params, '{"start_tag","limit"}', '{"string","number"}');
+  _start_tag = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'start_tag', 0, False);
+  _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'limit', 1, False);
+  _start_tag = hivemind_postgrest_utilities.valid_tag(_start_tag, True);
+  _limit = hivemind_postgrest_utilities.valid_number(_limit, 250, 1, 250, 'limit');
+  _category_id = hivemind_postgrest_utilities.find_category_id( _start_tag, True );
 
   IF _category_id <> 0 THEN
     SELECT SUM(hp.payout + hp.pending_payout) INTO _payout_limit
