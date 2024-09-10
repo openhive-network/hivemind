@@ -1,3 +1,4 @@
+-- after finish rewrite all api methods to sql, move all metods from the `hivemind_postgrest_utilities` schema to the `hivemin_app` schema.
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.find_account_id;
 CREATE FUNCTION hivemind_postgrest_utilities.find_account_id(
   in _account hivemind_app.hive_accounts.name%TYPE,
