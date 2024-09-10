@@ -77,6 +77,13 @@ BEGIN
     IF __method_type = 'get_account_reputations' THEN
       SELECT hivemind_endpoints.condenser_api_get_account_reputations(__json_with_params_is_object, __method_is_call, __params, /* _fat_node_style */ False) INTO __result;
     END IF;
+  ELSEIF __api_type = 'bridge' THEN
+    IF __method_type = 'get_community' THEN
+      SELECT hivemind_endpoints.bridge_api_get_community(__json_with_params_is_object, __method_is_call, __params) INTO __result;
+
+    ELSEIF __method_type = 'get_community_context' THEN
+      SELECT hivemind_endpoints.bridge_api_get_community_context(__json_with_params_is_object, __method_is_call, __params) INTO __result;
+    END IF;
   END IF;
 
   IF __result IS NULL THEN
