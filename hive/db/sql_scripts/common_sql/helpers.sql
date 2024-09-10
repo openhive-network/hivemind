@@ -170,24 +170,6 @@ END;
 $BODY$
 ;
 
-DROP FUNCTION IF EXISTS hivemind_helpers.json_date;
-CREATE OR REPLACE FUNCTION hivemind_helpers.json_date(_date TIMESTAMPTZ DEFAULT NULL)
-  RETURNS TEXT
-  LANGUAGE plpgsql
-  STABLE
-AS
-$BODY$
-BEGIN
-  IF _date IS NULL OR _date = '9999-12-31 23:59:59+00'::TIMESTAMPTZ THEN
-      RETURN '1969-12-31T23:59:59';
-  END IF;
-
-  RETURN TO_CHAR(_date, 'YYYY-MM-DD') || 'T' || TO_CHAR(_date, 'HH24:MI:SS');
-
-END;
-$BODY$
-;
-
 DROP FUNCTION IF EXISTS hivemind_helpers.get_hive_accounts_info_view_query_string;
 CREATE OR REPLACE FUNCTION hivemind_helpers.get_hive_accounts_info_view_query_string(
   _names TEXT[], 
