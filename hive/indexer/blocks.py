@@ -88,7 +88,6 @@ class Blocks:
         Reblog.setup_own_db_access(shared_db_adapter, "Reblog")
         Notify.setup_own_db_access(shared_db_adapter, "Notify")
         Accounts.setup_own_db_access(shared_db_adapter, "Accounts")
-        PayoutStats.setup_own_db_access(shared_db_adapter, "PayoutStats")
         Mentions.setup_own_db_access(shared_db_adapter, "Mentions")
 
     @staticmethod
@@ -103,7 +102,6 @@ class Blocks:
         Reblog.close_own_db_access()
         Notify.close_own_db_access()
         Accounts.close_own_db_access()
-        PayoutStats.close_own_db_access()
         Mentions.close_own_db_access()
 
     @staticmethod
@@ -257,7 +255,7 @@ class Blocks:
             log.info(f"head block {block_num} @ {block.get_date()}")
             log.info("[SINGLE] hourly stats")
             log.info("[SINGLE] filling payout_stats_view executed")
-            PayoutStats.generate()
+            PayoutStats.generate(db=DbAdapterHolder.common_block_processing_db())
             Mentions.refresh()
         elif block_num % 200 == 0:  # 10min
             log.info("[SINGLE] 10min")

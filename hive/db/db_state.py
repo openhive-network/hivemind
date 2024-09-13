@@ -433,10 +433,11 @@ class DbState:
             log.info("[MASSIVE] update_hive_posts_mentions executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
-    def _finish_payout_stats_view(cls):
-        time_start = perf_counter()
-        PayoutStats.generate()
-        log.info("[MASSIVE] payout_stats_view executed in %.4fs", perf_counter() - time_start)
+    def _finish_payout_stats_view(cls, db):
+        with AutoDbDisposer(db, "finish_payout_stats_view") as db_mgr:
+            time_start = perf_counter()
+            PayoutStats.generate(db=db_mgr.db)
+            log.info("[MASSIVE] payout_stats_view executed in %.4fs", perf_counter() - time_start)
 
     @classmethod
     def _finish_communities_posts_and_rank(cls, db):
@@ -507,7 +508,7 @@ class DbState:
         methods = [
             ('hive_feed_cache', cls._finish_hive_feed_cache, [cls.db(), last_imported_block, current_imported_block]),
             ('hive_mentions', cls._finish_hive_mentions, [cls.db(), last_imported_block, current_imported_block]),
-            ('payout_stats_view', cls._finish_payout_stats_view, []),
+            ('payout_stats_view', cls._finish_payout_stats_view, [cls.db()]),
             ('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]),
             (
                 'hive_posts',
@@ -550,6 +551,7 @@ class DbState:
         if last_imported_blocks > last_completed_blocks:
             if cls.db().is_trx_active():
                 cls.db().query_no_return("COMMIT")
+
             is_initial_massive = (last_imported_blocks - last_completed_blocks) > ONE_WEEK_IN_BLOCKS
 
             if is_initial_massive:

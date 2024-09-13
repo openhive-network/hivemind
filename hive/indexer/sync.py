@@ -83,9 +83,8 @@ class SyncHiveDb:
     def __exit__(self, exc_type, value, traceback):
         if self._enter_sync:
             log.info("Exiting HAF mode synchronization")
-            if not DbState.is_massive_sync():
-                Blocks.setup_own_db_access(shared_db_adapter=self._db)  # needed for PayoutStats.generate
-            PayoutStats.generate(separate_transaction=True)
+
+            PayoutStats.generate(self._db,separate_transaction=True)
 
             last_imported_block = Blocks.last_imported()
             log.info(f'LAST IMPORTED BLOCK IS: {last_imported_block}')
