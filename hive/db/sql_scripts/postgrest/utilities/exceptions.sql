@@ -132,7 +132,7 @@ IMMUTABLE
 AS
 $$
 BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', 'got an unexpected keyword argument ' || _arg_name);
+  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', 'got an unexpected keyword argument ''' || _arg_name || '''');
 END
 $$
 ;
