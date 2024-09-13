@@ -9,29 +9,15 @@ CREATE FUNCTION hivemind_postgrest_utilities.valid_account(
 AS
 $BODY$
 DECLARE
-  name_segment TEXT := '[a-z][a-z0-9\-]+[a-z0-9]';
+  error_message TEXT;
 BEGIN
-  IF _name IS NULL OR _name = '' THEN
-    IF NOT _allow_empty THEN
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.invalid_account_exception('invalid account (not specified)');
-    END IF;
+  error_message = hivemind_postgrest_utilities.valid_account_no_exception(_name, _allow_empty);
 
-    RETURN _name;
+  IF error_message <> _name THEN
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.invalid_account_exception(error_message);
   END IF;
 
-  IF LENGTH(_name) NOT BETWEEN 3 AND 16 THEN
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.invalid_account_exception('invalid account name length: `' || _name || '`');
-  END IF;
-
-  IF LEFT(_name, 1) = '@' THEN
-    RAISE EXCEPTION '%', hivemind_postgrest_utilities.invalid_account_exception('invalid account name char `@`');
-  END IF;
-
-  IF _name ~ ('^'|| name_segment ||'(?:\.'|| name_segment ||')*$') THEN
-    RETURN _name;
-  ELSE
-    RAISE EXCEPTION '%', hivemind_postgrest_utilities.invalid_account_exception('invalid account char');
-  END IF;
+  RETURN _name;
 END;
 $BODY$
 ;
