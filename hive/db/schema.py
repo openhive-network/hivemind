@@ -735,6 +735,7 @@ def setup_runtime_code(db):
         "postgrest/utilities/json_date.sql",
         "postgrest/utilities/community.sql",
         "postgrest/utilities/valid_account_no_exception.sql",
+        "postgrest/utilities/valid_observer.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
