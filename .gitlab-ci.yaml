@@ -616,8 +616,8 @@ e2e_benchmark_on_postgrest:
     DATA_CACHE_HIVEMIND_SHM_DIR: "${DATA_CACHE_HIVEMIND_DATADIR}/blockchain"
     # TODO: As you complete the migration of methods to SQL, uncomment variables and add finished method names.
     # Missing variable enables the entire test group.
-    # COMPLETED_BRIDGE_API_METHODS: ""
-    COMPLETED_CONDENSER_API_METHODS: "get_account_reputations,get_follow_count,get_reblogged_by,get_trending_tags,get_community,get_community_context"
+    COMPLETED_BRIDGE_API_METHODS: "get_community,get_community_context"
+    COMPLETED_CONDENSER_API_METHODS: "get_account_reputations,get_follow_count,get_reblogged_by,get_trending_tags"
     # COMPLETED_DATABASE_API_METHODS: ""
     COMPLETED_FOLLOW_API_METHODS: "get_account_reputations"
     # COMPLETED_TAGS_API_METHODS: ""
@@ -632,6 +632,8 @@ e2e_benchmark_on_postgrest:
     - *condenser_api_smoketest-script
     - *condenser_api_smoketest_negative-script
     - *follow_api_smoketest-script
+    - *bridge_api_smoketest-script
+    - *bridge_api_smoketest_negative-script
     - |
       BENCHMARK_AWAIT_URL="tcp://${RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}"
       echo "Waiting for Hivemind benchmark server to start running on ${BENCHMARK_AWAIT_URL}"
