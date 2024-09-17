@@ -506,15 +506,16 @@ class DbState:
 
         log.info("#############################################################################")
 
-        # it is the longest query which we have, form some reason it sometimes last 12h, sometimes 2h
-        # it was moved before starting other finalization to ensure that other pending queries do not affect it
-        cls._finish_hive_posts(cls.db(), massive_sync_preconditions, last_imported_block, current_imported_block)
-
         methods = [
             ('hive_feed_cache', cls._finish_hive_feed_cache, [cls.db(), last_imported_block, current_imported_block]),
             ('hive_mentions', cls._finish_hive_mentions, [cls.db(), last_imported_block, current_imported_block]),
             ('payout_stats_view', cls._finish_payout_stats_view, [cls.db()]),
             ('communities_posts_and_rank', cls._finish_communities_posts_and_rank, [cls.db()]),
+            (
+                'hive_posts',
+                cls._finish_hive_posts,
+                [cls.db(), massive_sync_preconditions, last_imported_block, current_imported_block],
+            ),
             (
                 'blocks_consistency_flag',
                 cls._finish_blocks_consistency_flag,
