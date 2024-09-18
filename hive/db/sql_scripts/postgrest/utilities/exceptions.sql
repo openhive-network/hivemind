@@ -42,6 +42,19 @@ END
 $$
 ;
 
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_api_not_found_exception;
+CREATE FUNCTION hivemind_postgrest_utilities.raise_api_not_found_exception(_api_name TEXT)
+RETURNS JSON
+LANGUAGE 'plpgsql'
+IMMUTABLE
+AS
+$$
+BEGIN
+  RETURN hivemind_postgrest_utilities.raise_exception(-32601, 'Api not found ' || _api_name);
+END
+$$
+;
+
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_invalid_json_format_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_invalid_json_format_exception(_exception_message TEXT)
 RETURNS JSON
