@@ -57,46 +57,14 @@ BEGIN
     END IF;
   END IF;
 
-  IF __api_type = 'condenser_api' THEN
-    IF __method_type = 'get_follow_count' THEN
-      SELECT hivemind_endpoints.condenser_api_get_follow_count(__json_with_params_is_object, __method_is_call, __params) INTO __result;
+  __result := hivemind_postgrest_utilities.dispatch(__api_type, __method_type, __json_with_params_is_object, __method_is_call, __params);
 
-    ELSEIF __method_type = 'get_reblogged_by' THEN
-      SELECT hivemind_endpoints.condenser_api_get_reblogged_by(__json_with_params_is_object, __method_is_call, __params) INTO __result;
-
-    ELSEIF __method_type = 'get_trending_tags' THEN
-      SELECT hivemind_endpoints.condenser_api_get_trending_tags(__json_with_params_is_object, __method_is_call, __params) INTO __result;
-
-    ELSEIF __method_type = 'get_state' THEN
-      SELECT hivemind_endpoints.condenser_api_get_state(__json_with_params_is_object, __method_is_call, __params) INTO __result;
-
-    ELSEIF __method_type = 'get_account_reputations' THEN
-      SELECT hivemind_endpoints.condenser_api_get_account_reputations(__json_with_params_is_object, __method_is_call, __params, /* _fat_node_style */ True) INTO __result;
-    END IF;
-  ELSEIF __api_type = 'follow_api' THEN
-    IF __method_type = 'get_account_reputations' THEN
-      SELECT hivemind_endpoints.condenser_api_get_account_reputations(__json_with_params_is_object, __method_is_call, __params, /* _fat_node_style */ False) INTO __result;
-    END IF;
-  ELSEIF __api_type = 'bridge' THEN
-    IF __method_type = 'get_community' THEN
-      SELECT hivemind_endpoints.bridge_api_get_community(__json_with_params_is_object, __method_is_call, __params) INTO __result;
-
-    ELSEIF __method_type = 'get_community_context' THEN
-      SELECT hivemind_endpoints.bridge_api_get_community_context(__json_with_params_is_object, __method_is_call, __params) INTO __result;
-    END IF;
-  END IF;
-
-  IF __result IS NULL THEN
-    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method);
-  ELSEIF __result->'error' IS NULL THEN
-    RETURN jsonb_build_object(
+  RETURN jsonb_build_object(
       'jsonrpc', '2.0',
       'result', __result,
       'id', __id
     );
-  ELSE
-    RETURN __result::JSONB;
-  END IF;
+
   EXCEPTION
     WHEN raise_exception THEN
       __exception = SQLERRM;
