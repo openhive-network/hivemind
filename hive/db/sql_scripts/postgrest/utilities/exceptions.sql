@@ -279,3 +279,16 @@ BEGIN
 END
 $$
 ;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_invalid_community_type_exception;
+CREATE FUNCTION hivemind_postgrest_utilities.raise_invalid_community_type_exception()
+RETURNS JSON
+LANGUAGE 'plpgsql'
+IMMUTABLE
+AS
+$$
+BEGIN
+  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', 'Unsupported follow type, valid types: blog, ignore');
+END
+$$
+;
