@@ -700,7 +700,7 @@ def setup_runtime_code(db):
         "postgrest/utilities/find_account_id.sql",
         "postgrest/condenser_api/condenser_api_get_follow_count.sql",
         "postgrest/utilities/find_comment_id.sql",
-        "postgrest/utilities/valid_permink.sql",
+        "postgrest/utilities/valid_permlink.sql",
         "postgrest/condenser_api/condenser_api_get_reblogged_by.sql",
         "postgrest/utilities/valid_number.sql",
         "postgrest/utilities/valid_tag.sql",
