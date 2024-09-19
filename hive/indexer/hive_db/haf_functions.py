@@ -17,7 +17,7 @@ def prepare_app_context(db: Db) -> None:
             , hive.live_stage()
         ]::hive.application_stages"""
         log.info(f"No application context present. Attempting to create a '{SCHEMA_NAME}' context...")
-        db.query_no_return(f"SELECT hive.app_create_context('{SCHEMA_NAME}', '{SCHEMA_NAME}', _is_forking => FALSE, _is_attached => False, _stages => {synchronization_stages} );") #is-forking=FALSE, only process irreversible blocks
+        db.query_no_return(f"SELECT hive.app_create_context('{SCHEMA_NAME}', '{SCHEMA_NAME}', _is_forking => FALSE, _stages => {synchronization_stages} );") #is-forking=FALSE, only process irreversible blocks
         log.info("Application context creation done.")
     else:
         log.info(f"Found existing context, set to non-forking.")
