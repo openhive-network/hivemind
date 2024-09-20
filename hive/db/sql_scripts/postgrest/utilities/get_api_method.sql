@@ -117,3 +117,24 @@ BEGIN
 END;
 $$
 ;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_database_api_method;
+CREATE FUNCTION hivemind_postgrest_utilities.get_database_api_method(IN __method_type TEXT, IN __json_with_params_is_object BOOLEAN, IN __params JSON)
+RETURNS JSONB
+LANGUAGE 'plpgsql'
+STABLE
+AS
+$$
+DECLARE
+  result JSONB;
+BEGIN
+  CASE
+    WHEN __method_type = 'find_votes' THEN
+      result := hivemind_endpoints.database_api_find_votes(__json_with_params_is_object, __params)::JSONB;
+    ELSE
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
+  END CASE;
+  RETURN result;
+END;
+$$
+;
