@@ -17,6 +17,8 @@ BEGIN
       result := hivemind_postgrest_utilities.get_bridge_method(__method_type, __json_with_params_is_object, __params);
     WHEN __api_type = 'tags_api' THEN
       result := hivemind_postgrest_utilities.get_tags_api_method(__method_type, __json_with_params_is_object, __params);
+    WHEN __api_type = 'database_api' THEN
+      result := hivemind_postgrest_utilities.get_database_api_method(__method_type, __json_with_params_is_object, __params);
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_api_not_found_exception(__api_type);
   END CASE;

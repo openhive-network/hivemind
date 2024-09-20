@@ -731,6 +731,7 @@ def setup_runtime_code(db):
         "postgrest/utilities/follow_arguments.sql",
         "postgrest/condenser_api/condenser_api_get_followers.sql",
         "postgrest/condenser_api/condenser_api_get_following.sql",
+        "postgrest/database_api/database_api_find_votes.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
