@@ -146,7 +146,7 @@
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
       "total_votes": 26
     },
@@ -903,7 +903,7 @@
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
       "total_votes": 177
     },
@@ -1297,7 +1297,7 @@
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
       "total_votes": 87
     },
@@ -1536,7 +1536,7 @@
     "replies": [],
     "stats": {
       "flag_weight": 0.0,
-      "gray": false,
+      "gray": true,
       "hide": false,
       "total_votes": 44
     },
