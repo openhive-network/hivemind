@@ -80,7 +80,7 @@ BEGIN
       hp.is_hidden,
       -- is grayed - if author is muted by observer, make post gray
       CASE
-        WHEN hp.is_grayed = FALSE AND __observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = (SELECT id FROM hivemind_app.accounts_view WHERE name = hp.author)) THEN True
+        WHEN hp.is_grayed = FALSE AND __observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = __observer_id AND muted_id = hp.author_id) THEN True
         else hp.is_grayed
       END,
       hp.total_votes,
