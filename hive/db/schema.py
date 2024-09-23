@@ -740,6 +740,7 @@ def setup_runtime_code(db):
         "postgrest/bridge_api/bridge_api_get_community_context.sql",
         "postgrest/utilities/dispatch.sql",
         "postgrest/utilities/get_api_method.sql",
+        "postgrest/utilities/check_general_json_format.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
