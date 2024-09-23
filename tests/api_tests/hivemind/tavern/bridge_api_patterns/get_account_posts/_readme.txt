@@ -28,8 +28,8 @@ params:
 
   "observer": "{account}"
   
-     optional (can be skipped or passed empty), ignored for "blog", "feed" and "replies", otherwise when passed has to point to valid account
-     used to fill blacklist stats and mark posts of authors blacklisted by observer
-     (looks like it might be a bug since blacklist is applied to places where it makes no sense, while it is ignored where it would make sense to apply it)
-     (update: still WIP, for the time being observer is basically ignored)
+     optional (can be skipped or passed empty).
+     If observer is specified, then in every sort case result will be supplemented with observer's blacklist.
+     In case of sort by replies or feed, posts created by author muted by observer should not be visible,
+     In case of sort by blog, posts, payout or comments, posts created by authors muted by observer should be marked as gray.     
 }
