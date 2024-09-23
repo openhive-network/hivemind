@@ -227,3 +227,63 @@ BEGIN
 END
 $$
 ;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_missing_arg;
+CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.raise_missing_arg(_arg_name TEXT, _id JSON)
+RETURNS TEXT
+LANGUAGE 'plpgsql'
+AS
+$$
+BEGIN
+  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', format('missing a required argument: ''%s''', _arg_name), _id);
+END
+$$
+;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_extra_arg;
+CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.raise_extra_arg(_arg_name TEXT, _id JSON)
+RETURNS TEXT
+LANGUAGE 'plpgsql'
+AS
+$$
+BEGIN
+  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', format('got an unexpected keyword argument ''%s''', _arg_name), _id);
+END
+$$
+;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_int_exception;
+CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.raise_int_exception(_id JSON)
+RETURNS JSON
+LANGUAGE 'plpgsql'
+AS
+$$
+BEGIN
+  RETURN hivemind_postgrest_utilities.raise_exception(-32000, 'Parse Error:Couldn''t parse int64_t', NULL, _id, TRUE);
+END
+$$
+;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_account_exception;
+CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.raise_account_exception(_id JSON)
+RETURNS JSON
+LANGUAGE 'plpgsql'
+AS
+$$
+BEGIN
+  RETURN hivemind_postgrest_utilities.raise_exception(-32602,'Invalid parameters','invalid account name type', _id);
+END
+$$
+;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_invalid_array_exception;
+CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.raise_invalid_array_exception(_id JSON)
+RETURNS JSON
+LANGUAGE 'plpgsql'
+AS
+$$
+BEGIN
+  RETURN hivemind_postgrest_utilities.raise_exception(-32602,'Invalid parameters','too many positional arguments', _id);
+END
+$$
+;
