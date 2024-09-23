@@ -462,7 +462,7 @@ async def get_discussions_by_feed(
         valid_permlink(start_permlink, allow_empty=True),
         valid_limit(limit, 100, 20),
         valid_truncate(truncate_body),
-        observer,
+        valid_account(observer, allow_empty=True),
     )
 
 
