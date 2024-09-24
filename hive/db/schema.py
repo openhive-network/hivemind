@@ -528,7 +528,6 @@ def setup(db, admin_db):
 
     # create schema and aux functions
     admin_db.query(f'CREATE SCHEMA IF NOT EXISTS {SCHEMA_NAME} AUTHORIZATION {SCHEMA_OWNER_NAME};')
-    admin_db.query(f'CREATE SCHEMA IF NOT EXISTS hivemind_helpers AUTHORIZATION {SCHEMA_OWNER_NAME};')
     admin_db.query(f'CREATE SCHEMA IF NOT EXISTS hivemind_endpoints AUTHORIZATION {SCHEMA_OWNER_NAME};')
     admin_db.query(f'CREATE SCHEMA IF NOT EXISTS hivemind_postgrest_utilities AUTHORIZATION {SCHEMA_OWNER_NAME};')
 
@@ -550,22 +549,6 @@ def setup(db, admin_db):
         db.query(sql)
 
     context_detach(db=db)
-
-    sqls = [
-        f"DROP TYPE IF EXISTS hivemind_helpers.unit_type CASCADE",
-        f"CREATE TYPE hivemind_helpers.unit_type AS ENUM( 'HBD', 'HIVE', 'VESTS')",
-        f"""
-          CREATE TABLE IF NOT EXISTS hivemind_helpers.nai_map 
-          (
-            name hivemind_helpers.unit_type NOT NULL,
-            nai TEXT NOT NULL,
-            precision INT NOT NULL
-          )    
-        """,
-        f"INSERT INTO hivemind_helpers.nai_map VALUES ('HBD','@@000000013', 3), ('HIVE','@@000000021', 3), ('VESTS','@@000000037', 3)",
-    ]
-    for sql in sqls:
-        db.query(sql)
 
     # default rows
     sqls = [
