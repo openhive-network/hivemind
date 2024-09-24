@@ -54,7 +54,6 @@ class Blocks:
     _concurrent_flush = [
         ('Posts', Posts.flush, Posts),
         ('PostDataCache', PostDataCache.flush, PostDataCache),
-        ('Reputations', Reputations.flush, Reputations),
         ('Votes', Votes.flush, Votes),
         ('Follow', Follow.flush, Follow),
         ('Reblog', Reblog.flush, Reblog),
