@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.5
+# syntax=docker/dockerfile:1.7-labs
 # Base docker file having defined environment for build and run of a Hivemind instance.
 # Use scripts/ci/build_ci_base_image.sh to build a new version of the CI base image. It must be properly tagged and pushed to the container registry.
 
@@ -118,7 +118,7 @@ COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/haf/scripts/cr
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/haf/scripts/common.sh /home/hivemind/haf/scripts/common.sh
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/mock_data/block_data /home/hivemind/app/mock_data/block_data
 COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/mock_data/vops_data /home/hivemind/app/mock_data/vops_data
-COPY --from=builder --chown=hivemind:hivemind  /home/hivemind/app/reputation_tracker /home/hivemind/app/reputation_tracker
+COPY --from=builder --chown=hivemind:hivemind  --exclude=haf/* /home/hivemind/app/reputation_tracker /home/hivemind/app/reputation_tracker
 
 # JSON rpc service
 EXPOSE ${HTTP_PORT}
