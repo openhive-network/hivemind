@@ -4,6 +4,7 @@
   marks:
     - patterntest # should validate if community is passed as string
     - negative
+    - postgrest
 
   includes:
     - !include ../../common.yaml

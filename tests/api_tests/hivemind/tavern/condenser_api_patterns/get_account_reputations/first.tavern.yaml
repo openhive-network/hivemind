@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # fat node gives different answer (not only nonzero reputation but also json is generally different)
+    - postgrest
 
   includes:
     - !include ../../common.yaml

@@ -4,6 +4,7 @@
   marks:
     - patterntest
     - negative
+    - postgrest
 
   includes:
     - !include ../../common.yaml

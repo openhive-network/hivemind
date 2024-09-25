@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # original did not cut out record with given tag (see also no_payout_1)
+    - postgrest
 
   includes:
     - !include ../../common.yaml
