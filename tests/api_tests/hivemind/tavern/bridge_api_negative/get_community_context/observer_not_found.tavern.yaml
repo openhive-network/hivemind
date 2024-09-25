@@ -5,6 +5,7 @@
     - patterntest
     - negative
     - postgrest
+    - neverpostgrest
 
   includes:
     - !include ../../common.yaml
