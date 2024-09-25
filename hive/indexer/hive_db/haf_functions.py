@@ -25,29 +25,3 @@ def prepare_app_context(db: Db) -> None:
         is_forking = db.query_one(f"SELECT hive.app_is_forking('{SCHEMA_NAME}') as is_forking;")
         log.info(f"is_forking={is_forking}")
 
-
-
-def context_detach(db: Db) -> None:
-    is_attached = db.query_one(f"SELECT hive.app_context_are_attached(ARRAY['{SCHEMA_NAME}', '{REPTRACKER_SCHEMA_NAME}'])")
-
-    if not is_attached:
-        log.info("No attached context - detach skipped.")
-        return
-
-    log.info("Trying to detach app context...")
-    db.query_no_return(f"SELECT hive.app_context_detach(ARRAY['{SCHEMA_NAME}', '{REPTRACKER_SCHEMA_NAME}'])")
-    log.info("App context detaching done.")
-
-
-def context_attach(db: Db) -> None:
-    is_attached = db.query_one(f"SELECT hive.app_context_are_attached(ARRAY['{SCHEMA_NAME}', '{REPTRACKER_SCHEMA_NAME}'])")
-    if is_attached:
-        #Update last_active_at to avoid context being detached by auto-detacher prior to call to next_app_block.
-        #This is a workaround for current flaws in transaction management in hivemind, so it can be removed
-        #once transaction management is properly done (i.e. transactions should start/end when hivemind is consistent with a block)
-        db.query_no_return(f"SELECT hive.app_update_last_active_at('{SCHEMA_NAME}');")
-        log.info("Context already attached - attaching skipped, but last_active_at updated.")
-        return
-
-    db.query_no_return(f"CALL hive.appproc_context_attach(ARRAY['{SCHEMA_NAME}', '{REPTRACKER_SCHEMA_NAME}'])")
-    log.info("App context attaching done.")
