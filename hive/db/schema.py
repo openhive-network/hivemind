@@ -624,7 +624,6 @@ def setup(db, admin_db):
 
 def setup_runtime_code(db):
     sql_scripts = [
-        "install_preconditions.sql" # it must be first
         "utility_functions.sql",
         "hive_accounts_view.sql",
         "hive_accounts_info_view.sql",
