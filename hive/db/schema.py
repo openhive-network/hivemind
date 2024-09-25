@@ -14,7 +14,7 @@ from sqlalchemy.types import VARCHAR
 from hive.conf import SCHEMA_NAME, REPTRACKER_SCHEMA_NAME
 from hive.conf import SCHEMA_OWNER_NAME
 
-from hive.indexer.hive_db.haf_functions import context_attach, context_detach, prepare_app_context
+from hive.indexer.hive_db.haf_functions import prepare_app_context
 
 log = logging.getLogger(__name__)
 
@@ -548,7 +548,6 @@ def setup(db, admin_db):
         sql = f'ALTER TABLE {SCHEMA_NAME}.{table.name} INHERIT {SCHEMA_NAME}.{SCHEMA_NAME};'
         db.query(sql)
 
-    context_detach(db=db)
 
     # default rows
     sqls = [
@@ -622,8 +621,6 @@ def setup(db, admin_db):
         ON {SCHEMA_NAME}.hive_post_tags USING btree (tag_id, post_id DESC)
         """
     db.query_no_return(sql)
-
-    context_attach(db=db)
 
 def setup_runtime_code(db):
     sql_scripts = [
