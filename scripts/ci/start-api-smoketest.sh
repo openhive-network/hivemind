@@ -33,7 +33,15 @@ echo "Starting tests on hivemind server running on ${HIVEMIND_ADDRESS}:${HIVEMIN
 
 echo "Selected test group (if empty all will be executed): ${TEST_GROUP}"
 
-tox -e tavern -- \
-  -W ignore::pytest.PytestDeprecationWarning \
-  -n "${JOBS}" \
-  --junitxml=../../../../"${JUNITXML}" ${TEST_GROUP}
+if [ -v RUN_TESTS_WITH_MARKER ]; then
+  tox -e tavern -- \
+    -W ignore::pytest.PytestDeprecationWarning \
+    -n "${JOBS}" \
+    -m "${RUN_TESTS_WITH_MARKER}" \
+    --junitxml=../../../../"${JUNITXML}" ${TEST_GROUP}
+else
+  tox -e tavern -- \
+    -W ignore::pytest.PytestDeprecationWarning \
+    -n "${JOBS}" \
+    --junitxml=../../../../"${JUNITXML}" ${TEST_GROUP}
+fi
