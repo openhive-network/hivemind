@@ -436,6 +436,9 @@ sync:
             --community-start-block 4998000
       pushd +2
       ${WORKING_DIR}/app/ci/collect-db-stats.sh
+      ${WORKING_DIR}/app/reputation_tracker/scripts/process_blocks.sh \
+        --stop-at-block="${RUNNER_HIVEMIND_SYNC_MAX_BLOCK}" \
+        --postgres-url="${HAF_POSTGRES_URL}"
   after_script:
     - cp "$DATA_CACHE_HIVEMIND_DATADIR/$CI_JOB_NAME.log" "haf-$CI_JOB_NAME.log"  || true # in after_script, so it's done even if the job fails
   artifacts:
