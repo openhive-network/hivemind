@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # not comparable due to differences in pending payouts
+    - postgrest
 
   includes:
     - !include ../../common.yaml

@@ -4,6 +4,7 @@
   marks:
     - patterntest # original did not validate given page defining category
     - negative
+    - postgrest
 
   includes:
     - !include ../../common.yaml
