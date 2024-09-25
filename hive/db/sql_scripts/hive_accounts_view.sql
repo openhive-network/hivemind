@@ -10,6 +10,7 @@ END
 $BODY$;
 --slower than hive.accounts_view join
 
+
 DROP VIEW IF EXISTS hivemind_app.hive_account_reputations_view CASCADE;
 CREATE OR REPLACE VIEW hivemind_app.hive_account_reputations_view
 AS
