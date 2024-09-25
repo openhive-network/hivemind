@@ -426,6 +426,9 @@ sync:
       ${WORKING_DIR}/docker_entrypoint.sh setup \
             --database-admin-url="${HAF_ADMIN_POSTGRES_URL}" \
             --add-mocks=${ADD_MOCKS}
+      ${WORKING_DIR}/app/reputation_tracker/scripts/process_blocks.sh \
+        --stop-at-block=4999979 \
+        --postgres-url="${HAF_POSTGRES_URL}"
       ${WORKING_DIR}/docker_entrypoint.sh sync \
             --log-mask-sensitive-data \
             --pid-file hive_sync.pid \
