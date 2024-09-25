@@ -4,6 +4,7 @@
   marks:
     - patterntest # results slightly different from original because now collation is natural instead of old weird one
                   # fat node had slightly different implementation, did not accept arguments by name (.fatnode pattern made with positional call)
+    - postgrest
 
   includes:
     - !include ../../common.yaml

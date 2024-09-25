@@ -4,6 +4,7 @@
   marks:
     - patterntest # fat node pattern made with positional call
     - negative
+    - postgrest
 
   includes:
     - !include ../../common.yaml
