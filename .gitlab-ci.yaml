@@ -250,6 +250,21 @@ include:
         $RUNNER_PYTEST_WORKERS
     echo -e "\e[0Ksection_end:$(date +%s):api-benchmark\r\e[0K"
 
+
+.postgrest_negative-script: &postgrest_negative-script
+  - |
+    echo -e "\e[0Ksection_start:$(date +%s):postgrest_negative[collapsed=true]\r\e[0KRunning Postgrest negative smoketests..."
+    ./scripts/ci/start-api-smoketest.sh \
+        $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
+        $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
+        postgrest_negative/ \
+        postgrest_negative.xml \
+        $RUNNER_PYTEST_WORKERS \
+        "auto" \
+        ${COMPLETED_HIVE_API_METHODS:-}
+    echo -e "\e[0Ksection_end:$(date +%s):postgrest_negative\r\e[0K"
+
+
 .hivemind-serve-script: &hivemind-serve-script
   |
   ${DATA_CACHE_HAF}/await -t 5m http://haf-instance:8091 -- echo "HAF ready" 2>&1 | tee -i "$AWAIT_LOG_PATH" && \
@@ -637,6 +652,7 @@ e2e_benchmark_on_postgrest:
     - *follow_api_smoketest-script
     - *bridge_api_smoketest-script
     - *bridge_api_smoketest_negative-script
+    - *postgrest_negative-script
     - |
       BENCHMARK_AWAIT_URL="tcp://${RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}"
       echo "Waiting for Hivemind benchmark server to start running on ${BENCHMARK_AWAIT_URL}"
