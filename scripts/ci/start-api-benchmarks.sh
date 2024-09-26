@@ -32,7 +32,7 @@ for ((i = 0; i < ITERATIONS; i++)); do
   tox -e tavern-benchmark -- \
     -W ignore::pytest.PytestDeprecationWarning \
     -n "${JOBS}" \
-    "${@:6}"
+    "${@:5}"
   echo "Done!"
 done
 tox -e csv-report-parser -- "http://${HIVEMIND_ADDRESS}" "${HIVEMIND_PORT}" "${TAVERN_DIR}" "${TAVERN_DIR}" --time-threshold=2.0
