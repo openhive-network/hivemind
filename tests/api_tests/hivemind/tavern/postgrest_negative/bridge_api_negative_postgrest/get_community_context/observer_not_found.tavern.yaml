@@ -5,6 +5,7 @@
     - patterntest
     - negative
     - postgrest
+    - postgrest_exception
 
   includes:
     - !include ../../../common.yaml
