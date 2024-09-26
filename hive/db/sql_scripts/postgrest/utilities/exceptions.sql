@@ -5,29 +5,25 @@ LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
 $$
+DECLARE
+  error_json_result JSON;
 BEGIN
-  RETURN
-    REPLACE(error_json::TEXT, ' :', ':')
-  FROM json_build_object(
-    'jsonrpc', '2.0',
-    'error',
-    CASE WHEN _data IS NULL THEN
-      json_build_object(
-        'code', _code,
-        'message', _message
-      )
-    ELSE
-      json_build_object(
-        'code', _code,
-        'message', _message,
-        'data', _data
-      )
-    END,
-    'id', _id -- this should be updated to right number in hivemind_endpoints.home when exception is caught
-  ) error_json;
+  IF _data IS NULL THEN
+    error_json_result := json_build_object(
+      'code', _code,
+      'message', _message
+    );
+  ELSE
+    error_json_result := json_build_object(
+      'code', _code,
+      'message', _message,
+      'data', _data
+    );
+  END IF;
+  RAISE WARNING 'raise_exception:: %', error_json_result;
+  RAISE EXCEPTION '%', REPLACE(error_json_result::TEXT, ' :', ':');
 END
-$$
-;
+$$;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_method_not_found_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_method_not_found_exception(_method_name TEXT)

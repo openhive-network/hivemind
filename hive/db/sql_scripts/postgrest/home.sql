@@ -13,8 +13,6 @@ DECLARE
   __id JSON;
 
   __result JSONB;
-  __exception_message TEXT;
-  __exception JSONB;
 BEGIN
   __jsonrpc = (__request_data->>'jsonrpc');
   __method = (__request_data->>'method');
@@ -37,14 +35,11 @@ BEGIN
 
   EXCEPTION
     WHEN raise_exception THEN
-      __exception = SQLERRM;
-      __exception = jsonb_set(__exception, '{id}', __id::jsonb);
-      RETURN __exception ;
-    WHEN invalid_text_representation THEN
-      RETURN hivemind_postgrest_utilities.raise_uint_exception(__id);
-    WHEN OTHERS THEN
-      GET STACKED DIAGNOSTICS __exception_message = message_text;
-      RETURN hivemind_postgrest_utilities.raise_operation_param_exception(__exception_message, __id);
+      RETURN json_build_object(
+        'jsonrpc', '2.0',
+        'error', SQLERRM::JSON,
+        'id', __id
+      );
 END
 $$
 ;
