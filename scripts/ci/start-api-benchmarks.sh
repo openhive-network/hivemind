@@ -32,6 +32,7 @@ for ((i = 0; i < ITERATIONS; i++)); do
   tox -e tavern-benchmark -- \
     -W ignore::pytest.PytestDeprecationWarning \
     -n "${JOBS}" \
+    -m "not postgrest_exception" \
     "${@:5}"
   echo "Done!"
 done
