@@ -17,6 +17,10 @@ DO $$
 DECLARE
 __version INT;
 BEGIN
+    ASSERT EXISTS( SELECT 1 FROM information_schema.schemata WHERE schema_name = 'reptracker_app' )
+        , 'Reputation tracker with schema reptracker_app is not installed'
+    ;
+
   SELECT CURRENT_SETTING('server_version_num')::INT INTO __version;
 
   EXECUTE 'ALTER DATABASE '||current_database()||' SET join_collapse_limit TO 16';
