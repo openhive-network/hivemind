@@ -3,7 +3,7 @@
 
   marks:
     - patterntest 
-    - postgrest
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

@@ -4,7 +4,7 @@
   marks:
     - patterntest # bug in old HM
     - negative
-    - postgrest
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
