@@ -5,6 +5,7 @@
     - patterntest
     - negative
     - postgrest_ready
+    - postgrest_ignore
 
   includes:
     - !include ../../common.yaml
