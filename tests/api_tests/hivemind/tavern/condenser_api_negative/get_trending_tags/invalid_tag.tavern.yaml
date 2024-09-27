@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # see no_payout_1
-    - postgrest
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

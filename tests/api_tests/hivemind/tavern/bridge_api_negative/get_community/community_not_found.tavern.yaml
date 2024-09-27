@@ -4,7 +4,7 @@
   marks:
     - patterntest
     - negative
-    - postgrest
+    - postgrest_ready
     - neverpostgrest
 
   includes:
