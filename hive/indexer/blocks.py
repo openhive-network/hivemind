@@ -7,7 +7,7 @@ from pathlib import Path
 from time import perf_counter
 from typing import Tuple
 
-from hive.conf import Conf, SCHEMA_NAME, REPTRACKER_SCHEMA_NAME, ONE_WEEK_IN_BLOCKS
+from hive.conf import Conf, SCHEMA_NAME, ONE_WEEK_IN_BLOCKS
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 from hive.indexer.db_adapter_holder import DbAdapterHolder
