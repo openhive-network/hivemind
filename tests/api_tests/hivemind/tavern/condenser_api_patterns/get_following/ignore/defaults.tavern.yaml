@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # original didn't allow skipping params (.orig created with all params passed)
+    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml

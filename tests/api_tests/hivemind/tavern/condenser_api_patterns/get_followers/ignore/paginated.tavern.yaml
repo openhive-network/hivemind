@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # original always included page defining account in results (and order of follows created in the same time was basically random), that was corrected
+    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml
