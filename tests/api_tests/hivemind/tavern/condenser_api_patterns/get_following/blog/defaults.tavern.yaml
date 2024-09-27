@@ -4,6 +4,7 @@
   marks:
     - patterntest # original didn't allow skipping params (.orig created with all params passed), also
                   # order of follows created in the same time was basically random, now newer is always first
+    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml
