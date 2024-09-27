@@ -26,7 +26,7 @@ POSTGRES_ADMIN_URL=${POSTGRES_ADMIN_URL:-}
 POSTGREST_SERVER=0
 INSTALL_APP=0
 DO_SCHEMA_UPGRADE=0
-SKIP_REPTRACKER=0
+WITH_REPTRACKER=0
 REPTRACKER_SCHEMA=reptracker_app
 reptracker_dir="$SCRIPT_DIR/app/reputation_tracker"
 
@@ -60,8 +60,8 @@ while [ $# -gt 0 ]; do
         INSTALL_APP=1
         DO_SCHEMA_UPGRADE=1
         ;;
-    --only-hivemind)
-        SKIP_REPTRACKER=1
+    --with-reptracker)
+        WITH_REPTRACKER=1
         ;;
     *)
         HIVEMIND_ARGS+=("$1")
@@ -115,7 +115,7 @@ setup() {
   cd /home/hivemind/app
   ./setup_postgres.sh --postgres-url="${POSTGRES_ADMIN_URL}"
 
-  if [ "${SKIP_REPTRACKER}" -eq 0 ]; then
+  if [ "${WITH_REPTRACKER}" -eq 1 ]; then
     # if we force to install rep tracker then we setup it as non-forking app
     # if we do not install it together with hivemind, then we get what we have forking or not
     pushd "$reptracker_dir"
@@ -147,7 +147,7 @@ uninstall_app() {
   cd /home/hivemind/app
   ./uninstall_app.sh --postgres-url="${POSTGRES_ADMIN_URL}"
 
-  if [ "${SKIP_REPTRACKER}" -eq 0 ]; then
+  if [ "${WITH_REPTRACKER}" -eq 1 ]; then
     "${SCRIPT_DIR}/app/reputation_tracker/scripts/uninstall_app.sh" --postgres-url="${POSTGRES_ADMIN_URL}"
   fi
 
