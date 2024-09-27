@@ -67,6 +67,7 @@ class DbState:
             db_setup_admin.close()
             log.info("Database schema upgrade finished")
 
+        db_setup_owner.query_no_return( f"SET SEARCH_PATH TO {REPTRACKER_SCHEMA_NAME}" )
         setup_runtime_code(db=db_setup_owner)
 
         db_setup_owner.close()

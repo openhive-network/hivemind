@@ -11,7 +11,7 @@ from sqlalchemy.types import SMALLINT
 from sqlalchemy.types import TEXT
 from sqlalchemy.types import VARCHAR
 
-from hive.conf import SCHEMA_NAME, REPTRACKER_SCHEMA_NAME
+from hive.conf import SCHEMA_NAME
 from hive.conf import SCHEMA_OWNER_NAME
 
 from hive.indexer.hive_db.haf_functions import prepare_app_context

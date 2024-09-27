@@ -13,7 +13,7 @@ from hive.utils.stats import DbStats
 log = logging.getLogger(__name__)
 
 SCHEMA_NAME: Final[str] = 'hivemind_app'
-REPTRACKER_SCHEMA_NAME: Final[str] = 'reptracker_app'
+REPTRACKER_SCHEMA_NAME = 'reptracker_app'
 SCHEMA_OWNER_NAME: Final[str] = 'hivemind'
 ONE_WEEK_IN_BLOCKS = 7 * 24 * 1200
 
@@ -146,6 +146,14 @@ class Conf:
             help='Hivemind will listen on first available port from this range',
         )
 
+        add(
+            '--reptracker-schema-name',
+            type=str,
+            env_var='REPTRACKER_SCHEMA_NAME',
+            help='reputation tracker schema name',
+            default='reptracker_app',
+        )
+
         # needed for e.g. tests - other args may be present
         args = parser.parse_args() if strict else parser.parse_known_args()[0]
 
@@ -187,6 +195,8 @@ class Conf:
         else:
             root.info("Used command line args: %s", " ".join(argv[1:]))
 
+        global REPTRACKER_SCHEMA_NAME
+        REPTRACKER_SCHEMA_NAME = self.get('reptracker_schema_name')
         # uncomment for full list of program args
         # args_list = ["--" + k + " " + str(v) for k,v in vars(args).items()]
         # root.info("Full command line args: %s", " ".join(args_list))

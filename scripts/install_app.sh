@@ -28,6 +28,8 @@ print_help () {
 POSTGRES_HOST="/var/run/postgresql"
 POSTGRES_PORT=5432
 POSTGRES_URL=""
+REPTRACKER_SCHEMA="reptracker_app"
+
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -39,6 +41,9 @@ while [ $# -gt 0 ]; do
         ;;
     --postgres-url=*)
         POSTGRES_URL="${1#*=}"
+        ;;
+    --reptracker-schema-name=*)
+        REPTRACKER_SCHEMA="${1#*=}"
         ;;
     --help)
         print_help
@@ -66,8 +71,8 @@ else
   POSTGRES_ACCESS=$POSTGRES_URL
 fi
 
-psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -f "${SCRIPTPATH}/install_app.sql"
+psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -v REPTRACKER_SCHEMA=${REPTRACKER_SCHEMA}  -f "${SCRIPTPATH}/install_app.sql"
 
 echo "Grant permissions to reptracker schema."
-psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -c "GRANT reptracker_owner TO hivemind;"
+psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -v REPTRACKER_SCHEMA=${REPTRACKER_SCHEMA} -c "GRANT reptracker_owner TO hivemind;"
 psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -c "GRANT reptracker_user TO hivemind;"
