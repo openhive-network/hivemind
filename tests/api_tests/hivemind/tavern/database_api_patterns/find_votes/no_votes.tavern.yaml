@@ -3,6 +3,7 @@ test_name: Hivemind
 
 marks:
   - patterntest
+  - postgrest_ready
 
 includes:
   - !include ../../common.yaml
