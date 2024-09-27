@@ -7,7 +7,7 @@ import time
 from time import perf_counter as perf
 from typing import Iterable, Tuple
 
-from hive.conf import Conf, SCHEMA_NAME, REPTRACKER_SCHEMA_NAME, ONE_WEEK_IN_BLOCKS
+from hive.conf import Conf, SCHEMA_NAME
 from hive.db.adapter import Db
 from hive.db.db_state import DbState
 from hive.indexer.accounts import Accounts

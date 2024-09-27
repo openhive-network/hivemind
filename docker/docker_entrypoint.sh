@@ -92,10 +92,10 @@ run_hive() {
   source /home/hivemind/.hivemind-venv/bin/activate
   if [[ -n "$LOG_PATH" ]]; then
     log "run_hive" "Starting Hivemind with log $LOG_PATH"
-    exec hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
+    exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name=${REPTRACKER_SCHEMA} --database-url="${db_url}" > >( tee -i "$LOG_PATH" ) 2>&1
   else
     log "run_hive" "Starting Hivemind..."
-    exec hive "${HIVEMIND_ARGS[@]}" --database-url="${db_url}"
+    exec hive "${HIVEMIND_ARGS[@]}" --reptracker-schema-name=${REPTRACKER_SCHEMA} --database-url="${db_url}"
   fi
 }
 
@@ -108,11 +108,11 @@ setup() {
     # if we force to install rep tracker then we setup it as non-forking app
     # if we do not install it together with hivemind, then we get what we have forking or not
     pushd "$reptracker_dir"
-    ./scripts/install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}" --schema="$REPTRACKER_SCHEMA" --is_forking="false" 
+    ./scripts/install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}" --schema="$REPTRACKER_SCHEMA" --is_forking="false"
     popd
   fi
 
-  ./install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}"
+  ./install_app.sh --reptracker-schema-name=${REPTRACKER_SCHEMA} --postgres-url="${POSTGRES_ADMIN_URL}"
   
   if [[ "$ADD_MOCKS" == "true" ]]; then
     log "setup" "Adding mocks to database..."
@@ -137,7 +137,7 @@ uninstall_app() {
   ./uninstall_app.sh --postgres-url="${POSTGRES_ADMIN_URL}"
 
   if [ "${WITH_REPTRACKER}" -eq 1 ]; then
-    "${SCRIPT_DIR}/app/reputation_tracker/scripts/uninstall_app.sh" --postgres-url="${POSTGRES_ADMIN_URL}"
+    "${SCRIPT_DIR}/app/reputation_tracker/scripts/uninstall_app.sh" --schema=${REPTRACKER_SCHEMA} --postgres-url="${POSTGRES_ADMIN_URL}"
   fi
 
 }
