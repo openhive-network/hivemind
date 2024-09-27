@@ -4,6 +4,7 @@ test_name: Hivemind
 marks:
   - patterntest # fat node didn't care about extra params
   - negative
+  - postgrest_ready
 
 includes:
   - !include ../../common.yaml
