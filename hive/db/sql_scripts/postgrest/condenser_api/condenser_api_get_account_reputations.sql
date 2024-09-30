@@ -3,6 +3,7 @@ DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_account_reputations
 CREATE FUNCTION hivemind_endpoints.condenser_api_get_account_reputations(IN _json_is_object BOOLEAN, IN _method_is_call BOOLEAN, IN _params JSON, IN _fat_node_style BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
+STABLE
 AS
 $$
 DECLARE
