@@ -1,0 +1,129 @@
+[
+  {
+    "blog": "sovereignbtc",
+    "comment": {
+      "active_votes": [
+        {
+          "percent": "10000",
+          "reputation": 1111594060096,
+          "rshares": 3916108088,
+          "voter": "daycrypter"
+        },
+        {
+          "percent": "10000",
+          "reputation": 9389887938261,
+          "rshares": 9004615518,
+          "voter": "kennyskitchen"
+        },
+        {
+          "percent": "10000",
+          "reputation": 6105344565899,
+          "rshares": 12833102717,
+          "voter": "primus"
+        },
+        {
+          "percent": "10000",
+          "reputation": 1959446497877,
+          "rshares": 4352042391,
+          "voter": "dennygalindo"
+        },
+        {
+          "percent": "10000",
+          "reputation": 5451039980643,
+          "rshares": 268679076,
+          "voter": "steemswede"
+        },
+        {
+          "percent": "10000",
+          "reputation": 1220081355,
+          "rshares": 248206793,
+          "voter": "ardina"
+        },
+        {
+          "percent": "10000",
+          "reputation": 399687388945,
+          "rshares": 253302943,
+          "voter": "fintekneeks"
+        },
+        {
+          "percent": "10000",
+          "reputation": 884407671803,
+          "rshares": 822031024,
+          "voter": "sovereignbtc"
+        },
+        {
+          "percent": "10000",
+          "reputation": 0,
+          "rshares": 62016239,
+          "voter": "muizianer"
+        },
+        {
+          "percent": "10000",
+          "reputation": 7436429161346,
+          "rshares": 11225025179,
+          "voter": "mione"
+        },
+        {
+          "percent": "10000",
+          "reputation": 158672055554,
+          "rshares": 58217540,
+          "voter": "pollina"
+        },
+        {
+          "percent": "10000",
+          "reputation": 6300363201553,
+          "rshares": 12463016379,
+          "voter": "mandibil"
+        },
+        {
+          "percent": "10000",
+          "reputation": 66311335718,
+          "rshares": 108822425815,
+          "voter": "roy2016"
+        },
+        {
+          "percent": "10000",
+          "reputation": 1502200909130,
+          "rshares": 111262845,
+          "voter": "ola1"
+        },
+        {
+          "percent": "10000",
+          "reputation": 163980508,
+          "rshares": 155301930,
+          "voter": "not4love"
+        }
+      ],
+      "author": "sovereignbtc",
+      "author_reputation": 884407671803,
+      "beneficiaries": [],
+      "body": "![image of business with dash](https://cdn.shopify.com/s/files/1/0961/9054/files/Screen_Shot_2016-08-31_at_12.12.02_AM.png?2440510524532980584)\n\nHey there, thanks for following my Dash to Adoption budget proposal being submitted to the Dash Masternode System.\n\nDash is a privacy-center cryptocurrency with instant transactions and a decentralized and autonomous governance structure. \u00a0For more background on Dash and my proposal, see my first post here: [The Future of Business: Contracting Directly with the Dash Protocol Part 1](https://steemit.com/bitcoin/@sovereignbtc/the-future-of-business-contracting-directly-with-the-dash-protocol-follow-my-progress)\n\nWe left off with me getting ready to transmit my proposal to the Dash Network. \u00a0Let\u2019s get on with it!\n\n**Step. 3 Prepare Your Proposal Using Dash Central**\n\nAfter submitting your pre-proposal to the Dash Forum and receiving adequate feedback, it\u2019s time to broadcast your proposal to the Dash Network. \u00a0To do that we will be using two tools, the Dash Core Wallet and the website [DashCentral.org](http://dashcentral.org)\n\nGo to [DashCentral.org](http://dashcentral.org) and setup a free user account\n\nClick on \u201cBudget\u201d at the top of the sidebar and then click \u201cCreate Proposal\u201d\n\nEnter a proposal name. \u00a0\n*NOTE: name cannot have any spaces. \u00a0Use a dash in place of spaces*\n\nEnter the block you would like to be paid out on. \u00a0\n*NOTE: it i recommended that you submit your proposal at least two weeks in advance of the block you want to be paid on so as to allow for adequate discussion*\n\nEnter the amount of Dash you want to receive \n*NOTE: if you want to be paid over the course of several months, choose the amount you want for each month. \u00a0For example, if you want to be paid 1000 Dash over the course of three months, you would enter 333.33 for this section*\n\nEnter the payment cycle you would like to be paid out in. \u00a0If only one time, choose \u201cone-time payment\u201d. \u00a0If more months than one, choose accordingly. \u00a0\n\nFinally, enter the Dash address you want to use to receive payment on. \u00a0NOTE: This address needs to have 5 Dash and enough for a transaction fee. \u00a0It costs 5 Dash to submit a proposal to the Dash Network. \u00a0This is to prevent spam.\n\nNow we are ready to use Dash Central to generate the commands we will broadcast through the Core Client. \u00a0To do this, click on \u201cGenerate Commands\u201d\n\n**Step 4: Sending Commands with QT**\n\nYou will then see a couple of commands. \u00a0The first of which prepares your proposal for submission. \n\n\u00a0It looks like this:\nmnbudget prepare Dash-to-Adoption www.dashcentral.org/p/Dash-to-Adoption 3 531712 Xd4vBLpKrcqSbKui4Pj7LyrmqL25iCN9L5 333.33\n\nTo send your prepare submission go to Tools in the menu bar, then debug console. \n\nFrom the debug console, open your wallet by entering the following:\n\"walletpassphrase INSERTYOURPASSPHRASEHERE 60\u201d\n\nNow that your wallet has been opened for transactions, send the prepare command generated through Dash Central.  \n\nCopy and save the hash that is given to you after submission.\n\nNext you wait for six confirmations of the 5 Dash pulled from your address through execution of the prepare command.\n\nOnce six confirmations have gone through, enter the submit command which will look likes the one below.  Be sure to copy and paste the hash you recorded earlier in place of REPLACE_WITH_COLLATERAL_HASH\n\nmnbudget submit Dash-to-Adoption www.dashcentral.org/p/Dash-to-Adoption 3 531712 Xd4vBLpKrcqSbKui4Pj7LyrmqL25iCN9L5 333.33 REPLACE_WITH_COLLATERAL_HASH\n\nOnce you have sent the submit command, in around 15 to 30 minutes, your proposal will be ready to claim on DashCentral.org\n\n**Step 5: Claiming and Editing Your Proposal**\n\nOnce your proposal appears in the budget proposal list on Dash Central, here is how you claim it.  \n\nFirst, you must be logged in to your Dash Central Account.  \n\nLocate the proposal and click on claim proposal.  \n\nYou will now be given the following instructions to verify you are the rightful owner of the proposal.  \n\nClick on \"File\" -> \"Sign message\"\nEnter address: \"XpFgZ7h3WQpZWR8sERtK1zsBMU2PvmH8yM\"\nEnter message to sign: \"dashcentral-proposal-116\" (without quotes or spaces!)\nPress the button \"Sign\"\n\nYou have now successfully claimed your proposal!  \n\nNext step is to edit your proposal.  Include a title and copy and paste your proposal over from your pre-proposal submission. \n\n*Note: Write that this is a cross post from Dash Forum and link to your pre-proposal. * \n\n*Note: Copy the manual vote command for masternodes from Dash Central and paste it at the bottom of your proposal.*\n\n**Step 6: Lobby Masternodes and Respond to Feedback**\n\nNow all thats left to do is lobby your heart out.  Respond to questions that may rise on Dash Central.  Don\u2019t forget to check back on your pre-proposal submission in the Dash Forums. \n\nHere are three places you can go to stir up some support for your newly submitted proposal:\n\nSlack invitation link: [http://dashchat.co](http://dashchat.co)\nSubreddit: [http://reddit.com/r/dashpay](http://reddit.com/r/dashpay)\nForum: [http://dash.org/forum](http://dash.org/forum)\n\nI hope you\u2019ll follow my proposal, see how it\u2019s doing and check back with us in our third installment of The Future of Business: Contracting Directly with the Dash Protocol.\n\nFollow my proposal here: [https://www.dashcentral.org/p/Dash-to-Adoption](https://www.dashcentral.org/p/Dash-to-Adoption)\n\nIn Part 3, we will share the exciting conclusion of whether or not my proposal was successful or not.  We will also share more tips we have picked up after submitting two proposals to the Dash Network. \n\nPeace and love!\n\nJohn Bush",
+      "body_length": 5609,
+      "cashout_time": "2016-09-07T07:15:30",
+      "category": "business",
+      "children": 0,
+      "created": "2016-08-31T07:15:30",
+      "curator_payout_value": "0.000 HBD",
+      "depth": 0,
+      "json_metadata": "{\"tags\":[\"business\",\"dash\",\"anarchism\",\"bitcoin\"],\"image\":[\"https://cdn.shopify.com/s/files/1/0961/9054/files/Screen_Shot_2016-08-31_at_12.12.02_AM.png?2440510524532980584\"],\"links\":[\"https://steemit.com/bitcoin/@sovereignbtc/the-future-of-business-contracting-directly-with-the-dash-protocol-follow-my-progress\",\"http://dashcentral.org\",\"http://dashchat.co\",\"http://reddit.com/r/dashpay\",\"http://dash.org/forum\",\"https://www.dashcentral.org/p/Dash-to-Adoption\"]}",
+      "last_payout": "1969-12-31T23:59:59",
+      "last_update": "2016-08-31T07:15:30",
+      "max_accepted_payout": "1000000.000 HBD",
+      "net_rshares": 164595354477,
+      "parent_author": "",
+      "parent_permlink": "business",
+      "pending_payout_value": "0.070 HBD",
+      "percent_hbd": 10000,
+      "permlink": "the-future-of-business-contracting-directly-with-the-dash-protocol-part-2",
+      "post_id": 1067614,
+      "promoted": "0.000 HBD",
+      "replies": [],
+      "root_title": "The Future of Business: Contracting Directly with the Dash Protocol Part 2",
+      "title": "The Future of Business: Contracting Directly with the Dash Protocol Part 2",
+      "total_payout_value": "0.000 HBD",
+      "url": "/business/@sovereignbtc/the-future-of-business-contracting-directly-with-the-dash-protocol-part-2"
+    },
+    "entry_id": 9,
+    "reblogged_on": "1970-01-01T00:00:00"
+  }
+]
