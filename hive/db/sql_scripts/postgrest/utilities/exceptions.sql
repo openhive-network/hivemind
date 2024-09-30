@@ -117,18 +117,14 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_invalid_parameters_array_length_exception;
-CREATE FUNCTION hivemind_postgrest_utilities.raise_invalid_parameters_array_length_exception(in _expected_count INTEGER, in _parameters_count INTEGER, in _method_is_call BOOLEAN )
+CREATE FUNCTION hivemind_postgrest_utilities.raise_invalid_parameters_array_length_exception(in _expected_count INTEGER, in _parameters_count INTEGER)
 RETURNS JSON
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
 $$
 BEGIN
-  IF NOT _method_is_call AND _expected_count < _parameters_count THEN
-    RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', 'too many positional arguments');
-  ELSE
-    RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters','expected ' || _expected_count || ' params');
-  END IF;
+  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters','expected ' || _expected_count || ' params');
 END
 $$
 ;

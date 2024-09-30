@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_trending_tags;
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_trending_tags(IN _json_is_object BOOLEAN, IN _method_is_call BOOLEAN, IN _params JSON)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_trending_tags(IN _json_is_object BOOLEAN, IN _params JSON)
 RETURNS JSON
 LANGUAGE 'plpgsql'
 STABLE
@@ -11,7 +11,7 @@ _limit INT;
 _category_id INT;
 _payout_limit hivemind_app.hive_posts.payout%TYPE;
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _method_is_call, _params, '{"start_tag","limit"}', '{"string","number"}');
+  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"start_tag","limit"}', '{"string","number"}');
   _start_tag = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'start_tag', 0, False);
   _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'limit', 1, False);
   _start_tag = hivemind_postgrest_utilities.valid_tag(_start_tag, True);
