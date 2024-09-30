@@ -721,6 +721,7 @@ def setup_runtime_code(db):
         "postgrest/utilities/dispatch.sql",
         "postgrest/utilities/get_api_method.sql",
         "postgrest/utilities/check_general_json_format.sql",
+        "postgrest/utilities/valid_offset.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
