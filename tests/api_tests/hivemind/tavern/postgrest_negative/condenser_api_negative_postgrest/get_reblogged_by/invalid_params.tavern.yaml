@@ -4,10 +4,11 @@
   marks:
     - patterntest
     - negative
-    - postgrest_ignore
+    - postgrest_ready
+    - postgrest_exception
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
