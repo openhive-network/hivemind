@@ -28,7 +28,6 @@ BEGIN
                                                     __result->>'api_type'::TEXT,
                                                     __result->>'method_type'::TEXT,
                                                     (__result->>'json_with_params_is_object')::BOOLEAN,
-                                                    (__result->>'method_is_call')::BOOLEAN,
                                                     (__result->>'params')::JSON
     )
   );

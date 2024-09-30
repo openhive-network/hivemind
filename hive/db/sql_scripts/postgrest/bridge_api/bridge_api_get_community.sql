@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_community;
-CREATE FUNCTION hivemind_endpoints.bridge_api_get_community(IN _json_is_object BOOLEAN, IN _method_is_call BOOLEAN, IN _params JSON)
+CREATE FUNCTION hivemind_endpoints.bridge_api_get_community(IN _json_is_object BOOLEAN, IN _params JSON)
 RETURNS JSON
 LANGUAGE 'plpgsql'
 STABLE
@@ -12,7 +12,7 @@ BEGIN
   -- additional positional arguments
   IF json_typeof(_params) = 'array' THEN
     IF json_array_length(_params) > 2 THEN
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_parameters_array_length_exception(2, json_array_length(_params), _method_is_call);
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_parameters_array_length_exception(2, json_array_length(_params));
     END IF;
   END IF;
 
@@ -27,7 +27,7 @@ BEGIN
     _observer = hivemind_postgrest_utilities.valid_observer(_observer);
   END IF;
 
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _method_is_call, _params, '{"name","observer"}', '{"string", "string"}');
+  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"name","observer"}', '{"string", "string"}');
 
   RETURN (
     SELECT to_json(row) FROM (
