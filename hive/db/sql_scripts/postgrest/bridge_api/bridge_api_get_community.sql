@@ -2,6 +2,7 @@ DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_community;
 CREATE FUNCTION hivemind_endpoints.bridge_api_get_community(IN _json_is_object BOOLEAN, IN _method_is_call BOOLEAN, IN _params JSON)
 RETURNS JSON
 LANGUAGE 'plpgsql'
+STABLE
 AS
 $$
 DECLARE
