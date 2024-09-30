@@ -723,6 +723,8 @@ def setup_runtime_code(db):
         "postgrest/utilities/check_general_json_format.sql",
         "postgrest/utilities/valid_offset.sql",
         "postgrest/utilities/list_votes.sql",
+        "postgrest/utilities/assets_operations.sql",
+        "postgrest/utilities/create_condenser_post_object.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
