@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_reblogged_by;
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_reblogged_by(IN _json_is_object BOOLEAN, IN _method_is_call BOOLEAN, IN _params JSON)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_reblogged_by(IN _json_is_object BOOLEAN, IN _params JSON)
 RETURNS JSON
 LANGUAGE 'plpgsql'
 STABLE
@@ -11,7 +11,7 @@ DECLARE
   _post_id INT;
   _account_id INT;
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _method_is_call, _params, '{"author","permlink"}','{"string","string"}');
+  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"author","permlink"}','{"string","string"}');
   _author = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'author', 0, True);
   _permlink = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'permlink', 1, True);
   _account_id = hivemind_postgrest_utilities.find_account_id( hivemind_postgrest_utilities.valid_account(_author, False), True );
