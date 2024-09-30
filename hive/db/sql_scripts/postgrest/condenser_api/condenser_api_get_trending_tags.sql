@@ -2,6 +2,7 @@ DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_trending_tags;
 CREATE FUNCTION hivemind_endpoints.condenser_api_get_trending_tags(IN _json_is_object BOOLEAN, IN _method_is_call BOOLEAN, IN _params JSON)
 RETURNS JSON
 LANGUAGE 'plpgsql'
+STABLE
 AS
 $$
 DECLARE
