@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # one newest post (ABW: a bug but would most likely break apps if fixed; should return oldest post)
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

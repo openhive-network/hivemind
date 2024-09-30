@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # oldest posts in blog - call with self-set limit
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

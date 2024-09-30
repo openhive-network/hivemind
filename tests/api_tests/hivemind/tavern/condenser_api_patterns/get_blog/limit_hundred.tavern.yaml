@@ -4,6 +4,7 @@
   marks:
     - patterntest # original had trouble with the call, when limit exceeded number of post entries error was returned
                   # see https://gitlab.syncad.com/hive/hivemind/-/issues/53 - pattern/original prepared with limit 1
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

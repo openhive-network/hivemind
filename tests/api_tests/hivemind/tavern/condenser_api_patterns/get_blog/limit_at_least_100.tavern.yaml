@@ -4,6 +4,7 @@
   marks:
     - patterntest # original code didn't correct limit when offset was auto selected (.orig created with limit 1), it was corrected in new version
                   # (effectively limit becomes 1 because there is just one blog entry)
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
