@@ -4,6 +4,7 @@
   marks:
     - patterntest # old didn't correct limit when it was too big, also there was less reblogs due to some bug (.orig prepared with max valid limit 4)
                   # finally time of reblog was incorrectly taken from post, now it is time when reblog happened
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
