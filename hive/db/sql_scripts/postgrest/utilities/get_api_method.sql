@@ -65,7 +65,7 @@ BEGIN
     WHEN __method_type = 'get_following' THEN
       result := hivemind_endpoints.condenser_api_get_following(__json_with_params_is_object, __params)::JSONB;
     ELSE
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method);
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
   END CASE;
   RETURN result;
 END;
@@ -88,7 +88,7 @@ BEGIN
     WHEN __method_type = 'get_community_context' THEN
       result := hivemind_endpoints.bridge_api_get_community_context(__json_with_params_is_object, __params)::JSONB;
     ELSE
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method);
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
   END CASE;
   RETURN result;
 END;
