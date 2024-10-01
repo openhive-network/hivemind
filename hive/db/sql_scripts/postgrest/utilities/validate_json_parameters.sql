@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.validate_json_parameters;
-CREATE FUNCTION hivemind_postgrest_utilities.validate_json_parameters(IN _json_is_object BOOLEAN, IN _params JSON, IN _expected_params_names TEXT[], IN _expected_params_types TEXT[])
+CREATE FUNCTION hivemind_postgrest_utilities.validate_json_parameters(IN _json_is_object BOOLEAN, IN _params JSON, IN _expected_params_names TEXT[], IN _expected_params_types TEXT[], IN _min_parameters_array_len INT DEFAULT NULL)
 RETURNS JSON
 LANGUAGE 'plpgsql'
 IMMUTABLE
@@ -36,7 +36,8 @@ BEGIN
     END LOOP;
   ELSE
     expected_array_len = CARDINALITY(_expected_params_types);
-    IF json_array_length(_params) <> expected_array_len THEN
+    IF (_min_parameters_array_len IS NOT NULL AND (_min_parameters_array_len > json_array_length(_params) OR json_array_length(_params) < json_array_length(_params)))
+      OR (_min_parameters_array_len IS NULL AND json_array_length(_params) <> expected_array_len) THEN
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_parameters_array_length_exception(expected_array_len, json_array_length(_params));
     ELSE
       FOR array_idx IN 1..expected_array_len-1 LOOP
