@@ -25,7 +25,14 @@ FOR _vote IN SELECT * FROM jsonb_array_elements(_votes) LOOP
   ELSIF _presentation_mode = 'bridge_api' THEN
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('create_votes_json_array for bridge_api not implemented');
   ELSIF _presentation_mode = 'active_votes' THEN
-    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('create_votes_json_array for active_votes not implemented');
+    _result = COALESCE(_result, '[]'::jsonb) || json_build_object(
+      'percent', _vote->'percent',
+      'reputation', _vote->'reputation',
+      'rshares', _vote->'rshares',
+      'voter', _vote->>'voter',
+      'time', hivemind_postgrest_utilities.json_date(to_timestamp(_vote->>'last_update', 'YYYY-MM-DD"T"HH24:MI:SS')),
+      'weight', _vote->'weight'
+    )::jsonb;
   ELSE
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('create_votes_json_array - unspecified vote presentation mode');
   END IF;
