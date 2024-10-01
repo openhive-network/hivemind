@@ -6,17 +6,10 @@ STABLE
 AS
 $$
 DECLARE
-  _author TEXT;
-  _permlink TEXT;
+  _vote_args hivemind_postgrest_utilities.vote_arguments;
   _result JSON;
 BEGIN
-  _author = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'author', 0, True);
-  _author = hivemind_postgrest_utilities.valid_account(_author, False);
-
-  _permlink = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'permlink', 1, True);
-  _permlink = hivemind_postgrest_utilities.valid_permlink(_permlink, False);
-
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"author","permlink"}', '{"string","string"}');
+  _vote_args := hivemind_postgrest_utilities.get_validated_vote_arguments(_params, _json_is_object);
 
   SELECT jsonb_build_object(
     'votes', COALESCE(jsonb_agg(
@@ -33,7 +26,7 @@ BEGIN
       )), '[]'::jsonb)
   ) AS _result INTO _result
 
-  FROM (SELECT * FROM hivemind_app.find_votes(_author, _permlink, 1000)) AS votes;
+  FROM (SELECT * FROM hivemind_app.find_votes(_vote_args.author, _vote_args.permlink, 1000)) AS votes;
 
   RETURN _result;
 END;
