@@ -23,6 +23,10 @@ BEGIN
       result := hivemind_endpoints.condenser_api_get_blog(__json_with_params_is_object, __params, /* _get_entries */ False)::JSONB;
     WHEN __method_type = 'get_blog_entries' THEN
       result := hivemind_endpoints.condenser_api_get_blog(__json_with_params_is_object, __params, /* _get_entries */ True)::JSONB;
+    WHEN __method_type = 'get_content' THEN
+      result := hivemind_endpoints.condenser_api_get_content(__json_with_params_is_object, __params, /* _get_replies */ False)::JSONB;
+    WHEN __method_type = 'get_content_replies' THEN
+      result := hivemind_endpoints.condenser_api_get_content(__json_with_params_is_object, __params, /* _get_replies */ True)::JSONB;
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
   END CASE;
