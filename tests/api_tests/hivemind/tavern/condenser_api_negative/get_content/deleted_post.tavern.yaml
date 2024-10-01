@@ -4,6 +4,7 @@
   marks:
     - patterntest # bug in old HM and empty post in fat node
     - negative
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
