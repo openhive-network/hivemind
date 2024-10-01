@@ -636,7 +636,7 @@ e2e_benchmark_on_postgrest:
     COMPLETED_CONDENSER_API_METHODS: "get_account_reputations,get_follow_count,get_reblogged_by,get_trending_tags,get_blog,get_blog_entries,get_content,get_content_replies"
     # COMPLETED_DATABASE_API_METHODS: ""
     COMPLETED_FOLLOW_API_METHODS: "get_account_reputations"
-    # COMPLETED_TAGS_API_METHODS: ""
+    COMPLETED_TAGS_API_METHODS: "get_discussion,get_content_replies"
     # COMPLETED_HIVE_API_METHODS: ""
   script:
     - |
@@ -650,6 +650,7 @@ e2e_benchmark_on_postgrest:
     - *follow_api_smoketest-script
     - *bridge_api_smoketest-script
     - *bridge_api_smoketest_negative-script
+    - *tags_api_smoketest_negative-script
     - *postgrest_negative-script
     - |
       BENCHMARK_AWAIT_URL="tcp://${RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}"

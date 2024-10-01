@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_content;
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_content(IN _json_is_object BOOLEAN, IN _params JSON, IN _get_replies BOOLEAN)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_content(IN _json_is_object BOOLEAN, IN _params JSON, IN _get_replies BOOLEAN, IN _content_additions BOOLEAN)
 RETURNS JSON
 LANGUAGE 'plpgsql'
 STABLE
@@ -21,7 +21,7 @@ BEGIN
     RETURN (
       SELECT to_json(result.array) FROM (
         SELECT ARRAY (
-          SELECT hivemind_postgrest_utilities.create_condenser_post_object(row, 0, True) FROM (
+          SELECT hivemind_postgrest_utilities.create_condenser_post_object(row, 0, _content_additions) FROM (
             WITH replies AS MATERIALIZED
             (
               SELECT id 
@@ -81,7 +81,7 @@ BEGIN
         
   ELSE
     RETURN (
-      SELECT hivemind_postgrest_utilities.create_condenser_post_object(row, 0, True) FROM (
+      SELECT hivemind_postgrest_utilities.create_condenser_post_object(row, 0, _content_additions) FROM (
         SELECT
           hp.id,
           hp.author,

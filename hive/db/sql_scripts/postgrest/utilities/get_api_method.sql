@@ -24,9 +24,9 @@ BEGIN
     WHEN __method_type = 'get_blog_entries' THEN
       result := hivemind_endpoints.condenser_api_get_blog(__json_with_params_is_object, __params, /* _get_entries */ True)::JSONB;
     WHEN __method_type = 'get_content' THEN
-      result := hivemind_endpoints.condenser_api_get_content(__json_with_params_is_object, __params, /* _get_replies */ False)::JSONB;
+      result := hivemind_endpoints.condenser_api_get_content(__json_with_params_is_object, __params, /* _get_replies */ False, /* _content_additions */ True)::JSONB;
     WHEN __method_type = 'get_content_replies' THEN
-      result := hivemind_endpoints.condenser_api_get_content(__json_with_params_is_object, __params, /* _get_replies */ True)::JSONB;
+      result := hivemind_endpoints.condenser_api_get_content(__json_with_params_is_object, __params, /* _get_replies */ True, /* _content_additions */ True)::JSONB;
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
   END CASE;
@@ -79,4 +79,25 @@ END;
 $$
 ;
 
-
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_tags_api_method;
+CREATE FUNCTION hivemind_postgrest_utilities.get_tags_api_method(IN __method_type TEXT, IN __json_with_params_is_object BOOLEAN, IN __params JSON)
+RETURNS JSONB
+LANGUAGE 'plpgsql'
+STABLE
+AS
+$$
+DECLARE
+  result JSONB;
+BEGIN
+  CASE
+    WHEN __method_type = 'get_content_replies' THEN
+      result := hivemind_endpoints.condenser_api_get_content(__json_with_params_is_object, __params, /* _get_replies */ True, /* _content_additions */ False)::JSONB;
+    WHEN __method_type = 'get_discussion' THEN
+      result := hivemind_endpoints.condenser_api_get_content(__json_with_params_is_object, __params, /* _get_replies */ False, /* _content_additions */ False)::JSONB;
+    ELSE
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method);
+  END CASE;
+  RETURN result;
+END;
+$$
+;
