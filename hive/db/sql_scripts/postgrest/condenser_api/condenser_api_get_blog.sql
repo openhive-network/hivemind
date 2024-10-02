@@ -13,7 +13,7 @@ DECLARE
   _account_id INT;
   _result JSONB;
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"account", "start_entry_id", "limit"}', '{"string", "number", "number"}');
+  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"account", "start_entry_id", "limit"}', '{"string", "number", "number"}', 1);
   _account = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'account', 0, True);
   _offset = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'start_entry_id', 1, False);
   _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'limit', 2, False);
