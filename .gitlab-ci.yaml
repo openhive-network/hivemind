@@ -196,8 +196,8 @@ include:
     ./scripts/ci/start-api-smoketest.sh \
         $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        tags_api_negative/ \
-        api_smoketest_tags_api_negative.xml \
+        tags_api_patterns/ \
+        api_smoketest_tags_api.xml \
         $RUNNER_PYTEST_WORKERS \
         "auto" \
         ${COMPLETED_TAGS_API_METHODS:-}
@@ -209,8 +209,8 @@ include:
     ./scripts/ci/start-api-smoketest.sh \
         $RUNNER_HIVEMIND_SMOKETEST_SERVER_HOSTNAME \
         $RUNNER_HIVEMIND_SERVER_HTTP_PORT \
-        tags_api_patterns/ \
-        api_smoketest_tags_api.xml \
+        tags_api_negative/ \
+        api_smoketest_tags_api_negative.xml \
         $RUNNER_PYTEST_WORKERS \
         "auto" \
         ${COMPLETED_TAGS_API_METHODS:-}
@@ -651,7 +651,7 @@ e2e_benchmark_on_postgrest:
     - *follow_api_smoketest_negative-script
     - *bridge_api_smoketest-script
     - *bridge_api_smoketest_negative-script
-    - *tags_api_smoketest_negative-script
+    - *tags_api_smoketest-script
     - *postgrest_negative-script
     - |
       BENCHMARK_AWAIT_URL="tcp://${RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}"
