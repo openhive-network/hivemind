@@ -738,6 +738,7 @@ def setup_runtime_code(db):
         "postgrest/utilities/muted_reasons_operations.sql",
         "postgrest/utilities/create_bridge_post_object.sql",
         "postgrest/bridge_api/bridge_api_get_post.sql",
+        "postgrest/bridge_api/bridge_api_get_payout_stats.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
