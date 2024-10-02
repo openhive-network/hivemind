@@ -5,9 +5,10 @@
     - patterntest
     - negative
     - postgrest_ready
+    - postgrest_exception
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -20,9 +21,9 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.get_payout_stats"
-          params: {"limit": 100, "extra_parameter": "valid"}
+          params: {"limit": "sto"}
       response:
-        status_code: 200
+        status_code: 400
         verify_response_with:
           function: validate_response:compare_response_with_pattern
           extra_kwargs:
