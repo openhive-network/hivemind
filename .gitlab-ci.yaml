@@ -186,8 +186,7 @@ include:
         follow_api_negative/ \
         api_smoketest_follow_api_negative.xml \
         $RUNNER_PYTEST_WORKERS \
-        "auto" \
-        ${COMPLETED_FOLLOW_API_METHODS:-}
+        "auto"
     echo -e "\e[0Ksection_end:$(date +%s):follow_api_smoketest_negative\r\e[0K"
 
 .tags_api_smoketest-script: &tags_api_smoketest-script
