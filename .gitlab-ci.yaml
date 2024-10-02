@@ -343,6 +343,8 @@ sync:
       artifacts: true
     - job: prepare_hivemind_image
       artifacts: true
+    - job: download_await
+      artifacts: false 
   when: on_success
   services:
     - name: $HAF_IMAGE_NAME
