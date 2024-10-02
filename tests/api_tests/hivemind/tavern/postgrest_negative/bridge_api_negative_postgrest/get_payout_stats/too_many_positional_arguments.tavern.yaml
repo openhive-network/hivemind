@@ -7,7 +7,7 @@
     - postgrest_ready
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -20,7 +20,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.get_payout_stats"
-          params: {"limit": 100, "extra_parameter": "valid"}
+          params: ["10", ""]
       response:
         status_code: 200
         verify_response_with:
