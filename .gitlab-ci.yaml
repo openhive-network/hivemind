@@ -645,7 +645,7 @@ e2e_benchmark_on_postgrest:
     COMPLETED_BRIDGE_API_METHODS: "get_community,get_community_context"
     COMPLETED_CONDENSER_API_METHODS: "get_account_reputations,get_follow_count,get_reblogged_by,get_trending_tags,get_blog,get_blog_entries,get_content,get_content_replies"
     # COMPLETED_DATABASE_API_METHODS: ""
-    COMPLETED_FOLLOW_API_METHODS: "get_account_reputations"
+    COMPLETED_FOLLOW_API_METHODS: "get_account_reputations,get_follow_count,get_blog,get_blog_entries,get_reblogged_by"
     COMPLETED_TAGS_API_METHODS: "get_discussion,get_content_replies"
     # COMPLETED_HIVE_API_METHODS: ""
   script:
@@ -658,6 +658,7 @@ e2e_benchmark_on_postgrest:
     - *condenser_api_smoketest-script
     - *condenser_api_smoketest_negative-script
     - *follow_api_smoketest-script
+    - *follow_api_smoketest_negative-script
     - *bridge_api_smoketest-script
     - *bridge_api_smoketest_negative-script
     - *tags_api_smoketest_negative-script
