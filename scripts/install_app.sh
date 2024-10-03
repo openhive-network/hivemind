@@ -71,8 +71,8 @@ else
   POSTGRES_ACCESS=$POSTGRES_URL
 fi
 
-psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -v REPTRACKER_SCHEMA=${REPTRACKER_SCHEMA}  -f "${SCRIPTPATH}/install_app.sql"
+psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -v REPTRACKER_SCHEMA="${REPTRACKER_SCHEMA}" -f "${SCRIPTPATH}/install_app.sql"
 
 echo "Grant permissions to reptracker schema."
-psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -v REPTRACKER_SCHEMA=${REPTRACKER_SCHEMA} -c "GRANT reptracker_owner TO hivemind;"
+psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -c "GRANT reptracker_owner TO hivemind;"
 psql "$POSTGRES_ACCESS" -v ON_ERROR_STOP=on -c "GRANT reptracker_user TO hivemind;"
