@@ -48,19 +48,21 @@ LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
 $$
+DECLARE
+  _value NUMERIC;
 BEGIN
   IF _exception_on_unset_field THEN
     IF _json_is_object THEN
       IF _params->>_arg_name IS NULL THEN
         RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_missing_required_argument_exception(_arg_name);
       ELSE
-        RETURN _params->>_arg_name;
+        _value := (_params->>_arg_name)::NUMERIC;
       END IF;
     ELSE
       IF _params->>_arg_number IS NULL THEN
         RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_missing_required_argument_exception(_arg_name);
       ELSE
-        RETURN _params->>_arg_number;
+        _value := (_params->>_arg_number)::NUMERIC;
       END IF;
     END IF;
   ELSE
@@ -68,16 +70,22 @@ BEGIN
       IF _params->>_arg_name IS NULL THEN
         RETURN NULL;
       ELSE
-        RETURN _params->>_arg_name;
+        _value := (_params->>_arg_name)::NUMERIC;
       END IF;
     ELSE
       IF _params->>_arg_number IS NULL THEN
         RETURN NULL;
       ELSE
-        RETURN _params->>_arg_number;
+        _value := (_params->>_arg_number)::NUMERIC;
       END IF;
     END IF;
   END IF;
+
+  IF _value IS NULL OR _value != floor(_value) THEN
+      RAISE EXCEPTION 'Invalid value for argument "%": %', _arg_name, _value;
+  END IF;
+
+  RETURN floor(_value)::INTEGER;
 END
 $$
 ;
