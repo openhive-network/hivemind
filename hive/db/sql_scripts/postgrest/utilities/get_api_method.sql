@@ -60,6 +60,10 @@ BEGIN
       result :=  hivemind_endpoints.condenser_api_get_follow_count(__json_with_params_is_object, __params)::JSONB;
     WHEN __method_type = 'get_reblogged_by' THEN
       result := hivemind_endpoints.condenser_api_get_reblogged_by(__json_with_params_is_object, __params)::JSONB;
+    WHEN __method_type = 'get_followers' THEN
+      result := hivemind_endpoints.condenser_api_get_followers(__json_with_params_is_object, __params)::JSONB;
+    WHEN __method_type = 'get_following' THEN
+      result := hivemind_endpoints.condenser_api_get_following(__json_with_params_is_object, __params)::JSONB;
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
   END CASE;
