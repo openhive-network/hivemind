@@ -118,7 +118,7 @@ setup() {
     # if we force to install rep tracker then we setup it as non-forking app
     # if we do not install it together with hivemind, then we get what we have forking or not
     pushd "$reptracker_dir"
-    ./scripts/install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}" --schema="${REPTRACKER_SCHEMA}" --is_forking="false"
+    ./scripts/install_app.sh --postgres-url="${POSTGRES_ADMIN_URL}" --schema="${REPTRACKER_SCHEMA}" --is_forking="true"
     popd
   fi
 
