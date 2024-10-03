@@ -173,8 +173,7 @@ include:
         follow_api_patterns/ \
         api_smoketest_follow_api.xml \
         $RUNNER_PYTEST_WORKERS \
-        "auto" \
-        ${COMPLETED_FOLLOW_API_METHODS:-}
+        "auto"
     echo -e "\e[0Ksection_end:$(date +%s):follow_api_smoketest\r\e[0K"
 
 .follow_api_smoketest_negative-script: &follow_api_smoketest_negative-script
@@ -644,7 +643,6 @@ e2e_benchmark_on_postgrest:
     COMPLETED_BRIDGE_API_METHODS: "get_community,get_community_context"
     COMPLETED_CONDENSER_API_METHODS: "get_account_reputations,get_follow_count,get_reblogged_by,get_trending_tags,get_blog,get_blog_entries,get_content,get_content_replies,get_following,get_followers"
     # COMPLETED_DATABASE_API_METHODS: ""
-    COMPLETED_FOLLOW_API_METHODS: "get_account_reputations,get_follow_count,get_blog,get_blog_entries,get_reblogged_by"
     COMPLETED_TAGS_API_METHODS: "get_discussion,get_content_replies"
     # COMPLETED_HIVE_API_METHODS: ""
   script:
@@ -662,6 +660,7 @@ e2e_benchmark_on_postgrest:
     - *bridge_api_smoketest_negative-script
     - *tags_api_smoketest-script
     - *postgrest_negative-script
+    - *mock_tests-script
     - |
       BENCHMARK_AWAIT_URL="tcp://${RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}"
       echo "Waiting for Hivemind benchmark server to start running on ${BENCHMARK_AWAIT_URL}"
