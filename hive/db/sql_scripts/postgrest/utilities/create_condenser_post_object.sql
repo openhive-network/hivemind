@@ -16,7 +16,7 @@ BEGIN
     'author', _row.author,
     'permlink', _row.permlink,
     'category', (CASE
-                  WHEN _row.category IS NULL THEN 'undefined'
+                  WHEN _row.category IS NULL OR _row.category = '' THEN 'undefined'
                   ELSE _row.category
                 END),
     'title', _row.title,
