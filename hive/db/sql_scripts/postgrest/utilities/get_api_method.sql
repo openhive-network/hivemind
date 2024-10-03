@@ -111,7 +111,7 @@ BEGIN
     WHEN __method_type = 'get_discussion' THEN
       result := hivemind_endpoints.condenser_api_get_content(__json_with_params_is_object, __params, /* _get_replies */ False, /* _content_additions */ False)::JSONB;
     ELSE
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method);
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
   END CASE;
   RETURN result;
 END;
