@@ -81,3 +81,44 @@ BEGIN
 END
 $$
 ;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.parse_array_argument_from_json;
+CREATE FUNCTION hivemind_postgrest_utilities.parse_array_argument_from_json(_params JSON, _json_is_object BOOLEAN, _arg_name TEXT, _arg_number INT, _exception_on_unset_field BOOLEAN)
+RETURNS JSONB
+LANGUAGE 'plpgsql'
+IMMUTABLE
+AS
+$$
+BEGIN
+  IF _exception_on_unset_field THEN
+    IF _json_is_object THEN
+      IF _params->>_arg_name IS NULL THEN
+        RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_missing_required_argument_exception(_arg_name);
+      ELSE
+        RETURN _params->>_arg_name;
+      END IF;
+    ELSE
+      IF _params->>_arg_number IS NULL THEN
+        RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_missing_required_argument_exception(_arg_name);
+      ELSE
+        RETURN _params->>_arg_number;
+      END IF;
+    END IF;
+  ELSE
+    IF _json_is_object THEN
+      IF _params->>_arg_name IS NULL THEN
+        RETURN NULL;
+      ELSE
+        RETURN _params->>_arg_name;
+      END IF;
+    ELSE
+      IF _params->>_arg_number IS NULL THEN
+        RETURN NULL;
+      ELSE
+        RETURN _params->>_arg_number;
+      END IF;
+    END IF;
+  END IF;
+END
+$$
+;
