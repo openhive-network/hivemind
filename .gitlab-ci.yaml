@@ -642,7 +642,8 @@ e2e_benchmark_on_postgrest:
     RUN_TESTS_WITH_MARKER: "postgrest_ready and not postgrest_ignore"
     COMPLETED_BRIDGE_API_METHODS: "get_community,get_community_context"
     COMPLETED_CONDENSER_API_METHODS: "get_account_reputations,get_follow_count,get_reblogged_by,get_trending_tags,get_blog,get_blog_entries,get_content,get_content_replies,get_following,get_followers"
-    COMPLETED_DATABASE_API_METHODS: "find_votes"
+    COMPLETED_DATABASE_API_METHODS: "find_votes,list_votes"
+    COMPLETED_FOLLOW_API_METHODS: "get_account_reputations,get_follow_count,get_blog,get_blog_entries,get_reblogged_by"
     COMPLETED_TAGS_API_METHODS: "get_discussion,get_content_replies"
     # COMPLETED_HIVE_API_METHODS: ""
   script:
