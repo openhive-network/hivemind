@@ -27,7 +27,7 @@ BEGIN
       IF array_idx IS NOT NULL THEN
         passed_type_to_check = jsonb_typeof(_params->passed_arg_key);
         expected_type_to_check = _expected_params_types[array_idx];
-        IF passed_type_to_check <> expected_type_to_check THEN
+        IF (expected_type_to_check = 'number' AND passed_type_to_check NOT IN ('number', 'string')) OR (expected_type_to_check <> 'number' AND passed_type_to_check <> expected_type_to_check) THEN
           RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('invalid ' || passed_arg_key || ' type');
         END IF;
       ELSE
@@ -44,7 +44,7 @@ BEGIN
         IF _params->array_idx IS NOT NULL THEN
           expected_type_to_check = _expected_params_types[array_idx];
           passed_type_to_check = jsonb_typeof(_params->(array_idx-1));
-          IF passed_type_to_check <> expected_type_to_check THEN
+          IF (expected_type_to_check = 'number' AND passed_type_to_check NOT IN ('number', 'string')) OR (expected_type_to_check <> 'number' AND passed_type_to_check <> expected_type_to_check) THEN
             RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('invalid ' || _expected_params_names[array_idx] || ' type');
           END IF;
         -- not all parameters are required, so return without an error
