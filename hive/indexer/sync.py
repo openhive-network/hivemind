@@ -127,6 +127,7 @@ class SyncHiveDb:
             if self._db.is_trx_active():
                 self._db.query_no_return( "COMMIT" )
             self._db.query_no_return( "START TRANSACTION" )
+            self._wait_for_massive_consume()
             self._lbound, self._ubound = self._query_for_app_next_block()
 
             if self._break_requested(last_imported_block, active_connections_before):
