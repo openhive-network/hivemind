@@ -128,6 +128,7 @@ class SyncHiveDb:
             if self._db.is_trx_active():
                 self._db.query_no_return( "COMMIT" )
             self._db.query_no_return( "START TRANSACTION" )
+            self._wait_for_massive_consume()
             self._lbound, self._ubound = self._query_for_app_next_block()
 
             application_stage = self._db.query_one(f"SELECT hive.get_current_stage_name('{SCHEMA_NAME}')")
