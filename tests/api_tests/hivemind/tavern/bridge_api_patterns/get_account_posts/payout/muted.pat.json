@@ -750,6 +750,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 177
     },
     "title": "Heavy duty witness node infrastructure",
@@ -827,6 +830,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 8
     },
     "title": "RE: Heavy duty witness node infrastructure",
@@ -982,6 +988,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 26
     },
     "title": "Missing rewards while mining - common mistake with keys",
@@ -1035,6 +1044,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 2
     },
     "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
@@ -1097,6 +1109,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 4
     },
     "title": "RE: Steemit.chat - Stats & Rules",
@@ -1157,6 +1172,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 3
     },
     "title": "RE: [Solved] Important info for STEEM miners,  Steemit.com accounts (coming from facebook or reddit) seem to loose the 'Generated blocks'",
@@ -1215,6 +1233,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 2
     },
     "title": "RE: [Bounty] Community bounty for open source GPU miner.",
@@ -1270,6 +1291,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 1
     },
     "title": "RE: My first real post was a success and I would like to share the story.",
@@ -1317,6 +1341,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 0
     },
     "title": "RE: A balanced voting system is impossible with current witness\u2019s payouts.",
@@ -1361,6 +1388,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 0
     },
     "title": "RE: [STEEMSQL] A deep analysis of Steemians gratefulness",
@@ -1405,6 +1435,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 0
     },
     "title": "RE: [STEEMSQL] A deep analysis of Steemians gratefulness",
@@ -1455,6 +1488,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 0
     },
     "title": "RE: [STEEMSQL] A deep analysis of Steemians gratefulness",
@@ -1499,6 +1535,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 0
     },
     "title": "RE: Hi! I'm Jaro and this is my introductory verification post!",
@@ -1543,6 +1582,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 0
     },
     "title": "RE: Introduction post - Gold at the end of the rainbow... On the Emerald Isle",
@@ -1587,6 +1629,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 0
     },
     "title": "RE: The Best Adventures Start With Rabbit Holes... -Eleanor",
@@ -1631,6 +1676,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 0
     },
     "title": "RE: MY FAVORITE CAT!",
@@ -1683,6 +1731,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 1
     },
     "title": "RE: I'm an English teacher in Beijing.  My Introduction to Steemit & Verification",
@@ -1730,6 +1781,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 0
     },
     "title": "RE: Teacher. Story teller. Cat Lover. - about me :)",
@@ -1774,6 +1828,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 0
     },
     "title": "RE: Hello Steemit! I'm Alex, a new member of the Steemit team",
@@ -1822,6 +1879,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 0
     },
     "title": "RE: [Bounty] Community bounty for open source GPU miner.",
