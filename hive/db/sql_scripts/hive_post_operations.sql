@@ -140,7 +140,7 @@ BEGIN
         RETURN QUERY INSERT INTO hivemind_app.hive_posts as hp
             (parent_id, depth, community_id, category_id,
              root_id, is_muted, is_valid,
-             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted, block_num, block_num_created)
+             author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend, active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons)
             SELECT
                 s.parent_id,
                 s.depth,
@@ -160,7 +160,8 @@ BEGIN
                 s.cashout_time,
                 s.counter_deleted,
                 s.block_num,
-                s.block_num_created
+                s.block_num_created,
+                (s.composite).muted_reasons
             FROM (
                      SELECT
                          hivemind_app.process_community_post(_block_num, _community_support_start_block, _parent_permlink, ha.id, TRUE, php.is_muted, php.community_id) as composite,
@@ -223,7 +224,8 @@ BEGIN
                     s.cashout_time,
                     s.counter_deleted,
                     s.block_num,
-                    s.block_num_created
+                    s.block_num_created,
+                    (s.composite).muted_reasons
                 FROM (
                          SELECT
                              hivemind_app.process_community_post(_block_num, _community_support_start_block, _parent_permlink, ha.id, FALSE,FALSE, NULL) as composite,
@@ -249,7 +251,7 @@ BEGIN
                         (parent_id, depth, community_id, category_id,
                          root_id, is_muted, is_valid,
                          author_id, permlink_id, created_at, updated_at, sc_hot, sc_trend,
-                         active, payout_at, cashout_time, counter_deleted, block_num, block_num_created) -- removed tagsids
+                         active, payout_at, cashout_time, counter_deleted, block_num, block_num_created, muted_reasons) -- removed tagsids
                         SELECT
                             pdi.parent_id,
                             pdi.depth,
@@ -269,7 +271,8 @@ BEGIN
                             pdi.cashout_time,
                             pdi.counter_deleted,
                             pdi.block_num,
-                            pdi.block_num_created
+                            pdi.block_num_created,
+                            pdi.muted_reasons
                         FROM posts_data_to_insert as pdi
                         ON CONFLICT ON CONSTRAINT hive_posts_ux1 DO UPDATE SET
                             --- During post update it is disallowed to change: parent-post, category, community-id
