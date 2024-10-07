@@ -105,7 +105,7 @@ BEGIN
 
         END IF;
 
-        RETURN (__is_muted, __community_id, encode_bitwise_mask(__muted_reasons))::hivemind_app.process_community_post_result;
+        RETURN (__is_muted, __community_id, hivemind_app.encode_bitwise_mask(__muted_reasons))::hivemind_app.process_community_post_result;
     END;
 $$ STABLE;
 
