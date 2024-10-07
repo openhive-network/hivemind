@@ -148,6 +148,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 26
     },
     "title": "Missing rewards while mining - common mistake with keys",
@@ -905,6 +908,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 177
     },
     "title": "Heavy duty witness node infrastructure",
@@ -1299,6 +1305,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 87
     },
     "title": "Witness \"gtg\"",
@@ -1538,6 +1547,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 44
     },
     "title": "Hello, World!",
