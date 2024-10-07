@@ -25,8 +25,8 @@ BEGIN
 END
 $function$;
 
-
-CREATE OR REPLACE FUNCTION encode_bitwise_mask(muted_reasons INT[])
+DROP FUNCTION IF EXISTS hivemind_app.encode_bitwise_mask;
+CREATE OR REPLACE FUNCTION hivemind_app.encode_bitwise_mask(muted_reasons INT[])
     RETURNS INT AS $$
 DECLARE
     mask INT := 0;
