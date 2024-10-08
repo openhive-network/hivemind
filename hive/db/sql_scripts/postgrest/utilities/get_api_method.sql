@@ -146,3 +146,24 @@ BEGIN
 END;
 $$
 ;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_hive_api_method;
+CREATE FUNCTION hivemind_postgrest_utilities.get_hive_api_method(IN __method_type TEXT, IN __json_with_params_is_object BOOLEAN, IN __params JSONB)
+RETURNS JSONB
+LANGUAGE 'plpgsql'
+STABLE
+AS
+$$
+DECLARE
+  result JSONB;
+BEGIN
+  CASE
+    WHEN __method_type = 'get_info' THEN
+      result := hivemind_endpoints.hive_api_get_info(__json_with_params_is_object, __params);
+    ELSE
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
+  END CASE;
+  RETURN result;
+END;
+$$
+;
