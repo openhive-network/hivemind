@@ -16,6 +16,8 @@ from hive.conf import SCHEMA_OWNER_NAME
 
 from hive.indexer.hive_db.haf_functions import prepare_app_context
 
+from hive.version import GIT_DATE, GIT_REVISION, VERSION
+
 log = logging.getLogger(__name__)
 
 # pylint: disable=line-too-long, too-many-lines, bad-whitespace
@@ -342,6 +344,9 @@ def build_metadata():
         sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
         sa.Column('last_completed_block_num', sa.Integer, nullable=False),
         sa.Column('db_version', sa.Integer, nullable=False),
+        sa.Column('hivemind_version', sa.Text, nullable=False, server_default=''),
+        sa.Column('hivemind_git_date', sa.DateTime(), nullable=False, server_default=sa.func.now()),
+        sa.Column('hivemind_git_rev', sa.Text, nullable=False, server_default=''),
     )
 
     sa.Table(
@@ -552,7 +557,7 @@ def setup(db, admin_db):
 
     # default rows
     sqls = [
-        f"INSERT INTO {SCHEMA_NAME}.hive_state (last_completed_block_num, db_version) VALUES (1, 0)",
+        f"INSERT INTO {SCHEMA_NAME}.hive_state (last_completed_block_num, db_version, hivemind_git_rev, hivemind_git_date, hivemind_version) VALUES (1, 0, '{GIT_REVISION}', '{GIT_DATE}', '{VERSION}')",
         f"INSERT INTO {SCHEMA_NAME}.hive_permlink_data (id, permlink) VALUES (0, '')",
         f"INSERT INTO {SCHEMA_NAME}.hive_category_data (id, category) VALUES (0, '')",
         f"INSERT INTO {SCHEMA_NAME}.hive_tag_data (id, tag) VALUES (0, '')",
@@ -759,9 +764,29 @@ def setup_runtime_code(db):
           ;
           """
 
-    from hive.version import GIT_REVISION
+    # Update hivemind_app.hive_stats table
+    git_rev = f"""
+              UPDATE {SCHEMA_NAME}.hive_state
+              SET hivemind_git_rev = '{GIT_REVISION}'
+              WHERE hivemind_git_rev != '{GIT_REVISION}';
+              """
+
+    git_date = f"""
+               UPDATE {SCHEMA_NAME}.hive_state
+               SET hivemind_git_date = '{GIT_DATE}'
+               WHERE hivemind_git_date != '{GIT_DATE}';
+               """
+
+    version = f"""
+              UPDATE {SCHEMA_NAME}.hive_state
+              SET hivemind_version = '{VERSION}'
+              WHERE hivemind_version != '{VERSION}';
+              """
 
     db.query_no_return(sql.format(GIT_REVISION))
+    db.query_no_return(git_rev)
+    db.query_no_return(git_date)
+    db.query_no_return(version)
 
 def perform_db_upgrade(db, admin_db):
     sql_scripts_dir_path = Path(__file__).parent /'sql_scripts'

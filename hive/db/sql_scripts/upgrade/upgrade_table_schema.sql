@@ -43,5 +43,8 @@ CREATE TABLE IF NOT EXISTS hivemind_app.hive_post_tags (
 CREATE UNIQUE INDEX IF NOT EXISTS hive_post_tags_tag_id_post_id_idx
     ON hivemind_app.hive_post_tags USING btree (tag_id, post_id DESC);
 
+ALTER TABLE hivemind_app.hive_state ADD COLUMN IF NOT EXISTS hivemind_git_rev TEXT NOT NULL DEFAULT '';
+ALTER TABLE hivemind_app.hive_state ADD COLUMN IF NOT EXISTS hivemind_git_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT  NOW();
+ALTER TABLE hivemind_app.hive_state ADD COLUMN IF NOT EXISTS hivemind_version TEXT NOT NULL DEFAULT '';
 
 RESET ROLE;
