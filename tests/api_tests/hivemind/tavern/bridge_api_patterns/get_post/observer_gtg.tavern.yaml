@@ -4,6 +4,7 @@
   marks:
     - patterntest
     # observer is not use in this call due to https://gitlab.syncad.com/hive/hivemind/-/merge_requests/421/diffs#77bb9aa452deae80bb67db28a26b13cb888e7724 changes
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
