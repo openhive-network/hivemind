@@ -25,12 +25,12 @@ BEGIN
               ELSE _row.body
               END),
     'json_metadata', _row.json,
-    'created', _row.created_at,
-    'last_update', _row.updated_at,
+    'created', to_jsonb(hivemind_postgrest_utilities.json_date(_row.created_at)),
+    'last_update', to_jsonb(hivemind_postgrest_utilities.json_date(_row.updated_at)),
     'depth', _row.depth,
     'children', _row.children,
     'curator_payout_value', '0.000 HBD',
-    'promoted', _row.promoted || ' ' || 'HBD',
+    'promoted', _row.promoted || ' HBD',
     'replies', array_to_json('{}'::INT[]),
     'body_length', LENGTH(_row.body),
     'author_reputation', _row.author_rep,
@@ -91,9 +91,7 @@ BEGIN
       _result = jsonb_set(_result, '{total_vote_weight}', to_jsonb(_row.total_vote_weight));
       _result = jsonb_set(_result, '{net_rshares}', to_jsonb(_row.rshares));
       _result = jsonb_set(_result, '{abs_rshares}', to_jsonb(_row.abs_rshares));
-      -- in python code, // operator is used in order to round result to whole number.
-      -- Here simple division should be enough 
-      _tmp_amount = (_row.rshares + _row.abs_rshares) / 2;
+      _tmp_amount = FLOOR((_row.rshares + _row.abs_rshares) / 2);
       _result = jsonb_set(_result, '{vote_rshares}', to_jsonb(_tmp_amount));
     END IF;
   ELSE
