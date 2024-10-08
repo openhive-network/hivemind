@@ -33,7 +33,10 @@ FOR _vote IN SELECT * FROM jsonb_array_elements(_votes) LOOP
       'num_changes', _vote->'num_changes'
     )::jsonb;
   ELSIF _presentation_mode = 'bridge_api' THEN
-    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('create_votes_json_array for bridge_api not implemented');
+    _result = COALESCE(_result, '[]'::jsonb) || json_build_object(
+      'rshares', _vote->'rshares',
+      'voter', _vote->>'voter'
+    )::jsonb;
   ELSIF _presentation_mode = 'active_votes' THEN
     _result = COALESCE(_result, '[]'::jsonb) || json_build_object(
       'percent', _vote->'percent',
@@ -53,7 +56,7 @@ $function$
 ;
 
 DROP TYPE IF EXISTS hivemind_postgrest_utilities.list_votes_case CASCADE;
-CREATE TYPE hivemind_postgrest_utilities.list_votes_case AS ENUM( 'create_condenser_post', 'database_list_by_comment_voter', 'database_list_by_voter_comment');
+CREATE TYPE hivemind_postgrest_utilities.list_votes_case AS ENUM( 'create_post', 'database_list_by_comment_voter', 'database_list_by_voter_comment');
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.list_votes;
 CREATE FUNCTION hivemind_postgrest_utilities.list_votes(IN _author TEXT, IN _permlink TEXT, IN _limit INT, IN _case hivemind_postgrest_utilities.list_votes_case, IN _presentation_mode hivemind_postgrest_utilities.vote_presentation, IN _voter TEXT DEFAULT NULL)
@@ -92,7 +95,7 @@ BEGIN
         WHERE
           (
             CASE
-              WHEN _case = 'create_condenser_post' THEN v.post_id = _post_id
+              WHEN _case = 'create_post' THEN v.post_id = _post_id
               WHEN _case = 'database_list_by_comment_voter' THEN (v.post_id = _post_id AND v.voter_id >= _voter_id)
               WHEN _case = 'database_list_by_voter_comment' THEN (v.voter_id = _voter_id AND v.post_id >= _post_id)
               END
@@ -100,7 +103,7 @@ BEGIN
         ORDER BY
           (
             CASE
-              WHEN _case = 'create_condenser_post' THEN v.voter_id
+              WHEN _case = 'create_post' THEN v.voter_id
               WHEN _case = 'database_list_by_comment_voter' THEN v.voter_id
               WHEN _case = 'database_list_by_voter_comment' THEN v.post_id
               END
