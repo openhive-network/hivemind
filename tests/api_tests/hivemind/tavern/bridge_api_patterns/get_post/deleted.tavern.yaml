@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # post with allow_votes = 'f' in database
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
