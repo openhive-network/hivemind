@@ -40,5 +40,6 @@ CREATE TYPE hivemind_app.condenser_api_post_ex AS (
     url TEXT,
     root_title VARCHAR(512),
     active TIMESTAMP,
-    author_rewards BIGINT
+    author_rewards BIGINT,
+    muted_reasons INTEGER
 );

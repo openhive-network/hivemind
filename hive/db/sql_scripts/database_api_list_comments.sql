@@ -39,7 +39,8 @@ CREATE TYPE hivemind_app.database_api_post AS (
   root_title VARCHAR(512),
   abs_rshares NUMERIC,
   active TIMESTAMP,
-  author_rewards BIGINT
+  author_rewards BIGINT,
+  muted_reasons INTEGER
 );
 
 DROP FUNCTION IF EXISTS hivemind_app.list_comments_by_permlink(character varying, character varying, int);
@@ -73,7 +74,7 @@ BEGIN
         hp.parent_author, hp.parent_permlink_or_category, hp.curator_payout_value, hp.root_author, hp.root_permlink,
         hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
         hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
-        hp.active, hp.author_rewards
+        hp.active, hp.author_rewards, hp.muted_reasons
   FROM comments,
   LATERAL hivemind_app.get_post_view_by_id(comments.id) hp
   ORDER BY hp.author, hp.permlink
@@ -119,7 +120,7 @@ BEGIN
         hp.parent_author, hp.parent_permlink_or_category, hp.curator_payout_value, hp.root_author, hp.root_permlink,
         hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
         hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
-        hp.active, hp.author_rewards
+        hp.active, hp.author_rewards, hp.muted_reasons
   FROM comments,
   LATERAL hivemind_app.get_post_view_by_id(comments.id) hp
   ORDER BY comments.cashout_time ASC, comments.id ASC
@@ -164,7 +165,7 @@ BEGIN
     hp.parent_author, hp.parent_permlink_or_category, hp.curator_payout_value, hp.root_author, hp.root_permlink,
     hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
     hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
-    hp.active, hp.author_rewards
+    hp.active, hp.author_rewards, hp.muted_reasons
   FROM comments,
   LATERAL hivemind_app.get_post_view_by_id(comments.id) hp
   ORDER BY comments.id
@@ -208,7 +209,7 @@ BEGIN
     hp.parent_author, hp.parent_permlink_or_category, hp.curator_payout_value, hp.root_author, hp.root_permlink,
     hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
     hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
-    hp.active, hp.author_rewards
+    hp.active, hp.author_rewards, hp.muted_reasons
   FROM comments,
   LATERAL hivemind_app.get_post_view_by_id(comments.id) hp
   ORDER BY comments.id
@@ -259,7 +260,7 @@ BEGIN
       hp.parent_author, hp.parent_permlink_or_category, hp.curator_payout_value, hp.root_author, hp.root_permlink,
       hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
       hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
-      hp.active, hp.author_rewards
+      hp.active, hp.author_rewards, hp.muted_reasons
   FROM comments,
   LATERAL hivemind_app.get_post_view_by_id(comments.id) hp
   ORDER BY comments.updated_at DESC, comments.id ASC
@@ -310,7 +311,7 @@ BEGIN
       hp.parent_author, hp.parent_permlink_or_category, hp.curator_payout_value, hp.root_author, hp.root_permlink,
       hp.max_accepted_payout, hp.percent_hbd, hp.allow_replies, hp.allow_votes,
       hp.allow_curation_rewards, hp.beneficiaries, hp.url, hp.root_title, hp.abs_rshares,
-      hp.active, hp.author_rewards
+      hp.active, hp.author_rewards, hp.muted_reasons
   FROM comments,
   LATERAL hivemind_app.get_post_view_by_id(comments.id) hp
   ORDER BY comments.updated_at DESC, comments.id ASC

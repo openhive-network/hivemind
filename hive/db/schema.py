@@ -59,6 +59,7 @@ def build_metadata():
         sa.Column('counter_deleted', sa.Integer, nullable=False, server_default='0'),
         sa.Column('is_pinned', BOOLEAN, nullable=False, server_default='0'),
         sa.Column('is_muted', BOOLEAN, nullable=False, server_default='0'),
+        sa.Column('muted_reasons', sa.Integer, nullable=False, server_default='0'),
         sa.Column('is_valid', BOOLEAN, nullable=False, server_default='1'),
         sa.Column('promoted', sa.types.DECIMAL(10, 3), nullable=False, server_default='0'),
         sa.Column('children', sa.Integer, nullable=False, server_default='0'),

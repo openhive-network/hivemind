@@ -48,7 +48,8 @@ BEGIN
       hp.url,
       hp.root_title,
       hp.active,
-      hp.author_rewards
+      hp.author_rewards,
+      hp.muted_reasons
     FROM hivemind_app.get_post_view_by_id(__post_id) hp;
 END
 $function$
@@ -112,7 +113,8 @@ BEGIN
       hp.url,
       hp.root_title,
       hp.active,
-      hp.author_rewards
+      hp.author_rewards,
+      hp.muted_reasons
     FROM replies,
     LATERAL hivemind_app.get_post_view_by_id(replies.id) hp
     ORDER BY hp.id;

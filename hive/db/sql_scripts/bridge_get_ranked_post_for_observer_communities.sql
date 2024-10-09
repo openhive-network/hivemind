@@ -72,7 +72,8 @@ BEGIN
     hp.is_pinned,
     hp.curator_payout_value,
     hp.is_muted,
-    blacklist.source
+    blacklist.source,
+    hp.muted_reasons
   FROM post_ids,
   LATERAL hivemind_app.get_post_view_by_id(post_ids.id) hp
   LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (blacklist.observer_id = __account_id AND blacklist.blacklisted_id = hp.author_id)
@@ -150,7 +151,8 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      hot.source
+      hot.source,
+      hp.muted_reasons
   FROM hot,
   LATERAL hivemind_app.get_post_view_by_id(hot.id) hp
   ORDER BY hp.sc_hot DESC, hp.id DESC
@@ -230,7 +232,8 @@ SELECT
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      payout.source
+      payout.source,
+      hp.muted_reasons
   FROM payout,
   LATERAL hivemind_app.get_post_view_by_id(payout.id) hp
   ORDER BY payout.total_payout DESC, payout.id DESC
@@ -313,7 +316,8 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      payout.source
+      payout.source,
+      hp.muted_reasons
   FROM payout,
   LATERAL hivemind_app.get_post_view_by_id(payout.id) hp
   ORDER BY payout.total_payout DESC, payout.id DESC
@@ -392,7 +396,8 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      promoted.source
+      promoted.source,
+      hp.muted_reasons
   FROM promoted,
   LATERAL hivemind_app.get_post_view_by_id(promoted.id) hp
   ORDER BY hp.promoted DESC, hp.id DESC
@@ -472,7 +477,8 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      trending.source
+      trending.source,
+      hp.muted_reasons
   FROM trending,
   LATERAL hivemind_app.get_post_view_by_id(trending.id) hp
   ORDER BY trending.sc_trend DESC, trending.id DESC
@@ -554,7 +560,8 @@ BEGIN
       hp.is_pinned,
       hp.curator_payout_value,
       hp.is_muted,
-      muted.source
+      muted.source,
+      hp.muted_reasons
   FROM muted,
   LATERAL hivemind_app.get_post_view_by_id(muted.id) hp
   ORDER BY muted.total_payout DESC, hp.id DESC

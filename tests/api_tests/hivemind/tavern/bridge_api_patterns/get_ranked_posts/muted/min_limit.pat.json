@@ -80,12 +80,15 @@
     "permlink": "re-steemed-re-dantheman-our-corrupt-sense-of-fairness-20160820t090630202z",
     "post_id": 903105,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 12
     },
     "title": "RE: Our Corrupt Sense of Fairness",
