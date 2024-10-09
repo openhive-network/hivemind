@@ -234,8 +234,7 @@ include:
         hive_api_patterns/ \
         api_smoketest_hive_api.xml \
         $RUNNER_PYTEST_WORKERS \
-        "auto" \
-        ${COMPLETED_HIVE_API_METHODS:-}
+        "auto"
     echo -e "\e[0Ksection_end:$(date +%s):hive_api_smoketest\r\e[0K"
 
 .api-benchmark-script: &api-benchmark-script
@@ -659,7 +658,6 @@ e2e_benchmark_on_postgrest:
     COMPLETED_CONDENSER_API_METHODS: "get_account_reputations,get_follow_count,get_reblogged_by,get_trending_tags,get_blog,get_blog_entries,get_content,get_content_replies,get_following,get_followers,get_active_votes"
     COMPLETED_DATABASE_API_METHODS: "find_votes,list_votes"
     COMPLETED_TAGS_API_METHODS: "get_discussion,get_content_replies"
-    COMPLETED_HIVE_API_METHODS: "get_info"
   script:
     - |
       echo "HAF image name $HAF_IMAGE_NAME"
