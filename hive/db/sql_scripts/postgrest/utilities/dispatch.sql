@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.dispatch;
-CREATE FUNCTION hivemind_postgrest_utilities.dispatch(IN __api_type TEXT, IN __method_type TEXT, IN __json_with_params_is_object BOOLEAN, IN __params JSON)
+CREATE FUNCTION hivemind_postgrest_utilities.dispatch(IN __api_type TEXT, IN __method_type TEXT, IN __json_with_params_is_object BOOLEAN, IN __params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE

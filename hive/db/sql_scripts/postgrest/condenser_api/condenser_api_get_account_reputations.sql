@@ -1,6 +1,6 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_account_reputations;
 -- this _fat_node_style is true for condenser api and false for follow api at the moment
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_account_reputations(IN _json_is_object BOOLEAN, IN _params JSON, IN _fat_node_style BOOLEAN)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_account_reputations(IN _json_is_object BOOLEAN, IN _params JSONB, IN _fat_node_style BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -20,9 +20,9 @@ BEGIN
 
   IF _fat_node_style THEN
     RETURN (
-      SELECT to_json(result.array) FROM (
+      SELECT to_jsonb(result.array) FROM (
         SELECT ARRAY (
-          SELECT to_json(row) FROM (
+          SELECT to_jsonb(row) FROM (
             SELECT ha.name AS account, ha.reputation AS reputation
               FROM hivemind_app.hive_accounts_view ha
               WHERE ha.name >= _account_lower_bound AND ha.id != 0
@@ -33,10 +33,10 @@ BEGIN
       ) result
     );
   ELSE
-    RETURN json_build_object('reputations', (
-      SELECT to_json(result.array) FROM (
+    RETURN jsonb_build_object('reputations', (
+      SELECT to_jsonb(result.array) FROM (
         SELECT ARRAY (
-          SELECT to_json(row) FROM (
+          SELECT to_jsonb(row) FROM (
             SELECT ha.name AS name, ha.reputation AS reputation
               FROM hivemind_app.hive_accounts_view ha
               WHERE ha.name >= _account_lower_bound AND ha.id != 0

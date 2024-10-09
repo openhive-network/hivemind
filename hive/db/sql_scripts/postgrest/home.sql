@@ -9,8 +9,8 @@ DECLARE
   __request_data JSON = $1;
   __jsonrpc TEXT;
   __method TEXT;
-  __params JSON;
-  __id JSON;
+  __params JSONB;
+  __id JSONB;
 
   __result JSONB;
 BEGIN
@@ -25,18 +25,18 @@ BEGIN
     'jsonrpc', '2.0',
     'id', __id,
     'result', hivemind_postgrest_utilities.dispatch(
-                                                    __result->>'api_type'::TEXT,
-                                                    __result->>'method_type'::TEXT,
-                                                    (__result->>'json_with_params_is_object')::BOOLEAN,
-                                                    (__result->>'params')::JSON
+                                                    __result->>'api_type',
+                                                    __result->>'method_type',
+                                                    (__result->'json_with_params_is_object')::BOOLEAN,
+                                                    __result->'params'
     )
   );
 
   EXCEPTION
     WHEN raise_exception THEN
-      RETURN json_build_object(
+      RETURN jsonb_build_object(
         'jsonrpc', '2.0',
-        'error', SQLERRM::JSON,
+        'error', SQLERRM::JSONB,
         'id', __id
       );
 END

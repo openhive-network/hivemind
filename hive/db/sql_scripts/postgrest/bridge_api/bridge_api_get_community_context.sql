@@ -1,6 +1,6 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_community_context;
-CREATE FUNCTION hivemind_endpoints.bridge_api_get_community_context(IN _json_is_object BOOLEAN, IN _params JSON)
-RETURNS JSON
+CREATE FUNCTION hivemind_endpoints.bridge_api_get_community_context(IN _json_is_object BOOLEAN, IN _params JSONB)
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
 AS

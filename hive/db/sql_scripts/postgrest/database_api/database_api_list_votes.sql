@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.database_api_list_votes;
-CREATE FUNCTION hivemind_endpoints.database_api_list_votes(IN _json_is_object BOOLEAN, IN _params JSON)
+CREATE FUNCTION hivemind_endpoints.database_api_list_votes(IN _json_is_object BOOLEAN, IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -52,9 +52,9 @@ BEGIN
   END IF;
 
   IF _order_by_comment_voter THEN
-    RETURN json_build_object('votes', (hivemind_postgrest_utilities.list_votes(_author, _permlink, _limit, 'database_list_by_comment_voter'::hivemind_postgrest_utilities.list_votes_case, 'database_api'::hivemind_postgrest_utilities.vote_presentation, _voter)));
+    RETURN jsonb_build_object('votes', (hivemind_postgrest_utilities.list_votes(_author, _permlink, _limit, 'database_list_by_comment_voter'::hivemind_postgrest_utilities.list_votes_case, 'database_api'::hivemind_postgrest_utilities.vote_presentation, _voter)));
   ELSE
-    RETURN json_build_object('votes', (hivemind_postgrest_utilities.list_votes(_author, _permlink, _limit, 'database_list_by_voter_comment'::hivemind_postgrest_utilities.list_votes_case, 'database_api'::hivemind_postgrest_utilities.vote_presentation, _voter)));
+    RETURN jsonb_build_object('votes', (hivemind_postgrest_utilities.list_votes(_author, _permlink, _limit, 'database_list_by_voter_comment'::hivemind_postgrest_utilities.list_votes_case, 'database_api'::hivemind_postgrest_utilities.vote_presentation, _voter)));
   END IF;
 END;
 $$

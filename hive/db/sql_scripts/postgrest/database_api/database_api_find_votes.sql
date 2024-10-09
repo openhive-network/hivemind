@@ -1,13 +1,13 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.database_api_find_votes;
-CREATE FUNCTION hivemind_endpoints.database_api_find_votes(IN _json_is_object BOOLEAN, IN _params JSON)
-RETURNS JSON
+CREATE FUNCTION hivemind_endpoints.database_api_find_votes(IN _json_is_object BOOLEAN, IN _params JSONB)
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
 AS
 $$
 DECLARE
   _vote_args hivemind_postgrest_utilities.vote_arguments;
-  _result JSON;
+  _result JSONB;
 BEGIN
   _vote_args := hivemind_postgrest_utilities.get_validated_vote_arguments(_params, _json_is_object);
 

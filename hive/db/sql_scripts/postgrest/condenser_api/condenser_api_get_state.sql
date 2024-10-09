@@ -1,6 +1,6 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_state;
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_state(IN _json_is_object BOOLEAN, IN _params JSON)
-RETURNS JSON
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_state(IN _json_is_object BOOLEAN, IN _params JSONB)
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
 AS

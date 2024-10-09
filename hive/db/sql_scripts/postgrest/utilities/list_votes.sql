@@ -14,14 +14,14 @@ _result JSONB;
 BEGIN
 FOR _vote IN SELECT * FROM jsonb_array_elements(_votes) LOOP
   IF _presentation_mode = 'condenser_api' THEN
-    _result = COALESCE(_result, '[]'::jsonb) || json_build_object(
+    _result = COALESCE(_result, '[]'::jsonb) || jsonb_build_object(
       'percent', _vote->>'percent',
       'reputation', _vote->'reputation',
       'rshares', _vote->'rshares',
       'voter', _vote->>'voter'
     )::jsonb;
   ELSIF _presentation_mode = 'database_api' THEN
-    _result = COALESCE(_result, '[]'::jsonb) || json_build_object(
+    _result = COALESCE(_result, '[]'::jsonb) || jsonb_build_object(
       'id', _vote->'id',
       'voter', _vote->>'voter',
       'author', _vote->>'author',
@@ -33,12 +33,12 @@ FOR _vote IN SELECT * FROM jsonb_array_elements(_votes) LOOP
       'num_changes', _vote->'num_changes'
     )::jsonb;
   ELSIF _presentation_mode = 'bridge_api' THEN
-    _result = COALESCE(_result, '[]'::jsonb) || json_build_object(
+    _result = COALESCE(_result, '[]'::jsonb) || jsonb_build_object(
       'rshares', _vote->'rshares',
       'voter', _vote->>'voter'
     )::jsonb;
   ELSIF _presentation_mode = 'active_votes' THEN
-    _result = COALESCE(_result, '[]'::jsonb) || json_build_object(
+    _result = COALESCE(_result, '[]'::jsonb) || jsonb_build_object(
       'percent', _vote->'percent',
       'reputation', _vote->'reputation',
       'rshares', _vote->'rshares',
@@ -78,7 +78,7 @@ BEGIN
   _post_id =  hivemind_postgrest_utilities.find_comment_id( _author, _permlink, True);
   _result = hivemind_postgrest_utilities.create_votes_json_array(
     ( 
-      SELECT jsonb_agg(row_to_json( r )) FROM (
+      SELECT jsonb_agg(to_jsonb( r )) FROM (
         SELECT 
           v.id,
           v.voter,

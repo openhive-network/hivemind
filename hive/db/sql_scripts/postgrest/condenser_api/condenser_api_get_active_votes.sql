@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_active_votes;
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_active_votes(IN _json_is_object BOOLEAN, IN _params JSON)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_active_votes(IN _json_is_object BOOLEAN, IN _params JSONB)
 RETURNS JSON
 LANGUAGE 'plpgsql'
 STABLE

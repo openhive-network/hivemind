@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_blog;
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_blog(IN _json_is_object BOOLEAN, IN _params JSON, IN _get_entries BOOLEAN)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_blog(IN _json_is_object BOOLEAN, IN _params JSONB, IN _get_entries BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -50,9 +50,9 @@ BEGIN
 
   IF _get_entries THEN
     RETURN (
-      SELECT to_json(result.array) FROM (
+      SELECT to_jsonb(result.array) FROM (
         SELECT ARRAY (
-          SELECT json_build_object(
+          SELECT jsonb_build_object(
             'blog', _account,
             'entry_id', row.entry_id,
             'author', row.author,
@@ -91,9 +91,9 @@ BEGIN
     );
   ELSE
     RETURN (
-      SELECT to_json(result.array) FROM (
+      SELECT to_jsonb(result.array) FROM (
         SELECT ARRAY (
-          SELECT json_build_object(
+          SELECT jsonb_build_object(
             'blog', _account,
             'entry_id', row.entry_id,
             'comment', hivemind_postgrest_utilities.create_condenser_post_object(row, 0, False),
