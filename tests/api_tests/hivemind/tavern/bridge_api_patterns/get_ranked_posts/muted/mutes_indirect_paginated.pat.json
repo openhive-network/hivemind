@@ -72,12 +72,15 @@
     "permlink": "re-complexring-preview-of-custom-steemit-com-skins-by-maximkichev-20160824t220504965z",
     "post_id": 973569,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 10
     },
     "title": "RE: Preview of Custom Steemit.com Skins by @maximkichev",
@@ -390,12 +393,15 @@
     "permlink": "my-1000th-post-and-other-steemit-achievements",
     "post_id": 925023,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 4.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 67
     },
     "title": "My 1000th post and other Steemit achievements!",
@@ -483,12 +489,15 @@
     "permlink": "re-jvper-international-money-transfer-provider-started-using-steem-20160823t142700478z",
     "post_id": 951445,
     "promoted": "0.000 HBD",
-    "replies": [],
     "reblogs": 0,
+    "replies": [],
     "stats": {
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 12
     },
     "title": "RE: International Money Transfer Provider started using Steem",

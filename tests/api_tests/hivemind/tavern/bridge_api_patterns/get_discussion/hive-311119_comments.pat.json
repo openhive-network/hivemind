@@ -21,7 +21,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "ismember-hive-311119",
-    "post_id": 1258121,
+    "post_id": 1258122,
     "promoted": "0.000 HBD",
     "reblogs": 0,
     "replies": [
@@ -62,7 +62,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-ismember-hive-311119",
-    "post_id": 1258123,
+    "post_id": 1258124,
     "promoted": "0.000 HBD",
     "reblogs": 0,
     "replies": [
@@ -102,7 +102,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-re-ismember-hive-311119",
-    "post_id": 1258124,
+    "post_id": 1258125,
     "promoted": "0.000 HBD",
     "reblogs": 0,
     "replies": [],
@@ -140,7 +140,7 @@
     "pending_payout_value": "0.000 HBD",
     "percent_hbd": 10000,
     "permlink": "re-2-ismember-hive-311119",
-    "post_id": 1258125,
+    "post_id": 1258126,
     "promoted": "0.000 HBD",
     "reblogs": 0,
     "replies": [],
@@ -148,6 +148,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        1
+      ],
       "total_votes": 0
     },
     "title": "RE: ismember This post will not be muted",

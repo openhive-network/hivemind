@@ -1,5 +1,6 @@
 """Bridge API public endpoints for posts"""
 from hive.conf import SCHEMA_NAME
+from hive.server.common.mute_reasons import MUTED_REASONS
 from hive.server.bridge_api.objects import _bridge_post_object, append_statistics_to_post, load_profiles
 from hive.server.common.helpers import (
     check_community,
@@ -460,3 +461,7 @@ async def _follow_contexts(db, accounts, observer_id, include_mute=False):
 async def count_reblogs(db, post_id: int):
     sql = f"""SELECT * FROM {SCHEMA_NAME}.get_reblog_count(:post_id)"""
     return await db.query_one(sql, post_id=post_id)
+
+@return_error_info
+async def list_muted_reasons_enum(db):
+    return MUTED_REASONS

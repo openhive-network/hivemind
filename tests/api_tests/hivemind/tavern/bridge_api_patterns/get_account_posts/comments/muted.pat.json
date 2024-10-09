@@ -31,6 +31,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 0
     },
     "title": "RE: Comment my post03",
@@ -69,6 +72,10 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0,
+        3
+      ],
       "total_votes": 0
     },
     "title": "RE: Comment my post02",
@@ -107,6 +114,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        3
+      ],
       "total_votes": 0
     },
     "title": "RE: Comment my post01",

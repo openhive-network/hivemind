@@ -83,7 +83,8 @@ BEGIN
       hp.curator_payout_value,
       hp.is_muted,
       feed.reblogged_by,
-      (SELECT array_to_string(feed.blacklist_source, ',', ''))
+      (SELECT array_to_string(feed.blacklist_source, ',', '')),
+      hp.muted_reasons
   FROM feed,
   LATERAL hivemind_app.get_post_view_by_id(feed.post_id) hp
   ORDER BY feed.min_created DESC, feed.post_id DESC

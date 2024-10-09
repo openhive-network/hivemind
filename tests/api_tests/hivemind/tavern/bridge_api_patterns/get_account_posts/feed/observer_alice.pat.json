@@ -3932,6 +3932,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "powerful crocodile 02",
@@ -3977,6 +3980,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 1
     },
     "title": "powerful crocodile 01",
@@ -4013,6 +4019,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        0
+      ],
       "total_votes": 0
     },
     "title": "powerful spider 02",
@@ -4210,6 +4219,9 @@
       "flag_weight": 0.0,
       "gray": true,
       "hide": false,
+      "muted_reasons": [
+        4
+      ],
       "total_votes": 0
     },
     "title": "i am muted in this community",
