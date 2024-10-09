@@ -737,6 +737,7 @@ def setup_runtime_code(db):
         "postgrest/database_api/database_api_list_votes.sql",
         "postgrest/condenser_api/condenser_api_get_active_votes.sql",
         "postgrest/utilities/rep_log10.sql",
+        "postgrest/utilities/muted_reasons_operations.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
