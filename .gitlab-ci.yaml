@@ -258,8 +258,7 @@ include:
         postgrest_negative/ \
         postgrest_negative.xml \
         $RUNNER_PYTEST_WORKERS \
-        "auto" \
-        ${COMPLETED_HIVE_API_METHODS:-}
+        "auto"
     echo -e "\e[0Ksection_end:$(date +%s):postgrest_negative\r\e[0K"
 
 
