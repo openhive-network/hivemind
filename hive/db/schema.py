@@ -744,6 +744,7 @@ def setup_runtime_code(db):
         "postgrest/utilities/create_bridge_post_object.sql",
         "postgrest/bridge_api/bridge_api_get_post.sql",
         "postgrest/bridge_api/bridge_api_get_payout_stats.sql",
+        "postgrest/hive_api/hive_api_get_info.sql"
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
