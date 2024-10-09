@@ -1,20 +1,20 @@
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_exception(_code INT, _message TEXT, _data TEXT = NULL, _id JSON = NULL)
-RETURNS JSON
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
 $$
 DECLARE
-  error_json_result JSON;
+  error_json_result JSONB;
 BEGIN
   IF _data IS NULL THEN
-    error_json_result := json_build_object(
+    error_json_result := jsonb_build_object(
       'code', _code,
       'message', _message
     );
   ELSE
-    error_json_result := json_build_object(
+    error_json_result := jsonb_build_object(
       'code', _code,
       'message', _message,
       'data', _data
@@ -26,7 +26,7 @@ $$;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_method_not_found_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_method_not_found_exception(_method_name TEXT)
-RETURNS JSON
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
@@ -39,7 +39,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_api_not_found_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_api_not_found_exception(_api_name TEXT)
-RETURNS JSON
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
@@ -52,7 +52,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_invalid_json_format_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_invalid_json_format_exception(_exception_message TEXT)
-RETURNS JSON
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
@@ -65,7 +65,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_parameter_validation_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_parameter_validation_exception(_exception_message TEXT)
-RETURNS JSON
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
@@ -78,7 +78,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.invalid_account_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.invalid_account_exception(_exception_message TEXT)
-RETURNS JSON
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
@@ -91,7 +91,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_post_deleted_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_post_deleted_exception(in _author TEXT, in _permlink TEXT, in _times INT)
-RETURNS JSON
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
@@ -104,7 +104,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_non_existing_post_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_non_existing_post_exception(in _author TEXT, in _permlink TEXT)
-RETURNS JSON
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
@@ -117,7 +117,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_invalid_parameters_array_length_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_invalid_parameters_array_length_exception(in _expected_count INTEGER, in _parameters_count INTEGER)
-RETURNS JSON
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
@@ -130,7 +130,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_unexpected_keyword_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_unexpected_keyword_exception(_arg_name TEXT)
-RETURNS TEXT
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
@@ -143,7 +143,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_missing_required_argument_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_missing_required_argument_exception(_arg_name TEXT)
-RETURNS TEXT
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
@@ -156,7 +156,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_invalid_permlink_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_invalid_permlink_exception(_exception_message TEXT)
-RETURNS TEXT
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
@@ -169,7 +169,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_uint_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_uint_exception(_id JSON)
-RETURNS JSON
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
@@ -182,7 +182,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_operation_param_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_operation_param_exception(_exception_message TEXT, _id JSON)
-RETURNS JSON
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
@@ -195,7 +195,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_category_not_exists_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_category_not_exists_exception(_category_name TEXT)
-RETURNS JSON
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
@@ -208,7 +208,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_community_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_community_exception(_exception_message TEXT)
-RETURNS JSON
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS
@@ -221,7 +221,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_missing_arg;
 CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.raise_missing_arg(_arg_name TEXT, _id JSON)
-RETURNS TEXT
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 AS
 $$
@@ -233,7 +233,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_extra_arg;
 CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.raise_extra_arg(_arg_name TEXT, _id JSON)
-RETURNS TEXT
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 AS
 $$
@@ -245,7 +245,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_int_exception;
 CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.raise_int_exception(_id JSON)
-RETURNS JSON
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 AS
 $$
@@ -257,7 +257,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_account_exception;
 CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.raise_account_exception(_id JSON)
-RETURNS JSON
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 AS
 $$
@@ -269,7 +269,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_invalid_array_exception;
 CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.raise_invalid_array_exception(_id JSON)
-RETURNS JSON
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 AS
 $$
@@ -281,7 +281,7 @@ $$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_invalid_community_type_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_invalid_community_type_exception()
-RETURNS JSON
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE
 AS

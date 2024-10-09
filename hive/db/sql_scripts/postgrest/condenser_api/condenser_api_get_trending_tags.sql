@@ -1,6 +1,6 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_trending_tags;
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_trending_tags(IN _json_is_object BOOLEAN, IN _params JSON)
-RETURNS JSON
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_trending_tags(IN _json_is_object BOOLEAN, IN _params JSONB)
+RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
 AS
@@ -25,9 +25,9 @@ BEGIN
   END IF;
 
 RETURN (
-  SELECT to_json(result.array) FROM (
+  SELECT to_jsonb(result.array) FROM (
     SELECT ARRAY(
-      SELECT to_json(row) FROM (
+      SELECT to_jsonb(row) FROM (
         WITH row AS (
           SELECT
             hcd.category AS name,

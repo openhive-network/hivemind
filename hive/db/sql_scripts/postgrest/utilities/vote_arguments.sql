@@ -6,7 +6,7 @@ CREATE TYPE hivemind_postgrest_utilities.vote_arguments AS (
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_validated_vote_arguments;
 CREATE FUNCTION hivemind_postgrest_utilities.get_validated_vote_arguments(
-  _params JSON,
+  _params JSONB,
   _json_is_object BOOLEAN
 ) RETURNS hivemind_postgrest_utilities.vote_arguments AS $$
 DECLARE

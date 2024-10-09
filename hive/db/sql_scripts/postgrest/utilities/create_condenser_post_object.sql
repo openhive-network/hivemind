@@ -12,7 +12,7 @@ _tmp_currency hivemind_postgrest_utilities.currency;
 _tmp_amount NUMERIC;
 
 BEGIN
-  _result = json_build_object(
+  _result = jsonb_build_object(
     'author', _row.author,
     'permlink', _row.permlink,
     'category', (CASE
@@ -31,7 +31,7 @@ BEGIN
     'children', _row.children,
     'curator_payout_value', '0.000 HBD',
     'promoted', _row.promoted || ' HBD',
-    'replies', array_to_json('{}'::INT[]),
+    'replies', to_jsonb('{}'::INT[]),
     'body_length', LENGTH(_row.body),
     'author_reputation', _row.author_rep,
     'parent_author', _row.parent_author,

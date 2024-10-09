@@ -1,7 +1,7 @@
 -- at the moment all type checks are performed by hivemind_postgrest_utilities.validate_json_parameters. So it shouldn't be necessary to check again type of passed parameter.
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.parse_string_argument_from_json;
-CREATE FUNCTION hivemind_postgrest_utilities.parse_string_argument_from_json(_params JSON, _json_is_object BOOLEAN, _arg_name TEXT, _arg_number INT, _exception_on_unset_field BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.parse_string_argument_from_json(_params JSONB, _json_is_object BOOLEAN, _arg_name TEXT, _arg_number INT, _exception_on_unset_field BOOLEAN)
 RETURNS TEXT
 LANGUAGE 'plpgsql'
 IMMUTABLE
@@ -42,7 +42,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.parse_integer_argument_from_json;
-CREATE FUNCTION hivemind_postgrest_utilities.parse_integer_argument_from_json(_params JSON, _json_is_object BOOLEAN, _arg_name TEXT, _arg_number INT, _exception_on_unset_field BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.parse_integer_argument_from_json(_params JSONB, _json_is_object BOOLEAN, _arg_name TEXT, _arg_number INT, _exception_on_unset_field BOOLEAN)
 RETURNS INTEGER
 LANGUAGE 'plpgsql'
 IMMUTABLE
@@ -83,7 +83,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.parse_array_argument_from_json;
-CREATE FUNCTION hivemind_postgrest_utilities.parse_array_argument_from_json(_params JSON, _json_is_object BOOLEAN, _arg_name TEXT, _arg_number INT, _exception_on_unset_field BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.parse_array_argument_from_json(_params JSONB, _json_is_object BOOLEAN, _arg_name TEXT, _arg_number INT, _exception_on_unset_field BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 IMMUTABLE

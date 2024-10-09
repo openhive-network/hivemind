@@ -2,8 +2,8 @@ DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.check_general_json_format;
 CREATE FUNCTION hivemind_postgrest_utilities.check_general_json_format(
     IN __jsonrpc TEXT,
     IN __method TEXT,
-    IN __params JSON,
-    IN __id JSON
+    IN __params JSONB,
+    IN __id JSONB
 ) RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -19,7 +19,7 @@ BEGIN
   END IF;
 
   if lower(__method) = 'call' THEN
-    if json_array_length(__params) < 2 THEN
+    if jsonb_array_length(__params) < 2 THEN
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_json_format_exception('Invalid JSON-RPC');
     END IF;
     __api_type = __params->>0;
@@ -29,16 +29,16 @@ BEGIN
   ELSE
     SELECT substring(__method FROM '^[^.]+') INTO __api_type;
     SELECT substring(__method FROM '[^.]+$') INTO __method_type;
-    IF json_typeof(__params) = 'object' THEN
+    IF jsonb_typeof(__params) = 'object' THEN
       __json_with_params_is_object = True;
-    ELSEIF json_typeof(__params) = 'array' THEN
-      IF json_array_length(__params) <> 0 THEN
+    ELSEIF jsonb_typeof(__params) = 'array' THEN
+      IF jsonb_array_length(__params) <> 0 THEN
         __json_with_params_is_object = False;
       ELSE
         __json_with_params_is_object = True;
       END IF;
     ELSE
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_json_format_exception('Invalid JSON format:' || json_typeof(__params)::text);
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_json_format_exception('Invalid JSON format:' || jsonb_typeof(__params)::text);
     END IF;
   END IF;
 

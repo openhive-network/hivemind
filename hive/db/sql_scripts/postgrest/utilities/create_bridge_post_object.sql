@@ -12,7 +12,7 @@ _tmp_amount NUMERIC;
 _tmp_muted_reasons JSONB;
 BEGIN
   _tmp_amount = hivemind_postgrest_utilities.rep_log10(_row.author_rep);
-  _result = json_build_object(
+  _result = jsonb_build_object(
     'post_id', _row.id,
     'author', _row.author,
     'permlink', _row.permlink,
@@ -32,7 +32,7 @@ BEGIN
     'net_rshares', _row.rshares,
     'is_paidout', _row.is_paidout,
     'payout_at', to_jsonb(hivemind_postgrest_utilities.json_date(_row.payout_at)),
-    'replies', array_to_json('{}'::INT[]),
+    'replies', to_jsonb('{}'::INT[]),
     'reblogs',  (CASE
                   WHEN _update_reblogs_field THEN (SELECT COUNT(*) FROM hivemind_app.hive_reblogs hr WHERE hr.post_id = _row.id)
                   ELSE 0
@@ -45,7 +45,7 @@ BEGIN
                         WHEN _row.json IS NOT NULL AND _row.json <> '' AND _row.json::jsonb IS NOT NULL THEN _row.json::jsonb
                         ELSE '{}'::jsonb
                       END),
-    'stats', json_build_object(
+    'stats', jsonb_build_object(
               'hide', _row.is_hidden,
               'gray', (CASE
                         WHEN _row.is_grayed OR _row.is_muted OR _row.role_id = -2 THEN True
@@ -66,8 +66,8 @@ BEGIN
     'active_votes', hivemind_postgrest_utilities.list_votes(_row.author, _row.permlink, /* in python code it was hardcoded */ 1000,
                     'create_post'::hivemind_postgrest_utilities.list_votes_case, 'bridge_api'::hivemind_postgrest_utilities.vote_presentation),
     'blacklists', (CASE
-                    WHEN _row.blacklists IS NOT NULL AND _row.blacklists <> '' THEN array_to_json(string_to_array(_row.blacklists, ',')) 
-                    ELSE array_to_json('{}'::INT[])
+                    WHEN _row.blacklists IS NOT NULL AND _row.blacklists <> '' THEN to_jsonb(string_to_array(_row.blacklists, ',')) 
+                    ELSE to_jsonb('{}'::INT[])
                   END)
   );
   -- reputation
