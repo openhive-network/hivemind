@@ -160,6 +160,8 @@ BEGIN
   CASE
     WHEN __method_type = 'get_info' THEN
       result := hivemind_endpoints.hive_api_get_info(__json_with_params_is_object, __params);
+    WHEN __method_type = 'db_head_state' THEN
+      result := hivemind_endpoints.hive_api_db_head_state(__json_with_params_is_object, __params);
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
   END CASE;
