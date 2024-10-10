@@ -3,6 +3,8 @@
 
   marks:
     - patterntest # muted by observer should make posts grayed. Alice mutes herself
+    - postgrest_ready
+
   includes:
     - !include ../../../common.yaml
 

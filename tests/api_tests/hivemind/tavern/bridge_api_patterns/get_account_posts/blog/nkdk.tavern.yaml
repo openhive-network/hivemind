@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # old HM produced ovrlapping pages, this was corrected
+    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml

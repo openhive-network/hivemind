@@ -3,6 +3,7 @@
 
   marks:
     - patterntest #todo find or create user with community
+    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml

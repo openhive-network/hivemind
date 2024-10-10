@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # mock_data - steemit muted in community 'hive-198723'
+    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml

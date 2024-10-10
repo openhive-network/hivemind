@@ -4,6 +4,7 @@
   marks:
     - patterntest # test-safari only has reblogs and replies, no top posts; original had less reblogs, most likely a bug
                   # also old HM produced overlapping pages
+    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml
