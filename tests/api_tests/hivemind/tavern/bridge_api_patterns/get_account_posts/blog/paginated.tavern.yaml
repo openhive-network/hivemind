@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # start permlink is one before last from 'blocktrades' test to show pagination (last there first here)
+    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml

@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # alice has many roles in differents communitties (mock_data)
+    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml
