@@ -2,11 +2,12 @@
   test_name: Hivemind
 
   marks:
-    - patterntest # relies on mock data and extra unofficial argument
+    - patterntest
+    - negative
     - postgrest_ready
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -19,8 +20,10 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.get_relationship_between_accounts"
-          params: {"account1": "flw5x", "account2": "flw9", "debug":true}
+          params: {"account": "tinfoilfedora"}
       response:
         status_code: 200
         verify_response_with:
           function: validate_response:compare_response_with_pattern
+          extra_kwargs:
+            error_response: true
