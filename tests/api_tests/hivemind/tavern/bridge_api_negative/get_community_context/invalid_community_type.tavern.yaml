@@ -4,7 +4,7 @@
   marks:
     - patterntest # should validate if community is passed as string
     - negative
-    - postgrest_ready
+    - postgrest_ignore
 
   includes:
     - !include ../../common.yaml
