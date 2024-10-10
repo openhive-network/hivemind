@@ -2,12 +2,13 @@
   test_name: Hivemind
 
   marks:
-    - patterntest
+    - patterntest # should validate if community is passed as string
     - negative
-    - postgrest_ignore
+    - postgrest_ready
+    - postgrest_exception
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -20,7 +21,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.get_community_context"
-          params: {"account": 1234, "name": "hive-117600"}
+          params: {"account": "blocktrades", "name": 1234}
       response:
         status_code: 200
         verify_response_with:
