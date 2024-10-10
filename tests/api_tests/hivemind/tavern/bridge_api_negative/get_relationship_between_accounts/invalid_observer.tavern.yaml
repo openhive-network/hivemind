@@ -5,6 +5,7 @@
     - patterntest # observer ignored by both old and new implementation
     - negative
     - xfail # it should fail after implementing observer filtering to get_relationship_between_accounts
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
