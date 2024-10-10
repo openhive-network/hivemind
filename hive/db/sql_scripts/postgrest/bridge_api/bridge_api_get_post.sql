@@ -22,7 +22,7 @@ BEGIN
   _post_id =  hivemind_postgrest_utilities.find_comment_id( _author, _permlink, True);
 
   RETURN (
-    SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, False, True) FROM (
+    SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, False, True) FROM (
       SELECT
         hp.id,
         hp.author,
