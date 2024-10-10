@@ -715,8 +715,6 @@ def setup_runtime_code(db):
         "postgrest/utilities/valid_limit.sql",
         "postgrest/utilities/json_date.sql",
         "postgrest/utilities/community.sql",
-        "postgrest/utilities/valid_account_no_exception.sql",
-        "postgrest/utilities/valid_observer.sql",
         "postgrest/bridge_api/bridge_api_get_community.sql",
         "postgrest/bridge_api/bridge_api_get_community_context.sql",
         "postgrest/utilities/dispatch.sql",

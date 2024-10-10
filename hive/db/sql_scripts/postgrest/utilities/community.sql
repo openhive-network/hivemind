@@ -11,7 +11,7 @@ AS
 $BODY$
 DECLARE
   _name TEXT = hivemind_postgrest_utilities.valid_community(name);
-  _observer TEXT = hivemind_postgrest_utilities.valid_observer(observer,TRUE);
+  _observer TEXT = hivemind_postgrest_utilities.valid_account(observer,TRUE);
 BEGIN
   RETURN (gc.id,
     gc.name,
