@@ -17,10 +17,12 @@ BEGIN
     _rep_is_negative = True;
     _rep = @_rep;
   END IF;
-                  --( first four digits \/              )
-  _result = LOG(10, (_rep / 10^(FLOOR(LOG(10, _rep) - 3)))) + 0.00000001;
+
+                  --( first four digits \/                   )
+  _result = LOG(10, FLOOR(_rep / 10^(FLOOR(LOG(10, _rep) - 3)))) + 0.00000001;
           --( HOW MANY DIGITS \/  )
   _result = (FLOOR(LOG10(_rep) + 1) - 1) + (_result - FLOOR(_result));
+
   _result = GREATEST(_result - 9, 0);
   IF _rep_is_negative THEN
     _result = -_result;
