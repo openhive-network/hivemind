@@ -355,6 +355,22 @@ cleanup_haf_cache_manual:
   tags:
     - data-cache-storage
 
+# Cleans up cahce after tests. Must depend on all jobs that use
+# this cache
+cleanup_pipeline_cache:
+  needs:
+    - sync
+    - e2e_benchmark
+    - e2e_benchmark_on_postgrest
+  extends: 
+    - .cleanup_cache_manual_template
+  stage: cleanup
+  variables:
+    CLEANUP_PATH_PATTERN: "${DATA_CACHE_HIVEMIND}"
+  when: always
+  tags:
+    - data-cache-storage
+
 download_await:
   extends: .job-defaults
   image: $CI_REGISTRY_IMAGE/ci-base-image:python-3.8-slim-6
