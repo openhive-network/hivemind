@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.create_bridge_post_object;
-CREATE FUNCTION hivemind_postgrest_utilities.create_bridge_post_object(IN _row RECORD, IN _truncate_body_len INT, IN _set_is_pinned_field BOOLEAN, IN _update_reblogs_field BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.create_bridge_post_object(IN _row RECORD, IN _truncate_body_len INT, IN _reblogged_by TEXT[], IN _set_is_pinned_field BOOLEAN, IN _update_reblogs_field BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -17,7 +17,7 @@ BEGIN
     'author', _row.author,
     'permlink', _row.permlink,
     'category', (CASE
-                  WHEN _row.category IS NULL OR _row.category = '' THEN 'undefined'
+                  WHEN _row.category IS NULL THEN ''
                   ELSE _row.category
                 END),
     'title', _row.title,
@@ -77,8 +77,15 @@ BEGIN
     _result = jsonb_set(_result, '{blacklists}', _result->'blacklists' || jsonb_build_array('reputation-1'));
   END IF;
 
-  IF _set_is_pinned_field THEN
+  IF _set_is_pinned_field AND _row.is_pinned THEN
     _result = jsonb_set(_result, '{stats}', _result->'stats' || jsonb_build_object('is_pinned', True));
+  END IF;
+
+  IF _reblogged_by IS NOT NULL AND CARDINALITY(_reblogged_by) > 0 THEN
+    IF CARDINALITY(_reblogged_by) > 1 THEN
+      _reblogged_by = array_sort(_reblogged_by);
+    END IF;
+    _result = jsonb_set(_result, '{reblogged_by}', to_jsonb(_reblogged_by));
   END IF;
 
   IF _row.community_title IS NOT NULL AND _row.community_title <> '' THEN
