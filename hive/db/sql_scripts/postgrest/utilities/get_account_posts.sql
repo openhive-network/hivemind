@@ -27,8 +27,8 @@ BEGIN
               blacklist.source
             FROM hivemind_app.hive_feed_cache hfc
             LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hfc.account_id)
-            WHERE hfc.account_id = _account_id AND ( _post_id = 0 OR hfc.created_at < _created_at OR (hfc.created_at = _created_at AND hfc.post_id < _post_id) )
-              AND ( NOT _called_from_bridge_api OR NOT EXISTS (
+            WHERE hfc.account_id = _account_id AND NOT ( _post_id <> 0 AND hfc.created_at >= _created_at AND NOT (hfc.created_at = _created_at AND hfc.post_id < _post_id) )
+              AND NOT ( _called_from_bridge_api AND EXISTS (
                 SELECT NULL FROM hivemind_app.live_posts_comments_view hp1
                 WHERE hp1.id = hfc.post_id AND hp1.community_id IS NOT NULL AND NOT EXISTS (
                 SELECT NULL FROM hivemind_app.hive_reblogs hr WHERE hr.blogger_id = _account_id AND hr.post_id = hp1.id)
@@ -119,7 +119,7 @@ BEGIN
             FROM hivemind_app.live_comments_view hp1
             LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp1.author_id)
             WHERE hp1.author_id = _account_id
-              AND (_post_id = 0 OR hp1.id < _post_id)
+              AND NOT ( _post_id <> 0 AND hp1.id >= _post_id)
             ORDER BY hp1.id DESC
             LIMIT _limit
           )
@@ -201,7 +201,7 @@ BEGIN
         SELECT ARRAY (
           SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, ( CASE WHEN row.reblogged_by IS NOT NULL THEN array_remove(row.reblogged_by, row.author)
                                                                                   ELSE NULL END), False, True) FROM (
-            WITH feed AS MATERIALIZED -- bridge_get_by_feed_with_reblog
+            WITH feed AS MATERIALIZED
             (
               SELECT 
                 hfc.post_id, 
@@ -213,9 +213,9 @@ BEGIN
               JOIN hivemind_app.hive_accounts ha ON ha.id = hf.following
               LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hfc.account_id)
               WHERE hfc.block_num > _cutoff AND hf.state = 1 AND hf.follower = _account_id
-              AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hfc.account_id))
+              AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hfc.account_id))
               GROUP BY hfc.post_id
-              HAVING _post_id = 0 OR MIN(hfc.created_at) < _min_date OR ( MIN(hfc.created_at) = _min_date AND hfc.post_id < _post_id )
+              HAVING NOT(_post_id <> 0 AND NOT MIN(hfc.created_at) < _min_date AND NOT ( MIN(hfc.created_at) = _min_date AND hfc.post_id < _post_id ))
               ORDER BY min_created DESC, hfc.post_id DESC
               LIMIT _limit
             )
@@ -292,14 +292,14 @@ BEGIN
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
         SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, False, True) FROM (
-          WITH posts AS MATERIALIZED -- bridge_get_account_posts_by_posts
+          WITH posts AS MATERIALIZED
           (
             SELECT id, author_id, blacklist.source
             FROM hivemind_app.live_posts_view hp
             LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp.author_id)
             WHERE
               hp.author_id = _account_id
-              AND ( _post_id = 0 OR hp.id < _post_id )
+              AND NOT( _post_id <> 0 AND hp.id >= _post_id )
             ORDER BY hp.id DESC
             LIMIT _limit
           )
@@ -385,8 +385,8 @@ BEGIN
             JOIN hivemind_app.hive_posts hp1 ON hp1.id = hpr.parent_id
             LEFT OUTER JOIN hivemind_app.blacklisted_by_observer_view blacklist ON (_observer_id != 0 AND blacklist.observer_id = _observer_id AND blacklist.blacklisted_id = hp1.author_id)
             WHERE hp1.author_id = _account_id
-              AND (_post_id = 0 OR hpr.id < _post_id )
-              AND (_observer_id = 0 OR NOT EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hpr.author_id))
+              AND NOT(_post_id <> 0 AND hpr.id >= _post_id )
+              AND NOT (_observer_id <> 0 AND EXISTS (SELECT 1 FROM hivemind_app.muted_accounts_by_id_view WHERE observer_id = _observer_id AND muted_id = hpr.author_id))
             ORDER BY hpr.id + 1 DESC
             LIMIT _limit
           )
@@ -477,8 +477,7 @@ BEGIN
           WHERE
             hp.author_id = _account_id
             AND NOT hp.is_paidout
-            AND ( _post_id = 0 OR (hp.payout + hp.pending_payout) < _payout_limit
-            OR ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id) )
+            AND NOT( _post_id <> 0 AND (hp.payout + hp.pending_payout) >= _payout_limit AND NOT ((hp.payout + hp.pending_payout) = _payout_limit AND hp.id < _post_id) )
           ORDER BY (hp.payout + hp.pending_payout) DESC, hp.id DESC
           LIMIT _limit
           )
