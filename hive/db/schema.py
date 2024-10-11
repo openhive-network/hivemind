@@ -767,28 +767,23 @@ def setup_runtime_code(db):
           """
 
     # Update hivemind_app.hive_stats table
-    git_rev = f"""
-              UPDATE {SCHEMA_NAME}.hive_state
-              SET hivemind_git_rev = '{GIT_REVISION}'
-              WHERE hivemind_git_rev != '{GIT_REVISION}';
-              """
+    slq_hive_state_update = f"""
+        UPDATE {SCHEMA_NAME}.hive_state
+        SET hivemind_git_date = '{GIT_DATE}'
+        WHERE hivemind_git_date != '{GIT_DATE}';
 
-    git_date = f"""
-               UPDATE {SCHEMA_NAME}.hive_state
-               SET hivemind_git_date = '{GIT_DATE}'
-               WHERE hivemind_git_date != '{GIT_DATE}';
-               """
+        UPDATE {SCHEMA_NAME}.hive_state
+        SET hivemind_git_rev = '{GIT_REVISION}'
+        WHERE hivemind_git_rev != '{GIT_REVISION}';
 
-    version = f"""
-              UPDATE {SCHEMA_NAME}.hive_state
-              SET hivemind_version = '{VERSION}'
-              WHERE hivemind_version != '{VERSION}';
-              """
+        UPDATE {SCHEMA_NAME}.hive_state
+        SET hivemind_version = '{VERSION}'
+        WHERE hivemind_version != '{VERSION}';
+        """
 
     db.query_no_return(sql.format(GIT_REVISION))
-    db.query_no_return(git_rev)
-    db.query_no_return(git_date)
-    db.query_no_return(version)
+    db.query_no_return(slq_hive_state_update)
+
 
 def perform_db_upgrade(db, admin_db):
     sql_scripts_dir_path = Path(__file__).parent /'sql_scripts'
