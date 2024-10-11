@@ -130,3 +130,43 @@ BEGIN
 END
 $$
 ;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.parse_boolean_argument_from_json;
+CREATE FUNCTION hivemind_postgrest_utilities.parse_boolean_argument_from_json(_params JSONB, _json_is_object BOOLEAN, _arg_name TEXT, _arg_number INT, _exception_on_unset_field BOOLEAN) 
+RETURNS BOOLEAN
+LANGUAGE 'plpgsql'
+IMMUTABLE
+AS
+$$
+DECLARE
+  bool_value BOOLEAN;
+BEGIN
+  IF _exception_on_unset_field THEN
+    IF _json_is_object THEN
+      IF _params->>_arg_name IS NULL THEN
+        RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_missing_required_argument_exception(_arg_name);
+      END IF;
+      bool_value := (_params->>_arg_name);
+    ELSE
+      IF _params->>_arg_number IS NULL THEN
+        RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_missing_required_argument_exception(_arg_name);
+      END IF;
+      bool_value := (_params->>_arg_number::TEXT);
+    END IF;
+  ELSE
+    IF _json_is_object THEN
+      IF _params->>_arg_name IS NULL THEN
+        RETURN NULL;
+      END IF;
+      bool_value := (_params->>_arg_name);
+    ELSE
+      IF _params->>_arg_number IS NULL THEN
+        RETURN NULL;
+      END IF;
+      bool_value := (_params->>_arg_number::TEXT);
+    END IF;
+  END IF;
+  RETURN bool_value;
+END
+$$
+;
