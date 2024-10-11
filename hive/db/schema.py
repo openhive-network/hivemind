@@ -748,6 +748,7 @@ def setup_runtime_code(db):
         "postgrest/hive_api/hive_api_db_head_state.sql",
         "postgrest/utilities/get_account_posts.sql",
         "postgrest/bridge_api/bridge_api_get_account_posts.sql",
+        "postgrest/bridge_api/bridge_api_get_relationship_between_accounts.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
