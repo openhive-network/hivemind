@@ -130,8 +130,8 @@ class Accounts(DbAdapterHolder):
         (_posting_json_metadata, _json_metadata) = get_profile_str(op_details)
 
         sql = f"""
-                  INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at, posting_json_metadata, json_metadata )
-                  VALUES ( '{name}', '{block_date}', {cls.get_json_data(_posting_json_metadata)}, {cls.get_json_data(_json_metadata)} )
+                  INSERT INTO {SCHEMA_NAME}.hive_accounts (name, created_at, posting_json_metadata, json_metadata, haf_id )
+                  VALUES ( '{name}', '{block_date}', {cls.get_json_data(_posting_json_metadata)}, {cls.get_json_data(_json_metadata)}, (select ha.id from hivemind_app.accounts_view ha where ha.name = '{name}') )
                   RETURNING id
               """
 
