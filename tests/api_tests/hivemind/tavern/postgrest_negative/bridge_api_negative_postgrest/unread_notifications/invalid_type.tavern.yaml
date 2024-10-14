@@ -5,10 +5,9 @@
     - patterntest
     - negative
     - postgrest_ready
-    - postgrest_ignore
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -21,7 +20,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.unread_notifications"
-          params: {"account": "not-exitsting"}
+          params: {"account": 1234}
       response:
         status_code: 200
         verify_response_with:

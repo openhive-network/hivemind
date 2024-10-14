@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # all messeges are unread
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
