@@ -2,22 +2,30 @@ DROP VIEW IF EXISTS hivemind_app.hive_accounts_rank_view CASCADE;
 
 CREATE OR REPLACE VIEW hivemind_app.hive_accounts_rank_view
  AS
-select ha.id, 
+SELECT ha.id,
 	  case
-            WHEN ds.account_rank < 200 THEN 70
-            WHEN ds.account_rank < 1000 THEN 60
-            WHEN ds.account_rank < 6500 THEN 50
-            WHEN ds.account_rank < 25000 THEN 40
-            WHEN ds.account_rank < 100000 THEN 30
-            ELSE 20
+      WHEN ds.account_rank < 200 THEN 70
+      WHEN ds.account_rank < 1000 THEN 60
+      WHEN ds.account_rank < 6500 THEN 50
+      WHEN ds.account_rank < 25000 THEN 40
+      WHEN ds.account_rank < 100000 THEN 30
+      ELSE 20
 	  end AS score
-from hivemind_app.hive_accounts ha
-left join 
+FROM hivemind_app.hive_accounts ha
+LEFT JOIN
 (
-	SELECT ha3.id, rank() OVER (ORDER BY ha3.reputation DESC) as account_rank
-    FROM hivemind_app.hive_accounts_view ha3
-	order by ha3.reputation desc
-	limit 150000
+  WITH base_rank_data AS
+  (
+  SELECT ha3.account_id, rank() OVER (ORDER BY ha3.reputation DESC) AS account_rank
+  FROM account_reputations ha3
+	ORDER BY ha3.reputation DESC
+	LIMIT 150000
+  )
+  SELECT ha.id,
+         brd.account_rank
+  FROM base_rank_data brd
+  JOIN hivemind_app.hive_accounts ha on ha.haf_id = brd.account_id
+
   -- Conditions above (related to rank.position) eliminates all records having rank > 100k. So with inclding some
   -- additional space for redundant accounts (having same reputation) lets assume we're limiting it to 150k
   -- As another reason, it can be pointed that only 2% of account has the same reputations, it means only 2000
