@@ -2,7 +2,7 @@ DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.check_community;
 CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.check_community(_name TEXT)
   RETURNS BOOLEAN
   LANGUAGE plpgsql
-  STABLE
+  IMMUTABLE
 AS
 $BODY$
 BEGIN
