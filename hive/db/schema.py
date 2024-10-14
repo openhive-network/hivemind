@@ -32,7 +32,8 @@ def build_metadata():
         'hive_accounts',
         metadata,
         sa.Column('hive_rowid', sa.BigInteger, server_default=hive_rowid_seq.next_value(), nullable=False),
-        sa.Column('id', sa.Integer, primary_key=True),
+        sa.Column('id', sa.Integer, primary_key=True), # warning this ID does not match to hive.accounts::id
+        sa.Column('haf_id', sa.Integer, nullable=True), # Account ID matching hive.accounts::id
         sa.Column('name', VARCHAR(16, collation='C'), nullable=False),
         sa.Column('created_at', sa.DateTime, nullable=False),
         # sa.Column('block_num', sa.Integer, nullable=False),
@@ -43,6 +44,7 @@ def build_metadata():
         sa.Column('posting_json_metadata', sa.Text),
         sa.Column('json_metadata', sa.Text),
         sa.UniqueConstraint('name', name='hive_accounts_ux1'),
+        sa.Index('hive_accounts_haf_id_idx', 'haf_id'),
     )
 
     sa.Table(
