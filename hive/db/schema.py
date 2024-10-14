@@ -773,22 +773,28 @@ def setup_runtime_code(db):
           """
 
     # Update hivemind_app.hive_stats table
-    slq_hive_state_update = f"""
-        UPDATE {SCHEMA_NAME}.hive_state
-        SET hivemind_git_date = '{GIT_DATE}'
-        WHERE hivemind_git_date != '{GIT_DATE}';
-
-        UPDATE {SCHEMA_NAME}.hive_state
-        SET hivemind_git_rev = '{GIT_REVISION}'
-        WHERE hivemind_git_rev != '{GIT_REVISION}';
-
-        UPDATE {SCHEMA_NAME}.hive_state
-        SET hivemind_version = '{VERSION}'
-        WHERE hivemind_version != '{VERSION}';
-        """
+    sql_hive_state_update = f"""
+                            UPDATE {SCHEMA_NAME}.hive_state
+                            SET
+                                hivemind_git_date = CASE
+                                    WHEN hivemind_git_date != '{GIT_DATE}' THEN '{GIT_DATE}'
+                                    ELSE hivemind_git_date
+                                END,
+                                hivemind_git_rev = CASE
+                                    WHEN hivemind_git_rev != '{GIT_REVISION}' THEN '{GIT_REVISION}'
+                                    ELSE hivemind_git_rev
+                                END,
+                                hivemind_version = CASE
+                                    WHEN hivemind_version != '{VERSION}' THEN '{VERSION}'
+                                    ELSE hivemind_version
+                                END
+                            WHERE hivemind_git_date != '{GIT_DATE}'
+                                OR hivemind_git_rev != '{GIT_REVISION}'
+                                OR hivemind_version != '{VERSION}';
+                            """
 
     db.query_no_return(sql.format(GIT_REVISION))
-    db.query_no_return(slq_hive_state_update)
+    db.query_no_return(sql_hive_state_update)
 
 
 def perform_db_upgrade(db, admin_db):
