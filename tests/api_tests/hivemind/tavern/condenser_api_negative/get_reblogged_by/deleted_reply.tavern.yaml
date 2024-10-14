@@ -3,7 +3,6 @@
 
   marks:
     - patterntest # bug in old HM
-    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

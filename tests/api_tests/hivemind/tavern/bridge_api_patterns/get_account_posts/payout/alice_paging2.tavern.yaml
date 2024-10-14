@@ -3,7 +3,6 @@
 
   marks:
     - patterntest # mock_data - second and -02 posts muted
-    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml

@@ -3,7 +3,6 @@
 
   marks:
     - patterntest #in old hivemind an account `jamesc` didn't make any reblog
-    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

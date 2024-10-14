@@ -3,7 +3,6 @@
 
   marks:
     - patterntest # not comparable to original due to ordering influenced by different pending payouts (also order of tags with the same payout was basically random) 
-    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

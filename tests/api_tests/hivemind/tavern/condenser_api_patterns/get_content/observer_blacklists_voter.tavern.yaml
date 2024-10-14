@@ -4,7 +4,6 @@
   marks:
     - patterntest # ned upvote `recursive/bertrand-russell-on-the-paradox-of-fools-and-wise-men` and he is blacklisted by spaminator (mockdata)
                   # observer is not implemented - has no effect on the result (votes)
-    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

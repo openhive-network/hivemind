@@ -4,7 +4,6 @@
   marks:
     - patterntest # original didn't test for account existence, only returned empty results
     - negative
-    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml

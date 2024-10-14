@@ -6,7 +6,6 @@
     - negative
     - failing
     - xfail # observer is ignored at the moment
-    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml

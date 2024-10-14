@@ -3,7 +3,6 @@
 
   marks:
     - patterntest # original HM as well as fat node didn't like skipping parameters (patterns made with all params given)
-    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

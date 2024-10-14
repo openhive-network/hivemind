@@ -4,7 +4,6 @@
   marks:
     - patterntest # call lists no more than 1000 votes
     # this post due to information from database - total_votes = 1565
-    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

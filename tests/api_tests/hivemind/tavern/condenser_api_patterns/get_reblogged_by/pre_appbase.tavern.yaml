@@ -3,7 +3,6 @@
 
   marks:
     - patterntest # bug in old hivemind
-    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

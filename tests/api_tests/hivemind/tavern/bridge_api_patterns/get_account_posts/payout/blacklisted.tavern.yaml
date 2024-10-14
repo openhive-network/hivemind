@@ -3,7 +3,6 @@
 
   marks:
     - patterntest # spaminator blacklists ned (mock data) - post should be visible
-    - postgrest_ready
                   
 
   includes:

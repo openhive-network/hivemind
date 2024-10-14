@@ -3,7 +3,6 @@
 
   marks:
     - patterntest # relies on mock data
-    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

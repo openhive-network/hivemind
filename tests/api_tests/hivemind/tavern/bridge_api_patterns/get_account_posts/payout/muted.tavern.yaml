@@ -3,7 +3,6 @@
 
   marks:
     - patterntest # ignoreall mute gtg (mock data) - posts should be grayed
-    - postgrest_ready
 
 
   includes:

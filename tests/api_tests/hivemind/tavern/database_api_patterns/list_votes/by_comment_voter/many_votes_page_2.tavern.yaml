@@ -3,7 +3,6 @@ test_name: Hivemind
 
 marks:
   - patterntest # more votes than hardcoded limit, second page; fat node did not stop when votes on selected post ended
-  - postgrest_ready
 
 includes:
   - !include ../../../common.yaml

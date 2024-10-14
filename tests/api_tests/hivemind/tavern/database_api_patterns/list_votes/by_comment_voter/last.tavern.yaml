@@ -3,7 +3,6 @@ test_name: Hivemind
 
 marks:
   - patterntest # in fat node only first was correct, rest is basically random (new version does not output voters that did not vote for given post)
-  - postgrest_ready
 
 includes:
   - !include ../../../common.yaml

@@ -3,7 +3,6 @@
 
   marks:
     - patterntest # blacklisted should be visible, no muted posts here
-    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml

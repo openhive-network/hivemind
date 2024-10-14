@@ -4,7 +4,6 @@
   marks:
     - patterntest
     - negative
-    - postgrest_ready
     - postgrest_exception
 
   includes:

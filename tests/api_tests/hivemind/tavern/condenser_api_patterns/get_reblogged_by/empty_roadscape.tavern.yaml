@@ -3,7 +3,6 @@
 
   marks:
     - patterntest #a result is empty, because no one reblogged this post
-    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

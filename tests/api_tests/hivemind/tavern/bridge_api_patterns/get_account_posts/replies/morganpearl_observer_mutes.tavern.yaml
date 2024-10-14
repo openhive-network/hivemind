@@ -4,7 +4,6 @@
   marks:
     - patterntest
     # morganpearl muted users chitty and arcange. Response should be the same as gtg observer + 4 more posts
-    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml

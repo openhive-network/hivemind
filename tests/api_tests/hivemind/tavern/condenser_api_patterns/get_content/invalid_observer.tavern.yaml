@@ -3,7 +3,6 @@
 
   marks:
     - patterntest # does not validate observer in any way at the moment
-    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

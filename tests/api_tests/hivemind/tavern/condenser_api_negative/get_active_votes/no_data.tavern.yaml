@@ -4,7 +4,6 @@
   marks:
     - patterntest # required values
     - negative    # timestamp changes
-    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

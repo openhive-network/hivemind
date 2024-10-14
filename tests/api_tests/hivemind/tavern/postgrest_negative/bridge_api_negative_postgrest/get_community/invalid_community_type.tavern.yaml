@@ -4,7 +4,6 @@
   marks:
     - patterntest # should validate community name
     - negative
-    - postgrest_ready
     - postgrest_exception
 
   includes:

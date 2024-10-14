@@ -5,7 +5,6 @@
     - patterntest
     # spaminator blacklists ned which reply to `liondani/give-us-your-ideas-and-be-the-reason-to-make-steemit-the-social-platform-that`
     # blacklisted user's post should be visible
-    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml

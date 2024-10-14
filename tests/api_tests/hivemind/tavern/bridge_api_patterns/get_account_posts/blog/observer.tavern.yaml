@@ -3,7 +3,6 @@
 
   marks:
     - patterntest # observer ignored - ignoreall mutes gtg
-    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml

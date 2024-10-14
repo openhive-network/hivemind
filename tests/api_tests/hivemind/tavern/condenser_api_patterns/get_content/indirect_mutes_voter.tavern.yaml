@@ -5,7 +5,6 @@
     - patterntest # gtg upvote `luke-williams/buying-bitcoin-in-taiwan`
                   # alice follows muted of ignoreall who mutes gtg (mock data)
                   # observer is not implemented - has no effect on the result (votes)
-    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

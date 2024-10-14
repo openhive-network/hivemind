@@ -4,7 +4,6 @@
   marks:
     - patterntest # bug in old HM and empty post in fat node; post deleted 5 times within 5mln blocks and not recreated at the end
     - negative
-    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

@@ -5,7 +5,6 @@
     - patterntest # ned upvote `recursive/bertrand-russell-on-the-paradox-of-fools-and-wise-men`
                   # alice follows blacklisted of spaminator who blacklists ned (mock data)
                   # observer is not implemented - has no effect on the result (votes)
-    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

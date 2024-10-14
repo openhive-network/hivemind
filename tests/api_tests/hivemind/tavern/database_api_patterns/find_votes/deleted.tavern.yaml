@@ -3,7 +3,6 @@ test_name: Hivemind
 
 marks:
   - patterntest # see comment in ../find_comments/deleted.tavern.yaml
-  - postgrest_ready
 
 includes:
   - !include ../../common.yaml
