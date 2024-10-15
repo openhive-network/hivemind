@@ -2,11 +2,13 @@
   test_name: Hivemind
 
   marks:
-    - patterntest
+    - patterntest # communities not present in 5mln blocks
+    - negative
     - postgrest_ready
+    - postgrest_exception
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -19,8 +21,10 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.account_notifications"
-          params: {"account":"steemit", "min_score": 15, "limit":100}
+          params: {"account":"hive-197922","limit":50}
       response:
-        status_code: 200
+        status_code: 400
         verify_response_with:
           function: validate_response:compare_response_with_pattern
+          extra_kwargs:
+            error_response: true
