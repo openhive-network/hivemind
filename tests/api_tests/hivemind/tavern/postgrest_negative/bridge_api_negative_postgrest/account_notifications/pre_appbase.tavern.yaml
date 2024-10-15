@@ -2,11 +2,12 @@
   test_name: Hivemind
 
   marks:
-    - patterntest
+    - patterntest # `call` requires condenser_api
+    - negative
     - postgrest_ready
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -18,9 +19,11 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "bridge.account_notifications"
-          params: {"account":"steemit", "min_score": 15, "limit":100}
+          method: "call"
+          params: ["bridge_api", "account_notifications", ["steemit",15, 20]]
       response:
         status_code: 200
         verify_response_with:
           function: validate_response:compare_response_with_pattern
+          extra_kwargs:
+            error_response: true

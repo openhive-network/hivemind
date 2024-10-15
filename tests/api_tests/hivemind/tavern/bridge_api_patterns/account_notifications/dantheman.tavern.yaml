@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # old notification score was related to voting power, now it is related to reputation, since vp is not available to HM
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

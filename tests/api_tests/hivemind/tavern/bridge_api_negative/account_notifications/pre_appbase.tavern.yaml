@@ -4,6 +4,8 @@
   marks:
     - patterntest # `call` requires condenser_api
     - negative
+    - postgrest_ready
+    - postgrest_ignore
 
   includes:
     - !include ../../common.yaml
