@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # community exists but there is no posts related
+    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml

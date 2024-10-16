@@ -3,7 +3,8 @@
 
   marks:
     - patterntest # see also tag_all.tavern.yaml; ignoreall ignores fyrstikken (mock data)
-
+    - postgrest_ready
+    
   includes:
     - !include ../../../common.yaml
 

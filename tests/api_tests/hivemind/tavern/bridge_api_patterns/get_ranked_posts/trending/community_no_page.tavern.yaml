@@ -3,7 +3,8 @@
 
   marks:
     - patterntest # communities not implemented under 5 mln blocks so all data comes from mocks
-
+    - postgrest_ready
+    
   includes:
     - !include ../../../common.yaml
 

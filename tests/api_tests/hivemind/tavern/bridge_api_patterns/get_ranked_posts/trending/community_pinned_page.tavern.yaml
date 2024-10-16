@@ -3,7 +3,8 @@
 
   marks:
     - patterntest # page post is pinned and limit makes it only return pinned posts; see also community_no_page
-
+    - postgrest_ready
+    
   includes:
     - !include ../../../common.yaml
 

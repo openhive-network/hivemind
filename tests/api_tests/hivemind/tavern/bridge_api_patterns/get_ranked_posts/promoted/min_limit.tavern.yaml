@@ -4,7 +4,8 @@
   marks:
     - patterntest # incomparable with original since top posts are also selected now (initial pattern made with get_post)
                   # blacklists matched with mock data
-
+    - postgrest_ready
+    
   includes:
     - !include ../../../common.yaml
 

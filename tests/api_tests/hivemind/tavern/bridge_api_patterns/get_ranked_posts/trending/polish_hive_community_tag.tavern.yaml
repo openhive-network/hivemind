@@ -3,7 +3,8 @@
 
   marks:
     - patterntest # empty results caused by community not present in 5 mln blocks
-
+    - postgrest_ready
+    
   includes:
     - !include ../../../common.yaml
 
