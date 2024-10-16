@@ -754,6 +754,7 @@ def setup_runtime_code(db):
         "postgrest/bridge_api/bridge_api_unread_notifications.sql",
         "postgrest/utilities/find_tag_id.sql",
         "postgrest/utilities/get_ranked_posts.sql",
+        "postgrest/bridge_api/bridge_api_get_ranked_posts.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
