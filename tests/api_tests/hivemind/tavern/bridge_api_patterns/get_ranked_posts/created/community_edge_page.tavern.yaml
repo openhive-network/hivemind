@@ -1,8 +1,8 @@
----
   test_name: Hivemind
 
   marks:
     - patterntest # page is pinned, but first post is nonpinned; compare with community_no_page
+    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml

@@ -4,7 +4,8 @@
   marks:
     - patterntest # incomparable with original as now not only replies but top posts are in results as well (pattern accepted as-is, too big to create manually)
                   # blacklists differ due to lack of global blacklist
-
+    - postgrest_ready
+    
   includes:
     - !include ../../../common.yaml
 

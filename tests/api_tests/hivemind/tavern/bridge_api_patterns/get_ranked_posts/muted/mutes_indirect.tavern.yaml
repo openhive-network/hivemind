@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # see also tag_all.tavern.yaml; alice follows muted of ignoreall who ignores r4fken (mock data) but it has no influence on results
+    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml

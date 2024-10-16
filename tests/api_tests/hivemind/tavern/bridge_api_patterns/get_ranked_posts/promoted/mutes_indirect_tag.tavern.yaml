@@ -3,7 +3,8 @@
 
   marks:
     - patterntest # see also tag_steemit.tavern.yaml; alice follows muted of ignoreall who ignores fyrstikken (mock data)
-
+    - postgrest_ready
+    
   includes:
     - !include ../../../common.yaml
 

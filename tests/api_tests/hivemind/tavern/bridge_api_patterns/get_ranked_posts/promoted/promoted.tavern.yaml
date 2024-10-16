@@ -3,7 +3,8 @@
 
   marks:
     - patterntest # change in behaviour compared to original, not only replies are in results, but top posts as well
-
+    - postgrest_ready
+    
   includes:
     - !include ../../../common.yaml
 

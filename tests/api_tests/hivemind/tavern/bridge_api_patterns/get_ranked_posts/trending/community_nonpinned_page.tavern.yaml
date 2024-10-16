@@ -3,7 +3,8 @@
 
   marks:
     - patterntest # page post is nonpinned; see also community_no_page
-
+    - postgrest_ready
+    
   includes:
     - !include ../../../common.yaml
 

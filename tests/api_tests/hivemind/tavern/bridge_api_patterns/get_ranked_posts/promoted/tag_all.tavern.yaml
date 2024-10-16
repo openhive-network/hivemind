@@ -4,7 +4,8 @@
   marks:
     - patterntest # change in behaviour compared to original, not only replies are in results, but top posts as well (initial pattern created with get_post calls)
                   # differences in blacklists are caused by lack of global/default blacklist - observer always needed
-
+    - postgrest_ready
+    
   includes:
     - !include ../../../common.yaml
 

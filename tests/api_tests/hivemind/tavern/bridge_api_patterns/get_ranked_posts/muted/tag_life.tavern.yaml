@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # posts missing in original had their payout rounded down to zero
+    - postgrest_ready
 
   includes:
     - !include ../../../common.yaml
