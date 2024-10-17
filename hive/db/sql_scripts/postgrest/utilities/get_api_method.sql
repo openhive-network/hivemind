@@ -37,6 +37,8 @@ BEGIN
       result :=  hivemind_endpoints.condenser_api_get_discussions_by_blog(__json_with_params_is_object, __params);
     WHEN __method_type = 'get_discussions_by_comments' THEN
       result :=  hivemind_endpoints.condenser_api_get_discussions_by_comments(__json_with_params_is_object, __params);
+    WHEN __method_type = 'get_replies_by_last_update' THEN
+      result :=  hivemind_endpoints.condenser_api_get_replies_by_last_update(__json_with_params_is_object, __params);
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
   END CASE;
