@@ -97,6 +97,12 @@ IMMUTABLE
 AS
 $$
 BEGIN
+  IF _author IS NULL THEN
+    _author = '';
+  END IF;
+  IF _permlink IS NULL THEN
+    _permlink = '';
+  END IF;
   RETURN hivemind_postgrest_utilities.raise_exception(-31999, 'Invalid parameters', 'Post ' || _author || '/' || _permlink || ' was deleted ' || _times || ' time(s)');
 END
 $$
@@ -110,7 +116,13 @@ IMMUTABLE
 AS
 $$
 BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', 'Post ' || _author || '/' || _permlink || ' does not exist');
+  IF _author IS NULL THEN
+    _author = '';
+  END IF;
+  IF _permlink IS NULL THEN
+    _permlink = '';
+  END IF;
+  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', 'Post ' || _author::TEXT || '/' || _permlink::TEXT || ' does not exist');
 END
 $$
 ;
