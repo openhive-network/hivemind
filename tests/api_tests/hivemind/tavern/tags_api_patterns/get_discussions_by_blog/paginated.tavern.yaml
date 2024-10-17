@@ -3,7 +3,8 @@
 
   marks:
     - patterntest # old version used overlapping paging - that was corrected
-
+    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

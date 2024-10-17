@@ -130,6 +130,10 @@ BEGIN
       result := hivemind_endpoints.condenser_api_get_content(__json_with_params_is_object, __params, /* _get_replies */ True, /* _content_additions */ False);
     WHEN __method_type = 'get_discussion' THEN
       result := hivemind_endpoints.condenser_api_get_content(__json_with_params_is_object, __params, /* _get_replies */ False, /* _content_additions */ False);
+    WHEN __method_type = 'get_discussions_by_blog' THEN
+      result := hivemind_endpoints.condenser_api_get_discussions_by_blog(__json_with_params_is_object, __params);
+    WHEN __method_type = 'get_discussions_by_comments' THEN
+      result := hivemind_endpoints.condenser_api_get_discussions_by_comments(__json_with_params_is_object, __params);
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
   END CASE;
