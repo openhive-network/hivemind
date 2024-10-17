@@ -756,6 +756,7 @@ def setup_runtime_code(db):
         "postgrest/utilities/get_ranked_posts.sql",
         "postgrest/bridge_api/bridge_api_get_ranked_posts.sql",
         "postgrest/condenser_api/condenser_api_get_discussions_by_blog.sql",
+        "postgrest/condenser_api/condenser_api_get_discussions_by_comments.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
