@@ -6,6 +6,7 @@
     - negative
     - failing
     - xfail # while this would be acceptable we should change it to invalid parameters over server error (code suggests we wanted to completely silence that, but rest passes is as generic error, old code was the same so...)
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
