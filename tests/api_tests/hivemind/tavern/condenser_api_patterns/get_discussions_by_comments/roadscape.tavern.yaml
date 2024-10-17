@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # original produced overlapping pages; it does not show in this case since given permlink points to top post, so it's not in results anyway
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
