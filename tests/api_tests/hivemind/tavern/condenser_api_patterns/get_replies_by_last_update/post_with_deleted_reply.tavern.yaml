@@ -6,6 +6,7 @@
                   # reply to his clueless-user-s-guide-to-upgrading-to-steemd-0-8-x post was deleted: @criticalproof/re-gregory-f-clueless-user-s-guide-to-upgrading-to-steemd-0-8-x-20160716t124218553z
                   # but if it wasn't it would be on selected page right below @kiwiscorner/re-gregory-f-re-kiwiscorner-speedpaint-also-art-improvement-in-less-then-a-year-20160717t040452393z
                   # original overlapped pages, but that was corrected
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

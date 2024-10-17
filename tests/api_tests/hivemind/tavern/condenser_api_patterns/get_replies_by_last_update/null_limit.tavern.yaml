@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # common bug with limit not applying default when null was passed explicitly (result exceeded max of 100 posts)
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
