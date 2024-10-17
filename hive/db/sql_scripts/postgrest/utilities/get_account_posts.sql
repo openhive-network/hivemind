@@ -367,7 +367,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_posts_by_replies;
-CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_replies(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _permlink_was_not_empty BOOLEAN, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_replies(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _permlink_was_not_empty BOOLEAN, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -387,7 +387,12 @@ BEGIN
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
         -- in python code i saw in that case is_pinned should be set, but I couldn't find an example in db to do a test case.
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, True, True) FROM (
+        SELECT
+        ( CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, True, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH replies AS MATERIALIZED
           (
             SELECT hpr.id, blacklist.source
