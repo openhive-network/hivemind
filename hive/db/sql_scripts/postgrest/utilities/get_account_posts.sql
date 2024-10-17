@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_posts_by_blog;
-CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_blog(IN _account TEXT, IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_blog(IN _account TEXT, IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -17,7 +17,12 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, (CASE WHEN row.author <> _account THEN ARRAY[_account] ELSE NULL END), False, True) FROM (
+        SELECT 
+        (
+          CASE WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, (CASE WHEN row.author <> _account THEN ARRAY[_account] ELSE NULL END), False, True)
+          ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH blog AS MATERIALIZED
           (
             SELECT 
