@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # see abit.tavern.yaml
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

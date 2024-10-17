@@ -4,6 +4,7 @@
   marks:
     - patterntest # replies to posts of gtg
                   # original overlapped pages, but that was corrected
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
