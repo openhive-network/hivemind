@@ -382,8 +382,14 @@ download_await:
       artifacts: true
   script:
     - |
-      wget --header "JOB-TOKEN: $CI_JOB_TOKEN" "$AWAIT_PACKAGE_URL" -O "${DATA_CACHE_HAF}/await"
-      chmod +x ${DATA_CACHE_HAF}/await
+      if [[ -e "${DATA_CACHE_HAF}/await" ]]; then
+        echo "Await is already present in ${DATA_CACHE_HAF}"
+        ls -lAh "${DATA_CACHE_HAF}"
+      else
+        echo "Downloading await..."
+        wget --header "JOB-TOKEN: $CI_JOB_TOKEN" "$AWAIT_PACKAGE_URL" -O "${DATA_CACHE_HAF}/await"
+        chmod +x ${DATA_CACHE_HAF}/await
+      fi
   tags:
     - data-cache-storage
 
