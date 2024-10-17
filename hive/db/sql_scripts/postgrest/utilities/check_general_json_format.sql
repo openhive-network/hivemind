@@ -26,6 +26,10 @@ BEGIN
     __method_type = __params->>1;
     __params = __params->>2;
     __json_with_params_is_object = False;
+    IF jsonb_typeof(__params) = 'array' AND jsonb_array_length(__params) = 1 AND jsonb_typeof(__params->0) = 'object' THEN
+      __json_with_params_is_object = True;
+      __params = __params->0;
+    END IF;
   ELSE
     SELECT substring(__method FROM '^[^.]+') INTO __api_type;
     SELECT substring(__method FROM '[^.]+$') INTO __method_type;
