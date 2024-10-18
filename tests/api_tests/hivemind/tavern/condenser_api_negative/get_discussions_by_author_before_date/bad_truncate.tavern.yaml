@@ -4,6 +4,7 @@
   marks:
     - patterntest # original didn't handle truncation in this call
     - negative
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
