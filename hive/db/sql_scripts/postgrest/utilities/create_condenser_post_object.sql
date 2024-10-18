@@ -41,7 +41,7 @@ BEGIN
     'beneficiaries', _row.beneficiaries,
     'max_accepted_payout', _row.max_accepted_payout,
     'percent_hbd', _row.percent_hbd,
-    'active_votes', hivemind_postgrest_utilities.list_votes(_row.author, _row.permlink, /* in python code it was hardcoded */ 1000,
+    'active_votes', hivemind_postgrest_utilities.list_votes(_row.id, /* in python code it was hardcoded */ 1000,
                     'create_post'::hivemind_postgrest_utilities.list_votes_case, (SELECT CASE
                                                                                     WHEN _content_additions THEN 'active_votes'::hivemind_postgrest_utilities.vote_presentation
                                                                                     ELSE 'condenser_api'::hivemind_postgrest_utilities.vote_presentation END))
