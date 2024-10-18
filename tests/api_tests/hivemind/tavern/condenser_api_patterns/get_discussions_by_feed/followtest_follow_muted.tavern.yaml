@@ -3,7 +3,8 @@
 
   marks:
     - patterntest # due to controversial changes cutting out observer related functionality this test is currenttly not filtering muted "peerplays"
-
+    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

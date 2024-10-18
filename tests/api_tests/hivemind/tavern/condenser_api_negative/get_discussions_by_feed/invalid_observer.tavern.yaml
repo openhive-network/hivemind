@@ -5,6 +5,7 @@
     - patterntest
     - negative
     - xfail # should validate observer
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
