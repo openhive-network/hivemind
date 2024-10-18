@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.create_condenser_post_object;
-CREATE FUNCTION hivemind_postgrest_utilities.create_condenser_post_object(IN _row RECORD, IN _truncate_body_len INT, IN _content_additions BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.create_condenser_post_object(IN _row RECORD, IN _truncate_body_len INT, IN _content_additions BOOLEAN, IN _reblogged_by TEXT[] DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -46,6 +46,13 @@ BEGIN
                                                                                     WHEN _content_additions THEN 'active_votes'::hivemind_postgrest_utilities.vote_presentation
                                                                                     ELSE 'condenser_api'::hivemind_postgrest_utilities.vote_presentation END))
   );
+
+  IF _reblogged_by IS NOT NULL AND CARDINALITY(_reblogged_by) > 0 THEN
+    IF CARDINALITY(_reblogged_by) > 1 THEN
+      _reblogged_by = array_sort(_reblogged_by);
+    END IF;
+    _result = jsonb_set(_result, '{reblogged_by}', to_jsonb(_reblogged_by));
+  END IF;
 
   -- afaik in all cases when currency is not HBD, assert is thrown in python code, so currency type is always HBD.
   IF _row.is_paidout THEN

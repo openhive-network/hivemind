@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_discussions_by_blog;
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_discussions_by_blog(IN _json_is_object BOOLEAN, IN _params JSONB)
+DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_discussions_by_blog_or_feed;
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_discussions_by_blog_or_feed(IN _json_is_object BOOLEAN, IN _params JSONB, IN _by_blog BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -53,7 +53,11 @@ BEGIN
       True),
     True);
 
-  RETURN hivemind_postgrest_utilities.get_account_posts_by_blog(_account_tag, _account_tag_id, _post_id, _observer_id, _limit, _truncate_body, False);
+  IF _by_blog  THEN
+    RETURN hivemind_postgrest_utilities.get_account_posts_by_blog(_account_tag, _account_tag_id, _post_id, _observer_id, _limit, _truncate_body, False);
+  ELSE
+    RETURN hivemind_postgrest_utilities.get_account_posts_by_feed(_account_tag_id, _post_id, _observer_id, _limit, _truncate_body, False);
+  END IF;
 END
 $$
 ;
