@@ -4,6 +4,7 @@
   marks:
     - patterntest # differences in pending payout make it incomparable with original (also order of comments with the same payout was basically random)
     # does not work correctly, start_author and start_permlink does not matter
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

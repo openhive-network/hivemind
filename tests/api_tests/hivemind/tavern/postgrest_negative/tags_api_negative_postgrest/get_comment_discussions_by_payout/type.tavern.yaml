@@ -5,9 +5,10 @@
     - patterntest
     - negative
     - postgrest_ready
+    - postgrest_exception
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -20,7 +21,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "tags_api.get_comment_discussions_by_payout"
-          params: ["1", "re-budgiebee-re-mikkolyytinen-re-budgiebee-hey-can-somebody-please-tell-me-how-to-add-pictures-to-blogs-20160911t191955857z", "5", "pictures", 0]
+          params: [2, "re-budgiebee-re-mikkolyytinen-re-budgiebee-hey-can-somebody-please-tell-me-how-to-add-pictures-to-blogs-20160911t191955857z", "5", "pictures", 0]
       response:
         status_code: 200
         verify_response_with:
