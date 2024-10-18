@@ -6,6 +6,7 @@
                   # there can be no nonempty results for not-up-to-date HM because it only gives posts that were created/reblogged within last month (no param to change it)
                   # there are 4 reblogs done by 'jamesc` account
                   # original produced overlapping pages
+    - postgrest_ready
   includes:
     - !include ../../common.yaml
 
