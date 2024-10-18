@@ -37,6 +37,8 @@ BEGIN
       result :=  hivemind_endpoints.condenser_api_get_discussions_by_blog_or_feed(__json_with_params_is_object, __params, /* by_blog */ True);
     WHEN __method_type = 'get_discussions_by_feed' THEN
       result :=  hivemind_endpoints.condenser_api_get_discussions_by_blog_or_feed(__json_with_params_is_object, __params, /* by_blog */ False);
+    WHEN __method_type = 'get_discussions_by_author_before_date' THEN
+      result :=  hivemind_endpoints.condenser_api_get_discussions_by_author_before_date(__json_with_params_is_object, __params);
     WHEN __method_type = 'get_discussions_by_comments' THEN
       result :=  hivemind_endpoints.condenser_api_get_discussions_by_comments(__json_with_params_is_object, __params);
     WHEN __method_type = 'get_replies_by_last_update' THEN

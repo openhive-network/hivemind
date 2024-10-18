@@ -758,6 +758,7 @@ def setup_runtime_code(db):
         "postgrest/condenser_api/condenser_api_get_discussions_by_blog_or_feed.sql",
         "postgrest/condenser_api/condenser_api_get_discussions_by_comments.sql",
         "postgrest/condenser_api/condenser_api_get_replies_by_last_update.sql",
+        "postgrest/condenser_api/condenser_api_get_discussion_by_author_before_date.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
