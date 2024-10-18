@@ -4,7 +4,7 @@
   marks:
     - patterntest # ignoreall ignores kental (mock data); see also tag paging (without observer)
                   # original didn't accept observer (.orig made without it); original also produced overlapping pages
-
+    - postgrest_ready
   includes:
     - !include ../../common.yaml
 

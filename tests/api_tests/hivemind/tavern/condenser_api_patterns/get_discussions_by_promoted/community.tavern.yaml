@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # IMHO this should be negative, since community does not exist
-
+    - postgrest_ready
   includes:
     - !include ../../common.yaml
 

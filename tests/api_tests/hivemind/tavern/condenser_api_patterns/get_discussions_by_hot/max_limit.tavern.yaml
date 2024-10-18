@@ -4,7 +4,7 @@
   marks:
     - patterntest # replies were also put in results in original version (but TODO suggested it was to be changed, now only top posts can be hot)
                   # compared to original extra vote is due to removed vote muting
-
+    - postgrest_ready
   includes:
     - !include ../../common.yaml
 

@@ -4,7 +4,7 @@
   marks:
     - patterntest # differences in pending payout make it incomparable with original (also order of comments with the same payout was basically random)
                   # compared to original extra vote is due to removed vote muting
-
+    - postgrest_ready
   includes:
     - !include ../../common.yaml
 

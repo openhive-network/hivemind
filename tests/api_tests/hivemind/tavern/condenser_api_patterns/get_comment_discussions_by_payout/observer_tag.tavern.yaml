@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # ignoreall ignores roland.haynes (mock data); see also tag_steemit
-
+    - postgrest_ready
   includes:
     - !include ../../common.yaml
 
