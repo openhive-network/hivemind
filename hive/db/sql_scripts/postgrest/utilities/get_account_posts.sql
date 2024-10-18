@@ -187,7 +187,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_account_posts_by_feed;
-CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_feed(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_account_posts_by_feed(IN _account_id INT, IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -209,8 +209,13 @@ BEGIN
    RETURN (
       SELECT to_jsonb(result.array) FROM (
         SELECT ARRAY (
-          SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, ( CASE WHEN row.reblogged_by IS NOT NULL THEN array_remove(row.reblogged_by, row.author)
-                                                                                  ELSE NULL END), False, True) FROM (
+          SELECT
+          ( CASE
+              WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(
+                  row, 0, (CASE WHEN row.reblogged_by IS NOT NULL THEN array_remove(row.reblogged_by, row.author) ELSE NULL END), False, True)
+              ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False, (CASE WHEN row.reblogged_by IS NOT NULL THEN array_remove(row.reblogged_by, row.author) ELSE NULL END))
+            END
+          ) FROM (
             WITH feed AS MATERIALIZED
             (
               SELECT 
