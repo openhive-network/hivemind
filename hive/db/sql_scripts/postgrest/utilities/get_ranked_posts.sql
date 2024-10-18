@@ -2,7 +2,7 @@ DROP TYPE IF EXISTS hivemind_postgrest_utilities.ranked_post_sort_type CASCADE;
 CREATE TYPE hivemind_postgrest_utilities.ranked_post_sort_type AS ENUM( 'hot', 'trending', 'promoted', 'created', 'muted', 'payout', 'payout_comments');
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_ranked_posts_for_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _sort_type hivemind_postgrest_utilities.ranked_post_sort_type)
+CREATE FUNCTION hivemind_postgrest_utilities.get_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN, IN _sort_type hivemind_postgrest_utilities.ranked_post_sort_type)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -12,7 +12,7 @@ DECLARE
 _extract_pinned_posts BOOLEAN DEFAULT False;
 _result JSONB DEFAULT '[]'::jsonb;
 BEGIN
-  IF _sort_type = ANY(ARRAY['trending'::hivemind_postgrest_utilities.ranked_post_sort_type, 'created'::hivemind_postgrest_utilities.ranked_post_sort_type])
+  IF _called_from_bridge_api AND _sort_type = ANY(ARRAY['trending'::hivemind_postgrest_utilities.ranked_post_sort_type, 'created'::hivemind_postgrest_utilities.ranked_post_sort_type])
     AND NOT (_post_id <> 0 AND NOT (SELECT is_pinned FROM hivemind_app.hive_posts WHERE id = _post_id LIMIT 1)) THEN
     _extract_pinned_posts = True;
   END IF;
@@ -21,7 +21,7 @@ BEGIN
     _result = _result || (
       SELECT to_jsonb(result.array) FROM (
         SELECT ARRAY (
-          SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+          SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True) FROM (
             WITH pinned_post AS MATERIALIZED
             (
               SELECT 
@@ -88,12 +88,12 @@ BEGIN
 
   IF _limit > 0 THEN
     CASE _sort_type
-      WHEN 'trending' THEN _result = _result || hivemind_postgrest_utilities.get_trending_ranked_posts_for_communities(_post_id, _observer_id, _limit, _tag, _called_from_bridge_api);
-      WHEN 'hot' THEN _result = _result || hivemind_postgrest_utilities.get_hot_ranked_posts_for_communities(_post_id, _observer_id, _limit, _tag);
-      WHEN 'created' THEN _result = _result || hivemind_postgrest_utilities.get_created_ranked_posts_for_communities(_post_id, _observer_id, _limit, _tag, _called_from_bridge_api);
-      WHEN 'promoted' THEN _result = _result || hivemind_postgrest_utilities.get_promoted_ranked_posts_for_communities(_post_id, _observer_id, _limit, _tag);
-      WHEN 'payout' THEN _result = _result || hivemind_postgrest_utilities.get_payout_ranked_posts_for_communities(_post_id, _observer_id, _limit, _tag);
-      WHEN 'payout_comments' THEN _result = _result || hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_communities(_post_id, _observer_id, _limit, _tag);
+      WHEN 'trending' THEN _result = _result || hivemind_postgrest_utilities.get_trending_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api);
+      WHEN 'hot' THEN _result = _result || hivemind_postgrest_utilities.get_hot_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api);
+      WHEN 'created' THEN _result = _result || hivemind_postgrest_utilities.get_created_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api);
+      WHEN 'promoted' THEN _result = _result || hivemind_postgrest_utilities.get_promoted_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api);
+      WHEN 'payout' THEN _result = _result || hivemind_postgrest_utilities.get_payout_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api);
+      WHEN 'payout_comments' THEN _result = _result || hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_communities(_post_id, _observer_id, _limit, _truncate_body, _tag, _called_from_bridge_api);
       WHEN 'muted' THEN _result = _result || hivemind_postgrest_utilities.get_muted_ranked_posts_for_communities(_post_id, _observer_id, _limit, _tag);
     END CASE;
   END IF;
@@ -104,7 +104,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_trending_ranked_posts_for_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_trending_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_trending_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -122,7 +122,13 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+        SELECT
+        (
+          CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH 
           community_posts as MATERIALIZED
           (
@@ -194,7 +200,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_promoted_ranked_posts_for_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_promoted_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_promoted_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -210,7 +216,12 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+        SELECT
+        ( CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH 
           community_posts as MATERIALIZED
           (
@@ -282,7 +293,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_payout_ranked_posts_for_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_payout_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_payout_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -301,7 +312,12 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+        SELECT
+        ( CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH 
           community_posts as MATERIALIZED
           (
@@ -374,7 +390,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -390,7 +406,12 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+        SELECT
+        ( CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH 
           community_posts as MATERIALIZED
           (
@@ -463,7 +484,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_hot_ranked_posts_for_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_hot_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_hot_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -479,7 +500,12 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+        SELECT
+        ( CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH 
           community_posts as MATERIALIZED
           (
@@ -551,7 +577,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_created_ranked_posts_for_communities;
-CREATE FUNCTION hivemind_postgrest_utilities.get_created_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_created_ranked_posts_for_communities(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -565,7 +591,12 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+        SELECT 
+        ( CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH 
           community_posts as MATERIALIZED
           (
@@ -726,7 +757,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_trending_ranked_posts_for_tag;
-CREATE FUNCTION hivemind_postgrest_utilities.get_trending_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_trending_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -745,7 +776,12 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+        SELECT
+        ( CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH 
           tag_posts as MATERIALIZED
           (
@@ -817,7 +853,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_hot_ranked_posts_for_tag;
-CREATE FUNCTION hivemind_postgrest_utilities.get_hot_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_hot_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -836,7 +872,12 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+        SELECT
+        ( CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH 
           tag_posts as MATERIALIZED
           (
@@ -907,7 +948,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_created_ranked_posts_for_tag;
-CREATE FUNCTION hivemind_postgrest_utilities.get_created_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_created_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -921,7 +962,12 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+        SELECT
+        ( CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH 
           tag_posts as MATERIALIZED
           (
@@ -994,7 +1040,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_promoted_ranked_posts_for_tag;
-CREATE FUNCTION hivemind_postgrest_utilities.get_promoted_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_promoted_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1013,7 +1059,12 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+        SELECT
+        ( CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH 
           tag_posts as MATERIALIZED
           (
@@ -1085,7 +1136,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_payout_ranked_posts_for_tag;
-CREATE FUNCTION hivemind_postgrest_utilities.get_payout_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_payout_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1105,7 +1156,12 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+        SELECT
+        ( CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH 
           tag_posts as MATERIALIZED
           (
@@ -1178,7 +1234,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_tag;
-CREATE FUNCTION hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _tag TEXT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_tag(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _tag TEXT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1197,7 +1253,12 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+        SELECT
+        ( CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH 
           tag_posts as MATERIALIZED
           (
@@ -1979,7 +2040,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_all_trending_ranked_posts;
-CREATE FUNCTION hivemind_postgrest_utilities.get_all_trending_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_all_trending_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -1995,7 +2056,12 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+        SELECT
+        ( CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH 
           all_posts as MATERIALIZED
           (
@@ -2066,7 +2132,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_all_hot_ranked_posts;
-CREATE FUNCTION hivemind_postgrest_utilities.get_all_hot_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_all_hot_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -2082,7 +2148,12 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+        SELECT
+        ( CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH 
           all_posts as MATERIALIZED
           (
@@ -2153,7 +2224,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_all_created_ranked_posts;
-CREATE FUNCTION hivemind_postgrest_utilities.get_all_created_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_all_created_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -2163,7 +2234,12 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+        SELECT
+        ( CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH 
           all_posts as MATERIALIZED
           (
@@ -2235,7 +2311,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_all_promoted_ranked_posts;
-CREATE FUNCTION hivemind_postgrest_utilities.get_all_promoted_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_all_promoted_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -2251,7 +2327,12 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+        SELECT
+        ( CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH 
           all_posts as MATERIALIZED
           (
@@ -2322,7 +2403,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_all_payout_ranked_posts;
-CREATE FUNCTION hivemind_postgrest_utilities.get_all_payout_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _called_from_bridge_api BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.get_all_payout_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -2341,7 +2422,12 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+        SELECT
+        ( CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH 
           all_posts as MATERIALIZED
           (
@@ -2414,7 +2500,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_all_payout_comments_ranked_posts;
-CREATE FUNCTION hivemind_postgrest_utilities.get_all_payout_comments_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT)
+CREATE FUNCTION hivemind_postgrest_utilities.get_all_payout_comments_ranked_posts(IN _post_id INT, IN _observer_id INT, IN _limit INT, IN _truncate_body INT, IN _called_from_bridge_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -2430,7 +2516,12 @@ BEGIN
   RETURN (
     SELECT to_jsonb(result.array) FROM (
       SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) FROM (
+        SELECT
+        ( CASE
+            WHEN _called_from_bridge_api THEN hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
+            ELSE hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
+          END
+        ) FROM (
           WITH 
           all_posts as MATERIALIZED
           (
