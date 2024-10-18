@@ -55,45 +55,73 @@ BEGIN
     IF _json_is_object THEN
       IF _params->>_arg_name IS NULL THEN
         RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_missing_required_argument_exception(_arg_name);
-      ELSE
-        IF jsonb_typeof(_params->_arg_name) = 'string' AND _params->>_arg_name ~ '[A-Za-z]' THEN
-          RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(CONCAT('invalid literal for int() with base 10: ''', _params->>_arg_name, ''''));
-        ELSE
-          _value := (_params->>_arg_name)::NUMERIC;
-        END IF;
       END IF;
+
+      CASE jsonb_typeof(_params->_arg_name)
+        WHEN 'string' THEN
+          IF _params->>_arg_name ~ '[A-Za-z]' THEN
+            RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(CONCAT('invalid literal for int() with base 10: ''', _params->>_arg_name, ''''));
+          ELSIF _params->>_arg_name = '' OR LOWER(_params->>_arg_name) = 'null' THEN
+            RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_missing_required_argument_exception(_arg_name);
+          ELSE
+            _value := (_params->>_arg_name)::NUMERIC;
+          END IF;
+        WHEN 'null' THEN RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_missing_required_argument_exception(_arg_name);
+        ELSE _value := _params->_arg_name;
+      END CASE;
     ELSE
-      IF _params->>_arg_number IS NULL THEN
+      IF _params->_arg_number IS NULL THEN
         RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_missing_required_argument_exception(_arg_name);
-      ELSE
-        IF jsonb_typeof(_params->_arg_number) = 'string' AND _params->>_arg_number ~ '[A-Za-z]' THEN
-          RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(CONCAT('invalid literal for int() with base 10: ''', _params->>_arg_number, ''''));
-        ELSE
-          _value := (_params->>_arg_number)::NUMERIC;
-        END IF;
       END IF;
+
+      CASE jsonb_typeof(_params->_arg_number)
+        WHEN 'string' THEN
+          IF _params->>_arg_number ~ '[A-Za-z]' THEN
+            RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(CONCAT('invalid literal for int() with base 10: ''', _params->>_arg_number, ''''));
+          ELSIF _params->>_arg_number = '' OR LOWER(_params->>_arg_number) = 'null' THEN
+            RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_missing_required_argument_exception(_arg_name);
+          ELSE
+            _value := (_params->>_arg_number)::NUMERIC;
+          END IF;
+        WHEN 'null' THEN RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_missing_required_argument_exception(_arg_name);
+        ELSE _value := _params->_arg_number;
+      END CASE;
     END IF;
   ELSE
     IF _json_is_object THEN
       IF _params->>_arg_name IS NULL THEN
         RETURN NULL;
-      ELSE
-        IF jsonb_typeof(_params->_arg_name) = 'string' AND _params->>_arg_name ~ '[A-Za-z]' THEN
-          RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(CONCAT('invalid literal for int() with base 10: ''', _params->>_arg_name, ''''));
-        ELSE
-          _value := (_params->>_arg_name)::NUMERIC;
-        END IF;
       END IF;
+
+      CASE jsonb_typeof(_params->_arg_name)
+        WHEN 'string' THEN
+          IF _params->>_arg_name ~ '[A-Za-z]' THEN
+            RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(CONCAT('invalid literal for int() with base 10: ''', _params->>_arg_name, ''''));
+          ELSIF _params->>_arg_name = '' OR LOWER(_params->>_arg_name) = 'null' THEN
+            RETURN NULL;
+          ELSE
+            _value := (_params->>_arg_name)::NUMERIC;
+          END IF;
+        WHEN 'null' THEN RETURN NULL;
+        ELSE _value := _params->_arg_name;
+      END CASE;
     ELSE
-      IF _params->>_arg_number IS NULL THEN
+      IF _params->_arg_number IS NULL THEN
         RETURN NULL;
-      ELSE
-        IF jsonb_typeof(_params->_arg_number) = 'string' AND _params->>_arg_number ~ '[A-Za-z]' THEN
-          RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(CONCAT('invalid literal for int() with base 10: ''', _params->>_arg_number, ''''));
-        ELSE
-          _value := (_params->>_arg_number)::NUMERIC;
-        END IF;
       END IF;
+
+      CASE jsonb_typeof(_params->_arg_number)
+        WHEN 'string' THEN
+          IF _params->>_arg_number ~ '[A-Za-z]' THEN
+            RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(CONCAT('invalid literal for int() with base 10: ''', _params->>_arg_number, ''''));
+          ELSIF _params->>_arg_number = '' OR LOWER(_params->>_arg_number) = 'null' THEN
+            RETURN NULL;
+          ELSE
+            _value := (_params->>_arg_number)::NUMERIC;
+          END IF;
+        WHEN 'null' THEN RETURN NULL;
+        ELSE _value := _params->_arg_number;
+      END CASE;
     END IF;
   END IF;
 
