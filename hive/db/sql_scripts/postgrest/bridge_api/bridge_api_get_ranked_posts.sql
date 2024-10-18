@@ -49,12 +49,12 @@ BEGIN
 
   IF _tag IS NULL OR _tag = '' OR _tag = 'all' THEN
     CASE _sort_type
-      WHEN 'trending' THEN RETURN hivemind_postgrest_utilities.get_all_trending_ranked_posts(_post_id, _observer_id, _limit);
-      WHEN 'hot' THEN RETURN hivemind_postgrest_utilities.get_all_hot_ranked_posts(_post_id, _observer_id, _limit);
-      WHEN 'created' THEN RETURN hivemind_postgrest_utilities.get_all_created_ranked_posts(_post_id, _observer_id, _limit);
-      WHEN 'promoted' THEN RETURN hivemind_postgrest_utilities.get_all_promoted_ranked_posts(_post_id, _observer_id, _limit);
-      WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_all_payout_ranked_posts(_post_id, _observer_id, _limit, True);
-      WHEN 'payout_comments' THEN RETURN hivemind_postgrest_utilities.get_all_payout_comments_ranked_posts(_post_id, _observer_id, _limit);
+      WHEN 'trending' THEN RETURN hivemind_postgrest_utilities.get_all_trending_ranked_posts(_post_id, _observer_id, _limit, 0, True);
+      WHEN 'hot' THEN RETURN hivemind_postgrest_utilities.get_all_hot_ranked_posts(_post_id, _observer_id, _limit, 0, True);
+      WHEN 'created' THEN RETURN hivemind_postgrest_utilities.get_all_created_ranked_posts(_post_id, _observer_id, _limit, 0, True);
+      WHEN 'promoted' THEN RETURN hivemind_postgrest_utilities.get_all_promoted_ranked_posts(_post_id, _observer_id, _limit, 0, True);
+      WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_all_payout_ranked_posts(_post_id, _observer_id, _limit, 0, True);
+      WHEN 'payout_comments' THEN RETURN hivemind_postgrest_utilities.get_all_payout_comments_ranked_posts(_post_id, _observer_id, _limit, 0, True);
       WHEN 'muted' THEN RETURN hivemind_postgrest_utilities.get_all_muted_ranked_posts(_post_id, _observer_id, _limit);
     END CASE;
   ELSIF _tag = 'my' THEN
@@ -68,15 +68,15 @@ BEGIN
       WHEN 'muted' THEN RETURN hivemind_postgrest_utilities.get_muted_ranked_posts_for_observer_communities(_post_id, _observer_id, _limit);
     END CASE;
   ELSIF hivemind_postgrest_utilities.check_community(_tag) THEN
-    RETURN hivemind_postgrest_utilities.get_ranked_posts_for_communities(_post_id, _observer_id, _limit, _tag, True, _sort_type);
+    RETURN hivemind_postgrest_utilities.get_ranked_posts_for_communities(_post_id, _observer_id, _limit, 0, _tag, True, _sort_type);
   ELSE
     CASE _sort_type
-      WHEN 'trending' THEN RETURN hivemind_postgrest_utilities.get_trending_ranked_posts_for_tag(_post_id, _observer_id, _limit, _tag);
-      WHEN 'hot' THEN RETURN hivemind_postgrest_utilities.get_hot_ranked_posts_for_tag(_post_id, _observer_id, _limit, _tag);
-      WHEN 'created' THEN RETURN hivemind_postgrest_utilities.get_created_ranked_posts_for_tag(_post_id, _observer_id, _limit, _tag);
-      WHEN 'promoted' THEN RETURN hivemind_postgrest_utilities.get_promoted_ranked_posts_for_tag(_post_id, _observer_id, _limit, _tag);
-      WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_payout_ranked_posts_for_tag(_post_id, _observer_id, _limit, _tag, True);
-      WHEN 'payout_comments' THEN RETURN hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_tag(_post_id, _observer_id, _limit, _tag);
+      WHEN 'trending' THEN RETURN hivemind_postgrest_utilities.get_trending_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True);
+      WHEN 'hot' THEN RETURN hivemind_postgrest_utilities.get_hot_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True);
+      WHEN 'created' THEN RETURN hivemind_postgrest_utilities.get_created_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True);
+      WHEN 'promoted' THEN RETURN hivemind_postgrest_utilities.get_promoted_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True);
+      WHEN 'payout' THEN RETURN hivemind_postgrest_utilities.get_payout_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True);
+      WHEN 'payout_comments' THEN RETURN hivemind_postgrest_utilities.get_payout_comments_ranked_posts_for_tag(_post_id, _observer_id, _limit, 0, _tag, True);
       WHEN 'muted' THEN RETURN hivemind_postgrest_utilities.get_muted_ranked_posts_for_tag(_post_id, _observer_id, _limit, _tag);
     END CASE;
   END IF;
