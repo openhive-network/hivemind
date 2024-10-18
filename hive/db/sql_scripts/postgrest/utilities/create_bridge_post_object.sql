@@ -22,7 +22,7 @@ BEGIN
                 END),
     'title', _row.title,
     'body', (CASE
-              WHEN _truncate_body_len > 0 THEN left(_row.body, _truncate_body_len)
+              WHEN _truncate_body_len <> 0 THEN left(_row.body, _truncate_body_len)
               ELSE _row.body
             END),
     'created', to_jsonb(hivemind_postgrest_utilities.json_date(_row.created_at)),
