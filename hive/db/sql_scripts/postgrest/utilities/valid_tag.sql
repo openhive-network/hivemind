@@ -12,7 +12,7 @@ BEGIN
     END IF;
     RETURN _tag;
   END IF;
-  IF NOT _tag ~ '^[a-z0-9_]' THEN
+  IF NOT _tag ~ '^[a-z0-9\-_]+$' THEN
     RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('invalid tag `' || _tag || '`');
   END IF;
   RETURN _tag;
