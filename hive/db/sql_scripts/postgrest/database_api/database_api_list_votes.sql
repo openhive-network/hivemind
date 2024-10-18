@@ -51,10 +51,13 @@ BEGIN
     _permlink = hivemind_postgrest_utilities.valid_permlink(_start->>2, True);
   END IF;
 
+  _post_id = hivemind_postgrest_utilities.find_comment_id( _author, _permlink, True);
+  _voter_id = hivemind_postgrest_utilities.find_account_id(_voter, True);
+
   IF _order_by_comment_voter THEN
-    RETURN jsonb_build_object('votes', (hivemind_postgrest_utilities.list_votes(_author, _permlink, _limit, 'database_list_by_comment_voter'::hivemind_postgrest_utilities.list_votes_case, 'database_api'::hivemind_postgrest_utilities.vote_presentation, _voter)));
+    RETURN jsonb_build_object('votes', (hivemind_postgrest_utilities.list_votes(_post_id, _limit, 'database_list_by_comment_voter'::hivemind_postgrest_utilities.list_votes_case, 'database_api'::hivemind_postgrest_utilities.vote_presentation, _voter_id)));
   ELSE
-    RETURN jsonb_build_object('votes', (hivemind_postgrest_utilities.list_votes(_author, _permlink, _limit, 'database_list_by_voter_comment'::hivemind_postgrest_utilities.list_votes_case, 'database_api'::hivemind_postgrest_utilities.vote_presentation, _voter)));
+    RETURN jsonb_build_object('votes', (hivemind_postgrest_utilities.list_votes(_post_id, _limit, 'database_list_by_voter_comment'::hivemind_postgrest_utilities.list_votes_case, 'database_api'::hivemind_postgrest_utilities.vote_presentation, _voter_id)));
   END IF;
 END;
 $$

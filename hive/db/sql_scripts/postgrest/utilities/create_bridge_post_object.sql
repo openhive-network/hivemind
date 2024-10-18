@@ -63,7 +63,7 @@ BEGIN
                             WHEN _row.author_rep = 0 THEN _tmp_amount
                             ELSE ROUND(_tmp_amount, 2)
                           END),
-    'active_votes', hivemind_postgrest_utilities.list_votes(_row.author, _row.permlink, /* in python code it was hardcoded */ 1000,
+    'active_votes', hivemind_postgrest_utilities.list_votes(_row.id, /* in python code it was hardcoded */ 1000,
                     'create_post'::hivemind_postgrest_utilities.list_votes_case, 'bridge_api'::hivemind_postgrest_utilities.vote_presentation),
     'blacklists', (CASE
                     WHEN _row.blacklists IS NOT NULL AND _row.blacklists <> '' THEN to_jsonb(string_to_array(_row.blacklists, ',')) 
