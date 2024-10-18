@@ -4,7 +4,8 @@
   marks:
     - patterntest
     # if all posts in category do not have any votes there is empty result
-
+    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

@@ -5,7 +5,8 @@
     - patterntest
     # category name not allowed (starts with number)
     # wrong output - comments with no payout
-
+    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

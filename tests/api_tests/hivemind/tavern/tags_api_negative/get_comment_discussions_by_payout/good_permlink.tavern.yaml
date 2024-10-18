@@ -4,6 +4,7 @@
   marks:
     - patterntest # changed behaviour so when either start_author or start_permlink is passed, both have to be passed and point to actual post
     - negative
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

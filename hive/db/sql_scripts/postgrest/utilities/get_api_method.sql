@@ -150,6 +150,22 @@ BEGIN
       result := hivemind_endpoints.condenser_api_get_discussions_by_blog_or_feed(__json_with_params_is_object, __params, /* by_blog */ True);
     WHEN __method_type = 'get_discussions_by_comments' THEN
       result := hivemind_endpoints.condenser_api_get_discussions_by_comments(__json_with_params_is_object, __params);
+    WHEN __method_type = 'get_discussions_by_author_before_date' THEN
+      result :=  hivemind_endpoints.condenser_api_get_discussions_by_author_before_date(__json_with_params_is_object, __params);
+    WHEN __method_type = 'get_discussions_by_created' THEN
+      result :=  hivemind_endpoints.condenser_api_get_discussions_by(__json_with_params_is_object, __params, 'created'::hivemind_postgrest_utilities.ranked_post_sort_type);
+    WHEN __method_type = 'get_discussions_by_hot' THEN
+      result :=  hivemind_endpoints.condenser_api_get_discussions_by(__json_with_params_is_object, __params, 'hot'::hivemind_postgrest_utilities.ranked_post_sort_type);
+    WHEN __method_type = 'get_discussions_by_promoted' THEN
+      result :=  hivemind_endpoints.condenser_api_get_discussions_by(__json_with_params_is_object, __params, 'promoted'::hivemind_postgrest_utilities.ranked_post_sort_type);
+    WHEN __method_type = 'get_discussions_by_trending' THEN
+      result :=  hivemind_endpoints.condenser_api_get_discussions_by(__json_with_params_is_object, __params, 'trending'::hivemind_postgrest_utilities.ranked_post_sort_type);
+    WHEN __method_type = 'get_post_discussions_by_payout' THEN
+      result :=  hivemind_endpoints.condenser_api_get_discussions_by(__json_with_params_is_object, __params, 'payout'::hivemind_postgrest_utilities.ranked_post_sort_type);
+    WHEN __method_type = 'get_comment_discussions_by_payout' THEN
+      result :=  hivemind_endpoints.condenser_api_get_discussions_by(__json_with_params_is_object, __params, 'payout_comments'::hivemind_postgrest_utilities.ranked_post_sort_type);
+    WHEN __method_type = 'get_account_votes' THEN
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('get_account_votes is no longer supported, for details see https://hive.blog/steemit/@steemitdev/additional-public-api-change');
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
   END CASE;
