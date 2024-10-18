@@ -5,7 +5,7 @@
     - patterntest # unlike in old version where page defining post (last from previous page) was always part of new page (along with others with the same
                   # payout, potentially making it impossible to move forward with pages), new version always skips it, also has defined order for posts with
                   # the same payout (previously random)
-
+    - postgrest_ready
   includes:
     - !include ../../common.yaml
 

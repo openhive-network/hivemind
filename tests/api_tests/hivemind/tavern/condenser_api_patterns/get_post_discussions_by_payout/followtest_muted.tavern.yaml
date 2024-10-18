@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # discussion filtered out from muted user dollarvigilante
-
+    - postgrest_ready
   includes:
     - !include ../../common.yaml
 

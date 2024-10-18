@@ -4,7 +4,7 @@
   marks:
     - patterntest # order in original when promotion amount was equal was basically random, so posts are ordered differently
                   # compared to original extra votes are due to removed vote muting
-
+    - postgrest_ready
   includes:
     - !include ../../common.yaml
 

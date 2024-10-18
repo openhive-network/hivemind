@@ -4,7 +4,7 @@
   marks:
     - patterntest # ignoreall ignores gavvet (mock data)
                   # original did not accept observer (.orig made without it); also original produced overlapping pages
-
+    - postgrest_ready
   includes:
     - !include ../../common.yaml
 

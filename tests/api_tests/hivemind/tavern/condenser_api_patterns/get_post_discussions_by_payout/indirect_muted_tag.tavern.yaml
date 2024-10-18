@@ -4,7 +4,7 @@
   marks:
     - patterntest # alice follows muted of ignoreall who ignores gavvet (mock data); see also tag_life (without observer)
                   # original didn't accept observer (.orig made without it)
-
+    - postgrest_ready
   includes:
     - !include ../../common.yaml
 

@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # alice follows muted of ignoreall who ignores ooak (mock data); see also tag_steemit
-
+    - postgrest_ready
   includes:
     - !include ../../common.yaml
 

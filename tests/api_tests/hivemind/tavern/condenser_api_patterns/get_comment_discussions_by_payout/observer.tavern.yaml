@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # ignoreall who ignores r4fken (mock data); see also no_tag
-
+    - postgrest_ready
   includes:
     - !include ../../common.yaml
 

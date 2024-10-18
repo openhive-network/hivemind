@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # compared to original extra vote is due to removed vote muting
-
+    - postgrest_ready
   includes:
     - !include ../../common.yaml
 
