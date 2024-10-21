@@ -4,6 +4,7 @@ test_name: Hivemind
 marks:
   - patterntest # it doesn't matter that they are all the same and not even existing
   - negative
+  - postgrest_ready
 
 includes:
   - !include ../../common.yaml
