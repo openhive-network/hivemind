@@ -1,5 +1,6 @@
 DROP TYPE IF EXISTS hivemind_postgrest_utilities.currency CASCADE;
 CREATE TYPE hivemind_postgrest_utilities.currency AS ENUM( 'HBD', 'HIVE', 'VESTS');
+
 DROP TABLE IF EXISTS hivemind_postgrest_utilities.nai_currency_map;
 CREATE TABLE hivemind_postgrest_utilities.nai_currency_map
 (
@@ -8,6 +9,7 @@ CREATE TABLE hivemind_postgrest_utilities.nai_currency_map
   precision INT NOT NULL
 );
 INSERT INTO hivemind_postgrest_utilities.nai_currency_map VALUES ('HBD','@@000000013', 3), ('HIVE','@@000000021', 3), ('VESTS','@@000000037', 3);
+
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.to_nai;
 CREATE FUNCTION hivemind_postgrest_utilities.to_nai(IN _amount NUMERIC, IN _currency hivemind_postgrest_utilities.currency) 
@@ -26,7 +28,7 @@ WITH calculate_nai_type AS
   WHERE nai_map.name = _currency
 )
   SELECT jsonb_build_object(
-    'amount', cnt.amount,
+    'amount', cnt.amount::TEXT, -- FOR NOW TESTS ALWAYS REQUIRES AMOUNT AS TEXT
     'nai', cnt.nai,
     'precision', cnt.precision)
   FROM calculate_nai_type cnt);
