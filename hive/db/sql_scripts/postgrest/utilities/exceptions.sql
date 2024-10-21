@@ -317,3 +317,15 @@ END
 $$
 ;
 
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.invalid_notify_type_id_exception;
+CREATE FUNCTION hivemind_postgrest_utilities.invalid_notify_type_id_exception(_exception_message TEXT)
+RETURNS JSONB
+LANGUAGE 'plpgsql'
+IMMUTABLE
+AS
+$$
+BEGIN
+  RETURN hivemind_postgrest_utilities.raise_exception(-32602,'Invalid parameters', _exception_message);
+END
+$$
+;
