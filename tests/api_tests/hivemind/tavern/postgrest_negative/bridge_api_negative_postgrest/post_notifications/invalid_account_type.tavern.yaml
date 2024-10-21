@@ -7,7 +7,7 @@
     - postgrest_ready
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -20,7 +20,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.post_notifications"
-          params: {}
+          params: {"author": 1234, "permlink": "witness-report-for-blocktrades-for-last-week-of-august"}
       response:
         status_code: 200
         verify_response_with:
