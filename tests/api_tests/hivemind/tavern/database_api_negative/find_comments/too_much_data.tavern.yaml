@@ -4,6 +4,7 @@ test_name: Hivemind
 marks:
   - patterntest # fat node didn't care about extra arguments so it gave response like in database_api_patterns/find_comments/all_data.tavern.yaml
   - negative
+  - postgrest_ready
 
 includes:
   - !include ../../common.yaml
