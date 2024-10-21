@@ -21,7 +21,7 @@ BEGIN
   _min_score = hivemind_postgrest_utilities.valid_number(_min_score, 25, 0, 100, 'score');
 
   _last_id = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'last_id', 2, False);
-  _last_id = hivemind_postgrest_utilities.valid_number(_last_id, 0, 0, 100, 'last_id');
+  _last_id = hivemind_postgrest_utilities.valid_number(_last_id, 0, NULL, NULL, 'last_id');
 
   _limit = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'limit', 3, False);
   _limit = hivemind_postgrest_utilities.valid_number(_limit, 100, 1, 100, 'limit');
