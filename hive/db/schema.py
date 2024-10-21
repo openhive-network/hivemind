@@ -763,6 +763,7 @@ def setup_runtime_code(db):
         "postgrest/utilities/notifications.sql",
         "postgrest/bridge_api/bridge_api_account_notifications.sql",
         "postgrest/bridge_api/bridge_api_post_notifications.sql",
+        "postgrest/utilities/create_database_post_object.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
