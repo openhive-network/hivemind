@@ -2,7 +2,7 @@ DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.json_date;
 CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.json_date(_date TIMESTAMPTZ DEFAULT NULL)
   RETURNS TEXT
   LANGUAGE plpgsql
-  STABLE
+  IMMUTABLE
 AS
 $BODY$
 BEGIN
