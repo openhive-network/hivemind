@@ -656,7 +656,7 @@ e2e_benchmark_on_postgrest:
     # TODO: As you complete the migration of methods to SQL, uncomment variables and add finished method names.
     # Missing variable enables the entire test group.
     RUN_TESTS_WITH_MARKER: "postgrest_ready and not postgrest_ignore"
-    COMPLETED_BRIDGE_API_METHODS: "get_community,get_community_context,get_post,get_payout_stats,get_account_posts,get_relationship_between_accounts,unread_notifications,get_ranked_posts,account_notifications,post_notifications"
+    COMPLETED_BRIDGE_API_METHODS: "get_community,get_community_context,get_post,get_payout_stats,get_account_posts,get_relationship_between_accounts,unread_notifications,get_ranked_posts,account_notifications,post_notifications,list_subscribers"
     COMPLETED_CONDENSER_API_METHODS: "get_account_reputations,get_follow_count,get_reblogged_by,get_trending_tags,get_blog,get_blog_entries,get_content,get_content_replies,get_following,get_followers,get_active_votes,get_discussions_by_blog,get_discussions_by_comments,get_replies_by_last_update,get_discussions_by_feed,get_discussions_by_author_before_date,get_discussions_by_created,get_discussions_by_hot,get_discussions_by_promoted,get_discussions_by_trending,get_post_discussions_by_payout,get_comment_discussions_by_payout"
   script:
     - |
