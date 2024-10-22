@@ -96,7 +96,7 @@ def main():
     log.info('Sorting block data')
     blocks.sort(key=lambda b: b.block_number)
 
-    last_block_in_db = db.query_row("SELECT * FROM hive.blocks ORDER BY num DESC LIMIT 1")
+    last_block_in_db = db.query_row("SELECT * FROM hafd.blocks ORDER BY num DESC LIMIT 1")
     log.info(f'Last block in db: {last_block_in_db["num"]}')
 
     last_block_num_to_mock = blocks[-1].block_number

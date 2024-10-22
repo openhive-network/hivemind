@@ -6,7 +6,7 @@ STABLE
 AS
 $$
 DECLARE
-    _database_head_block hive.blocks.num%TYPE;
+    _database_head_block hive.blocks_view.num%TYPE;
     _patch_level_data RECORD;
     _hivemind_data RECORD;
 BEGIN
