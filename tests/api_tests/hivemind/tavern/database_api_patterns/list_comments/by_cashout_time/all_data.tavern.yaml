@@ -3,6 +3,7 @@ test_name: Hivemind
 
 marks:
   - patterntest # passing only because parameters were changed so results only cover specific posts
+  - postgrest_ready
 
 includes:
   - !include ../../../common.yaml

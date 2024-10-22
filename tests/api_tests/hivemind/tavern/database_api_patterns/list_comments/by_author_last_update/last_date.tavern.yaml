@@ -3,6 +3,7 @@ test_name: Hivemind
 
 marks:
   - patterntest # at exactly the update date of oldest post
+  - postgrest_ready
 
 includes:
   - !include ../../../common.yaml

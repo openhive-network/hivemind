@@ -3,6 +3,7 @@ test_name: Hivemind
 
 marks:
   - patterntest # incomparable with original (bug in fat node using wrong index)
+  - postgrest_ready
 
 includes:
   - !include ../../../common.yaml

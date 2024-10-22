@@ -4,7 +4,7 @@ test_name: Hivemind
 marks:
   - patterntest # paging mechanism not work properly, output the same as without start_author and start_permlink
                 # (like in fat node that is the result of ordering by update first and only within it by post id)
-
+  - postgrest_ready
 includes:
   - !include ../../../common.yaml
 

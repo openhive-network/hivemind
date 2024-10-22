@@ -4,6 +4,7 @@ test_name: Hivemind
 marks:
   - patterntest # child_author, child_permlink are optional (but only when both are skipped)
   - negative
+  - postgrest_ready
 
 includes:
   - !include ../../../common.yaml

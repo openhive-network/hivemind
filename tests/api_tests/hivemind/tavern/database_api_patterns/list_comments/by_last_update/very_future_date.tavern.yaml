@@ -3,7 +3,7 @@ test_name: Hivemind
 
 marks:
   - patterntest # "2038-01-19T03:14:08" is the first timestamp that is "too far" for old fat node, but SQL has normal timestamps so we won't be generating error here
-
+  - postgrest_ready
 includes:
   - !include ../../../common.yaml
 

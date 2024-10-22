@@ -3,7 +3,7 @@ test_name: Hivemind
 
 marks:
   - patterntest # paging mechanism not work properly, output the same as without start_author and start_permlink
-
+  - postgrest_ready
 includes:
   - !include ../../../common.yaml
 

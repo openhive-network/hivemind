@@ -4,7 +4,7 @@ test_name: Hivemind
 marks:
   - patterntest # net_votes differ compared to fat node f.e. for @xeroc/tapin-python-based-bitshares-faucet-released (no bug was found in current implementation)
                 # see also get_active_votes/net_votes in condenser_api tests or find_votes/net_votes in database_api tests
-
+  - postgrest_ready
 includes:
   - !include ../../../common.yaml
 

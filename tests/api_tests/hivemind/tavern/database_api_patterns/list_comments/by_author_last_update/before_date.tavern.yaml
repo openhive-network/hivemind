@@ -3,6 +3,7 @@ test_name: Hivemind
 
 marks:
   - patterntest # one second before first date that gives nonempty results
+  - postgrest_ready
 
 includes:
   - !include ../../../common.yaml

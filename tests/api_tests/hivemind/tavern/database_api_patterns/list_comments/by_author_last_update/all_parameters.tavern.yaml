@@ -3,6 +3,7 @@ test_name: Hivemind
 
 marks:
   - patterntest # does not give different posts with start_author and start_permlink
+  - postgrest_ready
 
 includes:
   - !include ../../../common.yaml
