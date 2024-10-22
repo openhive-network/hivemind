@@ -768,6 +768,7 @@ def setup_runtime_code(db):
         "postgrest/utilities/valid_date.sql",
         "postgrest/utilities/list_comments.sql",
         "postgrest/database_api/database_api_list_comments.sql",
+        "postgrest/bridge_api/bridge_api_list_subscribers.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
