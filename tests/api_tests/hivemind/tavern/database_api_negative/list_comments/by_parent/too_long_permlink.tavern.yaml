@@ -4,6 +4,7 @@ test_name: Hivemind
 marks:
   - patterntest # fat node did not require valid parent post
   - negative
+  - postgrest_ready
 
 includes:
   - !include ../../../common.yaml

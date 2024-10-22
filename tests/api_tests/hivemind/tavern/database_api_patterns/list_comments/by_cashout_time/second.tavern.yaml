@@ -3,7 +3,7 @@ test_name: Hivemind
 
 marks:
   - patterntest # incomparable with original due to cashout_time differences (same pattern as in first_date)
-
+  - postgrest_ready
 includes:
   - !include ../../../common.yaml
 

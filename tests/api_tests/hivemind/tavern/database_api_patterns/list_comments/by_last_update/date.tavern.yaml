@@ -3,7 +3,7 @@ test_name: Hivemind
 
 marks:
   - patterntest # fat node didn't like that format of date (original made from regular ISO format)
-
+  - postgrest_ready
 includes:
   - !include ../../../common.yaml
 

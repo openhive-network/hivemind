@@ -4,6 +4,7 @@ test_name: Hivemind
 marks:
   - patterntest # not comparable with original due to significant differences in cashout time
                 # (especially that prior HF17 non-root posts were set at max cashout time); initial pattern made with find_comments
+  - postgrest_ready
 
 includes:
   - !include ../../../common.yaml

@@ -4,6 +4,7 @@ test_name: Hivemind
 marks:
   - patterntest # fat node did not check existence of given author account
   - negative
+  - postgrest_ready
 
 includes:
   - !include ../../../common.yaml
