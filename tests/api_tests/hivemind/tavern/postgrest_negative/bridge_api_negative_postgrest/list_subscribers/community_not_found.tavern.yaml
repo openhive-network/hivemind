@@ -5,10 +5,10 @@
     - patterntest # original did not validate community
     - negative
     - postgrest_ready
-    - postgrest_ignore
+    - postgrest_exception
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -23,7 +23,7 @@
           method: "bridge.list_subscribers"
           params: {"community":"hive-197922"}
       response:
-        status_code: 200
+        status_code: 400
         verify_response_with:
           function: validate_response:compare_response_with_pattern
           extra_kwargs:

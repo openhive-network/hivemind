@@ -2,13 +2,12 @@
   test_name: Hivemind
 
   marks:
-    - patterntest # original did not validate community
-    - negative
+    - patterntest # last: cloop2 does not subscribe any community
     - postgrest_ready
-    - postgrest_ignore
+    - postgrest_exception
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -21,9 +20,9 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.list_subscribers"
-          params: {"community":"hive-197922"}
+          params: {"community":"hive-103459", "last":"cloop2"}
       response:
-        status_code: 200
+        status_code: 400
         verify_response_with:
           function: validate_response:compare_response_with_pattern
           extra_kwargs:

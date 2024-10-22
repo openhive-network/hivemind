@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # mock data subs: (gtg, roadscape), good-karma, agartha, abit
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
