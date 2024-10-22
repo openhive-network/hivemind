@@ -4,6 +4,7 @@
   marks:
     - patterntest # mock data subs: good-karma, abit
                   # mock data roles: gtg - muted, alice - mod, agartha - admin, camilla - owner
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

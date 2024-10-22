@@ -3,6 +3,7 @@
 
   marks:
     - patterntest # relies on mock data (so original is empty - left only to show that positional call was possible)
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
