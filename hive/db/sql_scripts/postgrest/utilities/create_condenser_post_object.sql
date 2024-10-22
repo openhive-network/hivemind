@@ -74,7 +74,7 @@ BEGIN
     _result = jsonb_set(_result, '{max_cashout_time}', to_jsonb(hivemind_postgrest_utilities.json_date()));
 
     SELECT amount, currency FROM hivemind_postgrest_utilities.parse_asset(_row.curator_payout_value) AS (amount NUMERIC, currency hivemind_postgrest_utilities.currency) INTO _tmp_amount, _tmp_currency;
-    assert _tmp_currency = 'HBD', 'expecting HBD currency';
+    ASSERT _tmp_currency = 'HBD', 'expecting HBD currency';
     _result = jsonb_set(_result, '{curator_payout_value}', to_jsonb(_tmp_amount || ' HBD'));
     _tmp_amount = _row.payout - _tmp_amount;
     _result = jsonb_set(_result, '{total_payout_value}', to_jsonb(_tmp_amount || ' HBD'));
@@ -107,7 +107,7 @@ BEGIN
     IF _row.is_paidout THEN
       _result = jsonb_set(_result, '{curator_payout_value}', to_jsonb(_row.curator_payout_value));
       SELECT amount, currency FROM hivemind_postgrest_utilities.parse_asset(_row.curator_payout_value) AS (amount NUMERIC, currency hivemind_postgrest_utilities.currency) INTO _tmp_amount, _tmp_currency;
-      assert _tmp_currency = 'HBD', 'expecting HBD currency';
+      ASSERT _tmp_currency = 'HBD', 'expecting HBD currency';
       _tmp_amount = _row.payout - _tmp_amount;
       _result = jsonb_set(_result, '{total_payout_value}', to_jsonb(_tmp_amount || ' ' || _tmp_currency));
     END IF;
