@@ -46,11 +46,11 @@ BEGIN
   );
 
   SELECT amount, currency FROM hivemind_postgrest_utilities.parse_asset(_row.curator_payout_value) AS (amount NUMERIC, currency hivemind_postgrest_utilities.currency) INTO _tmp_amount, _tmp_currency;
-  assert _tmp_currency = 'HBD', 'expecting HBD currency';
+  ASSERT _tmp_currency = 'HBD', 'expecting HBD currency';
   _result = jsonb_set(_result, '{curator_payout_value}', hivemind_postgrest_utilities.to_nai(_tmp_amount, _tmp_currency));
   _result = jsonb_set(_result, '{total_payout_value}', hivemind_postgrest_utilities.to_nai(_row.payout - _tmp_amount, _tmp_currency));
   SELECT amount, currency FROM hivemind_postgrest_utilities.parse_asset(_row.max_accepted_payout) AS (amount NUMERIC, currency hivemind_postgrest_utilities.currency) INTO _tmp_amount, _tmp_currency;
-  assert _tmp_currency = 'HBD', 'expecting HBD currency';
+  ASSERT _tmp_currency = 'HBD', 'expecting HBD currency';
   _result = jsonb_set(_result, '{max_accepted_payout}', hivemind_postgrest_utilities.to_nai(_tmp_amount, _tmp_currency));
 
   IF _row.is_paidout THEN
