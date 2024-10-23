@@ -3,7 +3,8 @@
 
   marks:
     - patterntest # alice follows muted of ignoreall who ignores gtg (mock data) - author of top post
-
+    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 
