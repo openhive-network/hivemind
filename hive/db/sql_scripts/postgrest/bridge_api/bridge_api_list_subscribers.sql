@@ -24,6 +24,7 @@ BEGIN
 
     WITH subscribers AS (
         SELECT
+            su.name,
             jsonb_build_array(su.name, su.role, COALESCE(su.title, NULL),
             hivemind_postgrest_utilities.json_date(su.created_at)) AS subs
         FROM hivemind_app.bridge_list_subscribers(
@@ -31,6 +32,7 @@ BEGIN
             (_last)::VARCHAR,
             (_limit)::INT
         ) su
+        ORDER BY su.name ASC
     )
     SELECT jsonb_agg(s.subs)
     INTO _response
