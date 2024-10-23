@@ -32,7 +32,7 @@ BEGIN
         hs.id < __last_id
         )
     )
-    ORDER BY hs.id DESC
+    ORDER BY ha.name ASC
     LIMIT _limit;
 END
 $function$
