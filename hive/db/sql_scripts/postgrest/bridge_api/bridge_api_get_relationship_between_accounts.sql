@@ -15,7 +15,7 @@ DECLARE
   _blacklisted BOOLEAN;
   _follow_blacklists BOOLEAN;
   _follow_muted BOOLEAN;
-  _created_at TIMESTAMPTZ;
+  _created_at TIMESTAMP;
   _block_num INT;
 BEGIN
   PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"account1", "account2", "observer", "debug"}', '{"string", "string", "string", "boolean"}');
