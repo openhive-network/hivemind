@@ -25,7 +25,7 @@ BEGIN
       'weight', _vote.weight,
       'rshares', _vote.rshares,
       'vote_percent', _vote.percent,
-      'last_update', hivemind_postgrest_utilities.json_date(to_timestamp(_vote.last_update::TEXT, 'YYYY-MM-DD"T"HH24:MI:SS')),
+      'last_update', hivemind_postgrest_utilities.json_date(to_timestamp(_vote.last_update::TEXT, 'YYYY-MM-DD"T"HH24:MI:SS')::TIMESTAMP),
       'num_changes', _vote.num_changes
     );
   ELSIF _presentation_mode = 'bridge_api' THEN
@@ -39,7 +39,7 @@ BEGIN
       'reputation', _vote.reputation,
       'rshares', _vote.rshares,
       'voter', _vote.voter,
-      'time', hivemind_postgrest_utilities.json_date(to_timestamp(_vote.last_update::TEXT, 'YYYY-MM-DD"T"HH24:MI:SS')),
+      'time', hivemind_postgrest_utilities.json_date(to_timestamp(_vote.last_update::TEXT, 'YYYY-MM-DD"T"HH24:MI:SS')::TIMESTAMP),
       'weight', _vote.weight
     )::jsonb;
   ELSE
