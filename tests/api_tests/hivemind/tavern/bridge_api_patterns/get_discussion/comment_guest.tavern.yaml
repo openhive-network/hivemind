@@ -4,7 +4,8 @@
   marks:
     - patterntest # alice is guest before answering parent post in this community - mock_data (hive-157439)
                   # never muted comments (test for comparison with muted and unmuted)
-
+    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

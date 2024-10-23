@@ -4,7 +4,8 @@
   marks:
     - patterntest # ignoreall ignores gtg (mock data) - author of some comments
                   # difference in blacklists due to lack of global blacklists now
-
+    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 
