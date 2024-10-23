@@ -3,7 +3,8 @@
 
   marks:
     - patterntest # nkdk is correctly follow blacklisted "blacklisted by blacklisttester"
-
+    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

@@ -4,6 +4,7 @@
   marks:
     - patterntest # original returns empty result
     - negative
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml

@@ -4,6 +4,7 @@
   marks:
     - patterntest # originally observer was not validated (and since it was not part of query its nonexistence did not make result empty)
     - negative
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
