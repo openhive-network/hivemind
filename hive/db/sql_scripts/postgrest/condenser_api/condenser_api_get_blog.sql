@@ -11,7 +11,6 @@ DECLARE
   _limit INT;
 
   _account_id INT;
-  _result JSONB;
 BEGIN
   PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"account", "start_entry_id", "limit"}', '{"string", "number", "number"}', 1);
   _account = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'account', 0, True);
