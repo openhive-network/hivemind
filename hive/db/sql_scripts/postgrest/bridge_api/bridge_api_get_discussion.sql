@@ -8,14 +8,14 @@ $$
 DECLARE
   _post_id  INT;
   _observer_id INT;
-  _result JSONB DEFAULT '{}'::JSONB;
-
-  _rec RECORD;
-  _post_id_reference_pairs JSONB DEFAULT '{}'::JSONB;
+  _post_id_as_text TEXT;
   _parent_id_as_text TEXT;
-  _reference TEXT;
+  _bridge_post JSONB;
+  _parent_author_permlink TEXT;
+  _post_id_parent_id_post JSONB;
+  _result JSONB DEFAULT '{}'::JSONB;
 BEGIN
-    PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"author","permlink","observer"}', '{"string","string","string"}', 2);
+  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"author","permlink","observer"}', '{"string","string","string"}', 2);
 
   _post_id =
     hivemind_postgrest_utilities.find_comment_id(
@@ -32,11 +32,8 @@ BEGIN
       hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'observer', 2, False), True),
     True);
 
-  FOR _rec IN
   SELECT
-    row.author || '/' || row.permlink AS reference,
-    row.parent_id,
-    hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True) AS post
+    jsonb_object_agg(row.id::TEXT, jsonb_build_array(row.parent_id::TEXT, (row.author || '/' || row.permlink), hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)))
     FROM (
       SELECT
         hpv.id,
@@ -102,16 +99,21 @@ BEGIN
         LATERAL hivemind_app.get_post_view_by_id(ds.id) hpv
       ORDER BY ds.id
       LIMIT 2000
-  ) row
-  LOOP
-    _result = _result || jsonb_build_object(_rec.reference, _rec.post);
-    _post_id_reference_pairs = _post_id_reference_pairs || jsonb_build_object(_rec.post->>'post_id', _rec.reference);
-    _parent_id_as_text = _rec.parent_id::TEXT;
-    IF _post_id_reference_pairs ? _parent_id_as_text THEN
-      _reference = _post_id_reference_pairs->>_parent_id_as_text;
-      _result = jsonb_set(_result, ARRAY[_reference, 'replies'], _result->(_reference)->'replies' || jsonb_build_array(_rec.reference));
-    END IF;
-  END LOOP;
+  ) row INTO _post_id_parent_id_post;
+
+  IF _post_id_parent_id_post IS NOT NULL THEN
+    FOR _post_id_as_text IN SELECT key FROM jsonb_each(_post_id_parent_id_post) LOOP
+      _parent_id_as_text = _post_id_parent_id_post->_post_id_as_text->>0;
+      _bridge_post = _post_id_parent_id_post->_post_id_as_text->2;
+      _result = _result || jsonb_build_object(_post_id_parent_id_post->_post_id_as_text->>1, _bridge_post);
+      IF _parent_id_as_text IS NOT NULL AND _parent_id_as_text <> '0' THEN
+        IF _post_id_parent_id_post ? _parent_id_as_text THEN
+          _parent_author_permlink = _post_id_parent_id_post->_parent_id_as_text->>1;
+          _result = jsonb_set(_result, ARRAY[_parent_author_permlink, 'replies'], _result->(_parent_author_permlink)->'replies' || jsonb_build_array(_post_id_parent_id_post->_post_id_as_text->>1));
+        END IF;
+      END IF;
+    END LOOP;
+  END IF;
 
   RETURN _result;
 END
