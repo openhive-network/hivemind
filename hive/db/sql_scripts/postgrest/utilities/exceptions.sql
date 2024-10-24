@@ -329,3 +329,15 @@ BEGIN
 END
 $$
 ;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_;
+CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.raise_invalid_float_number(_id JSON)
+RETURNS JSONB
+LANGUAGE 'plpgsql'
+AS
+$$
+BEGIN
+  RETURN hivemind_postgrest_utilities.raise_exception(-32602,'Invalid parameters','too many positional arguments', _id);
+END
+$$
+;
