@@ -771,6 +771,7 @@ def setup_runtime_code(db):
         "postgrest/bridge_api/bridge_api_list_subscribers.sql",
         "postgrest/bridge_api/bridge_api_get_trending_topics.sql",
         "postgrest/bridge_api/bridge_api_get_discussion.sql",
+        "postgrest/bridge_api/bridge_api_get_post_header.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
