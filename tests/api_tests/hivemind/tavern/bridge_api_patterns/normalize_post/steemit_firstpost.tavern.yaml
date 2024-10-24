@@ -5,6 +5,7 @@
     - patterntest # TODO: multistage test since condenser_api.get_content is the source of parameter for the main call
                   # pattern made with "post" param made by fat node (since it was what was expected in parameter and crashed when it was taken from hivemind)
                   # now the result is basically the same as get_post
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
