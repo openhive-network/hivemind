@@ -137,6 +137,9 @@ BEGIN
       result := hivemind_endpoints.bridge_api_get_discussion(__json_with_params_is_object, __params);
     WHEN __method_type = 'get_post_header' THEN
       result := hivemind_endpoints.bridge_api_get_posts_header(__json_with_params_is_object, __params);
+    WHEN __method_type = 'normalize_post' THEN
+      -- according to python code, there are no checks if anything is good, just extract author & permlink and call get_post
+      result := hivemind_endpoints.bridge_api_get_posts(True, jsonb_build_object('author', __params->'post'->>'author', 'permlink', __params->'post'->>'permlink'));
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
   END CASE;
