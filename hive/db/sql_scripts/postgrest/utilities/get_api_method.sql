@@ -131,6 +131,8 @@ BEGIN
       result := hivemind_endpoints.bridge_api_list_subscribers(__json_with_params_is_object, __params);
     WHEN __method_type = 'get_trending_topics' THEN
       result := hivemind_endpoints.bridge_api_get_trending_topics(__json_with_params_is_object, __params);
+    WHEN __method_type = 'list_communities' THEN
+      result := hivemind_endpoints.bridge_api_list_communities(__json_with_params_is_object, __params);
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
   END CASE;
