@@ -86,7 +86,7 @@ async def list_subscribers(context, community, last='', limit=100):
     limit = valid_limit(limit, 100, 100)
     db = context['db']
     sql = (
-        f"SELECT * FROM {SCHEMA_NAME}.bridge_list_subscribers( (:community)::VARCHAR, (:last)::VARCHAR, (:limit)::INT )"
+        f"SELECT name, role, title, created_at FROM {SCHEMA_NAME}.bridge_list_subscribers( (:community)::VARCHAR, (:last)::VARCHAR, (:limit)::INT ) ORDER BY name ASC"
     )
     rows = await db.query_all(sql, community=community, last=last, limit=limit)
     return [(r[0], r[1], r[2], json_date(r[3])) for r in rows]
