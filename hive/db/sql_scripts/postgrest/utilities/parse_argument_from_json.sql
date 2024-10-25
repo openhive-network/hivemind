@@ -126,7 +126,7 @@ BEGIN
   END IF;
 
   IF _value IS NULL OR _value != floor(_value) THEN
-      RAISE EXCEPTION 'Invalid value for argument "%": %', _arg_name, _value;
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception(FORMAT('Invalid input for integer: parameter %s must be an integer or a float with zero fractional part, but received value ''%s''.', _arg_number, _params->>_arg_number));
   END IF;
 
   RETURN floor(_value)::INTEGER;
