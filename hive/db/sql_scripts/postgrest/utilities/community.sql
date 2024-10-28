@@ -69,7 +69,7 @@ $BODY$
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.list_top_communities;
 CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.list_top_communities(IN "limit" INT DEFAULT 25)
-  RETURNS SETOF JSONB
+  RETURNS TABLE (community_data JSONB, rank INT)
   LANGUAGE plpgsql
   STABLE
 AS
@@ -78,7 +78,7 @@ DECLARE
   _limit INT = hivemind_postgrest_utilities.valid_limit("limit", 100, 25);
 BEGIN
   RETURN QUERY (
-    SELECT jsonb_build_array(hc.name, hc.title)
+    SELECT jsonb_build_array(hc.name, hc.title) AS community_data, hc.rank
     FROM hivemind_app.hive_communities hc
     WHERE hc.rank > 0 ORDER BY hc.rank LIMIT _limit
 );
