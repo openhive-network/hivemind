@@ -3,11 +3,12 @@
 
   marks:
     - patterntest
-    # Communities not implemented under 5 mln blocks, but some were created by mock mechanism, therefore they are in result.
+    - negative
     - postgrest_ready
+    - postgrest_exception
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -20,10 +21,10 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.list_communities"
-          params: {"limit":100, "query":"Nothing", "sort": "subs"}
+          params: {"last":"hive-12345","sort":"subs"}
       response:
-        status_code: 200
+        status_code: 400
         verify_response_with:
           function: validate_response:compare_response_with_pattern
           extra_kwargs:
-            ignore_tags: "<bridge communities>"
+            error_response: true
