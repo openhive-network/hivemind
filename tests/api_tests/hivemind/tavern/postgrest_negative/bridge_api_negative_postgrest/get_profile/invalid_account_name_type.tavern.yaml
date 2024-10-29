@@ -2,11 +2,13 @@
   test_name: Hivemind
 
   marks:
-    - patterntest # very strange reaction in original - there was no observer parameter
+    - patterntest
     - negative
     - postgrest_ready
+    - postgrest_exception
+
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -19,7 +21,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.get_profile"
-          params: {"account":"gtg","observer":"nonexisting"}
+          params: {"account":789}
       response:
         status_code: 200
         verify_response_with:
