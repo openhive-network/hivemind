@@ -1,6 +1,6 @@
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.rep_log10;
 CREATE FUNCTION hivemind_postgrest_utilities.rep_log10(IN _rep BIGINT)
-  RETURNS FLOAT
+  RETURNS NUMERIC
   LANGUAGE plpgsql
   IMMUTABLE
 AS

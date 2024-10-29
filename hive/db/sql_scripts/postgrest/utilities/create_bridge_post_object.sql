@@ -59,10 +59,7 @@ BEGIN
             ),
     'payout', (_row.payout + _row.pending_payout),
     'promoted', _row.promoted || ' HBD',
-    'author_reputation',  (CASE
-                            WHEN _row.author_rep = 0 THEN _tmp_amount
-                            ELSE ROUND(_tmp_amount, 2)
-                          END),
+    'author_reputation', _tmp_amount,
     'active_votes', hivemind_postgrest_utilities.list_votes(_row.id, /* in python code it was hardcoded */ 1000,
                     'create_post'::hivemind_postgrest_utilities.list_votes_case, 'bridge_api'::hivemind_postgrest_utilities.vote_presentation),
     'blacklists', (CASE
