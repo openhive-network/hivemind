@@ -774,6 +774,7 @@ def setup_runtime_code(db):
         "postgrest/bridge_api/bridge_api_get_post_header.sql",
         "postgrest/bridge_api/bridge_api_get_profile.sql",
         "postgrest/bridge_api/bridge_api_does_user_follow_any_lists.sql",
+        "postgrest/utilities/extract_profile_metadata.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
