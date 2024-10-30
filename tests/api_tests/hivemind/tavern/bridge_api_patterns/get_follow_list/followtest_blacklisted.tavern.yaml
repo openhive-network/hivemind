@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # mocked user - not listed muted users - i think it should probably works like that
-
+    - postgrest_ready
   includes:
     - !include ../../common.yaml
 
