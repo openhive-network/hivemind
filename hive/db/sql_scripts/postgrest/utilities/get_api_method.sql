@@ -142,6 +142,8 @@ BEGIN
       result := hivemind_endpoints.bridge_api_get_posts(True, jsonb_build_object('author', __params->'post'->>'author', 'permlink', __params->'post'->>'permlink'));
     WHEN __method_type = 'get_profile' THEN
       result := hivemind_endpoints.bridge_api_get_profile(__json_with_params_is_object, __params);
+    WHEN __method_type = 'list_muted_reasons_enum' THEN
+      result := hivemind_postgrest_utilities.get_muted_reason_map();
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
   END CASE;
