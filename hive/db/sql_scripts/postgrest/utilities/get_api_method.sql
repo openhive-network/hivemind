@@ -144,6 +144,8 @@ BEGIN
       result := hivemind_endpoints.bridge_api_get_profile(__json_with_params_is_object, __params);
     WHEN __method_type = 'list_muted_reasons_enum' THEN
       result := hivemind_postgrest_utilities.get_muted_reason_map();
+    WHEN __method_type = 'does_user_follow_any_lists' THEN
+      result := hivemind_endpoints.bridge_api_does_user_follow_any_lists(__json_with_params_is_object, __params);
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
   END CASE;

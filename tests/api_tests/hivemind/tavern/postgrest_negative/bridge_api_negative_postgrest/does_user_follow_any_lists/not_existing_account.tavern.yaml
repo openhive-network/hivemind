@@ -2,12 +2,13 @@
   test_name: Hivemind
 
   marks:
-    - patterntest # there is no observer name validation - account can by unspecified
+    - patterntest
     - negative
     - postgrest_ready
+    - postgrest_exception
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -20,7 +21,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.does_user_follow_any_lists"
-          params: {"observer": "", "extra_parameter": "valid"}
+          params: {"observer": "not-existing-account"}
       response:
         status_code: 200
         verify_response_with:
