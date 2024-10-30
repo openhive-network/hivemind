@@ -4,7 +4,7 @@
   marks:
     - patterntest # tested on anyx.io
     - negative
-
+    - postgrest_ready
   includes:
     - !include ../../common.yaml
 

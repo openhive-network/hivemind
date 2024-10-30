@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # mocked user - empty as only created not fol
-
+    - postgrest_ready
   includes:
     - !include ../../common.yaml
 
