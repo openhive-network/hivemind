@@ -3,10 +3,12 @@
 
   marks:
     - patterntest
+    - negative
     - postgrest_ready
+    - postgrest_exception
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -19,8 +21,10 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.list_pop_communities"
-          params: []
+          params: [["steemit"]]
       response:
-        status_code: 200
+        status_code: 400
         verify_response_with:
           function: validate_response:compare_response_with_pattern
+          extra_kwargs:
+            error_response: true
