@@ -57,3 +57,27 @@ BEGIN
 END
 $$
 ;
+
+DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.prepare_json_for_communities;
+CREATE FUNCTION hivemind_postgrest_utilities.prepare_json_for_communities(community_data hivemind_app.bridge_api_list_communities)
+RETURNS JSONB
+LANGUAGE plpgsql
+IMMUTABLE
+AS
+$BODY$
+DECLARE
+    _json_response JSONB;
+BEGIN
+    IF community_data.title IS NULL THEN
+        community_data.title := community_data.name;
+    END IF;
+
+    _json_response := to_jsonb(community_data);
+
+    IF community_data.admins[1] IS NULL THEN
+        _json_response := _json_response - 'admins';
+    END IF;
+
+    RETURN _json_response;
+END;
+$BODY$;
