@@ -1,0 +1,5 @@
+{
+  "code": -32602,
+  "data": "int() argument must be a string, a bytes-like object or a number, not 'list'",
+  "message": "Invalid parameters"
+}
