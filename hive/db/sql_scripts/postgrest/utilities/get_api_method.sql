@@ -150,6 +150,8 @@ BEGIN
       result := hivemind_endpoints.bridge_api_get_follow_list(__json_with_params_is_object, __params);
     WHEN __method_type = 'list_community_roles' THEN
       result := hivemind_endpoints.bridge_api_list_community_roles(__json_with_params_is_object, __params);
+    WHEN __method_type = 'list_all_subscriptions' THEN
+      result := hivemind_endpoints.bridge_api_list_all_subscriptions(__json_with_params_is_object, __params);
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
   END CASE;
