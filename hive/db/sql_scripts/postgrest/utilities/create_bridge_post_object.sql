@@ -91,21 +91,7 @@ BEGIN
 
     IF _row.role_id IS NOT NULL THEN
       _result = jsonb_set(_result, '{author_title}', to_jsonb(_row.role_title));
-
-      IF _row.role_id IN (-2,0,2,4,6,8) THEN
-        _result = jsonb_set(_result, '{author_role}', to_jsonb(CASE _row.role_id
-                                                                WHEN -2 THEN 'muted'::text
-                                                                WHEN 0 THEN 'guest'::text
-                                                                WHEN 2 THEN 'member'::text
-                                                                WHEN 4 THEN 'mod'::text
-                                                                WHEN 6 THEN 'admin'::text
-                                                                WHEN 8 THEN 'owner'::text
-                                                                ELSE 'unknown'
-                                                              END));
-      ELSE
-        RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Unknown author role: ' || _row.role_id);
-      END IF;
-
+      _result = jsonb_set(_result, '{author_role}', to_jsonb(hivemind_postgrest_utilities.get_role_name(_row.role_id)));
     ELSE
       _result = jsonb_set(_result, '{author_role}', to_jsonb('guest'::text));
       _result = jsonb_set(_result, '{author_title}', to_jsonb(''::text));
