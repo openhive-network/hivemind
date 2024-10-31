@@ -17,6 +17,12 @@ CREATE TYPE hivemind_app.bridge_api_list_communities AS (
     admins VARCHAR ARRAY
 );
 
+DROP TYPE IF EXISTS hivemind_app.bridge_api_list_communities_with_rank CASCADE;
+CREATE TYPE hivemind_app.bridge_api_list_communities_with_rank AS (
+    list_communities hivemind_app.bridge_api_list_communities,
+    rank INTEGER
+);
+
 DROP FUNCTION IF EXISTS hivemind_app.bridge_list_communities_by_rank
 ;
 CREATE OR REPLACE FUNCTION hivemind_app.bridge_list_communities_by_rank(
@@ -25,7 +31,7 @@ CREATE OR REPLACE FUNCTION hivemind_app.bridge_list_communities_by_rank(
     in _search VARCHAR,
     in _limit INT
 )
-RETURNS SETOF hivemind_app.bridge_api_list_communities
+RETURNS SETOF hivemind_app.bridge_api_list_communities_with_rank
 LANGUAGE plpgsql
 AS
 $function$
@@ -37,21 +43,24 @@ BEGIN
         SELECT hc.rank INTO __rank FROM hivemind_app.hive_communities hc WHERE hc.id = __last_id;
     END IF;
     RETURN QUERY SELECT
-        hc.id,
-        hc.name,
-        COALESCE(NULLIF(hc.title,''),CONCAT('@',hc.name))::VARCHAR(32),
-        hc.about,
-        hc.lang,
-        hc.type_id,
-        hc.is_nsfw,
-        hc.subscribers,
-        hc.sum_pending,
-        hc.num_pending,
-        hc.num_authors,
-        hc.created_at::VARCHAR(19),
-        hc.avatar_url,
-        hivemind_app.bridge_get_community_context(_observer, hc.name),
-        array_agg(ha.name ORDER BY ha.name)
+        ROW(
+            hc.id,
+            hc.name,
+            COALESCE(NULLIF(hc.title,''),CONCAT('@',hc.name))::VARCHAR(32),
+            hc.about,
+            hc.lang,
+            hc.type_id,
+            hc.is_nsfw,
+            hc.subscribers,
+            hc.sum_pending,
+            hc.num_pending,
+            hc.num_authors,
+            hc.created_at::VARCHAR(19),
+            hc.avatar_url,
+            hivemind_app.bridge_get_community_context(_observer, hc.name),
+            array_agg(ha.name ORDER BY ha.name)
+        )::hivemind_app.bridge_api_list_communities,
+        hc.rank
     FROM hivemind_app.hive_communities as hc
     LEFT JOIN hivemind_app.hive_roles hr ON hr.community_id = hc.id AND hr.role_id = 6
     LEFT JOIN hivemind_app.hive_accounts ha ON hr.account_id = ha.id
