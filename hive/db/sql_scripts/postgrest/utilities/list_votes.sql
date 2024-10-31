@@ -59,47 +59,53 @@ LANGUAGE plpgsql
 STABLE
 AS
 $function$
+DECLARE
+_result JSONB;
 BEGIN
   IF _case = ANY(ARRAY['database_list_by_comment_voter'::hivemind_postgrest_utilities.list_votes_case,'database_list_by_voter_comment'::hivemind_postgrest_utilities.list_votes_case]) THEN
     assert _voter_id IS NOT NULL;
   END IF;
 
-  RETURN (
-    SELECT to_jsonb(result.array) FROM (
-      SELECT ARRAY (
-        SELECT hivemind_postgrest_utilities.apply_vote_presentation(r, _presentation_mode) FROM (
-          SELECT 
-            v.id,
-            v.voter,
-            v.author,
-            v.permlink,
-            v.weight,
-            v.rshares,
-            v.percent,
-            v.last_update,
-            v.num_changes,
-            v.reputation
-          FROM
-            hivemind_app.hive_votes_view v
-          WHERE
-          ( CASE
-              WHEN _case = 'create_post' THEN v.post_id = _post_id
-              WHEN _case = 'database_list_by_comment_voter' THEN (v.post_id = _post_id AND v.voter_id >= _voter_id)
-              WHEN _case = 'database_list_by_voter_comment' THEN (v.voter_id = _voter_id AND v.post_id >= _post_id)
-            END
-          )
-          ORDER BY
-          ( CASE
-              WHEN _case = 'create_post' THEN v.voter_id
-              WHEN _case = 'database_list_by_comment_voter' THEN v.voter_id
-              WHEN _case = 'database_list_by_voter_comment' THEN v.post_id
-            END
-          )
-          LIMIT _limit
-        ) r
+  _result = (
+    SELECT jsonb_agg(
+        hivemind_postgrest_utilities.apply_vote_presentation(r, _presentation_mode)
+      ) FROM (
+      SELECT 
+        v.id,
+        v.voter,
+        v.author,
+        v.permlink,
+        v.weight,
+        v.rshares,
+        v.percent,
+        v.last_update,
+        v.num_changes,
+        v.reputation
+      FROM
+        hivemind_app.hive_votes_view v
+      WHERE
+      ( CASE
+          WHEN _case = 'create_post' THEN v.post_id = _post_id
+          WHEN _case = 'database_list_by_comment_voter' THEN (v.post_id = _post_id AND v.voter_id >= _voter_id)
+          WHEN _case = 'database_list_by_voter_comment' THEN (v.voter_id = _voter_id AND v.post_id >= _post_id)
+        END
       )
-    ) result
+      ORDER BY
+      ( CASE
+          WHEN _case = 'create_post' THEN v.voter_id
+          WHEN _case = 'database_list_by_comment_voter' THEN v.voter_id
+          WHEN _case = 'database_list_by_voter_comment' THEN v.post_id
+        END
+      )
+      LIMIT _limit
+    ) r
   );
+
+  IF _result IS NULL THEN
+    _result = '[]'::jsonb;
+  END IF;
+
+  RETURN _result;
 END;
 $function$
 ;

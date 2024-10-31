@@ -9,6 +9,7 @@ $$
 DECLARE
 _account_lower_bound TEXT;
 _limit INTEGER;
+_result JSONB;
 BEGIN
   PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"account_lower_bound", "limit"}', '{"string", "number"}');
   _account_lower_bound = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'account_lower_bound', 0, False);
@@ -19,34 +20,36 @@ BEGIN
   END IF;
 
   IF _fat_node_style THEN
-    RETURN (
-      SELECT to_jsonb(result.array) FROM (
-        SELECT ARRAY (
-          SELECT to_jsonb(row) FROM (
-            SELECT ha.name AS account, ha.reputation AS reputation
-              FROM hivemind_app.hive_accounts_view ha
-              WHERE ha.name >= _account_lower_bound AND ha.id != 0
-              ORDER BY ha.name
-              LIMIT _limit
-          ) row
-        )
-      ) result
+    _result = (
+      SELECT jsonb_agg (
+        to_jsonb(row)
+      ) FROM (
+        SELECT ha.name AS account, ha.reputation AS reputation
+        FROM hivemind_app.hive_accounts_view ha
+        WHERE ha.name >= _account_lower_bound AND ha.id != 0
+        ORDER BY ha.name
+        LIMIT _limit
+      ) row
     );
   ELSE
-    RETURN jsonb_build_object('reputations', (
-      SELECT to_jsonb(result.array) FROM (
-        SELECT ARRAY (
-          SELECT to_jsonb(row) FROM (
-            SELECT ha.name AS name, ha.reputation AS reputation
-              FROM hivemind_app.hive_accounts_view ha
-              WHERE ha.name >= _account_lower_bound AND ha.id != 0
-              ORDER BY ha.name
-              LIMIT _limit
-          ) row
-        )
-      ) result
+    _result = jsonb_build_object('reputations', (
+      SELECT jsonb_agg (
+        to_jsonb(row)
+      ) FROM (
+        SELECT ha.name AS name, ha.reputation AS reputation
+        FROM hivemind_app.hive_accounts_view ha
+        WHERE ha.name >= _account_lower_bound AND ha.id != 0
+        ORDER BY ha.name
+        LIMIT _limit
+      ) row
     ));
   END IF;
+
+  IF _result IS NULL THEN
+    _result = '[]'::jsonb;
+  END IF;
+
+  RETURN _result;
 END;
 $$
 ;

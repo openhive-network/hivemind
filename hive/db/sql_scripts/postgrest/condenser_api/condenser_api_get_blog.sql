@@ -11,6 +11,7 @@ DECLARE
   _limit INT;
 
   _account_id INT;
+  _result JSONB;
 BEGIN
   PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"account", "start_entry_id", "limit"}', '{"string", "number", "number"}', 1);
   _account = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'account', 0, True);
@@ -48,111 +49,113 @@ BEGIN
   END IF;
 
   IF _get_entries THEN
-    RETURN (
-      SELECT to_jsonb(result.array) FROM (
-        SELECT ARRAY (
-          SELECT jsonb_build_object(
-            'blog', _account,
-            'entry_id', row.entry_id,
-            'author', row.author,
-            'permlink', row.permlink,
-            'reblogged_on', hivemind_postgrest_utilities.json_date(row.reblogged_at)
-          ) FROM (
-            SELECT
-              blog.entry_id::INT,
-              ha.name as author,
-              hpd.permlink,
-              (
-                CASE hp.author_id = _account_id
-                WHEN True THEN '1970-01-01T00:00:00'::timestamp
-                ELSE blog.created_at
-                END
-              ) AS reblogged_at
-            FROM
-            (
-              SELECT
-                hfc.created_at, hfc.post_id, row_number() over (ORDER BY hfc.created_at ASC, hfc.post_id ASC) - 1 as entry_id
-              FROM
-                hivemind_app.hive_feed_cache hfc
-              WHERE
-                hfc.account_id = _account_id
-              ORDER BY hfc.created_at ASC, hfc.post_id ASC
-              LIMIT _limit
-              OFFSET _offset
-            ) as blog
-            JOIN hivemind_app.hive_posts hp ON hp.id = blog.post_id
-            JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
-            JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id
-            ORDER BY blog.created_at DESC, blog.post_id DESC
-          ) row
+    _result = (
+      SELECT jsonb_agg (
+        jsonb_build_object(
+          'blog', _account,
+          'entry_id', row.entry_id,
+          'author', row.author,
+          'permlink', row.permlink,
+          'reblogged_on', hivemind_postgrest_utilities.json_date(row.reblogged_at)
         )
-      ) result
+      ) FROM (
+        SELECT
+          blog.entry_id::INT,
+          ha.name as author,
+          hpd.permlink,
+          (
+            CASE hp.author_id = _account_id
+            WHEN True THEN '1970-01-01T00:00:00'::timestamp
+            ELSE blog.created_at
+            END
+          ) AS reblogged_at
+        FROM
+        (
+          SELECT
+            hfc.created_at, hfc.post_id, row_number() over (ORDER BY hfc.created_at ASC, hfc.post_id ASC) - 1 as entry_id
+          FROM
+            hivemind_app.hive_feed_cache hfc
+          WHERE
+            hfc.account_id = _account_id
+          ORDER BY hfc.created_at ASC, hfc.post_id ASC
+          LIMIT _limit
+          OFFSET _offset
+        ) as blog
+        JOIN hivemind_app.hive_posts hp ON hp.id = blog.post_id
+        JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
+        JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id
+        ORDER BY blog.created_at DESC, blog.post_id DESC
+      ) row
     );
   ELSE
-    RETURN (
-      SELECT to_jsonb(result.array) FROM (
-        SELECT ARRAY (
-          SELECT jsonb_build_object(
-            'blog', _account,
-            'entry_id', row.entry_id,
-            'comment', hivemind_postgrest_utilities.create_condenser_post_object(row, 0, False),
-            'reblogged_on', row.reblogged_at)  FROM (
-            SELECT
-              hp.id,
-              blog.entry_id::INT,
-              hp.author,
-              hp.permlink,
-              hp.author_rep,
-              hp.title,
-              hp.body,
-              hp.category,
-              hp.depth,
-              hp.promoted,
-              hp.payout,
-              hp.pending_payout,
-              hp.payout_at,
-              hp.is_paidout,
-              hp.children,
-              hp.created_at,
-              hp.updated_at,
-              (
-                CASE hp.author_id = _account_id
-                  WHEN True THEN '1970-01-01T00:00:00'::timestamp
-                  ELSE blog.created_at
-                END
-              ) as reblogged_at,
-              hp.rshares,
-              hp.json,
-              hp.parent_author,
-              hp.parent_permlink_or_category,
-              hp.curator_payout_value,
-              hp.max_accepted_payout,
-              hp.percent_hbd,
-              hp.beneficiaries,
-              hp.url,
-              hp.root_title,
-              hp.author_rewards
-            FROM
-            (
-              SELECT
-                hfc.created_at, hfc.post_id, row_number() over (ORDER BY hfc.created_at ASC, hfc.post_id ASC) - 1 as entry_id
-              FROM
-                hivemind_app.hive_feed_cache hfc
-              WHERE
-                hfc.account_id = _account_id
-              ORDER BY hfc.created_at ASC, hfc.post_id ASC
-              LIMIT _limit
-              OFFSET _offset
-            ) as blog,
-            LATERAL hivemind_app.get_post_view_by_id(blog.post_id) hp
-            -- in python code order was ASC, but because we append new elements to array in reverse order, order is DESC here
-            ORDER BY blog.created_at DESC, blog.post_id DESC
-          ) row      
+    _result = (
+      SELECT jsonb_agg(
+        jsonb_build_object(
+          'blog', _account,
+          'entry_id', row.entry_id,
+          'comment', hivemind_postgrest_utilities.create_condenser_post_object(row, 0, False),
+          'reblogged_on', row.reblogged_at
         )
-      ) result
+      ) FROM (
+        SELECT
+          hp.id,
+          blog.entry_id::INT,
+          hp.author,
+          hp.permlink,
+          hp.author_rep,
+          hp.title,
+          hp.body,
+          hp.category,
+          hp.depth,
+          hp.promoted,
+          hp.payout,
+          hp.pending_payout,
+          hp.payout_at,
+          hp.is_paidout,
+          hp.children,
+          hp.created_at,
+          hp.updated_at,
+          (
+            CASE hp.author_id = _account_id
+              WHEN True THEN '1970-01-01T00:00:00'::timestamp
+              ELSE blog.created_at
+            END
+          ) as reblogged_at,
+          hp.rshares,
+          hp.json,
+          hp.parent_author,
+          hp.parent_permlink_or_category,
+          hp.curator_payout_value,
+          hp.max_accepted_payout,
+          hp.percent_hbd,
+          hp.beneficiaries,
+          hp.url,
+          hp.root_title,
+          hp.author_rewards
+        FROM
+        (
+          SELECT
+            hfc.created_at, hfc.post_id, row_number() over (ORDER BY hfc.created_at ASC, hfc.post_id ASC) - 1 as entry_id
+          FROM
+            hivemind_app.hive_feed_cache hfc
+          WHERE
+            hfc.account_id = _account_id
+          ORDER BY hfc.created_at ASC, hfc.post_id ASC
+          LIMIT _limit
+          OFFSET _offset
+        ) as blog,
+        LATERAL hivemind_app.get_post_view_by_id(blog.post_id) hp
+        -- in python code order was ASC, but because we append new elements to array in reverse order, order is DESC here
+        ORDER BY blog.created_at DESC, blog.post_id DESC
+      ) row      
     );
   END IF;
 
+  IF _result IS NULL THEN
+    _result = '[]'::jsonb;
+  END IF;
+
+  RETURN _result;
 END;
 $$
 ;
