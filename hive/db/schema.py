@@ -782,6 +782,7 @@ def setup_runtime_code(db):
         "postgrest/utilities/find_community_id.sql",
         "postgrest/bridge_api/bridge_api_list_community_roles.sql",
         "postgrest/bridge_api/bridge_api_list_all_subscriptions.sql",
+        "postgrest/bridge_api/bridge_api_list_pop_communities.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
