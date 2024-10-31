@@ -103,11 +103,18 @@ async def list_communities(context, last='', limit=100, query=None, sort='rank',
     observer = valid_account(observer, True)
     search = query
     db = context['db']
+    order = {"rank": "rank ASC", "new": "id DESC", "subs": "subscribers DESC, id DESC"}
+    columns = [
+        "id", "name", "title", "about", "lang", "type_id", "is_nsfw",
+        "subscribers", "sum_pending", "num_pending", "num_authors",
+        "created_at", "avatar_url", "context", "admins"
+    ]
 
     sql = (
-        f"SELECT * FROM {SCHEMA_NAME}.bridge_list_communities_by_"
-        + sort
-        + "( (:observer)::VARCHAR, (:last)::VARCHAR, (:search)::VARCHAR, (:limit)::INT )"
+            f"SELECT {'(list_communities).*' if sort == 'rank' else ', '.join(columns)} "
+            f"FROM {SCHEMA_NAME}.bridge_list_communities_by_{sort}"
+            + "( (:observer)::VARCHAR, (:last)::VARCHAR, (:search)::VARCHAR, (:limit)::INT ) "
+            f"ORDER BY {order[sort]}"
     )
 
     rows = await db.query_all(sql, observer=observer, last=last, search=search, limit=limit)
