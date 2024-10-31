@@ -779,6 +779,7 @@ def setup_runtime_code(db):
         "postgrest/utilities/extract_profile_metadata.sql",
         "postgrest/bridge_api/bridge_api_get_follow_list.sql",
         "postgrest/utilities/get_role_name.sql",
+        "postgrest/utilities/find_community_id.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
