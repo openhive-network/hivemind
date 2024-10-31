@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # mock-data - test-safari is in different communities
-
+    - postgrest_ready
   includes:
     - !include ../../common.yaml
 
