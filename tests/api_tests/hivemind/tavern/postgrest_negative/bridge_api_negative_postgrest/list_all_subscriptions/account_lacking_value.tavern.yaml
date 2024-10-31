@@ -5,9 +5,10 @@
     - patterntest
     - negative
     - postgrest_ready
+    - postgrest_exception
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -20,7 +21,7 @@
           jsonrpc: "2.0"
           id: 1
           method: "bridge.list_all_subscriptions"
-          params: {"account":"wyuh"}
+          params: {"test":"gtg"}
       response:
         status_code: 200
         verify_response_with:
