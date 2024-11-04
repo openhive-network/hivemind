@@ -14,6 +14,7 @@ _ACCOUNT_TAB_KEYS TEXT[] DEFAULT '{blog, feed, comments, recent-replies}';
 _field_text_1 TEXT;
 
 BEGIN
+  RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('condenser_api get state is not supported');
   PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"path"}', '{"string"}');
   _path = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'path', 0, False);
   SELECT path, parts FROM hivemind_postgrest_utilities.gs_normalize_path(_path) AS (path TEXT, parts TEXT[]) INTO _path, _parts;
@@ -37,8 +38,6 @@ BEGIN
       
     END IF;
   END IF;
-  
-  RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('METHOD condenser_api get state is not finished');
 END;
 $$
 ;
