@@ -61,7 +61,7 @@ async def list_top_communities(context, limit=25):
 async def list_pop_communities(context, limit: int = 25):
     """List communities by new subscriber count. Returns lite community list."""
     limit = valid_limit(limit, 25, 25)
-    sql = f"SELECT * FROM {SCHEMA_NAME}.bridge_list_pop_communities( (:limit)::INT )"
+    sql = f"SELECT name, title FROM {SCHEMA_NAME}.bridge_list_pop_communities( (:limit)::INT ) ORDER BY newsubs DESC, id DESC"
     out = await context['db'].query_all(sql, limit=limit)
 
     return [(r[0], r[1]) for r in out]
