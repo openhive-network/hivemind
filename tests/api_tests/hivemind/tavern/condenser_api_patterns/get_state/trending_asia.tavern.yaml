@@ -5,6 +5,7 @@
     - patterntest # there are differences against orig. pattern i.e. for post "sweetsssj/a-chinese-twist-on-japanese-cuisine"
                   # since new HM version has a problem in handling tags during post edits. New version does merge of tags specified
                   # at each edit where old one replaced them.
+    - postgrest_ignore
 
   includes:
     - !include ../../common.yaml
