@@ -1,7 +1,9 @@
 DROP TYPE IF EXISTS hivemind_app.bridge_api_list_pop_communities CASCADE;
 CREATE TYPE hivemind_app.bridge_api_list_pop_communities AS (
     name VARCHAR,
-    title VARCHAR
+    title VARCHAR,
+    newsubs BIGINT,
+    id INTEGER
 );
 
 DROP FUNCTION IF EXISTS hivemind_app.bridge_list_pop_communities
@@ -15,7 +17,7 @@ AS
 $function$
 BEGIN
     RETURN QUERY
-    SELECT name, title
+    SELECT name, title, newsubs, id
     FROM hivemind_app.hive_communities
     JOIN (
         SELECT community_id, COUNT(*) newsubs
