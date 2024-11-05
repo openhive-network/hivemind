@@ -4,6 +4,7 @@
   marks:
     - patterntest # same as 'deprecated' test, just called through 'call'
     - negative
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
