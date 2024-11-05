@@ -683,8 +683,7 @@ e2e_benchmark_on_postgrest:
       BENCHMARK_AWAIT_URL="tcp://${RUNNER_HIVEMIND_BENCHMARK_SERVER_HOSTNAME}:${RUNNER_HIVEMIND_SERVER_HTTP_PORT}"
       echo "Waiting for Hivemind benchmark server to start running on ${BENCHMARK_AWAIT_URL}"
       "${DATA_CACHE_HAF}/await" -t 10m "${BENCHMARK_AWAIT_URL}" -- echo "Hivemind benchmark instance is running"
-    # TODO: Uncomment anchors to enable a test group. To test only selected methods, add their names to the environment variable
-    # - *api-benchmark-script
+    - *api-benchmark-script
   after_script:
     - |
       echo -e "\e[0Ksection_start:$(date +%s):logs[collapsed=true]\r\e[0KCollecting logs..."
