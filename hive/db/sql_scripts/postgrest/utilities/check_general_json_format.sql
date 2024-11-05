@@ -25,25 +25,22 @@ BEGIN
     __api_type = __params->>0;
     __method_type = __params->>1;
     __params = __params->>2;
-    __json_with_params_is_object = False;
-    IF jsonb_typeof(__params) = 'array' AND jsonb_array_length(__params) = 1 AND jsonb_typeof(__params->0) = 'object' THEN
-      __json_with_params_is_object = True;
-      __params = __params->0;
-    END IF;
   ELSE
     SELECT substring(__method FROM '^[^.]+') INTO __api_type;
     SELECT substring(__method FROM '[^.]+$') INTO __method_type;
-    IF jsonb_typeof(__params) = 'object' THEN
+  END IF;
+
+  IF jsonb_typeof(__params) = 'object' THEN
+    __json_with_params_is_object = True;
+  ELSEIF jsonb_typeof(__params) = 'array' THEN
+    IF jsonb_array_length(__params) = 1 AND jsonb_typeof(__params->0) = 'object' THEN
       __json_with_params_is_object = True;
-    ELSEIF jsonb_typeof(__params) = 'array' THEN
-      IF jsonb_array_length(__params) <> 0 THEN
-        __json_with_params_is_object = False;
-      ELSE
-        __json_with_params_is_object = True;
-      END IF;
+      __params = __params->0;
     ELSE
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_json_format_exception('Invalid JSON format:' || jsonb_typeof(__params)::text);
+      __json_with_params_is_object = False;
     END IF;
+  ELSE
+    RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_json_format_exception('Invalid JSON format:' || jsonb_typeof(__params)::text);
   END IF;
 
   RETURN jsonb_build_object(

@@ -1,13 +1,14 @@
----
+--- 
   test_name: Hivemind
 
   marks:
     - patterntest
     - negative
-    - postgrest_ignore
+    - postgrest_ready
+    - postgrest_exception
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -19,8 +20,8 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "bridge.list_subscribers"
-          params: []
+          method: "tags_api.get_discussions_by_author_before_date"
+          params: [] # context, author: str = None, start_permlink: str = '', before_date: str = '', limit: int = 10
       response:
         status_code: 200
         verify_response_with:

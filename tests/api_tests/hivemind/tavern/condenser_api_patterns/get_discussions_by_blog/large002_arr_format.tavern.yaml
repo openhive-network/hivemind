@@ -2,9 +2,8 @@
   test_name: Hivemind
 
   marks:
-    - patterntest
-    - negative
-    - postgrest_ignore
+    - patterntest # old HM produced overlapping pages - that was corrected
+    - postgrest_ready
 
   includes:
     - !include ../../common.yaml
@@ -19,11 +18,11 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "bridge.list_subscribers"
-          params: []
+          method: "condenser_api.get_discussions_by_blog"
+          params: [{"tag":"nkdk","start_author":"nkdk","start_permlink":"withered--distort-engulf-official-premiere","limit":10}]
       response:
         status_code: 200
         verify_response_with:
           function: validate_response:compare_response_with_pattern
           extra_kwargs:
-            error_response: true
+            ignore_tags: "<condenser posts>"

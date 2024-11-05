@@ -4,10 +4,11 @@
   marks:
     - patterntest
     - negative
-    - postgrest_ignore
+    - postgrest_ready
+    - postgrest_exception
 
   includes:
-    - !include ../../common.yaml
+    - !include ../../../common.yaml
 
   stages:
     - name: test
@@ -19,8 +20,9 @@
         json:
           jsonrpc: "2.0"
           id: 1
-          method: "bridge.list_subscribers"
-          params: []
+          method: "tags_api.get_discussions_by_blog"
+          params: [] # context, tag: str = None, start_author: str = '', start_permlink: str = '', limit: int = 20, truncate_body: int = 0, filter_tags: list = None
+         # tag -> auhtor
       response:
         status_code: 200
         verify_response_with:
