@@ -4,6 +4,8 @@
   marks:
     - patterntest
     - negative
+    #method is not supported, in postgrest just throw exception, do not do any other action
+    - postgrest_ignore
 
   includes:
     - !include ../../common.yaml
