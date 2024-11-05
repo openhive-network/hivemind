@@ -9,7 +9,7 @@ DECLARE
     _limit INTEGER;
     _response JSONB;
 BEGIN
-    PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"limit"}', '{"number"}');
+    PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"limit"}', '{"number"}', 0);
 
     _limit := hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'limit', 0, False);
     _limit := hivemind_postgrest_utilities.valid_number(_limit, 25, 1, 25, 'limit');
