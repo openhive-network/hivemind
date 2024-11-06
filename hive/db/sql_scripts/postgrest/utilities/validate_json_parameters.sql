@@ -36,9 +36,9 @@ BEGIN
     END LOOP;
   ELSE
     expected_array_len = CARDINALITY(_expected_params_types);
-    IF (_min_parameters_array_len IS NOT NULL AND (_min_parameters_array_len > jsonb_array_length(_params) OR jsonb_array_length(_params) < jsonb_array_length(_params)))
+    IF (_min_parameters_array_len IS NOT NULL AND (_min_parameters_array_len > jsonb_array_length(_params) OR expected_array_len < jsonb_array_length(_params)))
       OR (_min_parameters_array_len IS NULL AND jsonb_array_length(_params) <> expected_array_len) THEN
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_parameters_array_length_exception(expected_array_len, jsonb_array_length(_params));
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_invalid_parameters_array_length_exception((CASE WHEN _min_parameters_array_len IS NOT NULL AND _min_parameters_array_len <> 0 THEN _min_parameters_array_len ELSE expected_array_len END), jsonb_array_length(_params));
     ELSE
       FOR array_idx IN 1..expected_array_len-1 LOOP
         IF _params->array_idx IS NOT NULL THEN
