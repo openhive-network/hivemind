@@ -48,9 +48,6 @@ BEGIN
   );
 
   IF _reblogged_by IS NOT NULL AND CARDINALITY(_reblogged_by) > 0 THEN
-    IF CARDINALITY(_reblogged_by) > 1 THEN
-      _reblogged_by = array_sort(_reblogged_by);
-    END IF;
     _result = jsonb_set(_result, '{reblogged_by}', to_jsonb(_reblogged_by));
   END IF;
 
