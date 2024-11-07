@@ -233,7 +233,7 @@ BEGIN
           SELECT 
             hfc.post_id, 
             MIN(hfc.created_at) as min_created, 
-            array_agg(ha.name) AS reblogged_by,
+            array_agg(DISTINCT(ha.name) ORDER BY ha.name) AS reblogged_by,
             array_agg(blacklist.source) as blacklist_source
           FROM hivemind_app.hive_feed_cache hfc
           JOIN hivemind_app.hive_follows hf ON hfc.account_id = hf.following
