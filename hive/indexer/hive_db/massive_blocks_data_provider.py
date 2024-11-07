@@ -76,7 +76,7 @@ class MassiveBlocksDataProviderHiveDb:
 
         if not MassiveBlocksDataProviderHiveDb._vop_types_dictionary:
             virtual_operations_types_ids = self._db.query_all(
-                "SELECT id, name FROM hive.operation_types WHERE is_virtual  = true"
+                "SELECT id, name FROM hafd.operation_types WHERE is_virtual  = true"
             )
             for id, name in virtual_operations_types_ids:
                 MassiveBlocksDataProviderHiveDb._vop_types_dictionary[id] = VirtualOperationType.from_name(
@@ -85,7 +85,7 @@ class MassiveBlocksDataProviderHiveDb:
 
         if not MassiveBlocksDataProviderHiveDb._op_types_dictionary:
             operations_types_ids = self._db.query_all(
-                "SELECT id, name FROM hive.operation_types WHERE is_virtual  = false"
+                "SELECT id, name FROM hafd.operation_types WHERE is_virtual  = false"
             )
             for id, name in operations_types_ids:
                 MassiveBlocksDataProviderHiveDb._op_types_dictionary[id] = OperationType.from_name(

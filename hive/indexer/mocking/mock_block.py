@@ -23,7 +23,7 @@ class AccountMock:
         self._name = name
 
         if self.__class__.account_id is None:
-            last_account_id = Db.instance().query_one(sql='SELECT id from hive.accounts ORDER BY id DESC LIMIT 1;')
+            last_account_id = Db.instance().query_one(sql='SELECT id from hafd.accounts ORDER BY id DESC LIMIT 1;')
             log.info(f'Last account id stored in HAf database is: {last_account_id}')
             self.__class__.account_id = last_account_id
 
@@ -38,7 +38,7 @@ class AccountMock:
     def push(self) -> None:
         sql = """
 INSERT INTO 
-    hive.accounts (id, name, block_num)
+    hafd.accounts (id, name, block_num)
 VALUES
     (:id, :name, :block_num);
 """
@@ -66,7 +66,7 @@ class OperationBase:
         self._body = body
 
         if OperationBase.operation_id is None:
-            last_operation_id = Db.instance().query_one(sql='SELECT id from hive.operations ORDER BY id DESC LIMIT 1;')
+            last_operation_id = Db.instance().query_one(sql='SELECT id from hafd.operations ORDER BY id DESC LIMIT 1;')
             log.info(f'Last operation id stored in HAf database is: {last_operation_id}')
             OperationBase.operation_id = last_operation_id
 
@@ -86,9 +86,9 @@ class OperationBase:
     def push(self) -> None:
         sql = """
 INSERT INTO 
-    hive.operations (id, trx_in_block, op_pos, body_binary)
+    hafd.operations (id, trx_in_block, op_pos, body_binary)
 VALUES
-    (:id, -2, -2, :body :: jsonb :: hive.operation);
+    (:id, -2, -2, :body :: jsonb :: hafd.operation);
 """
         OperationBase.pos_in_block += 1
 
@@ -185,7 +185,7 @@ class TransactionMock:
     def push(self) -> None:
         sql = """
 INSERT INTO 
-    hive.transactions (block_num, trx_in_block, trx_hash, ref_block_num, ref_block_prefix, expiration, signature)
+    hafd.transactions (block_num, trx_in_block, trx_hash, ref_block_num, ref_block_prefix, expiration, signature)
 VALUES
     (:block_num, -2, :trx_hash, :ref_block_num, :ref_block_prefix, :expiration, NULL);
 """
@@ -253,7 +253,7 @@ class BlockMockAfterDb:
         initminer_account_id = 3
 
         sql = f"""
-INSERT INTO hive.blocks (num, hash, prev, created_at, producer_account_id, transaction_merkle_root, extensions,
+INSERT INTO hafd.blocks (num, hash, prev, created_at, producer_account_id, transaction_merkle_root, extensions,
                          witness_signature, signing_key, hbd_interest_rate, total_vesting_fund_hive, total_vesting_shares,
                          total_reward_fund_hive, virtual_supply, current_supply, current_hbd_supply, dhf_interval_ledger)
 VALUES (:num, :hash, :prev, :created_at, {initminer_account_id}, 'mocked'::bytea, NULL, 'mocked'::bytea, 'mocked', 1000, 1000,
