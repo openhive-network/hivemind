@@ -103,7 +103,8 @@ class SyncHiveDb:
         start_time = perf()
         def report_enter_to_stage(current_stage) -> bool:
             if report_enter_to_stage.prev_application_stage is None or report_enter_to_stage.prev_application_stage != current_stage:
-                log.info( f"Switched to {current_stage} block processing mode after: {secs_to_str(perf() - start_time)}" )
+                last_imported = self._db.query_one(f"SELECT hive.app_get_current_block_num( '{SCHEMA_NAME}' );")
+                log.info( f"Switched to `{current_stage}` mode | block: {last_imported} | processing time: {secs_to_str(perf() - start_time)}")
                 report_enter_to_stage.prev_application_stage = current_stage
                 return True
             report_enter_to_stage.prev_application_stage = current_stage
