@@ -46,11 +46,7 @@ _result = (
   ) row
 );
 
-  IF _result IS NULL THEN
-    _result = '[]'::jsonb;
-  END IF;
-
-  RETURN _result;
+  RETURN COALESCE(_result, '[]'::jsonb);
 END;
 $$
 ;

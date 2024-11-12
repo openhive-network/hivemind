@@ -10,7 +10,6 @@ _author TEXT;
 _permlink TEXT;
 _post_id INT;
 
-_result JSONB;
 BEGIN
   PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"author", "permlink", "observer"}', '{"string", "string", "string"}', 2);
   -- observer is ignored in python, so it is ignored here as well
@@ -20,7 +19,7 @@ BEGIN
   _permlink = hivemind_postgrest_utilities.valid_permlink(_permlink);
   _post_id = hivemind_postgrest_utilities.find_comment_id( _author, _permlink, True );
   IF _get_replies THEN
-    _result = (
+    RETURN COALESCE((
       SELECT jsonb_agg (
         hivemind_postgrest_utilities.create_condenser_post_object(row, 0, _content_additions)
       ) FROM (
@@ -76,14 +75,12 @@ BEGIN
         FROM replies,
         LATERAL hivemind_app.get_post_view_by_id(replies.id) hp
         ORDER BY hp.id
-      ) row
-    );
+      ) row )
+    , '[]'::jsonb);
 
-    IF _result IS NULL THEN
-      _result = '[]'::jsonb;
-    END IF;
+    RETURN COALESCE(_result, '[]'::jsonb);
   ELSE
-    _result = (
+    RETURN (
       SELECT hivemind_postgrest_utilities.create_condenser_post_object(row, 0, _content_additions) FROM (
         SELECT
           hp.id,
@@ -130,8 +127,6 @@ BEGIN
       ) row
     );
   END IF;
-
-  RETURN _result;
 END;
 $$
 ;
