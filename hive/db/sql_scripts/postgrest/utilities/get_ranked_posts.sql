@@ -23,7 +23,7 @@ BEGIN
         hivemind_postgrest_utilities.create_bridge_post_object(row, _truncate_body, NULL, row.is_pinned, True)
       ) FROM (
         WITH
-        community_data AS MATERIALIZED
+        community_data AS
         (
           SELECT
             id
@@ -32,7 +32,7 @@ BEGIN
             name = _tag
           LIMIT 1
         ),
-        pinned_post AS MATERIALIZED
+        pinned_post AS
         (
           SELECT 
             hp.id,
@@ -618,7 +618,7 @@ BEGIN
     )
     ) FROM (
       WITH
-      community_data AS MATERIALIZED
+      community_data AS
       (
         SELECT
           id
@@ -627,7 +627,7 @@ BEGIN
           name = _tag
         LIMIT 1
       ),
-      community_posts as MATERIALIZED
+      community_posts as
       (
         SELECT
           hp.id,
