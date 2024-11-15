@@ -49,7 +49,7 @@ BEGIN
   END IF;
 
   IF _get_entries THEN
-    WITH blog AS (
+    WITH blog AS MATERIALIZED (
       SELECT
           hfc.created_at,
           hfc.post_id,
@@ -91,7 +91,7 @@ BEGIN
     ) INTO _result
     FROM row;
   ELSE
-    WITH blog AS (
+    WITH blog AS MATERIALIZED(
       SELECT
           hfc.created_at,
           hfc.post_id,
