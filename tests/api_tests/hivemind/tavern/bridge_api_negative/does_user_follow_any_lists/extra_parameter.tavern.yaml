@@ -4,7 +4,7 @@
   marks:
     - patterntest # there is no observer name validation - account can by unspecified
     - negative
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

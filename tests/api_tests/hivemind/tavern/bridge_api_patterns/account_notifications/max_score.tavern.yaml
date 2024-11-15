@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # there used to be no posts with max score (but since now score is calculated differently...)
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # same pattern as tag_steemit but starting below selected post
-    - postgrest_ready
+    
     
   includes:
     - !include ../../../common.yaml

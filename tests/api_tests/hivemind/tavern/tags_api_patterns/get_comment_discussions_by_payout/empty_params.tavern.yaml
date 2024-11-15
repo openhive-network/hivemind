@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # original failed on empty string as limit, but now we treat it as default, so the results are the same as if params were skipped
-    - postgrest_ready
+    
     
   includes:
     - !include ../../common.yaml

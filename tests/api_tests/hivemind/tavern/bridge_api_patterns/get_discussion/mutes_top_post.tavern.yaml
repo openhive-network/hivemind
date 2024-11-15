@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # ignoreall ignores gtg (mock data) - author of top post
-    - postgrest_ready
+    
     
   includes:
     - !include ../../common.yaml

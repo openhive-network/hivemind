@@ -5,7 +5,7 @@
     - patterntest # tag is not a tag but account whose feed we are looking at (set of posts created/reblogged by those followed by selected account)
                   # there can be no nonempty results for not-up-to-date HM because it only gives posts that were created/reblogged within last month (no param to change it)
                   # original produced overlapping pages
-    - postgrest_ready
+    
     
   includes:
     - !include ../../common.yaml

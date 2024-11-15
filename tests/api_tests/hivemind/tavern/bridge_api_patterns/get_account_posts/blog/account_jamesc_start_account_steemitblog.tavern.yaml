@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # original didn't have any reblogs from jamesc (bug?); also jamesc has no top posts
-    - postgrest_ready
+    
 
   includes:
     - !include ../../../common.yaml

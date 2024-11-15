@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # more votes than hardcoded limit; fat node had a bug - lists 1001 votes
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # original only gives posts from last month (counted from now()) so there can be no nonempty results
-    - postgrest_ready
+    
   
   includes:
     - !include ../../../common.yaml

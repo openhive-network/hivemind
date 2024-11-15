@@ -5,7 +5,7 @@
     - patterntest
     # note: before_date is completely ignored, and it appears to be broken and/or completely ignored in steemd as well. This call is similar to get_discussions_by_blog but does NOT serve reblogs
     # does not work properly, there should be different result in output
-    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

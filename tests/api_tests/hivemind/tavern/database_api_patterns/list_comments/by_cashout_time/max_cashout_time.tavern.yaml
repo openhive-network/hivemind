@@ -3,7 +3,7 @@ test_name: Hivemind
 
 marks:
   - patterntest # start_author and start_permlink work correctly when posts have the same cashout_time
-  - postgrest_ready
+  
 includes:
   - !include ../../../common.yaml
 

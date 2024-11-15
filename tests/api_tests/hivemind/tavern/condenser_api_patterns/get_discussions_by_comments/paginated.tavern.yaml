@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # see also roadscape.tavern.yaml; original produced overlapping pages
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

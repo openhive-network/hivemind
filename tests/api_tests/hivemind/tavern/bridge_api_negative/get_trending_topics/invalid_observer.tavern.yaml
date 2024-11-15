@@ -5,7 +5,7 @@
     - patterntest # observer is ignored both by old and new; it is not clear what observer could influence in this call
     - negative
     - xfail # it should fail after implementing observer filtering to get_trending_topics
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

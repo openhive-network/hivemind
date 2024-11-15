@@ -4,7 +4,7 @@
   marks:
     - patterntest # it used to only check permlink when looking for start post, now both author and permlink trigger page (and are required to point to valid post)
     - negative
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

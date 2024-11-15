@@ -4,7 +4,7 @@ test_name: Hivemind
 marks:
   - patterntest # fat node didn't like that format of date (so original made with regular ISO format date)
                 # also results incomparable with original due to differences in cashout (pattern the same as in author_permlink)
-  - postgrest_ready
+  
   
 includes:
   - !include ../../../common.yaml

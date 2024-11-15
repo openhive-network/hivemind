@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # alice follows muted of ignoreall who ignores gavvet (mock data); see also no_params
-    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

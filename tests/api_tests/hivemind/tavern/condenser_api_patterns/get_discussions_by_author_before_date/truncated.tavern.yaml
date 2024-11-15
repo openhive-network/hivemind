@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # original did not have truncate_body argument - it was added for consistency
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

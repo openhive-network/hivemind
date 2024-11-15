@@ -4,7 +4,7 @@ test_name: Hivemind
 marks:
   - patterntest # fat node showed first post votes because primary ordering was by comment and when comment is skipped it can only start with the very first post
   - negative
-  - postgrest_ready
+  
 
 includes:
   - !include ../../../common.yaml

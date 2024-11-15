@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # see also hive-171488
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

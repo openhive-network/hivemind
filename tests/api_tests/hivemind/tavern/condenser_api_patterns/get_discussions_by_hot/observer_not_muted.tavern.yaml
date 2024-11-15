@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # test to compare with observers alice and ignoreall; see also no_params
-    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

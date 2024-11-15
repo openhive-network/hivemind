@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # blacklists matched with mock data
-    - postgrest_ready
+    
 
   includes:
     - !include ../../../common.yaml

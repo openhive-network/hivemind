@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # bridge_get_by_feed_with_reblog filters muted accounts by observer
-    - postgrest_ready
+    
     
   includes:
     - !include ../../common.yaml

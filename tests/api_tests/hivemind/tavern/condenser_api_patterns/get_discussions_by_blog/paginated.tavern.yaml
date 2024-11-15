@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # old HM produced overlapping pages, this was corrected
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

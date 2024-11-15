@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # page post is pinned but page crosses to nonpinned query containing both pinned and nonpinned posts; compare with community_no_page
-    - postgrest_ready
+    
 
   includes:
     - !include ../../../common.yaml

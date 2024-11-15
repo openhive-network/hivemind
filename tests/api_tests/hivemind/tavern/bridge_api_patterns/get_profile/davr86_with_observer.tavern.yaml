@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # observer would have no effect on 5 mln blocks but mock data added necessary follows
-    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

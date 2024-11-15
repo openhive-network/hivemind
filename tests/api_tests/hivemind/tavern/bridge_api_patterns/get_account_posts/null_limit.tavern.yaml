@@ -4,7 +4,7 @@
   marks:
     - patterntest # there was a bug with limit not applying default when null was passed explicitly; the bug was in get_ranked_posts, but could be
                   # introduced in every call that uses limit; original did not handle default properly
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

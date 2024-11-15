@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # new field followed (true/false) by observer (and muted if true)
-    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

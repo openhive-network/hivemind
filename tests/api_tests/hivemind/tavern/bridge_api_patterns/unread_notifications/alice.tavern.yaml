@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # mock-data setLastRead date 2016-05-26T14:21:43
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

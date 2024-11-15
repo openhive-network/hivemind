@@ -3,7 +3,7 @@ test_name: Hivemind
 
 marks:
   - patterntest # author first - when empty, takes alphabetical (later by permlink)
-  - postgrest_ready
+  
 includes:
   - !include ../../../common.yaml
 

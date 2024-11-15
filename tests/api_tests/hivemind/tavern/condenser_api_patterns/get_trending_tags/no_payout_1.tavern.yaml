@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # previously paging didn't really worked when there was many categories with the same amount of payout (compare .orig here and in no_payout_2)
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

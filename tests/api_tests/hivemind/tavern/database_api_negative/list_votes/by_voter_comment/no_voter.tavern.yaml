@@ -4,7 +4,7 @@ test_name: Hivemind
 marks:
   - patterntest # fat node showed "voter": "nxt2" votes, not connected with author and permlink (like no data)
   - negative
-  - postgrest_ready
+  
 
 includes:
   - !include ../../../common.yaml

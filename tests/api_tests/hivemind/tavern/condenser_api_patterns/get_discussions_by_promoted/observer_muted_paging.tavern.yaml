@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # ignoreall ignores fyrstikken (mock data); see also observer_muted
-    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

@@ -4,7 +4,7 @@
   marks:
     - patterntest # used to have a bug related to invalid call when nonstring was passed
     - negative
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

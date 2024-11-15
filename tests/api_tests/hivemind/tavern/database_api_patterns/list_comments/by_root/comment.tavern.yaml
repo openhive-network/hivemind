@@ -3,7 +3,7 @@ test_name: Hivemind
 
 marks:
   - patterntest # since comment is not a root only empty result is possible (note that unlike fat node now only posts with specified root are returned)
-  - postgrest_ready
+  
 includes:
   - !include ../../../common.yaml
 
