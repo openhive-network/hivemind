@@ -708,6 +708,7 @@ e2e_benchmark_on_postgrest:
       junit: "*.xml"
       dotenv: variables.env
     paths:
+      - "*.xml"
       - haf-$CI_JOB_NAME.log
       - hivemind-sync.log
       - hivemind-server.log
