@@ -3,7 +3,7 @@ test_name: Hivemind
 
 marks:
   - patterntest # date in format without 'T' separator - fat node didn't like it
-  - postgrest_ready
+  
 
 includes:
   - !include ../../../common.yaml

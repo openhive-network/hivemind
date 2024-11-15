@@ -3,7 +3,6 @@
 
   marks:
     - patterntest # last: camilla does not subscribe this community
-    - postgrest_ready
     - postgrest_ignore
 
   includes:

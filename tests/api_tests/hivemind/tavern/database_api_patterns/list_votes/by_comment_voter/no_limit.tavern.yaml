@@ -3,7 +3,7 @@ test_name: Hivemind
 
 marks:
   - patterntest # code of fat node looks like skipped limit was most likely random (uninitialized value - at least I can't see where it might be initialized)
-  - postgrest_ready
+  
 
 includes:
   - !include ../../../common.yaml

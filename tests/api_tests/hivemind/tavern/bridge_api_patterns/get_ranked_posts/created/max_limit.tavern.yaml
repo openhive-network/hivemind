@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # blacklists not matched due to lack of global blacklist; originally ordering of posts with the same creation date was wrong
-    - postgrest_ready
+    
 
   includes:
     - !include ../../../common.yaml

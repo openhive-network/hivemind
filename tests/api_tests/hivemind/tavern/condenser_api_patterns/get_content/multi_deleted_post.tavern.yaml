@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # post deleted 7 times within 5mln blocks but recreated yet one more time at the end
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

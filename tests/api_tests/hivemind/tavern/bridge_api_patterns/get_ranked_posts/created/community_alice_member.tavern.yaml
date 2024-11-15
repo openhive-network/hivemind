@@ -7,7 +7,7 @@
                   # -> few comment are unmuted -> alice become member
                   # -> new comments muted -> few of them are unmuted
                   # steemit is muted and test-safari is admin in this community
-    - postgrest_ready
+    
 
   includes:
     - !include ../../../common.yaml

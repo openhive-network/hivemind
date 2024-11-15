@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # if user is on the list it can filter out itself :)
-    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

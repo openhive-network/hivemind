@@ -4,7 +4,7 @@
   marks:
     - patterntest # oldest posts in blog - call with self-set limit
                   # compared to original extra vote is due to removed vote muting
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

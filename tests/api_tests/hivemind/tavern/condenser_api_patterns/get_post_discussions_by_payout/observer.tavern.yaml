@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # ignoreall ignores gavvet (mock data);see also max_limit.tavern.yaml; original did not accept observer (.orig made without it)
-    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

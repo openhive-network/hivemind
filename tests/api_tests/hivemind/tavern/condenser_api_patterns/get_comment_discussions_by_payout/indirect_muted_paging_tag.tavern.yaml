@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # alice follows mute list of ignoreall who ignores roland.haynes (mock data); see also no_observer_paging_tag
-    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

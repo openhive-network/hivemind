@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # same as limit 100, but with truncated posts
-    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

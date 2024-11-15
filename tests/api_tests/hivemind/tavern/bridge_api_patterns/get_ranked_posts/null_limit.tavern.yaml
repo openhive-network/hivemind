@@ -4,7 +4,7 @@
   marks:
     - patterntest # there was a bug with limit not applying default when null was passed explicitly (result exceeded max of 100 posts)
                   # the bug was not related to "sort" - same for every sort
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

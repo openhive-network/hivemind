@@ -7,7 +7,7 @@
                   # now the result is basically the same as get_post
                   # also due to how tavern tries to substitute {tags} with value, but it has no such value, which generates error
                   # original content of json_metadata: "{\"tags\":[\"witness-category\"],\"links\":[\"https://steemit.com/introduceyourself/@gtg/hello-world\"]}"
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

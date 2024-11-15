@@ -5,7 +5,7 @@
     - patterntest # that comment was created (block 3329142), edited (3329169 and 3329186), downvoted (3329582), deleted (3329753), recreated (3329969) and
                   # it was then processed for rewards (twice) - there was a bug in HM that assigned downvote to recreated comment, because they were
                   # processed in the same pack of blocks (showed in value of net_votes)
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

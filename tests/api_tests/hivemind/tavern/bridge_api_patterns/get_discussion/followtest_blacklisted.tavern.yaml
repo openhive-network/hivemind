@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # cryptos is correctly on "my blacklist"
-    - postgrest_ready
+    
     
   includes:
     - !include ../../common.yaml

@@ -3,7 +3,7 @@ test_name: Hivemind
 
 marks:
   - patterntest # fat node didn't limit results to replies to given post
-  - postgrest_ready
+  
 includes:
   - !include ../../../common.yaml
 

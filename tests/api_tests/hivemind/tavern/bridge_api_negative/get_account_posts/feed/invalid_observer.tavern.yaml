@@ -4,7 +4,7 @@
   marks:
     - patterntest # original did not run observer through preliminary validation
     - negative
-    - postgrest_ready
+    
 
   includes:
     - !include ../../../common.yaml

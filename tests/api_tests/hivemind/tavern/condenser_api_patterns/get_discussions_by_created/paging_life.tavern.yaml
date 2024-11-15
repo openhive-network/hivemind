@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # see also tag_life
-    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

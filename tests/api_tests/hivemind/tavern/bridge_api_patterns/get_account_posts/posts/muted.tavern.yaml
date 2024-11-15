@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # ignoreall mutes gtg (mock data), post should be grayed
-    - postgrest_ready
+    
 
   includes:
     - !include ../../../common.yaml

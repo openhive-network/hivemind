@@ -653,7 +653,7 @@ e2e_benchmark_on_postgrest:
     DATA_CACHE_HIVEMIND_SHM_DIR: "${DATA_CACHE_HIVEMIND_DATADIR}/blockchain"
     # TODO: As you complete the migration of methods to SQL, uncomment variables and add finished method names.
     # Missing variable enables the entire test group.
-    RUN_TESTS_WITH_MARKER: "postgrest_ready and not postgrest_ignore"
+    RUN_TESTS_WITH_MARKER: "not postgrest_ignore"
   script:
     - |
       echo "HAF image name $HAF_IMAGE_NAME"

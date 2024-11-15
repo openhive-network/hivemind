@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # discussion filtered out from user powerup who is on follow_muted list
-    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

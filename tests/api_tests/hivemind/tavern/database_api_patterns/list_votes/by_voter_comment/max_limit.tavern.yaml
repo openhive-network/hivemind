@@ -3,7 +3,7 @@ test_name: Hivemind
 
 marks:
   - patterntest # compared to original extra vote was cast on post that was later deleted
-  - postgrest_ready
+  
 
 includes:
   - !include ../../../common.yaml

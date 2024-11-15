@@ -4,7 +4,7 @@
   marks:
     - patterntest # alice follow buildawhale list of blacklists {craig-grant ,earnest, trevonjb, wildchild, zaitsevalesyaa}
     # buildawhale was created after 5mln blocks - is not in result
-    - postgrest_ready
+    
     
   includes:
     - !include ../../common.yaml

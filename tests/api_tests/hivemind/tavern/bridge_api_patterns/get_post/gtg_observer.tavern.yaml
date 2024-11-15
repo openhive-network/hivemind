@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # normally observer would have no effect on 5 mln blocks because there were no users blacklisted, but mock data did the job
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

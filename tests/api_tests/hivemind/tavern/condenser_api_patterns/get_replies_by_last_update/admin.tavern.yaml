@@ -4,7 +4,7 @@
   marks:
     - patterntest # original made overlapping pages, that was corrected
                   # (compare with steemit.tavern.yaml - @admin/firstpost is the last - oldest - reply to any post by steemit, therefore there is nothing on page defined by it)
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

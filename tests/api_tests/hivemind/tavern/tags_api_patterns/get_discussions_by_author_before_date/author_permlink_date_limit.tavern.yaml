@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # original produced overlapping pages, now starting post is never part of the page
-    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

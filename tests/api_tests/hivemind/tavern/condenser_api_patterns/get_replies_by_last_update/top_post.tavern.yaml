@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # since permlink is given call tries to look for parent post to get blogger account, but this is top post, so blogger is effectively NULL
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

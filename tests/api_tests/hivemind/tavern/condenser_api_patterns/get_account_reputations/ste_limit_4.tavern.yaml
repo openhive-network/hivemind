@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # fat node had slightly different implementation, did not accept arguments by name (.fatnode pattern made with positional call)
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

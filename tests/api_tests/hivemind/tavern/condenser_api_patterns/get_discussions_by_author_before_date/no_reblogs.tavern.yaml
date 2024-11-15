@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # see also get_discussions_by_blog/max_limit.tavern.yaml - here reblogs are not in results
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

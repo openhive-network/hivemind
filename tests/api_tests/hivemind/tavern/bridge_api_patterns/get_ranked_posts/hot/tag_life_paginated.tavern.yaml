@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # difference in blacklist caused by lack of global/default blacklist - observer always needed
-    - postgrest_ready
+    
 
   includes:
     - !include ../../../common.yaml

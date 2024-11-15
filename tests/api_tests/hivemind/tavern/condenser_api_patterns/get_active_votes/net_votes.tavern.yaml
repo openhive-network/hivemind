@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # test added to help with difference in list_comments/by_permlink/blank_category
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

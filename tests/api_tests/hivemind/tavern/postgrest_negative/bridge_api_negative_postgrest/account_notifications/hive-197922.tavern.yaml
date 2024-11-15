@@ -4,7 +4,7 @@
   marks:
     - patterntest # communities not present in 5mln blocks
     - negative
-    - postgrest_ready
+    
     - postgrest_exception
 
   includes:

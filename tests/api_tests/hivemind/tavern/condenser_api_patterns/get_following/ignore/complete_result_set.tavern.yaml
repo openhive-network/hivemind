@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # see paginated.tavern.yaml
-    - postgrest_ready
+    
 
   includes:
     - !include ../../../common.yaml

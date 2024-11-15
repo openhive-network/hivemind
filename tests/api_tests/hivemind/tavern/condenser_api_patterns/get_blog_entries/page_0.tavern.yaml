@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # newest posts - call with self-detect start entry (-1)
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

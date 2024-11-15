@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # similar to limit_100 but this one actually reaches the limit
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml

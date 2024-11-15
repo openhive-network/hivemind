@@ -3,7 +3,7 @@ test_name: Hivemind
 
 marks:
   - patterntest # return same with just valid author ["camilla"]
-  - postgrest_ready
+  
 includes:
   - !include ../../../common.yaml
 

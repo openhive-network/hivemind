@@ -9,7 +9,7 @@
 #    filtered follow_muted users:
 #      - powerup
 #      - skapaneas
-    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # ignoreall ignores r4fken (mock data); see also no_observer_paging
-    - postgrest_ready
+    
   includes:
     - !include ../../common.yaml
 

@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # as it not subscribe itself, its empty
-    - postgrest_ready
+    
 
   includes:
     - !include ../../common.yaml
