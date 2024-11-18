@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.create_bridge_post_object;
-CREATE FUNCTION hivemind_postgrest_utilities.create_bridge_post_object(IN _row RECORD, IN _truncate_body_len INT, IN _reblogged_by TEXT[], IN _set_is_pinned_field BOOLEAN, IN _update_reblogs_field BOOLEAN)
+CREATE FUNCTION hivemind_postgrest_utilities.create_bridge_post_object(IN _row RECORD, IN _truncate_body_len INT, IN _reblogged_by TEXT[], IN _set_is_pinned_field BOOLEAN, IN _update_reblogs_field BOOLEAN, IN _replies JSONB DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
@@ -126,6 +126,14 @@ BEGIN
 
   IF jsonb_array_length(_tmp_muted_reasons) <> 0 THEN
     _result = jsonb_set(_result, '{stats}', _result->'stats' || jsonb_build_object('muted_reasons', _tmp_muted_reasons));
+  END IF;
+
+  IF _replies IS NOT NULL THEN
+    IF jsonb_typeof(_replies) = 'array' THEN
+      _result = jsonb_set(_result, '{replies}', _replies);
+    ELSE
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Replies argument in create_bridge_post_object is expected to be an array');
+    END IF;
   END IF;
 
   RETURN _result;
