@@ -6,21 +6,30 @@ STABLE
 AS
 $$
 DECLARE
-  _name TEXT;
-  _account TEXT;
+  _community_id INT;
+  _account_id INT;
 BEGIN
   PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"name","account"}', '{"string", "string"}');
-  --- name
-  _name = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'name', 0, True);
-  _name = hivemind_postgrest_utilities.valid_community(_name);
-  --- account
-  _account = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'account', 1, True);
-  _account = hivemind_postgrest_utilities.valid_account(_account);
 
-  RETURN (
-    SELECT to_json(row) FROM (
-      SELECT * FROM hivemind_postgrest_utilities.get_community_context(_name::TEXT, _account::TEXT)
-    ) row );
+  _community_id = 
+    hivemind_postgrest_utilities.find_community_id(
+      hivemind_postgrest_utilities.valid_community(
+        hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'name', 0, True)
+      ),
+    True);
+  
+  _account_id = 
+    hivemind_postgrest_utilities.find_account_id(
+      hivemind_postgrest_utilities.valid_account(
+        hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'account', 1, True),
+      True),
+    True);
+  
+  IF _account_id = 0 THEN
+    RETURN '{}'::JSONB;
+  END IF;
+
+  RETURN hivemind_postgrest_utilities.get_community_context(_account_id, _community_id);
 END
 $$
 ;
