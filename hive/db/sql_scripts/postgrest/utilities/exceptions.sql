@@ -291,19 +291,6 @@ END
 $$
 ;
 
-DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_invalid_community_type_exception;
-CREATE FUNCTION hivemind_postgrest_utilities.raise_invalid_community_type_exception()
-RETURNS JSONB
-LANGUAGE 'plpgsql'
-IMMUTABLE
-AS
-$$
-BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', 'Unsupported follow type, valid types: blog, ignore');
-END
-$$
-;
-
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.raise_tag_not_exists_exception;
 CREATE FUNCTION hivemind_postgrest_utilities.raise_tag_not_exists_exception(IN _tag TEXT)
 RETURNS JSONB

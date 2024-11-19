@@ -733,10 +733,6 @@ def setup_runtime_code(db):
         "postgrest/utilities/create_condenser_post_object.sql",
         "postgrest/condenser_api/condenser_api_get_blog.sql",
         "postgrest/condenser_api/condenser_api_get_content.sql",
-        "postgrest/utilities/valid_follow_type.sql",
-        "postgrest/utilities/follow_arguments.sql",
-        "postgrest/condenser_api/condenser_api_get_followers.sql",
-        "postgrest/condenser_api/condenser_api_get_following.sql",
         "postgrest/utilities/vote_arguments.sql",
         "postgrest/database_api/database_api_find_votes.sql",
         "postgrest/database_api/database_api_list_votes.sql",
@@ -783,6 +779,9 @@ def setup_runtime_code(db):
         "postgrest/bridge_api/bridge_api_list_community_roles.sql",
         "postgrest/bridge_api/bridge_api_list_all_subscriptions.sql",
         "postgrest/bridge_api/bridge_api_list_pop_communities.sql",
+        "postgrest/condenser_api/extract_parameters_for_get_following_and_followers.sql",
+        "postgrest/condenser_api/condenser_api_get_followers.sql",
+        "postgrest/condenser_api/condenser_api_get_following.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
