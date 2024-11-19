@@ -1,70 +1,38 @@
---SELECT * FROM hivemind_postgrest_utilities.get_community('hive-112345')
-DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_community;
-CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.get_community(
-  IN name TEXT,
-  IN observer TEXT DEFAULT NULL
-)
-  RETURNS hivemind_app.bridge_api_community
-  LANGUAGE plpgsql
-  STABLE
-AS
-$BODY$
-DECLARE
-  _name TEXT = hivemind_postgrest_utilities.valid_community(name);
-  _observer TEXT = hivemind_postgrest_utilities.valid_account(observer,TRUE);
-BEGIN
-  RETURN (gc.id,
-    gc.name,
-    gc.title,
-    gc.about,
-    gc.lang,
-    gc.type_id,
-    gc.is_nsfw,
-    gc.subscribers,
-    gc.created_at,
-    gc.sum_pending,
-    gc.num_pending,
-    gc.num_authors,
-    gc.avatar_url,
-    gc.description,
-    gc.flag_text,
-    gc.settings,
-    gc.context,
-    gc.team)::hivemind_app.bridge_api_community
-  FROM hivemind_app.bridge_get_community(_name, _observer) gc
-;
-END;
-$BODY$
-;
-
-DROP TYPE IF EXISTS hivemind_postgrest_utilities.community_context CASCADE;
-CREATE TYPE hivemind_postgrest_utilities.community_context AS (
-  role TEXT,
-  subscribed BOOLEAN,
-  title TEXT
-);
-
---SELECT * FROM hivemind_postgrest_utilities.get_community_context('hive-112345','good-karma')
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_community_context;
-CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.get_community_context(
-  IN name TEXT,
-  IN account TEXT DEFAULT NULL
-)
-  RETURNS hivemind_postgrest_utilities.community_context
-  LANGUAGE plpgsql
-  STABLE
+CREATE OR REPLACE FUNCTION hivemind_postgrest_utilities.get_community_context(IN _account_id INT, _community_id INT)
+RETURNS JSONB
+LANGUAGE 'plpgsql'
+STABLE
 AS
-$BODY$
+$function$
 DECLARE
-  _name TEXT = hivemind_postgrest_utilities.valid_community(name);
-  _account TEXT = hivemind_postgrest_utilities.valid_account(account);
+  _subscribed BOOLEAN;
+  _result JSONB;
 BEGIN
-  RETURN (role, subscribed, title)::hivemind_postgrest_utilities.community_context
-  FROM json_to_record((SELECT * FROM hivemind_app.bridge_get_community_context(_account, _name))) as x(role TEXT, subscribed BOOLEAN, title text)
-;
+  ASSERT _account_id <> 0;
 
-END;
-$BODY$
+  _subscribed = EXISTS(SELECT 1 FROM hivemind_app.hive_subscriptions WHERE account_id = _account_id AND community_id = _community_id);
+
+  _result = (
+    SELECT jsonb_build_object(
+      'role', hivemind_postgrest_utilities.get_role_name(role_id),
+      'subscribed', _subscribed,
+      'title', title
+    )
+    FROM hivemind_app.hive_roles
+    WHERE account_id = _account_id AND community_id = _community_id
+  );
+
+  RETURN COALESCE(
+    _result,
+    jsonb_build_object(
+      'role', hivemind_postgrest_utilities.get_role_name(0),
+      'subscribed', _subscribed,
+      'title', ''
+    )
+  );
+END
+$function$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.list_top_communities;
