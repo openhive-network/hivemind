@@ -1,38 +1,50 @@
 DROP FUNCTION IF EXISTS hivemind_endpoints.condenser_api_get_followers;
-CREATE FUNCTION hivemind_endpoints.condenser_api_get_followers(IN _json_is_object BOOLEAN, IN _params JSONB)
+CREATE FUNCTION hivemind_endpoints.condenser_api_get_followers(IN _json_is_object BOOLEAN, IN _params JSONB, IN _called_from_condenser_api BOOLEAN)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE
 AS
 $$
 DECLARE
-    _follow_args hivemind_postgrest_utilities.follow_arguments;
-    _result JSONB;
+  _start_id INT DEFAULT 0;
 BEGIN
-    _follow_args := hivemind_postgrest_utilities.get_validated_follow_arguments(_params, _json_is_object);
+  _params = hivemind_postgrest_utilities.extract_parameters_for_get_following_and_followers(_json_is_object, _params, _called_from_condenser_api);
 
-SELECT COALESCE(
-    jsonb_agg(
-        jsonb_build_object(
-            'following', _follow_args.account,
-            'follower', followers.condenser_get_followers,
-            'what', array[_follow_args.follow_type]
-        )
-    ),
-    '[]'::jsonb
-) AS _result
-INTO _result
-FROM (
-    SELECT *
-    FROM hivemind_app.condenser_get_followers(
-      _follow_args.account,
-      _follow_args.start,
-      _follow_args.converted_follow_type,
-      _follow_args.limit
-    )
-) AS followers;
+  IF (_params->'start_id')::INT <> 0 THEN
+    _start_id = (
+      SELECT hf.id
+      FROM hivemind_app.hive_follows hf
+      WHERE hf.following = (_params->'account_id')::INT AND hf.follower = (_params->'start_id')::INT
+    );
+  END IF;
 
-RETURN _result;
-
-END;
+  RETURN COALESCE(
+  (
+    SELECT jsonb_agg(
+      jsonb_build_object(
+        'following', _params->'account',
+        'follower', row.name,
+        'what', jsonb_build_array(_params->'follow_type')
+      )
+      ORDER BY row.id DESC
+    ) FROM (
+      SELECT
+        hf.id,
+        ha.name
+      FROM hivemind_app.hive_follows hf
+      JOIN hivemind_app.hive_accounts ha ON hf.follower = ha.id
+      WHERE
+        hf.state = (_params->'hive_follows_state')::SMALLINT
+        AND hf.following = (_params->'account_id')::INT
+        AND NOT (_start_id <> 0 AND hf.id >= _start_id )
+      -- + 1 is important hack for Postgres Intelligence to use dedicated index and avoid choosing PK index and performing a linear filtering on it
+      ORDER BY hf.id + 1 DESC
+      LIMIT (_params->'limit')::INT
+    ) row
+  ),
+  '[]'::jsonb
+  );
+END
 $$
+;
+

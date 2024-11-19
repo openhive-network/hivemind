@@ -3,6 +3,7 @@
 
   marks:
     - patterntest
+    - negative
     
 
   includes:
