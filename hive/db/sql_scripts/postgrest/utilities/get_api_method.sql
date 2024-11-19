@@ -28,9 +28,9 @@ BEGIN
     WHEN __method_type = 'get_content_replies' THEN
       result := hivemind_endpoints.condenser_api_get_content(__json_with_params_is_object, __params, /* _get_replies */ True, /* _content_additions */ True);
     WHEN __method_type = 'get_followers' THEN
-      result := hivemind_endpoints.condenser_api_get_followers(__json_with_params_is_object, __params);
+      result := hivemind_endpoints.condenser_api_get_following_or_followers(__json_with_params_is_object, __params, /* _get_following */ False, /* _called_from_condenser_api */ True);
     WHEN __method_type = 'get_following' THEN
-      result := hivemind_endpoints.condenser_api_get_following(__json_with_params_is_object, __params);
+      result := hivemind_endpoints.condenser_api_get_following_or_followers(__json_with_params_is_object, __params, /* _get_following */ True, /* _called_from_condenser_api */ True);
     WHEN __method_type = 'get_active_votes' THEN
       result := hivemind_endpoints.condenser_api_get_active_votes(__json_with_params_is_object, __params);
     WHEN __method_type = 'get_discussions_by_blog' THEN
@@ -87,9 +87,9 @@ BEGIN
     WHEN __method_type = 'get_reblogged_by' THEN
       result := hivemind_endpoints.condenser_api_get_reblogged_by(__json_with_params_is_object, __params);
     WHEN __method_type = 'get_followers' THEN
-      result := hivemind_endpoints.condenser_api_get_followers(__json_with_params_is_object, __params);
+      result := hivemind_endpoints.condenser_api_get_following_or_followers(__json_with_params_is_object, __params, /* _get_following */ False, /* _called_from_condenser_api */ False);
     WHEN __method_type = 'get_following' THEN
-      result := hivemind_endpoints.condenser_api_get_following(__json_with_params_is_object, __params);
+      result := hivemind_endpoints.condenser_api_get_following_or_followers(__json_with_params_is_object, __params, /* _get_following */ True, /* _called_from_condenser_api */ False);
     ELSE
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
   END CASE;
