@@ -6,24 +6,46 @@ STABLE
 AS
 $$
 DECLARE
-  _account TEXT;
+  _account_id INT;
   _min_score SMALLINT := 25;
-  _lastread_at TIMESTAMP WITHOUT TIME ZONE;
-  _unread BIGINT;
+  _last_read_at TIMESTAMP WITHOUT TIME ZONE;
+  _last_read_at_block hivemind_app.blocks_view.num%TYPE;
+  _limit_block hivemind_app.blocks_view.num%TYPE = hivemind_app.block_before_head( '90 days' );
 BEGIN
-  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"account", "min_score"}', '{"string", "number"}');
+  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"account", "min_score"}', '{"string", "number"}', 1);
 
-  _account = hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'account', 0, True);
-  _account = hivemind_postgrest_utilities.valid_account(_account);
+  _account_id = 
+    hivemind_postgrest_utilities.find_account_id(
+      hivemind_postgrest_utilities.valid_account(
+        hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'account', 0, True),
+      False),
+    True);
 
   _min_score = hivemind_postgrest_utilities.parse_integer_argument_from_json(_params, _json_is_object, 'min_score', 1, False);
   _min_score = hivemind_postgrest_utilities.valid_number(_min_score, 25, 0, 100, 'score');
 
-  SELECT lastread_at, unread INTO _lastread_at, _unread FROM hivemind_app.get_number_of_unread_notifications( _account, _min_score);
+  SELECT ha.lastread_at INTO _last_read_at FROM hivemind_app.hive_accounts ha WHERE ha.id = _account_id;
 
-  RETURN jsonb_build_object(
-    'lastread', to_char(_lastread_at, 'YYYY-MM-DD HH24:MI:SS'),
-    'unread', _unread
+  SELECT
+    COALESCE(
+      (
+        SELECT hb.num
+        FROM hive.blocks_view hb -- very important for performance (originally it was a hivemind_app_blocks_view)
+        WHERE hb.created_at <= _last_read_at
+      ORDER by hb.created_at desc
+      LIMIT 1
+      ),
+    _limit_block)
+  INTO _last_read_at_block;
+
+  RETURN 
+    jsonb_build_object(
+      'lastread', to_char(_last_read_at, 'YYYY-MM-DD HH24:MI:SS'),
+      'unread', (
+        SELECT count(1)
+        FROM hivemind_app.hive_notification_cache hnv
+        WHERE hnv.dst = _account_id  AND hnv.block_num > _limit_block AND hnv.block_num > _last_read_at_block AND hnv.score >= _min_score
+      )
     );
 END
 $$
