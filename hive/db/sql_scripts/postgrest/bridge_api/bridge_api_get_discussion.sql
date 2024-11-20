@@ -75,7 +75,7 @@ BEGIN
           ds.replies
         FROM
         (
-          WITH RECURSIVE child_posts (id, parent_id) AS MATERIALIZED
+          WITH RECURSIVE child_posts (id, parent_id) AS
           (
             SELECT
               hp.id,
