@@ -4,7 +4,6 @@
   marks:
     - patterntest # communities not present in 5mln blocks
     - negative
-    - postgrest_ignore
 
   includes:
     - !include ../../common.yaml
