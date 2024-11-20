@@ -24,7 +24,7 @@ BEGIN
       END
     ) 
     ) FROM (
-      WITH blog AS MATERIALIZED
+      WITH blog AS
       (
         SELECT 
           hfc.post_id,
@@ -90,7 +90,6 @@ BEGIN
       FROM blog,
       LATERAL hivemind_app.get_post_view_by_id(blog.post_id) hp
       ORDER BY blog.created_at DESC, blog.post_id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -125,7 +124,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH ds AS MATERIALIZED
+      WITH ds AS
       (
         SELECT hp1.id, hp1.author_id, blacklist.source
         FROM hivemind_app.live_comments_view hp1
@@ -179,7 +178,6 @@ BEGIN
       FROM ds,
       LATERAL hivemind_app.get_post_view_by_id(ds.id) hp
       ORDER BY ds.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -219,7 +217,7 @@ BEGIN
       END
     )
     ) FROM (
-        WITH feed AS MATERIALIZED
+        WITH feed AS
         (
           SELECT 
             hfc.post_id, 
@@ -281,7 +279,6 @@ BEGIN
         FROM feed,
         LATERAL hivemind_app.get_post_view_by_id(feed.post_id) hp
         ORDER BY feed.min_created DESC, feed.post_id DESC
-        LIMIT _limit
       ) row
     );
 
@@ -311,7 +308,7 @@ BEGIN
     SELECT jsonb_agg (
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, False, True)
     ) FROM (
-      WITH posts AS MATERIALIZED
+      WITH posts AS
       (
         SELECT id, author_id, blacklist.source
         FROM hivemind_app.live_posts_view hp
@@ -366,7 +363,6 @@ BEGIN
       FROM posts,
       LATERAL hivemind_app.get_post_view_by_id(posts.id) hp
       ORDER BY posts.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -403,7 +399,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH replies AS MATERIALIZED
+      WITH replies AS
       (
         SELECT hpr.id, blacklist.source
         FROM hivemind_app.live_posts_comments_view hpr
@@ -458,7 +454,6 @@ BEGIN
       FROM replies,
       LATERAL hivemind_app.get_post_view_by_id(replies.id) hp
       ORDER BY replies.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -492,7 +487,7 @@ BEGIN
     SELECT jsonb_agg (
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, False, True)
     ) FROM (
-      WITH payouts AS MATERIALIZED
+      WITH payouts AS
       (  
       SELECT 
         id, author_id,
@@ -551,7 +546,6 @@ BEGIN
       FROM payouts,
       LATERAL hivemind_app.get_post_view_by_id(payouts.id) hp
       ORDER BY payouts.total_payout DESC, payouts.id DESC
-      LIMIT _limit
     ) row
   );
 

@@ -32,7 +32,7 @@ BEGIN
       'comments', ( SELECT jsonb_agg(
                       hivemind_postgrest_utilities.create_database_post_object(row, 0)
                     ) FROM (
-                        WITH comments AS MATERIALIZED
+                        WITH comments AS
                         (
                           SELECT
                             hp.id,
@@ -90,7 +90,6 @@ BEGIN
                         FROM comments,
                         LATERAL hivemind_app.get_post_view_by_id(comments.id) hp
                         ORDER BY comments.cashout_time ASC, comments.id ASC
-                        LIMIT _limit
                       ) row
                     )
         )
@@ -141,7 +140,7 @@ BEGIN
       'comments', ( SELECT jsonb_agg(
                     hivemind_postgrest_utilities.create_database_post_object(row, 0)
                   ) FROM (
-                      WITH comments AS MATERIALIZED
+                      WITH comments AS
                       (
                         SELECT
                           hp.id
@@ -201,7 +200,6 @@ BEGIN
                       FROM comments,
                       LATERAL hivemind_app.get_post_view_by_id(comments.id) hp
                       ORDER BY comments.id
-                      LIMIT _limit
                     ) row
                   )
         )
@@ -250,7 +248,7 @@ BEGIN
       'comments', ( SELECT jsonb_agg(
                       hivemind_postgrest_utilities.create_database_post_object(row, 0)
                     ) FROM (
-                      WITH comments AS MATERIALIZED
+                      WITH comments AS
                       (
                         SELECT
                           lpcv.id,
@@ -311,7 +309,6 @@ BEGIN
                       FROM comments,
                       LATERAL hivemind_app.get_post_view_by_id(comments.id) hp
                       ORDER BY comments.updated_at DESC, comments.id ASC
-                      LIMIT _limit
                     ) row
                   )
         )
@@ -361,7 +358,7 @@ BEGIN
       'comments', ( SELECT jsonb_agg(
                       hivemind_postgrest_utilities.create_database_post_object(row, 0)
                     ) FROM (
-                      WITH comments AS MATERIALIZED
+                      WITH comments AS
                       (
                         SELECT
                           lpcv.id,
@@ -421,7 +418,6 @@ BEGIN
                       FROM comments,
                       LATERAL hivemind_app.get_post_view_by_id(comments.id) hp
                       ORDER BY comments.updated_at DESC, comments.id ASC
-                      LIMIT _limit
                     ) row
                   )
         )
@@ -464,7 +460,7 @@ BEGIN
       'comments', ( SELECT jsonb_agg(
                       hivemind_postgrest_utilities.create_database_post_object(row, 0)
                     ) FROM (
-                      WITH comments AS MATERIALIZED
+                      WITH comments AS
                       (
                         SELECT
                           hph.id,
@@ -526,7 +522,6 @@ BEGIN
                       FROM comments,
                       LATERAL hivemind_app.get_post_view_by_id(comments.id) hp
                       ORDER BY hp.author, hp.permlink
-                      LIMIT _limit
                     ) row
                   )
         )

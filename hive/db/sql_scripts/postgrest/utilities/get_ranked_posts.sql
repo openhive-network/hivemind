@@ -90,7 +90,6 @@ BEGIN
         FROM pinned_post,
         LATERAL hivemind_app.get_post_view_by_id(pinned_post.id) hp
         ORDER BY hp.id DESC
-        LIMIT _limit
       ) row
     );
   END IF;
@@ -145,7 +144,7 @@ BEGIN
     )
     ) FROM (
       WITH 
-      community_posts as MATERIALIZED
+      community_posts as
       (
         SELECT
           hp.id,
@@ -205,7 +204,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
       ORDER BY
         hp.sc_trend DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -238,7 +236,7 @@ BEGIN
     )
     ) FROM (
       WITH 
-      community_posts as MATERIALIZED
+      community_posts as
       (
         SELECT
           hp.id,
@@ -298,7 +296,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
       ORDER BY
         hp.promoted DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -335,7 +332,7 @@ BEGIN
     )
     ) FROM (
       WITH 
-      community_posts as MATERIALIZED
+      community_posts as
       (
         SELECT
           hp.id,
@@ -396,7 +393,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
       ORDER BY
         community_posts.total_payout DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -430,7 +426,7 @@ BEGIN
     )
     ) FROM (
       WITH 
-      community_posts as MATERIALIZED
+      community_posts as
       (
         SELECT
           hp.id,
@@ -491,7 +487,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
       ORDER BY
         community_posts.total_payout DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -525,7 +520,7 @@ BEGIN
     )
     ) FROM (
       WITH 
-      community_posts as MATERIALIZED
+      community_posts as
       (
         SELECT
           hp.id,
@@ -585,7 +580,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
       ORDER BY
         hp.sc_hot DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -687,7 +681,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
       ORDER BY
         community_posts.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -716,7 +709,7 @@ BEGIN
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH 
-      community_posts as MATERIALIZED
+      community_posts as
       (
         SELECT
           hp.id,
@@ -777,7 +770,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
       ORDER BY
         community_posts.total_payout DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -814,7 +806,7 @@ BEGIN
     )
     ) FROM (
       WITH 
-      tag_posts as MATERIALIZED
+      tag_posts as
       (
         SELECT
           hp.id,
@@ -874,7 +866,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
       ORDER BY
         hp.sc_trend DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -911,7 +902,7 @@ BEGIN
     )
     ) FROM (
       WITH 
-      tag_posts as MATERIALIZED
+      tag_posts as
       (
         SELECT
           hp.id,
@@ -970,7 +961,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
       ORDER BY
         hp.sc_hot DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -1002,7 +992,7 @@ BEGIN
     )
     ) FROM (
       WITH 
-      tag_posts as MATERIALIZED
+      tag_posts as
       (
         SELECT
           hp.id,
@@ -1063,7 +1053,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
       ORDER BY
         hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -1099,7 +1088,7 @@ BEGIN
     )
     ) FROM (
       WITH 
-      tag_posts as MATERIALIZED
+      tag_posts as
       (
         SELECT
           hp.id,
@@ -1159,7 +1148,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
       ORDER BY
         hp.promoted DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -1197,7 +1185,7 @@ BEGIN
     )
     ) FROM (
       WITH 
-      tag_posts as MATERIALIZED
+      tag_posts as
       (
         SELECT
           hp.id,
@@ -1258,7 +1246,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
       ORDER BY
         tag_posts.total_payout DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -1295,7 +1282,7 @@ BEGIN
     )
     ) FROM (
       WITH 
-      tag_posts as MATERIALIZED
+      tag_posts as
       (
         SELECT
           hp.id,
@@ -1355,7 +1342,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
       ORDER BY
         tag_posts.total_payout DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -1387,7 +1373,7 @@ BEGIN
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH 
-      tag_posts as MATERIALIZED
+      tag_posts as
       (
         SELECT
           hp.id,
@@ -1448,7 +1434,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
       ORDER BY
         tag_posts.total_payout DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -1477,7 +1462,7 @@ BEGIN
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH 
-      observer_posts as MATERIALIZED
+      observer_posts as
       (
         SELECT
           hp.id,
@@ -1537,7 +1522,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
       ORDER BY
         hp.sc_trend DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -1566,7 +1550,7 @@ BEGIN
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH 
-      observer_posts as MATERIALIZED
+      observer_posts as
       (
         SELECT
           hp.id,
@@ -1626,7 +1610,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
       ORDER BY
         hp.sc_hot DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -1650,7 +1633,7 @@ BEGIN
         hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH 
-      observer_posts as MATERIALIZED
+      observer_posts as
       (
         SELECT
           hp.id,
@@ -1711,7 +1694,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
       ORDER BY
         hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -1740,7 +1722,7 @@ BEGIN
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH 
-      observer_posts as MATERIALIZED
+      observer_posts as
       (
         SELECT
           hp.id,
@@ -1800,7 +1782,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
       ORDER BY
         hp.promoted DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -1832,7 +1813,7 @@ BEGIN
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH 
-      observer_posts as MATERIALIZED
+      observer_posts as
       (
         SELECT
           hp.id,
@@ -1894,7 +1875,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
       ORDER BY
         observer_posts.total_payout DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -1923,7 +1903,7 @@ BEGIN
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH 
-      observer_posts as MATERIALIZED
+      observer_posts as
       (
         SELECT
           hp.id,
@@ -1984,7 +1964,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
       ORDER BY
         observer_posts.total_payout DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -2013,7 +1992,7 @@ BEGIN
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH 
-      observer_posts as MATERIALIZED
+      observer_posts as
       (
         SELECT
           hp.id,
@@ -2074,7 +2053,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
       ORDER BY
         observer_posts.total_payout DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -2108,7 +2086,7 @@ BEGIN
     )
     ) FROM (
       WITH 
-      all_posts as MATERIALIZED
+      all_posts as
       (
         SELECT
           hp.id,
@@ -2167,7 +2145,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
       ORDER BY
         hp.sc_trend DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -2200,7 +2177,7 @@ BEGIN
     )
     ) FROM (
       WITH 
-      all_posts as MATERIALIZED
+      all_posts as
       (
         SELECT
           hp.id,
@@ -2259,7 +2236,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
       ORDER BY
         hp.sc_hot DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -2288,7 +2264,7 @@ BEGIN
     )
     ) FROM (
       WITH 
-      all_posts as MATERIALIZED
+      all_posts as
       (
         SELECT
           hp.id,
@@ -2348,7 +2324,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
       ORDER BY
         hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -2382,7 +2357,7 @@ BEGIN
     )
     ) FROM (
       WITH 
-      all_posts as MATERIALIZED
+      all_posts as
       (
         SELECT
           hp.id,
@@ -2441,7 +2416,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
       ORDER BY
         hp.promoted DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -2478,7 +2452,7 @@ BEGIN
     )
     ) FROM (
       WITH 
-      all_posts as MATERIALIZED
+      all_posts as
       (
         SELECT
           hp.id,
@@ -2539,7 +2513,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
       ORDER BY
         (hp.payout + hp.pending_payout) DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -2573,7 +2546,7 @@ BEGIN
     )
     ) FROM (
       WITH 
-      all_posts as MATERIALIZED
+      all_posts as
       (
         SELECT
           hp.id,
@@ -2633,7 +2606,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
       ORDER BY
         (hp.payout + hp.pending_payout) DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
@@ -2662,7 +2634,7 @@ BEGIN
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True)
     ) FROM (
       WITH 
-      all_posts as MATERIALIZED
+      all_posts as
       (
         SELECT
           hp.id,
@@ -2721,7 +2693,6 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
       ORDER BY
         (hp.payout + hp.pending_payout) DESC, hp.id DESC
-      LIMIT _limit
     ) row
   );
 
