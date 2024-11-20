@@ -1,5 +1,5 @@
 {
   "code": -32602,
-  "data": "expected 5 params",
+  "data": "expected 2 params",
   "message": "Invalid parameters"
 }
