@@ -46,7 +46,7 @@ BEGIN
     SELECT jsonb_agg (
       hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
     ) FROM (
-      WITH blog_posts AS MATERIALIZED
+      WITH blog_posts AS
       (
         SELECT
           hp.id
@@ -100,7 +100,6 @@ BEGIN
       FROM blog_posts,
       LATERAL hivemind_app.get_post_view_by_id(blog_posts.id) hp
       ORDER BY hp.id DESC
-      LIMIT _limit
     ) row
   );
 

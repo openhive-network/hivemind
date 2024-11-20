@@ -39,7 +39,7 @@ BEGIN
       'comments', ( SELECT jsonb_agg (
                       hivemind_postgrest_utilities.create_database_post_object(row, 0)
                     ) FROM (
-                      WITH posts AS MATERIALIZED
+                      WITH posts AS
                       (
                         SELECT
                           hp.id
@@ -96,7 +96,6 @@ BEGIN
                         pv.parent_author
                       FROM posts,
                       LATERAL hivemind_app.get_post_view_by_id (posts.id) pv
-                      LIMIT _comments_amount
                     ) row
                   )
     )

@@ -23,7 +23,7 @@ BEGIN
       SELECT jsonb_agg (
         hivemind_postgrest_utilities.create_condenser_post_object(row, 0, _content_additions)
       ) FROM (
-        WITH replies AS MATERIALIZED
+        WITH replies AS
         (
           SELECT id 
           FROM hivemind_app.live_posts_comments_view hp
