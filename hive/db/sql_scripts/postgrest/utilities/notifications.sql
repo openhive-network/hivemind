@@ -38,7 +38,7 @@ $$
 ;
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.get_notify_message;
-CREATE FUNCTION hivemind_postgrest_utilities.get_notify_message(_row JSONB)
+CREATE FUNCTION hivemind_postgrest_utilities.get_notify_message(_row RECORD)
 RETURNS TEXT
 LANGUAGE plpgsql
 IMMUTABLE
@@ -47,7 +47,7 @@ DECLARE
     _msg TEXT;
     _notify_type TEXT;
 BEGIN
-    _notify_type := hivemind_postgrest_utilities.get_notify_type_from_id((_row->>'type_id')::INT);
+    _notify_type := hivemind_postgrest_utilities.get_notify_type_from_id(_row.type_id);
 
     _msg := CASE
         WHEN _notify_type = 'new_community' THEN '<dst> was created'
@@ -69,32 +69,32 @@ BEGIN
         WHEN _notify_type = 'vote' THEN '<src> voted on your post'
     END;
 
-    IF _row->>'type_id' = '17' AND _row->>'payload' <> '' THEN
+    IF _row.type_id = 17 AND _row.payload IS NOT NULL AND _row.payload <> '' THEN
         _msg := _msg || ' <payload>';
     END IF;
 
     IF position('<dst>' IN _msg) > 0 THEN
-        _msg := replace(_msg, '<dst>', '@' || coalesce(_row->>'dst', ''));
+        _msg := replace(_msg, '<dst>', '@' || coalesce(_row.dst, ''));
     END IF;
 
     IF position('<src>' IN _msg) > 0 THEN
-        _msg := replace(_msg, '<src>', '@' || coalesce(_row->>'src', ''));
+        _msg := replace(_msg, '<src>', '@' || coalesce(_row.src, ''));
     END IF;
 
     IF position('<post>' IN _msg) > 0 THEN
-        _msg := replace(_msg, '<post>', coalesce(_row->>'post', ''));
+        _msg := replace(_msg, '<post>', coalesce(_row.post, ''));
     END IF;
 
     IF position('<payload>' IN _msg) > 0 THEN
-        _msg := replace(_msg, '<payload>', coalesce(_row->>'payload', 'null'));
+        _msg := replace(_msg, '<payload>', coalesce(_row.payload, 'null'));
     END IF;
 
     IF position('<comm>' IN _msg) > 0 THEN
-        _msg := replace(_msg, '<comm>', coalesce(_row->>'community_title', ''));
+        _msg := replace(_msg, '<comm>', coalesce(_row.community_title, ''));
     END IF;
 
     IF position('<other_mentions>' IN _msg) > 0 THEN
-        _msg := replace(_msg, '<other_mentions>', (coalesce((_row->>'number_of_mentions')::INT, 1) - 1)::TEXT);
+        _msg := replace(_msg, '<other_mentions>', (coalesce(_row.number_of_mentions, 1) - 1)::TEXT);
     END IF;
 
     RETURN _msg;
