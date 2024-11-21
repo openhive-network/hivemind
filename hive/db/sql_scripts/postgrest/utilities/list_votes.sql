@@ -50,7 +50,7 @@ $function$
 ;
 
 DROP TYPE IF EXISTS hivemind_postgrest_utilities.list_votes_case CASCADE;
-CREATE TYPE hivemind_postgrest_utilities.list_votes_case AS ENUM( 'create_post', 'database_list_by_comment_voter', 'database_list_by_voter_comment');
+CREATE TYPE hivemind_postgrest_utilities.list_votes_case AS ENUM( 'get_votes_for_posts', 'database_list_by_comment_voter', 'database_list_by_voter_comment');
 
 DROP FUNCTION IF EXISTS hivemind_postgrest_utilities.list_votes;
 CREATE FUNCTION hivemind_postgrest_utilities.list_votes(IN _post_id INT, IN _limit INT, IN _case hivemind_postgrest_utilities.list_votes_case, IN _presentation_mode hivemind_postgrest_utilities.vote_presentation, IN _voter_id INT DEFAULT NULL)
@@ -85,14 +85,14 @@ BEGIN
         hivemind_app.hive_votes_view v
       WHERE
       ( CASE
-          WHEN _case = 'create_post' THEN v.post_id = _post_id
+          WHEN _case = 'get_votes_for_posts' THEN v.post_id = _post_id
           WHEN _case = 'database_list_by_comment_voter' THEN (v.post_id = _post_id AND v.voter_id >= _voter_id)
           WHEN _case = 'database_list_by_voter_comment' THEN (v.voter_id = _voter_id AND v.post_id >= _post_id)
         END
       )
       ORDER BY
       ( CASE
-          WHEN _case = 'create_post' THEN v.voter_id
+          WHEN _case = 'get_votes_for_posts' THEN v.voter_id
           WHEN _case = 'database_list_by_comment_voter' THEN v.voter_id
           WHEN _case = 'database_list_by_voter_comment' THEN v.post_id
         END
