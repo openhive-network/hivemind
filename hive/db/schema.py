@@ -779,6 +779,7 @@ def setup_runtime_code(db):
         "postgrest/bridge_api/bridge_api_list_all_subscriptions.sql",
         "postgrest/bridge_api/bridge_api_list_pop_communities.sql",
         "postgrest/condenser_api/condenser_api_get_following_or_followers.sql",
+        "postgrest/utilities/find_subscription_id.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'

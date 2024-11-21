@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # last: camilla does not subscribe this community
-    - postgrest_ignore
+    - negative
 
   includes:
     - !include ../../common.yaml

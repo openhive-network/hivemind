@@ -4,7 +4,6 @@
   marks:
     - patterntest # original did not validate community
     - negative
-    - postgrest_ignore
 
   includes:
     - !include ../../common.yaml
