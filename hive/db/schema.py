@@ -781,6 +781,7 @@ def setup_runtime_code(db):
         "postgrest/condenser_api/extract_parameters_for_get_following_and_followers.sql",
         "postgrest/condenser_api/condenser_api_get_followers.sql",
         "postgrest/condenser_api/condenser_api_get_following.sql",
+        "postgrest/utilities/find_subscription_id.sql",
     ]
 
     sql_scripts_dir_path = Path(__file__).parent / 'sql_scripts'
