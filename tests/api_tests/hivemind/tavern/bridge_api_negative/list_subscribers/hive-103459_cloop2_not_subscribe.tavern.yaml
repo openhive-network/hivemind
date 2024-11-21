@@ -3,7 +3,7 @@
 
   marks:
     - patterntest # last: cloop2 does not subscribe any community
-    - postgrest_ignore
+    - negative
 
   includes:
     - !include ../../common.yaml
