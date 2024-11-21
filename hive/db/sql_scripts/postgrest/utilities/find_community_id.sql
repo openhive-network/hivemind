@@ -10,7 +10,7 @@ $function$
 DECLARE
   _community_id INT = 0;
 BEGIN
-  IF (_community_name <> '') THEN
+  IF (_community_name IS NOT NULL AND _community_name <> '') THEN
     SELECT INTO _community_id COALESCE( ( SELECT id FROM hivemind_app.hive_communities WHERE name=_community_name ), 0 );
     IF _check AND _community_id = 0 THEN
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('Community ' || _community_name || ' does not exist');
