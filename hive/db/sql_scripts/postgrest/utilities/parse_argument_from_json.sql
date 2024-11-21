@@ -67,7 +67,8 @@ BEGIN
             _value := (_params->>_arg_name)::NUMERIC;
           END IF;
         WHEN 'null' THEN RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_missing_required_argument_exception(_arg_name);
-        ELSE _value := _params->_arg_name;
+        WHEN 'number' THEN _value := _params->_arg_name;
+        ELSE RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('int() argument must be a string, a bytes-like object or a number, not ''list''');
       END CASE;
     ELSE
       IF _params->_arg_number IS NULL THEN
@@ -84,7 +85,8 @@ BEGIN
             _value := (_params->>_arg_number)::NUMERIC;
           END IF;
         WHEN 'null' THEN RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_missing_required_argument_exception(_arg_name);
-        ELSE _value := _params->_arg_number;
+        WHEN 'number' THEN _value := _params->_arg_number;
+        ELSE RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('int() argument must be a string, a bytes-like object or a number, not ''list''');
       END CASE;
     END IF;
   ELSE
@@ -103,7 +105,8 @@ BEGIN
             _value := (_params->>_arg_name)::NUMERIC;
           END IF;
         WHEN 'null' THEN RETURN NULL;
-        ELSE _value := _params->_arg_name;
+        WHEN 'number' THEN _value := _params->_arg_name;
+        ELSE RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('int() argument must be a string, a bytes-like object or a number, not ''list''');
       END CASE;
     ELSE
       IF _params->_arg_number IS NULL THEN
@@ -120,7 +123,8 @@ BEGIN
             _value := (_params->>_arg_number)::NUMERIC;
           END IF;
         WHEN 'null' THEN RETURN NULL;
-        ELSE _value := _params->_arg_number;
+        WHEN 'number' THEN _value := _params->_arg_number;
+        ELSE RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('int() argument must be a string, a bytes-like object or a number, not ''list''');
       END CASE;
     END IF;
   END IF;
