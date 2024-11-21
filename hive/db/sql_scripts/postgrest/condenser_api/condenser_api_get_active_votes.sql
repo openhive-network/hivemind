@@ -6,24 +6,21 @@ STABLE
 AS
 $$
 DECLARE
-  _vote_args hivemind_postgrest_utilities.vote_arguments;
-  _result JSON;
+  _post_id INT;
 BEGIN
-  _vote_args := hivemind_postgrest_utilities.get_validated_vote_arguments(_params, _json_is_object);
+  PERFORM hivemind_postgrest_utilities.validate_json_parameters(_json_is_object, _params, '{"author","permlink"}', '{"string","string"}');
 
-  SELECT COALESCE(jsonb_agg(
-      jsonb_build_object(
-        'voter', votes.voter,
-        'weight', votes.weight,
-        'rshares', votes.rshares,
-        'percent', votes.percent,
-        'reputation', votes.reputation,
-        'time', votes.last_update
-      )), '[]'::jsonb) AS _result INTO _result
+  _post_id =
+    hivemind_postgrest_utilities.find_comment_id(
+      hivemind_postgrest_utilities.valid_account(
+        hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'author', 0, True),
+        False),
+      hivemind_postgrest_utilities.valid_permlink(
+        hivemind_postgrest_utilities.parse_string_argument_from_json(_params, _json_is_object, 'permlink', 1, True),
+        False),
+      True);
 
-  FROM (SELECT * FROM hivemind_app.find_votes(_vote_args.author, _vote_args.permlink, 1000)) AS votes;
-
-  RETURN _result;
+  RETURN hivemind_postgrest_utilities.list_votes(_post_id, 1000, 'get_votes_for_posts'::hivemind_postgrest_utilities.list_votes_case, 'active_votes'::hivemind_postgrest_utilities.vote_presentation);
 END;
 $$
 ;
