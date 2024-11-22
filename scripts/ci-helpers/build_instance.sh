@@ -64,6 +64,7 @@ done
 
 # Supplement a registry path by trailing slash (if needed)
 [[ "${REGISTRY}" != */ ]] && REGISTRY="${REGISTRY}/"
+REGISTRY_WITHOUT_SLASH="$(echo "$REGISTRY" | sed 's/\/$//')"
 
 printf "Moving into source root directory: %s\n" "$SRCROOTDIR"
 
@@ -76,6 +77,7 @@ CI_IMAGE_TAG=${CI_IMAGE_TAG:-"python-3.8-slim-6"} # see scripts/ci/build_ci_base
 BUILD_OPTIONS=("--platform=linux/amd64" "--target=instance" "--progress=plain")
 TAG="${REGISTRY}instance:$BUILD_IMAGE_TAG"
 MINIMAL_TAG="${REGISTRY}minimal-instance:$BUILD_IMAGE_TAG"
+ALTERNATE_TAG="${REGISTRY_WITHOUT_SLASH}:$BUILD_IMAGE_TAG"
 
 # On CI push the images to the registry
 if [[ -n "${CI:-}" ]]; then
@@ -131,6 +133,7 @@ if [[ -n "${CI:-}" ]]; then
 fi
 
 docker tag "$TAG" "$MINIMAL_TAG"
+docker tag "$TAG" "$ALTERNATE_TAG"
 
 [[ -n "${DOT_ENV_FILENAME:-}" ]] && echo "${DOTENV_VAR_NAME:-IMAGE}=$TAG" > "$DOT_ENV_FILENAME"
 
