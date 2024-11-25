@@ -90,6 +90,7 @@ BEGIN
         FROM pinned_post,
         LATERAL hivemind_app.get_post_view_by_id(pinned_post.id) hp
         ORDER BY hp.id DESC
+        LIMIT _limit
       ) row
     );
   END IF;
@@ -204,6 +205,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
       ORDER BY
         hp.sc_trend DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -296,6 +298,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
       ORDER BY
         hp.promoted DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -393,6 +396,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
       ORDER BY
         community_posts.total_payout DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -487,6 +491,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
       ORDER BY
         community_posts.total_payout DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -580,6 +585,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
       ORDER BY
         hp.sc_hot DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -681,6 +687,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
       ORDER BY
         community_posts.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -770,6 +777,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(community_posts.id) hp
       ORDER BY
         community_posts.total_payout DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -866,6 +874,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
       ORDER BY
         hp.sc_trend DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -961,6 +970,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
       ORDER BY
         hp.sc_hot DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -1053,6 +1063,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
       ORDER BY
         hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -1148,6 +1159,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
       ORDER BY
         hp.promoted DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -1246,6 +1258,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
       ORDER BY
         tag_posts.total_payout DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -1342,6 +1355,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
       ORDER BY
         tag_posts.total_payout DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -1434,6 +1448,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(tag_posts.id) hp
       ORDER BY
         tag_posts.total_payout DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -1522,6 +1537,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
       ORDER BY
         hp.sc_trend DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -1610,6 +1626,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
       ORDER BY
         hp.sc_hot DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -1694,6 +1711,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
       ORDER BY
         hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -1782,6 +1800,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
       ORDER BY
         hp.promoted DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -1875,6 +1894,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
       ORDER BY
         observer_posts.total_payout DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -1964,6 +1984,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
       ORDER BY
         observer_posts.total_payout DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -2053,6 +2074,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(observer_posts.id) hp
       ORDER BY
         observer_posts.total_payout DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -2145,6 +2167,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
       ORDER BY
         hp.sc_trend DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -2236,6 +2259,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
       ORDER BY
         hp.sc_hot DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -2324,6 +2348,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
       ORDER BY
         hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -2416,6 +2441,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
       ORDER BY
         hp.promoted DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -2513,6 +2539,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
       ORDER BY
         (hp.payout + hp.pending_payout) DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -2606,6 +2633,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
       ORDER BY
         (hp.payout + hp.pending_payout) DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -2693,6 +2721,7 @@ BEGIN
       LATERAL hivemind_app.get_post_view_by_id(all_posts.id) hp
       ORDER BY
         (hp.payout + hp.pending_payout) DESC, hp.id DESC
+      LIMIT _limit
     ) row
   );
 

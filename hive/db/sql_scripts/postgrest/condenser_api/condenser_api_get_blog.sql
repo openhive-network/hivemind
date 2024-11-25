@@ -85,6 +85,7 @@ BEGIN
         JOIN hivemind_app.hive_accounts ha ON ha.id = hp.author_id
         JOIN hivemind_app.hive_permlink_data hpd ON hpd.id = hp.permlink_id
         ORDER BY blog.created_at DESC, blog.post_id DESC
+        LIMIT _limit
       ) row
     );
   ELSE
@@ -147,6 +148,7 @@ BEGIN
         LATERAL hivemind_app.get_post_view_by_id(blog.post_id) hp
         -- in python code order was ASC, but because we append new elements to array in reverse order, order is DESC here
         ORDER BY blog.created_at DESC, blog.post_id DESC
+        LIMIT _limit
       ) row      
     );
   END IF;
