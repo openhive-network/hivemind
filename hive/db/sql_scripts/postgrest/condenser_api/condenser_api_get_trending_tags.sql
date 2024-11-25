@@ -42,7 +42,7 @@ _result = (
       ORDER BY SUM(hp.payout + hp.pending_payout) DESC, hcd.category ASC
       LIMIT _limit
     )
-    SELECT name, comments - top_posts AS comments, top_posts, total_payouts FROM row
+    SELECT name, comments - top_posts AS comments, top_posts, total_payouts FROM row LIMIT _limit
   ) row
 );
 

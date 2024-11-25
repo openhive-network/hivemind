@@ -90,6 +90,7 @@ BEGIN
                         FROM comments,
                         LATERAL hivemind_app.get_post_view_by_id(comments.id) hp
                         ORDER BY comments.cashout_time ASC, comments.id ASC
+                        LIMIT _limit
                       ) row
                     )
         )
@@ -200,6 +201,7 @@ BEGIN
                       FROM comments,
                       LATERAL hivemind_app.get_post_view_by_id(comments.id) hp
                       ORDER BY comments.id
+                      LIMIT _limit
                     ) row
                   )
         )
@@ -309,6 +311,7 @@ BEGIN
                       FROM comments,
                       LATERAL hivemind_app.get_post_view_by_id(comments.id) hp
                       ORDER BY comments.updated_at DESC, comments.id ASC
+                      LIMIT _limit
                     ) row
                   )
         )
@@ -418,6 +421,7 @@ BEGIN
                       FROM comments,
                       LATERAL hivemind_app.get_post_view_by_id(comments.id) hp
                       ORDER BY comments.updated_at DESC, comments.id ASC
+                      LIMIT _limit
                     ) row
                   )
         )
@@ -522,6 +526,7 @@ BEGIN
                       FROM comments,
                       LATERAL hivemind_app.get_post_view_by_id(comments.id) hp
                       ORDER BY hp.author, hp.permlink
+                      LIMIT _limit
                     ) row
                   )
         )

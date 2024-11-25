@@ -49,6 +49,7 @@ BEGIN
         FROM following_set fs
         JOIN hivemind_app.hive_accounts ha ON fs.following = ha.id
         ORDER BY fs.id DESC
+        LIMIT (_params->'limit')::INT
       ) row
     ),
     '[]'::jsonb

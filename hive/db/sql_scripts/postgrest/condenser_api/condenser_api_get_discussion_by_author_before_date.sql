@@ -100,6 +100,7 @@ BEGIN
       FROM blog_posts,
       LATERAL hivemind_app.get_post_view_by_id(blog_posts.id) hp
       ORDER BY hp.id DESC
+      LIMIT _limit
     ) row
   );
 

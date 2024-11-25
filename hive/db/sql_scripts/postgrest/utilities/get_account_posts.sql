@@ -90,6 +90,7 @@ BEGIN
       FROM blog,
       LATERAL hivemind_app.get_post_view_by_id(blog.post_id) hp
       ORDER BY blog.created_at DESC, blog.post_id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -178,6 +179,7 @@ BEGIN
       FROM ds,
       LATERAL hivemind_app.get_post_view_by_id(ds.id) hp
       ORDER BY ds.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -279,6 +281,7 @@ BEGIN
         FROM feed,
         LATERAL hivemind_app.get_post_view_by_id(feed.post_id) hp
         ORDER BY feed.min_created DESC, feed.post_id DESC
+        LIMIT _limit
       ) row
     );
 
@@ -363,6 +366,7 @@ BEGIN
       FROM posts,
       LATERAL hivemind_app.get_post_view_by_id(posts.id) hp
       ORDER BY posts.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -462,6 +466,7 @@ BEGIN
       FROM replies,
       LATERAL hivemind_app.get_post_view_by_id(replies.id) hp
       ORDER BY replies.id DESC
+      LIMIT _limit
     ) row
   );
 
@@ -554,6 +559,7 @@ BEGIN
       FROM payouts,
       LATERAL hivemind_app.get_post_view_by_id(payouts.id) hp
       ORDER BY payouts.total_payout DESC, payouts.id DESC
+      LIMIT _limit
     ) row
   );
 
