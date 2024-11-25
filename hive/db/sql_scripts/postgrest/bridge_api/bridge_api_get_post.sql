@@ -1,5 +1,5 @@
-DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_posts;
-CREATE FUNCTION hivemind_endpoints.bridge_api_get_posts(IN _json_is_object BOOLEAN, IN _params JSONB)
+DROP FUNCTION IF EXISTS hivemind_endpoints.bridge_api_get_post;
+CREATE FUNCTION hivemind_endpoints.bridge_api_get_post(IN _json_is_object BOOLEAN, IN _params JSONB)
 RETURNS JSONB
 LANGUAGE 'plpgsql'
 STABLE

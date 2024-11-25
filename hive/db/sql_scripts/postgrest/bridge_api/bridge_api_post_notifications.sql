@@ -88,6 +88,7 @@ BEGIN
             END as mentions
         ) as hm
         ORDER BY hnv.id DESC
+        LIMIT _limit
       )
       SELECT
         notifications.id,
@@ -104,6 +105,7 @@ BEGIN
           END
         ) AS url
       FROM notifications
+      LIMIT _limit
     ) row
   );
 END

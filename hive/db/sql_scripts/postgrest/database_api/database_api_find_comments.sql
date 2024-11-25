@@ -96,6 +96,7 @@ BEGIN
                         pv.parent_author
                       FROM posts,
                       LATERAL hivemind_app.get_post_view_by_id (posts.id) pv
+                      LIMIT _comments_amount
                     ) row
                   )
     )

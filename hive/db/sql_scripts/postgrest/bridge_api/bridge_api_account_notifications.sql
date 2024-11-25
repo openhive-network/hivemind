@@ -93,6 +93,7 @@ BEGIN
                 ELSE hivemind_app.get_number_of_mentions_in_post( hnv.post_id )
             END as mentions
         ) as hm
+        LIMIT _limit
       ) hive_notification_cache
   );
 END
