@@ -32,7 +32,7 @@ IMMUTABLE
 AS
 $$
 BEGIN
-  RETURN hivemind_postgrest_utilities.raise_exception(-32601, 'Method not found ' || _method_name);
+  RETURN hivemind_postgrest_utilities.raise_exception(-32602, 'Invalid parameters', 'unknown method: ' || _method_name);
 END
 $$
 ;
