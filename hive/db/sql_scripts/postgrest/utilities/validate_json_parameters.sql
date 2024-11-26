@@ -28,7 +28,12 @@ BEGIN
         passed_type_to_check = jsonb_typeof(_params->passed_arg_key);
         expected_type_to_check = _expected_params_types[array_idx];
         IF (expected_type_to_check = 'number' AND passed_type_to_check NOT IN ('number', 'string','null')) OR (expected_type_to_check <> 'number' AND passed_type_to_check <> expected_type_to_check AND passed_type_to_check <> 'null') THEN
-          RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('invalid ' || passed_arg_key || ' type');
+          -- for permlink there is another error message
+          IF position('permlink' IN passed_arg_key) <> 0 THEN
+            RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('permlink must be string');
+          ELSE
+            RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('invalid ' || passed_arg_key || ' type');
+          END IF;
         END IF;
       ELSE
         RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_unexpected_keyword_exception(passed_arg_key);
@@ -45,7 +50,12 @@ BEGIN
           expected_type_to_check = _expected_params_types[array_idx];
           passed_type_to_check = jsonb_typeof(_params->(array_idx-1));
           IF (expected_type_to_check = 'number' AND passed_type_to_check NOT IN ('number', 'string','null')) OR (expected_type_to_check <> 'number' AND passed_type_to_check <> expected_type_to_check AND passed_type_to_check <> 'null') THEN
-            RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('invalid ' || _expected_params_names[array_idx] || ' type');
+            -- for permlink there is another error message
+            IF position('permlink' IN _expected_params_names[array_idx]) <> 0 THEN
+              RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('permlink must be string');
+            ELSE
+              RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('invalid ' || _expected_params_names[array_idx] || ' type');
+            END IF;
           END IF;
         -- not all parameters are required, so return without an error
         ELSE
