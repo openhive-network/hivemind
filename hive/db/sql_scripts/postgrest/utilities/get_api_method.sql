@@ -58,7 +58,7 @@ BEGIN
     WHEN __method_type = 'get_account_votes' THEN
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('get_account_votes is no longer supported, for details see https://hive.blog/steemit/@steemitdev/additional-public-api-change');
     ELSE
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('condenser_api.' || __method_type);
   END CASE;
   RETURN result;
 END;
@@ -91,7 +91,7 @@ BEGIN
     WHEN __method_type = 'get_following' THEN
       result := hivemind_endpoints.condenser_api_get_following(__json_with_params_is_object, __params, /* _called_from_condenser_api */ False);
     ELSE
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('follow_api.' || __method_type);
   END CASE;
   RETURN result;
 END;
@@ -157,7 +157,7 @@ BEGIN
     WHEN __method_type = 'list_pop_communities' THEN
       result := hivemind_endpoints.bridge_api_list_pop_communities(__json_with_params_is_object, __params);
     ELSE
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('bridge_api' || __method_type);
   END CASE;
   RETURN result;
 END;
@@ -200,7 +200,7 @@ BEGIN
     WHEN __method_type = 'get_account_votes' THEN
       RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_parameter_validation_exception('get_account_votes is no longer supported, for details see https://hive.blog/steemit/@steemitdev/additional-public-api-change');
     ELSE
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('tags_api' || __method_type);
   END CASE;
   RETURN result;
 END;
@@ -227,7 +227,7 @@ BEGIN
     WHEN __method_type = 'list_comments' THEN
       result := hivemind_endpoints.database_api_list_comments(__json_with_params_is_object, __params);
     ELSE
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('database_api' || __method_type);
   END CASE;
   RETURN result;
 END;
@@ -250,7 +250,7 @@ BEGIN
     WHEN __method_type = 'db_head_state' THEN
       result := hivemind_endpoints.hive_api_db_head_state(__json_with_params_is_object, __params);
     ELSE
-      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception(__method_type);
+      RAISE EXCEPTION '%', hivemind_postgrest_utilities.raise_method_not_found_exception('hive_api' || __method_type);
   END CASE;
   RETURN result;
 END;
