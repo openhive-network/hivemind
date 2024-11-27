@@ -14,7 +14,7 @@ BEGIN
   _subscribed = EXISTS(SELECT 1 FROM hivemind_app.hive_subscriptions WHERE account_id = _account_id AND community_id = _community_id);
 
   _result = (
-    SELECT jsonb_build_object(
+    SELECT jsonb_build_object( -- get_community_context
       'role', hivemind_postgrest_utilities.get_role_name(role_id),
       'subscribed', _subscribed,
       'title', title
@@ -51,7 +51,7 @@ BEGIN
 
   RETURN COALESCE(
     (
-      SELECT jsonb_agg(jsonb_strip_nulls(to_jsonb(row))) FROM
+      SELECT jsonb_agg(jsonb_strip_nulls(to_jsonb(row))) FROM -- list_communities_by_rank
       (
         SELECT
           hc.id,
@@ -106,7 +106,7 @@ $function$
 BEGIN
   RETURN COALESCE(
     (
-      SELECT jsonb_agg(jsonb_strip_nulls(to_jsonb(row))) FROM
+      SELECT jsonb_agg(jsonb_strip_nulls(to_jsonb(row))) FROM -- list_communities_by_new
       (
         SELECT
           hc.id,
@@ -167,7 +167,7 @@ BEGIN
 
   RETURN COALESCE(
     (
-      SELECT jsonb_agg(jsonb_strip_nulls(to_jsonb(row))) FROM
+      SELECT jsonb_agg(jsonb_strip_nulls(to_jsonb(row))) FROM -- list_communities_by_subs
       (
         SELECT
           hc.id,
@@ -223,7 +223,7 @@ DECLARE
   _limit INT = hivemind_postgrest_utilities.valid_limit("limit", 100, 25);
 BEGIN
   RETURN QUERY (
-    SELECT jsonb_build_array(hc.name, hc.title) AS community_data, hc.rank
+    SELECT jsonb_build_array(hc.name, hc.title) AS community_data, hc.rank -- list_top_communities
     FROM hivemind_app.hive_communities hc
     WHERE hc.rank > 0 ORDER BY hc.rank LIMIT _limit
 );

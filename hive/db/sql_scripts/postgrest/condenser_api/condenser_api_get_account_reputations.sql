@@ -21,7 +21,7 @@ BEGIN
 
   IF _fat_node_style THEN
     _result = (
-      SELECT jsonb_agg (
+      SELECT jsonb_agg ( -- condenser_api_get_account_reputations with fat node style
         to_jsonb(row)
       ) FROM (
         SELECT ha.name AS account, ha.reputation AS reputation
@@ -33,7 +33,7 @@ BEGIN
     );
   ELSE
     _result = jsonb_build_object('reputations', (
-      SELECT jsonb_agg (
+      SELECT jsonb_agg ( -- condenser_api_get_account_reputations without fat node style
         to_jsonb(row)
       ) FROM (
         SELECT ha.name AS name, ha.reputation AS reputation

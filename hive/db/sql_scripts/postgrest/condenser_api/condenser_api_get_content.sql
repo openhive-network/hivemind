@@ -23,7 +23,7 @@ BEGIN
       SELECT jsonb_agg (
         hivemind_postgrest_utilities.create_condenser_post_object(row, 0, _content_additions)
       ) FROM (
-        WITH replies AS
+        WITH replies AS -- condenser_api_get_content with replies
         (
           SELECT id 
           FROM hivemind_app.live_posts_comments_view hp
@@ -81,7 +81,7 @@ BEGIN
     RETURN COALESCE(_result, '[]'::jsonb);
   ELSE
     RETURN (
-      SELECT hivemind_postgrest_utilities.create_condenser_post_object(row, 0, _content_additions) FROM (
+      SELECT hivemind_postgrest_utilities.create_condenser_post_object(row, 0, _content_additions) FROM (       -- condenser_api_get_content without replies
         SELECT
           hp.id,
           hp.author,

@@ -24,7 +24,7 @@ BEGIN
       END
     ) 
     ) FROM (
-      WITH blog AS
+      WITH blog AS -- get_account_posts_by_blog
       (
         SELECT 
           hfc.post_id,
@@ -125,7 +125,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH ds AS
+      WITH ds AS -- get_account_posts_by_comments
       (
         SELECT hp1.id, hp1.author_id, blacklist.source
         FROM hivemind_app.live_comments_view hp1
@@ -219,7 +219,7 @@ BEGIN
       END
     )
     ) FROM (
-        WITH feed AS
+        WITH feed AS -- get_account_posts_by_feed
         (
           SELECT 
             hfc.post_id, 
@@ -311,7 +311,7 @@ BEGIN
     SELECT jsonb_agg (
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, False, True)
     ) FROM (
-      WITH posts AS
+      WITH posts AS -- get_account_posts_by_posts
       (
         SELECT id, author_id, blacklist.source
         FROM hivemind_app.live_posts_view hp
@@ -403,7 +403,7 @@ BEGIN
       END
     )
     ) FROM (
-      WITH replies AS
+      WITH replies AS -- get_account_posts_by_replies
       (
         SELECT hpr.id, blacklist.source
         FROM hivemind_app.live_posts_comments_view hpr
@@ -492,7 +492,7 @@ BEGIN
     SELECT jsonb_agg (
       hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, False, True)
     ) FROM (
-      WITH payouts AS
+      WITH payouts AS -- get_account_posts_by_payout
       (  
       SELECT 
         id, author_id,

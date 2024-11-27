@@ -46,7 +46,7 @@ BEGIN
     SELECT jsonb_agg (
       hivemind_postgrest_utilities.create_condenser_post_object(row, _truncate_body, False)
     ) FROM (
-      WITH blog_posts AS
+      WITH blog_posts AS -- condenser_api_get_discussions_by_author_before_date
       (
         SELECT
           hp.id

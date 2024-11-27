@@ -30,7 +30,7 @@ BEGIN
 
     RETURN COALESCE(
       (
-        SELECT jsonb_agg(jsonb_build_array(row.name, row.role, row.title, row.created_at)) FROM (
+        SELECT jsonb_agg(jsonb_build_array(row.name, row.role, row.title, row.created_at)) FROM ( -- bridge_api_list_subscribers
           SELECT
             ha.name,
             hivemind_postgrest_utilities.get_role_name(COALESCE(hr.role_id,0)) AS role,

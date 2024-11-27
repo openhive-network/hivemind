@@ -67,7 +67,7 @@ BEGIN
   END IF;
 
   _result = (
-    SELECT jsonb_agg(
+    SELECT jsonb_agg( -- list_votes
         hivemind_postgrest_utilities.apply_vote_presentation(r, _presentation_mode)
       ) FROM (
       SELECT 

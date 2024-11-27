@@ -30,7 +30,7 @@ BEGIN
   _limit = hivemind_postgrest_utilities.valid_number(_limit, 100, 1, 100, 'limit');
 
   RETURN(
-    SELECT jsonb_agg(
+    SELECT jsonb_agg( -- bridge_api_account_notifications
       jsonb_build_object(
         'id', hive_notification_cache.id,
         'type', hivemind_postgrest_utilities.get_notify_type_from_id(hive_notification_cache.type_id),

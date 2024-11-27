@@ -27,7 +27,7 @@ BEGIN
   SELECT ha.lastread_at INTO _last_read_at FROM hivemind_app.hive_accounts ha WHERE ha.id = _account_id;
 
   SELECT
-    COALESCE(
+    COALESCE( -- bridge_api_unread_notifications
       (
         SELECT hb.num
         FROM hive.blocks_view hb -- very important for performance (originally it was a hivemind_app_blocks_view)

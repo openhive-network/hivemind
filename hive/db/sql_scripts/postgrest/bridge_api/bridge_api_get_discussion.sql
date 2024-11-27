@@ -28,7 +28,7 @@ BEGIN
 
   RETURN COALESCE(
   (
-    SELECT
+    SELECT     -- bridge_api_get_discussion
       jsonb_object_agg((row.author || '/' || row.permlink), hivemind_postgrest_utilities.create_bridge_post_object(row, 0, NULL, row.is_pinned, True, row.replies))
       FROM (
         SELECT

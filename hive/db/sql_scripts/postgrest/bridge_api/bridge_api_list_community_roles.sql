@@ -46,7 +46,7 @@ BEGIN
   END IF;
 
   _result = (
-    SELECT jsonb_agg(
+    SELECT jsonb_agg( -- bridge_api_list_community_roles
       jsonb_build_array(row.name, row.role, row.title)
     ) FROM (
       SELECT

@@ -41,7 +41,7 @@ BEGIN
 
   IF _get_blacklists THEN
     _result = (
-      WITH np AS (
+      WITH np AS ( -- bridge_api_get_follow_list with _get_blacklists
         SELECT 
           ha.name,
           hivemind_postgrest_utilities.extract_profile_metadata(ha.json_metadata, ha.posting_json_metadata)->'profile' AS profile
@@ -63,7 +63,7 @@ BEGIN
     );
   ELSE
     _result = (
-      SELECT jsonb_agg (
+      SELECT jsonb_agg ( -- bridge_api_get_follow_list without _get_blacklists
         jsonb_build_object(
           'name', row.name,
           'blacklist_description', to_jsonb(''::TEXT),

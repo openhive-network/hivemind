@@ -20,7 +20,7 @@ BEGIN
 
   RETURN COALESCE(
   (
-    SELECT jsonb_agg(
+    SELECT jsonb_agg( -- condenser_api_get_followers
       jsonb_build_object(
         'following', _params->'account',
         'follower', row.name,
